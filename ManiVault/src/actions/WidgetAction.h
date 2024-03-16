@@ -187,6 +187,22 @@ public: // Hierarchy queries
     }
 
     /**
+     * Get child actions of \p WidgetActionType, up until \p maxDepth
+     * @param maxDepth Max depth of included children (fully recursive when -1)
+     * @return Vector of pointers to child actions of \p WidgetActionType
+     */
+    template<typename WidgetActionType = WidgetAction>
+    WidgetActionsOfType<WidgetActionType> getChildren(std::int32_t maxDepth) const {
+        WidgetActionsOfType<WidgetActionType> childrenOfType;
+
+        for (auto childOfType : getChildren<WidgetActionType>(true))
+            if (maxDepth == -1 || childOfType->getDepth() <= maxDepth)
+                childrenOfType << childOfType;
+
+        return childrenOfType;
+    }
+
+    /**
      * Get number of children of \p WidgetActionType, possibly \p recursively
      * @param recursively Count recursively
      * @returm Number of children
@@ -220,19 +236,15 @@ public: // Hierarchy queries
      */
     template<typename WidgetActionType = WidgetAction>
     WidgetActionType* findChildBypath(const QString& path) const {
-        auto segments = path.split("/");
+        QMap<QString, WidgetAction*> childrenByPath;
 
-        if (segments.isEmpty())
-            return nullptr;
+        for (auto child : getChildren(true))
+            childrenByPath[child->getLocation()] = child;
 
-        const auto firstSegment = segments.first();
+        const auto prefixedPath = QString("%1/%2").arg(text(), path);
 
-        segments.removeAt(0);
-
-        for (auto action : getChildren())
-            if (action->text() == firstSegment)
-                if (auto childByPath = findChildBypath(segments.join("/")))
-                    return childByPath;
+        if (childrenByPath.contains(prefixedPath))
+            return childrenByPath[prefixedPath];
 
         return nullptr;
     }
@@ -282,8 +294,8 @@ public:
 
     /** Print the paths of children of \p WidgetActionType */
     template<typename WidgetActionType = WidgetAction>
-    void printChildren() const {
-        for (auto child : getChildren<WidgetActionType>())
+    void printChildren(std::int32_t maxDepth = -1) const {
+        for (auto child : getChildren<WidgetActionType>(maxDepth))
             qDebug() << child->getLocation();
     }
 

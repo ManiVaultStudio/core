@@ -41,7 +41,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _settingsActions(),
     _progressTask(nullptr)
 {
-    setText(getGuiName());
+    setText(isSystemViewPlugin() ? getKind() : getGuiName());
 
     _widget.setAutoFillBackground(true);
 

@@ -21,7 +21,7 @@ Plugin::Plugin(const PluginFactory* factory) :
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _properties(),
     _eventListener(),
-    _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "" : QString::number(factory->getNumberOfInstances() + 1)))),
+    _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "1" : QString::number(factory->getNumberOfInstances() + 1)))),
     _destroyAction(this, "Remove")
 {
     setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::ForceNone);
