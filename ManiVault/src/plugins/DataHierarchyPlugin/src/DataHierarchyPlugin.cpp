@@ -15,6 +15,7 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataHierarchyWidget(&getWidget())
 {
+    printChildren();
 }
 
 void DataHierarchyPlugin::init()
