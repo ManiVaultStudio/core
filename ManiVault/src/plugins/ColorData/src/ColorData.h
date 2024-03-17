@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "colordata_export.h"
+
 #include <RawData.h>
 #include <Set.h>
 
@@ -18,7 +20,7 @@ const mv::DataType ColorType = mv::DataType(QString("Colors"));
 // Raw Data
 // =============================================================================
 
-class ColorData : public mv::plugin::RawData
+class COLORDATA_EXPORT ColorData : public mv::plugin::RawData
 {
 public:
     ColorData(const mv::plugin::PluginFactory* factory) : mv::plugin::RawData(factory, ColorType) { }
@@ -39,7 +41,7 @@ private:
     std::vector<QColor> _colors;
 };
 
-class Colors : public mv::DatasetImpl
+class COLORDATA_EXPORT Colors : public mv::DatasetImpl
 {
 public:
     Colors(QString dataName, bool mayUnderive = true, const QString& guid = "") :
