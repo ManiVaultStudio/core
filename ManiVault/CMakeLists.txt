@@ -369,28 +369,28 @@ install(FILES
 add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault public headers"
     COMMAND ${CMAKE_COMMAND}
-        --install ${CMAKE_BINARY_DIR}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_HEADERS
         --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault public link library"
     COMMAND ${CMAKE_COMMAND}
-        --install ${CMAKE_BINARY_DIR}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_LINKLIB
         --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     # COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake config files"
     # COMMAND ${CMAKE_COMMAND}
-        # --install ${CMAKE_BINARY_DIR}
+        # --install ${CMAKE_CURRENT_BINARY_DIR}
         # --config $<CONFIGURATION>
         # --component MVPUBLIC_PACKAGE
         # --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
         # --verbose
     # COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake target files"
     # COMMAND ${CMAKE_COMMAND}
-        # --install ${CMAKE_BINARY_DIR}
+        # --install ${CMAKE_CURRENT_BINARY_DIR}
         # --config $<CONFIGURATION>
         # --component MVPUBLIC_TARGET
         # --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
