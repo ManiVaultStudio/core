@@ -959,6 +959,17 @@ set(PUBLIC_SOURCES
     ${PUBLIC_HEADERS}
 )
 
+set(PRECOMPILE_HEADERS
+    src/actions/Actions.h
+    src/event/EventListener.h
+    src/AbstractManager.h
+    src/Task.h
+    src/BackgroundTask.h
+    src/ForegroundTask.h
+    src/ModalTask.h
+    ${PUBLIC_UTIL_HEADERS}
+)
+
 source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
 source_group(Event FILES ${PUBLIC_EVENT_FILES})
 source_group(Actions\\Colormap FILES ${PUBLIC_COLOR_MAP_ACTION_FILES})

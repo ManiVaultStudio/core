@@ -162,9 +162,8 @@ message(STATUS "Using QuaZip version ${QuaZip_VERSION}")
 # Source files
 # -----------------------------------------------------------------------------
 include(CMakeMvSourcesApplication)    # defines MAIN_SOURCES, PRIVATE_SOURCES and PRIVATE_HEADERS
-include(CMakeMvSourcesPublic)         # defines PUBLIC_SOURCES and PUBLIC_HEADERS
+include(CMakeMvSourcesPublic)         # defines PUBLIC_SOURCES, PUBLIC_HEADERS and PRECOMPILE_HEADERS
 include(CMakeMvSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
-
 
 # -----------------------------------------------------------------------------
 # Target MV_PUBLIC_LIB
@@ -191,11 +190,7 @@ check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
 
 if(MV_PRECOMPILE_HEADERS)
     target_precompile_headers(${MV_PUBLIC_LIB} PRIVATE 
-        src/actions/Actions.h
-        src/event/EventListener.h
-        src/AbstractManager.h
-        src/Task.h
-        ${PUBLIC_UTIL_HEADERS}
+        ${PRECOMPILE_HEADERS}
     )
 endif()
 
@@ -237,8 +232,9 @@ target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
 
 if(MV_PRECOMPILE_HEADERS)
-    target_precompile_headers(${MV_EXE} REUSE_FROM ${MV_PUBLIC_LIB})
-    target_compile_definitions(${MV_EXE} PRIVATE "${MV_PUBLIC_LIB}_EXPORTS")
+    target_precompile_headers(${MV_EXE} PRIVATE 
+        ${PRECOMPILE_HEADERS}
+    )
 endif()
 
 if(MV_UNITY_BUILD)
