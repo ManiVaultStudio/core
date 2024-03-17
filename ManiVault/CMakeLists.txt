@@ -213,10 +213,6 @@ set_target_properties(${MV_EXE} PROPERTIES OUTPUT_NAME ${MV_APPLICATION_NAME})
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
 
-# find libraries relative to the executable in the macOS .app tree
-if(APPLE)
-    set_target_properties( ${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
-endif()
 
 target_include_directories(${MV_EXE} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -251,6 +247,10 @@ if(MSVC)
     )
 endif(MSVC)
 
+# find libraries relative to the executable in the macOS .app tree
+if(APPLE)
+    set_target_properties( ${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
+endif()
 
 # -----------------------------------------------------------------------------
 # Installation
