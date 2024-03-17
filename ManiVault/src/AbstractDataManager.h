@@ -8,19 +8,6 @@
 
 #include "actions/ToggleAction.h"
 
-// Qt 5.14.1 has a std::hash<QString> specialization and defines the following macro.
-// Qt 5.12.4 does not! See also https://bugreports.qt.io/browse/QTBUG-33428
-#ifndef QT_SPECIALIZE_STD_HASH_TO_CALL_QHASH
-// Hash specialization for QString so we can use it as a key in the data maps
-namespace std {
-    template<> struct hash<QString> {
-        std::size_t operator()(const QString& s) const {
-            return qHash(s);
-        }
-    };
-}
-#endif
-
 namespace mv
 {
 
