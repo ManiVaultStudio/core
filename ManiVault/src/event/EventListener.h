@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "DataType.h"
 
 #include <QSet>
@@ -18,7 +20,7 @@ namespace mv
 class CoreInterface;
 class DatasetEvent;
 
-class EventListener final
+class CORE_EXPORT EventListener final
 {
 public:
 

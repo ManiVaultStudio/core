@@ -21,14 +21,14 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class TasksListAction : public GroupAction
+class CORE_EXPORT TasksListAction : public GroupAction
 {
     Q_OBJECT
 
 public:
 
     /** Widget action for listing the tasks vertically */
-    class Widget : public WidgetActionWidget
+    class CORE_EXPORT Widget : public WidgetActionWidget
     {
     private:
         using WidgetsMap = QMap<Task*, QVector<QWidget*>>;

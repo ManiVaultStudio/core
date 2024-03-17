@@ -32,14 +32,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class StatusBarAction : public WidgetAction
+class CORE_EXPORT StatusBarAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
     /** Widget class for display of a status bar action */
-    class Widget : public mv::gui::WidgetActionWidget {
+    class CORE_EXPORT Widget : public mv::gui::WidgetActionWidget {
     private:
 
         class ToolButton : public mv::gui::WidgetActionToolButton {

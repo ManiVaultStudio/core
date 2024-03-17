@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
 
 class QWidget;
 
@@ -12,10 +13,10 @@ namespace mv {
 namespace gui {
 
 /** Create horizontal divider line */
-QWidget* createHorizontalDivider();
+CORE_EXPORT QWidget* createHorizontalDivider();
 
 /** Create vertical divider line */
-QWidget* createVerticalDivider();
+CORE_EXPORT QWidget* createVerticalDivider();
 
 }
 }

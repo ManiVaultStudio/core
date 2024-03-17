@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <unordered_map>
@@ -15,7 +17,7 @@ class Vector3f;
 class Matrix3f;
 class Matrix4f;
 
-class ShaderProgram : protected QOpenGLFunctions_3_3_Core
+class CORE_EXPORT ShaderProgram : protected QOpenGLFunctions_3_3_Core
 {
 public:
     ShaderProgram();

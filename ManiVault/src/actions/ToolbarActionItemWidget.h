@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
 
 #include "ToolbarActionItem.h"
 
@@ -17,14 +18,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ToolbarActionItemWidget final : public QWidget
+class CORE_EXPORT ToolbarActionItemWidget final : public QWidget
 {
     Q_OBJECT
 
 protected:
 
     /** State widget class (displays either collapsed or expanded action) */
-    class StateWidget : public QWidget
+    class CORE_EXPORT StateWidget : public QWidget
     {
     public:
 

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "ColorMap.h"
 
 #include <QSortFilterProxyModel>
@@ -17,7 +19,7 @@ namespace util {
  *
  * @author Thomas Kroes
  */
-class ColorMapFilterModel : public QSortFilterProxyModel {
+class CORE_EXPORT ColorMapFilterModel : public QSortFilterProxyModel {
 public:
 
     /** Constructor

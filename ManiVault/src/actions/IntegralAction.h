@@ -23,14 +23,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class IntegralAction : public NumericalAction<std::int32_t>
+class CORE_EXPORT IntegralAction : public NumericalAction<std::int32_t>
 {
     Q_OBJECT
 
 public:
 
     /** Spinbox widget class for integral action */
-    class SpinBoxWidget : public QSpinBox
+    class CORE_EXPORT SpinBoxWidget : public QSpinBox
     {
     protected:
 
@@ -45,7 +45,7 @@ public:
     };
 
     /** Slider widget class for integral action */
-    class SliderWidget : public QSlider
+    class CORE_EXPORT SliderWidget : public QSlider
     {
     protected:
 
@@ -60,7 +60,7 @@ public:
     };
 
     /** Line edit widget class for integral action */
-    class LineEditWidget : public QLineEdit
+    class CORE_EXPORT LineEditWidget : public QLineEdit
     {
     protected:
 

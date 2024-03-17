@@ -9,7 +9,7 @@
 namespace mv
 {
 
-class ModalTaskTester final : public AbstractTaskTester
+class CORE_EXPORT ModalTaskTester final : public AbstractTaskTester
 {
     Q_OBJECT
 

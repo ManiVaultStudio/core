@@ -20,11 +20,6 @@ set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
 set(MV_EXE MV_Application)                   # The ManiVault executable target
 set(MV_PUBLIC_LIB Core)                      # A public shared library used by plugin builders and the ManiVault executable
 
-set(LINK_TYPE SHARED)
-if(MSVC)
-    set(LINK_TYPE STATIC)
-endif(MSVC)
-
 message(STATUS "ManiVault version ${MV_VERSION_FULL}")
 message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
 
@@ -35,16 +30,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INSTALL_MESSAGE LAZY)
-set(CMAKE_AUTOMOC_PATH_PREFIX ON)
-set(CMAKE_AUTOMOC ON)
 
 # include CMakePackageConfigHelpers macro
 include(CMakePackageConfigHelpers)
 
 # Test hardware avx capabilities
 include(CMakeCheckSetAVX)
+
+# Generate a header file that contains the EXPORT macro for public libraries
+include(GenerateExportHeader)
 
 # create a file that defines MV_VERSION_MAJOR, etc
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
@@ -168,21 +163,34 @@ include(CMakeMvSourcesResources)      # defines RESOURCE_FILES, UI_HEADERS and M
 # -----------------------------------------------------------------------------
 # Target MV_PUBLIC_LIB
 # -----------------------------------------------------------------------------
-add_library(${MV_PUBLIC_LIB} ${LINK_TYPE}
+add_library(${MV_PUBLIC_LIB} SHARED)
+
+set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    AUTOMOC ON
+    PROJECT_LABEL "MV_Public"       # Set the project name in VS different to the target name
+    OUTPUT_NAME "MV_Public"         # Set the library output name different to the target name
+)
+
+target_sources(${MV_PUBLIC_LIB}
+    PRIVATE
     src/.editorconfig
     ${PUBLIC_SOURCES}
 )
 
-set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
-                      PROJECT_LABEL "MV_Public"       # Set the project name in VS different to the target name
-                      OUTPUT_NAME "MV_Public"         # Set the library output name different to the target name
+target_include_directories(${MV_PUBLIC_LIB} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<INSTALL_INTERFACE:include>
 )
-
-target_include_directories(${MV_PUBLIC_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
 
+target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
+
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Core)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
 # Use AVX if enabled and available
@@ -201,7 +209,15 @@ endif()
 # -----------------------------------------------------------------------------
 # Target MV_EXE
 # -----------------------------------------------------------------------------
-add_executable(${MV_EXE} MACOSX_BUNDLE WIN32
+add_executable(${MV_EXE} MACOSX_BUNDLE WIN32)
+
+set_target_properties(${MV_EXE} PROPERTIES
+    AUTOMOC ON
+    OUTPUT_NAME ${MV_APPLICATION_NAME}
+)
+
+target_sources(${MV_EXE}
+    PRIVATE
     src/.editorconfig
     ${MAIN_SOURCES}
     ${PRIVATE_SOURCES}
@@ -209,13 +225,15 @@ add_executable(${MV_EXE} MACOSX_BUNDLE WIN32
     ${MAIN_APP_ICON_RESOURCE}
 )
 
-set_target_properties(${MV_EXE} PROPERTIES OUTPUT_NAME ${MV_APPLICATION_NAME})
+target_include_directories(${MV_EXE} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
+)
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
 
-
-target_include_directories(${MV_EXE} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
+target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
+target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
@@ -237,7 +255,6 @@ endif()
 if(MV_UNITY_BUILD)
     set_target_properties(${MV_EXE} PROPERTIES UNITY_BUILD ON)
 endif()
-
 
 if(MSVC)
     set_target_properties(${MV_EXE} PROPERTIES
@@ -314,10 +331,16 @@ endforeach()
 # Install public library
 install(TARGETS ${MV_PUBLIC_LIB}
     EXPORT ManiVaultPublicExport
+    RUNTIME DESTINATION . COMPONENT MVPUBLIC_LINKLIB    # Windows .dll
     ARCHIVE DESTINATION lib COMPONENT MVPUBLIC_LINKLIB  # Linux/Mac .so
     LIBRARY DESTINATION lib COMPONENT MVPUBLIC_LINKLIB  # Windows .lib
     INCLUDES DESTINATION include
 )
+
+
+# Install program database (.pdb) files
+install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION . COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
+install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION . COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
 
 # TODO: Create a ManiVaultCore package to support the find_package command
 

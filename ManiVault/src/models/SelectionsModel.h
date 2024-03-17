@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Dataset.h"
 #include "Set.h"
 
@@ -22,7 +24,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class SelectionsModel final : public QStandardItemModel
+class CORE_EXPORT SelectionsModel final : public QStandardItemModel
 {
 public:
 

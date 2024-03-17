@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QVector>
 #include <QMap>
 #include <QIcon>
@@ -34,7 +36,7 @@ namespace plugin
         VIEW 
     };
 
-    struct TypeHash
+    struct CORE_EXPORT TypeHash
     {
         std::size_t operator()(Type type) const
         {
@@ -44,8 +46,8 @@ namespace plugin
     
     using Types = QVector<Type>;
 
-    QString getPluginTypeName(const Type& type);
-    QIcon getPluginTypeIcon(const Type& type);
+    CORE_EXPORT QString getPluginTypeName(const Type& type);
+    CORE_EXPORT QIcon getPluginTypeIcon(const Type& type);
 
 } // namespace plugin
 

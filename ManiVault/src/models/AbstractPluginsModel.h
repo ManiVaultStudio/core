@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QList>
 #include <QStandardItem>
 #include <QStandardItemModel>
@@ -17,7 +19,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class AbstractPluginsModel : public QStandardItemModel
+class CORE_EXPORT AbstractPluginsModel : public QStandardItemModel
 {
 public:
 
@@ -31,7 +33,7 @@ public:
     };
 
     /** Standard model item class for displaying the item name */
-    class NameItem final : public QStandardItem {
+    class CORE_EXPORT NameItem final : public QStandardItem {
     public:
 
         /** No need for specialized constructor */
@@ -58,7 +60,7 @@ public:
     };
 
     /** Standard model item class for displaying the item category */
-    class CategoryItem final : public QStandardItem {
+    class CORE_EXPORT CategoryItem final : public QStandardItem {
     public:
 
         /** No need for specialized constructor */
@@ -85,7 +87,7 @@ public:
     };
 
     /** Standard model item class for displaying the plugin ID */
-    class IdItem final : public QStandardItem {
+    class CORE_EXPORT IdItem final : public QStandardItem {
     public:
 
         /** No need for specialized constructor */
@@ -110,6 +112,8 @@ public:
             return {};
         }
     };
+
+protected:
 
     /** Convenience class for combining items in a row */
     class Row final : public QList<QStandardItem*>

@@ -15,7 +15,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ColorMap1DAction : public ColorMapAction
+class CORE_EXPORT ColorMap1DAction : public ColorMapAction
 {
     Q_OBJECT
 

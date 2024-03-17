@@ -18,7 +18,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class WidgetActionBadgeOverlayWidget final : public OverlayWidget
+class CORE_EXPORT WidgetActionBadgeOverlayWidget final : public OverlayWidget
 {
 public:
 

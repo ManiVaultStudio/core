@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QString>
 
 namespace mv
@@ -11,8 +13,9 @@ namespace mv
 namespace util
 {
 
-QString loadFileContents(QString path);
-bool ShowFileInFolder(const QString path);
+CORE_EXPORT QString loadFileContents(const QString& path);
+
+CORE_EXPORT bool showFileInFolder(const QString& path);
 
 }
 

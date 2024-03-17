@@ -29,14 +29,14 @@ class SplashScreenWidget;
  * 
  * @author Thomas Kroes
  */
-class SplashScreenAction : public HorizontalGroupAction
+class CORE_EXPORT SplashScreenAction : public HorizontalGroupAction
 {
     Q_OBJECT
 
 public:
 
     /** Basic class to add an alert on the splash screen */
-    class Alert
+    class CORE_EXPORT Alert
     {
     public:
         enum class Type {

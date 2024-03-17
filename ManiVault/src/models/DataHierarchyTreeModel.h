@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "AbstractDataHierarchyModel.h"
 
 namespace mv {
@@ -17,7 +19,7 @@ class DataHierarchyItem;
  *
  * @author Thomas Kroes
  */
-class DataHierarchyTreeModel final : public AbstractDataHierarchyModel
+class CORE_EXPORT DataHierarchyTreeModel final : public AbstractDataHierarchyModel
 {
     Q_OBJECT
 

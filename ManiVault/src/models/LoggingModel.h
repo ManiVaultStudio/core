@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "util/Logger.h"
 
 #include "actions/ToggleAction.h"
@@ -24,7 +26,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class LoggingModel final : public QStandardItemModel
+class CORE_EXPORT LoggingModel final : public QStandardItemModel
 {
 public:
 
@@ -44,7 +46,7 @@ public:
 public:
 
     /** Base standard model item class for message record */
-    class Item : public QStandardItem, public QObject {
+    class CORE_EXPORT Item : public QStandardItem, public QObject {
     public:
 
         /**
@@ -84,7 +86,7 @@ public:
     };
 
     /** Standard model item class for interacting with the message number */
-    class NumberItem final : public Item {
+    class CORE_EXPORT NumberItem final : public Item {
     public:
 
         /** No need to override base constructor */
@@ -117,7 +119,7 @@ public:
     };
 
     /** Standard model item class for displaying the message type */
-    class TypeItem final : public Item {
+    class CORE_EXPORT TypeItem final : public Item {
     public:
 
         /** No need to override base constructor */
@@ -150,7 +152,7 @@ public:
     };
 
     /** Standard model item class for displaying the message type */
-    class MessageItem final : public Item {
+    class CORE_EXPORT MessageItem final : public Item {
     public:
 
         /**
@@ -187,7 +189,7 @@ public:
     };
 
     /** Standard model item class for displaying the message file and line */
-    class FileAndLineItem final : public Item {
+    class CORE_EXPORT FileAndLineItem final : public Item {
     public:
 
         /** No need to override base constructor */
@@ -220,7 +222,7 @@ public:
     };
 
     /** Standard model item class for displaying the message function */
-    class FunctionItem final : public Item {
+    class CORE_EXPORT FunctionItem final : public Item {
     public:
 
         /** No need to override base constructor */
@@ -253,7 +255,7 @@ public:
     };
 
     /** Standard model item class for displaying the message category */
-    class CategoryItem final : public Item {
+    class CORE_EXPORT CategoryItem final : public Item {
     public:
 
         /** No need to override base constructor */
@@ -284,6 +286,8 @@ public:
             return {};
         }
     };
+
+protected:
 
     /** Convenience class for combining message record items in a row */
     class Row final : public QList<QStandardItem*>

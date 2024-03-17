@@ -4,11 +4,13 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QAbstractItemModel>
 #include <QObject>
 #include <QStack>
 
-class AbstractItemModelTester : public QObject
+class CORE_EXPORT AbstractItemModelTester : public QObject
 {
     Q_OBJECT
 

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
 
 #include <QString>
 #include <QIcon>
@@ -35,7 +36,7 @@ static const QMap<PresetType, QString> presetTypes = {
  *
  * @author Thomas Kroes
  */
-class Preset
+class CORE_EXPORT Preset
 {
 protected:
 

@@ -26,7 +26,7 @@ class GroupSectionTreeItem;
  *
  * @author Thomas Kroes
  */
-class GroupsAction : public WidgetAction
+class CORE_EXPORT GroupsAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -49,7 +49,7 @@ public:
      * Tree widget class
      * Implemented solely to be able to update geometries by hand
      */
-    class TreeWidget : public QTreeWidget
+    class CORE_EXPORT TreeWidget : public QTreeWidget
     {
     public:
 
@@ -61,7 +61,7 @@ public:
     };
 
     /** Group widget class for widget action groups */
-    class Widget : public WidgetActionWidget
+    class CORE_EXPORT Widget : public WidgetActionWidget
     {
     protected:
 

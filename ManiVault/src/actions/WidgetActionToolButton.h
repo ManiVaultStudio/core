@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "WidgetAction.h"
 #include "WidgetActionToolButtonMenu.h"
 
@@ -22,7 +24,7 @@ class WidgetAction;
  *
  * @author Thomas Kroes
  */
-class WidgetActionToolButton : public QToolButton
+class CORE_EXPORT WidgetActionToolButton : public QToolButton
 {
     Q_OBJECT
 

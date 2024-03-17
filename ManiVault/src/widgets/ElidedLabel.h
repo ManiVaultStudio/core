@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QLabel>
 
 namespace mv::gui {
@@ -15,7 +17,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class ElidedLabel : public QLabel
+class CORE_EXPORT ElidedLabel : public QLabel
 {
 public:
 

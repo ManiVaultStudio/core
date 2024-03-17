@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "util/WidgetFader.h"
 
 #include <QWidget>
@@ -30,7 +32,7 @@ namespace gui
  *
  * @author Thomas Kroes
  */
-class DropWidget : public QWidget
+class CORE_EXPORT DropWidget : public QWidget
 {
 public:
 
@@ -41,7 +43,7 @@ public:
      *
      * @author Thomas Kroes
      */
-    class DropIndicatorWidget : public QWidget
+    class CORE_EXPORT DropIndicatorWidget : public QWidget
     {
     public:
         /**
@@ -64,7 +66,7 @@ public:
      *
      * @author Thomas Kroes
      */
-    class DropRegion : public QObject
+    class CORE_EXPORT DropRegion : public QObject
     {
     public:
         /**
@@ -138,7 +140,7 @@ public:
      *
      * @author Thomas Kroes
      */
-    class DropRegionContainerWidget : public QWidget
+    class CORE_EXPORT DropRegionContainerWidget : public QWidget
     {
     public:
         /**

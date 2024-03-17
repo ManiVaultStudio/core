@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "actions/GroupAction.h"
 #include "actions/HorizontalGroupAction.h"
 #include "actions/OptionAction.h"
@@ -29,7 +31,7 @@ class HierarchyWidget;
  * Custom tree view class
  * Tree view does not emit signals when column visibility changes (needed to update visible columns popup), this class solves this problem.
  */
-class HierarchyWidgetTreeView : public QTreeView
+class CORE_EXPORT HierarchyWidgetTreeView : public QTreeView
 {
     Q_OBJECT
 
@@ -89,7 +91,7 @@ signals:
  * 
  * @author Thomas Kroes
  */
-class HierarchyWidget : public QWidget
+class CORE_EXPORT HierarchyWidget : public QWidget
 {
     Q_OBJECT
 

@@ -4,12 +4,14 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <string>
 #include <iostream>
 
 namespace mv
 {
-    class Vector3f
+    class CORE_EXPORT Vector3f
     {
     public:
         // C++ Rule of Zero: Implicitly defined destructor and copy member functions are fine for this class.
@@ -117,6 +119,6 @@ namespace mv
         float x{}, y{}, z{};
     };
 
-    std::ostream& operator<<(std::ostream& os, const Vector3f& v);
+    CORE_EXPORT std::ostream& operator<<(std::ostream& os, const Vector3f& v);
 
 } // namespace mv

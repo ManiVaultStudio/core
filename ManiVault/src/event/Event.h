@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "DataType.h"
 #include "Dataset.h"
 
@@ -36,7 +38,7 @@ enum class EventType
     DatasetUnlocked
 };
 
-class ManiVaultEvent
+class CORE_EXPORT ManiVaultEvent
 {
 public:
     ManiVaultEvent(EventType type) :
@@ -58,7 +60,7 @@ private:
  * Dataset event class
  * Event container class for datasets
  */
-class DatasetEvent : public ManiVaultEvent
+class CORE_EXPORT DatasetEvent : public ManiVaultEvent
 {
 public:
 
@@ -104,7 +106,7 @@ protected:
  * Dataset added event class
  * Dataset event which is emitted by the core when data is added
  */
-class DatasetAddedEvent : public DatasetEvent
+class CORE_EXPORT DatasetAddedEvent : public DatasetEvent
 {
 public:
 
@@ -154,7 +156,7 @@ protected:
  * Dataset data changed event class
  * Dataset event which is emitted by the core when dataset data has changed
  */
-class DatasetDataChangedEvent : public DatasetEvent
+class CORE_EXPORT DatasetDataChangedEvent : public DatasetEvent
 {
 public:
 
@@ -172,7 +174,7 @@ public:
  * Dataset data dimensions changed event class
  * Dataset event which is emitted by the core when dataset data dimensions change
  */
-class DatasetDataDimensionsChangedEvent : public DatasetEvent
+class CORE_EXPORT DatasetDataDimensionsChangedEvent : public DatasetEvent
 {
 public:
 
@@ -190,7 +192,7 @@ public:
  * Dataset about to be removed event class
  * Dataset event which is emitted by the core when a dataset is about to be removed
  */
-class DatasetAboutToBeRemovedEvent : public DatasetEvent
+class CORE_EXPORT DatasetAboutToBeRemovedEvent : public DatasetEvent
 {
 public:
 
@@ -208,7 +210,7 @@ public:
  * Dataset removed event class
  * Dataset event which is emitted by the core when a dataset has been removed
  */
-class DatasetRemovedEvent : public DatasetEvent
+class CORE_EXPORT DatasetRemovedEvent : public DatasetEvent
 {
 public:
 
@@ -243,7 +245,7 @@ protected:
  * Dataset data selection changed event class
  * Dataset event which is emitted by the core when dataset data selection has changed
  */
-class DatasetDataSelectionChangedEvent : public DatasetEvent
+class CORE_EXPORT DatasetDataSelectionChangedEvent : public DatasetEvent
 {
 public:
 
@@ -261,7 +263,7 @@ public:
  * Dataset child added event class
  * Dataset event which is emitted by the core when a child dataset is added to the dataset
  */
-class DatasetChildAddedEvent : public DatasetEvent
+class CORE_EXPORT DatasetChildAddedEvent : public DatasetEvent
 {
 public:
 
@@ -289,7 +291,7 @@ protected:
  * Dataset child removed event class
  * Dataset event which is emitted by the core when a child dataset is removed from the dataset
  */
-class DatasetChildRemovedEvent : public DatasetEvent
+class CORE_EXPORT DatasetChildRemovedEvent : public DatasetEvent
 {
 public:
 
@@ -317,7 +319,7 @@ protected:
  * Dataset locked event class
  * Dataset event which is emitted by the core when a dataset became locked
  */
-class DatasetLockedEvent : public DatasetEvent
+class CORE_EXPORT DatasetLockedEvent : public DatasetEvent
 {
 public:
 
@@ -335,7 +337,7 @@ public:
  * Dataset unlocked event class
  * Dataset event which is emitted by the core when a dataset became unlocked
  */
-class DatasetUnlockedEvent : public DatasetEvent
+class CORE_EXPORT DatasetUnlockedEvent : public DatasetEvent
 {
 public:
 
@@ -353,7 +355,7 @@ public:
  * Dataset grouping event class
  * Event container class for datasets grouping events
  */
-class DatasetGroupingEvent : public ManiVaultEvent
+class CORE_EXPORT DatasetGroupingEvent : public ManiVaultEvent
 {
 public:
 

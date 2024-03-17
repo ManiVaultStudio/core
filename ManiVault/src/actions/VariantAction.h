@@ -17,7 +17,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class VariantAction : public WidgetAction
+class CORE_EXPORT VariantAction : public WidgetAction
 {
     Q_OBJECT
 

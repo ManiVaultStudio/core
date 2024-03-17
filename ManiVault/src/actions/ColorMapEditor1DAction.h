@@ -21,7 +21,7 @@ class ColorMapAction;
  *
  * @author Thomas Kroes and Mitchell M. de Boer
  */
-class ColorMapEditor1DAction : public WidgetAction
+class CORE_EXPORT ColorMapEditor1DAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -32,7 +32,7 @@ public:
 public:
 
     /** Widget class for one-dimensional color map editor action */
-    class Widget : public WidgetActionWidget
+    class CORE_EXPORT Widget : public WidgetActionWidget
     {
     public:
 

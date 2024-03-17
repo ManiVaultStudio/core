@@ -31,7 +31,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class AbstractSettingsManager : public AbstractManager
+class CORE_EXPORT AbstractSettingsManager : public AbstractManager
 {
     Q_OBJECT
 
@@ -74,7 +74,7 @@ public: // Global settings actions
      * @return Pointer to plugin global settings of \p ActionType (if available, otherwise returns a nullptr)
      */
     template<typename ActionType>
-    ActionType* getPluginGlobalSettingsGroupAction(const QString& kind) {
+    inline ActionType* getPluginGlobalSettingsGroupAction(const QString& kind) {
         return dynamic_cast<ActionType*>(getPluginGlobalSettingsGroupAction(kind));
     }
 
@@ -91,7 +91,7 @@ public: // Global settings actions
     * @return Pointer to plugin global settings of \p ActionType (if available, otherwise returns a nullptr)
     */
     template<typename ActionType>
-    ActionType* getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin) {
+    inline ActionType* getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin) {
         return dynamic_cast<ActionType*>(getPluginGlobalSettingsGroupAction(plugin));
     }
 };

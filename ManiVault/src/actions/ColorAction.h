@@ -19,7 +19,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ColorAction : public WidgetAction
+class CORE_EXPORT ColorAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -37,12 +37,12 @@ public:
 public:
 
     /** Color picker push button class for color action */
-    class PushButtonWidget : public WidgetActionWidget
+    class CORE_EXPORT PushButtonWidget : public WidgetActionWidget
     {
     protected:
 
         /** Extended tool button widget class with display of current color */
-        class ToolButton : public QToolButton
+        class CORE_EXPORT ToolButton : public QToolButton
         {
         public:
 

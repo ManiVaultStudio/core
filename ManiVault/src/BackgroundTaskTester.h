@@ -9,7 +9,7 @@
 namespace mv
 {
 
-class BackgroundTaskTester final : public AbstractTaskTester
+class CORE_EXPORT BackgroundTaskTester final : public AbstractTaskTester
 {
     Q_OBJECT
 

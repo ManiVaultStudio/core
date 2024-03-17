@@ -22,7 +22,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class AbstractActionsModel : public QStandardItemModel
+class CORE_EXPORT AbstractActionsModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -65,7 +65,7 @@ public:
 protected:
 
     /** Header standard model item class */
-    class HeaderItem : public QStandardItem {
+    class CORE_EXPORT HeaderItem : public QStandardItem {
     public:
 
         /**
@@ -87,7 +87,7 @@ protected:
 public:
 
     /** Base standard model item class for widget action */
-    class Item : public QStandardItem, public QObject {
+    class CORE_EXPORT Item : public QStandardItem, public QObject {
     public:
 
         /**
@@ -110,7 +110,7 @@ public:
 protected:
 
     /** Standard model item class for displaying the action name */
-    class NameItem final : public Item {
+    class CORE_EXPORT NameItem final : public Item {
     public:
 
         /**
@@ -130,7 +130,7 @@ protected:
     };
 
     /** Standard model item class for displaying the action location */
-    class LocationItem final : public Item {
+    class CORE_EXPORT LocationItem final : public Item {
     public:
 
         /**
@@ -147,7 +147,7 @@ protected:
     };
 
     /** Standard model item class for displaying the action identifier */
-    class IdItem final : public Item {
+    class CORE_EXPORT IdItem final : public Item {
     public:
 
         /**
@@ -164,7 +164,7 @@ protected:
     };
 
     /** Standard model item class for displaying the action type */
-    class TypeItem final : public Item {
+    class CORE_EXPORT TypeItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -178,7 +178,7 @@ protected:
     };
 
     /** Standard model item class for displaying the action scope */
-    class ScopeItem final : public Item {
+    class CORE_EXPORT ScopeItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -192,7 +192,7 @@ protected:
     };
 
     /** Model item class for toggling action force disabled */
-    class ForceDisabledItem final : public Item {
+    class CORE_EXPORT ForceDisabledItem final : public Item {
     public:
 
         /**
@@ -212,7 +212,7 @@ protected:
     };
 
     /** Model item class for toggling force hidden */
-    class ForceHiddenItem final : public Item {
+    class CORE_EXPORT ForceHiddenItem final : public Item {
     public:
 
         /**
@@ -232,7 +232,7 @@ protected:
     };
 
     /** Model item class for toggling a permission flag */
-    class ConnectionPermissionItem final : public Item {
+    class CORE_EXPORT ConnectionPermissionItem final : public Item {
     public:
 
         /**
@@ -256,7 +256,7 @@ protected:
     };
 
     /** Model item class for action sort index */
-    class SortIndexItem final : public Item {
+    class CORE_EXPORT SortIndexItem final : public Item {
     public:
 
         /**
@@ -276,7 +276,7 @@ protected:
     };
 
     /** Model item class for action stretch */
-    class StretchItem final : public Item {
+    class CORE_EXPORT StretchItem final : public Item {
     public:
 
         /**
@@ -296,7 +296,7 @@ protected:
     };
 
     /** Standard model item class for displaying the parent action identifier */
-    class ParentActionIdItem final : public Item {
+    class CORE_EXPORT ParentActionIdItem final : public Item {
     public:
 
         /**
@@ -313,7 +313,7 @@ protected:
     };
 
     /** Standard model item class for displaying whether the action is connected or not */
-    class IsConnectedItem final : public Item {
+    class CORE_EXPORT IsConnectedItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -327,7 +327,7 @@ protected:
     };
 
     /** Standard model item class for displaying the number of connected actions */
-    class NumberOfConnectedActionsItem final : public Item {
+    class CORE_EXPORT NumberOfConnectedActionsItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -340,9 +340,8 @@ protected:
         QVariant data(int role = Qt::UserRole + 1) const override;
     };
     
-
     /** Standard model item class for displaying the public action identifier */
-    class PublicActionIdItem final : public Item {
+    class CORE_EXPORT PublicActionIdItem final : public Item {
     public:
 
         /**
@@ -359,7 +358,7 @@ protected:
     };
 
     /** Standard model item class for displaying whether the action is a root action */
-    class IsRootItem final : public Item {
+    class CORE_EXPORT IsRootItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -373,7 +372,7 @@ protected:
     };
 
     /** Standard model item class for displaying whether the action is a leaf action */
-    class IsLeafItem final : public Item {
+    class CORE_EXPORT IsLeafItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -450,6 +449,13 @@ public:
      * @return Pointer to standard item (nullptr if not found)
      */
     virtual QStandardItem* getActionItem(const gui::WidgetAction* action) const final;
+
+    /**
+     * Create a AbstractActionsModel::Row and return a QList<QStandardItem*>
+     * @param action Pointer to row action
+     * @return return a QList<QStandardItem*>
+     */
+    QList<QStandardItem*> createActionsRow(gui::WidgetAction* action) const;
 
 protected: // Drag-and-drop behavior
 

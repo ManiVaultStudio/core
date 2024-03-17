@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QToolButton>
@@ -28,12 +30,12 @@ class SplashScreenAction;
  *
  * @author Thomas Kroes
  */
-class SplashScreenWidget : public QWidget
+class CORE_EXPORT SplashScreenWidget : public QWidget
 {
 public:
 
     /** Widget class for adding an external link on the splash screen widget */
-    class ExternalLinkWidget : public QWidget {
+    class CORE_EXPORT ExternalLinkWidget : public QWidget {
     public:
 
         /**

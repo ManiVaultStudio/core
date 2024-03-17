@@ -618,6 +618,11 @@ AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     append(new IsLeafItem(action));
 }
 
+QList<QStandardItem*> AbstractActionsModel::createActionsRow(gui::WidgetAction* action) const
+{ 
+    return Row(action); 
+};
+
 QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> AbstractActionsModel::columnInfo = QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo>({
     { AbstractActionsModel::Column::ForceDisabled, { "" , "Enabled", "Whether the parameter is enabled or not" } },
     { AbstractActionsModel::Column::Name, { "Name" , "Name", "Name of the parameter" } },

@@ -21,7 +21,7 @@ class ColorMapEditor1DAction;
  *
  * @author Thomas Kroes and Mitchell M. de Boer
  */
-class ColorMapEditor1DNode : public QObject, public util::Serializable
+class CORE_EXPORT ColorMapEditor1DNode : public QObject, public util::Serializable
 {
     Q_OBJECT
 

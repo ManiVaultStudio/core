@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "WidgetAction.h"
 
 #include <QMenu>
@@ -26,17 +28,17 @@ class WidgetActionToolButton;
  *
  * @author Thomas Kroes
  */
-class WidgetActionToolButtonMenu : public QMenu
+class CORE_EXPORT WidgetActionToolButtonMenu : public QMenu
 {
 private:
 
     /** Customized widget action class which defers layout population until the popup menu is about to be shown */
-    class DeferredLoadWidgetAction : public QWidgetAction
+    class CORE_EXPORT DeferredLoadWidgetAction : public QWidgetAction
     {
     private:
 
         /** Widget class which initializes with an empty vertical box layout and populates when the menu is about to be shown */
-        class ActionWidget : public QWidget
+        class CORE_EXPORT ActionWidget : public QWidget
         {
         public:
 

@@ -27,7 +27,7 @@ namespace mv {
  * 
  * @author Thomas Kroes
  */
-class FontAwesome : public IconFont
+class CORE_EXPORT FontAwesome : public IconFont
 {
 public: // Construction/destruction
 

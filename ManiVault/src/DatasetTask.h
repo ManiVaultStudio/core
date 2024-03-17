@@ -16,7 +16,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class DatasetTask final : public Task
+class CORE_EXPORT DatasetTask final : public Task
 {
     Q_OBJECT
 

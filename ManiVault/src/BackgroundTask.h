@@ -17,7 +17,7 @@ class BackgroundTaskHandler;
  *
  * @author Thomas Kroes
  */
-class BackgroundTask final : public Task
+class CORE_EXPORT BackgroundTask final : public Task
 {
     Q_OBJECT
 

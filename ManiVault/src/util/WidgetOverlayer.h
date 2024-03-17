@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
 
 #include <QObject>
 
@@ -18,7 +19,7 @@ namespace mv::util {
  *
  * @author Thomas Kroes
  */
-class WidgetOverlayer : public QObject
+class CORE_EXPORT WidgetOverlayer : public QObject
 {
     Q_OBJECT
 

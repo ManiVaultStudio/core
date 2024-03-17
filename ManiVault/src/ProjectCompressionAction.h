@@ -17,7 +17,7 @@ namespace mv {
  * 
  * @author Thomas Kroes
  */
-class ProjectCompressionAction final : public gui::GroupAction {
+class CORE_EXPORT ProjectCompressionAction final : public gui::GroupAction {
 public:
 
     /**

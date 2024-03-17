@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "actions/StringAction.h"
 #include "actions/OptionsAction.h"
 #include "actions/ToggleAction.h"
@@ -24,7 +26,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class TasksFilterModel final : public QSortFilterProxyModel
+class CORE_EXPORT TasksFilterModel final : public QSortFilterProxyModel
 {
     Q_OBJECT
 

@@ -20,7 +20,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class WidgetActionHighlightWidget final : public OverlayWidget
+class CORE_EXPORT WidgetActionHighlightWidget final : public OverlayWidget
 {
 public:
 

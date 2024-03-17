@@ -19,7 +19,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class TriggersAction : public WidgetAction
+class CORE_EXPORT TriggersAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -34,7 +34,7 @@ public:
     };
 
     /** Trigger for push button */
-    struct Trigger {
+    struct CORE_EXPORT Trigger {
 
         /**
          * Constructor
@@ -70,7 +70,7 @@ public:
 public:
 
     /** Widget class for triggers action */
-    class Widget : public WidgetActionWidget {
+    class CORE_EXPORT Widget : public WidgetActionWidget {
     protected:
 
         /**

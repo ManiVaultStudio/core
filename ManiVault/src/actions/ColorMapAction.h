@@ -29,7 +29,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ColorMapAction : public WidgetAction
+class CORE_EXPORT ColorMapAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -54,7 +54,7 @@ public:
 public:
 
     /** Combobox widget class for display of a color map */
-    class ComboBoxWidget : public OptionAction::ComboBoxWidget {
+    class CORE_EXPORT ComboBoxWidget : public OptionAction::ComboBoxWidget {
     protected:
 
         /**

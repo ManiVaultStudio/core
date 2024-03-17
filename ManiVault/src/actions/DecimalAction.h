@@ -22,14 +22,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class DecimalAction : public NumericalAction<float>
+class CORE_EXPORT DecimalAction : public NumericalAction<float>
 {
     Q_OBJECT
 
 public:
 
     /** Spinbox widget class for decimal action */
-    class SpinBoxWidget : public QDoubleSpinBox
+    class CORE_EXPORT SpinBoxWidget : public QDoubleSpinBox
     {
     protected:
 
@@ -44,7 +44,7 @@ public:
     };
 
     /** Slider widget class for decimal action */
-    class SliderWidget : public QSlider
+    class CORE_EXPORT SliderWidget : public QSlider
     {
     protected:
 
@@ -59,7 +59,7 @@ public:
     };
 
     /** Line edit widget class for decimal action */
-    class LineEditWidget : public QLineEdit
+    class CORE_EXPORT LineEditWidget : public QLineEdit
     {
     protected:
 

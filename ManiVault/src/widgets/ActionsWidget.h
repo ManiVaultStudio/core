@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "models/AbstractActionsModel.h"
 #include "models/ActionsFilterModel.h"
 #include "widgets/HierarchyWidget.h"
@@ -23,7 +25,7 @@ namespace mv::gui
  *
  * @author Thomas Kroes
  */
-class ActionsWidget final : public QWidget
+class CORE_EXPORT ActionsWidget final : public QWidget
 {
     Q_OBJECT
 

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "ActionsWidget.h"
 
 #include "models/ActionsListModel.h"
@@ -29,7 +31,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ViewPluginEditorDialog : public QDialog
+class CORE_EXPORT ViewPluginEditorDialog : public QDialog
 {
 public:
 

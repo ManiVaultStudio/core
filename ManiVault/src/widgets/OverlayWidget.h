@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "util/WidgetOverlayer.h"
 
 #include <QWidget>
@@ -18,7 +20,7 @@ namespace mv::gui
  *  
  * @author Thomas Kroes
  */
-class OverlayWidget : public QWidget
+class CORE_EXPORT OverlayWidget : public QWidget
 {
 public:
 

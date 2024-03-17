@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QWidget>
 
 namespace mv::gui {
@@ -21,7 +23,7 @@ class WidgetActionBadgeOverlayWidget;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionViewWidget : public QWidget
+class CORE_EXPORT WidgetActionViewWidget : public QWidget
 {
 public:
 

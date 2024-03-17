@@ -15,7 +15,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class PluginsTreeModel : public AbstractPluginsModel
+class CORE_EXPORT PluginsTreeModel : public AbstractPluginsModel
 {
 public:
 

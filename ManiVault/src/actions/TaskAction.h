@@ -18,7 +18,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class TaskAction : public GroupAction
+class CORE_EXPORT TaskAction : public GroupAction
 {
     Q_OBJECT
 

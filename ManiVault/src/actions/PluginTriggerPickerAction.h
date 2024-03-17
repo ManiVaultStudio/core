@@ -18,14 +18,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class PluginTriggerPickerAction : public TriggerAction
+class CORE_EXPORT PluginTriggerPickerAction : public TriggerAction
 {
     Q_OBJECT
 
 public:
 
     /** Widget plugin trigger picker action */
-    class Widget : public WidgetActionWidget {
+    class CORE_EXPORT Widget : public WidgetActionWidget {
     protected:
 
         /**

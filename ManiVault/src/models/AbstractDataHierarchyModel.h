@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Dataset.h"
 #include "Task.h"
 #include "Set.h"
@@ -24,7 +26,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class AbstractDataHierarchyModel : public QStandardItemModel
+class CORE_EXPORT AbstractDataHierarchyModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -52,7 +54,7 @@ public:
 public:
 
     /** Base standard model item class for dataset */
-    class Item : public QStandardItem, public QObject {
+    class CORE_EXPORT Item : public QStandardItem, public QObject {
     public:
     
         /**
@@ -90,7 +92,7 @@ public:
     };
 
     /** Standard model item class for interacting with the dataset name */
-    class NameItem final : public Item {
+    class CORE_EXPORT NameItem final : public Item {
     public:
 
         /**
@@ -129,7 +131,7 @@ public:
     };
 
     /** Standard model item class for showing the dataset location */
-    class LocationItem final : public Item {
+    class CORE_EXPORT LocationItem final : public Item {
     public:
 
         /**
@@ -165,7 +167,7 @@ public:
     };
 
     /** Standard model item class for displaying the dataset identifier */
-    class DatasetIdItem final : public Item {
+    class CORE_EXPORT DatasetIdItem final : public Item {
     public:
 
         /**
@@ -201,7 +203,7 @@ public:
     };
 
     /** Standard model item class for displaying the source dataset identifier */
-    class SourceDatasetIdItem final : public Item {
+    class CORE_EXPORT SourceDatasetIdItem final : public Item {
     public:
 
         /**
@@ -237,7 +239,7 @@ public:
     };
 
     /** Standard model item class for displaying the raw data name */
-    class RawDataNameItem final : public Item {
+    class CORE_EXPORT RawDataNameItem final : public Item {
     public:
 
         /** Use base item constructor */
@@ -270,7 +272,7 @@ public:
     };
 
     /** Standard model item class for displaying the raw data size */
-    class RawDataSizeItem final : public Item {
+    class CORE_EXPORT RawDataSizeItem final : public Item {
     public:
 
         /** Use base item constructor */
@@ -303,7 +305,7 @@ public:
     };
 
     /** Standard model item class for displaying the dataset task progress */
-    class ProgressItem final : public Item {
+    class CORE_EXPORT ProgressItem final : public Item {
     public:
 
         /**
@@ -367,7 +369,7 @@ public:
     };
 
     /** Standard model item class for displaying the selection group index */
-    class SelectionGroupIndexItem final : public Item {
+    class CORE_EXPORT SelectionGroupIndexItem final : public Item {
     public:
 
         /**
@@ -408,7 +410,7 @@ public:
     };
 
     /** Standard model item class for displaying whether the dataset is visible or not */
-    class IsVisibleItem final : public Item {
+    class CORE_EXPORT IsVisibleItem final : public Item {
     public:
 
         /**
@@ -449,7 +451,7 @@ public:
     };
 
     /** Standard model item class for displaying whether the dataset belongs to a group */
-    class IsGroupItem final : public Item {
+    class CORE_EXPORT IsGroupItem final : public Item {
     public:
 
         /**
@@ -487,7 +489,7 @@ public:
     };
 
     /** Standard model item class for displaying whether the dataset is derived from another dataset */
-    class IsDerivedItem final : public Item {
+    class CORE_EXPORT IsDerivedItem final : public Item {
     public:
 
         /** Use base item constructor */
@@ -522,7 +524,7 @@ public:
     };
 
     /** Standard model item class for displaying whether the dataset is a subset of another dataset */
-    class IsSubsetItem final : public Item {
+    class CORE_EXPORT IsSubsetItem final : public Item {
     public:
 
         /**
@@ -584,7 +586,7 @@ public:
     };
 
     /** Standard model item class for displaying whether the dataset is locked */
-    class IsLockedItem final : public Item {
+    class CORE_EXPORT IsLockedItem final : public Item {
     public:
 
         /** Use base item constructor */
@@ -617,6 +619,8 @@ public:
             return {};
         }
     };
+
+protected:
 
     /** Convenience class for combining dataset items in a row */
     class Row final : public QList<QStandardItem*>

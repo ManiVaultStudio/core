@@ -11,7 +11,7 @@
 namespace mv::util {
 
 /** Class for representing version with major-, minor- and patch version number plus an optional suffic */
-class Version final : public Serializable {
+class CORE_EXPORT Version final : public Serializable {
 public:
 
     /**

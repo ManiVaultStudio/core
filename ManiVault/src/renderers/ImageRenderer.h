@@ -8,7 +8,7 @@
 
 namespace mv
 {
-    class ImageRenderer : public Renderer
+    class CORE_EXPORT ImageRenderer : public Renderer
     {
     public:
         void init() override;

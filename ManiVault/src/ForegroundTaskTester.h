@@ -16,7 +16,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class ForegroundTaskTester final : public AbstractTaskTester
+class CORE_EXPORT ForegroundTaskTester final : public AbstractTaskTester
 {
     Q_OBJECT
 

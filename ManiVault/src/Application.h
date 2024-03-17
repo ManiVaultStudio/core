@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "util/IconFonts.h"
 #include "util/Logger.h"
 #include "util/Version.h"
@@ -29,14 +31,14 @@ class ProjectMetaAction;
  * 
  * @author Thomas Kroes
  */
-class Application final : public QApplication
+class CORE_EXPORT Application final : public QApplication
 {
     Q_OBJECT
 
 public:
 
     /** Class for managing ManiVault application temporary directories */
-    class TemporaryDirs final : public QObject {
+    class CORE_EXPORT TemporaryDirs final : public QObject {
     public:
 
         /**

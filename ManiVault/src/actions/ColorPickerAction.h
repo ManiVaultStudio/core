@@ -19,14 +19,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ColorPickerAction : public WidgetAction
+class CORE_EXPORT ColorPickerAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
     /** Color picker widget class for color picker action */
-    class Widget : public WidgetActionWidget {
+    class CORE_EXPORT Widget : public WidgetActionWidget {
     protected:
 
         /**

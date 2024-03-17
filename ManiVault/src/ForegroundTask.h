@@ -17,7 +17,7 @@ class ForegroundTaskHandler;
  *
  * @author Thomas Kroes
  */
-class ForegroundTask final : public Task
+class CORE_EXPORT ForegroundTask final : public Task
 {
     Q_OBJECT
 

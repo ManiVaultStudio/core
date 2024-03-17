@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QString>
 #include <QFont>
 #include <QIcon>
@@ -19,7 +21,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class IconFont
+class CORE_EXPORT IconFont
 {
 public: // Construction/destruction
 
@@ -115,7 +117,7 @@ protected:
  * @param debug Qt output stream for debugging information
  * @param iconFont Reference to icon font class
  */
-inline QDebug operator << (QDebug debug, const IconFont& iconFont) {
+CORE_EXPORT inline QDebug operator << (QDebug debug, const IconFont& iconFont) {
     debug << iconFont.getFullName();
 
     return debug;

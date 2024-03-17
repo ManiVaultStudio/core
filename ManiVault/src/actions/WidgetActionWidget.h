@@ -19,7 +19,7 @@ class WidgetAction;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionWidget : public WidgetActionViewWidget
+class CORE_EXPORT WidgetActionWidget : public WidgetActionViewWidget
 {
 public:
 

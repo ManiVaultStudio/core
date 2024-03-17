@@ -16,7 +16,7 @@ namespace mv {
 
 namespace plugin {
 
-struct DataLoadException : public std::exception
+struct CORE_EXPORT DataLoadException : public std::exception
 {
 public:
     DataLoadException(QString filePath, QString reason)
@@ -38,7 +38,7 @@ private:
 };
 
 
-class LoaderPlugin : public Plugin
+class CORE_EXPORT LoaderPlugin : public Plugin
 {
 public:
     LoaderPlugin(const PluginFactory* factory) : Plugin(factory) { }
@@ -63,7 +63,7 @@ protected:
 };
 
 
-class LoaderPluginFactory : public PluginFactory
+class CORE_EXPORT LoaderPluginFactory : public PluginFactory
 {
     Q_OBJECT
     

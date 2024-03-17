@@ -19,7 +19,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class StatusAction : public WidgetAction
+class CORE_EXPORT StatusAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -43,7 +43,7 @@ public:
 public:
 
     /** Line edit widget class for status action */
-    class LineEditWidget : public QLineEdit {
+    class CORE_EXPORT LineEditWidget : public QLineEdit {
     protected:
 
         /**

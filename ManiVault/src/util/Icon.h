@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "actions/WidgetActionBadge.h" 
 
 #include <QString>
@@ -22,7 +24,7 @@ static const QList<QSize> defaultIconPixmapSizes = QList({QSize(64, 64), QSize(3
  * @param pixmapSizes Pixmap size in the icon
  * @return Icon
  */
-QIcon createIcon(const QPixmap& pixmap, const QList<QSize>& pixmapSizes = defaultIconPixmapSizes);
+CORE_EXPORT QIcon createIcon(const QPixmap& pixmap, const QList<QSize>& pixmapSizes = defaultIconPixmapSizes);
 
 /**
  * Convenience function to overlay \p icon pixmap(s) with an overlay \p pixmap
@@ -30,7 +32,7 @@ QIcon createIcon(const QPixmap& pixmap, const QList<QSize>& pixmapSizes = defaul
  * @param overlay Overlay pixmap
  * @return Overlay icon
  */
-QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay);
+CORE_EXPORT QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay);
 
 /**
  * Convenience function to create a plugin icon, which consists of maximum of four characters laid out in a grid
@@ -38,14 +40,14 @@ QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay);
  * @param color Icon color
  * @return Plugin icon
  */
-QIcon createPluginIcon(const QString& characters, const QColor& color);
+CORE_EXPORT QIcon createPluginIcon(const QString& characters, const QColor& color);
 
 /**
  * Combines two (or more) icons into a horizontal icon
  * @param icons Vector of input icons (need to be the same height)
  * @return Combined icon
  */
-QIcon combineIconsHorizontally(const QVector<QIcon>& icons);
+CORE_EXPORT QIcon combineIconsHorizontally(const QVector<QIcon>& icons);
 
 /**
  * Creates a pixmap with a number badge from \p number, \p badgeBackgroundColor and \p foregroundColor
@@ -54,14 +56,14 @@ QIcon combineIconsHorizontally(const QVector<QIcon>& icons);
  * @param foregroundColor Color of the badge foreground (text)
  * @return Number badge pixmap
  */
-QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/);
+CORE_EXPORT QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/);
 
 /**
  * Creates a pixmap with a number badge from \p widgetActionBadge
  * @param widgetActionBadge Widget action badge configuration
  * @return Number badge pixmap
  */
-QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadge);
+CORE_EXPORT QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadge);
 
 /**
  * Overlays \p icon with a \p number badge in \p color and with \p alignment
@@ -70,6 +72,6 @@ QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadg
  * @param iconMargin Icon margin
  * @return Icon with badge overlay
  */
-QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const WidgetActionBadge& widgetActionBadge, std::uint32_t iconMargin = 0);
+CORE_EXPORT QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const WidgetActionBadge& widgetActionBadge, std::uint32_t iconMargin = 0);
 
 }

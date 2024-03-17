@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QMap>
 #include <QString>
 #include <QIcon>
@@ -37,7 +39,7 @@ static QMap<QString, DockAreaFlag> dockAreaMap({
     { "Tabbed", static_cast<DockAreaFlag>(DockAreaFlag::Center) }
 });
 
-QIcon getDockAreaIcon(DockAreaFlag dockArea);
+CORE_EXPORT QIcon getDockAreaIcon(DockAreaFlag dockArea);
 
 /** Auto-hide location flags */
 enum class AutoHideLocation {

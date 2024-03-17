@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QGraphicsItem>
 
 namespace mv {
@@ -20,7 +22,7 @@ class ColorMapEditor1DNode;
  *
  * @author Thomas Kroes and Mitchell M. de Boer
  */
-class ColorMapEditor1DEdgesGraphicsItem : public QObject, public QGraphicsItem
+class CORE_EXPORT ColorMapEditor1DEdgesGraphicsItem : public QObject, public QGraphicsItem
 {
     Q_OBJECT
     Q_INTERFACES(QGraphicsItem)

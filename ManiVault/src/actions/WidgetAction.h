@@ -41,7 +41,7 @@ using WidgetConfigurationFunction = std::function<void(WidgetAction*, QWidget*)>
  * 
  * @author Thomas Kroes
  */
-class WidgetAction : public QWidgetAction, public util::Serializable
+class CORE_EXPORT WidgetAction : public QWidgetAction, public util::Serializable
 {
     Q_OBJECT
 

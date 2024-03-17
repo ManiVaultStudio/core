@@ -20,7 +20,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class Workspace final : public QObject, public mv::util::Serializable
+class CORE_EXPORT Workspace final : public QObject, public mv::util::Serializable
 {
     Q_OBJECT
 

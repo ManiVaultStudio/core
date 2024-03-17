@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <chrono>
 
 #include <QString>
@@ -21,7 +23,7 @@ using MilliSeconds  = std::chrono::microseconds;
  *
  * @author Thomas Kroes
  */
-class Timer
+class CORE_EXPORT Timer
 {
 public: // Construction/destruction
 

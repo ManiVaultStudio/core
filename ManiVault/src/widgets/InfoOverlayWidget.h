@@ -22,7 +22,7 @@ namespace mv::gui
  *  
  * @author Thomas Kroes
  */
-class InfoOverlayWidget : public InfoWidget
+class CORE_EXPORT InfoOverlayWidget : public InfoWidget
 {
 public:
 

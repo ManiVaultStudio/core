@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <QPixmap>
@@ -31,7 +33,7 @@ namespace mv
 * an OpenGL context is current and active, otherwise
 * their behaviour is undefined.
 */
-class Texture : protected QOpenGLFunctions_3_3_Core
+class CORE_EXPORT Texture : protected QOpenGLFunctions_3_3_Core
 {
 public:
     /**
@@ -131,7 +133,7 @@ protected:
     GLenum _target;
 };
 
-class Texture1D : public Texture
+class CORE_EXPORT Texture1D : public Texture
 {
 public:
     Texture1D() : Texture(GL_TEXTURE_1D) { }
@@ -156,7 +158,7 @@ public:
     }
 };
 
-class Texture2D : public Texture
+class CORE_EXPORT Texture2D : public Texture
 {
 public:
     Texture2D() : Texture(GL_TEXTURE_2D) { }

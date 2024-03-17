@@ -18,7 +18,7 @@ namespace mv
 namespace util
 {
 
-QString loadFileContents(QString path) {
+QString loadFileContents(const QString& path) {
     QFile file(path);
 
     QString contents = "";
@@ -31,7 +31,7 @@ QString loadFileContents(QString path) {
     return contents;
 }
 
-bool ShowFileInFolder(const QString path)
+bool showFileInFolder(const QString& path)
 {
     const QFileInfo info(path);
 

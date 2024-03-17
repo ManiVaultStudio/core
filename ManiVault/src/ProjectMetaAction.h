@@ -23,7 +23,7 @@ class Project;
  *
  * @author Thomas Kroes
  */
-class ProjectMetaAction final : public gui::VerticalGroupAction
+class CORE_EXPORT ProjectMetaAction final : public gui::VerticalGroupAction
 {
     Q_OBJECT
 
