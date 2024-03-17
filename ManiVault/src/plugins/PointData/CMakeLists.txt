@@ -55,10 +55,6 @@ set(POINTS_HEADERS
     src/CreateSetFromSelectionAction.h
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/PointData.h
-)
-
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
@@ -95,6 +91,15 @@ set(ACTIONS_SOURCES
     src/DimensionsPickerMiscellaneousAction.cpp
     src/ModelResetter.h
     src/ModelResetter.cpp
+)
+
+set(PLUGIN_MOC_HEADERS
+    src/PointData.h
+    src/ProxyDatasetsAction.h
+    src/EditProxyDatasetsAction.h
+    src/CreateSetFromSelectionAction.h
+    src/DimensionPickerAction.h
+    src/DimensionsPickerAction.h
 )
 
 source_group(Plugin FILES ${POINTS_SOURCES})
