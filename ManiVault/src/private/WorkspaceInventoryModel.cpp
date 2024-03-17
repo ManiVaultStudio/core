@@ -4,9 +4,11 @@
 
 #include "WorkspaceInventoryModel.h"
 
-#include <Application.h>
 #include <CoreInterface.h>
 #include <Workspace.h>
+
+#include <QList>
+#include <QStandardItem>
 
 using namespace mv;
 

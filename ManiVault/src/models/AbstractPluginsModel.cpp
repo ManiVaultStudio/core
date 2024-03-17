@@ -4,6 +4,8 @@
 
 #include "AbstractPluginsModel.h"
 
+#include "Plugin.h"
+
 using namespace mv;
 
 #ifdef _DEBUG

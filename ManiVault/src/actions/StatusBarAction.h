@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <actions/HorizontalGroupAction.h>
+#include <actions/StringAction.h>
 #include <actions/WidgetAction.h>
 #include <actions/WidgetActionToolButton.h>
 

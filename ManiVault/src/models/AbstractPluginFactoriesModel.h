@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <QList>
+#include <QStandardItem>
 #include <QStandardItemModel>
 
 namespace mv {

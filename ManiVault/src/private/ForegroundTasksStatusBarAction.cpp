@@ -8,6 +8,7 @@
     #define FOREGROUND_TASKS_STATUS_BAR_ACTION_VERBOSE
 #endif
 
+#include <QApplication> 
 #include <QDebug>
 
 using namespace mv;

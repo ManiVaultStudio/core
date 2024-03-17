@@ -8,6 +8,8 @@
 #include <Application.h>
 #include <Set.h>
 
+#include <widgets/HierarchyWidget.h>
+
 #include <QVBoxLayout>
 #include <QHeaderView>
 

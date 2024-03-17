@@ -9,6 +9,8 @@
 #include "actions/StringAction.h"
 #include "actions/TaskAction.h"
 
+#include <QList>
+#include <QStandardItem>
 #include <QStandardItemModel>
 
 namespace mv

@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "actions/OptionsAction.h"
 
 #include <QSortFilterProxyModel>
 

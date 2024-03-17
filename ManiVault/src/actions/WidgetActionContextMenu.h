@@ -11,6 +11,8 @@
 #include <QMenu>
 #include <QDialog>
 
+class QCloseEvent;
+
 namespace mv::gui {
 
 class WidgetAction;

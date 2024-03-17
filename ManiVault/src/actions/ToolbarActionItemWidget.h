@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "util/WidgetFader.h"
 
 #include "ToolbarActionItem.h"
 

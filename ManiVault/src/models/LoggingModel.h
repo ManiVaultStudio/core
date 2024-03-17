@@ -8,17 +8,14 @@
 
 #include "actions/ToggleAction.h"
 
-#include <QStandardItemModel>
+#include <QList>
 #include <QStandardItem>
+#include <QStandardItemModel>
 
 #include <deque>
 #include <cstdint>
 
 namespace mv {
-
-namespace util {
-    struct MessageRecord;
-}
 
 /**
  * Logging model

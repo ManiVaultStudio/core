@@ -6,7 +6,6 @@
 
 #include "Plugin.h"
 
-#include "DataHierarchyItem.h"
 #include "Set.h"
 
 namespace mv

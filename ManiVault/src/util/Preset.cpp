@@ -4,6 +4,8 @@
 
 #include "Preset.h"
 
+#include "Application.h"
+
 namespace mv {
 
 namespace util {

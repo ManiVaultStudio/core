@@ -4,7 +4,13 @@
 
 #pragma once
 
+#include "WidgetAction.h"
+
 #include <QMenu>
+#include <QWidget>
+#include <QWidgetAction>
+
+class QCloseEvent;
 
 namespace mv::gui {
 

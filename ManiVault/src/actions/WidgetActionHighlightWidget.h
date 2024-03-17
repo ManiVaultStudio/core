@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "util/WidgetFader.h"
 #include "widgets/OverlayWidget.h"
 
 #include "WidgetAction.h"

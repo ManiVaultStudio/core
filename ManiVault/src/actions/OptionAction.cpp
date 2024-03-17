@@ -3,13 +3,14 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "OptionAction.h"
+
 #include "Application.h"
 
 #include "util/Serialization.h"
 
+#include <QComboBox>
 #include <QDebug>
 #include <QHBoxLayout>
-#include <QComboBox>
 #include <QListView>
 #include <QStylePainter>
 

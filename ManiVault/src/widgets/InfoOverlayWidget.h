@@ -6,6 +6,7 @@
 
 #include "InfoWidget.h"
 
+#include "util/WidgetFader.h"
 #include "util/WidgetOverlayer.h"
 
 #include <QWidget>

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "WidgetAction.h"
 #include "WidgetActionToolButtonMenu.h"
 
 #include <QToolButton>

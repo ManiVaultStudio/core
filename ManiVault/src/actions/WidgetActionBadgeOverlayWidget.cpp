@@ -4,6 +4,8 @@
 
 #include "WidgetActionBadgeOverlayWidget.h"
 
+#include "util/Icon.h"
+
 #include <QPainter>
 
 namespace mv::gui {

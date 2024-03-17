@@ -3,17 +3,19 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "OptionsAction.h"
+
 #include "Application.h"
 
-#include <QDebug>
-#include <QHBoxLayout>
-#include <QFileDialog>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
 #include <QAbstractItemView>
-#include <QMouseEvent>
+#include <QDebug>
+#include <QFileDialog>
+#include <QHBoxLayout>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QListView>
+#include <QMouseEvent>
+#include <QStandardItemModel>
 
 using namespace mv::util;
 

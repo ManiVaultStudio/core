@@ -8,8 +8,6 @@
 
 #include "actions/LockingAction.h"
 
-#include "Task.h"
-
 #include <QObject>
 #include <QDebug>
 #include <QIcon>

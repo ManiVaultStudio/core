@@ -8,6 +8,8 @@
 
 #include "actions/WidgetAction.h"
 
+#include <QList>
+#include <QStandardItem>
 #include <QStandardItemModel>
 
 namespace mv

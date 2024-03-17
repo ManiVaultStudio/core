@@ -8,6 +8,8 @@
 
 #include <QSortFilterProxyModel>
 
+class QModelIndex;
+
 /**
  * Workspace inventory filter model class
  *

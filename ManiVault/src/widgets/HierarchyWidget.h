@@ -7,16 +7,18 @@
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 #include "actions/GroupAction.h"
-#include "actions/ToggleAction.h"
-#include "actions/OptionAction.h"
 #include "actions/HorizontalGroupAction.h"
+#include "actions/OptionAction.h"
+#include "actions/StringAction.h"
+#include "actions/ToggleAction.h"
+#include "actions/TriggerAction.h"
 
 #include "InfoOverlayWidget.h"
 
-#include <QWidget>
-#include <QTreeView>
 #include <QAbstractItemModel>
 #include <QHBoxLayout>
+#include <QTreeView>
+#include <QWidget>
 
 class QSortFilterProxyModel;
 

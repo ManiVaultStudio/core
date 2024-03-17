@@ -4,6 +4,8 @@
 
 #include "PluginStatusBarAction.h"
 
+#include "CoreInterface.h"
+
 #ifdef _DEBUG
     #define PLUGIN_STATUS_BAR_ACTION_VERBOSE
 #endif

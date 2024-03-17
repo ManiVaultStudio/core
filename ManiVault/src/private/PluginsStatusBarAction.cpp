@@ -4,6 +4,10 @@
 
 #include "PluginsStatusBarAction.h"
 
+#include <Application.h>
+#include <CoreInterface.h>
+#include <widgets/HierarchyWidget.h>
+
 #ifdef _DEBUG
     #define PLUGINS_STATUS_BAR_ACTION_VERBOSE
 #endif

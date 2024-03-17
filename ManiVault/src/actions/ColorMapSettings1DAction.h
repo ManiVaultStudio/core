@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GroupAction.h"
+#include "WidgetAction.h"
 
 namespace mv::gui {
 

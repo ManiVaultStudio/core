@@ -4,12 +4,11 @@
 
 #pragma once
 
-#include "actions/VerticalGroupAction.h"
+#include "actions/SplashScreenAction.h"
 #include "actions/StringAction.h"
 #include "actions/StringsAction.h"
-#include "actions/IntegralAction.h"
 #include "actions/VersionAction.h"
-#include "actions/SplashScreenAction.h"
+#include "actions/VerticalGroupAction.h"
 
 #include "ProjectCompressionAction.h"
 

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AbstractManager.h"
+#include "Dataset.h"
 
 #include "actions/ToggleAction.h"
 

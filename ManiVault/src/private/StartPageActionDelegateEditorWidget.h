@@ -4,16 +4,17 @@
 
 #pragma once
 
-#include "util/WidgetFader.h"
-
-#include <QWidget>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QGridLayout>
 #include <QGraphicsOpacityEffect>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QPersistentModelIndex>
+#include <QString>
 #include <QStyleOptionViewItem>
+#include <QVBoxLayout>
+#include <QWidget>
+
+#include <functional>
 
 /**
  * Start page action delegate editor widget class

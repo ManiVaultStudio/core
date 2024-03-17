@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "Application.h"
 
 #include <QString>
 #include <QIcon>

@@ -4,7 +4,10 @@
 
 #pragma once
 
+#include <QMap>
+#include <QPair>
 #include <QStandardItemModel>
+#include <QString>
 
 /**
  * Workspace inventory model class

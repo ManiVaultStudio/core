@@ -4,12 +4,11 @@
 
 #pragma once
 
-#include "actions/VerticalGroupAction.h"
-#include "actions/ToggleAction.h"
-#include "actions/IntegralAction.h"
-#include "actions/TriggerAction.h"
-#include "actions/TaskAction.h"
 #include "actions/ImageAction.h"
+#include "actions/TaskAction.h"
+#include "actions/ToggleAction.h"
+#include "actions/TriggerAction.h"
+#include "actions/VerticalGroupAction.h"
 
 #include <QPointer>
 

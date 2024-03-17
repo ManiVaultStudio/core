@@ -4,6 +4,7 @@
 
 #include "StartPageOpenProjectWidget.h"
 #include "StartPageContentWidget.h"
+#include "StartPageAction.h"
 #include "StartPageActionsModel.h"
 #include "Archiver.h"
 
