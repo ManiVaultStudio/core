@@ -18,8 +18,6 @@ namespace mv
  */
 class PublicActionsModel final : public AbstractActionsModel
 {
-    Q_OBJECT
-
 public:
 
     /**

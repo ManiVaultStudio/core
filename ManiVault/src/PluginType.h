@@ -25,7 +25,14 @@ namespace mv
 {
 namespace plugin
 {
-    enum class Type { ANALYSIS, DATA, LOADER, WRITER, TRANSFORMATION, VIEW };
+    enum class Type { 
+        ANALYSIS, 
+        DATA, 
+        LOADER, 
+        WRITER, 
+        TRANSFORMATION, 
+        VIEW 
+    };
 
     struct TypeHash
     {

@@ -30,10 +30,6 @@ set(CLUSTERD_SOURCES
     src/ClusterData.json
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/ClusterData.h
-)
-
 set(CLUSTER_HEADERS
     src/Cluster.h
     src/ClusterData.h
@@ -87,6 +83,11 @@ set(MODEL_SOURCES
 set(DIALOG_SOURCES
     src/OverwriteClustersConfirmationDialog.h
     src/OverwriteClustersConfirmationDialog.cpp
+)
+
+set(PLUGIN_MOC_HEADERS
+    src/ClusterData.h
+    src/ClustersAction.h
 )
 
 source_group(Plugin FILES ${CLUSTERD_SOURCES})

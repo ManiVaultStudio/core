@@ -25,8 +25,6 @@ class DataPropertiesPlugin;
  */
 class DataPropertiesWidget : public QWidget
 {
-    Q_OBJECT
-
 public:
 
     /**

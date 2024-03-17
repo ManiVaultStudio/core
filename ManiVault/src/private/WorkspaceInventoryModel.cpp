@@ -43,7 +43,7 @@ void WorkspaceInventoryModel::synchronizeWithWorkspaceManager()
     qDebug() << __FUNCTION__;
 #endif
 
-    for (const auto workspaceLocation : workspaces().getWorkspaceLocations()) {
+    for (const auto& workspaceLocation : workspaces().getWorkspaceLocations()) {
         Workspace workspace(workspaceLocation.getFilePath());
 
         const auto workspaceName = QFileInfo(workspaceLocation.getFilePath()).baseName();

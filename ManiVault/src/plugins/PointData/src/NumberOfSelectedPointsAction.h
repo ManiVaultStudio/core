@@ -23,8 +23,6 @@ using namespace mv::gui;
  */
 class NumberOfSelectedPointsAction : public WidgetAction
 {
-    Q_OBJECT
-
 protected:
 
     /** Widget class for number of selected points action */

@@ -25,8 +25,6 @@ using namespace mv::util;
  */
 class SelectedIndicesAction : public WidgetAction
 {
-    Q_OBJECT
-
 protected:
 
     /** Widget class for points info action */

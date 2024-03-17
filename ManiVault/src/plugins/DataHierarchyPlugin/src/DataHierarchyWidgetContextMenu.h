@@ -23,8 +23,6 @@ using namespace mv::plugin;
  */
 class DataHierarchyWidgetContextMenu final : public QMenu
 {
-    Q_OBJECT
-
 public:
 
     /**
