@@ -163,7 +163,7 @@ message(STATUS "Using QuaZip version ${QuaZip_VERSION}")
 # -----------------------------------------------------------------------------
 include(CMakeMvSourcesApplication)    # defines MAIN_SOURCES, PRIVATE_SOURCES and PRIVATE_HEADERS
 include(CMakeMvSourcesPublic)         # defines PUBLIC_SOURCES, PUBLIC_HEADERS and PRECOMPILE_HEADERS
-include(CMakeMvSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
+include(CMakeMvSourcesResources)      # defines RESOURCE_FILES, UI_HEADERS and MAIN_APP_ICON_RESOURCE
 
 # -----------------------------------------------------------------------------
 # Target MV_PUBLIC_LIB
@@ -206,6 +206,7 @@ add_executable(${MV_EXE} MACOSX_BUNDLE WIN32
     ${MAIN_SOURCES}
     ${PRIVATE_SOURCES}
     ${RESOURCE_FILES}
+    ${MAIN_APP_ICON_RESOURCE}
 )
 
 set_target_properties(${MV_EXE} PROPERTIES OUTPUT_NAME ${MV_APPLICATION_NAME})
