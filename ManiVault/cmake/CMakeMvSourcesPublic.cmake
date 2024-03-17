@@ -871,6 +871,11 @@ set(PUBLIC_TASK_FILES
     ${PUBLIC_TASK_SOURCES}
 )
 
+# Automatically generated during cmake config
+set(PUBLIC_VERSION_HEADERS
+    src/ManiVaultVersion.h
+)
+
 set(PUBLIC_HEADERS
     ${PUBLIC_CORE_INTERFACE_HEADERS}
     ${PUBLIC_EVENT_HEADERS}
@@ -910,6 +915,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_MISCELLANEOUS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
+    ${PUBLIC_VERSION_HEADERS}
 )
 
 set(PUBLIC_SOURCES
@@ -974,7 +980,7 @@ source_group(Widgets\\Internal FILES ${PUBLIC_WIDGETS_INTERNAL_FILES})
 source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})
-source_group(Application FILES ${PUBLIC_APPLICATION_FILES})
+source_group(Application FILES ${PUBLIC_APPLICATION_FILES} ${PUBLIC_VERSION_HEADERS})
 source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})
 source_group(DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
