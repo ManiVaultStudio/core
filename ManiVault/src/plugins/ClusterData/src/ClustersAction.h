@@ -8,6 +8,7 @@
 
 #include <Dataset.h>
 
+#include "ClusterData.h"
 #include "ClustersModel.h"
 #include "ClustersFilterModel.h"
 #include "ClustersActionWidget.h"
@@ -15,9 +16,6 @@
 #include "PrefixClustersAction.h"
 
 #include <QItemSelectionModel>
-
-class Cluster;
-class Clusters;
 
 using namespace mv::gui;
 using namespace mv::util;
