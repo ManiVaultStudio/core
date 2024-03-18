@@ -16,18 +16,6 @@ Q_DECLARE_METATYPE(mv::plugin::Plugin*);
 
 namespace mv {
 
-AbstractPluginsModel::Row::Row(const QString& name, const QString& category, const QString& id, const QIcon& icon /*= QIcon()*/)
-{
-    auto nameItem = new NameItem(name);
-
-    if (!icon.isNull())
-        nameItem->setIcon(icon);
-
-    append(nameItem);
-    append(new CategoryItem(category));
-    append(new IdItem(id));
-}
-
 AbstractPluginsModel::AbstractPluginsModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent)
 {

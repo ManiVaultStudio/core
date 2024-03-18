@@ -394,7 +394,27 @@ protected:
          * Construct row with \p action
          * @param action Pointer to row action
          */
-        Row(gui::WidgetAction* action);
+        Row(gui::WidgetAction* action) : QList<QStandardItem*>()
+        {
+            append(new NameItem(action));
+            append(new LocationItem(action));
+            append(new IdItem(action));
+            append(new TypeItem(action));
+            append(new ScopeItem(action));
+            append(new ForceDisabledItem(action));
+            append(new ForceHiddenItem(action));
+            append(new ConnectionPermissionItem(action, gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui));
+            append(new ConnectionPermissionItem(action, gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui));
+            append(new ConnectionPermissionItem(action, gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui));
+            append(new SortIndexItem(action));
+            append(new StretchItem(action));
+            append(new ParentActionIdItem(action));
+            append(new IsConnectedItem(action));
+            append(new NumberOfConnectedActionsItem(action));
+            append(new PublicActionIdItem(action));
+            append(new IsRootItem(action));
+            append(new IsLeafItem(action));
+        }
     };
 
 public:
@@ -449,13 +469,6 @@ public:
      * @return Pointer to standard item (nullptr if not found)
      */
     virtual QStandardItem* getActionItem(const gui::WidgetAction* action) const final;
-
-    /**
-     * Create a AbstractActionsModel::Row and return a QList<QStandardItem*>
-     * @param action Pointer to row action
-     * @return return a QList<QStandardItem*>
-     */
-    QList<QStandardItem*> createActionsRow(gui::WidgetAction* action) const;
 
 protected: // Drag-and-drop behavior
 

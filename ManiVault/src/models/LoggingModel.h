@@ -299,7 +299,16 @@ protected:
          * @param loggingModel Reference to owning logging model
          * @param MessageRecord Reference to message record
          */
-        Row(LoggingModel& loggingModel, const util::MessageRecord& messageRecord);
+        Row(LoggingModel& loggingModel, const util::MessageRecord& messageRecord) : QList<QStandardItem*>()
+        {
+            append(new NumberItem(loggingModel, messageRecord));
+            append(new TypeItem(loggingModel, messageRecord));
+            append(new MessageItem(loggingModel, messageRecord));
+            append(new FileAndLineItem(loggingModel, messageRecord));
+            append(new FunctionItem(loggingModel, messageRecord));
+            append(new CategoryItem(loggingModel, messageRecord));
+        }
+
     };
 
 public:

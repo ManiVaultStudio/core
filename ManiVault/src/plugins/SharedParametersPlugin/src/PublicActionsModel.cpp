@@ -65,7 +65,7 @@ void PublicActionsModel::addAction(WidgetAction* action)
         if (!publicActionItem)
             return;
 
-        auto row = createActionsRow(action);
+        auto row = Row(action);
 
         publicActionItem->appendRow(row);
 
@@ -110,7 +110,7 @@ void PublicActionsModel::addPublicAction(WidgetAction* publicAction)
 
     auto parentAction = publicAction->getParentAction();
 
-    auto row = createActionsRow(publicAction);
+    auto row = Row(publicAction);
 
     if (parentAction) {
         auto parentActionItem = getActionItem(parentAction);

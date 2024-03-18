@@ -186,7 +186,13 @@ protected:
          * Construct with \p rawDataName
          * @param rawDataName Name of the raw data
          */
-        Row(const QString& rawDataName);
+        Row(const QString& rawDataName) : QList<QStandardItem*>()
+        {
+            append(new RawDataNameItem(rawDataName));
+            append(new RawDataTypeItem(rawDataName));
+            append(new RawDataSizeItem(rawDataName));
+        }
+
     };
 
 protected: // Drag-and-drop behavior

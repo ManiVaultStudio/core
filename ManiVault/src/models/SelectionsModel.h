@@ -220,7 +220,14 @@ protected:
          * Construct with \p selection
          * @param selection Pointer to selection dataset to display item for
          */
-        Row(Dataset<DatasetImpl> selection);
+        Row(Dataset<DatasetImpl> selection) : QList<QStandardItem*>()
+        {
+            append(new NameItem(selection));
+            append(new IdItem(selection));
+            append(new RawDataNameItem(selection));
+            append(new RawDataTypeItem(selection));
+        }
+
     };
 
 protected: // Drag-and-drop behavior

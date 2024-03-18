@@ -175,19 +175,24 @@ protected:
          * @param type View type
          * @param pluginFactory Pointer to plugin factory
          */
-        Row(const QString& type, plugin::PluginFactory* pluginFactory);
+        Row(const QString& type, plugin::PluginFactory* pluginFactory) : QList<QStandardItem*>()
+        {
+            append(new NameItem(type, pluginFactory));
+            append(new VersionItem(type, pluginFactory));
+            append(new NumberOfInstancesItem(type, pluginFactory));
+        }
 
         /**
          * Construct with \p type
          * @param type View type
          */
-        Row(const QString& type);
+        Row(const QString& type) : Row(type, nullptr) {}
 
         /**
          * Construct with pointer to \p pluginFactory
          * @param pluginFactory Pointer to plugin factory
          */
-        Row(plugin::PluginFactory* pluginFactory);
+        Row(plugin::PluginFactory* pluginFactory) : Row("", pluginFactory) {}
     };
 
 public:
