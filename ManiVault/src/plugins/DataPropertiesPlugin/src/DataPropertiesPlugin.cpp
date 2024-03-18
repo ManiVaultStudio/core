@@ -19,25 +19,6 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     _additionalEditorAction(this, "Edit dataset parameters..."),
     _dataPropertiesWidget(this, nullptr)
 {
-    qDebug() << "-----Print children with maxDepth = 0";
-    printChildren(0);
-
-    qDebug() << "-----Print children with maxDepth = 1";
-    printChildren(1);
-
-    qDebug() << "-----Print children with maxDepth = 2";
-    printChildren(2);
-
-    qDebug() << "-----Print children with maxDepth = -1";
-    printChildren(-1);
-
-    QString childPath("Docking options/File");
-
-    if (auto file = findChildBypath(childPath))
-        qDebug() << file->getLocation();
-    else
-        qDebug() << childPath << "not found";
-
     _additionalEditorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     _additionalEditorAction.setShortcut(tr("F11"));
     _additionalEditorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
