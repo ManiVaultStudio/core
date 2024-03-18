@@ -338,9 +338,11 @@ install(TARGETS ${MV_PUBLIC_LIB}
 )
 
 
-# Install program database (.pdb) files
-install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION . COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
-install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION . COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
+if(MSVC)
+    # Install program database (.pdb) files
+    install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION . COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION . COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
+endif()
 
 # TODO: Create a ManiVaultCore package to support the find_package command
 
