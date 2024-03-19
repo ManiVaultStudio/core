@@ -15,11 +15,22 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CheckableStringListModel : public QStringListModel {
+class CheckableStringListModel final : public QStringListModel {
 public:
 
     using StringIndicesSet = QSet<std::int32_t>;
     using StringIndicesList = QList<std::int32_t>;
+
+private:
+
+    /**
+     * We want to reset our internal CheckableStringListModel#_checkedItems every time the strings are changed.
+     * We make the CheckableStringListModel::setStringList(...) private and replace it with 
+     * CheckableStringListModel::setStrings(...) so that we have control over the internals. This also prevents
+     * accidental misuse of QStringListModel::setStringList(...), which would lead to problems with checked items.
+     * Note: Underneath we still call QStringListModel::setStringList(...)
+     */
+    using QStringListModel::setStringList;
 
 public:
 
@@ -49,6 +60,12 @@ public:
      * @return Whether setting the data was successful or not
      */
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
+    /**
+     * Sets the strings in the model to \p strings
+     * @param strings New strings
+     */
+    void setStrings(const QStringList& strings);
 
     /**
      * Get checked strings
