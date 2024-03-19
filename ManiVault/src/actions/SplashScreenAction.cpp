@@ -195,7 +195,7 @@ void SplashScreenAction::closeSplashScreenWidget()
     _splashScreenWidget.clear();
 }
 
-void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
+void SplashScreenAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     HorizontalGroupAction::fromVariantMap(variantMap);
 
@@ -204,7 +204,7 @@ void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
     _affiliateLogosImageAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap SplashScreenAction::toVariantMap() const
+mv::VariantMap SplashScreenAction::toVariantMap() const
 {
     auto variantMap = HorizontalGroupAction::toVariantMap();
 

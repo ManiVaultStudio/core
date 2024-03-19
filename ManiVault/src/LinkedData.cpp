@@ -95,7 +95,7 @@ bool SelectionMap::hasMappingForPointIndex(std::uint32_t pointIndex) const
     return false;
 }
 
-void SelectionMap::fromVariantMap(const QVariantMap& variantMap)
+void SelectionMap::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -131,9 +131,9 @@ void SelectionMap::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-QVariantMap SelectionMap::toVariantMap() const
+mv::VariantMap SelectionMap::toVariantMap() const
 {
-    QVariantMap variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     // serialize a std::map<std::uint32_t, std::vector<std::uint32_t>>;
     std::vector<std::uint32_t> serializedMap;
@@ -194,7 +194,7 @@ void LinkedData::setMapping(SelectionMap& mapping)
     _mapping = mapping;
 }
 
-void LinkedData::fromVariantMap(const QVariantMap& variantMap)
+void LinkedData::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -207,9 +207,9 @@ void LinkedData::fromVariantMap(const QVariantMap& variantMap)
     _mapping.fromParentVariantMap(variantMap);
 }
 
-QVariantMap LinkedData::toVariantMap() const
+mv::VariantMap LinkedData::toVariantMap() const
 {
-    QVariantMap variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     variantMap["SourceDataset"] = QVariant::fromValue(_sourceDataSet.getDatasetId());
     variantMap["TargetDataset"] = QVariant::fromValue(_targetDataSet.getDatasetId());

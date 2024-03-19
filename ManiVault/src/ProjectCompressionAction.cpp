@@ -28,7 +28,7 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
     updateCompressionLevelReadOnly();
 }
 
-void ProjectCompressionAction::fromVariantMap(const QVariantMap& variantMap)
+void ProjectCompressionAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -36,9 +36,9 @@ void ProjectCompressionAction::fromVariantMap(const QVariantMap& variantMap)
     _levelAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap ProjectCompressionAction::toVariantMap() const
+mv::VariantMap ProjectCompressionAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     _enabledAction.insertIntoVariantMap(variantMap);
     _levelAction.insertIntoVariantMap(variantMap);

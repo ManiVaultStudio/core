@@ -53,14 +53,14 @@ void Serializable::setSerializationName(const QString& serializationName)
     _serializationName = serializationName;
 }
 
-void Serializable::fromVariantMap(const QVariantMap& variantMap)
+void Serializable::fromVariantMap(const VariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "ID");
 
     _id = variantMap["ID"].toString();
 }
 
-QVariantMap Serializable::toVariantMap() const
+VariantMap Serializable::toVariantMap() const
 {
     return {
         { "ID", _id }
@@ -78,7 +78,7 @@ QJsonDocument Serializable::toJsonDocument() const
 {
     QVariantMap variantMap;
 
-    variantMap[getSerializationName()] = const_cast<Serializable*>(this)->toVariantMap(this);
+    variantMap[getSerializationName()] = const_cast<Serializable*>(this)->toVariantMap(this).getVariantMap();
 
     return QJsonDocument::fromVariant(variantMap);
 }
@@ -160,7 +160,7 @@ QString Serializable::createId()
     return QUuid::createUuid().toString(QUuid::WithoutBraces);
 }
 
-void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)
+void Serializable::fromVariantMap(Serializable* serializable, const VariantMap& variantMap)
 {
 #ifdef SERIALIZABLE_VERBOSE
     qDebug().noquote() << QString("From variant map: %1").arg(serializable->getSerializationName());
@@ -185,7 +185,7 @@ void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap&
     */
 }
 
-void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key)
+void Serializable::fromVariantMap(Serializable& serializable, const VariantMap& variantMap, const QString& key)
 {
     if (!variantMap.contains(key)) {
         const auto errorMessage = QString("%1 not found in map: %2").arg(key);
@@ -199,7 +199,7 @@ void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap&
     serializable.fromVariantMap(variantMap[key].toMap());
 }
 
-void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap)
+void Serializable::fromParentVariantMap(const VariantMap& parentVariantMap)
 {
     try
     {
@@ -234,7 +234,7 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap)
     }
 }
 
-QVariantMap Serializable::toVariantMap(const Serializable* serializable)
+VariantMap Serializable::toVariantMap(const Serializable* serializable)
 {
 #ifdef SERIALIZABLE_VERBOSE
     qDebug().noquote() << QString("To variant map: %1").arg(serializable->getSerializationName());
@@ -243,17 +243,17 @@ QVariantMap Serializable::toVariantMap(const Serializable* serializable)
     return serializable->toVariantMap();
 }
 
-void Serializable::insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap, const QString& key)
+void Serializable::insertIntoVariantMap(const Serializable& serializable, VariantMap& variantMap, const QString& key)
 {
     variantMap.insert(key, serializable.toVariantMap());
 }
 
-void Serializable::insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap)
+void Serializable::insertIntoVariantMap(const Serializable& serializable, VariantMap& variantMap)
 {
     serializable.insertIntoVariantMap(variantMap);
 }
 
-void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
+void Serializable::insertIntoVariantMap(VariantMap& variantMap) const
 {
     if (getSerializationName().isEmpty())
         throw std::runtime_error("Serialization name may not be empty");

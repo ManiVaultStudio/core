@@ -752,7 +752,7 @@ ToggleAction& DataManager::getSelectionGroupingAction()
     return _selectionGroupingAction;
 }
 
-void DataManager::fromVariantMap(const QVariantMap& variantMap)
+void DataManager::fromVariantMap(const mv::VariantMap& variantMap)
 {
     AbstractDataManager::fromVariantMap(variantMap);
 
@@ -760,9 +760,9 @@ void DataManager::fromVariantMap(const QVariantMap& variantMap)
         _selectionGroupingAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap DataManager::toVariantMap() const
+mv::VariantMap DataManager::toVariantMap() const
 {
-    QVariantMap variantMap = AbstractDataManager::toVariantMap();
+    auto variantMap = AbstractDataManager::toVariantMap();
 
     for (auto& dataset : _datasets)
         variantMap[dataset->getId()] = dataset->toVariantMap();

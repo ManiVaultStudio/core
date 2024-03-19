@@ -486,6 +486,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Version.h
     src/util/DockWidgetPermission.h
     src/util/NumericalRange.h
+    src/util/VariantMap.h
 )
 
 if(APPLE)
@@ -530,6 +531,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Version.cpp
     src/util/DockWidgetPermission.cpp
     src/util/NumericalRange.cpp
+    src/util/VariantMap.cpp
 )
 
 if(APPLE)

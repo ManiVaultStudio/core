@@ -180,13 +180,13 @@ public: // Serialization
      * Load splash screen action from variant
      * @param Variant representation of the project
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save splash screen action to variant
      * @return Variant representation of the project
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 private:
     

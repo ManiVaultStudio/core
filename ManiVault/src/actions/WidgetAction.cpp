@@ -683,7 +683,7 @@ QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     return new QWidget();
 }
 
-void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
+void WidgetAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     auto previousId = getId();
 
@@ -726,9 +726,9 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
         setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
 }
 
-QVariantMap WidgetAction::toVariantMap() const
+mv::VariantMap WidgetAction::toVariantMap() const
 {
-    QVariantMap variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     variantMap.insert({
         { "ActionType", QVariant::fromValue(getTypeString()) },

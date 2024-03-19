@@ -193,7 +193,7 @@ void ColorMapEditor1DAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void ColorMapEditor1DAction::fromVariantMap(const QVariantMap& variantMap)
+void ColorMapEditor1DAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -208,9 +208,9 @@ void ColorMapEditor1DAction::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-QVariantMap ColorMapEditor1DAction::toVariantMap() const
+mv::VariantMap ColorMapEditor1DAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     QVariantList nodes;
 

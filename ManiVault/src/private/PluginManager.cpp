@@ -620,7 +620,7 @@ QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
     return _pluginFactories[pluginKind]->getIcon();
 }
 
-void PluginManager::fromVariantMap(const QVariantMap& variantMap)
+void PluginManager::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -676,7 +676,7 @@ void PluginManager::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-QVariantMap PluginManager::toVariantMap() const
+mv::VariantMap PluginManager::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 

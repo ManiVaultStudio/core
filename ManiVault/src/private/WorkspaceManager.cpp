@@ -540,7 +540,7 @@ Workspace* WorkspaceManager::getCurrentWorkspace()
     return _workspace.get();
 }
 
-void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
+void WorkspaceManager::fromVariantMap(const mv::VariantMap& variantMap)
 {
     auto& projectSerializationTask = projects().getProjectSerializationTask();
 
@@ -562,7 +562,7 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
     ViewPluginDockWidget::restoreViewPluginStates();
 }
 
-QVariantMap WorkspaceManager::toVariantMap() const
+mv::VariantMap WorkspaceManager::toVariantMap() const
 {
     auto& projectSerializationTask = projects().getProjectSerializationTask();
 

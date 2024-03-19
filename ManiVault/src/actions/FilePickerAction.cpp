@@ -178,7 +178,7 @@ QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widget
     return widget;
 }
 
-void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
+void FilePickerAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -188,7 +188,7 @@ void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
         setFilePath(variantMap["Value"].toString());
 }
 
-QVariantMap FilePickerAction::toVariantMap() const
+mv::VariantMap FilePickerAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

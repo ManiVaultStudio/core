@@ -135,14 +135,14 @@ PluginGlobalSettingsGroupAction* Plugin::getGlobalSettingsAction() const
     return _factory->getGlobalSettingsGroupAction();
 }
 
-void Plugin::fromVariantMap(const QVariantMap& variantMap)
+void Plugin::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
     Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
 }
 
-QVariantMap Plugin::toVariantMap() const
+mv::VariantMap Plugin::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

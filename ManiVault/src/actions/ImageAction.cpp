@@ -141,7 +141,7 @@ QWidget* ImageAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     return widget;
 }
 
-void ImageAction::fromVariantMap(const QVariantMap& variantMap)
+void ImageAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
     
@@ -155,7 +155,7 @@ void ImageAction::fromVariantMap(const QVariantMap& variantMap)
     _fileNameAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap ImageAction::toVariantMap() const
+mv::VariantMap ImageAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

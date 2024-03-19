@@ -120,7 +120,7 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
         _variantOfVectors);
 }
 
-void PointData::fromVariantMap(const QVariantMap& variantMap)
+void PointData::fromVariantMap(const mv::VariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
@@ -141,7 +141,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
    
 }
 
-QVariantMap PointData::toVariantMap() const
+mv::VariantMap PointData::toVariantMap() const
 {
     const auto typeSpecifier        = getElementTypeSpecifier();
     const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
@@ -890,7 +890,7 @@ void Points::selectInvert()
     events().notifyDatasetDataSelectionChanged(this);
 }
 
-void Points::fromVariantMap(const QVariantMap& variantMap)
+void Points::fromVariantMap(const mv::VariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
@@ -987,7 +987,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-QVariantMap Points::toVariantMap() const
+mv::VariantMap Points::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 

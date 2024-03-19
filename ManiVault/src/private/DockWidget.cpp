@@ -85,14 +85,14 @@ void DockWidget::setWidget(QWidget* widget, eInsertMode insertMode /*= AutoScrol
     CDockWidget::setWidget(widget, insertMode);
 }
 
-void DockWidget::fromVariantMap(const QVariantMap& variantMap)
+void DockWidget::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
     setObjectName(getId());
 }
 
-QVariantMap DockWidget::toVariantMap() const
+mv::VariantMap DockWidget::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 

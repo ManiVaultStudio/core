@@ -199,7 +199,7 @@ QMenu* ViewPluginDockWidget::getSettingsMenu()
     return &_settingsMenu;
 }
 
-void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
+void ViewPluginDockWidget::fromVariantMap(const mv::VariantMap& variantMap)
 {
 #ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
     qDebug() << __FUNCTION__;
@@ -241,7 +241,7 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     setProperty("ViewPluginId", _viewPlugin->getId());
 }
 
-QVariantMap ViewPluginDockWidget::toVariantMap() const
+mv::VariantMap ViewPluginDockWidget::toVariantMap() const
 {
 #ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
     qDebug() << __FUNCTION__;

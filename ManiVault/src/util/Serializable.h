@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Serialization.h"
+#include "VariantMap.h"
 
 #include <QString>
 #include <QJsonDocument>
@@ -66,25 +67,25 @@ public:
      * Load from variant map
      * @param variantMap Variant map
      */
-    virtual void fromVariantMap(const QVariantMap& variantMap);
+    virtual void fromVariantMap(const VariantMap& variantMap);
 
     /**
      * Load from variant map located in \p parentVariantMap at the serialization name
      * @param parentVariantMap Parent variant map
      */
-    virtual void fromParentVariantMap(const QVariantMap& parentVariantMap);
+    virtual void fromParentVariantMap(const VariantMap& parentVariantMap);
 
     /**
      * Save to variant map
      * @return Variant map
      */
-    virtual QVariantMap toVariantMap() const;
+    virtual VariantMap toVariantMap() const;
 
     /**
      * Save into \p variantMap
      * @param variantMap Variant map
      */
-    virtual void insertIntoVariantMap(QVariantMap& variantMap) const final;
+    virtual void insertIntoVariantMap(VariantMap& variantMap) const final;
 
     /**
      * Load widget action from JSON document
@@ -126,7 +127,7 @@ protected: // Serialization
      * @param serializable Pointer to serializable object
      * @param Variant map
      */
-    static void fromVariantMap(Serializable* serializable, const QVariantMap& variantMap);
+    static void fromVariantMap(Serializable* serializable, const VariantMap& variantMap);
 
     /**
      * Load from variant map
@@ -134,14 +135,14 @@ protected: // Serialization
      * @param variantMap Variant map
      * @param key Variant map key
      */
-    static void fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key);
+    static void fromVariantMap(Serializable& serializable, const VariantMap& variantMap, const QString& key);
 
     /**
      * Save serializable object to variant map
      * @param serializable Pointer to serializable object
      * @return Variant map
      */
-    static QVariantMap toVariantMap(const Serializable* serializable);
+    static VariantMap toVariantMap(const Serializable* serializable);
 
     /**
      * Save \p serializable object in \p variantMap with \p key
@@ -149,14 +150,14 @@ protected: // Serialization
      * @param variantMap Variant map
      * @param key Variant map key
      */
-    static void insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap, const QString& key);
+    static void insertIntoVariantMap(const Serializable& serializable, VariantMap& variantMap, const QString& key);
 
     /**
      * Save \p serializable object in \p variantMap
      * @param serializable Reference to serializable object
      * @param variantMap Variant map
      */
-    static void insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap);
+    static void insertIntoVariantMap(const Serializable& serializable, VariantMap& variantMap);
 
 public: // Operators
 

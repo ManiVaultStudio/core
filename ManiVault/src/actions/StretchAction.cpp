@@ -47,14 +47,14 @@ void StretchAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void StretchAction::fromVariantMap(const QVariantMap& variantMap)
+void StretchAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 }
 
-QVariantMap StretchAction::toVariantMap() const
+mv::VariantMap StretchAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     return variantMap;
 }

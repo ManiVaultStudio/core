@@ -138,7 +138,7 @@ QWidget* DockManager::getWidget()
     return this;
 }
 
-void DockManager::fromVariantMap(const QVariantMap& variantMap)
+void DockManager::fromVariantMap(const mv::VariantMap& variantMap)
 {
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
@@ -196,7 +196,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     show();
 }
 
-QVariantMap DockManager::toVariantMap() const
+mv::VariantMap DockManager::toVariantMap() const
 {
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();

@@ -135,13 +135,13 @@ public: // Serialization
      * Load file picker action from variant
      * @param Variant representation of the file picker action
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save file picker action to variant
      * @return Variant representation of the file picker action
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 public: // Action getters
 

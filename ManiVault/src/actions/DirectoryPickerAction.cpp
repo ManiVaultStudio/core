@@ -102,7 +102,7 @@ bool DirectoryPickerAction::isValid() const
     return !getDirectory().isEmpty() && QDir(getDirectory()).exists();
 }
 
-void DirectoryPickerAction::fromVariantMap(const QVariantMap& variantMap)
+void DirectoryPickerAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -112,7 +112,7 @@ void DirectoryPickerAction::fromVariantMap(const QVariantMap& variantMap)
         setDirectory(variantMap["Value"].toString());
 }
 
-QVariantMap DirectoryPickerAction::toVariantMap() const
+mv::VariantMap DirectoryPickerAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

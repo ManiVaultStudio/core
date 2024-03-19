@@ -236,7 +236,7 @@ void ViewPlugin::setTriggerShortcut(const QKeySequence& keySequence)
     _triggerShortcut = keySequence;
 }
 
-void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
+void ViewPlugin::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Plugin::fromVariantMap(variantMap);
 
@@ -247,7 +247,7 @@ void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
     _visibleAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap ViewPlugin::toVariantMap() const
+mv::VariantMap ViewPlugin::toVariantMap() const
 {
     auto variantMap = Plugin::toVariantMap();
 

@@ -90,7 +90,7 @@ QRectF ColorMapEditor1DNode::getLimits() const
     return QRectF(QPointF(previousNode->getNormalizedCoordinate().x(), 0.0f), QPointF(nextNode->getNormalizedCoordinate().x(), 1.0f));
 }
 
-void ColorMapEditor1DNode::fromVariantMap(const QVariantMap& variantMap)
+void ColorMapEditor1DNode::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -104,9 +104,9 @@ void ColorMapEditor1DNode::fromVariantMap(const QVariantMap& variantMap)
     _radius = variantMap["Radius"].toFloat();
 }
 
-QVariantMap ColorMapEditor1DNode::toVariantMap() const
+mv::VariantMap ColorMapEditor1DNode::toVariantMap() const
 {
-    QVariantMap variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     variantMap.insert({
         { "NormX", QVariant::fromValue(_normalizedCoordinate.x()) },

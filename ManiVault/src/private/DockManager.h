@@ -106,13 +106,13 @@ public: // Serialization
      * Load from variant map
      * @param variantMap Variant map representation of the serializable object
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
     
     /**
      * Save to variant map
      * @return Variant map representation of the serializable object
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
     friend class ViewPluginsDockWidget;
     friend class QPointer<DockManager>;

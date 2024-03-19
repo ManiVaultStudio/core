@@ -46,7 +46,7 @@ void AnalysisPlugin::setOutputDatasets(const Datasets& outputDatasets)
         output->setAnalysis(this);
 }
 
-void AnalysisPlugin::fromVariantMap(const QVariantMap& variantMap)
+void AnalysisPlugin::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Plugin::fromVariantMap(variantMap);
 
@@ -55,7 +55,7 @@ void AnalysisPlugin::fromVariantMap(const QVariantMap& variantMap)
     // since they might be used in the init() function
 }
 
-QVariantMap AnalysisPlugin::toVariantMap() const
+mv::VariantMap AnalysisPlugin::toVariantMap() const
 {
     auto variantMap = Plugin::toVariantMap();
 

@@ -183,13 +183,13 @@ public: // Serialization
      * Load layout from variant
      * @param Variant representation of the layout
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save layout to variant
      * @return Variant representation of the layout
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 public: // Menus
 

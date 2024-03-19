@@ -74,7 +74,7 @@ void WindowLevelAction::disconnectFromPublicAction(bool recursive)
     GroupAction::disconnectFromPublicAction(recursive);
 }
 
-void WindowLevelAction::fromVariantMap(const QVariantMap& variantMap)
+void WindowLevelAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     GroupAction::fromVariantMap(variantMap);
 
@@ -82,7 +82,7 @@ void WindowLevelAction::fromVariantMap(const QVariantMap& variantMap)
     _levelAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap WindowLevelAction::toVariantMap() const
+mv::VariantMap WindowLevelAction::toVariantMap() const
 {
     auto variantMap = GroupAction::toVariantMap();
 

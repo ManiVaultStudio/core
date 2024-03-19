@@ -144,7 +144,7 @@ void DimensionPickerAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void DimensionPickerAction::fromVariantMap(const QVariantMap& variantMap)
+void DimensionPickerAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -162,7 +162,7 @@ void DimensionPickerAction::fromVariantMap(const QVariantMap& variantMap)
     _currentDimensionAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap DimensionPickerAction::toVariantMap() const
+mv::VariantMap DimensionPickerAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

@@ -48,7 +48,7 @@ void ColorMapAxisAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-void ColorMapAxisAction::fromVariantMap(const QVariantMap& variantMap)
+void ColorMapAxisAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -56,9 +56,9 @@ void ColorMapAxisAction::fromVariantMap(const QVariantMap& variantMap)
     _mirrorAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap ColorMapAxisAction::toVariantMap() const
+mv::VariantMap ColorMapAxisAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     _rangeAction.insertIntoVariantMap(variantMap);
     _mirrorAction.insertIntoVariantMap(variantMap);

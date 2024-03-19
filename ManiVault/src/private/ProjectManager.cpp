@@ -1010,12 +1010,12 @@ void ProjectManager::createProject()
     workspaces().reset();
 }
 
-void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
+void ProjectManager::fromVariantMap(const mv::VariantMap& variantMap)
 {
     _project->fromVariantMap(variantMap);
 }
 
-QVariantMap ProjectManager::toVariantMap() const
+mv::VariantMap ProjectManager::toVariantMap() const
 {
     if (hasProject())
         return _project->toVariantMap();

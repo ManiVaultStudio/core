@@ -235,14 +235,17 @@ void DataHierarchyManager::removeAllItems()
     _items.clear();
 }
 
-void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
+void DataHierarchyManager::fromVariantMap(const VariantMap& variantMap)
 {
     auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
 
-    QStringList subtasks;
-    std::vector<std::pair<QVariantMap, bool>> datasetList;
+    // For backward compatibility; older projects might not have an 'items' key
+    const auto itemsMap = variantMap.contains("Items") ? static_cast<VariantMap>(variantMap["Items"].toMap()) : variantMap;
 
-    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &subtasks, &datasetList](const QVariantMap& variantMap) -> void {
+    QStringList subtasks;
+    std::vector<std::pair<VariantMap, bool>> datasetList;
+
+    const std::function<void(const VariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &subtasks, &datasetList](const VariantMap& variantMap) -> void {
         for (const auto& variant : variantMap.values()) {
             enumerateDatasetNames(variant.toMap()["Children"].toMap());
 
@@ -254,12 +257,12 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         }
     };
 
-    enumerateDatasetNames(variantMap);
+    enumerateDatasetNames(itemsMap);
 
     projectDataSerializationTask.setSubtasks(subtasks);
     projectDataSerializationTask.setRunning();
 
-    const auto loadDataHierarchyItem = [&projectDataSerializationTask](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
+    const auto loadDataHierarchyItem = [&projectDataSerializationTask](const VariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
         const auto dataset          = dataHierarchyItemMap["Dataset"].toMap();
         const auto datasetId        = dataset["ID"].toString();
         const auto datasetName      = dataset["Name"].toString();
@@ -287,12 +290,12 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         return loadedDataset;
     };
 
-    const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
+    const std::function<void(const VariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const VariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
 
         if (Application::isSerializationAborted())
             return;
 
-        QVector<QVariantMap> sortedItems;
+        QVector<VariantMap> sortedItems;
 
         sortedItems.resize(variantMap.count());
 
@@ -303,7 +306,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             populateDataHierarchy(item["Children"].toMap(), loadDataHierarchyItem(item, item["Name"].toString(), parent));
     };
 
-    auto populateDatasets = [&projectDataSerializationTask, &datasetList](const QVariantMap& variantMap) -> void {
+    auto populateDatasets = [&projectDataSerializationTask, &datasetList](const VariantMap& variantMap) -> void {
 
         if (Application::isSerializationAborted())
             return;
@@ -313,7 +316,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         // First load non-derived datasets
         std::stable_partition(datasetList.begin(), datasetList.end(),
-            [](const std::pair<QVariantMap, bool>& element) {
+            [](const std::pair<VariantMap, bool>& element) {
                 return !element.second; 
             });
 
@@ -333,14 +336,14 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         }
     };
 
-    populateDataHierarchy(variantMap, Dataset<DatasetImpl>());
+    populateDataHierarchy(itemsMap, Dataset<DatasetImpl>());
 
-    populateDatasets(variantMap);
+    populateDatasets(itemsMap);
 
     projectDataSerializationTask.setFinished();
 }
 
-QVariantMap DataHierarchyManager::toVariantMap() const
+VariantMap DataHierarchyManager::toVariantMap() const
 {
     if (!_items.empty()) {
         auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
@@ -353,7 +356,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         projectDataSerializationTask.setSubtasks(subtasks);
         projectDataSerializationTask.setRunning();
 
-        QVariantMap variantMap;
+        VariantMap variantMap;
 
         std::uint32_t sortIndex = 0;
 
@@ -380,10 +383,14 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
         projectDataSerializationTask.setFinished();
 
-        return variantMap;
+        return {
+            { "Items", variantMap }
+        };
     }
 
-    return {};
+    return {
+        { "Items", QVariantMap() }
+    };
 }
 
 }
