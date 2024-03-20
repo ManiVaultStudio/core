@@ -806,7 +806,7 @@ void Points::resolveLinkedData(bool force /*= false*/)
         return;
 
     // Check for linked data in this dataset and resolve them
-    for (const mv::LinkedData& linkedData : getSourceDataset<Points>()->getLinkedData())
+    for (const mv::LinkedData& linkedData : getLinkedData())
         resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
 }
 
