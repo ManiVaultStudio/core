@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "ColorMap.h"
 
 #include <QAbstractListModel>
@@ -17,7 +19,7 @@ namespace util {
  *
  * @author Thomas Kroes
  */
-class ColorMapModel : public QAbstractListModel
+class CORE_EXPORT ColorMapModel : public QAbstractListModel
 {
 public:
 

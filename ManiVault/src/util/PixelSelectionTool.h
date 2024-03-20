@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "PixelSelection.h"
 
 #include <QWidget>
@@ -26,7 +28,7 @@ namespace util {
  *
  * @author Thomas Kroes
  */
-class PixelSelectionTool : public QObject
+class CORE_EXPORT PixelSelectionTool : public QObject
 {
     Q_OBJECT
 

@@ -19,7 +19,7 @@ namespace mv::gui
  *
  * @author Thomas Kroes
  */
-class MiscellaneousSettingsAction final : public GlobalSettingsGroupAction
+class CORE_EXPORT MiscellaneousSettingsAction final : public GlobalSettingsGroupAction
 {
 public:
 

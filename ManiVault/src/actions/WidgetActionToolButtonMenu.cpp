@@ -3,12 +3,14 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WidgetActionToolButtonMenu.h"
-#include "WidgetActionToolButton.h"
-#include "WidgetAction.h"
 
+#include "WidgetAction.h"
+#include "WidgetActionToolButton.h"
+
+#include <QCloseEvent>
 #include <QDebug>
-#include <QVBoxLayout>
 #include <QEvent>
+#include <QVBoxLayout>
 
 namespace mv::gui {
 

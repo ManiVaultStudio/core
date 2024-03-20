@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 /**
     Custom bounds class because the QRectF class in Qt should kindly remove itself from the library.
 
@@ -17,7 +19,7 @@
 
 namespace mv
 {
-    class Bounds
+    class CORE_EXPORT Bounds
     {
     public:
         const static Bounds Max;

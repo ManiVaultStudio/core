@@ -24,7 +24,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class FilePickerAction : public WidgetAction
+class CORE_EXPORT FilePickerAction : public WidgetAction
 {
     Q_OBJECT
 

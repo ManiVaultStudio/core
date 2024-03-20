@@ -23,7 +23,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class DatasetPickerAction : public OptionAction
+class CORE_EXPORT DatasetPickerAction : public OptionAction
 {
 Q_OBJECT
 
@@ -36,7 +36,7 @@ protected:
      *
      * @author Thomas Kroes
      */
-    class DatasetsModel : public QAbstractListModel {
+    class CORE_EXPORT DatasetsModel : public QAbstractListModel {
     public:
 
         /** Model columns */
@@ -191,7 +191,7 @@ public:
 
     /** Get the current dataset */
     template<typename DatasetType>
-    mv::Dataset<DatasetType> getCurrentDataset() const
+    inline mv::Dataset<DatasetType> getCurrentDataset() const
     {
         return getCurrentDataset();
     }

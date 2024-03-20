@@ -46,7 +46,7 @@ namespace mv::gui
  * 
  * @author Thomas Kroes
  */
-class GlobalSettingsGroupAction : public GroupAction
+class CORE_EXPORT GlobalSettingsGroupAction : public GroupAction
 {
 public:
 

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QStringListModel>
 
 namespace mv {
@@ -15,7 +17,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CheckableStringListModel final : public QStringListModel {
+class CORE_EXPORT CheckableStringListModel final : public QStringListModel {
 public:
 
     using StringIndicesSet = QSet<std::int32_t>;

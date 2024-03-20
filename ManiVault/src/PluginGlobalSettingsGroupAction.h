@@ -31,7 +31,7 @@ namespace mv::gui
  *
  * @author Thomas Kroes
  */
-class PluginGlobalSettingsGroupAction : public GlobalSettingsGroupAction
+class CORE_EXPORT PluginGlobalSettingsGroupAction : public GlobalSettingsGroupAction
 {
 public:
 

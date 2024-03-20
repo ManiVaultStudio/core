@@ -4,6 +4,8 @@
 
 #include "SettingsStatusBarAction.h"
 
+#include "CoreInterface.h"
+
 #ifdef _DEBUG
 #define SETTINGS_STATUS_BAR_ACTION_VERBOSE
 #endif

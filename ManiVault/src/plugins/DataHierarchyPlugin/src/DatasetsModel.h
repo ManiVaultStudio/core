@@ -9,6 +9,8 @@
 
 #include <actions/StringAction.h>
 
+#include <QList>
+#include <QStandardItem>
 #include <QStandardItemModel>
 
 /**

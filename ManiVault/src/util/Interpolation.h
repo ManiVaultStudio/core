@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QMap>
+#include <QString>
 
 namespace mv {
 

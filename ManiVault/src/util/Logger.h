@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QString>
 #include <QMap>
 
@@ -19,7 +21,7 @@ namespace mv {
 namespace mv::util
 {
 
-struct MessageRecord
+struct CORE_EXPORT MessageRecord
 {
     std::size_t number;
     QtMsgType type;
@@ -43,7 +45,7 @@ using MessageRecords = std::deque<MessageRecord>;
  *
  * @author Niels Dekker (original design) and Thomas Kroes (re-design and refactor)
  */
-class Logger
+class CORE_EXPORT Logger
 {
 public:
     static QMap<QtMsgType, QString> messageTypeNames;

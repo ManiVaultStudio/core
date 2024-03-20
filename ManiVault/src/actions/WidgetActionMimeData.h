@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "WidgetAction.h"
 
 #include "models/ActionsFilterModel.h"
@@ -22,7 +24,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class WidgetActionMimeData final : public QMimeData
+class CORE_EXPORT WidgetActionMimeData final : public QMimeData
 {
 public:
 

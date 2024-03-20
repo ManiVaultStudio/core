@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QGraphicsScene>
 
 class QGraphicsSceneMouseEvent;
@@ -21,7 +23,7 @@ class ColorMapEditor1DWidget;
  *
  * @author Thomas Kroes and Mitchell M. de Boer
  */
-class ColorMapEditor1DScene : public QGraphicsScene
+class CORE_EXPORT ColorMapEditor1DScene : public QGraphicsScene
 {
     Q_OBJECT
 public:

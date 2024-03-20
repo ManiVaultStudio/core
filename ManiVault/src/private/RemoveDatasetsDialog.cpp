@@ -8,6 +8,8 @@
 #include <Application.h>
 #include <Set.h>
 
+#include <widgets/HierarchyWidget.h>
+
 #include <QVBoxLayout>
 #include <QHeaderView>
 
@@ -54,7 +56,7 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
         if (!topLevelDatasetCandidate->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems))
             _topLevelDatasets << topLevelDatasetCandidate;
 
-    for (auto topLevelDatasetToRemove : _topLevelDatasets)
+    for (const auto& topLevelDatasetToRemove : _topLevelDatasets)
         for (auto descendantDataHierarchyItem : topLevelDatasetToRemove->getDataHierarchyItem().getChildren(true))
             _descendantDatasets << descendantDataHierarchyItem->getDataset();
 

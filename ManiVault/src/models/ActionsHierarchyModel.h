@@ -16,7 +16,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class ActionsHierarchyModel final : public AbstractActionsModel
+class CORE_EXPORT ActionsHierarchyModel final : public AbstractActionsModel
 {
     Q_OBJECT
 

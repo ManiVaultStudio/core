@@ -25,7 +25,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class AbstractProjectManager : public AbstractManager
+class CORE_EXPORT AbstractProjectManager : public AbstractManager
 {
     Q_OBJECT
 
@@ -63,7 +63,7 @@ public:
     };
 
     /** Set state for the duration of the enveloping scope, reverts to idle when the object gets out of scope */
-    class ScopedState {
+    class CORE_EXPORT ScopedState {
     public:
 
         /**

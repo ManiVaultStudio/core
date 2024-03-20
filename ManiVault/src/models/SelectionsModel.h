@@ -4,11 +4,15 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Dataset.h"
 #include "Set.h"
 
 #include "actions/StringAction.h"
 
+#include <QList>
+#include <QStandardItem>
 #include <QStandardItemModel>
 
 namespace mv {
@@ -20,7 +24,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class SelectionsModel final : public QStandardItemModel
+class CORE_EXPORT SelectionsModel final : public QStandardItemModel
 {
 public:
 
@@ -216,7 +220,14 @@ protected:
          * Construct with \p selection
          * @param selection Pointer to selection dataset to display item for
          */
-        Row(Dataset<DatasetImpl> selection);
+        Row(Dataset<DatasetImpl> selection) : QList<QStandardItem*>()
+        {
+            append(new NameItem(selection));
+            append(new IdItem(selection));
+            append(new RawDataNameItem(selection));
+            append(new RawDataTypeItem(selection));
+        }
+
     };
 
 protected: // Drag-and-drop behavior

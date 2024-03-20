@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "actions/WidgetAction.h"
 #include "widgets/OverlayWidget.h"
 
 namespace mv::gui {
@@ -17,7 +18,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class WidgetActionBadgeOverlayWidget final : public OverlayWidget
+class CORE_EXPORT WidgetActionBadgeOverlayWidget final : public OverlayWidget
 {
 public:
 

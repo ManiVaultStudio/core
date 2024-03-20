@@ -110,16 +110,18 @@ void PublicActionsModel::addPublicAction(WidgetAction* publicAction)
 
     auto parentAction = publicAction->getParentAction();
 
+    auto row = Row(publicAction);
+
     if (parentAction) {
         auto parentActionItem = getActionItem(parentAction);
 
         if (parentActionItem)
-            parentActionItem->appendRow(Row(publicAction));
+            parentActionItem->appendRow(row);
         else
-            appendRow(Row(publicAction));
+            appendRow(row);
     }
     else {
-        appendRow(Row(publicAction));
+        appendRow(row);
     }
 
     for (auto connectedAction : publicAction->getConnectedActions())

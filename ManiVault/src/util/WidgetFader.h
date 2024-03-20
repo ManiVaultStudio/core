@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QObject>
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
@@ -17,7 +19,7 @@ namespace mv::util {
  *
  * @author Thomas Kroes
  */
-class WidgetFader : public QObject
+class CORE_EXPORT WidgetFader : public QObject
 {
     Q_OBJECT
 

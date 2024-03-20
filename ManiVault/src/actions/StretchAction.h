@@ -17,7 +17,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class StretchAction : public WidgetAction
+class CORE_EXPORT StretchAction : public WidgetAction
 {
     Q_OBJECT
 

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Serialization.h"
 
 #include <QString>
@@ -18,7 +20,7 @@ namespace mv::util {
  * 
  * @author Thomas Kroes
  */
-class Serializable
+class CORE_EXPORT Serializable
 {
 public:
 

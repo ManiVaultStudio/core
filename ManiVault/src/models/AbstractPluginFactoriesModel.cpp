@@ -82,23 +82,6 @@ QVariant AbstractPluginFactoriesModel::NumberOfInstancesItem::data(int role /*= 
     return Item::data(role);
 }
 
-AbstractPluginFactoriesModel::Row::Row(const QString& type, plugin::PluginFactory* pluginFactory)
-{
-    append(new NameItem(type, pluginFactory));
-    append(new VersionItem(type, pluginFactory));
-    append(new NumberOfInstancesItem(type, pluginFactory));
-}
-
-AbstractPluginFactoriesModel::Row::Row(const QString& type) :
-    Row(type, nullptr)
-{
-}
-
-AbstractPluginFactoriesModel::Row::Row(plugin::PluginFactory* pluginFactory) :
-    Row("", pluginFactory)
-{
-}
-
 AbstractPluginFactoriesModel::AbstractPluginFactoriesModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent)
 {

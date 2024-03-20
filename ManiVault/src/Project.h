@@ -29,7 +29,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class Project final : public QObject, public mv::util::Serializable
+class CORE_EXPORT Project final : public QObject, public mv::util::Serializable
 {
     Q_OBJECT
 

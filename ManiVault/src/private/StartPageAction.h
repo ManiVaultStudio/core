@@ -5,11 +5,13 @@
 #pragma once
 
 #include <QIcon>
+#include <QImage>
+#include <QList>
+#include <QModelIndex>
 #include <QString>
 #include <QStringList>
-#include <QImage>
-#include <QModelIndex>
-#include <QList>
+
+#include <functional>
 
 /**
  * Start page action

@@ -75,6 +75,6 @@ private:
     QVBoxLayout                     _layout;            /** Main layout */
     StartPageActionsModel           _model;             /** Model which contains start page actions */
     StartPageActionsFilterModel     _filterModel;       /** Model for filtering and sorting start page actions */
-    mv::gui::HierarchyWidget      _hierarchyWidget;   /** Widget for displaying the actions */
+    mv::gui::HierarchyWidget        _hierarchyWidget;   /** Widget for displaying the actions */
     bool                            _restyle;           /** Remember whether the restyle flag was set upon creation */
 };

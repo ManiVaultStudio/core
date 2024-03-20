@@ -4,9 +4,7 @@
 
 #include "PluginsTreeModel.h"
 
-#include "Application.h"
 #include "CoreInterface.h"
-#include "AbstractPluginManager.h"
 
 using namespace mv;
 

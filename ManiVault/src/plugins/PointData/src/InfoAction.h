@@ -26,8 +26,6 @@ using namespace mv::util;
  */
 class InfoAction : public GroupAction
 {
-    Q_OBJECT
-
 public:
 
     /**

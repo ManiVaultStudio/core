@@ -17,7 +17,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ToolbarAction : public WidgetAction
+class CORE_EXPORT ToolbarAction : public WidgetAction
 {
     Q_OBJECT
 

@@ -566,24 +566,6 @@ QVariant AbstractDataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRol
     return Item::data(role);
 }
 
-AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
-    QList<QStandardItem*>()
-{
-    append(new NameItem(dataset));
-    append(new LocationItem(dataset));
-    append(new DatasetIdItem(dataset));
-    append(new RawDataNameItem(dataset));
-    append(new RawDataSizeItem(dataset));
-    append(new SourceDatasetIdItem(dataset));
-    append(new ProgressItem(dataset));
-    append(new SelectionGroupIndexItem(dataset));
-    append(new IsVisibleItem(dataset));
-    append(new IsGroupItem(dataset));
-    append(new IsDerivedItem(dataset));
-    append(new IsSubsetItem(dataset));
-    append(new IsLockedItem(dataset));
-}
-
 AbstractDataHierarchyModel::AbstractDataHierarchyModel(QObject* parent) :
     QStandardItemModel(parent)
 {

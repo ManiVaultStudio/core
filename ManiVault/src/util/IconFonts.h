@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <map>
 #include <stdexcept>
 
@@ -22,7 +24,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class IconFonts
+class CORE_EXPORT IconFonts
 {
     using Fonts = QVector<QSharedPointer<IconFont>>;
 
@@ -33,7 +35,7 @@ public: // Exceptions
      *
      * @author Thomas Kroes
      */
-    class IconFontNotFoundException : public std::runtime_error
+    class CORE_EXPORT IconFontNotFoundException : public std::runtime_error
     {
     public:
         /**
@@ -98,7 +100,7 @@ private:
  * @param debug Qt output stream for debugging information
  * @param iconFonts Reference to icon fonts class
  */
-inline QDebug operator << (QDebug debug, const IconFonts& iconFonts) {
+CORE_EXPORT inline QDebug operator << (QDebug debug, const IconFonts& iconFonts) {
     for (const auto& fontName : iconFonts.getFontNames()) {
         debug.noquote();
 

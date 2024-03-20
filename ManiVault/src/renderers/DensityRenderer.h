@@ -21,7 +21,7 @@ namespace mv
     namespace gui
     {
 
-        class DensityRenderer : public Renderer
+        class CORE_EXPORT DensityRenderer : public Renderer
         {
 
         public:

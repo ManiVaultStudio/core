@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QWidget>
 #include <QLabel>
 
@@ -17,7 +19,7 @@ namespace mv::gui
  *  
  * @author Thomas Kroes
  */
-class InfoWidget : public QWidget
+class CORE_EXPORT InfoWidget : public QWidget
 {
 public:
 

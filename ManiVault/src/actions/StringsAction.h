@@ -23,7 +23,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class StringsAction : public WidgetAction
+class CORE_EXPORT StringsAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -41,7 +41,7 @@ public:
 public:
 
     /** Widget class for strings action */
-    class ListWidget : public WidgetActionWidget
+    class CORE_EXPORT ListWidget : public WidgetActionWidget
     {
     protected:
 

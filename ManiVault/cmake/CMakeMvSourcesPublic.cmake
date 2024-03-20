@@ -871,6 +871,15 @@ set(PUBLIC_TASK_FILES
     ${PUBLIC_TASK_SOURCES}
 )
 
+# Automatically generated during cmake config
+set(PUBLIC_VERSION_HEADERS
+    src/ManiVaultVersion.h
+)
+
+set(PUBLIC_GLOBALS_HEADERS
+    src/ManiVaultGlobals.h
+)
+
 set(PUBLIC_HEADERS
     ${PUBLIC_CORE_INTERFACE_HEADERS}
     ${PUBLIC_EVENT_HEADERS}
@@ -910,6 +919,8 @@ set(PUBLIC_HEADERS
     ${PUBLIC_MISCELLANEOUS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
+    ${PUBLIC_VERSION_HEADERS}
+    ${PUBLIC_GLOBALS_HEADERS}
 )
 
 set(PUBLIC_SOURCES
@@ -953,6 +964,20 @@ set(PUBLIC_SOURCES
     ${PUBLIC_HEADERS}
 )
 
+set(PRECOMPILE_HEADERS
+    src/actions/Actions.h
+    src/event/EventListener.h
+    src/AbstractManager.h
+    src/Task.h
+    src/BackgroundTask.h
+    src/ForegroundTask.h
+    src/ModalTask.h
+    ${PUBLIC_UTIL_HEADERS}
+)
+
+list(REMOVE_DUPLICATES PUBLIC_HEADERS)
+list(REMOVE_DUPLICATES PUBLIC_SOURCES)
+
 source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
 source_group(Event FILES ${PUBLIC_EVENT_FILES})
 source_group(Actions\\Colormap FILES ${PUBLIC_COLOR_MAP_ACTION_FILES})
@@ -974,13 +999,12 @@ source_group(Widgets\\Internal FILES ${PUBLIC_WIDGETS_INTERNAL_FILES})
 source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})
-source_group(Application FILES ${PUBLIC_APPLICATION_FILES})
+source_group(Application FILES ${PUBLIC_APPLICATION_FILES} ${PUBLIC_GLOBALS_HEADERS} ${PUBLIC_VERSION_HEADERS})
 source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})
 source_group(DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
 source_group(Dataset FILES ${PUBLIC_DATASET_FILES})
 source_group(Plugin FILES ${PUBLIC_PLUGIN_FILES})
-source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
 source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 source_group(Model\\RawData FILES ${PUBLIC_RAW_DATA_MODEL_FILES})

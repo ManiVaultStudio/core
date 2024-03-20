@@ -595,29 +595,6 @@ QVariant AbstractActionsModel::IsLeafItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
-AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
-    QList<QStandardItem*>()
-{
-    append(new NameItem(action));
-    append(new LocationItem(action));
-    append(new IdItem(action));
-    append(new TypeItem(action));
-    append(new ScopeItem(action));
-    append(new ForceDisabledItem(action));
-    append(new ForceHiddenItem(action));
-    append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::PublishViaGui));
-    append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::ConnectViaGui));
-    append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::DisconnectViaGui));
-    append(new SortIndexItem(action));
-    append(new StretchItem(action));
-    append(new ParentActionIdItem(action));
-    append(new IsConnectedItem(action));
-    append(new NumberOfConnectedActionsItem(action));
-    append(new PublicActionIdItem(action));
-    append(new IsRootItem(action));
-    append(new IsLeafItem(action));
-}
-
 QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> AbstractActionsModel::columnInfo = QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo>({
     { AbstractActionsModel::Column::ForceDisabled, { "" , "Enabled", "Whether the parameter is enabled or not" } },
     { AbstractActionsModel::Column::Name, { "Name" , "Name", "Name of the parameter" } },

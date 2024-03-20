@@ -26,7 +26,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class PluginTriggerAction : public TriggerAction
+class CORE_EXPORT PluginTriggerAction : public TriggerAction
 {
     Q_OBJECT
     

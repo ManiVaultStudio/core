@@ -21,14 +21,14 @@ class ColorMapEditor1DAction;
  *
  * @author Mitchell M. de Boer and Thomas Kroes
  */
-class ColorMapEditor1DNodeAction : public WidgetAction
+class CORE_EXPORT ColorMapEditor1DNodeAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
     /** Widget class for one-dimensional color map editor node action */
-    class Widget : public WidgetActionWidget {
+    class CORE_EXPORT Widget : public WidgetActionWidget {
     public:
 
         /**

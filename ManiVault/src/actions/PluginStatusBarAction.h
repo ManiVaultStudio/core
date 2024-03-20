@@ -16,7 +16,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class PluginStatusBarAction : public StatusBarAction
+class CORE_EXPORT PluginStatusBarAction : public StatusBarAction
 {
     Q_OBJECT
 

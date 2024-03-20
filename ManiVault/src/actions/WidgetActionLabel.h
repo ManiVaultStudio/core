@@ -32,8 +32,10 @@ class WidgetAction;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionLabel : public WidgetActionViewWidget
+class CORE_EXPORT WidgetActionLabel : public WidgetActionViewWidget
 {
+    Q_OBJECT
+
 public:
 
     /** Describes the widget flags */

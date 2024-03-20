@@ -20,7 +20,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class TreeAction : public WidgetAction
+class CORE_EXPORT TreeAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -34,7 +34,7 @@ public:
 public:
 
     /** Widget class for tree action */
-    class Widget : public WidgetActionWidget {
+    class CORE_EXPORT Widget : public WidgetActionWidget {
     protected:
 
         /**

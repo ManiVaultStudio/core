@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "PluginType.h"
 #include "Dataset.h"
 #include "Application.h"
@@ -49,7 +51,7 @@ namespace mv
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 
-class CoreInterface : public QObject
+class CORE_EXPORT CoreInterface : public QObject
 {
     Q_OBJECT
 
@@ -135,7 +137,7 @@ signals:
  * Convenience function to obtain access to the core
  * @return Pointer to the current instance of the core
  */
-static CoreInterface* core() {
+CORE_EXPORT inline CoreInterface* core() {
     return Application::core();
 }
 
@@ -143,7 +145,7 @@ static CoreInterface* core() {
  * Convenience function to obtain access to the actions manager in the core
  * @return Reference to abstract actions manager
  */
-static AbstractActionsManager& actions() {
+CORE_EXPORT inline AbstractActionsManager& actions() {
     return core()->getActionsManager();
 }
 
@@ -151,7 +153,7 @@ static AbstractActionsManager& actions() {
  * Convenience function to obtain access to the plugin manager in the core
  * @return Reference to abstract plugin manager
  */
-static AbstractPluginManager& plugins() {
+CORE_EXPORT inline AbstractPluginManager& plugins() {
     return core()->getPluginManager();
 }
 
@@ -159,7 +161,7 @@ static AbstractPluginManager& plugins() {
  * Convenience function to obtain access to the event manager in the core
  * @return Reference to abstract event manager
  */
-static AbstractEventManager& events() {
+CORE_EXPORT inline AbstractEventManager& events() {
     return core()->getEventManager();
 }
 
@@ -167,7 +169,7 @@ static AbstractEventManager& events() {
  * Convenience function to obtain access to the data manager in the core
  * @return Reference to abstract data manager
  */
-static AbstractDataManager& data() {
+CORE_EXPORT inline AbstractDataManager& data() {
     return core()->getDataManager();
 }
 
@@ -175,7 +177,7 @@ static AbstractDataManager& data() {
  * Convenience function to obtain access to the data hierarchy manager in the core
  * @return Reference to abstract data hierarchy manager
  */
-static AbstractDataHierarchyManager& dataHierarchy() {
+CORE_EXPORT inline AbstractDataHierarchyManager& dataHierarchy() {
     return core()->getDataHierarchyManager();
 }
 
@@ -183,7 +185,7 @@ static AbstractDataHierarchyManager& dataHierarchy() {
  * Convenience function to obtain access to the workspace manager in the core
  * @return Reference to abstract workspace manager
  */
-static AbstractWorkspaceManager& workspaces() {
+CORE_EXPORT inline AbstractWorkspaceManager& workspaces() {
     return core()->getWorkspaceManager();
 }
 
@@ -191,7 +193,7 @@ static AbstractWorkspaceManager& workspaces() {
  * Convenience function to obtain access to the task manager in the core
  * @return Reference to abstract task manager
  */
-static AbstractTaskManager& tasks() {
+CORE_EXPORT inline AbstractTaskManager& tasks() {
     return core()->getTaskManager();
 }
 
@@ -199,7 +201,7 @@ static AbstractTaskManager& tasks() {
  * Convenience function to obtain access to the project manager in the core
  * @return Reference to abstract project manager
  */
-static AbstractProjectManager& projects() {
+CORE_EXPORT inline AbstractProjectManager& projects() {
     return core()->getProjectManager();
 }
 
@@ -207,7 +209,7 @@ static AbstractProjectManager& projects() {
  * Convenience function to obtain access to the settings manager in the core
  * @return Reference to abstract settings manager
  */
-static AbstractSettingsManager& settings() {
+CORE_EXPORT inline AbstractSettingsManager& settings() {
     return core()->getSettingsManager();
 }
 

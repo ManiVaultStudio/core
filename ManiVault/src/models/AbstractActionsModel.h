@@ -8,6 +8,8 @@
 
 #include "actions/WidgetAction.h"
 
+#include <QList>
+#include <QStandardItem>
 #include <QStandardItemModel>
 
 namespace mv
@@ -20,7 +22,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class AbstractActionsModel : public QStandardItemModel
+class CORE_EXPORT AbstractActionsModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -63,7 +65,7 @@ public:
 protected:
 
     /** Header standard model item class */
-    class HeaderItem : public QStandardItem {
+    class CORE_EXPORT HeaderItem : public QStandardItem {
     public:
 
         /**
@@ -85,7 +87,7 @@ protected:
 public:
 
     /** Base standard model item class for widget action */
-    class Item : public QStandardItem, public QObject {
+    class CORE_EXPORT Item : public QStandardItem, public QObject {
     public:
 
         /**
@@ -108,7 +110,7 @@ public:
 protected:
 
     /** Standard model item class for displaying the action name */
-    class NameItem final : public Item {
+    class CORE_EXPORT NameItem final : public Item {
     public:
 
         /**
@@ -128,7 +130,7 @@ protected:
     };
 
     /** Standard model item class for displaying the action location */
-    class LocationItem final : public Item {
+    class CORE_EXPORT LocationItem final : public Item {
     public:
 
         /**
@@ -145,7 +147,7 @@ protected:
     };
 
     /** Standard model item class for displaying the action identifier */
-    class IdItem final : public Item {
+    class CORE_EXPORT IdItem final : public Item {
     public:
 
         /**
@@ -162,7 +164,7 @@ protected:
     };
 
     /** Standard model item class for displaying the action type */
-    class TypeItem final : public Item {
+    class CORE_EXPORT TypeItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -176,7 +178,7 @@ protected:
     };
 
     /** Standard model item class for displaying the action scope */
-    class ScopeItem final : public Item {
+    class CORE_EXPORT ScopeItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -190,7 +192,7 @@ protected:
     };
 
     /** Model item class for toggling action force disabled */
-    class ForceDisabledItem final : public Item {
+    class CORE_EXPORT ForceDisabledItem final : public Item {
     public:
 
         /**
@@ -210,7 +212,7 @@ protected:
     };
 
     /** Model item class for toggling force hidden */
-    class ForceHiddenItem final : public Item {
+    class CORE_EXPORT ForceHiddenItem final : public Item {
     public:
 
         /**
@@ -230,7 +232,7 @@ protected:
     };
 
     /** Model item class for toggling a permission flag */
-    class ConnectionPermissionItem final : public Item {
+    class CORE_EXPORT ConnectionPermissionItem final : public Item {
     public:
 
         /**
@@ -254,7 +256,7 @@ protected:
     };
 
     /** Model item class for action sort index */
-    class SortIndexItem final : public Item {
+    class CORE_EXPORT SortIndexItem final : public Item {
     public:
 
         /**
@@ -274,7 +276,7 @@ protected:
     };
 
     /** Model item class for action stretch */
-    class StretchItem final : public Item {
+    class CORE_EXPORT StretchItem final : public Item {
     public:
 
         /**
@@ -294,7 +296,7 @@ protected:
     };
 
     /** Standard model item class for displaying the parent action identifier */
-    class ParentActionIdItem final : public Item {
+    class CORE_EXPORT ParentActionIdItem final : public Item {
     public:
 
         /**
@@ -311,7 +313,7 @@ protected:
     };
 
     /** Standard model item class for displaying whether the action is connected or not */
-    class IsConnectedItem final : public Item {
+    class CORE_EXPORT IsConnectedItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -325,7 +327,7 @@ protected:
     };
 
     /** Standard model item class for displaying the number of connected actions */
-    class NumberOfConnectedActionsItem final : public Item {
+    class CORE_EXPORT NumberOfConnectedActionsItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -338,9 +340,8 @@ protected:
         QVariant data(int role = Qt::UserRole + 1) const override;
     };
     
-
     /** Standard model item class for displaying the public action identifier */
-    class PublicActionIdItem final : public Item {
+    class CORE_EXPORT PublicActionIdItem final : public Item {
     public:
 
         /**
@@ -357,7 +358,7 @@ protected:
     };
 
     /** Standard model item class for displaying whether the action is a root action */
-    class IsRootItem final : public Item {
+    class CORE_EXPORT IsRootItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -371,7 +372,7 @@ protected:
     };
 
     /** Standard model item class for displaying whether the action is a leaf action */
-    class IsLeafItem final : public Item {
+    class CORE_EXPORT IsLeafItem final : public Item {
     public:
 
         /** Use base action item constructor */
@@ -393,7 +394,27 @@ protected:
          * Construct row with \p action
          * @param action Pointer to row action
          */
-        Row(gui::WidgetAction* action);
+        Row(gui::WidgetAction* action) : QList<QStandardItem*>()
+        {
+            append(new NameItem(action));
+            append(new LocationItem(action));
+            append(new IdItem(action));
+            append(new TypeItem(action));
+            append(new ScopeItem(action));
+            append(new ForceDisabledItem(action));
+            append(new ForceHiddenItem(action));
+            append(new ConnectionPermissionItem(action, gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui));
+            append(new ConnectionPermissionItem(action, gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui));
+            append(new ConnectionPermissionItem(action, gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui));
+            append(new SortIndexItem(action));
+            append(new StretchItem(action));
+            append(new ParentActionIdItem(action));
+            append(new IsConnectedItem(action));
+            append(new NumberOfConnectedActionsItem(action));
+            append(new PublicActionIdItem(action));
+            append(new IsRootItem(action));
+            append(new IsLeafItem(action));
+        }
     };
 
 public:

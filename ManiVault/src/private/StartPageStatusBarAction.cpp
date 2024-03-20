@@ -4,6 +4,8 @@
 
 #include "StartPageStatusBarAction.h"
 
+#include "CoreInterface.h"
+
 #ifdef _DEBUG
     #define START_PAGE_STATUS_BAR_ACTION_VERBOSE
 #endif

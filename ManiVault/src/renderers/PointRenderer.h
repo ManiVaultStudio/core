@@ -31,7 +31,7 @@ namespace mv
             Outline, Override
         };
 
-        struct PointArrayObject : private QOpenGLFunctions_3_3_Core
+        struct CORE_EXPORT PointArrayObject : private QOpenGLFunctions_3_3_Core
         {
         public:
             GLuint _handle;
@@ -103,7 +103,7 @@ namespace mv
             bool _dirtyColors           = false;
         };
 
-        struct PointSettings
+        struct CORE_EXPORT PointSettings
         {
             // Constants
             const float         DEFAULT_POINT_SIZE      = 15;
@@ -115,7 +115,7 @@ namespace mv
             float               _alpha                  = DEFAULT_ALPHA_VALUE;
         };
 
-        class PointRenderer : public Renderer
+        class CORE_EXPORT PointRenderer : public Renderer
         {
         public:
             void setData(const std::vector<Vector2f>& points);

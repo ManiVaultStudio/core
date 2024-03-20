@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "event/EventListener.h"
 #include "util/Exception.h"
 
@@ -28,7 +30,7 @@ template<typename> class Dataset;
  *
  * @author T. Kroes
  */
-class DatasetPrivate : public QObject
+class CORE_EXPORT DatasetPrivate : public QObject
 {
     Q_OBJECT
 
@@ -160,7 +162,7 @@ private:
  * @param rhs Right hand side dataset smart pointer
  * @return Whether lhs and rhs are equal
  */
-inline bool operator == (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
+CORE_EXPORT inline bool operator == (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
 {
     return lhs.getDatasetId() == rhs.getDatasetId();
 }
@@ -171,7 +173,7 @@ inline bool operator == (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
  * @param rhs Right hand side dataset smart pointer
  * @return Whether lhs and rhs are not equal
  */
-inline bool operator != (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
+CORE_EXPORT inline bool operator != (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
 {
     return lhs.getDatasetId() != rhs.getDatasetId();
 }

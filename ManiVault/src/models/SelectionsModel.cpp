@@ -98,15 +98,6 @@ QVariant SelectionsModel::RawDataTypeItem::data(int role /*= Qt::UserRole + 1*/)
     return {};
 }
 
-SelectionsModel::Row::Row(Dataset<DatasetImpl> selection) :
-    QList<QStandardItem*>()
-{
-    append(new NameItem(selection));
-    append(new IdItem(selection));
-    append(new RawDataNameItem(selection));
-    append(new RawDataTypeItem(selection));
-}
-
 SelectionsModel::SelectionsModel(QObject* parent) :
     QStandardItemModel(parent),
     _countAction(this, "Number of selections")

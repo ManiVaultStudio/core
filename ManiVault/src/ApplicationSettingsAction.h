@@ -20,7 +20,7 @@ namespace mv::gui
  * @author Thomas Kroes
  * @author Thomas Höllt
  */
-class ApplicationSettingsAction final : public GlobalSettingsGroupAction
+class CORE_EXPORT ApplicationSettingsAction final : public GlobalSettingsGroupAction
 {
 public:
 

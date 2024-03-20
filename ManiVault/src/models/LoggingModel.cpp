@@ -199,16 +199,6 @@ QVariant LoggingModel::CategoryItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-LoggingModel::Row::Row(LoggingModel& loggingModel, const util::MessageRecord& messageRecord)
-{
-    append(new NumberItem(loggingModel, messageRecord));
-    append(new TypeItem(loggingModel, messageRecord));
-    append(new MessageItem(loggingModel, messageRecord));
-    append(new FileAndLineItem(loggingModel, messageRecord));
-    append(new FunctionItem(loggingModel, messageRecord));
-    append(new CategoryItem(loggingModel, messageRecord));
-}
-
 LoggingModel::LoggingModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent),
     _messageRecords(),

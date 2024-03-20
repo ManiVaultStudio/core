@@ -19,7 +19,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class LockingAction final : public GroupAction
+class CORE_EXPORT LockingAction final : public GroupAction
 {
     Q_OBJECT
 

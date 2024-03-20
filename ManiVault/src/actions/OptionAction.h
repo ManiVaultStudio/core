@@ -26,7 +26,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class OptionAction : public WidgetAction
+class CORE_EXPORT OptionAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -46,7 +46,7 @@ public:
 public: // Widgets
 
     /** Combobox widget class for option action */
-    class ComboBoxWidget : public QComboBox {
+    class CORE_EXPORT ComboBoxWidget : public QComboBox {
     protected:
 
         /**
@@ -69,7 +69,7 @@ public: // Widgets
     };
 
     /** Line edit widget (with auto completion) class for option action */
-    class LineEditWidget : public QLineEdit {
+    class CORE_EXPORT LineEditWidget : public QLineEdit {
     protected:
 
         /**
@@ -87,7 +87,7 @@ public: // Widgets
     };
 
     /** Horizontal/vertical buttons widget for option action */
-    class ButtonsWidget : public QWidget {
+    class CORE_EXPORT ButtonsWidget : public QWidget {
     protected:
 
         /**

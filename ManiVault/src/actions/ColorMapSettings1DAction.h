@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GroupAction.h"
+#include "WidgetAction.h"
 
 namespace mv::gui {
 
@@ -17,14 +17,14 @@ class ColorMapAction;
  *
  * @author Thomas Kroes
  */
-class ColorMapSettings1DAction : public WidgetAction
+class CORE_EXPORT ColorMapSettings1DAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
     /** Widget class for one-dimensional color map settings action */
-    class Widget : public WidgetActionWidget {
+    class CORE_EXPORT Widget : public WidgetActionWidget {
     public:
 
         /**

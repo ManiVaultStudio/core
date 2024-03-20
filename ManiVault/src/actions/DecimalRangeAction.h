@@ -16,14 +16,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class DecimalRangeAction : public NumericalRangeAction<float, DecimalAction>
+class CORE_EXPORT DecimalRangeAction : public NumericalRangeAction<float, DecimalAction>
 {
     Q_OBJECT
 
 public:
 
     /** Widget class for decimal range action */
-    class DecimalRangeWidget : public WidgetActionWidget
+    class CORE_EXPORT DecimalRangeWidget : public WidgetActionWidget
     {
     protected:
 

@@ -14,7 +14,7 @@ namespace mv {
 
 namespace plugin {
 
-class RawData : public Plugin
+class CORE_EXPORT RawData : public Plugin
 {
 public:
 
@@ -62,7 +62,7 @@ private:
     DataType    _dataType;  /** Type of data */
 };
 
-class RawDataFactory : public PluginFactory
+class CORE_EXPORT RawDataFactory : public PluginFactory
 {
     Q_OBJECT
     

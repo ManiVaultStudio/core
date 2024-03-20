@@ -2,13 +2,15 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include <QString>
+#include "FileUtil.h"
+
+#include <QDesktopServices>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <QTextStream>
-#include <QDir>
 #include <QProcess>
-#include <QDesktopServices>
+#include <QString>
+#include <QTextStream>
 #include <QUrl>
 
 namespace mv
@@ -16,7 +18,7 @@ namespace mv
 namespace util
 {
 
-QString loadFileContents(QString path) {
+QString loadFileContents(const QString& path) {
     QFile file(path);
 
     QString contents = "";
@@ -29,7 +31,7 @@ QString loadFileContents(QString path) {
     return contents;
 }
 
-bool ShowFileInFolder(const QString path)
+bool showFileInFolder(const QString& path)
 {
     const QFileInfo info(path);
 

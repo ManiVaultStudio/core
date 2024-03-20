@@ -16,7 +16,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class IntegralRectangleAction : public RectangleAction<QRect, IntegralRangeAction>
+class CORE_EXPORT IntegralRectangleAction : public RectangleAction<QRect, IntegralRangeAction>
 {
     Q_OBJECT
 

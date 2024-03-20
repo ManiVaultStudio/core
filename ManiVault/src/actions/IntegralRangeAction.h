@@ -16,14 +16,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class IntegralRangeAction : public NumericalRangeAction<std::int32_t, IntegralAction>
+class CORE_EXPORT IntegralRangeAction : public NumericalRangeAction<std::int32_t, IntegralAction>
 {
     Q_OBJECT
 
 public:
 
     /** Widget class for integral range action */
-    class IntegralRangeWidget : public WidgetActionWidget
+    class CORE_EXPORT IntegralRangeWidget : public WidgetActionWidget
     {
     protected:
 

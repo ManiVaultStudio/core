@@ -17,14 +17,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class VerticalToolbarAction : public ToolbarAction
+class CORE_EXPORT VerticalToolbarAction : public ToolbarAction
 {
     Q_OBJECT
 
 public: // Widgets
 
     /** Widget class for the horizontal toolbar */
-    class Widget final : public WidgetActionWidget
+    class CORE_EXPORT Widget final : public WidgetActionWidget
     {
     protected:
 

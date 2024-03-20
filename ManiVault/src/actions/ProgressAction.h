@@ -19,7 +19,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ProgressAction final : public WidgetAction
+class CORE_EXPORT ProgressAction final : public WidgetAction
 {
     Q_OBJECT
 
@@ -38,7 +38,7 @@ public:
 public:
 
     /** Bar widget for progress action */
-    class BarWidget : public QProgressBar
+    class CORE_EXPORT BarWidget : public QProgressBar
     {
     public:
 
@@ -63,7 +63,7 @@ public:
     };
 
     /** Label widget for progress action */
-    class LabelWidget : public QLabel
+    class CORE_EXPORT LabelWidget : public QLabel
     {
     protected:
 
@@ -82,7 +82,7 @@ public:
     };
 
     /** Line edit widget for progress action */
-    class LineEditWidget : public QLineEdit
+    class CORE_EXPORT LineEditWidget : public QLineEdit
     {
     protected:
 

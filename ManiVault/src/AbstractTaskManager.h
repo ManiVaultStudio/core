@@ -24,7 +24,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class AbstractTaskManager : public AbstractManager
+class CORE_EXPORT AbstractTaskManager : public AbstractManager
 {
     Q_OBJECT
 
@@ -58,7 +58,7 @@ public:
      * @return Vector of tasks
      */
     template<typename TaskHandlerType>
-    Tasks getTasksByHandlerTypeAndStatus(const Task::Status& status) {
+    inline Tasks getTasksByHandlerTypeAndStatus(const Task::Status& status) {
         Tasks tasks = getTasks();
         Tasks tasksByHandlerType;
 

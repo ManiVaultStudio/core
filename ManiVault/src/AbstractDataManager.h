@@ -5,21 +5,9 @@
 #pragma once
 
 #include "AbstractManager.h"
+#include "Dataset.h"
 
 #include "actions/ToggleAction.h"
-
-// Qt 5.14.1 has a std::hash<QString> specialization and defines the following macro.
-// Qt 5.12.4 does not! See also https://bugreports.qt.io/browse/QTBUG-33428
-#ifndef QT_SPECIALIZE_STD_HASH_TO_CALL_QHASH
-// Hash specialization for QString so we can use it as a key in the data maps
-namespace std {
-    template<> struct hash<QString> {
-        std::size_t operator()(const QString& s) const {
-            return qHash(s);
-        }
-    };
-}
-#endif
 
 namespace mv
 {
@@ -37,7 +25,7 @@ namespace plugin {
  *
  * @author Thomas Kroes and Julian Thijssen
  */
-class AbstractDataManager : public AbstractManager
+class CORE_EXPORT AbstractDataManager : public AbstractManager
 {
     Q_OBJECT
 
@@ -81,7 +69,7 @@ protected: // Raw data
      * @return Pointer of \p RawDataType to raw data if found, nullptr otherwise
      */
     template<typename RawDataType>
-    RawDataType* getRawData(const QString& rawDataName) {
+    inline RawDataType* getRawData(const QString& rawDataName) {
         return dynamic_cast<RawDataType*>(getRawData(rawDataName));
     }
 
@@ -154,7 +142,7 @@ public: // Dataset creation
      * @return Smart pointer to the added dataset
      */
     template <class DatasetType>
-    Dataset<DatasetType> createDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) {
+    inline Dataset<DatasetType> createDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) {
         return Dataset<DatasetType>(createDataset(kind, dataSetGuiName, parentDataset).get<DatasetType>());
     }
 
@@ -209,7 +197,7 @@ public: // Derived datasets
      * @return Smart pointer to the created derived dataset of \p DatasetType
      */
     template <typename DatasetType>
-    Dataset<DatasetType> createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), bool notify = true) {
+    inline Dataset<DatasetType> createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), bool notify = true) {
         return createDerivedDataset(guiName, sourceDataset, parentDataset, notify);
     }
 
@@ -238,7 +226,7 @@ public: // Subsets
      * @return Smart pointer to the created subset of \p DatasetType
      */
     template <typename DatasetType>
-    Dataset<DatasetType> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true, bool notify = true) {
+    inline Dataset<DatasetType> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true, bool notify = true) {
         return createSubsetFromSelection(selection, sourceDataset, guiName, parentDataset, visible);
     }
 
@@ -257,7 +245,7 @@ public: // Dataset access
      * @return Smart pointer to the dataset of \p DatasetType
      */
     template<typename DatasetType>
-    Dataset<DatasetType> getDataset(const QString& datasetId) {
+    inline Dataset<DatasetType> getDataset(const QString& datasetId) {
         return Dataset<DatasetType>(getDataset(datasetId));
     }
 
@@ -292,7 +280,7 @@ public: // Selection
      * @return Smart pointer to the selection dataset
      */
     template<typename DatasetType>
-    Dataset<DatasetType> getSelection(const QString& rawDataName) {
+    inline Dataset<DatasetType> getSelection(const QString& rawDataName) {
         return Dataset<DatasetType>(dynamic_cast<DatasetType*>(getSelection(rawDataName).get()));
     }
 

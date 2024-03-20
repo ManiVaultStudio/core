@@ -25,7 +25,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class AbstractDataHierarchyManager : public AbstractManager
+class CORE_EXPORT AbstractDataHierarchyManager : public AbstractManager
 {
     Q_OBJECT
 

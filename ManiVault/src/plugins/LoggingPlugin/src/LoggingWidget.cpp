@@ -102,7 +102,7 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
     connect(&_findLogFileAction, &QAction::triggered, [this](bool) {
         const auto filePath = Logger::GetFilePathName();
 
-        if (!mv::util::ShowFileInFolder(filePath))
+        if (!mv::util::showFileInFolder(filePath))
             QMessageBox::information(this, QObject::tr("Log file not found"), QObject::tr("The log file is not found:\n%1").arg(filePath));
         });
 }

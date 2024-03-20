@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Dataset.h"
 #include "DataType.h"
 #include "PluginType.h"
@@ -32,7 +34,7 @@ namespace mv::plugin
 
 class Plugin;
 
-class PluginFactory : public QObject
+class CORE_EXPORT PluginFactory : public QObject
 {
     Q_OBJECT
 

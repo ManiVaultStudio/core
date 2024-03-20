@@ -4,19 +4,21 @@
 
 #pragma once
 
-#include "actions/StringAction.h"
-#include "actions/TriggerAction.h"
+#include "ManiVaultGlobals.h"
+
 #include "actions/GroupAction.h"
-#include "actions/ToggleAction.h"
-#include "actions/OptionAction.h"
 #include "actions/HorizontalGroupAction.h"
+#include "actions/OptionAction.h"
+#include "actions/StringAction.h"
+#include "actions/ToggleAction.h"
+#include "actions/TriggerAction.h"
 
 #include "InfoOverlayWidget.h"
 
-#include <QWidget>
-#include <QTreeView>
 #include <QAbstractItemModel>
 #include <QHBoxLayout>
+#include <QTreeView>
+#include <QWidget>
 
 class QSortFilterProxyModel;
 
@@ -29,7 +31,7 @@ class HierarchyWidget;
  * Custom tree view class
  * Tree view does not emit signals when column visibility changes (needed to update visible columns popup), this class solves this problem.
  */
-class HierarchyWidgetTreeView : public QTreeView
+class CORE_EXPORT HierarchyWidgetTreeView : public QTreeView
 {
     Q_OBJECT
 
@@ -89,7 +91,7 @@ signals:
  * 
  * @author Thomas Kroes
  */
-class HierarchyWidget : public QWidget
+class CORE_EXPORT HierarchyWidget : public QWidget
 {
     Q_OBJECT
 

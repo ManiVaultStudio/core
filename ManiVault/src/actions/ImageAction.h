@@ -21,7 +21,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ImageAction : public WidgetAction
+class CORE_EXPORT ImageAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -36,7 +36,7 @@ public:
 public:
 
     /** Preview widget class for image action */
-    class PreviewWidget : public QLabel
+    class CORE_EXPORT PreviewWidget : public QLabel
     {
     protected:
 
@@ -58,7 +58,7 @@ public:
     };
 
     /** Loader widget class for image action */
-    class LoaderWidget : public QWidget
+    class CORE_EXPORT LoaderWidget : public QWidget
     {
     protected:
 

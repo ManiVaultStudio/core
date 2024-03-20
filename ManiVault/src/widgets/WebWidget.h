@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QWidget>
 
 #include <QObject>
@@ -18,7 +20,7 @@ namespace mv
 namespace gui
 {
 
-class WebCommunicationObject : public QObject
+class CORE_EXPORT WebCommunicationObject : public QObject
 {
     Q_OBJECT
 
@@ -40,7 +42,7 @@ public slots:
     }
 };
 
-class WebWidget : public QWidget
+class CORE_EXPORT WebWidget : public QWidget
 {
     Q_OBJECT
 public:

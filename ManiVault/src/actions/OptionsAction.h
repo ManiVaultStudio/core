@@ -25,14 +25,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class OptionsAction : public WidgetAction
+class CORE_EXPORT OptionsAction : public WidgetAction
 {
     Q_OBJECT
 
 private:
 
     /** Extends the standard list view to support checking items in the checkable string list model */
-    class CheckableItemView : public QListView {
+    class CORE_EXPORT CheckableItemView : public QListView {
     public:
 
         /** No need for a custom constructor */
@@ -59,7 +59,7 @@ public:
 public: // Widgets
 
     /** Combobox widget class for options action */
-    class ComboBoxWidget : public QComboBox {
+    class CORE_EXPORT ComboBoxWidget : public QComboBox {
     protected:
 
         /**
@@ -107,7 +107,7 @@ protected:
      *
      * @author Thomas Kroes
      */
-    class SelectionAction : public WidgetAction
+    class CORE_EXPORT SelectionAction : public WidgetAction
     {
     protected:
 
@@ -166,7 +166,7 @@ protected:
      *
      * @author Thomas Kroes
      */
-    class FileAction : public WidgetAction
+    class CORE_EXPORT FileAction : public WidgetAction
     {
     protected:
 

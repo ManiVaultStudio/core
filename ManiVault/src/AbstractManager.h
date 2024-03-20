@@ -8,8 +8,6 @@
 
 #include "actions/LockingAction.h"
 
-#include "Task.h"
-
 #include <QObject>
 #include <QDebug>
 #include <QIcon>
@@ -28,7 +26,7 @@ namespace mv
  * 
  * @author Thomas Kroes
  */
-class AbstractManager : public QObject, public util::Serializable
+class CORE_EXPORT AbstractManager : public QObject, public util::Serializable
 {
     Q_OBJECT
 
