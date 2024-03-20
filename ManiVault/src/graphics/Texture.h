@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "ManiVaultGlobals.h"
-
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <QPixmap>
@@ -133,7 +131,7 @@ protected:
     GLenum _target;
 };
 
-class CORE_EXPORT Texture1D : public Texture
+class Texture1D : public Texture
 {
 public:
     Texture1D() : Texture(GL_TEXTURE_1D) { }
@@ -158,7 +156,7 @@ public:
     }
 };
 
-class CORE_EXPORT Texture2D : public Texture
+class Texture2D : public Texture
 {
 public:
     Texture2D() : Texture(GL_TEXTURE_2D) { }

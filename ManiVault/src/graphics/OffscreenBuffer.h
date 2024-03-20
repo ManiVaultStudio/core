@@ -4,12 +4,10 @@
 
 #pragma once
 
-#include "ManiVaultGlobals.h"
-
 #include <QWindow>
 #include <QOpenGLContext>
 
-class CORE_EXPORT OffscreenBuffer : public QWindow
+class OffscreenBuffer : public QWindow
 {
 public:
     OffscreenBuffer()
