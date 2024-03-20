@@ -20,8 +20,14 @@ namespace mv {
 class Variant : public QVariant
 {
 public:
-
+    Variant();
     Variant(const QVariant& other);
+
+    Variant operator =(const QVariant& other) {
+        QVariant::operator=(other);
+
+        return *this;
+    }
 
     operator QVariant () const {
         return *this;

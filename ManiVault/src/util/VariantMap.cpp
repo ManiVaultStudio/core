@@ -12,6 +12,41 @@ namespace mv {
 
 const QString VariantMap::serializationVersionKey = "SerializationVersion";
 
+_VariantMap::_VariantMap()
+{
+}
+
+_VariantMap::_VariantMap(std::initializer_list<std::pair<QString, QVariant>> list) :
+    QMap<QString, Variant>()
+{
+}
+
+_VariantMap::_VariantMap(const std::map<QString, QVariant>& other) :
+    QMap<QString, Variant>()
+{
+}
+
+_VariantMap::_VariantMap(std::map<QString, QVariant>&& other) :
+    QMap<QString, Variant>()
+{
+}
+
+_VariantMap::_VariantMap(const QVariantMap& other) :
+    QMap<QString, Variant>()
+{
+}
+
+_VariantMap::_VariantMap(QVariantMap&& other) :
+    QMap<QString, Variant>()
+{
+}
+
+
+
+
+
+
+
 VariantMap::VariantMap()
 {
     initialize();
@@ -24,25 +59,25 @@ VariantMap::VariantMap(std::initializer_list<std::pair<QString, QVariant>> list)
 }
 
 VariantMap::VariantMap(const std::map<QString, QVariant>& other) :
-    _variantMap(other)
+    _variantMap(_VariantMap(other))
 {
     initialize();
 }
 
 VariantMap::VariantMap(std::map<QString, QVariant>&& other) :
-    _variantMap(other)
+    _variantMap(_VariantMap(other))
 {
     initialize();
 }
 
 VariantMap::VariantMap(const QVariantMap& other) :
-    _variantMap(other)
+    _variantMap(_VariantMap(other))
 {
     initialize();
 }
 
 VariantMap::VariantMap(QVariantMap&& other) :
-    _variantMap(other)
+    _variantMap(_VariantMap(other))
 {
     initialize();
 }
@@ -52,9 +87,14 @@ std::uint32_t VariantMap::getVersion() const
     return _version;
 }
 
-const QVariantMap& VariantMap::getVariantMap() const
+QVariantMap VariantMap::getVariantMap() const
 {
-    return _variantMap;
+    QVariantMap variantMap;
+
+    for (const auto& key : _variantMap.keys())
+        variantMap[key] = _variantMap[key];
+
+    return variantMap;
 }
 
 void VariantMap::initialize()
@@ -70,7 +110,7 @@ QVariant VariantMap::converted() const
             qDebug() << "Found a string list!";
     }
 
-    return _variantMap;
+    return getVariantMap();
 }
 
 }

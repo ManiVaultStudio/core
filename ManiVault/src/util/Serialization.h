@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "VariantMap.h"
+
 #include <QFileInfo>
 #include <QFile>
 #include <QDir>
@@ -50,6 +52,6 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
  * @param variantMap Variant map that should contain the key
  * @param key Item name
  */
-void variantMapMustContain(const QVariantMap& variantMap, const QString& key);
+void variantMapMustContain(const VariantMap& variantMap, const QString& key);
 
 }

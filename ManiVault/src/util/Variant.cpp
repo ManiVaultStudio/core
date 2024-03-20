@@ -10,10 +10,17 @@
 
 namespace mv {
 
+Variant::Variant()
+{
+
+}
+
 Variant::Variant(const QVariant& other) :
     QVariant(other)
 {
 
 }
+
+
 
 }

@@ -14,6 +14,16 @@ namespace mv::util {
 
 namespace mv {
 
+class _VariantMap : public QMap<QString, Variant> {
+public:
+    _VariantMap();
+    _VariantMap(std::initializer_list<std::pair<QString, QVariant>> list);
+    _VariantMap(const std::map<QString, QVariant>& other);
+    _VariantMap(std::map<QString, QVariant>&& other);
+    _VariantMap(const QVariantMap& other);
+    _VariantMap(QVariantMap&& other);
+};
+
 /**
  * TODO
  * 
@@ -23,7 +33,7 @@ class VariantMap final
 {
 public:
 
-    using PrivateVariantMap = QMap<QString, Variant>;
+    
 
 public:
     VariantMap();
@@ -47,20 +57,20 @@ public:
         return _variantMap.count();
     }
 
-    QVariantMap::iterator insert(const QString& key, const QVariant& value) {
+    _VariantMap::iterator insert(const QString& key, const QVariant& value) {
         return _variantMap.insert(key, value);
     }
 
-    QVariantMap::iterator insert(QVariantMap::const_iterator pos, const QString& key, const QVariant& value) {
+    _VariantMap::iterator insert(_VariantMap::const_iterator pos, const QString& key, const QVariant& value) {
         return _variantMap.insert(pos, key, value);
     }
 
     void insert(const QVariantMap& map) {
-        _variantMap.insert(map);
+        _variantMap.insert(_VariantMap(map));
     }
 
     void insert(QVariantMap&& map) {
-        _variantMap.insert(map);
+        _variantMap.insert(_VariantMap(map));
     }
 
     QList<QString> keys() const {
@@ -68,7 +78,12 @@ public:
     }
 
     QList<QVariant> values() const {
-        return _variantMap.values();
+        QList<QVariant> variantValues;
+
+        for (const auto& value : _variantMap.values())
+            variantValues << value;
+
+        return variantValues;
     }
 
     QVariant& operator [](const QString& key) {
@@ -84,13 +99,14 @@ public:
     }
 
     VariantMap operator =(const VariantMap& other) {
-        _variantMap = other.getVariantMap();
+        _variantMap = other._variantMap;
 
         return *this;
     }
 
     VariantMap operator =(const QVariantMap& variantMap) {
-        _variantMap = variantMap;
+        for (const auto& key : variantMap.keys())
+            _variantMap[key] = variantMap[key];
 
         return *this;
     }
@@ -100,12 +116,12 @@ public:
     }
 
     operator QVariantMap () const {
-        return _variantMap;
+        return getVariantMap();
     }
 
 protected:
 
-    const QVariantMap& getVariantMap() const;
+    QVariantMap getVariantMap() const;
 
 private:
 
@@ -116,7 +132,7 @@ private:
 
 private:
     const std::uint32_t     _version{1};    /** Variant map serialization version */
-    QVariantMap             _variantMap;    /** The actual variant map container */
+    _VariantMap             _variantMap;    /** The actual variant map container */
 
     static const QString serializationVersionKey;
 
