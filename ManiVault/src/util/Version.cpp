@@ -76,7 +76,7 @@ void Version::setSuffix(const std::string& suffix)
     _suffix = suffix;
 }
 
-void Version::fromVariantMap(const QVariantMap& variantMap)
+void Version::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -91,7 +91,7 @@ void Version::fromVariantMap(const QVariantMap& variantMap)
     setSuffix(variantMap["Suffix"].toString().toStdString());
 }
 
-QVariantMap Version::toVariantMap() const
+mv::VariantMap Version::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 

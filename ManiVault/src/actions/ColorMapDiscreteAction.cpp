@@ -34,16 +34,16 @@ void ColorMapDiscreteAction::disconnectFromPublicAction()
     
 }
 
-void ColorMapDiscreteAction::fromVariantMap(const QVariantMap& variantMap)
+void ColorMapDiscreteAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
     
 }
 
-QVariantMap ColorMapDiscreteAction::toVariantMap() const
+mv::VariantMap ColorMapDiscreteAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     
 

@@ -269,7 +269,7 @@ void DataHierarchyItem::setExpanded(bool expanded)
     emit expandedChanged(_expanded);
 }
 
-void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
+void DataHierarchyItem::fromVariantMap(const mv::VariantMap& variantMap)
 {
     try
     {
@@ -289,7 +289,7 @@ void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
         setSelected(variantMap["Selected"].toBool(), false);
 }
 
-QVariantMap DataHierarchyItem::toVariantMap() const
+mv::VariantMap DataHierarchyItem::toVariantMap() const
 {
     QVariantMap variantMap, children;
 

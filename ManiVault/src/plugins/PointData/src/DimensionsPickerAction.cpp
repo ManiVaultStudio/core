@@ -81,7 +81,7 @@ DimensionsPickerAction::~DimensionsPickerAction()
     disconnect(_summaryUpdateAwakeConnection);
 }
 
-void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
+void DimensionsPickerAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -114,7 +114,7 @@ void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-QVariantMap DimensionsPickerAction::toVariantMap() const
+mv::VariantMap DimensionsPickerAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

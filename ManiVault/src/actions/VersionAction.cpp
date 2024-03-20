@@ -51,7 +51,7 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
     connect(&_suffixAction, &StringAction::stringChanged, this, updateVersionStringAction);
 }
 
-void VersionAction::fromVariantMap(const QVariantMap& variantMap)
+void VersionAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -60,7 +60,7 @@ void VersionAction::fromVariantMap(const QVariantMap& variantMap)
     _suffixAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap VersionAction::toVariantMap() const
+mv::VariantMap VersionAction::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 

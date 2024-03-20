@@ -69,13 +69,13 @@ public:
      * Load from variant map
      * @param variantMap Variant map
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save to variant map
      * @return Variant map
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 private:
     Type    _type;              /** The type of selection map */
@@ -101,13 +101,13 @@ public:
      * Load from variant map
      * @param variantMap Variant map
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save to variant map
      * @return Variant map
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 private:
     Dataset<DatasetImpl>    _sourceDataSet;

@@ -102,7 +102,7 @@ void DecimalAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
+void DecimalAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -111,7 +111,7 @@ void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
     setValue(static_cast<float>(variantMap["Value"].toDouble()));
 }
 
-QVariantMap DecimalAction::toVariantMap() const
+mv::VariantMap DecimalAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

@@ -519,7 +519,7 @@ void PixelSelectionAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void PixelSelectionAction::fromVariantMap(const QVariantMap& variantMap)
+void PixelSelectionAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     GroupAction::fromVariantMap(variantMap);
 
@@ -533,7 +533,7 @@ void PixelSelectionAction::fromVariantMap(const QVariantMap& variantMap)
         qDebug() << text() << _typeAction.getOptions();
 }
 
-QVariantMap PixelSelectionAction::toVariantMap() const
+mv::VariantMap PixelSelectionAction::toVariantMap() const
 {
     auto variantMap = GroupAction::toVariantMap();
 

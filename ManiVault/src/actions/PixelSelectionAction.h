@@ -114,13 +114,13 @@ public: // Serialization
      * Load selection action from variant
      * @param Variant representation of the selection action
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save selection action to variant
      * @return Variant representation of the selection action
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 public: // Action getters
 

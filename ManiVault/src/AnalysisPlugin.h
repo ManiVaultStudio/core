@@ -90,13 +90,13 @@ public: // Serialization
      * Load analysis plugin from variant
      * @param Variant representation of the analysis plugin
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save analysis plugin to variant
      * @param Variant representation of the analysis plugin
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 protected:
     /** Returns whether any output dataset is given */

@@ -120,13 +120,13 @@ public: // Serialization
      * Load widget action from variant
      * @param Variant representation of the widget action
      */
-    virtual void fromVariantMap(const QVariantMap& variantMap) override = 0;
+    void fromVariantMap(const mv::VariantMap& variantMap) override = 0;
 
     /**
      * Save widget action to variant
      * @return Variant representation of the widget action
      */
-    virtual QVariantMap toVariantMap() const override = 0;
+    mv::VariantMap toVariantMap() const override = 0;
 
 signals:
 

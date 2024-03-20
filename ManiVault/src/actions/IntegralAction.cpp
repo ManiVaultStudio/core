@@ -80,7 +80,7 @@ void IntegralAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
+void IntegralAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -89,7 +89,7 @@ void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
     setValue(variantMap["Value"].toInt());
 }
 
-QVariantMap IntegralAction::toVariantMap() const
+mv::VariantMap IntegralAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

@@ -142,7 +142,7 @@ mv::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
     return _analysis;
 }
 
-void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
+void DatasetImpl::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -210,7 +210,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-QVariantMap DatasetImpl::toVariantMap() const
+mv::VariantMap DatasetImpl::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

@@ -51,7 +51,7 @@ void ToggleAction::setIndeterminate(bool indeterminate)
     emit indeterminateChanged(_indeterminate);
 }
 
-void ToggleAction::fromVariantMap(const QVariantMap& variantMap)
+void ToggleAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -60,7 +60,7 @@ void ToggleAction::fromVariantMap(const QVariantMap& variantMap)
     setChecked(variantMap["Value"].toBool());
 }
 
-QVariantMap ToggleAction::toVariantMap() const
+mv::VariantMap ToggleAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

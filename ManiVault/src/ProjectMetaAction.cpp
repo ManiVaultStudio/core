@@ -77,7 +77,7 @@ ProjectMetaAction::ProjectMetaAction(const QString& filePath, QObject* parent /*
     }
 }
 
-void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
+void ProjectMetaAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -93,7 +93,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _compressionAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap ProjectMetaAction::toVariantMap() const
+mv::VariantMap ProjectMetaAction::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 

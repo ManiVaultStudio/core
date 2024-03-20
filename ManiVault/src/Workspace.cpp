@@ -84,7 +84,7 @@ void Workspace::setFilePath(const QString& filePath)
     emit filePathChanged(_filePath);
 }
 
-void Workspace::fromVariantMap(const QVariantMap& variantMap)
+void Workspace::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -97,7 +97,7 @@ void Workspace::fromVariantMap(const QVariantMap& variantMap)
     workspaces().getLockingAction().setLocked(_lockingAction.isLocked());
 }
 
-QVariantMap Workspace::toVariantMap() const
+mv::VariantMap Workspace::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 

@@ -32,13 +32,13 @@ public: // Serialization
      * Load compression action from variant
      * @param Variant representation of the compression action
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save compression action to variant
      * @return Variant representation of the compression action
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 public: // Action getters
 

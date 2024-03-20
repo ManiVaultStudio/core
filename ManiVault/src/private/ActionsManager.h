@@ -52,13 +52,13 @@ public: // Serialization
      * Load manager from variant map
      * @param Variant map representation of the manager
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save manager to variant map
      * @return Variant map representation of the manager
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 };
 
 }

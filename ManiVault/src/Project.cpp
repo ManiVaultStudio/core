@@ -81,7 +81,7 @@ bool Project::isStartupProject() const
     return _startupProject;
 }
 
-void Project::fromVariantMap(const QVariantMap& variantMap)
+void Project::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -104,7 +104,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     plugins().fromParentVariantMap(variantMap);
 }
 
-QVariantMap Project::toVariantMap() const
+mv::VariantMap Project::toVariantMap() const
 {
     projects().getProjectSerializationTask().setName("Save project");
 

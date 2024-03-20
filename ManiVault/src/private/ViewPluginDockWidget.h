@@ -148,13 +148,13 @@ public: // Serialization
      * Load view plugin dock widget from variant
      * @param Variant representation of the view plugin dock widget
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save view plugin dock widget to variant
      * @return Variant representation of the view plugin dock widget
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
     /**
      * Create a view plugin dock widget serialization task for \p viewPluginDockWidgetId (even if no instance is yet available)

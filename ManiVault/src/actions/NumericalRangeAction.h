@@ -205,7 +205,7 @@ public: // Serialization
      * Load numerical range action from variant map
      * @param Variant map representation of the numerical range action
      */
-    void fromVariantMap(const QVariantMap& variantMap) override
+    void fromVariantMap(const mv::VariantMap& variantMap) override
     {
         WidgetAction::fromVariantMap(variantMap);
 
@@ -217,7 +217,7 @@ public: // Serialization
      * Save numerical range action to variant map
      * @return Variant map representation of the numerical range action
      */
-    QVariantMap toVariantMap() const override
+    mv::VariantMap toVariantMap() const override
     {
         auto variantMap = WidgetAction::toVariantMap();
 

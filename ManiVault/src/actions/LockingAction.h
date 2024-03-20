@@ -69,13 +69,13 @@ public: // Serialization
      * Load locked action from variant map
      * @param Variant map representation of the locked action
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
       * Save locked action to variant map
       * @return Variant map representation of the locked action
       */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 public: // Action getters
 

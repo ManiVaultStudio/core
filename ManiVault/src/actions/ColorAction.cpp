@@ -76,7 +76,7 @@ void ColorAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void ColorAction::fromVariantMap(const QVariantMap& variantMap)
+void ColorAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -85,9 +85,9 @@ void ColorAction::fromVariantMap(const QVariantMap& variantMap)
     setColor(variantMap["Value"].value<QColor>());
 }
 
-QVariantMap ColorAction::toVariantMap() const
+mv::VariantMap ColorAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
         { "Value", QVariant::fromValue(_color) }

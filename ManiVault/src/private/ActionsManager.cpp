@@ -63,7 +63,7 @@ void ActionsManager::reset()
     endReset();
 }
 
-void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
+void ActionsManager::fromVariantMap(const mv::VariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
@@ -112,7 +112,7 @@ void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-QVariantMap ActionsManager::toVariantMap() const
+mv::VariantMap ActionsManager::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 

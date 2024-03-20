@@ -218,7 +218,7 @@ void DatasetPickerAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
+void DatasetPickerAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -227,9 +227,9 @@ void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
     setCurrentDataset(variantMap["Value"].toString());
 }
 
-QVariantMap DatasetPickerAction::toVariantMap() const
+mv::VariantMap DatasetPickerAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
         { "Value", getCurrentDatasetGuid() }

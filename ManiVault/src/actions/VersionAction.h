@@ -38,13 +38,13 @@ public: // Serialization
      * Load project from variant
      * @param Variant representation of the project
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save project to variant
      * @return Variant representation of the project
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 public: // Action getters
 

@@ -275,7 +275,7 @@ GroupAction::WidgetConfigurationFunctionsMap GroupAction::getWidgetConfiguration
     return _widgetConfigurationFunctionsMap;
 }
 
-void GroupAction::fromVariantMap(const QVariantMap& variantMap)
+void GroupAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -284,7 +284,7 @@ void GroupAction::fromVariantMap(const QVariantMap& variantMap)
     setExpanded(variantMap["Expanded"].toBool());
 }
 
-QVariantMap GroupAction::toVariantMap() const
+mv::VariantMap GroupAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

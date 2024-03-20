@@ -43,7 +43,7 @@ void DecimalRectangleAction::disconnectFromPublicAction(bool recursive)
     RectangleAction<QRectF, DecimalRangeAction>::disconnectFromPublicAction(recursive);
 }
 
-void DecimalRectangleAction::fromVariantMap(const QVariantMap& variantMap)
+void DecimalRectangleAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     RectangleAction<QRectF, DecimalRangeAction>::fromVariantMap(variantMap);
 
@@ -51,7 +51,7 @@ void DecimalRectangleAction::fromVariantMap(const QVariantMap& variantMap)
     getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
 }
 
-QVariantMap DecimalRectangleAction::toVariantMap() const
+mv::VariantMap DecimalRectangleAction::toVariantMap() const
 {
     auto variantMap = RectangleAction<QRectF, DecimalRangeAction>::toVariantMap();
 

@@ -681,7 +681,7 @@ std::int32_t Images::getPixelIndexFromPixelCoordinate(const QPoint& pixelCoordin
     return pixelCoordinate.y() * getImageSize().width() + pixelCoordinate.x();
 }
 
-void Images::fromVariantMap(const QVariantMap& variantMap)
+void Images::fromVariantMap(const mv::VariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
@@ -708,7 +708,7 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
     events().notifyDatasetDataChanged(this);
 }
 
-QVariantMap Images::toVariantMap() const
+mv::VariantMap Images::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 

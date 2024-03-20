@@ -81,7 +81,7 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
-void ClusterData::fromVariantMap(const QVariantMap& variantMap)
+void ClusterData::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -159,7 +159,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-QVariantMap ClusterData::toVariantMap() const
+mv::VariantMap ClusterData::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
@@ -286,7 +286,7 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
     return selectedIndices;
 }
 
-void Clusters::fromVariantMap(const QVariantMap& variantMap)
+void Clusters::fromVariantMap(const mv::VariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
@@ -295,7 +295,7 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
     events().notifyDatasetDataChanged(this);
 }
 
-QVariantMap Clusters::toVariantMap() const
+mv::VariantMap Clusters::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 

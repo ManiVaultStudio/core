@@ -170,7 +170,7 @@ void StringAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void StringAction::fromVariantMap(const QVariantMap& variantMap)
+void StringAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -179,7 +179,7 @@ void StringAction::fromVariantMap(const QVariantMap& variantMap)
     setString(variantMap["Value"].toString());
 }
 
-QVariantMap StringAction::toVariantMap() const
+mv::VariantMap StringAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

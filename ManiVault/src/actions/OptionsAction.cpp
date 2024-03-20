@@ -227,7 +227,7 @@ void OptionsAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
+void OptionsAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
@@ -240,7 +240,7 @@ void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
     setSelectedOptions(variantMap["Value"].toStringList());
 }
 
-QVariantMap OptionsAction::toVariantMap() const
+mv::VariantMap OptionsAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

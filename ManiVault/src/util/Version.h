@@ -93,13 +93,13 @@ public: // Serialization
      * Load version from variant map
      * @param Variant map representation of the version
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
      * Save version to variant map
      * @return Variant map representation of the version
      */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 private:
     std::int32_t _major;

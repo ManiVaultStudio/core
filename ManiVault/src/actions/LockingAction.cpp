@@ -53,14 +53,14 @@ void LockingAction::initialize(bool locked /*= false*/)
     });
 }
 
-void LockingAction::fromVariantMap(const QVariantMap& variantMap)
+void LockingAction::fromVariantMap(const mv::VariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
     _lockedAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap LockingAction::toVariantMap() const
+mv::VariantMap LockingAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 

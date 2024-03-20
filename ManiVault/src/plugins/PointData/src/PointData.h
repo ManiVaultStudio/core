@@ -413,13 +413,13 @@ public:
      * Load point data from variant map
      * @param Variant map representation of the point data
      */
-    virtual void fromVariantMap(const QVariantMap& variantMap) final;
+    void fromVariantMap(const mv::VariantMap& variantMap) override final;
 
     /**
      * Save point data to variant map
      * @return Variant map representation of the point data
      */
-    virtual QVariantMap toVariantMap() const final;
+    mv::VariantMap toVariantMap() const override final;
 
 private:
     VariantOfVectors _variantOfVectors;
@@ -883,13 +883,13 @@ public: // Serialization
      * Load widget action from variant
      * @param Variant representation of the widget action
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const mv::VariantMap& variantMap) override;
 
     /**
         * Save widget action to variant
         * @return Variant representation of the widget action
         */
-    QVariantMap toVariantMap() const override;
+    mv::VariantMap toVariantMap() const override;
 
 public: // Linked data
 
