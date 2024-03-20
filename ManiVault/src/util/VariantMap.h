@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Variant.h"
+
 #include <QVariantMap>
 
 namespace mv::util {
@@ -19,6 +21,10 @@ namespace mv {
  */
 class VariantMap final
 {
+public:
+
+    using PrivateVariantMap = QMap<QString, Variant>;
+
 public:
     VariantMap();
     VariantMap(std::initializer_list<std::pair<QString, QVariant>> list);
@@ -44,35 +50,25 @@ public:
     QVariantMap::iterator insert(const QString& key, const QVariant& value) {
         return _variantMap.insert(key, value);
     }
-    
+
     QVariantMap::iterator insert(QVariantMap::const_iterator pos, const QString& key, const QVariant& value) {
         return _variantMap.insert(pos, key, value);
     }
-    
+
     void insert(const QVariantMap& map) {
         _variantMap.insert(map);
     }
-    
+
     void insert(QVariantMap&& map) {
         _variantMap.insert(map);
     }
 
     QList<QString> keys() const {
         return _variantMap.keys();
-        //auto allKeysExceptSerializationVersion = _variantMap.keys();
-
-        //allKeysExceptSerializationVersion.takeFirst();
-
-        //return allKeysExceptSerializationVersion;
     }
 
     QList<QVariant> values() const {
         return _variantMap.values();
-        //auto allValuesExceptSerializationVersion = _variantMap.values();
-
-        //allValuesExceptSerializationVersion.takeFirst();
-
-        //return allValuesExceptSerializationVersion;
     }
 
     QVariant& operator [](const QString& key) {
@@ -100,7 +96,7 @@ public:
     }
 
     operator QVariant () const {
-        return _variantMap;
+        return converted();
     }
 
     operator QVariantMap () const {
@@ -113,12 +109,14 @@ protected:
 
 private:
 
+    QVariant converted() const;
+
     /** Add serialization version etc. */
     void initialize();
 
 private:
-    const std::uint32_t _version{1};    /** Variant map serialization version */
-    QVariantMap         _variantMap;    /** The actual variant map container */
+    const std::uint32_t     _version{1};    /** Variant map serialization version */
+    QVariantMap             _variantMap;    /** The actual variant map container */
 
     static const QString serializationVersionKey;
 

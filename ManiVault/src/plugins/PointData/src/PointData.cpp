@@ -1021,7 +1021,7 @@ mv::VariantMap Points::toVariantMap() const
         selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
     }
 
-    variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
+    variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : VariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();
     variantMap["Indices"]               = indices;
     variantMap["Selection"]             = selection;

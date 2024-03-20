@@ -62,4 +62,15 @@ void VariantMap::initialize()
     //_variantMap["SerializationVersion"] = QVariant::fromValue(_version);
 }
 
+QVariant VariantMap::converted() const
+{
+    for (const auto& variant : _variantMap.values()) {
+        qDebug() << variant.typeName();
+        if (variant.typeName() == "QStringList")
+            qDebug() << "Found a string list!";
+    }
+
+    return _variantMap;
+}
+
 }
