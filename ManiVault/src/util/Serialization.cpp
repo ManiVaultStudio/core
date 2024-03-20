@@ -162,4 +162,67 @@ void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
         throw std::runtime_error(QString("%1 not found in map: %2").arg(key, variantMap.keys().join(", ")).toLatin1());
 }
 
+QVariant storeQVariant(const QVariant& variant)
+{
+    
+    if (variant.isNull() || !variant.isValid())
+        return variant;
+
+    // check how many bytes it takes to store the variant
+    QByteArray byteArray;
+    QDataStream stream(&byteArray, QIODevice::WriteOnly);
+    stream << variant;
+
+    if (byteArray.size() < 10485760)
+    {
+        return variant;
+    }
+    // store large variant in one or more binary files similar to raw data
+    const quint32 version = 1;
+    QVariantMap result = rawDataToVariantMap(byteArray.data(), byteArray.size(), true);
+    Q_ASSERT(!result.contains("QVariantOnDiskVersion"));
+    result["QVariantOnDiskVersion"] = version; // add an extra item to the result so we can check how the data was stored
+    return result;
+}
+
+QVariant loadQVariant(const QVariant& variant)
+{
+    // check if variant contains a non-empty QVariantMap
+    QVariantMap variantMap = variant.toMap();
+    if (variantMap.empty())
+        return variant;
+
+    // check if it was stored on disk, if not just return it
+    if (!variantMap.contains("QVariantOnDiskVersion"))
+    {
+        return variantMap;
+    }
+
+    // load the QVariant from disk
+    quint32 version = variantMap["QVariantOnDiskVersion"].toUInt();
+    Q_ASSERT(version == 1);
+
+
+    // First check the size we need for a temporary buffer
+    variantMapMustContain(variantMap, "Blocks");
+    const auto blocks = variantMap["Blocks"].toList();
+    uint64_t totalSize = 0;
+    for (const auto& block : blocks)
+    {
+        // Get block variant map
+        const auto map = block.toMap();
+        variantMapMustContain(map, "Size");
+        totalSize += map["Size"].value<uint64_t>();
+    }
+    // Next create a temporary buffer and load the data
+    std::vector<char> bytes(totalSize);
+    populateDataBufferFromVariantMap(variantMap, bytes.data());
+
+    // Finally convert the data to a QVariant.
+    QVariant result;;
+    QByteArray byteArray(bytes.data(), bytes.size());
+    QDataStream stream(&byteArray, QIODevice::ReadOnly);
+    stream >> result;
+    return result;
+}
 }
