@@ -284,6 +284,11 @@ namespace mv
             _gpuPoints.setColors(colors);
         }
 
+        PointEffect PointRenderer::getScalarEffect() const
+        {
+            return _pointEffect;
+        }
+
         void PointRenderer::setScalarEffect(const PointEffect effect)
         {
             _pointEffect = effect;
@@ -292,6 +297,11 @@ namespace mv
         void PointRenderer::setColormap(const QImage& image)
         {
             _colormap.loadFromImage(image);
+        }
+
+        Bounds PointRenderer::getBounds() const
+        {
+            return _bounds;
         }
 
         void PointRenderer::setBounds(const Bounds& bounds)
@@ -314,6 +324,11 @@ namespace mv
         void PointRenderer::setPointScaling(PointScaling scalingMode)
         {
             _pointSettings._scalingMode = scalingMode;
+        }
+
+        const PointSettings& PointRenderer::getPointSettings() const
+        {
+            return _pointSettings;
         }
 
         mv::gui::PointSelectionDisplayMode PointRenderer::getSelectionDisplayMode() const

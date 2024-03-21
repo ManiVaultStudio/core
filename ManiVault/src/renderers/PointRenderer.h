@@ -125,9 +125,15 @@ namespace mv
             void setOpacityChannelScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
 
+            PointEffect getScalarEffect() const;
             void setScalarEffect(const PointEffect effect);
+
             void setColormap(const QImage& image);
+
+            Bounds getBounds() const;
             void setBounds(const Bounds& bounds);
+
+            const PointSettings& getPointSettings() const;
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
