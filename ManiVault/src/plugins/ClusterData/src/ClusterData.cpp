@@ -311,6 +311,9 @@ std::vector<std::uint32_t>& Clusters::getSelectionIndices()
 
 void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
+    if (!getDataHierarchyItem().hasParent())
+        return;
+
     getSelection<Clusters>()->indices = indices;
 
     events().notifyDatasetDataSelectionChanged(this);
