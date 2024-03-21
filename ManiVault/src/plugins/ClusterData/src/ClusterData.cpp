@@ -311,12 +311,12 @@ std::vector<std::uint32_t>& Clusters::getSelectionIndices()
 
 void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
-    if (!getDataHierarchyItem().hasParent())
-        return;
-
     getSelection<Clusters>()->indices = indices;
 
     events().notifyDatasetDataSelectionChanged(this);
+
+    if (!getDataHierarchyItem().hasParent())
+        return;
 
     // Get reference to input dataset
     auto points             = getDataHierarchyItem().getParent()->getDataset<Points>();
