@@ -307,6 +307,11 @@ namespace mv
             _bounds = bounds;
         }
 
+        Matrix3f PointRenderer::getProjectionMatrix() const
+        {
+            return _orthoM;
+        }
+
         void PointRenderer::setPointSize(const float size)
         {
             _pointSettings._pointSize = size;

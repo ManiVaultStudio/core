@@ -131,6 +131,8 @@ namespace mv
             Bounds getBounds() const;
             void setBounds(const Bounds& bounds);
 
+            Matrix3f getProjectionMatrix() const;
+
             const PointSettings& getPointSettings() const;
             void setPointSize(const float size);
             void setAlpha(const float alpha);
@@ -183,7 +185,7 @@ namespace mv
             PointArrayObject            _gpuPoints;
             Texture2D                   _colormap;
 
-            Matrix3f                    _orthoM;
+            Matrix3f                    _orthoM                             = {};       /** Projection matrix from bounds space to clip space */
             Bounds                      _bounds                             = Bounds(-1, 1, -1, 1);
 
             std::int32_t                _numSelectedPoints                  = 0;     /** Number of selected (highlighted points) */
