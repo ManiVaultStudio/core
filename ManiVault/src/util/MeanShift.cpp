@@ -4,7 +4,7 @@
 
 #include "MeanShift.h"
 
-#include "../graphics/Matrix3f.h"
+#include "graphics/Matrix3f.h"
 
 #include <algorithm>
 

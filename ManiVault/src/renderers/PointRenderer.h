@@ -6,14 +6,12 @@
 
 #include "Renderer.h"
 
-#include "../graphics/BufferObject.h"
-#include "../graphics/Vector2f.h"
-#include "../graphics/Vector3f.h"
-#include "../graphics/Matrix3f.h"
-#include "../graphics/Bounds.h"
-#include "../graphics/Texture.h"
-
-#include <QRectF>
+#include "graphics/Bounds.h"
+#include "graphics/BufferObject.h"
+#include "graphics/Matrix3f.h"
+#include "graphics/Texture.h"
+#include "graphics/Vector2f.h"
+#include "graphics/Vector3f.h"
 
 namespace mv
 {
