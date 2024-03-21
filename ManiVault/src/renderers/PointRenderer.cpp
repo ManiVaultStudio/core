@@ -6,8 +6,6 @@
 
 #include <limits>
 
-#include <QDebug>
-
 namespace mv
 {
     namespace gui
@@ -18,7 +16,7 @@ namespace mv
              * Builds an orthographic projection matrix that transforms the given bounds
              * to the range [-1, 1] in both directions.
              */
-            Matrix3f createProjectionMatrix(Bounds bounds)
+            Matrix3f createProjectionMatrix(const Bounds& bounds)
             {
                 Matrix3f m;
                 m.setIdentity();

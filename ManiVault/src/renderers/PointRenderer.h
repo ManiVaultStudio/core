@@ -135,15 +135,19 @@ namespace mv
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
-            
+
             PointSelectionDisplayMode getSelectionDisplayMode() const;
             void setSelectionDisplayMode(PointSelectionDisplayMode selectionDisplayMode);
+
             Vector3f getSelectionOutlineColor() const;
             void setSelectionOutlineColor(Vector3f color);
+
             bool getSelectionOutlineOverrideColor() const;
             void setSelectionOutlineOverrideColor(float selectionOutlineOverrideColor);
+
             float getSelectionOutlineScale() const;
             void setSelectionOutlineScale(float selectionOutlineScale);
+
             float getSelectionOutlineOpacity() const;
             void setSelectionOutlineOpacity(float selectionOutlineOpacity);
 
@@ -160,8 +164,8 @@ namespace mv
 
         private:
             /* Point properties */
-            PointSettings _pointSettings;
-            PointEffect   _pointEffect = PointEffect::Size;
+            PointSettings               _pointSettings;
+            PointEffect                 _pointEffect = PointEffect::Size;
             
             PointSelectionDisplayMode   _selectionDisplayMode               = PointSelectionDisplayMode::Outline;
             Vector3f                    _selectionOutlineColor              = Vector3f(0, 0, 1);
