@@ -292,11 +292,23 @@ private: // Location
 
 public:
 
-    /** Print the paths of children of \p WidgetActionType */
+    /**
+     * Print the paths of children of \p WidgetActionType
+     * @param maxDepth Maximum depth to print
+     */
     template<typename WidgetActionType = WidgetAction>
     void printChildren(std::int32_t maxDepth = -1) const {
-        for (auto child : getChildren<WidgetActionType>(maxDepth))
-            qDebug() << child->getLocation();
+        for (auto child : getChildren<WidgetActionType>(maxDepth)) {
+            auto segments = child->getLocation().split("/");
+
+            if (segments.isEmpty())
+                continue;
+
+            segments.removeFirst();
+
+            if (!segments.isEmpty())
+                qDebug() << segments.join("/");
+        }
     }
 
 public:
