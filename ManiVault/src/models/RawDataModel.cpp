@@ -83,14 +83,6 @@ QVariant RawDataModel::RawDataSizeItem::data(int role /*= Qt::UserRole + 1*/) co
     return {};
 }
 
-RawDataModel::Row::Row(const QString& rawDataName) :
-    QList<QStandardItem*>()
-{
-    append(new RawDataNameItem(rawDataName));
-    append(new RawDataTypeItem(rawDataName));
-    append(new RawDataSizeItem(rawDataName));
-}
-
 RawDataModel::RawDataModel(QObject* parent) :
     QStandardItemModel(parent),
     _countAction(this, "Number of raw data"),

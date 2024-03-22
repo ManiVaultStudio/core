@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "ColorMapEditor1DScene.h"
 #include "ColorMapEditor1DNode.h"
 
@@ -25,7 +27,7 @@ class ColorMapEditor1DNodeGraphicsItem;
  *
  * @author Thomas Kroes and Mitchell M. de Boer
  */
-class ColorMapEditor1DWidget : public QGraphicsView
+class CORE_EXPORT ColorMapEditor1DWidget : public QGraphicsView
 {
     Q_OBJECT
 

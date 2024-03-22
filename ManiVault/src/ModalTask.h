@@ -17,7 +17,7 @@ class ModalTaskHandler;
  *
  * @author Thomas Kroes
  */
-class ModalTask final : public Task
+class CORE_EXPORT ModalTask final : public Task
 {
     Q_OBJECT   
 

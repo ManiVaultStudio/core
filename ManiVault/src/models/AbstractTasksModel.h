@@ -4,11 +4,15 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Task.h"
 
 #include "actions/StringAction.h"
 #include "actions/TaskAction.h"
 
+#include <QList>
+#include <QStandardItem>
 #include <QStandardItemModel>
 
 namespace mv
@@ -21,7 +25,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class AbstractTasksModel : public QStandardItemModel
+class CORE_EXPORT AbstractTasksModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -82,7 +86,7 @@ protected:
 public:
 
     /** Base standard model item class for task */
-    class Item : public QStandardItem, public QObject {
+    class CORE_EXPORT Item : public QStandardItem, public QObject {
     public:
 
         /**
@@ -103,7 +107,7 @@ public:
     };
 
     /** Standard model item class for displaying the task name */
-    class NameItem final : public Item {
+    class CORE_EXPORT NameItem final : public Item {
     public:
 
         /**
@@ -172,7 +176,7 @@ protected:
 public:
 
     /** Standard model item class for displaying the task progress */
-    class ProgressItem final : public Item {
+    class CORE_EXPORT ProgressItem final : public Item {
     public:
 
         /**
@@ -202,7 +206,7 @@ public:
 protected:
 
     /** Standard model item class for displaying the progress description */
-    class ProgressDescriptionItem final : public Item {
+    class CORE_EXPORT ProgressDescriptionItem final : public Item {
     public:
 
         /**
@@ -219,7 +223,7 @@ protected:
     };
 
     /** Standard model item class for displaying the progress text */
-    class ProgressTextItem final : public Item {
+    class CORE_EXPORT ProgressTextItem final : public Item {
     public:
 
         /**
@@ -236,7 +240,7 @@ protected:
     };
 
     /** Standard model item class for displaying the task status */
-    class StatusItem final : public Item {
+    class CORE_EXPORT StatusItem final : public Item {
     public:
 
         /**
@@ -253,7 +257,7 @@ protected:
     };
 
     /** Standard model item class for displaying the progress mode */
-    class ProgressModeItem final : public Item {
+    class CORE_EXPORT ProgressModeItem final : public Item {
     public:
 
         /**
@@ -270,7 +274,7 @@ protected:
     };
 
     /** Standard model item class for displaying the task identifier */
-    class IdItem final : public Item {
+    class CORE_EXPORT IdItem final : public Item {
     public:
 
         /** Use base task item constructor */
@@ -284,7 +288,7 @@ protected:
     };
 
     /** Standard model item class for displaying the parent task identifier */
-    class ParentIdItem final : public Item {
+    class CORE_EXPORT ParentIdItem final : public Item {
     public:
 
         /** Use base task item constructor */
@@ -298,7 +302,7 @@ protected:
     };
 
     /** Standard model item class for displaying the task type */
-    class TypeItem final : public Item {
+    class CORE_EXPORT TypeItem final : public Item {
     public:
 
         /** Use base task item constructor */
@@ -312,7 +316,7 @@ protected:
     };
 
     /** Standard model item class for displaying the task GUI scopes */
-    class GuiScopesItem final : public Item {
+    class CORE_EXPORT GuiScopesItem final : public Item {
     public:
 
         /**
@@ -329,7 +333,7 @@ protected:
     };
 
     /** Standard model item class for displaying whether the task may be killed */
-    class MayKillItem final : public Item {
+    class CORE_EXPORT MayKillItem final : public Item {
     public:
 
         /** Use base task item constructor */
@@ -343,7 +347,7 @@ protected:
     };
 
     /** Standard model item class for killing a task */
-    class KillItem final : public Item {
+    class CORE_EXPORT KillItem final : public Item {
     public:
 
         /**
@@ -368,7 +372,24 @@ protected:
          * Construct row with \p task
          * @param task Pointer to row task
          */
-        Row(Task* task);
+        Row(Task* task) : QList<QStandardItem*>()
+        {
+            append(new NameItem(task));
+            append(new EnabledItem(task));
+            append(new VisibleItem(task));
+            append(new ProgressItem(task));
+            append(new ProgressDescriptionItem(task));
+            append(new ProgressTextItem(task));
+            append(new StatusItem(task));
+            append(new ProgressModeItem(task));
+            append(new IdItem(task));
+            append(new ParentIdItem(task));
+            append(new TypeItem(task));
+            append(new GuiScopesItem(task));
+            append(new MayKillItem(task));
+            append(new KillItem(task));
+        }
+
     };
 
 public:

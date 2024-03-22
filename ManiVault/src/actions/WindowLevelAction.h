@@ -16,7 +16,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class WindowLevelAction : public GroupAction
+class CORE_EXPORT WindowLevelAction : public GroupAction
 {
     Q_OBJECT
 

@@ -17,14 +17,14 @@ class ColorMapAction;
  *
  * @author Thomas Kroes
  */
-class ColorMapSettingsAction : public WidgetAction
+class CORE_EXPORT ColorMapSettingsAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
     /** Widget class for color map settings action */
-    class Widget : public WidgetActionWidget {
+    class CORE_EXPORT Widget : public WidgetActionWidget {
     public:
 
         /**

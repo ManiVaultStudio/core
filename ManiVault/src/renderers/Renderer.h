@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QOpenGLFunctions_3_3_Core>
 #include <QSize>
 
@@ -17,7 +19,7 @@
 
 namespace mv
 {
-    class Renderer : protected QOpenGLFunctions_3_3_Core
+    class CORE_EXPORT Renderer : protected QOpenGLFunctions_3_3_Core
     {
         virtual void init() = 0;
         virtual void resize(QSize renderSize) = 0;

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <iostream>
 
 namespace mv
@@ -11,7 +13,7 @@ namespace mv
     class Vector2f;
     class Selection;
 
-    class Matrix3f
+    class CORE_EXPORT Matrix3f
     {
     public:
         Matrix3f();
@@ -33,6 +35,6 @@ namespace mv
         float a[9];
     };
 
-    std::ostream& operator<<(std::ostream& os, const Matrix3f& v);
+    CORE_EXPORT std::ostream& operator<<(std::ostream& os, const Matrix3f& v);
 
 } // namespace mv

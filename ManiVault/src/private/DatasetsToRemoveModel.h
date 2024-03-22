@@ -7,6 +7,8 @@
 #include <Dataset.h>
 #include <Set.h>
 
+#include <QList>
+#include <QStandardItem>
 #include <QStandardItemModel>
 
 class DataHierarchyItem;

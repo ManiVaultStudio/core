@@ -4,9 +4,12 @@
 
 #pragma once
 
-#include "StartPageAction.h"
-
+#include <QMap>
+#include <QPair>
 #include <QStandardItemModel>
+#include <QString>
+
+class StartPageAction;
 
 /**
  * Start page actions model class

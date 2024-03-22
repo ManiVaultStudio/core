@@ -22,7 +22,7 @@ namespace mv
 namespace plugin
 {
 
-class WriterPlugin : public Plugin
+class CORE_EXPORT WriterPlugin : public Plugin
 {
 public:
     WriterPlugin(const PluginFactory* factory);
@@ -64,7 +64,7 @@ protected:
 };
 
 
-class WriterPluginFactory : public PluginFactory
+class CORE_EXPORT WriterPluginFactory : public PluginFactory
 {
     Q_OBJECT
     

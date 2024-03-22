@@ -22,7 +22,7 @@ namespace mv::gui
  *
  * @author Thomas Kroes
  */
-class TemporaryDirectoriesSettingsAction final : public GlobalSettingsGroupAction
+class CORE_EXPORT TemporaryDirectoriesSettingsAction final : public GlobalSettingsGroupAction
 {
 public:
 

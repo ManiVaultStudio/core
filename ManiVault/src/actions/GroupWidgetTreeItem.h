@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "WidgetAction.h"
 
 #include <QTreeWidget>
@@ -23,7 +25,7 @@ class GroupSectionTreeItem;
  *
  * @author Thomas Kroes
  */
-class GroupWidgetTreeItem : public QTreeWidgetItem
+class CORE_EXPORT GroupWidgetTreeItem : public QTreeWidgetItem
 {
     /**
     * Size synchronizer class
@@ -33,7 +35,7 @@ class GroupWidgetTreeItem : public QTreeWidgetItem
     *
     * @author Thomas Kroes
     */
-    class SizeSynchronizer : public QObject
+    class CORE_EXPORT SizeSynchronizer : public QObject
     {
     public:
 

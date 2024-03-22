@@ -3,17 +3,19 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "OptionsAction.h"
+
 #include "Application.h"
 
-#include <QDebug>
-#include <QHBoxLayout>
-#include <QFileDialog>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
 #include <QAbstractItemView>
-#include <QMouseEvent>
+#include <QDebug>
+#include <QFileDialog>
+#include <QHBoxLayout>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QListView>
+#include <QMouseEvent>
+#include <QStandardItemModel>
 
 using namespace mv::util;
 
@@ -74,7 +76,7 @@ void OptionsAction::setOptions(const QStringList& options, bool clearSelection /
 {
     const auto selectedOptions = getSelectedOptions();
 
-    _optionsModel.setStringList(options);
+    _optionsModel.setStrings(options);
 
     for (std::int32_t rowIndex = 0; rowIndex < options.count(); ++rowIndex) {
 
@@ -133,8 +135,6 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
     auto previousSelectedOptions = getSelectedOptions();
 
     QSignalBlocker optionsModelBlocker(&_optionsModel);
-
-    auto selectionChanged = false;
 
     for (std::int32_t optionIndex = 0; optionIndex < _optionsModel.rowCount(); optionIndex++)
         _optionsModel.setData(_optionsModel.index(optionIndex, 0), selectedOptions.contains(_optionsModel.index(optionIndex, 0).data(Qt::EditRole).toString()) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);

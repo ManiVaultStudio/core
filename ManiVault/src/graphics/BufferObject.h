@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <vector>
@@ -11,7 +13,7 @@
 namespace mv
 {
 
-class BufferObject : protected QOpenGLFunctions_3_3_Core
+class CORE_EXPORT BufferObject : protected QOpenGLFunctions_3_3_Core
 {
 public:
     BufferObject();

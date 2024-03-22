@@ -15,7 +15,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class HorizontalGroupAction : public GroupAction
+class CORE_EXPORT HorizontalGroupAction : public GroupAction
 {
     Q_OBJECT
 

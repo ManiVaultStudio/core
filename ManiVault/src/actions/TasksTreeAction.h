@@ -23,7 +23,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class TasksTreeAction : public GroupAction
+class CORE_EXPORT TasksTreeAction : public GroupAction
 {
     Q_OBJECT
 

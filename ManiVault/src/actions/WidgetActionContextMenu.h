@@ -4,12 +4,16 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "actions/TriggerAction.h"
 #include "actions/StringsAction.h"
 #include "actions/VerticalGroupAction.h"
 
 #include <QMenu>
 #include <QDialog>
+
+class QCloseEvent;
 
 namespace mv::gui {
 
@@ -24,7 +28,7 @@ class WidgetAction;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionContextMenu : public QMenu
+class CORE_EXPORT WidgetActionContextMenu : public QMenu
 {
 public:
 
@@ -38,7 +42,7 @@ public:
 protected:
 
     /** Dialog class for asking permission prior to removing a public action */
-    class ConfirmRemovePublicActionDialog : public QDialog
+    class CORE_EXPORT ConfirmRemovePublicActionDialog : public QDialog
     {
     public:
 
@@ -57,7 +61,7 @@ protected:
     };
 
     /** Dialog class for editing one ore more actions */
-    class EditActionsDialog : public QDialog
+    class CORE_EXPORT EditActionsDialog : public QDialog
     {
     public:
 

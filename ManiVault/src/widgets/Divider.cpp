@@ -4,6 +4,10 @@
 
 #include "Divider.h"
 
+#include <QFrame>
+#include <QString>
+#include <QWidget>
+
 namespace mv {
 
 namespace gui {

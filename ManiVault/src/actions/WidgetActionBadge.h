@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QObject>
 #include <QColor>
 #include <QPixmap>
@@ -22,7 +24,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class WidgetActionBadge : public QObject
+class CORE_EXPORT WidgetActionBadge : public QObject
 {
     Q_OBJECT
 

@@ -15,7 +15,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class ForegroundTaskHandler final : public AbstractTaskHandler
+class CORE_EXPORT ForegroundTaskHandler final : public AbstractTaskHandler
 {
 public:
 

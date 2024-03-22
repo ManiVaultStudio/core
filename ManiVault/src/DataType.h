@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QString>
 #include <QList>
 
@@ -13,7 +15,7 @@ namespace mv
         class RawData;
     }
 
-    class DataType
+    class CORE_EXPORT DataType
     {
     public:
         DataType() = delete;

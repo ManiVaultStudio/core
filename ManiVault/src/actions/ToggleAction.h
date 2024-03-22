@@ -18,7 +18,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class ToggleAction : public WidgetAction
+class CORE_EXPORT ToggleAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -45,7 +45,7 @@ public:
 public:
 
     /** Check box widget class for toggle action */
-    class CheckBoxWidget : public QCheckBox
+    class CORE_EXPORT CheckBoxWidget : public QCheckBox
     {
     protected:
 
@@ -70,7 +70,7 @@ public:
     };
 
     /** Push button widget class for toggle action */
-    class PushButtonWidget : public QPushButton
+    class CORE_EXPORT PushButtonWidget : public QPushButton
     {
     protected:
 

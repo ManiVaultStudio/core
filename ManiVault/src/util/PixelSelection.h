@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QMap>
 #include <QAbstractListModel>
 
@@ -45,7 +47,7 @@ static const QMap<PixelSelectionType, QString> pixelSelectionTypes = {
  * Get pixel selection type name from enum
  * @param pixelSelectionType Pixel selection type
  */
-static QString getPixelSelectionTypeName(const PixelSelectionType& pixelSelectionType) {
+CORE_EXPORT inline QString getPixelSelectionTypeName(const PixelSelectionType& pixelSelectionType) {
     return pixelSelectionTypes.value(pixelSelectionType);
 }
 
@@ -53,7 +55,7 @@ static QString getPixelSelectionTypeName(const PixelSelectionType& pixelSelectio
  * Get pixel selection type enum from name
  * @param pixelSelectionTypeName Name of the pixel selection type
  */
-static PixelSelectionType getPixelSelectionTypeEnum(const QString& pixelSelectionTypeName) {
+CORE_EXPORT inline PixelSelectionType getPixelSelectionTypeEnum(const QString& pixelSelectionTypeName) {
     return pixelSelectionTypes.key(pixelSelectionTypeName);
 }
 
@@ -76,7 +78,7 @@ static const QMap<PixelSelectionModifierType, QString> pixelSelectionModifiers =
  * Get pixel selection modifier type name
  * @param pixelSelectionModifierType Pixel selection modifier type
  */
-static QString getPixelSelectionModifierTypeName(const PixelSelectionModifierType& pixelSelectionModifierType) {
+CORE_EXPORT inline QString getPixelSelectionModifierTypeName(const PixelSelectionModifierType& pixelSelectionModifierType) {
     return pixelSelectionModifiers.value(pixelSelectionModifierType);
 }
 
@@ -84,7 +86,7 @@ static QString getPixelSelectionModifierTypeName(const PixelSelectionModifierTyp
  * Get pixel selection modifier type enum from name
  * @param pixelSelectionModifierTypeName Name of the pixel selection type
  */
-static PixelSelectionModifierType getPixelSelectionModifierTypeEnum(const QString& pixelSelectionModifierTypeName) {
+CORE_EXPORT inline PixelSelectionModifierType getPixelSelectionModifierTypeEnum(const QString& pixelSelectionModifierTypeName) {
     return pixelSelectionModifiers.key(pixelSelectionModifierTypeName);
 }
 
@@ -92,14 +94,14 @@ static PixelSelectionModifierType getPixelSelectionModifierTypeEnum(const QStrin
  * Get the icon for the specified selection type
  * @param selectionType The type of selection e.g. brush rectangle etc.
  */
-QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType);
+CORE_EXPORT QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType);
 
 /**
  * Pixel selection type model class
  *
  * @author Thomas Kroes
  */
-class PixelSelectionTypeModel : public QAbstractListModel {
+class CORE_EXPORT PixelSelectionTypeModel : public QAbstractListModel {
 public:
     
     /**

@@ -45,7 +45,7 @@ public:
     };
 
     /** Widget class for editing the rectangle action */
-    class EditWidget : public WidgetActionWidget
+    class CORE_EXPORT EditWidget : public WidgetActionWidget
     {
     protected:
 

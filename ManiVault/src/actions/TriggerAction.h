@@ -17,7 +17,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class TriggerAction : public WidgetAction
+class CORE_EXPORT TriggerAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -37,7 +37,7 @@ public:
 public:
 
     /** Push button widget class for trigger action */
-    class PushButtonWidget : public QPushButton {
+    class CORE_EXPORT PushButtonWidget : public QPushButton {
     protected:
 
         /**

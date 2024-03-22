@@ -34,7 +34,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class PresetsAction final : public WidgetAction
+class CORE_EXPORT PresetsAction final : public WidgetAction
 {
     Q_OBJECT
 
@@ -50,7 +50,7 @@ public:
     static QMap<Column, QPair<QString, QString>> columnInfo;
 
     /** Filter model for presets model */
-    class FilterModel : public QSortFilterProxyModel
+    class CORE_EXPORT FilterModel : public QSortFilterProxyModel
     {
     public:
 
@@ -77,7 +77,7 @@ public:
     };
 
     /** Dialog for choosing a preset name */
-    class ChoosePresetNameDialog final : public QDialog
+    class CORE_EXPORT ChoosePresetNameDialog final : public QDialog
     {
     protected:
 
@@ -114,7 +114,7 @@ public:
     };
 
     /** Dialog for managing presets */
-    class ManagePresetsDialog final : public QDialog
+    class CORE_EXPORT ManagePresetsDialog final : public QDialog
     {
     protected:
 

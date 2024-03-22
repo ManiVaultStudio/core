@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QMessageBox>
 #include <QDebug>
 
@@ -17,7 +19,7 @@ namespace mv::util {
  * @param reason Reason for the exception
  * @param parent Pointer to parent widget
  */
-static void exceptionMessageBox(const QString& title, const QString& reason, QWidget* parent = nullptr)
+CORE_EXPORT inline void exceptionMessageBox(const QString& title, const QString& reason, QWidget* parent = nullptr)
 {
     QMessageBox::critical(parent, title, reason);
 
@@ -29,7 +31,7 @@ static void exceptionMessageBox(const QString& title, const QString& reason, QWi
  * @param title Message box title
  * @param parent Pointer to parent widget
  */
-static void exceptionMessageBox(const QString& title, QWidget* parent = nullptr)
+CORE_EXPORT inline void exceptionMessageBox(const QString& title, QWidget* parent = nullptr)
 {
     exceptionMessageBox(title, "An unhandled error occurred.", parent);
 }
@@ -40,7 +42,7 @@ static void exceptionMessageBox(const QString& title, QWidget* parent = nullptr)
  * @param exception Reference to exception
  * @param parent Pointer to parent widget
  */
-static void exceptionMessageBox(const QString& title, const std::exception& exception, QWidget* parent = nullptr)
+CORE_EXPORT inline void exceptionMessageBox(const QString& title, const std::exception& exception, QWidget* parent = nullptr)
 {
     exceptionMessageBox(title, exception.what(), parent);
 }

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QString>
 #include <QVector>
 #include <QWidget>
@@ -22,21 +24,21 @@ namespace mv::util
  * @param count Integer count
  * @return Human readable string of an integer count
  */
-QString getIntegerCountHumanReadable(const float& count);
+CORE_EXPORT QString getIntegerCountHumanReadable(const float& count);
 
 /**
  * Returns a human readable string of a byte count
  * @param noBytes Number of bytes
  * @return Human readable string of a byte count
  */
-QString getNoBytesHumanReadable(float noBytes);
+CORE_EXPORT QString getNoBytesHumanReadable(float noBytes);
 
 /**
  * Sort action based on their text
  * @param actions Actions to sort
  */
 template<typename ActionType>
-void sortActions(QVector<QPointer<ActionType>>& actions)
+inline void sortActions(QVector<QPointer<ActionType>>& actions)
 {
     std::sort(actions.begin(), actions.end(), [](auto actionA, auto actionB) {
         return actionA->text() < actionB->text();
@@ -49,7 +51,7 @@ void sortActions(QVector<QPointer<ActionType>>& actions)
  * @return Pointer to parent widget of type \p WidgetClass, otherwise a nullptr
  */
 template <class WidgetClass>
-WidgetClass* findParent(const QWidget* widget)
+inline WidgetClass* findParent(const QWidget* widget)
 {
     auto parentWidget = widget->parentWidget();
 
@@ -72,7 +74,7 @@ WidgetClass* findParent(const QWidget* widget)
  * @param tabIndex Number of tabs to prefix with
  * @return Message indented with tabs
  */
-inline QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex) {
+CORE_EXPORT inline QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex) {
     static const std::uint32_t tabSize = 4;
 
     QString indentation;

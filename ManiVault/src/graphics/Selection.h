@@ -4,11 +4,13 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Vector2f.h"
 
 namespace mv
 {
-    class Selection
+    class CORE_EXPORT Selection
     {
     public:
         // C++ Rule of Zero: Implicitly defined destructor and copy member functions are fine for this class.

@@ -18,7 +18,7 @@ namespace mv::gui
  *
  * @author Thomas Kroes
  */
-class ParametersSettingsAction final : public GlobalSettingsGroupAction
+class CORE_EXPORT ParametersSettingsAction final : public GlobalSettingsGroupAction
 {
 public:
 

@@ -16,7 +16,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class ApplicationStartupTask final : public Task
+class CORE_EXPORT ApplicationStartupTask final : public Task
 {
     Q_OBJECT
 

@@ -24,7 +24,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class DirectoryPickerAction : public WidgetAction
+class CORE_EXPORT DirectoryPickerAction : public WidgetAction
 {
     Q_OBJECT
 

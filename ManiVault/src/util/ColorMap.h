@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QImage>
 
 namespace mv {
@@ -15,7 +17,7 @@ namespace util {
  *
  * @author Thomas Kroes
  */
-class ColorMap
+class CORE_EXPORT ColorMap
 {
 
 public: // Enumerations

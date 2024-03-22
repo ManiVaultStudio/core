@@ -23,7 +23,7 @@ class QMenu;
 namespace mv::plugin
 {
 
-class Plugin : public mv::gui::WidgetAction
+class CORE_EXPORT Plugin : public mv::gui::WidgetAction
 {
 public:
 

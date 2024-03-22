@@ -23,12 +23,12 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class ModalTaskHandler final : public AbstractTaskHandler
+class CORE_EXPORT ModalTaskHandler final : public AbstractTaskHandler
 {
 protected:
 
     /** Dialog for interaction with modal tasks */
-    class ModalTasksDialog final : public QDialog {
+    class CORE_EXPORT ModalTasksDialog final : public QDialog {
     public:
 
         /**

@@ -39,7 +39,7 @@ class DataHierarchyItem;
  * Dataset implementation class
  * Base dataset class from which concrete dataset classes derive
   */
-class DatasetImpl : public gui::WidgetAction
+class CORE_EXPORT DatasetImpl : public gui::WidgetAction
 {
 public:
 

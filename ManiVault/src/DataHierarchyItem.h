@@ -29,7 +29,7 @@ using DataHierarchyItems = QVector<DataHierarchyItem*>;
  *
  * @author Thomas Kroes
  */
-class DataHierarchyItem final : public gui::WidgetAction
+class CORE_EXPORT DataHierarchyItem final : public gui::WidgetAction
 {
     Q_OBJECT
 

@@ -18,7 +18,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class GroupAction : public WidgetAction
+class CORE_EXPORT GroupAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -50,7 +50,7 @@ public:
 public: // Widgets
 
     /** Widget class for arranging the groups actions vertically */
-    class VerticalWidget : public WidgetActionWidget
+    class CORE_EXPORT VerticalWidget : public WidgetActionWidget
     {
     protected:
 
@@ -73,7 +73,7 @@ public: // Widgets
     };
 
     /** Widget class for arranging the groups actions horizontally */
-    class HorizontalWidget : public WidgetActionWidget
+    class CORE_EXPORT HorizontalWidget : public WidgetActionWidget
     {
     protected:
 

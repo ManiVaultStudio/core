@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PluginFactoriesFilterModel.h"
-#include "AbstractPluginFactoriesModel.h"
 
 #include <QDebug>
 
@@ -12,8 +11,6 @@
 #endif
 
 namespace mv {
-
-using namespace gui;
 
 PluginFactoriesFilterModel::PluginFactoriesFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent)

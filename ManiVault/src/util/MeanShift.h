@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "DensityComputation.h"
 
 #include "../graphics/Framebuffer.h"
@@ -16,7 +18,7 @@
 namespace mv
 {
 
-class MeanShift : protected QOpenGLFunctions_3_3_Core
+class CORE_EXPORT MeanShift : protected QOpenGLFunctions_3_3_Core
 {
 public:
     MeanShift() : _sigma(0.15f), _needsDensityMapUpdate(true), _quad(0) { }
@@ -49,7 +51,7 @@ private:
     Texture2D _gradientTexture;
     Texture2D _meanshiftTexture;
 
-    const std::vector<Vector2f>* _points;
+    const std::vector<Vector2f>* _points = nullptr;
     QRectF _bounds = QRectF(-1, 1, 2, 2);
     GLuint _quad;
 

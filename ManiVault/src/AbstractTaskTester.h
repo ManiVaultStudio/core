@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Task.h"
 
 #include <QObject>
@@ -12,7 +14,7 @@
 namespace mv
 {
 
-class AbstractTaskTester : public QObject
+class CORE_EXPORT AbstractTaskTester : public QObject
 {
     Q_OBJECT
 

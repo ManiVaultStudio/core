@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "util/WidgetOverlayer.h"
 
 #include <QWidget>
@@ -16,7 +18,7 @@
 namespace mv::gui
 {
 
-class FlowLayout : public QLayout
+class CORE_EXPORT FlowLayout : public QLayout
 {
 public:
     FlowLayout(QWidget* parent, int margin = -1, int hSpacing = -1, int vSpacing = -1);

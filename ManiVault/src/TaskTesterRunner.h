@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QObject>
 #include <QThread>
 #include <QDebug>
@@ -11,7 +13,7 @@
 namespace mv
 {
 
-class TaskTesterRunnerPrivate : public  QObject
+class CORE_EXPORT TaskTesterRunnerPrivate : public  QObject
 {
     Q_OBJECT
 
@@ -24,7 +26,7 @@ signals:
     friend class TaskTesterRunner;
 };
 
-class TaskTesterRunner : public TaskTesterRunnerPrivate
+class CORE_EXPORT TaskTesterRunner : public TaskTesterRunnerPrivate
 {
 public:
     using RunFunction = std::function<void(TaskTesterRunner*)>;

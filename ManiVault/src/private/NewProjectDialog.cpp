@@ -4,6 +4,8 @@
 
 #include "NewProjectDialog.h"
 
+#include "StartPageAction.h"
+
 #include <AbstractWorkspaceManager.h>
 
 #include <Application.h>

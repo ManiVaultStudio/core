@@ -29,6 +29,8 @@ set(PLUGIN
 
 set(PLUGIN_MOC_HEADERS
     src/DataHierarchyPlugin.h
+    src/UnhideAction.h
+    src/StatisticsAction.h
 )
 
 set(ACTIONS

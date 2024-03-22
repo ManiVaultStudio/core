@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Preset.h"
 
 #include <QAbstractListModel>
@@ -22,7 +24,7 @@ namespace util {
  *
  * @author Thomas Kroes
  */
-class PresetsModel : public QAbstractListModel
+class CORE_EXPORT PresetsModel : public QAbstractListModel
 {
 public:
 

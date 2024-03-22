@@ -3,9 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ColorMapSettings1DAction.h"
+
 #include "ColorMapAction.h"
 #include "GroupAction.h"
-#include "Application.h"
 
 #include <QVBoxLayout>
 

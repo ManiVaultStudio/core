@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "util/WidgetFader.h"
 #include "widgets/OverlayWidget.h"
 
 #include "WidgetAction.h"
@@ -19,7 +20,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class WidgetActionHighlightWidget final : public OverlayWidget
+class CORE_EXPORT WidgetActionHighlightWidget final : public OverlayWidget
 {
 public:
 

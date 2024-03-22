@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "textdata_export.h"
+
 #include <RawData.h>
 #include <Set.h>
 
@@ -23,7 +25,7 @@ const mv::DataType TextType = mv::DataType(QString("Text"));
 // Raw Data
 // =============================================================================
 
-class TextData : public mv::plugin::RawData
+class TEXTDATA_EXPORT TextData : public mv::plugin::RawData
 {
 public:
     TextData(PluginFactory* factory) : mv::plugin::RawData(factory, TextType) { }
@@ -42,7 +44,7 @@ private:
     std::vector<QString> _data;
 };
 
-class Text : public DatasetImpl
+class TEXTDATA_EXPORT Text : public DatasetImpl
 {
 public:
     Text(QString dataName, bool mayUnderive = true, const QString& guid = "") :

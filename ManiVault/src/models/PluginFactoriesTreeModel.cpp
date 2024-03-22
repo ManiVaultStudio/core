@@ -5,6 +5,7 @@
 #include "PluginFactoriesTreeModel.h"
 
 #include "AbstractPluginManager.h"
+#include "CoreInterface.h"
 
 using namespace mv;
 

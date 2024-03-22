@@ -24,7 +24,7 @@ namespace mv::gui {
 namespace mv::plugin
 {
 
-class ViewPlugin : public Plugin
+class CORE_EXPORT ViewPlugin : public Plugin
 {
     Q_OBJECT
 
@@ -180,7 +180,7 @@ private:
     Task*                   _progressTask;              /** When set and running, a thin progress bar will be displayed on top of the view plugin dock widget */
 };
 
-class ViewPluginFactory : public PluginFactory
+class CORE_EXPORT ViewPluginFactory : public PluginFactory
 {
     Q_OBJECT
 

@@ -4,6 +4,8 @@
 
 #include "LoggingStatusBarAction.h"
 
+#include "CoreInterface.h"
+
 #ifdef _DEBUG
     #define LOGGING_STATUS_BAR_ACTION_VERBOSE
 #endif

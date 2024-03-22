@@ -6,7 +6,6 @@
 
 #include "Plugin.h"
 
-#include "DataHierarchyItem.h"
 #include "Set.h"
 
 namespace mv
@@ -20,7 +19,7 @@ namespace plugin
  *
  * @author T. Kroes
  */
-class TransformationPlugin : public Plugin
+class CORE_EXPORT TransformationPlugin : public Plugin
 {
 public:
 
@@ -72,7 +71,7 @@ private:
  *
  * @author T. Kroes
  */
-class TransformationPluginFactory : public PluginFactory
+class CORE_EXPORT TransformationPluginFactory : public PluginFactory
 {
     Q_OBJECT
     

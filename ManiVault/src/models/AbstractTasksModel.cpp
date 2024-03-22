@@ -476,25 +476,6 @@ QVariant AbstractTasksModel::KillItem::data(int role /*= Qt::UserRole + 1*/) con
     return Item::data(role);
 }
 
-AbstractTasksModel::Row::Row(Task* task) :
-    QList<QStandardItem*>()
-{
-    append(new NameItem(task));
-    append(new EnabledItem(task));
-    append(new VisibleItem(task));
-    append(new ProgressItem(task));
-    append(new ProgressDescriptionItem(task));
-    append(new ProgressTextItem(task));
-    append(new StatusItem(task));
-    append(new ProgressModeItem(task));
-    append(new IdItem(task));
-    append(new ParentIdItem(task));
-    append(new TypeItem(task));
-    append(new GuiScopesItem(task));
-    append(new MayKillItem(task));
-    append(new KillItem(task));
-}
-
 QMap<AbstractTasksModel::Column, AbstractTasksModel::ColumHeaderInfo> AbstractTasksModel::columnInfo = QMap<AbstractTasksModel::Column, AbstractTasksModel::ColumHeaderInfo>({
     { AbstractTasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
     { AbstractTasksModel::Column::Enabled, { "" , "Enabled", "Whether the task is enabled or not" } },

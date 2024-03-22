@@ -17,7 +17,7 @@ class DataHierarchyItem;
  *
  * @author Thomas Kroes
  */
-class DataHierarchyListModel final : public AbstractDataHierarchyModel
+class CORE_EXPORT DataHierarchyListModel final : public AbstractDataHierarchyModel
 {
     Q_OBJECT
 

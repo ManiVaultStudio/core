@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QTreeWidget>
 #include <QPushButton>
 #include <QLabel>
@@ -23,7 +25,7 @@ class GroupWidgetTreeItem;
  *
  * @author Thomas Kroes
  */
-class GroupSectionTreeItem : public QTreeWidgetItem
+class CORE_EXPORT GroupSectionTreeItem : public QTreeWidgetItem
 {
 public:
 
@@ -34,7 +36,7 @@ public:
      *
      * @author Thomas Kroes
      */
-    class PushButton : public QPushButton {
+    class CORE_EXPORT PushButton : public QPushButton {
     public:
 
         /**

@@ -19,8 +19,6 @@
  */
 class CLUSTERDATA_EXPORT ClustersModel : public QAbstractListModel
 {
-    Q_OBJECT
-
 public:
 
     /** Columns */

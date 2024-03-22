@@ -4,19 +4,14 @@
 
 #pragma once
 
-#include "ManiVaultGlobals.h"
+#include <QtCore/QtGlobal>
 
-#include <QString>
-
-namespace mv
-{
-namespace util
-{
-
-CORE_EXPORT QString loadFileContents(const QString& path);
-
-CORE_EXPORT bool showFileInFolder(const QString& path);
-
-}
-
-}
+#ifndef MV_STATIC
+#ifdef MV_SHARED_EXPORT
+#define CORE_EXPORT Q_DECL_EXPORT
+#else
+#define CORE_EXPORT Q_DECL_IMPORT
+#endif
+#else
+#define CORE_EXPORT
+#endif

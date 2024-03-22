@@ -25,7 +25,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class AbstractActionsManager : public AbstractManager
+class CORE_EXPORT AbstractActionsManager : public AbstractManager
 {
     Q_OBJECT
 
@@ -81,7 +81,7 @@ public:
      * @param action Pointer to action
      */
     template<typename ActionType>
-    void addAction(ActionType* action) {
+    inline void addAction(ActionType* action) {
         try
         {
             Q_ASSERT(action != nullptr);
@@ -125,7 +125,7 @@ public:
      * @param action Pointer to action
      */
     template<typename ActionType>
-    void removeAction(ActionType* action) {
+    inline void removeAction(ActionType* action) {
         
         try
         {

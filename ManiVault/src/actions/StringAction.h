@@ -22,7 +22,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class StringAction : public WidgetAction
+class CORE_EXPORT StringAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -40,7 +40,7 @@ public:
 public:
 
     /** Label widget class for string action */
-    class LabelWidget : public QLabel
+    class CORE_EXPORT LabelWidget : public QLabel
     {
     protected:
 
@@ -70,7 +70,7 @@ public:
     };
 
     /** Line edit widget class for string action */
-    class LineEditWidget : public QLineEdit
+    class CORE_EXPORT LineEditWidget : public QLineEdit
     {
     protected:
 
@@ -88,7 +88,7 @@ public:
     };
 
     /** Text edit widget class for multi-line strings */
-    class TextEditWidget : public QTextEdit
+    class CORE_EXPORT TextEditWidget : public QTextEdit
     {
     protected:
 

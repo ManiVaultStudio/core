@@ -24,7 +24,7 @@ class WidgetAction;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionCollapsedWidget : public WidgetActionViewWidget
+class CORE_EXPORT WidgetActionCollapsedWidget : public WidgetActionViewWidget
 {
 public:
 

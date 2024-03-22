@@ -3,8 +3,10 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StartPageActionsWidget.h"
+
+#include "StartPageAction.h"
 #include "StartPageActionDelegate.h"
-#include "StartPageWidget.h"
+#include "StartPageContentWidget.h"
 
 #include <Application.h>
 

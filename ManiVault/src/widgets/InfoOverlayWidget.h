@@ -6,6 +6,7 @@
 
 #include "InfoWidget.h"
 
+#include "util/WidgetFader.h"
 #include "util/WidgetOverlayer.h"
 
 #include <QWidget>
@@ -21,7 +22,7 @@ namespace mv::gui
  *  
  * @author Thomas Kroes
  */
-class InfoOverlayWidget : public InfoWidget
+class CORE_EXPORT InfoOverlayWidget : public InfoWidget
 {
 public:
 

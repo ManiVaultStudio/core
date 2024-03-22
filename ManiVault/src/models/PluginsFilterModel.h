@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "actions/ToggleAction.h"
 
 #include <QSortFilterProxyModel>
@@ -17,7 +19,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class PluginsFilterModel : public QSortFilterProxyModel
+class CORE_EXPORT PluginsFilterModel : public QSortFilterProxyModel
 {
 public:
 

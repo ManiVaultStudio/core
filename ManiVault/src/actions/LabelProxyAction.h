@@ -17,7 +17,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class LabelProxyAction : public WidgetAction
+class CORE_EXPORT LabelProxyAction : public WidgetAction
 {
     Q_OBJECT
 

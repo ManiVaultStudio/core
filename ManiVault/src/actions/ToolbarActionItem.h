@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QObject>
 #include <QSize>
 
@@ -18,7 +20,7 @@ class WidgetAction;
  *
  * @author Thomas Kroes
  */
-class ToolbarActionItem final : public QObject
+class CORE_EXPORT ToolbarActionItem final : public QObject
 {
     Q_OBJECT
 

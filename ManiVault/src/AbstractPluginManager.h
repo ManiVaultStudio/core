@@ -30,7 +30,7 @@ namespace plugin {
  *
  * @author Thomas Kroes
  */
-class AbstractPluginManager : public AbstractManager
+class CORE_EXPORT AbstractPluginManager : public AbstractManager
 {
     Q_OBJECT
 
@@ -72,7 +72,7 @@ public: // Plugin creation/destruction
      * @return Pointer of \p PluginType to created plugin, nullptr if creation failed
      */
     template<typename PluginType>
-    PluginType* requestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets())
+    inline PluginType* requestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets())
     {
         return dynamic_cast<PluginType*>(requestPlugin(kind, inputDatasets, outputDatasets));
     }

@@ -17,7 +17,7 @@ class DatasetTask;
  *
  * @author Thomas Kroes
  */
-class DatasetTaskHandler final : public AbstractTaskHandler
+class CORE_EXPORT DatasetTaskHandler final : public AbstractTaskHandler
 {
 public:
 

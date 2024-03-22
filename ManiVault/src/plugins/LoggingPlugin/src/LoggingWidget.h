@@ -21,8 +21,6 @@
  */
 class LoggingWidget : public QWidget
 {
-    Q_OBJECT
-
 public:
 
     /**

@@ -16,7 +16,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class ProjectSerializationTask final : public Task
+class CORE_EXPORT ProjectSerializationTask final : public Task
 {
     Q_OBJECT
 

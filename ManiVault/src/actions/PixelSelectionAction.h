@@ -27,7 +27,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class PixelSelectionAction : public GroupAction
+class CORE_EXPORT PixelSelectionAction : public GroupAction
 {
     Q_OBJECT
 

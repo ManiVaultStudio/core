@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QObject>
 
 namespace mv::gui {
@@ -21,7 +23,7 @@ class Task;
  *
  * @author Thomas Kroes
  */
-class AbstractTaskHandler : public QObject
+class CORE_EXPORT AbstractTaskHandler : public QObject
 {
     Q_OBJECT
 

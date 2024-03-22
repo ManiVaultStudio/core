@@ -19,7 +19,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class ActionsListModel final : public AbstractActionsModel
+class CORE_EXPORT ActionsListModel final : public AbstractActionsModel
 {
     Q_OBJECT
 

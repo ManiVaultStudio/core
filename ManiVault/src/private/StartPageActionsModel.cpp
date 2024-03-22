@@ -4,6 +4,11 @@
 
 #include "StartPageActionsModel.h"
 
+#include "StartPageAction.h"
+
+#include <QList>
+#include <QStandardItem>
+
 #ifdef _DEBUG
     //#define START_PAGE_ACTIONS_MODEL_VERBOSE
 #endif

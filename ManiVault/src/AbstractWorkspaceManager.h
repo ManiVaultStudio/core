@@ -19,7 +19,7 @@ namespace mv
 {
 
 /** Workspace location which consists of a workspace title, file path and location type */
-class WorkspaceLocation final {
+class CORE_EXPORT WorkspaceLocation final {
 public:
 
     /** Enum determining the type of workspace location */
@@ -111,7 +111,7 @@ using WorkspaceLocations = QList<WorkspaceLocation>;
  *
  * @author Thomas Kroes
  */
-class AbstractWorkspaceManager : public AbstractManager
+class CORE_EXPORT AbstractWorkspaceManager : public AbstractManager
 {
     Q_OBJECT
 

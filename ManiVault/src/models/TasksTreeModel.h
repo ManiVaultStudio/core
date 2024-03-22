@@ -16,7 +16,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class TasksTreeModel : public AbstractTasksModel
+class CORE_EXPORT TasksTreeModel : public AbstractTasksModel
 {
     Q_OBJECT
 

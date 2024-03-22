@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "Dataset.h"
 
 #include <QMimeData>
@@ -17,7 +19,7 @@ namespace mv {
  * 
  * @author Thomas Kroes
  */
-class DatasetsMimeData final : public QMimeData
+class CORE_EXPORT DatasetsMimeData final : public QMimeData
 {
 public:
 

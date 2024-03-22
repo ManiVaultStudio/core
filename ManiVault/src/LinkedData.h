@@ -16,7 +16,7 @@ namespace mv
 
 class DatasetImpl;
 
-class SelectionMap : public util::Serializable
+class CORE_EXPORT SelectionMap : public util::Serializable
 {
 public:
 
@@ -84,7 +84,7 @@ private:
     QSize   _targetImageSize;   /** Target image size (when mapping type is image pyramid) */
 };
 
-class LinkedData : public util::Serializable
+class CORE_EXPORT LinkedData : public util::Serializable
 {
 public:
     LinkedData();

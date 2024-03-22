@@ -17,13 +17,13 @@
 namespace mv
 {
 
-class GaussianTexture : public Texture2D
+class CORE_EXPORT GaussianTexture : public Texture2D
 {
 public:
     void generate();
 };
 
-class DensityComputation : protected QOpenGLFunctions_3_3_Core
+class CORE_EXPORT DensityComputation : protected QOpenGLFunctions_3_3_Core
 {
 public:
     DensityComputation();

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QGraphicsItem>
 
 class QGraphicsSceneMouseEvent;
@@ -22,7 +24,7 @@ class ColorMapEditor1DNode;
  *
  * @author Thomas Kroes and Mitchell M. de Boer
  */
-class ColorMapEditor1DNodeGraphicsItem : public QObject, public QGraphicsItem
+class CORE_EXPORT ColorMapEditor1DNodeGraphicsItem : public QObject, public QGraphicsItem
 {
     Q_OBJECT
     Q_INTERFACES(QGraphicsItem)

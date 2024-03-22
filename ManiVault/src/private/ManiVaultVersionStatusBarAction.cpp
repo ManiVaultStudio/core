@@ -3,7 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ManiVaultVersionStatusBarAction.h"
-#include "ManiVaultVersion.h"
+
+#include <Application.h>
+#include <ManiVaultVersion.h>
 
 #ifdef _DEBUG
     #define MANIVAULT_VERSION_STATUS_BAR_ACTION_VERBOSE

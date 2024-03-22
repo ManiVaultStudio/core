@@ -16,7 +16,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class DecimalRectangleAction : public RectangleAction<QRectF, DecimalRangeAction>
+class CORE_EXPORT DecimalRectangleAction : public RectangleAction<QRectF, DecimalRangeAction>
 {
     Q_OBJECT
 

@@ -17,7 +17,7 @@ namespace mv
 namespace plugin
 {
 
-class AnalysisPlugin : public Plugin
+class CORE_EXPORT AnalysisPlugin : public Plugin
 {
 
 public:
@@ -107,7 +107,7 @@ protected:
     Datasets    _output;      /** Output datasets smart pointers */
 };
 
-class AnalysisPluginFactory : public PluginFactory
+class CORE_EXPORT AnalysisPluginFactory : public PluginFactory
 {
     Q_OBJECT
     

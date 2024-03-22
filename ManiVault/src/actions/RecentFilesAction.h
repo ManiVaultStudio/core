@@ -16,7 +16,7 @@
 namespace mv::gui {
 
 /** Recent file utility class (contains file path and date time) */
-class RecentFile final {
+class CORE_EXPORT RecentFile final {
 public:
 
     /**
@@ -62,14 +62,14 @@ using RecentFiles = QList<RecentFile>;
  * 
  * @author Thomas Kroes
  */
-class RecentFilesAction : public WidgetAction
+class CORE_EXPORT RecentFilesAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
     /** Standard item model loading and manipulating the recent file paths */
-    class Model final : public QStandardItemModel {
+    class CORE_EXPORT Model final : public QStandardItemModel {
     public:
 
         /** Model columns */
@@ -123,7 +123,7 @@ public:
         friend class RecentFilesAction;
     };
 
-    class FilterModel : public QSortFilterProxyModel
+    class CORE_EXPORT FilterModel : public QSortFilterProxyModel
     {
     public:
 
@@ -150,7 +150,7 @@ public:
     };
 
     /** Dialog for editing recent file paths */
-    class Dialog : public QDialog
+    class CORE_EXPORT Dialog : public QDialog
     {
     protected:
 
