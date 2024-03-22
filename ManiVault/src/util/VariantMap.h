@@ -14,16 +14,6 @@ namespace mv::util {
 
 namespace mv {
 
-//class _VariantMap : public QMap<QString, Variant> {
-//public:
-//    _VariantMap();
-//    _VariantMap(std::initializer_list<std::pair<QString, QVariant>> list);
-//    _VariantMap(const std::map<QString, QVariant>& other);
-//    _VariantMap(std::map<QString, QVariant>&& other);
-//    _VariantMap(const QVariantMap& other);
-//    _VariantMap(QVariantMap&& other);
-//};
-
 /**
  * TODO
  * 
@@ -45,77 +35,37 @@ public:
 
     std::uint32_t getVersion() const;
 
-    bool contains(const QString& key) const {
-        return _variantMap.contains(key);
-    }
+    bool contains(const QString& key) const;
 
-    QVariantMap::size_type count(const QString& key) const {
-        return _variantMap.count(key);
-    }
+    QVariantMap::size_type count(const QString& key) const;
     
-    QVariantMap::size_type count() const {
-        return _variantMap.count();
-    }
+    QVariantMap::size_type count() const;
 
-    QVariantMap::iterator insert(const QString& key, const QVariant& value) {
-        return _variantMap.insert(key, value);
-    }
+    QVariantMap::iterator insert(const QString& key, const QVariant& value);
 
     //QVariantMap::iterator insert(QVariantMap::const_iterator pos, const QString& key, const QVariant& value) {
     //    return _variantMap.insert(pos, key, value);
     //}
 
-    void insert(const QVariantMap& map) {
-        _variantMap.insert(map);
-    }
+    void insert(const QVariantMap& map);
 
-    void insert(QVariantMap&& map) {
-        _variantMap.insert(map);
-    }
+    void insert(QVariantMap&& map);
 
-    QList<QString> keys() const {
-        return _variantMap.keys();
-    }
+    QList<QString> keys() const;
 
-    QList<QVariant> values() const {
-        QList<QVariant> variantValues;
+    QList<QVariant> values() const;
 
-        for (const auto& value : _variantMap.values())
-            variantValues << value;
+    VariantProxy& operator[](const QString& key);
 
-        return variantValues;
-    }
+    QVariant operator[](const QString& key) const;
 
-    VariantProxy& operator[](const QString& key) {
-        _variantProxy.setKey(key);
+    VariantMap operator=(const VariantMap& other);
 
-        return _variantProxy;
-    }
+    VariantMap operator=(const QVariantMap& variantMap);
 
-    QVariant operator[](const QString& key) const {
-        return VariantProxy(key, const_cast<QVariantMap&>(_variantMap)).get();
-    }
+    operator QVariant () const;
 
-    VariantMap operator=(const VariantMap& other) {
-        _variantMap = other._variantMap;
-
-        return *this;
-    }
-
-    VariantMap operator=(const QVariantMap& variantMap) {
-        for (const auto& key : variantMap.keys())
-            _variantMap[key] = variantMap[key];
-
-        return *this;
-    }
-
-    operator QVariant () const {
-        return converted();
-    }
-
-    operator QVariantMap () const {
-        return getVariantMap();
-    }
+    operator QVariantMap () const;
 
     QVariant toVariant() const;
 

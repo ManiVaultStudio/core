@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "VariantProxy.h"
+#include "VariantMap.h"
 
 #ifdef _DEBUG
     #define VARIANT_PROXY_VERBOSE
@@ -10,15 +11,17 @@
 
 namespace mv {
 
-VariantProxy::VariantProxy(const QString& key, QVariantMap& variantMap) :
+VariantProxy::VariantProxy(const QString& key, QVariantMap* variantMap) :
     _key(key),
     _variantMap(variantMap)
 {
+    Q_ASSERT(_variantMap);
 }
 
-VariantProxy::VariantProxy(QVariantMap& variantMap) :
+VariantProxy::VariantProxy(QVariantMap* variantMap) :
     _variantMap(variantMap)
 {
+    Q_ASSERT(_variantMap);
 }
 
 VariantProxy::VariantProxy(const VariantProxy& other) :
@@ -31,6 +34,62 @@ VariantProxy::VariantProxy(const VariantProxy& other) :
 void VariantProxy::setKey(const QString& key)
 {
     _key = key;
+}
+
+VariantProxy& VariantProxy::operator=(const VariantProxy& rhs)
+{
+    _key        = rhs._key;
+    _variantMap = rhs._variantMap;
+
+    return *this;
+}
+
+VariantProxy VariantProxy::operator=(const VariantMap& rhs)
+{
+    Q_ASSERT(!_variantMap->contains(_key));
+
+    (*_variantMap)[_key] = rhs.toVariant();
+
+    return *this;
+}
+
+VariantProxy VariantProxy::operator=(const QVariant& rhs)
+{
+    Q_ASSERT(!_variantMap->contains(_key));
+
+#ifdef VARIANT_PROXY_VERBOSE
+    qDebug() << __FUNCTION__ << _key;
+#endif
+
+    (*_variantMap)[_key] = rhs;
+
+    return *this;
+}
+
+VariantProxy VariantProxy::operator=(const QVariantList& rhs)
+{
+    Q_ASSERT(!_variantMap->contains(_key));
+
+#ifdef VARIANT_PROXY_VERBOSE
+    qDebug() << __FUNCTION__ << _key;
+#endif
+
+    (*_variantMap)[_key] = rhs;
+
+    return *this;
+}
+
+VariantProxy VariantProxy::operator=(const QVariantMap& rhs)
+{
+    Q_ASSERT(!_variantMap->contains(_key));
+
+#ifdef VARIANT_PROXY_VERBOSE
+    qDebug() << __FUNCTION__ << _key;
+#endif
+
+    (*_variantMap)[_key] = rhs;
+
+    return *this;
 }
 
 }

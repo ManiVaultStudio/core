@@ -35,17 +35,17 @@ protected:
     VariantProxy(const VariantProxy& other);
 
     /**
-     * Initialize with current \p key and reference to \p variantMap
+     * Initialize with current \p key and pointer to \p variantMap
      * @param key Key of the \p QVariant to modify in VariantProxy#_variantMap
-     * @param variantMap Reference to the external \p QVariantMap that we want to modify
+     * @param variantMap Pointer to the external \p QVariantMap that we want to modify
      */
-    VariantProxy(const QString& key, QVariantMap& variantMap);
+    VariantProxy(const QString& key, QVariantMap* variantMap);
 
     /**
-     * Initialize with reference to \p variantMap
-     * @param variantMap Reference to the external \p QVariantMap that we want to modify
+     * Initialize with pointer to \p variantMap
+     * @param variantMap Pointer to the external \p QVariantMap that we want to modify
      */
-    VariantProxy(QVariantMap& variantMap);
+    VariantProxy(QVariantMap* variantMap);
 
     /**
      * Sets current key to \p key
@@ -59,86 +59,41 @@ public:
      * Assign \p rhs ManiVault variant proxy
      * @param rhs Other variant proxy
      */
-    VariantProxy operator=(const VariantProxy& rhs) {
-        _key        = rhs._key;
-        _variantMap = rhs._variantMap;
-
-        return *this;
-    }
+    VariantProxy& operator=(const VariantProxy& rhs);
 
     /**
      * Assign \p rhs ManiVault variant map
      * @param rhs Other variant map
      */
-    VariantProxy operator=(const VariantMap& rhs) {
-        Q_ASSERT(!_variantMap.contains(_key));
-
-        _variantMap[_key] = rhs.toVariant();
-
-        return *this;
-    }
+    VariantProxy operator=(const VariantMap& rhs);
 
     /**
      * Assign \p rhs QVariant
      * @param rhs Other QVariant
      */
-    VariantProxy operator=(const QVariant& rhs) {
-        Q_ASSERT(!_variantMap.contains(_key));
-
-#ifdef VARIANT_PROXY_VERBOSE
-        qDebug() << __FUNCTION__;
-#endif
-
-        _variantMap[_key] = rhs;
-
-        return *this;
-    }
+    VariantProxy operator=(const QVariant& rhs);
 
     /**
      * Assign \p rhs QVariantList
      * @param rhs Other QVariantList
      */
-    VariantProxy operator=(const QVariantList& rhs) {
-        Q_ASSERT(!_variantMap.contains(_key));
-
-        _variantMap[_key] = rhs;
-
-        return *this;
-    }
+    VariantProxy operator=(const QVariantList& rhs);
 
     /**
      * Assign \p rhs QVariantMap
      * @param rhs Other QVariantMap
      */
-    VariantProxy operator=(const QVariantMap& rhs) {
-        Q_ASSERT(!_variantMap.contains(_key));
-
-        _variantMap[_key] = rhs;
-
-        return *this;
-    }
-
-    /**
-     * Assign \p rhs float
-     * @param rhs Other float
-     */
-    //VariantProxy operator =(const float& rhs) {
-    //    Q_ASSERT(!_variantMap.contains(_key));
-
-    //    _variantMap[_key] = rhs;
-
-    //    return *this;
-    //}
+    VariantProxy operator=(const QVariantMap& rhs);
 
 protected:
 
     QVariant get() const {
-        return _variantMap[_key];
+        return (*_variantMap)[_key];
     }
 
 private:
     QString         _key;           /** Key of the \p QVariant to modify in VariantProxy#_variantMap */
-    QVariantMap&    _variantMap;    /** Reference to the external \p QVariantMap that we want to modify */
+    QVariantMap*    _variantMap;    /** Pointer to the external \p QVariantMap that we want to modify */
 
     friend class mv::VariantMap;
 };
