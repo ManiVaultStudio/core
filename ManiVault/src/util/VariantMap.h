@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Variant.h"
+#include "VariantProxy.h"
 
 #include <QVariantMap>
 
@@ -14,15 +14,15 @@ namespace mv::util {
 
 namespace mv {
 
-class _VariantMap : public QMap<QString, Variant> {
-public:
-    _VariantMap();
-    _VariantMap(std::initializer_list<std::pair<QString, QVariant>> list);
-    _VariantMap(const std::map<QString, QVariant>& other);
-    _VariantMap(std::map<QString, QVariant>&& other);
-    _VariantMap(const QVariantMap& other);
-    _VariantMap(QVariantMap&& other);
-};
+//class _VariantMap : public QMap<QString, Variant> {
+//public:
+//    _VariantMap();
+//    _VariantMap(std::initializer_list<std::pair<QString, QVariant>> list);
+//    _VariantMap(const std::map<QString, QVariant>& other);
+//    _VariantMap(std::map<QString, QVariant>&& other);
+//    _VariantMap(const QVariantMap& other);
+//    _VariantMap(QVariantMap&& other);
+//};
 
 /**
  * TODO
@@ -57,20 +57,20 @@ public:
         return _variantMap.count();
     }
 
-    _VariantMap::iterator insert(const QString& key, const QVariant& value) {
+    QVariantMap::iterator insert(const QString& key, const QVariant& value) {
         return _variantMap.insert(key, value);
     }
 
-    _VariantMap::iterator insert(_VariantMap::const_iterator pos, const QString& key, const QVariant& value) {
-        return _variantMap.insert(pos, key, value);
-    }
+    //QVariantMap::iterator insert(QVariantMap::const_iterator pos, const QString& key, const QVariant& value) {
+    //    return _variantMap.insert(pos, key, value);
+    //}
 
     void insert(const QVariantMap& map) {
-        _variantMap.insert(_VariantMap(map));
+        _variantMap.insert(map);
     }
 
     void insert(QVariantMap&& map) {
-        _variantMap.insert(_VariantMap(map));
+        _variantMap.insert(map);
     }
 
     QList<QString> keys() const {
@@ -86,25 +86,23 @@ public:
         return variantValues;
     }
 
-    QVariant& operator [](const QString& key) {
-        Q_ASSERT(key != serializationVersionKey);
+    VariantProxy& operator[](const QString& key) {
+        _variantProxy.setKey(key);
 
-        return _variantMap[key];
+        return _variantProxy;
     }
 
-    QVariant operator [](const QString& key) const {
-        Q_ASSERT(key != serializationVersionKey);
-
-        return _variantMap[key];
+    QVariant operator[](const QString& key) const {
+        return VariantProxy(key, const_cast<QVariantMap&>(_variantMap)).get();
     }
 
-    VariantMap operator =(const VariantMap& other) {
+    VariantMap operator=(const VariantMap& other) {
         _variantMap = other._variantMap;
 
         return *this;
     }
 
-    VariantMap operator =(const QVariantMap& variantMap) {
+    VariantMap operator=(const QVariantMap& variantMap) {
         for (const auto& key : variantMap.keys())
             _variantMap[key] = variantMap[key];
 
@@ -119,6 +117,8 @@ public:
         return getVariantMap();
     }
 
+    QVariant toVariant() const;
+
 protected:
 
     QVariantMap getVariantMap() const;
@@ -132,7 +132,8 @@ private:
 
 private:
     const std::uint32_t     _version{1};    /** Variant map serialization version */
-    _VariantMap             _variantMap;    /** The actual variant map container */
+    QVariantMap             _variantMap;    /** The actual variant map container */
+    VariantProxy            _variantProxy;  /**  */
 
     static const QString serializationVersionKey;
 
