@@ -235,7 +235,7 @@ public: // Hierarchy queries
      * @return Pointer to child action of \p WidgetActionType, otherwise nullptr
      */
     template<typename WidgetActionType = WidgetAction>
-    WidgetActionType* findChildBypath(const QString& path) const {
+    WidgetActionType* findChildByPath(const QString& path) const {
         QMap<QString, WidgetAction*> childrenByPath;
 
         for (auto child : getChildren(true))
