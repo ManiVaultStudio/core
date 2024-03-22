@@ -54,7 +54,7 @@ void ActionsHierarchyModel::addAction(gui::WidgetAction* action)
     if (action == _rootAction)
         appendRow(Row(action));
     else {
-        auto parentAction = action->getParentAction();
+        auto parentAction = action->getParent();
 
         if (parentAction) {
             const auto parentActionIndex = getActionIndex(parentAction);

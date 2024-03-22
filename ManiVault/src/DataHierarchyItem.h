@@ -29,7 +29,7 @@ using DataHierarchyItems = QVector<DataHierarchyItem*>;
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT DataHierarchyItem final : public mv::gui::WidgetAction
+class CORE_EXPORT DataHierarchyItem final : public gui::WidgetAction
 {
     Q_OBJECT
 
@@ -44,73 +44,84 @@ public:
      */
     DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true, bool selected = false);
 
-    /**
-     * Establish whether the data hierarchy item has a parent
-     * @return Boolean determining whether the data hierarchy item has a parent or not
-     */
-    bool hasParent() const;
+public:
 
     /**
-     * Get pointer to parent hierarchy item
-     * @return Pointer to parent hierarchy item if there is a parent otherwise nullptr
+     * Get parent item
+     * @return Pointer to parent item (nullptr if the item has not parent item)
      */
-    DataHierarchyItem* getParent() const;
-
-protected:
+    DataHierarchyItem* getParent() const {
+        return gui::WidgetAction::getParent<DataHierarchyItem>();
+    }
 
     /**
      * Set pointer to parent hierarchy item to \p parent
      * @param parent Pointer to parent hierarchy item (root item if nullptr)
      */
-    void setParent(DataHierarchyItem* parent);
+    void setParent(DataHierarchyItem* parent) {
+        gui::WidgetAction::setParent(parent);
 
-public:
-
-    /**
-     * Walks up the hierarchy onwards from the data hierarchy item and returns all parents
-     * @return Vector of pointers to parent items
-     */
-    DataHierarchyItems getParents() const;
-
-    /**
-     * Determine whether the data hierarchy item is a child of \p dataHierarchyItem
-     * @param dataHierarchyItem Reference to possible parent data hierarchy item
-     * @return Boolean determining if \p dataHierarchyItem is a parent
-     */
-    bool isChildOf(DataHierarchyItem& dataHierarchyItem) const;
-
-    /**
-     * Determine whether the data hierarchy item is a child of one or more \p dataHierarchyItems
-     * @param dataHierarchyItems Vector of possible parent data hierarchy items
-     * @return Boolean determining if it is a child of one or more \p dataHierarchyItems
-     */
-    bool isChildOf(DataHierarchyItems dataHierarchyItems) const;
+        emit parentChanged(getParent());
+    }
 
     /**
      * Get children, possibly \p recursively
-     * @param recursively Get all descendants
-     * @return Vector of pointers to children
+     * @param recursively Get children recursively
+     * @return Vector of pointers to child items
      */
-    DataHierarchyItems getChildren(bool recursively = false) const;
+    gui::WidgetActionsOfType<DataHierarchyItem> getChildren(bool recursively = false) const {
+        return gui::WidgetAction::getChildren<DataHierarchyItem>(recursively);
+    }
 
     /**
-     * Get number of children, possibly \p recursively
+     * Get number of children
      * @param recursively Count recursively
      * @returm Number of children
      */
-    std::uint32_t getNumberOfChildren(bool recursively = false) const;
+    std::uint32_t getNumberOfChildren(bool recursively = false) const {
+        return gui::WidgetAction::getNumberOfChildren<DataHierarchyItem>(recursively);
+    }
 
     /**
      * Establishes whether the item has any children
      * @return Boolean determining whether the item has any children
      */
-    bool hasChildren() const;
+    template<typename WidgetActionType = WidgetAction>
+    bool hasChildren() const {
+        return gui::WidgetAction::hasChildren<DataHierarchyItem>();
+    }
 
     /**
-     * Get the depth of the data hierarchy item
+     * Get the depth of the item w.r.t. its furthest ancestor
      * @return Item depth (root starts at zero)
      */
-    std::int32_t getDepth() const;
+    std::int32_t getDepth() const {
+        return gui::WidgetAction::getDepth<DataHierarchyItem>();
+    }
+
+    /**
+     * Determine whether the item is a child of \p item
+     * @param item Item to check for
+     * @return Boolean determining whether \p item is an ancestor or not
+     */
+    bool isChildOf(DataHierarchyItem* item) const {
+        return getAncestors<DataHierarchyItem>().contains(item);
+    }
+
+    /**
+     * Determine whether the item is a child of one of \p items
+     * @param items Items to check for
+     * @return Boolean determining whether the action is child of one of \p actions or not
+     */
+    bool isChildOf(gui::WidgetActionsOfType<DataHierarchyItem> items) const {
+        for (const auto item : items)
+            if (item != this && gui::WidgetAction::isChildOf<DataHierarchyItem>(item))
+                return true;
+
+        return false;
+    }
+
+public:
 
     /**
      * Set visibility to \p visible possibly \p recursively

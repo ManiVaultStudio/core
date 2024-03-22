@@ -87,51 +87,42 @@ WidgetAction::~WidgetAction()
     actions().removeAction(this);
 }
 
-WidgetAction* WidgetAction::getParentAction() const
+QString WidgetAction::getLocation(bool recompute /*= false*/) const
 {
-    return dynamic_cast<WidgetAction*>(this->parent());
+    if (recompute)
+        const_cast<WidgetAction*>(this)->updateLocation();
+
+    return _location;
 }
 
-WidgetActions WidgetAction::getParentActions() const
+void WidgetAction::updateLocation(bool recursive /*= true*/)
 {
-    WidgetActions parentActions;
+    const auto parentAction = getParent();
+    const auto location     = parentAction ? QString("%1/%2").arg(parentAction->getLocation(), text()) : text();
 
-    auto currentParent = dynamic_cast<WidgetAction*>(parent());
+    if (location == _location)
+        return;
 
-    while (currentParent) {
-        parentActions << currentParent;
+    _location = location;
 
-        currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
-    }
+    emit locationChanged(_location);
 
-    return parentActions;
-}
-
-WidgetActions WidgetAction::getChildren() const
-{
-    WidgetActions children;
-
-    for (auto child : this->children()) {
-        auto childAction = dynamic_cast<WidgetAction*>(child);
-
-        if (childAction)
-            children << childAction;
-    }
-
-    return children;
+    if (recursive)
+        for (const auto& child : getChildren<WidgetAction>())
+            child->updateLocation(recursive);
 }
 
 bool WidgetAction::isRoot() const
 {
-    if (!getParentAction())
+    if (!getParent())
         return true;
 
-    return getParentAction()->getScope() != getScope();
+    return getParent()->getScope() != getScope();
 }
 
 bool WidgetAction::isLeaf() const
 {
-    return getChildren().isEmpty();
+    return getChildren<>().isEmpty();
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
@@ -641,31 +632,6 @@ void WidgetAction::saveToSettings()
 #endif
 
     Application::current()->setSetting(_settingsPrefix, toVariantMap());
-}
-
-QString WidgetAction::getLocation(bool recompute /*= false*/) const
-{
-    if (recompute)
-        const_cast<WidgetAction*>(this)->updateLocation();
-
-    return _location;
-}
-
-void WidgetAction::updateLocation(bool recursive /*= true*/)
-{
-    const auto parentAction = getParentAction();
-    const auto location     = parentAction ? QString("%1/%2").arg(parentAction->getLocation(), text()) : text();
-
-    if (location == _location)
-        return;
-
-    _location = location;
-
-    emit locationChanged(_location);
-
-    if (recursive)
-        for (const auto& child : getChildren())
-            child->updateLocation(recursive);
 }
 
 QSize WidgetAction::getPopupSizeHint() const

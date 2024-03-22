@@ -108,7 +108,7 @@ void PublicActionsModel::addPublicAction(WidgetAction* publicAction)
     qDebug() << __FUNCTION__ << publicAction->text();
 #endif
 
-    auto parentAction = publicAction->getParentAction();
+    auto parentAction = publicAction->getParent();
 
     auto row = Row(publicAction);
 

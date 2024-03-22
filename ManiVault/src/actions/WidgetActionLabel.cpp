@@ -4,6 +4,7 @@
 
 #include "WidgetActionLabel.h"
 #include "WidgetAction.h"
+#include "WidgetActionContextMenu.h"
 #include "Application.h"
 
 #include <QDebug>
@@ -91,10 +92,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (!getAction()->mayPublish(WidgetAction::Gui) && !getAction()->mayConnect(WidgetAction::Gui) && !getAction()->mayDisconnect(WidgetAction::Gui))
                         break;
 
-                    auto contextMenu = getAction()->getContextMenu(this);
-
-                    if (!contextMenu)
-                        break;
+                    auto contextMenu = new WidgetActionContextMenu(this, { getAction() });
 
                     if (contextMenu->actions().isEmpty())
                         return QWidget::eventFilter(target, event);

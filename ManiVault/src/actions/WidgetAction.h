@@ -30,7 +30,11 @@ namespace gui {
 class WidgetActionLabel;
 class WidgetAction;
 
-using WidgetActions = QVector<WidgetAction*>;
+template<typename WidgetActionType>
+using WidgetActionsOfType = QVector<WidgetActionType*>;
+
+using WidgetActions = WidgetActionsOfType<WidgetAction>;
+
 using ConstWidgetActions = QVector<const WidgetAction*>;
 using WidgetConfigurationFunction = std::function<void(WidgetAction*, QWidget*)>;
 
@@ -122,22 +126,180 @@ public:
 public: // Hierarchy queries
 
     /**
-     * Get parent widget action
-     * @return Pointer to parent widget action (if any)
+     * Get parent action of \p WidgetActionType
+     * @return Pointer to parent action (nullptr if not found or if dynamic cast fails)
      */
-    virtual WidgetAction* getParentAction() const final;
+    template<typename WidgetActionType = WidgetAction>
+    WidgetActionType* getParent() const {
+        return dynamic_cast<WidgetActionType*>(parent());
+    }
 
     /**
-     * Get parent widget actions
-     * @return Pointer to parent widget actions
+     * Establish whether the action has a parent
+     * @return Boolean determining whether the action has a parent or not
      */
-    virtual WidgetActions getParentActions() const final;
+    bool hasParent() const {
+        return getParent();
+    }
 
     /**
-     * Get child actions
-     * @return Vector of pointers to child actions
+     * Establish whether the action has a parent of \p WidgetActionType
+     * @return Boolean determining whether the action has a parent of \p WidgetActionType or not
      */
-    virtual WidgetActions getChildren() const final;
+    template<typename WidgetActionType = WidgetAction>
+    bool hasParent() const {
+        return getParent<WidgetActionType>();
+    }
+
+    /**
+     * Get ancestors of \p WidgetActionType
+     * @return Pointers to ancestors of \p WidgetActionType (bottom-up)
+     */
+    template<typename WidgetActionType = WidgetAction>
+    WidgetActionsOfType<WidgetActionType> getAncestors() const {
+        WidgetActionsOfType<WidgetActionType> ancestors;
+
+        auto currentParent = dynamic_cast<WidgetActionType*>(parent());
+
+        while (currentParent) {
+            ancestors << currentParent;
+
+            currentParent = dynamic_cast<WidgetActionType*>(currentParent->parent());
+        }
+
+        return ancestors;
+    }
+
+    /**
+     * Get child actions of \p WidgetActionType, possibly \p recursively
+     * @param recursively Get children recursively
+     * @return Vector of pointers to child actions of \p WidgetActionType
+     */
+    template<typename WidgetActionType = WidgetAction>
+    WidgetActionsOfType<WidgetActionType> getChildren(bool recursively = false) const {
+        WidgetActionsOfType<WidgetActionType> childrenOfType;
+
+        for (auto actionChild : findChildren<QObject*>(recursively ? Qt::FindChildrenRecursively : Qt::FindDirectChildrenOnly))
+            if (auto childOfType = dynamic_cast<WidgetActionType*>(actionChild))
+                childrenOfType << childOfType;
+
+        return childrenOfType;
+    }
+
+    /**
+     * Get child actions of \p WidgetActionType, up until \p maxDepth
+     * @param maxDepth Max depth of included children (fully recursive when -1)
+     * @return Vector of pointers to child actions of \p WidgetActionType
+     */
+    template<typename WidgetActionType = WidgetAction>
+    WidgetActionsOfType<WidgetActionType> getChildren(std::int32_t maxDepth) const {
+        WidgetActionsOfType<WidgetActionType> childrenOfType;
+
+        for (auto childOfType : getChildren<WidgetActionType>(true))
+            if (maxDepth == -1 || childOfType->getDepth() <= maxDepth)
+                childrenOfType << childOfType;
+
+        return childrenOfType;
+    }
+
+    /**
+     * Get number of children of \p WidgetActionType, possibly \p recursively
+     * @param recursively Count recursively
+     * @returm Number of children
+     */
+    template<typename WidgetActionType = WidgetAction>
+    std::uint32_t getNumberOfChildren(bool recursively = false) const {
+        return getChildren<WidgetActionType>(recursively).count();
+    }
+
+    /**
+     * Establishes whether this action has any children of \p WidgetActionType
+     * @return Boolean determining whether the item has any children
+     */
+    template<typename WidgetActionType = WidgetAction>
+    bool hasChildren() const {
+        return getNumberOfChildren<WidgetActionType>() > 0;
+    }
+
+    /**
+     * Get the depth of the action w.r.t. its furthest ancestor of \p WidgetActionType
+     * @return Item depth (root starts at zero)
+     */
+    template<typename WidgetActionType = WidgetAction>
+    std::int32_t getDepth() const {
+        return getAncestors<WidgetActionType>().count();
+    }
+
+    /**
+     * Find child of \p WidgetActionType by \p path
+     * @return Pointer to child action of \p WidgetActionType, otherwise nullptr
+     */
+    template<typename WidgetActionType = WidgetAction>
+    WidgetActionType* findChildBypath(const QString& path) const {
+        QMap<QString, WidgetAction*> childrenByPath;
+
+        for (auto child : getChildren(true))
+            childrenByPath[child->getLocation()] = child;
+
+        const auto prefixedPath = QString("%1/%2").arg(text(), path);
+
+        if (childrenByPath.contains(prefixedPath))
+            return childrenByPath[prefixedPath];
+
+        return nullptr;
+    }
+
+    /**
+     * Determine whether this action is a child of \p action of \p WidgetActionType
+     * @param action Action to check for
+     * @return Boolean determining whether \p action is an ancestor or not
+     */
+    template<typename WidgetActionType = WidgetAction>
+    bool isChildOf(WidgetAction* action) const {
+        return getAncestors<WidgetActionType>().contains(action);
+    }
+
+    /**
+     * Determine whether this action is a child of \p actions of \p WidgetActionType
+     * @param actions Actions to check for
+     * @return Boolean determining whether this action is child of one of \p actions or not
+     */
+    template<typename WidgetActionType = WidgetAction>
+    bool isChildOf(WidgetActions actions) const {
+        for (auto action : actions)
+            if (action != this && isChildOf<WidgetActionType>(action))
+                return true;
+
+        return false;
+    }
+
+public: // Location
+
+    /**
+     * Get location and possibly \p recompute it
+     * @param recompute Whether to re-compute the location
+     * @return Path relative to the top-level action
+     */
+    virtual QString getLocation(bool recompute = false) const;
+
+private: // Location
+
+    /**
+     * Compute the location of the action and update the cached location if it changed
+     * @param recursive Whether to also update child actions recursively
+     */
+    virtual void updateLocation(bool recursive = true) final;
+
+public:
+
+    /** Print the paths of children of \p WidgetActionType */
+    template<typename WidgetActionType = WidgetAction>
+    void printChildren(std::int32_t maxDepth = -1) const {
+        for (auto child : getChildren<WidgetActionType>(maxDepth))
+            qDebug() << child->getLocation();
+    }
+
+public:
 
     /**
      * Establish whether this action is positioned at the top of the hierarchy
@@ -298,23 +460,6 @@ public: // Text
      * @param text Text to set
      */
     void setText(const QString& text);
-
-public: // Location
-
-    /**
-     * Get location and possibly \p recompute it
-     * @param recompute Whether to re-compute the location
-     * @return Path relative to the top-level action
-     */
-    virtual QString getLocation(bool recompute = false) const;
-
-private: // Location
-
-    /**
-     * Compute the location of the action and update the cached location if it changed
-     * @param recursive Whether to also update child actions recursively
-     */
-    virtual void updateLocation(bool recursive = true) final;
 
 public: // Widget flags
 

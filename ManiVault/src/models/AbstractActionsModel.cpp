@@ -468,10 +468,10 @@ QVariant AbstractActionsModel::ParentActionIdItem::data(int role /*= Qt::UserRol
 {
     switch (role) {
         case Qt::EditRole:
-            return getAction()->getParentAction() ? getAction()->getParentAction()->getId() : "";
+            return getAction()->hasParent() ? getAction()->getParent()->getId() : "";
 
         case Qt::DisplayRole:
-            return getAction()->getParentAction() ? getAction()->getParentAction()->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked()) : "";
+            return getAction()->hasParent() ? getAction()->getParent()->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked()) : "";
 
         case Qt::ToolTipRole:
             return QString("Parent parameter globally unique identifier: %1").arg(data(Qt::DisplayRole).toString());
