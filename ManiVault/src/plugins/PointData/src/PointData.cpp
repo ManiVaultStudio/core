@@ -151,11 +151,11 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
     const auto data                 = variantMap["Data"].toMap();
     const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-    const auto numberOfDimensions   =variantMap["NumberOfDimensions"].toUInt();
+    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toUInt();
     const auto numberOfElements     = numberOfPoints * numberOfDimensions;
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
-    const bool isDense              = data["Dense"].toBool();
+    const bool isDense              = variantMap["Dense"].toBool();
 
     _isDense = isDense;
 
