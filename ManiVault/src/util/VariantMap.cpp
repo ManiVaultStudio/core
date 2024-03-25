@@ -15,48 +15,26 @@ const QString VariantMap::serializationVersionKey = "SerializationVersion";
 VariantMap::VariantMap() :
     _version(),
     _variantMap(),
-    _variantProxy(&_variantMap)
+    _variantProxy(this)
 {
     initialize();
+}
+
+VariantMap::VariantMap(const QVariantMap& variantMap) :
+    _version(),
+    _variantMap(variantMap),
+    _variantProxy(this)
+{
 }
 
 VariantMap::VariantMap(std::initializer_list<std::pair<QString, QVariant>> list) :
     _version(),
-    _variantMap(list),
-    _variantProxy(&_variantMap)
+    _variantMap(),
+    _variantProxy(this)
 {
-    initialize();
-}
+    for (const auto& [key, value] : list)
+        (*this)[key] = value;
 
-VariantMap::VariantMap(const std::map<QString, QVariant>& other) :
-    _version(),
-    _variantMap(other),
-    _variantProxy(&_variantMap)
-{
-    initialize();
-}
-
-VariantMap::VariantMap(std::map<QString, QVariant>&& other) :
-    _version(),
-    _variantMap(other),
-    _variantProxy(&_variantMap)
-{
-    initialize();
-}
-
-VariantMap::VariantMap(const QVariantMap& other) :
-    _version(),
-    _variantMap(other),
-    _variantProxy(&_variantMap)
-{
-    initialize();
-}
-
-VariantMap::VariantMap(QVariantMap&& other) :
-    _version(),
-    _variantMap(other),
-    _variantProxy(&_variantMap)
-{
     initialize();
 }
 
@@ -90,11 +68,6 @@ void VariantMap::insert(const QVariantMap& map)
     _variantMap.insert(map);
 }
 
-void VariantMap::insert(QVariantMap&& map)
-{
-    _variantMap.insert(map);
-}
-
 QList<QString> VariantMap::keys() const
 {
     return _variantMap.keys();
@@ -102,12 +75,7 @@ QList<QString> VariantMap::keys() const
 
 QList<QVariant> VariantMap::values() const
 {
-    QList<QVariant> variantValues;
-
-    for (const auto& value : _variantMap.values())
-        variantValues << value;
-
-    return variantValues;
+    return _variantMap.values();
 }
 
 VariantProxy& VariantMap::operator[](const QString& key)
@@ -117,15 +85,15 @@ VariantProxy& VariantMap::operator[](const QString& key)
     return _variantProxy;
 }
 
-
 QVariant VariantMap::operator[](const QString& key) const
 {
-    return VariantProxy(key, const_cast<QVariantMap*>(&_variantMap)).get();
+    return VariantProxy(key, const_cast<VariantMap*>(this)).get();
 }
 
 VariantMap VariantMap::operator=(const VariantMap& other)
 {
-    _variantMap = other._variantMap;
+    _variantMap     = other._variantMap;
+    _variantProxy   = other._variantProxy;
 
     return *this;
 }
@@ -138,14 +106,14 @@ VariantMap VariantMap::operator=(const QVariantMap& variantMap)
     return *this;
 }
 
-QVariantMap VariantMap::getVariantMap() const
+QVariantMap& VariantMap::get()
 {
-    QVariantMap variantMap;
+    return _variantMap;
+}
 
-    for (const auto& key : _variantMap.keys())
-        variantMap[key] = _variantMap[key];
-
-    return variantMap;
+const QVariantMap& VariantMap::get() const
+{
+    return _variantMap;
 }
 
 void VariantMap::initialize()
@@ -153,30 +121,19 @@ void VariantMap::initialize()
     //_variantMap["SerializationVersion"] = QVariant::fromValue(_version);
 }
 
-QVariant VariantMap::converted() const
-{
-    for (const auto& variant : _variantMap.values()) {
-        qDebug() << variant.typeName();
-        if (variant.typeName() == "QStringList")
-            qDebug() << "Found a string list!";
-    }
-
-    return getVariantMap();
-}
-
 QVariant VariantMap::toVariant() const
 {
     return _variantMap;
 }
 
-VariantMap::operator QVariantMap() const
-{
-    return getVariantMap();
-}
-
 VariantMap::operator QVariant() const
 {
-    return converted();
+    return get();
+}
+
+VariantMap::operator QVariantMap() const
+{
+    return get();
 }
 
 }

@@ -11,17 +11,16 @@
 
 namespace mv {
 
-VariantProxy::VariantProxy(const QString& key, QVariantMap* variantMap) :
+VariantProxy::VariantProxy(const QString& key, VariantMap* variantMap) :
     _key(key),
     _variantMap(variantMap)
 {
-    Q_ASSERT(_variantMap);
 }
 
-VariantProxy::VariantProxy(QVariantMap* variantMap) :
+VariantProxy::VariantProxy(VariantMap* variantMap) :
+    _key(),
     _variantMap(variantMap)
 {
-    Q_ASSERT(_variantMap);
 }
 
 VariantProxy::VariantProxy(const VariantProxy& other) :
@@ -46,50 +45,55 @@ VariantProxy& VariantProxy::operator=(const VariantProxy& rhs)
 
 VariantProxy VariantProxy::operator=(const VariantMap& rhs)
 {
-    Q_ASSERT(!_variantMap->contains(_key));
+    Q_ASSERT(!_variantMap->get().contains(_key));
 
-    (*_variantMap)[_key] = rhs.toVariant();
+    _variantMap->get()[_key] = rhs.toVariant();
 
     return *this;
 }
 
 VariantProxy VariantProxy::operator=(const QVariant& rhs)
 {
-    Q_ASSERT(!_variantMap->contains(_key));
+    Q_ASSERT(!_variantMap->get().contains(_key));
 
 #ifdef VARIANT_PROXY_VERBOSE
     qDebug() << __FUNCTION__ << _key;
 #endif
 
-    (*_variantMap)[_key] = rhs;
+    _variantMap->get()[_key] = rhs;
 
     return *this;
 }
 
 VariantProxy VariantProxy::operator=(const QVariantList& rhs)
 {
-    Q_ASSERT(!_variantMap->contains(_key));
+    Q_ASSERT(!_variantMap->get().contains(_key));
 
 #ifdef VARIANT_PROXY_VERBOSE
     qDebug() << __FUNCTION__ << _key;
 #endif
 
-    (*_variantMap)[_key] = rhs;
+    _variantMap->get()[_key] = rhs;
 
     return *this;
 }
 
 VariantProxy VariantProxy::operator=(const QVariantMap& rhs)
 {
-    Q_ASSERT(!_variantMap->contains(_key));
+    Q_ASSERT(!_variantMap->get().contains(_key));
 
 #ifdef VARIANT_PROXY_VERBOSE
     qDebug() << __FUNCTION__ << _key;
 #endif
 
-    (*_variantMap)[_key] = rhs;
+    _variantMap->get()[_key] = rhs;
 
     return *this;
+}
+
+QVariant VariantProxy::get() const
+{
+    return _variantMap->get()[_key];
 }
 
 }

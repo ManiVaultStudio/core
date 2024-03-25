@@ -17,65 +17,55 @@ namespace mv {
 /**
  * TODO
  * 
- * @author Thomas Kroes
+ * @author Thomas Kroes & Jeroen Eggermont
  */
 class VariantMap final
 {
 public:
-
-    
-
-public:
     VariantMap();
+    VariantMap(const QVariantMap& variantMap);
     VariantMap(std::initializer_list<std::pair<QString, QVariant>> list);
-    VariantMap(const std::map<QString, QVariant>& other);
-    VariantMap(std::map<QString, QVariant>&& other);
-    VariantMap(const QVariantMap& other);
-    VariantMap(QVariantMap&& other);
 
     std::uint32_t getVersion() const;
 
     bool contains(const QString& key) const;
 
     QVariantMap::size_type count(const QString& key) const;
-    
     QVariantMap::size_type count() const;
 
+public: // Insertion
+
     QVariantMap::iterator insert(const QString& key, const QVariant& value);
-
-    //QVariantMap::iterator insert(QVariantMap::const_iterator pos, const QString& key, const QVariant& value) {
-    //    return _variantMap.insert(pos, key, value);
-    //}
-
     void insert(const QVariantMap& map);
 
-    void insert(QVariantMap&& map);
+public: // keys, values
 
     QList<QString> keys() const;
-
     QList<QVariant> values() const;
+
+public:
 
     VariantProxy& operator[](const QString& key);
 
     QVariant operator[](const QString& key) const;
 
-    VariantMap operator=(const VariantMap& other);
 
+    VariantMap operator=(const VariantMap& other);
     VariantMap operator=(const QVariantMap& variantMap);
 
-    operator QVariant () const;
+public: // Conversion operators
 
+    operator QVariant () const;
     operator QVariantMap () const;
 
     QVariant toVariant() const;
 
 protected:
 
-    QVariantMap getVariantMap() const;
+    QVariantMap& get();
+    const QVariantMap& get() const;
 
 private:
-
-    QVariant converted() const;
 
     /** Add serialization version etc. */
     void initialize();
@@ -87,6 +77,7 @@ private:
 
     static const QString serializationVersionKey;
 
+    friend class VariantProxy;
     friend class mv::util::Serializable;
 };
 

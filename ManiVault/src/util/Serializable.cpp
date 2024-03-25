@@ -78,7 +78,7 @@ QJsonDocument Serializable::toJsonDocument() const
 {
     QVariantMap variantMap;
 
-    variantMap[getSerializationName()] = const_cast<Serializable*>(this)->toVariantMap(this).getVariantMap();
+    variantMap[getSerializationName()] = const_cast<Serializable*>(this)->toVariantMap(this).get();
 
     return QJsonDocument::fromVariant(variantMap);
 }

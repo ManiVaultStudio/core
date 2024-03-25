@@ -20,9 +20,9 @@ class VariantMap;
  * 
  * This class acts a proxy for modifying QVariant data in a \p QVariantMap located
  * elsewhere. It does not contain the actual QVariant data, it merely uses a key and 
- * a reference to a \p QVariantMap to modify it.
+ * a reference to a ManiVault \p VariantMap to modify it.
  * 
- * @author Thomas Kroes
+ * @author Thomas Kroes & Jeroen Eggermont
  */
 class VariantProxy
 {
@@ -35,21 +35,21 @@ protected:
     VariantProxy(const VariantProxy& other);
 
     /**
-     * Initialize with current \p key and pointer to \p variantMap
+     * Initialize with current \p key and pointer to owning \p variantMap
      * @param key Key of the \p QVariant to modify in VariantProxy#_variantMap
-     * @param variantMap Pointer to the external \p QVariantMap that we want to modify
+     * @param variantMap Pointer to the owning ManiVault VariantMap
      */
-    VariantProxy(const QString& key, QVariantMap* variantMap);
+    VariantProxy(const QString& key, VariantMap* variantMap);
 
     /**
-     * Initialize with pointer to \p variantMap
-     * @param variantMap Pointer to the external \p QVariantMap that we want to modify
+     * Initialize with pointer to owning ManiVault \p variantMap
+     * @param variantMap Pointer to the owning ManiVault VariantMap
      */
-    VariantProxy(QVariantMap* variantMap);
+    VariantProxy(VariantMap* variantMap);
 
     /**
      * Sets current key to \p key
-     * @param key Key of the \p QVariant to modify in VariantProxy#_variantMap
+     * @param key Key of the \p QVariant to modify in VariantMap#_variantMap
      */
     void setKey(const QString& key);
 
@@ -57,13 +57,13 @@ public:
 
     /**
      * Assign \p rhs ManiVault variant proxy
-     * @param rhs Other variant proxy
+     * @param rhs Other ManiVault variant proxy
      */
     VariantProxy& operator=(const VariantProxy& rhs);
 
     /**
      * Assign \p rhs ManiVault variant map
-     * @param rhs Other variant map
+     * @param rhs Other ManiVault variant map
      */
     VariantProxy operator=(const VariantMap& rhs);
 
@@ -87,15 +87,17 @@ public:
 
 protected:
 
-    QVariant get() const {
-        return (*_variantMap)[_key];
-    }
+    /**
+     * Get the proxy as a QVariant
+     * @return Proxy as QVariant
+     */
+    QVariant get() const;
 
 private:
-    QString         _key;           /** Key of the \p QVariant to modify in VariantProxy#_variantMap */
-    QVariantMap*    _variantMap;    /** Pointer to the external \p QVariantMap that we want to modify */
+    QString         _key;           /** Key of the \p QVariant to modify in VariantMap#_variantMap */
+    VariantMap*     _variantMap;    /** Pointer to owning ManiVault variant map */
 
-    friend class mv::VariantMap;
+    friend class VariantMap;
 };
 
 }
