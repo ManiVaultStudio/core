@@ -47,6 +47,18 @@ namespace mv
         void setBottom(float bottom) { _bottom = bottom; }
         void setTop(float top) { _top = top; }
 
+        friend bool operator==(const Bounds& lhs, const Bounds& rhs) {
+            float eps = 0.0001f;
+            return std::abs(lhs.getLeft() - rhs.getLeft()) < eps &&
+                std::abs(lhs.getRight() - rhs.getRight()) < eps &&
+                std::abs(lhs.getBottom() - rhs.getBottom()) < eps &&
+                std::abs(lhs.getTop() - rhs.getTop()) < eps;
+        }
+
+        friend bool operator!=(const Bounds& lhs, const Bounds& rhs) {
+            return !(lhs == rhs);
+        }
+
     private:
         float _left;
         float _right;
