@@ -39,10 +39,20 @@ protected:
     /** Callback when is called when the selected items in the data hierarchy changed */
     void dataHierarchySelectionChanged();
 
+private:
+
+    void beginPopulate();
+    void populate();
+    void endPopulate();
+
 protected:
-    DataPropertiesPlugin*   _dataPropertiesPlugin;          /** Pointer to owning data properties plugin */
-    QVBoxLayout             _layout;                        /** Main layout */
-    DataHierarchyItems      _selectedDataHierarchyItems;    /** Selected data hierarchy items */
-    GroupsAction            _groupsAction;                  /** Groups action */
-    GroupsAction::Widget*   _groupsActionWidget;            /** Pointer to groups action widget (used to change label sizing) */
+    DataPropertiesPlugin*   _dataPropertiesPlugin;      /** Pointer to owning data properties plugin */
+    QVBoxLayout             _layout;                    /** Main layout */
+    QTimer                  _populateTimer;             /** Timer for selectively populating the UI */
+    DataHierarchyItems      _scheduledItems;            /** Items scheduled to be shown */
+    DataHierarchyItems      _currentItems;              /** Items currently shown */
+    bool                    _abortPopulate;             /** Boolean determining whether the UI build process should be terminated */
+    bool                    _isPopulating;              /** Boolean determining whether the UI build process should be terminated */
+    GroupsAction            _groupsAction;              /** Groups action */
+    GroupsAction::Widget*   _groupsActionWidget;        /** Pointer to groups action widget (used to change label sizing) */
 };
