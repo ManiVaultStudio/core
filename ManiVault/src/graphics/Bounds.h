@@ -6,25 +6,25 @@
 
 #include "ManiVaultGlobals.h"
 
-/**
-    Custom bounds class because the QRectF class in Qt should kindly remove itself from the library.
-
-    This bounds class:
-        * Has a bottom-left anchor point.
-        * Does not allow negative sizes
-        * Does not secretly clamp values set by the user
-*/
-
 #include "Vector2f.h"
 
 namespace mv
 {
+    /**
+        Lightweight rectangular bounds class.
+
+        This bounds class:
+            * Has a bottom-left anchor point.
+            * Does not allow negative sizes
+            * Does not secretly clamp values set by the user
+    */
     class CORE_EXPORT Bounds
     {
     public:
         const static Bounds Max;
 
         Bounds();
+        Bounds(const Bounds&);
         Bounds(float left, float right, float bottom, float top);
 
         void setBounds(float left, float right, float bottom, float top);
