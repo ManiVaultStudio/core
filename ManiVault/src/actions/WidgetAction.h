@@ -31,11 +31,11 @@ class WidgetActionLabel;
 class WidgetAction;
 
 template<typename WidgetActionType>
-using WidgetActionsOfType = QVector<WidgetActionType*>;
+using WidgetActionsOfType = QList<WidgetActionType*>;
 
 using WidgetActions = WidgetActionsOfType<WidgetAction>;
 
-using ConstWidgetActions = QVector<const WidgetAction*>;
+using ConstWidgetActions = QList<const WidgetAction*>;
 using WidgetConfigurationFunction = std::function<void(WidgetAction*, QWidget*)>;
 
 /**
