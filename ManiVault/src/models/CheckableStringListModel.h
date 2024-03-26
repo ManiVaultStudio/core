@@ -87,6 +87,15 @@ public:
      */
     StringIndicesList getCheckedIndicesList() const;
 
+    /**
+     * Get header data for \p section, \p orientation and display \p role
+     * @param section Section
+     * @param orientation Orientation
+     * @param role Data role
+     * @return Header
+     */
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
 private:
     StringIndicesSet   _checkedItems;  /** Keeps track of the selected items */
 };

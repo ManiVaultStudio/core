@@ -77,4 +77,26 @@ mv::CheckableStringListModel::StringIndicesList CheckableStringListModel::getChe
     return StringIndicesList(_checkedItems.begin(), _checkedItems.end());
 }
 
+QVariant CheckableStringListModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+{
+    if (section != 0)
+        return {};
+
+    if (orientation != Qt::Horizontal)
+        return {};
+
+    switch (role) {
+        case Qt::DisplayRole:
+            return "String";
+
+        case Qt::ToolTipRole:
+            return "String value";
+
+        default:
+            return {};
+    }
+
+    return {};
+}
+
 }
