@@ -17,6 +17,7 @@
 #include <QLineEdit>
 #include <QCompleter>
 #include <QListView>
+#include <QSortFilterProxyModel>
 
 namespace mv::gui {
 
@@ -170,8 +171,9 @@ public: // Widgets
         ListViewWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags);
 
     protected:
-        OptionsAction*  _optionsAction;     /** Pointer to owning options action */
-        TreeAction      _treeAction;        /** Tree action */
+        OptionsAction*          _optionsAction;     /** Pointer to owning options action */
+        QSortFilterProxyModel   _filterModel;       /** For filtering the options */
+        TreeAction              _treeAction;        /** Tree action */
 
         friend class OptionsAction;
     };

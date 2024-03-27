@@ -97,7 +97,8 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 private:
-    StringIndicesSet   _checkedItems;  /** Keeps track of the selected items */
+    //StringIndicesSet   _checkedItems;  /** Keeps track of the selected items */
+    QList<bool>   _checkedItems;  /** Keeps track of the selected items */
 };
 
 }

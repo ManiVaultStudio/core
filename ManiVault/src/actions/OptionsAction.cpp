@@ -16,6 +16,7 @@
 #include <QListView>
 #include <QMouseEvent>
 #include <QStandardItemModel>
+#include <QTableView>
 
 using namespace mv::util;
 
@@ -355,13 +356,13 @@ bool OptionsAction::ComboBoxWidget::eventFilter(QObject* target, QEvent* event)
 OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags) :
     QWidget(parent),
     _optionsAction(optionsAction),
-    _treeAction(this, "Options")
+    _filterModel(),
+    _treeAction(nullptr, "Options")
 {
-    auto filterModel = new QSortFilterProxyModel(this);
+    _filterModel.setSourceModel(&optionsAction->getOptionsModel());
 
-    filterModel->setSourceModel(&optionsAction->getOptionsModel());
-
-    _treeAction.initialize(&optionsAction->getOptionsModel(), filterModel, "Option");
+    /*
+    _treeAction.initialize(&optionsAction->getOptionsModel(), &_filterModel, "Option");
 
     _treeAction.setWidgetConfigurationFunction([this, widgetFlags](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
@@ -395,12 +396,17 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
 
         treeView->setRootIsDecorated(false);
     });
+    */
 
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    layout->addWidget(_treeAction.createWidget(this));
+    auto listView = new QTableView();
+
+    listView->setModel(&_filterModel);
+
+    layout->addWidget(listView);
 
     setLayout(layout);
 }
