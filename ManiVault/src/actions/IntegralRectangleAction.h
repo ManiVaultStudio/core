@@ -7,6 +7,8 @@
 #include "RectangleAction.h"
 #include "IntegralRangeAction.h"
 
+#include <QRect>
+
 namespace mv::gui {
 
 /**
@@ -28,6 +30,15 @@ public:
      * @param title Title of the action
      */
     Q_INVOKABLE IntegralRectangleAction(QObject* parent, const QString& title);
+
+    /**
+     * Set rectangle to \p rectangle
+     * @param rectangle Rectangle
+     */
+    void setRectangle(const QRect& rectangle)
+    {
+        RectangleAction::setRectangle(rectangle.left(), rectangle.right(), rectangle.bottom(), rectangle.top());
+    }
 
 protected: // Linking
 
