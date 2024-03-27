@@ -7,10 +7,13 @@
 
 namespace mv::gui {
 
-IntegralRectangleAction::IntegralRectangleAction(QObject* parent, const QString& title, const QRect& rectangle /*= QRect()*/) :
-    RectangleAction<QRect, IntegralRangeAction>(parent, title, rectangle)
+IntegralRectangleAction::IntegralRectangleAction(QObject* parent, const QString& title) :
+    RectangleAction<IntegralRangeAction>(parent, title)
 {
-    _rectangleChanged = [this]() -> void { emit rectangleChanged(getRectangle()); };
+    _rectangleChanged = [this]() -> void { emit rectangleChanged(getLeft(), getRight(), getBottom(), getTop()); };
+
+    connect(&getRangeAction(Axis::X), &IntegralRangeAction::rangeChanged, this, [this]() -> void { _rectangleChanged(); });
+    connect(&getRangeAction(Axis::Y), &IntegralRangeAction::rangeChanged, this, [this]() -> void { _rectangleChanged(); });
 }
 
 void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -27,7 +30,7 @@ void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction, 
         actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::Y), &publicIntegralRectangleAction->getRangeAction(Axis::Y), recursive);
     }
 
-    RectangleAction<QRect, IntegralRangeAction>::connectToPublicAction(publicAction, recursive);
+    RectangleAction<IntegralRangeAction>::connectToPublicAction(publicAction, recursive);
 }
 
 void IntegralRectangleAction::disconnectFromPublicAction(bool recursive)
@@ -40,12 +43,12 @@ void IntegralRectangleAction::disconnectFromPublicAction(bool recursive)
         actions().disconnectPrivateActionFromPublicAction(&getRangeAction(Axis::Y), recursive);
     }
 
-    RectangleAction<QRect, IntegralRangeAction>::disconnectFromPublicAction(recursive);
+    RectangleAction<IntegralRangeAction>::disconnectFromPublicAction(recursive);
 }
 
 void IntegralRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    RectangleAction<QRect, IntegralRangeAction>::fromVariantMap(variantMap);
+    RectangleAction<IntegralRangeAction>::fromVariantMap(variantMap);
 
     getRangeAction(Axis::X).fromParentVariantMap(variantMap);
     getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
@@ -53,7 +56,7 @@ void IntegralRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap IntegralRectangleAction::toVariantMap() const
 {
-    auto variantMap = RectangleAction<QRect, IntegralRangeAction>::toVariantMap();
+    auto variantMap = RectangleAction<IntegralRangeAction>::toVariantMap();
 
     getRangeAction(Axis::X).insertIntoVariantMap(variantMap);
     getRangeAction(Axis::Y).insertIntoVariantMap(variantMap);

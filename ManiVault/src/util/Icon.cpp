@@ -35,6 +35,18 @@ QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay)
     return createIcon(pixmap);
 }
 
+CORE_EXPORT QIcon combineIcons(const QIcon& iconA, const QIcon& iconB)
+{
+    auto pixmapA = iconA.pixmap(defaultIconPixmapSizes.first());
+    auto pixmapB = iconB.pixmap(defaultIconPixmapSizes.first());
+
+    QPainter painter(&pixmapA);
+
+    painter.drawPixmap(0, 0, pixmapB);
+
+    return createIcon(pixmapA);
+}
+
 QIcon createPluginIcon(const QString& characters, const QColor& color)
 {
     const auto margin       = 8;

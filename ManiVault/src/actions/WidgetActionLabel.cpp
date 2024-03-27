@@ -50,7 +50,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
     updateNameLabel();
 
     _nameLabel.installEventFilter(this);
-    
+
     updateCustomStyle();
     connect(qApp, &QApplication::paletteChanged, this, &WidgetActionLabel::updateCustomStyle);
 }
@@ -93,6 +93,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                         break;
 
                     auto contextMenu = new WidgetActionContextMenu(this, { getAction() });
+
+                    if (!contextMenu)
+                        contextMenu = new WidgetActionContextMenu(&_nameLabel, { getAction() });
 
                     if (contextMenu->actions().isEmpty())
                         return QWidget::eventFilter(target, event);
