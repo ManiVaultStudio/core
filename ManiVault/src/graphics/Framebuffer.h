@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "ManiVaultGlobals.h"
-
 #include "Texture.h"
 
 #include <QOpenGLFunctions_3_3_Core>
@@ -15,7 +13,7 @@
 
 namespace mv
 {
-    class CORE_EXPORT Framebuffer : protected QOpenGLFunctions_3_3_Core
+    class Framebuffer : protected QOpenGLFunctions_3_3_Core
     {
     public:
         Framebuffer() :

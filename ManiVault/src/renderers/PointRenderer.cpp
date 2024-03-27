@@ -6,8 +6,6 @@
 
 #include <limits>
 
-#include <QDebug>
-
 namespace mv
 {
     namespace gui
@@ -18,7 +16,7 @@ namespace mv
              * Builds an orthographic projection matrix that transforms the given bounds
              * to the range [-1, 1] in both directions.
              */
-            Matrix3f createProjectionMatrix(Bounds bounds)
+            Matrix3f createProjectionMatrix(const Bounds& bounds)
             {
                 Matrix3f m;
                 m.setIdentity();
@@ -284,6 +282,11 @@ namespace mv
             _gpuPoints.setColors(colors);
         }
 
+        PointEffect PointRenderer::getScalarEffect() const
+        {
+            return _pointEffect;
+        }
+
         void PointRenderer::setScalarEffect(const PointEffect effect)
         {
             _pointEffect = effect;
@@ -294,9 +297,19 @@ namespace mv
             _colormap.loadFromImage(image);
         }
 
+        Bounds PointRenderer::getBounds() const
+        {
+            return _bounds;
+        }
+
         void PointRenderer::setBounds(const Bounds& bounds)
         {
             _bounds = bounds;
+        }
+
+        Matrix3f PointRenderer::getProjectionMatrix() const
+        {
+            return _orthoM;
         }
 
         void PointRenderer::setPointSize(const float size)
@@ -314,6 +327,11 @@ namespace mv
         void PointRenderer::setPointScaling(PointScaling scalingMode)
         {
             _pointSettings._scalingMode = scalingMode;
+        }
+
+        const PointSettings& PointRenderer::getPointSettings() const
+        {
+            return _pointSettings;
         }
 
         mv::gui::PointSelectionDisplayMode PointRenderer::getSelectionDisplayMode() const

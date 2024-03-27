@@ -15,7 +15,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QSize>
 
-#include "../graphics/Shader.h"
+#include "graphics/Shader.h"
 
 namespace mv
 {

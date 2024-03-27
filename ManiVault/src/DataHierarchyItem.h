@@ -19,8 +19,21 @@ namespace mv
 
 class DatasetImpl;
 
-/** Vector of data hierarchy item pointers */
-using DataHierarchyItems = QVector<DataHierarchyItem*>;
+/** List of data hierarchy item pointers */
+class DataHierarchyItems : public QList<DataHierarchyItem*> {
+public:
+
+    using QList<DataHierarchyItem*>::QList;
+
+    bool operator==(const DataHierarchyItems& rhs) const
+    {
+        for (auto dataHierarchyItem : *this)
+            if (!rhs.contains(dataHierarchyItem))
+                return false;
+
+        return true;
+    }
+};
 
 /**
  * Data hierarchy item class

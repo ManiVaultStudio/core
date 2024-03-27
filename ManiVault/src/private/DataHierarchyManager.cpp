@@ -121,7 +121,7 @@ DataHierarchyItems DataHierarchyManager::getTopLevelItems()
     return topLevelItems;
 }
 
-mv::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
+DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
 {
     auto children = dataHierarchyItem.getChildren();
 
@@ -129,7 +129,7 @@ mv::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& data
         for (auto child : children)
             children << getChildren(*child, recursive);
 
-    return children;
+    return DataHierarchyItems(children.begin(), children.end());
 }
 
 void DataHierarchyManager::select(DataHierarchyItems items, bool clear /*= true*/)

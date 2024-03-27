@@ -26,6 +26,13 @@ namespace mv
         _top(top)
     { }
 
+    Bounds::Bounds(const Bounds& b) :
+        _left(b._left),
+        _right(b._right),
+        _bottom(b._bottom),
+        _top(b._top)
+    { }
+
     void Bounds::setBounds(float left, float right, float bottom, float top)
     {
         _left = left;
