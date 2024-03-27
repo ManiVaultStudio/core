@@ -35,7 +35,7 @@ QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay)
     return createIcon(pixmap);
 }
 
-CORE_EXPORT QIcon combineIcons(const QIcon& iconA, const QIcon& iconB)
+QIcon combineIcons(const QIcon& iconA, const QIcon& iconB)
 {
     auto pixmapA = iconA.pixmap(defaultIconPixmapSizes.first());
     auto pixmapB = iconB.pixmap(defaultIconPixmapSizes.first());
