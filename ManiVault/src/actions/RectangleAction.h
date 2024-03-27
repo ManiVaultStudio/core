@@ -8,6 +8,8 @@
 #include "HorizontalGroupAction.h"
 #include "NumericalRangeAction.h"
 
+#include "graphics/Bounds.h"
+
 #include <QVBoxLayout>
 
 namespace mv::gui {
@@ -76,13 +78,41 @@ public:
     }
 
     /**
+     * Get bounds
+     * @return Rectangle as bounds
+     */
+    Bounds getBounds() const {
+        return {
+            static_cast<float>(getLeft()),
+            static_cast<float>(getRight()),
+            static_cast<float>(getBottom()),
+            static_cast<float>(getTop())
+        };
+    }
+
+    /**
      * Set rectangle with \p left, \p right, \p bottom and \p top coordinates
      * @param left Left of the rectangle
+     * @param right Right of the rectangle
+     * @param bottom Bottom of the rectangle
+     * @param top Top of the rectangle
      */
     void setRectangle(NumValType left, NumValType right, NumValType bottom, NumValType top) {
 
         getRangeAction(Axis::X).setRange(ValueRange(static_cast<NumValType>(left), static_cast<NumValType>(right)));
         getRangeAction(Axis::Y).setRange(ValueRange(static_cast<NumValType>(bottom), static_cast<NumValType>(top)));
+
+        _rectangleChanged();
+    }
+
+    /**
+     * Set rectangle from \p bounds
+     * @param bounds Rectangle bounds
+     */
+    void setBounds(const Bounds& bounds) {
+
+        getRangeAction(Axis::X).setRange(ValueRange(static_cast<NumValType>(bounds.getLeft()), static_cast<NumValType>(bounds.getRight())));
+        getRangeAction(Axis::Y).setRange(ValueRange(static_cast<NumValType>(bounds.getBottom()), static_cast<NumValType>(bounds.getTop())));
 
         _rectangleChanged();
     }
