@@ -6,25 +6,25 @@
 
 #include "ManiVaultGlobals.h"
 
-/**
-    Custom bounds class because the QRectF class in Qt should kindly remove itself from the library.
-
-    This bounds class:
-        * Has a bottom-left anchor point.
-        * Does not allow negative sizes
-        * Does not secretly clamp values set by the user
-*/
-
 #include "Vector2f.h"
 
 namespace mv
 {
+    /**
+        Lightweight rectangular bounds class.
+
+        This bounds class:
+            * Has a bottom-left anchor point.
+            * Does not allow negative sizes
+            * Does not secretly clamp values set by the user
+    */
     class CORE_EXPORT Bounds
     {
     public:
         const static Bounds Max;
 
         Bounds();
+        Bounds(const Bounds&);
         Bounds(float left, float right, float bottom, float top);
 
         void setBounds(float left, float right, float bottom, float top);
@@ -46,6 +46,18 @@ namespace mv
         void setRight(float right) { _right = right; }
         void setBottom(float bottom) { _bottom = bottom; }
         void setTop(float top) { _top = top; }
+
+        friend bool operator==(const Bounds& lhs, const Bounds& rhs) {
+            float eps = 0.0001f;
+            return std::abs(lhs.getLeft() - rhs.getLeft()) < eps &&
+                std::abs(lhs.getRight() - rhs.getRight()) < eps &&
+                std::abs(lhs.getBottom() - rhs.getBottom()) < eps &&
+                std::abs(lhs.getTop() - rhs.getTop()) < eps;
+        }
+
+        friend bool operator!=(const Bounds& lhs, const Bounds& rhs) {
+            return !(lhs == rhs);
+        }
 
     private:
         float _left;

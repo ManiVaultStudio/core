@@ -6,13 +6,13 @@
 
 #include "Renderer.h"
 
-#include "../graphics/Vector2f.h"
-#include "../graphics/Vector3f.h"
-#include "../graphics/Bounds.h"
-#include "../graphics/Texture.h"
-#include "../graphics/Shader.h"
+#include "graphics/Bounds.h"
+#include "graphics/Shader.h"
+#include "graphics/Texture.h"
+#include "graphics/Vector2f.h"
+#include "graphics/Vector3f.h"
 
-#include "../util/MeanShift.h"
+#include "util/MeanShift.h"
 
 #include <memory>
 

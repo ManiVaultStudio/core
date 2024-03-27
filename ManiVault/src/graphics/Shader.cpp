@@ -4,10 +4,11 @@
 
 #include "Shader.h"
 
-#include "Vector3f.h"
-#include "Matrix3f.h"
-//#include "Util/Matrix4f.h"
-#include "../util/FileUtil.h"
+#include "graphics/Matrix3f.h"
+#include "graphics/Vector3f.h"
+#include "util/FileUtil.h"
+
+//#include "graphics/Matrix4f.h"
 
 #include <QDebug>
 #include <QOpenGLVersionFunctionsFactory>

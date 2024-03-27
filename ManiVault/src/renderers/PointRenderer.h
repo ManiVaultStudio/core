@@ -6,14 +6,12 @@
 
 #include "Renderer.h"
 
-#include "../graphics/BufferObject.h"
-#include "../graphics/Vector2f.h"
-#include "../graphics/Vector3f.h"
-#include "../graphics/Matrix3f.h"
-#include "../graphics/Bounds.h"
-#include "../graphics/Texture.h"
-
-#include <QRectF>
+#include "graphics/Bounds.h"
+#include "graphics/BufferObject.h"
+#include "graphics/Matrix3f.h"
+#include "graphics/Texture.h"
+#include "graphics/Vector2f.h"
+#include "graphics/Vector3f.h"
 
 namespace mv
 {
@@ -125,21 +123,33 @@ namespace mv
             void setOpacityChannelScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
 
+            PointEffect getScalarEffect() const;
             void setScalarEffect(const PointEffect effect);
+
             void setColormap(const QImage& image);
+
+            Bounds getBounds() const;
             void setBounds(const Bounds& bounds);
+
+            Matrix3f getProjectionMatrix() const;
+
+            const PointSettings& getPointSettings() const;
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
-            
+
             PointSelectionDisplayMode getSelectionDisplayMode() const;
             void setSelectionDisplayMode(PointSelectionDisplayMode selectionDisplayMode);
+
             Vector3f getSelectionOutlineColor() const;
             void setSelectionOutlineColor(Vector3f color);
+
             bool getSelectionOutlineOverrideColor() const;
             void setSelectionOutlineOverrideColor(float selectionOutlineOverrideColor);
+
             float getSelectionOutlineScale() const;
             void setSelectionOutlineScale(float selectionOutlineScale);
+
             float getSelectionOutlineOpacity() const;
             void setSelectionOutlineOpacity(float selectionOutlineOpacity);
 
@@ -156,8 +166,8 @@ namespace mv
 
         private:
             /* Point properties */
-            PointSettings _pointSettings;
-            PointEffect   _pointEffect = PointEffect::Size;
+            PointSettings               _pointSettings;
+            PointEffect                 _pointEffect = PointEffect::Size;
             
             PointSelectionDisplayMode   _selectionDisplayMode               = PointSelectionDisplayMode::Outline;
             Vector3f                    _selectionOutlineColor              = Vector3f(0, 0, 1);
@@ -175,7 +185,7 @@ namespace mv
             PointArrayObject            _gpuPoints;
             Texture2D                   _colormap;
 
-            Matrix3f                    _orthoM;
+            Matrix3f                    _orthoM                             = {};       /** Projection matrix from bounds space to clip space */
             Bounds                      _bounds                             = Bounds(-1, 1, -1, 1);
 
             std::int32_t                _numSelectedPoints                  = 0;     /** Number of selected (highlighted points) */

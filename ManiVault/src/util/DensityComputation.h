@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "../graphics/Framebuffer.h"
-#include "../graphics/Texture.h"
-#include "../graphics/Shader.h"
-#include "../graphics/BufferObject.h"
-#include "../graphics/Bounds.h"
+#include "graphics/Bounds.h"
+#include "graphics/BufferObject.h"
+#include "graphics/Framebuffer.h"
+#include "graphics/Shader.h"
+#include "graphics/Texture.h"
 
-#include "../graphics/Vector2f.h"
+#include "graphics/Vector2f.h"
 
 #include <QOffscreenSurface>
 
