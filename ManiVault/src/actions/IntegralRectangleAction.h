@@ -7,6 +7,8 @@
 #include "RectangleAction.h"
 #include "IntegralRangeAction.h"
 
+#include <QRect>
+
 namespace mv::gui {
 
 /**
@@ -16,19 +18,27 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT IntegralRectangleAction : public RectangleAction<QRect, IntegralRangeAction>
+class CORE_EXPORT IntegralRectangleAction : public RectangleAction<IntegralRangeAction>
 {
     Q_OBJECT
 
 public:
 
     /**
-     * Constructor
+     * Construct with pointer to \p parent object and \p title
      * @param parent Pointer to parent object
      * @param title Title of the action
+     */
+    Q_INVOKABLE IntegralRectangleAction(QObject* parent, const QString& title);
+
+    /**
+     * Set rectangle to \p rectangle
      * @param rectangle Rectangle
      */
-    Q_INVOKABLE IntegralRectangleAction(QObject* parent, const QString& title, const QRect& rectangle = QRect());
+    void setRectangle(const QRect& rectangle)
+    {
+        RectangleAction::setRectangle(rectangle.left(), rectangle.right(), rectangle.bottom(), rectangle.top());
+    }
 
 protected: // Linking
 
@@ -63,9 +73,12 @@ signals:
 
     /**
      * Signals that the rectangle changed
-     * @param rectangle Rectangle
+     * @param left Rectangle left
+     * @param right Rectangle right
+     * @param bottom Rectangle bottom
+     * @param top Rectangle top
      */
-    void rectangleChanged(const QRectF& rectangle);
+    void rectangleChanged(std::int32_t left, std::int32_t right, std::int32_t bottom, std::int32_t top);
 
     friend class AbstractActionsManager;
 };

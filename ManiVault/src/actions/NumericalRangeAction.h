@@ -114,6 +114,22 @@ public:
         _rangeChanged();
     }
 
+    /**
+     * Get length of the range
+     * @return Range length
+     */
+    NumericalType getLength() const {
+        return getMaximum() - getMinimum();
+    }
+
+    /**
+     * Get center of the range
+     * @return Range center
+     */
+    NumericalType getCenter() const {
+        return getMinimum() + (0.5 * getLength());
+    }
+
     /** Get the range */
     util::NumericalRange<NumericalType> getRange() const {
         return util::NumericalRange<NumericalType>(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
@@ -197,6 +213,26 @@ public:
         _rangeMaxAction.setMaximum(limits.getMaximum());
 
         _limitsChanged();
+    }
+
+    /**
+     * Shift range by \p amount
+     * @param amount Amount of shift
+     */
+    void shiftBy(NumericalType amount) {
+        setMinimum(getMinimum() + amount);
+        setMaximum(getMaximum() + amount);
+    }
+
+    /**
+     * Expand by \p factor
+     * @param factor Expansion factor
+     */
+    void expandBy(float factor) {
+        const auto offset = (getLength() * factor) / 2.f;
+
+        setMinimum(getMinimum() - offset);
+        setMaximum(getMaximum() + offset);
     }
 
 public: // Serialization

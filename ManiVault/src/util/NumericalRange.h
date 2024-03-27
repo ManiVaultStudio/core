@@ -62,6 +62,28 @@ public:
     }
 
     /**
+     * Shift range by \p amount
+     * @param amount Amount of shift
+     */
+    void shiftBy(NumericalType amount) {
+        setMinimum(getMinimum() + amount);
+        setMaximum(getMaximum() + amount);
+    }
+
+    /**
+     * Get shifted range
+     * @param amount Amount of shift
+     * @return Shifted range
+     */
+    NumericalRange<NumericalType> shiftedBy(NumericalType amount) {
+        auto shiftedRange = *this;
+
+        shiftedRange.shiftBy(amount);
+
+        return shiftedRange;
+    }
+
+    /**
      * Addition operator
      * @return Added range
      */
