@@ -20,7 +20,7 @@ class WidgetAction;
  *
  * Specialized tool button which show an action widget as a popup
  *
- * Note: This action is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * Note: This action is developed for internal use only
  *
  * @author Thomas Kroes
  */

@@ -181,6 +181,17 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     layout->addWidget(&_hierarchyWidget, 1);
 
+    QStringList options = { "a", "b", "c", "d", "e" };
+
+    auto optionsActionA = new OptionsAction(this, "OptionsA", options);
+    auto optionsActionB = new OptionsAction(this, "OptionsB", options);
+
+    optionsActionA->setDefaultWidgetFlags(OptionsAction::WidgetFlag::ComboBox | OptionsAction::WidgetFlag::Selection | OptionsAction::WidgetFlag::File);
+    optionsActionB->setDefaultWidgetFlags(OptionsAction::WidgetFlag::ListView | OptionsAction::WidgetFlag::Selection | OptionsAction::WidgetFlag::File);
+
+    layout->addWidget(optionsActionA->createWidget(this));
+    layout->addWidget(optionsActionB->createWidget(this));
+
     setLayout(layout);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));

@@ -24,6 +24,8 @@ namespace mv::gui {
  * By default, a plugin is automatically created when the trigger action is triggered.
  * Custom plugin creation is possible by setting a creation handler function, see setCreatePluginFunction()
  *
+ * Note: This action is developed for internal use only
+ * 
  * @author Thomas Kroes
  */
 class CORE_EXPORT PluginTriggerAction : public TriggerAction

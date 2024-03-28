@@ -77,4 +77,26 @@ mv::CheckableStringListModel::StringIndicesList CheckableStringListModel::getChe
     return StringIndicesList(_checkedItems.begin(), _checkedItems.end());
 }
 
+void CheckableStringListModel::setCheckedIndicesSet(const StringIndicesSet& checkedStringIndicesSet)
+{
+    _checkedItems = checkedStringIndicesSet;
+
+    emit dataChanged(index(0, 0), index(rowCount() - 1));
+}
+
+void CheckableStringListModel::setCheckedIndicesFromStrings(const QStringList& checkedStrings)
+{
+    _checkedItems.clear();
+    _checkedItems.reserve(rowCount());
+
+    for (const auto& checkedString : checkedStrings) {
+        const auto matches = match(index(0, 0), Qt::EditRole, checkedString, -1);
+
+        if (!matches.isEmpty())
+            _checkedItems << matches.first().row();
+    }
+
+    emit dataChanged(index(0, 0), index(rowCount() - 1));
+}
+
 }

@@ -13,7 +13,7 @@ namespace mv::gui {
  *
  * Sole purpose is to override the label text of the source action
  *
- * Note: This action is a WIP
+ * Note: This action is developed for internal use only and is in a WIP state
  * 
  * @author Thomas Kroes
  */

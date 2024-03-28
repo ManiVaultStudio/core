@@ -25,7 +25,7 @@ class SplashScreenWidget;
  *
  * Action class for configuring and displaying a splash screen.
  *
- * Note: This action is primarily developed for internal use (not meant to be used in third-party plugins)
+ * Note: This action is developed for internal use only
  * 
  * @author Thomas Kroes
  */

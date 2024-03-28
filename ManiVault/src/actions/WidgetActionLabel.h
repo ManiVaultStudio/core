@@ -21,14 +21,14 @@ class WidgetAction;
  *
  * Provides a label view on the action
  * 
- * Features:
+ * Most important features:
  * - Label of which the text, visibility and tooltip is synchronized with the action
  * - Provide linking commands
  *   - Publish an action (create a public shared action)
  *   - Connect to a shared action
  *   - Disconnect from a shared action
  * 
- * Note: This widget class is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * Note: This action is developed for internal use only
  * 
  * @author Thomas Kroes
  */

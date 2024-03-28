@@ -16,6 +16,8 @@ namespace mv::gui {
  *
  * Action class for picking (and configuring) a plugin trigger action
  *
+ * Note: This action is developed for internal use only
+ * 
  * @author Thomas Kroes
  */
 class CORE_EXPORT PluginTriggerPickerAction : public TriggerAction
