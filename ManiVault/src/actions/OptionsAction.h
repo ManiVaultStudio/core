@@ -6,7 +6,7 @@
 
 #include "WidgetAction.h"
 #include "TriggerAction.h"
-#include "TreeAction.h"
+#include "TableAction.h"
 #include "HorizontalGroupAction.h"
 
 #include "models/CheckableStringListModel.h"
@@ -14,8 +14,8 @@
 #include <QSet>
 #include <QPersistentModelIndex>
 #include <QComboBox>
-#include <QLineEdit>
 #include <QCompleter>
+#include <QLineEdit>
 #include <QListView>
 #include <QSortFilterProxyModel>
 
@@ -133,9 +133,8 @@ public: // Widgets
          * @param parent Pointer to parent widget
          * @param optionsAction Pointer to options action
          * @param widgetFlags Widget flags for the configuration of the widget
-         * @param completer Pointer to completer
          */
-        ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags, QCompleter* completer);
+        ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags);
 
     protected:
 
@@ -153,6 +152,7 @@ public: // Widgets
         OptionsAction*          _optionsAction;     /** Pointer to owning options action */
         QHBoxLayout             _layout;            /** Horizontal layout */
         QComboBox               _comboBox;          /** Combobox for selecting options */
+        QCompleter              _completer;         /** For inline searching */
         CheckableItemView       _view;              /** View for checking items */
 
         friend class OptionsAction;
@@ -173,7 +173,7 @@ public: // Widgets
     protected:
         OptionsAction*          _optionsAction;     /** Pointer to owning options action */
         QSortFilterProxyModel   _filterModel;       /** For filtering the options */
-        TreeAction              _treeAction;        /** Tree action */
+        TableAction             _tableAction;       /** Table view for showing the data */
 
         friend class OptionsAction;
     };

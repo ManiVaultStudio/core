@@ -272,6 +272,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/StatusAction.h
     src/actions/VersionAction.h
     src/actions/TreeAction.h
+    src/actions/TableAction.h
     src/actions/StatusBarAction.h
     src/actions/PluginStatusBarAction.h
 )
@@ -285,6 +286,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/StatusAction.cpp
     src/actions/VersionAction.cpp
     src/actions/TreeAction.cpp
+    src/actions/TableAction.cpp
     src/actions/StatusBarAction.cpp
     src/actions/PluginStatusBarAction.cpp
 )
@@ -328,6 +330,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/PluginTriggerPickerAction.h
     src/actions/PluginTriggerAction.h
     src/actions/LabelProxyAction.h
+    src/actions/ModelFilterAction.h
     src/actions/WidgetActionBadgeOverlayWidget.h
     src/actions/WidgetActionToolButton.h
     src/actions/WidgetActionToolButtonMenu.h
@@ -352,6 +355,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/PluginTriggerPickerAction.cpp
     src/actions/PluginTriggerAction.cpp
     src/actions/LabelProxyAction.cpp
+	src/actions/ModelFilterAction.cpp
     src/actions/WidgetActionBadgeOverlayWidget.cpp
     src/actions/WidgetActionToolButton.cpp
     src/actions/WidgetActionToolButtonMenu.cpp

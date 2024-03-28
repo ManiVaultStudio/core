@@ -17,7 +17,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT CheckableStringListModel final : public QStringListModel {
+class CORE_EXPORT CheckableStringListModel final : public QStringListModel{
 public:
 
     using StringIndicesSet = QSet<std::int32_t>;
@@ -27,7 +27,7 @@ private:
 
     /**
      * We want to reset our internal CheckableStringListModel#_checkedItems every time the strings are changed.
-     * We make the CheckableStringListModel::setStringList(...) private and replace it with 
+     * We make the CheckableStringListModel::setStringList(...) private and replace it with
      * CheckableStringListModel::setStrings(...) so that we have control over the internals. This also prevents
      * accidental misuse of QStringListModel::setStringList(...), which would lead to problems with checked items.
      * Note: Underneath we still call QStringListModel::setStringList(...)
@@ -88,17 +88,19 @@ public:
     StringIndicesList getCheckedIndicesList() const;
 
     /**
-     * Get header data for \p section, \p orientation and display \p role
-     * @param section Section
-     * @param orientation Orientation
-     * @param role Data role
-     * @return Header
+     * Set checked indices set to \p checkedStringIndicesSet
+     * @param checkedStringIndicesSet Set of checked string indices
      */
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    void setCheckedIndicesSet(const StringIndicesSet& checkedStringIndicesSet);
+
+    /**
+     * Set checked indices from \p checkedStrings
+     * @param checkedStrings List of checked strings
+     */
+    void setCheckedIndicesFromStrings(const QStringList& checkedStrings);
 
 private:
-    //StringIndicesSet   _checkedItems;  /** Keeps track of the selected items */
-    QList<bool>   _checkedItems;  /** Keeps track of the selected items */
+    StringIndicesSet   _checkedItems;  /** Keeps track of the selected items */
 };
 
 }

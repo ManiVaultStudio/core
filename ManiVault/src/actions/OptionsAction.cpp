@@ -7,6 +7,7 @@
 #include "Application.h"
 
 #include <QAbstractItemView>
+#include <QHeaderView>
 #include <QDebug>
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -15,7 +16,6 @@
 #include <QJsonObject>
 #include <QListView>
 #include <QMouseEvent>
-#include <QStandardItemModel>
 #include <QTableView>
 
 using namespace mv::util;
@@ -135,10 +135,7 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 
     auto previousSelectedOptions = getSelectedOptions();
 
-    QSignalBlocker optionsModelBlocker(&_optionsModel);
-
-    for (std::int32_t optionIndex = 0; optionIndex < _optionsModel.rowCount(); optionIndex++)
-        _optionsModel.setData(_optionsModel.index(optionIndex, 0), selectedOptions.contains(_optionsModel.index(optionIndex, 0).data(Qt::EditRole).toString()) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+    _optionsModel.setCheckedIndicesFromStrings(selectedOptions);
 
     if (getSelectedOptions() != previousSelectedOptions)
         emit selectedOptionsChanged(getSelectedOptions());
@@ -258,16 +255,17 @@ QVariantMap OptionsAction::toVariantMap() const
     return variantMap;
 }
 
-OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags, QCompleter* completer) :
+OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags) :
     QWidget(parent),
     _optionsAction(optionsAction),
     _layout(),
     _comboBox(),
+    _completer(),
     _view()
 {
     _comboBox.setObjectName("ComboBox");
     _comboBox.setEditable(true);
-    _comboBox.setCompleter(completer);
+    _comboBox.setCompleter(&_completer);
     _comboBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     _comboBox.setSizeAdjustPolicy(QComboBox::AdjustToContents);
     _comboBox.setModel(&optionsAction->getOptionsModel());
@@ -275,10 +273,15 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     _comboBox.setInsertPolicy(QComboBox::NoInsert);
     _comboBox.setView(&_view);
 
+    _completer.setModel(&optionsAction->getOptionsModel());
+    _completer.setCaseSensitivity(Qt::CaseInsensitive);
+    _completer.setFilterMode(Qt::MatchContains);
+    _completer.setPopup(new CheckableItemView(this));
+
     connect(optionsAction, &OptionsAction::selectedOptionsChanged, this, &ComboBoxWidget::updateCurrentText);
     connect(&_comboBox, &QComboBox::activated, this, &ComboBoxWidget::updateCurrentText);
-    connect(completer, QOverload<const QString&>::of(&QCompleter::activated), this, &ComboBoxWidget::updateCurrentText);
-    connect(completer, QOverload<const QModelIndex&>::of(&QCompleter::activated), this, &ComboBoxWidget::updateCurrentText);
+    connect(&_completer, QOverload<const QString&>::of(&QCompleter::activated), this, &ComboBoxWidget::updateCurrentText);
+    connect(&_completer, QOverload<const QModelIndex&>::of(&QCompleter::activated), this, &ComboBoxWidget::updateCurrentText);
 
     updateCurrentText();
 
@@ -357,56 +360,34 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
     QWidget(parent),
     _optionsAction(optionsAction),
     _filterModel(),
-    _treeAction(nullptr, "Options")
+    _tableAction(this, "Options")
 {
-    _filterModel.setSourceModel(&optionsAction->getOptionsModel());
+    _tableAction.initialize(&optionsAction->getOptionsModel(), &_filterModel, "Option");
 
-    /*
-    _treeAction.initialize(&optionsAction->getOptionsModel(), &_filterModel, "Option");
+    _tableAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+        auto tableView = widget->findChild<QTableView*>("TableView");
 
-    _treeAction.setWidgetConfigurationFunction([this, widgetFlags](WidgetAction* action, QWidget* widget) -> void {
-        auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
+        Q_ASSERT(tableView != nullptr);
 
-        Q_ASSERT(hierarchyWidget != nullptr);
-
-        if (hierarchyWidget == nullptr)
+        if (tableView == nullptr)
             return;
 
-        widget->layout()->setContentsMargins(0, 0, 0, 0);
+        tableView->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
 
-        hierarchyWidget->setHeaderHidden(true);
-        hierarchyWidget->getColumnsGroupAction().setVisible(false);
+        auto horizontalHeader   = tableView->horizontalHeader();
+        auto verticalHeader     = tableView->verticalHeader();
 
-        auto& toolbarAction = hierarchyWidget->getToolbarAction();
+        horizontalHeader->setVisible(false);
+        horizontalHeader->setStretchLastSection(true);
 
-        if (widgetFlags & WidgetFlag::Selection)
-            toolbarAction.addAction(&_optionsAction->getSelectionAction());
-
-        if (widgetFlags & WidgetFlag::File)
-            toolbarAction.addAction(&_optionsAction->getFileAction());
-
-        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
-
-        auto treeView = widget->findChild<QTreeView*>("TreeView");
-
-        Q_ASSERT(treeView != nullptr);
-
-        if (treeView == nullptr)
-            return;
-
-        treeView->setRootIsDecorated(false);
+        verticalHeader->setVisible(false);
     });
-    */
 
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    auto listView = new QTableView();
-
-    listView->setModel(&_filterModel);
-
-    layout->addWidget(listView);
+    layout->addWidget(_tableAction.createWidget(this));
 
     setLayout(layout);
 }
@@ -415,18 +396,12 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 {
     auto widget     = new WidgetActionWidget(parent, this, widgetFlags);
     auto layout     = new QHBoxLayout();
-    auto completer  = new QCompleter();
-
-    completer->setModel(&_optionsModel);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-    completer->setFilterMode(Qt::MatchContains);
-    completer->setPopup(new CheckableItemView(widget));
 
     if (!widget->isPopup())
         layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::ComboBox)
-        layout->addWidget(new OptionsAction::ComboBoxWidget(parent, this, widgetFlags, completer));
+        layout->addWidget(new OptionsAction::ComboBoxWidget(parent, this, widgetFlags));
 
     if (widgetFlags & WidgetFlag::ListView)
         layout->addWidget(new OptionsAction::ListViewWidget(parent, this, widgetFlags));

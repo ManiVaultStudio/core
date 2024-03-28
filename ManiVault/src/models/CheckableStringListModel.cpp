@@ -27,7 +27,7 @@ Qt::ItemFlags CheckableStringListModel::flags(const QModelIndex& index) const
 QVariant CheckableStringListModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::CheckStateRole && index.isValid())
-        return _checkedItems[index.row()] ? Qt::Checked : Qt::Unchecked;
+        return (_checkedItems.contains(index.row())) ? Qt::Checked : Qt::Unchecked;
 
     return QStringListModel::data(index, role);
 }
@@ -36,9 +36,9 @@ bool CheckableStringListModel::setData(const QModelIndex& index, const QVariant&
 {
     if (role == Qt::CheckStateRole && index.isValid()) {
         if (value == Qt::Checked)
-            _checkedItems[index.row()] = true;
+            _checkedItems.insert(index.row());
         else
-            _checkedItems[index.row()] = false;
+            _checkedItems.remove(index.row());
 
         emit dataChanged(index, index);
 
@@ -52,9 +52,7 @@ void CheckableStringListModel::setStrings(const QStringList& strings)
 {
     QStringListModel::setStringList(strings);
 
-    _checkedItems.resize(strings.count());
-
-    std::fill(_checkedItems.begin(), _checkedItems.end(), false);
+    _checkedItems.clear();
 }
 
 QStringList CheckableStringListModel::getCheckedStrings() const
@@ -63,51 +61,42 @@ QStringList CheckableStringListModel::getCheckedStrings() const
 
     checkedStrings.reserve(_checkedItems.count());
 
-    for (int itemIndex = 0; itemIndex < _checkedItems.count(); ++itemIndex)
-        if (_checkedItems[itemIndex])
-            checkedStrings.push_back(data(index(itemIndex, 0), Qt::EditRole).toString());
+    for (const auto& checkedItem : _checkedItems)
+        checkedStrings.push_back(data(index(checkedItem, 0), Qt::EditRole).toString());
 
     return checkedStrings;
 }
 
 CheckableStringListModel::StringIndicesSet CheckableStringListModel::getCheckedIndicesSet() const
 {
-    const auto checkedIndicesList = getCheckedIndicesList();
-
-    return StringIndicesSet(checkedIndicesList.begin(), checkedIndicesList.end());
+    return _checkedItems;
 }
 
 mv::CheckableStringListModel::StringIndicesList CheckableStringListModel::getCheckedIndicesList() const
 {
-    StringIndicesList checkedIndicesList;
-
-    for (int itemIndex = 0; itemIndex < _checkedItems.count(); ++itemIndex)
-        if (_checkedItems[itemIndex])
-            checkedIndicesList << itemIndex;
-
-    return checkedIndicesList;
+    return StringIndicesList(_checkedItems.begin(), _checkedItems.end());
 }
 
-QVariant CheckableStringListModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+void CheckableStringListModel::setCheckedIndicesSet(const StringIndicesSet& checkedStringIndicesSet)
 {
-    if (section != 0)
-        return {};
+    _checkedItems = checkedStringIndicesSet;
 
-    if (orientation != Qt::Horizontal)
-        return {};
+    emit dataChanged(index(0, 0), index(rowCount() - 1));
+}
 
-    switch (role) {
-        case Qt::DisplayRole:
-            return "String";
+void CheckableStringListModel::setCheckedIndicesFromStrings(const QStringList& checkedStrings)
+{
+    _checkedItems.clear();
+    _checkedItems.reserve(rowCount());
 
-        case Qt::ToolTipRole:
-            return "String value";
+    for (const auto& checkedString : checkedStrings) {
+        const auto matches = match(index(0, 0), Qt::EditRole, checkedString, -1);
 
-        default:
-            return {};
+        if (!matches.isEmpty())
+            _checkedItems << matches.first().row();
     }
 
-    return {};
+    emit dataChanged(index(0, 0), index(rowCount() - 1));
 }
 
 }
