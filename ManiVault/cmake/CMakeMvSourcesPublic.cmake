@@ -331,6 +331,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/PluginTriggerAction.h
     src/actions/LabelProxyAction.h
     src/actions/ModelFilterAction.h
+    src/actions/ModelSelectionAction.h
     src/actions/WidgetActionBadgeOverlayWidget.h
     src/actions/WidgetActionToolButton.h
     src/actions/WidgetActionToolButtonMenu.h
@@ -356,6 +357,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/PluginTriggerAction.cpp
     src/actions/LabelProxyAction.cpp
 	src/actions/ModelFilterAction.cpp
+	src/actions/ModelSelectionAction.cpp
     src/actions/WidgetActionBadgeOverlayWidget.cpp
     src/actions/WidgetActionToolButton.cpp
     src/actions/WidgetActionToolButtonMenu.cpp

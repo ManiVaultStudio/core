@@ -18,16 +18,18 @@ namespace mv::gui {
  *
  * Action class for configuring filtering parameters
  *
+ * Note: This action is developed for internal use only
+ * 
  * @author Thomas Kroes
  */
-class CORE_EXPORT ModelFilterAction : public HorizontalGroupAction
+class CORE_EXPORT ModelFilterAction final : public HorizontalGroupAction
 {
     Q_OBJECT
 
 public:
 
     /**
-     * Construct with pointer to \p parent object and \p title
+     * Construct with pointer to \p parent object and action \p title
      * @param parent Pointer to parent object
      * @param title Title of the action
      */

@@ -58,7 +58,7 @@ using RecentFiles = QList<RecentFile>;
  *
  * Action class for storing and editing recent file paths and saving them to settings.
  *
- * Note: This action is primarily developed for internal use (not meant to be used in third-party plugins)
+ * Note: This action is developed for internal use only
  * 
  * @author Thomas Kroes
  */

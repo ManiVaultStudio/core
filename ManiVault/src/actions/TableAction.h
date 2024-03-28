@@ -8,6 +8,7 @@
 #include "VerticalGroupAction.h"
 #include "StringAction.h"
 #include "ModelFilterAction.h"
+#include "ModelSelectionAction.h"
 
 #include <QWidget>
 #include <QTableView>
@@ -53,7 +54,6 @@ public:
     protected:
         TableAction*            _tableAction;           /** Pointer to owning table action */
         HorizontalGroupAction   _toolbarGroupAction;    /** Horizontal toolbar group action */
-        ModelFilterAction       _modelFilterAction;     /** Action for configuring filtering */
         QTableView              _tableView;             /** Table view for showing the data */
 
         friend class TableAction;
@@ -104,6 +104,14 @@ public:
     }
 
     /**
+     * Get selection model
+     * @return Reference to selection model
+     */
+    QItemSelectionModel& getSelectionModel() {
+        return _selectionModel;
+    }
+
+    /**
      * Get item type name
      * @return Item type name string
      */
@@ -111,10 +119,18 @@ public:
         return _itemTypeName;
     }
 
+public: // Action getters
+
+    ModelFilterAction& getModelFilterAction() { return _modelFilterAction; }
+    ModelSelectionAction& getModelSelectionAction() { return _modelSelectionAction; }
+
 private:
-    QAbstractItemModel*     _model;             /** Pointer to model */
-    QSortFilterProxyModel*  _filterModel;       /** Pointer to filter model */
-    QString                 _itemTypeName;      /** String that describes an individual model item type */
+    QAbstractItemModel*     _model;                 /** Pointer to model */
+    QSortFilterProxyModel*  _filterModel;           /** Pointer to filter model */
+    QItemSelectionModel     _selectionModel;        /** Selection model */
+    QString                 _itemTypeName;          /** String that describes an individual model item type */
+    ModelFilterAction       _modelFilterAction;     /** Action for configuring filtering */
+    ModelSelectionAction    _modelSelectionAction;  /** Action for bulk selection */
 
     friend class AbstractActionsManager;
 };

@@ -14,7 +14,9 @@ namespace mv::gui {
 TableAction::TableAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
     _model(nullptr),
-    _filterModel(nullptr)
+    _filterModel(nullptr),
+    _modelFilterAction(this, "Filtering"),
+    _modelSelectionAction(this, "Selection")
 {
 }
 
@@ -29,21 +31,32 @@ void TableAction::initialize(QAbstractItemModel* model, QSortFilterProxyModel* f
     _filterModel    = filterModel;
     _itemTypeName   = itemTypeName;
 
-    if (_filterModel)
+    if (_filterModel) {
         _filterModel->setSourceModel(_model);
+        _selectionModel.setModel(_filterModel);
+    }
+    else {
+        _selectionModel.setModel(_model);
+    }
+
+    _modelFilterAction.initialize(_model, _filterModel, _itemTypeName);
+    _modelSelectionAction.initialize(&_selectionModel);
 }
 
 TableAction::Widget::Widget(QWidget* parent, TableAction* tableAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, tableAction, widgetFlags),
     _tableAction(tableAction),
     _toolbarGroupAction(this, "Toolbar"),
-    _modelFilterAction(this, "Filter"),
     _tableView()
 {
     _toolbarGroupAction.setShowLabels(false);
-    _toolbarGroupAction.addAction(&_modelFilterAction);
+
+    _toolbarGroupAction.addAction(&_tableAction->getModelFilterAction());
+    _toolbarGroupAction.addAction(&_tableAction->getModelSelectionAction());
 
     _tableView.setObjectName("TableView");
+    _tableView.setSelectionModel(&tableAction->getSelectionModel());
+    _tableView.setStyleSheet("QTableView::item { margin: 0px; }");
 
     if (auto filterModel = tableAction->getFilterModel())
         _tableView.setModel(filterModel);
@@ -58,10 +71,6 @@ TableAction::Widget::Widget(QWidget* parent, TableAction* tableAction, const std
     layout->addWidget(&_tableView);
 
     setLayout(layout);
-
-    _modelFilterAction.initialize(tableAction->getModel(), tableAction->getFilterModel(), tableAction->getItemTypeName());
-
-    //connect(&_model, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateFilterModel);
 }
 
 }

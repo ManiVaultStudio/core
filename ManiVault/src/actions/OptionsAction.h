@@ -65,36 +65,6 @@ public: // Sub actions
 protected:
 
     /**
-     * Selection action class
-     *
-     * Action class for manipulating selections
-     *
-     * @author Thomas Kroes
-     */
-    class CORE_EXPORT SelectionAction : public HorizontalGroupAction
-    {
-    public:
-
-        /**
-         * Constructor
-         * @param optionsAction Reference to owning options action
-         */
-        SelectionAction(OptionsAction& optionsAction);
-
-    public: // Action getters
-
-        TriggerAction& getSelectAllAction() { return _selectAllAction; }
-        TriggerAction& getClearSelectionAction() { return _clearSelectionAction; }
-        TriggerAction& getInvertSelectionAction() { return _invertSelectionAction; }
-
-    protected:
-        OptionsAction&  _optionsAction;             /** Reference to owning options action */
-        TriggerAction   _selectAllAction;           /** Select all action */
-        TriggerAction   _clearSelectionAction;      /** Clear selection action */
-        TriggerAction   _invertSelectionAction;     /** Invert selection action */
-    };
-
-    /**
      * File action class
      *
      * Action class for loading/saving selections
@@ -322,7 +292,6 @@ public: // Serialization
 
 public: // Action getters
 
-    SelectionAction& getSelectionAction() { return _selectionAction; }
     FileAction& getFileAction() { return _fileAction; }
 
 signals:
@@ -341,7 +310,6 @@ signals:
 
 protected:
     CheckableStringListModel    _optionsModel;      /** Options model */
-    SelectionAction             _selectionAction;   /** Selection action */
     FileAction                  _fileAction;        /** File action */
 
     friend class AbstractActionsManager;

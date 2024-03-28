@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "OptionsAction.h"
+#include "ModelSelectionAction.h"
 
 #include "Application.h"
 
@@ -25,7 +26,6 @@ namespace mv::gui {
 OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
     WidgetAction(parent, title),
     _optionsModel({}),
-    _selectionAction(*this),
     _fileAction(*this)
 {
     setText(title);
@@ -292,8 +292,11 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
 
     _layout.addWidget(&_comboBox);
 
-    if (widgetFlags & WidgetFlag::Selection)
-        _layout.addWidget(_optionsAction->getSelectionAction().createCollapsedWidget(this));
+    if (widgetFlags & WidgetFlag::Selection) {
+        auto modelSelectionAction = new ModelSelectionAction(this, "Selection", _view.selectionModel());
+
+        _layout.addWidget(modelSelectionAction->createCollapsedWidget(this));
+    }
 
     if (widgetFlags & WidgetFlag::File)
         _layout.addWidget(_optionsAction->getFileAction().createCollapsedWidget(this));
@@ -372,7 +375,8 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
         if (tableView == nullptr)
             return;
 
-        tableView->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+        tableView->setWindowIcon(_optionsAction->icon());
+        tableView->setAlternatingRowColors(true);
 
         auto horizontalHeader   = tableView->horizontalHeader();
         auto verticalHeader     = tableView->verticalHeader();
@@ -381,6 +385,7 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
         horizontalHeader->setStretchLastSection(true);
 
         verticalHeader->setVisible(false);
+        //verticalHeader->setDefaultSectionSize(verticalHeader->fontMetrics().height());
     });
 
     auto layout = new QVBoxLayout();
@@ -390,6 +395,25 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
     layout->addWidget(_tableAction.createWidget(this));
 
     setLayout(layout);
+
+    auto& modelSelectionAction = _tableAction.getModelSelectionAction();
+
+    connect(&modelSelectionAction.getSelectAllAction(), &TriggerAction::triggered, this, [this]() -> void {
+        _optionsAction->setSelectedOptions(_optionsAction->getOptions());
+    });
+
+    connect(&modelSelectionAction.getClearSelectionAction(), &TriggerAction::triggered, this, [this]() -> void {
+        _optionsAction->setSelectedOptions(QStringList());
+    });
+
+    connect(&modelSelectionAction.getInvertSelectionAction(), &TriggerAction::triggered, this, [this]() -> void {
+        auto invertedSelectedOptions = _optionsAction->getOptions();
+
+        for (const auto& selectedOption : _optionsAction->getSelectedOptions())
+            invertedSelectedOptions.removeOne(selectedOption);
+
+        _optionsAction->setSelectedOptions(invertedSelectedOptions);
+    });
 }
 
 QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -409,49 +433,6 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     widget->setLayout(layout);
 
     return widget;
-}
-
-OptionsAction::SelectionAction::SelectionAction(OptionsAction& optionsAction) :
-    HorizontalGroupAction(&optionsAction, "Selection"),
-    _optionsAction(optionsAction),
-    _selectAllAction(this, "All"),
-    _clearSelectionAction(this, "Clear"),
-    _invertSelectionAction(this, "Invert")
-{
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    setText("Selection");
-    setToolTip("Change selection");
-    setIconByName("mouse-pointer");
-    setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-
-    addAction(&_selectAllAction);
-    addAction(&_clearSelectionAction);
-    addAction(&_invertSelectionAction);
-
-    const auto updateReadOnly = [this]() -> void {
-        _selectAllAction.setEnabled(_optionsAction.getSelectedOptions().count() < _optionsAction.getOptions().count());
-        _clearSelectionAction.setEnabled(_optionsAction.getSelectedOptions().count() >= 1);
-    };
-
-    connect(&_optionsAction, &OptionsAction::selectedOptionsChanged, this, updateReadOnly);
-
-    connect(&_selectAllAction, &TriggerAction::triggered, this, [this]() -> void {
-        _optionsAction.setSelectedOptions(_optionsAction.getOptions());
-    });
-
-    connect(&_clearSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
-        _optionsAction.setSelectedOptions(QStringList());
-    });
-
-    connect(&_invertSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
-        auto invertedSelectedOptions = _optionsAction.getOptions();
-
-        for (const auto& selectedOption : _optionsAction.getSelectedOptions())
-            invertedSelectedOptions.removeOne(selectedOption);
-
-        _optionsAction.setSelectedOptions(invertedSelectedOptions);
-    });
 }
 
 OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :

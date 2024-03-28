@@ -24,11 +24,11 @@ class WidgetAction;
  * 
  * Context menu for one (or more) widget actions
  *
- * Note: This menu is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * Note: This action is developed for internal use only
  * 
  * @author Thomas Kroes
  */
-class CORE_EXPORT WidgetActionContextMenu : public QMenu
+class CORE_EXPORT WidgetActionContextMenu final : public QMenu
 {
 public:
 
