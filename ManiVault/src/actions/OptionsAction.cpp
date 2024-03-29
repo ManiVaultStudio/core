@@ -366,7 +366,7 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
     _tableAction(this, "Options")
 {
     _tableAction.initialize(&optionsAction->getOptionsModel(), &_filterModel, "Option");
-
+    _tableAction.setIconByName("tasks");
     _tableAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
         auto tableView = widget->findChild<QTableView*>("TableView");
 
@@ -385,7 +385,7 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
         horizontalHeader->setStretchLastSection(true);
 
         verticalHeader->setVisible(false);
-        //verticalHeader->setDefaultSectionSize(verticalHeader->fontMetrics().height());
+        verticalHeader->setDefaultSectionSize(verticalHeader->fontMetrics().height());
     });
 
     auto layout = new QVBoxLayout();

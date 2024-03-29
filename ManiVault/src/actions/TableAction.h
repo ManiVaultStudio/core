@@ -4,11 +4,13 @@
 
 #pragma once
 
-#include "HorizontalGroupAction.h"
 #include "VerticalGroupAction.h"
+#include "HorizontalGroupAction.h"
 #include "StringAction.h"
 #include "ModelFilterAction.h"
 #include "ModelSelectionAction.h"
+
+#include "widgets/InfoOverlayWidget.h"
 
 #include <QWidget>
 #include <QTableView>
@@ -21,7 +23,7 @@ namespace mv::gui {
 /**
  * Table action class
  *
- * Action class for interacting with a list model in a table view
+ * Action class for interacting with a model in a table view
  *
  * @author Thomas Kroes
  */
@@ -45,16 +47,14 @@ public:
 
     private:
 
-        /** Update the filter model and related actions */
-        void updateFilterModel();
-
-        /** Updates the overlay widget icon, title and description based on the state of the hierarchy */
+        /** Updates the overlay widget icon, title and description based on the state of the table */
         void updateOverlayWidget();
 
     protected:
-        TableAction*            _tableAction;           /** Pointer to owning table action */
-        HorizontalGroupAction   _toolbarGroupAction;    /** Horizontal toolbar group action */
-        QTableView              _tableView;             /** Table view for showing the data */
+        TableAction*        _tableAction;           /** Pointer to owning table action */
+        QTableView          _tableView;             /** Table view for showing the data */
+        InfoOverlayWidget   _infoOverlayWidget;     /** Overlay widget that show information when there are no items in the model */
+        QString             _noItemsDescription;    /** Overlay widget description when no items are loaded */
 
         friend class TableAction;
     };
@@ -121,16 +121,18 @@ public:
 
 public: // Action getters
 
+    HorizontalGroupAction& getToolbarGroupAction() { return _toolbarGroupAction; }
     ModelFilterAction& getModelFilterAction() { return _modelFilterAction; }
     ModelSelectionAction& getModelSelectionAction() { return _modelSelectionAction; }
 
 private:
-    QAbstractItemModel*     _model;                 /** Pointer to model */
-    QSortFilterProxyModel*  _filterModel;           /** Pointer to filter model */
-    QItemSelectionModel     _selectionModel;        /** Selection model */
-    QString                 _itemTypeName;          /** String that describes an individual model item type */
-    ModelFilterAction       _modelFilterAction;     /** Action for configuring filtering */
-    ModelSelectionAction    _modelSelectionAction;  /** Action for bulk selection */
+    QAbstractItemModel*         _model;                 /** Pointer to model */
+    QSortFilterProxyModel*      _filterModel;           /** Pointer to filter model */
+    QItemSelectionModel         _selectionModel;        /** Selection model */
+    QString                     _itemTypeName;          /** String that describes an individual model item type */
+    HorizontalGroupAction       _toolbarGroupAction;    /** Horizontal toolbar group action */
+    ModelFilterAction           _modelFilterAction;     /** Action for configuring filtering */
+    ModelSelectionAction        _modelSelectionAction;  /** Action for bulk selection */
 
     friend class AbstractActionsManager;
 };

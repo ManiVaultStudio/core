@@ -15,9 +15,16 @@ TableAction::TableAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
     _model(nullptr),
     _filterModel(nullptr),
+    _toolbarGroupAction(this, "Toolbar"),
     _modelFilterAction(this, "Filtering"),
     _modelSelectionAction(this, "Selection")
 {
+    _toolbarGroupAction.setShowLabels(false);
+
+    _modelFilterAction.setStretch(1);
+
+    _toolbarGroupAction.addAction(&getModelFilterAction());
+    _toolbarGroupAction.addAction(&getModelSelectionAction());
 }
 
 void TableAction::initialize(QAbstractItemModel* model, QSortFilterProxyModel* filterModel, const QString& itemTypeName)
@@ -46,17 +53,14 @@ void TableAction::initialize(QAbstractItemModel* model, QSortFilterProxyModel* f
 TableAction::Widget::Widget(QWidget* parent, TableAction* tableAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, tableAction, widgetFlags),
     _tableAction(tableAction),
-    _toolbarGroupAction(this, "Toolbar"),
-    _tableView()
+    _tableView(),
+    _infoOverlayWidget(&_tableView),
+    _noItemsDescription(QString("No %1s available").arg(_tableAction->getItemTypeName()))
 {
-    _toolbarGroupAction.setShowLabels(false);
-
-    _toolbarGroupAction.addAction(&_tableAction->getModelFilterAction());
-    _toolbarGroupAction.addAction(&_tableAction->getModelSelectionAction());
+    setWindowIcon(tableAction->icon());
 
     _tableView.setObjectName("TableView");
     _tableView.setSelectionModel(&tableAction->getSelectionModel());
-    _tableView.setStyleSheet("QTableView::item { margin: 0px; }");
 
     if (auto filterModel = tableAction->getFilterModel())
         _tableView.setModel(filterModel);
@@ -67,10 +71,59 @@ TableAction::Widget::Widget(QWidget* parent, TableAction* tableAction, const std
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    layout->addWidget(_toolbarGroupAction.createWidget(this));
+    layout->addWidget(_tableAction->getToolbarGroupAction().createWidget(this));
     layout->addWidget(&_tableView);
 
     setLayout(layout);
+
+    auto& widgetFader = _infoOverlayWidget.getWidgetFader();
+
+    widgetFader.setOpacity(0.0f);
+    widgetFader.setMaximumOpacity(0.5f);
+    widgetFader.setFadeInDuration(100);
+    widgetFader.setFadeOutDuration(300);
+
+    auto filterModel = _tableAction->getFilterModel();
+
+    connect(filterModel, &QAbstractItemModel::rowsInserted, this, &Widget::updateOverlayWidget);
+    connect(filterModel, &QAbstractItemModel::rowsRemoved, this, &Widget::updateOverlayWidget);
+    connect(filterModel, &QAbstractItemModel::layoutChanged, this, &Widget::updateOverlayWidget);
+}
+
+void TableAction::Widget::updateOverlayWidget()
+{
+    auto& widgetFader = _infoOverlayWidget.getWidgetFader();
+
+    auto filterModel    = _tableAction->getFilterModel();
+    auto model          = _tableAction->getModel();
+
+    const auto& itemTypeName = _tableAction->getItemTypeName();
+
+    if (!filterModel) {
+        if (model->rowCount() == 0) {
+            _infoOverlayWidget.set(windowIcon(), QString("No %1s to display").arg(itemTypeName.toLower()), _noItemsDescription);
+            widgetFader.fadeIn();
+        }
+        else {
+            widgetFader.fadeOut();
+        }
+    }
+    else {
+        if (model->rowCount() >= 1) {
+            if (filterModel->rowCount() == 0) {
+                _infoOverlayWidget.set(windowIcon(), QString("No %1s found").arg(itemTypeName.toLower()), (_tableAction->getToolbarGroupAction().isVisible() ? "Try changing the filter parameters..." : ""));
+                widgetFader.fadeIn();
+            }
+            else {
+                _infoOverlayWidget.set(windowIcon(), QString("No %1s found").arg(itemTypeName.toLower()), "");
+                widgetFader.fadeOut();
+            }
+        }
+        else {
+            _infoOverlayWidget.set(windowIcon(), QString("No %1s to display").arg(itemTypeName.toLower()), _noItemsDescription);
+            widgetFader.fadeIn();
+        }
+    }
 }
 
 }
