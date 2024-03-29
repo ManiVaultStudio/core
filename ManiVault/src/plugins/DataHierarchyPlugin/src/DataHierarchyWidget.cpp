@@ -181,7 +181,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     layout->addWidget(&_hierarchyWidget, 1);
 
-    QStringList options = { "a", "b", "c", "d", "e" };
+    QStringList options;
+
+    for (int i = 0; i < 10000; i++)
+        options << QString("option_%1").arg(QString::number(i));
 
     auto optionsActionA = new OptionsAction(this, "OptionsA", options);
     auto optionsActionB = new OptionsAction(this, "OptionsB", options);

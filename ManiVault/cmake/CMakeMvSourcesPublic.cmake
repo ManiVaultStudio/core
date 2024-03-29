@@ -332,7 +332,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/LabelProxyAction.h
     src/actions/ModelFilterAction.h
     src/actions/ModelSelectionAction.h
-    src/actions/ModelColumnsAction.h
+    src/actions/HorizontalHeaderAction.h
     src/actions/WidgetActionBadgeOverlayWidget.h
     src/actions/WidgetActionToolButton.h
     src/actions/WidgetActionToolButtonMenu.h
@@ -359,7 +359,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/LabelProxyAction.cpp
 	src/actions/ModelFilterAction.cpp
 	src/actions/ModelSelectionAction.cpp
-	src/actions/ModelColumnsAction.cpp
+	src/actions/HorizontalHeaderAction.cpp
     src/actions/WidgetActionBadgeOverlayWidget.cpp
     src/actions/WidgetActionToolButton.cpp
     src/actions/WidgetActionToolButtonMenu.cpp

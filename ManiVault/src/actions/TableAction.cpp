@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "TableAction.h"
-#include "ModelColumnsAction.h"
 
 #include <QVBoxLayout>
 
@@ -57,11 +56,11 @@ TableAction::Widget::Widget(QWidget* parent, TableAction* tableAction, const std
     _tableView(),
     _infoOverlayWidget(&_tableView),
     _noItemsDescription(QString("No %1s available").arg(_tableAction->getItemTypeName())),
-    _modelColumnsAction(new ModelColumnsAction(this, "Columns", tableAction->getModel(), _tableView.horizontalHeader()))
+    _horizontalHeaderAction(this, "Header", _tableView.horizontalHeader())
 {
     setWindowIcon(tableAction->icon());
 
-    _tableAction->getToolbarGroupAction().addAction(_modelColumnsAction);
+    _tableAction->getToolbarGroupAction().addAction(&_horizontalHeaderAction, GroupAction::Vertical);
 
     _tableView.setObjectName("TableView");
     _tableView.setSelectionModel(&tableAction->getSelectionModel());

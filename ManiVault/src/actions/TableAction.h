@@ -10,6 +10,7 @@
 
 #include "ModelFilterAction.h"
 #include "ModelSelectionAction.h"
+#include "HorizontalHeaderAction.h"
 
 #include "widgets/InfoOverlayWidget.h"
 
@@ -54,11 +55,11 @@ public:
         void updateOverlayWidget();
 
     protected:
-        TableAction*            _tableAction;           /** Pointer to owning table action */
-        QTableView              _tableView;             /** Table view for showing the data */
-        InfoOverlayWidget       _infoOverlayWidget;     /** Overlay widget that show information when there are no items in the model */
-        QString                 _noItemsDescription;    /** Overlay widget description when no items are loaded */
-        ModelColumnsAction*     _modelColumnsAction;    /** Action for columns toggling */
+        TableAction*            _tableAction;               /** Pointer to owning table action */
+        QTableView              _tableView;                 /** Table view for showing the data */
+        InfoOverlayWidget       _infoOverlayWidget;         /** Overlay widget that show information when there are no items in the model */
+        QString                 _noItemsDescription;        /** Overlay widget description when no items are loaded */
+        HorizontalHeaderAction  _horizontalHeaderAction;    /** Action for configuring the horizontal header */
 
         friend class TableAction;
     };

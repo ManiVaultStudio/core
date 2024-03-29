@@ -78,13 +78,9 @@ void OptionsAction::setOptions(const QStringList& options, bool clearSelection /
     const auto selectedOptions = getSelectedOptions();
 
     _optionsModel.setStrings(options);
+    _optionsModel.setCheckedIndicesFromStrings(selectedOptions);
 
-    for (std::int32_t rowIndex = 0; rowIndex < options.count(); ++rowIndex) {
-
-        auto index = _optionsModel.index(rowIndex, 0, QModelIndex());
-
-        _optionsModel.setData(index, clearSelection ? Qt::Unchecked : (selectedOptions.contains(options.at(rowIndex)) ? Qt::Checked : Qt::Unchecked), Qt::CheckStateRole);
-    }
+    auto result = _optionsModel.setHeaderData(0, Qt::Horizontal, "Option", Qt::EditRole);
 
     emit optionsChanged(getOptions());
 }
