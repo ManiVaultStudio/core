@@ -7,6 +7,7 @@
 #include "VerticalGroupAction.h"
 #include "HorizontalGroupAction.h"
 #include "StringAction.h"
+
 #include "ModelFilterAction.h"
 #include "ModelSelectionAction.h"
 
@@ -19,6 +20,8 @@ class QAbstractItemModel;
 class QSortFilterProxyModel;
 
 namespace mv::gui {
+
+class ModelColumnsAction;
 
 /**
  * Table action class
@@ -51,10 +54,11 @@ public:
         void updateOverlayWidget();
 
     protected:
-        TableAction*        _tableAction;           /** Pointer to owning table action */
-        QTableView          _tableView;             /** Table view for showing the data */
-        InfoOverlayWidget   _infoOverlayWidget;     /** Overlay widget that show information when there are no items in the model */
-        QString             _noItemsDescription;    /** Overlay widget description when no items are loaded */
+        TableAction*            _tableAction;           /** Pointer to owning table action */
+        QTableView              _tableView;             /** Table view for showing the data */
+        InfoOverlayWidget       _infoOverlayWidget;     /** Overlay widget that show information when there are no items in the model */
+        QString                 _noItemsDescription;    /** Overlay widget description when no items are loaded */
+        ModelColumnsAction*     _modelColumnsAction;    /** Action for columns toggling */
 
         friend class TableAction;
     };
