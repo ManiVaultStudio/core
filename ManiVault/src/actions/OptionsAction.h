@@ -11,12 +11,8 @@
 
 #include "models/CheckableStringListModel.h"
 
-#include <QSet>
-#include <QPersistentModelIndex>
 #include <QComboBox>
 #include <QCompleter>
-#include <QLineEdit>
-#include <QListView>
 #include <QTableView>
 #include <QSortFilterProxyModel>
 
@@ -35,18 +31,27 @@ class CORE_EXPORT OptionsAction : public WidgetAction
 
 private:
 
-    /** Extends the standard list view to support checking items in the checkable string list model */
-    class CORE_EXPORT CheckableItemView : public QTableView {
+    /** Extends the standard table view to support checking items */
+    class CORE_EXPORT CheckableTableView : public QTableView {
     public:
 
-        /** No need for a custom constructor */
-        using QTableView::QTableView;
+        /**
+         * Construct with pointer to \p parent object
+         * @param parent Pointer to parent object
+         */
+        CheckableTableView(QWidget* parent = nullptr);
 
         /**
          * Invoked when the user presses somewhere in the list view
          * @param event Mouse event that occurred
          */
         void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Configure \p tableView such that it looks according to the checkable table view protocol
+         * @param tableView Pointer to table view to configure
+         */
+        static void configure(QTableView* tableView);
     };
 
 public:
@@ -120,11 +125,12 @@ public: // Widgets
         void updateCurrentText();
 
     protected:
-        OptionsAction*          _optionsAction;     /** Pointer to owning options action */
-        QHBoxLayout             _layout;            /** Horizontal layout */
-        QComboBox               _comboBox;          /** Combobox for selecting options */
-        QCompleter              _completer;         /** For inline searching */
-        CheckableItemView       _view;              /** View for checking items */
+        OptionsAction*          _optionsAction;                 /** Pointer to owning options action */
+        QHBoxLayout             _layout;                        /** Horizontal layout */
+        QComboBox               _comboBox;                      /** Combobox for selecting options */
+        QCompleter              _completer;                     /** For inline searching */
+        CheckableTableView      _comboBoxCheckableTableView;    /** Table view for the combobox popup view */
+        CheckableTableView      _completerCheckableTableView;   /** Table view for the completer popup view */
 
         friend class OptionsAction;
     };

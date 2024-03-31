@@ -7,17 +7,14 @@
 
 #include "Application.h"
 
-#include <QAbstractItemView>
-#include <QHeaderView>
 #include <QDebug>
+#include <QHeaderView>
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QListView>
 #include <QMouseEvent>
-#include <QTableView>
 
 using namespace mv::util;
 
@@ -255,43 +252,20 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     _layout(),
     _comboBox(),
     _completer(),
-    _view()
+    _comboBoxCheckableTableView(),
+    _completerCheckableTableView()
 {
     _comboBox.setObjectName("ComboBox");
     _comboBox.setEditable(true);
     _comboBox.setCompleter(&_completer);
     _comboBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    //_comboBox.setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    //_comboBox.setModel(new QStringListModel());
-    //_comboBox.setModelColumn(0);
-    //_comboBox.setInsertPolicy(QComboBox::NoInsert);
-    
-    //auto view = (QListView*)_comboBox.view();
-
-    //view->setUniformItemSizes(true);
-    //view->setLayoutMode(QListView::Batched);
-
-    //auto view = new CheckableItemView();
-
-    //view->setModel(&optionsAction->getOptionsModel());
-
-    _comboBox.setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-    _comboBox.setView(new QTableView());
+    _comboBox.setSizeAdjustPolicy(optionsAction->getOptionsModel().rowCount() > 1000 ? QComboBox::AdjustToMinimumContentsLengthWithIcon : QComboBox::AdjustToContents);
+    _comboBox.setView(&_comboBoxCheckableTableView);
     _comboBox.setModel(&optionsAction->getOptionsModel());
 
-    //_completer.setModel(&optionsAction->getOptionsModel());
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
     _completer.setFilterMode(Qt::MatchContains);
-    _completer.setPopup(&_view);
-
-    auto horizontalHeader   = _view.horizontalHeader();
-    auto verticalHeader     = _view.verticalHeader();
-
-    horizontalHeader->setVisible(false);
-    horizontalHeader->setStretchLastSection(true);
-
-    verticalHeader->setVisible(false);
-    verticalHeader->setDefaultSectionSize(verticalHeader->fontMetrics().height());
+    _completer.setPopup(&_completerCheckableTableView);
 
     connect(optionsAction, &OptionsAction::selectedOptionsChanged, this, &ComboBoxWidget::updateCurrentText);
     connect(&_comboBox, &QComboBox::activated, this, &ComboBoxWidget::updateCurrentText);
@@ -308,9 +282,9 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     _layout.addWidget(&_comboBox);
 
     if (widgetFlags & WidgetFlag::Selection) {
-        //auto modelSelectionAction = new ModelSelectionAction(this, "Selection", _view.selectionModel());
+        auto modelSelectionAction = new ModelSelectionAction(this, "Selection", _comboBoxCheckableTableView.selectionModel());
 
-        //_layout.addWidget(modelSelectionAction->createCollapsedWidget(this));
+        _layout.addWidget(modelSelectionAction->createCollapsedWidget(this));
     }
 
     if (widgetFlags & WidgetFlag::File)
@@ -321,7 +295,6 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
 
 void OptionsAction::ComboBoxWidget::updateCurrentText()
 {
-    /*
     const auto selectedOptions = _optionsAction->getSelectedOptions();
 
     QString text;
@@ -338,7 +311,6 @@ void OptionsAction::ComboBoxWidget::updateCurrentText()
     QFontMetrics metrics(_comboBox.lineEdit()->font());
 
     _comboBox.lineEdit()->setText(metrics.elidedText(text, Qt::ElideMiddle, _comboBox.lineEdit()->width()));
-    */
 };
 
 bool OptionsAction::ComboBoxWidget::eventFilter(QObject* target, QEvent* event)
@@ -393,6 +365,9 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
             return;
 
         tableView->setWindowIcon(_optionsAction->icon());
+
+        CheckableTableView::configure(tableView);
+        
         tableView->setAlternatingRowColors(true);
 
         auto horizontalHeader   = tableView->horizontalHeader();
@@ -414,6 +389,8 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
     setLayout(layout);
 
     auto& modelSelectionAction = _tableAction.getModelSelectionAction();
+
+    _tableAction.getToolbarGroupAction().addAction(&optionsAction->getFileAction());
 
     connect(&modelSelectionAction.getSelectAllAction(), &TriggerAction::triggered, this, [this]() -> void {
         _optionsAction->setSelectedOptions(_optionsAction->getOptions());
@@ -545,7 +522,13 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
     updateReadOnly();
 }
 
-void OptionsAction::CheckableItemView::mousePressEvent(QMouseEvent* event)
+OptionsAction::CheckableTableView::CheckableTableView(QWidget* parent /*= nullptr*/) :
+    QTableView(parent)
+{
+    configure(this);
+}
+
+void OptionsAction::CheckableTableView::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton) {
         const auto index = indexAt(event->pos());
@@ -567,6 +550,25 @@ void OptionsAction::CheckableItemView::mousePressEvent(QMouseEvent* event)
     }
 
     QAbstractItemView::mousePressEvent(event);
+}
+
+void OptionsAction::CheckableTableView::configure(QTableView* tableView)
+{
+    Q_ASSERT(tableView);
+
+    if (!tableView)
+        return;
+
+    tableView->setAlternatingRowColors(true);
+
+    auto horizontalHeader   = tableView->horizontalHeader();
+    auto verticalHeader     = tableView->verticalHeader();
+
+    horizontalHeader->setVisible(false);
+    horizontalHeader->setStretchLastSection(true);
+
+    verticalHeader->setVisible(false);
+    verticalHeader->setDefaultSectionSize(verticalHeader->fontMetrics().height());
 }
 
 }

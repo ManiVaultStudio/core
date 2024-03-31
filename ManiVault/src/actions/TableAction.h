@@ -131,13 +131,13 @@ public: // Action getters
     ModelSelectionAction& getModelSelectionAction() { return _modelSelectionAction; }
 
 private:
-    QAbstractItemModel*         _model;                 /** Pointer to model */
-    QSortFilterProxyModel*      _filterModel;           /** Pointer to filter model */
-    QItemSelectionModel         _selectionModel;        /** Selection model */
-    QString                     _itemTypeName;          /** String that describes an individual model item type */
-    HorizontalGroupAction       _toolbarGroupAction;    /** Horizontal toolbar group action */
-    ModelFilterAction           _modelFilterAction;     /** Action for configuring filtering */
-    ModelSelectionAction        _modelSelectionAction;  /** Action for bulk selection */
+    QAbstractItemModel*         _model;                         /** Pointer to model */
+    QSortFilterProxyModel*      _filterModel;                   /** Pointer to filter model */
+    QItemSelectionModel         _selectionModel;                /** Selection model */
+    QString                     _itemTypeName;                  /** String that describes an individual model item type */
+    HorizontalGroupAction       _toolbarGroupAction;            /** Horizontal toolbar group action */
+    ModelFilterAction           _modelFilterAction;             /** Action for configuring filtering */
+    ModelSelectionAction        _modelSelectionAction;          /** Action for bulk selection */
 
     friend class AbstractActionsManager;
 };
