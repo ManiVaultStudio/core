@@ -15,6 +15,7 @@ TableAction::TableAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
     _model(nullptr),
     _filterModel(nullptr),
+    _selectionModel(),
     _toolbarGroupAction(this, "Toolbar"),
     _modelFilterAction(this, "Filtering"),
     _modelSelectionAction(this, "Selection")
@@ -63,12 +64,13 @@ TableAction::Widget::Widget(QWidget* parent, TableAction* tableAction, const std
     _tableAction->getToolbarGroupAction().addAction(&_horizontalHeaderAction, GroupAction::Vertical);
 
     _tableView.setObjectName("TableView");
-    _tableView.setSelectionModel(&tableAction->getSelectionModel());
 
     if (auto filterModel = tableAction->getFilterModel())
         _tableView.setModel(filterModel);
     else
         _tableView.setModel(tableAction->getModel());
+
+    _tableView.setSelectionModel(&tableAction->getSelectionModel());
 
     auto layout = new QVBoxLayout();
 

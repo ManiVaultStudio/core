@@ -27,7 +27,7 @@ Qt::ItemFlags CheckableStringListModel::flags(const QModelIndex& index) const
 QVariant CheckableStringListModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::CheckStateRole && index.isValid())
-        return (_checkedItems.contains(index.row())) ? Qt::Checked : Qt::Unchecked;
+        return _checkStatesList[index.row()] ? Qt::Checked : Qt::Unchecked;
 
     return QStringListModel::data(index, role);
 }
@@ -35,10 +35,7 @@ QVariant CheckableStringListModel::data(const QModelIndex& index, int role) cons
 bool CheckableStringListModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (role == Qt::CheckStateRole && index.isValid()) {
-        if (value == Qt::Checked)
-            _checkedItems.insert(index.row());
-        else
-            _checkedItems.remove(index.row());
+        _checkStatesList[index.row()] = value == Qt::Checked;
 
         emit dataChanged(index, index);
 
@@ -52,48 +49,71 @@ void CheckableStringListModel::setStrings(const QStringList& strings)
 {
     QStringListModel::setStringList(strings);
 
-    _checkedItems.clear();
+    _checkStatesList.resize(strings.count());
+
+    _strings = strings;
 }
 
 QStringList CheckableStringListModel::getCheckedStrings() const
 {
     QStringList checkedStrings;
 
-    checkedStrings.reserve(_checkedItems.count());
+    checkedStrings.reserve(_checkStatesList.count());
 
-    for (const auto& checkedItem : _checkedItems)
-        checkedStrings.push_back(data(index(checkedItem, 0), Qt::EditRole).toString());
+    for (std::int32_t stringIndex = 0; stringIndex < _checkStatesList.count(); ++stringIndex)
+        if (_checkStatesList[stringIndex])
+            checkedStrings << data(index(stringIndex, 0), Qt::EditRole).toString();
 
     return checkedStrings;
 }
 
-CheckableStringListModel::StringIndicesSet CheckableStringListModel::getCheckedIndicesSet() const
+CheckableStringListModel::CheckedIndicesList CheckableStringListModel::getCheckedIndicesList() const
 {
-    return _checkedItems;
+    CheckedIndicesList checkedIndicesList;
+
+    checkedIndicesList.reserve(_checkStatesList.count());
+
+    for (std::int32_t stringIndex = 0; stringIndex < _checkStatesList.count(); ++stringIndex)
+        if (_checkStatesList[stringIndex])
+            checkedIndicesList << stringIndex;
+
+    return checkedIndicesList;
 }
 
-mv::CheckableStringListModel::StringIndicesList CheckableStringListModel::getCheckedIndicesList() const
+CheckableStringListModel::CheckedIndicesSet CheckableStringListModel::getCheckedIndicesSet() const
 {
-    return StringIndicesList(_checkedItems.begin(), _checkedItems.end());
+    CheckedIndicesSet checkedIndicesSet;
+
+    checkedIndicesSet.reserve(_checkStatesList.count());
+
+    for (std::int32_t stringIndex = 0; stringIndex < _checkStatesList.count(); ++stringIndex)
+        if (_checkStatesList[stringIndex])
+            checkedIndicesSet << stringIndex;
+
+    return checkedIndicesSet;
 }
 
-void CheckableStringListModel::setCheckedIndicesSet(const StringIndicesSet& checkedStringIndicesSet)
+void CheckableStringListModel::setCheckedIndicesSet(const CheckedIndicesSet& checkedIndicesSet)
 {
-    _checkedItems = checkedStringIndicesSet;
+    std::fill(_checkStatesList.begin(), _checkStatesList.end(), false);
+
+    for (const auto& checkedIndex : checkedIndicesSet)
+        _checkStatesList[checkedIndex] = true;
 
     emit dataChanged(index(0, 0), index(rowCount() - 1));
 }
 
 void CheckableStringListModel::setCheckedIndicesFromStrings(const QStringList& checkedStrings)
 {
-    _checkedItems.clear();
-    _checkedItems.reserve(rowCount());
+    std::fill(_checkStatesList.begin(), _checkStatesList.end(), false);
 
     for (const auto& checkedString : checkedStrings) {
-        const auto matches = match(index(0, 0), Qt::EditRole, checkedString, -1);
+        const auto index = _strings.indexOf(checkedString);
 
-        if (!matches.isEmpty())
-            _checkedItems << matches.first().row();
+        if (index < 0)
+            continue;
+
+        _checkStatesList[index] = true;
     }
 
     emit dataChanged(index(0, 0), index(rowCount() - 1));

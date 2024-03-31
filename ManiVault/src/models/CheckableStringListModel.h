@@ -17,11 +17,12 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT CheckableStringListModel final : public QStringListModel{
+class CORE_EXPORT CheckableStringListModel final : public QStringListModel {
 public:
 
-    using StringIndicesSet = QSet<std::int32_t>;
-    using StringIndicesList = QList<std::int32_t>;
+    using CheckedIndicesList    = QList<std::int32_t>;  /** List of checked string indices */
+    using CheckedIndicesSet     = QSet<std::int32_t>;   /** Set of checked string indices */
+    using CheckStatesList       = QList<bool>;          /** Check state for each string */
 
 private:
 
@@ -76,22 +77,22 @@ public:
     QStringList getCheckedStrings() const;
 
     /**
-     * Get checked indices set
-     * @return Set of checked indices
-     */
-    StringIndicesSet getCheckedIndicesSet() const;
-
-    /**
      * Get checked indices list
      * @return List of checked indices
      */
-    StringIndicesList getCheckedIndicesList() const;
+    CheckedIndicesList getCheckedIndicesList() const;
 
     /**
-     * Set checked indices set to \p checkedStringIndicesSet
-     * @param checkedStringIndicesSet Set of checked string indices
+     * Get checked indices set
+     * @return Set of checked indices
      */
-    void setCheckedIndicesSet(const StringIndicesSet& checkedStringIndicesSet);
+    CheckedIndicesSet getCheckedIndicesSet() const;
+
+    /**
+     * Set checked indices set to \p checkedIndicesSet
+     * @param checkedIndicesSet Set of checked indices
+     */
+    void setCheckedIndicesSet(const CheckedIndicesSet& checkedIndicesSet);
 
     /**
      * Set checked indices from \p checkedStrings
@@ -100,7 +101,8 @@ public:
     void setCheckedIndicesFromStrings(const QStringList& checkedStrings);
 
 private:
-    StringIndicesSet   _checkedItems;  /** Keeps track of the selected items */
+    CheckStatesList _checkStatesList;   /** Keeps track of the selected items */
+    QStringList     _strings;
 };
 
 }

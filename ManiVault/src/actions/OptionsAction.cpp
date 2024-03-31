@@ -80,8 +80,6 @@ void OptionsAction::setOptions(const QStringList& options, bool clearSelection /
     _optionsModel.setStrings(options);
     _optionsModel.setCheckedIndicesFromStrings(selectedOptions);
 
-    auto result = _optionsModel.setHeaderData(0, Qt::Horizontal, "Option", Qt::EditRole);
-
     emit optionsChanged(getOptions());
 }
 
@@ -263,16 +261,37 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     _comboBox.setEditable(true);
     _comboBox.setCompleter(&_completer);
     _comboBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    _comboBox.setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    _comboBox.setModel(&optionsAction->getOptionsModel());
-    _comboBox.setModelColumn(0);
-    _comboBox.setInsertPolicy(QComboBox::NoInsert);
-    _comboBox.setView(&_view);
+    //_comboBox.setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    //_comboBox.setModel(new QStringListModel());
+    //_comboBox.setModelColumn(0);
+    //_comboBox.setInsertPolicy(QComboBox::NoInsert);
+    
+    //auto view = (QListView*)_comboBox.view();
 
-    _completer.setModel(&optionsAction->getOptionsModel());
+    //view->setUniformItemSizes(true);
+    //view->setLayoutMode(QListView::Batched);
+
+    //auto view = new CheckableItemView();
+
+    //view->setModel(&optionsAction->getOptionsModel());
+
+    _comboBox.setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    _comboBox.setView(new QTableView());
+    _comboBox.setModel(&optionsAction->getOptionsModel());
+
+    //_completer.setModel(&optionsAction->getOptionsModel());
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
     _completer.setFilterMode(Qt::MatchContains);
-    _completer.setPopup(new CheckableItemView(this));
+    _completer.setPopup(&_view);
+
+    auto horizontalHeader   = _view.horizontalHeader();
+    auto verticalHeader     = _view.verticalHeader();
+
+    horizontalHeader->setVisible(false);
+    horizontalHeader->setStretchLastSection(true);
+
+    verticalHeader->setVisible(false);
+    verticalHeader->setDefaultSectionSize(verticalHeader->fontMetrics().height());
 
     connect(optionsAction, &OptionsAction::selectedOptionsChanged, this, &ComboBoxWidget::updateCurrentText);
     connect(&_comboBox, &QComboBox::activated, this, &ComboBoxWidget::updateCurrentText);
@@ -289,9 +308,9 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     _layout.addWidget(&_comboBox);
 
     if (widgetFlags & WidgetFlag::Selection) {
-        auto modelSelectionAction = new ModelSelectionAction(this, "Selection", _view.selectionModel());
+        //auto modelSelectionAction = new ModelSelectionAction(this, "Selection", _view.selectionModel());
 
-        _layout.addWidget(modelSelectionAction->createCollapsedWidget(this));
+        //_layout.addWidget(modelSelectionAction->createCollapsedWidget(this));
     }
 
     if (widgetFlags & WidgetFlag::File)
@@ -302,6 +321,7 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
 
 void OptionsAction::ComboBoxWidget::updateCurrentText()
 {
+    /*
     const auto selectedOptions = _optionsAction->getSelectedOptions();
 
     QString text;
@@ -318,6 +338,7 @@ void OptionsAction::ComboBoxWidget::updateCurrentText()
     QFontMetrics metrics(_comboBox.lineEdit()->font());
 
     _comboBox.lineEdit()->setText(metrics.elidedText(text, Qt::ElideMiddle, _comboBox.lineEdit()->width()));
+    */
 };
 
 bool OptionsAction::ComboBoxWidget::eventFilter(QObject* target, QEvent* event)

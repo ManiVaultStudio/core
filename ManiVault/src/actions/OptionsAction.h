@@ -17,6 +17,7 @@
 #include <QCompleter>
 #include <QLineEdit>
 #include <QListView>
+#include <QTableView>
 #include <QSortFilterProxyModel>
 
 namespace mv::gui {
@@ -35,11 +36,11 @@ class CORE_EXPORT OptionsAction : public WidgetAction
 private:
 
     /** Extends the standard list view to support checking items in the checkable string list model */
-    class CORE_EXPORT CheckableItemView : public QListView {
+    class CORE_EXPORT CheckableItemView : public QTableView {
     public:
 
         /** No need for a custom constructor */
-        using QListView::QListView;
+        using QTableView::QTableView;
 
         /**
          * Invoked when the user presses somewhere in the list view
