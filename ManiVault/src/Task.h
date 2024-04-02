@@ -334,15 +334,15 @@ public: // Name, description, icon and may kill
 
     /**
      * Envoke Qt's processEvents on updates
-     * @param alwaysProcessEvent Whether to invoke Qt's processEvents on updates
+     * @param alwaysProcessEvents Whether to invoke Qt's processEvents on updates
      */
-    virtual void setAlwaysProcessEvent(bool alwaysProcessEvent) final;
+    virtual void setAlwaysProcessEvents(bool alwaysProcessEvents) final;
 
     /**
      * Get whether the task envokes Qt processEvents on updates
      * @return Whether the task envokes Qt's processEvents on updates
      */
-    virtual bool getAlwaysProcessEvent() const final;
+    virtual bool getAlwaysProcessEvents() const final;
 
 public: // Status
 
