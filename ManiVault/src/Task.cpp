@@ -369,7 +369,7 @@ void Task::setAlwaysProcessEvents(bool alwaysProcessEvents)
     _alwaysProcessEvents = alwaysProcessEvents;
 }
 
-bool Task::getAlwaysProcessEvent() const
+bool Task::getAlwaysProcessEvents() const
 {
     return _alwaysProcessEvents;
 }
