@@ -31,22 +31,8 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
 }
 
 ProjectMetaAction::ProjectMetaAction(const QString& filePath, QObject* parent /*= nullptr*/) :
-    VerticalGroupAction(parent, "ProjectMeta"),
-    _project(nullptr),
-    _applicationVersionAction(this, "Application Version"),
-    _projectVersionAction(this, "Project Version"),
-    _readOnlyAction(this, "Read-only"),
-    _titleAction(this, "Title"),
-    _descriptionAction(this, "Description"),
-    _tagsAction(this, "Tags"),
-    _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors"),
-    _splashScreenAction(this),
-    _studioModeAction(this, "Studio Mode"),
-    _compressionAction(this)
+    ProjectMetaAction(nullptr, parent)
 {
-    _splashScreenAction.setProjectMetaAction(this);
-
     try {
         if (!QFileInfo(filePath).exists())
             throw std::runtime_error("File does not exist");
