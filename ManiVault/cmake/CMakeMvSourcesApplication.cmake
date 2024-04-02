@@ -5,7 +5,6 @@
 
 set(MAIN_SOURCES
     src/Main.cpp
-    res/styles/default.qss
 )
 
 set(PRIVATE_CORE_HEADERS
@@ -322,7 +321,7 @@ list(REMOVE_DUPLICATES PRIVATE_SOURCES)
 
 source_group(Core FILES ${PRIVATE_CORE_FILES})
 source_group(Actions FILES ${PRIVATE_ACTION_FILES})
-source_group(Application FILES ${PRIVATE_APPLICATION_FILES})
+source_group(Application FILES ${PRIVATE_APPLICATION_FILES} ${MAIN_SOURCES})
 source_group(Managers\\Layout FILES ${PRIVATE_LAYOUT_MANAGER_FILES})
 source_group(Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
 source_group(Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
