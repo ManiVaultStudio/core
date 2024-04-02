@@ -98,7 +98,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _editAction.addAction(&_projectImageAction);
     _editAction.addAction(&_affiliateLogosImageAction);
 
-    getTaskAction().setTask(&Application::current()->getStartupTask());
+    _taskAction.setTask(&Application::current()->getStartupTask());
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
