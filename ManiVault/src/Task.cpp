@@ -364,9 +364,9 @@ void Task::reset(bool recursive /*= false*/)
     emit privateResetSignal(recursive, QPrivateSignal());
 }
 
-void Task::setAlwaysProcessEvent(bool val)
+void Task::setAlwaysProcessEvents(bool alwaysProcessEvents)
 {
-    _alwaysProcessEvents = val;
+    _alwaysProcessEvents = alwaysProcessEvents;
 }
 
 bool Task::getAlwaysProcessEvent() const
