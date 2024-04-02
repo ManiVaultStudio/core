@@ -332,8 +332,16 @@ public: // Name, description, icon and may kill
      */
     virtual void reset(bool recursive = false) final;
 
+    /**
+     * Envoke Qt's processEvents on updates
+     * @param val Whether to envoke Qt's processEvents on updates
+     */
     virtual void setAlwaysProcessEvent(bool val) final;
 
+    /**
+     * Get whether the task envokes Qt processEvents on updates
+     * @return Whether the task envokes Qt's processEvents on updates
+     */
     virtual bool getAlwaysProcessEvent() const final;
 
 public: // Status
@@ -960,7 +968,7 @@ private:
     Status                  _deferredStatus;                                /** Task status which is set after a delay */
     bool                    _deferredStatusRecursive;                       /** Whether to set the task status deferred recursively */
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
-    bool                    _alwaysProcessEvents;                           /** Whether the task envokes Qt processEvents on updates, e.g. for task before the main event loop started. Default: false */
+    bool                    _alwaysProcessEvents;                           /** Whether the task envokes Qt's processEvents on updates, e.g. for task before the main event loop started. Default: false */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
     GuiScopes               _guiScopes;                                     /** The gui scope(s) in which the task will present itself to the user */
