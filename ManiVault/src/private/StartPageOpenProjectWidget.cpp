@@ -17,6 +17,9 @@
 #include <QDebug>
 #include <QPainter>
 
+#include <iostream>
+#include <chrono>
+
 using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;
@@ -175,24 +178,51 @@ void StartPageOpenProjectWidget::updateRecentActions()
 {
     _recentProjectsWidget.getModel().reset();
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
+    auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
+
+    QList<QSharedPointer<ProjectMetaAction>> projectMetaActions;
+
+    auto executionTime = [](std::chrono::steady_clock::time_point start, std::chrono::steady_clock::time_point end) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    };
+
+    std::chrono::steady_clock::time_point t0, t1;
+    t0 = std::chrono::steady_clock::now();
+
+    qDebug() << "Loading recent project...";
 
     for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
+
+        t1 = std::chrono::steady_clock::now();
+        std::cout << "Time (for begin): " << executionTime(t0, t1) << " milliseconds" << std::endl;
+
         const auto recentFilePath = recentFile.getFilePath();
 
-        const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
+        const auto projectMetaJsonFilePath = projects().extractFileFromManiVaultProject(recentFilePath, Application::current()->getTemporaryDir(), "meta.json");
+        qDebug() << "projectMetaJsonFilePath: " << projectMetaJsonFilePath;
+        //auto& projectMetaAction = projectMetaActions.emplace_back(Project::getProjectMetaActionFromProjectFilePath(recentFilePath));
 
-        if (projectMetaAction.isNull()) {
-            StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
+        t0 = std::chrono::steady_clock::now();
+        std::cout << "Time (projectMetaJsonFilePath): " << executionTime(t1, t0) << " milliseconds" << std::endl;
+
+        if (projectMetaJsonFilePath.isEmpty()) {
+            StartPageAction recentProjectStartPageAction(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
                 projects().openProject(recentFilePath);
             });
 
             _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
         }
         else {
-            StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), recentFilePath, projectMetaAction->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+            qDebug() << "Loading project: " << QFileInfo(recentFilePath).baseName();
+
+            auto* projectMetaAction = new ProjectMetaAction(projectMetaJsonFilePath, this);
+
+            StartPageAction recentProjectStartPageAction(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, projectMetaAction->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
                 projects().openProject(recentFilePath);
             });
+
+            t1 = std::chrono::steady_clock::now();
+            std::cout << "Time (StartPageAction): " << executionTime(t0, t1) << " milliseconds" << std::endl;
 
             recentProjectStartPageAction.setComments(projectMetaAction->getCommentsAction().getString());
             recentProjectStartPageAction.setTags(projectMetaAction->getTagsAction().getStrings());
@@ -200,9 +230,26 @@ void StartPageOpenProjectWidget::updateRecentActions()
             recentProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(recentFilePath));
             recentProjectStartPageAction.setContributors(projectMetaAction->getContributorsAction().getStrings());
 
+            t0 = std::chrono::steady_clock::now();
+            std::cout << "Time (recentProjectStartPageAction): " << executionTime(t1, t0) << " milliseconds" << std::endl;
+
             _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
+
+            t1 = std::chrono::steady_clock::now();
+            std::cout << "Time (getModel): " << executionTime(t0, t1) << " milliseconds" << std::endl;
+
+            projectMetaAction->deleteLater();
+            t0 = std::chrono::steady_clock::now();
+            std::cout << "Time (delete projectMetaAction): " << executionTime(t1, t0) << " milliseconds" << std::endl;
         }
+
+        t1 = std::chrono::steady_clock::now();
+        std::cout << "Time (if end): " << executionTime(t0, t1) << " milliseconds" << std::endl;
     }
+
+    t0 = std::chrono::steady_clock::now();
+    std::cout << "Time (for end): " << executionTime(t1, t0) << " milliseconds" << std::endl;
+
 }
 
 void StartPageOpenProjectWidget::updateExamplesActions()

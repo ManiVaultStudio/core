@@ -77,6 +77,11 @@ ProjectMetaAction::ProjectMetaAction(const QString& filePath, QObject* parent /*
     }
 }
 
+ProjectMetaAction::~ProjectMetaAction()
+{
+    qDebug() << "~ProjectMetaAction()";
+}
+
 void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
