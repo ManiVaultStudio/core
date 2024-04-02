@@ -35,6 +35,14 @@ CORE_EXPORT QIcon createIcon(const QPixmap& pixmap, const QList<QSize>& pixmapSi
 CORE_EXPORT QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay);
 
 /**
+ * Combine icons \p iconA and \p iconB into one
+ * @param iconA Icon A
+ * @param iconB Icon B (overlays iconA)
+ * @return Combined icon
+ */
+CORE_EXPORT QIcon combineIcons(const QIcon& iconA, const QIcon& iconB);
+
+/**
  * Convenience function to create a plugin icon, which consists of maximum of four characters laid out in a grid
  * @param characters Characters
  * @param color Icon color
