@@ -11,14 +11,6 @@
 
 namespace mv::gui {
 
-#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
-    constexpr float  DecimalRangeAction::INIT_LIMIT_MIN;
-    constexpr float  DecimalRangeAction::INIT_LIMIT_MAX;
-    constexpr float  DecimalRangeAction::INIT_RANGE_MIN;
-    constexpr float  DecimalRangeAction::INIT_RANGE_MAX;
-    constexpr float  DecimalRangeAction::INIT_NUMBER_OF_DECIMALS;
-#endif
-
 DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<float>& limits /*= util::NumericalRange<float>(INIT_LIMIT_MIN, INIT_LIMIT_MAX)*/, const util::NumericalRange<float>& range /*= util::NumericalRange<float>(INIT_RANGE_MIN, INIT_RANGE_MAX)*/, std::int32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
     NumericalRangeAction(parent, title, limits, range)
 {

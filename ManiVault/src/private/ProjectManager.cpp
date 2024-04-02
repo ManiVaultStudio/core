@@ -34,12 +34,6 @@ using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;
 
-// Definition needed for pre C++17 gcc and clang
-#if (__cplusplus < 201703L)
-    constexpr bool ProjectManager::DEFAULT_ENABLE_COMPRESSION;
-    constexpr std::uint32_t ProjectManager::DEFAULT_COMPRESSION_LEVEL;
-#endif
-
 ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     AbstractProjectManager(parent),
     _project(),

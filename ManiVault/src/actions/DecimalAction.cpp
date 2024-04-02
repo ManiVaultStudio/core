@@ -10,14 +10,6 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
-    constexpr float DecimalAction::INIT_MIN;
-    constexpr float DecimalAction::INIT_MAX;
-    constexpr float DecimalAction::INIT_VALUE;
-    constexpr float DecimalAction::INIT_DEFAULT_VALUE;
-    constexpr int   DecimalAction::INIT_DECIMALS;
-#endif
-
 DecimalAction::DecimalAction(QObject * parent, const QString& title, float minimum /*= INIT_MIN*/, float maximum /*= INIT_MAX*/, float value /*= INIT_VALUE*/, std::uint32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
     NumericalAction<float>(parent, title, minimum, maximum, value, numberOfDecimals),
     _singleStep(0.1f)
