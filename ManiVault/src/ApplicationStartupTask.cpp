@@ -29,8 +29,8 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
     setStatus(Task::Status::Idle, true);
 
     // Call QCoreApplication::processEvents() on each task update since we live before Qt's main event loop
-    _loadCoreManagersTask.setAlwaysProcessEvent(true);
-    _loadGuiTask.setAlwaysProcessEvent(true);
+    _loadCoreManagersTask.setAlwaysProcessEvents(true);
+    _loadGuiTask.setAlwaysProcessEvents(true);
 
     connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
         if (Application::current()->shouldOpenProjectAtStartup())
