@@ -466,6 +466,12 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
     addAction(&_loadSelectionAction);
     addAction(&_saveSelectionAction);
 
+    _loadSelectionAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _saveSelectionAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _loadSelectionAction.setIconByName("file-import");
+    _saveSelectionAction.setIconByName("file-export");
+
     const auto updateReadOnly = [this]() -> void {
         _loadSelectionAction.setEnabled(_optionsAction.getOptions().count() >= 1);
         _saveSelectionAction.setEnabled(_optionsAction.getOptions().count() >= 1);
