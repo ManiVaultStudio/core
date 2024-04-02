@@ -43,8 +43,6 @@ public:
      */
     ProjectMetaAction(const QString& filePath, QObject* parent = nullptr);
 
-    ~ProjectMetaAction();
-
     /**
      * Get owning project
      * @return Pointer to owning project (might be nullptr if project meta action is used in isolation)
