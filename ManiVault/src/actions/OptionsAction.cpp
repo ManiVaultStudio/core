@@ -285,6 +285,23 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
         auto modelSelectionAction = new ModelSelectionAction(this, "Selection", _comboBoxCheckableTableView.selectionModel());
 
         _layout.addWidget(modelSelectionAction->createCollapsedWidget(this));
+
+        connect(&modelSelectionAction->getSelectAllAction(), &TriggerAction::triggered, this, [this]() -> void {
+            _optionsAction->setSelectedOptions(_optionsAction->getOptions());
+        });
+
+        connect(&modelSelectionAction->getClearSelectionAction(), &TriggerAction::triggered, this, [this]() -> void {
+            _optionsAction->setSelectedOptions(QStringList());
+        });
+
+        connect(&modelSelectionAction->getInvertSelectionAction(), &TriggerAction::triggered, this, [this]() -> void {
+            auto invertedSelectedOptions = _optionsAction->getOptions();
+
+            for (const auto& selectedOption : _optionsAction->getSelectedOptions())
+                invertedSelectedOptions.removeOne(selectedOption);
+
+            _optionsAction->setSelectedOptions(invertedSelectedOptions);
+        });
     }
 
     if (widgetFlags & WidgetFlag::File)
@@ -394,9 +411,9 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
     modelFilterAction.getFilterGroupAction().setShowLabels(false);
     modelFilterAction.getFilterColumnAction().setVisible(false);
 
-    auto& modelSelectionAction = _tableAction.getModelSelectionAction();
-
     _tableAction.getToolbarGroupAction().addAction(&optionsAction->getFileAction());
+
+    auto& modelSelectionAction = _tableAction.getModelSelectionAction();
 
     connect(&modelSelectionAction.getSelectAllAction(), &TriggerAction::triggered, this, [this]() -> void {
         _optionsAction->setSelectedOptions(_optionsAction->getOptions());
