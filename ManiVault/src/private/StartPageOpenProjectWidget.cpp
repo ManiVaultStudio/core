@@ -176,9 +176,12 @@ void StartPageOpenProjectWidget::updateRecentActions()
 
     auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
 
-    qDebug() << "Looking for recent projects...";
+    const auto recentFiles = _recentProjectsAction.getRecentFiles();
 
-    for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
+    if(!recentFiles.isEmpty())
+        qDebug() << "Looking for recent projects...";
+
+    for (const auto& recentFile : recentFiles) {
         const auto recentFilePath = recentFile.getFilePath();
 
         const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
@@ -213,7 +216,7 @@ void StartPageOpenProjectWidget::updateExamplesActions()
 {
     _exampleProjectsWidget.getModel().reset();
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
+    auto filePrescriptionIcon = Application::getIconFont("FontAwesome").getIcon("clock");
 
     QStringList projectFilter("*.mv");
 
@@ -221,20 +224,25 @@ void StartPageOpenProjectWidget::updateExamplesActions()
 
     const auto exampleProjects = exampleProjectsDirectory.entryList(projectFilter);
 
+    if(!exampleProjects.isEmpty())
+        qDebug() << "Looking for example projects...";
+
     for (const auto& exampleProject : exampleProjects) {
         const auto exampleProjectFilePath = QString("%1/examples/projects/%2").arg(qApp->applicationDirPath(), exampleProject);
 
         const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(exampleProjectFilePath);
 
         if (projectMetaAction.isNull()) {
-            StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), QFileInfo(exampleProjectFilePath).baseName(), exampleProjectFilePath, exampleProjectFilePath, "", [exampleProjectFilePath]() -> void {
+            StartPageAction exampleProjectStartPageAction(filePrescriptionIcon, QFileInfo(exampleProjectFilePath).baseName(), exampleProjectFilePath, exampleProjectFilePath, "", [exampleProjectFilePath]() -> void {
                 projects().openProject(exampleProjectFilePath);
             });
 
             _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
         }
         else {
-            StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), projectMetaAction->getTitleAction().getString(), exampleProjectFilePath, projectMetaAction->getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
+            qDebug() << "Found project: " << QFileInfo(projectMetaAction->getTitleAction().getString()).baseName();
+
+            StartPageAction exampleProjectStartPageAction(filePrescriptionIcon, projectMetaAction->getTitleAction().getString(), exampleProjectFilePath, projectMetaAction->getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
                 projects().openProject(exampleProjectFilePath);
             });
 
