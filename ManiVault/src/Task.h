@@ -334,9 +334,9 @@ public: // Name, description, icon and may kill
 
     /**
      * Envoke Qt's processEvents on updates
-     * @param val Whether to envoke Qt's processEvents on updates
+     * @param alwaysProcessEvent Whether to invoke Qt's processEvents on updates
      */
-    virtual void setAlwaysProcessEvent(bool val) final;
+    virtual void setAlwaysProcessEvent(bool alwaysProcessEvent) final;
 
     /**
      * Get whether the task envokes Qt processEvents on updates
@@ -719,9 +719,9 @@ public: // Advanced (only use methods if consequences are understood)
     /**
      * Adds this task to the task manager
      * Under normal circumstances, tasks are automatically added to the task manager during construction.
-     * In some cases, the task manager is not yet present then and therefor this method allows to
+     * In some cases, the task manager is not yet present then and therefore this method allows to
      * manually add this task to the task manager at a later point in time.
-     * Only use this in edge-cases!
+     * Only use this in edge cases!
      */
     void addToTaskManager();
 
