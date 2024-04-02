@@ -356,6 +356,7 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
 {
     _tableAction.initialize(&optionsAction->getOptionsModel(), &_filterModel, "Option");
     _tableAction.setIconByName("tasks");
+    _tableAction.getShowHeaderSettingsAction().setChecked(false);
     _tableAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
         auto tableView = widget->findChild<QTableView*>("TableView");
 
@@ -387,6 +388,11 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
     layout->addWidget(_tableAction.createWidget(this));
 
     setLayout(layout);
+
+    auto& modelFilterAction = _tableAction.getModelFilterAction();
+
+    modelFilterAction.getFilterGroupAction().setShowLabels(false);
+    modelFilterAction.getFilterColumnAction().setVisible(false);
 
     auto& modelSelectionAction = _tableAction.getModelSelectionAction();
 

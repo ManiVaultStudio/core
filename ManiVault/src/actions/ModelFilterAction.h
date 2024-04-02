@@ -48,6 +48,14 @@ private:
     /** Update the filter model and related actions */
     void updateFilterModel();
 
+public: // Action getters
+
+    StringAction& getFilterNameAction() { return _filterNameAction; }
+    OptionAction& getFilterColumnAction() { return _filterColumnAction; }
+    GroupAction& getFilterGroupAction() { return _filterGroupAction; }
+    ToggleAction& getFfilterCaseSensitiveAction() { return _filterCaseSensitiveAction; }
+    ToggleAction& getFilterRegularExpressionAction() { return _filterRegularExpressionAction; }
+
 private:
     QAbstractItemModel*         _model;                             /** Pointer to input model */
     QSortFilterProxyModel*      _filterModel;                       /** Pointer to filter model */

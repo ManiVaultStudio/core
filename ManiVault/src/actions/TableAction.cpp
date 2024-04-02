@@ -18,7 +18,8 @@ TableAction::TableAction(QObject* parent, const QString& title) :
     _selectionModel(),
     _toolbarGroupAction(this, "Toolbar"),
     _modelFilterAction(this, "Filtering"),
-    _modelSelectionAction(this, "Selection")
+    _modelSelectionAction(this, "Selection"),
+    _showHeaderSettingsAction(this, "Show header settings", true)
 {
     _toolbarGroupAction.setShowLabels(false);
 
@@ -93,6 +94,14 @@ TableAction::Widget::Widget(QWidget* parent, TableAction* tableAction, const std
     connect(filterModel, &QAbstractItemModel::rowsInserted, this, &Widget::updateOverlayWidget);
     connect(filterModel, &QAbstractItemModel::rowsRemoved, this, &Widget::updateOverlayWidget);
     connect(filterModel, &QAbstractItemModel::layoutChanged, this, &Widget::updateOverlayWidget);
+
+    const auto updateHeaderActionVisibility = [this]() -> void {
+        _horizontalHeaderAction.setVisible(_tableAction->getShowHeaderSettingsAction().isChecked());
+    };
+
+    updateHeaderActionVisibility();
+
+    connect(&tableAction->getShowHeaderSettingsAction(), &ToggleAction::toggled, this, updateHeaderActionVisibility);
 }
 
 void TableAction::Widget::updateOverlayWidget()

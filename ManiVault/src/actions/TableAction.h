@@ -7,6 +7,7 @@
 #include "VerticalGroupAction.h"
 #include "HorizontalGroupAction.h"
 #include "StringAction.h"
+#include "ToggleAction.h"
 
 #include "ModelFilterAction.h"
 #include "ModelSelectionAction.h"
@@ -129,6 +130,7 @@ public: // Action getters
     HorizontalGroupAction& getToolbarGroupAction() { return _toolbarGroupAction; }
     ModelFilterAction& getModelFilterAction() { return _modelFilterAction; }
     ModelSelectionAction& getModelSelectionAction() { return _modelSelectionAction; }
+    ToggleAction& getShowHeaderSettingsAction() { return _showHeaderSettingsAction; }
 
 private:
     QAbstractItemModel*         _model;                         /** Pointer to model */
@@ -138,6 +140,7 @@ private:
     HorizontalGroupAction       _toolbarGroupAction;            /** Horizontal toolbar group action */
     ModelFilterAction           _modelFilterAction;             /** Action for configuring filtering */
     ModelSelectionAction        _modelSelectionAction;          /** Action for bulk selection */
+    ToggleAction                _showHeaderSettingsAction;      /** Toggle header settings */
 
     friend class AbstractActionsManager;
 };
