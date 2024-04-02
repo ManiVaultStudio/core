@@ -54,8 +54,9 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param filePath File path
+     * @param populateCompleter Whether to create a QCompleter for _filePathAction
      */
-    Q_INVOKABLE FilePickerAction(QObject* parent, const QString& title, const QString& filePath = QString());
+    Q_INVOKABLE FilePickerAction(QObject* parent, const QString& title, const QString& filePath = QString(), bool populateCompleter = true);
     
     /**
      * Get the current file path
@@ -169,13 +170,13 @@ signals:
     void fileTypeChanged(const QString& fileType);
 
 private:
-    QFileSystemModel    _dirModel;          /** Directory model */
-    QCompleter          _completer;         /** Completer */
-    StringAction        _filePathAction;    /** File path action */
-    TriggerAction       _pickAction;        /** Pick file action */
-    QStringList         _nameFilters;       /** File type filters */
-    QString             _defaultSuffix;     /** Default suffix */
-    QString             _fileType;          /** File type (e.g. image and project)*/
+    QPointer<QFileSystemModel>  _dirModel;          /** Directory model */
+    QPointer<QCompleter>        _completer;         /** Completer */
+    StringAction                _filePathAction;    /** File path action */
+    TriggerAction               _pickAction;        /** Pick file action */
+    QStringList                 _nameFilters;       /** File type filters */
+    QString                     _defaultSuffix;     /** Default suffix */
+    QString                     _fileType;          /** File type (e.g. image and project)*/
 };
 
 }

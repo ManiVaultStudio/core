@@ -91,8 +91,9 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param title Title of the action
+     * @param populateFilePickerCompleter Whether to create a QCompleter for _filePathAction in _filePickerAction
      */
-    Q_INVOKABLE ImageAction(QObject* parent, const QString& title);
+    Q_INVOKABLE ImageAction(QObject* parent, const QString& title, bool populateFilePickerCompleter = true);
 
     /** Get the current image */
     const QImage getImage() const;

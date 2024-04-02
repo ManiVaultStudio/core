@@ -10,12 +10,12 @@
 
 namespace mv::gui {
 
-ImageAction::ImageAction(QObject* parent, const QString& title) :
+ImageAction::ImageAction(QObject* parent, const QString& title, bool populateFilePickerCompleter /*= true*/) :
     WidgetAction(parent, title),
     _image(),
     _filePathAction(this, "File Path"),
     _fileNameAction(this, "File Name"),
-    _filePickerAction(parent, "File Picker"),
+    _filePickerAction(parent, "File Picker", QString(), populateFilePickerCompleter),
     _previewAction(this, "Preview")
 {
     setText(title);
