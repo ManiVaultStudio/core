@@ -25,11 +25,14 @@ find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 set(TEXTDATA_SOURCES
     src/TextData.h
     src/TextData.cpp
+    src/InfoAction.h
+    src/InfoAction.cpp
     src/TextData.json
 )
 
 set(TEXTDATA_HEADERS
     src/TextData.h
+    src/InfoAction.h
 )
 
 set(PLUGIN_MOC_HEADERS
