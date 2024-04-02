@@ -332,6 +332,18 @@ public: // Name, description, icon and may kill
      */
     virtual void reset(bool recursive = false) final;
 
+    /**
+     * Envoke Qt's processEvents on updates
+     * @param alwaysProcessEvents Whether to invoke Qt's processEvents on updates
+     */
+    virtual void setAlwaysProcessEvents(bool alwaysProcessEvents) final;
+
+    /**
+     * Get whether the task envokes Qt processEvents on updates
+     * @return Whether the task envokes Qt's processEvents on updates
+     */
+    virtual bool getAlwaysProcessEvents() const final;
+
 public: // Status
 
     /** Get task status */
@@ -707,9 +719,9 @@ public: // Advanced (only use methods if consequences are understood)
     /**
      * Adds this task to the task manager
      * Under normal circumstances, tasks are automatically added to the task manager during construction.
-     * In some cases, the task manager is not yet present then and therefor this method allows to
+     * In some cases, the task manager is not yet present then and therefore this method allows to
      * manually add this task to the task manager at a later point in time.
-     * Only use this in edge-cases!
+     * Only use this in edge cases!
      */
     void addToTaskManager();
 
@@ -956,6 +968,7 @@ private:
     Status                  _deferredStatus;                                /** Task status which is set after a delay */
     bool                    _deferredStatusRecursive;                       /** Whether to set the task status deferred recursively */
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
+    bool                    _alwaysProcessEvents;                           /** Whether the task envokes Qt's processEvents on updates, e.g. for task before the main event loop started. Default: false */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
     GuiScopes               _guiScopes;                                     /** The gui scope(s) in which the task will present itself to the user */

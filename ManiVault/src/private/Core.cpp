@@ -90,8 +90,6 @@ void Core::initialize()
                 manager->initialize();
             }
             loadCoreManagersTask.setSubtaskFinished(manager->getSerializationName(), "Initializing " + manager->getSerializationName().toLower() + " manager");
-
-            QCoreApplication::processEvents();
         }
         
         loadCoreManagersTask.setFinished();

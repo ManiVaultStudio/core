@@ -52,6 +52,7 @@ Task::Task(QObject* parent, const QString& name, const GuiScopes& guiScopes /*= 
     _deferredStatus(Status::Undefined),
     _deferredStatusRecursive(false),
     _mayKill(mayKill),
+    _alwaysProcessEvents(false),
     _handler(handler),
     _progressMode(ProgressMode::Manual),
     _guiScopes(guiScopes),
@@ -361,6 +362,16 @@ bool Task::isKillable() const
 void Task::reset(bool recursive /*= false*/)
 {
     emit privateResetSignal(recursive, QPrivateSignal());
+}
+
+void Task::setAlwaysProcessEvents(bool alwaysProcessEvents)
+{
+    _alwaysProcessEvents = alwaysProcessEvents;
+}
+
+bool Task::getAlwaysProcessEvents() const
+{
+    return _alwaysProcessEvents;
 }
 
 Task::Status Task::getStatus() const
@@ -1434,7 +1445,8 @@ void Task::privateEmitProgressChanged()
         getTimer(TimerType::EmitProgressChanged).start();
     }
 
-    //QCoreApplication::processEvents();
+    if (_alwaysProcessEvents)
+        QCoreApplication::processEvents();
 }
 
 void Task::privateEmitProgressDescriptionChanged()
@@ -1447,7 +1459,8 @@ void Task::privateEmitProgressDescriptionChanged()
         getTimer(TimerType::EmitProgressDescriptionChanged).start();
     }
 
-    //QCoreApplication::processEvents();
+    if (_alwaysProcessEvents)
+        QCoreApplication::processEvents();
 }
 
 void Task::privateEmitProgressTextChanged()
@@ -1460,7 +1473,8 @@ void Task::privateEmitProgressTextChanged()
         getTimer(TimerType::EmitProgressTextChanged).start();
     }
 
-    //QCoreApplication::processEvents();
+    if (_alwaysProcessEvents)
+        QCoreApplication::processEvents();
 }
 
 void Task::addToTaskManager()

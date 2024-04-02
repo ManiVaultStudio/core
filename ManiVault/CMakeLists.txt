@@ -158,7 +158,7 @@ message(STATUS "Using QuaZip version ${QuaZip_VERSION}")
 # -----------------------------------------------------------------------------
 include(CMakeMvSourcesApplication)    # defines MAIN_SOURCES, PRIVATE_SOURCES and PRIVATE_HEADERS
 include(CMakeMvSourcesPublic)         # defines PUBLIC_SOURCES, PUBLIC_HEADERS and PRECOMPILE_HEADERS
-include(CMakeMvSourcesResources)      # defines RESOURCE_FILES, UI_HEADERS and MAIN_APP_ICON_RESOURCE
+include(CMakeMvSourcesResources)      # defines RESOURCE_FILES, MAIN_APP_ICON_RESOURCE and MAIN_STYLES
 
 # -----------------------------------------------------------------------------
 # Target MV_PUBLIC_LIB
@@ -220,6 +220,7 @@ target_sources(${MV_EXE}
     PRIVATE
     src/.editorconfig
     ${MAIN_SOURCES}
+    ${MAIN_STYLES}
     ${PRIVATE_SOURCES}
     ${RESOURCE_FILES}
     ${MAIN_APP_ICON_RESOURCE}
