@@ -187,11 +187,6 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-private:
-    
-    /** https://doc.qt.io/qt-6/qscopedpointer.html#forward-declared-pointers */
-    Q_DISABLE_COPY(SplashScreenAction)
-
 public: // Action getters
 
     const ToggleAction& getEnabledAction() const { return _enabledAction; }
