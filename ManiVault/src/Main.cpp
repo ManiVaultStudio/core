@@ -209,7 +209,6 @@ int main(int argc, char *argv[])
     QString styleSheet = QLatin1String(styleSheetFile.readAll());
 
     application.setStyleSheet(styleSheet);
-
     loadGuiTask.setSubtaskFinished("Apply styles");
 
     QIcon appIcon;
@@ -223,17 +222,13 @@ int main(int argc, char *argv[])
 
     application.setWindowIcon(appIcon);
 
-    loadGuiTask.setSubtaskStarted("Create main window");
-
-    QCoreApplication::processEvents();
-
     MainWindow mainWindow;
 
-    loadGuiTask.setSubtaskFinished("Create main window");
-
-    QCoreApplication::processEvents();
+    loadGuiTask.setSubtaskStarted("Create main window");
 
     mainWindow.show();
+
+    loadGuiTask.setSubtaskFinished("Create main window");
 
     return application.exec();
 }
