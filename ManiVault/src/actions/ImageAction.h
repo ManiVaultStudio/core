@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "WidgetAction.h"
-#include "HorizontalGroupAction.h"
 #include "FilePickerAction.h"
+#include "HorizontalGroupAction.h"
 #include "TriggerAction.h"
+#include "WidgetAction.h"
 
-#include <QLabel>
 #include <QImage>
+#include <QLabel>
 
 namespace mv::gui {
 

@@ -3,8 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "SplashScreenAction.h"
-#include "ProjectMetaAction.h"
+
 #include "Application.h"
+#include "ProjectMetaAction.h"
 
 #include "widgets/SplashScreenWidget.h"
 

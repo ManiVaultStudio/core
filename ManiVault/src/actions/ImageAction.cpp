@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ImageAction.h"
-#include "Application.h"
 
 #include <QHBoxLayout>
 #include <QBuffer>

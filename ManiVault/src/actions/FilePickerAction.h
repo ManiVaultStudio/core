@@ -4,14 +4,15 @@
 
 #pragma once
 
-#include "WidgetAction.h"
 #include "StringAction.h"
 #include "TriggerAction.h"
+#include "WidgetAction.h"
 
-#include <QLineEdit>
-#include <QString>
-#include <QFileSystemModel>
 #include <QCompleter>
+#include <QFileSystemModel>
+#include <QLineEdit>
+#include <QPointer>
+#include <QString>
 
 class QWidget;
 
