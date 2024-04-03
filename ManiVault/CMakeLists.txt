@@ -114,10 +114,10 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 # Qt Advanced docking system
-set(ADS_VERSION 4.2.1)
-message(STATUS "Using Qt Advanced Docking System version ${ADS_VERSION}")
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
+get_target_property(ADS_VERSION qt6advanceddocking VERSION)
+message(STATUS "Using Qt Advanced Docking System version ${ADS_VERSION}")
 
 if(MV_UNITY_BUILD)
     set_target_properties(qt6advanceddocking PROPERTIES UNITY_BUILD ON)
