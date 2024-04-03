@@ -6,6 +6,8 @@
 
 #include <Application.h>
 
+#include "InfoAction.h"
+
 #include <QtCore>
 #include <QtDebug>
 
@@ -32,6 +34,13 @@ QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 mv::plugin::RawData* TextDataFactory::produce()
 {
     return new TextData(this);
+}
+
+void Text::init()
+{
+    DatasetImpl::init();
+
+    _infoAction = new InfoAction(this, *this);
 }
 
 QIcon Text::getIcon(const QColor& color /*= Qt::black*/) const
@@ -78,4 +87,13 @@ void Text::selectNone()
 
 void Text::selectInvert()
 {
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               Action getters                               */
+/* -------------------------------------------------------------------------- */
+
+InfoAction& Text::getInfoAction()
+{
+    return *_infoAction;
 }

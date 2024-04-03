@@ -187,11 +187,6 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-private:
-    
-    /** https://doc.qt.io/qt-6/qscopedpointer.html#forward-declared-pointers */
-    Q_DISABLE_COPY(SplashScreenAction)
-
 public: // Action getters
 
     const ToggleAction& getEnabledAction() const { return _enabledAction; }
@@ -222,9 +217,6 @@ private:
     TaskAction                      _taskAction;                    /** Task action for showing load progress */
     QPointer<SplashScreenWidget>    _splashScreenWidget;            /** Splash screen dialog */
     Alerts                          _alerts;                        /** Alerts that will be displayed on the splash screen widget */
-
-    friend class SplashScreenWidget;
-    friend class ProjectMetaAction;
 };
 
 }

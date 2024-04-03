@@ -3,10 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StartPageOpenProjectWidget.h"
-#include "StartPageContentWidget.h"
+
 #include "StartPageAction.h"
-#include "StartPageActionsModel.h"
-#include "Archiver.h"
+#include "StartPageContentWidget.h"
 
 #include <Application.h>
 #include <CoreInterface.h>
@@ -175,22 +174,29 @@ void StartPageOpenProjectWidget::updateRecentActions()
 {
     _recentProjectsWidget.getModel().reset();
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
+    auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
 
-    for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
+    const auto recentFiles = _recentProjectsAction.getRecentFiles();
+
+    if(!recentFiles.isEmpty())
+        qDebug() << "Looking for recent projects...";
+
+    for (const auto& recentFile : recentFiles) {
         const auto recentFilePath = recentFile.getFilePath();
 
         const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
 
         if (projectMetaAction.isNull()) {
-            StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
+            StartPageAction recentProjectStartPageAction(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
                 projects().openProject(recentFilePath);
             });
 
             _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
         }
         else {
-            StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), recentFilePath, projectMetaAction->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+            qDebug() << "Found project: " << QFileInfo(recentFilePath).baseName();
+
+            StartPageAction recentProjectStartPageAction(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, projectMetaAction->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
                 projects().openProject(recentFilePath);
             });
 
@@ -203,13 +209,14 @@ void StartPageOpenProjectWidget::updateRecentActions()
             _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
         }
     }
+
 }
 
 void StartPageOpenProjectWidget::updateExamplesActions()
 {
     _exampleProjectsWidget.getModel().reset();
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
+    auto filePrescriptionIcon = Application::getIconFont("FontAwesome").getIcon("clock");
 
     QStringList projectFilter("*.mv");
 
@@ -217,20 +224,25 @@ void StartPageOpenProjectWidget::updateExamplesActions()
 
     const auto exampleProjects = exampleProjectsDirectory.entryList(projectFilter);
 
+    if(!exampleProjects.isEmpty())
+        qDebug() << "Looking for example projects...";
+
     for (const auto& exampleProject : exampleProjects) {
         const auto exampleProjectFilePath = QString("%1/examples/projects/%2").arg(qApp->applicationDirPath(), exampleProject);
 
         const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(exampleProjectFilePath);
 
         if (projectMetaAction.isNull()) {
-            StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), QFileInfo(exampleProjectFilePath).baseName(), exampleProjectFilePath, exampleProjectFilePath, "", [exampleProjectFilePath]() -> void {
+            StartPageAction exampleProjectStartPageAction(filePrescriptionIcon, QFileInfo(exampleProjectFilePath).baseName(), exampleProjectFilePath, exampleProjectFilePath, "", [exampleProjectFilePath]() -> void {
                 projects().openProject(exampleProjectFilePath);
             });
 
             _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
         }
         else {
-            StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), projectMetaAction->getTitleAction().getString(), exampleProjectFilePath, projectMetaAction->getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
+            qDebug() << "Found project: " << QFileInfo(projectMetaAction->getTitleAction().getString()).baseName();
+
+            StartPageAction exampleProjectStartPageAction(filePrescriptionIcon, projectMetaAction->getTitleAction().getString(), exampleProjectFilePath, projectMetaAction->getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
                 projects().openProject(exampleProjectFilePath);
             });
 

@@ -3,8 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "SplashScreenAction.h"
-#include "ProjectMetaAction.h"
+
 #include "Application.h"
+#include "ProjectMetaAction.h"
 
 #include "widgets/SplashScreenWidget.h"
 
@@ -81,8 +82,8 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _mayCloseSplashScreenWidget(mayClose),
     _projectMetaAction(nullptr),
     _enabledAction(this, "Enable splash screen"),
-    _projectImageAction(this, "Project Image"),
-    _affiliateLogosImageAction(this, "Affiliate Logos"),
+    _projectImageAction(this, "Project Image", false),
+    _affiliateLogosImageAction(this, "Affiliate Logos", false),
     _editAction(this, "Edit"),
     _openAction(this, "Open splash screen"),
     _closeAction(this, "Close splash screen"),
@@ -98,7 +99,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _editAction.addAction(&_projectImageAction);
     _editAction.addAction(&_affiliateLogosImageAction);
 
-    getTaskAction().setTask(&Application::current()->getStartupTask());
+    _taskAction.setTask(&Application::current()->getStartupTask());
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 

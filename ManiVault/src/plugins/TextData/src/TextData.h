@@ -15,6 +15,8 @@
 using namespace mv;
 using namespace mv::plugin;
 
+class InfoAction;
+
 // =============================================================================
 // Data Type
 // =============================================================================
@@ -40,6 +42,16 @@ public:
      */
     Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
+    void setData(std::vector<QString>& textData)
+    {
+        _data = textData;
+    }
+
+    size_t getNumPoints() const
+    {
+        return _data.size();
+    }
+
 private:
     std::vector<QString> _data;
 };
@@ -48,11 +60,14 @@ class TEXTDATA_EXPORT Text : public DatasetImpl
 {
 public:
     Text(QString dataName, bool mayUnderive = true, const QString& guid = "") :
-        DatasetImpl(dataName, mayUnderive, guid)
+        DatasetImpl(dataName, mayUnderive, guid),
+        _infoAction(nullptr)
     {
     }
 
     ~Text() override { }
+
+    void init() override;
 
     Dataset<DatasetImpl> copy() const override
     {
@@ -62,6 +77,16 @@ public:
         text->indices = indices;
         
         return text;
+    }
+
+    void setData(std::vector<QString>& textData)
+    {
+        getRawData<TextData>()->setData(textData);
+    }
+
+    size_t getNumPoints() const
+    {
+        return getRawData<TextData>()->getNumPoints();
     }
 
     /**
@@ -82,6 +107,9 @@ public:
      * @return Icon
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
+
+public: // Action getters
+    InfoAction& getInfoAction();
 
 public: // Selection
 
@@ -118,6 +146,7 @@ public: // Selection
     /** Invert item selection */
     void selectInvert() override;
 
+    InfoAction* _infoAction;                    /** Non-owning pointer to info action */
 
     std::vector<unsigned int> indices;
 };

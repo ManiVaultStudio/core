@@ -60,8 +60,4 @@ public: // Miscellaneous
     /** Does a graphics requirements check (used at startup of the application) */
     void checkGraphicsCapabilities();
 
-private:
-
-    /** Sets up the GUI */
-    void initialize();
 };
