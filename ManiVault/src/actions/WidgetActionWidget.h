@@ -15,7 +15,7 @@ class WidgetAction;
  *
  * Base class for widgets that interact with a widget action
  * 
- * Note: This widget class is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * Note: This action is developed for internal use only
  * 
  * @author Thomas Kroes
  */

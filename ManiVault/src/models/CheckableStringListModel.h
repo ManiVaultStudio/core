@@ -20,14 +20,15 @@ namespace mv {
 class CORE_EXPORT CheckableStringListModel final : public QStringListModel {
 public:
 
-    using StringIndicesSet = QSet<std::int32_t>;
-    using StringIndicesList = QList<std::int32_t>;
+    using CheckedIndicesList    = QList<std::int32_t>;  /** List of checked string indices */
+    using CheckedIndicesSet     = QSet<std::int32_t>;   /** Set of checked string indices */
+    using CheckStatesList       = QList<bool>;          /** Check state for each string */
 
 private:
 
     /**
      * We want to reset our internal CheckableStringListModel#_checkedItems every time the strings are changed.
-     * We make the CheckableStringListModel::setStringList(...) private and replace it with 
+     * We make the CheckableStringListModel::setStringList(...) private and replace it with
      * CheckableStringListModel::setStrings(...) so that we have control over the internals. This also prevents
      * accidental misuse of QStringListModel::setStringList(...), which would lead to problems with checked items.
      * Note: Underneath we still call QStringListModel::setStringList(...)
@@ -76,19 +77,32 @@ public:
     QStringList getCheckedStrings() const;
 
     /**
-     * Get checked indices set
-     * @return Set of checked indices
-     */
-    StringIndicesSet getCheckedIndicesSet() const;
-
-    /**
      * Get checked indices list
      * @return List of checked indices
      */
-    StringIndicesList getCheckedIndicesList() const;
+    CheckedIndicesList getCheckedIndicesList() const;
+
+    /**
+     * Get checked indices set
+     * @return Set of checked indices
+     */
+    CheckedIndicesSet getCheckedIndicesSet() const;
+
+    /**
+     * Set checked indices set to \p checkedIndicesSet
+     * @param checkedIndicesSet Set of checked indices
+     */
+    void setCheckedIndicesSet(const CheckedIndicesSet& checkedIndicesSet);
+
+    /**
+     * Set checked indices from \p checkedStrings
+     * @param checkedStrings List of checked strings
+     */
+    void setCheckedIndicesFromStrings(const QStringList& checkedStrings);
 
 private:
-    StringIndicesSet   _checkedItems;  /** Keeps track of the selected items */
+    CheckStatesList _checkStatesList;   /** Keeps track of the selected items */
+    QStringList     _strings;
 };
 
 }

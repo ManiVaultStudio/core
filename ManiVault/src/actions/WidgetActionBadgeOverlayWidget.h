@@ -14,7 +14,7 @@ namespace mv::gui {
  *
  * Overlay widget class for showing a badge over an action widget
  *
- * Note: This widget class is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * Note: This action is developed for internal use only
  * 
  * @author Thomas Kroes
  */

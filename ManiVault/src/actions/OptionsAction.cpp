@@ -3,19 +3,18 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "OptionsAction.h"
+#include "ModelSelectionAction.h"
 
 #include "Application.h"
 
-#include <QAbstractItemView>
 #include <QDebug>
+#include <QHeaderView>
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QListView>
 #include <QMouseEvent>
-#include <QStandardItemModel>
 
 using namespace mv::util;
 
@@ -24,7 +23,6 @@ namespace mv::gui {
 OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
     WidgetAction(parent, title),
     _optionsModel({}),
-    _selectionAction(*this),
     _fileAction(*this)
 {
     setText(title);
@@ -77,13 +75,7 @@ void OptionsAction::setOptions(const QStringList& options, bool clearSelection /
     const auto selectedOptions = getSelectedOptions();
 
     _optionsModel.setStrings(options);
-
-    for (std::int32_t rowIndex = 0; rowIndex < options.count(); ++rowIndex) {
-
-        auto index = _optionsModel.index(rowIndex, 0, QModelIndex());
-
-        _optionsModel.setData(index, clearSelection ? Qt::Unchecked : (selectedOptions.contains(options.at(rowIndex)) ? Qt::Checked : Qt::Unchecked), Qt::CheckStateRole);
-    }
+    _optionsModel.setCheckedIndicesFromStrings(selectedOptions);
 
     emit optionsChanged(getOptions());
 }
@@ -134,10 +126,7 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 
     auto previousSelectedOptions = getSelectedOptions();
 
-    QSignalBlocker optionsModelBlocker(&_optionsModel);
-
-    for (std::int32_t optionIndex = 0; optionIndex < _optionsModel.rowCount(); optionIndex++)
-        _optionsModel.setData(_optionsModel.index(optionIndex, 0), selectedOptions.contains(_optionsModel.index(optionIndex, 0).data(Qt::EditRole).toString()) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+    _optionsModel.setCheckedIndicesFromStrings(selectedOptions);
 
     if (getSelectedOptions() != previousSelectedOptions)
         emit selectedOptionsChanged(getSelectedOptions());
@@ -257,31 +246,68 @@ QVariantMap OptionsAction::toVariantMap() const
     return variantMap;
 }
 
-OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction, QCompleter* completer) :
-    QComboBox(parent),
+OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags) :
+    QWidget(parent),
     _optionsAction(optionsAction),
-    _view()
+    _layout(),
+    _comboBox(),
+    _completer()
 {
-    setObjectName("ComboBox");
-    setEditable(true);
-    setCompleter(completer);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    setModel(&optionsAction->getOptionsModel());
-    setModelColumn(0);
-    setInsertPolicy(QComboBox::NoInsert);
-    setView(&_view);
+    auto comboBoxCheckableTableView = new CheckableTableView(this);
+
+    _comboBox.setObjectName("ComboBox");
+    _comboBox.setEditable(true);
+    _comboBox.setCompleter(&_completer);
+    _comboBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    _comboBox.setSizeAdjustPolicy(optionsAction->getOptionsModel().rowCount() > 1000 ? QComboBox::AdjustToMinimumContentsLengthWithIcon : QComboBox::AdjustToContents);
+    _comboBox.setView(comboBoxCheckableTableView);
+    _comboBox.setModel(&optionsAction->getOptionsModel());
+
+    _completer.setCaseSensitivity(Qt::CaseInsensitive);
+    _completer.setFilterMode(Qt::MatchContains);
+    _completer.setPopup(new CheckableTableView(this));
 
     connect(optionsAction, &OptionsAction::selectedOptionsChanged, this, &ComboBoxWidget::updateCurrentText);
-    connect(this, &QComboBox::activated, this, &ComboBoxWidget::updateCurrentText);
-    connect(completer, QOverload<const QString&>::of(&QCompleter::activated), this, &ComboBoxWidget::updateCurrentText);
-    connect(completer, QOverload<const QModelIndex&>::of(&QCompleter::activated), this, &ComboBoxWidget::updateCurrentText);
+    connect(&_comboBox, &QComboBox::activated, this, &ComboBoxWidget::updateCurrentText);
+    connect(&_completer, QOverload<const QString&>::of(&QCompleter::activated), this, &ComboBoxWidget::updateCurrentText);
+    connect(&_completer, QOverload<const QModelIndex&>::of(&QCompleter::activated), this, &ComboBoxWidget::updateCurrentText);
 
     updateCurrentText();
-    
-    this->installEventFilter(this);
 
-    lineEdit()->installEventFilter(this);
+    _comboBox.installEventFilter(this);
+    _comboBox.lineEdit()->installEventFilter(this);
+
+    _layout.setContentsMargins(0, 0, 0, 0);
+
+    _layout.addWidget(&_comboBox);
+
+    if (widgetFlags & WidgetFlag::Selection) {
+        auto modelSelectionAction = new ModelSelectionAction(this, "Selection", comboBoxCheckableTableView->selectionModel());
+
+        _layout.addWidget(modelSelectionAction->createCollapsedWidget(this));
+
+        connect(&modelSelectionAction->getSelectAllAction(), &TriggerAction::triggered, this, [this]() -> void {
+            _optionsAction->setSelectedOptions(_optionsAction->getOptions());
+        });
+
+        connect(&modelSelectionAction->getClearSelectionAction(), &TriggerAction::triggered, this, [this]() -> void {
+            _optionsAction->setSelectedOptions(QStringList());
+        });
+
+        connect(&modelSelectionAction->getInvertSelectionAction(), &TriggerAction::triggered, this, [this]() -> void {
+            auto invertedSelectedOptions = _optionsAction->getOptions();
+
+            for (const auto& selectedOption : _optionsAction->getSelectedOptions())
+                invertedSelectedOptions.removeOne(selectedOption);
+
+            _optionsAction->setSelectedOptions(invertedSelectedOptions);
+        });
+    }
+
+    if (widgetFlags & WidgetFlag::File)
+        _layout.addWidget(_optionsAction->getFileAction().createCollapsedWidget(this));
+
+    setLayout(&_layout);
 }
 
 void OptionsAction::ComboBoxWidget::updateCurrentText()
@@ -299,9 +325,9 @@ void OptionsAction::ComboBoxWidget::updateCurrentText()
             text = _optionsAction->getSelectedOptions().join(", ");
     }
 
-    QFontMetrics metrics(lineEdit()->font());
+    QFontMetrics metrics(_comboBox.lineEdit()->font());
 
-    lineEdit()->setText(metrics.elidedText(text, Qt::ElideMiddle, lineEdit()->width()));
+    _comboBox.lineEdit()->setText(metrics.elidedText(text, Qt::ElideMiddle, _comboBox.lineEdit()->width()));
 };
 
 bool OptionsAction::ComboBoxWidget::eventFilter(QObject* target, QEvent* event)
@@ -310,15 +336,15 @@ bool OptionsAction::ComboBoxWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::MouseButtonPress:
         {
-            if (target == lineEdit())
-                QTimer::singleShot(0, lineEdit(), &QLineEdit::selectAll);
+            if (target == _comboBox.lineEdit())
+                QTimer::singleShot(0, _comboBox.lineEdit(), &QLineEdit::selectAll);
 
             break;
         }
 
         case QEvent::Resize:
         {
-            if (target == lineEdit())
+            if (target == _comboBox.lineEdit())
                 updateCurrentText();
 
             break;
@@ -336,89 +362,98 @@ bool OptionsAction::ComboBoxWidget::eventFilter(QObject* target, QEvent* event)
             break;
     }
 
-    return QComboBox::eventFilter(target, event);
+    return QWidget::eventFilter(target, event);
+}
+
+OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags) :
+    QWidget(parent),
+    _optionsAction(optionsAction),
+    _filterModel(),
+    _tableAction(this, "Options")
+{
+    _tableAction.initialize(&optionsAction->getOptionsModel(), &_filterModel, "Option");
+    _tableAction.setIconByName("tasks");
+    _tableAction.getShowHeaderSettingsAction().setChecked(false);
+    _tableAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+        auto tableView = widget->findChild<QTableView*>("TableView");
+
+        Q_ASSERT(tableView != nullptr);
+
+        if (tableView == nullptr)
+            return;
+
+        tableView->setWindowIcon(_optionsAction->icon());
+
+        CheckableTableView::configure(tableView);
+        
+        tableView->setAlternatingRowColors(true);
+
+        auto horizontalHeader   = tableView->horizontalHeader();
+        auto verticalHeader     = tableView->verticalHeader();
+
+        horizontalHeader->setVisible(false);
+        horizontalHeader->setStretchLastSection(true);
+
+        verticalHeader->setVisible(false);
+        verticalHeader->setDefaultSectionSize(verticalHeader->fontMetrics().height());
+    });
+
+    auto layout = new QVBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    layout->addWidget(_tableAction.createWidget(this));
+
+    setLayout(layout);
+
+    auto& modelFilterAction = _tableAction.getModelFilterAction();
+
+    modelFilterAction.getFilterGroupAction().setShowLabels(false);
+    modelFilterAction.getFilterColumnAction().setVisible(false);
+
+    _tableAction.getToolbarGroupAction().addAction(&optionsAction->getFileAction());
+
+    auto& modelSelectionAction = _tableAction.getModelSelectionAction();
+
+    connect(&modelSelectionAction.getSelectAllAction(), &TriggerAction::triggered, this, [this]() -> void {
+        _optionsAction->setSelectedOptions(_optionsAction->getOptions());
+    });
+
+    connect(&modelSelectionAction.getClearSelectionAction(), &TriggerAction::triggered, this, [this]() -> void {
+        _optionsAction->setSelectedOptions(QStringList());
+    });
+
+    connect(&modelSelectionAction.getInvertSelectionAction(), &TriggerAction::triggered, this, [this]() -> void {
+        auto invertedSelectedOptions = _optionsAction->getOptions();
+
+        for (const auto& selectedOption : _optionsAction->getSelectedOptions())
+            invertedSelectedOptions.removeOne(selectedOption);
+
+        _optionsAction->setSelectedOptions(invertedSelectedOptions);
+    });
 }
 
 QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     auto widget     = new WidgetActionWidget(parent, this, widgetFlags);
     auto layout     = new QHBoxLayout();
-    auto completer  = new QCompleter();
-
-    completer->setModel(&_optionsModel);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-    completer->setFilterMode(Qt::MatchContains);
-    completer->setPopup(new CheckableItemView(widget));
 
     if (!widget->isPopup())
         layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::ComboBox)
-        layout->addWidget(new OptionsAction::ComboBoxWidget(parent, this, completer));
+        layout->addWidget(new OptionsAction::ComboBoxWidget(parent, this, widgetFlags));
 
-    if (widgetFlags & WidgetFlag::Selection)
-        layout->addWidget(_selectionAction.createCollapsedWidget(parent));
-
-    if (widgetFlags & WidgetFlag::File)
-        layout->addWidget(_fileAction.createCollapsedWidget(parent));
+    if (widgetFlags & WidgetFlag::ListView)
+        layout->addWidget(new OptionsAction::ListViewWidget(parent, this, widgetFlags));
 
     widget->setLayout(layout);
 
     return widget;
 }
 
-OptionsAction::SelectionAction::SelectionAction(OptionsAction& optionsAction) :
-    WidgetAction(&optionsAction, "Selection"),
-    _optionsAction(optionsAction),
-    _selectAllAction(this, "All"),
-    _clearSelectionAction(this, "Clear"),
-    _invertSelectionAction(this, "Invert")
-{
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    setText("Selection");
-    setToolTip("Change selection");
-    setIconByName("mouse-pointer");
-
-    const auto updateReadOnly = [this]() -> void {
-        _selectAllAction.setEnabled(_optionsAction.getSelectedOptions().count() < _optionsAction.getOptions().count());
-        _clearSelectionAction.setEnabled(_optionsAction.getSelectedOptions().count() >= 1);
-    };
-
-    connect(&_optionsAction, &OptionsAction::selectedOptionsChanged, this, updateReadOnly);
-
-    connect(&_selectAllAction, &TriggerAction::triggered, this, [this]() -> void {
-        _optionsAction.setSelectedOptions(_optionsAction.getOptions());
-    });
-
-    connect(&_clearSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
-        _optionsAction.setSelectedOptions(QStringList());
-    });
-
-    connect(&_invertSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
-        auto invertedSelectedOptions = _optionsAction.getOptions();
-
-        for (const auto& selectedOption : _optionsAction.getSelectedOptions())
-            invertedSelectedOptions.removeOne(selectedOption);
-
-        _optionsAction.setSelectedOptions(invertedSelectedOptions);
-    });
-}
-
-OptionsAction::SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionAction) :
-    WidgetActionWidget(parent, selectionAction)
-{
-    auto layout = new QHBoxLayout();
-
-    layout->addWidget(selectionAction->getSelectAllAction().createWidget(this));
-    layout->addWidget(selectionAction->getClearSelectionAction().createWidget(this));
-    layout->addWidget(selectionAction->getInvertSelectionAction().createWidget(this));
-
-    setLayout(layout);
-}
-
 OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
-    WidgetAction(&optionsAction, "File"),
+    HorizontalGroupAction(&optionsAction, "File"),
     _optionsAction(optionsAction),
     _loadSelectionAction(this, "Load selection"),
     _saveSelectionAction(this, "Save selection")
@@ -426,6 +461,16 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
     setText("File");
     setToolTip("Load/save selection");
     setIconByName("file");
+    setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+
+    addAction(&_loadSelectionAction);
+    addAction(&_saveSelectionAction);
+
+    _loadSelectionAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _saveSelectionAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _loadSelectionAction.setIconByName("file-import");
+    _saveSelectionAction.setIconByName("file-export");
 
     const auto updateReadOnly = [this]() -> void {
         _loadSelectionAction.setEnabled(_optionsAction.getOptions().count() >= 1);
@@ -506,18 +551,13 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
     updateReadOnly();
 }
 
-OptionsAction::FileAction::Widget::Widget(QWidget* parent, FileAction* fileAction) :
-    WidgetActionWidget(parent, fileAction)
+OptionsAction::CheckableTableView::CheckableTableView(QWidget* parent /*= nullptr*/) :
+    QTableView(parent)
 {
-    auto layout = new QHBoxLayout();
-
-    layout->addWidget(fileAction->getLoadSelectionAction().createWidget(this));
-    layout->addWidget(fileAction->getSaveSelectionAction().createWidget(this));
-
-    setLayout(layout);
+    configure(this);
 }
 
-void OptionsAction::CheckableItemView::mousePressEvent(QMouseEvent* event)
+void OptionsAction::CheckableTableView::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton) {
         const auto index = indexAt(event->pos());
@@ -539,6 +579,25 @@ void OptionsAction::CheckableItemView::mousePressEvent(QMouseEvent* event)
     }
 
     QAbstractItemView::mousePressEvent(event);
+}
+
+void OptionsAction::CheckableTableView::configure(QTableView* tableView)
+{
+    Q_ASSERT(tableView);
+
+    if (!tableView)
+        return;
+
+    tableView->setAlternatingRowColors(true);
+
+    auto horizontalHeader   = tableView->horizontalHeader();
+    auto verticalHeader     = tableView->verticalHeader();
+
+    horizontalHeader->setVisible(false);
+    horizontalHeader->setStretchLastSection(true);
+
+    verticalHeader->setVisible(false);
+    verticalHeader->setDefaultSectionSize(verticalHeader->fontMetrics().height());
 }
 
 }
