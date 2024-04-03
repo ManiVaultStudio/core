@@ -125,12 +125,10 @@ public: // Widgets
         void updateCurrentText();
 
     protected:
-        OptionsAction*          _optionsAction;                 /** Pointer to owning options action */
-        QHBoxLayout             _layout;                        /** Horizontal layout */
-        QComboBox               _comboBox;                      /** Combobox for selecting options */
-        QCompleter              _completer;                     /** For inline searching */
-        CheckableTableView      _comboBoxCheckableTableView;    /** Table view for the combobox popup view */
-        CheckableTableView      _completerCheckableTableView;   /** Table view for the completer popup view */
+        OptionsAction*          _optionsAction;     /** Pointer to owning options action */
+        QHBoxLayout             _layout;            /** Horizontal layout */
+        QComboBox               _comboBox;          /** Combobox for selecting options */
+        QCompleter              _completer;         /** For inline searching */
 
         friend class OptionsAction;
     };

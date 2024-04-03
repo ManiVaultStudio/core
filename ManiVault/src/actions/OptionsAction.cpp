@@ -251,21 +251,21 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     _optionsAction(optionsAction),
     _layout(),
     _comboBox(),
-    _completer(),
-    _comboBoxCheckableTableView(),
-    _completerCheckableTableView()
+    _completer()
 {
+    auto comboBoxCheckableTableView = new CheckableTableView(this);
+
     _comboBox.setObjectName("ComboBox");
     _comboBox.setEditable(true);
     _comboBox.setCompleter(&_completer);
     _comboBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     _comboBox.setSizeAdjustPolicy(optionsAction->getOptionsModel().rowCount() > 1000 ? QComboBox::AdjustToMinimumContentsLengthWithIcon : QComboBox::AdjustToContents);
-    _comboBox.setView(&_comboBoxCheckableTableView);
+    _comboBox.setView(comboBoxCheckableTableView);
     _comboBox.setModel(&optionsAction->getOptionsModel());
 
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
     _completer.setFilterMode(Qt::MatchContains);
-    _completer.setPopup(&_completerCheckableTableView);
+    _completer.setPopup(new CheckableTableView(this));
 
     connect(optionsAction, &OptionsAction::selectedOptionsChanged, this, &ComboBoxWidget::updateCurrentText);
     connect(&_comboBox, &QComboBox::activated, this, &ComboBoxWidget::updateCurrentText);
@@ -282,7 +282,7 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     _layout.addWidget(&_comboBox);
 
     if (widgetFlags & WidgetFlag::Selection) {
-        auto modelSelectionAction = new ModelSelectionAction(this, "Selection", _comboBoxCheckableTableView.selectionModel());
+        auto modelSelectionAction = new ModelSelectionAction(this, "Selection", comboBoxCheckableTableView->selectionModel());
 
         _layout.addWidget(modelSelectionAction->createCollapsedWidget(this));
 
