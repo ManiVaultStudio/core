@@ -15,10 +15,10 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const QString& filePath /*= QString()*/) :
+FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const QString& filePath /*= QString()*/, bool populateCompleter /*= true*/) :
     WidgetAction(parent, title),
-    _dirModel(),
-    _completer(),
+    _dirModel(nullptr),
+    _completer(nullptr),
     _filePathAction(this, "File path"),
     _pickAction(this, "Pick"),
     _nameFilters(),
@@ -27,10 +27,15 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 {
     setDefaultWidgetFlags(WidgetFlag::Default);
 
-    _completer.setModel(&_dirModel);
-
     _filePathAction.getTrailingAction().setVisible(true);
-    _filePathAction.setCompleter(&_completer);
+
+    if (populateCompleter)
+    {
+        _dirModel = new QFileSystemModel(this);
+        _completer = new QCompleter(this);
+        _completer->setModel(_dirModel.get());
+        _filePathAction.setCompleter(_completer.get());
+    }
 
     _pickAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _pickAction.setIconByName("folder-open");

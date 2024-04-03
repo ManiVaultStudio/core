@@ -11,13 +11,6 @@
 
 namespace mv::gui {
 
-#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
-    constexpr std::int32_t IntegralRangeAction::INIT_LIMIT_MIN;
-    constexpr std::int32_t IntegralRangeAction::INIT_LIMIT_MAX;
-    constexpr std::int32_t IntegralRangeAction::INIT_RANGE_MIN;
-    constexpr std::int32_t IntegralRangeAction::INIT_RANGE_MAX;
-#endif
-
 IntegralRangeAction::IntegralRangeAction(QObject* parent, const QString& title, const util::NumericalRange<std::int32_t>& limits /*= util::NumericalRange<std::int32_t>(INIT_LIMIT_MIN, INIT_LIMIT_MAX)*/, const util::NumericalRange<std::int32_t>& range /*= util::NumericalRange<std::int32_t>(INIT_RANGE_MIN, INIT_RANGE_MAX)*/) :
     NumericalRangeAction(parent, title, limits, range)
 {

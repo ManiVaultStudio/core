@@ -16,15 +16,6 @@ namespace mv {
 
 namespace util {
 
-#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
-    constexpr float PixelSelectionTool::BRUSH_RADIUS_MIN;
-    constexpr float PixelSelectionTool::BRUSH_RADIUS_MAX;
-    constexpr float PixelSelectionTool::BRUSH_RADIUS_DEFAULT;
-    constexpr float PixelSelectionTool::BRUSH_RADIUS_DELTA;
-    constexpr float PixelSelectionTool::CP_RADIUS_LINE;
-    constexpr float PixelSelectionTool::CP_RADIUS_CLOSING;
-#endif
-
 PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enabled /*= true*/) :
     QObject(targetWidget),
     _enabled(enabled),

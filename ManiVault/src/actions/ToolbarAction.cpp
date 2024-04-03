@@ -6,10 +6,6 @@
 
 namespace mv::gui {
 
-#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
-    constexpr std::int32_t ToolbarAction::CONTENTS_MARGIN;
-#endif
-
 ToolbarAction::ToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment /*= Qt::AlignmentFlag::AlignLeft*/) :
     WidgetAction(parent, title),
     _groupAction(this, "Actions", false, alignment),

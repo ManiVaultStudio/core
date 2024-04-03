@@ -3,19 +3,18 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ImageAction.h"
-#include "Application.h"
 
 #include <QHBoxLayout>
 #include <QBuffer>
 
 namespace mv::gui {
 
-ImageAction::ImageAction(QObject* parent, const QString& title) :
+ImageAction::ImageAction(QObject* parent, const QString& title, bool populateFilePickerCompleter /*= true*/) :
     WidgetAction(parent, title),
     _image(),
     _filePathAction(this, "File Path"),
     _fileNameAction(this, "File Name"),
-    _filePickerAction(parent, "File Picker"),
+    _filePickerAction(parent, "File Picker", QString(), populateFilePickerCompleter),
     _previewAction(this, "Preview")
 {
     setText(title);

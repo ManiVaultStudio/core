@@ -16,10 +16,6 @@
 
 namespace mv::gui {
 
-#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
-    constexpr QSize ColorMapEditor1DAction::colorMapImageSize;
-#endif
-
 ColorMapEditor1DAction::ColorMapEditor1DAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _colorMapAction(*static_cast<ColorMapAction*>(parent)),
