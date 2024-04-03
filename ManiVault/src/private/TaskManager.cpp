@@ -10,6 +10,8 @@
 
 #include <Task.h>
 
+#include <QListIterator>
+
 #ifdef _DEBUG
     //#define TASK_MANAGER_VERBOSE
 #endif
@@ -51,8 +53,10 @@ void TaskManager::reset()
 
     beginReset();
     {
-        for (auto task : _tasks)
-            removeTask(task);
+        QListIterator<Task*> it(_tasks);
+        it.toBack();
+        while (it.hasPrevious())
+            removeTask(it.previous());
     }
     endReset();
 }

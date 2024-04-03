@@ -77,6 +77,8 @@ public:
     /** Default constructor */
     CoreInterface() = default;
     
+    virtual ~CoreInterface() { }
+
     /** Creates the core managers */
     virtual void createManagers() = 0;
 

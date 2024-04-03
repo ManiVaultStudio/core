@@ -258,6 +258,11 @@ namespace
 
 namespace mv::util {
 
+Logger::~Logger()
+{
+    qInstallMessageHandler(0);
+}
+
 QMap<QtMsgType, QString> Logger::messageTypeNames = {
     { QtDebugMsg, "Debug" },
     { QtWarningMsg, "Warning" },

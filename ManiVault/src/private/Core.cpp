@@ -34,7 +34,9 @@ Core::Core() :
 
 Core::~Core()
 {
+    qDebug() << "~Core";
     getPluginManager().reset();
+    getTaskManager().reset();
 }
 
 void Core::createManagers()
