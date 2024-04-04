@@ -57,20 +57,12 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
     ViewPluginDockWidget(title, parent)
 {
-    active << this;
-
-    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
-    initialize();
     setViewPlugin(viewPlugin);
 }
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
     ViewPluginDockWidget()
 {
-    active << this;
-
-    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
-    initialize();
     fromVariantMap(variantMap);
 }
 
@@ -188,6 +180,7 @@ void ViewPluginDockWidget::restoreViewPluginState()
 
     _viewPlugin->fromVariantMap(_viewPluginMap);
 }
+
 void ViewPluginDockWidget::restoreViewPluginStates()
 {
     for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
