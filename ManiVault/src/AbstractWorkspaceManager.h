@@ -126,6 +126,8 @@ public:
     {
     }
 
+    virtual ~AbstractWorkspaceManager() { }
+
     /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin
      * @param viewPlugin Pointer to view plugin to add to layout

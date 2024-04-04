@@ -40,6 +40,8 @@ public:
     {
     }
 
+    virtual ~AbstractDataHierarchyManager() { }
+
     /**
      * Get hierarchy item by \p datasetId
      * @param datasetId Dataset GUID

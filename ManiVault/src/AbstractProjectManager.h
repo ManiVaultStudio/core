@@ -112,6 +112,8 @@ public:
     {
     }
 
+    virtual ~AbstractProjectManager() { }
+
     /**
      * Creates a new project, possibly also loading a workspace located at \p workspaceFilePath
      * @param workspaceFilePath File path of the workspace to load (will not attempt to load workspace if empty)

@@ -45,6 +45,8 @@ public:
     {
     }
     
+    virtual ~AbstractPluginManager() { }
+
     /** Loads all plugin factories from the plugin directory */
     virtual void loadPluginFactories() = 0;
 

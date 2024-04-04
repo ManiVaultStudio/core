@@ -39,6 +39,8 @@ public:
      */
     Serializable(const QString& serializationName = "");
 
+    virtual ~Serializable() { }
+
     /**
      * Get globally unique identifier, possibly \p truncated
      * @param truncated Whether to only return the first six characters of the ID

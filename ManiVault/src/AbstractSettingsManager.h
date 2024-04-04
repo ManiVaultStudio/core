@@ -46,6 +46,8 @@ public:
     {
     }
 
+    virtual ~AbstractSettingsManager() { }
+
     /** Opens the settings editor dialog */
     virtual void edit() = 0;
 

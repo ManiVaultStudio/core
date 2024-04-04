@@ -45,6 +45,8 @@ public:
     {
     }
 
+    virtual ~AbstractManager() { }
+
     /** Perform manager startup initialization */
     virtual void initialize() {
         _lockingAction = new gui::LockingAction(this, getSerializationName());
