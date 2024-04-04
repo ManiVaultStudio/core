@@ -100,10 +100,20 @@ void TaskManager::removeTask(Task* task)
         Q_ASSERT(task != nullptr);
 
         if (task == nullptr)
-            throw std::runtime_error("Task may not be a null pointer");
+        {
+#ifdef TASK_MANAGER_VERBOSE
+            qDebug() << "Warning: Cannot remove task, task is nullptr";
+#endif
+            return;
+        }
 
         if (!_tasks.contains(task))
-            throw std::runtime_error(QString("%1 not found in manager").arg(task->getName()).toStdString());
+        {
+#ifdef TASK_MANAGER_VERBOSE
+            qDebug() << "Warning: Cannot remove task, TaskManager does not know about it";
+#endif
+            return;
+        }
 
 #ifdef TASK_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << task->getName();
