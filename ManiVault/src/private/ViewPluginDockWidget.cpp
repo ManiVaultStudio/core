@@ -40,8 +40,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _viewPlugin(nullptr),
     _viewPluginKind(),
     _viewPluginMap(),
-    _settingsMenu(),
-    _toggleMenu("Toggle"),
+    _settingsMenu(this),
+    _toggleMenu("Toggle", this),
     _helpAction(this, "Help"),
     _cachedVisibility(false),
     _dockManager(this),
@@ -343,7 +343,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
     };
 
     for (auto settingsAction : _viewPlugin->getDockingActions()) {
-        auto settingsDockWidget     = new CDockWidget(settingsAction->text());
+        auto settingsDockWidget     = new CDockWidget(settingsAction->text(), this);
         auto settingsWidget         = new SettingsActionWidget(this, settingsAction);
         auto containerWidget        = new QWidget();
         auto containerWidgetLayout  = new QVBoxLayout();
