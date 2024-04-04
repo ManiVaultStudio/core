@@ -213,17 +213,17 @@ public: // Action getters
     gui::TriggerAction& getEditWorkspaceSettingsAction() { return _editWorkspaceSettingsAction; }
 
 private:
-    QScopedPointer<mv::Workspace>     _workspace;                             /** Current workspace */
+    QScopedPointer<mv::Workspace>       _workspace;                             /** Current workspace */
     QPointer<DockManager>               _mainDockManager;                       /** Dock manager for docking system view plugins */
     QPointer<DockManager>               _viewPluginsDockManager;                /** Dock manager for docking non-system view plugins */
     QPointer<ViewPluginsDockWidget>     _viewPluginsDockWidget;                 /** Pointer to view plugins dock widget in which non-system view plugins are docked */
-    mv::gui::TriggerAction            _resetWorkspaceAction;                  /** Action for resetting the current workspace */
-    mv::gui::TriggerAction            _importWorkspaceAction;                 /** Action for importing a workspace from file */
-    mv::gui::TriggerAction            _exportWorkspaceAction;                 /** Action for exporting the current workspace to file */
-    mv::gui::TriggerAction            _exportWorkspaceAsAction;               /** Action for exporting the current workspace to file with a different path */
-    mv::gui::TriggerAction            _editWorkspaceSettingsAction;           /** Action for triggering the workspace settings dialog */
-    mv::gui::TriggerAction            _importWorkspaceFromProjectAction;      /** Action for importing a workspace from a project file */
-    mv::gui::RecentFilesAction        _recentWorkspacesAction;                /** Action for saving the current workspace to file with a different path */
+    mv::gui::TriggerAction              _resetWorkspaceAction;                  /** Action for resetting the current workspace */
+    mv::gui::TriggerAction              _importWorkspaceAction;                 /** Action for importing a workspace from file */
+    mv::gui::TriggerAction              _exportWorkspaceAction;                 /** Action for exporting the current workspace to file */
+    mv::gui::TriggerAction              _exportWorkspaceAsAction;               /** Action for exporting the current workspace to file with a different path */
+    mv::gui::TriggerAction              _editWorkspaceSettingsAction;           /** Action for triggering the workspace settings dialog */
+    mv::gui::TriggerAction              _importWorkspaceFromProjectAction;      /** Action for importing a workspace from a project file */
+    mv::gui::RecentFilesAction          _recentWorkspacesAction;                /** Action for saving the current workspace to file with a different path */
     QIcon                               _icon;                                  /** Manager icon */
     QString                             _styleSheet;                            /** Dock manager style sheet */
 };

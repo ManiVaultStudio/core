@@ -45,7 +45,9 @@ namespace mv
 
 WorkspaceManager::WorkspaceManager() :
     AbstractWorkspaceManager(),
+    _workspace(),
     _mainDockManager(),
+    _viewPluginsDockManager(),
     _viewPluginsDockWidget(),
     _resetWorkspaceAction(this, "Reset"),
     _importWorkspaceAction(this, "Import"),
@@ -197,9 +199,9 @@ void WorkspaceManager::initialize()
             if (!viewPlugin)
                 return;
             
-            if (viewPlugin->isSystemViewPlugin())
+            if (_mainDockManager && viewPlugin->isSystemViewPlugin())
                 _mainDockManager->removeViewPluginDockWidget(viewPlugin);
-            else
+            else if(_viewPluginsDockManager)
                 _viewPluginsDockManager->removeViewPluginDockWidget(viewPlugin);
         });
 
