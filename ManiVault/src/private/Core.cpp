@@ -34,8 +34,6 @@ Core::Core() :
 
 Core::~Core()
 {
-    qDebug() << "~Core";
-
     for (auto& manager : _managers)
     {
         qDebug() << "Reset " << manager->metaObject()->className();

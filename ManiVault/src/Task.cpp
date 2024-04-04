@@ -132,8 +132,6 @@ Task::Task(QObject* parent, const QString& name, const GuiScopes& guiScopes /*= 
 
 Task::~Task()
 {
-    qDebug() << "~Task";
-
     for (auto& timer : _timers)
         timer.stop();
 
