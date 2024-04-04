@@ -10,7 +10,7 @@
 * Base plugin class for plugins that write data to a file.
 */
 
-
+#include "Application.h"
 #include "Plugin.h"
 
 #include <QString>
@@ -69,17 +69,34 @@ class CORE_EXPORT WriterPluginFactory : public PluginFactory
     Q_OBJECT
     
 public:
-    WriterPluginFactory();
+    WriterPluginFactory() :
+        PluginFactory(Type::WRITER)
+    {
+    }
 
-    ~WriterPluginFactory() override {};
+    ~WriterPluginFactory() = default;
+
+    /**
+     * Set name of the object
+     * @param name Name of the object
+     */
+    void setObjectName(const QString& name)
+    {
+        QObject::setObjectName("Plugins/Writer/" + name);
+    }
 
     /**
      * Get plugin icon
      * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon(const QColor& color = Qt::black) const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-export", color);
+    }
 
+    /**
+    * Produces an instance of a writer plugin. This function gets called by the plugin manager.
+    */
     WriterPlugin* produce() override = 0;
 };
 

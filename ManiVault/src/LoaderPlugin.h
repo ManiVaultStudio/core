@@ -4,9 +4,8 @@
 
 #pragma once
 
-#include "Plugin.h"
-#include "DataHierarchyItem.h"
 #include "Application.h"
+#include "Plugin.h"
 
 #include <QString>
 
@@ -73,7 +72,7 @@ public:
     {
 
     }
-    ~LoaderPluginFactory() override {};
+    ~LoaderPluginFactory() = default;
     
     /**
      * Set name of the object
