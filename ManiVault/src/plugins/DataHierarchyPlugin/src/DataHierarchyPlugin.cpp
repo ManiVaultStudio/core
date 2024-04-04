@@ -13,7 +13,7 @@ using namespace mv::gui;
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
-    _dataHierarchyWidget(&getWidget())
+    _dataHierarchyWidget(nullptr)
 {
 }
 

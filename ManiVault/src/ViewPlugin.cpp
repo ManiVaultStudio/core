@@ -25,9 +25,9 @@ namespace mv::plugin
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
-    _editorAction(&_widget, "Edit..."),
-    _screenshotAction(&_widget, "Screenshot..."),
-    _isolateAction(&_widget, "Isolate"),
+    _editorAction(this, "Edit..."),
+    _screenshotAction(this, "Screenshot..."),
+    _isolateAction(this, "Isolate"),
     _mayCloseAction(this, "May close", true),
     _mayFloatAction(this, "May float", true),
     _mayMoveAction(this, "May move", true),
