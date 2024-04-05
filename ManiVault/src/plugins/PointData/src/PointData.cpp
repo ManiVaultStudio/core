@@ -1161,7 +1161,7 @@ QVariantMap Points::toVariantMap() const
     variantMap["Dense"]                 = getRawData<PointData>()->isDense();
     if (!getRawData<PointData>()->isDense())
     {
-        variantMap["NumberOfNonZeroElements"] = getRawData<PointData>()->getNumNonZeroElements();
+        variantMap["NumberOfNonZeroElements"] = QVariant::fromValue(getRawData<PointData>()->getNumNonZeroElements());
     }
     
     return variantMap;
