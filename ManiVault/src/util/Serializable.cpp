@@ -195,8 +195,9 @@ void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap&
         else
             throw std::runtime_error(errorMessage.toLatin1());
     }
-
-    serializable.fromVariantMap(variantMap[key].toMap());
+    else {
+        serializable.fromVariantMap(variantMap[key].toMap());
+    }
 }
 
 void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap)
@@ -214,8 +215,9 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap)
             else
                 throw std::runtime_error(errorMessage.toLatin1());
         }
-
-        fromVariantMap(parentVariantMap[getSerializationName()].toMap());
+        else {
+            fromVariantMap(parentVariantMap[getSerializationName()].toMap());
+        }
     }
     catch (std::exception& e)
     {
@@ -263,28 +265,5 @@ void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
 
     variantMap.insert(getSerializationName(), toVariantMap());
 }
-
-//Serializable::State Serializable::getState() const
-//{
-//    return _state;
-//}
-//
-//void Serializable::setState(const State& state)
-//{
-//    if (state == _state)
-//        return;
-//
-//    _state = state;
-//}
-//
-//bool Serializable::isReading() const
-//{
-//    return _state == State::Reading;
-//}
-//
-//bool Serializable::isWriting() const
-//{
-//    return _state == State::Writing;
-//}
 
 }
