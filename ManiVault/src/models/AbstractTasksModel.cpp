@@ -546,11 +546,11 @@ void AbstractTasksModel::removeTask(Task* task)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to remove task from tasks tree model", e);
+        exceptionMessageBox("Unable to remove task from tasks model", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to remove task from tasks tree model");
+        exceptionMessageBox("Unable to remove task from tasks model");
     }
 }
 

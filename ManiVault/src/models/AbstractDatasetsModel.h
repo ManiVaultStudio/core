@@ -6,10 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "Task.h"
-
-#include "actions/StringAction.h"
-#include "actions/TaskAction.h"
+#include "Dataset.h"
 
 #include <QList>
 #include <QStandardItem>
@@ -19,13 +16,13 @@ namespace mv
 {
 
 /**
- * Tasks model class
+ * Datasets model class
  *
- * Standard item model class for tasks
+ * Standard item model class for datasets
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT AbstractTasksModel : public QStandardItemModel
+class CORE_EXPORT AbstractDatasetsModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -33,20 +30,9 @@ public:
 
     /** Task columns */
     enum class Column {
-        Name,                   /** Name of the task */
-        Enabled,                /** Whether the task is enabled, disabled tasks are not included in task aggregation */
-        Visible,                /** Whether the task is visible in the user interface */
-        Progress,               /** Task progress */
-        ProgressDescription,    /** Progress description */
-        ProgressText,           /** Progress text */
-        Status,                 /** Status of the task */
-        ProgressMode,           /** Progress mode (manual, subtasks or aggregate) */
-        ID,                     /** Globally unique identifier of the task */
-        ParentID,               /** Globally unique identifier of the parent task (empty string if not a child task) */
-        Type,                   /** Task type */
-        GuiScopes,              /** Task GUI scopes */
-        MayKill,                /** Task may kill boolean */
-        Kill,                   /** Column for killing a task */
+        Name,       /** Name of the dataset */
+        Location,   /** Location of the dataset */
+        ID,         /** Globally unique identifier of the dataset */
 
         Count
     };
@@ -85,69 +71,36 @@ protected:
 
 public:
 
-    /** Base standard model item class for task */
+    /** Base standard model item class for a dataset */
     class CORE_EXPORT Item : public QStandardItem, public QObject {
     public:
 
         /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
+         * Construct with smart pointer to \p dataset
+         * @param dataset Smart pointer to the dataset to display item for
          * @param editable Whether the model item is editable or not
          */
-        Item(Task* task, bool editable = false);
+        Item(Dataset<DatasetImpl> dataset, bool editable = false);
 
         /**
-         * Get task
-         * return Pointer to task to display item for
+         * Get dataset
+         * return Reference to smart pointer to dataset to display item for
          */
-        Task* getTask() const;
+        Dataset<DatasetImpl>& getDataset();
 
     private:
-        Task*   _task;      /** Pointer to task to display item for */
+        Dataset<DatasetImpl>    _dataset;      /** Smart pointer to the dataset to display item for */
     };
 
-    /** Standard model item class for displaying the task name */
+    /** Standard model item class for displaying the dataset name */
     class CORE_EXPORT NameItem final : public Item {
     public:
 
         /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
+         * Construct with smart pointer to \p dataset
+         * @param dataset Smart pointer to the dataset to display item for
          */
-        NameItem(Task* task);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /** Set model data to \p value for \p role */
-        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
-
-        /**
-         * Get string action
-         * @return String action for use in item delegates
-         */
-        gui::StringAction& getStringAction() {
-            return _stringAction;
-        }
-
-    private:
-        gui::StringAction   _stringAction;    /** String action for use in item delegates */
-    };
-
-protected:
-
-    /** Standard model item class for displaying whether the task is enabled or not */
-    class EnabledItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
-         */
-        EnabledItem(Task* task);
+        NameItem(Dataset<DatasetImpl> dataset);
 
         /**
          * Get model data for \p role
@@ -156,115 +109,15 @@ protected:
         QVariant data(int role = Qt::UserRole + 1) const override;
     };
 
-    /** Standard model item class for displaying whether the task is visible or not */
-    class VisibleItem final : public Item {
+    /** Standard model item class for displaying the dataset location */
+    class CORE_EXPORT LocationItem final : public Item{
     public:
 
         /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
+         * Construct with smart pointer to \p dataset
+         * @param dataset Smart pointer to the dataset to display item for
          */
-        VisibleItem(Task* task);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-public:
-
-    /** Standard model item class for displaying the task progress */
-    class CORE_EXPORT ProgressItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
-         */
-        ProgressItem(Task* task);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get task action
-         * @return Task action for use in item delegate (its built-in progress action)
-         */
-        gui::TaskAction& getTaskAction() {
-            return _taskAction;
-        }
-
-    private:
-        gui::TaskAction     _taskAction;    /** Task action for use in item delegate (uses its built-in progress action) */
-    };
-
-protected:
-
-    /** Standard model item class for displaying the progress description */
-    class CORE_EXPORT ProgressDescriptionItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
-         */
-        ProgressDescriptionItem(Task* task);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-    /** Standard model item class for displaying the progress text */
-    class CORE_EXPORT ProgressTextItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
-         */
-        ProgressTextItem(Task* task);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-    /** Standard model item class for displaying the task status */
-    class CORE_EXPORT StatusItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
-         */
-        StatusItem(Task* task);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-    /** Standard model item class for displaying the progress mode */
-    class CORE_EXPORT ProgressModeItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
-         */
-        ProgressModeItem(Task* task);
+        LocationItem(Dataset<DatasetImpl> dataset);
 
         /**
          * Get model data for \p role
@@ -277,84 +130,8 @@ protected:
     class CORE_EXPORT IdItem final : public Item {
     public:
 
-        /** Use base task item constructor */
+        /** Use base dataset item constructor */
         using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-    /** Standard model item class for displaying the parent task identifier */
-    class CORE_EXPORT ParentIdItem final : public Item {
-    public:
-
-        /** Use base task item constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-    /** Standard model item class for displaying the task type */
-    class CORE_EXPORT TypeItem final : public Item {
-    public:
-
-        /** Use base task item constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-    /** Standard model item class for displaying the task GUI scopes */
-    class CORE_EXPORT GuiScopesItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
-         */
-        GuiScopesItem(Task* task);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-    /** Standard model item class for displaying whether the task may be killed */
-    class CORE_EXPORT MayKillItem final : public Item {
-    public:
-
-        /** Use base task item constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-    /** Standard model item class for killing a task */
-    class CORE_EXPORT KillItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
-         */
-        KillItem(Task* task);
 
         /**
          * Get model data for \p role
@@ -369,27 +146,16 @@ protected:
     public:
 
         /**
-         * Construct row with \p task
-         * @param task Pointer to row task
+         * Construct with smart pointer to \p dataset
+         * @param dataset Smart pointer to the dataset to display item for
          */
-        Row(Task* task) : QList<QStandardItem*>()
+        Row(Dataset<DatasetImpl> dataset) :
+            QList<QStandardItem*>()
         {
-            append(new NameItem(task));
-            append(new EnabledItem(task));
-            append(new VisibleItem(task));
-            append(new ProgressItem(task));
-            append(new ProgressDescriptionItem(task));
-            append(new ProgressTextItem(task));
-            append(new StatusItem(task));
-            append(new ProgressModeItem(task));
-            append(new IdItem(task));
-            append(new ParentIdItem(task));
-            append(new TypeItem(task));
-            append(new GuiScopesItem(task));
-            append(new MayKillItem(task));
-            append(new KillItem(task));
+            append(new NameItem(dataset));
+            append(new LocationItem(dataset));
+            append(new IdItem(dataset));
         }
-
     };
 
 public:
@@ -398,27 +164,27 @@ public:
      * Construct with \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractTasksModel(QObject* parent = nullptr);
+    AbstractDatasetsModel(QObject* parent = nullptr);
 
     /**
-     * Get item from \p task
+     * Get item from smart pointer to \p dataset
      * @return Pointer to found item, nullptr otherwise
      */
-    QStandardItem* itemFromTask(Task* task) const;
+    QStandardItem* itemFromDataset(Dataset<DatasetImpl> dataset) const;
 
 private:
 
     /**
-     * Add \p task to the model (this method is called when a task is added to the manager)
-     * @param task Pointer to task to add
+     * Add \p dataset to the model (this method is called when a dataset is added to the manager)
+     * @param dataset Smart pointer to dataset to add
      */
-    virtual void addTask(Task* task) = 0;
+    virtual void addDataset(Dataset<DatasetImpl> dataset) = 0;
 
     /**
-     * Remove \p task from the model (this method is called when a task is about to be removed from the manager)
-     * @param task Pointer to task to remove
+     * Remove \p dataset from the model (this method is called when a dataset is about to be removed from the manager)
+     * @param dataset Smart pointer to task to remove
      */
-    virtual void removeTask(Task* task) final;
+    virtual void removeDataset(Dataset<DatasetImpl> dataset) final;
 
     friend class Item;
 };

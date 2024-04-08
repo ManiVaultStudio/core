@@ -815,13 +815,13 @@ set(PUBLIC_MISCELLANEOUS_MODEL_FILES
 
 set(PUBLIC_DATASETS_MODEL_HEADERS
     src/models/AbstractDatasetsModel.h
-    src/models/DatasetsTreeModel.h
+    src/models/DatasetsListModel.h
     src/models/DatasetsFilterModel.h
 )
 
 set(PUBLIC_DATASETS_MODEL_SOURCES
     src/models/AbstractDatasetsModel.cpp
-    src/models/DatasetsTreeModel.cpp
+    src/models/DatasetsListModel.cpp
     src/models/DatasetsFilterModel.cpp
 )
 
