@@ -54,4 +54,16 @@ CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap,
  */
 CORE_EXPORT void variantMapMustContain(const QVariantMap& variantMap, const QString& key);
 
+/**
+* Store QVariant on disk if it is too large (divide up in blocks when the total number of bytes exceeds maxBlockSize) and return a QVariantMap with the file information, otherwise return the QVariant parameter.
+* @param variant QVariant to store
+*/
+QVariant storeQVariant(const QVariant& variant);
+
+/**
+ * Load QVariant from disk if it was large, othewise return QVariant.
+ * @param variant QVariant to load
+ */
+QVariant loadQVariant(const QVariant& variant);
+
 }
