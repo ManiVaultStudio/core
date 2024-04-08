@@ -813,6 +813,23 @@ set(PUBLIC_MISCELLANEOUS_MODEL_FILES
     ${PUBLIC_MISCELLANEOUS_MODEL_SOURCES}
 )
 
+set(PUBLIC_DATASETS_MODEL_HEADERS
+    src/models/AbstractDatasetsModel.h
+    src/models/DatasetsTreeModel.h
+    src/models/DatasetsFilterModel.h
+)
+
+set(PUBLIC_DATASETS_MODEL_SOURCES
+    src/models/AbstractDatasetsModel.cpp
+    src/models/DatasetsTreeModel.cpp
+    src/models/DatasetsFilterModel.cpp
+)
+
+set(PUBLIC_DATASETS_MODEL_FILES
+    ${PUBLIC_DATASETS_MODEL_HEADERS}
+    ${PUBLIC_DATASETS_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -925,6 +942,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_PLUGINS_MODEL_HEADERS}
     ${PUBLIC_PLUGIN_FACTORIES_MODEL_HEADERS}
     ${PUBLIC_MISCELLANEOUS_MODEL_HEADERS}
+	${PUBLIC_DATASETS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_VERSION_HEADERS}
@@ -967,6 +985,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_PLUGINS_MODEL_SOURCES}
     ${PUBLIC_PLUGIN_FACTORIES_MODEL_SOURCES}
     ${PUBLIC_MISCELLANEOUS_MODEL_SOURCES}
+	${PUBLIC_DATASETS_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_HEADERS}
@@ -1013,14 +1032,15 @@ source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})
 source_group(DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
 source_group(Dataset FILES ${PUBLIC_DATASET_FILES})
 source_group(Plugin FILES ${PUBLIC_PLUGIN_FILES})
-source_group(Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
-source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
-source_group(Model\\RawData FILES ${PUBLIC_RAW_DATA_MODEL_FILES})
-source_group(Model\\Selections FILES ${PUBLIC_SELECTIONS_MODEL_FILES})
-source_group(Model\\Logging FILES ${PUBLIC_LOGGING_MODEL_FILES})
-source_group(Model\\Tasks FILES ${PUBLIC_TASKS_MODEL_FILES})
-source_group(Model\\Plugins FILES ${PUBLIC_PLUGINS_MODEL_FILES})
-source_group(Model\\PluginFactories FILES ${PUBLIC_PLUGIN_FACTORIES_MODEL_FILES})
-source_group(Model\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
+source_group(Models\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
+source_group(Models\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
+source_group(Models\\RawData FILES ${PUBLIC_RAW_DATA_MODEL_FILES})
+source_group(Models\\Selections FILES ${PUBLIC_SELECTIONS_MODEL_FILES})
+source_group(Models\\Logging FILES ${PUBLIC_LOGGING_MODEL_FILES})
+source_group(Models\\Tasks FILES ${PUBLIC_TASKS_MODEL_FILES})
+source_group(Models\\Plugins FILES ${PUBLIC_PLUGINS_MODEL_FILES})
+source_group(Models\\PluginFactories FILES ${PUBLIC_PLUGIN_FACTORIES_MODEL_FILES})
+source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
+source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
