@@ -46,6 +46,8 @@ public:
      */
     PluginFactory(Type type);
 
+    virtual ~PluginFactory() { }
+
     /**
      * Get plugin kind
      * @return Plugin kind

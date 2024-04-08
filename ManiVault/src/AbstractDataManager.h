@@ -40,6 +40,8 @@ public:
     {
     }
 
+    virtual ~AbstractDataManager() { }
+
 protected: // Raw data
 
     /**

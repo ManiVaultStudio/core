@@ -48,6 +48,8 @@ public:
     {
     }
 
+    virtual ~AbstractActionsManager() { }
+
     /**
      * Get all actions in the manager
      * @return List of all actions in the manager

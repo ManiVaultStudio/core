@@ -74,23 +74,17 @@ Application::Application(int& argc, char** argv) :
     });
 }
 
+Application::~Application()
+{
+    _core = nullptr;
+}
+
 Application* Application::current()
 {
-    try
-    {
-        auto applicationInstance    = instance();
-        auto maniVaultApplication   = dynamic_cast<Application*>(applicationInstance);
+    auto applicationInstance = instance();
+    auto maniVaultApplication = dynamic_cast<Application*>(applicationInstance);
 
-        if (maniVaultApplication == nullptr)
-            throw std::runtime_error("Current application instance is not a ManiVault application");
-
-        return maniVaultApplication;
-    }
-    catch (std::exception& e)
-    {
-        QMessageBox::critical(nullptr, "An application error occurred", e.what());
-        return nullptr;
-    }
+    return maniVaultApplication;
 }
 
 const IconFont& Application::getIconFont(const QString& name, const std::int32_t& majorVersion /*= -1*/, const std::int32_t& minorVersion /*= -1*/)
@@ -124,6 +118,9 @@ void Application::setCore(CoreInterface* core)
 
 mv::CoreInterface* Application::core()
 {
+    if (current() == nullptr)
+        return nullptr;
+
     return current()->getCore();
 }
 

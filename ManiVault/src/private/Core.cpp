@@ -34,7 +34,11 @@ Core::Core() :
 
 Core::~Core()
 {
-    getPluginManager().reset();
+    for (auto& manager : _managers)
+    {
+        qDebug() << "Reset " << manager->metaObject()->className();
+        manager->reset();
+    }
 }
 
 void Core::createManagers()

@@ -54,6 +54,7 @@ DockManager::~DockManager()
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
+    reset();
 }
 
 ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
@@ -104,8 +105,25 @@ void DockManager::reset()
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
-        removeViewPluginDockWidget(viewPluginDockWidget);
+    QListIterator<QPointer<ViewPluginDockWidget>> it(getViewPluginDockWidgets());
+    it.toBack();
+    while (it.hasPrevious())
+    {
+        QPointer<ViewPluginDockWidget> viewPluginDockWidget = it.previous();
+
+        if (viewPluginDockWidget == nullptr)
+            continue;
+
+        if (viewPluginDockWidget.get() == nullptr)
+            continue;
+
+        auto ttt = viewPluginDockWidget.get();
+
+        qDebug() << ttt->objectName();
+
+        removeViewPluginDockWidget(viewPluginDockWidget.get());
+    }
+
 }
 
 void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* Dockwidget, ads::CDockAreaWidget* DockAreaWidget)

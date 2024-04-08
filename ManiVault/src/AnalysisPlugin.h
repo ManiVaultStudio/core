@@ -117,7 +117,7 @@ public:
     {
 
     }
-    ~AnalysisPluginFactory() override {};
+    ~AnalysisPluginFactory() = default;
     
     /**
      * Get plugin icon

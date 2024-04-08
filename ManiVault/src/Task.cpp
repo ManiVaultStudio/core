@@ -147,7 +147,12 @@ Task::~Task()
 
 QString Task::getTypeName(bool humanFriendly /*= true*/) const
 {
-    auto typeString = QString(metaObject()->className());
+    auto metaObjectPrt = metaObject();
+
+    if (metaObjectPrt == nullptr)
+        return {};
+
+    auto typeString = QString(metaObjectPrt->className());
 
     if (humanFriendly)
         typeString.replace("mv::", "");
@@ -699,6 +704,9 @@ void Task::updateProgress()
 //    qDebug() << __FUNCTION__ << getName();
 //#endif
 
+    if (core() == nullptr)
+        return;
+
     switch (_progressMode) {
         case ProgressMode::Manual:
             break;
@@ -823,6 +831,9 @@ void Task::unregisterChildTask(Task* childTask)
 
 void Task::updateAggregateStatus()
 {
+    if (core() == nullptr)
+        return;
+
     if (_progressMode != ProgressMode::Aggregate)
         return;
 

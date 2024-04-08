@@ -40,8 +40,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _viewPlugin(nullptr),
     _viewPluginKind(),
     _viewPluginMap(),
-    _settingsMenu(),
-    _toggleMenu("Toggle"),
+    _settingsMenu(this),
+    _toggleMenu("Toggle", this),
     _helpAction(this, "Help"),
     _cachedVisibility(false),
     _dockManager(this),
@@ -57,20 +57,12 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
     ViewPluginDockWidget(title, parent)
 {
-    active << this;
-
-    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
-    initialize();
     setViewPlugin(viewPlugin);
 }
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
     ViewPluginDockWidget()
 {
-    active << this;
-
-    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
-    initialize();
     fromVariantMap(variantMap);
 }
 
@@ -188,6 +180,7 @@ void ViewPluginDockWidget::restoreViewPluginState()
 
     _viewPlugin->fromVariantMap(_viewPluginMap);
 }
+
 void ViewPluginDockWidget::restoreViewPluginStates()
 {
     for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
@@ -350,7 +343,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
     };
 
     for (auto settingsAction : _viewPlugin->getDockingActions()) {
-        auto settingsDockWidget     = new CDockWidget(settingsAction->text());
+        auto settingsDockWidget     = new CDockWidget(settingsAction->text(), this);
         auto settingsWidget         = new SettingsActionWidget(this, settingsAction);
         auto containerWidget        = new QWidget();
         auto containerWidgetLayout  = new QVBoxLayout();

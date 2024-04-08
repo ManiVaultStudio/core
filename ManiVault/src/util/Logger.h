@@ -51,6 +51,8 @@ public:
     static QMap<QtMsgType, QString> messageTypeNames;
 
 public:
+    ~Logger();
+
     static QString getMessageTypeName(QtMsgType);
     static QString GetFilePathName();
     static QString ExceptionToText(const std::exception& stdException);

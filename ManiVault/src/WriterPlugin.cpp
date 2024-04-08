@@ -4,8 +4,6 @@
 
 #include "WriterPlugin.h"
 
-#include "Application.h"
-
 namespace mv
 {
 namespace plugin
@@ -26,17 +24,6 @@ void WriterPlugin::setInputDataset(const Dataset<DatasetImpl>& inputDataset)
 void WriterPlugin::setInputDatasets(const Datasets& inputDatasets)
 {
     _input = inputDatasets;
-}
-
-WriterPluginFactory::WriterPluginFactory() :
-    PluginFactory(Type::WRITER)
-{
-
-}
-
-QIcon WriterPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("file-export", color);
 }
 
 }
