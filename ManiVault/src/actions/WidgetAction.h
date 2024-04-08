@@ -239,7 +239,7 @@ public: // Hierarchy queries
         QMap<QString, WidgetAction*> childrenByPath;
 
         for (auto child : getChildren(true))
-            childrenByPath[child->getLocation()] = child;
+            childrenByPath[child->getLocation(true)] = child;
 
         const auto prefixedPath = QString("%1/%2").arg(text(), path);
 
@@ -299,7 +299,7 @@ public:
     template<typename WidgetActionType = WidgetAction>
     void printChildren(std::int32_t maxDepth = -1) const {
         for (auto child : getChildren<WidgetActionType>(maxDepth)) {
-            auto segments = child->getLocation().split("/");
+            auto segments = child->getLocation(true).split("/");
 
             if (segments.isEmpty())
                 continue;
