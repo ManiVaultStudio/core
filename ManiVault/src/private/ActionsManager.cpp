@@ -26,7 +26,7 @@ namespace mv
 
 ActionsManager::ActionsManager() :
     AbstractActionsManager(),
-    _actionsListModel(this)
+    _actionsListModel(nullptr)
 {
 }
 
@@ -47,6 +47,9 @@ void ActionsManager::initialize()
         return;
 
     beginInitialization();
+    {
+        _actionsListModel = new ActionsListModel(this);
+    }
     endInitialization();
 }
 
@@ -224,10 +227,9 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
             qDebug() << __FUNCTION__ << privateAction->text();
     #endif
 
-            ActionsListModel    actionsListModel(this);
             ActionsFilterModel  actionsFilterModel(this);
 
-            actionsFilterModel.setSourceModel(&actionsListModel);
+            actionsFilterModel.setSourceModel(&mv::actions().getActionsListModel());
             actionsFilterModel.setFilterKeyColumn(static_cast<int>(ActionsListModel::Column::Name));
             actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
             actionsFilterModel.setFilterRegularExpression(name);
@@ -286,7 +288,7 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
 ActionsListModel& ActionsManager::getActionsListModel()
 {
-    return _actionsListModel;
+    return *_actionsListModel;
 }
 
 }

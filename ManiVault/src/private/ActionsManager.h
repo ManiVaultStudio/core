@@ -65,7 +65,7 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    ActionsListModel    _actionsListModel;
+    ActionsListModel*    _actionsListModel;
 };
 
 }
