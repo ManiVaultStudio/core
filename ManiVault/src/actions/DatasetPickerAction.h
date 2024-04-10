@@ -9,7 +9,11 @@
 
 #include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
+
 #include "event/EventListener.h"
+
+#include "models/DatasetsListModel.h"
+#include "models/DatasetsFilterModel.h"
 
 #include <QAbstractListModel>
 
@@ -27,128 +31,6 @@ class CORE_EXPORT DatasetPickerAction : public OptionAction
 {
 Q_OBJECT
 
-protected:
-
-    /**
-     * Datasets list model class
-     *
-     * List model class which serves as input to the dataset picker option action class
-     *
-     * @author Thomas Kroes
-     */
-    class CORE_EXPORT DatasetsModel : public QAbstractListModel {
-    public:
-
-        /** Model columns */
-        enum class Column {
-            Name,
-            GUID
-        };
-
-        /** (Default) constructor */
-        DatasetsModel(QObject* parent = nullptr);
-
-        /**
-         * Get the number of row
-         * @param parent Parent model index
-         * @return Number of rows in the model
-         */
-        int rowCount(const QModelIndex& parent = QModelIndex()) const;
-
-        /**
-         * Get the row index of a dataset
-         * @param parent Parent model index
-         * @return Row index of the dataset
-         */
-        int rowIndex(const mv::Dataset<mv::DatasetImpl>& dataset) const;
-
-        /**
-         * Get the number of columns
-         * @param parent Parent model index
-         * @return Number of columns in the model
-         */
-        int columnCount(const QModelIndex& parent = QModelIndex()) const;
-
-        /**
-         * Get data
-         * @param index Model index to query
-         * @param role Data role
-         * @return Data
-         */
-        QVariant data(const QModelIndex& index, int role) const;
-
-        /**
-         * Get datasets
-         * @return Vector of smart pointers to datasets
-         */
-        const QVector<mv::Dataset<mv::DatasetImpl>>& getDatasets() const;
-
-        /**
-         * Get dataset at the specified row index
-         * @param rowIndex Index of the row
-         * @return Smart pointer to dataset
-         */
-        mv::Dataset<mv::DatasetImpl> getDataset(const std::int32_t& rowIndex) const;
-
-        /**
-         * Set datasets (resets the model)
-         * @param datasets Vector of smart pointers to datasets
-         */
-        void setDatasets(const QVector<mv::Dataset<mv::DatasetImpl>>& datasets);
-
-        /**
-         * Add dataset
-         * @param dataset Smart pointer to dataset
-         */
-        void addDataset(const mv::Dataset<mv::DatasetImpl>& dataset);
-
-        /**
-         * Remove specific dataset
-         * @param dataset Smart pointer to dataset
-         */
-        void removeDataset(const mv::Dataset<mv::DatasetImpl>& dataset);
-
-        /** Remove all datasets from the model */
-        void removeAllDatasets();
-
-        /** Get whether to show the dataset icon */
-        bool getShowIcon() const;
-
-        /**
-         * Set whether to show the icon
-         * @param showFullPathName Whether to show the icon
-         */
-        void setShowIcon(bool showIcon);
-
-        /** Get to show the dataset location */
-        bool getShowLocation() const;
-
-        /**
-         * Set whether to show the full path name in the GUI
-         * @param showFullPathName Whether to show the full path name in the GUI
-         */
-        void setShowLocation(bool showLocation);
-
-        /** Updates the model from the datasets */
-        void updateData();
-
-    protected:
-        QVector<mv::Dataset<mv::DatasetImpl>>   _datasets;          /** Datasets from which can be picked */
-        bool                                        _showIcon;          /** Whether to show the dataset icon */
-        bool                                        _showLocation;      /** Whether to show the dataset location */
-    };
-
-public:
-
-    /** Pickable datasets */
-    enum class Mode {
-        Manual,         /** ...are set manually with \p setDatasets() */
-        Automatic       /** ...are a continuous reflection of the datasets in the data model and can be possibly filtered with \p setDatasetsFilterFunction() */
-    };
-
-    /** Filter function signature, the input are all datasets in the core and it returns the filtered datasets */
-    using DatasetsFilterFunction = std::function<mv::Datasets(const mv::Datasets&)>;
-
 public:
 
     /**
@@ -157,16 +39,7 @@ public:
      * @param title Title of the action
      * @param mode Picker mode
      */
-    Q_INVOKABLE DatasetPickerAction(QObject* parent, const QString& title, Mode mode = Mode::Automatic);
-
-    /** Get current mode */
-    Mode getMode() const;
-
-    /**
-     * Set current mode
-     * @param mode Mode
-     */
-    void setMode(Mode mode);
+    Q_INVOKABLE DatasetPickerAction(QObject* parent, const QString& title);
 
     /**
      * Get datasets
@@ -184,7 +57,7 @@ public:
      * Set datasets filter function (mode is set to Mode::Automatic)
      * @param datasetsFilterFunction Filter lambda (triggered when datasets are added and/or removed from the datasets model)
      */
-    void setDatasetsFilterFunction(const DatasetsFilterFunction& datasetsFilterFunction);
+    void setFilterFunction(const DatasetsFilterModel::FilterFunction& filterFunction);
 
     /** Get the current dataset */
     mv::Dataset<mv::DatasetImpl> getCurrentDataset() const;
@@ -197,16 +70,16 @@ public:
     }
 
     /**
-     * Set the current dataset
+     * Set current dataset to \p currentDataset
      * @param currentDataset Smart pointer to current dataset
      */
     void setCurrentDataset(mv::Dataset<mv::DatasetImpl> currentDataset);
 
     /**
-     * Set the current dataset by \p guid
-     * @param guid Current dataset globally unique identifier
+     * Set current dataset by \p datasetId
+     * @param datasetId Current dataset globally unique identifier
      */
-    void setCurrentDataset(const QString& guid);
+    void setCurrentDataset(const QString& datasetId);
 
     /**
      * Get current dataset globally unique identifier
@@ -214,38 +87,24 @@ public:
      */
     QString getCurrentDatasetGuid() const;
 
-public: // Datasets model facade
-
-    /** Get whether to show the dataset icon */
-    bool getShowIcon() const {
-        return _datasetsModel.getShowIcon();
-    }
+public: // Population
 
     /**
-     * Set whether to show the icon
-     * @param showFullPathName Whether to show the icon
+     * Get current population mode
+     * @return Population mode
      */
-    void setShowIcon(bool showIcon) {
-        _datasetsModel.setShowIcon(showIcon);
-    }
-
-    /** Get whether to show the location */
-    bool getShowLocation() const {
-        return _datasetsModel.getShowLocation();
-    }
+    AbstractDatasetsModel::PopulationMode getPopulationMode() const;
 
     /**
-     * Set whether to show the location
-     * @param showLocation Boolean determining whether to show the location
+     * Set population mode to \p populationMode
+     * @param populationMode Population mode
      */
-    void setShowFullPathName(bool showLocation) {
-        _datasetsModel.setShowLocation(showLocation);
-    }
+    void setPopulationMode(AbstractDatasetsModel::PopulationMode populationMode);
 
-private:
+private: // Population
 
-    /** Populates the datasets from the core */
-    void populateDatasetsFromCore();
+    /** Handle changes to the population mode */
+    void populationModeChanged();
 
 protected: // Linking
 
@@ -286,15 +145,21 @@ signals:
 
     /**
      * Signals that selectable datasets changed
-     * @param Selectable datasets
+     * @param datasets Selectable datasets
      */
     void datasetsChanged(mv::Datasets datasets);
 
+    /**
+     * Signals that the population mode changed from \p previousPopulationMode to \p populationMode
+     * @param previousPopulationMode Previous population mode
+     * @param populationMode Previous population mode
+     */
+    void populationModeChanged(AbstractDatasetsModel::PopulationMode previousPopulationMode, AbstractDatasetsModel::PopulationMode populationMode);
+
 protected:
-    Mode                        _mode;                      /** Picker mode (e.g. manual or automatic) */
-    DatasetsFilterFunction      _datasetsFilterFunction;    /** Datasets filter lambda */
-    DatasetsModel               _datasetsModel;             /** Datasets list model */
-    mv::EventListener         _eventListener;             /** Listen to events from the core */
+    AbstractDatasetsModel::PopulationMode   _populationMode;        /** Population mode (e.g. manual or automatic) */
+    DatasetsListModel                       _datasetsListModel;     /** Datasets list model for manual population (mv::data().getDatasetsListModel() otherwise) */
+    DatasetsFilterModel                     _datasetsFilterModel;   /** Filter model for the datasets model above */
 
     friend class AbstractActionsManager;
 };

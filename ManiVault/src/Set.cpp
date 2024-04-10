@@ -361,9 +361,6 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
 
 DatasetImpl::~DatasetImpl()
 {
-#ifdef _DEBUG
-    qDebug() << "Removed dataset" << getGuiName();
-#endif
 }
 
 void DatasetImpl::init()

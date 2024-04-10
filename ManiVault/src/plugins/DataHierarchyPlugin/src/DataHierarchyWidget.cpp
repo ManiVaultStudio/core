@@ -171,9 +171,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeModel(this),
     _filterModel(this),
     _hierarchyWidget(this, "Dataset", _treeModel, &_filterModel),
-    _resetAction(this, "Reset"),
-    _unhideAction(this, "Unhide"),
-    _statisticsAction(this, "Statistics")
+    _resetAction(this, "Reset")//,
+    //_unhideAction(this, "Unhide"),
+    //_statisticsAction(this, "Statistics")
 {
     auto layout = new QVBoxLayout();
 
@@ -207,8 +207,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     auto& toolbarAction = _hierarchyWidget.getToolbarAction();
 
-    toolbarAction.addAction(&_unhideAction);
-    toolbarAction.addAction(&_statisticsAction);
+    //toolbarAction.addAction(&_unhideAction);
+    //toolbarAction.addAction(&_statisticsAction);
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -310,7 +310,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        try{
+        try {
             for (const auto& deselectedRange : deselected) {
                 for (int rowIndex = deselectedRange.top(); rowIndex <= deselectedRange.bottom(); rowIndex++) {
                     const auto deselectedSourceModelIndex = _filterModel.mapToSource(_filterModel.index(rowIndex, 0, deselectedRange.parent()));

@@ -168,7 +168,7 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
 {
     try {
 
-#ifdef _DEBUG
+#ifdef DATA_HIERARCHY_MANAGER_VERBOSE
         qDebug() << "Add dataset" << dataset->getGuiName() << "to the data hierarchy manager";
 #endif
 
@@ -202,7 +202,7 @@ void DataHierarchyManager::removeItem(Dataset<DatasetImpl> dataset)
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
-#ifdef _DEBUG
+#ifdef DATA_HIERARCHY_MANAGER_VERBOSE
         qDebug() << "Remove dataset" << dataset->getGuiName() << "from the data hierarchy manager";
 #endif
 

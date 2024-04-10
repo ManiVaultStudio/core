@@ -4,37 +4,36 @@
 
 #pragma once
 
-#include "AbstractTasksModel.h"
+#include "AbstractDatasetsModel.h"
 
 namespace mv
 {
 
 /**
- * Tasks model class
+ * Datasets list model class
  *
- * Standard item model class for tasks
+ * Standard item model class for datasets as a list
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT TasksListModel : public AbstractTasksModel
+class CORE_EXPORT DatasetsListModel : public AbstractDatasetsModel
 {
-    Q_OBJECT
-
 public:
 
     /**
-     * Construct with \p parent object
+     * Construct with \p populationMode and pointer to \p parent object
+     * @param populationMode Population mode
      * @param parent Pointer to parent object
      */
-    TasksListModel(QObject* parent = nullptr);
+    DatasetsListModel(PopulationMode populationMode = PopulationMode::Automatic, QObject* parent = nullptr);
 
 private:
 
     /**
-     * Add \p task to the model (this method is called when a task is added to the manager)
-     * @param task Pointer to task to add
+     * Add \p dataset to the model (this method is called when a dataset is added to the manager)
+     * @param dataset Smart pointer to dataset to add
      */
-    void addTask(Task* task) override;
+    void addDataset(Dataset<DatasetImpl> dataset) override;
 };
 
 }

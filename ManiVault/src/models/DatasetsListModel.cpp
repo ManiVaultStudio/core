@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "TasksListModel.h"
+#include "DatasetsListModel.h"
 
 #include "Application.h"
 #include "CoreInterface.h"
@@ -10,7 +10,7 @@
 #include <util/Exception.h>
 
 #ifdef _DEBUG
-    #define TASKS_LIST_MODEL_VERBOSE
+    #define DATASETS_LIST_MODEL_VERBOSE
 #endif
 
 namespace mv
@@ -18,35 +18,40 @@ namespace mv
 
 using namespace util;
 
-TasksListModel::TasksListModel(QObject* parent /*= nullptr*/) :
-    AbstractTasksModel(parent)
+DatasetsListModel::DatasetsListModel(PopulationMode populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
+    AbstractDatasetsModel(populationMode, parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
     for (auto column : columnInfo.keys())
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 
-    for (auto task : tasks().getTasks())
-        addTask(task);
+    if (getPopulationMode() == AbstractDatasetsModel::PopulationMode::Automatic)
+        for (auto dataset : mv::data().getAllDatasets())
+            addDataset(dataset);
 }
 
-void TasksListModel::addTask(Task* task)
+void DatasetsListModel::addDataset(Dataset<DatasetImpl> dataset)
 {
+    AbstractDatasetsModel::addDataset(dataset);
+
     try {
-        Q_ASSERT(task != nullptr);
+        Q_ASSERT(dataset.isValid());
 
-        if (task == nullptr)
-            throw std::runtime_error("Task may not be a nullptr");
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset is not valid");
 
-        appendRow(Row(task));
+        auto datasetRow = Row(*this, dataset);
+        
+        appendRow(datasetRow);
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to add task to tasks list model", e);
+        exceptionMessageBox("Unable to add dataset to datasets list model", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to add task to tasks list model");
+        exceptionMessageBox("Unable to add dataset to datasets list model");
     }
 }
 

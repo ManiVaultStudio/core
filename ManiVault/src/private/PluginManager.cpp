@@ -30,7 +30,7 @@
 #include <stdexcept>
 
 #ifdef _DEBUG
-    #define PLUGIN_MANAGER_VERBOSE
+    //#define PLUGIN_MANAGER_VERBOSE
 #endif
 
 namespace mv {
@@ -320,7 +320,9 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
 
         addPlugin(pluginInstance);
 
+#ifdef PLUGIN_MANAGER_VERBOSE
         qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion() << "and ID" << pluginInstance->getId();
+#endif
 
         _plugins.push_back(std::move(std::unique_ptr<plugin::Plugin>(pluginInstance)));
 

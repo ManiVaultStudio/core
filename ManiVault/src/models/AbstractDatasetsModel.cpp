@@ -13,7 +13,7 @@
 #include <actions/WidgetAction.h>
 
 #ifdef _DEBUG
-    //#define ABSTRACT_DATASETS_MODEL_VERBOSE
+    #define ABSTRACT_DATASETS_MODEL_VERBOSE
 #endif
 
 namespace mv
@@ -48,9 +48,10 @@ QVariant AbstractDatasetsModel::HeaderItem::data(int role /*= Qt::UserRole + 1*/
     return QVariant();
 }
 
-AbstractDatasetsModel::Item::Item(Dataset<DatasetImpl> dataset, bool editable /*= false*/) :
+AbstractDatasetsModel::Item::Item(AbstractDatasetsModel& datasetsModel, Dataset<DatasetImpl> dataset, bool editable /*= false*/) :
     QStandardItem(),
     QObject(),
+    _datasetsModel(datasetsModel),
     _dataset(dataset)
 {
     Q_ASSERT(_dataset.isValid());
@@ -59,14 +60,23 @@ AbstractDatasetsModel::Item::Item(Dataset<DatasetImpl> dataset, bool editable /*
     setDropEnabled(true);
 }
 
+AbstractDatasetsModel& AbstractDatasetsModel::Item::getDatasetsModel()
+{
+    return _datasetsModel;
+}
+
 Dataset<DatasetImpl>& AbstractDatasetsModel::Item::getDataset()
 {
     return _dataset;
 }
 
-AbstractDatasetsModel::NameItem::NameItem(Dataset<DatasetImpl> dataset) :
-    Item(dataset)
+AbstractDatasetsModel::NameItem::NameItem(AbstractDatasetsModel& datasetsModel, Dataset<DatasetImpl> dataset) :
+    Item(datasetsModel, dataset)
 {
+    connect(&datasetsModel.getShowIconAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emitDataChanged();
+    });
+
     //connect(&getDataset(), &Dataset<DatasetImpl>::textChanged, this, [this](const QString& name) -> void {
     //    emitDataChanged();
     //});
@@ -74,13 +84,18 @@ AbstractDatasetsModel::NameItem::NameItem(Dataset<DatasetImpl> dataset) :
 
 QVariant AbstractDatasetsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    auto nonConstThis = const_cast<AbstractDatasetsModel::NameItem*>(this);
+
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return const_cast<AbstractDatasetsModel::NameItem*>(this)->getDataset()->getGuiName();
+            return nonConstThis->getDataset()->getGuiName();
 
         case Qt::ToolTipRole:
             return "Dataset name: " + data(Qt::DisplayRole).toString();
+
+        case Qt::DecorationRole:
+            return nonConstThis->getDatasetsModel().getShowIconAction().isChecked() ? nonConstThis->getDataset()->getIcon() : QIcon();
 
         default:
             break;
@@ -89,12 +104,14 @@ QVariant AbstractDatasetsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) 
     return Item::data(role);
 }
 
-AbstractDatasetsModel::LocationItem::LocationItem(Dataset<DatasetImpl> dataset) :
-    Item(dataset)
+AbstractDatasetsModel::LocationItem::LocationItem(AbstractDatasetsModel& datasetsModel, Dataset<DatasetImpl> dataset) :
+    Item(datasetsModel, dataset)
 {
     //connect(&getDataset(), &WidgetAction::textChanged, this, [this](const QString& name) -> void {
     //    emitDataChanged();
     //});
+
+    //connect(dataset.get(), &DatasetImpl::locationChanged, &_datasetsModel, &DatasetsModel::updateData);
 }
 
 QVariant AbstractDatasetsModel::LocationItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -114,13 +131,17 @@ QVariant AbstractDatasetsModel::LocationItem::data(int role /*= Qt::UserRole + 1
     return Item::data(role);
 }
 
+AbstractDatasetsModel::IdItem::IdItem(AbstractDatasetsModel& datasetsModel, Dataset<DatasetImpl> dataset) :
+    Item(datasetsModel, dataset)
+{
+}
 
 QVariant AbstractDatasetsModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            const_cast<AbstractDatasetsModel::IdItem*>(this)->getDataset()->getId();
+            return const_cast<AbstractDatasetsModel::IdItem*>(this)->getDataset()->getId();
 
         case Qt::ToolTipRole:
             return "Dataset globally unique identifier: " + data(Qt::DisplayRole).toString();
@@ -138,23 +159,71 @@ QMap<AbstractDatasetsModel::Column, AbstractDatasetsModel::ColumHeaderInfo> Abst
     { AbstractDatasetsModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the dataset" } }
 });
 
-AbstractDatasetsModel::AbstractDatasetsModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+AbstractDatasetsModel::AbstractDatasetsModel(PopulationMode populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
+    QStandardItemModel(parent),
+    _populationMode(),
+    _showIconAction(this, "Show icon", true)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
     for (auto column : columnInfo.keys())
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 
-    connect(&mv::data(), &AbstractDataManager::datasetAdded, this, [this](Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true) -> void {
-        addDataset(dataset);
-    });
-
-    connect(&mv::data(), &AbstractDataManager::datasetAboutToBeRemoved, this, &AbstractDatasetsModel::removeDataset);
+    setPopulationMode(populationMode);
 }
 
-QStandardItem* AbstractDatasetsModel::itemFromDataset(Dataset<DatasetImpl> dataset) const
+QModelIndex AbstractDatasetsModel::getIndexFromDataset(Dataset<DatasetImpl> dataset) const
 {
+    try {
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset is not valid");
+
+        return getItemFromDataset(dataset)->index();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get index from dataset ID in datasets model", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to get index from dataset ID in datasets model");
+    }
+
+    return {};
+}
+
+QModelIndex AbstractDatasetsModel::getIndexFromDataset(const QString& datasetId) const
+{
+    try {
+        return getIndexFromDataset(mv::data().getDataset(datasetId));
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get index from dataset ID in datasets model", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to get index from dataset ID in datasets model");
+    }
+
+    return {};
+}
+
+QStandardItem* AbstractDatasetsModel::getItemFromDataset(const QString& datasetId) const
+{
+    const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, datasetId, 1, Qt::MatchExactly | Qt::MatchRecursive);
+
+    if (matches.isEmpty())
+        throw std::runtime_error(QString("Dataset with id %1 not found").arg(datasetId).toStdString());
+
+    return itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)));
+}
+
+QStandardItem* AbstractDatasetsModel::getItemFromDataset(Dataset<DatasetImpl> dataset) const
+{
+    if (!dataset.isValid())
+        throw std::runtime_error("Supplied dataset is not valid");
+
     const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, dataset->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
 
     if (matches.isEmpty())
@@ -163,17 +232,89 @@ QStandardItem* AbstractDatasetsModel::itemFromDataset(Dataset<DatasetImpl> datas
     return itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)));
 }
 
+AbstractDatasetsModel::PopulationMode AbstractDatasetsModel::getPopulationMode() const
+{
+    return _populationMode;
+}
+
+void AbstractDatasetsModel::setPopulationMode(PopulationMode populationMode)
+{
+#ifdef ABSTRACT_DATASETS_MODEL_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    _populationMode = populationMode;
+
+    switch (_populationMode)
+    {
+        case AbstractDatasetsModel::PopulationMode::Manual: {
+            disconnect(&mv::data(), &AbstractDataManager::datasetAdded, this, nullptr);
+
+            break;
+        }
+
+        case AbstractDatasetsModel::PopulationMode::Automatic: {
+            connect(&mv::data(), &AbstractDataManager::datasetAdded, this, [this](Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true) -> void {
+                addDataset(dataset);
+            });
+
+            connect(&mv::data(), &AbstractDataManager::datasetAboutToBeRemoved, this, [this](Dataset<DatasetImpl> dataset) {
+                removeDataset(dataset);
+            });
+
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+Datasets AbstractDatasetsModel::getDatasets() const
+{
+    return _datasets;
+}
+
+Dataset<DatasetImpl> AbstractDatasetsModel::getDataset(std::int32_t rowIndex) const
+{
+    auto nameItem = dynamic_cast<Item*>(itemFromIndex(index(rowIndex, static_cast<int>(Column::Name))));
+
+    if (!nameItem)
+        return {};
+
+    return nameItem->getDataset();
+}
+
+void AbstractDatasetsModel::setDatasets(mv::Datasets datasets)
+{
+    for (const auto& dataset : _datasets)
+        removeDataset(dataset);
+
+    for (const auto& dataset : datasets)
+        addDataset(dataset);
+}
+
+void AbstractDatasetsModel::addDataset(Dataset<DatasetImpl> dataset)
+{
+    _datasets << dataset;
+}
+
 void AbstractDatasetsModel::removeDataset(Dataset<DatasetImpl> dataset)
 {
     try {
-        auto datasetItem = itemFromDataset(dataset);
+        auto datasetItem = getItemFromDataset(dataset);
 
 #ifdef ABSTRACT_DATASETS_MODEL_VERBOSE
-        qDebug() << "AbstractDatasetsModel: Remove dataset:" << dataset->getGuiName();
+        qDebug() << __FUNCTION__ << dataset->getLocation();
 #endif
 
         if (!removeRow(datasetItem->row()))
             throw std::runtime_error("Remove row failed");
+
+        if (!_datasets.contains(dataset))
+            throw std::runtime_error("Dataset no found");
+
+        _datasets.removeOne(dataset);
     }
     catch (std::exception& e)
     {

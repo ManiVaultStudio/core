@@ -17,6 +17,8 @@
 namespace mv
 {
 
+class DatasetsListModel;
+
 namespace plugin {
     class RawData;
 }
@@ -243,6 +245,20 @@ public: // Dataset and selection grouping
      */
     gui::ToggleAction& getSelectionGroupingAction() override;
 
+public: // Model
+
+    /**
+     * Get datasets list model
+     * @return Reference to datasets list model
+     */
+    const DatasetsListModel& getDatasetsListModel() const override;
+    
+    /**
+     * Link \p filterModel to the datasets list model
+     * @param filterModel Pointer to filter model
+     */
+    void linkFilterModelToDatasetsListModel(QSortFilterProxyModel* filterModel) override;
+
 public: // Serialization
 
     /**
@@ -261,7 +277,8 @@ private:
     std::unordered_map<QString, plugin::RawData*>   _rawDataMap;                /** Maps raw data name to raw data plugin shared pointer (the plugins are owned by the plugin manager) */
     std::vector<std::unique_ptr<DatasetImpl>>       _datasets;                  /** Vector of pointers to datasets */
     std::vector<std::unique_ptr<DatasetImpl>>       _selections;                /** Vector of pointers to selection datasets */
-    gui::ToggleAction                               _selectionGroupingAction;   /** Action for toggling whether dataset selection groupin is enabled or not */
+    gui::ToggleAction                               _selectionGroupingAction;   /** Action for toggling whether dataset selection grouping is enabled or not */
+    DatasetsListModel*                              _datasetsListModel;             /** Pointer to datasets model containing all the datasets */
 };
 
 }

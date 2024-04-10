@@ -18,74 +18,54 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, Mode mode /*= Mode::Automatic*/) :
+DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) :
     OptionAction(parent, title),
-    _mode(mode),
-    _datasetsFilterFunction(),
-    _datasetsModel(),
-    _eventListener()
+    _populationMode(AbstractDatasetsModel::PopulationMode::Automatic),
+    _datasetsListModel(AbstractDatasetsModel::PopulationMode::Manual),
+    _datasetsFilterModel()
 {
     setText(title);
     setIconByName("database");
     setToolTip("Pick a dataset");
-    setCustomModel(&_datasetsModel);
     setPlaceHolderString("--choose dataset--");
+    setCustomModel(&_datasetsFilterModel);
 
     connect(this, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
-        emit datasetPicked(_datasetsModel.getDataset(currentIndex));
-    });
+        const auto sourceModelRow = _datasetsFilterModel.mapToSource(_datasetsFilterModel.index(currentIndex, 0)).row();
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAdded));
-    _eventListener.registerDataEvent([this](DatasetEvent* dataEvent) {
-        switch (dataEvent->getType()) {
-            case EventType::DatasetAdded:
-                populateDatasetsFromCore();
+        switch (_populationMode)
+        {
+            case AbstractDatasetsModel::PopulationMode::Manual:
+                emit datasetPicked(_datasetsListModel.getDataset(sourceModelRow));
+                break;
+
+            case AbstractDatasetsModel::PopulationMode::Automatic:
+                emit datasetPicked(mv::data().getDatasetsListModel().getDataset(sourceModelRow));
+                break;
+
+            default:
                 break;
         }
     });
 
-    switch (_mode)
-    {
-        case DatasetPickerAction::Mode::Manual:
-            break;
-
-        case DatasetPickerAction::Mode::Automatic:
-            populateDatasetsFromCore();
-            break;
-        
-        default:
-            break;
-    }
+    populationModeChanged();
 }
 
-DatasetPickerAction::Mode DatasetPickerAction::getMode() const
+Datasets DatasetPickerAction::getDatasets() const
 {
-    return _mode;
-}
-
-void DatasetPickerAction::setMode(Mode mode)
-{
-#ifdef DATASET_PICKER_ACTION_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (mode == _mode)
-        return;
-
-    _mode = mode;
-
-    switch (_mode)
+    switch (_populationMode)
     {
-        case DatasetPickerAction::Mode::Manual:
-            break;
+        case AbstractDatasetsModel::PopulationMode::Manual:
+            return _datasetsListModel.getDatasets();
 
-        case DatasetPickerAction::Mode::Automatic:
-            populateDatasetsFromCore();
-            break;
+        case AbstractDatasetsModel::PopulationMode::Automatic:
+            return mv::data().getDatasetsListModel().getDatasets();
 
         default:
             break;
     }
+
+    return {};
 }
 
 void DatasetPickerAction::setDatasets(Datasets datasets)
@@ -94,18 +74,9 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
     qDebug() << __FUNCTION__;
 #endif
 
-    _mode = Mode::Manual;
+    setPopulationMode(AbstractDatasetsModel::PopulationMode::Manual);
 
-    _datasetsModel.setDatasets(datasets);
-
-    for (auto& dataset : _datasetsModel.getDatasets()) {
-
-        connect(&dataset, &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, dataset]() {
-            _datasetsModel.removeDataset(dataset);
-        });
-
-        connect(dataset.get(), &DatasetImpl::locationChanged, &_datasetsModel, &DatasetsModel::updateData);
-    }
+    _datasetsListModel.setDatasets(datasets);
 
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
@@ -113,44 +84,87 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 }
 
-void DatasetPickerAction::setDatasetsFilterFunction(const DatasetsFilterFunction& datasetsFilterFunction)
+void DatasetPickerAction::setFilterFunction(const DatasetsFilterModel::FilterFunction& filterFunction)
 {
 #ifdef DATASET_PICKER_ACTION_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    _mode                   = Mode::Automatic;
-    _datasetsFilterFunction = datasetsFilterFunction;
+    _datasetsFilterModel.setFilterFunction(filterFunction);
 
-    populateDatasetsFromCore();
+    setPopulationMode(AbstractDatasetsModel::PopulationMode::Automatic);
 }
 
 Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
 {
-    return _datasetsModel.getDataset(getCurrentIndex());
+    const auto sourceModelRowIndex = _datasetsFilterModel.mapToSource(_datasetsFilterModel.index(getCurrentIndex(), 0)).row();
+
+    switch (_populationMode)
+    {
+        case AbstractDatasetsModel::PopulationMode::Manual:
+            return _datasetsListModel.getDataset(sourceModelRowIndex);
+
+        case AbstractDatasetsModel::PopulationMode::Automatic:
+            return mv::data().getDatasetsListModel().getDataset(sourceModelRowIndex);
+
+        default:
+            break;
+    }
+
+    return {};
 }
 
 void DatasetPickerAction::setCurrentDataset(Dataset<DatasetImpl> currentDataset)
 {
-    const auto currentIndex = _datasetsModel.rowIndex(currentDataset);
+    QModelIndex datasetIndex;
 
-    if (currentIndex < 0)
+    if (currentDataset.isValid()) {
+        switch (_populationMode)
+        {
+            case AbstractDatasetsModel::PopulationMode::Manual:
+                datasetIndex = _datasetsListModel.getIndexFromDataset(currentDataset);
+                break;
+
+            case AbstractDatasetsModel::PopulationMode::Automatic:
+                datasetIndex = mv::data().getDatasetsListModel().getIndexFromDataset(currentDataset);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    if (!datasetIndex.isValid())
         return;
 
-    setCurrentIndex(currentIndex);
+    setCurrentIndex(_datasetsFilterModel.mapFromSource(datasetIndex).row());
 }
 
-void DatasetPickerAction::setCurrentDataset(const QString& guid)
+void DatasetPickerAction::setCurrentDataset(const QString& datasetId)
 {
-    if (guid.isEmpty())
+    if (datasetId.isEmpty())
         return;
 
-    const auto matches = _datasetsModel.match(_datasetsModel.index(0, static_cast<int>(DatasetsModel::Column::GUID)), Qt::EditRole, guid, -1);
+    QModelIndex datasetIndex;
 
-    if (matches.isEmpty())
+    switch (_populationMode)
+    {
+        case AbstractDatasetsModel::PopulationMode::Manual:
+            datasetIndex = _datasetsListModel.getIndexFromDataset(datasetId);
+            break;
+
+        case AbstractDatasetsModel::PopulationMode::Automatic:
+            datasetIndex = mv::data().getDatasetsListModel().getIndexFromDataset(datasetId);
+            break;
+
+        default:
+            break;
+    }
+
+    if (!datasetIndex.isValid())
         return;
 
-    setCurrentIndex(matches.first().row());
+    setCurrentIndex(_datasetsFilterModel.mapFromSource(datasetIndex).row());
 }
 
 QString DatasetPickerAction::getCurrentDatasetGuid() const
@@ -158,29 +172,57 @@ QString DatasetPickerAction::getCurrentDatasetGuid() const
     return getCurrentDataset().getDatasetId();
 }
 
-void DatasetPickerAction::populateDatasetsFromCore()
-{
-    if (_mode == Mode::Manual)
-        return;
 
-#ifdef DATASET_PICKER_ACTION_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    auto datasets = mv::data().getAllDatasets();
-
-    if (_datasetsFilterFunction)
-        datasets = _datasetsFilterFunction(datasets);
-
-    _datasetsModel.setDatasets(datasets);
-
-    for (auto& dataset : datasets)
-        connect(dataset.get(), &DatasetImpl::locationChanged, &_datasetsModel, &DatasetsModel::updateData);
-
+/*
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
     if (publicDatasetPickerAction)
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
+*/
+
+AbstractDatasetsModel::PopulationMode DatasetPickerAction::getPopulationMode() const
+{
+    return _populationMode;
+}
+
+void DatasetPickerAction::setPopulationMode(AbstractDatasetsModel::PopulationMode populationMode)
+{
+#ifdef DATASET_PICKER_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    const auto previousPopulationMode = _populationMode;
+
+    if (populationMode == _populationMode)
+        return;
+
+    _populationMode = populationMode;
+
+    populationModeChanged();
+
+    emit populationModeChanged(previousPopulationMode, _populationMode);
+}
+
+void DatasetPickerAction::populationModeChanged()
+{
+    switch (_populationMode)
+    {
+        case AbstractDatasetsModel::PopulationMode::Manual: {
+            _datasetsFilterModel.getUseFilterFunctionAction().setChecked(false);
+            _datasetsFilterModel.setSourceModel(&_datasetsListModel);
+            break;
+        }
+
+        case AbstractDatasetsModel::PopulationMode::Automatic:
+        {
+            _datasetsFilterModel.getUseFilterFunctionAction().setChecked(true);
+            _datasetsFilterModel.setSourceModel(&const_cast<DatasetsListModel&>(mv::data().getDatasetsListModel()));
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -236,192 +278,6 @@ QVariantMap DatasetPickerAction::toVariantMap() const
     });
 
     return variantMap;
-}
-
-mv::Datasets DatasetPickerAction::getDatasets() const
-{
-    return _datasetsModel.getDatasets();
-}
-
-DatasetPickerAction::DatasetsModel::DatasetsModel(QObject* parent /*= nullptr*/) :
-    QAbstractListModel(parent),
-    _datasets(),
-    _showLocation(true),
-    _showIcon(true)
-{
-}
-
-int DatasetPickerAction::DatasetsModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
-{
-    return _datasets.count();
-}
-
-int DatasetPickerAction::DatasetsModel::rowIndex(const Dataset<DatasetImpl>& dataset) const
-{
-    return _datasets.indexOf(dataset);
-}
-
-int DatasetPickerAction::DatasetsModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
-{
-    return 2;
-}
-
-QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int role) const
-{
-    if (!index.isValid())
-        return QVariant();
-
-    const auto column   = static_cast<Column>(index.column());
-    const auto dataset  = _datasets.at(index.row());
-
-    if (!dataset.isValid())
-        return QVariant();
-
-    switch (role)
-    {
-        case Qt::DecorationRole:
-            return _showIcon ? dataset->getIcon() : QVariant();
-
-        case Qt::EditRole:
-        case Qt::DisplayRole:
-        {
-            switch (column)
-            {
-                case Column::Name:
-                    return _showLocation ? dataset->getLocation() : dataset->text();
-
-                case Column::GUID:
-                    return dataset->getId();
-
-                default:
-                    break;
-            }
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    return QVariant();
-}
-
-const QVector<Dataset<DatasetImpl>>& DatasetPickerAction::DatasetsModel::getDatasets() const
-{
-    return _datasets;
-}
-
-Dataset<DatasetImpl> DatasetPickerAction::DatasetsModel::getDataset(const std::int32_t& rowIndex) const
-{
-    if (rowIndex < 0)
-        return Dataset<DatasetImpl>();
-
-    return _datasets[rowIndex];
-}
-
-void DatasetPickerAction::DatasetsModel::setDatasets(const QVector<Dataset<DatasetImpl>>& datasets)
-{
-    removeAllDatasets();
-
-    for (const auto& dataset : datasets)
-        addDataset(dataset);
-}
-
-void DatasetPickerAction::DatasetsModel::addDataset(const Dataset<DatasetImpl>& dataset)
-{
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    {
-        _datasets << dataset;
-    }
-    endInsertRows();
-
-    auto& addedDataset = _datasets.last();
-
-    connect(&addedDataset, &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, &addedDataset]() {
-        removeDataset(addedDataset);
-    });
-
-    connect(addedDataset.get(), &DatasetImpl::locationChanged, this, [this, &addedDataset]() {
-        const auto colorDatasetRowIndex = rowIndex(addedDataset);
-
-        if (colorDatasetRowIndex < 0)
-            return;
-
-        const auto modelIndex = index(colorDatasetRowIndex, 0);
-
-        if (!modelIndex.isValid())
-            return;
-
-        emit dataChanged(modelIndex, modelIndex);
-    });
-}
-
-void DatasetPickerAction::DatasetsModel::removeDataset(const mv::Dataset<mv::DatasetImpl>& dataset)
-{
-    const auto datasetRowIndex = rowIndex(dataset);
-
-    beginRemoveRows(QModelIndex(), datasetRowIndex, datasetRowIndex);
-    {
-        _datasets.removeOne(dataset);
-    }
-    endRemoveRows();
-}
-
-void DatasetPickerAction::DatasetsModel::removeAllDatasets()
-{
-    if (rowCount() == 0)
-        return;
-
-    beginRemoveRows(QModelIndex(), 0, std::max(0, rowCount() - 1));
-    {
-        _datasets.clear();
-    }
-    endRemoveRows();
-
-    updateData();
-}
-
-bool DatasetPickerAction::DatasetsModel::getShowIcon() const
-{
-    return _showIcon;
-}
-
-void DatasetPickerAction::DatasetsModel::setShowIcon(bool showIcon)
-{
-    if (showIcon == _showIcon)
-        return;
-
-    _showIcon = showIcon;
-
-    updateData();
-}
-
-bool DatasetPickerAction::DatasetsModel::getShowLocation() const
-{
-    return _showLocation;
-}
-
-void DatasetPickerAction::DatasetsModel::setShowLocation(bool showLocation)
-{
-    if (showLocation == _showLocation)
-        return;
-
-    _showLocation = showLocation;
-
-    updateData();
-}
-
-void DatasetPickerAction::DatasetsModel::updateData()
-{
-    for (auto dataset : _datasets) {
-
-        if (!dataset.isValid())
-            continue;
-
-        const auto datasetModelIndex = index(_datasets.indexOf(dataset), 0);
-
-        emit dataChanged(datasetModelIndex, datasetModelIndex);
-    }
 }
 
 }

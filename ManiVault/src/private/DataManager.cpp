@@ -9,6 +9,8 @@
 
 #include <util/Exception.h>
 
+#include <models/DatasetsListModel.h>
+
 #include <ModalTask.h>
 #include <RawData.h>
 #include <DataType.h>
@@ -18,7 +20,7 @@
 #include <stdexcept>
 
 #ifdef _DEBUG
-    #define DATA_MANAGER_VERBOSE
+    //#define DATA_MANAGER_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -30,7 +32,8 @@ using namespace plugin;
 
 DataManager::DataManager(QObject* parent /*= nullptr*/) :
     AbstractDataManager(parent),
-    _selectionGroupingAction(this, "Selection grouping")
+    _selectionGroupingAction(this, "Selection grouping"),
+    _datasetsListModel(nullptr)
 {
     _selectionGroupingAction.setSettingsPrefix(getSettingsPrefix() + "DatasetGroupingEnabled");
 }
@@ -53,6 +56,8 @@ void DataManager::initialize()
 
     beginInitialization();
     endInitialization();
+
+    _datasetsListModel = new DatasetsListModel(AbstractDatasetsModel::PopulationMode::Automatic, this);
 }
 
 void DataManager::reset()
@@ -382,23 +387,6 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
             emit datasetRemoved(datasetId);
         }
         events().notifyDatasetRemoved(datasetId, datasetType);
-
-#ifdef DATA_MANAGER_VERBOSE
-        qDebug() << "Raw data" << QString("(%1)").arg(_rawDataMap.size());
-
-        for (const auto& pair : _rawDataMap)
-            qDebug() << "\t" << pair.first;
-
-        qDebug() << "Datasets" << QString("(%1)").arg(_datasets.size());
-
-        for (auto& dataset : _datasets)
-            qDebug() << "\t" << dataset->getGuiName() << dataset->getRawDataName();
-
-        qDebug() << "Selection" << QString("(%1)").arg(_selections.size());
-
-        for (auto& selection : _selections)
-            qDebug() << "\t" << selection->getGuiName() << selection->getRawDataName();
-#endif
     }
     catch (std::exception& e)
     {
@@ -415,6 +403,8 @@ void DataManager::removeDatasets(Datasets datasets)
 #ifdef DATA_MANAGER_VERBOSE
         qDebug() << "Remove" << datasets.size() << "datasets from the data manager";
 #endif
+
+        mv::dataHierarchy().clearSelection();
 
         if (datasets.isEmpty())
             throw std::runtime_error("No datasets to remove");
@@ -750,6 +740,21 @@ mv::Dataset<mv::DatasetImpl> DataManager::groupDatasets(const Datasets& datasets
 ToggleAction& DataManager::getSelectionGroupingAction()
 {
     return _selectionGroupingAction;
+}
+
+const DatasetsListModel& DataManager::getDatasetsListModel() const
+{
+    return *_datasetsListModel;
+}
+
+void DataManager::linkFilterModelToDatasetsListModel(QSortFilterProxyModel* filterModel)
+{
+    Q_ASSERT(filterModel);
+
+    if (!filterModel)
+        return;
+
+    filterModel->setSourceModel(_datasetsListModel);
 }
 
 void DataManager::fromVariantMap(const QVariantMap& variantMap)

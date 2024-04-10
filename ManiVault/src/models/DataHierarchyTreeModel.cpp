@@ -12,7 +12,7 @@
 #include <QDebug>
 
 #ifdef _DEBUG
-    #define DATA_HIERARCHY_TREE_MODEL_VERBOSE
+    //#define DATA_HIERARCHY_TREE_MODEL_VERBOSE
 #endif
 
 namespace mv {
