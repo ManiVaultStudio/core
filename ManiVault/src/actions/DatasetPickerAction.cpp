@@ -105,7 +105,7 @@ Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
     if (!filterModelIndex.isValid())
         return {};
 
-    const auto sourceModelIndex = _datasetsFilterModel.mapToSource().row();
+    const auto sourceModelIndex = _datasetsFilterModel.mapToSource();
 
     if (!sourceModelIndex.isValid())
         return {};
@@ -113,10 +113,10 @@ Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
     switch (_populationMode)
     {
         case AbstractDatasetsModel::PopulationMode::Manual:
-            return _datasetsListModel.getDataset(sourceModelIndex);
+            return _datasetsListModel.getDataset(sourceModelIndex.row());
 
         case AbstractDatasetsModel::PopulationMode::Automatic:
-            return mv::data().getDatasetsListModel().getDataset(sourceModelIndex);
+            return mv::data().getDatasetsListModel().getDataset(sourceModelIndex.row());
 
         default:
             break;
