@@ -25,7 +25,8 @@ namespace mv
 {
 
 ActionsManager::ActionsManager() :
-    AbstractActionsManager()
+    AbstractActionsManager(),
+    _actionsListModel(this)
 {
 }
 
