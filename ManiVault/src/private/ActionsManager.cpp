@@ -283,4 +283,9 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
     return false;
 }
 
+ActionsListModel& ActionsManager::getActionsListModel()
+{
+    return _actionsListModel;
+}
+
 }

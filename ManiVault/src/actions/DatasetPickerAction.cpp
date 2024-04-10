@@ -105,7 +105,7 @@ Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
     if (!filterModelIndex.isValid())
         return {};
 
-    const auto sourceModelIndex = _datasetsFilterModel.mapToSource();
+    const auto sourceModelIndex = _datasetsFilterModel.mapToSource(filterModelIndex);
 
     if (!sourceModelIndex.isValid())
         return {};

@@ -18,6 +18,8 @@
 namespace mv
 {
 
+class ActionsListModel;
+
 /**
  * Abstract actions manager
  *
@@ -479,6 +481,10 @@ public: // Action types
         return actionTypesHumanFriendly;
     }
 
+public: // Models
+
+    virtual ActionsListModel& getActionsListModel() = 0;
+
 protected:
 
     /**
@@ -560,7 +566,7 @@ protected:
     gui::WidgetActions          _actions;               /** List of actions that are instantiated in the plugin system */
     gui::WidgetActions          _publicActions;         /** List of public actions that are instantiated in the plugin system */
     QMap<QString, ActionType>   _actionTypes;           /** Maps action type to counter and human-friendly action type string */
-
+    
     friend class gui::WidgetAction;
 };
 
