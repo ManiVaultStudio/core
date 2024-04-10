@@ -97,15 +97,26 @@ void DatasetPickerAction::setFilterFunction(const DatasetsFilterModel::FilterFun
 
 Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
 {
-    const auto sourceModelRowIndex = _datasetsFilterModel.mapToSource(_datasetsFilterModel.index(getCurrentIndex(), 0)).row();
+    if (getCurrentIndex() < 0)
+        return {};
+
+    const auto filterModelIndex = _datasetsFilterModel.index(getCurrentIndex(), 0);
+
+    if (!filterModelIndex.isValid())
+        return {};
+
+    const auto sourceModelIndex = _datasetsFilterModel.mapToSource().row();
+
+    if (!sourceModelIndex.isValid())
+        return {};
 
     switch (_populationMode)
     {
         case AbstractDatasetsModel::PopulationMode::Manual:
-            return _datasetsListModel.getDataset(sourceModelRowIndex);
+            return _datasetsListModel.getDataset(sourceModelIndex);
 
         case AbstractDatasetsModel::PopulationMode::Automatic:
-            return mv::data().getDatasetsListModel().getDataset(sourceModelRowIndex);
+            return mv::data().getDatasetsListModel().getDataset(sourceModelIndex);
 
         default:
             break;
