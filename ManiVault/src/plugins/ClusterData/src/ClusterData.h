@@ -44,6 +44,9 @@ public:
     /** Returns reference to the clusters */
     QVector<Cluster>& getClusters();
 
+    /** Set the clusters */
+    void setClusters(const QVector<Cluster>& clusters);
+
     /**
      * Adds a cluster
      * @param cluster Cluster to add
@@ -111,6 +114,11 @@ public:
     const QVector<Cluster>& getClusters() const
     {
         return getRawData<ClusterData>()->getClusters();
+    }
+
+    void setClusters(const QVector<Cluster>& clusters)
+    {
+        getRawData<ClusterData>()->setClusters(clusters);
     }
 
     /**

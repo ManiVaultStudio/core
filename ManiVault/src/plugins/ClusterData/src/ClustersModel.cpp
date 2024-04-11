@@ -264,6 +264,11 @@ QVector<Cluster>& ClustersModel::getClusters()
     return _clusters;
 }
 
+const QVector<Cluster>& ClustersModel::getClusters() const
+{
+    return _clusters;
+}
+
 void ClustersModel::setClusters(const QVector<Cluster>& clusters)
 {
     // Allocate the same number of items for the modified by user column

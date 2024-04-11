@@ -97,6 +97,9 @@ public:
     /** Get clusters */
     QVector<Cluster>& getClusters();
 
+    /** Get clusters */
+    const QVector<Cluster>& getClusters() const;
+
     /**
      * Set clusters
      * @param clusters Pointer to clusters

@@ -46,6 +46,11 @@ QVector<Cluster>& ClusterData::getClusters()
     return _clusters;
 }
 
+void ClusterData::setClusters(const QVector<Cluster>&clusters)
+{
+    _clusters = clusters;
+}
+
 void ClusterData::addCluster(Cluster& cluster)
 {
     _clusters.push_back(cluster);
