@@ -9,10 +9,6 @@
 #include "PluginType.h"
 #include "Dataset.h"
 
-namespace mv {
-    class AbstractPluginManager;
-}
-
 namespace mv::plugin {
     class PluginFactory;
 }
@@ -146,7 +142,6 @@ private:
     RequestPluginCallback           _requestPluginCallback;     /** Request plugin callback function which should create the plugin (invoked when the trigger action is triggered) */
 
     friend class plugin::PluginFactory;
-    friend class AbstractPluginManager;
 };
 
 using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;

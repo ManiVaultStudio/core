@@ -192,6 +192,15 @@ public:
         return gui::PluginTriggerActions();
     }
 
+    /**
+     * Initializes a list of plugin trigger actions
+     * @param pluginTriggerActions List of plugin trigger actions to be initialized
+     */
+    static void initializePluginTriggerActions(gui::PluginTriggerActions& pluginTriggerActions) {
+        for (auto& pluginTriggerAction : pluginTriggerActions)
+            pluginTriggerAction->initialize();
+    }
+
 public: // Number of instances
 
     /** Get number of plugin instances currently loaded */

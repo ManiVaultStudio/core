@@ -549,7 +549,7 @@ mv::gui::PluginTriggerActions PluginManager::getPluginTriggerActions(const plugi
 
     sortActions(pluginProducerActions);
 
-    initializePluginTriggerActions(pluginProducerActions);
+    PluginFactory::initializePluginTriggerActions(pluginProducerActions);
 
     return pluginProducerActions;
 }
@@ -564,7 +564,7 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const Type& pluginTy
 
     sortActions(pluginProducerActions);
 
-    initializePluginTriggerActions(pluginProducerActions);
+    PluginFactory::initializePluginTriggerActions(pluginProducerActions);
 
     return pluginProducerActions;
 }
@@ -579,7 +579,7 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const plugin::Type& 
 
     sortActions(pluginProducerActions);
 
-    initializePluginTriggerActions(pluginProducerActions);
+    PluginFactory::initializePluginTriggerActions(pluginProducerActions);
 
     return pluginProducerActions;
 }
@@ -594,7 +594,7 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const QString& plugi
 
     sortActions(pluginProducerActions);
 
-    initializePluginTriggerActions(pluginProducerActions);
+    PluginFactory::initializePluginTriggerActions(pluginProducerActions);
 
     return pluginProducerActions;
 }
@@ -609,7 +609,7 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const QString& plugi
 
     sortActions(pluginProducerActions);
 
-    initializePluginTriggerActions(pluginProducerActions);
+    PluginFactory::initializePluginTriggerActions(pluginProducerActions);
 
     return pluginProducerActions;
 }
