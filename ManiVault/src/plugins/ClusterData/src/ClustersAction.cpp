@@ -87,6 +87,8 @@ void ClustersAction::updateClustersModel()
 
 void ClustersAction::updateClustersDataset()
 {
+    auto temp = _clustersModel.getClusters()[0].getColor();
+
     const auto& newClusters = _clustersModel.getClusters();
     const auto& currentClusters = _clustersDataset->getClusters();
 
