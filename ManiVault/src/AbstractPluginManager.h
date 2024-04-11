@@ -221,6 +221,16 @@ protected:
      */
     virtual QStringList resolveDependencies(QDir pluginDir) const = 0;
 
+    /**
+     * Initializes a list of plugin trigger actions
+     * @param pluginTriggerActions List of plugin trigger actions to be initialized
+     */
+    virtual void initializePluginTriggerActions(gui::PluginTriggerActions& pluginTriggerActions) const final
+    {
+        for (auto& pluginTriggerAction : pluginTriggerActions)
+            pluginTriggerAction->initialize();
+    }
+
 signals:
 
     /**
