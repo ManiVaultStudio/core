@@ -44,6 +44,9 @@ public:
     /** Returns reference to the clusters */
     QVector<Cluster>& getClusters();
 
+    /** Returns a const reference to the clusters */
+    const QVector<Cluster>& getClusters() const;
+
     /** Set the clusters */
     void setClusters(const QVector<Cluster>& clusters);
 

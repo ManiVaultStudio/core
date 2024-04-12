@@ -87,55 +87,19 @@ void ClustersAction::updateClustersModel()
 
 void ClustersAction::updateClustersDataset()
 {
-    qDebug() << "ClustersAction::updateClustersDataset START";
-
-    qDebug() << "_clustersModel.getClusters";
-    qDebug() << _clustersModel.getClusters()[0].getColor();
-    qDebug() << "_clustersDataset->getClusters";
-    qDebug() << _clustersDataset->getClusters()[0].getColor();
-
-    auto temp = _clustersModel.getClusters()[0].getColor();
-
-    const auto& newClusters = _clustersModel.getClusters();
+    const auto& newClusters     = _clustersModel.getClusters();
     const auto& currentClusters = _clustersDataset->getClusters();
 
     if (newClusters == currentClusters)
-    {
-        qDebug() << "ClustersAction::updateClustersDataset RETURN";
         return;
-    }
-
-    qDebug() << "ClustersAction::updateClustersDataset YES CHANGE";
 
     bool automaticRecolor = newClusters.size() != currentClusters.size();
 
     _clustersDataset->setClusters(newClusters);
 
-    qDebug() << "ClustersAction::updateClustersDataset MIDDLE 1";
-
-    qDebug() << "_clustersModel.getClusters";
-    qDebug() << _clustersModel.getClusters()[0].getColor();
-    qDebug() << "_clustersDataset->getClusters";
-    qDebug() << _clustersDataset->getClusters()[0].getColor();
-
+    // Re-color if a cluster was deleted
     if (automaticRecolor)
         _colorizeClustersAction.updateColorsInModel();
 
-    qDebug() << "ClustersAction::updateClustersDataset MIDDLE 2";
-
-    qDebug() << "_clustersModel.getClusters";
-    qDebug() << _clustersModel.getClusters()[0].getColor();
-    qDebug() << "_clustersDataset->getClusters";
-    qDebug() << _clustersDataset->getClusters()[0].getColor();
-
     events().notifyDatasetDataChanged(_clustersDataset);
-
-    qDebug() << "ClustersAction::updateClustersDataset MIDDLE 3";
-
-    qDebug() << "_clustersModel.getClusters";
-    qDebug() << _clustersModel.getClusters()[0].getColor();
-    qDebug() << "_clustersDataset->getClusters";
-    qDebug() << _clustersDataset->getClusters()[0].getColor();
-
-    qDebug() << "ClustersAction::updateClustersDataset END";
 }
