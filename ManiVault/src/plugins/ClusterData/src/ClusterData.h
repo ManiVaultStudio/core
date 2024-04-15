@@ -41,13 +41,22 @@ public:
      */
     Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
-    /** Returns reference to the clusters */
+    /**
+     * Get clusters
+     * @return Reference to the clusters
+     */
     QVector<Cluster>& getClusters();
 
-    /** Returns a const reference to the clusters */
+    /**
+     * Get clusters
+     * @return Const reference to the clusters 
+     */
     const QVector<Cluster>& getClusters() const;
 
-    /** Set the clusters */
+    /**
+     * Set clusters to \p clusters
+     * @param clusters New clusters
+     */
     void setClusters(const QVector<Cluster>& clusters);
 
     /**
@@ -144,7 +153,7 @@ public:
 
     /**
      * Get a copy of the dataset
-     * @return Smart pointer to copy of dataset
+     * @return Smart pointer to copy of the dataset
      */
     Dataset<DatasetImpl> copy() const override
     {
@@ -268,6 +277,4 @@ public:
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
     mv::plugin::RawData* produce() override;
-
-
 };
