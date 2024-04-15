@@ -79,6 +79,7 @@ void ClusterData::setClusterNames(const std::vector<QString>& clusterNames)
 std::vector<QString> ClusterData::getClusterNames()
 {
     std::vector<QString> clusterNames;
+    clusterNames.reserve(_clusters.size());
 
     for (const auto& clusters : _clusters)
         clusterNames.push_back(clusters.getName());
