@@ -69,7 +69,7 @@ public:
      * Set cluster names
      * @param Vector of cluster names
      */
-    void setDimensionNames(const std::vector<QString>& clusterNames);
+    void setClusterNames(const std::vector<QString>& clusterNames);
 
     /**
      * Get cluster names
@@ -155,9 +155,9 @@ public:
      * Set cluster names
      * @param Vector of cluster names
      */
-    void setDimensionNames(const std::vector<QString>& clusterNames)
+    void setClusterNames(const std::vector<QString>& clusterNames)
     {
-        getRawData<ClusterData>()->setDimensionNames(clusterNames);
+        getRawData<ClusterData>()->setClusterNames(clusterNames);
     }
 
     /**
