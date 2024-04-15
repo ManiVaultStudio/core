@@ -94,10 +94,16 @@ public:
      */
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    /** Get clusters */
+    /**
+     * Get clusters
+     * @return vector of clusters
+     */
     QVector<Cluster>& getClusters();
 
-    /** Get clusters */
+    /**
+     * Get clusters
+     * @return Const reference vector of clusters
+     */
     const QVector<Cluster>& getClusters() const;
 
     /**
