@@ -66,6 +66,18 @@ public:
     void addCluster(Cluster& cluster);
 
     /**
+     * Set cluster names
+     * @param Vector of cluster names
+     */
+    void setClusterNames(const std::vector<QString>& clusterNames);
+
+    /**
+     * Get cluster names
+     * @return Vector of cluster names
+     */
+    std::vector<QString> getClusterNames();
+
+    /**
      * Removes a cluster by its unique identifier
      * @param id Unique identifier of the cluster to remove
      */
@@ -138,6 +150,24 @@ public:
      * @param cluster Cluster to add
      */
     void addCluster(Cluster& cluster);
+
+    /**
+     * Set cluster names
+     * @param Vector of cluster names
+     */
+    void setClusterNames(const std::vector<QString>& clusterNames)
+    {
+        getRawData<ClusterData>()->setClusterNames(clusterNames);
+    }
+
+    /**
+     * Get cluster names
+     * @return Vector of cluster names
+     */
+    std::vector<QString> getClusterNames()
+    {
+        return getRawData<ClusterData>()->getClusterNames();
+    }
 
     /**
      * Removes a cluster by its unique identifier

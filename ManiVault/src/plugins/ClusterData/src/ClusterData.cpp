@@ -61,6 +61,32 @@ void ClusterData::addCluster(Cluster& cluster)
     _clusters.push_back(cluster);
 }
 
+void ClusterData::setClusterNames(const std::vector<QString>& clusterNames)
+{
+    if (clusterNames.empty())
+        return;
+
+    if (clusterNames.size() != _clusters.size())
+    {
+        qWarning() << "ClusterData: Number of cluster names does not equal the number of data cluster. No cluster names assigned.";
+        return;
+    }
+
+    for (size_t i = 0; i < clusterNames.size(); i++)
+        _clusters[i].setName(clusterNames[i]);
+}
+
+std::vector<QString> ClusterData::getClusterNames()
+{
+    std::vector<QString> clusterNames;
+    clusterNames.reserve(_clusters.size());
+
+    for (const auto& clusters : _clusters)
+        clusterNames.push_back(clusters.getName());
+
+    return clusterNames;
+}
+
 void ClusterData::removeClusterById(const QString& id)
 {
     _clusters.erase(std::remove_if(_clusters.begin(), _clusters.end(), [id](const Cluster& cluster) -> bool
