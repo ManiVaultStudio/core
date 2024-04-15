@@ -61,6 +61,16 @@ void ClusterData::addCluster(Cluster& cluster)
     _clusters.push_back(cluster);
 }
 
+std::vector<QString> ClusterData::getClusterNames()
+{
+    std::vector<QString> clusterNames;
+
+    for (const auto& clusters : _clusters)
+        clusterNames.push_back(clusters.getName());
+
+    return clusterNames;
+}
+
 void ClusterData::removeClusterById(const QString& id)
 {
     _clusters.erase(std::remove_if(_clusters.begin(), _clusters.end(), [id](const Cluster& cluster) -> bool
