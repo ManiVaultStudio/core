@@ -68,7 +68,8 @@ void ClusterData::setClusterNames(const std::vector<QString>& clusterNames)
 
     if (clusterNames.size() != _clusters.size())
     {
-        qWarning() << "ClusterData: Number of cluster names does not equal the number of data cluster";
+        qWarning() << "ClusterData: Number of cluster names does not equal the number of data cluster. No cluster names assigned.";
+        return;
     }
 
     for (size_t i = 0; i < clusterNames.size(); i++)
