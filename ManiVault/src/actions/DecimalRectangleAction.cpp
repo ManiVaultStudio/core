@@ -10,7 +10,12 @@ namespace mv::gui {
 DecimalRectangleAction::DecimalRectangleAction(QObject * parent, const QString& title) :
     RectangleAction<DecimalRangeAction>(parent, title)
 {
-    _rectangleChanged = [this]() -> void { emit rectangleChanged(getLeft(), getRight(), getBottom(), getTop()); };
+    _rectangleChanged = [this]() -> void {
+        if (isRectangleChangedCallBackBlocked())
+            return;
+
+        emit rectangleChanged(getLeft(), getRight(), getBottom(), getTop());
+    };
 
     connect(&getRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this]() -> void { _rectangleChanged(); });
     connect(&getRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this]() -> void { _rectangleChanged(); });

@@ -14,21 +14,37 @@ namespace mv::gui {
 IntegralRangeAction::IntegralRangeAction(QObject* parent, const QString& title, const util::NumericalRange<std::int32_t>& limits /*= util::NumericalRange<std::int32_t>(INIT_LIMIT_MIN, INIT_LIMIT_MAX)*/, const util::NumericalRange<std::int32_t>& range /*= util::NumericalRange<std::int32_t>(INIT_RANGE_MIN, INIT_RANGE_MAX)*/) :
     NumericalRangeAction(parent, title, limits, range)
 {
-    _limitsChanged  = [this]() -> void { emit limitsChanged(getLimits()); };
-    _rangeChanged   = [this]() -> void { emit rangeChanged(getRange()); };
+    _limitsChanged = [this]() -> void {
+        if (isLimitsChangedCallBackBlocked())
+            return;
+
+        emit limitsChanged(getLimits());
+    };
+
+    _rangeChanged = [this]() -> void {
+        if (isRangeChangedCallBackBlocked())
+            return;
+
+        emit rangeChanged(getRange());
+    };
+
+    connect(&getRangeMinAction(), &IntegralAction::minimumChanged, this, _limitsChanged);
+    connect(&getRangeMinAction(), &IntegralAction::maximumChanged, this, _limitsChanged);
+    connect(&getRangeMaxAction(), &IntegralAction::minimumChanged, this, _limitsChanged);
+    connect(&getRangeMaxAction(), &IntegralAction::maximumChanged, this, _limitsChanged);
 
     connect(&getRangeMinAction(), &IntegralAction::valueChanged, this, [this](const std::int32_t& value) -> void {
-        if (value >= _rangeMaxAction.getValue())
-            _rangeMaxAction.setValue(value);
+        if (value >= getRangeMaxAction().getValue())
+            getRangeMaxAction().setValue(value);
 
-        emit rangeChanged({ _rangeMinAction.getValue(), _rangeMaxAction.getValue() });
+        _rangeChanged();
     });
 
     connect(&getRangeMaxAction(), &IntegralAction::valueChanged, this, [this](const std::int32_t& value) -> void {
-        if (value <= _rangeMinAction.getValue())
-            _rangeMinAction.setValue(value);
+        if (value <= getRangeMinAction().getValue())
+            getRangeMinAction().setValue(value);
 
-        emit rangeChanged({ _rangeMinAction.getValue(), _rangeMaxAction.getValue() });
+        _rangeChanged();
     });
 }
 
@@ -40,25 +56,25 @@ QWidget* IntegralRangeAction::getWidget(QWidget* parent, const std::int32_t& wid
     layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::MinimumSpinBox)
-        layout->addWidget(_rangeMinAction.createWidget(widget, IntegralAction::SpinBox), 1);
+        layout->addWidget(getRangeMinAction().createWidget(widget, IntegralAction::SpinBox), 1);
 
     if (widgetFlags & WidgetFlag::MinimumLineEdit)
-        layout->addWidget(_rangeMinAction.createWidget(widget, IntegralAction::LineEdit));
+        layout->addWidget(getRangeMinAction().createWidget(widget, IntegralAction::LineEdit));
 
     if (widgetFlags & WidgetFlag::Slider) {
         auto slidersLayout = new QHBoxLayout();
 
-        slidersLayout->addWidget(_rangeMinAction.createWidget(widget, IntegralAction::Slider), 2);
-        slidersLayout->addWidget(_rangeMaxAction.createWidget(widget, IntegralAction::Slider), 2);
+        slidersLayout->addWidget(getRangeMinAction().createWidget(widget, IntegralAction::Slider), 2);
+        slidersLayout->addWidget(getRangeMaxAction().createWidget(widget, IntegralAction::Slider), 2);
 
         layout->addLayout(slidersLayout);
     }
 
     if (widgetFlags & WidgetFlag::MaximumSpinBox)
-        layout->addWidget(_rangeMaxAction.createWidget(widget, IntegralAction::SpinBox), 1);
+        layout->addWidget(getRangeMaxAction().createWidget(widget, IntegralAction::SpinBox), 1);
 
     if (widgetFlags & WidgetFlag::MaximumLineEdit)
-        layout->addWidget(_rangeMaxAction.createWidget(widget, IntegralAction::LineEdit));
+        layout->addWidget(getRangeMaxAction().createWidget(widget, IntegralAction::LineEdit));
 
     widget->setLayout(layout);
 
@@ -75,8 +91,8 @@ void IntegralRangeAction::connectToPublicAction(WidgetAction* publicAction, bool
         return;
 
     if (recursive) {
-        actions().connectPrivateActionToPublicAction(&_rangeMinAction, &publicIntegralRangeAction->getRangeMinAction(), recursive);
-        actions().connectPrivateActionToPublicAction(&_rangeMaxAction, &publicIntegralRangeAction->getRangeMaxAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&getRangeMinAction(), &publicIntegralRangeAction->getRangeMinAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&getRangeMaxAction(), &publicIntegralRangeAction->getRangeMaxAction(), recursive);
     }
 
     NumericalRangeAction::connectToPublicAction(publicAction, recursive);
@@ -88,8 +104,8 @@ void IntegralRangeAction::disconnectFromPublicAction(bool recursive)
         return;
 
     if (recursive) {
-        actions().disconnectPrivateActionFromPublicAction(&_rangeMinAction, recursive);
-        actions().disconnectPrivateActionFromPublicAction(&_rangeMaxAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getRangeMinAction(), recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getRangeMaxAction(), recursive);
     }
     
     NumericalRangeAction::disconnectFromPublicAction(recursive);

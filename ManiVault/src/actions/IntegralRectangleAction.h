@@ -24,6 +24,10 @@ class CORE_EXPORT IntegralRectangleAction : public RectangleAction<IntegralRange
 
 public:
 
+    using RectangleAction<IntegralRangeAction>::setRectangle;
+
+public:
+
     /**
      * Construct with pointer to \p parent object and \p title
      * @param parent Pointer to parent object
