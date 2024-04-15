@@ -4,6 +4,8 @@
 
 #include "ModelSelectionAction.h"
 
+#include "Application.h"
+
 #include <QAbstractItemModel>
 #include <QItemSelectionModel>
 
