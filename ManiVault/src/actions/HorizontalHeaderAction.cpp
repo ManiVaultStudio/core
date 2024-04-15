@@ -3,8 +3,11 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "HorizontalHeaderAction.h"
+
+#include "Application.h"
 #include "OptionsAction.h"
 
+#include <QEvent>
 #include <QHeaderView>
 
 namespace mv::gui {

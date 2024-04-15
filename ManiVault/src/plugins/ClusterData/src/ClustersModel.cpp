@@ -133,7 +133,7 @@ bool ClustersModel::setData(const QModelIndex& index, const QVariant& value, int
 {
     const auto column = static_cast<Column>(index.column());
 
-    auto cluster = static_cast<Cluster*>((void*)index.internalPointer());
+    auto& cluster = _clusters[index.row()];
 
     switch (role)
     {
@@ -141,12 +141,12 @@ bool ClustersModel::setData(const QModelIndex& index, const QVariant& value, int
         {
             switch (column) {
                 case Column::Color:
-                    cluster->setColor(value.value<QColor>());
+                    cluster.setColor(value.value<QColor>());
                     _modifiedByUser[index.row()] = true;
                     break;
 
                 case Column::Name:
-                    cluster->setName(value.toString());
+                    cluster.setName(value.toString());
                     _modifiedByUser[index.row()] = true;
                     break;
 
@@ -168,7 +168,7 @@ bool ClustersModel::setData(const QModelIndex& index, const QVariant& value, int
             break;
     }
 
-    emit dataChanged(index, index);
+    emit dataChanged(index, index, { index.column() });
 
     return true;
 }
@@ -260,6 +260,11 @@ Qt::ItemFlags ClustersModel::flags(const QModelIndex& index) const
 }
 
 QVector<Cluster>& ClustersModel::getClusters()
+{
+    return _clusters;
+}
+
+const QVector<Cluster>& ClustersModel::getClusters() const
 {
     return _clusters;
 }

@@ -41,14 +41,41 @@ public:
      */
     Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
-    /** Returns reference to the clusters */
+    /**
+     * Get clusters
+     * @return Reference to the clusters
+     */
     QVector<Cluster>& getClusters();
+
+    /**
+     * Get clusters
+     * @return Const reference to the clusters 
+     */
+    const QVector<Cluster>& getClusters() const;
+
+    /**
+     * Set clusters to \p clusters
+     * @param clusters New clusters
+     */
+    void setClusters(const QVector<Cluster>& clusters);
 
     /**
      * Adds a cluster
      * @param cluster Cluster to add
      */
     void addCluster(Cluster& cluster);
+
+    /**
+     * Set cluster names
+     * @param Vector of cluster names
+     */
+    void setClusterNames(const std::vector<QString>& clusterNames);
+
+    /**
+     * Get cluster names
+     * @return Vector of cluster names
+     */
+    std::vector<QString> getClusterNames();
 
     /**
      * Removes a cluster by its unique identifier
@@ -113,11 +140,34 @@ public:
         return getRawData<ClusterData>()->getClusters();
     }
 
+    void setClusters(const QVector<Cluster>& clusters)
+    {
+        getRawData<ClusterData>()->setClusters(clusters);
+    }
+
     /**
      * Adds a cluster
      * @param cluster Cluster to add
      */
     void addCluster(Cluster& cluster);
+
+    /**
+     * Set cluster names
+     * @param Vector of cluster names
+     */
+    void setClusterNames(const std::vector<QString>& clusterNames)
+    {
+        getRawData<ClusterData>()->setClusterNames(clusterNames);
+    }
+
+    /**
+     * Get cluster names
+     * @return Vector of cluster names
+     */
+    std::vector<QString> getClusterNames()
+    {
+        return getRawData<ClusterData>()->getClusterNames();
+    }
 
     /**
      * Removes a cluster by its unique identifier
@@ -133,7 +183,7 @@ public:
 
     /**
      * Get a copy of the dataset
-     * @return Smart pointer to copy of dataset
+     * @return Smart pointer to copy of the dataset
      */
     Dataset<DatasetImpl> copy() const override
     {
@@ -257,6 +307,4 @@ public:
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
     mv::plugin::RawData* produce() override;
-
-
 };

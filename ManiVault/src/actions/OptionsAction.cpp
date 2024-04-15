@@ -29,7 +29,7 @@ OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStrin
     setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(options, selectedOptions);
 
-    connect(&_optionsModel, &QStandardItemModel::dataChanged, this, [this]() -> void {
+    connect(&_optionsModel, &QAbstractItemModel::dataChanged, this, [this]() -> void {
         selectedOptionsChanged(getSelectedOptions());
     });
 }
