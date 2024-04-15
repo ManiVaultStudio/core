@@ -61,6 +61,20 @@ void ClusterData::addCluster(Cluster& cluster)
     _clusters.push_back(cluster);
 }
 
+void ClusterData::setDimensionNames(const std::vector<QString>& clusterNames)
+{
+    if (clusterNames.empty())
+        return;
+
+    if (clusterNames.size() != _clusters.size())
+    {
+        qWarning() << "PointData: Number of dimension names does not equal the number of data dimensions";
+    }
+
+    for (size_t i = 0; i < clusterNames.size(); i++)
+        _clusters[i].setName(clusterNames[i]);
+}
+
 std::vector<QString> ClusterData::getClusterNames()
 {
     std::vector<QString> clusterNames;
