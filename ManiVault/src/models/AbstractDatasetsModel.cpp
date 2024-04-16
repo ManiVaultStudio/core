@@ -77,9 +77,9 @@ AbstractDatasetsModel::NameItem::NameItem(AbstractDatasetsModel& datasetsModel, 
         emitDataChanged();
     });
 
-    //connect(&getDataset(), &Dataset<DatasetImpl>::textChanged, this, [this](const QString& name) -> void {
-    //    emitDataChanged();
-    //});
+    connect(getDataset().get(), &DatasetImpl::textChanged, this, [this](const QString& name) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant AbstractDatasetsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -107,11 +107,9 @@ QVariant AbstractDatasetsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) 
 AbstractDatasetsModel::LocationItem::LocationItem(AbstractDatasetsModel& datasetsModel, Dataset<DatasetImpl> dataset) :
     Item(datasetsModel, dataset)
 {
-    //connect(&getDataset(), &WidgetAction::textChanged, this, [this](const QString& name) -> void {
-    //    emitDataChanged();
-    //});
-
-    //connect(dataset.get(), &DatasetImpl::locationChanged, &_datasetsModel, &DatasetsModel::updateData);
+    connect(getDataset().get(), &DatasetImpl::locationChanged, this, [this](const QString& location) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant AbstractDatasetsModel::LocationItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -134,6 +132,9 @@ QVariant AbstractDatasetsModel::LocationItem::data(int role /*= Qt::UserRole + 1
 AbstractDatasetsModel::IdItem::IdItem(AbstractDatasetsModel& datasetsModel, Dataset<DatasetImpl> dataset) :
     Item(datasetsModel, dataset)
 {
+    connect(getDataset().get(), &DatasetImpl::idChanged, this, [this](const QString& id) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant AbstractDatasetsModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
