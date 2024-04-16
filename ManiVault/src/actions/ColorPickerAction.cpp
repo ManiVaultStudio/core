@@ -149,7 +149,7 @@ ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPicke
         {
             _colorDialog.setCurrentColor(color);
             _hueAction.setValue(color.hue());
-            _saturationAction.setValue(color.saturation());
+            _saturationAction.setValue(color.hslSaturation());
             _lightnessAction.setValue(color.lightness());
         }
         _updateColorPickerAction = true;
