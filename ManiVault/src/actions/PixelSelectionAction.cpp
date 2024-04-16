@@ -311,13 +311,11 @@ void PixelSelectionAction::initModifier()
     });
 
     connect(&_modifierAddAction, &QAction::toggled, [this](bool toggled) {
-        if (toggled)
-            _modifierAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionModifierType::Add));
+        _modifierAction.setCurrentIndex(toggled ? static_cast<std::int32_t>(PixelSelectionModifierType::Add) : static_cast<std::int32_t>(PixelSelectionModifierType::Replace));
     });
 
     connect(&_modifierSubtractAction, &QAction::toggled, [this](bool toggled) {
-        if (toggled)
-            _modifierAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionModifierType::Subtract));
+        _modifierAction.setCurrentIndex(toggled ? static_cast<std::int32_t>(PixelSelectionModifierType::Subtract) : static_cast<std::int32_t>(PixelSelectionModifierType::Replace));
     });
 
     if (!isInitialized())
