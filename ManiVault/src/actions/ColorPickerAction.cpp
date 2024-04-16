@@ -78,7 +78,7 @@ ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPicke
     _layout(),
     _colorDialog(),
     _hueAction(this, "Hue", 0, 359, colorPickerAction->getColor().hue()),
-    _saturationAction(this, "Saturation", 0, 255, colorPickerAction->getColor().saturation()),
+    _saturationAction(this, "Saturation", 0, 255, colorPickerAction->getColor().hslSaturation()),
     _lightnessAction(this, "Lightness", 0, 255, colorPickerAction->getColor().lightness()),
     _updateColorPickerAction(true)
 {
