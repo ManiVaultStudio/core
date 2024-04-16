@@ -48,7 +48,8 @@ public:
      */
     RectangleAction(QObject* parent, const QString& title) :
         GroupAction(parent, title),
-        _rangeAction{ NumericalRangeActionType(this, "X-range", ValueRange(std::numeric_limits<NumValType>::lowest(), std::numeric_limits<NumValType>::max())), NumericalRangeActionType(this, "Y-range", ValueRange(std::numeric_limits<NumValType>::lowest(), std::numeric_limits<NumValType>::max())) }
+        _rangeAction{ NumericalRangeActionType(this, "X-range", ValueRange(std::numeric_limits<NumValType>::lowest(), std::numeric_limits<NumValType>::max())), NumericalRangeActionType(this, "Y-range", ValueRange(std::numeric_limits<NumValType>::lowest(), std::numeric_limits<NumValType>::max())) },
+        _blockRectangleChangedCallBack(false)
     {
         setDefaultWidgetFlags(WidgetFlag::Default);
         setShowLabels(false);
@@ -99,8 +100,12 @@ public:
      */
     void setRectangle(NumValType left, NumValType right, NumValType bottom, NumValType top) {
 
-        getRangeAction(Axis::X).setRange(ValueRange(static_cast<NumValType>(left), static_cast<NumValType>(right)));
-        getRangeAction(Axis::Y).setRange(ValueRange(static_cast<NumValType>(bottom), static_cast<NumValType>(top)));
+        blockRectangleChangedCallBack();
+        {
+            getRangeAction(Axis::X).setRange(ValueRange(static_cast<NumValType>(left), static_cast<NumValType>(right)));
+            getRangeAction(Axis::Y).setRange(ValueRange(static_cast<NumValType>(bottom), static_cast<NumValType>(top)));
+        }
+        unblockRectangleChangedCallBack();
 
         _rectangleChanged();
     }
@@ -111,8 +116,12 @@ public:
      */
     void setBounds(const Bounds& bounds) {
 
-        getRangeAction(Axis::X).setRange(ValueRange(static_cast<NumValType>(bounds.getLeft()), static_cast<NumValType>(bounds.getRight())));
-        getRangeAction(Axis::Y).setRange(ValueRange(static_cast<NumValType>(bounds.getBottom()), static_cast<NumValType>(bounds.getTop())));
+        blockRectangleChangedCallBack();
+        {
+            getRangeAction(Axis::X).setRange(ValueRange(static_cast<NumValType>(bounds.getLeft()), static_cast<NumValType>(bounds.getRight())));
+            getRangeAction(Axis::Y).setRange(ValueRange(static_cast<NumValType>(bounds.getBottom()), static_cast<NumValType>(bounds.getTop())));
+        }
+        unblockRectangleChangedCallBack();
 
         _rectangleChanged();
     }
@@ -158,8 +167,6 @@ public:
             return;
 
         getRangeAction(Axis::X).setMinimum(left);
-
-        _rectangleChanged();
     }
 
     /**
@@ -179,8 +186,6 @@ public:
             return;
 
         getRangeAction(Axis::X).setMaximum(right);
-
-        _rectangleChanged();
     }
 
     /**
@@ -200,8 +205,6 @@ public:
             return;
 
         getRangeAction(Axis::Y).setMinimum(bottom);
-
-        _rectangleChanged();
     }
 
     /**
@@ -221,8 +224,6 @@ public:
             return;
 
         getRangeAction(Axis::Y).setMaximum(top);
-
-        _rectangleChanged();
     }
 
     /**
@@ -230,8 +231,14 @@ public:
      * @param translation Amount of translation
      */
     void translateBy(QPair<NumValType, NumValType> translation) {
-        getRangeAction(Axis::X).shiftBy(translation.first);
-        getRangeAction(Axis::Y).shiftBy(translation.second);
+        blockRectangleChangedCallBack();
+        {
+            getRangeAction(Axis::X).shiftBy(translation.first);
+            getRangeAction(Axis::Y).shiftBy(translation.second);
+        }
+        unblockRectangleChangedCallBack();
+
+        _rectangleChanged();
     }
 
     /**
@@ -239,8 +246,34 @@ public:
      * @param factor Expansion factor
      */
     void expandBy(float factor) {
-        getRangeAction(Axis::X).expandBy(factor);
-        getRangeAction(Axis::Y).expandBy(factor);
+        blockRectangleChangedCallBack();
+        {
+            getRangeAction(Axis::X).expandBy(factor);
+            getRangeAction(Axis::Y).expandBy(factor);
+        }
+        unblockRectangleChangedCallBack();
+
+        _rectangleChanged();
+    }
+
+protected: // Callbacks blocking
+
+    /** Prevent RectangleAction#_rectangleChanged from being called */
+    void blockRectangleChangedCallBack() {
+        _blockRectangleChangedCallBack = true;
+    }
+
+    /** Allow RectangleAction#_rectangleChanged to be called */
+    void unblockRectangleChangedCallBack() {
+        _blockRectangleChangedCallBack = false;
+    }
+
+    /**
+     * Get whether RectangleAction#_rectangleChanged callbacks are blocked
+     * @return Boolean determining whether RectangleAction#_rectangleChanged calls are blocked
+     */
+    bool isRectangleChangedCallBackBlocked() const {
+        return _blockRectangleChangedCallBack;
     }
 
 public: // Action getters
@@ -251,6 +284,7 @@ public: // Action getters
 
 private:
     NumericalRangeActionType    _rangeAction[static_cast<int>(Axis::Count)];    /** Range actions for the x- and y axis of the rectangle */
+    bool                        _blockRectangleChangedCallBack;                 /** Whether RectangleAction#_rectangleChanged calls are blocked */
 
 protected:
     RectangleChangedCB      _rectangleChanged;      /** Callback which is called when the rectangle changed */

@@ -10,7 +10,12 @@ namespace mv::gui {
 IntegralRectangleAction::IntegralRectangleAction(QObject* parent, const QString& title) :
     RectangleAction<IntegralRangeAction>(parent, title)
 {
-    _rectangleChanged = [this]() -> void { emit rectangleChanged(getLeft(), getRight(), getBottom(), getTop()); };
+    _rectangleChanged = [this]() -> void {
+        if (isRectangleChangedCallBackBlocked())
+            return;
+
+        emit rectangleChanged(getLeft(), getRight(), getBottom(), getTop());
+    };
 
     connect(&getRangeAction(Axis::X), &IntegralRangeAction::rangeChanged, this, [this]() -> void { _rectangleChanged(); });
     connect(&getRangeAction(Axis::Y), &IntegralRangeAction::rangeChanged, this, [this]() -> void { _rectangleChanged(); });
