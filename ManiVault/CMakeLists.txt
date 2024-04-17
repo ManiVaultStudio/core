@@ -126,6 +126,7 @@ find_package(ZLIB QUIET)
 
 if(ZLIB_FOUND)
     message(STATUS "Using zlib version ${ZLIB_VERSION_STRING}")
+    set(INSTALL_ZLIB OFF)
 else()
     CPMAddPackage(
       NAME ZLIB
@@ -521,10 +522,10 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 )
 
 if(INSTALL_ZLIB)
-add_custom_command(TARGET ${MV_EXE} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
-)
+    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
+    )
 endif()
 
 # -----------------------------------------------------------------------------
