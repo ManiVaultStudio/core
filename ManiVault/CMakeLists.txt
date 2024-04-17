@@ -129,6 +129,8 @@ else()
       OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_LIBRARIES OFF"
     )
 
+    set(INSTALL_ZLIB ON)
+
     # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
     add_library(ZLIB::ZLIB ALIAS zlib)
     set(ZLIB_LIBRARIES zlib)
@@ -310,7 +312,7 @@ if(APPLE)
         COMPONENT MACOS_BUNDLE
     )
     
-    if(NOT ZLIB_FOUND)
+    if(INSTALL_ZLIB)
         install(CODE "execute_process(
             COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
@@ -477,7 +479,7 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
-    if(NOT ZLIB_FOUND)
+    if(INSTALL_ZLIB)
         add_custom_command(TARGET ${MV_EXE} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:zlib> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
         )
