@@ -303,9 +303,6 @@ if(APPLE)
                     \$<TARGET_FILE:QuaZip>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \$<TARGET_FILE:zlib>\" 
-                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
         )
