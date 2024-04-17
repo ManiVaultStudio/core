@@ -217,6 +217,8 @@ public:
 
     std::uint64_t getNumberOfElements() const;
 
+    SparseMatrix<uint16_t, uint16_t>& getSparseData() { return _sparseData; }
+
     /**
      * Get amount of data occupied by the raw data
      * @return Size of the raw data in bytes
@@ -270,7 +272,7 @@ public:
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
     void extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
     void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
-
+    
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
@@ -406,6 +408,14 @@ public:
         _numRows = numRows;
         _numDimensions = numCols;
         _sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
+
+        _isDense = false;
+    }
+
+    void setSparseData(size_t numRows, size_t numCols)
+    {
+        _numRows = numRows;
+        _numDimensions = numCols;
 
         _isDense = false;
     }
@@ -663,6 +673,11 @@ public:
             mv::events().notifyDatasetDataDimensionsChanged(this);
     }
 
+    SparseMatrix<uint16_t, uint16_t>& getSparseData()
+    {
+        return getRawData<PointData>()->getSparseData();
+    }
+
     /// Just calls the corresponding member function of its PointData.
     void setData(std::nullptr_t data, std::size_t numPoints, std::size_t numDimensions);
 
@@ -694,6 +709,11 @@ public:
     void setSparseData(size_t numRows, size_t numCols, std::vector<size_t> rowPointers, std::vector<ColIndexType> colIndices, std::vector<ValueType> values)
     {
         getRawData<PointData>()->setSparseData(numRows, numCols, rowPointers, colIndices, values);
+    }
+
+    void setSparseData(size_t numRows, size_t numCols)
+    {
+        getRawData<PointData>()->setSparseData(numRows, numCols);
     }
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
