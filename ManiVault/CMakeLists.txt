@@ -117,6 +117,11 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 # File compression: zlib
+if(APPLE)
+    find_program(BREW_BIN brew)
+    execute_process(COMMAND ${BREW_BIN} install pkg-config) 
+endif()
+
 find_package(ZLIB QUIET)
 
 if(ZLIB_FOUND)
