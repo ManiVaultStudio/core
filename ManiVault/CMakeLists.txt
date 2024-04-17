@@ -126,7 +126,7 @@ find_package(ZLIB QUIET)
 
 if(ZLIB_FOUND)
     message(STATUS "Using zlib version ${ZLIB_VERSION_STRING}")
-    set(INSTALL_ZLIB OFF)
+    set(MV_INSTALL_ZLIB OFF)
 else()
     CPMAddPackage(
       NAME ZLIB
@@ -135,7 +135,7 @@ else()
       OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_LIBRARIES OFF"
     )
 
-    set(INSTALL_ZLIB ON)
+    set(MV_INSTALL_ZLIB ON)
 
     # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
     add_library(ZLIB::ZLIB ALIAS zlib)
@@ -315,7 +315,7 @@ if(APPLE)
         COMPONENT MACOS_BUNDLE
     )
     
-    if(INSTALL_ZLIB)
+    if(${MV_INSTALL_ZLIB})
         install(CODE "execute_process(
             COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
@@ -482,7 +482,7 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
-    if(INSTALL_ZLIB)
+    if(${MV_INSTALL_ZLIB})
         add_custom_command(TARGET ${MV_EXE} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:zlib> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
         )
@@ -521,7 +521,7 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
 )
 
-if(INSTALL_ZLIB)
+if(${MV_INSTALL_ZLIB})
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
