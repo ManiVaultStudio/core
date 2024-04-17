@@ -30,7 +30,12 @@ const mv::DataType TextType = mv::DataType(QString("Text"));
 class TEXTDATA_EXPORT TextData : public mv::plugin::RawData
 {
 public:
-    TextData(PluginFactory* factory) : mv::plugin::RawData(factory, TextType) { }
+    TextData(PluginFactory* factory) :
+        mv::plugin::RawData(factory, TextType),
+        _numRows(-1)
+    {
+    }
+
     ~TextData(void) override;
     
     void init() override;
@@ -42,18 +47,30 @@ public:
      */
     Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
-    void setData(std::vector<QString>& textData)
+    std::vector<QString>& getColumn(QString columnName)
     {
-        _data = textData;
+        return _data[columnName];
     }
 
-    size_t getNumPoints() const
+    void addColumn(QString columnName, std::vector<QString>& columnData)
     {
-        return _data.size();
+        if (_numRows == -1)
+            _numRows = columnData.size();
+        else
+            Q_ASSERT(columnData.size() == _numRows);
+
+        _data[columnName] = columnData;
+    }
+
+    size_t getNumRows() const
+    {
+        return _numRows;
     }
 
 private:
-    std::vector<QString> _data;
+    size_t _numRows;
+
+    std::unordered_map<QString, std::vector<QString>> _data;
 };
 
 class TEXTDATA_EXPORT Text : public DatasetImpl
@@ -79,14 +96,19 @@ public:
         return text;
     }
 
-    void setData(std::vector<QString>& textData)
+    std::vector<QString>& getColumn(QString columnName) const
     {
-        getRawData<TextData>()->setData(textData);
+        return getRawData<TextData>()->getColumn(columnName);
     }
 
-    size_t getNumPoints() const
+    void addColumn(QString columnName, std::vector<QString>& columnData)
     {
-        return getRawData<TextData>()->getNumPoints();
+        getRawData<TextData>()->addColumn(columnName, columnData);
+    }
+
+    size_t getNumRows() const
+    {
+        return getRawData<TextData>()->getNumRows();
     }
 
     /**

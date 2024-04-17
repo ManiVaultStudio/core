@@ -36,7 +36,7 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Text>& dataset) :
             return;
 
         _dataStorageAction.setString("Owner");
-        _numberOfPointsAction.setString(QString::number(_dataset->getNumPoints()));
+        _numberOfPointsAction.setString(QString::number(_dataset->getNumRows()));
         _rawDataSizeAction.setString(_dataset->getRawDataSizeHumanReadable());
     };
 
