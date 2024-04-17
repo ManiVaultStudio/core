@@ -510,13 +510,12 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 # Install dependency licenses
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses"
-    COMMAND ${CMAKE_COMMAND} 
-        --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
-        --config $<CONFIGURATION> 
-        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>/
-        --component license
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/external/quazip/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
 )
 
 # -----------------------------------------------------------------------------
