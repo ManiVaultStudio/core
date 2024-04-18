@@ -41,6 +41,9 @@ include(CMakeCheckSetAVX)
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
 
+# Cmake package manager, downloads dependencies during configuration
+include(CPM)
+
 # create a file that defines MV_VERSION_MAJOR, etc
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
 
@@ -113,45 +116,62 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
+# File compression: zlib
+if(APPLE)
+    find_program(BREW_BIN brew)
+    execute_process(COMMAND ${BREW_BIN} install pkg-config) 
+endif()
+
+find_package(ZLIB QUIET)
+
+if(ZLIB_FOUND)
+    message(STATUS "Using zlib version ${ZLIB_VERSION_STRING}")
+    set(MV_INSTALL_ZLIB OFF)
+else()
+    CPMAddPackage(
+      NAME              ZLIB
+      GITHUB_REPOSITORY madler/zlib
+      GIT_TAG           v1.3.1
+      OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_LIBRARIES OFF"
+    )
+
+    set(MV_INSTALL_ZLIB ON)
+    set_target_properties(zlibstatic PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+    # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
+    add_library(ZLIB::ZLIB ALIAS zlib)
+    set(ZLIB_LIBRARIES zlib)
+endif()
+
+# File compression: QuaZip
+CPMAddPackage(
+  NAME              quazip
+  GITHUB_REPOSITORY stachenov/quazip
+  GIT_TAG           v1.4
+  OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF"
+)
+
 # Qt Advanced docking system
-set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
-add_subdirectory(external/advanced_docking)
-get_target_property(ADS_VERSION qt6advanceddocking VERSION)
-message(STATUS "Using Qt Advanced Docking System version ${ADS_VERSION}")
+CPMAddPackage(
+  NAME              advanced_docking
+  GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
+  GIT_TAG           4.3.0
+  OPTIONS "BUILD_EXAMPLES OFF"
+)
 
 if(MV_UNITY_BUILD)
     set_target_properties(qt6advanceddocking PROPERTIES UNITY_BUILD ON)
 endif()
 
-# File compression: ZLib, a dependency for QuaZip
-if(APPLE)
-    message(STATUS "********Using brew zlib for QUAZIP *********")
-
-    find_program(BREW_BIN brew)
-    execute_process(COMMAND ${BREW_BIN} install pkg-config) 
-endif()
-
-find_package(ZLIB)
-
-if(ZLIB_FOUND)
-    message(STATUS "Using zlib version ${ZLIB_VERSION_STRING}")
-else()
-    set(ZLIB_ERROR_MSG "You need to define ZLIB_ROOT, pointing to a zlib installation")
-    if (LINUX)
-        set(ZLIB_ERROR_MSG "You need to install zlib, e.g. (on Ubuntu) apt install zlib1g")
-    endif()
-
-    message(FATAL_ERROR ${ZLIB_ERROR_MSG})
-endif()
-
-# File compression: QuaZip
-set(QUAZIP_QT_MAJOR_VERSION 6)
-set(QUAZIP_BZIP2 OFF CACHE BOOL "Enables BZIP2 compression")  # we use ZLIB, not BZIP
-set(CMAKE_MESSAGE_LOG_LEVEL "WARNING")                        # prevent some status messages from quazip
-add_subdirectory(external/quazip)
-set(CMAKE_MESSAGE_LOG_LEVEL "STATUS")
-get_target_property(QuaZip_VERSION QuaZip VERSION)
-message(STATUS "Using QuaZip version ${QuaZip_VERSION}")
+# bfloat16 implementation for pre c++23
+CPMAddPackage(
+  NAME              biovault_bfloat16
+  GITHUB_REPOSITORY biovault/biovault_bfloat16
+  GIT_TAG           v1.0.1
+  DOWNLOAD_ONLY     YES
+  EXCLUDE_FROM_ALL  YES
+  SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
+)
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -305,6 +325,20 @@ if(APPLE)
         "
         COMPONENT MACOS_BUNDLE
     )
+    
+    if(${MV_INSTALL_ZLIB})
+        install(CODE "execute_process(
+            COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
+            COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                    \$<TARGET_FILE:zlib>\" 
+                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
+            )
+            "
+            COMPONENT MACOS_BUNDLE
+        )
+    endif()
+    
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} ${BUNDLE_DIR}
         )"
@@ -459,6 +493,12 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
+    if(${MV_INSTALL_ZLIB})
+        add_custom_command(TARGET ${MV_EXE} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:zlib> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+        )
+    endif()
+
     # Create symlink with slightly different name required on some linux distributions
     if(UNIX)
         include(CMakeQuaZipSymlink)
@@ -484,14 +524,20 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 # Install dependency licenses
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses"
-    COMMAND ${CMAKE_COMMAND} 
-        --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
-        --config $<CONFIGURATION> 
-        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>/
-        --component license
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/external/quazip/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
 )
+
+if(${MV_INSTALL_ZLIB})
+    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
+    )
+endif()
 
 # -----------------------------------------------------------------------------
 # Plugin projects
