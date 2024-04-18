@@ -50,12 +50,13 @@ public:
     /**
      * Set the datasets from which can be picked (mode is set to Mode::Manual)
      * @param datasets Datasets from which can be picked
+     * @param silent Whether the signal datasetsChanged is emitted
      */
-    void setDatasets(mv::Datasets datasets);
+    void setDatasets(mv::Datasets datasets, bool silent = false);
 
     /**
-     * Set datasets filter function (mode is set to Mode::Automatic)
-     * @param datasetsFilterFunction Filter lambda (triggered when datasets are added and/or removed from the datasets model)
+     * Set datasets filter function
+     * @param datasetsFilterFunction Filter lambda (triggered when datasets are added and/or removed from the global datasets model)
      */
     void setFilterFunction(const DatasetsFilterModel::FilterFunction& filterFunction);
 
@@ -85,7 +86,7 @@ public:
      * Get current dataset globally unique identifier
      * @return The globally unique identifier of the currently selected dataset (if any)
      */
-    QString getCurrentDatasetGuid() const;
+    QString getCurrentDatasetId() const;
 
 public: // Population
 
@@ -101,10 +102,22 @@ public: // Population
      */
     void setPopulationMode(AbstractDatasetsModel::PopulationMode populationMode);
 
-private: // Population
+private:
 
     /** Handle changes to the population mode */
     void populationModeChanged();
+
+    /** Blocks the DatasetPickerAction::datasetsChanged() signal from being emitted */
+    void blockDatasetsChangedSignal();
+
+    /** Allows the DatasetPickerAction::datasetsChanged() signal to be emitted */
+    void unblockDatasetsChangedSignal();
+
+    /**
+     * Get whether the DatasetPickerAction::datasetsChanged() may be emitted
+     * @return Boolean determining whether the DatasetPickerAction::datasetsChanged() may be emitted
+     */
+    bool isDatasetsChangedSignalBlocked() const;
 
 protected: // Linking
 
@@ -156,10 +169,11 @@ signals:
      */
     void populationModeChanged(AbstractDatasetsModel::PopulationMode previousPopulationMode, AbstractDatasetsModel::PopulationMode populationMode);
 
-protected:
-    AbstractDatasetsModel::PopulationMode   _populationMode;        /** Population mode (e.g. manual or automatic) */
-    DatasetsListModel                       _datasetsListModel;     /** Datasets list model for manual population (mv::data().getDatasetsListModel() otherwise) */
-    DatasetsFilterModel                     _datasetsFilterModel;   /** Filter model for the datasets model above */
+private:
+    AbstractDatasetsModel::PopulationMode   _populationMode;                /** Population mode (e.g. manual or automatic) */
+    DatasetsListModel                       _datasetsListModel;             /** Datasets list model for manual population (mv::data().getDatasetsListModel() otherwise) */
+    DatasetsFilterModel                     _datasetsFilterModel;           /** Filter model for the datasets model above */
+    bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_datasetsFilterModel */
 
     friend class AbstractActionsManager;
 };
