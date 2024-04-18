@@ -177,8 +177,9 @@ public:
     /**
      * Set the datasets from which can be picked (mode is set to Mode::Manual)
      * @param datasets Datasets from which can be picked
+     * @param silent Whether the signal datasetsChanged is emitted
      */
-    void setDatasets(mv::Datasets datasets);
+    void setDatasets(mv::Datasets datasets, bool silent = false);
 
     /**
      * Set datasets filter function (mode is set to Mode::Automatic)

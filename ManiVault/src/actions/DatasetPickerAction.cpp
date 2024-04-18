@@ -88,7 +88,7 @@ void DatasetPickerAction::setMode(Mode mode)
     }
 }
 
-void DatasetPickerAction::setDatasets(Datasets datasets)
+void DatasetPickerAction::setDatasets(Datasets datasets, bool silent)
 {
 #ifdef DATASET_PICKER_ACTION_VERBOSE
     qDebug() << __FUNCTION__;
@@ -97,6 +97,9 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
     _mode = Mode::Manual;
 
     _datasetsModel.setDatasets(datasets);
+
+    if (!silent)
+        emit datasetsChanged(_datasetsModel.getDatasets());
 
     for (auto& dataset : _datasetsModel.getDatasets()) {
 
@@ -173,6 +176,8 @@ void DatasetPickerAction::populateDatasetsFromCore()
         datasets = _datasetsFilterFunction(datasets);
 
     _datasetsModel.setDatasets(datasets);
+
+    emit datasetsChanged(_datasetsModel.getDatasets());
 
     for (auto& dataset : datasets)
         connect(dataset.get(), &DatasetImpl::locationChanged, &_datasetsModel, &DatasetsModel::updateData);
