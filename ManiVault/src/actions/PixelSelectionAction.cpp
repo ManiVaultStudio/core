@@ -418,6 +418,9 @@ QMenu* PixelSelectionAction::getContextMenu()
 
 bool PixelSelectionAction::eventFilter(QObject* object, QEvent* event)
 {
+    if (!isEnabled())
+        return QObject::eventFilter(object, event);
+
     const auto keyEvent = dynamic_cast<QKeyEvent*>(event);
 
     if (!keyEvent)
