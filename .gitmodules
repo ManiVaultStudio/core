@@ -1,3 +1,0 @@
-[submodule "biovault_bfloat16"]
-	path = ManiVault/external/biovault/biovault_bfloat16
-	url = https://github.com/biovault/biovault_bfloat16.git

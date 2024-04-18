@@ -129,9 +129,9 @@ if(ZLIB_FOUND)
     set(MV_INSTALL_ZLIB OFF)
 else()
     CPMAddPackage(
-      NAME ZLIB
+      NAME              ZLIB
       GITHUB_REPOSITORY madler/zlib
-      GIT_TAG v1.3.1
+      GIT_TAG           v1.3.1
       OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_LIBRARIES OFF"
     )
 
@@ -144,23 +144,33 @@ endif()
 
 # File compression: QuaZip
 CPMAddPackage(
-  NAME quazip
+  NAME              quazip
   GITHUB_REPOSITORY stachenov/quazip
-  GIT_TAG v1.4
+  GIT_TAG           v1.4
   OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF"
 )
 
 # Qt Advanced docking system
 CPMAddPackage(
-  NAME advanced_docking
+  NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
-  GIT_TAG 4.3.0
+  GIT_TAG           4.3.0
   OPTIONS "BUILD_EXAMPLES OFF"
 )
 
 if(MV_UNITY_BUILD)
     set_target_properties(qt6advanceddocking PROPERTIES UNITY_BUILD ON)
 endif()
+
+# bfloat16 implementation for pre c++23
+CPMAddPackage(
+  NAME              biovault_bfloat16
+  GITHUB_REPOSITORY biovault/biovault_bfloat16
+  GIT_TAG           v1.0.1
+  DOWNLOAD_ONLY     YES
+  EXCLUDE_FROM_ALL  YES
+  SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/
+)
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -517,6 +527,8 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
 )
 
 if(${MV_INSTALL_ZLIB})
