@@ -169,7 +169,7 @@ CPMAddPackage(
   GIT_TAG           v1.0.1
   DOWNLOAD_ONLY     YES
   EXCLUDE_FROM_ALL  YES
-  SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/
+  SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
 
 # -----------------------------------------------------------------------------
