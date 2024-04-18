@@ -23,7 +23,8 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
     _populationMode(AbstractDatasetsModel::PopulationMode::Automatic),
     _datasetsListModel(AbstractDatasetsModel::PopulationMode::Manual),
     _datasetsFilterModel(),
-    _blockDatasetsChangedSignal(false)
+    _blockDatasetsChangedSignal(false),
+    _currentDatasetsIds()
 {
     setText(title);
     setIconByName("database");
@@ -53,11 +54,24 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
         if (isDatasetsChangedSignalBlocked())
             return;
 
-        emit datasetsChanged(getDatasets());
+        const auto datasets = getDatasets();
+
+        QStringList datasetsIds;
+
+        for (const auto& dataset : datasets)
+            datasetsIds << dataset->getId();
+
+        if (datasetsIds == _currentDatasetsIds)
+            return;
+
+        _currentDatasetsIds = datasetsIds;
+
+        emit datasetsChanged(datasets);
     };
 
     connect(&_datasetsFilterModel, &QSortFilterProxyModel::rowsInserted, this, filterModelChanged);
     connect(&_datasetsFilterModel, &QSortFilterProxyModel::rowsRemoved, this, filterModelChanged);
+    connect(&_datasetsFilterModel, &QSortFilterProxyModel::dataChanged, this, filterModelChanged);
     connect(&_datasetsFilterModel, &QSortFilterProxyModel::layoutChanged, this, filterModelChanged);
 
     populationModeChanged();

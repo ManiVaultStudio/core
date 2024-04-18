@@ -174,6 +174,7 @@ private:
     DatasetsListModel                       _datasetsListModel;             /** Datasets list model for manual population (mv::data().getDatasetsListModel() otherwise) */
     DatasetsFilterModel                     _datasetsFilterModel;           /** Filter model for the datasets model above */
     bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_datasetsFilterModel */
+    QStringList                             _currentDatasetsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
 
     friend class AbstractActionsManager;
 };
