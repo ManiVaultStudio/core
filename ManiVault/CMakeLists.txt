@@ -136,6 +136,7 @@ else()
     )
 
     set(MV_INSTALL_ZLIB ON)
+    set_target_properties(zlibstatic PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
     # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
     add_library(ZLIB::ZLIB ALIAS zlib)
