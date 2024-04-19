@@ -119,8 +119,12 @@ void DatasetPickerAction::setDatasets(Datasets datasets, bool silent /*= false*/
             _datasetsListModel.setDatasets(datasets);
         }
         unblockDatasetsChangedSignal();
-    } else
+    }
+    else {
+        _datasetsListModel.setDatasets(datasets);
+
         emit datasetsChanged(_datasetsListModel.getDatasets());
+    }
 
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
