@@ -163,6 +163,8 @@ if(MV_UNITY_BUILD)
     set_target_properties(qt6advanceddocking PROPERTIES UNITY_BUILD ON)
 endif()
 
+set_target_properties(qt6advanceddocking PROPERTIES PROJECT_LABEL "qtadvanceddocking" OUTPUT_NAME "qtadvanceddocking")
+
 # bfloat16 implementation for pre c++23
 CPMAddPackage(
   NAME              biovault_bfloat16
