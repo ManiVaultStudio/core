@@ -38,6 +38,12 @@ Dataset<Clusters>& ClustersAction::getClustersDataset()
 
 void ClustersAction::setClustersDataset(Dataset<Clusters> clustersDataset)
 {
+    if (_clustersDataset.isValid()) {
+        disconnect(&_clustersDataset, &Dataset<Clusters>::dataChanged, this, nullptr);
+        disconnect(&_clustersModel, &QAbstractItemModel::dataChanged, this, nullptr);
+        disconnect(&_clustersModel, &QAbstractItemModel::layoutChanged, this, nullptr);
+    }
+
     _clustersDataset = clustersDataset;
 
     // Automatically synchronize clusters when we have a valid clusters dataset
