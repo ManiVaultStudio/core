@@ -87,12 +87,19 @@ void ClustersAction::updateClustersModel()
 
 void ClustersAction::updateClustersDataset()
 {
-    if (_clustersModel.getClusters() == _clustersDataset->getClusters())
+    const auto& newClusters     = _clustersModel.getClusters();
+    const auto& currentClusters = _clustersDataset->getClusters();
+
+    if (newClusters == currentClusters)
         return;
 
-    _clustersDataset->getClusters() = _clustersModel.getClusters();
+    bool automaticRecolor = newClusters.size() != currentClusters.size();
 
-    _colorizeClustersAction.updateColorsInModel();
+    _clustersDataset->setClusters(newClusters);
+
+    // Re-color if a cluster was deleted
+    if (automaticRecolor)
+        _colorizeClustersAction.updateColorsInModel();
 
     events().notifyDatasetDataChanged(_clustersDataset);
 }

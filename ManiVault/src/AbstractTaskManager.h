@@ -43,6 +43,8 @@ public:
     {
     }
 
+    virtual ~AbstractTaskManager() { }
+
     /** Perform manager startup initialization */
     void initialize() override {
     }

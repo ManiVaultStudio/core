@@ -82,6 +82,8 @@ public: // Construction
      */
     Application(int& argc, char** argv);
 
+    ~Application();
+
 public: // Miscellaneous
 
     /** Get the globally unique identifier of the application instance */

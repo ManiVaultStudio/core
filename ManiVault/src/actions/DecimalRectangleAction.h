@@ -24,6 +24,10 @@ class CORE_EXPORT DecimalRectangleAction : public RectangleAction<DecimalRangeAc
 
 public:
 
+    using RectangleAction<DecimalRangeAction>::setRectangle;
+
+public:
+
     /**
      * Construct with pointer to \p parent object and \p title
      * @param parent Pointer to parent object

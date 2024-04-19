@@ -50,7 +50,9 @@ public:
     NumericalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<NumericalType>& limits, const util::NumericalRange<NumericalType>& range) :
         GroupAction(parent, title),
         _rangeMinAction(this, "Minimum"),
-        _rangeMaxAction(this, "Maximum")
+        _rangeMaxAction(this, "Maximum"),
+        _blockLimitsChangedCallBack(false),
+        _blockRangeChangedCallBack(false)
     {
         setText(title);
         setDefaultWidgetFlags(WidgetFlag::Default);
@@ -88,7 +90,11 @@ public:
         if (minimum == _rangeMinAction.getValue())
             return;
 
-        _rangeMinAction.setValue(minimum);
+        blockRangeChangedCallBack();
+        {
+            _rangeMinAction.setValue(minimum);
+        }
+        unblockRangeChangedCallBack();
 
         _rangeChanged();
     }
@@ -109,7 +115,11 @@ public:
         if (maximum == _rangeMaxAction.getValue())
             return;
 
-        _rangeMaxAction.setValue(maximum);
+        blockRangeChangedCallBack();
+        {
+            _rangeMaxAction.setValue(maximum);
+        }
+        unblockRangeChangedCallBack();
 
         _rangeChanged();
     }
@@ -143,8 +153,12 @@ public:
         if (range == getRange())
             return;
 
-        _rangeMinAction.setValue(range.getMinimum());
-        _rangeMaxAction.setValue(range.getMaximum());
+        blockRangeChangedCallBack();
+        {
+            _rangeMinAction.setValue(range.getMinimum());
+            _rangeMaxAction.setValue(range.getMaximum());
+        }
+        unblockRangeChangedCallBack();
 
         _rangeChanged();
     }
@@ -165,8 +179,12 @@ public:
         if (limitsMinimum == _rangeMinAction.getMinimum())
             return;
 
-        _rangeMinAction.setMinimum(limitsMinimum);
-        _rangeMaxAction.setMinimum(limitsMinimum);
+        blockLimitsChangedCallBack();
+        {
+            _rangeMinAction.setMinimum(limitsMinimum);
+            _rangeMaxAction.setMinimum(limitsMinimum);
+        }
+        unblockLimitsChangedCallBack();
 
         _limitsChanged();
     }
@@ -187,8 +205,12 @@ public:
         if (limitsMaximum == _rangeMaxAction.getMaximum())
             return;
 
-        _rangeMinAction.setMaximum(limitsMaximum);
-        _rangeMaxAction.setMaximum(limitsMaximum);
+        blockLimitsChangedCallBack();
+        {
+            _rangeMinAction.setMaximum(limitsMaximum);
+            _rangeMaxAction.setMaximum(limitsMaximum);
+        }
+        unblockLimitsChangedCallBack();
 
         _limitsChanged();
     }
@@ -206,11 +228,14 @@ public:
         if (limits == getLimits())
             return;
 
-        _rangeMinAction.setMinimum(limits.getMinimum());
-        _rangeMaxAction.setMinimum(limits.getMinimum());
-
-        _rangeMinAction.setMaximum(limits.getMaximum());
-        _rangeMaxAction.setMaximum(limits.getMaximum());
+        blockLimitsChangedCallBack();
+        {
+            _rangeMinAction.setMinimum(limits.getMinimum());
+            _rangeMaxAction.setMinimum(limits.getMinimum());
+            _rangeMinAction.setMaximum(limits.getMaximum());
+            _rangeMaxAction.setMaximum(limits.getMaximum());
+        }
+        unblockLimitsChangedCallBack();
 
         _limitsChanged();
     }
@@ -220,8 +245,15 @@ public:
      * @param amount Amount of shift
      */
     void shiftBy(NumericalType amount) {
-        setMinimum(getMinimum() + amount);
-        setMaximum(getMaximum() + amount);
+
+        blockRangeChangedCallBack();
+        {
+            setMinimum(getMinimum() + amount);
+            setMaximum(getMaximum() + amount);
+        }
+        unblockRangeChangedCallBack();
+
+        _rangeChanged();
     }
 
     /**
@@ -231,8 +263,54 @@ public:
     void expandBy(float factor) {
         const auto offset = (getLength() * factor) / 2.f;
 
-        setMinimum(getMinimum() - offset);
-        setMaximum(getMaximum() + offset);
+        blockRangeChangedCallBack();
+        {
+            setMinimum(getMinimum() - offset);
+            setMaximum(getMaximum() + offset);
+        }
+        unblockRangeChangedCallBack();
+
+        _rangeChanged();
+    }
+
+protected: // Callbacks blocking
+
+    /** Prevent RangeAction#_limitsChanged from being called */
+    void blockLimitsChangedCallBack() {
+        _blockLimitsChangedCallBack = true;
+    }
+
+    /** Allow RangeAction#_limitsChanged to be called */
+    void unblockLimitsChangedCallBack() {
+        _blockLimitsChangedCallBack = false;
+    }
+
+    /** Prevent RangeAction#_rangeChanged from being called */
+    void blockRangeChangedCallBack() {
+        _blockRangeChangedCallBack = true;
+    }
+
+    /** Allow RangeAction#_rangeChanged to be called */
+    void unblockRangeChangedCallBack() {
+        _blockRangeChangedCallBack = false;
+    }
+
+protected: // Callbacks blocking
+
+    /**
+     * Get whether RangeAction#_limitsChanged callbacks are blocked
+     * @return Boolean determining whether RangeAction#_limitsChanged calls are blocked
+     */
+    bool isLimitsChangedCallBackBlocked() const {
+        return _blockLimitsChangedCallBack;
+    }
+
+    /**
+     * Get whether RangeAction#_rangeChanged callbacks are blocked
+     * @return Boolean determining whether RangeAction#_rangeChanged calls are blocked
+     */
+    bool isRangeChangedCallBackBlocked() const {
+        return _blockRangeChangedCallBack;
     }
 
 public: // Serialization
@@ -247,6 +325,8 @@ public: // Serialization
 
         _rangeMinAction.fromParentVariantMap(variantMap);
         _rangeMaxAction.fromParentVariantMap(variantMap);
+
+        _rangeChanged();
     }
 
     /**
@@ -268,11 +348,15 @@ public: // Action getters
     NumericalActionType& getRangeMinAction() { return _rangeMinAction; }
     NumericalActionType& getRangeMaxAction() { return _rangeMaxAction; }
 
+private:
+    NumericalActionType     _rangeMinAction;                /** Minimum range numerical action */
+    NumericalActionType     _rangeMaxAction;                /** Maximum range numerical action */
+    bool                    _blockLimitsChangedCallBack;    /** Whether RangeAction#_limitsChanged calls are blocked */
+    bool                    _blockRangeChangedCallBack;     /** Whether RangeAction#_rangeChanged calls are blocked */
+
 protected:
-    NumericalActionType     _rangeMinAction;        /** Minimum range numerical action */
-    NumericalActionType     _rangeMaxAction;        /** Maximum range numerical action */
     LimitsChangedCB         _limitsChanged;         /** Callback which is called when the limits change */
     RangeChangedCB          _rangeChanged;          /** Callback which is called when the range changes */
 };
 
-}
+} 

@@ -34,6 +34,8 @@ public:
     {
     }
 
+    virtual ~AbstractEventManager() { }
+
     /**
      * Notify listeners that a new dataset has been added to the core
      * @param dataset Smart pointer to the dataset that was added

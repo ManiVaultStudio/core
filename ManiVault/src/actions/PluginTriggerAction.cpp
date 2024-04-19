@@ -3,9 +3,8 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PluginTriggerAction.h"
-#include "CoreInterface.h"
-#include "AbstractPluginManager.h"
 
+#include "CoreInterface.h"
 #include "PluginFactory.h"
 
 #include <QCryptographicHash>
@@ -17,6 +16,7 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
     _pluginFactory(pluginFactory),
     _menuLocation(),
     _sha(),
+    _datasets(),
     _configurationAction(nullptr),
     _requestPluginCallback()
 {
@@ -81,6 +81,11 @@ QString PluginTriggerAction::getSha() const
     return _sha;
 }
 
+ mv::Datasets PluginTriggerAction::getDatasets() const
+{
+    return _datasets;
+}
+
 WidgetAction* PluginTriggerAction::getConfigurationAction()
 {
     return _configurationAction;
@@ -89,6 +94,11 @@ WidgetAction* PluginTriggerAction::getConfigurationAction()
 void PluginTriggerAction::setConfigurationAction(WidgetAction* configurationAction)
 {
     _configurationAction = configurationAction;
+}
+
+void PluginTriggerAction::setDatasets(const mv::Datasets& datasets)
+{
+    _datasets = datasets;
 }
 
 void PluginTriggerAction::initialize()

@@ -1,9 +1,0 @@
-[submodule "biovault_bfloat16"]
-	path = ManiVault/external/biovault/biovault_bfloat16
-	url = https://github.com/biovault/biovault_bfloat16.git
-[submodule "advanced_docking"]
-	path = ManiVault/external/advanced_docking
-	url = https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System.git
-[submodule "quazip"]
-	path = ManiVault/external/quazip
-	url = https://github.com/stachenov/quazip.git

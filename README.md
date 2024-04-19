@@ -21,7 +21,14 @@ The best starting point is the [example plugins](https://github.com/ManiVaultStu
 The three projects above have all been built using ManiVault ([Vieth et al. 2022](https://doi.org/10.1109/PacificVis53943.2022.00010): [plugin](https://github.com/ManiVaultStudio/SpidrPlugin), [Popa et al. 2022](https://doi.org/10.2312/gch.20221233): [plugin](https://github.com/ManiVaultStudio/SpectralViewPlugin), [Li et al. 2023](https://doi.org/10.1101/2023.03.20.532934): [plugin](https://github.com/ManiVaultStudio/SpaceWalker)).
 
 ## Installation & Building
-<details open>
+The [install guide](https://github.com/ManiVaultStudio/core/wiki/Installation) gives a complete overview of ManiVault's dependencies and setup.
+
+Before building ManiVault, be sure to set up [Qt6](https://doc.qt.io/qt-6/get-and-install-qt.html), then clone this repo:
+```
+git clone git@github.com:ManiVaultStudio/core.git
+```
+
+<details closed>
    
 <summary>Automated using DevBundle (available for BioVault team members)</summary>
 
@@ -31,19 +38,6 @@ The preferred approach to building the example plugins is by using our [DevBundl
 - Setting up an umbrella `CMakeLists.txt` which consists of all projects from the build configuration
 
 Note: the `allmain` build config in the DevBundle [config.json](https://github.com/ManiVaultStudio/DevBundle/blob/master/config.json) contains an example of how to add the core and plugins to a build configuration.
-
-</details>
-
-<details>
-
-<summary>Manual</summary>
-
-The [install guide](https://github.com/ManiVaultStudio/core/wiki/Installation) gives a complete overview of ManiVault's dependencies and setup.
-
-Before building ManiVault, be sure to set up its requirements (mainly Qt6 and zlib), then copy this repo:
-```
-git clone --recurse-submodule git@github.com:ManiVaultStudio/core.git
-```
 
 </details>
 

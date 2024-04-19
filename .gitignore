@@ -1,4 +1,6 @@
 build/
+external/
+ManiVault/external/
 *.log
 *.dir
 Doxygen/

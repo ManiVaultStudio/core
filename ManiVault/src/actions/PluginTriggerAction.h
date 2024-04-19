@@ -5,7 +5,6 @@
 #pragma once
 
 #include "TriggerAction.h"
-#include "DecimalAction.h"
 
 #include "PluginType.h"
 #include "Dataset.h"
@@ -89,6 +88,12 @@ public:
     QString getSha() const;
 
     /**
+     * Get list of datasets that the plugin can work with when triggered
+     * @return Dataset list
+     */
+    mv::Datasets getDatasets() const;
+
+    /**
      * Get configuration action
      * @return Action for configuring the plugin creation (if available)
      */
@@ -105,6 +110,12 @@ public:
      * @param text Action text
      */
     void setText(const QString& text);
+
+    /**
+     * Set list of datasets that the plugin can work with when triggered
+     * @param datasets Dataset list
+     */
+    void setDatasets(const mv::Datasets& datasets);
 
     /**
      * Set the callback function which is invoked when the trigger action is triggered
@@ -126,6 +137,7 @@ private:
     const plugin::PluginFactory*    _pluginFactory;             /** Pointer to plugin factory */
     QString                         _menuLocation;              /** Determines where the plugin trigger action resides w.r.t. other plugin trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
     QString                         _sha;                       /** Cryptographic hash of the plugin kind and trigger title */
+    mv::Datasets                    _datasets;                  /** List of datasets that the plugin should work with when triggered */
     WidgetAction*                   _configurationAction;       /** Action for configuring the plugin creation */
     RequestPluginCallback           _requestPluginCallback;     /** Request plugin callback function which should create the plugin (invoked when the trigger action is triggered) */
 

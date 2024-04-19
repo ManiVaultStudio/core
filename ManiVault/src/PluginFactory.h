@@ -46,6 +46,8 @@ public:
      */
     PluginFactory(Type type);
 
+    virtual ~PluginFactory() { }
+
     /**
      * Get plugin kind
      * @return Plugin kind
@@ -188,6 +190,15 @@ public:
      */
     virtual gui::PluginTriggerActions getPluginTriggerActions(const DataTypes& dataTypes) const {
         return gui::PluginTriggerActions();
+    }
+
+    /**
+     * Initializes a list of plugin trigger actions
+     * @param pluginTriggerActions List of plugin trigger actions to be initialized
+     */
+    static void initializePluginTriggerActions(gui::PluginTriggerActions& pluginTriggerActions) {
+        for (auto& pluginTriggerAction : pluginTriggerActions)
+            pluginTriggerAction->initialize();
     }
 
 public: // Number of instances

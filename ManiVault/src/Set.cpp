@@ -190,7 +190,10 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         _mayUnderive = variantMap["MayUnderive"].toBool();
 
     if (variantMap.contains("Properties"))
-        _properties = variantMap["Properties"].toMap();
+    {
+        _properties = mv::util::loadQVariant(variantMap["Properties"]).toMap();
+    }
+    
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;
@@ -239,7 +242,7 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
         { "LinkedData", linkedDataList },
-        { "Properties", QVariant::fromValue(_properties)}
+        { "Properties", mv::util::storeQVariant(_properties)}
     });
 
     return variantMap;

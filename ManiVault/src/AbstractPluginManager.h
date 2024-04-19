@@ -44,7 +44,7 @@ public:
         AbstractManager(parent, "Plugins")
     {
     }
-    
+
     /** Loads all plugin factories from the plugin directory */
     virtual void loadPluginFactories() = 0;
 

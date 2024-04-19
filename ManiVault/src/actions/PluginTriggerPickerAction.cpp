@@ -64,9 +64,10 @@ void PluginTriggerPickerAction::initialize(const QString& pluginKind, const Data
 
 QPointer<PluginTriggerAction> PluginTriggerPickerAction::getPluginTriggerAction(const QString& sha)
 {
-    for (const auto& pluginTriggerAction : _pluginTriggerActions)
-        if (pluginTriggerAction->getSha() == sha)
-            return pluginTriggerAction;
+    if(!sha.isEmpty())
+        for (const auto& pluginTriggerAction : _pluginTriggerActions)
+            if (pluginTriggerAction->getSha() == sha)
+                return pluginTriggerAction;
 
     return nullptr;
 }

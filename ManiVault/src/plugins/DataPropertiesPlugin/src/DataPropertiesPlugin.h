@@ -39,8 +39,6 @@ protected:
 private:
     gui::TriggerAction      _additionalEditorAction;    /** Trigger action to start the data set editor */
     DataPropertiesWidget    _dataPropertiesWidget;      /** Data properties widget */
-
-    friend class DataPropertiesWidget;
 };
 
 class DataPropertiesPluginFactory : public ViewPluginFactory
