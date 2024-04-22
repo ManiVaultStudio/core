@@ -101,7 +101,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         loadGuiTask.setSubtaskFinished("Initializing start page");
 
         statusBar()->setSizeGripEnabled(false);
-        /*
+
         auto startPageStatusBarAction       = new StartPageStatusBarAction(this, "Start Page");
         auto versionStatusBarAction         = new ManiVaultVersionStatusBarAction(this, "Version");
         auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
@@ -136,7 +136,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
                     statusBar()->insertPermanentWidget(index - 1, statusBarAction->createWidget(this), statusBarAction->getStretch());
             }
         }
-        */
+
         const auto projectChanged = [this]() -> void {
             if (!projects().hasProject()) {
                 setWindowTitle("ManiVault");
