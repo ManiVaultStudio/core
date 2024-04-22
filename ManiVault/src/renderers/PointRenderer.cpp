@@ -299,31 +299,31 @@ namespace mv
 
         Bounds PointRenderer::getBounds() const
         {
-            return getBoundsView();
+            return getViewBounds();
         }
 
-        Bounds PointRenderer::getBoundsView() const
+        Bounds PointRenderer::getViewBounds() const
         {
             return _boundsView;
         }
 
-        Bounds PointRenderer::getBoundsData() const
+        Bounds PointRenderer::getDataBounds() const
         {
             return _boundsData;
         }
 
         void PointRenderer::setBounds(const Bounds& bounds)
         {
-            setBoundsView(bounds);
-            setBoundsData(bounds);
+            setViewBounds(bounds);
+            setDataBounds(bounds);
         }
 
-        void PointRenderer::setBoundsView(const Bounds& boundsView)
+        void PointRenderer::setViewBounds(const Bounds& boundsView)
         {
             _boundsView = boundsView;
         }
 
-        void PointRenderer::setBoundsData(const Bounds& boundsData)
+        void PointRenderer::setDataBounds(const Bounds& boundsData)
         {
             _boundsData = boundsData;
         }

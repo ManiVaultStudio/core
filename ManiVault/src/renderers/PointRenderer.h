@@ -128,23 +128,23 @@ namespace mv
 
             void setColormap(const QImage& image);
 
-            // Returns getBoundsView()
+            // Returns getViewBounds()
             Bounds getBounds() const;
 
             // Retuns _boundsView
-            Bounds getBoundsView() const;
+            Bounds getViewBounds() const;
 
             // Returns _boundsData
-            Bounds getBoundsData() const;
+            Bounds getDataBounds() const;
 
-            // Calls both setBoundsView() and setBoundsData()
+            // Calls both setViewBounds() and setDataBounds()
             void setBounds(const Bounds& bounds);
 
             // sets _boundsView, used for computing the projection matrix _orthoM
-            void setBoundsView(const Bounds& boundsView);
+            void setViewBounds(const Bounds& boundsView);
 
             // sets _boundsData, used for scaling the 2d _colormap
-            void setBoundsData(const Bounds& boundsData);
+            void setDataBounds(const Bounds& boundsData);
 
             Matrix3f getProjectionMatrix() const;
 
