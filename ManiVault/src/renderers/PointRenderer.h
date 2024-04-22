@@ -128,8 +128,23 @@ namespace mv
 
             void setColormap(const QImage& image);
 
+            // Returns getViewBounds()
             Bounds getBounds() const;
+
+            // Retuns _boundsView
+            Bounds getViewBounds() const;
+
+            // Returns _boundsData
+            Bounds getDataBounds() const;
+
+            // Calls both setViewBounds() and setDataBounds()
             void setBounds(const Bounds& bounds);
+
+            // sets _boundsView, used for computing the projection matrix _orthoM
+            void setViewBounds(const Bounds& boundsView);
+
+            // sets _boundsData, used for scaling the 2d _colormap
+            void setDataBounds(const Bounds& boundsData);
 
             Matrix3f getProjectionMatrix() const;
 
@@ -183,12 +198,13 @@ namespace mv
             ShaderProgram               _shader;
 
             PointArrayObject            _gpuPoints;
-            Texture2D                   _colormap;
+            Texture2D                   _colormap;                                                          /** 2D colormap, sets point color based on point position */
 
-            Matrix3f                    _orthoM                             = {};       /** Projection matrix from bounds space to clip space */
-            Bounds                      _bounds                             = Bounds(-1, 1, -1, 1);
+            Matrix3f                    _orthoM                             = {};                           /** Projection matrix from bounds space to clip space */
+            Bounds                      _boundsView                         = Bounds(-1, 1, -1, 1);         /** Used for computing the projection matrix _orthoM */
+            Bounds                      _boundsData                         = Bounds(-1, 1, -1, 1);         /** Used for scaling the 2d _colormap */
 
-            std::int32_t                _numSelectedPoints                  = 0;     /** Number of selected (highlighted points) */
+            std::int32_t                _numSelectedPoints                  = 0;                            /** Number of selected (highlighted points) */
         };
 
     } // namespace gui

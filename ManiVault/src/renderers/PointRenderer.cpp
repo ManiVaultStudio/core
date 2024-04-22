@@ -299,12 +299,33 @@ namespace mv
 
         Bounds PointRenderer::getBounds() const
         {
-            return _bounds;
+            return getViewBounds();
+        }
+
+        Bounds PointRenderer::getViewBounds() const
+        {
+            return _boundsView;
+        }
+
+        Bounds PointRenderer::getDataBounds() const
+        {
+            return _boundsData;
         }
 
         void PointRenderer::setBounds(const Bounds& bounds)
         {
-            _bounds = bounds;
+            setViewBounds(bounds);
+            setDataBounds(bounds);
+        }
+
+        void PointRenderer::setViewBounds(const Bounds& boundsView)
+        {
+            _boundsView = boundsView;
+        }
+
+        void PointRenderer::setDataBounds(const Bounds& boundsData)
+        {
+            _boundsData = boundsData;
         }
 
         Matrix3f PointRenderer::getProjectionMatrix() const
@@ -425,7 +446,7 @@ namespace mv
             glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
 
             // World to clip transformation
-            _orthoM = createProjectionMatrix(_bounds);
+            _orthoM = createProjectionMatrix(_boundsView);
 
             _shader.bind();
 
@@ -438,7 +459,7 @@ namespace mv
             _shader.uniform1f("pointOpacity", _pointSettings._alpha);
             _shader.uniform1i("scalarEffect", _pointEffect);
             
-            _shader.uniform4f("dataBounds", _bounds.getLeft(), _bounds.getRight(), _bounds.getBottom(), _bounds.getTop());
+            _shader.uniform4f("dataBounds", _boundsData.getLeft(), _boundsData.getRight(), _boundsData.getBottom(), _boundsData.getTop());
 
             _shader.uniform1i("selectionDisplayMode", static_cast<std::int32_t>(_selectionDisplayMode));
             _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
