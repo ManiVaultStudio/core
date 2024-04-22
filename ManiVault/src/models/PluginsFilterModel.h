@@ -6,9 +6,9 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "actions/ToggleAction.h"
+#include "SortFilterProxyModel.h"
 
-#include <QSortFilterProxyModel>
+#include "actions/ToggleAction.h"
 
 namespace mv {
 
@@ -19,7 +19,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT PluginsFilterModel : public QSortFilterProxyModel
+class CORE_EXPORT PluginsFilterModel : public SortFilterProxyModel
 {
 public:
 

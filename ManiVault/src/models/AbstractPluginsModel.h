@@ -6,9 +6,10 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "StandardItemModel.h"
+
 #include <QList>
 #include <QStandardItem>
-#include <QStandardItemModel>
 
 namespace mv {
 
@@ -19,7 +20,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT AbstractPluginsModel : public QStandardItemModel
+class CORE_EXPORT AbstractPluginsModel : public StandardItemModel
 {
 public:
 

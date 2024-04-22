@@ -6,9 +6,12 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "SortFilterProxyModel.h"
+
 #include "Dataset.h"
 
 #include "actions/ToggleAction.h"
+#include "actions/StringAction.h"
 
 #include <QSortFilterProxyModel>
 
@@ -24,7 +27,7 @@ class DatasetImpl;
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT DatasetsFilterModel final : public QSortFilterProxyModel
+class CORE_EXPORT DatasetsFilterModel final : public SortFilterProxyModel
 {
 public:
 

@@ -567,7 +567,7 @@ QVariant AbstractDataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRol
 }
 
 AbstractDataHierarchyModel::AbstractDataHierarchyModel(QObject* parent) :
-    QStandardItemModel(parent)
+    StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 }

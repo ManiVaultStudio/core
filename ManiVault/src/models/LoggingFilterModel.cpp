@@ -15,7 +15,7 @@ using namespace util;
 using namespace gui;
 
 LoggingFilterModel::LoggingFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent),
+    SortFilterProxyModel(parent),
     _filterTypeAction(this, "Filter type", Logger::messageTypeNames.values(), Logger::messageTypeNames.values())
 {
     setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));

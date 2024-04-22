@@ -154,14 +154,50 @@ QVariant AbstractDatasetsModel::IdItem::data(int role /*= Qt::UserRole + 1*/) co
     return Item::data(role);
 }
 
+QVariant AbstractDatasetsModel::RawDataNameItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return const_cast<AbstractDatasetsModel::RawDataNameItem*>(this)->getDataset()->getRawDataName();
+
+        case Qt::ToolTipRole:
+            return "Raw data name: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractDatasetsModel::SourceDatasetIdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return const_cast<AbstractDatasetsModel::SourceDatasetIdItem*>(this)->getDataset()->getSourceDataset<DatasetImpl>()->getId();
+
+        case Qt::ToolTipRole:
+            return "Source dataset ID: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 QMap<AbstractDatasetsModel::Column, AbstractDatasetsModel::ColumHeaderInfo> AbstractDatasetsModel::columnInfo = QMap<AbstractDatasetsModel::Column, AbstractDatasetsModel::ColumHeaderInfo>({
     { AbstractDatasetsModel::Column::Name, { "Name" , "Name", "Name of the dataset" } },
     { AbstractDatasetsModel::Column::Location, { "" , "Enabled", "Whether the dataset is enabled or not" } },
-    { AbstractDatasetsModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the dataset" } }
+    { AbstractDatasetsModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the dataset" } },
+    { AbstractDatasetsModel::Column::RawDataName, { "Raw data name",  "Raw data name", "Name of the raw data" } },
+    { AbstractDatasetsModel::Column::SourceDatasetID, { "Source dataset ID",  "Source dataset ID", "Globally unique identifier of the source dataset" } }
 });
 
 AbstractDatasetsModel::AbstractDatasetsModel(PopulationMode populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent),
+    StandardItemModel(parent),
     _populationMode(),
     _showIconAction(this, "Show icon", true)
 {

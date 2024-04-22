@@ -6,11 +6,12 @@
 
 #include "CoreInterface.h"
 
+#include "StandardItemModel.h"
+
 #include "actions/WidgetAction.h"
 
 #include <QList>
 #include <QStandardItem>
-#include <QStandardItemModel>
 
 namespace mv
 {
@@ -22,7 +23,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT AbstractActionsModel : public QStandardItemModel
+class CORE_EXPORT AbstractActionsModel : public StandardItemModel
 {
     Q_OBJECT
 

@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "SortFilterProxyModel.h"
+
 #include "actions/StringAction.h"
 #include "actions/OptionsAction.h"
 #include "actions/ToggleAction.h"
@@ -13,7 +15,6 @@
 
 #include "AbstractTasksModel.h"
 
-#include <QSortFilterProxyModel>
 #include <QMap>
 
 namespace mv
@@ -26,7 +27,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT TasksFilterModel final : public QSortFilterProxyModel
+class CORE_EXPORT TasksFilterModel final : public SortFilterProxyModel
 {
     Q_OBJECT
 

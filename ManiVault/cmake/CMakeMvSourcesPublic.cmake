@@ -662,6 +662,23 @@ list(APPEND PUBLIC_DATA_HIERARCHY_FILES
     ${PUBLIC_DATA_HIERARCHY_SOURCES}
 )
 
+set(PUBLIC_COMMON_MODEL_HEADERS
+    src/models/StandardItemModel.h
+    src/models/SortFilterProxyModel.h
+    src/models/NumberOfRowsAction.h
+)
+
+set(PUBLIC_COMMON_MODEL_SOURCES
+    src/models/StandardItemModel.cpp
+    src/models/SortFilterProxyModel.cpp
+    src/models/NumberOfRowsAction.cpp
+)
+
+set(PUBLIC_COMMON_MODEL_FILES
+    ${PUBLIC_COMMON_MODEL_HEADERS}
+    ${PUBLIC_COMMON_MODEL_SOURCES}
+)
+
 set(PUBLIC_ACTIONS_MODEL_HEADERS
     src/models/AbstractActionsModel.h
     src/models/ActionsListModel.h
@@ -933,6 +950,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_DATASET_HEADERS}
     ${PUBLIC_PLUGIN_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_HEADERS}
+	${PUBLIC_COMMON_MODEL_HEADERS}
     ${PUBLIC_ACTIONS_MODEL_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
     ${PUBLIC_RAW_DATA_MODEL_HEADERS}
@@ -976,6 +994,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_DATASET_SOURCES}
     ${PUBLIC_PLUGIN_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_SOURCES}
+	${PUBLIC_COMMON_MODEL_SOURCES}
     ${PUBLIC_ACTIONS_MODEL_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
     ${PUBLIC_RAW_DATA_MODEL_SOURCES}
@@ -1032,6 +1051,7 @@ source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})
 source_group(DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
 source_group(Dataset FILES ${PUBLIC_DATASET_FILES})
 source_group(Plugin FILES ${PUBLIC_PLUGIN_FILES})
+source_group(Models\\Common FILES ${PUBLIC_COMMON_MODEL_FILES})
 source_group(Models\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
 source_group(Models\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 source_group(Models\\RawData FILES ${PUBLIC_RAW_DATA_MODEL_FILES})

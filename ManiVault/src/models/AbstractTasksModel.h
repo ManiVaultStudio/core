@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "StandardItemModel.h"
 #include "Task.h"
 
 #include "actions/StringAction.h"
@@ -13,7 +14,6 @@
 
 #include <QList>
 #include <QStandardItem>
-#include <QStandardItemModel>
 
 namespace mv
 {
@@ -25,7 +25,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT AbstractTasksModel : public QStandardItemModel
+class CORE_EXPORT AbstractTasksModel : public StandardItemModel
 {
     Q_OBJECT
 

@@ -16,7 +16,7 @@ namespace mv
 {
 
 TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent),
+    SortFilterProxyModel(parent),
     _taskTypeFilterAction(this, "Type"),
     _taskGuiScopeFilterAction(this, "GUI Scope", Task::guiScopeNames.values(), Task::guiScopeNames.values()),
     _taskStatusFilterAction(this, "Status", Task::statusNames.values(), Task::statusNames.values()),

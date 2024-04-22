@@ -494,7 +494,7 @@ QMap<AbstractTasksModel::Column, AbstractTasksModel::ColumHeaderInfo> AbstractTa
 });
 
 AbstractTasksModel::AbstractTasksModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+    StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 

@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "StandardItemModel.h"
 #include "Dataset.h"
 #include "Set.h"
 
@@ -13,7 +14,6 @@
 
 #include <QList>
 #include <QStandardItem>
-#include <QStandardItemModel>
 
 namespace mv {
 
@@ -24,7 +24,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT RawDataModel final : public QStandardItemModel
+class CORE_EXPORT RawDataModel final : public StandardItemModel
 {
 public:
 
@@ -214,11 +214,9 @@ public:
 
 public: // Action getters
 
-    gui::StringAction& getCountAction() { return _countAction; }
     gui::StringAction& getOverallSizeAction() { return _overallSizeAction; }
 
 private:
-    gui::StringAction   _countAction;           /** String action for displaying the number of raw data */
     gui::StringAction   _overallSizeAction;     /** String action for displaying the overall raw data size */
 };
 

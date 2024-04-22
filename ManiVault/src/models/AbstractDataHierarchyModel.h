@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "StandardItemModel.h"
 #include "Dataset.h"
 #include "Task.h"
 #include "Set.h"
@@ -14,7 +15,6 @@
 
 #include <QList>
 #include <QStandardItem>
-#include <QStandardItemModel>
 #include <QMimeData>
 
 namespace mv {
@@ -26,7 +26,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT AbstractDataHierarchyModel : public QStandardItemModel
+class CORE_EXPORT AbstractDataHierarchyModel : public StandardItemModel
 {
     Q_OBJECT
 

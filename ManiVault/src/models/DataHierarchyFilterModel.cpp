@@ -12,7 +12,7 @@ using namespace mv::gui;
 namespace mv {
 
 DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent),
+    SortFilterProxyModel(parent),
     _visibilityFilterAction(this, "Filter visibility", { "Visible", "Hidden" }, { "Visible" }),
     _groupFilterAction(this, "Filter group", { "Yes", "No" }),
     _lockedFilterAction(this, "Filter locked", { "Yes", "No" }),

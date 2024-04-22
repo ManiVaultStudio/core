@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "StandardItemModel.h"
 #include "Dataset.h"
 #include "Set.h"
 
@@ -13,7 +14,6 @@
 
 #include <QList>
 #include <QStandardItem>
-#include <QStandardItemModel>
 
 namespace mv {
 
@@ -24,7 +24,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT SelectionsModel final : public QStandardItemModel
+class CORE_EXPORT SelectionsModel final : public StandardItemModel
 {
 public:
 
@@ -246,13 +246,6 @@ public:
 
     /** Populate the model with selections from the data manager */
     void populateFromDataManager();
-
-public: // Action getters
-
-    gui::StringAction& getCountAction() { return _countAction; }
-
-private:
-    gui::StringAction   _countAction;    /** String action for displaying the number of selections */
 };
 
 }
