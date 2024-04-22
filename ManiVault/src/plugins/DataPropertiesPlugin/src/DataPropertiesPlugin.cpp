@@ -24,7 +24,7 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     _additionalEditorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _additionalEditorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _additionalEditorAction.setConnectionPermissionsToForceNone();
-    _additionalEditorAction.setEnabled(false);
+    //_additionalEditorAction.setEnabled(false);
 
     addTitleBarMenuAction(&_additionalEditorAction);
 

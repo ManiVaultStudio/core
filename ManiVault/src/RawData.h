@@ -51,9 +51,9 @@ public:
      * @return Size of the raw data in bytes
      */
     virtual std::uint64_t getRawDataSize() const {
-#ifdef _DEBUG
-        qDebug() << __FUNCTION__ << "not implemented in derived class";
-#endif
+//#ifdef _DEBUG
+//        qDebug() << __FUNCTION__ << "not implemented in derived class";
+//#endif
 
         return {};
     }

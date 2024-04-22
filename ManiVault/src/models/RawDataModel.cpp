@@ -123,6 +123,7 @@ QVariant RawDataModel::headerData(int section, Qt::Orientation orientation, int 
 
 void RawDataModel::populateFromDataManager()
 {
+    /*
 #ifdef RAW_DATA_MODEL_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
@@ -134,6 +135,7 @@ void RawDataModel::populateFromDataManager()
 
     _countAction.setString(QString("Count: %1").arg(QString::number(rowCount())));
     _overallSizeAction.setString(QString("Overall size: %1").arg(util::getNoBytesHumanReadable(mv::data().getOverallRawDataSize())));
+    */
 }
 
 }

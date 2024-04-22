@@ -82,10 +82,9 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
             _publishAction.setText("Publish...");
 
-            ActionsListModel actionsListModel(this);
             ActionsFilterModel actionsFilterModel(this);
 
-            actionsFilterModel.setSourceModel(&actionsListModel);
+            actionsFilterModel.setSourceModel(&mv::actions().getActionsListModel());
             actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
             actionsFilterModel.getTypeFilterAction().setString(firstAction->getTypeString());
 
