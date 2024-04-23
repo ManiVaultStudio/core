@@ -6,11 +6,12 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "StandardItemModel.h"
+
 #include "Dataset.h"
 
 #include <QList>
 #include <QStandardItem>
-#include <QStandardItemModel>
 
 namespace mv
 {
@@ -22,7 +23,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT AbstractDatasetsModel : public QStandardItemModel
+class CORE_EXPORT AbstractDatasetsModel : public StandardItemModel
 {
     Q_OBJECT
 
@@ -38,9 +39,11 @@ public:
 
     /** Task columns */
     enum class Column {
-        Name,       /** Name of the dataset */
-        Location,   /** Location of the dataset */
-        ID,         /** Globally unique identifier of the dataset */
+        Name,               /** Name of the dataset */
+        Location,           /** Location of the dataset */
+        ID,                 /** Globally unique identifier of the dataset */
+        RawDataName,        /** Name of the associated raw data */
+        SourceDatasetID,    /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
 
         Count
     };
@@ -162,6 +165,34 @@ public:
         QVariant data(int role = Qt::UserRole + 1) const override;
     };
 
+    /** Standard model item class for displaying the raw data name */
+    class CORE_EXPORT RawDataNameItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying the source dataset identifier name */
+    class CORE_EXPORT SourceDatasetIdItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
     /** Convenience class for combining dataset items in a row */
     class Row final : public QList<QStandardItem*>
     {
@@ -178,6 +209,8 @@ public:
             append(new NameItem(datasetsModel, dataset));
             append(new LocationItem(datasetsModel, dataset));
             append(new IdItem(datasetsModel, dataset));
+            append(new RawDataNameItem(datasetsModel, dataset));
+            append(new SourceDatasetIdItem(datasetsModel, dataset));
         }
     };
 

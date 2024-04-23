@@ -10,7 +10,7 @@
 namespace mv {
 
 RawDataFilterModel::RawDataFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent)
+    SortFilterProxyModel(parent)
 {
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);

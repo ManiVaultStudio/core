@@ -13,7 +13,7 @@
 namespace mv {
 
 PluginFactoriesFilterModel::PluginFactoriesFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent)
+    SortFilterProxyModel(parent)
 {
     setRecursiveFilteringEnabled(true);
 }

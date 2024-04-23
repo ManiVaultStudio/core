@@ -13,6 +13,8 @@
 
 #include <widgets/HierarchyWidget.h>
 
+#include <models/DatasetsListModel.h>
+
 #include <QHeaderView>
 
 using namespace mv;
@@ -22,7 +24,6 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
     _rawDataModel(),
     _rawDataFilterModel(),
-    _datasetsModel(),
     _datasetsFilterModel(),
     _selectionsModel(),
     _selectionsFilterModel(),
@@ -48,11 +49,11 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _selectionsTreeAction.setIconByName("bars");
 
     _rawDataTreeAction.initialize(&_rawDataModel, &_rawDataFilterModel, "Raw data set");
-    _datasetsTreeAction.initialize(&_datasetsModel, &_datasetsFilterModel, "Dataset");
+    _datasetsTreeAction.initialize(&const_cast<DatasetsListModel&>(mv::data().getDatasetsListModel()), &_datasetsFilterModel, "Dataset");
     _selectionsTreeAction.initialize(&_selectionsModel, &_selectionsFilterModel, "Selection");
 
     _rawDataTreeAction.setPopupSizeHint(QSize(450, 400));
-    _datasetsTreeAction.setPopupSizeHint(QSize(200, 400));
+    _datasetsTreeAction.setPopupSizeHint(QSize(400, 400));
     _selectionsTreeAction.setPopupSizeHint(QSize(350, 400));
 
     _rawDataGroupAction.setShowLabels(false);
@@ -65,7 +66,7 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
     _rawDataCountGroupAction.setShowLabels(false);
 
-    _rawDataCountGroupAction.addAction(&_rawDataModel.getCountAction());
+    _rawDataCountGroupAction.addAction(&_rawDataModel.getNumberOfRowsAction());
     _rawDataCountGroupAction.addAction(&_rawDataTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
@@ -99,7 +100,7 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _rawDataGroupAction.addAction(&_rawDataCountGroupAction);
     _rawDataGroupAction.addAction(&_rawDataModel.getOverallSizeAction());
 
-    _datasetsGroupAction.addAction(&_datasetsModel.getCountAction());
+    _datasetsGroupAction.addAction(const_cast<NumberOfRowsAction*>(&mv::data().getDatasetsListModel().getNumberOfRowsAction()));
     _datasetsGroupAction.addAction(&_datasetsTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
@@ -117,21 +118,22 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
         treeView->setRootIsDecorated(false);
 
-        treeView->setColumnHidden(static_cast<int>(DatasetsModel::Column::DatasetId), true);
-        treeView->setColumnHidden(static_cast<int>(DatasetsModel::Column::RawDataName), true);
-        treeView->setColumnHidden(static_cast<int>(DatasetsModel::Column::SourceDatasetId), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDatasetsModel::Column::ID), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDatasetsModel::Column::Location), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDatasetsModel::Column::RawDataName), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDatasetsModel::Column::SourceDatasetID), true);
 
         auto treeViewHeader = treeView->header();
 
         treeViewHeader->setStretchLastSection(true);
 
-        for (int columnIndex = 0; columnIndex < _datasetsModel.columnCount(); ++columnIndex)
+        for (int columnIndex = 0; columnIndex < mv::data().getDatasetsListModel().columnCount(); ++columnIndex)
             treeViewHeader->setSectionResizeMode(columnIndex, QHeaderView::ResizeToContents);
 
         treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });
 
-    _selectionsGroupAction.addAction(&_selectionsModel.getCountAction());
+    _selectionsGroupAction.addAction(&_selectionsModel.getNumberOfRowsAction());
     _selectionsGroupAction.addAction(&_selectionsTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 

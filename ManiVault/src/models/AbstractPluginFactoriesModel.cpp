@@ -83,7 +83,7 @@ QVariant AbstractPluginFactoriesModel::NumberOfInstancesItem::data(int role /*= 
 }
 
 AbstractPluginFactoriesModel::AbstractPluginFactoriesModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+    StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 }

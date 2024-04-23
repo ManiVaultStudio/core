@@ -14,7 +14,7 @@ namespace mv
 {
 
 ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent),
+    SortFilterProxyModel(parent),
     _typeFilterAction(this, "Type"),
     _typeFilterHumanReadableAction(this, "Type"),
     _typeCompleter(this),

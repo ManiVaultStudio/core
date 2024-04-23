@@ -16,7 +16,7 @@ namespace mv {
 using namespace gui;
 
 PluginsFilterModel::PluginsFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent),
+    SortFilterProxyModel(parent),
     _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", true)
 {
     _instantiatedPluginsOnlyAction.setToolTip("Show only instantiated plugins are all available plugins");

@@ -84,14 +84,10 @@ QVariant RawDataModel::RawDataSizeItem::data(int role /*= Qt::UserRole + 1*/) co
 }
 
 RawDataModel::RawDataModel(QObject* parent) :
-    QStandardItemModel(parent),
-    _countAction(this, "Number of raw data"),
+    StandardItemModel(parent),
     _overallSizeAction(this, "Overall size")
 {
     setColumnCount(static_cast<int>(Column::Count));
-
-    _countAction.setToolTip("Number of raw data items");
-    _countAction.setEnabled(false);
 
     _overallSizeAction.setEnabled(false);
 
@@ -123,7 +119,6 @@ QVariant RawDataModel::headerData(int section, Qt::Orientation orientation, int 
 
 void RawDataModel::populateFromDataManager()
 {
-    /*
 #ifdef RAW_DATA_MODEL_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
@@ -133,9 +128,7 @@ void RawDataModel::populateFromDataManager()
     for (const auto& rawDataName : mv::data().getRawDataNames())
         appendRow(Row(rawDataName));
 
-    _countAction.setString(QString("Count: %1").arg(QString::number(rowCount())));
     _overallSizeAction.setString(QString("Overall size: %1").arg(util::getNoBytesHumanReadable(mv::data().getOverallRawDataSize())));
-    */
 }
 
 }

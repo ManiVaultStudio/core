@@ -47,13 +47,6 @@ set(WIDGETS
     src/DataHierarchyWidgetContextMenu.cpp
 )
 
-set(MODELS
-    src/DatasetsModel.h
-    src/DatasetsModel.cpp
-    src/DatasetsFilterModel.h
-    src/DatasetsFilterModel.cpp
-)
-
 set(AUX
     src/DataHierarchyPlugin.json
 )
@@ -62,14 +55,12 @@ set(DATAHIERARCHY_SOURCES
     ${PLUGIN}
     ${ACTIONS}
     ${WIDGETS}
-    ${MODELS}
     ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
 source_group(Actions FILES ${ACTIONS})
 source_group(Widgets FILES ${WIDGETS})
-source_group(Models FILES ${MODELS})
 source_group(Aux FILES ${AUX})
 
 add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
@@ -91,7 +82,7 @@ check_and_set_AVX(${DATAHIERARCHYPLUGIN} ${MV_USE_AVX})
 if(MV_UNITY_BUILD)
     set_target_properties(${DATAHIERARCHYPLUGIN} PROPERTIES UNITY_BUILD ON)
     set_source_files_properties(${DATAHIERARCHY_MOC} PROPERTIES
-                            SKIP_UNITY_BUILD_INCLUSION TRUE)
+    SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 install(TARGETS ${DATAHIERARCHYPLUGIN}

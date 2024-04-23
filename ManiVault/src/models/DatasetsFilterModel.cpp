@@ -17,13 +17,10 @@ namespace mv
 {
 
 DatasetsFilterModel::DatasetsFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent),
+    SortFilterProxyModel(parent),
     _filterFunction(),
     _useFilterFunctionAction(this, "Use filter function", false)
 {
-    setDynamicSortFilter(true);
-    setRecursiveFilteringEnabled(true);
-
     invalidate();
 }
 

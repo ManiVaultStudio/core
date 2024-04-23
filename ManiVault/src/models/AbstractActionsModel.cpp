@@ -618,7 +618,7 @@ QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> Abstra
 });
 
 AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+    StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
