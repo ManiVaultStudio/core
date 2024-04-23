@@ -41,7 +41,7 @@ namespace mv
             BufferObject _opacityScalarBuffer;
             BufferObject _colorBuffer;
 
-            PointArrayObject() : _handle(0), _colorScalarsRange(0, 1, 1) {}
+            PointArrayObject() : QOpenGLFunctions_3_3_Core(), _handle(0), _colorScalarsRange(0, 1, 1) {}
             void init();
             void setPositions(const std::vector<Vector2f>& positions);
             void setHighlights(const std::vector<char>& highlights);
@@ -49,6 +49,13 @@ namespace mv
             void setSizeScalars(const std::vector<float>& scalars);
             void setOpacityScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
+
+            const std::vector<Vector2f>& getPositions() const { return _positions; }
+            const std::vector<char>& getHighlights() const { return _highlights; }
+            const std::vector<float>& getScalars() const { return _colorScalars; }
+            const std::vector<float>& getSizeScalars() const { return _sizeScalars; }
+            const std::vector<float>& getOpacityScalars() const { return _opacityScalars; }
+            const std::vector<Vector3f>& getColors() const { return _colors; }
 
             void enableAttribute(uint index, bool enable);
 
@@ -147,6 +154,10 @@ namespace mv
             void setDataBounds(const Bounds& boundsData);
 
             Matrix3f getProjectionMatrix() const;
+
+            const PointArrayObject& getGpuPoints() const;
+            QSize getWindowsSize() const;
+            std::int32_t getNumSelectedPoints() const;
 
             const PointSettings& getPointSettings() const;
             void setPointSize(const float size);

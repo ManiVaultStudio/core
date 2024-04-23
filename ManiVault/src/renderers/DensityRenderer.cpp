@@ -34,6 +34,11 @@ namespace mv
             _densityComputation.setData(points);
         }
 
+        void DensityRenderer::setWeights(const std::vector<float>* weights)
+        {
+            _densityComputation.setWeights(weights);
+        }
+
         void DensityRenderer::setBounds(const Bounds& bounds)
         {
             _densityComputation.setBounds(bounds.getLeft(), bounds.getRight(), bounds.getBottom(), bounds.getTop());

@@ -198,6 +198,7 @@ target_sources(${MV_PUBLIC_LIB}
     PRIVATE
     src/.editorconfig
     ${PUBLIC_SOURCES}
+    ${SHADERS}
 )
 
 target_include_directories(${MV_PUBLIC_LIB} PUBLIC

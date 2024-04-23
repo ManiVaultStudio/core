@@ -333,6 +333,21 @@ namespace mv
             return _orthoM;
         }
 
+        const PointArrayObject& PointRenderer::getGpuPoints() const
+        {
+            return _gpuPoints;
+        }
+
+        QSize PointRenderer::getWindowsSize() const
+        {
+            return _windowSize;
+        }
+
+        std::int32_t PointRenderer::getNumSelectedPoints() const
+        {
+            return _numSelectedPoints;
+        }
+
         void PointRenderer::setPointSize(const float size)
         {
             _pointSettings._pointSize = size;

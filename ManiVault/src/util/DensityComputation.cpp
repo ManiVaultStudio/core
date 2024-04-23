@@ -4,17 +4,17 @@
 
 #include "DensityComputation.h"
 
-#include "../graphics/Matrix3f.h"
-#include "../graphics/Bounds.h"
+#include "graphics/Bounds.h"
+#include "graphics/Matrix3f.h"
 
-#include <math.h>
+#include <cmath>
 
 namespace mv
 {
 
 namespace
 {
-    float getMaxDimension(const std::vector<Vector2f>& points)
+    static float getMaxDimension(const std::vector<Vector2f>& points)
     {
         float maxDimension = 0;
         for (const Vector2f& point : points)
@@ -23,10 +23,10 @@ namespace
 
             if (len > maxDimension) { maxDimension = len; }
         }
-        return sqrt(maxDimension);
+        return std::sqrt(maxDimension);
     }
 
-    Matrix3f createProjectionMatrix(Bounds bounds)
+    static Matrix3f createProjectionMatrix(const Bounds& bounds)
     {
         Matrix3f m;
         m.setIdentity();
@@ -69,12 +69,13 @@ void GaussianTexture::generate()
     delete[] data;
 }
 
-DensityComputation::DensityComputation()
-    :
+DensityComputation::DensityComputation() :
+    QOpenGLFunctions_3_3_Core(),
     _initialized(false),
     _needsDensityMapUpdate(true),
     _ctx(nullptr),
     _points(nullptr),
+    _weights(nullptr),
     _vao(0)
 {
 
@@ -125,6 +126,13 @@ void DensityComputation::init(QOpenGLContext* ctx)
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
+    // Weights of the points
+    _weightsBuffer.create();
+    _weightsBuffer.bind();
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribDivisor(3, 1);
+    glEnableVertexAttribArray(3);
+
     // Load the density computation shader
     bool loaded = _shaderDensityCompute.loadShaderFromFile(":shaders/DensityCompute.vert", ":shaders/DensityCompute.frag");
     if (!loaded) {
@@ -169,12 +177,18 @@ void DensityComputation::cleanup()
     // Destroy the VAO
     glDeleteVertexArrays(1, &_vao);
     _pointBuffer.destroy();
+    _weightsBuffer.destroy();
     // FIXME: Other VBOs are not deleted
 }
 
 void DensityComputation::setData(const std::vector<Vector2f>* points)
 {
     _points = points;
+}
+
+void DensityComputation::setWeights(const std::vector<float>* weights)
+{
+    _weights = weights;
 }
 
 void DensityComputation::setBounds(float left, float right, float bottom, float top)
@@ -209,6 +223,15 @@ void DensityComputation::compute()
     _pointBuffer.bind();
     _pointBuffer.setData(*_points);
 
+    if (_weights != nullptr)
+    {
+        assert(_weights->size() == _numPoints);
+
+        // Upload the weigths to the GPU
+        _weightsBuffer.bind();
+        _weightsBuffer.setData(*_weights);
+    }
+
     // Bind the off-screen framebuffer
     _densityBuffer.bind();
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -234,6 +257,11 @@ void DensityComputation::compute()
     Matrix3f ortho = createProjectionMatrix(_bounds);
     _shaderDensityCompute.uniformMatrix3f("projMatrix", ortho);
 
+    if (_weights != nullptr)
+        _shaderDensityCompute.uniform1f("hasWeight", true);
+    else
+        _shaderDensityCompute.uniform1f("hasWeight", false);
+
     // Draw the splats
     glBindVertexArray(_vao);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
@@ -248,7 +276,7 @@ void DensityComputation::compute()
     //qDebug() << "Done computing density";
 }
 
-bool DensityComputation::hasData()
+bool DensityComputation::hasData() const
 {
     return _points != nullptr && _points->size() > 0;
 }
