@@ -33,6 +33,7 @@ public:
 
     // Note: setData does not take the ownership of the vector specified by the argument.
     void setData(const std::vector<Vector2f>* data);
+    void setWeights(const std::vector<float>* weights);
     void setBounds(float left, float right, float bottom, float top);
     void setSigma(float sigma);
 
@@ -62,7 +63,9 @@ private:
 
     GLuint _vao;
     BufferObject _pointBuffer;
+    BufferObject _weightsBuffer;
     const std::vector<Vector2f>* _points;
+    const std::vector<float>* _weights;
 
     QOpenGLContext* _ctx;
     QOffscreenSurface _offscreenSurface;
