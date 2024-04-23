@@ -38,22 +38,22 @@ public:
 
     Texture2D& getDensityTexture() { return _densityTexture; }
     float getMaxDensity() const { return _maxKDE; }
-    unsigned int getNumPoints() { return _numPoints; }
+    unsigned int getNumPoints() const { return _numPoints; }
 
     void compute();
 
 private:
-    bool hasData();
+    bool hasData() const;
     float calculateMaxKDE();
 
 private:
-    const unsigned int RESOLUTION = 128;
-    const float DEFAULT_SIGMA = 0.15f;
+    const unsigned int RESOLUTION       = 128;
+    const float DEFAULT_SIGMA           = 0.15f;
 
-    float _sigma = DEFAULT_SIGMA;
-    float _maxKDE = -1;
-    unsigned int _numPoints = 0;
-    Bounds _bounds = Bounds(-1, 1, 2, 2);
+    float _sigma                        = DEFAULT_SIGMA;
+    float _maxKDE                       = -1;
+    unsigned int _numPoints             = 0;
+    Bounds _bounds                      = Bounds(-1, 1, 2, 2);
 
     ShaderProgram _shaderDensityCompute;
     Framebuffer _densityBuffer;
