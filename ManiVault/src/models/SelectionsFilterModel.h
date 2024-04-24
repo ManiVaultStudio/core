@@ -6,7 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QSortFilterProxyModel>
+#include "SortFilterProxyModel.h"
 
 namespace mv {
 
@@ -17,7 +17,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT SelectionsFilterModel : public QSortFilterProxyModel {
+class CORE_EXPORT SelectionsFilterModel : public SortFilterProxyModel {
 public:
 
     /** Constructor

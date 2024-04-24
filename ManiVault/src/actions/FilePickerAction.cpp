@@ -25,7 +25,9 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     _defaultSuffix(),
     _fileType("File")
 {
+    setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
+    setFilePath(filePath);
 
     _filePathAction.getTrailingAction().setVisible(true);
 
@@ -60,7 +62,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     connect(&_filePathAction, &StringAction::stringChanged, this, updateStatusAction);
 
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
-        auto* fileDialog = new QFileDialog();
+        auto* fileDialog = new QFileDialog(nullptr, Qt::WindowStaysOnTopHint);
 
         fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
         fileDialog->setWindowTitle(QString("Open %1").arg(getFileType()));
@@ -80,8 +82,8 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
             setFilePath(filePath);
 
             if (!getSettingsPrefix().isEmpty())
-                Application::current()->setSetting(getSettingsPrefix(), QFileInfo(filePath).absolutePath());
-			});
+                setFilePath(QFileInfo(filePath).absoluteFilePath());
+		});
         connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
         fileDialog->open();
@@ -105,6 +107,8 @@ void FilePickerAction::setFilePath(const QString& filePath)
         return;
 
     _filePathAction.setString(filePath);
+
+    saveToSettings();
 }
 
 QStringList FilePickerAction::getNameFilters() const

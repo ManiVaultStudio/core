@@ -12,8 +12,7 @@
 #include <models/RawDataModel.h>
 #include <models/RawDataFilterModel.h>
 
-#include "DatasetsModel.h"
-#include "DatasetsFilterModel.h"
+#include <models/DatasetsFilterModel.h>
 
 #include <models/SelectionsModel.h>
 #include <models/SelectionsFilterModel.h>
@@ -47,8 +46,7 @@ public:
 private:
     mv::RawDataModel                    _rawDataModel;              /** Standard model for storing the raw data */
     mv::RawDataFilterModel              _rawDataFilterModel;        /** Sort/filter model for the raw data model */
-    DatasetsModel                       _datasetsModel;             /** Standard model for storing the dataset */
-    DatasetsFilterModel                 _datasetsFilterModel;       /** Sort/filter model for the datasets model */
+    mv::DatasetsFilterModel             _datasetsFilterModel;       /** Sort/filter model for the datasets model */
     mv::SelectionsModel                 _selectionsModel;           /** Standard model for storing the selections */
     mv::SelectionsFilterModel           _selectionsFilterModel;     /** Sort/filter model for the selections model */
     mv::gui::VerticalGroupAction        _rawDataGroupAction;        /** Raw data group action */

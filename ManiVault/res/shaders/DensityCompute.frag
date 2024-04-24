@@ -7,9 +7,12 @@
 uniform sampler2D gaussSampler;
 
 in vec2 pass_texCoord;
+flat in float pass_weight;
 
 out float value;
 
 void main() {
-    value = texture(gaussSampler, pass_texCoord).r;
+    float density = texture(gaussSampler, pass_texCoord).r;
+
+    value = density * pass_weight;
 }

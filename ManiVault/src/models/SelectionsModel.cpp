@@ -99,13 +99,9 @@ QVariant SelectionsModel::RawDataTypeItem::data(int role /*= Qt::UserRole + 1*/)
 }
 
 SelectionsModel::SelectionsModel(QObject* parent) :
-    QStandardItemModel(parent),
-    _countAction(this, "Number of selections")
+    StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
-
-    _countAction.setToolTip("Number of selections");
-    _countAction.setEnabled(false);
 
     connect(&mv::data(), &AbstractDataManager::selectionAdded, this, &SelectionsModel::populateFromDataManager);
     connect(&mv::data(), &AbstractDataManager::selectionRemoved, this, &SelectionsModel::populateFromDataManager);
@@ -146,8 +142,6 @@ void SelectionsModel::populateFromDataManager()
 
     for (const auto& selection : mv::data().getAllSelections())
         appendRow(Row(selection));
-
-    _countAction.setString(QString("Count: %1").arg(QString::number(rowCount())));
 }
 
 }

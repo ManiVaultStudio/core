@@ -200,7 +200,7 @@ QVariant LoggingModel::CategoryItem::data(int role /*= Qt::UserRole + 1*/) const
 }
 
 LoggingModel::LoggingModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent),
+    StandardItemModel(parent),
     _messageRecords(),
     _wordWrapAction(this, "Word wrap", true),
     _idleUpdateConnection()

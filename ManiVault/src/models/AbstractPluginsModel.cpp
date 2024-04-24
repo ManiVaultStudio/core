@@ -17,7 +17,7 @@ Q_DECLARE_METATYPE(mv::plugin::Plugin*);
 namespace mv {
 
 AbstractPluginsModel::AbstractPluginsModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+    StandardItemModel(parent)
 {
 }
 

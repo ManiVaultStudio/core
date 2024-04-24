@@ -6,13 +6,14 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "StandardItemModel.h"
+
 #include "util/Logger.h"
 
 #include "actions/ToggleAction.h"
 
 #include <QList>
 #include <QStandardItem>
-#include <QStandardItemModel>
 
 #include <deque>
 #include <cstdint>
@@ -26,7 +27,7 @@ namespace mv {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT LoggingModel final : public QStandardItemModel
+class CORE_EXPORT LoggingModel final : public StandardItemModel
 {
 public:
 

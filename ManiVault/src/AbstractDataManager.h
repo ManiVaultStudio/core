@@ -9,10 +9,13 @@
 
 #include "actions/ToggleAction.h"
 
+class QSortFilterProxyModel;
+
 namespace mv
 {
 
 class DatasetImpl;
+class DatasetsListModel;
 
 namespace plugin {
     class RawData;
@@ -315,6 +318,20 @@ public: // Dataset and selection grouping
      * @return Reference to selection grouping toggle action
      */
     virtual gui::ToggleAction& getSelectionGroupingAction() = 0;
+
+public: // Model
+
+    /**
+     * Get datasets list model
+     * @return Reference to datasets list model
+     */
+    virtual const DatasetsListModel& getDatasetsListModel() const = 0;
+
+    /**
+     * Link \p filterModel to the datasets list model
+     * @param filterModel Pointer to filter model
+     */
+    virtual void linkFilterModelToDatasetsListModel(QSortFilterProxyModel* filterModel) = 0;
 
 signals:
 

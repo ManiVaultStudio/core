@@ -6,7 +6,7 @@
 #include "CoreInterface.h"
 
 #ifdef _DEBUG
-    #define PLUGIN_VERBOSE
+    //#define PLUGIN_VERBOSE
 #endif
 
 using namespace mv::gui;

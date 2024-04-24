@@ -34,6 +34,7 @@ namespace mv
 
             void setRenderMode(RenderMode renderMode);
             void setData(const std::vector<Vector2f>* data);
+            void setWeights(const std::vector<float>* weights);
             void setBounds(const Bounds& bounds);
             void setSigma(const float sigma);
             void computeDensity();

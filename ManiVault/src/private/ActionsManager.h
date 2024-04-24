@@ -46,6 +46,10 @@ public:
      */
     bool publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "", bool recursive = true, bool allowDuplicateName = false) override;
 
+public: // Models
+
+    ActionsListModel& getActionsListModel() override;
+
 public: // Serialization
 
     /**
@@ -59,6 +63,9 @@ public: // Serialization
      * @return Variant map representation of the manager
      */
     QVariantMap toVariantMap() const override;
+
+private:
+    ActionsListModel*    _actionsListModel;
 };
 
 }

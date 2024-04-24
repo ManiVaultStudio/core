@@ -494,7 +494,7 @@ QMap<AbstractTasksModel::Column, AbstractTasksModel::ColumHeaderInfo> AbstractTa
 });
 
 AbstractTasksModel::AbstractTasksModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+    StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
@@ -546,11 +546,11 @@ void AbstractTasksModel::removeTask(Task* task)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to remove task from tasks tree model", e);
+        exceptionMessageBox("Unable to remove task from tasks model", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to remove task from tasks tree model");
+        exceptionMessageBox("Unable to remove task from tasks model");
     }
 }
 
