@@ -78,6 +78,19 @@ public:
     }
 
     /**
+     * Get ancestors
+     * @return Pointers to data hierarchy item ancestors (bottom-up)
+     */
+    DataHierarchyItems getAncestors() const {
+        DataHierarchyItems ancestors;
+
+        for (auto ancestor : WidgetAction::getAncestors<DataHierarchyItem>())
+            ancestors << static_cast<DataHierarchyItem*>(ancestor);
+
+        return ancestors;
+    }
+
+    /**
      * Get children, possibly \p recursively
      * @param recursively Get children recursively
      * @return Vector of pointers to child items
@@ -118,7 +131,7 @@ public:
      * @return Boolean determining whether \p item is an ancestor or not
      */
     bool isChildOf(DataHierarchyItem* item) const {
-        return getAncestors<DataHierarchyItem>().contains(item);
+        return getAncestors().contains(item);
     }
 
     /**
