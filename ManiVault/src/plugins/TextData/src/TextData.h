@@ -6,6 +6,8 @@
 
 #include "textdata_export.h"
 
+#include "OrderedMap.h"
+
 #include <RawData.h>
 #include <Set.h>
 
@@ -31,8 +33,7 @@ class TEXTDATA_EXPORT TextData : public mv::plugin::RawData
 {
 public:
     TextData(PluginFactory* factory) :
-        mv::plugin::RawData(factory, TextType),
-        _numRows(-1)
+        mv::plugin::RawData(factory, TextType)
     {
     }
 
@@ -47,30 +48,49 @@ public:
      */
     Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
-    std::vector<QString>& getColumn(QString columnName)
+    /**
+     * Get a column by the name of its header
+     * @return The column of text data associated with the given header name
+     */
+    const std::vector<QString>& getColumn(QString columnName) const
     {
-        return _data[columnName];
+        return _data.getColumn(columnName);
     }
 
     void addColumn(QString columnName, std::vector<QString>& columnData)
     {
-        if (_numRows == -1)
-            _numRows = columnData.size();
-        else
-            Q_ASSERT(columnData.size() == _numRows);
-
-        _data[columnName] = columnData;
+        _data.addColumn(columnName, columnData);
     }
 
+    /**
+     * Get the number of elements stored in each column.
+     * @return Number of rows per column
+     */
     size_t getNumRows() const
     {
-        return _numRows;
+        return _data.getNumRows();
+    }
+
+    /**
+     * Get the number of columns.
+     * @return Number of columns
+     */
+    size_t getNumColumns() const
+    {
+        return _data.getNumColumns();
+    }
+
+    /**
+     * Get an ordered list of names associated to each column. Names are listed in the order their columns were added.
+     * @return Ordered list of column header names
+     */
+    const std::vector<QString>& getColumnNames() const
+    {
+        return _data.getColumnNames();
     }
 
 private:
-    size_t _numRows;
-
-    std::unordered_map<QString, std::vector<QString>> _data;
+    OrderedMap _data;
 };
 
 class TEXTDATA_EXPORT Text : public DatasetImpl
@@ -96,7 +116,7 @@ public:
         return text;
     }
 
-    std::vector<QString>& getColumn(QString columnName) const
+    const std::vector<QString>& getColumn(QString columnName) const
     {
         return getRawData<TextData>()->getColumn(columnName);
     }
@@ -109,6 +129,16 @@ public:
     size_t getNumRows() const
     {
         return getRawData<TextData>()->getNumRows();
+    }
+
+    size_t getNumColumns() const
+    {
+        return getRawData<TextData>()->getNumColumns();
+    }
+
+    const std::vector<QString>& getColumnNames() const
+    {
+        return getRawData<TextData>()->getColumnNames();
     }
 
     /**
