@@ -309,22 +309,22 @@ if(APPLE)
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
     install(CODE "execute_process(
             COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
-        #	RESULT_VARIABLE retval
+        	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \$<TARGET_FILE:qt6advanceddocking>\" 
+                    \"$<TARGET_FILE:qt6advanceddocking>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \$<TARGET_FILE:QuaZip>\" 
+                    \"$<TARGET_FILE:QuaZip>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
         )
         
-        #if(NOT retval EQUAL 0)
-        #	message(FATAL_ERROR \"macdeployqt failed\")
-        #endif()
+        if(NOT retval EQUAL 0)
+        	message(FATAL_ERROR \"macdeployqt failed\")
+        endif()
         "
         COMPONENT MACOS_BUNDLE
     )
@@ -343,7 +343,7 @@ if(APPLE)
     endif()
     
     install(CODE "execute_process(
-            COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} ${BUNDLE_DIR}
+            COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"
         )"
         COMPONENT MACOS_BUNDLE
     )
@@ -468,7 +468,7 @@ add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
 # Install the ManiVault executable
 if(APPLE)
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault executable bundle"
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault executable bundle to ${MV_INSTALL_DIR}/$<CONFIGURATION>"
         COMMAND ${CMAKE_COMMAND}
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
@@ -479,7 +479,7 @@ endif()
 
 if(NOT APPLE)
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault executable"
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault executable to ${MV_INSTALL_DIR}/$<CONFIGURATION>"
         COMMAND ${CMAKE_COMMAND}
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
