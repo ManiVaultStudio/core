@@ -17,7 +17,7 @@ for LIB in QtGui QtCore QtWebEngineCore QtQuick QtWebChannel QtNetwork QtPositio
 do
     OLD_PATH=`otool -L QtWebEngineProcess | grep ${LIB}.framework | cut -f 1 -d ' '`
     NEW_PATH="@loader_path/../../../../../../../${LIB}.framework/${LIB}"
-    echo ${OLD_PATH} ${NEW_PATH}
-    install_name_tool -change ${OLD_PATH} ${NEW_PATH} QtWebEngineProcess
+    echo "${OLD_PATH}" "${NEW_PATH}"
+    install_name_tool -change "${OLD_PATH}" "${NEW_PATH}" QtWebEngineProcess
 done
 popd
