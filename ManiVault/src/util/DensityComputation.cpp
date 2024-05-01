@@ -126,13 +126,6 @@ void DensityComputation::init(QOpenGLContext* ctx)
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
-    // Weights of the points
-    _weightsBuffer.create();
-    _weightsBuffer.bind();
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribDivisor(3, 1);
-    glEnableVertexAttribArray(3);
-
     // Load the density computation shader
     bool loaded = _shaderDensityCompute.loadShaderFromFile(":shaders/DensityCompute.vert", ":shaders/DensityCompute.frag");
     if (!loaded) {
@@ -189,6 +182,13 @@ void DensityComputation::setData(const std::vector<Vector2f>* points)
 void DensityComputation::setWeights(const std::vector<float>* weights)
 {
     _weights = weights;
+
+    // Weights of the points
+    _weightsBuffer.create();
+    _weightsBuffer.bind();
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribDivisor(3, 1);
+    glEnableVertexAttribArray(3);
 }
 
 void DensityComputation::setBounds(float left, float right, float bottom, float top)
@@ -223,10 +223,9 @@ void DensityComputation::compute()
     _pointBuffer.bind();
     _pointBuffer.setData(*_points);
 
-    if (_weights != nullptr)
+    bool hasWeight = (_weights != nullptr) && (_weights->size() == _numPoints);
+    if (hasWeight)
     {
-        assert(_weights->size() == _numPoints);
-
         // Upload the weigths to the GPU
         _weightsBuffer.bind();
         _weightsBuffer.setData(*_weights);
@@ -257,10 +256,7 @@ void DensityComputation::compute()
     Matrix3f ortho = createProjectionMatrix(_bounds);
     _shaderDensityCompute.uniformMatrix3f("projMatrix", ortho);
 
-    if (_weights != nullptr)
-        _shaderDensityCompute.uniform1f("hasWeight", true);
-    else
-        _shaderDensityCompute.uniform1f("hasWeight", false);
+    _shaderDensityCompute.uniform1f("hasWeight", hasWeight);
 
     // Draw the splats
     glBindVertexArray(_vao);
