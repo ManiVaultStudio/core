@@ -148,7 +148,7 @@ public: // Dataset creation
      */
     template <class DatasetType>
     inline Dataset<DatasetType> createDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) {
-        return Dataset<DatasetType>(createDataset(kind, dataSetGuiName, parentDataset).get<DatasetType>());
+        return Dataset<DatasetType>(createDataset(kind, dataSetGuiName, parentDataset, id, notify).get<DatasetType>());
     }
 
 protected: // Dataset add
