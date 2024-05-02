@@ -74,7 +74,7 @@ class HdpsCoreConan(ConanFile):
         branch_info = CoreBranchInfo(self.recipe_folder)
         self.version = branch_info.version
         # for release versions force the macos_bundle option to on
-        if branch_info.version.release_status:
+        if branch_info.release_status:
             self.options.macos_bundle = True
 
     # Remove runtime and use always default (MD/MDd)
