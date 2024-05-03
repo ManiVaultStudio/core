@@ -80,7 +80,7 @@ class HdpsCoreConan(ConanFile):
             
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
-        branch_info = CoreBranchInfo(self.recipe_folder)
+        pass
         # Needed for toolchain
         # if self.settings.compiler == "Visual Studio":
         #    del self.settings.compiler.runtime
