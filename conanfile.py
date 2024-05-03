@@ -11,6 +11,7 @@ import shutil
 from rules_support import CoreBranchInfo
 import subprocess
 import traceback
+import re
 
 class HdpsCoreConan(ConanFile):
     """Class to package hdps-core using conan
