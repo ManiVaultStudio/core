@@ -217,7 +217,7 @@ class HdpsCoreConan(ConanFile):
         else:
             print("No macos_bundle in package")
 
-        if False == self.options.macos_bundle:
+        if False == self.options.macos_bundle and self.settings.os == "Macos:
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/ManiVault Studio.app")))
