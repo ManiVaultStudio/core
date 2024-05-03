@@ -226,30 +226,32 @@ namespace
 
             const auto messageNumber = messageRecords.size() + 1;
 
-            messageRecords.push_back(
-                {
-                    messageNumber,
-                    type,
-                    context.version,
-                    context.line,
-                    context.file,
-                    context.function,
-                    context.category,
-                    message
-                });
+            for (const auto& messageSegment : message.split("\n")) {
+                messageRecords.push_back(
+                    {
+                        messageNumber,
+                        type,
+                        context.version,
+                        context.line,
+                        context.file,
+                        context.function,
+                        context.category,
+                        messageSegment
+                    });
 
-            if (logFile)
-            {
-                logFile.GetOutputStream()
-                    << messageNumber
-                    << separator << MakeNullPrintable(context.category, "<category>")
-                    << separator << mv::util::Logger::getMessageTypeName(type).toStdString()
-                    << separator << context.version
-                    << separator << MakeNullPrintable(context.file, "<file>")
-                    << separator << context.line
-                    << separator << MakeNullPrintable(context.function, "<function>")
-                    << separator << '"' << utf8MessageData << '"'
-                    << std::endl;
+                if (logFile)
+                {
+                    logFile.GetOutputStream()
+                        << messageNumber
+                        << separator << MakeNullPrintable(context.category, "<category>")
+                        << separator << mv::util::Logger::getMessageTypeName(type).toStdString()
+                        << separator << context.version
+                        << separator << MakeNullPrintable(context.file, "<file>")
+                        << separator << context.line
+                        << separator << MakeNullPrintable(context.function, "<function>")
+                        << separator << '"' << utf8MessageData << '"'
+                        << std::endl;
+                }
             }
         }
     }
