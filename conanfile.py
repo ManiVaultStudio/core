@@ -36,6 +36,7 @@ class HdpsCoreConan(ConanFile):
     )
     short_paths = True
     generators = "CMakeDeps"
+    force_macbundle = False
 
     # Options may need to change depending on the packaged library
     settings = {"os": None, "build_type": None, "compiler": None, "arch": None}
@@ -73,13 +74,13 @@ class HdpsCoreConan(ConanFile):
         # Assign a version from the branch name
         branch_info = CoreBranchInfo(self.recipe_folder)
         self.version = branch_info.version
-
+        # for release versions force the macos_bundle option to on
+        if branch_info.release_status:
+            self.force_macbundle = True
+            
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
         branch_info = CoreBranchInfo(self.recipe_folder)
-        # for release versions force the macos_bundle option to on
-        if branch_info.release_status:
-            self.options.macos_bundle = True
         # Needed for toolchain
         # if self.settings.compiler == "Visual Studio":
         #    del self.settings.compiler.runtime
@@ -208,12 +209,12 @@ class HdpsCoreConan(ConanFile):
 
         print("Packaging install dir: ", self.install_dir)
         print("Options macos: ", self.options.macos_bundle)
-        if False == self.options.macos_bundle:
-            print("No macos_bundle in package")
-        else:
+        if self.options.macos_bundle or self.force_macbundle:
             print("Macos including bundle")
+        else:
+            print("No macos_bundle in package")
 
-        if self.settings.os == "Macos" and False == self.options.macos_bundle:
+        if self.settings.os == "Macos" and False == self.options.macos_bundle and False == self.force_macbundle:
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/ManiVault Studio.app")))
