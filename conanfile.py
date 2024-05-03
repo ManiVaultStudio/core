@@ -206,11 +206,12 @@ class HdpsCoreConan(ConanFile):
             self.install_dir = os.environ["MV_INSTALL_DIR"]
 
         print("Packaging install dir: ", self.install_dir)
-        git = tools.Git()
-        branch_name = str(git.get_branch())
-        release_tag = re.search(r"^release-|release\/(.*)$", branch_name)
-        if (self.settings.os == "Macos") and (release_tag is not None):
-            self.options.macos_bundle = True
+        if (self.settings.os == "Macos") 
+            git = tools.Git()
+            branch_name = str(git.get_branch())
+            release_tag = re.search(r"^release-|release\/(.*)$", branch_name)
+            if (self.settings.os == "Macos") and (release_tag is not None):
+                self.options.macos_bundle = True
         print("Options macos: ", self.options.macos_bundle)
         if self.options.macos_bundle:
             print("Macos including bundle")
