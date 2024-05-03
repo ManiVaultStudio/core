@@ -74,9 +74,6 @@ class HdpsCoreConan(ConanFile):
         # Assign a version from the branch name
         branch_info = CoreBranchInfo(self.recipe_folder)
         self.version = branch_info.version
-        # for release versions force the macos_bundle option to on
-        if branch_info.release_status:
-            self.force_macbundle = True
             
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
@@ -208,13 +205,18 @@ class HdpsCoreConan(ConanFile):
             self.install_dir = os.environ["MV_INSTALL_DIR"]
 
         print("Packaging install dir: ", self.install_dir)
+        git = tools.Git()
+        branch_name = str(git.get_branch())
+        release_tag = re.search(r"^release-|release\/(.*)$", branch_name)
+        if (self.settings.os == "Macos") and (release_tag is not None):
+            self.options.macos_bundle = True
         print("Options macos: ", self.options.macos_bundle)
-        if self.options.macos_bundle or self.force_macbundle:
+        if self.options.macos_bundle:
             print("Macos including bundle")
         else:
             print("No macos_bundle in package")
 
-        if self.settings.os == "Macos" and False == self.options.macos_bundle and False == self.force_macbundle:
+        if False == self.options.macos_bundle:
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/ManiVault Studio.app")))
