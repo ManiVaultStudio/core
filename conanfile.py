@@ -73,13 +73,13 @@ class HdpsCoreConan(ConanFile):
         # Assign a version from the branch name
         branch_info = CoreBranchInfo(self.recipe_folder)
         self.version = branch_info.version
-        # for release versions force the macos_bundle option to on
-        if branch_info.release_status:
-            self.options["macos_bundle"] = True
 
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
-        pass
+        branch_info = CoreBranchInfo(self.recipe_folder)
+        # for release versions force the macos_bundle option to on
+        if branch_info.release_status:
+            self.options.macos_bundle = True
         # Needed for toolchain
         # if self.settings.compiler == "Visual Studio":
         #    del self.settings.compiler.runtime
