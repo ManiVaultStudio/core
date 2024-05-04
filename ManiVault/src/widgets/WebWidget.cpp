@@ -22,8 +22,10 @@ namespace gui
 WebWidget::WebWidget() :
     _webView(nullptr),
     _communicationChannel(nullptr),
-    _js(nullptr),
-    _css()
+    _webCommunicationObject(nullptr),
+    _css(),
+    _communicationAvailable(false),
+    _webPageLoaded(false)
 {
 
 }
@@ -35,11 +37,13 @@ WebWidget::~WebWidget()
 
 void WebWidget::init(WebCommunicationObject* communicationObject)
 {
-    _js = communicationObject;
-    QObject::connect(_js, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::initWebPage);
+    _webCommunicationObject = communicationObject;
+    connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::onJsBridgeIsAvailable);
 
     _webView = new QWebEngineView();
     _webView->setAcceptDrops(false);
+
+    connect(_webView, &QWebEngineView::loadFinished, this, &WebWidget::onWebPageLoaded);
     //assert(_webView->settings()->testAttribute(QWebEngineSettings::JavascriptEnabled));
 
     QVBoxLayout* layout = new QVBoxLayout();
@@ -51,9 +55,7 @@ void WebWidget::init(WebCommunicationObject* communicationObject)
     _communicationChannel = new QWebChannel();
     _webView->page()->setWebChannel(_communicationChannel);
 
-    _communicationChannel->registerObject("QtBridge", _js);
-
-    //QObject::connect(page, &QWebEnginePage::loadFinished, this, &WebWidget::initWebPage);
+    _communicationChannel->registerObject("QtBridge", _webCommunicationObject);
 }
 
 QWebEngineView* WebWidget::getView()
@@ -76,12 +78,36 @@ void WebWidget::setPage(QString htmlPath, QString basePath)
 
 void WebWidget::registerFunctions()
 {
-    _communicationChannel->registerObject("QtBridge", _js);
+    _communicationChannel->registerObject("QtBridge", _webCommunicationObject);
 }
 
 void WebWidget::js_debug(QString text)
 {
     qDebug() << "WebWidget Debug Info: " << text;
+}
+
+void WebWidget::onJsBridgeIsAvailable()
+{
+    qDebug() << "WebWidget: Web page communication available.";
+    _communicationAvailable = true;
+
+    emit communicationBridgeReady();
+    if (_webPageLoaded)
+        emit webPageFullyLoaded();
+}
+
+void WebWidget::onWebPageLoaded(bool ok)
+{
+    if (ok)
+    {
+        qDebug() << "WebWidget: Web page finished loading.";
+        _webPageLoaded = true;
+
+        if (_communicationAvailable)
+            emit webPageFullyLoaded();
+    }
+    else
+        qWarning() << "WebWidget: Web page failed to load properly.";
 }
 
 } // namespace gui
