@@ -55,6 +55,10 @@ public:
     QWebEnginePage* getPage();
     void setPage(QString htmlPath, QString basePath);
 
+signals:
+    void communicationBridgeReady();
+    void webPageFullyLoaded();
+
 protected:
     void registerFunctions();
 
@@ -62,15 +66,23 @@ public slots:
     void js_debug(QString text);
 
 protected slots:
-    virtual void initWebPage() = 0;
+    /** DEPRECATED, please connect to the communicationBridgeReady() signal instead. */
+    virtual void initWebPage() {}
+
+private slots:
+    void onJsBridgeIsAvailable();
+    void onWebPageLoaded(bool ok);
 
 private:
     QWebEngineView* _webView;
     QWebChannel* _communicationChannel;
 
-    WebCommunicationObject* _js;
+    WebCommunicationObject* _webCommunicationObject;
 
     QString _css;
+
+    bool _communicationAvailable;
+    bool _webPageLoaded;
 };
 
 } // namespace gui

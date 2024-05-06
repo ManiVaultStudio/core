@@ -82,9 +82,4 @@ void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
     }
 }
 
-bool WidgetActionWidget::isPopup() const
-{
-    return getWidgetFlags() & PopupLayout;
-}
-
 }
