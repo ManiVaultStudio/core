@@ -32,12 +32,6 @@ public:
     WidgetActionWidget(QWidget* parent, WidgetAction* action, std::int32_t widgetFlags = 0);
 
 public: // Popup widget related
-    
-    /**
-     * Get whether the widget is in a popup state
-     * @return Boolean determining whether the widget is in a popup state
-     */
-    virtual bool isPopup() const final;
 
     /**
      * Override the size hint to account for popups
