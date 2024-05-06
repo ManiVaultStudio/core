@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "WidgetActionBadgeOverlayWidget.h"
 
 #include <QWidget>
 
@@ -12,7 +13,6 @@ namespace mv::gui {
 
 class WidgetAction;
 class WidgetActionHighlightWidget;
-class WidgetActionBadgeOverlayWidget;
 
 /**
  * Widget action view widget class
@@ -60,6 +60,20 @@ public:
      */
     std::int32_t getWidgetFlags() const;
 
+    /**
+     * Get whether the widget is in a popup state
+     * @return Boolean determining whether the widget is in a popup state
+     */
+    virtual bool isPopup() const final;
+
+private: // Badge
+
+    /** Show the widget action badge */
+    void enableBadge();
+    
+    /** Hide the widget action badge */
+    void disableBadge();
+
 protected: // Drag-and-drop events
 
     /**
@@ -81,11 +95,11 @@ protected: // Drag-and-drop events
     void dropEvent(QDropEvent* dropEvent) override;
 
 private:
-    WidgetAction*                       _action;                /** Pointer to action that will be displayed */
-    std::int32_t                        _widgetFlags;           /** Widget creation flags */
-    WidgetActionHighlightWidget*        _highlightWidget;       /** Pointer to highlight widget */
-    WidgetActionBadgeOverlayWidget*     _badgeOverlayWidget;    /** Pointer to badge overlay widget */
-    std::int32_t                        _cachedHighlighting;    /** Cached highlighting */
+    WidgetAction*                                   _action;                /** Pointer to action that will be displayed */
+    std::int32_t                                    _widgetFlags;           /** Widget creation flags */
+    WidgetActionHighlightWidget*                    _highlightWidget;       /** Pointer to highlight widget */
+    std::unique_ptr<WidgetActionBadgeOverlayWidget> _badgeOverlayWidget;    /** Pointer to badge overlay widget */
+    std::int32_t                                    _cachedHighlighting;    /** Cached highlighting */
 };
 
 }

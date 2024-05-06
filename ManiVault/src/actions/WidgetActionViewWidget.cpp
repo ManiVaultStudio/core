@@ -3,8 +3,8 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WidgetActionViewWidget.h"
+#include "WidgetActionCollapsedWidget.h"
 #include "WidgetActionHighlightWidget.h"
-#include "WidgetActionBadgeOverlayWidget.h"
 #include "WidgetActionMimeData.h"
 #include "WidgetAction.h"
 #include "CoreInterface.h"
@@ -12,6 +12,11 @@
 #include <QDebug>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
+#include <QWindow>
+
+#ifdef _DEBUG
+    //#define WIDGET_ACTION_VIEW_WIDGET_VERBOSE
+#endif
 
 namespace mv::gui {
 
@@ -20,12 +25,10 @@ WidgetActionViewWidget::WidgetActionViewWidget(QWidget* parent, WidgetAction* ac
     _action(nullptr),
     _widgetFlags(widgetFlags),
     _highlightWidget(new WidgetActionHighlightWidget(this, action)),
-    _badgeOverlayWidget(new WidgetActionBadgeOverlayWidget(this, action)),
+    _badgeOverlayWidget(nullptr),
     _cachedHighlighting(0)
 {
     setAcceptDrops(true);
-
-    _badgeOverlayWidget->show();
 }
 
 WidgetAction* WidgetActionViewWidget::getAction()
@@ -68,11 +71,27 @@ void WidgetActionViewWidget::setAction(WidgetAction* action)
     visibleChanged();
 
     connect(_action, &WidgetAction::visibleChanged, this, visibleChanged);
+
+    const auto badgeEnabledChanged = [this]() -> void {
+        if (_action->getBadge().getEnabled())
+            enableBadge();
+        else
+            disableBadge();
+    };
+
+    badgeEnabledChanged();
+
+    connect(&_action->getBadge(), &WidgetActionBadge::enabledChanged, this, badgeEnabledChanged);
 }
 
 std::int32_t WidgetActionViewWidget::getWidgetFlags() const
 {
     return _widgetFlags;
+}
+
+bool WidgetActionViewWidget::isPopup() const
+{
+    return getWidgetFlags() & PopupLayout;
 }
 
 void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
@@ -131,6 +150,52 @@ void WidgetActionViewWidget::dropEvent(QDropEvent* dropEvent)
         else
             mv::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
     }
+}
+
+void WidgetActionViewWidget::enableBadge()
+{
+    Q_ASSERT(_action);
+
+    if (!_action)
+        return;
+
+#ifdef WIDGET_ACTION_VIEW_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << (_action ? _action->text() : "");
+#endif
+
+    auto currentParentWidget = parentWidget();
+
+    WidgetActionCollapsedWidget* widgetActionCollapsedWidget = nullptr;
+
+    while (currentParentWidget) {
+        if (widgetActionCollapsedWidget = dynamic_cast<WidgetActionCollapsedWidget*>(currentParentWidget))
+            break;
+
+        currentParentWidget = currentParentWidget->parentWidget();
+    }
+
+    if (widgetActionCollapsedWidget)
+        if (widgetActionCollapsedWidget->getAction() == _action)
+            return;
+
+    if (!isPopup()) {
+        _badgeOverlayWidget.reset(new WidgetActionBadgeOverlayWidget(this, _action));
+        _badgeOverlayWidget->show();
+    }
+}
+
+void WidgetActionViewWidget::disableBadge()
+{
+    Q_ASSERT(_action);
+
+    if (!_action)
+        return;
+
+#ifdef WIDGET_ACTION_VIEW_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << (_action ? _action->text() : "");
+#endif
+
+    _badgeOverlayWidget.reset();
 }
 
 }

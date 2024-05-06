@@ -9,6 +9,8 @@
 
 namespace mv::gui {
 
+class WidgetAction;
+
 /**
  * Widget action badge overlay widget class
  *
