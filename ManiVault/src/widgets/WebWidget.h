@@ -65,6 +65,10 @@ protected:
 public slots:
     void js_debug(QString text);
 
+protected slots:
+    /** DEPRECATED, please connect to the communicationBridgeReady() signal instead. */
+    virtual void initWebPage() {}
+
 private slots:
     void onJsBridgeIsAvailable();
     void onWebPageLoaded(bool ok);
