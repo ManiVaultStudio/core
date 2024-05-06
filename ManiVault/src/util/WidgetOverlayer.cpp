@@ -29,6 +29,8 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
 
     _sourceWidget->installEventFilter(this);
     _targetWidget->installEventFilter(this);
+
+    _sourceWidget->resize(_targetWidget->size());
 }
 
 bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
