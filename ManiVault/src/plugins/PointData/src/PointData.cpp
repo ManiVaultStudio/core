@@ -147,7 +147,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
     variantMapMustContain(variantMap, "NumberOfDimensions");
-    variantMapMustContain(variantMap, "Dense");
+
 
     const auto data                 = variantMap["Data"].toMap();
     const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
@@ -155,7 +155,12 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     const auto numberOfElements     = numberOfPoints * numberOfDimensions;
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
-    const bool isDense              = variantMap["Dense"].toBool();
+
+    bool isDense = true;    // default is dense, e.g. project saved from master branch
+    
+    if (variantMap.contains("Dense")) {
+        isDense = variantMap["Dense"].toBool();
+    }
 
     _isDense = isDense;
 
