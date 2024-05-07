@@ -5,6 +5,7 @@
 #include "MainWindow.h"
 #include "PluginManager.h"
 #include "StartPageWidget.h"
+#include "LearningPageWidget.h"
 #include "ProjectWidget.h"
 #include "FileMenu.h"
 #include "ViewMenu.h"
@@ -92,9 +93,11 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         auto stackedWidget      = new StackedWidget();
         auto projectWidget      = new ProjectWidget();
         auto startPageWidget    = new StartPageWidget(projectWidget);
+        auto learningPageWidget = new LearningPageWidget();
 
         stackedWidget->addWidget(startPageWidget);
         stackedWidget->addWidget(projectWidget);
+        stackedWidget->addWidget(learningPageWidget);
 
         setCentralWidget(stackedWidget);
 

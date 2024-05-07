@@ -7,17 +7,13 @@
 #include "StartPageAction.h"
 #include "StartPageWidget.h"
 
-#include <Application.h>
-
 #include <QDebug>
 
 using namespace mv;
 using namespace mv::gui;
 
 StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _mainLayout(),
-    _collumnsLayout(),
+    PageContentWidget(parent),
     _toolbarLayout(),
     _compactViewAction(this, "Compact"),
     _toggleOpenCreateProjectAction(this, "Open & Create", true),
@@ -30,6 +26,8 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _openProjectWidget(this),
     _getStartedWidget(this)
 {
+    setObjectName("StartPageContentWidget");
+
     _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
     _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
     _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
@@ -49,37 +47,18 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _settingsAction.addAction(&_toggleProjectFromDataAction);
     _settingsAction.addAction(&_toggleTutorialVideosAction);
 
-    _collumnsLayout.setContentsMargins(35, 35, 35, 35);
     _toolbarLayout.setContentsMargins(35, 10, 35, 10);
 
-    _collumnsLayout.addWidget(&_openProjectWidget);
-    _collumnsLayout.addWidget(&_getStartedWidget);
+    getColumnsLayout().addWidget(&_openProjectWidget);
+    getColumnsLayout().addWidget(&_getStartedWidget);
 
-    _mainLayout.addLayout(&_collumnsLayout, 1);
-    _mainLayout.addLayout(&_toolbarLayout);
+    getMainLayout().addLayout(&_toolbarLayout);
 
     _toolbarLayout.addWidget(_compactViewAction.createWidget(this));
     _toolbarLayout.addStretch(1);
     _toolbarLayout.addWidget(_settingsAction.createCollapsedWidget(this));
 
-    setLayout(&_mainLayout);
-
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
-    
-    setObjectName("StartPageContentWidget");
-    updateCustomStyle();
-    connect(qApp, &QApplication::paletteChanged, this, &StartPageContentWidget::updateCustomStyle);
-}
-
-QLabel* StartPageContentWidget::createHeaderLabel(const QString& title, const QString& tooltip)
-{
-    auto label = new QLabel(title);
-
-    label->setAlignment(Qt::AlignLeft);
-    label->setStyleSheet("QLabel { font-weight: 200; font-size: 13pt; }");
-    label->setToolTip(tooltip);
-
-    return label;
 }
 
 void StartPageContentWidget::updateActions()
@@ -88,10 +67,4 @@ void StartPageContentWidget::updateActions()
 
     _openProjectWidget.updateActions();
     _getStartedWidget.updateActions();
-}
-
-void StartPageContentWidget::updateCustomStyle()
-{
-    // update custome style settings
-    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }

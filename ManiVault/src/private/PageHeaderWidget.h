@@ -8,13 +8,13 @@
 #include <QLabel>
 
 /**
- * Header widget class
+ * Page header widget class
  *
- * Widget class for header with logo.
+ * Widget class for page header with logo
  *
  * @author Thomas Kroes
  */
-class StartPageHeaderWidget : public QWidget
+class PageHeaderWidget : public QWidget
 {
 public:
 
@@ -22,7 +22,7 @@ public:
      * Construct with \p parent widget
      * @param parent Pointer to parent widget
      */
-    StartPageHeaderWidget(QWidget* parent = nullptr);
+    PageHeaderWidget(QWidget* parent = nullptr);
 
 protected:
     /**
@@ -46,16 +46,14 @@ private:
     
 private slots:
     
-    /**
-     * Update custom theme parts not caught by the system itself
-     */
+    /** Update custom theme parts not caught by the system itself */
     void updateCustomStyle() ;
     
 protected:
-    QVBoxLayout     _layout;        /** Main layout */
-    QLabel          _headerLabel;   /** Header label */
+    QVBoxLayout     _layout;            /** Main layout */
+    QLabel          _headerLabel;       /** Header label */
 
 private:
-    QString         _iconName;      /** Name of background icon */
-    int             _previousHeight;/** Height of main header icon */
+    QString         _iconName;          /** Name of background icon */
+    int             _previousHeight;    /** Height of main header icon */
 };

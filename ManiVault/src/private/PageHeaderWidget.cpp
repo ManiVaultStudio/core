@@ -2,28 +2,27 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "StartPageHeaderWidget.h"
-#include "StartPageWidget.h"
+#include "PageHeaderWidget.h"
+#include "PageWidget.h"
 
 #include <QDebug>
 #include <QResizeEvent>
-#include <Application.h>
 
 #include <algorithm>
 
 using namespace mv;
 using namespace mv::gui;
 
-StartPageHeaderWidget::StartPageHeaderWidget(QWidget* parent /*= nullptr*/) :
+PageHeaderWidget::PageHeaderWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
     _headerLabel(),
     _iconName(":/Images/AppBackground256"),
     _previousHeight(-1)
 {
+    setObjectName("StartPageHeaderWidget");
     setLayout(&_layout);
     setAutoFillBackground(true);
-
     setMinimumHeight(150);
 
     const int pixelRatio = devicePixelRatio();
@@ -39,31 +38,29 @@ StartPageHeaderWidget::StartPageHeaderWidget(QWidget* parent /*= nullptr*/) :
 
     _layout.setContentsMargins(50, 25, 50, 0);
     _layout.addWidget(&_headerLabel);
-    
-    setObjectName("StartPageHeaderWidget");
+
     updateCustomStyle();
-    connect(qApp, &QApplication::paletteChanged, this, &StartPageHeaderWidget::updateCustomStyle);
+
+    connect(qApp, &QApplication::paletteChanged, this, &PageHeaderWidget::updateCustomStyle);
 }
 
-void StartPageHeaderWidget::resizeEvent(QResizeEvent* event)
+void PageHeaderWidget::resizeEvent(QResizeEvent* event)
 {
-    // resize icon when widget is resized
     resizeIcon(event->size());
 }
 
-void StartPageHeaderWidget::showEvent(QShowEvent* event)
+void PageHeaderWidget::showEvent(QShowEvent* event)
 {
-    // resize icon when widget is first opened
     resizeIcon(size());
 }
 
-void StartPageHeaderWidget::resizeIcon(const QSize& newSize)
+void PageHeaderWidget::resizeIcon(const QSize& newSize)
 {
     // only update when visible and if the window height changed, i.e. ignore width changes
     if (isVisible() && newSize.height() != _previousHeight)
     {
-        float fracHeight = newSize.height() / 296.0f; // 296 = 2 * top margin + default pixmap size
-        float scale = std::clamp(fracHeight, 0.1f, 1.0f);
+        float fracHeight =   newSize.height() / 296.0f; // 296 = 2 * top margin + default pixmap size
+        float scale         = std::clamp(fracHeight, 0.1f, 1.0f);
 
         _headerLabel.setPixmap(QPixmap(_iconName).scaled(scale * 256, scale * 256));
 
@@ -71,8 +68,7 @@ void StartPageHeaderWidget::resizeIcon(const QSize& newSize)
     }
 }
 
-void StartPageHeaderWidget::updateCustomStyle()
+void PageHeaderWidget::updateCustomStyle()
 {
-    // update custome style settings
-    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+    PageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
