@@ -1,5 +1,9 @@
 #include "SelectionGroup.h"
 
+#include "util/Serialization.h"
+
+using namespace mv::util;
+
 namespace mv
 {
     BiMap::BiMap()
@@ -72,6 +76,84 @@ namespace mv
         return values;
     }
 
+    void BiMap::fromVariantMap(const QVariantMap& variantMap)
+    {
+        Serializable::fromVariantMap(variantMap);
+
+        variantMapMustContain(variantMap, "KvKeysMap");
+        variantMapMustContain(variantMap, "VkValuesMap");
+        variantMapMustContain(variantMap, "KvValuesMap");
+        variantMapMustContain(variantMap, "VkKeysMap");
+
+        const auto kvKeysVariant = variantMap["KvKeysMap"].toMap();
+        const auto vkValuesVariant = variantMap["VkValuesMap"].toMap();
+        const auto kvValuesVariant = variantMap["KvValuesMap"].toMap();
+        const auto vkKeysVariant = variantMap["VkKeysMap"].toMap();
+
+        // Unpack the string vectors
+        QStringList kvKeys;
+        loadFromDisk(kvKeysVariant, kvKeys);
+
+        QStringList vkValues;
+        loadFromDisk(vkValuesVariant, vkValues);
+
+        // Unpack the uint32_t vectors
+        std::vector<uint32_t> kvValues(kvValuesVariant["Size"].value<uint64_t>() / sizeof(uint32_t));
+        populateDataBufferFromVariantMap(kvValuesVariant, (char*)kvValues.data());
+
+        std::vector<uint32_t> vkKeys(vkKeysVariant["Size"].value<uint64_t>() / sizeof(uint32_t));
+        populateDataBufferFromVariantMap(vkKeysVariant, (char*)vkKeys.data());
+
+        // Fill the unordered maps
+        for (int i = 0; i < kvKeys.size(); i++)
+        {
+            _kvMap[kvKeys[i]] = kvValues[i];
+        }
+
+        for (int i = 0; i < vkKeys.size(); i++)
+        {
+            _vkMap[vkKeys[i]] = vkValues[i];
+        }
+    }
+
+    QVariantMap BiMap::toVariantMap() const
+    {
+        auto variantMap = Serializable::toVariantMap();
+
+        QList<QString> kvKeys;
+        std::vector<uint32_t> kvValues;
+
+        std::vector<uint32_t> vkKeys;
+        QList<QString> vkValues;
+
+        for (auto kv : _kvMap)
+        {
+            kvKeys.push_back(kv.first);
+            kvValues.push_back(kv.second);
+        }
+
+        for (auto vk : _vkMap)
+        {
+            vkKeys.push_back(vk.first);
+            vkValues.push_back(vk.second);
+        }
+
+        QVariantMap kvKeysVariant = storeOnDisk(kvKeys);
+        QVariantMap vkValuesVariant = storeOnDisk(vkValues);
+
+        QVariantMap kvValuesVariant = rawDataToVariantMap((const char*)kvValues.data(), kvValues.size() * sizeof(uint32_t), true);
+        QVariantMap vkKeysVariant = rawDataToVariantMap((const char*)vkKeys.data(), vkKeys.size() * sizeof(uint32_t), true);
+
+        variantMap.insert({
+            { "KvKeysMap", QVariant::fromValue(kvKeysVariant) },
+            { "VkValuesMap", QVariant::fromValue(vkValuesVariant) },
+            { "KvValuesMap", QVariant::fromValue(kvValuesVariant) },
+            { "VkKeysMap", QVariant::fromValue(vkKeysVariant) }
+        });
+
+        return variantMap;
+    }
+
     void KeyBasedSelectionGroup::addDataset(Dataset<DatasetImpl> dataset, BiMap& bimap)
     {
         _datasets.push_back(dataset);
@@ -96,6 +178,7 @@ namespace mv
         for (int i = 0; i < _datasets.size(); i++)
         {
             Dataset<DatasetImpl> d = _datasets[i];
+
             if (d != dataset)
             {
                 std::vector<uint32_t> indices = _biMaps[i].getValuesByKeys(keys);
@@ -105,5 +188,57 @@ namespace mv
                 d->dirtySelection();
             }
         }
+    }
+
+    void KeyBasedSelectionGroup::fromVariantMap(const QVariantMap& variantMap)
+    {
+        Serializable::fromVariantMap(variantMap);
+
+        variantMapMustContain(variantMap, "ListOfDatasets");
+        variantMapMustContain(variantMap, "ListOfBiMaps");
+
+        const auto listOfDatasets = variantMap["ListOfDatasets"].toList();
+        const auto listOfBiMaps = variantMap["ListOfBiMaps"].toList();
+
+        for (int i = 0; i < listOfDatasets.size(); i++)
+        {
+            QString datasetId = listOfDatasets[i].toString();
+
+            _datasets.push_back(mv::data().getDataset(datasetId));
+        }
+
+        for (int i = 0; i < listOfBiMaps.size(); i++)
+        {
+            QVariantMap biMapVariantMap = listOfBiMaps[i].toMap();
+
+            BiMap biMap;
+            biMap.fromVariantMap(biMapVariantMap);
+            _biMaps.push_back(biMap);
+        }
+    }
+
+    QVariantMap KeyBasedSelectionGroup::toVariantMap() const
+    {
+        auto variantMap = Serializable::toVariantMap();
+
+        QVariantList listOfDatasets;
+        for (int i = 0; i < _datasets.size(); i++)
+        {
+            listOfDatasets.push_back(_datasets[i].getDatasetId());
+        }
+
+        QVariantList listOfBiMaps;
+        for (int i = 0; i < _biMaps.size(); i++)
+        {
+            qDebug() << _datasets[i]->getGuiName();
+            listOfBiMaps.push_back(_biMaps[i].toVariantMap());
+        }
+
+        variantMap.insert({
+            { "ListOfDatasets", listOfDatasets },
+            { "ListOfBiMaps", listOfBiMaps }
+        });
+
+        return variantMap;
     }
 }

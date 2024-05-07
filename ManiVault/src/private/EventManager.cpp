@@ -285,6 +285,41 @@ void EventManager::initialize()
     _selectionPollingTimer->start(20);
 }
 
+void EventManager::fromVariantMap(const QVariantMap& variantMap)
+{
+    Serializable::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "SelectionGroupsList");
+
+    const auto listOfSelectionGroups = variantMap["SelectionGroupsList"].toList();
+
+    for (int i = 0; i < listOfSelectionGroups.size(); i++)
+    {
+        QVariantMap selectionGroupVariantMap = listOfSelectionGroups[i].toMap();
+
+        KeyBasedSelectionGroup selectionGroup;
+        selectionGroup.fromVariantMap(selectionGroupVariantMap);
+        _selectionGroups.push_back(selectionGroup);
+    }
+}
+
+QVariantMap EventManager::toVariantMap() const
+{
+    auto variantMap = Serializable::toVariantMap();
+
+    QVariantList selectionGroupsList;
+    for (int i = 0; i < _selectionGroups.size(); i++)
+    {
+        selectionGroupsList.push_back(_selectionGroups[i].toVariantMap());
+    }
+
+    variantMap.insert({
+        { "SelectionGroupsList", selectionGroupsList }
+    });
+
+    return variantMap;
+}
+
 void EventManager::reset()
 {
     _eventListeners.clear();
