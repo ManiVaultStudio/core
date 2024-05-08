@@ -92,9 +92,14 @@ bool PluginFactory::hasHelp()
     return false;
 }
 
-mv::gui::TriggerAction& PluginFactory::getTriggerHelpAction()
+TriggerAction& PluginFactory::getTriggerHelpAction()
 {
     return _triggerHelpAction;
+}
+
+TriggerAction& PluginFactory::getTriggerReadmeAction()
+{
+    return _triggerReadmeAction;
 }
 
 QString PluginFactory::getGuiName() const

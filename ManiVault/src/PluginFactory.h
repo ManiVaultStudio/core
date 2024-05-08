@@ -118,6 +118,12 @@ public: // Help
     virtual gui::TriggerAction& getTriggerHelpAction() final;
 
     /**
+     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
+     * @return Reference to show help trigger action (maybe nullptr if the plugin does not provide any help)
+     */
+    virtual gui::TriggerAction& getTriggerReadmeAction() final;
+
+    /**
      * Get the read me markdown file URL
      * @return Location of the read me markdown file
      */
@@ -280,6 +286,7 @@ private:
     std::uint32_t                           _numberOfInstances;                     /** Number of plugin instances */
     std::uint32_t                           _maximumNumberOfInstances;              /** Maximum number of plugin instances (unlimited when -1) */
     gui::TriggerAction                      _triggerHelpAction;                     /** Trigger action that triggers help (icon and text are already set) */
+    gui::TriggerAction                      _triggerReadmeAction;                   /** Trigger action that displays the read me markdown text in a modal dialog (if the read me markdown file URL is valid) */
     gui::PluginGlobalSettingsGroupAction*   _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
 };
