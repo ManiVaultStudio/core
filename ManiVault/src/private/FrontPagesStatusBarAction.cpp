@@ -19,5 +19,5 @@ FrontPagesStatusBarAction::FrontPagesStatusBarAction(QObject* parent, const QStr
     setToolTip("Front pages");
 
     addMenuAction(&projects().getShowStartPageAction());
-    addMenuAction(&help().getLaunchLearningCenterAction());
+    addMenuAction(&help().getShowLearningCenterAction());
 }
