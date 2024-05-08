@@ -18,10 +18,10 @@ namespace mv
 
 HelpManager::HelpManager() :
     AbstractHelpManager(),
-    _launchLearningCenterAction(this, "Learning center")
+    _showLearningCenterAction(this, "Learning center")
 {
-    _launchLearningCenterAction.setIconByName("chalkboard-teacher");
-    _launchLearningCenterAction.setToolTip("Go to the learning center");
+    _showLearningCenterAction.setIconByName("chalkboard-teacher");
+    _showLearningCenterAction.setToolTip("Go to the learning center");
 }
 
 void HelpManager::initialize()

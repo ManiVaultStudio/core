@@ -37,7 +37,7 @@ public:
 
 public: // Action getters
 
-    virtual mv::gui::TriggerAction& getLaunchLearningCenterAction() = 0;
+    virtual mv::gui::ToggleAction& getShowLearningCenterAction() = 0;
 };
 
 }

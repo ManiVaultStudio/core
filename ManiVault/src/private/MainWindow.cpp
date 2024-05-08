@@ -161,14 +161,25 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
         connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
 
-        const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget]() -> void {
-            if (projects().getShowStartPageAction().isChecked())
+        const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
+            if (toggled)
                 stackedWidget->setCurrentWidget(startPageWidget);
             else
                 stackedWidget->setCurrentWidget(projectWidget);
         };
 
         connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+
+        connect(&help().getShowLearningCenterAction(), &ToggleAction::toggled, this, [stackedWidget, startPageWidget, projectWidget, learningPageWidget](bool toggled) -> void {
+            if (toggled)
+                stackedWidget->setCurrentWidget(learningPageWidget);
+            else {
+                if (projects().hasProject())
+                    stackedWidget->setCurrentWidget(projectWidget);
+                else
+                    stackedWidget->setCurrentWidget(startPageWidget);
+            }
+        });
 
         const auto updateMenuVisibility = [fileMenuAction, viewMenuAction]() -> void {
             const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();

@@ -26,10 +26,10 @@ public:
 
 public: // Action getters
 
-    mv::gui::TriggerAction& getLaunchLearningCenterAction() override { return _launchLearningCenterAction; };
+    mv::gui::ToggleAction& getShowLearningCenterAction() override { return _showLearningCenterAction; };
 
 private:
-    mv::gui::TriggerAction      _launchLearningCenterAction;    /** Trigger action to launch the learning center */
+    mv::gui::ToggleAction      _showLearningCenterAction;    /** Toggle action for toggling the learning center */
 };
 
 }
