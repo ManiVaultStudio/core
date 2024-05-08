@@ -71,7 +71,6 @@ private:
     QOffscreenSurface _offscreenSurface;
 
     bool _initialized;
-    bool _needsDensityMapUpdate;
 };
 
 } // namespace mv
