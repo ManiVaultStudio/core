@@ -19,6 +19,7 @@
 #include "AbstractWorkspaceManager.h"
 #include "AbstractProjectManager.h"
 #include "AbstractSettingsManager.h"
+#include "AbstractHelpManager.h"
 
 #include <QString>
 #include <QObject>
@@ -68,6 +69,7 @@ public:
         Workspaces,         /** Workspace manager for controlling widgets layout */
         Projects,           /** Manager for loading/saving projects */
         Settings,           /** Manager for managing global settings */
+        Help,               /** Manager for getting help */
 
         Count
     };
@@ -118,6 +120,7 @@ public: // Managers
     virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
     virtual AbstractProjectManager& getProjectManager() = 0;
     virtual AbstractSettingsManager& getSettingsManager() = 0;
+    virtual AbstractHelpManager& getHelpManager() = 0;
 
 signals:
 
@@ -213,6 +216,14 @@ CORE_EXPORT inline AbstractProjectManager& projects() {
  */
 CORE_EXPORT inline AbstractSettingsManager& settings() {
     return core()->getSettingsManager();
+}
+
+/**
+ * Convenience function to obtain access to the help manager in the core
+ * @return Reference to abstract help manager
+ */
+CORE_EXPORT inline AbstractHelpManager& help() {
+    return core()->getHelpManager();
 }
 
 }

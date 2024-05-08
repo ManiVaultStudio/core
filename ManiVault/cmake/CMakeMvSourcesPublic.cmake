@@ -15,6 +15,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractProjectManager.h
     src/AbstractSettingsManager.h
     src/AbstractTaskManager.h
+    src/AbstractHelpManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_SOURCES
