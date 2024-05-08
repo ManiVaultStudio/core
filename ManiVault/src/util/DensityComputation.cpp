@@ -72,7 +72,6 @@ void GaussianTexture::generate()
 DensityComputation::DensityComputation() :
     QOpenGLFunctions_3_3_Core(),
     _initialized(false),
-    _needsDensityMapUpdate(true),
     _ctx(nullptr),
     _points(nullptr),
     _weights(nullptr),
@@ -276,8 +275,6 @@ void DensityComputation::compute()
     _maxKDE = calculateMaxKDE();
 
     //qDebug() << "	Max KDE Value = " << _maxKDE << ".\n";
-
-    //_needsDensityMapUpdate = false;
 
     //qDebug() << "Done computing density";
 }
