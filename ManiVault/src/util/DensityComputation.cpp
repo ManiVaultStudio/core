@@ -8,6 +8,7 @@
 #include "graphics/Matrix3f.h"
 
 #include <cmath>
+#include <limits>
 
 namespace mv
 {
@@ -72,7 +73,6 @@ void GaussianTexture::generate()
 DensityComputation::DensityComputation() :
     QOpenGLFunctions_3_3_Core(),
     _initialized(false),
-    _needsDensityMapUpdate(true),
     _ctx(nullptr),
     _points(nullptr),
     _weights(nullptr),
@@ -126,6 +126,13 @@ void DensityComputation::init(QOpenGLContext* ctx)
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
+    // Weights of the points
+    _weightsBuffer.create();
+    _weightsBuffer.bind();
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribDivisor(3, 1);
+    glEnableVertexAttribArray(3);
+
     // Load the density computation shader
     bool loaded = _shaderDensityCompute.loadShaderFromFile(":shaders/DensityCompute.vert", ":shaders/DensityCompute.frag");
     if (!loaded) {
@@ -149,6 +156,9 @@ void DensityComputation::init(QOpenGLContext* ctx)
     // Add the texture to the framebuffer and validate it
     _densityBuffer.addColorTexture(0, &_densityTexture);
     _densityBuffer.validate();
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
     _initialized = true;
 }
@@ -182,13 +192,6 @@ void DensityComputation::setData(const std::vector<Vector2f>* points)
 void DensityComputation::setWeights(const std::vector<float>* weights)
 {
     _weights = weights;
-
-    // Weights of the points
-    _weightsBuffer.create();
-    _weightsBuffer.bind();
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribDivisor(3, 1);
-    glEnableVertexAttribArray(3);
 }
 
 void DensityComputation::setBounds(float left, float right, float bottom, float top)
@@ -218,17 +221,23 @@ void DensityComputation::compute()
     _ctx->makeCurrent(&_offscreenSurface);
 
     _numPoints = static_cast<std::uint32_t>(_points->size());
+    
+    glBindVertexArray(_vao);
 
     // Upload the points to the GPU
     _pointBuffer.bind();
     _pointBuffer.setData(*_points);
 
-    bool hasWeight = (_weights != nullptr) && (_weights->size() == _numPoints);
+    const bool hasWeight = (_weights != nullptr) && (_weights->size() == _numPoints);
+
+    // Upload the weigths to the GPU, if they are any
+    _weightsBuffer.bind();
+    glDisableVertexAttribArray(3);
+
     if (hasWeight)
     {
-        // Upload the weigths to the GPU
-        _weightsBuffer.bind();
         _weightsBuffer.setData(*_weights);
+        glEnableVertexAttribArray(3);
     }
 
     // Bind the off-screen framebuffer
@@ -256,19 +265,17 @@ void DensityComputation::compute()
     Matrix3f ortho = createProjectionMatrix(_bounds);
     _shaderDensityCompute.uniformMatrix3f("projMatrix", ortho);
 
-    _shaderDensityCompute.uniform1f("hasWeight", hasWeight);
+    _shaderDensityCompute.uniform1i("hasWeight", hasWeight);
 
     // Draw the splats
-    glBindVertexArray(_vao);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     _maxKDE = calculateMaxKDE();
 
-    //qDebug() << "	Max KDE Value = " << _maxKDE << ".\n";
-
-    //_needsDensityMapUpdate = false;
-
+    //qDebug() << "Max KDE Value = " << _maxKDE << ".\n";
     //qDebug() << "Done computing density";
 }
 
@@ -286,8 +293,8 @@ float DensityComputation::calculateMaxKDE()
     glReadPixels(0, 0, RESOLUTION, RESOLUTION, GL_RGB, GL_FLOAT, kde.data());
 
     // Calculate max value for normalization
-    float maxKDE = -99999999.9f;
-    for (int i = 0; i < kde.size(); i += 3) // only lookup red channel
+    float maxKDE = std::numeric_limits<float>::lowest();
+    for (size_t i = 0; i < kde.size(); i += 3) // only lookup red channel
     {
         maxKDE = std::max(maxKDE, kde[i]);
     }
