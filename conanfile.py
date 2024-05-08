@@ -223,6 +223,9 @@ class HdpsCoreConan(ConanFile):
             # it contains the complete QtWebEngine > 1GB
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/ManiVault Studio.app")))
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/ManiVault Studio.app")))
+        elif self.settings.os == "Macos":
+            # also remove debug even in bundle build to keep package size down
+            shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/ManiVault Studio.app")))
 
         # Add the pdb files next to the libs for debug linking
         if tools.os_info.is_windows:
