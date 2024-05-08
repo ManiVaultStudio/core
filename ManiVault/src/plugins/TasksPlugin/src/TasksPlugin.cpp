@@ -105,6 +105,11 @@ QIcon TasksPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("tasks", color);
 }
 
+QString TasksPluginFactory::getReadmeMarkdownUrl() const
+{
+    return "https://github.com/ManiVaultStudio/core/blob/master/README.md";
+}
+
 ViewPlugin* TasksPluginFactory::produce()
 {
     return new TasksPlugin(this);

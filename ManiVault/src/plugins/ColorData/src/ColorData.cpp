@@ -88,9 +88,10 @@ QIcon ColorDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return mv::Application::getIconFont("FontAwesome").getIcon("palette", color);
 }
 
-// =============================================================================
-// Factory
-// =============================================================================
+QString ColorDataFactory::getReadmeMarkdownUrl() const
+{
+    return "https://github.com/ManiVaultStudio/core/blob/master/README.md";
+}
 
 mv::plugin::RawData* ColorDataFactory::produce()
 {

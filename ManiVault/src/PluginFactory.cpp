@@ -189,4 +189,9 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
     return numberOfDatasetsForType;
 }
 
+QString PluginFactory::getReadmeMarkdownUrl() const
+{
+    return {};
+}
+
 }

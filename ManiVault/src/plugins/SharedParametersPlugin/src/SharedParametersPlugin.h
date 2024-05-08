@@ -26,8 +26,14 @@ class SharedParametersPlugin : public ViewPlugin
     Q_OBJECT
     
 public:
+
+    /**
+     * Construct with pointer to plugin \p factory
+     * @param factory Pointer to plugin factory
+     */
     SharedParametersPlugin(const PluginFactory* factory);
-    
+
+    /** Perform plugin initialization */
     void init() override;
 
 private:
@@ -53,8 +59,14 @@ public:
      * @return Icon
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
-    
-	/**
+
+    /**
+     * Get the read me markdown file URL
+     * @return Location of the read me markdown file
+     */
+    QString getReadmeMarkdownUrl() const override;
+
+    /**
      * Produces the plugin
      * @return Pointer to the produced plugin
      */

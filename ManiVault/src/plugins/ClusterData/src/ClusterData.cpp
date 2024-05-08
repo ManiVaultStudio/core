@@ -476,6 +476,11 @@ QIcon ClusterDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("th-large", color);
 }
 
+QString ClusterDataFactory::getReadmeMarkdownUrl() const
+{
+    return "https://github.com/ManiVaultStudio/core/blob/master/README.md";
+}
+
 mv::plugin::RawData* ClusterDataFactory::produce()
 {
     return new ClusterData(this);

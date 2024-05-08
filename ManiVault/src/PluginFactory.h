@@ -117,6 +117,12 @@ public: // Help
      */
     virtual gui::TriggerAction& getTriggerHelpAction() final;
 
+    /**
+     * Get the read me markdown file URL
+     * @return Location of the read me markdown file
+     */
+    virtual QString getReadmeMarkdownUrl() const;
+
 public: // GUI name
 
     /** Get the menu name of the plugin */

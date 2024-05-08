@@ -143,5 +143,11 @@ public:
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
+    /**
+     * Get the read me markdown file URL
+     * @return Location of the read me markdown file
+     */
+    QString getReadmeMarkdownUrl() const override;
+
     mv::plugin::RawData* produce() override;
 };

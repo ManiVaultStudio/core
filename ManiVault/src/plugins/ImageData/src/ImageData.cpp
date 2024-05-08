@@ -96,6 +96,11 @@ QIcon ImageDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return mv::Application::getIconFont("FontAwesome").getIcon("images", color);
 }
 
+QString ImageDataFactory::getReadmeMarkdownUrl() const
+{
+    return "https://github.com/ManiVaultStudio/core/blob/master/README.md";
+}
+
 mv::plugin::RawData* ImageDataFactory::produce()
 {
     return new ImageData(this);

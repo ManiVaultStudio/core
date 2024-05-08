@@ -65,6 +65,11 @@ QIcon SharedParametersPluginFactory::getIcon(const QColor& color /*= Qt::black*/
     return Application::getIconFont("FontAwesome").getIcon("cloud", color);
 }
 
+QString SharedParametersPluginFactory::getReadmeMarkdownUrl() const
+{
+    return "https://github.com/ManiVaultStudio/core/blob/master/README.md";
+}
+
 ViewPlugin* SharedParametersPluginFactory::produce()
 {
     return new SharedParametersPlugin(this);
