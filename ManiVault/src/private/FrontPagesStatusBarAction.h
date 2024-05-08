@@ -7,22 +7,22 @@
 #include <actions/StatusBarAction.h>
 
 /**
- * Start page status bar action class
+ * Front pages status bar action class
  *
- * Status bar action class for switching to the start page
+ * Status bar action class for heading to the start page and help front page
  *
  * @author Thomas Kroes
  */
-class StartPageStatusBarAction : public mv::gui::StatusBarAction
+class FrontPagesStatusBarAction : public mv::gui::StatusBarAction
 {
     Q_OBJECT
 
 public:
 
     /**
-     * Construct with \p parent object and \p title
+     * Construct with pointer to \p parent object and \p title
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    StartPageStatusBarAction(QObject* parent, const QString& title);
+    FrontPagesStatusBarAction(QObject* parent, const QString& title);
 };

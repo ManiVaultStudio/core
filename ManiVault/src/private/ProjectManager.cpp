@@ -107,7 +107,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     //_showStartPageAction.setShortcut(QKeySequence("Alt+W"));
     //_showStartPageAction.setShortcutContext(Qt::ApplicationShortcut);
-    //_showStartPageAction.setIconByName("door-open");
+    _showStartPageAction.setIconByName("door-open");
     _showStartPageAction.setToolTip("Show the ManiVault start page");
     //_showStartPageAction.setChecked(!Application::current()->shouldOpenProjectAtStartup());
 

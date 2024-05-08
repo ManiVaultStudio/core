@@ -22,7 +22,7 @@
 #include <actions/ToggleAction.h>
 #include <actions/PluginStatusBarAction.h>
 
-#include "StartPageStatusBarAction.h"
+#include "FrontPagesStatusBarAction.h"
 #include "ManiVaultVersionStatusBarAction.h"
 #include "PluginsStatusBarAction.h"
 #include "LoggingStatusBarAction.h"
@@ -105,7 +105,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(false);
 
-        auto startPageStatusBarAction       = new StartPageStatusBarAction(this, "Start Page");
+        auto startPageStatusBarAction       = new FrontPagesStatusBarAction(this, "Start Page");
         auto versionStatusBarAction         = new ManiVaultVersionStatusBarAction(this, "Version");
         auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
         auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
@@ -179,7 +179,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         connect(&projects(), &AbstractProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {
             connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
-            });
+        });
 
         loadGuiTask.setFinished();
 

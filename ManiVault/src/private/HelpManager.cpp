@@ -4,6 +4,8 @@
 
 #include "HelpManager.h"
 
+#include <Application.h>
+
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -18,6 +20,8 @@ HelpManager::HelpManager() :
     AbstractHelpManager(),
     _launchLearningCenterAction(this, "Learning center")
 {
+    _launchLearningCenterAction.setIconByName("chalkboard-teacher");
+    _launchLearningCenterAction.setToolTip("Go to the learning center");
 }
 
 void HelpManager::initialize()
