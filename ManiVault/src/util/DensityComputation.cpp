@@ -8,6 +8,7 @@
 #include "graphics/Matrix3f.h"
 
 #include <cmath>
+#include <limits>
 
 namespace mv
 {
@@ -274,8 +275,7 @@ void DensityComputation::compute()
 
     _maxKDE = calculateMaxKDE();
 
-    //qDebug() << "	Max KDE Value = " << _maxKDE << ".\n";
-
+    //qDebug() << "Max KDE Value = " << _maxKDE << ".\n";
     //qDebug() << "Done computing density";
 }
 
@@ -293,8 +293,8 @@ float DensityComputation::calculateMaxKDE()
     glReadPixels(0, 0, RESOLUTION, RESOLUTION, GL_RGB, GL_FLOAT, kde.data());
 
     // Calculate max value for normalization
-    float maxKDE = -99999999.9f;
-    for (int i = 0; i < kde.size(); i += 3) // only lookup red channel
+    float maxKDE = std::numeric_limits<float>::lowest();
+    for (size_t i = 0; i < kde.size(); i += 3) // only lookup red channel
     {
         maxKDE = std::max(maxKDE, kde[i]);
     }
