@@ -31,9 +31,9 @@ QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("font", color);
 }
 
-QString TextDataFactory::getReadmeMarkdownUrl() const
+QUrl TextDataFactory::getReadmeMarkdownUrl() const
 {
-    return "https://github.com/ManiVaultStudio/core/blob/master/README.md";
+    return QUrl("https://github.com/ManiVaultStudio/core/blob/master/README.md");
 }
 
 mv::plugin::RawData* TextDataFactory::produce()

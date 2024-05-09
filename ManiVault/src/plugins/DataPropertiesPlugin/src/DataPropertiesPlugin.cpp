@@ -77,9 +77,9 @@ QIcon DataPropertiesPluginFactory::getIcon(const QColor& color /*= Qt::black*/) 
     return Application::getIconFont("FontAwesome").getIcon("sliders-h", color);
 }
 
-QString DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
+QUrl DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
 {
-    return "https://github.com/ManiVaultStudio/core/blob/master/README.md";
+    return QUrl("https://github.com/ManiVaultStudio/core/blob/master/README.md");
 }
 
 ViewPlugin* DataPropertiesPluginFactory::produce()

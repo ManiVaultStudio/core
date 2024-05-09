@@ -72,4 +72,7 @@
         <file>colormaps/2D/example_d.png</file>
 		<file>colormaps/2D/random.png</file>
     </qresource>
+	<qresource prefix="/HTML">
+        <file alias="MarkdownReadme">html/markdown.html</file>
+    </qresource>
 </RCC>

@@ -84,7 +84,7 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     connect(&workspaces().getLockingAction().getLockedAction(), &ToggleAction::toggled, this, updateReadOnly);
 
     updateReadOnly();
-    
+
     updateStyle();
     connect(qApp, &QApplication::paletteChanged, this, &DockAreaTitleBar::updateStyle);
 }

@@ -220,7 +220,8 @@ void ViewPlugin::createScreenshot()
         auto widgetPixmap = getWidget().grab();
 
         widgetPixmap.toImage().save(fileDialog->selectedFiles().first());
-        });
+    });
+
     connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
     fileDialog->open();

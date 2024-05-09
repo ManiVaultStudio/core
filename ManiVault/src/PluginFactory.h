@@ -125,9 +125,9 @@ public: // Help
 
     /**
      * Get the read me markdown file URL
-     * @return Location of the read me markdown file
+     * @return URL of the read me markdown file
      */
-    virtual QString getReadmeMarkdownUrl() const;
+    virtual QUrl getReadmeMarkdownUrl() const;
 
 public: // GUI name
 

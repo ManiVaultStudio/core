@@ -38,9 +38,9 @@ QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) c
     return Application::getIconFont("FontAwesome").getIcon("sitemap", color);
 }
 
-QString DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
+QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 {
-    return "https://github.com/ManiVaultStudio/core/blob/master/README.md";
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/README.md");
 }
 
 ViewPlugin* DataHierarchyPluginFactory::produce()

@@ -3,12 +3,14 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PluginFactory.h"
+#include "widgets/MarkdownDialog.h"
 
 #include "Set.h"
 
 #include "actions/PluginTriggerAction.h"
 
 using namespace mv::gui;
+using namespace mv::util;
 
 namespace mv::plugin
 {
@@ -22,9 +24,21 @@ PluginFactory::PluginFactory(Type type) :
     _maximumNumberOfInstances(-1),
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
     _triggerHelpAction(nullptr, "Trigger plugin help"),
+    _triggerReadmeAction(nullptr, "Readme"),
     _pluginGlobalSettingsGroupAction(nullptr),
     _statusBarAction(nullptr)
 {
+    _triggerReadmeAction.setIconByName("book");
+
+    connect(&_triggerReadmeAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (!getReadmeMarkdownUrl().isValid())
+            return;
+
+        MarkdownDialog markdownDialog(getReadmeMarkdownUrl());
+
+        markdownDialog.setWindowTitle(QString("%1 readme").arg(_kind));
+        markdownDialog.exec();
+    });
 }
 
 QString PluginFactory::getKind() const
@@ -194,7 +208,7 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
     return numberOfDatasetsForType;
 }
 
-QString PluginFactory::getReadmeMarkdownUrl() const
+QUrl PluginFactory::getReadmeMarkdownUrl() const
 {
     return {};
 }

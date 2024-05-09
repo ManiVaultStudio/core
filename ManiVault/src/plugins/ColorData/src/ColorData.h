@@ -145,9 +145,9 @@ public:
 
     /**
      * Get the read me markdown file URL
-     * @return Location of the read me markdown file
+     * @return URL of the read me markdown file
      */
-    QString getReadmeMarkdownUrl() const override;
+    QUrl getReadmeMarkdownUrl() const override;
 
     mv::plugin::RawData* produce() override;
 };

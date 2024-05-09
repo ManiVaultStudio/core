@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+  <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/sindresorhus/github-markdown-css/main/github-markdown.css">
+  <script src="qrc:/qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+  <div id="placeholder"></div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script type="module">
+  import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+  
+	var placeholder = document.getElementById('placeholder');
+
+  var updateText = function(text) {
+      placeholder.innerHTML = marked(text);
+  }
+  
+	new QWebChannel(qt.webChannelTransport,
+    function(channel) {
+      var content = channel.objects.content;
+      updateText(content.text);
+      content.textChanged.connect(updateText);
+    }
+  );
+  
+	</script>
+	<!--
+  <script>
+  'use strict';
+
+  
+
+  
+  </script>-->
+</body>
+</html>
