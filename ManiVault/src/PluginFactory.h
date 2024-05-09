@@ -129,6 +129,12 @@ public: // Help
      */
     virtual QUrl getReadmeMarkdownUrl() const;
 
+    /**
+     * Get the URL of the GitHub repository
+     * @return URL of the GitHub repository
+     */
+    virtual QUrl getGitHubRespositoryUrl() const;
+
 public: // GUI name
 
     /** Get the menu name of the plugin */

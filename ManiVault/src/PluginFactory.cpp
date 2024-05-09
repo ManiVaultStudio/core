@@ -210,6 +210,25 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
 
 QUrl PluginFactory::getReadmeMarkdownUrl() const
 {
+    const auto githubRepositoryUrl = getGitHubRespositoryUrl();
+
+    if (!githubRepositoryUrl.isValid())
+        return {};
+
+#ifdef _DEBUG
+    auto readmeMarkdownUrl = QUrl(QString("%1/blob/feature/learning_center/README.md").arg(githubRepositoryUrl.path()));
+#else
+    auto readmeMarkdownUrl = QUrl(QString("%1/blob/master/README.md").arg(githubRepositoryUrl.path()));
+#endif
+
+    if (readmeMarkdownUrl.isValid())
+        return readmeMarkdownUrl;
+
+    return {};
+}
+
+QUrl PluginFactory::getGitHubRespositoryUrl() const
+{
     return {};
 }
 
