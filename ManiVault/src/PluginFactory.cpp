@@ -9,6 +9,8 @@
 
 #include "actions/PluginTriggerAction.h"
 
+#include <QDesktopServices>
+
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -25,6 +27,7 @@ PluginFactory::PluginFactory(Type type) :
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
     _triggerHelpAction(nullptr, "Trigger plugin help"),
     _triggerReadmeAction(nullptr, "Readme"),
+    _visitRepositoryAction(nullptr, "Go to repository"),
     _pluginGlobalSettingsGroupAction(nullptr),
     _statusBarAction(nullptr)
 {
@@ -38,6 +41,15 @@ PluginFactory::PluginFactory(Type type) :
 
         markdownDialog.setWindowTitle(QString("%1").arg(_kind));
         markdownDialog.exec();
+    });
+
+    _visitRepositoryAction.setIconByName("github");
+
+    connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (!getRespositoryUrl().isValid())
+            return;
+
+        QDesktopServices::openUrl(getRespositoryUrl());
     });
 }
 
@@ -114,6 +126,11 @@ TriggerAction& PluginFactory::getTriggerHelpAction()
 TriggerAction& PluginFactory::getTriggerReadmeAction()
 {
     return _triggerReadmeAction;
+}
+
+TriggerAction& PluginFactory::getVisitRepositoryAction()
+{
+    return _visitRepositoryAction;
 }
 
 QString PluginFactory::getGuiName() const
@@ -210,7 +227,7 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
 
 QUrl PluginFactory::getReadmeMarkdownUrl() const
 {
-    const auto githubRepositoryUrl = getGitHubRespositoryUrl();
+    const auto githubRepositoryUrl = getRespositoryUrl();
 
     if (!githubRepositoryUrl.isValid())
         return {};
@@ -223,7 +240,7 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
     return {};
 }
 
-QUrl PluginFactory::getGitHubRespositoryUrl() const
+QUrl PluginFactory::getRespositoryUrl() const
 {
     return {};
 }

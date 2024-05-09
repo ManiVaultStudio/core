@@ -14,6 +14,7 @@ PageContentWidget::PageContentWidget(QWidget* parent /*= nullptr*/) :
     _rowsLayout()
 {
     setObjectName("PageContentWidget");
+    setAutoFillBackground(true);
 
     _columnsLayout.setContentsMargins(35, 35, 35, 35);
     _rowsLayout.setContentsMargins(35, 35, 35, 35);

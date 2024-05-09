@@ -65,7 +65,7 @@ public:
      * Get the URL of the GitHub repository
      * @return URL of the GitHub repository
      */
-    QUrl getGitHubRespositoryUrl() const override;
+    QUrl getRespositoryUrl() const override;
 
     /**
      * Produces the plugin

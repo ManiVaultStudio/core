@@ -6,6 +6,7 @@
 
 #include "Plugin.h"
 #include "DataType.h"
+#include "Application.h"
 
 #include <QString>
 
@@ -73,7 +74,15 @@ public:
 
     }
     ~RawDataFactory() override {};
-    
+
+    /**
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which belongs to the plugin factory category
+     */
+    QIcon getCategoryIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("table");
+    }
+
     /**
      * Produces the plugin
      * @return Pointer to the produced plugin

@@ -44,5 +44,10 @@ QIcon TransformationPluginFactory::getIcon(const QColor& color /*= Qt::black*/) 
     return Application::getIconFont("FontAwesome").getIcon("random", color);
 }
 
+QIcon TransformationPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("random");
+}
+
 }
 }

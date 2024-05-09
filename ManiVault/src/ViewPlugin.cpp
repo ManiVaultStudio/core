@@ -351,4 +351,9 @@ void ViewPluginFactory::setPreferredDockArea(const gui::DockAreaFlag& preferredD
     _preferredDockArea = preferredDockArea;
 }
 
+QIcon ViewPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("eye");
+}
+
 }

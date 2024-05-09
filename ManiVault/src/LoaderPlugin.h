@@ -88,9 +88,13 @@ public:
      * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-import", color);
-    }
+    QIcon getIcon(const QColor& color = Qt::black) const override;
+
+    /**
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which belongs to the plugin factory category
+     */
+    QIcon getCategoryIcon() const override;
 
     /**
     * Produces an instance of a loader plugin. This function gets called by the plugin manager.

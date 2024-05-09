@@ -4,6 +4,8 @@
 
 #include "LearningPageMiscellaneousWidget.h"
 #include "LearningPageContentWidget.h"
+#include "PageContentWidget.h"
+#include "LearningPagePluginAction.h"
 
 #include <Application.h>
 
@@ -11,6 +13,16 @@
 
 LearningPageMiscellaneousWidget::LearningPageMiscellaneousWidget(LearningPageContentWidget* learningPageContentWidget) :
     QWidget(learningPageContentWidget),
-    _learningPageContentWidget(learningPageContentWidget)
+    _learningPageContentWidget(learningPageContentWidget),
+    _mainLayout(),
+    _pluginsLayout()
 {
+    _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Plugins", "Additional plugin information"));
+    _mainLayout.addLayout(&_pluginsLayout);
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        _pluginsLayout.addWidget(new LearningPagePluginActionsWidget(pluginFactory));
+    }
+
+    setLayout(&_mainLayout);
 }

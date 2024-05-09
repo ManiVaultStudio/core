@@ -40,7 +40,7 @@ QUrl TextDataFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl TextDataFactory::getGitHubRespositoryUrl() const
+QUrl TextDataFactory::getRespositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }

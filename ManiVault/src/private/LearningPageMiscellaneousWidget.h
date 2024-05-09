@@ -5,6 +5,9 @@
 #pragma once
 
 #include <QWidget>
+#include <QVBoxLayout>
+
+#include <widgets/FlowLayout.h> 
 
 class LearningPageContentWidget;
 
@@ -26,7 +29,9 @@ protected:
     LearningPageMiscellaneousWidget(LearningPageContentWidget* learningPageContentWidget);
 
 private:
-    LearningPageContentWidget* _learningPageContentWidget;  /** Pointer to owning learning page content widget */
+    LearningPageContentWidget*  _learningPageContentWidget;     /** Pointer to owning learning page content widget */
+    QVBoxLayout                 _mainLayout;                    /** Main vertical layout */
+    mv::gui::FlowLayout         _pluginsLayout;                 /** Show plugins side-by-side */
 
     friend class LearningPageContentWidget;
 };
