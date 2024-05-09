@@ -215,11 +215,7 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
     if (!githubRepositoryUrl.isValid())
         return {};
 
-#ifdef _DEBUG
-    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com/%1/feature/learning_center/README.md").arg(githubRepositoryUrl.path()));
-#else
-    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com/%1/master/README.md").arg(githubRepositoryUrl.path()));
-#endif
+    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com%1/master/README.md").arg(githubRepositoryUrl.path()));
 
     if (readmeMarkdownUrl.isValid())
         return readmeMarkdownUrl;
