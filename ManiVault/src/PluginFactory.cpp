@@ -36,7 +36,7 @@ PluginFactory::PluginFactory(Type type) :
 
         MarkdownDialog markdownDialog(getReadmeMarkdownUrl());
 
-        markdownDialog.setWindowTitle(QString("%1 readme").arg(_kind));
+        markdownDialog.setWindowTitle(QString("%1").arg(_kind));
         markdownDialog.exec();
     });
 }

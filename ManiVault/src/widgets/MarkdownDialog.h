@@ -28,10 +28,10 @@ public:
 
     /**
      * Construct with \p readmeUrl and pointer to \p parent widget
-     * @param readmeUrl URL of the plugin readme URL
+     * @param markdownUrl URL of the plugin markdown URL
      * @param parent Pointer to parent widget
      */
-    MarkdownDialog(const QUrl& readmeUrl, QWidget* parent = nullptr);
+    MarkdownDialog(const QUrl& markdownUrl, QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -44,6 +44,7 @@ public:
     }
 
 private:
+    QUrl                        _markdownUrl;           /** Location of the markdown file */
     QWebEngineView              _webEngineView;         /** Browser to show the markdown in */
     QWebEnginePage              _markdownPage;          /** Browser page to show the markdown in */
     mv::util::FileDownloader    _fileDownloader;        /** For downloading the markdown file */

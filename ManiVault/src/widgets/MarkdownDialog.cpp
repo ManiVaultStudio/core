@@ -18,8 +18,9 @@ using namespace mv::gui;
 
 namespace mv::util {
 
-MarkdownDialog::MarkdownDialog(const QUrl& readmeUrl, QWidget* parent /*= nullptr*/) :
+MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
+    _markdownUrl(markdownUrl),
     _webEngineView(),
     _markdownPage(),
     _fileDownloader(),
@@ -34,10 +35,13 @@ MarkdownDialog::MarkdownDialog(const QUrl& readmeUrl, QWidget* parent /*= nullpt
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         const auto markdown = QString(_fileDownloader.downloadedData());
 
-        _markdownDocument.setText(markdown);
+        if (!markdown.isEmpty())
+            _markdownDocument.setText(markdown);
+        else
+            _markdownDocument.setText(QString("# Unable to display markdown file\n*%1* not found").arg(_markdownUrl.path()));
     });
 
-    _fileDownloader.download(readmeUrl);
+    _fileDownloader.download(_markdownUrl);
 
     auto channel = new QWebChannel(this);
     
