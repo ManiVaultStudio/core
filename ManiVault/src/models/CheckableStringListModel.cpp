@@ -105,6 +105,7 @@ void CheckableStringListModel::setCheckedIndicesSet(const CheckedIndicesSet& che
 
 void CheckableStringListModel::setCheckedIndicesFromStrings(const QStringList& checkedStrings)
 {
+    const auto checkStatesList = _checkStatesList;
     std::fill(_checkStatesList.begin(), _checkStatesList.end(), false);
 
     for (const auto& checkedString : checkedStrings) {
@@ -115,8 +116,12 @@ void CheckableStringListModel::setCheckedIndicesFromStrings(const QStringList& c
 
         _checkStatesList[index] = true;
     }
+    if (checkStatesList != _checkStatesList)
+    {
+        emit dataChanged(index(0, 0), index(rowCount() - 1));
+    }
 
-    emit dataChanged(index(0, 0), index(rowCount() - 1));
+
 }
 
 }
