@@ -1043,7 +1043,16 @@ QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 
 QUrl PointDataFactory::getReadmeMarkdownUrl() const
 {
-    return QUrl("https://github.com/ManiVaultStudio/core/blob/master/README.md");
+#ifdef _DEBUG
+    return QUrl(QString("%1/blob/feature/learning_center/ManiVault/src/plugins/PointData/README.md").arg(getGitHubRespositoryUrl().path()));
+#else
+    return QUrl(QString("%1/blob/master/ManiVault/src/plugins/PointData/README.md").arg(getGitHubRespositoryUrl().path()));
+#endif
+}
+
+QUrl PointDataFactory::getGitHubRespositoryUrl() const
+{
+    return QUrl("https://github.com/ManiVaultStudio/core");
 }
 
 mv::plugin::RawData* PointDataFactory::produce()

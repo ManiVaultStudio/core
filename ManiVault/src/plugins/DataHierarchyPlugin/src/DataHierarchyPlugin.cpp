@@ -40,7 +40,16 @@ QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) c
 
 QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 {
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/README.md");
+#ifdef _DEBUG
+    return QUrl(QString("%1/blob/feature/learning_center/ManiVault/src/plugins/DataHierarchyPlugin/README.md").arg(getGitHubRespositoryUrl().path()));
+#else
+    return QUrl(QString("%1/blob/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md").arg(getGitHubRespositoryUrl().path()));
+#endif
+}
+
+QUrl DataHierarchyPluginFactory::getGitHubRespositoryUrl() const
+{
+    return QUrl("https://github.com/ManiVaultStudio/core");
 }
 
 ViewPlugin* DataHierarchyPluginFactory::produce()

@@ -149,5 +149,11 @@ public:
      */
     QUrl getReadmeMarkdownUrl() const override;
 
+    /**
+     * Get the URL of the GitHub repository
+     * @return URL of the GitHub repository
+     */
+    QUrl getGitHubRespositoryUrl() const override;
+
     mv::plugin::RawData* produce() override;
 };

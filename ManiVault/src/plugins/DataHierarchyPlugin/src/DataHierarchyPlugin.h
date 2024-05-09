@@ -61,7 +61,13 @@ public:
      */
     QUrl getReadmeMarkdownUrl() const override;
 
-	/**
+    /**
+     * Get the URL of the GitHub repository
+     * @return URL of the GitHub repository
+     */
+    QUrl getGitHubRespositoryUrl() const override;
+
+    /**
      * Produces the plugin
      * @return Pointer to the produced plugin
      */

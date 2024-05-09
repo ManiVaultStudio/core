@@ -478,7 +478,11 @@ QIcon ClusterDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 
 QUrl ClusterDataFactory::getReadmeMarkdownUrl() const
 {
-    return QUrl("https://github.com/ManiVaultStudio/core/blob/master/ManiVault/src/plugins/ClusterData/README.md");
+#ifdef _DEBUG
+    return QUrl(QString("%1/blob/feature/learning_center/ManiVault/src/plugins/ClusterData/README.md").arg(getGitHubRespositoryUrl().path()));
+#else
+    return QUrl(QString("%1/blob/master/ManiVault/src/plugins/ClusterData/README.md").arg(getGitHubRespositoryUrl().path()));
+#endif
 }
 
 QUrl ClusterDataFactory::getGitHubRespositoryUrl() const
