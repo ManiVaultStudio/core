@@ -68,9 +68,9 @@ QIcon SharedParametersPluginFactory::getIcon(const QColor& color /*= Qt::black*/
 QUrl SharedParametersPluginFactory::getReadmeMarkdownUrl() const
 {
 #ifdef _DEBUG
-    return QUrl(QString("%1/blob/feature/learning_center/ManiVault/src/plugins/SharedParametersPlugin/README.md").arg(getGitHubRespositoryUrl().path()));
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/SharedParametersPlugin/README.md");
 #else
-    return QUrl(QString("%1/blob/master/ManiVault/src/plugins/SharedParametersPlugin/README.md").arg(getGitHubRespositoryUrl().path()));
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/SharedParametersPlugin/README.md");
 #endif
 }
 

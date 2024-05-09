@@ -1044,9 +1044,9 @@ QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 QUrl PointDataFactory::getReadmeMarkdownUrl() const
 {
 #ifdef _DEBUG
-    return QUrl(QString("%1/blob/feature/learning_center/ManiVault/src/plugins/PointData/README.md").arg(getGitHubRespositoryUrl().path()));
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/PointData/README.md");
 #else
-    return QUrl(QString("%1/blob/master/ManiVault/src/plugins/PointData/README.md").arg(getGitHubRespositoryUrl().path()));
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/PointData/README.md");
 #endif
 }
 

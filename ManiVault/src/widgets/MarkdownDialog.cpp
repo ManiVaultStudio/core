@@ -29,25 +29,31 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("book"));
     setModal(true);
 
+    auto channel = new QWebChannel(this);
+
+    channel->registerObject(QStringLiteral("content"), &_markdownDocument);
+
+    _markdownPage.setWebChannel(channel);
+
+    connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this]() -> void {
+        _fileDownloader.download(_markdownUrl);
+    });
+
     _webEngineView.setPage(&_markdownPage);
     _webEngineView.load(QUrl("qrc:/HTML/MarkdownReadme"));
 
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         const auto markdown = QString(_fileDownloader.downloadedData());
 
+#ifdef MARKDOWN_DIALOG_VERBOSE
+        qDebug() << _markdownUrl.toString() << "downloaded (" << markdown .size() << "bytes)";
+#endif
+
         if (!markdown.isEmpty())
             _markdownDocument.setText(markdown);
         else
-            _markdownDocument.setText(QString("# Unable to display markdown file\n*%1* not found").arg(_markdownUrl.path()));
+            _markdownDocument.setText(QString("# Unable to display markdown file\n*%1* not found").arg(_markdownUrl.toString()));
     });
-
-    _fileDownloader.download(_markdownUrl);
-
-    auto channel = new QWebChannel(this);
-    
-    channel->registerObject(QStringLiteral("content"), &_markdownDocument);
-    
-    _markdownPage.setWebChannel(channel);
 
     auto layout = new QVBoxLayout();
 
@@ -60,8 +66,6 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
     layout->addLayout(bottomLayout);
 
     setLayout(layout);
-
-    //connect(&_okAction, &TriggerAction::triggered, this, &ProjectSettingsDialog::accept);
 }
 
 }

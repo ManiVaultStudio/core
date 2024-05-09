@@ -80,9 +80,9 @@ QIcon DataPropertiesPluginFactory::getIcon(const QColor& color /*= Qt::black*/) 
 QUrl DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
 {
 #ifdef _DEBUG
-    return QUrl(QString("%1/blob/feature/learning_center/ManiVault/src/plugins/DataPropertiesPlugin/README.md").arg(getGitHubRespositoryUrl().path()));
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/DataPropertiesPlugin/README.md");
 #else
-    return QUrl(QString("%1/blob/master/ManiVault/src/plugins/DataPropertiesPlugin/README.md").arg(getGitHubRespositoryUrl().path()));
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataPropertiesPlugin/README.md");
 #endif
 }
 

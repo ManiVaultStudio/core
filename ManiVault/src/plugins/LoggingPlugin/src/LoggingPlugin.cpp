@@ -44,7 +44,11 @@ QIcon LoggingPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 
 QUrl LoggingPluginFactory::getReadmeMarkdownUrl() const
 {
-    return QUrl("https://github.com/ManiVaultStudio/core/blob/master/README.md");
+#ifdef _DEBUG
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/LoggingPlugin/README.md");
+#else
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/LoggingPlugin/README.md");
+#endif
 }
 
 ViewPlugin* LoggingPluginFactory::produce()

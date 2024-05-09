@@ -99,9 +99,9 @@ QIcon ImageDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 QUrl ImageDataFactory::getReadmeMarkdownUrl() const
 {
 #ifdef _DEBUG
-    return QUrl(QString("%1/blob/feature/learning_center/ManiVault/src/plugins/ImageData/README.md").arg(getGitHubRespositoryUrl().path()));
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/ImageData/README.md");
 #else
-    return QUrl(QString("%1/blob/master/ManiVault/src/plugins/ImageData/README.md").arg(getGitHubRespositoryUrl().path()));
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/ImageData/README.md");
 #endif
 }
 
