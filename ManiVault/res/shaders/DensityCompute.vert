@@ -19,10 +19,7 @@ flat out float pass_weight;
 void main() {
     pass_texCoord = texCoord;
 
-    if(hasWeight)
-        pass_weight = weight;
-    else
-        pass_weight = 1;
+    pass_weight = hasWeight ? weight : 1;
 
     vec2 pos = (projMatrix * vec3(position, 1)).xy;
     gl_Position = vec4(vertex * sigma + pos, 0, 1);
