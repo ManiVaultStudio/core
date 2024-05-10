@@ -43,6 +43,8 @@ source_group( Plugin FILES ${TEXTDATA_SOURCES})
 
 add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES})
 
+add_library(ManiVault::${TEXTDATA} ALIAS ${TEXTDATA})
+
 qt_wrap_cpp(TEXTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${TEXTDATA})
 target_sources(${TEXTDATA} PRIVATE ${TEXTDATA_MOC})
 

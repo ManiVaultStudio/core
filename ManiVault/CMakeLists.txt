@@ -189,6 +189,8 @@ include(CMakeMvSourcesResources)      # defines RESOURCE_FILES, MAIN_APP_ICON_RE
 # -----------------------------------------------------------------------------
 add_library(${MV_PUBLIC_LIB} SHARED)
 
+add_library(ManiVault::Core ALIAS Core)
+
 set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     AUTOMOC ON
@@ -433,6 +435,10 @@ install(FILES
         DESTINATION cmake/mv
         COMPONENT MVPUBLIC_PACKAGE
 )
+
+set(ManiVault_INCLUDE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/" CACHE INTERNAL "")
+set(ManiVault_LIB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/" CACHE INTERNAL "")
+set(ManiVault_INSTALL_DIR "${MV_INSTALL_DIR}" CACHE INTERNAL "")
 
 # Call the install functions of the all public targets
 # needed for plugins directly after the build

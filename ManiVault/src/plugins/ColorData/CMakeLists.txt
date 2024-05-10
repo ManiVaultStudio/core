@@ -40,6 +40,8 @@ source_group( Plugin FILES ${COLORDATA_SOURCES})
 
 add_library(${COLORDATA} SHARED ${COLORDATA_SOURCES})
 
+add_library(ManiVault::${COLORDATA} ALIAS ${COLORDATA})
+
 qt_wrap_cpp(COLORDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${COLORDATA})
 target_sources(${COLORDATA} PRIVATE ${COLORDATA_MOC})
 
