@@ -420,7 +420,7 @@ write_basic_package_version_file(
 
 # create config file
 configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/MvCoreConfig.cmake.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MvCoreConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfig.cmake"
     INSTALL_DESTINATION cmake/mv
     PATH_VARS MV_INSTALL_DIR
