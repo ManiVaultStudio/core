@@ -4,16 +4,20 @@
 
 #include "LearningPageVideoStyledItemDelegate.h"
 
+#include <widgets/YouTubeVideoDialog.h>
+
 #include <QDebug>
 #include <QImage>
 
 using namespace mv::util;
+using namespace mv::gui;
 
+/**
+ * Get youTube thumbnail for \p videoId with \p quality
+ * @param videoId Globally unique identifier of the video
+ * @param quality String determining the quality: "default", "hqdefault", "mqdefault", "sddefault", "maxresdefault"
+ */
 QString getYouTubeThumbnailUrl(const QString& videoId, const QString& quality = "default") {
-    // Default quality options: "default", "hqdefault", "mqdefault", "sddefault", "maxresdefault"
-    // You can replace "default" with any of the quality options as per your requirement
-
-    // Construct the thumbnail URL with the video ID and quality
     return QString("https://img.youtube.com/vi/%1/%2.jpg").arg(videoId, quality);
 }
 
@@ -102,4 +106,13 @@ void LearningPageVideoStyledItemDelegate::EditorWidget::setEditorData(const QMod
 
         _tagsLayout.addWidget(label);
     }
+}
+
+void LearningPageVideoStyledItemDelegate::EditorWidget::mousePressEvent(QMouseEvent* event)
+{
+    QWidget::mousePressEvent(event);
+
+    const auto youTubeId = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::YouTubeId)).data().toString();
+
+    YouTubeVideoDialog::play(youTubeId);
 }

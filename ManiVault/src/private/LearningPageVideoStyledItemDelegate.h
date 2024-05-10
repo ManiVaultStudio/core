@@ -42,6 +42,8 @@ private:
          */
         void setEditorData(const QModelIndex& index);
 
+        void mousePressEvent(QMouseEvent* event);
+
     private:
         QPersistentModelIndex       _index;                     /** Editor model index */
         QHBoxLayout                 _mainLayout;                /** Main editor layout */

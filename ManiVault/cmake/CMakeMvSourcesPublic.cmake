@@ -401,6 +401,7 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
     src/widgets/FlowLayout.h
 	src/widgets/MarkdownDocument.h
 	src/widgets/MarkdownDialog.h
+	src/widgets/YouTubeVideoDialog.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
@@ -414,6 +415,7 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
     src/widgets/FlowLayout.cpp
 	src/widgets/MarkdownDocument.cpp
 	src/widgets/MarkdownDialog.cpp
+	src/widgets/YouTubeVideoDialog.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES
