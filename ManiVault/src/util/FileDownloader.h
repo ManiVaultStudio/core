@@ -18,7 +18,7 @@ namespace mv::util {
  * 
  * @author Thomas Kroes
  */
-class FileDownloader : public QObject
+class CORE_EXPORT FileDownloader : public QObject
 {
     Q_OBJECT
 

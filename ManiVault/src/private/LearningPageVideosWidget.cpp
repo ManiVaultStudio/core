@@ -11,6 +11,16 @@
 
 LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* learningPageContentWidget) :
     QWidget(learningPageContentWidget),
-    _learningPageContentWidget(learningPageContentWidget)
+    _learningPageContentWidget(learningPageContentWidget),
+    _mainLayout(),
+    _model(),
+    _filterModel(),
+    _hierarchyWidget(this, "Video", _model, &_filterModel)
 {
+    _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Videos", "Videos"));
+    _mainLayout.addWidget(&_hierarchyWidget);
+
+    _hierarchyWidget.setWindowIcon(mv::Application::getIconFont("FontAwesome").getIcon("Video"));
+
+    setLayout(&_mainLayout);
 }

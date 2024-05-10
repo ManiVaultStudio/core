@@ -6,6 +6,9 @@
 
 #include <QWidget>
 
+#include "LearningPageVideosModel.h"
+#include "LearningPageVideosFilterModel.h"
+
 class LearningPageContentWidget;
 
 /**
@@ -26,7 +29,11 @@ protected:
     LearningPageVideosWidget(LearningPageContentWidget* learningPageContentWidget);
 
 private:
-    LearningPageContentWidget* _learningPageContentWidget;  /** Pointer to owning learning page content widget */
+    LearningPageContentWidget*      _learningPageContentWidget;     /** Pointer to owning learning page content widget */
+    QVBoxLayout                     _mainLayout;                    /** Main vertical layout */
+    LearningPageVideosModel         _model;                         /** Videos model */
+    LearningPageVideosFilterModel   _filterModel;                   /** Videos filter model */
+    mv::gui::HierarchyWidget        _hierarchyWidget;               /** Widget for displaying the video actions */
 
     friend class LearningPageContentWidget;
 };
