@@ -203,12 +203,7 @@ target_sources(${MV_PUBLIC_LIB}
     ${SHADERS}
 )
 
-foreach(build_mode ${BUILD_MODES})
-    target_include_directories(${MV_PUBLIC_LIB} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<INSTALL_INTERFACE:./${build_mode}/include>
-    )
-endforeach()
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
 
@@ -398,7 +393,6 @@ foreach(build_mode ${BUILD_MODES})
         RUNTIME DESTINATION "${build_mode}/." COMPONENT MVPUBLIC_LINKLIB    # Windows .dll
         ARCHIVE DESTINATION "${build_mode}/lib" COMPONENT MVPUBLIC_LINKLIB  # Linux/Mac .so
         LIBRARY DESTINATION "${build_mode}/lib" COMPONENT MVPUBLIC_LINKLIB  # Windows .lib
-        INCLUDES DESTINATION "${build_mode}/include"
     )
 
     # Generate a .cmake file that can be imported from the install to enable plugin building
