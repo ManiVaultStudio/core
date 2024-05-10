@@ -7,7 +7,7 @@
 
 #include <QDebug>
 
-PageContentWidget::PageContentWidget(QWidget* parent /*= nullptr*/) :
+PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _mainLayout(),
     _columnsLayout(),
@@ -19,8 +19,18 @@ PageContentWidget::PageContentWidget(QWidget* parent /*= nullptr*/) :
     _columnsLayout.setContentsMargins(35, 35, 35, 35);
     _rowsLayout.setContentsMargins(35, 35, 35, 35);
 
-    _mainLayout.addLayout(&_columnsLayout, 1);
-    _mainLayout.addLayout(&_rowsLayout, 1);
+    switch (orientation) {
+        case Qt::Horizontal:
+            _mainLayout.addLayout(&_columnsLayout);
+            break;
+
+        case Qt::Vertical:
+            _mainLayout.addLayout(&_rowsLayout);
+            break;
+
+        default:
+            break;
+    }
 
     setLayout(&_mainLayout);
 

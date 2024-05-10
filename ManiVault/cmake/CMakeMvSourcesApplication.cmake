@@ -318,6 +318,7 @@ set(PRIVATE_LEARNING_PAGE_HEADERS
     src/private/LearningPageWidget.h
     src/private/LearningPageContentWidget.h
     src/private/LearningPageVideosWidget.h
+    src/private/LearningPageVideoStyledItemDelegate.h
     src/private/LearningPageMiscellaneousWidget.h
     src/private/LearningPagePluginAction.h
     src/private/LearningPageVideosModel.h
@@ -328,6 +329,7 @@ set(PRIVATE_LEARNING_PAGE_SOURCES
     src/private/LearningPageWidget.cpp
     src/private/LearningPageContentWidget.cpp
     src/private/LearningPageVideosWidget.cpp
+    src/private/LearningPageVideoStyledItemDelegate.cpp
     src/private/LearningPageMiscellaneousWidget.cpp
     src/private/LearningPagePluginAction.cpp
     src/private/LearningPageVideosModel.cpp

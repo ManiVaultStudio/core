@@ -47,7 +47,7 @@ void PageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::C
     // Therefore we translate the colorRole to a color using the global palette instead of the widget style option
     QString color = QApplication::palette().color(QPalette::Normal, colorRole).name();
     
-    widget->setStyleSheet("QWidget#StartPageHeaderWidget, QWidget#StartPageContentWidget { background-color: " + color + "}");
+    widget->setStyleSheet("QWidget#StartPageHeaderWidget, QWidget#PageContentWidget { background-color: " + color + "}");
 }
 
 QVBoxLayout& PageWidget::getContentLayout()

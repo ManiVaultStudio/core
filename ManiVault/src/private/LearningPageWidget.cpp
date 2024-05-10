@@ -10,5 +10,5 @@ LearningPageWidget::LearningPageWidget(QWidget* parent /*= nullptr*/) :
     PageWidget(parent),
     _contentWidget(this)
 {
-    getContentLayout().addWidget(&_contentWidget, 3);
+    getContentLayout().addWidget(&_contentWidget, Qt::AlignTop);
 }

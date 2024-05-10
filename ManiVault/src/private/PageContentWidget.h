@@ -20,10 +20,11 @@ class PageContentWidget : public QWidget
 protected:
 
     /**
-     * Construct with pointer to \p parent widget
+     * Construct with \p orientation and pointer to \p parent widget
+     * @param orientation Orientation of the content
      * @param parent Pointer to parent widget
      */
-    PageContentWidget(QWidget* parent = nullptr);
+    PageContentWidget(const Qt::Orientation& orientation, QWidget* parent = nullptr);
 
 public:
 

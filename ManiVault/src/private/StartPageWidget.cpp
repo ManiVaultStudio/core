@@ -10,7 +10,7 @@ StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
     PageWidget(parent),
     _startPageContentWidget(this)
 {
-    getContentLayout().addWidget(&_startPageContentWidget, 3);
+    getContentLayout().addWidget(&_startPageContentWidget, Qt::AlignTop);
 }
 
 void StartPageWidget::showEvent(QShowEvent* showEvent)

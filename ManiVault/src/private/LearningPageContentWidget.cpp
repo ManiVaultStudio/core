@@ -7,7 +7,7 @@
 #include <QDebug>
 
 LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr*/) :
-    PageContentWidget(parent),
+    PageContentWidget(Qt::Vertical, parent),
     _videosWidget(this),
     _miscellaneousWidget(this)
 {

@@ -34,7 +34,6 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 {
     auto layout = new QVBoxLayout();
 
-    
     layout->addWidget(&_openCreateProjectWidget);
     layout->addWidget(&_recentProjectsWidget);
     layout->addWidget(&_exampleProjectsWidget);

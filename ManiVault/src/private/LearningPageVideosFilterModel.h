@@ -6,6 +6,10 @@
 
 #include <QSortFilterProxyModel>
 
+#include <actions/OptionsAction.h>
+
+class LearningPageVideosModel;
+
 /**
  * Learning page videos filter model class
  *
@@ -22,4 +26,26 @@ public:
      * @param parent Pointer to parent object
     */
     LearningPageVideosFilterModel(QObject* parent = nullptr);
+
+    /**
+     * Returns whether \p row with \p parent is filtered out (false) or in (true)
+     * @param row Row index
+     * @param parent Parent index
+     * @return Boolean indicating whether the item is filtered in or out
+     */
+    bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+
+    /**
+     * Set source model to \p sourceModel
+     * @param sourceModel Pointer to source model
+     */
+    void setSourceModel(QAbstractItemModel* sourceModel) override;
+
+public: // Action getters
+
+    mv::gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
+
+private:
+    LearningPageVideosModel*    _learningPageVideosModel;   /** Pointer to source model */
+    mv::gui::OptionsAction      _tagsFilterAction;          /** Filter based on tag(s) */
 };
