@@ -62,16 +62,20 @@ target_link_libraries(${COLORDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 set_target_properties(${COLORDATA} PROPERTIES PUBLIC_HEADER "${COLORDATA_HEADERS}")
 
-install(TARGETS ${COLORDATA}
-    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
-    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
-    ARCHIVE DESTINATION lib     COMPONENT LINKLIB # Windows .lib
-    PUBLIC_HEADER DESTINATION include/${COLORDATA} COMPONENT HEADERS
-)
+foreach(build_mode ${BUILD_MODES})
+    install(TARGETS ${COLORDATA}
+        CONFIGURATIONS ${build_mode}
+        EXPORT "ManiVaultPublicExport${build_mode}" 
+        RUNTIME DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Windows .dll
+        LIBRARY DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Linux/Mac .so
+        ARCHIVE DESTINATION "${build_mode}/lib"     COMPONENT LINKLIB # Windows .lib
+        PUBLIC_HEADER DESTINATION "${build_mode}/include/${COLORDATA}" COMPONENT HEADERS
+    )
+endforeach()
 
 add_custom_command(TARGET ${COLORDATA} POST_BUILD
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
-        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}
 )
