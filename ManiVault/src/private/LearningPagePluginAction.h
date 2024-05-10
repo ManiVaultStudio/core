@@ -88,6 +88,8 @@ protected:
 
 private:
 
+    bool hasOverlay() const;
+
     void updateStyle();
 
 private:

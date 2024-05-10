@@ -90,7 +90,7 @@ void LearningPageVideoStyledItemDelegate::EditorWidget::setEditorData(const QMod
 
         label->setObjectName("Tag");
         label->setStyleSheet("QLabel#Tag { \
-            background-color: rgb(150, 150, 150); \
+            background-color: rgb(180, 180, 180); \
             border-radius: 5px; \
             padding-left: 4px; \
             padding-right: 4px; \

@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QEvent>
 
+using namespace mv;
 using namespace mv::plugin;
 
 LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugin::PluginFactory* pluginFactory, QWidget* parent /*= nullptr*/) :
@@ -25,21 +26,34 @@ LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugi
     setObjectName("LearningPagePluginActionsWidget");
     setMouseTracking(true);
 
-    auto categoryIconLabel = new QLabel();
+    auto categoryIconLabel  = new QLabel();
+    auto nameLabel          = new QLabel(_pluginFactory->getKind());
+    auto versionLabel       = new QLabel(QString("v%1").arg(_pluginFactory->getVersion()));
 
     categoryIconLabel->setPixmap(_pluginFactory->getCategoryIcon().pixmap(QSize(12, 12)));
 
-    auto label = new QLabel(_pluginFactory->getKind());
+    categoryIconLabel->setToolTip("Plugin category");
+    nameLabel->setToolTip("Name of the plugin");
+    versionLabel->setToolTip("Plugin version");
 
-    auto versionLabel = new QLabel(QString("v%1").arg(_pluginFactory->getVersion()));
+    //if (!hasOverlay()) {
+    //    nameLabel->setStyleSheet("color: gray;");
+    //    versionLabel->setStyleSheet("color: gray;");
+    //}
 
     _mainLayout.setContentsMargins(4, 3, 4, 3);
     _mainLayout.addWidget(categoryIconLabel);
-    _mainLayout.addWidget(label);
+    _mainLayout.addWidget(nameLabel);
     _mainLayout.addWidget(versionLabel);
 
-    if (_pluginFactory->getReadmeMarkdownUrl().isValid() || _pluginFactory->getRespositoryUrl().isValid())
-        _mainLayout.addWidget(new QLabel("..."));
+    if (hasOverlay()) {
+        auto elipsisLabel = new QLabel();
+
+        elipsisLabel->setPixmap(Application::getIconFont("FontAwesome").getIcon("ellipsis-h").pixmap(QSize(12, 12)));
+        elipsisLabel->setToolTip("Plugin has additional resources");
+
+        _mainLayout.addWidget(elipsisLabel);
+    }
 
     setLayout(&_mainLayout);
 
@@ -59,6 +73,9 @@ void LearningPagePluginActionsWidget::enterEvent(QEnterEvent* enterEvent)
 {
     QWidget::enterEvent(enterEvent);
 
+    if (!hasOverlay())
+        return;
+
     _actionsOverlayWidget.show();
     _actionsOverlayWidget.raise();
     _actionsOverlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
@@ -70,16 +87,24 @@ void LearningPagePluginActionsWidget::leaveEvent(QEvent* leaveEvent)
 {
     QWidget::leaveEvent(leaveEvent);
 
+    if (!hasOverlay())
+
+        return;
     _actionsOverlayWidget.hide();
     _actionsOverlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
     updateStyle();
 }
 
+bool LearningPagePluginActionsWidget::hasOverlay() const
+{
+    return _pluginFactory->getReadmeMarkdownUrl().isValid() || _pluginFactory->getRespositoryUrl().isValid();
+}
+
 void LearningPagePluginActionsWidget::updateStyle()
 {
     setStyleSheet("QWidget#LearningPagePluginActionsWidget { \
-        background-color: rgb(150, 150, 150); \
+        background-color: rgb(200, 200, 200); \
         border-radius: 5px; \
     }");
 }
@@ -99,26 +124,34 @@ LearningPagePluginActionsWidget::ActionsOverlayWidget::ActionsOverlayWidget(Lear
     const auto hasRespositoryUrl    = _learningPagePluginActionWidget->getPluginFactory()->getRespositoryUrl().isValid();
 
     if (hasReadmeMarkdownUrl) {
-        _mainLayout.addWidget(new ActionWidget("book", [this]() -> void {
+        auto triggerReadmeActionWidget = new ActionWidget("book", [this]() -> void {
             const_cast<PluginFactory*>(_learningPagePluginActionWidget->getPluginFactory())->getTriggerReadmeAction().trigger();
-        }));
+        });
+
+        triggerReadmeActionWidget->setToolTip("View the plugin readme content");
+
+        _mainLayout.addWidget(triggerReadmeActionWidget);
     }
 
     if (hasRespositoryUrl) {
-        _mainLayout.addWidget(new ActionWidget("globe", [this]() -> void {
+        auto visitRepositoryActionWidget = new ActionWidget("globe", [this]() -> void {
             const_cast<PluginFactory*>(_learningPagePluginActionWidget->getPluginFactory())->getVisitRepositoryAction().trigger();
-        }));
+        });
+
+        visitRepositoryActionWidget->setToolTip("Visit the plugin repository");
+
+        _mainLayout.addWidget(visitRepositoryActionWidget);
     }
 
     if (hasReadmeMarkdownUrl || hasRespositoryUrl) {
         setStyleSheet("QWidget#ActionsOverlayWidget { \
-            background: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop: 0.2 rgba(150, 150, 150, 0), stop: 0.7 rgb(150, 150, 150), stop: 1.0 rgb(150, 150, 150)); \
+            background: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop: 0.2 rgba(150, 150, 150, 0), stop: 0.7 rgba(200, 200, 200, 200), stop: 1.0 rgba(200, 200, 200, 200)); \
             border-radius: 5px; \
         }");
     }
     else {
         setStyleSheet("QWidget#ActionsOverlayWidget { \
-            background-color: rgba(150, 150, 150, 150); \
+            background-color: rgba(200, 200, 200, 200); \
             border-radius: 5px; \
         }");
     }
@@ -162,5 +195,5 @@ void LearningPagePluginActionsWidget::ActionWidget::leaveEvent(QEvent* leaveEven
 
 void LearningPagePluginActionsWidget::ActionWidget::updateStyle()
 {
-    setPixmap(mv::Application::getIconFont("FontAwesome").getIcon(_iconName, underMouse() ? QColor(80, 80, 80) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
+    setPixmap(mv::Application::getIconFont("FontAwesome").getIcon(_iconName, underMouse() ? QColor(40, 40, 40) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
 }
