@@ -293,6 +293,26 @@ if(APPLE)
     set_target_properties( ${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 endif()
 
+
+# -----------------------------------------------------------------------------
+# Plugin projects
+# -----------------------------------------------------------------------------
+
+# System plugins
+add_subdirectory(src/plugins/DataHierarchyPlugin)
+add_subdirectory(src/plugins/DataPropertiesPlugin)
+add_subdirectory(src/plugins/SharedParametersPlugin)
+add_subdirectory(src/plugins/LoggingPlugin)
+add_subdirectory(src/plugins/TasksPlugin)
+
+# Data plugins
+add_subdirectory(src/plugins/PointData)
+add_subdirectory(src/plugins/ColorData)
+add_subdirectory(src/plugins/TextData)
+add_subdirectory(src/plugins/ClusterData)
+add_subdirectory(src/plugins/ImageData)
+
+
 # -----------------------------------------------------------------------------
 # Installation
 # -----------------------------------------------------------------------------
@@ -541,25 +561,6 @@ if(${MV_INSTALL_ZLIB})
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     )
 endif()
-
-# -----------------------------------------------------------------------------
-# Plugin projects
-# -----------------------------------------------------------------------------
-
-# System plugins
-add_subdirectory(src/plugins/DataHierarchyPlugin)
-add_subdirectory(src/plugins/DataPropertiesPlugin)
-add_subdirectory(src/plugins/SharedParametersPlugin)
-add_subdirectory(src/plugins/LoggingPlugin)
-add_subdirectory(src/plugins/TasksPlugin)
-
-# Data plugins
-add_subdirectory(src/plugins/PointData)
-add_subdirectory(src/plugins/ColorData)
-add_subdirectory(src/plugins/TextData)
-add_subdirectory(src/plugins/ClusterData)
-add_subdirectory(src/plugins/ImageData)
-
 
 # -----------------------------------------------------------------------------
 # Miscellaneous
