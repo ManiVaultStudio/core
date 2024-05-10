@@ -138,18 +138,21 @@ endif()
 
 if(MV_UNITY_BUILD)
     set_target_properties(${POINTDATA} PROPERTIES UNITY_BUILD ON)
-    set_source_files_properties(${POINTDATA_MOC} PROPERTIES
-                        SKIP_UNITY_BUILD_INCLUSION TRUE)
+    set_source_files_properties(${POINTDATA_MOC} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
 
-install(TARGETS ${POINTDATA}
-    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
-    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
-    ARCHIVE DESTINATION lib     COMPONENT LINKLIB # Windows .lib
-    PUBLIC_HEADER DESTINATION include/${POINTDATA} COMPONENT HEADERS
-)
+foreach(build_mode ${BUILD_MODES})
+    install(TARGETS ${POINTDATA}
+        CONFIGURATIONS ${build_mode}
+        EXPORT "ManiVaultPublicExport${build_mode}" 
+        RUNTIME DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Windows .dll
+        LIBRARY DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Linux/Mac .so
+        ARCHIVE DESTINATION "${build_mode}/lib"     COMPONENT LINKLIB # Windows .lib
+        PUBLIC_HEADER DESTINATION "${build_mode}/include/${POINTDATA}" COMPONENT HEADERS
+    )
+endforeach()
 
 # Copy the external biovault_bfloat16 header into its own subfolder - cmake's install PUBLIC_HEADER flattens all subdirs
 install(FILES "${BFLOAT_HEADER}" DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16/")
@@ -159,7 +162,7 @@ add_custom_command(TARGET ${POINTDATA} POST_BUILD
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
-        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}
 )
 
 # Currentlt, no tests are available
