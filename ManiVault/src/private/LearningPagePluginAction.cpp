@@ -27,12 +27,13 @@ LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugi
 
     auto categoryIconLabel = new QLabel();
 
-    categoryIconLabel->setPixmap(_pluginFactory->getCategoryIcon().pixmap(QSize(16, 16)));
+    categoryIconLabel->setPixmap(_pluginFactory->getCategoryIcon().pixmap(QSize(12, 12)));
 
     auto label = new QLabel(_pluginFactory->getKind());
 
     auto versionLabel = new QLabel(QString("v%1").arg(_pluginFactory->getVersion()));
 
+    _mainLayout.setContentsMargins(4, 3, 4, 3);
     _mainLayout.addWidget(categoryIconLabel);
     _mainLayout.addWidget(label);
     _mainLayout.addWidget(versionLabel);
@@ -90,8 +91,8 @@ LearningPagePluginActionsWidget::ActionsOverlayWidget::ActionsOverlayWidget(Lear
     _widgetOverlayer(this, this, learningPagePluginActionWidget)
 {
     setObjectName("ActionsOverlayWidget");
-    
 
+    _mainLayout.setContentsMargins(4, 2, 4, 2);
     _mainLayout.addStretch(1);
 
     const auto hasReadmeMarkdownUrl = _learningPagePluginActionWidget->getPluginFactory()->getReadmeMarkdownUrl().isValid();
@@ -111,7 +112,7 @@ LearningPagePluginActionsWidget::ActionsOverlayWidget::ActionsOverlayWidget(Lear
 
     if (hasReadmeMarkdownUrl || hasRespositoryUrl) {
         setStyleSheet("QWidget#ActionsOverlayWidget { \
-            background: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop: 0.0 rgba(150, 150, 150, 0), stop: 0.5 rgb(150, 150, 150), stop: 1.0 rgb(150, 150, 150)); \
+            background: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop: 0.2 rgba(150, 150, 150, 0), stop: 0.7 rgb(150, 150, 150), stop: 1.0 rgb(150, 150, 150)); \
             border-radius: 5px; \
         }");
     }
@@ -127,9 +128,18 @@ LearningPagePluginActionsWidget::ActionsOverlayWidget::ActionsOverlayWidget(Lear
 
 LearningPagePluginActionsWidget::ActionWidget::ActionWidget(const QString& iconName, ClickedFunction clickedFunction, QWidget* parent /*= nullptr*/) :
     QLabel(parent),
+    _iconName(iconName),
     _clickedFunction(clickedFunction)
 {
-    setPixmap(mv::Application::getIconFont("FontAwesome").getIcon(iconName).pixmap(QSize(16, 16)));
+    setObjectName("ActionWidget");
+    setMouseTracking(true);
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
+
+    const auto fixedSize = QSize(12, 12);
+
+    setFixedSize(fixedSize);
+
+    updateStyle();
 }
 
 void LearningPagePluginActionsWidget::ActionWidget::mousePressEvent(QMouseEvent* event)
@@ -138,4 +148,19 @@ void LearningPagePluginActionsWidget::ActionWidget::mousePressEvent(QMouseEvent*
         return;
 
     _clickedFunction();
+}
+
+void LearningPagePluginActionsWidget::ActionWidget::enterEvent(QEnterEvent* enterEvent)
+{
+    updateStyle();
+}
+
+void LearningPagePluginActionsWidget::ActionWidget::leaveEvent(QEvent* leaveEvent)
+{
+    updateStyle();
+}
+
+void LearningPagePluginActionsWidget::ActionWidget::updateStyle()
+{
+    setPixmap(mv::Application::getIconFont("FontAwesome").getIcon(_iconName, underMouse() ? QColor(80, 80, 80) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
 }

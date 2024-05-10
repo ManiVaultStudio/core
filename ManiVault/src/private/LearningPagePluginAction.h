@@ -31,7 +31,25 @@ private:
         explicit ActionWidget(const QString& iconName, ClickedFunction clickedFunction, QWidget* parent = nullptr);
 
         void mousePressEvent(QMouseEvent* event);
+
+        /**
+         * Triggered on mouse hover
+         * @param enterEvent Pointer to enter event
+         */
+        void enterEvent(QEnterEvent* enterEvent) override;
+
+        /**
+         * Triggered on mouse leave
+         * @param leaveEvent Pointer to leave event
+         */
+        void leaveEvent(QEvent* leaveEvent) override;
+
     private:
+
+        void updateStyle();
+
+    private:
+        const QString   _iconName;
         ClickedFunction _clickedFunction;
     };
 

@@ -17,12 +17,13 @@ LearningPageMiscellaneousWidget::LearningPageMiscellaneousWidget(LearningPageCon
     _mainLayout(),
     _pluginsLayout()
 {
-    _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Plugins", "Additional plugin information"));
+    _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Plugin Resources", "Additional plugin information"));
     _mainLayout.addLayout(&_pluginsLayout);
 
-    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+    _pluginsLayout.setContentsMargins(0, 0, 0, 0);
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
         _pluginsLayout.addWidget(new LearningPagePluginActionsWidget(pluginFactory));
-    }
 
     setLayout(&_mainLayout);
 }
