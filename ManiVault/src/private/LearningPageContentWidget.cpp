@@ -11,30 +11,42 @@ using namespace mv::gui;
 LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr*/) :
     PageContentWidget(Qt::Vertical, parent),
     _videosWidget(this),
+    _tutorialsWidget(this),
+    _examplesWidget(this),
     _pluginResourcesWidget(this),
     _showVideosAction(this, "Show videos", true),
-    _showTutorialsAction(this, "Show tutorials", true),
+    _showTutorialsAction(this, "Show tutorials (will be added soon)", false),
+    _showExamplesAction(this, "Show examples (will be added soon)", false),
     _showPluginResourcesAction(this, "Show plugin resources"),
     _settingsAction(this, "Page settings"),
     _toStartPageAction(this, "To start page"),
     _toolbarAction(this, "Toolbar settings")
 {
     getRowsLayout().addWidget(&_videosWidget);
+    getRowsLayout().addWidget(&_tutorialsWidget);
+    getRowsLayout().addWidget(&_examplesWidget);
     getRowsLayout().addWidget(&_pluginResourcesWidget);
 
     _showVideosAction.setSettingsPrefix("LearningPage/ShowVideos");
     _showTutorialsAction.setSettingsPrefix("LearningPage/ShowTutorials");
+    _showExamplesAction.setSettingsPrefix("LearningPage/ShowExamples");
     _showPluginResourcesAction.setSettingsPrefix("LearningPage/ShowPluginResources");
+
+    _showTutorialsAction.setEnabled(false);
+    _showExamplesAction.setEnabled(false);
 
     const auto toggleSections = [this]() -> void {
         _videosWidget.setVisible(_showVideosAction.isChecked());
+        _tutorialsWidget.setVisible(_showTutorialsAction.isChecked());
+        _examplesWidget.setVisible(_showExamplesAction.isChecked());
         _pluginResourcesWidget.setVisible(_showPluginResourcesAction.isChecked());
     };
 
     toggleSections();
 
     connect(&_showVideosAction, &ToggleAction::toggled, this, toggleSections);
-    //connect(&_showTutorialsAction, &ToggleAction::toggled, this, toggleViews);
+    connect(&_showTutorialsAction, &ToggleAction::toggled, this, toggleSections);
+    connect(&_showExamplesAction, &ToggleAction::toggled, this, toggleSections);
     connect(&_showPluginResourcesAction, &ToggleAction::toggled, this, toggleSections);
 
     _settingsAction.setToolTip("Adjust page settings");
@@ -47,7 +59,8 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _settingsAction.addAction(&_showVideosAction);
-    //_settingsAction.addAction(&_showTutorialsAction);
+    _settingsAction.addAction(&_showTutorialsAction);
+    _settingsAction.addAction(&_showExamplesAction);
     _settingsAction.addAction(&_showPluginResourcesAction);
 
     _toolbarAction.setShowLabels(false);
