@@ -28,7 +28,7 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
 
     _filterModel.setFilterKeyColumn(static_cast<int>(LearningPageVideosModel::Column::Title));
 
-    _hierarchyWidget.getToolbarAction().setVisible(false);
+    //_hierarchyWidget.getToolbarAction().setVisible(false);
     _hierarchyWidget.setWindowIcon(mv::Application::getIconFont("FontAwesome").getIcon("video"));
     _hierarchyWidget.setHeaderHidden(true);
     _hierarchyWidget.getColumnsGroupAction().setVisible(false);
@@ -58,11 +58,13 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
     treeView.setColumnHidden(static_cast<int>(LearningPageVideosModel::Column::YouTubeUrl), true);
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        qDebug() << __FUNCTION__;
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
             openPersistentEditor(rowIndex);
     });
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        qDebug() << __FUNCTION__;
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
             closePersistentEditor(rowIndex);
     });

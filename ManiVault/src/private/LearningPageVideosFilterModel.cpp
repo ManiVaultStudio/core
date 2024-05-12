@@ -17,6 +17,7 @@ LearningPageVideosFilterModel::LearningPageVideosFilterModel(QObject* parent /*=
     QSortFilterProxyModel(parent),
     _tagsFilterAction(this, "Tags")
 {
+    setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &QSortFilterProxyModel::invalidate);
@@ -37,15 +38,25 @@ bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex&
     }
 
     const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
-    const auto tagsSet          = QSet<QString>(tagsList.begin(), tagsList.end());
     const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
-    auto filterTagsSet          = QSet<QString>(filterTagsList.begin(), filterTagsList.end());
-    const auto intersection     = filterTagsSet.intersect(tagsSet);
 
-    qDebug() << tagsSet << filterTagsSet;
+    auto matchTags = false;
 
-    if (intersection.isEmpty())
-        return false;
+    for (const auto& tag : tagsList) {
+        if (!filterTagsList.contains(tag))
+            continue;
+
+        matchTags = true;
+
+        break;
+    }
+
+    if (!matchTags) {
+        qDebug() << "reject row";
+        //return false;
+    }
+
+    qDebug() << __FUNCTION__ << "TRUE";
 
     return true;
 }

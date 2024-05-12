@@ -51,6 +51,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     getColumnsLayout().addWidget(&_getStartedWidget);
 
     _toolbarAction.setShowLabels(false);
+    _toolbarAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
+        widget->layout()->setContentsMargins(35, 10, 35, 10);
+    });
 
     _toolbarAction.addAction(new StretchAction(this, "Left stretch"));
     _toolbarAction.addAction(&_settingsAction);
