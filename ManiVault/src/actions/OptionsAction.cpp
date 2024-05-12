@@ -245,8 +245,6 @@ QVariantMap OptionsAction::toVariantMap() const
         { "Value", getSelectedOptions() }
     });
 
-    qDebug() << variantMap["Value"];
-
     if (isPublic()) {
         variantMap.insert({
             { "Options", getOptions() }
@@ -520,7 +518,7 @@ void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
         background-color: %1; \
         border-radius: 5px; \
         padding: 5px; \
-    }").arg(isOptionSelected ? (underMouse() ? "rgb(160, 160, 160)" : "rgb(150, 150, 150)") : (underMouse() ? "rgb(190, 190, 190)" : "rgb(180, 180, 180)")));
+    }").arg(isOptionSelected ? (underMouse() ? "rgb(160, 160, 160)" : "rgb(150, 150, 150)") : (underMouse() ? "rgb(220, 220, 220)" : "rgb(210, 210, 210)")));
 }
 
 QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

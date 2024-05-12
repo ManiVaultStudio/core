@@ -20,9 +20,6 @@ LearningPageVideosFilterModel::LearningPageVideosFilterModel(QObject* parent /*=
     setRecursiveFilteringEnabled(true);
 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &QSortFilterProxyModel::invalidate);
-
-    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
-    _tagsFilterAction.setSettingsPrefix("LearningPage/Videos/TagsFilter");
 }
 
 bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -39,11 +36,18 @@ bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex&
             return false;
     }
 
-    const auto tagsList     = index.siblingAtColumn(static_cast<int>(LearningPageVideosModel::Column::Tags)).data().toStringList();
-    const auto tagsSet      = QSet<QString>(tagsList.begin(), tagsList.end());
-    const auto intersection = _learningPageVideosModel->getTagsSet().intersect(tagsSet);
+    const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    const auto tagsSet          = QSet<QString>(tagsList.begin(), tagsList.end());
+    const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
+    auto filterTagsSet          = QSet<QString>(filterTagsList.begin(), filterTagsList.end());
+    const auto intersection     = filterTagsSet.intersect(tagsSet);
 
-    return !intersection.isEmpty();
+    qDebug() << tagsSet << filterTagsSet;
+
+    if (intersection.isEmpty())
+        return false;
+
+    return true;
 }
 
 void LearningPageVideosFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
@@ -56,7 +60,8 @@ void LearningPageVideosFilterModel::setSourceModel(QAbstractItemModel* sourceMod
         const auto options = QStringList(_learningPageVideosModel->getTagsSet().begin(), _learningPageVideosModel->getTagsSet().end());
 
         _tagsFilterAction.setOptions(options);
-        _tagsFilterAction.setSelectedOptions(options);
+        _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
+        _tagsFilterAction.setSettingsPrefix("LearningPage/Videos/FilterModel/TagsFilter");
     });
 }
 

@@ -113,7 +113,6 @@ QVariant LearningPageVideosModel::TitleItem::data(int role /*= Qt::UserRole + 1*
 
 QVariant LearningPageVideosModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
 {
-    qDebug() << getVariantMap()["tags"].toStringList();
     switch (role) {
         case Qt::EditRole:
             return getVariantMap()["tags"].toStringList();

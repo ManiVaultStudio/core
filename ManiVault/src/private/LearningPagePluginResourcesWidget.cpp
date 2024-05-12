@@ -22,8 +22,6 @@ LearningPagePluginResourcesWidget::LearningPagePluginResourcesWidget(LearningPag
 {
     setMinimumHeight(250);
 
-    _pluginTypesFilterAction.setSettingsPrefix("LearningPage/PluginResources/PluginTypesFilter");
-
     _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Plugin Resources", "Additional plugin information"));
     _mainLayout.addWidget(_pluginTypesFilterAction.createWidget(this, OptionsAction::Tags));
@@ -39,6 +37,7 @@ LearningPagePluginResourcesWidget::LearningPagePluginResourcesWidget(LearningPag
     QStringList pluginTypes(pluginTypesSet.begin(), pluginTypesSet.end());
 
     _pluginTypesFilterAction.initialize(pluginTypes, pluginTypes);
+    _pluginTypesFilterAction.setSettingsPrefix("LearningPage/PluginResources/PluginTypesFilter");
 
     connect(&_pluginTypesFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningPagePluginResourcesWidget::updateFlowLayout);
 
