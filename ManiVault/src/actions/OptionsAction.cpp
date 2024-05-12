@@ -119,6 +119,14 @@ void OptionsAction::selectOption(const QString& option, bool unselect /*= false*
     saveToSettings();
 }
 
+void OptionsAction::toggleOption(const QString& option)
+{
+    if (!hasOption(option))
+        return;
+
+    selectOption(option, isOptionSelected(option));
+}
+
 void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 {
     if (selectedOptions == getSelectedOptions())
@@ -236,6 +244,8 @@ QVariantMap OptionsAction::toVariantMap() const
     variantMap.insert({
         { "Value", getSelectedOptions() }
     });
+
+    qDebug() << variantMap["Value"];
 
     if (isPublic()) {
         variantMap.insert({
@@ -433,6 +443,86 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
     });
 }
 
+OptionsAction::TagsViewWidget::TagsViewWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags) :
+    QWidget(parent),
+    _optionsAction(optionsAction),
+    _filterModel(),
+    _flowLayout(),
+    _widgetsMap()
+{
+    setLayout(&_flowLayout);
+
+    _flowLayout.setContentsMargins(0, 0, 0, 0);
+
+    connect(_optionsAction, &OptionsAction::optionsChanged, this, &TagsViewWidget::updateFlowLayout);
+
+    updateFlowLayout();
+}
+
+void OptionsAction::TagsViewWidget::updateFlowLayout()
+{
+    _widgetsMap.clear();
+
+    QLayoutItem* layoutItem;
+
+    while ((layoutItem = _flowLayout.takeAt(0)) != nullptr) {
+        delete layoutItem->widget();
+        delete layoutItem;
+    }
+
+    for (const auto& option : _optionsAction->getOptions()) {
+        auto tagLabel = new TagLabel(option, _optionsAction);
+
+        _widgetsMap[option] = tagLabel;
+
+        _flowLayout.addWidget(tagLabel);
+    }
+}
+
+OptionsAction::TagsViewWidget::TagLabel::TagLabel(const QString& option, OptionsAction* optionsAction, QWidget* parent /*= nullptr*/) :
+    QLabel(option, parent),
+    _option(option),
+    _optionsAction(optionsAction)
+{
+    setObjectName("Tag");
+
+    connect(_optionsAction, &OptionsAction::selectedOptionsChanged, this, &TagLabel::updateStyle);
+
+    updateStyle();
+}
+
+void OptionsAction::TagsViewWidget::TagLabel::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton)
+        _optionsAction->toggleOption(_option);
+}
+
+void OptionsAction::TagsViewWidget::TagLabel::enterEvent(QEnterEvent* enterEvent)
+{
+    QLabel::enterEvent(enterEvent);
+
+    updateStyle();
+}
+
+void OptionsAction::TagsViewWidget::TagLabel::leaveEvent(QEvent* leaveEvent)
+{
+    QLabel::leaveEvent(leaveEvent);
+
+    updateStyle();
+}
+
+void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
+{
+    const auto isOptionSelected = _optionsAction->isOptionSelected(_option);
+
+    setToolTip(QString("%1 %2 selected, click to toggle").arg(_option, isOptionSelected ? "is" : "is not"));
+    setStyleSheet(QString("QLabel#Tag { \
+        background-color: %1; \
+        border-radius: 5px; \
+        padding: 5px; \
+    }").arg(isOptionSelected ? (underMouse() ? "rgb(160, 160, 160)" : "rgb(150, 150, 150)") : (underMouse() ? "rgb(190, 190, 190)" : "rgb(180, 180, 180)")));
+}
+
 QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     auto widget     = new WidgetActionWidget(parent, this, widgetFlags);
@@ -446,6 +536,9 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
     if (widgetFlags & WidgetFlag::ListView)
         layout->addWidget(new OptionsAction::ListViewWidget(parent, this, widgetFlags));
+
+    if (widgetFlags & WidgetFlag::Tags)
+        layout->addWidget(new OptionsAction::TagsViewWidget(parent, this, widgetFlags));
 
     widget->setLayout(layout);
 

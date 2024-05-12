@@ -97,5 +97,5 @@ private:
     QHBoxLayout                         _mainLayout;                /** Main vertical layout */
     ActionsOverlayWidget                _actionsOverlayWidget;      /** Overlay widget which shows the associated plugin actions */
 
-    friend class LearningPageMiscellaneousWidget;
+    friend class LearningPagePluginResourcesWidget;
 };

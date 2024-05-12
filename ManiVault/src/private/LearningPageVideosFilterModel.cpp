@@ -19,9 +19,10 @@ LearningPageVideosFilterModel::LearningPageVideosFilterModel(QObject* parent /*=
 {
     setRecursiveFilteringEnabled(true);
 
-    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
-
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &QSortFilterProxyModel::invalidate);
+
+    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
+    _tagsFilterAction.setSettingsPrefix("LearningPage/Videos/TagsFilter");
 }
 
 bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -37,8 +38,6 @@ bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex&
         if (!key.contains(filterRegularExpression()))
             return false;
     }
-
-    return true;
 
     const auto tagsList     = index.siblingAtColumn(static_cast<int>(LearningPageVideosModel::Column::Tags)).data().toStringList();
     const auto tagsSet      = QSet<QString>(tagsList.begin(), tagsList.end());

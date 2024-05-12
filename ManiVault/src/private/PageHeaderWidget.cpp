@@ -13,10 +13,10 @@
 using namespace mv;
 using namespace mv::gui;
 
-PageHeaderWidget::PageHeaderWidget(QWidget* parent /*= nullptr*/) :
+PageHeaderWidget::PageHeaderWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
-    _headerLabel(),
+    _iconLabel(),
     _iconName(":/Images/AppBackground256"),
     _previousHeight(-1)
 {
@@ -33,11 +33,11 @@ PageHeaderWidget::PageHeaderWidget(QWidget* parent /*= nullptr*/) :
     if (pixelRatio > 2)
         _iconName = ":/Images/AppBackground1024";
 
-    _headerLabel.setPixmap(QPixmap(_iconName).scaled(256, 256));
-    _headerLabel.setAlignment(Qt::AlignCenter);
+    _iconLabel.setPixmap(QPixmap(_iconName).scaled(256, 256));
+    _iconLabel.setAlignment(Qt::AlignCenter);
 
     _layout.setContentsMargins(50, 25, 50, 0);
-    _layout.addWidget(&_headerLabel);
+    _layout.addWidget(&_iconLabel);
 
     updateCustomStyle();
 
@@ -62,7 +62,7 @@ void PageHeaderWidget::resizeIcon(const QSize& newSize)
         float fracHeight =   newSize.height() / 296.0f; // 296 = 2 * top margin + default pixmap size
         float scale         = std::clamp(fracHeight, 0.1f, 1.0f);
 
-        _headerLabel.setPixmap(QPixmap(_iconName).scaled(scale * 256, scale * 256));
+        _iconLabel.setPixmap(QPixmap(_iconName).scaled(scale * 256, scale * 256));
 
         _previousHeight = newSize.height();
     }

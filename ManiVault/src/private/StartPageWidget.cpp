@@ -3,11 +3,12 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StartPageWidget.h"
+#include "ManiVaultVersion.h"
 
 #include <QDebug>
 
 StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
-    PageWidget(parent),
+    PageWidget(QString("<b>ManiVault</b> v%1.%2.%3%4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX)), parent),
     _startPageContentWidget(this)
 {
     getContentLayout().addWidget(&_startPageContentWidget, Qt::AlignTop);

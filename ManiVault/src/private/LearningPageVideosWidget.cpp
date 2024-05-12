@@ -21,11 +21,14 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
     _filterModel(),
     _hierarchyWidget(this, "Video", _model, &_filterModel)
 {
+    _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Videos", "Videos"));
+    _mainLayout.addWidget(_filterModel.getTagsFilterAction().createWidget(this, OptionsAction::Tags));
     _mainLayout.addWidget(&_hierarchyWidget, 1);
 
     _filterModel.setFilterKeyColumn(static_cast<int>(LearningPageVideosModel::Column::Title));
 
+    _hierarchyWidget.getToolbarAction().setVisible(false);
     _hierarchyWidget.setWindowIcon(mv::Application::getIconFont("FontAwesome").getIcon("video"));
     _hierarchyWidget.setHeaderHidden(true);
     _hierarchyWidget.getColumnsGroupAction().setVisible(false);
@@ -34,11 +37,6 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
     _hierarchyWidget.getFilterGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     _filterModel.getTagsFilterAction().setStretch(2);
-
-    auto& toolbarAction = _hierarchyWidget.getToolbarAction();
-
-    toolbarAction.setShowLabels(true);
-    toolbarAction.addAction(&_filterModel.getTagsFilterAction());
 
     setLayout(&_mainLayout);
 

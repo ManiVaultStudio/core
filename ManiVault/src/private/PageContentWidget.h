@@ -62,8 +62,8 @@ protected:
         return _rowsLayout;
     };
 
-private slots:
-    
+private:
+
     /** Update custom theme parts not caught by the system itself */
     void updateCustomStyle() ;
 

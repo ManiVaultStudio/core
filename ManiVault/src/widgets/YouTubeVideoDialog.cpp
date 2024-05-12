@@ -49,7 +49,7 @@ YouTubeVideoDialog::YouTubeVideoDialog(const QString& videoId, QWidget* parent /
     QWebEngineProfile::defaultProfile()->setHttpUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36");
 
     const auto videoUrl = QString("https://www.youtube.com/embed/%1").arg(_videoId);
-    _webEngineView.setUrl(QUrl("https://www.youtube.com/watch?v=Mq4AbdNsFVw"));
+    _webEngineView.setUrl(QUrl(videoUrl));
 
     //QString htmlContent = QString("<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/%1\" frameborder=\"0\" allowfullscreen></iframe>").arg(videoId);
     //_webEngineView.setHtml(htmlContent);

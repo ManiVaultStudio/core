@@ -7,7 +7,7 @@
 #include <QDebug>
 
 LearningPageWidget::LearningPageWidget(QWidget* parent /*= nullptr*/) :
-    PageWidget(parent),
+    PageWidget("<b>Learning Center</b>", parent),
     _contentWidget(this)
 {
     getContentLayout().addWidget(&_contentWidget, Qt::AlignTop);

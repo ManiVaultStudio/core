@@ -18,7 +18,7 @@ class LearningPageContentWidget;
  *
  * @author Thomas Kroes
  */
-class LearningPageMiscellaneousWidget : public QWidget
+class LearningPagePluginResourcesWidget : public QWidget
 {
 protected:
 
@@ -26,12 +26,18 @@ protected:
      * Construct with pointer to \p learningPageContentWidget
      * @param learningPageContentWidget Pointer to owning learning page content widget
      */
-    LearningPageMiscellaneousWidget(LearningPageContentWidget* learningPageContentWidget);
+    LearningPagePluginResourcesWidget(LearningPageContentWidget* learningPageContentWidget);
 
 private:
-    LearningPageContentWidget*  _learningPageContentWidget;     /** Pointer to owning learning page content widget */
-    QVBoxLayout                 _mainLayout;                    /** Main vertical layout */
-    mv::gui::FlowLayout         _pluginsLayout;                 /** Show plugins side-by-side */
+
+    /** Updates the displayed plugin(s) based on the current filtering */
+    void updateFlowLayout();
+
+private:
+    LearningPageContentWidget*      _learningPageContentWidget;     /** Pointer to owning learning page content widget */
+    QVBoxLayout                     _mainLayout;                    /** Main vertical layout */
+    mv::gui::OptionsAction          _pluginTypesFilterAction;       /** Filter based on plugin types */
+    mv::gui::FlowLayout             _pluginsLayout;                 /** Show plugins side-by-side */
 
     friend class LearningPageContentWidget;
 };

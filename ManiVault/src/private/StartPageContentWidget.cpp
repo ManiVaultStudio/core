@@ -14,15 +14,15 @@ using namespace mv::gui;
 
 StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     PageContentWidget(Qt::Horizontal, parent),
-    _toolbarLayout(),
     _compactViewAction(this, "Compact"),
     _toggleOpenCreateProjectAction(this, "Open & Create", true),
     _toggleRecentProjectsAction(this, "Recent Projects", true),
     _toggleExampleProjectsAction(this, "Examples"),
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleProjectFromDataAction(this, "Project From Data", true),
-    _toggleTutorialVideosAction(this, "Instructional Videos"),
     _settingsAction(this, "Settings"),
+    _toLearningCenterAction(this, "Learning center"),
+    _toolbarAction(this, "Toolbar settings"),
     _openProjectWidget(this),
     _getStartedWidget(this)
 {
@@ -32,29 +32,35 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleExampleProjectsAction.setSettingsPrefix("StartPage/ToggleExampleProjects");
     _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
     _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
-    _toggleTutorialVideosAction.setSettingsPrefix("StartPage/ToggleTutorialVideos");
 
     _settingsAction.setText("Toggle Views");
-    
-    _settingsAction.setIconByName("eye");
+    _settingsAction.setToolTip("Adjust page settings");
+    _settingsAction.setIconByName("cog");
+
+    _toLearningCenterAction.setIconByName("chalkboard-teacher");
+    _toLearningCenterAction.setToolTip("Go to the learning center");
+
+    _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
     _settingsAction.addAction(&_toggleRecentProjectsAction);
     _settingsAction.addAction(&_toggleExampleProjectsAction);
     _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);
-    _settingsAction.addAction(&_toggleTutorialVideosAction);
-
-    _toolbarLayout.setContentsMargins(35, 10, 35, 10);
+    _settingsAction.addAction(&_compactViewAction);
 
     getColumnsLayout().addWidget(&_openProjectWidget);
     getColumnsLayout().addWidget(&_getStartedWidget);
 
-    getMainLayout().addLayout(&_toolbarLayout);
+    _toolbarAction.addAction(new StretchAction(this, "Left stretch"));
+    _toolbarAction.addAction(&_settingsAction);
+    _toolbarAction.addAction(&_toLearningCenterAction);
 
-    _toolbarLayout.addWidget(_compactViewAction.createWidget(this));
-    _toolbarLayout.addStretch(1);
-    _toolbarLayout.addWidget(_settingsAction.createCollapsedWidget(this));
+    getMainLayout().addWidget(_toolbarAction.createWidget(this));
+
+    connect(&_toLearningCenterAction, &TriggerAction::triggered, this, []() -> void {
+        mv::help().getShowLearningCenterAction().setChecked(true);
+    });
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
 }

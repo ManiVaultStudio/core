@@ -7,12 +7,15 @@
 #include <QDebug>
 #include <QPainter>
 
-PageWidget::PageWidget(QWidget* parent /*= nullptr*/) :
+PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
     _contentLayout(),
+    _pageHeaderWidget(title),
+    _titleLabel(title),
     _backgroundImage(":/Images/StartPageBackground")
 {
+    setObjectName("PageWidget");
     setLayout(&_layout);
     setMinimumWidth(500);
 
@@ -21,9 +24,26 @@ PageWidget::PageWidget(QWidget* parent /*= nullptr*/) :
 
     _contentLayout.addWidget(&_pageHeaderWidget,  1);
 
+    _titleLabel.setObjectName("Title");
+    _titleLabel.setAutoFillBackground(true);
+    _titleLabel.setStyleSheet(" \
+        font-size: 18pt; \
+        color: rgb(80, 80, 80); \
+        padding-top: 10px; \
+        padding-bottom: 0px; \
+    ");
+
+    _titleLabel.setAlignment(Qt::AlignCenter);
+
+    _contentLayout.addWidget(&_titleLabel);
+
     _layout.addStretch(1);
     _layout.addLayout(&_contentLayout, 2);
     _layout.addStretch(1);
+
+    connect(qApp, &QApplication::paletteChanged, this, &PageWidget::updateCustomStyle);
+
+    updateCustomStyle();
 }
 
 void PageWidget::paintEvent(QPaintEvent* paintEvent)
@@ -47,10 +67,15 @@ void PageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::C
     // Therefore we translate the colorRole to a color using the global palette instead of the widget style option
     QString color = QApplication::palette().color(QPalette::Normal, colorRole).name();
     
-    widget->setStyleSheet("QWidget#StartPageHeaderWidget, QWidget#PageContentWidget { background-color: " + color + "}");
+    widget->setStyleSheet("QWidget#PageWidget, QWidget#StartPageHeaderWidget, QWidget#PageContentWidget, QLabel#Title { background-color: " + color + "}");
 }
 
 QVBoxLayout& PageWidget::getContentLayout()
 {
     return _contentLayout;
+}
+
+void PageWidget::updateCustomStyle()
+{
+    PageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }

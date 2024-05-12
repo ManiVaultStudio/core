@@ -6,11 +6,7 @@
 
 #include "PageContentWidget.h"
 #include "LearningPageVideosWidget.h"
-#include "LearningPageMiscellaneousWidget.h"
-
-#include <QWidget>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
+#include "LearningPagePluginResourcesWidget.h"
 
 /**
  * Learning page content widget class
@@ -30,8 +26,14 @@ protected:
     LearningPageContentWidget(QWidget* parent = nullptr);
 
 private:
-    LearningPageVideosWidget            _videosWidget;          /** Learning page video content widget */
-    LearningPageMiscellaneousWidget     _miscellaneousWidget;   /** Learning page miscellaneous content widget */
+    mv::gui::ToggleAction               _showVideosAction;              /** Toggle videos action */
+    mv::gui::ToggleAction               _showTutorialsAction;           /** Toggle tutorials action */
+    mv::gui::ToggleAction               _showPluginResourcesAction;     /** Toggle plugin resources action */
+    mv::gui::GroupAction                _settingsAction;                /** Page settings action */
+    mv::gui::TriggerAction              _toStartPageAction;             /** Trigger action for showing the start page */
+    mv::gui::HorizontalGroupAction      _toolbarAction;                 /** Bottom toolbar action */
+    LearningPageVideosWidget            _videosWidget;                  /** Learning page video content widget */
+    LearningPagePluginResourcesWidget   _pluginResourcesWidget;         /** Learning page plugin resources content widget */
 
     friend class LearningPageWidget;
 };

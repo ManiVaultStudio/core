@@ -20,10 +20,11 @@ class PageWidget : public QWidget
 public:
 
     /**
-     * Construct with pointer to \p parent widget
+     * Construct with \p title and pointer to \p parent widget
+     * @param title Header title
      * @param parent Pointer to parent widget
      */
-    PageWidget(QWidget* parent = nullptr);
+    explicit PageWidget(const QString& title, QWidget* parent = nullptr);
 
     /**
      * Override paint event to draw the logo in the background
@@ -47,8 +48,14 @@ protected:
     QVBoxLayout& getContentLayout();
 
 private:
+
+    /** Update custom theme parts not caught by the system itself */
+    void updateCustomStyle();
+
+private:
     QHBoxLayout         _layout;                /** Main layout */
     QVBoxLayout         _contentLayout;         /** Layout for the main content */
     PageHeaderWidget    _pageHeaderWidget;      /** Widget which contains the header */
+    QLabel              _titleLabel;            /** Title label */
     QPixmap             _backgroundImage;       /** Background image */
 };

@@ -34,9 +34,9 @@ PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget
 
     setLayout(&_mainLayout);
 
-    updateCustomStyle();
-
     connect(qApp, &QApplication::paletteChanged, this, &PageContentWidget::updateCustomStyle);
+
+    updateCustomStyle();
 }
 
 QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString& tooltip)

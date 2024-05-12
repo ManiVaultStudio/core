@@ -41,7 +41,7 @@ LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugi
     //    versionLabel->setStyleSheet("color: gray;");
     //}
 
-    _mainLayout.setContentsMargins(4, 3, 4, 3);
+    _mainLayout.setContentsMargins(6, 3, 6, 3);
     _mainLayout.addWidget(categoryIconLabel);
     _mainLayout.addWidget(nameLabel);
     _mainLayout.addWidget(versionLabel);

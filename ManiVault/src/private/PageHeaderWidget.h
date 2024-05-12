@@ -19,10 +19,11 @@ class PageHeaderWidget : public QWidget
 public:
 
     /**
-     * Construct with \p parent widget
+     * Construct with \p title and pointer to \p parent widget
+     * @param title Header title
      * @param parent Pointer to parent widget
      */
-    PageHeaderWidget(QWidget* parent = nullptr);
+    explicit PageHeaderWidget(const QString& title, QWidget* parent = nullptr);
 
 protected:
     /**
@@ -51,7 +52,7 @@ private slots:
     
 protected:
     QVBoxLayout     _layout;            /** Main layout */
-    QLabel          _headerLabel;       /** Header label */
+    QLabel          _iconLabel;         /** Icon label */
 
 private:
     QString         _iconName;          /** Name of background icon */
