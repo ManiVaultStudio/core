@@ -39,6 +39,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     _toLearningCenterAction.setIconByName("chalkboard-teacher");
     _toLearningCenterAction.setToolTip("Go to the learning center");
+    _toLearningCenterAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
@@ -52,6 +53,8 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     getColumnsLayout().addWidget(&_openProjectWidget);
     getColumnsLayout().addWidget(&_getStartedWidget);
 
+    _toolbarAction.setShowLabels(false);
+
     _toolbarAction.addAction(new StretchAction(this, "Left stretch"));
     _toolbarAction.addAction(&_settingsAction);
     _toolbarAction.addAction(&_toLearningCenterAction);
@@ -59,6 +62,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     getMainLayout().addWidget(_toolbarAction.createWidget(this));
 
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, []() -> void {
+        mv::projects().getShowStartPageAction().setChecked(false);
         mv::help().getShowLearningCenterAction().setChecked(true);
     });
 

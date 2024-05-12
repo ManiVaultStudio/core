@@ -12,8 +12,8 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     PageContentWidget(Qt::Vertical, parent),
     _videosWidget(this),
     _pluginResourcesWidget(this),
-    _showVideosAction(this, "Show videos"),
-    _showTutorialsAction(this, "Show tutorials"),
+    _showVideosAction(this, "Show videos", true),
+    _showTutorialsAction(this, "Show tutorials", true),
     _showPluginResourcesAction(this, "Show plugin resources"),
     _settingsAction(this, "Page settings"),
     _toStartPageAction(this, "To start page"),
@@ -26,17 +26,31 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     _showTutorialsAction.setSettingsPrefix("LearningPage/ShowTutorials");
     _showPluginResourcesAction.setSettingsPrefix("LearningPage/ShowPluginResources");
 
+    const auto toggleSections = [this]() -> void {
+        _videosWidget.setVisible(_showVideosAction.isChecked());
+        _pluginResourcesWidget.setVisible(_showPluginResourcesAction.isChecked());
+    };
+
+    toggleSections();
+
+    connect(&_showVideosAction, &ToggleAction::toggled, this, toggleSections);
+    //connect(&_showTutorialsAction, &ToggleAction::toggled, this, toggleViews);
+    connect(&_showPluginResourcesAction, &ToggleAction::toggled, this, toggleSections);
+
     _settingsAction.setToolTip("Adjust page settings");
     _settingsAction.setIconByName("cog");
 
     _toStartPageAction.setIconByName("door-open");
     _toStartPageAction.setToolTip("Go to the start page");
+    _toStartPageAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _settingsAction.addAction(&_showVideosAction);
     //_settingsAction.addAction(&_showTutorialsAction);
     _settingsAction.addAction(&_showPluginResourcesAction);
+
+    _toolbarAction.setShowLabels(false);
 
     _toolbarAction.addAction(new StretchAction(this, "Left stretch"));
     _toolbarAction.addAction(&_settingsAction);
@@ -45,6 +59,7 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     getMainLayout().addWidget(_toolbarAction.createWidget(this));
 
     connect(&_toStartPageAction, &TriggerAction::triggered, this, []() -> void {
-        mv::projects().getShowStartPageAction().setChecked(true);
+        mv::help().getShowLearningCenterAction().setChecked(false);
+        mv::projects().getShowStartPageAction().setChecked(true);\
     });
 }
