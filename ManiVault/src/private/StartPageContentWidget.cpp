@@ -17,7 +17,6 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _compactViewAction(this, "Compact"),
     _toggleOpenCreateProjectAction(this, "Open & Create", true),
     _toggleRecentProjectsAction(this, "Recent Projects", true),
-    _toggleExampleProjectsAction(this, "Examples"),
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleProjectFromDataAction(this, "Project From Data", true),
     _settingsAction(this, "Settings"),
@@ -29,7 +28,6 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
     _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
     _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
-    _toggleExampleProjectsAction.setSettingsPrefix("StartPage/ToggleExampleProjects");
     _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
     _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
 
@@ -45,7 +43,6 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
     _settingsAction.addAction(&_toggleRecentProjectsAction);
-    _settingsAction.addAction(&_toggleExampleProjectsAction);
     _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);
     _settingsAction.addAction(&_compactViewAction);

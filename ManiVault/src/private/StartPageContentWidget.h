@@ -37,7 +37,6 @@ public: // Action getters
     const mv::gui::ToggleAction& getCompactViewAction() const { return _compactViewAction; }
     const mv::gui::ToggleAction& getToggleOpenCreateProjectAction() const { return _toggleOpenCreateProjectAction; }
     const mv::gui::ToggleAction& getToggleRecentProjectsAction() const { return _toggleRecentProjectsAction; }
-    const mv::gui::ToggleAction& getToggleExampleProjectsAction() const { return _toggleExampleProjectsAction; }
     const mv::gui::ToggleAction& getToggleProjectFromWorkspaceAction() const { return _toggleProjectFromWorkspaceAction; }
     const mv::gui::ToggleAction& getToggleProjectFromDataAction() const { return _toggleProjectFromDataAction; }
 
@@ -45,7 +44,6 @@ private:
     mv::gui::ToggleAction           _compactViewAction;                 /** Toggle compact view on/off */
     mv::gui::ToggleAction           _toggleOpenCreateProjectAction;     /** Toggle open and create project section */
     mv::gui::ToggleAction           _toggleRecentProjectsAction;        /** Toggle recent projects section */
-    mv::gui::ToggleAction           _toggleExampleProjectsAction;       /** Toggle example projects section */
     mv::gui::ToggleAction           _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
     mv::gui::ToggleAction           _toggleProjectFromDataAction;       /** Toggle project from data section */
     mv::gui::GroupAction            _settingsAction;                    /** Settings action */
