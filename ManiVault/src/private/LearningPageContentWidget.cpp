@@ -15,14 +15,14 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     _examplesWidget(this),
     _pluginResourcesWidget(this),
     _showVideosAction(this, "Show videos", true),
-    _showTutorialsAction(this, "Show tutorials (will be added soon)", false),
-    _showExamplesAction(this, "Show examples (will be added soon)", false),
+    _showTutorialsAction(this, "Show tutorials (coming soon)", false),
+    _showExamplesAction(this, "Show examples (coming soon)", false),
     _showPluginResourcesAction(this, "Show plugin resources"),
     _settingsAction(this, "Page settings"),
     _toStartPageAction(this, "To start page"),
     _toolbarAction(this, "Toolbar settings")
 {
-    getRowsLayout().addWidget(&_videosWidget);
+    getRowsLayout().addWidget(&_videosWidget, 2);
     getRowsLayout().addWidget(&_tutorialsWidget);
     getRowsLayout().addWidget(&_examplesWidget);
     getRowsLayout().addWidget(&_pluginResourcesWidget);

@@ -8,6 +8,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QTextBrowser>
 
 #include "LearningPageVideosModel.h"
 
@@ -32,9 +33,10 @@ private:
 
         /**
          * Construct with pointer to \p parent widget
+         * @param delegate Pointer to delegate item
          * @param parent Pointer to parent widget
          */
-        EditorWidget(QWidget* parent = nullptr);
+        EditorWidget(LearningPageVideoStyledItemDelegate* delegate, QWidget* parent = nullptr);
 
         /**
          * Set editor data from model \p index
@@ -45,14 +47,15 @@ private:
         void mousePressEvent(QMouseEvent* event);
 
     private:
+        LearningPageVideoStyledItemDelegate* _delegate;
         QPersistentModelIndex       _index;                     /** Editor model index */
         QHBoxLayout                 _mainLayout;                /** Main editor layout */
         QVBoxLayout                 _textLayout;                /** Right text layout */
         QLabel                      _thumbnailLabel;
-        QLabel                      _titleLabel;
-        QLabel                      _summaryLabel;
+        QTextBrowser                _propertiesLabel;
         mv::gui::FlowLayout         _tagsLayout;
         mv::util::FileDownloader    _fileDownloader;
+        QPixmap                     _thumbnailPixmap;
     };
 
 public:

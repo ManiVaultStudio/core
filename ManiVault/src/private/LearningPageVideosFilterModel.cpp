@@ -37,26 +37,26 @@ bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex&
             return false;
     }
 
-    const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
-    const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
+    //const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    //const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
 
-    auto matchTags = false;
+    //auto matchTags = false;
 
-    for (const auto& tag : tagsList) {
-        if (!filterTagsList.contains(tag))
-            continue;
+    //for (const auto& tag : tagsList) {
+    //    if (!filterTagsList.contains(tag))
+    //        continue;
 
-        matchTags = true;
+    //    matchTags = true;
 
-        break;
-    }
+    //    break;
+    //}
 
-    if (!matchTags) {
-        qDebug() << "reject row";
-        //return false;
-    }
+    //if (!matchTags) {
+    //    qDebug() << "reject row";
+    //    //return false;
+    //}
 
-    qDebug() << __FUNCTION__ << "TRUE";
+    //qDebug() << __FUNCTION__ << "TRUE";
 
     return true;
 }
