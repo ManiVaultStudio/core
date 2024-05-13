@@ -50,9 +50,10 @@ private:
         LearningPageVideoStyledItemDelegate* _delegate;
         QPersistentModelIndex       _index;                     /** Editor model index */
         QHBoxLayout                 _mainLayout;                /** Main editor layout */
+        QVBoxLayout                 _thumbnailLayout;                /**  */
         QVBoxLayout                 _textLayout;                /** Right text layout */
         QLabel                      _thumbnailLabel;
-        QTextBrowser                _propertiesLabel;
+        QTextBrowser                _propertiesTextBrowser;
         mv::gui::FlowLayout         _tagsLayout;
         mv::util::FileDownloader    _fileDownloader;
         QPixmap                     _thumbnailPixmap;

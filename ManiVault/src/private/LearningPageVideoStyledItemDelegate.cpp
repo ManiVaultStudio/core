@@ -36,7 +36,7 @@ QSize LearningPageVideoStyledItemDelegate::sizeHint(const QStyleOptionViewItem& 
     editorWidget->setEditorData(index);
     editorWidget->adjustSize();
 
-    return editorWidget->sizeHint();// dynamic_cast<QWidget*>(parent())->sizeHint().width());
+    return editorWidget->sizeHint();
 }
 
 QWidget* LearningPageVideoStyledItemDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
@@ -63,42 +63,56 @@ LearningPageVideoStyledItemDelegate::EditorWidget::EditorWidget(LearningPageVide
     QWidget(parent),
     _delegate(delegate),
     _mainLayout(),
+    _thumbnailLayout(),
     _textLayout(),
     _thumbnailLabel(),
-    _propertiesLabel(),
+    _propertiesTextBrowser(),
     _tagsLayout(),
     _thumbnailPixmap()
 {
-    _mainLayout.setContentsMargins(0, 0, 0, 0);
+    //_mainLayout.setContentsMargins(0, 0, 0, 0);
+    _mainLayout.setAlignment(Qt::AlignTop);
 
-    _textLayout.addWidget(&_propertiesLabel);
-    _textLayout.addLayout(&_tagsLayout);
-    //_textLayout.addStretch(1);
+    _thumbnailLayout.addWidget(&_thumbnailLabel);
+    _thumbnailLayout.setAlignment(Qt::AlignTop);
 
-    _thumbnailLabel.setStyleSheet("border: 1px solid red;");
+    _textLayout.setContentsMargins(0, 0, 0, 0);
+    _textLayout.setAlignment(Qt::AlignTop);
+    _textLayout.addWidget(&_propertiesTextBrowser);
+    _textLayout.addStretch(1);
+    //_textLayout.addLayout(&_tagsLayout);
 
-    _propertiesLabel.setReadOnly(true);
-    _propertiesLabel.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _propertiesLabel.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _propertiesLabel.setStyleSheet("background-color: yellow; border: none; margin: 0; padding: 0;");
-    _propertiesLabel.setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    _thumbnailLabel.setStyleSheet("border: 2px solid red;");
 
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+    _propertiesTextBrowser.setReadOnly(true);
+    _propertiesTextBrowser.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _propertiesTextBrowser.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _propertiesTextBrowser.setStyleSheet("background-color: yellow; border: none; margin: 0px; padding: 0px;");//transparent
+    _propertiesTextBrowser.setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    //_propertiesTextBrowser.document()->setDefaultStyleSheet("div { margin: 0px; }");
+    _propertiesTextBrowser.document()->setDocumentMargin(0);
 
-    
+    connect(_propertiesTextBrowser.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [this]() -> void {
+        _propertiesTextBrowser.setFixedHeight(_propertiesTextBrowser.document()->size().height());
 
-    //_mainLayout.addWidget(&_thumbnailLabel);
-    _mainLayout.addWidget(&_propertiesLabel);
-    //_mainLayout.addLayout(&_textLayout);
+        emit _delegate->sizeHintChanged(_index);
+    });
+
+    _mainLayout.addLayout(&_thumbnailLayout);
+    _mainLayout.addLayout(&_textLayout);
 
     setLayout(&_mainLayout);
 
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         _thumbnailPixmap = QPixmap::fromImage(QImage::fromData(_fileDownloader.downloadedData()));
 
+        const auto marginToRemove   = 10;
+        const auto rectangleToCopy  = QRect(0, marginToRemove,_thumbnailPixmap.width(), _thumbnailPixmap.height() - (2 * marginToRemove));
+
+        _thumbnailPixmap = _thumbnailPixmap.copy(rectangleToCopy);
+
         _thumbnailLabel.setFixedSize(_thumbnailPixmap.size());
-        _thumbnailLabel.setPixmap(_thumbnailPixmap);
-        _thumbnailLabel.setAlignment(Qt::AlignTop);
+        _thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
     });
 }
 
@@ -107,7 +121,7 @@ void LearningPageVideoStyledItemDelegate::EditorWidget::setEditorData(const QMod
     _index = index;
 
     if (_thumbnailPixmap.isNull()) {
-        const auto youTubeId = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::YouTubeId)).data().toString();
+        const auto youTubeId            = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::YouTubeId)).data().toString();
         const auto youtTubeThumbnailUrl = getYouTubeThumbnailUrl(youTubeId);
 
         _fileDownloader.download(QUrl(youtTubeThumbnailUrl));
@@ -116,54 +130,32 @@ void LearningPageVideoStyledItemDelegate::EditorWidget::setEditorData(const QMod
     const auto title    = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Title)).data().toString();
     const auto summary  = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Summary)).data().toString();
 
-    connect(_propertiesLabel.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [this]() -> void {
-        qDebug() << "QAbstractTextDocumentLayout::documentSizeChanged()";
-        _propertiesLabel.setFixedHeight(_propertiesLabel.document()->size().height() + 100);
-
-        emit _delegate->sizeHintChanged(_index);
-
-        if (parent()->parent())
-            dynamic_cast<QAbstractItemView*>(parent()->parent())->update();
-        
-        updateGeometry();
-
-        disconnect(_propertiesLabel.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, nullptr);
-    }, Qt::DirectConnection);
-
-    qDebug() << "----B----";
-
-    _propertiesLabel.setHtml(QString(" \
-        <p><b>%1</b></p> \
-        <p>%2</p> \
+    _propertiesTextBrowser.setHtml(QString(" \
+        <div> \
+            <p style='margin: 0px; padding: 0px; background-color: red;'><b>%1</b></p> \
+            <p style='margin: 0px; padding: 10px; background-color: blue;'>%2</p> \
+        </div> \
     ").arg(title, summary));
 
-    
+    /*const auto tags = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
 
-    //const auto tags = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    for (const auto& tag : tags) {
+        auto label = new QLabel(tag);
 
-    //for (const auto& tag : tags) {
-    //    auto label = new QLabel(tag);
+        label->setObjectName("Tag");
+        label->setStyleSheet("QLabel#Tag { \
+            background-color: rgb(180, 180, 180); \
+            border-radius: 5px; \
+            padding-left: 4px; \
+            padding-right: 4px; \
+            padding-top: 1px; \
+            padding-bottom: 1px; \
+            font-size: 8pt; \
+            font-weight: 600; \
+        }");
 
-    //    label->setObjectName("Tag");
-    //    label->setStyleSheet("QLabel#Tag { \
-    //        background-color: rgb(180, 180, 180); \
-    //        border-radius: 5px; \
-    //        padding-left: 4px; \
-    //        padding-right: 4px; \
-    //        padding-top: 1px; \
-    //        padding-bottom: 1px; \
-    //        font-size: 7pt; \
-    //        font-weight: 600; \
-    //    }");
-
-    //    _tagsLayout.addWidget(label);
-    //}
-
-    update();
-
-    
-
-    
+        _tagsLayout.addWidget(label);
+    }*/
 }
 
 void LearningPageVideoStyledItemDelegate::EditorWidget::mousePressEvent(QMouseEvent* event)
