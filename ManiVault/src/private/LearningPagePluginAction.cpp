@@ -77,7 +77,6 @@ void LearningPagePluginActionsWidget::enterEvent(QEnterEvent* enterEvent)
         return;
 
     _actionsOverlayWidget.show();
-    _actionsOverlayWidget.raise();
     _actionsOverlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
 
     updateStyle();
@@ -88,8 +87,8 @@ void LearningPagePluginActionsWidget::leaveEvent(QEvent* leaveEvent)
     QWidget::leaveEvent(leaveEvent);
 
     if (!hasOverlay())
-
         return;
+
     _actionsOverlayWidget.hide();
     _actionsOverlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
 

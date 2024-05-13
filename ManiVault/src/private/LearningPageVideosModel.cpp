@@ -135,7 +135,7 @@ QVariant LearningPageVideosModel::DateItem::data(int role /*= Qt::UserRole + 1*/
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getVariantMap()["date"].toDateTime();
+            return getVariantMap()["date"].toString().chopped(15);
 
         case Qt::ToolTipRole:
             return "Date: " + data(Qt::DisplayRole).toString();

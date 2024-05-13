@@ -22,10 +22,12 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     _toStartPageAction(this, "To start page"),
     _toolbarAction(this, "Toolbar settings")
 {
-    getRowsLayout().addWidget(&_videosWidget, 2);
-    getRowsLayout().addWidget(&_tutorialsWidget);
-    getRowsLayout().addWidget(&_examplesWidget);
-    getRowsLayout().addWidget(&_pluginResourcesWidget);
+    auto& rowsLayout = getRowsLayout();
+
+    rowsLayout.addWidget(&_videosWidget);
+    rowsLayout.addWidget(&_tutorialsWidget);
+    rowsLayout.addWidget(&_examplesWidget);
+    rowsLayout.addWidget(&_pluginResourcesWidget);
 
     _showVideosAction.setSettingsPrefix("LearningPage/ShowVideos");
     _showTutorialsAction.setSettingsPrefix("LearningPage/ShowTutorials");

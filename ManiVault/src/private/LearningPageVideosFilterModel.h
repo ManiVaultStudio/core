@@ -6,6 +6,7 @@
 
 #include <QSortFilterProxyModel>
 
+#include <actions/StringAction.h>
 #include <actions/OptionsAction.h>
 
 class LearningPageVideosModel;
@@ -43,9 +44,11 @@ public:
 
 public: // Action getters
 
+    mv::gui::StringAction& getTitleFilterAction() { return _titleFilterAction; }
     mv::gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
 
 private:
     LearningPageVideosModel*    _learningPageVideosModel;   /** Pointer to source model */
+    mv::gui::StringAction       _titleFilterAction;         /** Filter based on title */
     mv::gui::OptionsAction      _tagsFilterAction;          /** Filter based on tag(s) */
 };

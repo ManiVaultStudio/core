@@ -27,6 +27,20 @@ class LearningPageVideoStyledItemDelegate : public QStyledItemDelegate
 {
 private:
 
+    class VideoOverlayWidget : public QWidget {
+    public:
+        explicit VideoOverlayWidget(QWidget* parent);
+
+        void setIndex(const QModelIndex& index);
+
+    private:
+        QPersistentModelIndex       _index;
+        QVBoxLayout                 _mainLayout;                        /** Main vertical layout */
+        QLabel                      _dateLabel;
+        QLabel                      _tagsLabel;
+        mv::util::WidgetOverlayer   _widgetOverlayer;       /** Synchronizes the size with the source widget */
+
+    };
     class EditorWidget : public QWidget
     {
     public:
@@ -46,17 +60,29 @@ private:
 
         void mousePressEvent(QMouseEvent* event);
 
+        /**
+         * Triggered on mouse hover
+         * @param enterEvent Pointer to enter event
+         */
+        void enterEvent(QEnterEvent* enterEvent) override;
+
+        /**
+         * Triggered on mouse leave
+         * @param leaveEvent Pointer to leave event
+         */
+        void leaveEvent(QEvent* leaveEvent) override;
+
     private:
-        LearningPageVideoStyledItemDelegate* _delegate;
-        QPersistentModelIndex       _index;                     /** Editor model index */
-        QHBoxLayout                 _mainLayout;                /** Main editor layout */
-        QVBoxLayout                 _thumbnailLayout;                /**  */
-        QVBoxLayout                 _textLayout;                /** Right text layout */
-        QLabel                      _thumbnailLabel;
-        QTextBrowser                _propertiesTextBrowser;
-        mv::gui::FlowLayout         _tagsLayout;
-        mv::util::FileDownloader    _fileDownloader;
-        QPixmap                     _thumbnailPixmap;
+        LearningPageVideoStyledItemDelegate*    _delegate;
+        QPersistentModelIndex                   _index;                     /** Editor model index */
+        QHBoxLayout                             _mainLayout;                /** Main editor layout */
+        QVBoxLayout                             _thumbnailLayout;                /**  */
+        QVBoxLayout                             _textLayout;                /** Right text layout */
+        QLabel                                  _thumbnailLabel;
+        QTextBrowser                            _propertiesTextBrowser;
+        mv::util::FileDownloader                _fileDownloader;
+        QPixmap                                 _thumbnailPixmap;
+        VideoOverlayWidget                      _overlayWidget;             /** Overlay widget which shows the associated plugin actions */
     };
 
 public:

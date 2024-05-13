@@ -5,9 +5,14 @@
 #pragma once
 
 #include <QWidget>
+#include <QScrollArea>
 
 #include "LearningPageVideosModel.h"
 #include "LearningPageVideosFilterModel.h"
+
+#include <widgets/FlowLayout.h>
+
+#include <actions/HorizontalGroupAction.h>
 
 class LearningPageContentWidget;
 
@@ -30,27 +35,20 @@ protected:
 
 private:
 
-    /**
-     * Open persistent editor for \p rowIndex
-     * @param rowIndex Index of the row for which to open the persistent editor
-     */
-    void openPersistentEditor(int rowIndex);
-
-    /**
-     * Close persistent editor for \p rowIndex
-     * @param rowIndex Index of the row for which to close the persistent editor
-     */
-    void closePersistentEditor(int rowIndex);
-
     /** Update all  custom style elements */
-
     void updateCustomStyle();
+
+    void updateVideos();
+
 private:
     LearningPageContentWidget*      _learningPageContentWidget;     /** Pointer to owning learning page content widget */
     QVBoxLayout                     _mainLayout;                    /** Main vertical layout */
+    mv::gui::HorizontalGroupAction  _settingsAction;                
+    QScrollArea                     _videosScrollArea;
+    QWidget                         _videosWidget;
+    QGridLayout                     _videosLayout;
     LearningPageVideosModel         _model;                         /** Videos model */
     LearningPageVideosFilterModel   _filterModel;                   /** Videos filter model */
-    mv::gui::HierarchyWidget        _hierarchyWidget;               /** Widget for displaying the video actions */
 
     friend class LearningPageContentWidget;
 };

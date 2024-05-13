@@ -15,16 +15,22 @@ using namespace mv::gui;
 
 LearningPageVideosFilterModel::LearningPageVideosFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
+    _titleFilterAction(this, "Title"),
     _tagsFilterAction(this, "Tags")
 {
-    setDynamicSortFilter(true);
-    setRecursiveFilteringEnabled(true);
+    //setDynamicSortFilter(true);
+    //setRecursiveFilteringEnabled(true);
+
+    _tagsFilterAction.setIconByName("tag");
+    _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags);
 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &QSortFilterProxyModel::invalidate);
 }
 
 bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
+    qDebug() << __FUNCTION__;
     const auto index = sourceModel()->index(row, 0, parent);
 
     if (!index.isValid())
@@ -37,24 +43,31 @@ bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex&
             return false;
     }
 
-    //const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
-    //const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
+    const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
 
-    //auto matchTags = false;
+    if (_tagsFilterAction.hasOptions()) {
+        qDebug() << filterTagsList;
 
-    //for (const auto& tag : tagsList) {
-    //    if (!filterTagsList.contains(tag))
-    //        continue;
+        auto matchTags = false;
 
-    //    matchTags = true;
+        //for (const auto& tag : tagsList) {
+        //    //qDebug() << tag << filterTagsList;
+        //    if (!filterTagsList.contains(tag))
+        //        continue;
 
-    //    break;
-    //}
+        //    matchTags = true;
 
-    //if (!matchTags) {
-    //    qDebug() << "reject row";
-    //    //return false;
-    //}
+        //    break;
+        //}
+
+        ////qDebug() << "matchTags" << matchTags;
+        //if (!matchTags) {
+
+        //    //return false;
+        //}
+    }
+    
 
     //qDebug() << __FUNCTION__ << "TRUE";
 
@@ -72,7 +85,6 @@ void LearningPageVideosFilterModel::setSourceModel(QAbstractItemModel* sourceMod
 
         _tagsFilterAction.setOptions(options);
         _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
-        _tagsFilterAction.setSettingsPrefix("LearningPage/Videos/FilterModel/TagsFilter");
     });
 }
 

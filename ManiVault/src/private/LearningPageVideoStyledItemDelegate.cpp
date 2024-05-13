@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QImage>
 #include <QAbstractTextDocumentLayout>
+#include <QLocale>
 
 using namespace mv::util;
 using namespace mv::gui;
@@ -67,10 +68,11 @@ LearningPageVideoStyledItemDelegate::EditorWidget::EditorWidget(LearningPageVide
     _textLayout(),
     _thumbnailLabel(),
     _propertiesTextBrowser(),
-    _tagsLayout(),
-    _thumbnailPixmap()
+    _thumbnailPixmap(),
+    _overlayWidget(this)
 {
     //_mainLayout.setContentsMargins(0, 0, 0, 0);
+    _mainLayout.setSpacing(10);
     _mainLayout.setAlignment(Qt::AlignTop);
 
     _thumbnailLayout.addWidget(&_thumbnailLabel);
@@ -79,17 +81,14 @@ LearningPageVideoStyledItemDelegate::EditorWidget::EditorWidget(LearningPageVide
     _textLayout.setContentsMargins(0, 0, 0, 0);
     _textLayout.setAlignment(Qt::AlignTop);
     _textLayout.addWidget(&_propertiesTextBrowser);
-    _textLayout.addStretch(1);
-    //_textLayout.addLayout(&_tagsLayout);
 
-    _thumbnailLabel.setStyleSheet("border: 2px solid red;");
+    _thumbnailLabel.setStyleSheet("");
 
     _propertiesTextBrowser.setReadOnly(true);
     _propertiesTextBrowser.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _propertiesTextBrowser.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _propertiesTextBrowser.setStyleSheet("background-color: yellow; border: none; margin: 0px; padding: 0px;");//transparent
+    _propertiesTextBrowser.setStyleSheet("background-color: transparent; border: none; margin: 0px; padding: 0px;");
     _propertiesTextBrowser.setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-    //_propertiesTextBrowser.document()->setDefaultStyleSheet("div { margin: 0px; }");
     _propertiesTextBrowser.document()->setDocumentMargin(0);
 
     connect(_propertiesTextBrowser.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [this]() -> void {
@@ -106,14 +105,17 @@ LearningPageVideoStyledItemDelegate::EditorWidget::EditorWidget(LearningPageVide
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         _thumbnailPixmap = QPixmap::fromImage(QImage::fromData(_fileDownloader.downloadedData()));
 
-        const auto marginToRemove   = 10;
+        const auto marginToRemove   = 9;
         const auto rectangleToCopy  = QRect(0, marginToRemove,_thumbnailPixmap.width(), _thumbnailPixmap.height() - (2 * marginToRemove));
 
         _thumbnailPixmap = _thumbnailPixmap.copy(rectangleToCopy);
 
+        _thumbnailLabel.setStyleSheet("margin-top: 3px; border: 1px solid rgb(150, 150, 150);");
         _thumbnailLabel.setFixedSize(_thumbnailPixmap.size());
         _thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
     });
+
+    _overlayWidget.hide();
 }
 
 void LearningPageVideoStyledItemDelegate::EditorWidget::setEditorData(const QModelIndex& index)
@@ -128,34 +130,16 @@ void LearningPageVideoStyledItemDelegate::EditorWidget::setEditorData(const QMod
     }
 
     const auto title    = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Title)).data().toString();
-    const auto summary  = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Summary)).data().toString();
+    const auto summary  = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Summary)).data().toString().replace("\n", "").replace("<p>", "").replace("</p>", "");
 
     _propertiesTextBrowser.setHtml(QString(" \
-        <div> \
-            <p style='margin: 0px; padding: 0px; background-color: red;'><b>%1</b></p> \
-            <p style='margin: 0px; padding: 10px; background-color: blue;'>%2</p> \
+        <div style='margin: 0px;'> \
+            <p style='margin-top: -3px;'><b>%1</b></p> \
+            <p style='margin-top: 1px;'>%2</p> \
         </div> \
     ").arg(title, summary));
 
-    /*const auto tags = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
-
-    for (const auto& tag : tags) {
-        auto label = new QLabel(tag);
-
-        label->setObjectName("Tag");
-        label->setStyleSheet("QLabel#Tag { \
-            background-color: rgb(180, 180, 180); \
-            border-radius: 5px; \
-            padding-left: 4px; \
-            padding-right: 4px; \
-            padding-top: 1px; \
-            padding-bottom: 1px; \
-            font-size: 8pt; \
-            font-weight: 600; \
-        }");
-
-        _tagsLayout.addWidget(label);
-    }*/
+    _overlayWidget.setIndex(index);
 }
 
 void LearningPageVideoStyledItemDelegate::EditorWidget::mousePressEvent(QMouseEvent* event)
@@ -165,4 +149,71 @@ void LearningPageVideoStyledItemDelegate::EditorWidget::mousePressEvent(QMouseEv
     const auto youTubeId = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::YouTubeId)).data().toString();
 
     YouTubeVideoDialog::play(youTubeId);
+}
+
+void LearningPageVideoStyledItemDelegate::EditorWidget::enterEvent(QEnterEvent* enterEvent)
+{
+    QWidget::enterEvent(enterEvent);
+
+    _overlayWidget.show();
+}
+
+void LearningPageVideoStyledItemDelegate::EditorWidget::leaveEvent(QEvent* leaveEvent)
+{
+    QWidget::leaveEvent(leaveEvent);
+
+    _overlayWidget.hide();
+}
+
+LearningPageVideoStyledItemDelegate::VideoOverlayWidget::VideoOverlayWidget(QWidget* parent) :
+    QWidget(parent),
+    _mainLayout(),
+    _dateLabel(),
+    _tagsLabel(),
+    _widgetOverlayer(this, this, parent)
+{
+    setObjectName("VideoOverlayWidget");
+
+    _mainLayout.addWidget(&_dateLabel);
+    _mainLayout.addStretch(1);
+    _mainLayout.addWidget(&_tagsLabel);
+
+    setLayout(&_mainLayout);
+
+    const auto backgroundColor = QApplication::palette().color(QPalette::Normal, QPalette::Midlight);
+
+    setStyleSheet(QString("QWidget#VideoOverlayWidget { \
+        background: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop: 0.2 rgba(%1, %2, %3, 0), stop: 1.0 rgba(%1, %2, %3, 255)); \
+    }").arg(QString::number(backgroundColor.red()), QString::number(backgroundColor.green()), QString::number(backgroundColor.blue())));
+}
+
+void LearningPageVideoStyledItemDelegate::VideoOverlayWidget::setIndex(const QModelIndex& index)
+{
+    if (index == _index)
+        return;
+
+    if (!index.isValid())
+        return;
+
+    _index = index;
+
+    const auto date = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Date)).data(Qt::EditRole).toString();
+
+    QLocale locale;
+
+    const auto dateTime = QDateTime::fromString(date, Qt::ISODate);
+
+    _dateLabel.setText(QString("<div style='text-align: right; color: rgb(60, 60, 60);'>%1</div>").arg(locale.toString(dateTime.date())));
+
+    const auto tags = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
+
+    QString tagsHtml;
+
+    tagsHtml += "<div style='text-align: right; color: rgb(60, 60, 60)'>";
+    tagsHtml += tags.join(", ");
+    tagsHtml += "</div>";
+
+    _tagsLabel.setText(tagsHtml);
+
+    _mainLayout.addWidget(&_tagsLabel);
 }

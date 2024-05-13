@@ -517,7 +517,7 @@ void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
     setStyleSheet(QString("QLabel#Tag { \
         background-color: %1; \
         border-radius: 5px; \
-        padding: 5px; \
+        padding: 3px; \
     }").arg(isOptionSelected ? (underMouse() ? "rgb(160, 160, 160)" : "rgb(150, 150, 150)") : (underMouse() ? "rgb(220, 220, 220)" : "rgb(210, 210, 210)")));
 }
 

@@ -22,6 +22,7 @@ LearningPagePluginResourcesWidget::LearningPagePluginResourcesWidget(LearningPag
 {
     setMinimumHeight(250);
 
+    _mainLayout.setContentsMargins(0, 0, 0, 0);
     _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Plugin Resources", "Additional plugin information"));
     _mainLayout.addWidget(_pluginTypesFilterAction.createWidget(this, OptionsAction::Tags));

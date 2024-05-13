@@ -4,7 +4,7 @@
 
 #include "LearningPageVideosWidget.h"
 #include "LearningPageContentWidget.h"
-#include "LearningPageVideoStyledItemDelegate.h"
+#include "LearningPageVideoWidget.h"
 
 #include <Application.h>
 
@@ -17,110 +17,81 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
     QWidget(learningPageContentWidget),
     _learningPageContentWidget(learningPageContentWidget),
     _mainLayout(),
+    _settingsAction(this, "Settings"),
+    _videosScrollArea(),
+    _videosWidget(),
+    _videosLayout(),
     _model(),
-    _filterModel(),
-    _hierarchyWidget(this, "Video", _model, &_filterModel)
+    _filterModel()
 {
+    _mainLayout.setContentsMargins(0, 0, 0, 0);
     _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Videos", "Videos"));
+    //_mainLayout.addWidget(_settingsAction.createWidget(this));
     _mainLayout.addWidget(_filterModel.getTagsFilterAction().createWidget(this, OptionsAction::Tags));
-    _mainLayout.addWidget(&_hierarchyWidget, 1);
+    _mainLayout.addWidget(&_videosScrollArea, 1);
 
-    _filterModel.setFilterKeyColumn(static_cast<int>(LearningPageVideosModel::Column::Title));
+    _settingsAction.setShowLabels(false);
 
-    //_hierarchyWidget.getToolbarAction().setVisible(false);
-    _hierarchyWidget.setWindowIcon(mv::Application::getIconFont("FontAwesome").getIcon("video"));
-    _hierarchyWidget.setHeaderHidden(true);
-    _hierarchyWidget.getColumnsGroupAction().setVisible(false);
+    _settingsAction.addAction(&_filterModel.getTitleFilterAction());
+    _settingsAction.addAction(&_filterModel.getTagsFilterAction(), OptionsAction::Tags);
+
+    _videosScrollArea.setObjectName("VideosScrollArea");
+    _videosScrollArea.setWidgetResizable(true);
+    _videosScrollArea.setWidget(&_videosWidget);
+    _videosScrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    _videosScrollArea.setStyleSheet("QScrollArea#VideosScrollArea { background-color: transparent; border: none; }");
     
-    _hierarchyWidget.getFilterNameAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    _hierarchyWidget.getFilterGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
+    _videosWidget.setObjectName("VideosWidget");
+    _videosWidget.setLayout(&_videosLayout);
+
+    _videosLayout.setContentsMargins(0, 0, 0, 0);
+    _videosLayout.setVerticalSpacing(10);
+    _videosLayout.setAlignment(Qt::AlignTop);
+
+    _filterModel.setSourceModel(&_model);
+    _filterModel.setFilterKeyColumn(static_cast<int>(LearningPageVideosModel::Column::Title));
 
     _filterModel.getTagsFilterAction().setStretch(2);
 
     setLayout(&_mainLayout);
 
-    auto& treeView = _hierarchyWidget.getTreeView();
-
-    treeView.setRootIsDecorated(false);
-    treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
-    treeView.setSelectionMode(QAbstractItemView::SingleSelection);
-    treeView.setIconSize(QSize(24, 24));
-    treeView.setMouseTracking(true);
-    treeView.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    treeView.setItemDelegateForColumn(static_cast<int>(LearningPageVideosModel::Column::Delegate), new LearningPageVideoStyledItemDelegate(this));
-
-    treeView.setColumnHidden(static_cast<int>(LearningPageVideosModel::Column::Title), true);
-    treeView.setColumnHidden(static_cast<int>(LearningPageVideosModel::Column::Tags), true);
-    treeView.setColumnHidden(static_cast<int>(LearningPageVideosModel::Column::Date), true);
-    treeView.setColumnHidden(static_cast<int>(LearningPageVideosModel::Column::Summary), true);
-    treeView.setColumnHidden(static_cast<int>(LearningPageVideosModel::Column::YouTubeId), true);
-    treeView.setColumnHidden(static_cast<int>(LearningPageVideosModel::Column::YouTubeUrl), true);
-
-    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
-        qDebug() << __FUNCTION__;
-        for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            openPersistentEditor(rowIndex);
-    });
-
-    connect(&_filterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
-        qDebug() << __FUNCTION__;
-        for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            closePersistentEditor(rowIndex);
-    });
+    //connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, &LearningPageVideosWidget::updateVideos);
+    //connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, &LearningPageVideosWidget::updateVideos);
 
     connect(qApp, &QApplication::paletteChanged, this, &LearningPageVideosWidget::updateCustomStyle);
 
     updateCustomStyle();
-}
-
-void LearningPageVideosWidget::openPersistentEditor(int rowIndex)
-{
-    const auto index = _filterModel.index(rowIndex, static_cast<int>(LearningPageVideosModel::Column::Delegate));
-
-    if (_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
-        return;
-
-    if (index.isValid())
-        _hierarchyWidget.getTreeView().openPersistentEditor(index);
-}
-
-void LearningPageVideosWidget::closePersistentEditor(int rowIndex)
-{
-    const auto index = _filterModel.index(rowIndex, static_cast<int>(LearningPageVideosModel::Column::Delegate));
-
-    if (!_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
-        return;
-
-    if (index.isValid())
-        _hierarchyWidget.getTreeView().closePersistentEditor(index);
+    updateVideos();
 }
 
 void LearningPageVideosWidget::updateCustomStyle()
 {
-    auto styleSheet = QString(" \
-        QLabel { \
-            background-color: rgba(0, 0, 0, 0); \
-        } \
-        QTreeView::item:hover:!selected { \
-            background-color: rgba(0, 0, 0, 50); \
-        } \
-        QTreeView::item:selected { \
-            background-color: rgba(0, 0, 0, 100); \
-        } \
-    ");
+    _videosWidget.setStyleSheet(QString("QWidget#VideosWidget { background-color: %1; border: none;}").arg(QApplication::palette().color(QPalette::Normal, QPalette::Midlight).name()));
+}
 
-    auto& treeView = _hierarchyWidget.getTreeView();
-    
-    styleSheet += QString(" \
-        QTreeView { \
-            border: none; \
-        } \
-    ");
+void LearningPageVideosWidget::updateVideos()
+{
+    qDebug() << __FUNCTION__;
 
-    auto color = QApplication::palette().color(QPalette::Normal, QPalette::Midlight).name();
+    QLayoutItem* layoutItem;
 
-    styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
-    
-    treeView.setStyleSheet(styleSheet);
+    while ((layoutItem = _videosLayout.takeAt(0)) != nullptr) {
+        delete layoutItem->widget();
+        delete layoutItem;
+    }
+
+    const auto numberOfColumns = 4;
+
+    for (std::int32_t rowIndex = 0; rowIndex < _filterModel.rowCount(); ++rowIndex) {
+        const auto filterModelIndex = _filterModel.index(rowIndex, 0);
+        const auto sourceModelIndex = _filterModel.mapToSource(filterModelIndex);
+
+        if (!sourceModelIndex.isValid())
+            continue;
+
+        _videosLayout.addWidget(new LearningPageVideoWidget(sourceModelIndex), std::int32_t(floorf(rowIndex / static_cast<float>(numberOfColumns))), rowIndex % numberOfColumns);
+    }
+
+    _videosLayout.setRowStretch(_videosLayout.rowCount(), 1);
 }
