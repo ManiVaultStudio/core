@@ -89,16 +89,13 @@ if(MV_UNITY_BUILD)
     set_source_files_properties(${IMAGEDATA_MOC} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
-foreach(build_mode ${BUILD_MODES})
-    install(TARGETS ${IMAGEDATA}
-        CONFIGURATIONS ${build_mode}
-        EXPORT "ManiVaultPublicExport${build_mode}" 
-        RUNTIME DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Windows .dll
-        LIBRARY DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Linux/Mac .so
-        ARCHIVE DESTINATION "${build_mode}/lib"     COMPONENT LINKLIB # Windows .lib
-        PUBLIC_HEADER DESTINATION "${build_mode}/include/${IMAGEDATA}" COMPONENT HEADERS
-    )
-endforeach()
+install(TARGETS ${IMAGEDATA}
+    EXPORT "ManiVaultPublicExport"
+    RUNTIME DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Windows .dll
+    LIBRARY DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Linux/Mac .so
+    ARCHIVE DESTINATION "$<CONFIGURATION>/lib/"     COMPONENT LINKLIB # Windows .lib
+    PUBLIC_HEADER DESTINATION "$<CONFIGURATION>/include/${IMAGEDATA}/" COMPONENT HEADERS
+)
 
 add_custom_command(TARGET ${IMAGEDATA} POST_BUILD
     COMMAND ${CMAKE_COMMAND}
