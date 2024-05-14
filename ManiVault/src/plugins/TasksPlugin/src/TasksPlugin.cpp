@@ -107,7 +107,7 @@ QIcon TasksPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 
 QUrl TasksPluginFactory::getReadmeMarkdownUrl() const
 {
-#ifdef _DEBUG
+#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
     return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/TasksPlugin/README.md");
 #else
     return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/TasksPlugin/README.md");

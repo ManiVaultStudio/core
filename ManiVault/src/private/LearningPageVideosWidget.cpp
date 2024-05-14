@@ -28,13 +28,23 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
     _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Videos", "Videos"));
     //_mainLayout.addWidget(_settingsAction.createWidget(this));
-    _mainLayout.addWidget(_filterModel.getTagsFilterAction().createWidget(this, OptionsAction::Tags));
+    _mainLayout.addWidget(_filterModel.getTagsFilterAction().createWidget(this));
+    
+
+    auto pb = new QPushButton("asdad");
+
+    connect(pb, &QPushButton::clicked, this, [this]() -> void {
+        _filterModel.invalidate();
+    });
+
+    _mainLayout.addWidget(pb);
+
     _mainLayout.addWidget(&_videosScrollArea, 1);
 
-    _settingsAction.setShowLabels(false);
+    //_settingsAction.setShowLabels(false);
 
-    _settingsAction.addAction(&_filterModel.getTitleFilterAction());
-    _settingsAction.addAction(&_filterModel.getTagsFilterAction(), OptionsAction::Tags);
+    //_settingsAction.addAction(&_filterModel.getTitleFilterAction());
+    //_settingsAction.addAction(&_filterModel.getTagsFilterAction(), OptionsAction::Tags);
 
     _videosScrollArea.setObjectName("VideosScrollArea");
     _videosScrollArea.setWidgetResizable(true);
@@ -50,14 +60,16 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
     _videosLayout.setAlignment(Qt::AlignTop);
 
     _filterModel.setSourceModel(&_model);
-    _filterModel.setFilterKeyColumn(static_cast<int>(LearningPageVideosModel::Column::Title));
+    //_filterModel.setFilterKeyColumn(static_cast<int>(LearningPageVideosModel::Column::Title));
 
     _filterModel.getTagsFilterAction().setStretch(2);
 
     setLayout(&_mainLayout);
 
-    //connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, &LearningPageVideosWidget::updateVideos);
-    //connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, &LearningPageVideosWidget::updateVideos);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, &LearningPageVideosWidget::updateVideos);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, &LearningPageVideosWidget::updateVideos);
+
+    _model.populateFromServer();
 
     connect(qApp, &QApplication::paletteChanged, this, &LearningPageVideosWidget::updateCustomStyle);
 

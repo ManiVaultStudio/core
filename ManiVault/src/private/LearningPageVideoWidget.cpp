@@ -37,7 +37,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _propertiesTextBrowser.document()->setDocumentMargin(0);
     _propertiesTextBrowser.setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     _propertiesTextBrowser.setFixedWidth(200);
-    _propertiesTextBrowser.setHtml(QString("<p style='margin-top: 0px; rgb(60, 60, 60)'>%1</p>").arg(title));
+    _propertiesTextBrowser.setHtml(QString("<p style='margin-top: 0px; rgb(75, 75, 75)'><b>%1</b></p>").arg(title));
 
     connect(_propertiesTextBrowser.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [this]() -> void {
         _propertiesTextBrowser.setFixedHeight(_propertiesTextBrowser.document()->size().height());
@@ -144,7 +144,7 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     _playIconLabel.setToolTip("Click to start the video");
     _summaryIconLabel.setToolTip(summary);
     _dateIconLabel.setToolTip(dateString);
-    _tagsIconLabel.setToolTip(QString("<b>%1</b>").arg(tags.join(", ")));
+    _tagsIconLabel.setToolTip(QString("%1").arg(tags.join(", ")));
 
     _centerLayout.setAlignment(Qt::AlignCenter);
 

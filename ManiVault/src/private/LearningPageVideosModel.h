@@ -338,6 +338,9 @@ public:
      */
     QSet<QString> getTagsSet() const;
 
+    /** Loads learning center JSON file and picks out the videos */
+    void populateFromServer();
+
 signals:
 
     /**

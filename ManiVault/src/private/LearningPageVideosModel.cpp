@@ -26,24 +26,6 @@ LearningPageVideosModel::LearningPageVideosModel(QObject* parent /*= nullptr*/) 
     QStandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
-
-    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-        const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-        const auto videos       = jsonDocument.object()["videos"].toArray();
-
-        for (const auto& video : videos) {
-            const auto videoMap = video.toVariant().toMap();
-
-            appendRow(Row(videoMap));
-
-            for (const auto& tagVariant : videoMap["tags"].toList())
-                _tags.insert(tagVariant.toString());
-        }
-
-        emit tagsChanged(_tags);
-    });
-
-    _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
 }
 
 QVariant LearningPageVideosModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -81,6 +63,27 @@ QVariant LearningPageVideosModel::headerData(int section, Qt::Orientation orient
 QSet<QString> LearningPageVideosModel::getTagsSet() const
 {
     return _tags;
+}
+
+void LearningPageVideosModel::populateFromServer()
+{
+    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
+        const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
+        const auto videos = jsonDocument.object()["videos"].toArray();
+
+        for (const auto& video : videos) {
+            const auto videoMap = video.toVariant().toMap();
+
+            appendRow(Row(videoMap));
+
+            for (const auto& tagVariant : videoMap["tags"].toList())
+                _tags.insert(tagVariant.toString());
+        }
+
+        emit tagsChanged(_tags);
+    });
+
+    _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
 }
 
 LearningPageVideosModel::Item::Item(QVariantMap variantMap, bool editable /*= false*/) :

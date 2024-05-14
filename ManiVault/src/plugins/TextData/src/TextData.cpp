@@ -33,7 +33,7 @@ QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 
 QUrl TextDataFactory::getReadmeMarkdownUrl() const
 {
-#ifdef _DEBUG
+#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
     return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/TextData/README.md");
 #else
     return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/TextData/README.md");

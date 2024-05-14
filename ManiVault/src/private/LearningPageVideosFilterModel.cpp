@@ -18,20 +18,24 @@ LearningPageVideosFilterModel::LearningPageVideosFilterModel(QObject* parent /*=
     _titleFilterAction(this, "Title"),
     _tagsFilterAction(this, "Tags")
 {
-    //setDynamicSortFilter(true);
-    //setRecursiveFilteringEnabled(true);
+    setDynamicSortFilter(true);
+    setRecursiveFilteringEnabled(true);
 
     _tagsFilterAction.setIconByName("tag");
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags);
 
-    connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &QSortFilterProxyModel::invalidate);
+    //connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, [this]() -> void {
+    //    invalidate();
+    //});
 }
 
 bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
     qDebug() << __FUNCTION__;
     const auto index = sourceModel()->index(row, 0, parent);
+
+    return true;
 
     if (!index.isValid())
         return true;
@@ -78,6 +82,7 @@ void LearningPageVideosFilterModel::setSourceModel(QAbstractItemModel* sourceMod
 {
     QSortFilterProxyModel::setSourceModel(sourceModel);
 
+    /*
     _learningPageVideosModel = static_cast<LearningPageVideosModel*>(sourceModel);
 
     connect(_learningPageVideosModel, &LearningPageVideosModel::tagsChanged, this, [this](const QSet<QString>& tags) -> void {
@@ -86,5 +91,11 @@ void LearningPageVideosFilterModel::setSourceModel(QAbstractItemModel* sourceMod
         _tagsFilterAction.setOptions(options);
         _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
     });
+    */
+}
+
+bool LearningPageVideosFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
+{
+    return lhs.data().toString() < rhs.data().toString();
 }
 

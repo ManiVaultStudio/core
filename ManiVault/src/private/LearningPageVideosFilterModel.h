@@ -42,6 +42,13 @@ public:
      */
     void setSourceModel(QAbstractItemModel* sourceModel) override;
 
+    /**
+     * Compares two model indices plugin \p lhs with \p rhs
+     * @param lhs Left-hand model index
+     * @param rhs Right-hand model index
+     */
+    bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
+
 public: // Action getters
 
     mv::gui::StringAction& getTitleFilterAction() { return _titleFilterAction; }
