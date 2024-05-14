@@ -25,7 +25,7 @@ LearningPagePluginResourcesWidget::LearningPagePluginResourcesWidget(LearningPag
     _mainLayout.setContentsMargins(0, 0, 0, 0);
     _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Plugin Resources", "Additional plugin information"));
-    _mainLayout.addWidget(_pluginTypesFilterAction.createWidget(this, OptionsAction::Tags));
+    _mainLayout.addWidget(_pluginTypesFilterAction.createWidget(this, OptionsAction::Tags | OptionsAction::Selection));
     _mainLayout.addLayout(&_pluginsLayout, 1);
 
     _pluginsLayout.setContentsMargins(0, 0, 0, 0);

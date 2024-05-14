@@ -164,13 +164,24 @@ public: // Widgets
         class TagLabel : public QLabel {
         public:
 
+            /** Type of tag label */
+            enum class Type {
+                Regular,        /** Clicking on the label toggles the option */
+                SelectAll,      /** Clicking on the label selects all options */
+                SelectNone,     /** Clicking on the label clears the options selection */
+                SelectInvert    /** Clicking on the label inverts the options selection */
+            };
+
+        public:
+
             /**
              * Construct with \p option and pointer to \p parent widget
              * @param option Tag name
+             * @param type Tag type
              * @param optionsAction Pointer to options action
              * @param parent Pointer to parent widget
              */
-            TagLabel(const QString& option, OptionsAction* optionsAction, QWidget* parent = nullptr);
+            TagLabel(const QString& option, const Type& type, OptionsAction* optionsAction, QWidget* parent = nullptr);
 
             /**
              * Invoked when the user presses the mouse
@@ -196,6 +207,7 @@ public: // Widgets
             void updateStyle();
 
         private:
+            Type            _type;              /** Type of tag label */
             QString         _option;            /** Tag name */
             OptionsAction*  _optionsAction;     /** Pointer to options action */
         };
@@ -215,11 +227,21 @@ public: // Widgets
         /** Updates the flow layout with new tags */
         void updateFlowLayout();
 
+        /**
+         * Add \p option tag label to the flow layout
+         * @param option Option string
+         * @param type Type of tag label
+         * @param parent Pointer to parent widget
+         * @return Pointer to created tag label
+         */
+        TagLabel* addOption(const QString& option, const TagLabel::Type& type, QWidget* parent = nullptr);
+
     protected:
-        OptionsAction*              _optionsAction;     /** Pointer to owning options action */
-        QSortFilterProxyModel       _filterModel;       /** For filtering the options */
-        FlowLayout                  _flowLayout;        /** Table view for showing the data */
-        QMap<QString, QWidget*>     _widgetsMap;        /** Keep track of created push buttons */
+        OptionsAction*              _optionsAction;         /** Pointer to owning options action */
+        const bool                  _hasSelectionTags;      /** Whether to show tags for selection */
+        QSortFilterProxyModel       _filterModel;           /** For filtering the options */
+        FlowLayout                  _flowLayout;            /** Table view for showing the data */
+        QMap<QString, QWidget*>     _widgetsMap;            /** Keep track of created push buttons */
 
         friend class OptionsAction;
     };
@@ -342,6 +364,15 @@ public:
      * @param selectedOptions Selected options
      */
     void setSelectedOptions(const QStringList& selectedOptions);
+
+    /** Selects all options */
+    void selectAll();
+
+    /** Clears the options selection */
+    void selectNone();
+
+    /** Inverts the options selection */
+    void selectInvert();
 
 protected: // Linking
 

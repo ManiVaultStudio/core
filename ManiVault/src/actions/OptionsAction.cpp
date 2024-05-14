@@ -142,6 +142,21 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
     saveToSettings();
 }
 
+void OptionsAction::selectAll()
+{
+    setSelectedOptions(getOptions());
+}
+
+void OptionsAction::selectNone()
+{
+    setSelectedOptions({});
+}
+
+void OptionsAction::selectInvert()
+{
+    _optionsModel.invertChecks();
+}
+
 void OptionsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive /*= true*/)
 {
     auto publicOptionsAction = dynamic_cast<OptionsAction*>(publicAction);
@@ -444,6 +459,7 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
 OptionsAction::TagsViewWidget::TagsViewWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags) :
     QWidget(parent),
     _optionsAction(optionsAction),
+    _hasSelectionTags(widgetFlags & OptionsAction::Selection),
     _filterModel(),
     _flowLayout(),
     _widgetsMap()
@@ -468,17 +484,30 @@ void OptionsAction::TagsViewWidget::updateFlowLayout()
         delete layoutItem;
     }
 
-    for (const auto& option : _optionsAction->getOptions()) {
-        auto tagLabel = new TagLabel(option, _optionsAction);
+    for (const auto& option : _optionsAction->getOptions())
+        addOption(option, TagLabel::Type::Regular, this);
 
-        _widgetsMap[option] = tagLabel;
-
-        _flowLayout.addWidget(tagLabel);
+    if (_hasSelectionTags) {
+        addOption("All", TagLabel::Type::SelectAll, this);
+        addOption("None", TagLabel::Type::SelectNone, this);
+        addOption("Invert", TagLabel::Type::SelectInvert, this);
     }
 }
 
-OptionsAction::TagsViewWidget::TagLabel::TagLabel(const QString& option, OptionsAction* optionsAction, QWidget* parent /*= nullptr*/) :
+OptionsAction::TagsViewWidget::TagLabel* OptionsAction::TagsViewWidget::addOption(const QString& option, const TagLabel::Type& type, QWidget* parent /*= nullptr*/)
+{
+    auto tagLabel = new TagLabel(option, type, _optionsAction, parent);
+
+    _widgetsMap[option] = tagLabel;
+
+    _flowLayout.addWidget(tagLabel);
+
+    return tagLabel;
+}
+
+OptionsAction::TagsViewWidget::TagLabel::TagLabel(const QString& option, const Type& type, OptionsAction* optionsAction, QWidget* parent /*= nullptr*/) :
     QLabel(option, parent),
+    _type(type),
     _option(option),
     _optionsAction(optionsAction)
 {
@@ -491,8 +520,32 @@ OptionsAction::TagsViewWidget::TagLabel::TagLabel(const QString& option, Options
 
 void OptionsAction::TagsViewWidget::TagLabel::mousePressEvent(QMouseEvent* event)
 {
-    if (event->button() == Qt::LeftButton)
-        _optionsAction->toggleOption(_option);
+    QLabel::mousePressEvent(event);
+
+    if (event->button() != Qt::LeftButton)
+        return;
+
+    switch (_type)
+    {
+        case Type::Regular:
+            _optionsAction->toggleOption(_option);
+            break;
+
+        case Type::SelectAll:
+            _optionsAction->selectAll();
+            break;
+
+        case Type::SelectNone:
+            _optionsAction->selectNone();
+            break;
+
+        case Type::SelectInvert:
+            _optionsAction->selectInvert();
+            break;
+
+        default:
+            break;
+    }
 }
 
 void OptionsAction::TagsViewWidget::TagLabel::enterEvent(QEnterEvent* enterEvent)
@@ -513,12 +566,39 @@ void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
 {
     const auto isOptionSelected = _optionsAction->isOptionSelected(_option);
 
-    setToolTip(QString("%1 %2 selected, click to toggle").arg(_option, isOptionSelected ? "is" : "is not"));
+    QColor textColor;
+
+    switch (_type)
+    {
+        case Type::Regular:
+            setToolTip(QString("%1 %2 selected, click to toggle").arg(_option, isOptionSelected ? "is" : "is not"));
+            break;
+
+        case Type::SelectAll:
+            textColor = _optionsAction->getOptions().count() != _optionsAction->getSelectedOptions().count() ? Qt::black : Qt::gray;
+            setToolTip("Click to select all options");
+            break;
+
+        case Type::SelectNone:
+            textColor = !_optionsAction->getOptions().isEmpty() && !_optionsAction->getSelectedOptions().isEmpty() ? Qt::black : Qt::gray;
+            setToolTip("Click to clear the options selection");
+            break;
+
+        case Type::SelectInvert:
+            setToolTip("Click to invert the options selection");
+            break;
+
+        default:
+            break;
+    }
+
     setStyleSheet(QString("QLabel#Tag { \
         background-color: %1; \
+        color: %2; \
+        font-weight: %3; \
         border-radius: 5px; \
         padding: 3px; \
-    }").arg(isOptionSelected ? (underMouse() ? "rgb(160, 160, 160)" : "rgb(150, 150, 150)") : (underMouse() ? "rgb(220, 220, 220)" : "rgb(210, 210, 210)")));
+    }").arg(isOptionSelected ? (underMouse() ? "rgb(160, 160, 160)" : "rgb(150, 150, 150)") : (underMouse() ? "rgb(220, 220, 220)" : "rgb(210, 210, 210)"), getColorAsCssString(textColor), _type == Type::Regular ? "normal" : "bold"));
 }
 
 QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
