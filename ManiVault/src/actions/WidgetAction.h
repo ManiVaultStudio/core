@@ -244,7 +244,7 @@ public: // Hierarchy queries
         const auto prefixedPath = QString("%1/%2").arg(text(), path);
 
         if (childrenByPath.contains(prefixedPath))
-            return childrenByPath[prefixedPath];
+            return dynamic_cast<WidgetActionType*>(childrenByPath[prefixedPath]);
 
         return nullptr;
     }
