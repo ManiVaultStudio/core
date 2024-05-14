@@ -6,6 +6,8 @@
 
 #include <Application.h>
 
+#include <QDesktopServices>
+
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -18,10 +20,44 @@ namespace mv
 
 HelpManager::HelpManager() :
     AbstractHelpManager(),
-    _showLearningCenterAction(this, "Learning center")
+    _showLearningCenterAction(this, "Learning center"),
+    _toDiscordAction(this, "Join us..."),
+    _toWebsiteAction(this, "Website"),
+    _toWikiAction(this, "Wiki"),
+    _toRepositoryAction(this, "Repository")
 {
     _showLearningCenterAction.setIconByName("chalkboard-teacher");
     _showLearningCenterAction.setToolTip("Go to the learning center");
+
+    _toWebsiteAction.setIconByName("globe");
+    _toWebsiteAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _toWikiAction.setIconByName("book");
+    _toWikiAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _toRepositoryAction.setIconByName("code-branch");
+    _toRepositoryAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _toDiscordAction.setToolTip("Get in touch on our Discord");
+    _toWebsiteAction.setToolTip("Visit our website");
+    _toWikiAction.setToolTip("Visit our wiki");
+    _toRepositoryAction.setToolTip("Contribute to ManiVault on Github");
+
+    connect(&_toDiscordAction, &TriggerAction::triggered, this, []() -> void {
+        QDesktopServices::openUrl(QUrl("https://discord.gg/pVxmC2cSzA"));
+    });
+
+    connect(&_toWebsiteAction, &TriggerAction::triggered, this, []() -> void {
+        QDesktopServices::openUrl(QUrl("https://www.manivault.studio/"));
+    });
+
+    connect(&_toWikiAction, &TriggerAction::triggered, this, []() -> void {
+        QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki/wiki/"));
+    });
+
+    connect(&_toRepositoryAction, &TriggerAction::triggered, this, []() -> void {
+        QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio"));
+    });
 }
 
 void HelpManager::initialize()

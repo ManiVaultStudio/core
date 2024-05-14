@@ -29,16 +29,6 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Videos", "Videos"));
     //_mainLayout.addWidget(_settingsAction.createWidget(this));
     _mainLayout.addWidget(_filterModel.getTagsFilterAction().createWidget(this));
-    
-
-    auto pb = new QPushButton("asdad");
-
-    connect(pb, &QPushButton::clicked, this, [this]() -> void {
-        _filterModel.invalidate();
-    });
-
-    _mainLayout.addWidget(pb);
-
     _mainLayout.addWidget(&_videosScrollArea, 1);
 
     //_settingsAction.setShowLabels(false);

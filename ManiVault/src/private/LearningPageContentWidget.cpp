@@ -24,10 +24,10 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
 {
     auto& rowsLayout = getRowsLayout();
 
-    rowsLayout.addWidget(&_videosWidget);
+    rowsLayout.addWidget(&_videosWidget, 2);
     rowsLayout.addWidget(&_tutorialsWidget);
     rowsLayout.addWidget(&_examplesWidget);
-    rowsLayout.addWidget(&_pluginResourcesWidget);
+    rowsLayout.addWidget(&_pluginResourcesWidget, 1);
 
     _showVideosAction.setSettingsPrefix("LearningPage/ShowVideos");
     _showTutorialsAction.setSettingsPrefix("LearningPage/ShowTutorials");
@@ -67,10 +67,14 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
 
     _toolbarAction.setShowLabels(false);
     _toolbarAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
-        widget->layout()->setContentsMargins(35, 10, 35, 10);
+        widget->layout()->setContentsMargins(35, 10, 35, 20);
     });
 
-    _toolbarAction.addAction(new StretchAction(this, "Left stretch"));
+    _toolbarAction.addAction(&mv::help().getToDiscordAction());
+    _toolbarAction.addAction(&mv::help().getToWebsiteAction());
+    _toolbarAction.addAction(&mv::help().getToRepositoryAction());
+
+    _toolbarAction.addAction(new StretchAction(this, "Stretch"));
     _toolbarAction.addAction(&_settingsAction);
     _toolbarAction.addAction(&_toStartPageAction);
 
