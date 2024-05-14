@@ -45,9 +45,9 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         const auto markdown = QString(_fileDownloader.downloadedData());
 
-//#ifdef MARKDOWN_DIALOG_VERBOSE
+#ifdef MARKDOWN_DIALOG_VERBOSE
         qDebug() << _markdownUrl.toString() << "downloaded (" << markdown .size() << "bytes)";
-//#endif
+#endif
 
         if (!markdown.isEmpty())
             _markdownDocument.setText(markdown);
