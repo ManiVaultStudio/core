@@ -145,16 +145,13 @@ endif()
 
 set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
 
-foreach(build_mode ${BUILD_MODES})
-    install(TARGETS ${POINTDATA}
-        CONFIGURATIONS ${build_mode}
-        EXPORT "ManiVaultPublicExport${build_mode}" 
-        RUNTIME DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Windows .dll
-        LIBRARY DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Linux/Mac .so
-        ARCHIVE DESTINATION "${build_mode}/lib"     COMPONENT LINKLIB # Windows .lib
-        PUBLIC_HEADER DESTINATION "${build_mode}/include/${POINTDATA}" COMPONENT HEADERS
-    )
-endforeach()
+install(TARGETS ${POINTDATA}
+    EXPORT "ManiVaultPublicExport"
+    RUNTIME DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Windows .dll
+    LIBRARY DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Linux/Mac .so
+    ARCHIVE DESTINATION "$<CONFIGURATION>/lib/"     COMPONENT LINKLIB # Windows .lib
+    PUBLIC_HEADER DESTINATION "$<CONFIGURATION>/include/${POINTDATA}/" COMPONENT HEADERS
+)
 
 # Copy the external biovault_bfloat16 header into its own subfolder - cmake's install PUBLIC_HEADER flattens all subdirs
 install(FILES "${BFLOAT_HEADER}" DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16/")

@@ -32,8 +32,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INSTALL_MESSAGE LAZY)
 
-set(BUILD_MODES "Debug;Release;RelWithDebInfo;MinSizeRel " CACHE STRING "CMake build modes, any subset of CMAKE_CONFIGURATION_TYPES")
-
 # include CMakePackageConfigHelpers macro
 include(CMakePackageConfigHelpers)
 
@@ -388,29 +386,25 @@ foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
 endforeach()
 
 # Install public library
-foreach(build_mode ${BUILD_MODES})
-    install(TARGETS ${MV_PUBLIC_LIB}
-        CONFIGURATIONS ${build_mode}
-        EXPORT "ManiVaultPublicExport${build_mode}" 
-        RUNTIME DESTINATION "${build_mode}/." COMPONENT MVPUBLIC_LINKLIB    # Windows .dll
-        ARCHIVE DESTINATION "${build_mode}/lib" COMPONENT MVPUBLIC_LINKLIB  # Linux/Mac .so
-        LIBRARY DESTINATION "${build_mode}/lib" COMPONENT MVPUBLIC_LINKLIB  # Windows .lib
-    )
+install(TARGETS ${MV_PUBLIC_LIB}
+    EXPORT "ManiVaultPublicExport"
+    RUNTIME DESTINATION $<CONFIGURATION>        COMPONENT MVPUBLIC_LINKLIB  # Windows .dll
+    ARCHIVE DESTINATION "$<CONFIGURATION>/lib/" COMPONENT MVPUBLIC_LINKLIB  # Linux/Mac .so
+    LIBRARY DESTINATION "$<CONFIGURATION>/lib/" COMPONENT MVPUBLIC_LINKLIB  # Windows .lib
+)
 
-    # Generate a .cmake file that can be imported from the install to enable plugin building
-    install(EXPORT "ManiVaultPublicExport${build_mode}" 
-            CONFIGURATIONS ${build_mode}
-            FILE ManiVaultTargets.cmake
-            NAMESPACE ManiVault::
-            DESTINATION cmake/mv
-            COMPONENT MVPUBLIC_EXPORT
-    )
-endforeach()
+# Generate a .cmake file that can be imported from the install to enable plugin building
+install(EXPORT "ManiVaultPublicExport"
+        FILE ManiVaultTargets.cmake
+        NAMESPACE ManiVault::
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_EXPORT
+)
 
 if(MSVC)
     # Install program database (.pdb) files
-    install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION>/. COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
-    install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                  COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
 endif()
 
 # Generate the version file for use with find_package

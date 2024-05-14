@@ -67,16 +67,13 @@ target_link_libraries(${TEXTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 set_target_properties(${TEXTDATA} PROPERTIES PUBLIC_HEADER "${TEXTDATA_HEADERS}")
 
-foreach(build_mode ${BUILD_MODES})
-    install(TARGETS ${TEXTDATA}
-        CONFIGURATIONS ${build_mode}
-        EXPORT "ManiVaultPublicExport${build_mode}" 
-        RUNTIME DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Windows .dll
-        LIBRARY DESTINATION "${build_mode}/Plugins" COMPONENT PLUGINS # Linux/Mac .so
-        ARCHIVE DESTINATION "${build_mode}/lib"     COMPONENT LINKLIB # Windows .lib
-        PUBLIC_HEADER DESTINATION "${build_mode}/include/${TEXTDATA}" COMPONENT HEADERS
-    )
-endforeach()
+install(TARGETS ${TEXTDATA}
+    EXPORT "ManiVaultPublicExport"
+    RUNTIME DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Windows .dll
+    LIBRARY DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Linux/Mac .so
+    ARCHIVE DESTINATION "$<CONFIGURATION>/lib/"     COMPONENT LINKLIB # Windows .lib
+    PUBLIC_HEADER DESTINATION "$<CONFIGURATION>/include/${TEXTDATA}/" COMPONENT HEADERS
+)
 
 add_custom_command(TARGET ${TEXTDATA} POST_BUILD
     COMMAND ${CMAKE_COMMAND}
