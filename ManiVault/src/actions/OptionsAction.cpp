@@ -92,7 +92,7 @@ QList<std::int32_t> OptionsAction::getSelectedOptionIndices() const
 
 bool OptionsAction::isOptionSelected(const QString& option) const
 {
-    const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option);
+    const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option, -1, Qt::MatchExactly);
 
     if (matches.isEmpty())
         return false;

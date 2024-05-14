@@ -23,7 +23,7 @@ LearningPageVideosFilterModel::LearningPageVideosFilterModel(QObject* parent /*=
 
     _tagsFilterAction.setIconByName("tag");
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags);
+    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
 
     //connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, [this]() -> void {
     //    invalidate();
@@ -82,7 +82,6 @@ void LearningPageVideosFilterModel::setSourceModel(QAbstractItemModel* sourceMod
 {
     QSortFilterProxyModel::setSourceModel(sourceModel);
 
-    /*
     _learningPageVideosModel = static_cast<LearningPageVideosModel*>(sourceModel);
 
     connect(_learningPageVideosModel, &LearningPageVideosModel::tagsChanged, this, [this](const QSet<QString>& tags) -> void {
@@ -91,7 +90,6 @@ void LearningPageVideosFilterModel::setSourceModel(QAbstractItemModel* sourceMod
         _tagsFilterAction.setOptions(options);
         _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
     });
-    */
 }
 
 bool LearningPageVideosFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
