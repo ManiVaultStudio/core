@@ -27,14 +27,9 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
     _mainLayout.setContentsMargins(0, 0, 0, 0);
     _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Videos", "Videos"));
-    //_mainLayout.addWidget(_settingsAction.createWidget(this));
+    _mainLayout.addWidget(_filterModel.getFilterGroupAction().createWidget(this));
     _mainLayout.addWidget(_filterModel.getTagsFilterAction().createWidget(this));
     _mainLayout.addWidget(&_videosScrollArea, 1);
-
-    //_settingsAction.setShowLabels(false);
-
-    //_settingsAction.addAction(&_filterModel.getTitleFilterAction());
-    //_settingsAction.addAction(&_filterModel.getTagsFilterAction(), OptionsAction::Tags);
 
     _videosScrollArea.setObjectName("VideosScrollArea");
     _videosScrollArea.setWidgetResizable(true);
@@ -49,17 +44,16 @@ LearningPageVideosWidget::LearningPageVideosWidget(LearningPageContentWidget* le
     _videosLayout.setVerticalSpacing(10);
     _videosLayout.setAlignment(Qt::AlignTop);
 
-    _filterModel.setSourceModel(&_model);
-    //_filterModel.setFilterKeyColumn(static_cast<int>(LearningPageVideosModel::Column::Title));
+    _model.populateFromServer();
 
+    _filterModel.setSourceModel(&_model);
     _filterModel.getTagsFilterAction().setStretch(2);
 
     setLayout(&_mainLayout);
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, &LearningPageVideosWidget::updateVideos);
     connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, &LearningPageVideosWidget::updateVideos);
-
-    _model.populateFromServer();
+    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, &LearningPageVideosWidget::updateVideos);
 
     connect(qApp, &QApplication::paletteChanged, this, &LearningPageVideosWidget::updateCustomStyle);
 
@@ -74,8 +68,6 @@ void LearningPageVideosWidget::updateCustomStyle()
 
 void LearningPageVideosWidget::updateVideos()
 {
-    qDebug() << __FUNCTION__;
-
     QLayoutItem* layoutItem;
 
     while ((layoutItem = _videosLayout.takeAt(0)) != nullptr) {

@@ -11,31 +11,34 @@
     #define LEARNING_PAGE_VIDEOS_FILTER_MODEL_VERBOSE
 #endif
 
+using namespace mv;
 using namespace mv::gui;
 
 LearningPageVideosFilterModel::LearningPageVideosFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent),
-    _titleFilterAction(this, "Title"),
-    _tagsFilterAction(this, "Tags")
+    SortFilterProxyModel(parent),
+    _tagsFilterAction(this, "Tags filter"),
+    _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
+    setRowTypeName("Video");
 
     _tagsFilterAction.setIconByName("tag");
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
 
-    //connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, [this]() -> void {
-    //    invalidate();
-    //});
+    connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, [this]() -> void {
+        invalidate();
+    });
+
+    _filterGroupAction.setShowLabels(false);
+    _filterGroupAction.addAction(&getTextFilterAction());
+    _filterGroupAction.addAction(&getTextFilterSettingsAction());
 }
 
 bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
-    qDebug() << __FUNCTION__;
     const auto index = sourceModel()->index(row, 0, parent);
-
-    return true;
 
     if (!index.isValid())
         return true;
@@ -51,43 +54,34 @@ bool LearningPageVideosFilterModel::filterAcceptsRow(int row, const QModelIndex&
     const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
 
     if (_tagsFilterAction.hasOptions()) {
-        qDebug() << filterTagsList;
-
         auto matchTags = false;
 
-        //for (const auto& tag : tagsList) {
-        //    //qDebug() << tag << filterTagsList;
-        //    if (!filterTagsList.contains(tag))
-        //        continue;
+        for (const auto& tag : tagsList) {
+            if (!filterTagsList.contains(tag))
+                continue;
 
-        //    matchTags = true;
+            matchTags = true;
 
-        //    break;
-        //}
+            break;
+        }
 
-        ////qDebug() << "matchTags" << matchTags;
-        //if (!matchTags) {
-
-        //    //return false;
-        //}
+        if (!matchTags)
+            return false;
     }
-    
-
-    //qDebug() << __FUNCTION__ << "TRUE";
 
     return true;
 }
 
 void LearningPageVideosFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
 {
-    QSortFilterProxyModel::setSourceModel(sourceModel);
+    SortFilterProxyModel::setSourceModel(sourceModel);
 
     _learningPageVideosModel = static_cast<LearningPageVideosModel*>(sourceModel);
 
     connect(_learningPageVideosModel, &LearningPageVideosModel::tagsChanged, this, [this](const QSet<QString>& tags) -> void {
         const auto options = QStringList(_learningPageVideosModel->getTagsSet().begin(), _learningPageVideosModel->getTagsSet().end());
 
-        _tagsFilterAction.setOptions(options);
+        _tagsFilterAction.initialize(options, options);
         _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
     });
 }

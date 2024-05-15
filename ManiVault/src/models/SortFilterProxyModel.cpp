@@ -7,7 +7,7 @@
 #include <QDebug>
 
 #ifdef _DEBUG
-    //#define FILTER_MODEL_VERBOSE
+    //#define SORT_FILTER_PROXY_MODEL_VERBOSE
 #endif
 
 using namespace mv::gui;
@@ -17,14 +17,128 @@ namespace mv
 
 SortFilterProxyModel::SortFilterProxyModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _numberOfRowsAction(this, "Number of rows")
+    _rowTypeName("Item"),
+    _numberOfRowsAction(this, "Number of rows"),
+    _textFilterAction(this, "Text filter"),
+    _textFilterSettingsAction(this, "Text filter settings"),
+    _textFilterColumnAction(this, "Column"),
+    _textFilterCaseSensitiveAction(this, "Case sensitive"),
+    _textFilterRegularExpressionAction(this, "Regular expression", false)
 {
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
 
     _numberOfRowsAction.initialize(this);
 
+    _textFilterAction.setConnectionPermissionsToForceNone();
+    _textFilterAction.setPlaceHolderString("Search by title");
+    _textFilterAction.setClearable(true);
+    _textFilterAction.setSearchMode(true);
+
+    _textFilterAction.setConnectionPermissionsToForceNone();
+    _textFilterAction.setText("Filtering");
+    _textFilterAction.setIconByName("filter");
+    _textFilterAction.setToolTip("Adjust filtering parameters");
+
+    _textFilterCaseSensitiveAction.setConnectionPermissionsToForceNone();
+    _textFilterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
+
+    _textFilterRegularExpressionAction.setConnectionPermissionsToForceNone();
+    _textFilterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
+
+    _textFilterSettingsAction.setConnectionPermissionsToForceNone();
+    _textFilterSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _textFilterSettingsAction.addAction(&_textFilterColumnAction);
+    _textFilterSettingsAction.addAction(&_textFilterCaseSensitiveAction);
+    _textFilterSettingsAction.addAction(&_textFilterRegularExpressionAction);
+
+    connect(&_textFilterAction, &StringAction::stringChanged, this, &SortFilterProxyModel::updateTextFilterSettings);
+    connect(&_textFilterCaseSensitiveAction, &ToggleAction::toggled, this, &SortFilterProxyModel::updateTextFilterSettings);
+    connect(&_textFilterRegularExpressionAction, &ToggleAction::toggled, this, &SortFilterProxyModel::updateTextFilterSettings);
+}
+
+void SortFilterProxyModel::setSourceModel(QAbstractItemModel* sourceModel)
+{
+    if (this->sourceModel()) {
+        disconnect(this, &QAbstractItemModel::columnsInserted, this, nullptr);
+        disconnect(this, &QAbstractItemModel::columnsMoved, this, nullptr);
+        disconnect(this, &QAbstractItemModel::columnsRemoved, this, nullptr);
+        disconnect(this, &QAbstractItemModel::headerDataChanged, this, nullptr);
+    }
+
+    QSortFilterProxyModel::setSourceModel(sourceModel);
+
+    connect(sourceModel, &QAbstractItemModel::columnsInserted, this, &SortFilterProxyModel::updateFilterColumnAction);
+    connect(sourceModel, &QAbstractItemModel::columnsMoved, this, &SortFilterProxyModel::updateFilterColumnAction);
+    connect(sourceModel, &QAbstractItemModel::columnsRemoved, this, &SortFilterProxyModel::updateFilterColumnAction);
+    connect(sourceModel, &QAbstractItemModel::headerDataChanged, this, &SortFilterProxyModel::updateFilterColumnAction);
+
+    updateFilterColumnAction();
+    updateTextFilterSettings();
+}
+
+void SortFilterProxyModel::setRowTypeName(const QString& rowTypeName)
+{
+    if (rowTypeName == _rowTypeName)
+        return;
+
+    _rowTypeName = rowTypeName;
+
+    updateTextFilterSettings();
+
+    emit rowTypeNameChanged(_rowTypeName);
+}
+
+QString SortFilterProxyModel::getRowTypeName() const
+{
+    return _rowTypeName;
+}
+
+void SortFilterProxyModel::updateTextFilterSettings()
+{
+    const auto rowTypeNameLowered = _rowTypeName.toLower();
+
+    if (_textFilterRegularExpressionAction.isChecked()) {
+        const auto description = QString("Search for %1 by regular expression").arg(rowTypeNameLowered);
+
+        _textFilterAction.setPlaceHolderString(description);
+        _textFilterAction.setToolTip(description);
+
+        auto regularExpression = QRegularExpression(_textFilterAction.getString());
+
+        if (!_textFilterCaseSensitiveAction.isChecked())
+            regularExpression.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+
+        if (regularExpression.isValid() && (regularExpression != filterRegularExpression()))
+            setFilterRegularExpression(regularExpression);
+    }
+    else {
+        const auto filterColumn = headerData(filterKeyColumn(), Qt::Horizontal).toString().toLower();
+
+        const auto description = QString("Search for %1 by %2").arg(rowTypeNameLowered, filterColumn);
+
+        _textFilterAction.setPlaceHolderString(description);
+        _textFilterAction.setToolTip(description);
+
+        if (QRegularExpression(_textFilterAction.getString()) != filterRegularExpression())
+            setFilterFixedString(_textFilterAction.getString());
+    }
+
+    setFilterCaseSensitivity(_textFilterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
     invalidate();
+}
+
+void SortFilterProxyModel::updateFilterColumnAction()
+{
+    const auto previousFilterColumn = _textFilterColumnAction.getCurrentText();
+
+    QStringList columnNames;
+
+    for (std::int32_t columnIndex = 0; columnIndex < columnCount(); columnIndex++)
+        columnNames << headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString();
+
+    _textFilterColumnAction.setOptions(columnNames);
+    _textFilterColumnAction.setCurrentText(previousFilterColumn.isEmpty() ? "" : (columnNames.contains(previousFilterColumn) ? previousFilterColumn : ""));
 }
 
 }

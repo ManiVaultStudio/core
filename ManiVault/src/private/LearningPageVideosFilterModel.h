@@ -4,10 +4,11 @@
 
 #pragma once
 
-#include <QSortFilterProxyModel>
+#include <models/SortFilterProxyModel.h>
 
 #include <actions/StringAction.h>
 #include <actions/OptionsAction.h>
+#include <actions/HorizontalGroupAction.h>
 
 class LearningPageVideosModel;
 
@@ -18,7 +19,7 @@ class LearningPageVideosModel;
  *
  * @author Thomas Kroes
  */
-class LearningPageVideosFilterModel : public QSortFilterProxyModel
+class LearningPageVideosFilterModel : public mv::SortFilterProxyModel
 {
 public:
 
@@ -51,11 +52,11 @@ public:
 
 public: // Action getters
 
-    mv::gui::StringAction& getTitleFilterAction() { return _titleFilterAction; }
     mv::gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
+    mv::gui::HorizontalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
-    LearningPageVideosModel*    _learningPageVideosModel;   /** Pointer to source model */
-    mv::gui::StringAction       _titleFilterAction;         /** Filter based on title */
-    mv::gui::OptionsAction      _tagsFilterAction;          /** Filter based on tag(s) */
+    LearningPageVideosModel*        _learningPageVideosModel;   /** Pointer to source model */
+    mv::gui::OptionsAction          _tagsFilterAction;          /** Filter based on tag(s) */
+    mv::gui::HorizontalGroupAction  _filterGroupAction;         /** Groups the filter text and the the filter settings */
 };
