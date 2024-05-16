@@ -6,6 +6,7 @@
 
 #include <QWidget>
 #include <QScrollArea>
+#include <QListView>
 
 #include "LearningPageVideosModel.h"
 #include "LearningPageVideosFilterModel.h"
@@ -28,10 +29,12 @@ class LearningPageVideosWidget : public QWidget
 protected:
 
     /**
-     * Construct with pointer to \p learningPageContentWidget
-     * @param learningPageContentWidget Pointer to owning learning page content widget
+     * Construct with pointer to \p parent widget
+     * @param parent pointer to parent widget
      */
-    LearningPageVideosWidget(LearningPageContentWidget* learningPageContentWidget);
+    LearningPageVideosWidget(QWidget* parent = nullptr);
+
+    void showEvent(QShowEvent* showEvent);
 
 private:
 
@@ -41,12 +44,11 @@ private:
     void updateVideos();
 
 private:
-    LearningPageContentWidget*      _learningPageContentWidget;     /** Pointer to owning learning page content widget */
     QVBoxLayout                     _mainLayout;                    /** Main vertical layout */
     mv::gui::HorizontalGroupAction  _settingsAction;                
     QScrollArea                     _videosScrollArea;
     QWidget                         _videosWidget;
-    QGridLayout                     _videosLayout;
+    QListView                       _videosListView;
     LearningPageVideosModel         _model;                         /** Videos model */
     LearningPageVideosFilterModel   _filterModel;                   /** Videos filter model */
 
