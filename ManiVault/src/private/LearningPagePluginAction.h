@@ -24,16 +24,27 @@ class LearningPagePluginActionsWidget : public QWidget
 {
 private:
 
+    /** Visual representation of a plugin action */
     class ActionWidget : public QLabel {
     public:
         using ClickedFunction = std::function<void()>;
 
+        /**
+         * Create with \p iconName, \p clickedFunction and pointer to \p parent widget
+         * @param iconName Action icon name
+         * @param clickedFunction Function that is invoked when the action is clicked
+         * @param iconName Action icon name
+         */
         explicit ActionWidget(const QString& iconName, ClickedFunction clickedFunction, QWidget* parent = nullptr);
 
+        /**
+         * Invoked on mouse press
+         * @param event Pointer to mouse event
+         */
         void mousePressEvent(QMouseEvent* event);
 
         /**
-         * Triggered on mouse hover
+         * Invoked on mouse hover
          * @param enterEvent Pointer to enter event
          */
         void enterEvent(QEnterEvent* enterEvent) override;
@@ -46,11 +57,12 @@ private:
 
     private:
 
+        /** Updates the CSS styling */
         void updateStyle();
 
     private:
-        const QString   _iconName;
-        ClickedFunction _clickedFunction;
+        const QString       _iconName;          /** Action icon name */
+        ClickedFunction     _clickedFunction;   /** Function that is invoked when the action is clicked */
     };
 
     class ActionsOverlayWidget : public QWidget {
@@ -72,8 +84,6 @@ protected:
      */
     LearningPagePluginActionsWidget(const mv::plugin::PluginFactory* pluginFactory, QWidget* parent = nullptr);
 
-    const mv::plugin::PluginFactory* getPluginFactory() const;
-
     /**
      * Triggered on mouse hover
      * @param enterEvent Pointer to enter event
@@ -87,6 +97,12 @@ protected:
     void leaveEvent(QEvent* leaveEvent) override;
 
 private:
+
+    /**
+     * Get the plugin factory which is associated with the plugin action
+     * @param Pointer to plugin factory
+     */
+    const mv::plugin::PluginFactory* getPluginFactory() const;
 
     bool hasOverlay() const;
 

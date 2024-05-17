@@ -25,66 +25,6 @@
  */
 class LearningPageVideoStyledItemDelegate : public QStyledItemDelegate
 {
-private:
-
-    class VideoOverlayWidget : public QWidget {
-    public:
-        explicit VideoOverlayWidget(QWidget* parent);
-
-        void setIndex(const QModelIndex& index);
-
-    private:
-        QPersistentModelIndex       _index;
-        QVBoxLayout                 _mainLayout;                        /** Main vertical layout */
-        QLabel                      _dateLabel;
-        QLabel                      _tagsLabel;
-        mv::util::WidgetOverlayer   _widgetOverlayer;       /** Synchronizes the size with the source widget */
-
-    };
-    class EditorWidget : public QWidget
-    {
-    public:
-
-        /**
-         * Construct with pointer to \p parent widget
-         * @param delegate Pointer to delegate item
-         * @param parent Pointer to parent widget
-         */
-        EditorWidget(LearningPageVideoStyledItemDelegate* delegate, QWidget* parent = nullptr);
-
-        /**
-         * Set editor data from model \p index
-         * @param index Model index to fetch data from
-         */
-        void setEditorData(const QModelIndex& index);
-
-        void mousePressEvent(QMouseEvent* event);
-
-        /**
-         * Triggered on mouse hover
-         * @param enterEvent Pointer to enter event
-         */
-        void enterEvent(QEnterEvent* enterEvent) override;
-
-        /**
-         * Triggered on mouse leave
-         * @param leaveEvent Pointer to leave event
-         */
-        void leaveEvent(QEvent* leaveEvent) override;
-
-    private:
-        LearningPageVideoStyledItemDelegate*    _delegate;
-        QPersistentModelIndex                   _index;                     /** Editor model index */
-        QHBoxLayout                             _mainLayout;                /** Main editor layout */
-        QVBoxLayout                             _thumbnailLayout;                /**  */
-        QVBoxLayout                             _textLayout;                /** Right text layout */
-        QLabel                                  _thumbnailLabel;
-        QTextBrowser                            _propertiesTextBrowser;
-        mv::util::FileDownloader                _fileDownloader;
-        QPixmap                                 _thumbnailPixmap;
-        VideoOverlayWidget                      _overlayWidget;             /** Overlay widget which shows the associated plugin actions */
-    };
-
 public:
 
     /**
@@ -101,9 +41,26 @@ public:
      */
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
+    /**
+     * Creates an editor widget
+     * @param parent Pointer to parent widget
+     * @param option Style options
+     * @param index Model index
+     */
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
+    /**
+     * Updates an editor widget with new data for \p index
+     * @param editor Pointer to editor widget
+     * @param index Model index
+     */
     void setEditorData(QWidget* editor, const QModelIndex& index) const;
 
+    /**
+     * Updates \p editor widget geometry
+     * @param editor Pointer to editor widget
+     * @param option Style options
+     * @param index Model index
+     */
     void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };

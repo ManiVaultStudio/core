@@ -51,13 +51,8 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
             //if (_videosListView.isPersistentEditorOpen(index))
             //    return;
 
-            if (index.isValid()) {
-#ifdef LEARNING_PAGE_VIDEOS_WIDGET_VERBOSE
-                qDebug() << __FUNCTION__ << index.siblingAtColumn(static_cast<int>(LearningPageVideosModel::Column::Title)).data().toString() << index << index.isValid();
-#endif
-
+            if (index.isValid())
                 _videosListView.openPersistentEditor(index);
-            }
         }
     };
 
@@ -66,7 +61,6 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
     connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, openPersistentEditors);
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
-        qDebug() << "QSortFilterProxyModel::rowsAboutToBeRemoved";
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
             _videosListView.closePersistentEditor(_filterModel.index(rowIndex, static_cast<int>(LearningPageVideosModel::Column::Delegate)));
     });

@@ -27,18 +27,6 @@ protected:
 
 private:
 
-    /**
-     * Open persistent editor for \p rowIndex
-     * @param rowIndex Index of the row for which to open the persistent editor
-     */
-    void openPersistentEditor(int rowIndex);
-
-    /**
-     * Close persistent editor for \p rowIndex
-     * @param rowIndex Index of the row for which to close the persistent editor
-     */
-    void closePersistentEditor(int rowIndex);
-
     /** Update all custom style elements */
     void updateCustomStyle();
 

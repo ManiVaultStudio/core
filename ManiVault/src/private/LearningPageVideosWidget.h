@@ -34,23 +34,25 @@ protected:
      */
     LearningPageVideosWidget(QWidget* parent = nullptr);
 
+    /**
+     * Invoked when the widget is shown
+     * @param showEvent Pointer to show event
+     */
     void showEvent(QShowEvent* showEvent);
 
 private:
 
-    /** Update all  custom style elements */
+    /** Update all custom style elements */
     void updateCustomStyle();
 
-    void updateVideos();
-
 private:
-    QVBoxLayout                     _mainLayout;                    /** Main vertical layout */
-    mv::gui::HorizontalGroupAction  _settingsAction;                
-    QScrollArea                     _videosScrollArea;
-    QWidget                         _videosWidget;
-    QListView                       _videosListView;
-    LearningPageVideosModel         _model;                         /** Videos model */
-    LearningPageVideosFilterModel   _filterModel;                   /** Videos filter model */
+    QVBoxLayout                     _mainLayout;            /** Main vertical layout */
+    mv::gui::HorizontalGroupAction  _settingsAction;        /** For searching etc. */
+    QScrollArea                     _videosScrollArea;      /** Videos scroll area */
+    QWidget                         _videosWidget;          /** Container for the videos list view */
+    QListView                       _videosListView;        /** List view which shows videos with styled item delegates */
+    LearningPageVideosModel         _model;                 /** Videos model */
+    LearningPageVideosFilterModel   _filterModel;           /** Videos filter model */
 
     friend class LearningPageContentWidget;
 };

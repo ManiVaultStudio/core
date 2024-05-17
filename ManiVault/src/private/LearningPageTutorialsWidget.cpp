@@ -25,53 +25,6 @@ LearningPageTutorialsWidget::LearningPageTutorialsWidget(LearningPageContentWidg
     updateCustomStyle();
 }
 
-void LearningPageTutorialsWidget::openPersistentEditor(int rowIndex)
-{
-    //const auto index = _filterModel.index(rowIndex, static_cast<int>(LearningPageVideosModel::Column::Delegate));
-
-    //if (_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
-    //    return;
-
-    //if (index.isValid())
-    //    _hierarchyWidget.getTreeView().openPersistentEditor(index);
-}
-
-void LearningPageTutorialsWidget::closePersistentEditor(int rowIndex)
-{
-    //const auto index = _filterModel.index(rowIndex, static_cast<int>(LearningPageVideosModel::Column::Delegate));
-
-    //if (!_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
-    //    return;
-
-    //if (index.isValid())
-    //    _hierarchyWidget.getTreeView().closePersistentEditor(index);
-}
-
 void LearningPageTutorialsWidget::updateCustomStyle()
 {
-    //auto styleSheet = QString(" \
-    //    QLabel { \
-    //        background-color: rgba(0, 0, 0, 0); \
-    //    } \
-    //    QTreeView::item:hover:!selected { \
-    //        background-color: rgba(0, 0, 0, 50); \
-    //    } \
-    //    QTreeView::item:selected { \
-    //        background-color: rgba(0, 0, 0, 100); \
-    //    } \
-    //");
-
-    //auto& treeView = _hierarchyWidget.getTreeView();
-    //
-    //styleSheet += QString(" \
-    //    QTreeView { \
-    //        border: none; \
-    //    } \
-    //");
-
-    //auto color = QApplication::palette().color(QPalette::Normal, QPalette::Midlight).name();
-
-    //styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
-    //
-    //treeView.setStyleSheet(styleSheet);
 }

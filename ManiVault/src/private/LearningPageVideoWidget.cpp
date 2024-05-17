@@ -38,6 +38,12 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _propertiesTextBrowser.setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     _propertiesTextBrowser.setFixedWidth(200);
     _propertiesTextBrowser.setHtml(QString("<p style='margin-top: 0px; rgb(75, 75, 75)'><b>%1</b></p>").arg(title));
+    _propertiesTextBrowser.setStyleSheet(" \
+        background-color: transparent; \
+        border: none; \
+        margin: 0px; \
+        padding: 0px; \
+    ");
 
     connect(_propertiesTextBrowser.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [this]() -> void {
         _propertiesTextBrowser.setFixedHeight(_propertiesTextBrowser.document()->size().height());
@@ -45,7 +51,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
 
     _overlayWidget.hide();
 
-    _mainLayout.setContentsMargins(0, 0, 0, 0);
+    _mainLayout.setContentsMargins(0, 0, 15, 0);
     _mainLayout.setSpacing(1);
     _mainLayout.setAlignment(Qt::AlignTop);
 
@@ -54,7 +60,18 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
 
     setLayout(&_mainLayout);
 
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
+
     _thumbnailLabel.setObjectName("ThumbnailLabel");
+    _thumbnailLabel.setFont(fontAwesome.getFont(20));
+    _thumbnailLabel.setText(fontAwesome.getIconCharacter("spinner"));
+    _thumbnailLabel.setAlignment(Qt::AlignCenter);
+    _thumbnailLabel.setFixedSize(QSize(200, 102));
+    _thumbnailLabel.setStyleSheet("QLabel#ThumbnailLabel { \
+        background-color: rgb(200, 200, 200); \
+        color: rgb(100, 100, 100); \
+        border: 1px solid rgb(150, 150, 150); \
+    }");
 
     connect(&_thumbnailDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         _thumbnailPixmap = QPixmap::fromImage(QImage::fromData(_thumbnailDownloader.downloadedData()));
@@ -63,10 +80,6 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
         const auto rectangleToCopy  = QRect(0, marginToRemove, _thumbnailPixmap.width(), _thumbnailPixmap.height() - (2 * marginToRemove));
 
         _thumbnailPixmap = _thumbnailPixmap.copy(rectangleToCopy).scaledToWidth(200, Qt::SmoothTransformation);
-
-        _thumbnailLabel.setStyleSheet("QLabel#ThumbnailLabel { \
-            border: 1px solid rgb(150, 150, 150); \
-        }");
 
         _thumbnailLabel.setFixedSize(_thumbnailPixmap.size());
         _thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
@@ -80,20 +93,35 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _thumbnailLabel.installEventFilter(this);
 }
 
-void LearningPageVideoWidget::enterEvent(QEnterEvent* enterEvent)
+bool LearningPageVideoWidget::eventFilter(QObject* target, QEvent* event)
 {
-    QWidget::enterEvent(enterEvent);
+    switch (event->type())
+    {
+        case QEvent::Enter:
+        {
+            if (target == &_thumbnailLabel) {
+                _overlayWidget.show();
+                _overlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
+            }
+            
+            break;
+        }
 
-    _overlayWidget.show();
-    _overlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-}
+        case QEvent::Leave:
+        {
+            if (target == &_thumbnailLabel) {
+                _overlayWidget.hide();
+                _overlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+            }
 
-void LearningPageVideoWidget::leaveEvent(QEvent* leaveEvent)
-{
-    QWidget::leaveEvent(leaveEvent);
+            break;
+        }
 
-    _overlayWidget.hide();
-    _overlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        default:
+            break;
+    }
+
+    return QWidget::eventFilter(target, event);
 }
 
 QString LearningPageVideoWidget::getYouTubeThumbnailUrl(const QString& videoId, const QString& quality /*= "mqdefault"*/)
@@ -201,14 +229,10 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
 
 void LearningPageVideoWidget::OverlayWidget::updateStyle()
 {
-    auto colorEnter = getColorAsCssString(QColor(0, 0, 0, 110));
+    auto colorEnter = getColorAsCssString(QColor(0, 0, 0, 150));
     auto colorLeave = getColorAsCssString(QColor(0, 0, 0, 70));
 
     _playIconLabel.setStyleSheet(QString("color: %1").arg(_playIconLabel.underMouse() ? colorEnter : colorLeave));
-
-    colorEnter = getColorAsCssString(QColor(0, 0, 0, 100));
-    colorLeave = getColorAsCssString(QColor(0, 0, 0, 40));
-
     _summaryIconLabel.setStyleSheet(QString("color: %1").arg(_summaryIconLabel.underMouse() ? colorEnter : colorLeave));
     _dateIconLabel.setStyleSheet(QString("color: %1").arg(_dateIconLabel.underMouse() ? colorEnter : colorLeave));
     _tagsIconLabel.setStyleSheet(QString("color: %1").arg(_tagsIconLabel.underMouse() ? colorEnter : colorLeave));

@@ -11,7 +11,7 @@
 /**
  * Logo widget class
  *
- * Widget class for displaying the application logo
+ * Widget class for displaying the application logo (used by the page header widget and for the central docking widget)
  *
  * @author Thomas Kroes
  */
@@ -25,7 +25,7 @@ public:
      */
     LogoWidget(QWidget* parent = nullptr);
 
-protected:
+private:
     QVBoxLayout     _layout;        /** Main layout */
     QLabel          _headerLabel;   /** Header label */
 };

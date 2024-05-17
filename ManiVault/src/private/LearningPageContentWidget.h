@@ -35,10 +35,10 @@ private:
     mv::gui::GroupAction                _settingsAction;                /** Page settings action */
     mv::gui::TriggerAction              _toStartPageAction;             /** Trigger action for showing the start page */
     mv::gui::HorizontalGroupAction      _toolbarAction;                 /** Bottom toolbar action */
-    LearningPageVideosWidget            _videosWidget;                  /** Learning page video content widget */
-    LearningPageTutorialsWidget         _tutorialsWidget;               /** Learning page tutorials content widget */
-    LearningPageExamplesWidget          _examplesWidget;                /** Learning page examples content widget */
-    LearningPagePluginResourcesWidget   _pluginResourcesWidget;         /** Learning page plugin resources content widget */
+    LearningPageVideosWidget            _videosWidget;                  /** Learning page video section content widget */
+    LearningPageTutorialsWidget         _tutorialsWidget;               /** Learning page tutorials section content widget */
+    LearningPageExamplesWidget          _examplesWidget;                /** Learning page examples section content widget */
+    LearningPagePluginResourcesWidget   _pluginResourcesWidget;         /** Learning page plugin section resources content widget */
 
     friend class LearningPageWidget;
 };

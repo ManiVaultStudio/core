@@ -21,7 +21,7 @@ class LearningPageWidget : public PageWidget
 public:
 
     /**
-     * Constructor
+     * Construct with pointer to \p parent widget
      * @param parent Pointer to parent widget
      */
     LearningPageWidget(QWidget* parent = nullptr);

@@ -8,7 +8,7 @@
 #include <QVBoxLayout>
 #include <QTextBrowser>
 
-#include "util/FileDownloader.h"
+#include <util/FileDownloader.h>
 
 class LearningPageVideosWidget;
 
@@ -23,8 +23,15 @@ class LearningPageVideoWidget : public QWidget
 {
 private:
 
+    /** Overlay widget widget that shows video-related actions */
     class OverlayWidget : public QWidget {
     public:
+
+        /**
+         * Construct with model \p index and pointer to \p parent widget
+         * @param index Model index
+         * @param parent Pointer to parent widget
+         */
         explicit OverlayWidget(const QModelIndex& index, QWidget* parent);
 
         /**
@@ -36,6 +43,7 @@ private:
 
     private:
 
+        /** Updates custom styling */
         void updateStyle();
 
     private:
@@ -43,14 +51,14 @@ private:
         QVBoxLayout                 _mainLayout;                /** Main vertical layout */
         QHBoxLayout                 _centerLayout;              /** Center horizontal layout for the play button */
         QHBoxLayout                 _bottomLayout;              /** Bottom horizontal layout for the meta labels */
-        QLabel                      _playIconLabel;             /** Play label */
-        QLabel                      _summaryIconLabel;          /** Play label */
-        QLabel                      _dateIconLabel;             /** Date label */
-        QLabel                      _tagsIconLabel;             /** Tags label */
+        QLabel                      _playIconLabel;             /** Play icon label */
+        QLabel                      _summaryIconLabel;          /** Summary icon label */
+        QLabel                      _dateIconLabel;             /** Date icon label */
+        QLabel                      _tagsIconLabel;             /** Tags icon label */
         mv::util::WidgetOverlayer   _widgetOverlayer;           /** Synchronizes the size with the source widget */
     };
 
-protected:
+public:
 
     /**
      * Construct with model \p index and pointer to \p learningPageContentWidget
@@ -60,16 +68,11 @@ protected:
     LearningPageVideoWidget(const QModelIndex& index, QWidget* parent = nullptr);
 
     /**
-     * Triggered on mouse hover
-     * @param enterEvent Pointer to enter event
+     * Respond to target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
      */
-    void enterEvent(QEnterEvent* enterEvent) override;
-
-    /**
-     * Triggered on mouse leave
-     * @param leaveEvent Pointer to leave event
-     */
-    void leaveEvent(QEvent* leaveEvent) override;
+    bool eventFilter(QObject* target, QEvent* event) override;
 
     /**
      * Get youTube thumbnail for \p videoId with \p quality
@@ -79,13 +82,13 @@ protected:
     static QString getYouTubeThumbnailUrl(const QString& videoId, const QString& quality = "mqdefault");
 
 private:
-    QPersistentModelIndex       _index;         /** Pointer to owning learning page content widget */
-    QVBoxLayout                 _mainLayout;    /** Main vertical layout */
-    QLabel                      _thumbnailLabel;
-    QPixmap                     _thumbnailPixmap;
-    mv::util::FileDownloader    _thumbnailDownloader;
-    QTextBrowser                _propertiesTextBrowser;
-    OverlayWidget               _overlayWidget;
+    QPersistentModelIndex       _index;                     /** Pointer to owning learning page content widget */
+    QVBoxLayout                 _mainLayout;                /** Main vertical layout */
+    QLabel                      _thumbnailLabel;            /** Label that shows the thumbnail pixmap */
+    QPixmap                     _thumbnailPixmap;           /** Thumbnail pixmap */
+    mv::util::FileDownloader    _thumbnailDownloader;       /** File downloader for downloading the thumbnail image */
+    QTextBrowser                _propertiesTextBrowser;     /** Text browser for showing the video title */
+    OverlayWidget               _overlayWidget;             /** Overlay widget widget that shows video-related actions */
 
-    friend class LearningPageVideosWidget;
+    friend class LearningPageVideoStyledItemDelegate;
 };

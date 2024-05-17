@@ -48,13 +48,29 @@ SortFilterProxyModel::SortFilterProxyModel(QObject* parent /*= nullptr*/) :
 
     _textFilterSettingsAction.setConnectionPermissionsToForceNone();
     _textFilterSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _textFilterSettingsAction.setIconByName("filter");
     _textFilterSettingsAction.addAction(&_textFilterColumnAction);
     _textFilterSettingsAction.addAction(&_textFilterCaseSensitiveAction);
     _textFilterSettingsAction.addAction(&_textFilterRegularExpressionAction);
 
+    _textFilterColumnAction.setConnectionPermissionsToForceNone();
+    _textFilterColumnAction.setToolTip("Choose wich column to use for text filtering");
+
+    _textFilterCaseSensitiveAction.setConnectionPermissionsToForceNone();
+    _textFilterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
+
+    _textFilterRegularExpressionAction.setConnectionPermissionsToForceNone();
+    _textFilterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
+
+
     connect(&_textFilterAction, &StringAction::stringChanged, this, &SortFilterProxyModel::updateTextFilterSettings);
     connect(&_textFilterCaseSensitiveAction, &ToggleAction::toggled, this, &SortFilterProxyModel::updateTextFilterSettings);
     connect(&_textFilterRegularExpressionAction, &ToggleAction::toggled, this, &SortFilterProxyModel::updateTextFilterSettings);
+
+    connect(&_textFilterColumnAction, &OptionAction::currentIndexChanged, this, [this](const std::atomic_int32_t& currentIndex) -> void {
+        setFilterKeyColumn(currentIndex);
+        updateTextFilterSettings();
+    });
 }
 
 void SortFilterProxyModel::setSourceModel(QAbstractItemModel* sourceModel)
