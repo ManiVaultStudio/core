@@ -56,6 +56,17 @@ public:
      */
     QString getRowTypeName() const;
 
+    /**
+     * Set filter column to \p column
+     * @param column Column index
+     */
+    void setFilterColumn(int column);
+
+private:
+
+    /** Force users to use SortFilterProxyModel::setFilterColumn(...), because we need to be notified of filter column changes */
+    using QSortFilterProxyModel::setFilterKeyColumn;
+
 private:
 
     /** Updates the text filter settings and the configures the model */

@@ -27,7 +27,7 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     rowsLayout.addWidget(&_videosWidget, 2);
     rowsLayout.addWidget(&_tutorialsWidget);
     rowsLayout.addWidget(&_examplesWidget);
-    rowsLayout.addWidget(&_pluginResourcesWidget, 1);
+    rowsLayout.addWidget(&_pluginResourcesWidget);
 
     _showVideosAction.setSettingsPrefix("LearningPage/ShowVideos");
     _showTutorialsAction.setSettingsPrefix("LearningPage/ShowTutorials");

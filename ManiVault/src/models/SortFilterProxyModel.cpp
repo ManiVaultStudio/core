@@ -54,7 +54,7 @@ SortFilterProxyModel::SortFilterProxyModel(QObject* parent /*= nullptr*/) :
     _textFilterSettingsAction.addAction(&_textFilterRegularExpressionAction);
 
     _textFilterColumnAction.setConnectionPermissionsToForceNone();
-    _textFilterColumnAction.setToolTip("Choose wich column to use for text filtering");
+    _textFilterColumnAction.setToolTip("Choose which column to use for text filtering");
 
     _textFilterCaseSensitiveAction.setConnectionPermissionsToForceNone();
     _textFilterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
@@ -62,13 +62,12 @@ SortFilterProxyModel::SortFilterProxyModel(QObject* parent /*= nullptr*/) :
     _textFilterRegularExpressionAction.setConnectionPermissionsToForceNone();
     _textFilterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
 
-
     connect(&_textFilterAction, &StringAction::stringChanged, this, &SortFilterProxyModel::updateTextFilterSettings);
     connect(&_textFilterCaseSensitiveAction, &ToggleAction::toggled, this, &SortFilterProxyModel::updateTextFilterSettings);
     connect(&_textFilterRegularExpressionAction, &ToggleAction::toggled, this, &SortFilterProxyModel::updateTextFilterSettings);
 
     connect(&_textFilterColumnAction, &OptionAction::currentIndexChanged, this, [this](const std::atomic_int32_t& currentIndex) -> void {
-        setFilterKeyColumn(currentIndex);
+        setFilterColumn(currentIndex);
         updateTextFilterSettings();
     });
 }
@@ -91,6 +90,7 @@ void SortFilterProxyModel::setSourceModel(QAbstractItemModel* sourceModel)
 
     updateFilterColumnAction();
     updateTextFilterSettings();
+    setFilterColumn(0);
 }
 
 void SortFilterProxyModel::setRowTypeName(const QString& rowTypeName)
@@ -108,6 +108,13 @@ void SortFilterProxyModel::setRowTypeName(const QString& rowTypeName)
 QString SortFilterProxyModel::getRowTypeName() const
 {
     return _rowTypeName;
+}
+
+void SortFilterProxyModel::setFilterColumn(int column)
+{
+    QSortFilterProxyModel::setFilterKeyColumn(column);
+
+    updateTextFilterSettings();
 }
 
 void SortFilterProxyModel::updateTextFilterSettings()
@@ -130,8 +137,7 @@ void SortFilterProxyModel::updateTextFilterSettings()
     }
     else {
         const auto filterColumn = headerData(filterKeyColumn(), Qt::Horizontal).toString().toLower();
-
-        const auto description = QString("Search for %1 by %2").arg(rowTypeNameLowered, filterColumn);
+        const auto description  = QString("Search for %1 by %2").arg(rowTypeNameLowered, filterColumn);
 
         _textFilterAction.setPlaceHolderString(description);
         _textFilterAction.setToolTip(description);
