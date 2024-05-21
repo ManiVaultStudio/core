@@ -9,10 +9,14 @@
 
 #include <util/Miscellaneous.h>
 
+#include <widgets/YouTubeVideoDialog.h>
+
 #include <QDebug>
 #include <QAbstractTextDocumentLayout>
 #include <QEvent>
 #include <QDesktopServices>
+
+//#define USE_YOUTUBE_DIALOG
 
 using namespace mv;
 using namespace mv::gui;
@@ -209,8 +213,13 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
     {
         case QEvent::MouseButtonPress:
         {
-            if (target == &_playIconLabel)
+            if (target == &_playIconLabel) {
+#ifdef USE_YOUTUBE_DIALOG
+                YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::YouTubeId)).data().toString());
+#else
                 QDesktopServices::openUrl(_index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::YouTubeUrl)).data().toString());
+#endif
+            }
 
             break;
         }

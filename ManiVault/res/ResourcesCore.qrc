@@ -74,5 +74,6 @@
     </qresource>
 	<qresource prefix="/HTML">
         <file alias="MarkdownReadme">html/markdown.html</file>
+		<file alias="YouTube">html/youtube.html</file>
     </qresource>
 </RCC>

@@ -68,8 +68,10 @@ QSet<QString> LearningPageVideosModel::getTagsSet() const
 void LearningPageVideosModel::populateFromServer()
 {
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
+        setRowCount(0);
+
         const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-        const auto videos = jsonDocument.object()["videos"].toArray();
+        const auto videos       = jsonDocument.object()["videos"].toArray();
 
         for (const auto& video : videos) {
             const auto videoMap = video.toVariant().toMap();
