@@ -109,7 +109,7 @@ endif(MSVC)
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Multimedia MultiMediaWidgets REQUIRED)
+find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
@@ -215,8 +215,6 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Multimedia)
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::MultimediaWidgets)
 
 # Use AVX if enabled and available
 check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
@@ -264,8 +262,6 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_EXE} PRIVATE Qt6::Multimedia)
-target_link_libraries(${MV_EXE} PRIVATE Qt6::MultimediaWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
