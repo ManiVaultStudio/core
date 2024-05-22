@@ -13,6 +13,13 @@ import subprocess
 import traceback
 import re
 
+def compatibility(os, compiler, compiler_version):
+    # On macos fallback to zlib apple-clang 13
+    if os == "Macos" and compiler == "apple-clang" and bool(re.match("14.*", compiler_version)):  
+        print("Compatibility match")
+        return ["zlib/1.3:compiler.version=13"]
+    return None
+    
 class HdpsCoreConan(ConanFile):
     """Class to package hdps-core using conan
 
