@@ -38,6 +38,20 @@ QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) c
     return Application::getIconFont("FontAwesome").getIcon("sitemap", color);
 }
 
+QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
+{
+#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/DataHierarchyPlugin/README.md");
+#else
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md");
+#endif
+}
+
+QUrl DataHierarchyPluginFactory::getRespositoryUrl() const
+{
+    return QUrl("https://github.com/ManiVaultStudio/core");
+}
+
 ViewPlugin* DataHierarchyPluginFactory::produce()
 {
     return new DataHierarchyPlugin(this);

@@ -5,6 +5,7 @@
 #include "MainWindow.h"
 #include "PluginManager.h"
 #include "StartPageWidget.h"
+#include "LearningPageWidget.h"
 #include "ProjectWidget.h"
 #include "FileMenu.h"
 #include "ViewMenu.h"
@@ -21,7 +22,7 @@
 #include <actions/ToggleAction.h>
 #include <actions/PluginStatusBarAction.h>
 
-#include "StartPageStatusBarAction.h"
+#include "FrontPagesStatusBarAction.h"
 #include "ManiVaultVersionStatusBarAction.h"
 #include "PluginsStatusBarAction.h"
 #include "LoggingStatusBarAction.h"
@@ -92,9 +93,11 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         auto stackedWidget      = new StackedWidget();
         auto projectWidget      = new ProjectWidget();
         auto startPageWidget    = new StartPageWidget(projectWidget);
+        auto learningPageWidget = new LearningPageWidget();
 
         stackedWidget->addWidget(startPageWidget);
         stackedWidget->addWidget(projectWidget);
+        stackedWidget->addWidget(learningPageWidget);
 
         setCentralWidget(stackedWidget);
 
@@ -102,7 +105,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(false);
 
-        auto startPageStatusBarAction       = new StartPageStatusBarAction(this, "Start Page");
+        auto startPageStatusBarAction       = new FrontPagesStatusBarAction(this, "Start Page");
         auto versionStatusBarAction         = new ManiVaultVersionStatusBarAction(this, "Version");
         auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
         auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
@@ -158,14 +161,25 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
         connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
 
-        const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget]() -> void {
-            if (projects().getShowStartPageAction().isChecked())
+        const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
+            if (toggled)
                 stackedWidget->setCurrentWidget(startPageWidget);
             else
                 stackedWidget->setCurrentWidget(projectWidget);
         };
 
         connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+
+        connect(&help().getShowLearningCenterAction(), &ToggleAction::toggled, this, [stackedWidget, startPageWidget, projectWidget, learningPageWidget](bool toggled) -> void {
+            if (toggled)
+                stackedWidget->setCurrentWidget(learningPageWidget);
+            else {
+                if (projects().hasProject())
+                    stackedWidget->setCurrentWidget(projectWidget);
+                else
+                    stackedWidget->setCurrentWidget(startPageWidget);
+            }
+        });
 
         const auto updateMenuVisibility = [fileMenuAction, viewMenuAction]() -> void {
             const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
@@ -176,7 +190,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         connect(&projects(), &AbstractProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {
             connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
-            });
+        });
 
         loadGuiTask.setFinished();
 

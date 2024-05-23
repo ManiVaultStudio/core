@@ -55,7 +55,6 @@ private:
     StartPageContentWidget*     _startPageContentWidget;            /** Non-owning pointer to start page content widget */
     StartPageActionsWidget      _createProjectFromWorkspaceWidget;  /** Actions widget for creating a project from workspace */
     StartPageActionsWidget      _createProjectFromDatasetWidget;    /** Actions widget for creating a project from a dataset */
-    StartPageActionsWidget      _instructionVideosWidget;           /** Actions widget for watching instruction videos */
     mv::gui::OptionAction       _workspaceLocationTypeAction;       /** Action for filtering workspace location types (create project from built-in workspace or import from project) */
     QStandardItemModel          _workspaceLocationTypesModel;       /** Input model for the above workspace location type action */
     mv::gui::RecentFilesAction  _recentWorkspacesAction;            /** Action for recent workspaces (create project from recent workspace) */

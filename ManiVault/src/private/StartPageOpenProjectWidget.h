@@ -47,9 +47,6 @@ private:
 
     /** Update actions for opening recent projects */
     void updateRecentActions();
-
-    /** Update actions for opening example projects */
-    void updateExamplesActions();
     
     /** Create the custom drawn icons  */
     void createCustomIcons();
@@ -61,8 +58,7 @@ private:
     StartPageContentWidget*         _startPageContentWidget;    /** Non-owning pointer to start page content widget */
     StartPageActionsWidget          _openCreateProjectWidget;   /** Actions widget for open and create project action */
     StartPageActionsWidget          _recentProjectsWidget;      /** Actions widget for existing projects action */
-    StartPageActionsWidget          _exampleProjectsWidget;     /** Actions widget for example projects action */
-    mv::gui::RecentFilesAction    _recentProjectsAction;      /** Action for recent projects */
+    mv::gui::RecentFilesAction      _recentProjectsAction;      /** Action for recent projects */
     QIcon                           _leftAlignedIcon;           /** Icon for left-aligned default project */
     QIcon                           _leftAlignedLoggingIcon;    /** Icon for left-aligned default project with logging */
     QIcon                           _rightAlignedIcon;          /** Icon for right-aligned default project */

@@ -32,6 +32,16 @@ QString LoaderPlugin::AskForFileName(const QString& fileNameFilter)
     return fileName;
 }
 
+QIcon LoaderPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+{
+    return Application::getIconFont("FontAwesome").getIcon("file-import", color);
+}
+
+QIcon LoaderPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("file-import");
+}
+
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const Datasets& datasets) const
 {
     return { new PluginTriggerAction(const_cast<LoaderPluginFactory*>(this), this, QString("%1").arg(getKind()), QString("Load %1").arg(getKind()), getIcon()) };

@@ -58,6 +58,7 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
 
 void HelpMenu::populate()
 {
+    addAction(&mv::help().getShowLearningCenterAction());
     addAction(_devDocAction);
     addSeparator();
     

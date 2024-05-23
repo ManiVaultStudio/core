@@ -40,4 +40,12 @@ QString getNoBytesHumanReadable(float noBytes)
     return QString::number(noBytes, 'f', 2) + " " + unit;
 }
 
+CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha /*= true*/)
+{
+    if (alpha)
+        return QString("rgba(%1, %2, %3, %4)").arg(QString::number(color.red()), QString::number(color.green()), QString::number(color.blue()), QString::number(color.alpha()));
+    else
+        return QString("rgb(%1, %2, %3)").arg(QString::number(color.red()), QString::number(color.green()), QString::number(color.blue()));
+}
+
 }

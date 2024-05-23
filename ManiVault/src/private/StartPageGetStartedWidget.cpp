@@ -26,7 +26,6 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _startPageContentWidget(startPageContentWidget),
     _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
     _createProjectFromDatasetWidget(this, "Project From Data"),
-    _instructionVideosWidget(this, "Instruction Videos"),
     _workspaceLocationTypeAction(this, "Workspace location type"),
     _workspaceLocationTypesModel(this),
     _recentWorkspacesAction(this, mv::workspaces().getSettingsPrefix() + "RecentWorkspaces"),
@@ -36,26 +35,17 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     layout->addWidget(&_createProjectFromWorkspaceWidget, 3);
     layout->addWidget(&_createProjectFromDatasetWidget, 3);
-    layout->addWidget(&_instructionVideosWidget, 1);
 
     setLayout(layout);
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
     _createProjectFromDatasetWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
-    _instructionVideosWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Item");
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getTreeView().verticalScrollBar()->setDisabled(true);
 
-    _instructionVideosWidget.getHierarchyWidget().setWindowIcon(Application::getIconFont("FontAwesome").getIcon("video"));
-    //_instructionVideosWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
-    //_instructionVideosWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
-    //_instructionVideosWidget.getHierarchyWidget().setFixedHeight(86);
-    //_instructionVideosWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
     _createProjectFromDatasetWidget.getHierarchyWidget().setItemTypeName("Importer");
-    _instructionVideosWidget.getHierarchyWidget().setItemTypeName("Instruction video");
 
     _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::Application::getIconFont("FontAwesome").getIcon("industry"), "Built-in Workspace"));
     _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::Application::getIconFont("FontAwesome").getIcon("clock"), "Recent Workspace"));
@@ -74,12 +64,10 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     const auto toggleViews = [this]() -> void {
         _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());
         _createProjectFromDatasetWidget.setVisible(_startPageContentWidget->getToggleProjectFromDataAction().isChecked());
-        _instructionVideosWidget.setVisible(_startPageContentWidget->getToggleTutorialVideosAction().isChecked());
     };
 
     connect(&_startPageContentWidget->getToggleProjectFromWorkspaceAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
-    connect(&_startPageContentWidget->getToggleTutorialVideosAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
 }

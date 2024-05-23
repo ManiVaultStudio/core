@@ -13,6 +13,10 @@
 #include <QPainter>
 #include <QApplication>
 
+#ifdef _DEBUG
+    #define ICON_FONT_VERBOSE
+#endif
+
 using namespace mv::gui;
 
 namespace mv {
@@ -34,7 +38,9 @@ IconFont::IconFont(const QString& name, const std::uint32_t& majorVersion, const
                 throw std::runtime_error(QString("Unable to load %1").arg(getFullName()).toStdString().c_str());
             }
             else {
+#ifdef ICON_FONT_VERBOSE
                 qDebug() << "Loaded" << getFullName() << QFontDatabase::applicationFontFamilies(result);
+#endif
 
                 _fontFamily = QFontDatabase::applicationFontFamilies(result).first();
             }
@@ -153,7 +159,9 @@ void IconFont::setDefaultFont(bool defaultFont)
 
 void IconFont::initialize()
 {
+#ifdef ICON_FONT_VERBOSE
     qDebug() << QString("Initializing %1").arg(getFullName());
+#endif
 
     _characters.clear();
 }

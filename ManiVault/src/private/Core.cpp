@@ -16,6 +16,7 @@
 #include "WorkspaceManager.h"
 #include "ProjectManager.h"
 #include "SettingsManager.h"
+#include "HelpManager.h"
 
 //#define CORE_VERBOSE
 
@@ -54,6 +55,7 @@ void Core::createManagers()
     _managers[static_cast<int>(ManagerType::Workspaces)]    = new WorkspaceManager();
     _managers[static_cast<int>(ManagerType::Projects)]      = new ProjectManager();
     _managers[static_cast<int>(ManagerType::Settings)]      = new SettingsManager();
+    _managers[static_cast<int>(ManagerType::Help)]          = new HelpManager();
 
     setManagersCreated();
 }
@@ -170,6 +172,11 @@ AbstractProjectManager& Core::getProjectManager()
 AbstractSettingsManager& Core::getSettingsManager()
 {
     return *static_cast<AbstractSettingsManager*>(getManager(ManagerType::Settings));
+}
+
+mv::AbstractHelpManager& Core::getHelpManager()
+{
+    return *static_cast<AbstractHelpManager*>(getManager(ManagerType::Help));
 }
 
 }

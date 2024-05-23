@@ -18,7 +18,7 @@ LoggingFilterModel::LoggingFilterModel(QObject* parent /*= nullptr*/) :
     SortFilterProxyModel(parent),
     _filterTypeAction(this, "Filter type", Logger::messageTypeNames.values(), Logger::messageTypeNames.values())
 {
-    setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
+    setFilterColumn(static_cast<int>(LoggingModel::Column::Message));
 
     _filterTypeAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 

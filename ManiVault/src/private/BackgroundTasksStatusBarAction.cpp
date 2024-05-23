@@ -33,7 +33,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
     _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Aborting" });
     _filterModel.getParentTaskFilterAction().setString(overallBackgroundTask.getId());
-    _filterModel.setFilterKeyColumn(static_cast<int>(AbstractTasksModel::Column::Name));
+    _filterModel.setFilterColumn(static_cast<int>(AbstractTasksModel::Column::Name));
 
     getBarGroupAction().addAction(&_overallBackgroundTaskAction);
 

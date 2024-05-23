@@ -24,11 +24,12 @@ class DataHierarchyPlugin : public ViewPlugin
 public:
 
     /**
-     * Construct plugin with \p factory
+     * Construct with pointer to plugin \p factory
      * @param factory Pointer to plugin factory
      */
     DataHierarchyPlugin(const PluginFactory* factory);
-    
+
+    /** Perform plugin initialization */
     void init() override;
 
 private:
@@ -53,8 +54,20 @@ public:
      * @return Icon
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
-    
-	/**
+
+    /**
+     * Get the read me markdown file URL
+     * @return URL of the read me markdown file
+     */
+    QUrl getReadmeMarkdownUrl() const override;
+
+    /**
+     * Get the URL of the GitHub repository
+     * @return URL of the GitHub repository
+     */
+    QUrl getRespositoryUrl() const override;
+
+    /**
      * Produces the plugin
      * @return Pointer to the produced plugin
      */

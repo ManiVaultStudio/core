@@ -31,6 +31,20 @@ QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("font", color);
 }
 
+QUrl TextDataFactory::getReadmeMarkdownUrl() const
+{
+#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/TextData/README.md");
+#else
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/TextData/README.md");
+#endif
+}
+
+QUrl TextDataFactory::getRespositoryUrl() const
+{
+    return QUrl("https://github.com/ManiVaultStudio/core");
+}
+
 mv::plugin::RawData* TextDataFactory::produce()
 {
     return new TextData(this);

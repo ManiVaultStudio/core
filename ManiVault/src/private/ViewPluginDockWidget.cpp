@@ -119,6 +119,9 @@ void ViewPluginDockWidget::initialize()
         if (_viewPlugin->hasHelp())
             _settingsMenu.addAction(&_helpAction);
 
+        if (_viewPlugin->getFactory()->getReadmeMarkdownUrl().isValid())
+            _settingsMenu.addAction(& const_cast<PluginFactory*>(_viewPlugin->getFactory())->getTriggerReadmeAction());
+
         _settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
 
         if (!_viewPlugin->isSystemViewPlugin())

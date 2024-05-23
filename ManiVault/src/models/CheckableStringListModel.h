@@ -100,9 +100,12 @@ public:
      */
     void setCheckedIndicesFromStrings(const QStringList& checkedStrings);
 
+    /** Invert the state of each check */
+    void invertChecks();
+
 private:
     CheckStatesList _checkStatesList;   /** Keeps track of the selected items */
-    QStringList     _strings;
+    QStringList     _strings;           /** Model strings */
 };
 
 }

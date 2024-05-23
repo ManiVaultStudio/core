@@ -25,7 +25,6 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
-    _exampleProjectsWidget(this, "Examples"),
     _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
     _leftAlignedIcon(),
     _leftAlignedLoggingIcon(),
@@ -34,23 +33,19 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 {
     auto layout = new QVBoxLayout();
 
-    
     layout->addWidget(&_openCreateProjectWidget);
     layout->addWidget(&_recentProjectsWidget);
-    layout->addWidget(&_exampleProjectsWidget);
 
     setLayout(layout);
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
     _recentProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
-    _exampleProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
-    _exampleProjectsWidget.getHierarchyWidget().setItemTypeName("Example Project");
 
     _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
 
@@ -63,12 +58,10 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     const auto toggleViews = [this]() -> void {
         _openCreateProjectWidget.setVisible(_startPageContentWidget->getToggleOpenCreateProjectAction().isChecked());
         _recentProjectsWidget.setVisible(_startPageContentWidget->getToggleRecentProjectsAction().isChecked());
-        _exampleProjectsWidget.setVisible(_startPageContentWidget->getToggleExampleProjectsAction().isChecked());
     };
 
     connect(&_startPageContentWidget->getToggleOpenCreateProjectAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleRecentProjectsAction(), &ToggleAction::toggled, this, toggleViews);
-    connect(&_startPageContentWidget->getToggleExampleProjectsAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
     
@@ -79,7 +72,6 @@ void StartPageOpenProjectWidget::updateActions()
 {
     updateOpenCreateActions();
     updateRecentActions();
-    updateExamplesActions();
 }
 
 void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment& alignment, QIcon& icon, bool logging /*= false*/)
@@ -210,50 +202,6 @@ void StartPageOpenProjectWidget::updateRecentActions()
         }
     }
 
-}
-
-void StartPageOpenProjectWidget::updateExamplesActions()
-{
-    _exampleProjectsWidget.getModel().reset();
-
-    auto filePrescriptionIcon = Application::getIconFont("FontAwesome").getIcon("clock");
-
-    QStringList projectFilter("*.mv");
-
-    QDir exampleProjectsDirectory(QString("%1/examples/projects").arg(qApp->applicationDirPath()));
-
-    const auto exampleProjects = exampleProjectsDirectory.entryList(projectFilter);
-
-    if(!exampleProjects.isEmpty())
-        qDebug() << "Looking for example projects...";
-
-    for (const auto& exampleProject : exampleProjects) {
-        const auto exampleProjectFilePath = QString("%1/examples/projects/%2").arg(qApp->applicationDirPath(), exampleProject);
-
-        const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(exampleProjectFilePath);
-
-        if (projectMetaAction.isNull()) {
-            StartPageAction exampleProjectStartPageAction(filePrescriptionIcon, QFileInfo(exampleProjectFilePath).baseName(), exampleProjectFilePath, exampleProjectFilePath, "", [exampleProjectFilePath]() -> void {
-                projects().openProject(exampleProjectFilePath);
-            });
-
-            _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
-        }
-        else {
-            qDebug() << "Found project: " << QFileInfo(projectMetaAction->getTitleAction().getString()).baseName();
-
-            StartPageAction exampleProjectStartPageAction(filePrescriptionIcon, projectMetaAction->getTitleAction().getString(), exampleProjectFilePath, projectMetaAction->getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
-                projects().openProject(exampleProjectFilePath);
-            });
-
-            exampleProjectStartPageAction.setComments(projectMetaAction->getCommentsAction().getString());
-            exampleProjectStartPageAction.setTags(projectMetaAction->getTagsAction().getStrings());
-            exampleProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(exampleProjectFilePath));
-            exampleProjectStartPageAction.setContributors(projectMetaAction->getContributorsAction().getStrings());
-
-            _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
-        }
-    }
 }
 
 void StartPageOpenProjectWidget::createCustomIcons()
