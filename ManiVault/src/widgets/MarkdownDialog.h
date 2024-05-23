@@ -16,6 +16,34 @@
 namespace mv::util {
 
 /**
+ * Markdown web engine page class
+ *
+ * Custom web engine page class which ensures that links will open an external browser
+ *
+ * @author Thomas Kroes
+ */
+class MarkdownWebEnginePage : public QWebEnginePage
+{
+protected:
+
+    /**
+     * Construct with pointer to \p parent object
+     * @param parent Pointer to parent object
+     */
+    MarkdownWebEnginePage(QObject* parent = nullptr);
+
+    /**
+     * Override to intercept links
+     * @param url URL of the clicked link
+     * @param type Type of navigation
+     * @param isMainFrame Boolean determining if in the main frame or not
+     */
+    bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override;
+
+    friend class MarkdownDialog;
+};
+
+/**
  * Plugin read me dialog class
  * 
  * Dialog class for displaying plugin read me markdown content
@@ -46,7 +74,7 @@ public:
 private:
     QUrl                        _markdownUrl;           /** Location of the markdown file */
     QWebEngineView              _webEngineView;         /** Browser to show the markdown in */
-    QWebEnginePage              _markdownPage;          /** Browser page to show the markdown in */
+    MarkdownWebEnginePage       _markdownPage;          /** Browser page to show the markdown in */
     mv::util::FileDownloader    _fileDownloader;        /** For downloading the markdown file */
     MarkdownDocument            _markdownDocument;      /** Document for synchronizing the markdown text with the browser */
 };

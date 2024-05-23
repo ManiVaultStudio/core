@@ -9,6 +9,7 @@
 
 #include <QVBoxLayout>
 #include <QWebChannel>
+#include <QDesktopServices>
 
 #ifdef _DEBUG
     #define MARKDOWN_DIALOG_VERBOSE
@@ -66,6 +67,22 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
     layout->addLayout(bottomLayout);
 
     setLayout(layout);
+}
+
+bool MarkdownWebEnginePage::acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame)
+{
+    if (type == QWebEnginePage::NavigationTypeLinkClicked) {
+        QDesktopServices::openUrl(url);
+        return false;
+    }
+
+    return QWebEnginePage::acceptNavigationRequest(url, type, isMainFrame);
+}
+
+MarkdownWebEnginePage::MarkdownWebEnginePage(QObject* parent /*= nullptr*/) :
+    QWebEnginePage(parent)
+{
+
 }
 
 }
