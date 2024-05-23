@@ -29,13 +29,16 @@ HelpManager::HelpManager() :
     _showLearningCenterAction.setIconByName("chalkboard-teacher");
     _showLearningCenterAction.setToolTip("Go to the learning center");
 
+    _toDiscordAction.setIcon(Application::getIconFont("FontAwesomeBrands", 5, 14).getIcon("discord"));
+    _toDiscordAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
     _toWebsiteAction.setIconByName("globe");
     _toWebsiteAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _toWikiAction.setIconByName("book");
     _toWikiAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
-    _toRepositoryAction.setIconByName("code-branch");
+    _toRepositoryAction.setIcon(Application::getIconFont("FontAwesomeBrands", 6, 5).getIcon("github"));
     _toRepositoryAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _toDiscordAction.setToolTip("Get in touch on our Discord");
