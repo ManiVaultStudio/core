@@ -17,7 +17,7 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     _showVideosAction(this, "Show videos", true),
     _showTutorialsAction(this, "Show tutorials (coming soon)", false),
     _showExamplesAction(this, "Show examples (coming soon)", false),
-    _showPluginResourcesAction(this, "Show plugin resources"),
+    _showPluginResourcesAction(this, "Show plugin resources", true),
     _settingsAction(this, "Page settings"),
     _toStartPageAction(this, "To start page"),
     _toolbarAction(this, "Toolbar settings")
