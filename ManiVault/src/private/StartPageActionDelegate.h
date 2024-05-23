@@ -7,7 +7,7 @@
 #include <QStyledItemDelegate>
 
 /**
- * Workspace delegate class
+ * Delegate class
  *
  * Delegate class for custom start page action display in a view.
  *
@@ -32,19 +32,8 @@ public:
      */
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
-    /**
-     * 
-     */
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-
-    /**
-     * 
-     */
     void setEditorData(QWidget* editor, const QModelIndex& index) const;
-
-    /**
-     * 
-     */
     void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 private:

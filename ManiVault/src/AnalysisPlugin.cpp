@@ -78,6 +78,11 @@ QIcon AnalysisPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("square-root-alt", color);
 }
 
+QIcon AnalysisPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("square-root-alt");
+}
+
 }
 
 }

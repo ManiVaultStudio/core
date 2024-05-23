@@ -105,6 +105,20 @@ QIcon TasksPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("tasks", color);
 }
 
+QUrl TasksPluginFactory::getReadmeMarkdownUrl() const
+{
+#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/TasksPlugin/README.md");
+#else
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/TasksPlugin/README.md");
+#endif
+}
+
+QUrl TasksPluginFactory::getRespositoryUrl() const
+{
+    return QUrl("https://github.com/ManiVaultStudio/core");
+}
+
 ViewPlugin* TasksPluginFactory::produce()
 {
     return new TasksPlugin(this);

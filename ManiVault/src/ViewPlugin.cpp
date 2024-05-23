@@ -220,7 +220,8 @@ void ViewPlugin::createScreenshot()
         auto widgetPixmap = getWidget().grab();
 
         widgetPixmap.toImage().save(fileDialog->selectedFiles().first());
-        });
+    });
+
     connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
     fileDialog->open();
@@ -348,6 +349,11 @@ DockAreaFlag ViewPluginFactory::getPreferredDockArea() const
 void ViewPluginFactory::setPreferredDockArea(const gui::DockAreaFlag& preferredDockArea)
 {
     _preferredDockArea = preferredDockArea;
+}
+
+QIcon ViewPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("eye");
 }
 
 }

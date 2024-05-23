@@ -26,6 +26,11 @@ void WriterPlugin::setInputDatasets(const Datasets& inputDatasets)
     _input = inputDatasets;
 }
 
+QIcon WriterPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("file-export");
+}
+
 }
 
 }

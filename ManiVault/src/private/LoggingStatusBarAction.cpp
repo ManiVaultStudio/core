@@ -128,7 +128,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     });
 
     _filterModel.setSourceModel(&_model);
-    _filterModel.setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
+    _filterModel.setFilterColumn(static_cast<int>(LoggingModel::Column::Message));
 
     _clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
     _clearRecordsAction.setIconByName("trash");

@@ -15,6 +15,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractProjectManager.h
     src/AbstractSettingsManager.h
     src/AbstractTaskManager.h
+    src/AbstractHelpManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_SOURCES
@@ -398,6 +399,9 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
     src/widgets/ActionsWidget.h
     src/widgets/SplashScreenWidget.h
     src/widgets/FlowLayout.h
+	src/widgets/MarkdownDocument.h
+	src/widgets/MarkdownDialog.h
+	src/widgets/YouTubeVideoDialog.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
@@ -409,6 +413,9 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
     src/widgets/ActionsWidget.cpp
     src/widgets/SplashScreenWidget.cpp
     src/widgets/FlowLayout.cpp
+	src/widgets/MarkdownDocument.cpp
+	src/widgets/MarkdownDialog.cpp
+	src/widgets/YouTubeVideoDialog.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES
@@ -494,6 +501,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Version.h
     src/util/DockWidgetPermission.h
     src/util/NumericalRange.h
+    src/util/FileDownloader.h
 )
 
 if(APPLE)
@@ -538,6 +546,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Version.cpp
     src/util/DockWidgetPermission.cpp
     src/util/NumericalRange.cpp
+    src/util/FileDownloader.cpp
 )
 
 if(APPLE)

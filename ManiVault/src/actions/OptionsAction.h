@@ -11,6 +11,8 @@
 
 #include "models/CheckableStringListModel.h"
 
+#include "widgets/FlowLayout.h"
+
 #include <QComboBox>
 #include <QCompleter>
 #include <QTableView>
@@ -62,6 +64,7 @@ public:
         ListView        = 0x00002,      /** The widget includes a list view widget */
         Selection       = 0x00004,      /** The widget includes a selection control */
         File            = 0x00008,      /** The widget includes a file control */
+        Tags            = 0x00010,      /** The widget includes a flow layout with tags */
 
         Default = ComboBox
     };
@@ -149,6 +152,96 @@ public: // Widgets
         OptionsAction*          _optionsAction;     /** Pointer to owning options action */
         QSortFilterProxyModel   _filterModel;       /** For filtering the options */
         TableAction             _tableAction;       /** Table view for showing the data */
+
+        friend class OptionsAction;
+    };
+
+    /** Tags view widget class for options action */
+    class CORE_EXPORT TagsViewWidget : public QWidget {
+    private:
+
+        /** Utility label widget class */
+        class TagLabel : public QLabel {
+        public:
+
+            /** Type of tag label */
+            enum class Type {
+                Regular,        /** Clicking on the label toggles the option */
+                SelectAll,      /** Clicking on the label selects all options */
+                SelectNone,     /** Clicking on the label clears the options selection */
+                SelectInvert    /** Clicking on the label inverts the options selection */
+            };
+
+        public:
+
+            /**
+             * Construct with \p option and pointer to \p parent widget
+             * @param option Tag name
+             * @param type Tag type
+             * @param optionsAction Pointer to options action
+             * @param parent Pointer to parent widget
+             */
+            TagLabel(const QString& option, const Type& type, OptionsAction* optionsAction, QWidget* parent = nullptr);
+
+            /**
+             * Invoked when the user presses the mouse
+             * @param event Pointer to mouse event
+             */
+            void mousePressEvent(QMouseEvent* event);
+
+            /**
+             * Triggered on mouse hover
+             * @param enterEvent Pointer to enter event
+             */
+            void enterEvent(QEnterEvent* enterEvent) override;
+
+            /**
+             * Triggered on mouse leave
+             * @param leaveEvent Pointer to leave event
+             */
+            void leaveEvent(QEvent* leaveEvent) override;
+
+        private:
+
+            /** Update the current style */
+            void updateStyle();
+
+        private:
+            Type            _type;              /** Type of tag label */
+            QString         _option;            /** Tag name */
+            OptionsAction*  _optionsAction;     /** Pointer to options action */
+        };
+
+    protected:
+
+        /**
+         * Construct with pointer to \p parent widget, \p optionsAction and \p completer
+         * @param parent Pointer to parent widget
+         * @param optionsAction Pointer to options action
+         * @param widgetFlags Widget flags for the configuration of the widget
+         */
+        TagsViewWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags);
+
+    private:
+
+        /** Updates the flow layout with new tags */
+        void updateFlowLayout();
+
+        /**
+         * Add \p option tag label to the flow layout
+         * @param option Option string
+         * @param type Type of tag label
+         * @param parent Pointer to parent widget
+         * @return Pointer to created tag label
+         */
+        TagLabel* addOption(const QString& option, const TagLabel::Type& type, QWidget* parent = nullptr);
+
+    protected:
+        OptionsAction*              _optionsAction;         /** Pointer to owning options action */
+        const bool                  _hasSelectionTags;      /** Whether to show tags for selection */
+        QSortFilterProxyModel       _filterModel;           /** For filtering the options */
+        FlowLayout                  _flowLayout;            /** Table view for showing the data */
+        QMap<QString, QWidget*>     _widgetsMap;            /** Keep track of created push buttons */
 
         friend class OptionsAction;
     };
@@ -261,10 +354,25 @@ public:
     void selectOption(const QString& option, bool unselect = false);
 
     /**
+     * Toggle \p option
+     * @param option Option to toggle
+     */
+    void toggleOption(const QString& option);
+
+    /**
      * Set the selected options
      * @param selectedOptions Selected options
      */
     void setSelectedOptions(const QStringList& selectedOptions);
+
+    /** Selects all options */
+    void selectAll();
+
+    /** Clears the options selection */
+    void selectNone();
+
+    /** Inverts the options selection */
+    void selectInvert();
 
 protected: // Linking
 

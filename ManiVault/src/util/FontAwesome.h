@@ -37,8 +37,9 @@ public: // Construction/destruction
      * @param minorVersion Minor version number
      * @param fontResourceNames Names of the font resources
      * @param defaultFont Boolean determining whether this font is default when no version is specified
+     * @param name Name of the font
      */
-    FontAwesome(const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont = false);
+    FontAwesome(const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont = false, const QString& name = "FontAwesome");
 
     /** Destructor */
     ~FontAwesome() {};

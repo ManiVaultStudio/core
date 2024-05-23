@@ -87,4 +87,12 @@ CORE_EXPORT inline QString getTabIndentedMessage(QString message, const std::uin
     return message;
 }
 
+/**
+ * Get \p color as CSS string, either with or without \p alpha
+ * @param color Input color
+ * @param alpha Whether to use the alpha
+ * @return Color as rgb(...) or rgba(...)
+ */
+CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha = true);
+
 }

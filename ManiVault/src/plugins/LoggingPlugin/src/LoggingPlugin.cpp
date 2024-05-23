@@ -42,6 +42,15 @@ QIcon LoggingPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("scroll", color);
 }
 
+QUrl LoggingPluginFactory::getReadmeMarkdownUrl() const
+{
+#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/LoggingPlugin/README.md");
+#else
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/LoggingPlugin/README.md");
+#endif
+}
+
 ViewPlugin* LoggingPluginFactory::produce()
 {
     return new LoggingPlugin(this);

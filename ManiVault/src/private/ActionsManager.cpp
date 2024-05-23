@@ -230,7 +230,7 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
             ActionsFilterModel  actionsFilterModel(this);
 
             actionsFilterModel.setSourceModel(&mv::actions().getActionsListModel());
-            actionsFilterModel.setFilterKeyColumn(static_cast<int>(ActionsListModel::Column::Name));
+            actionsFilterModel.setFilterColumn(static_cast<int>(ActionsListModel::Column::Name));
             actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
             actionsFilterModel.setFilterRegularExpression(name);
 

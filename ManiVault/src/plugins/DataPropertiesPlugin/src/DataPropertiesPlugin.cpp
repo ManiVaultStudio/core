@@ -77,6 +77,20 @@ QIcon DataPropertiesPluginFactory::getIcon(const QColor& color /*= Qt::black*/) 
     return Application::getIconFont("FontAwesome").getIcon("sliders-h", color);
 }
 
+QUrl DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
+{
+#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/DataPropertiesPlugin/README.md");
+#else
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataPropertiesPlugin/README.md");
+#endif
+}
+
+QUrl DataPropertiesPluginFactory::getRespositoryUrl() const
+{
+    return QUrl("https://github.com/ManiVaultStudio/core");
+}
+
 ViewPlugin* DataPropertiesPluginFactory::produce()
 {
     return new DataPropertiesPlugin(this);

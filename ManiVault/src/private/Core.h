@@ -17,6 +17,7 @@ class AbstractTaskManager;
 class AbstractWorkspaceManager;
 class AbstractProjectManager;
 class AbstractSettingsManager;
+class AbstractHelpManager;
 
 class Core final : public CoreInterface
 {
@@ -69,6 +70,7 @@ public: // Managers
     AbstractWorkspaceManager& getWorkspaceManager() override;
     AbstractProjectManager& getProjectManager() override;
     AbstractSettingsManager& getSettingsManager() override;
+    AbstractHelpManager& getHelpManager() override;
 
 private:
     QVector<AbstractManager*>   _managers;      /** All managers in the core */

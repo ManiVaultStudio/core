@@ -7,79 +7,66 @@
 #include "StartPageAction.h"
 #include "StartPageWidget.h"
 
-#include <Application.h>
-
 #include <QDebug>
 
 using namespace mv;
 using namespace mv::gui;
 
 StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _mainLayout(),
-    _collumnsLayout(),
-    _toolbarLayout(),
+    PageContentWidget(Qt::Horizontal, parent),
     _compactViewAction(this, "Compact"),
     _toggleOpenCreateProjectAction(this, "Open & Create", true),
     _toggleRecentProjectsAction(this, "Recent Projects", true),
-    _toggleExampleProjectsAction(this, "Examples"),
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleProjectFromDataAction(this, "Project From Data", true),
-    _toggleTutorialVideosAction(this, "Instructional Videos"),
     _settingsAction(this, "Settings"),
+    _toLearningCenterAction(this, "Learning center"),
+    _toolbarAction(this, "Toolbar settings"),
     _openProjectWidget(this),
     _getStartedWidget(this)
 {
     _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
     _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
     _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
-    _toggleExampleProjectsAction.setSettingsPrefix("StartPage/ToggleExampleProjects");
     _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
     _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
-    _toggleTutorialVideosAction.setSettingsPrefix("StartPage/ToggleTutorialVideos");
 
     _settingsAction.setText("Toggle Views");
-    
-    _settingsAction.setIconByName("eye");
+    _settingsAction.setToolTip("Adjust page settings");
+    _settingsAction.setIconByName("cog");
+
+    _toLearningCenterAction.setIconByName("chalkboard-teacher");
+    _toLearningCenterAction.setToolTip("Go to the learning center");
+    _toLearningCenterAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
     _settingsAction.addAction(&_toggleRecentProjectsAction);
-    _settingsAction.addAction(&_toggleExampleProjectsAction);
     _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);
-    _settingsAction.addAction(&_toggleTutorialVideosAction);
+    _settingsAction.addAction(&_compactViewAction);
 
-    _collumnsLayout.setContentsMargins(35, 35, 35, 35);
-    _toolbarLayout.setContentsMargins(35, 10, 35, 10);
+    getColumnsLayout().addWidget(&_openProjectWidget);
+    getColumnsLayout().addWidget(&_getStartedWidget);
 
-    _collumnsLayout.addWidget(&_openProjectWidget);
-    _collumnsLayout.addWidget(&_getStartedWidget);
+    _toolbarAction.setShowLabels(false);
+    _toolbarAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
+        widget->layout()->setContentsMargins(35, 10, 35, 20);
+    });
 
-    _mainLayout.addLayout(&_collumnsLayout, 1);
-    _mainLayout.addLayout(&_toolbarLayout);
+    _toolbarAction.addAction(new StretchAction(this, "Left stretch"));
+    _toolbarAction.addAction(&_settingsAction);
+    _toolbarAction.addAction(&_toLearningCenterAction);
 
-    _toolbarLayout.addWidget(_compactViewAction.createWidget(this));
-    _toolbarLayout.addStretch(1);
-    _toolbarLayout.addWidget(_settingsAction.createCollapsedWidget(this));
+    getMainLayout().addWidget(_toolbarAction.createWidget(this));
 
-    setLayout(&_mainLayout);
+    connect(&_toLearningCenterAction, &TriggerAction::triggered, this, []() -> void {
+        mv::projects().getShowStartPageAction().setChecked(false);
+        mv::help().getShowLearningCenterAction().setChecked(true);
+    });
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
-    
-    setObjectName("StartPageContentWidget");
-    updateCustomStyle();
-    connect(qApp, &QApplication::paletteChanged, this, &StartPageContentWidget::updateCustomStyle);
-}
-
-QLabel* StartPageContentWidget::createHeaderLabel(const QString& title, const QString& tooltip)
-{
-    auto label = new QLabel(title);
-
-    label->setAlignment(Qt::AlignLeft);
-    label->setStyleSheet("QLabel { font-weight: 200; font-size: 13pt; }");
-    label->setToolTip(tooltip);
-
-    return label;
 }
 
 void StartPageContentWidget::updateActions()
@@ -88,10 +75,4 @@ void StartPageContentWidget::updateActions()
 
     _openProjectWidget.updateActions();
     _getStartedWidget.updateActions();
-}
-
-void StartPageContentWidget::updateCustomStyle()
-{
-    // update custome style settings
-    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }

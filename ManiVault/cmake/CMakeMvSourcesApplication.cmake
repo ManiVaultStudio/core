@@ -26,7 +26,7 @@ set(PRIVATE_ACTIONS_HEADERS
     src/private/LoggingStatusBarAction.h
     src/private/BackgroundTasksStatusBarAction.h
     src/private/ForegroundTasksStatusBarAction.h
-    src/private/StartPageStatusBarAction.h
+    src/private/FrontPagesStatusBarAction.h
     src/private/SettingsStatusBarAction.h
 )
 
@@ -36,7 +36,7 @@ set(PRIVATE_ACTIONS_SOURCES
     src/private/LoggingStatusBarAction.cpp
     src/private/BackgroundTasksStatusBarAction.cpp
     src/private/ForegroundTasksStatusBarAction.cpp
-    src/private/StartPageStatusBarAction.cpp
+    src/private/FrontPagesStatusBarAction.cpp
     src/private/SettingsStatusBarAction.cpp
 )
 
@@ -196,6 +196,19 @@ set(PRIVATE_TASK_MANAGER_FILES
     ${PRIVATE_TASK_MANAGER_SOURCES}
 )
 
+set(PRIVATE_HELP_MANAGER_HEADERS
+    src/private/HelpManager.h
+)
+
+set(PRIVATE_HELP_MANAGER_SOURCES
+    src/private/HelpManager.cpp
+)
+
+set(PRIVATE_HELP_MANAGER_FILES
+    ${PRIVATE_HELP_MANAGER_HEADERS}
+    ${PRIVATE_HELP_MANAGER_SOURCES}
+)
+
 set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
     ${PRIVATE_PLUGIN_MANAGER_HEADERS}
@@ -206,6 +219,7 @@ set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_PROJECT_MANAGER_HEADERS}
     ${PRIVATE_SETTINGS_MANAGER_HEADERS}
     ${PRIVATE_TASK_MANAGER_HEADERS}
+    ${PRIVATE_HELP_MANAGER_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -219,6 +233,7 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
     ${PRIVATE_SETTINGS_MANAGER_SOURCES}
     ${PRIVATE_TASK_MANAGER_SOURCES}
+    ${PRIVATE_HELP_MANAGER_SOURCES}
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -249,9 +264,27 @@ set(PRIVATE_APPLICATION_FILES
     ${PRIVATE_APPLICATION_SOURCES}
 )
 
+set(PRIVATE_PAGES_COMMON_HEADERS
+    src/private/PageWidget.h
+    src/private/PageHeaderWidget.h
+    src/private/PageContentWidget.h
+    src/private/LogoWidget.h
+)
+
+set(PRIVATE_PAGES_COMMON_SOURCES
+    src/private/PageWidget.cpp
+    src/private/PageHeaderWidget.cpp
+    src/private/PageContentWidget.cpp
+    src/private/LogoWidget.cpp
+)
+
+set(PRIVATE_PAGES_COMMON_FILES
+    ${PRIVATE_PAGES_COMMON_HEADERS}
+    ${PRIVATE_PAGES_COMMON_SOURCES}
+)
+
 set(PRIVATE_START_PAGE_HEADERS
     src/private/StartPageWidget.h
-    src/private/StartPageHeaderWidget.h
     src/private/StartPageContentWidget.h
     src/private/StartPageOpenProjectWidget.h
     src/private/StartPageGetStartedWidget.h
@@ -261,12 +294,10 @@ set(PRIVATE_START_PAGE_HEADERS
     src/private/StartPageActionDelegate.h
     src/private/StartPageActionDelegateEditorWidget.h
     src/private/StartPageAction.h
-    src/private/LogoWidget.h
 )
 
 set(PRIVATE_START_PAGE_SOURCES
     src/private/StartPageWidget.cpp
-    src/private/StartPageHeaderWidget.cpp
     src/private/StartPageContentWidget.cpp
     src/private/StartPageOpenProjectWidget.cpp
     src/private/StartPageGetStartedWidget.cpp
@@ -276,12 +307,44 @@ set(PRIVATE_START_PAGE_SOURCES
     src/private/StartPageActionDelegate.cpp
     src/private/StartPageActionDelegateEditorWidget.cpp
     src/private/StartPageAction.cpp
-    src/private/LogoWidget.cpp
 )
 
 set(PRIVATE_START_PAGE_FILES
     ${PRIVATE_START_PAGE_HEADERS}
     ${PRIVATE_START_PAGE_SOURCES}
+)
+
+set(PRIVATE_LEARNING_PAGE_HEADERS
+    src/private/LearningPageWidget.h
+    src/private/LearningPageContentWidget.h
+    src/private/LearningPageVideosWidget.h
+    src/private/LearningPageVideoWidget.h
+    src/private/LearningPageVideoStyledItemDelegate.h
+	src/private/LearningPageTutorialsWidget.h
+	src/private/LearningPageExamplesWidget.h
+    src/private/LearningPagePluginResourcesWidget.h
+    src/private/LearningPagePluginAction.h
+    src/private/LearningPageVideosModel.h
+	src/private/LearningPageVideosFilterModel.h
+)
+
+set(PRIVATE_LEARNING_PAGE_SOURCES
+    src/private/LearningPageWidget.cpp
+    src/private/LearningPageContentWidget.cpp
+    src/private/LearningPageVideosWidget.cpp
+    src/private/LearningPageVideoWidget.cpp
+    src/private/LearningPageVideoStyledItemDelegate.cpp
+	src/private/LearningPageTutorialsWidget.cpp
+	src/private/LearningPageExamplesWidget.cpp
+    src/private/LearningPagePluginResourcesWidget.cpp
+    src/private/LearningPagePluginAction.cpp
+    src/private/LearningPageVideosModel.cpp
+    src/private/LearningPageVideosFilterModel.cpp
+)
+
+set(PRIVATE_LEARNING_PAGE_FILES
+    ${PRIVATE_LEARNING_PAGE_HEADERS}
+    ${PRIVATE_LEARNING_PAGE_SOURCES}
 )
 
 set(PRIVATE_MISCELLANEOUS_HEADERS
@@ -301,7 +364,9 @@ set(PRIVATE_HEADERS
     ${PRIVATE_CORE_HEADERS}
     ${PRIVATE_MANAGER_HEADERS}
     ${PRIVATE_APPLICATION_HEADERS}
+	${PRIVATE_PAGES_COMMON_HEADERS}
     ${PRIVATE_START_PAGE_HEADERS}
+	${PRIVATE_LEARNING_PAGE_HEADERS}
     ${PRIVATE_MISCELLANEOUS_HEADERS}
     ${PRIVATE_ACTIONS_HEADERS}
 )
@@ -310,7 +375,9 @@ set(PRIVATE_SOURCES
     ${PRIVATE_CORE_SOURCES}
     ${PRIVATE_MANAGER_SOURCES}
     ${PRIVATE_APPLICATION_SOURCES}
+	${PRIVATE_PAGES_COMMON_SOURCES}
     ${PRIVATE_START_PAGE_SOURCES}
+	${PRIVATE_LEARNING_PAGE_SOURCES}
     ${PRIVATE_MISCELLANEOUS_SOURCES}
     ${PRIVATE_ACTIONS_SOURCES}
     ${PRIVATE_HEADERS}
@@ -332,6 +399,9 @@ source_group(Managers\\Project FILES ${PRIVATE_PROJECT_MANAGER_FILES})
 source_group(Managers\\Workspace FILES ${PRIVATE_WORKSPACE_MANAGER_FILES})
 source_group(Managers\\Settings FILES ${PRIVATE_SETTINGS_MANAGER_FILES})
 source_group(Managers\\Task FILES ${PRIVATE_TASK_MANAGER_FILES})
-source_group(StartPage FILES ${PRIVATE_START_PAGE_FILES})
+source_group(Managers\\Help FILES ${PRIVATE_HELP_MANAGER_FILES})
+source_group(Pages\\Common FILES ${PRIVATE_PAGES_COMMON_FILES})
+source_group(Pages\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
+source_group(Pages\\Learning FILES ${PRIVATE_LEARNING_PAGE_FILES})
 source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})

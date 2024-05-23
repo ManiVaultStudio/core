@@ -203,6 +203,12 @@ public:
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /**
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which belongs to the plugin factory category
+     */
+    QIcon getCategoryIcon() const override;
+
+    /**
      * Produces the plugin
      * @return Pointer to the produced plugin
      */

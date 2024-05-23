@@ -12,11 +12,15 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#ifdef _DEBUG
+    #define FONT_AWESOME_VERBOSE
+#endif
+
 namespace mv {
 
-FontAwesome::FontAwesome(const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont /*= false*/) :
-    IconFont("FontAwesome", majorVersion, minorVersion, fontResourceNames, defaultFont),
-    _metaDataResource(QString(":/IconFonts/%1.json").arg(getFullName()))
+FontAwesome::FontAwesome(const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont /*= false*/, const QString& name /*= "FontAwesome"*/) :
+    IconFont(name, majorVersion, minorVersion, fontResourceNames, defaultFont),
+    _metaDataResource(QString(":/IconFonts/%1.json").arg(getFullName().replace("Brands", "").replace("Regular", "")))
 {
     initialize();
 }
@@ -51,7 +55,9 @@ void FontAwesome::initialize()
         _characters[iconName] = QChar(codePoint);
     }
 
+#ifdef FONT_AWESOME_VERBOSE
     qDebug() << QString("Found %1 icons").arg(_characters.count());
+#endif
 }
 
 QString FontAwesome::getIconCharacter(const QString& iconName) const

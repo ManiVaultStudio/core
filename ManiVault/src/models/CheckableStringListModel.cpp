@@ -124,4 +124,12 @@ void CheckableStringListModel::setCheckedIndicesFromStrings(const QStringList& c
 
 }
 
+void CheckableStringListModel::invertChecks()
+{
+    for (auto& checkState : _checkStatesList)
+        checkState = !checkState;
+
+    emit dataChanged(index(0, 0), index(rowCount() - 1));
+}
+
 }

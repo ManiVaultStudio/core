@@ -16,6 +16,8 @@
 #include <QIcon>
 #include <QVariant>
 
+#define ON_LEARNING_CENTER_FEATURE_BRANCH
+
 namespace mv {
     class DatasetImpl;
 
@@ -113,9 +115,33 @@ public: // Help
 
     /**
      * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
-     * @return Reference to show help trigger action (maybe nullptr if the plugin does not provide any help)
+     * @return Reference to show help trigger action
      */
     virtual gui::TriggerAction& getTriggerHelpAction() final;
+
+    /**
+     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
+     * @return Reference to show help trigger action
+     */
+    virtual gui::TriggerAction& getTriggerReadmeAction() final;
+
+    /**
+     * Get trigger action that launches the GitHub repository website
+     * @return Reference to visit repository action
+     */
+    virtual gui::TriggerAction& getVisitRepositoryAction() final;
+
+    /**
+     * Get the read me markdown file URL
+     * @return URL of the read me markdown file
+     */
+    virtual QUrl getReadmeMarkdownUrl() const;
+
+    /**
+     * Get the URL of the GitHub repository
+     * @return URL of the GitHub repository
+     */
+    virtual QUrl getRespositoryUrl() const;
 
 public: // GUI name
 
@@ -147,6 +173,12 @@ public:
      * @return Icon
      */
     virtual QIcon getIcon(const QColor& color = Qt::black) const;
+
+    /**
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which belongs to the plugin factory category
+     */
+    virtual QIcon getCategoryIcon() const = 0;
 
     /**
      * Produces the plugin
@@ -274,6 +306,8 @@ private:
     std::uint32_t                           _numberOfInstances;                     /** Number of plugin instances */
     std::uint32_t                           _maximumNumberOfInstances;              /** Maximum number of plugin instances (unlimited when -1) */
     gui::TriggerAction                      _triggerHelpAction;                     /** Trigger action that triggers help (icon and text are already set) */
+    gui::TriggerAction                      _triggerReadmeAction;                   /** Trigger action that displays the read me markdown text in a modal dialog (if the read me markdown file URL is valid) */
+    gui::TriggerAction                      _visitRepositoryAction;                 /** Trigger action that opens an external browser and visits the GitHub repository */
     gui::PluginGlobalSettingsGroupAction*   _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
 };

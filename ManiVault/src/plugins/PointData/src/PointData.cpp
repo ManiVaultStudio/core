@@ -1041,6 +1041,20 @@ QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("circle", color);
 }
 
+QUrl PointDataFactory::getReadmeMarkdownUrl() const
+{
+#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/PointData/README.md");
+#else
+    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/PointData/README.md");
+#endif
+}
+
+QUrl PointDataFactory::getRespositoryUrl() const
+{
+    return QUrl("https://github.com/ManiVaultStudio/core");
+}
+
 mv::plugin::RawData* PointDataFactory::produce()
 {
     return new PointData(this);

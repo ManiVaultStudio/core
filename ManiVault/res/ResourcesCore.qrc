@@ -12,6 +12,10 @@
 		<file alias="FontAwesomeRegular-6.4.otf">iconfonts/FontAwesomeRegular-6.4.otf</file>
 		<file alias="FontAwesomeSolid-6.4.otf">iconfonts/FontAwesomeSolid-6.4.otf</file>
 		<file alias="FontAwesome-6.4.json">iconfonts/FontAwesome-6.4.json</file>
+		<file alias="FontAwesomeBrandsRegular-6.5.otf">iconfonts/FontAwesomeBrandsRegular-6.5.otf</file>
+		<file alias="FontAwesomeRegular-6.5.otf">iconfonts/FontAwesomeRegular-6.5.otf</file>
+		<file alias="FontAwesomeSolid-6.5.otf">iconfonts/FontAwesomeSolid-6.5.otf</file>
+		<file alias="FontAwesome-6.5.json">iconfonts/FontAwesome-6.5.json</file>
 	</qresource>
     <qresource prefix="/Icons">
         <file alias="AppIcon32">icons/AppIcon32.png</file>
@@ -71,5 +75,8 @@
         <file>colormaps/2D/example_c.png</file>
         <file>colormaps/2D/example_d.png</file>
 		<file>colormaps/2D/random.png</file>
+    </qresource>
+	<qresource prefix="/HTML">
+        <file alias="MarkdownReadme">html/markdown.html</file>
     </qresource>
 </RCC>
