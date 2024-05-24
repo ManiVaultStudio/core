@@ -16,7 +16,7 @@
 #include <QIcon>
 #include <QVariant>
 
-#define ON_LEARNING_CENTER_FEATURE_BRANCH
+//#define ON_LEARNING_CENTER_FEATURE_BRANCH
 
 namespace mv {
     class DatasetImpl;
