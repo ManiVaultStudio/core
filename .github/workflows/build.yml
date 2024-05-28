@@ -15,10 +15,20 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
-# for matrix check https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners
+# Get centrally defined build matrix
 jobs:
+  prepare_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix_setup.outputs.matrix }}
+    steps:
+    - name: Get matrix from file
+      id: matrix_setup
+      uses: ManiVaultStudio/github-actions/matrix_setup@main
+      
   cross-platform-build:
     name: Cross platform build
+    needs: prepare_matrix
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
@@ -26,41 +36,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        include:
-          - name: Windows-msvc2019
-            os: windows-2019
-            compiler: msvc-2019
-            build-cversion: 16
-            build-runtime: MD
-            build-config: Release
-
-          - name: Linux_gcc11
-            os: ubuntu-22.04
-            build-cc: gcc
-            build-cxx: g++
-            build-compiler: gcc
-            build-cversion: 11
-            build-config: Release
-            build-os: Linux
-            build-libcxx: libstdc++
-
-          - name: Macos_xcode13.4
-            os: macos-12
-            build-compiler: apple-clang
-            build-cversion: 13
-            build-config: Release
-            build-os: Macos
-            build-xcode-version: 13.4
-            build-libcxx: libc++
-
-          - name: Macos_xcode14.3
-            os: macos-13
-            build-compiler: apple-clang
-            build-cversion: 14
-            build-config: Release
-            build-os: Macos
-            build-xcode-version: 14.3
-            build-libcxx: libc++
+        include: ${{ fromJson(needs.prepare_matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout the source
