@@ -1,0 +1,15 @@
+@PACKAGE_INIT@
+
+set(ManiVault_INSTALL_DIR "@PACKAGE_MV_INSTALL_DIR@")
+set(ManiVault_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../$<CONFIGURATION>/include/")
+set(ManiVault_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/../../$<CONFIGURATION>/lib/")
+list(APPEND ManiVault_LINK_LIBS ManiVault::Core ManiVault::PointData ManiVault::ClusterData ManiVault::ImageData ManiVault::ColorData ManiVault::TextData)
+
+include("${CMAKE_CURRENT_LIST_DIR}/ManiVaultTargets.cmake")
+
+check_required_components("@PROJECT_NAME@")
+
+message(STATUS "Found ManiVault version ${ManiVault_VERSION}. Use for example as:")
+message(STATUS "   find_package(ManiVault COMPONENTS Core PointData ClusterData ImageData ColorData TextData CONFIG)")
+message(STATUS "   target_include_directories(\${YOURLIB} PRIVATE \"\${ManiVault_INCLUDE_DIR})\"")
+message(STATUS "   target_link_libraries(\${YOURLIB} PRIVATE ManiVault::Core ManiVault::PointData ManiVault::ClusterData ManiVault::ImageData ManiVault::ColorData ManiVault::TextData)")

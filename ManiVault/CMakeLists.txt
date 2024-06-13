@@ -187,6 +187,8 @@ include(CMakeMvSourcesResources)      # defines RESOURCE_FILES, MAIN_APP_ICON_RE
 # -----------------------------------------------------------------------------
 add_library(${MV_PUBLIC_LIB} SHARED)
 
+add_library(ManiVault::Core ALIAS Core)
+
 set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     AUTOMOC ON
@@ -201,10 +203,7 @@ target_sources(${MV_PUBLIC_LIB}
     ${SHADERS}
 )
 
-target_include_directories(${MV_PUBLIC_LIB} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-    $<INSTALL_INTERFACE:include>
-)
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
 
@@ -293,6 +292,26 @@ if(APPLE)
     set_target_properties( ${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 endif()
 
+
+# -----------------------------------------------------------------------------
+# Plugin projects
+# -----------------------------------------------------------------------------
+
+# System plugins
+add_subdirectory(src/plugins/DataHierarchyPlugin)
+add_subdirectory(src/plugins/DataPropertiesPlugin)
+add_subdirectory(src/plugins/SharedParametersPlugin)
+add_subdirectory(src/plugins/LoggingPlugin)
+add_subdirectory(src/plugins/TasksPlugin)
+
+# Data plugins
+add_subdirectory(src/plugins/PointData)
+add_subdirectory(src/plugins/ColorData)
+add_subdirectory(src/plugins/TextData)
+add_subdirectory(src/plugins/ClusterData)
+add_subdirectory(src/plugins/ImageData)
+
+
 # -----------------------------------------------------------------------------
 # Installation
 # -----------------------------------------------------------------------------
@@ -368,65 +387,52 @@ endforeach()
 
 # Install public library
 install(TARGETS ${MV_PUBLIC_LIB}
-    EXPORT ManiVaultPublicExport
-    RUNTIME DESTINATION . COMPONENT MVPUBLIC_LINKLIB    # Windows .dll
-    ARCHIVE DESTINATION lib COMPONENT MVPUBLIC_LINKLIB  # Linux/Mac .so
-    LIBRARY DESTINATION lib COMPONENT MVPUBLIC_LINKLIB  # Windows .lib
-    INCLUDES DESTINATION include
+    EXPORT "ManiVaultPublicExport"
+    RUNTIME DESTINATION $<CONFIGURATION>        COMPONENT MVPUBLIC_LINKLIB  # Windows .dll
+    ARCHIVE DESTINATION "$<CONFIGURATION>/lib/" COMPONENT MVPUBLIC_LINKLIB  # Linux/Mac .so
+    LIBRARY DESTINATION "$<CONFIGURATION>/lib/" COMPONENT MVPUBLIC_LINKLIB  # Windows .lib
 )
 
+# Generate a .cmake file that can be imported from the install to enable plugin building
+install(EXPORT "ManiVaultPublicExport"
+        FILE ManiVaultTargets.cmake
+        NAMESPACE ManiVault::
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_EXPORT
+)
 
 if(MSVC)
     # Install program database (.pdb) files
-    install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION . COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
-    install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION . COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
 endif()
-
-# TODO: Create a ManiVaultCore package to support the find_package command
-
-# Generate a .cmake file that can be imported from the install
-# to enable plugin building
-# Plugin building requires MV_Public.lib and the include headers
-# By convention this is placed in the lib directory
-install(EXPORT ManiVaultPublicExport
-        FILE ManiVaultTargets.cmake
-        NAMESPACE ManiVault::
-        DESTINATION lib/cmake/mv
-        COMPONENT MVPUBLIC_TARGET
-)
 
 # Generate the version file for use with find_package
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfigVersion.cmake"
-  VERSION "${version}"
-  # When the ManiVault core is stable - version 1.0 or greater -
-  # compatibility can change to
-  # AnyNewerVersion or SameMajorVersion
-  # until then employ ExactVersion
-  COMPATIBILITY ExactVersion
+  ManiVaultConfigVersion.cmake
+  VERSION ${MV_VERSION}
+  COMPATIBILITY SameMajorVersion
 )
 
 # create config file
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/MvCoreConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfig.cmake"
-  INSTALL_DESTINATION lib/cmake/mv
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MvCoreConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfig.cmake"
+    INSTALL_DESTINATION cmake/mv
+    PATH_VARS MV_INSTALL_DIR
 )
 
 # install the package files
 install(FILES
-          "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfig.cmake"
-          "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfigVersion.cmake"
-        DESTINATION lib/cmake/mv
+        "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfigVersion.cmake"
+        DESTINATION cmake/mv
         COMPONENT MVPUBLIC_PACKAGE
 )
 
-# could be used for the plugins subdirectories 
-# see doc https://cmake.org/cmake/help/v3.18/command/export.html
-#
-# export(EXPORT HdpsCoreTargets
-#        FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/HdpsCoreTargets.cmake"
-#        NAMESPACE HdpsCore::
-# )
+set(ManiVault_INCLUDE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/" CACHE INTERNAL "")
+set(ManiVault_LIB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/" CACHE INTERNAL "")
+set(ManiVault_INSTALL_DIR "${MV_INSTALL_DIR}" CACHE INTERNAL "")
 
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
@@ -436,29 +442,28 @@ add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_HEADERS
-        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault public link library"
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_LINKLIB
-        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}
         --verbose
-    # COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake config files"
-    # COMMAND ${CMAKE_COMMAND}
-        # --install ${CMAKE_CURRENT_BINARY_DIR}
-        # --config $<CONFIGURATION>
-        # --component MVPUBLIC_PACKAGE
-        # --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
-        # --verbose
-    # COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake target files"
-    # COMMAND ${CMAKE_COMMAND}
-        # --install ${CMAKE_CURRENT_BINARY_DIR}
-        # --config $<CONFIGURATION>
-        # --component MVPUBLIC_TARGET
-        # --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
-        # --verbose
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake config files"
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component MVPUBLIC_PACKAGE
+        --prefix ${MV_INSTALL_DIR}
+        --verbose
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake target files"
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component MVPUBLIC_EXPORT
+        --prefix ${MV_INSTALL_DIR}
+        --verbose
     # If no plugin directory exists, ManiVault might try to import 
     # any library in the executable directory as a plugin
     COMMAND ${CMAKE_COMMAND}
@@ -541,25 +546,6 @@ if(${MV_INSTALL_ZLIB})
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     )
 endif()
-
-# -----------------------------------------------------------------------------
-# Plugin projects
-# -----------------------------------------------------------------------------
-
-# System plugins
-add_subdirectory(src/plugins/DataHierarchyPlugin)
-add_subdirectory(src/plugins/DataPropertiesPlugin)
-add_subdirectory(src/plugins/SharedParametersPlugin)
-add_subdirectory(src/plugins/LoggingPlugin)
-add_subdirectory(src/plugins/TasksPlugin)
-
-# Data plugins
-add_subdirectory(src/plugins/PointData)
-add_subdirectory(src/plugins/ColorData)
-add_subdirectory(src/plugins/TextData)
-add_subdirectory(src/plugins/ClusterData)
-add_subdirectory(src/plugins/ImageData)
-
 
 # -----------------------------------------------------------------------------
 # Miscellaneous
