@@ -22,7 +22,13 @@ file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
+set(MATRIX_SOURCES
+    src/DenseMatrix.h
+    src/CSRMatrix.h
+)
+
 set(POINTS_SOURCES
+    src/VariantOfMatrixTypes.h
     src/PointData.h
     src/PointData.cpp
     src/PointData.json
@@ -33,6 +39,9 @@ set(POINTS_SOURCES
 )
 
 set(POINTS_HEADERS
+     src/VariantOfMatrixTypes.h
+     src/DenseMatrix.h
+     src/CSRMatrix.h
     src/PointData.h
     src/PointDataIterator.h
     src/PointDataRange.h
@@ -104,8 +113,9 @@ set(PLUGIN_MOC_HEADERS
 
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
+source_group(Matrices FILES ${MATRIX_SOURCES})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${MATRIX_SOURCES})
 
 qt_wrap_cpp(POINTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${POINTDATA})
 target_sources(${POINTDATA} PRIVATE ${POINTDATA_MOC})
@@ -114,6 +124,15 @@ target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATI
 target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
 
 target_compile_features(${POINTDATA} PRIVATE cxx_std_17)
+
+find_package(OpenMP REQUIRED)
+if(OpenMP_FOUND)
+	message(STATUS "OpenMP found")
+	target_link_libraries(${POINTDATA} PRIVATE OpenMP::OpenMP_CXX)
+	target_compile_options(${POINTDATA} PRIVATE ${OpenMP_CXX_FLAGS})
+else()
+   message(WARNING "OpenMP not found!")
+endif()
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
