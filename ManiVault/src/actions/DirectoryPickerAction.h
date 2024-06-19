@@ -55,7 +55,7 @@ public:
      * @param title Title of the action
      * @param directory Directory
      */
-    explicit DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory = QString());
+    explicit Q_INVOKABLE DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory = QString());
 
     /**
      * Get the current directory

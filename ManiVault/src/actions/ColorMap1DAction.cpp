@@ -13,4 +13,17 @@ ColorMap1DAction::ColorMap1DAction(QObject* parent, const QString& title, const 
 {
 }
 
+QWidget* ColorMap1DAction::createExampleWidget(QWidget* parent) const
+{
+    auto exampleWidget          = new QWidget(parent);
+    auto exampleWidgetLayout    = new QVBoxLayout();
+    auto colorMap1DAction       = new ColorMap1DAction(exampleWidget, "Example");
+
+    exampleWidgetLayout->addWidget(colorMap1DAction->createWidget(exampleWidget));
+
+    exampleWidget->setLayout(exampleWidgetLayout);
+
+    return exampleWidget;
+}
+
 }

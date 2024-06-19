@@ -28,6 +28,13 @@ public:
      * @param colorMap Current color map
      */
     Q_INVOKABLE ColorMap1DAction(QObject* parent, const QString& title, const QString& colorMap = "RdYlBu");
+
+    /**
+     * Create example widget
+     * @param parent Parent widget
+     * @return Pointer to widget (maybe a nullptr)
+     */
+    QWidget* createExampleWidget(QWidget* parent) const override;
 };
 
 }

@@ -99,8 +99,11 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 protected:
+    
     /** Returns whether any output dataset is given */
-    bool outputDataInit() const { return _output.size() > 0; }
+    bool outputDataInit() const {
+        return _output.size() > 0;
+    }
 
 protected:
     Datasets    _input;       /** Input datasets smart pointers */

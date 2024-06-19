@@ -203,4 +203,17 @@ QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     return widget;
 }
 
+QWidget* ColorAction::createExampleWidget(QWidget* parent) const
+{
+    auto exampleWidget          = new QWidget(parent);
+    auto exampleWidgetLayout    = new QVBoxLayout();
+    auto colorAction            = new ColorAction(exampleWidget, "Example");
+
+    exampleWidgetLayout->addWidget(colorAction->createWidget(exampleWidget));
+
+    exampleWidget->setLayout(exampleWidgetLayout);
+
+    return exampleWidget;
+}
+
 }

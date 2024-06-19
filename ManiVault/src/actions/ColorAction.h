@@ -93,6 +93,13 @@ protected:
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
+    /**
+     * Create example widget
+     * @param parent Parent widget
+     * @return Pointer to widget (maybe a nullptr)
+     */
+    QWidget* createExampleWidget(QWidget* parent) const override;
+
 public:
 
     /**

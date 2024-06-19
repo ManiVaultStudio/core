@@ -53,7 +53,11 @@ TreeAction::Widget::Widget(QWidget* parent, TreeAction* treeAction, const std::i
 
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(new HierarchyWidget(this, _treeAction->getItemTypeName(), *_treeAction->getModel(), _treeAction->getFilterModel()));
+    auto hierarchyWidget = new HierarchyWidget(this, _treeAction->getItemTypeName(), *_treeAction->getModel(), _treeAction->getFilterModel());
+
+    hierarchyWidget->setWindowIcon(_treeAction->icon());
+
+    layout->addWidget(hierarchyWidget);
 
     setLayout(layout);
 }

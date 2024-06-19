@@ -386,6 +386,15 @@ public: // Widgets
     virtual QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00001) const final;
 
     /**
+     * Create example widget
+     * @param parent Parent widget
+     * @return Pointer to widget (maybe a nullptr)
+     */
+    virtual QWidget* createExampleWidget(QWidget* parent) const {
+        return nullptr;
+    }
+
+    /**
      * Get the context menu for the action
      * @param parent Parent widget
      * @return Context menu
