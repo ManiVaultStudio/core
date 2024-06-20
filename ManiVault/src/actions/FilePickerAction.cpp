@@ -30,6 +30,8 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     setDefaultWidgetFlags(WidgetFlag::Default);
     setFilePath(filePath);
 
+    _filePathAction.setStretch(1);
+
     _filePathAction.getTrailingAction().setVisible(true);
 
     if (populateCompleter)
@@ -178,10 +180,10 @@ QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widget
     layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(_filePathAction.createWidget(parent));
+        layout->addWidget(_filePathAction.createWidget(parent), _filePathAction.getStretch());
 
     if (widgetFlags & WidgetFlag::PushButton)
-        layout->addWidget(_pickAction.createWidget(parent));
+        layout->addWidget(_pickAction.createWidget(parent), _pickAction.getStretch());
 
     widget->setLayout(layout);
 
@@ -211,39 +213,60 @@ QVariantMap FilePickerAction::toVariantMap() const
 
 QWidget* FilePickerAction::createExampleWidget(QWidget* parent) const
 {
-    auto exampleWidget          = new WidgetActionExampleWidget(parent);
-    auto directoryPickerAction  = new FilePickerAction(exampleWidget, "Example");
+    auto exampleWidget      = new WidgetActionExampleWidget(parent);
+    auto filePickerAction   = new FilePickerAction(exampleWidget, "Example");
+
+    filePickerAction->setPlaceHolderString("This placeholder text can be changed with mv::gui::FilePickerAction::setPlaceHolderString(const QString& placeholderString)");
 
     const QString markdownText =
         "## General \n\n"
         "`mv::gui::FilePickerAction` provides a GUI for picking a file residing on the on the system of the user. \n\n"
+        "By default it consists of a `line edit` and a `picker push button` control, but these can be toggled individually by: \n\n"
+        "- Setting default widget flags: \n\n"
+        "  `filePickerAction->setDefaultWidgetFlags(FilePickerAction::WidgetFlag::LineEdit)` \n\n"
+        "  `filePickerAction->setDefaultWidgetFlag(FilePickerAction::WidgetFlag::LineEdit, true/false)` \n\n"
+        "- Setting the widget flags during widget creation (e.g. `filePickerAction->createWidget(parentWidget, FilePickerAction::WidgetFlag::LineEdit)`) \n\n"
         "## Usage \n\n"
         "[#include <actions/FilePickerAction.h>](https://github.com/ManiVaultStudio/core/blob/master/ManiVault/src/actions/FilePickerAction.h)\n\n"
         "To use: \n\n"
         "- Manually edit the path in the text edit \n\n"
         "- Click on the button next to the text edit to pick a directory: \n\n"
         "## API \n\n"
-        "The `mv::gui::DirectoryPickerAction` API inherits from `mv::gui::WidgetAction` \n\n"
+        "The `mv::gui::FilePickerAction` API inherits from `mv::gui::WidgetAction` \n\n"
         "### Methods \n\n"
-        "- `QString getDirectory() const` \n\n"
-        "  Get the current directory \n\n"
-        "- `void setDirectory(const QString& directory)` \n\n"
-        "  Sets the current directory to `directory` \n\n"
+        "- `QString getFilePath() const` \n\n"
+        "  Get the current file path \n\n"
+        "- `void setFilePath(const QString& filePath)` \n\n"
+        "  Sets the current file path to `filePath` \n\n"
+        "- `QStringList getNameFilters() const` \n\n"
+        "  Gets the current name filters \n\n"
+        "- `void setNameFilters(const QStringList& nameFilters)` \n\n"
+        "  Sets the name filters to `nameFilters` \n\n"
+        "- `QString getDefaultSuffix() const` \n\n"
+        "  Get the default file suffix \n\n"
+        "- `void setDefaultSuffix(const QString& defaultSuffix)` \n\n"
+        "  Sets the default file suffix to `defaultSuffix` \n\n"
+        "- `QString getFileType() const` \n\n"
+        "  Get the file type filter \n\n"
+        "- `void setFileType(const QString& fileType)` \n\n"
+        "  Sets the file type filter to `fileType` \n\n"
         "- `QString getPlaceholderString()` \n\n"
         "  Gets the current placeholder string (string that is shown when there is no user input) \n\n"
         "- `void setPlaceHolderString(const QString& placeholderString)` \n\n"
         "  Sets the placeholder text to `placeholderString` \n\n"
-        "- `QString getDirectoryName()` \n\n"
-        "  Get the name of the current directory \n\n"
+        "- `QString getDirectoryName() const` \n\n"
+        "  Get the name of the directory in which the file resides \n\n"
         "- `bool isValid() const` \n\n"
-        "  Determines whether the directory actually exists \n\n"
+        "  Determines whether the file actually exists \n\n"
         "### Signals \n\n"
-        "- `void directoryChanged(const QString& directory)` \n\n"
-        "  Signals that the current directory changed to `directory` \n\n"
+        "- `void filePathChanged(const QString& filePath)` \n\n"
+        "  Signals that the current file path changed to `filePath` \n\n"
         "- `void placeholderStringChanged(const QString& placeholderString)` \n\n"
-        "  Signals that the placeholder string changed to `placeholderString` \n\n";
+        "  Signals that the placeholder string changed to `placeholderString` \n\n"
+        "- `void fileTypeChanged(const QString& fileType)` \n\n"
+        "  Signals that the file type filter has changed to `fileType` \n\n";
 
-    exampleWidget->addWidget(directoryPickerAction->createWidget(exampleWidget));
+    exampleWidget->addWidget(filePickerAction->createWidget(exampleWidget));
     exampleWidget->addMarkDownSection(markdownText);
 
     return exampleWidget;
