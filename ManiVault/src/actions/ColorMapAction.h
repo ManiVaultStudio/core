@@ -118,7 +118,7 @@ public: // Option action wrappers
     /** Gets the current color map name */
     QString getColorMap() const;
 
-    /** Gets the current color map */
+    /** Gets the current color map image */
     QImage getColorMapImage() const;
 
     /**

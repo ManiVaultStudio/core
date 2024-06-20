@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ColorAction.h"
+#include "WidgetActionExampleWidget.h"
 #include "Application.h"
 
 #include <QDebug>
@@ -205,13 +206,25 @@ QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
 
 QWidget* ColorAction::createExampleWidget(QWidget* parent) const
 {
-    auto exampleWidget          = new QWidget(parent);
-    auto exampleWidgetLayout    = new QVBoxLayout();
-    auto colorAction            = new ColorAction(exampleWidget, "Example");
+    auto exampleWidget  = new WidgetActionExampleWidget(parent);
+    auto colorAction    = new ColorAction(exampleWidget, "Example");
 
-    exampleWidgetLayout->addWidget(colorAction->createWidget(exampleWidget));
+    const QString markdownText = 
+        "## General \n\n"
+        "[#include <actions/ColorAction.h>](https://github.com/ManiVaultStudio/core/blob/master/ManiVault/src/actions/ColorAction.h) \n\n"
+        "`mv::gui::ColorAction` provides a color picking GUI with which the `hue`, `saturation`, `lightness` and `darkness` can be modified. \n\n"
+        "## Usage \n\n"
+        "Click on the color button and modify the color by dragging: \n\n"
+        "- The color cross hair in the large square \n\n"
+        "- The darkness slider up/down at the far right \n\n"
+        "- The hue slider left/right \n\n"
+        "- The saturation slider left/right \n\n"
+        "- The lightness slider left/right \n\n"
+        "## API \n\n"
+        "The current color can be retrieved with `getColor()` and set with `setColor(...)`.";
 
-    exampleWidget->setLayout(exampleWidgetLayout);
+    exampleWidget->addWidget(colorAction->createWidget(exampleWidget));
+    exampleWidget->addMarkDownSection(markdownText);
 
     return exampleWidget;
 }
