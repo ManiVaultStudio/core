@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "FilePickerAction.h"
+#include "WidgetActionExampleWidget.h"
 
 #include <Application.h>
 
@@ -206,6 +207,46 @@ QVariantMap FilePickerAction::toVariantMap() const
     });
 
     return variantMap;
+}
+
+QWidget* FilePickerAction::createExampleWidget(QWidget* parent) const
+{
+    auto exampleWidget          = new WidgetActionExampleWidget(parent);
+    auto directoryPickerAction  = new FilePickerAction(exampleWidget, "Example");
+
+    const QString markdownText =
+        "## General \n\n"
+        "`mv::gui::FilePickerAction` provides a GUI for picking a file residing on the on the system of the user. \n\n"
+        "## Usage \n\n"
+        "[#include <actions/FilePickerAction.h>](https://github.com/ManiVaultStudio/core/blob/master/ManiVault/src/actions/FilePickerAction.h)\n\n"
+        "To use: \n\n"
+        "- Manually edit the path in the text edit \n\n"
+        "- Click on the button next to the text edit to pick a directory: \n\n"
+        "## API \n\n"
+        "The `mv::gui::DirectoryPickerAction` API inherits from `mv::gui::WidgetAction` \n\n"
+        "### Methods \n\n"
+        "- `QString getDirectory() const` \n\n"
+        "  Get the current directory \n\n"
+        "- `void setDirectory(const QString& directory)` \n\n"
+        "  Sets the current directory to `directory` \n\n"
+        "- `QString getPlaceholderString()` \n\n"
+        "  Gets the current placeholder string (string that is shown when there is no user input) \n\n"
+        "- `void setPlaceHolderString(const QString& placeholderString)` \n\n"
+        "  Sets the placeholder text to `placeholderString` \n\n"
+        "- `QString getDirectoryName()` \n\n"
+        "  Get the name of the current directory \n\n"
+        "- `bool isValid() const` \n\n"
+        "  Determines whether the directory actually exists \n\n"
+        "### Signals \n\n"
+        "- `void directoryChanged(const QString& directory)` \n\n"
+        "  Signals that the current directory changed to `directory` \n\n"
+        "- `void placeholderStringChanged(const QString& placeholderString)` \n\n"
+        "  Signals that the placeholder string changed to `placeholderString` \n\n";
+
+    exampleWidget->addWidget(directoryPickerAction->createWidget(exampleWidget));
+    exampleWidget->addMarkDownSection(markdownText);
+
+    return exampleWidget;
 }
 
 }

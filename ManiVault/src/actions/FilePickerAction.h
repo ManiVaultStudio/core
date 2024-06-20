@@ -131,6 +131,15 @@ public:
      */
     bool isValid() const;
 
+public: // Miscellaneous
+
+    /**
+     * Create example widget
+     * @param parent Parent widget
+     * @return Pointer to widget (maybe a nullptr)
+     */
+    QWidget* createExampleWidget(QWidget* parent) const override;
+
 public: // Serialization
 
     /**

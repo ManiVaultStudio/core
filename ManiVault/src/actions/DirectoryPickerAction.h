@@ -107,6 +107,15 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Miscellaneous
+
+    /**
+     * Create example widget
+     * @param parent Parent widget
+     * @return Pointer to widget (maybe a nullptr)
+     */
+    QWidget* createExampleWidget(QWidget* parent) const override;
+
 signals:
 
     /**
