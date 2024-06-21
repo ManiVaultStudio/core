@@ -81,6 +81,13 @@ public:
      * @param alignment Item alignment (Qt::AlignmentFlag::AlignLeft, Qt::AlignmentFlag::AlignCenter or Qt::AlignmentFlag::AlignRight)
      */
     Q_INVOKABLE HorizontalToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignLeft);
+
+    /**
+     * Create example widget
+     * @param parent Parent widget
+     * @return Pointer to widget (maybe a nullptr)
+     */
+    QWidget* createExampleWidget(QWidget* parent) const override;
 };
 
 }
