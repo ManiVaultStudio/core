@@ -148,6 +148,10 @@ void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -
         emit actionsChanged(getActions());
     });
 
+    connect(action, &WidgetAction::stretchChanged, this, [this](std::int32_t stretch) -> void {
+        emit actionsChanged(getActions());
+    });
+
     emit actionsChanged(getActions());
 }
 
@@ -171,6 +175,7 @@ void GroupAction::removeAction(WidgetAction* action)
 
     disconnect(action, &WidgetAction::configurationFlagToggled, this, nullptr);
     disconnect(action, &WidgetAction::sortIndexChanged, this, nullptr);
+    disconnect(action, &WidgetAction::stretchChanged, this, nullptr);
 }
 
 WidgetActions GroupAction::getActions()
@@ -313,6 +318,16 @@ mv::gui::StretchAction* GroupAction::addStretch(std::int32_t stretch /*= 1*/)
     addAction(stretchAction);
 
     return stretchAction;
+}
+
+void GroupAction::setAlignment(const Qt::AlignmentFlag& alignment)
+{
+    if (alignment == _alignment)
+        return;
+
+    _alignment = alignment;
+
+    emit alignmentChanged(_alignment);
 }
 
 GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :
@@ -499,6 +514,8 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
     updateLayout();
 
     connect(groupAction, &GroupAction::actionsChanged, this, updateLayout);
+    connect(groupAction, &GroupAction::showLabelsChanged, this, updateLayout);
+    connect(groupAction, &GroupAction::alignmentChanged, this, updateLayout);
 
     setLayout(layout);
 }

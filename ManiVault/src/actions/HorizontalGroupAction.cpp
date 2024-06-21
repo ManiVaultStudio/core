@@ -18,6 +18,16 @@ QWidget* HorizontalGroupAction::createExampleWidget(QWidget* parent) const
 {
     auto exampleWidget          = new WidgetActionExampleWidget(parent);
     auto horizontalGroupAction  = new HorizontalGroupAction(exampleWidget, "Example");
+    auto colorAction            = new ColorAction(exampleWidget, "Color");
+    auto inputAAction           = new StringAction(exampleWidget, "Input A");
+    auto inputBAction           = new StringAction(exampleWidget, "Input B");
+
+    inputAAction->setPlaceHolderString("Input first string here...");
+    inputBAction->setPlaceHolderString("Input second string here...");
+
+    horizontalGroupAction->addAction(colorAction);
+    horizontalGroupAction->addAction(inputAAction);
+    horizontalGroupAction->addAction(inputBAction);
 
     const QString markdownText =
         "## General \n\n"
@@ -31,7 +41,7 @@ QWidget* HorizontalGroupAction::createExampleWidget(QWidget* parent) const
         "## API \n\n"
         "### Alignment \n\n"
         "- `Qt::AlignmentFlag getAlignment() const final` \n\n"
-        "  Get the action alignment as a `Qt::AlignmentFlag` \n\n"
+        "  Get the action alignment as a `Qt::AlignmentFlag` (only applies to vertical layouts) \n\n"
         "### Expansion \n\n"
         "- `void setExpanded(const bool& expanded)` \n\n"
         "  Set expansion state to `expanded` (when added to a [GroupsAction](https://github.com/ManiVaultStudio/core/blob/master/ManiVault/src/actions/GroupsAction.h)) \n\n"
@@ -80,6 +90,88 @@ QWidget* HorizontalGroupAction::createExampleWidget(QWidget* parent) const
         "  Signals that the show labels state changed to `showLabels` \n\n";
 
     exampleWidget->addWidget(horizontalGroupAction->createWidget(exampleWidget));
+
+    auto settingsAction         = new VerticalGroupAction(exampleWidget, "Settings");
+    auto showLabelsAction       = new ToggleAction(exampleWidget, "Show labels", horizontalGroupAction->getShowLabels());
+    auto stretchAction          = new VerticalGroupAction(exampleWidget, "Stretch");
+    auto colorStretchAction     = new IntegralAction(exampleWidget, "Color", 0, 10, 0);
+    auto inputAStretchAction    = new IntegralAction(exampleWidget, "Input A", 0, 10, 0);
+    auto inputBStretchAction    = new IntegralAction(exampleWidget, "Input B", 0, 10, 0);
+    auto sortIndexAction        = new VerticalGroupAction(exampleWidget, "Sort index");
+    auto colorSortIndexAction   = new IntegralAction(exampleWidget, "Color", -1, 10, -1);
+    auto inputASortIndexAction  = new IntegralAction(exampleWidget, "Input A", -1, 10, -1);
+    auto inputBSortIndexAction  = new IntegralAction(exampleWidget, "Input B", -1, 10, -1);
+
+    settingsAction->setLabelSizingType(GroupAction::LabelSizingType::Auto);
+
+    stretchAction->setLabelSizingType(GroupAction::LabelSizingType::Auto);
+    stretchAction->setDefaultWidgetFlag(GroupAction::WidgetFlag::NoMargins);
+
+    settingsAction->addAction(showLabelsAction);
+    settingsAction->addAction(stretchAction);
+    settingsAction->addAction(sortIndexAction);
+
+    stretchAction->addAction(colorStretchAction);
+    stretchAction->addAction(inputAStretchAction);
+    stretchAction->addAction(inputBStretchAction);
+
+    sortIndexAction->setLabelSizingType(GroupAction::LabelSizingType::Auto);
+    sortIndexAction->setDefaultWidgetFlag(GroupAction::WidgetFlag::NoMargins);
+
+    sortIndexAction->addAction(colorSortIndexAction);
+    sortIndexAction->addAction(inputASortIndexAction);
+    sortIndexAction->addAction(inputBSortIndexAction);
+
+    const auto updateShowLabels = [horizontalGroupAction, showLabelsAction]() -> void {
+        horizontalGroupAction->setShowLabels(showLabelsAction->isChecked());
+    };
+
+    updateShowLabels();
+
+    connect(showLabelsAction, &ToggleAction::toggled, exampleWidget, updateShowLabels);
+
+    const auto updateStretchColor = [colorAction, colorStretchAction]() -> void {
+        colorAction->setStretch(colorStretchAction->getValue());
+    };
+
+    const auto updateStretchInputA = [inputAAction, inputAStretchAction]() -> void {
+        inputAAction->setStretch(inputAStretchAction->getValue());
+    };
+
+    const auto updateStretchInputB = [inputBAction, inputBStretchAction]() -> void {
+        inputBAction->setStretch(inputBStretchAction->getValue());
+    };
+
+    updateStretchColor();
+    updateStretchInputA();
+    updateStretchInputB();
+
+    connect(colorStretchAction, &IntegralAction::valueChanged, exampleWidget, updateStretchColor);
+    connect(inputAStretchAction, &IntegralAction::valueChanged, exampleWidget, updateStretchInputA);
+    connect(inputBStretchAction, &IntegralAction::valueChanged, exampleWidget, updateStretchInputB);
+
+    const auto updateSortIndexColor = [colorAction, colorSortIndexAction]() -> void {
+        colorAction->setSortIndex(colorSortIndexAction->getValue());
+    };
+
+    const auto updateSortIndexInputA = [inputAAction, inputASortIndexAction]() -> void {
+        inputAAction->setSortIndex(inputASortIndexAction->getValue());
+    };
+
+    const auto updateSortIndexInputB = [inputBAction, inputBSortIndexAction]() -> void {
+        inputBAction->setSortIndex(inputBSortIndexAction->getValue());
+    };
+
+    updateSortIndexColor();
+    updateSortIndexInputA();
+    updateSortIndexInputB();
+
+    connect(colorSortIndexAction, &IntegralAction::valueChanged, exampleWidget, updateSortIndexColor);
+    connect(inputASortIndexAction, &IntegralAction::valueChanged, exampleWidget, updateSortIndexInputA);
+    connect(inputBSortIndexAction, &IntegralAction::valueChanged, exampleWidget, updateSortIndexInputB);
+
+    exampleWidget->addWidget(settingsAction->createWidget(exampleWidget));
+
     exampleWidget->addMarkDownSection(markdownText);
 
     return exampleWidget;

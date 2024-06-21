@@ -120,6 +120,12 @@ public:
      */
     virtual Qt::AlignmentFlag getAlignment() const final;
 
+    /**
+     * Set item alignment to \p alignment
+     * @param alignment Item alignment
+     */
+    virtual void setAlignment(const Qt::AlignmentFlag& alignment) final;
+
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);
 
@@ -260,6 +266,12 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 signals:
+
+    /**
+     * Signals that the alignment changed to \p alignment
+     * @param alignment Updated alignment
+     */
+    void alignmentChanged(const Qt::AlignmentFlag& alignment);
 
     /**
      * Signals that the actions changed to \p actions
