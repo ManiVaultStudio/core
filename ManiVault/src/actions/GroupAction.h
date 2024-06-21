@@ -263,7 +263,7 @@ signals:
 
     /**
      * Signals that the actions changed to \p actions
-     * @param actions Update vector of pointers to actions in the group
+     * @param actions Updated vector of pointers to actions in the group
      */
     void actionsChanged(const WidgetActions& actions);
 

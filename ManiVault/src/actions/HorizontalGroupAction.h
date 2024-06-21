@@ -28,6 +28,15 @@ public:
      * @param expanded Whether the group is initially expanded/collapsed
      */
     Q_INVOKABLE HorizontalGroupAction(QObject* parent, const QString& title, const bool& expanded = false);
+
+public: // Miscellaneous
+
+    /**
+     * Create example widget
+     * @param parent Parent widget
+     * @return Pointer to widget (maybe a nullptr)
+     */
+    QWidget* createExampleWidget(QWidget* parent) const override;
 };
 
 }

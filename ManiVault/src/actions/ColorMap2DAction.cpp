@@ -27,7 +27,6 @@ QWidget* ColorMap2DAction::createExampleWidget(QWidget* parent) const
         "To use: \n\n"
         "- Click on the color map button and select one of the available color maps \n\n"
         "- Click on the settings button to the right of the color map button to add the settings: \n\n"
-        "<details><summary>Toggle me!</summary>Peek a boo!</details> \n\n"
         "## API \n\n"
         "The `mv::gui::ColorMap2DAction` API inherits common actions from the `mv::gui::ColorMapAction`, see *sub-actions* sections \n\n"
         "### Methods \n\n"
