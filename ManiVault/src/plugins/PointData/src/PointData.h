@@ -1058,6 +1058,12 @@ public:
         getRawData<PointData>()->setSparseData(numRows, numCols, rowPointers, colIndices, values);
     }
 
+    template<typename MatrixType>
+    void setMatrix(MatrixType&& matrix)
+    {
+        getRawData<PointData>()->setMatrix<MatrixType>(std::move(matrix));
+    }
+
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
 
     void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
@@ -1165,6 +1171,11 @@ public:
             return 0;
         else
             return getRawData<PointData>()->getRawDataSize();
+    }
+
+    bool isCSR() const 
+    {
+        return getRawData<PointData>()->isCSR();
     }
 
     // Returns the value of the element at the specified position in the current

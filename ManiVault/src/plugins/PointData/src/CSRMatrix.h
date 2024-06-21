@@ -37,6 +37,7 @@ namespace mv
         using size_type = typename Container::size_type;
         using difference_type = typename Container::difference_type;
         using value_type = ValueType;
+        using column_index_type = ColIndexType;
 
     private:
         enum Index : std::ptrdiff_t { NoIndex = -1 };

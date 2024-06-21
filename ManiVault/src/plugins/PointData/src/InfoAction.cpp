@@ -50,7 +50,10 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
         if (!_points.isValid())
             return;
 
-        _dataStorageAction.setString(_points->isProxy() ? "Group" : "Owner");
+        QString dataStorageTypeString = QString(_points->isCSR() ? "Sparse " : "Dense ") + QString(_points->isProxy() ? "Group" : "Owner");
+        
+
+        _dataStorageAction.setString(dataStorageTypeString);
         _numberOfPointsAction.setString(QString::number(_points->getNumPoints()));
         _numberOfDimensionsAction.setString(QString::number(_points->getNumDimensions()));
         _rawDataSizeAction.setString(_points->getRawDataSizeHumanReadable());
