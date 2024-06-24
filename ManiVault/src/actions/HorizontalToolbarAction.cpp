@@ -161,9 +161,19 @@ QWidget* HorizontalToolbarAction::createExampleWidget(QWidget* parent) const
 {
     auto exampleWidget              = new WidgetActionExampleWidget(parent);
     auto horizontalToolbarAction    = new HorizontalToolbarAction(exampleWidget, "Example");
-    auto colorAction                = new ColorAction(exampleWidget, "Color");
+    auto buttonsAction              = new VerticalGroupAction(exampleWidget, "Buttons");
+    auto buttonAAction              = new TriggerAction(exampleWidget, "Button A");
+    auto buttonBAction              = new TriggerAction(exampleWidget, "Button B");
+    auto buttonCAction              = new TriggerAction(exampleWidget, "Button C");
     auto inputAAction               = new StringAction(exampleWidget, "Input A");
     auto inputBAction               = new StringAction(exampleWidget, "Input B");
+    auto inputsAction               = new VerticalGroupAction(exampleWidget, "Inputs");
+    //auto alwaysCollapse             = new String
+    //auto settingsAction             = new VerticalGroupAction(exampleWidget, "Settings");
+
+    buttonsAction->addAction(buttonAAction);
+    buttonsAction->addAction(buttonBAction);
+    buttonsAction->addAction(buttonCAction);
 
     inputAAction->setPlaceHolderString("Input first string here...");
     inputBAction->setPlaceHolderString("Input second string here...");
@@ -171,9 +181,11 @@ QWidget* HorizontalToolbarAction::createExampleWidget(QWidget* parent) const
     inputAAction->setStretch(1);
     inputBAction->setStretch(1);
 
-    horizontalToolbarAction->addAction(colorAction);
-    horizontalToolbarAction->addAction(inputAAction);
-    horizontalToolbarAction->addAction(inputBAction);
+    inputsAction->addAction(inputAAction);
+    inputsAction->addAction(inputBAction);
+
+    horizontalToolbarAction->addAction(buttonsAction, -1, GroupAction::WidgetFlag::Horizontal);
+    horizontalToolbarAction->addAction(inputsAction, -1, GroupAction::WidgetFlag::Horizontal);
 
     const QString markdownText =
         "## General \n\n"
@@ -238,36 +250,28 @@ QWidget* HorizontalToolbarAction::createExampleWidget(QWidget* parent) const
     exampleWidget->addWidget(horizontalToolbarAction->createWidget(exampleWidget));
 
     auto priorityAction         = new VerticalGroupAction(exampleWidget, "Expand priority");
-    auto colorPriorityAction    = new IntegralAction(exampleWidget, "Color", 0, 10, 0);
-    auto inputAPriorityAction   = new IntegralAction(exampleWidget, "Input A", 0, 10, 0);
-    auto inputBPriorityAction   = new IntegralAction(exampleWidget, "Input B", 0, 10, 0);
+    auto butttonsPriorityAction = new IntegralAction(exampleWidget, "Buttons expand priority", 0, 10, 0);
+    auto inputsPriorityAction   = new IntegralAction(exampleWidget, "Inputs expand priority", 0, 10, 0);
 
     priorityAction->setLabelSizingType(GroupAction::LabelSizingType::Auto);
     priorityAction->setDefaultWidgetFlag(GroupAction::WidgetFlag::NoMargins);
 
-    priorityAction->addAction(colorPriorityAction);
-    priorityAction->addAction(inputAPriorityAction);
-    priorityAction->addAction(inputBPriorityAction);
+    priorityAction->addAction(butttonsPriorityAction);
+    priorityAction->addAction(inputsPriorityAction);
 
-    const auto updatePriorityColor = [horizontalToolbarAction, colorPriorityAction]() -> void {
-        horizontalToolbarAction->setActionAutoExpandPriority(colorPriorityAction, colorPriorityAction->getValue());
+    const auto updateButtonsPriority = [horizontalToolbarAction, buttonsAction, butttonsPriorityAction]() -> void {
+        horizontalToolbarAction->setActionAutoExpandPriority(buttonsAction, butttonsPriorityAction->getValue());
     };
 
-    const auto updatePriorityInputA = [horizontalToolbarAction, inputAPriorityAction]() -> void {
-        horizontalToolbarAction->setActionAutoExpandPriority(inputAPriorityAction, inputAPriorityAction->getValue());
+    const auto updateInputsPriority = [horizontalToolbarAction, inputsAction, inputsPriorityAction]() -> void {
+        horizontalToolbarAction->setActionAutoExpandPriority(inputsAction, inputsPriorityAction->getValue());
     };
 
-    const auto updatePriorityInputB = [horizontalToolbarAction, inputBPriorityAction]() -> void {
-        horizontalToolbarAction->setActionAutoExpandPriority(inputBPriorityAction, inputBPriorityAction->getValue());
-    };
+    updateButtonsPriority();
+    updateInputsPriority();
 
-    updatePriorityColor();
-    updatePriorityInputA();
-    updatePriorityInputB();
-
-    connect(colorPriorityAction, &IntegralAction::valueChanged, exampleWidget, updatePriorityColor);
-    connect(inputAPriorityAction, &IntegralAction::valueChanged, exampleWidget, updatePriorityInputA);
-    connect(inputBPriorityAction, &IntegralAction::valueChanged, exampleWidget, updatePriorityInputB);
+    connect(butttonsPriorityAction, &IntegralAction::valueChanged, exampleWidget, updateButtonsPriority);
+    connect(inputsPriorityAction, &IntegralAction::valueChanged, exampleWidget, updateInputsPriority);
 
     exampleWidget->addWidget(priorityAction->createWidget(exampleWidget));
 
