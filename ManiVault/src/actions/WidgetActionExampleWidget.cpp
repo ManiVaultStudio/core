@@ -45,4 +45,21 @@ void WidgetActionExampleWidget::addWidget(QWidget* widget)
     _layout.addWidget(widget);
 }
 
+void WidgetActionExampleWidget::replaceWidget(QWidget* from, QWidget* to)
+{
+    auto layoutItem = _layout.replaceWidget(from, to);
+
+    if (layoutItem) {
+        if (auto widget = layoutItem->widget())
+            delete widget;
+
+        delete layoutItem;
+    }
+}
+
+void WidgetActionExampleWidget::replaceWidget(std::int32_t rowIndex, QWidget* to)
+{
+    replaceWidget(_layout.itemAt(rowIndex)->widget(), to);
+}
+
 }

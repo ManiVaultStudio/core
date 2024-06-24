@@ -40,6 +40,20 @@ public:
      */
     void addWidget(QWidget* widget);
 
+    /**
+     * Replace \p from widget with \p to widget
+     * @param from Pointer to existing widget
+     * @param to Pointer to new widget
+     */
+    void replaceWidget(QWidget* from, QWidget* to);
+
+    /**
+     * Replace widget from \p rowIndex widget with \p to widget
+     * @param rowIndex Row index of the widget to be replaced
+     * @param to Pointer to new widget
+     */
+    void replaceWidget(std::int32_t rowIndex, QWidget* to);
+
 private:
     QVBoxLayout     _layout;    /** Main layout */
 };

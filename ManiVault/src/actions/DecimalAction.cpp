@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DecimalAction.h"
+#include "WidgetActionExampleWidget.h"
 
 #include <QHBoxLayout>
 
@@ -305,6 +306,80 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     widget->setLayout(layout);
 
     return widget;
+}
+
+QWidget* DecimalAction::createExampleWidget(QWidget* parent) const
+{
+    auto exampleWidget          = new WidgetActionExampleWidget(parent);
+    auto decimalAction          = new DecimalAction(exampleWidget, "DecimalAction", 0.f, 100.f, 1);
+    auto widgetFlagsAction      = new OptionsAction(exampleWidget, "WidgetFlags", { "Spin box", "Slider", "Line edit" }, { "Spin box", "Slider" });
+    auto numberOfDecimalsAction = new IntegralAction(exampleWidget, "Number of decimals", 0, 5, decimalAction->getNumberOfDecimals());
+    auto prefixAction           = new StringAction(exampleWidget, "Prefix", decimalAction->getSuffix());
+    auto suffixAction           = new StringAction(exampleWidget, "Suffix", decimalAction->getSuffix());
+    auto updateDuringDragAction = new ToggleAction(exampleWidget, "Update during drag", decimalAction->getUpdateDuringDrag());
+    auto valueAction            = new StringAction(exampleWidget, "Value");
+    auto settingsAction         = new VerticalGroupAction(exampleWidget, "Settings");
+
+    settingsAction->setLabelSizingType(GroupAction::LabelSizingType::Auto);
+
+    numberOfDecimalsAction->setToolTip("The number of trailing decimals");
+    prefixAction->setToolTip("The text preceding the decimal value");
+    suffixAction->setToolTip("The text preceding the decimal value");
+    updateDuringDragAction->setToolTip("Whether to emit signals during dragging");
+
+    prefixAction->setPlaceHolderString("Enter prefix here");
+    suffixAction->setPlaceHolderString("Enter suffix here");
+
+    settingsAction->addAction(widgetFlagsAction, OptionsAction::WidgetFlag::Tags | OptionsAction::WidgetFlag::Selection);
+    settingsAction->addAction(numberOfDecimalsAction);
+    settingsAction->addAction(prefixAction);
+    settingsAction->addAction(suffixAction);
+    settingsAction->addAction(updateDuringDragAction);
+    settingsAction->addAction(valueAction);
+
+    connect(widgetFlagsAction, &OptionsAction::selectedOptionsChanged, exampleWidget, [exampleWidget, decimalAction](const QStringList& selectedOptions) -> void {
+        std::int32_t widgetFlags = 0;
+
+        if (selectedOptions.contains("Spin box"))
+            widgetFlags |= NumericalAction::WidgetFlag::SpinBox;
+
+        if (selectedOptions.contains("Slider"))
+            widgetFlags |= NumericalAction::WidgetFlag::Slider;
+
+        if (selectedOptions.contains("Line edit"))
+            widgetFlags |= NumericalAction::WidgetFlag::LineEdit;
+
+        exampleWidget->replaceWidget(0, decimalAction->createWidget(exampleWidget, widgetFlags));
+    });
+
+    connect(numberOfDecimalsAction, &IntegralAction::valueChanged, exampleWidget, [exampleWidget, decimalAction, numberOfDecimalsAction](std::int32_t value) -> void {
+        decimalAction->setNumberOfDecimals(value);
+    });
+
+    connect(prefixAction, &StringAction::stringChanged, exampleWidget, [exampleWidget, decimalAction, prefixAction](const QString& string) -> void {
+        decimalAction->setPrefix(prefixAction->getString());
+    });
+
+    connect(suffixAction, &StringAction::stringChanged, exampleWidget, [exampleWidget, decimalAction, suffixAction](const QString& string) -> void {
+        decimalAction->setSuffix(suffixAction->getString());
+    });
+
+    connect(updateDuringDragAction, &ToggleAction::toggled, exampleWidget, [exampleWidget, decimalAction, updateDuringDragAction]() -> void {
+        decimalAction->setUpdateDuringDrag(updateDuringDragAction->isChecked());
+    });
+
+    const auto updateValueString = [valueAction, decimalAction]() -> void {
+        valueAction->setString(QString::number(decimalAction->getValue(), 'f', decimalAction->getNumberOfDecimals()));
+    };
+
+    updateValueString();
+
+    connect(decimalAction, &DecimalAction::valueChanged, exampleWidget, updateValueString);
+
+    exampleWidget->addWidget(decimalAction->createWidget(exampleWidget));
+    exampleWidget->addWidget(settingsAction->createWidget(exampleWidget));
+
+    return exampleWidget;
 }
 
 }
