@@ -203,7 +203,9 @@ void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& 
 {
     try
     {
-        if (static_cast<std::uint32_t>(scalarData.count()) < getNumberOfPixels())
+        const auto numberOfElementsRequired = getNumberOfPixels();
+
+        if (static_cast<std::uint32_t>(scalarData.count()) < numberOfElementsRequired)
             throw std::runtime_error("Scalar data vector number of elements is smaller than the number of pixels");
 
         switch (_imageData->getType())
@@ -237,10 +239,113 @@ void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& 
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to get scalar data", e);
+        exceptionMessageBox("Unable to get scalar data for the given dimension index", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to get scalar data");
+        exceptionMessageBox("Unable to get scalar data for the given dimension index");
+    }
+}
+
+void Images::getScalarData(const std::vector<std::uint32_t>& dimensionIndices, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
+{
+    try
+    {
+        const auto numberOfPixels               = static_cast<std::int32_t>(getNumberOfPixels());
+        const auto numberOfElementsRequired     = dimensionIndices.size() * getNumberOfPixels();
+        const auto numberOfComponentsPerPixel   = static_cast<std::int32_t>(getNumberOfComponentsPerPixel());
+
+        if (static_cast<std::uint32_t>(scalarData.count()) < numberOfElementsRequired)
+            throw std::runtime_error("Scalar data vector number of elements is smaller than (nDimensions * nPixels)");
+
+        QVector<float> tempScalarData(numberOfElementsRequired);
+        QPair<float, float> tempScalarDataRange(std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest());
+
+        switch (_imageData->getType())
+        {
+            case ImageData::Undefined:
+                break;
+
+            case ImageData::Sequence:
+            {
+                std::int32_t componentIndex = 0;
+
+                for (const auto& dimensionIndex : dimensionIndices) {
+                    getScalarDataForImageSequence(dimensionIndex, tempScalarData, tempScalarDataRange);
+
+                    for (std::int32_t pixelIndex = 0; pixelIndex < numberOfPixels; pixelIndex++)
+                        scalarData[(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
+
+                    componentIndex++;
+                }
+
+                break;
+            }
+
+            case ImageData::Stack:
+            {
+                std::int32_t componentIndex = 0;
+
+                for (const auto& dimensionIndex : dimensionIndices) {
+                    getScalarDataForImageStack(dimensionIndex, tempScalarData, tempScalarDataRange);
+
+                    for (std::int32_t pixelIndex = 0; pixelIndex < numberOfPixels; pixelIndex++)
+                        scalarData[(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
+
+                    componentIndex++;
+                }
+
+                break;
+            }
+
+            case ImageData::MultiPartSequence:
+                break;
+
+            default:
+                break;
+        }
+
+        scalarDataRange = { std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest() };
+
+        for (auto& scalar : scalarData) {
+            scalarDataRange.first   = std::min(scalar, scalarDataRange.first);
+            scalarDataRange.second  = std::max(scalar, scalarDataRange.second);
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get scalar data for the given dimension indices", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get scalar data for the given dimension indices");
+    }
+}
+
+void Images::getImageScalarData(std::uint32_t imageIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
+{
+    try {
+        const auto numberOfPixels               = static_cast<std::int32_t>(getNumberOfPixels());
+        const auto numberOfComponentsPerPixel   = static_cast<std::int32_t>(getNumberOfComponentsPerPixel());
+        const auto numberOfElementsRequired     = numberOfPixels * numberOfComponentsPerPixel;
+
+        if (static_cast<std::uint32_t>(scalarData.count()) < numberOfElementsRequired)
+            throw std::runtime_error("Scalar data vector number of elements is smaller than (nComponentsPerPixel * nPixels)");
+
+        const auto dimensionIndexOffset = imageIndex * getNumberOfComponentsPerPixel();
+
+        std::vector<std::uint32_t> dimensionIndices;
+
+        dimensionIndices.resize(getNumberOfComponentsPerPixel());
+
+        std::iota(dimensionIndices.begin(), dimensionIndices.end(), dimensionIndexOffset);
+
+        getScalarData(dimensionIndices, scalarData, scalarDataRange);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get image scalar data", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get image scalar data");
     }
 }
 
