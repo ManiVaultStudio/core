@@ -176,12 +176,28 @@ public: // Selection
 public:
 
     /**
-     * Get scalar image data
+     * Get scalar image data for \p dimensionIndex, populates \p scalarData and \p establishes the \p scalarDataRange
      * @param dimensionIndex Dimension index
-     * @param scalarData Scalar data for the specified dimension
+     * @param scalarData Scalar data for the specified dimension (assumes enough elements are allocated by the caller)
      * @param scalarDataRange Scalar data range
      */
     void getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
+
+    /**
+     * Get scalar image data for \p dimensionIndices, populates \p scalarData and \p establishes the \p scalarDataRange
+     * @param dimensionIndices Dimension indices to retrieve the scalar data for
+     * @param scalarData Scalar data for the specified dimension (assumes enough elements are allocated by the caller)
+     * @param scalarDataRange Scalar data range
+     */
+    void getScalarData(const std::vector<std::uint32_t>& dimensionIndices, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
+
+    /**
+     * Get scalar image data for \p imageIndex
+     * @param imageIndex Index of the image to retrieve the scalar data for
+     * @param scalarData Scalar data for the specified dimension (assumes enough elements are allocated by the caller)
+     * @param scalarDataRange Scalar data range
+     */
+    void getImageScalarData(std::uint32_t imageIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
 
     /**
      * Get mask image data (for subsets)
@@ -200,7 +216,7 @@ public:
 protected:
 
     /**
-     * Get scalar data for image sequence
+     * Get image sequence scalar data for \p dimensionIndex, populate \p scalarData and establish the \p scalarDataRange
      * @param dimensionIndex Dimension index
      * @param scalarData Scalar data for the specified dimension
      * @param scalarDataRange Scalar data range
@@ -208,7 +224,7 @@ protected:
     void getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
 
     /**
-     * Get scalar data for image stack
+     * Get image stack scalar data for \p dimensionIndex, populate \p scalarData and establish the \p scalarDataRange
      * @param dimensionIndex Dimension index
      * @param scalarData Scalar data for the specified dimension
      * @param scalarDataRange Scalar data range
