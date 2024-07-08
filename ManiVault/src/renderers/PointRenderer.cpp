@@ -425,9 +425,19 @@ namespace mv
             return _selectionHaloEnabled;
         }
 
-        void PointRenderer::setSelectionHaloEnabled(float selectionHaloEnabled)
+        void PointRenderer::setSelectionHaloEnabled(bool selectionHaloEnabled)
         {
             _selectionHaloEnabled = selectionHaloEnabled;
+        }
+
+        bool PointRenderer::getRandomizedDepthEnabled() const
+        {
+            return _randomizedDepthEnabled;
+        }
+
+        void PointRenderer::setRandomizedDepthEnabled(bool randomizedDepth)
+        {
+            _randomizedDepthEnabled = randomizedDepth;
         }
 
         void PointRenderer::init()
@@ -482,6 +492,8 @@ namespace mv
             _shader.uniform1i("selectionOutlineOverrideColor", _selectionOutlineOverrideColor);
             _shader.uniform1f("selectionOutlineOpacity", _selectionOutlineOpacity);
             _shader.uniform1i("selectionHaloEnabled", _selectionHaloEnabled);
+
+            _shader.uniform1i("randomizedDepthEnabled", _randomizedDepthEnabled);
 
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
             _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
