@@ -180,7 +180,10 @@ namespace mv
             void setSelectionOutlineOpacity(float selectionOutlineOpacity);
 
             bool getSelectionHaloEnabled() const;
-            void setSelectionHaloEnabled(float selectionHaloEnabled);
+            void setSelectionHaloEnabled(bool selectionHaloEnabled);
+
+            bool getRandomizedDepthEnabled() const;
+            void setRandomizedDepthEnabled(bool randomizedDepth);
 
             void init() override;
             void resize(QSize renderSize) override;
@@ -201,6 +204,9 @@ namespace mv
             float                       _selectionOutlineScale              = 1.75f;
             float                       _selectionOutlineOpacity            = 0.5f;
             bool                        _selectionHaloEnabled               = false;
+
+            /* Depth control */
+            bool                        _randomizedDepthEnabled             = true;
 
             /* Window properties */
             QSize                       _windowSize;
