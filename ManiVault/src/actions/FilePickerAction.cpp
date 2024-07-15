@@ -29,6 +29,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     setDefaultWidgetFlags(WidgetFlag::Default);
     setFilePath(filePath);
 
+    _filePathAction.setStretch(1);
     _filePathAction.getTrailingAction().setVisible(true);
 
     if (populateCompleter)
@@ -39,6 +40,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
         _filePathAction.setCompleter(_completer.get());
     }
 
+    _pickAction.setStretch(0);
     _pickAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _pickAction.setIconByName("folder-open");
     

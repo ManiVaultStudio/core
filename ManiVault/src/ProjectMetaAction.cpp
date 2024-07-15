@@ -25,6 +25,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _contributorsAction(this, "Contributors"),
     _splashScreenAction(this, true),
     _studioModeAction(this, "Studio Mode"),
+    _iconAction(this, "Icon"),
     _compressionAction(this)
 {
     _splashScreenAction.setProjectMetaAction(this);
@@ -76,6 +77,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _contributorsAction.fromParentVariantMap(variantMap);
     _splashScreenAction.fromParentVariantMap(variantMap);
     _studioModeAction.fromParentVariantMap(variantMap);
+    _iconAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
 }
 
@@ -92,6 +94,7 @@ QVariantMap ProjectMetaAction::toVariantMap() const
     _contributorsAction.insertIntoVariantMap(variantMap);
     _splashScreenAction.insertIntoVariantMap(variantMap);
     _studioModeAction.insertIntoVariantMap(variantMap);
+    _iconAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
