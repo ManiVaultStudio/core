@@ -7,8 +7,6 @@
 #include "WidgetAction.h"
 #include "WidgetActionWidget.h"
 
-#include <QIcon>
-
 namespace mv::gui {
 
 /**
@@ -22,8 +20,6 @@ namespace mv::gui {
  */
 class CORE_EXPORT IconAction : public WidgetAction
 {
-    Q_OBJECT
-
 public:
 
     /** Label widget class for icon action */
@@ -73,12 +69,6 @@ public:
     QIcon getIcon() const;
 
     /**
-     * Set the current icon to \p icon
-     * @param icon Current icon
-     */
-    void setIcon(const QIcon& icon);
-
-    /**
      * Set the current icon from \p image
      * @param image Image to convert to icon
      */
@@ -97,28 +87,6 @@ public: // Serialization
      * @return Variant representation of the image action
      */
     QVariantMap toVariantMap() const override;
-
-public: // Action getters
-
-    //StringAction& getFilePathAction() { return _filePathAction; }
-    //StringAction& getFileNameAction() { return _fileNameAction; }
-    //FilePickerAction& getFilePickerAction() { return _filePickerAction; }
-    //TriggerAction& getPreviewAction() { return _previewAction; }
-
-signals:
-
-    /**
-     * Signals that the current icon changed
-     * @param icon Current icon that changed
-     */
-    void iconChanged(const QIcon& icon);
-
-protected:
-    QIcon              _icon;             /** Current icon */
-    //StringAction        _filePathAction;    /** String action which contains the last loaded file path */
-    //StringAction        _fileNameAction;    /** String action which contains the last loaded file name */
-    //FilePickerAction    _filePickerAction;  /** Action for loading the image from disk */
-    //TriggerAction       _previewAction;     /** Action for previewing the image (via tooltip) */
 };
 
 }

@@ -9,21 +9,8 @@ using namespace mv::util;
 namespace mv::gui {
 
 IconAction::IconAction(QObject* parent, const QString& title) :
-    WidgetAction(parent, title),
-    _icon()
+    WidgetAction(parent, title)
 {
-}
-
-QIcon IconAction::getIcon() const
-{
-    return _icon;
-}
-
-void IconAction::setIcon(const QIcon& icon)
-{
-    _icon = icon;
-
-    emit iconChanged(_icon);
 }
 
 void IconAction::setIconFromImage(const QImage& image)
@@ -87,7 +74,7 @@ IconAction::Widget::Widget(QWidget* parent, IconAction* iconAction, const std::i
 
     setLayout(layout);
 
-    _iconLabel.setPixmap(iconAction->getIcon().pixmap(12, 12));
+    _iconLabel.setPixmap(iconAction->icon().pixmap(12, 12));
 }
 
 }

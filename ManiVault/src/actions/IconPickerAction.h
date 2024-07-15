@@ -5,7 +5,9 @@
 #pragma once
 
 #include "actions/HorizontalGroupAction.h"
+#include "actions/FilePickerAction.h"
 #include "actions/IconAction.h"
+#include "actions/TriggerAction.h"
 
 namespace mv::gui {
 
@@ -68,22 +70,21 @@ public: // Serialization
 
 public: // Action getters
 
-    //StringAction& getFilePathAction() { return _filePathAction; }
-    //StringAction& getFileNameAction() { return _fileNameAction; }
-    //FilePickerAction& getFilePickerAction() { return _filePickerAction; }
-    //TriggerAction& getPreviewAction() { return _previewAction; }
+    FilePickerAction& getImageFilePathPickerAction() { return _inputFilePathPickerAction; }
+    IconAction& getIconAction() { return _iconAction; }
 
 signals:
 
     /**
-     * Signals that the current icon changed
+     * Signals that the current icon changed to \p icon
      * @param icon Current icon that changed
      */
     void iconChanged(const QIcon& icon);
 
 private:
-    FilePickerAction    _filePickerAction;  /** Action picking a PNG image which will be transformed into an icon */
-    IconAction          _iconAction;        /** Action which holds the current icon */
+    FilePickerAction    _inputFilePathPickerAction;     /** Action for picking an input (.ico, .png or .icns) file which serve as input for the internal icon (QIcon) */
+    IconAction          _iconAction;                    /** Action which holds the current icon */
+    TriggerAction       _testAction;                    /** Trigger an icon test */
 };
 
 }
