@@ -55,6 +55,8 @@ source_group(Aux FILES ${AUX})
 
 add_library(${IMAGEDATA} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${ACTIONS_SOURCES} ${AUX})
 
+add_library(ManiVault::${IMAGEDATA} ALIAS ${IMAGEDATA})
+
 qt_wrap_cpp(IMAGEDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${IMAGEDATA})
 target_sources(${IMAGEDATA} PRIVATE ${IMAGEDATA_MOC})
 
@@ -62,6 +64,7 @@ target_include_directories(${IMAGEDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATI
 
 target_compile_features(${IMAGEDATA} PRIVATE cxx_std_17)
 
+# Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
 generate_export_header(${IMAGEDATA})
 
@@ -76,24 +79,27 @@ target_link_libraries(${IMAGEDATA} PRIVATE ${MV_PUBLIC_LIB})
 target_link_libraries(${IMAGEDATA} PRIVATE PointData)
 target_link_libraries(${IMAGEDATA} PRIVATE ClusterData)
 
+# Use AVX if enabled and available
+check_and_set_AVX(${IMAGEDATA} ${MV_USE_AVX})
+
 set_target_properties(${IMAGEDATA} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
 
 if(MV_UNITY_BUILD)
     set_target_properties(${IMAGEDATA} PROPERTIES UNITY_BUILD ON)
-    set_source_files_properties(${IMAGEDATA_MOC} PROPERTIES
-                        SKIP_UNITY_BUILD_INCLUSION TRUE)
+    set_source_files_properties(${IMAGEDATA_MOC} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 install(TARGETS ${IMAGEDATA}
-    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
-    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
-    ARCHIVE DESTINATION lib     COMPONENT LINKLIB # Windows .lib
-    PUBLIC_HEADER DESTINATION include/${IMAGEDATA} COMPONENT HEADERS
+    EXPORT "ManiVaultPublicExport"
+    RUNTIME DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Windows .dll
+    LIBRARY DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Linux/Mac .so
+    ARCHIVE DESTINATION "$<CONFIGURATION>/lib/"     COMPONENT LINKLIB # Windows .lib
+    PUBLIC_HEADER DESTINATION "$<CONFIGURATION>/include/${IMAGEDATA}/" COMPONENT HEADERS
 )
 
 add_custom_command(TARGET ${IMAGEDATA} POST_BUILD
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
-        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}
 )

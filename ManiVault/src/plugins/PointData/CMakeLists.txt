@@ -107,6 +107,8 @@ source_group(Actions FILES ${ACTIONS_SOURCES})
 
 add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
+add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
+
 qt_wrap_cpp(POINTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${POINTDATA})
 target_sources(${POINTDATA} PRIVATE ${POINTDATA_MOC})
 
@@ -138,17 +140,17 @@ endif()
 
 if(MV_UNITY_BUILD)
     set_target_properties(${POINTDATA} PROPERTIES UNITY_BUILD ON)
-    set_source_files_properties(${POINTDATA_MOC} PROPERTIES
-                        SKIP_UNITY_BUILD_INCLUSION TRUE)
+    set_source_files_properties(${POINTDATA_MOC} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
 
 install(TARGETS ${POINTDATA}
-    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
-    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
-    ARCHIVE DESTINATION lib     COMPONENT LINKLIB # Windows .lib
-    PUBLIC_HEADER DESTINATION include/${POINTDATA} COMPONENT HEADERS
+    EXPORT "ManiVaultPublicExport"
+    RUNTIME DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Windows .dll
+    LIBRARY DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Linux/Mac .so
+    ARCHIVE DESTINATION "$<CONFIGURATION>/lib/"     COMPONENT LINKLIB # Windows .lib
+    PUBLIC_HEADER DESTINATION "$<CONFIGURATION>/include/${POINTDATA}/" COMPONENT HEADERS
 )
 
 # Copy the external biovault_bfloat16 header into its own subfolder - cmake's install PUBLIC_HEADER flattens all subdirs
@@ -159,7 +161,7 @@ add_custom_command(TARGET ${POINTDATA} POST_BUILD
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
-        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}
 )
 
 # Currentlt, no tests are available
