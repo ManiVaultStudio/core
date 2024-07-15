@@ -337,6 +337,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionBadgeOverlayWidget.h
     src/actions/WidgetActionToolButton.h
     src/actions/WidgetActionToolButtonMenu.h
+    src/actions/IconAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -364,6 +365,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionBadgeOverlayWidget.cpp
     src/actions/WidgetActionToolButton.cpp
     src/actions/WidgetActionToolButtonMenu.cpp
+    src/actions/IconAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
