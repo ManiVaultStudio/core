@@ -14,7 +14,7 @@ IconAction::IconAction(QObject* parent, const QString& title) :
 {
 }
 
-const QIcon IconAction::getIcon() const
+QIcon IconAction::getIcon() const
 {
     return _icon;
 }

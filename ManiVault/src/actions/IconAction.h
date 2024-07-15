@@ -16,6 +16,8 @@ namespace mv::gui {
  *
  * For icon storage
  *
+ * Note: This action is developed for internal use only
+ *
  * @author Thomas Kroes
  */
 class CORE_EXPORT IconAction : public WidgetAction
@@ -68,7 +70,7 @@ public:
      * Get the current icon
      * @return Icon
      */
-    const QIcon getIcon() const;
+    QIcon getIcon() const;
 
     /**
      * Set the current icon to \p icon

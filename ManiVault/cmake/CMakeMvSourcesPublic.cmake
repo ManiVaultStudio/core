@@ -338,6 +338,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionToolButton.h
     src/actions/WidgetActionToolButtonMenu.h
     src/actions/IconAction.h
+    src/actions/IconPickerAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -366,6 +367,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionToolButton.cpp
     src/actions/WidgetActionToolButtonMenu.cpp
     src/actions/IconAction.cpp
+    src/actions/IconPickerAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
