@@ -153,9 +153,6 @@ class HdpsCoreConan(ConanFile):
         self.install_dir = pathlib.Path(os.environ["MV_INSTALL_DIR"]).as_posix()
         # Give the installation directory to CMake
         tc.variables["MV_INSTALL_DIR"] = self.install_dir
-        
-        zlibpath = pathlib.Path(self.deps_cpp_info["zlib"].rootpath).as_posix()
-        tc.variables["ZLIB_ROOT"] = zlibpath
 
         # Set some build options
         tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
