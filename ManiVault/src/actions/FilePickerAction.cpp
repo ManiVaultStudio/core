@@ -21,7 +21,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     _dirModel(nullptr),
     _completer(nullptr),
     _filePathAction(this, "File path"),
-    _pickAction(this, ""),
+    _pickAction(this, "Pick"),
     _nameFilters(),
     _defaultSuffix(),
     _fileType("File")
