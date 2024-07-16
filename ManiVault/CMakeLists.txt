@@ -122,26 +122,19 @@ if(APPLE)
     execute_process(COMMAND ${BREW_BIN} install pkg-config) 
 endif()
 
-find_package(ZLIB QUIET)
+CPMAddPackage(
+  NAME              ZLIB
+  GITHUB_REPOSITORY madler/zlib
+  GIT_TAG           v1.3.1
+  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_LIBRARIES OFF"
+)
 
-if(ZLIB_FOUND)
-    message(STATUS "Using zlib version ${ZLIB_VERSION_STRING}")
-    set(MV_INSTALL_ZLIB OFF)
-else()
-    CPMAddPackage(
-      NAME              ZLIB
-      GITHUB_REPOSITORY madler/zlib
-      GIT_TAG           v1.3.1
-      OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_LIBRARIES OFF"
-    )
+set(MV_INSTALL_ZLIB ON)
+set_target_properties(zlibstatic PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-    set(MV_INSTALL_ZLIB ON)
-    set_target_properties(zlibstatic PROPERTIES EXCLUDE_FROM_ALL TRUE)
-
-    # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
-    add_library(ZLIB::ZLIB ALIAS zlib)
-    set(ZLIB_LIBRARIES zlib)
-endif()
+# Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
+add_library(ZLIB::ZLIB ALIAS zlib)
+set(ZLIB_LIBRARIES zlib)
 
 # File compression: QuaZip
 CPMAddPackage(
