@@ -112,12 +112,10 @@ endif(MSVC)
 find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 # File compression: zlib
-
 CPMAddPackage(
   NAME              ZLIB
   GITHUB_REPOSITORY madler/zlib
