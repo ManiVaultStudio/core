@@ -429,8 +429,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             _project->setFilePath(filePath);
 
-            ProjectMetaAction projectMetaAction(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
-
             auto& projectSerializationTask      = projects().getProjectSerializationTask();
             auto& compressionTask               = projectSerializationTask.getCompressionTask();
 
@@ -481,7 +479,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             _project->updateContributors();
 
             if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())
-                _project->getReadOnlyAction().setChecked(disableReadOnlyAction.isChecked());
+                _project->getReadOnlyAction().setChecked(false);
 
             if (_project->isStartupProject())
                 ModalTask::getGlobalHandler()->setEnabled(true);

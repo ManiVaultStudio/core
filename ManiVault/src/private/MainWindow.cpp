@@ -14,9 +14,6 @@
 #include <Application.h>
 #include <CoreInterface.h>
 
-#include <ForegroundTask.h>
-#include <ForegroundTaskHandler.h>
-#include <BackgroundTask.h>
 #include <BackgroundTaskHandler.h>
 
 #include <actions/ToggleAction.h>
@@ -36,10 +33,8 @@
 #include <QMenuBar>
 #include <QOpenGLFunctions>
 #include <QOffscreenSurface>
-#include <QMessageBox>
 #include <QStackedWidget>
 #include <QStatusBar>
-#include <QListView>
 #include <QRandomGenerator>
 
 #ifdef _DEBUG
@@ -145,12 +140,16 @@ void MainWindow::showEvent(QShowEvent* showEvent)
                 setWindowTitle("ManiVault");
             }
             else {
-                const auto projectFilePath = projects().getCurrentProject()->getFilePath();
+                if (projects().getCurrentProject()->getReadOnlyAction().isChecked()) {
+                    setWindowTitle(projects().getCurrentProject()->getTitleAction().getString());
+                } else {
+                    const auto projectFilePath = projects().getCurrentProject()->getFilePath();
 
-                if (projectFilePath.isEmpty())
-                    setWindowTitle("Unsaved - ManiVault");
-                else
-                    setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
+                    if (projectFilePath.isEmpty())
+                        setWindowTitle("Unsaved - ManiVault");
+                    else
+                        setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
+                }
             }
 
             statusBar()->setVisible(projects().hasProject());

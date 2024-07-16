@@ -25,6 +25,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _contributorsAction(this, "Contributors"),
     _splashScreenAction(this, true),
     _studioModeAction(this, "Studio Mode"),
+    _applicationIconAction(this, "Application icon"),
     _compressionAction(this)
 {
     _splashScreenAction.setProjectMetaAction(this);
@@ -69,6 +70,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
 
     _applicationVersionAction.fromParentVariantMap(variantMap);
     _projectVersionAction.fromParentVariantMap(variantMap);
+    _readOnlyAction.fromParentVariantMap(variantMap);
     _titleAction.fromParentVariantMap(variantMap);
     _descriptionAction.fromParentVariantMap(variantMap);
     _tagsAction.fromParentVariantMap(variantMap);
@@ -76,6 +78,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _contributorsAction.fromParentVariantMap(variantMap);
     _splashScreenAction.fromParentVariantMap(variantMap);
     _studioModeAction.fromParentVariantMap(variantMap);
+    _applicationIconAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
 }
 
@@ -85,6 +88,7 @@ QVariantMap ProjectMetaAction::toVariantMap() const
 
     _applicationVersionAction.insertIntoVariantMap(variantMap);
     _projectVersionAction.insertIntoVariantMap(variantMap);
+    _readOnlyAction.insertIntoVariantMap(variantMap);
     _titleAction.insertIntoVariantMap(variantMap);
     _descriptionAction.insertIntoVariantMap(variantMap);
     _tagsAction.insertIntoVariantMap(variantMap);
@@ -92,6 +96,7 @@ QVariantMap ProjectMetaAction::toVariantMap() const
     _contributorsAction.insertIntoVariantMap(variantMap);
     _splashScreenAction.insertIntoVariantMap(variantMap);
     _studioModeAction.insertIntoVariantMap(variantMap);
+    _applicationIconAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
@@ -121,6 +126,8 @@ void ProjectMetaAction::initialize()
     _contributorsAction.setEnabled(false);
     _contributorsAction.setStretch(1);
     _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
+
+    _applicationIconAction.setToolTip("Application icon settings");
 }
 
 Project* ProjectMetaAction::getProject()

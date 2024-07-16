@@ -10,12 +10,8 @@
 
 #include "actions/StringAction.h"
 #include "actions/StringsAction.h"
-#include "actions/IntegralAction.h"
 #include "actions/VersionAction.h"
 
-#include "ModalTask.h"
-
-#include "Application.h"
 #include "ProjectMetaAction.h"
 
 #include <QSharedPointer>
@@ -129,6 +125,7 @@ public: // Project meta action getters facade
     const ProjectCompressionAction& getCompressionAction() const { return _projectMetaAction.getCompressionAction(); }
     const gui::SplashScreenAction& getSplashScreenAction() const { return _projectMetaAction.getSplashScreenAction(); }
     const gui::ToggleAction& getStudioModeAction() const { return _projectMetaAction.getStudioModeAction(); }
+    const gui::ApplicationIconAction& getApplicationIconAction() const { return _projectMetaAction.getApplicationIconAction(); }
 
     gui::VersionAction& getApplicationVersionAction() { return _projectMetaAction.getApplicationVersionAction(); }
     gui::VersionAction& getProjectVersionAction() { return _projectMetaAction.getProjectVersionAction(); }
@@ -141,6 +138,7 @@ public: // Project meta action getters facade
     ProjectCompressionAction& getCompressionAction() { return _projectMetaAction.getCompressionAction(); }
     gui::SplashScreenAction& getSplashScreenAction() { return _projectMetaAction.getSplashScreenAction(); }
     gui::ToggleAction& getStudioModeAction() { return _projectMetaAction.getStudioModeAction(); }
+    gui::ApplicationIconAction& getApplicationIconAction() { return _projectMetaAction.getApplicationIconAction(); }
 
 signals:
 

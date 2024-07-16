@@ -6,9 +6,10 @@
 
 #include <Application.h>
 
+#include <actions/HorizontalGroupAction.h>
+
 #include <QDir>
 #include <QFileDialog>
-#include <QHBoxLayout>
 #include <QStandardPaths>
 
 using namespace mv::util;
@@ -29,6 +30,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     setDefaultWidgetFlags(WidgetFlag::Default);
     setFilePath(filePath);
 
+    _filePathAction.setStretch(1);
     _filePathAction.getTrailingAction().setVisible(true);
 
     if (populateCompleter)
@@ -171,20 +173,15 @@ bool FilePickerAction::isValid() const
 
 QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto widget = new WidgetActionWidget(parent, this);
-    auto layout = new QHBoxLayout();
-
-    layout->setContentsMargins(0, 0, 0, 0);
+    auto groupAction = new HorizontalGroupAction(this, "Group");
 
     if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(_filePathAction.createWidget(parent));
+        groupAction->addAction(&_filePathAction);
 
     if (widgetFlags & WidgetFlag::PushButton)
-        layout->addWidget(_pickAction.createWidget(parent));
+        groupAction->addAction(&_pickAction);
 
-    widget->setLayout(layout);
-
-    return widget;
+    return groupAction->createWidget(parent);
 }
 
 void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)

@@ -32,7 +32,7 @@ void TriggerAction::selfTriggered()
 
 TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags) :
     QPushButton(parent),
-    _triggersAction(triggerAction)
+    _triggerAction(triggerAction)
 {
     connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();

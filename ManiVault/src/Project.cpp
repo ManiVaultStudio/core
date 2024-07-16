@@ -9,8 +9,6 @@
 
 #include "util/Serialization.h"
 
-#include <stdlib.h>
-
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -98,6 +96,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     _projectMetaAction.getCompressionAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getSplashScreenAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getStudioModeAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getApplicationIconAction().fromParentVariantMap(variantMap);
 
     dataHierarchy().fromParentVariantMap(variantMap);
     actions().fromParentVariantMap(variantMap);
@@ -121,6 +120,7 @@ QVariantMap Project::toVariantMap() const
     _projectMetaAction.getCompressionAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getSplashScreenAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getStudioModeAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getApplicationIconAction().insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);
