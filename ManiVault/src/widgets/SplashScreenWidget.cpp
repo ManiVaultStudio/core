@@ -302,7 +302,7 @@ void SplashScreenWidget::createBody()
         auto comments       = projectMetaAction->getCommentsAction().getString();
 
         if (title.isEmpty())
-            title = QFileInfo(projects().getCurrentProject()->getFilePath()).fileName();
+            title = projects().hasProject() ? QFileInfo(projects().getCurrentProject()->getFilePath()).fileName() : "Untitled";
 
         htmlLabel->setText(QString(" \
             <div style='color: %5;'> \

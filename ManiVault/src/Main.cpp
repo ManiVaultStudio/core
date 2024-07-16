@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
-    application.setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
+    Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
     Core core;
 
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 
                     application.setStartupProjectMetaAction(projectMetaAction);
 
-                    if (projectMetaAction->getApplicationIconAction().getOverrideAction().isChecked())
+                    if (projectMetaAction->getReadOnlyAction().isChecked() && projectMetaAction->getApplicationIconAction().getOverrideAction().isChecked())
                         application.setWindowIcon(projectMetaAction->getApplicationIconAction().getIconPickerAction().getIcon());
                 }
                 else {
