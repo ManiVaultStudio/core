@@ -35,6 +35,12 @@ public:
     using IconPickerAction::setIcon;
     using IconPickerAction::setIconFromImage;
 
+    /** Set the main window icon to the override application icon */
+    void overrideMainWindowIcon() const;
+
+    /** Set the application icon to the default */
+    static void resetApplicationIcon();
+
 public: // Serialization
 
     /**
@@ -62,8 +68,9 @@ signals:
     void iconChanged(const QIcon& icon);
 
 private:
-    TriggerAction   _testAction;    /** Trigger an icon test */
-    QTimer          _testTimer;     /** Interval in which to set the application icon */
+    gui::ToggleAction   _overrideAction;     /** Toggles override application icon action when loading a published project at ManiVault startup */
+    TriggerAction       _testAction;                        /** Trigger an icon test */
+    QTimer              _testTimer;                         /** Interval in which to set the application icon */
 };
 
 }

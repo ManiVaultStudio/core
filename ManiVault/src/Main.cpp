@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
             else {
                 splashScreenAction.addAlert(SplashScreenAction::Alert::warning(QString("\
                     Unable to load <b>%1</b> at startup, the file does not exist. \
-                    Provide an exisiting project file path when using <b>-p</b>/<b>--project</b> ManiVault<sup>&copy;</sup> command line parameters. \
+                    Provide an existing project file path when using <b>-p</b>/<b>--project</b> ManiVault<sup>&copy;</sup> command line parameters. \
                 ").arg(startupProjectFilePath)));
 
                 throw std::runtime_error("Project file not found");
@@ -211,16 +211,10 @@ int main(int argc, char *argv[])
     application.setStyleSheet(styleSheet);
     loadGuiTask.setSubtaskFinished("Apply styles");
 
-    QIcon appIcon;
-
-    appIcon.addFile(":/Icons/AppIcon32");
-    appIcon.addFile(":/Icons/AppIcon64");
-    appIcon.addFile(":/Icons/AppIcon128");
-    appIcon.addFile(":/Icons/AppIcon256");
-    appIcon.addFile(":/Icons/AppIcon512");
-    appIcon.addFile(":/Icons/AppIcon1024");
-
-    application.setWindowIcon(appIcon);
+    if (projects().hasProject() && projects().getCurrentProject()->getReadOnlyAction().isChecked())
+        projects().getCurrentProject()->getApplicationIconAction().overrideMainWindowIcon();
+    else
+        application.setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
     MainWindow mainWindow;
 

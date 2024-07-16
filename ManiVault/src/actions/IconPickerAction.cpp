@@ -11,8 +11,7 @@ namespace mv::gui {
 IconPickerAction::IconPickerAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _inputFilePathPickerAction(this, "FilePicker"),
-    _iconAction(this, "Icon"),
-    _testAction(this, "Test")
+    _iconAction(this, "Icon")
 {
     setShowLabels(false);
 
@@ -38,9 +37,10 @@ IconPickerAction::IconPickerAction(QObject* parent, const QString& title) :
 
     _inputFilePathPickerAction.setStretch(1);
     _inputFilePathPickerAction.setNameFilters({ "*.png" });
+    _inputFilePathPickerAction.setDefaultWidgetFlags(FilePickerAction::WidgetFlag::PushButton);
 }
 
-const QIcon IconPickerAction::getIcon() const
+QIcon IconPickerAction::getIcon() const
 {
     return _iconAction.icon();
 }

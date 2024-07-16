@@ -38,7 +38,7 @@ public:
      * Facade for IconAction::getIcon()
      * @return Icon
      */
-    const QIcon getIcon() const;
+    QIcon getIcon() const;
 
     /**
      * Set the current icon to \p icon
@@ -70,7 +70,7 @@ public: // Serialization
 
 public: // Action getters
 
-    FilePickerAction& getImageFilePathPickerAction() { return _inputFilePathPickerAction; }
+    FilePickerAction& getInputFilePathPickerAction() { return _inputFilePathPickerAction; }
     IconAction& getIconAction() { return _iconAction; }
 
 signals:
@@ -82,9 +82,8 @@ signals:
     void iconChanged(const QIcon& icon);
 
 private:
-    FilePickerAction    _inputFilePathPickerAction;     /** Action for picking an input (.ico, .png or .icns) file which serve as input for the internal icon (QIcon) */
+    FilePickerAction    _inputFilePathPickerAction;     /** Action for picking an input PNG file which serve as input for the internal icon (QIcon) */
     IconAction          _iconAction;                    /** Action which holds the current icon */
-    TriggerAction       _testAction;                    /** Trigger an icon test */
 };
 
 }

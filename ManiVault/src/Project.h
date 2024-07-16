@@ -129,7 +129,7 @@ public: // Project meta action getters facade
     const ProjectCompressionAction& getCompressionAction() const { return _projectMetaAction.getCompressionAction(); }
     const gui::SplashScreenAction& getSplashScreenAction() const { return _projectMetaAction.getSplashScreenAction(); }
     const gui::ToggleAction& getStudioModeAction() const { return _projectMetaAction.getStudioModeAction(); }
-    const gui::ApplicationIconPickerAction& getIconAction() const { return _projectMetaAction.getIconAction(); }
+    const gui::ApplicationIconPickerAction& getApplicationIconAction() const { return _projectMetaAction.getApplicationIconAction(); }
 
     gui::VersionAction& getApplicationVersionAction() { return _projectMetaAction.getApplicationVersionAction(); }
     gui::VersionAction& getProjectVersionAction() { return _projectMetaAction.getProjectVersionAction(); }
@@ -142,7 +142,7 @@ public: // Project meta action getters facade
     ProjectCompressionAction& getCompressionAction() { return _projectMetaAction.getCompressionAction(); }
     gui::SplashScreenAction& getSplashScreenAction() { return _projectMetaAction.getSplashScreenAction(); }
     gui::ToggleAction& getStudioModeAction() { return _projectMetaAction.getStudioModeAction(); }
-    gui::ApplicationIconPickerAction& getIconAction() { return _projectMetaAction.getIconAction(); }
+    gui::ApplicationIconPickerAction& getApplicationIconAction() { return _projectMetaAction.getApplicationIconAction(); }
 
 signals:
 
