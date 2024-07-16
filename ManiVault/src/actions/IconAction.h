@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "WidgetAction.h"
-#include "WidgetActionWidget.h"
+#include "TriggerAction.h"
 
 namespace mv::gui {
 
@@ -18,41 +17,8 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT IconAction : public WidgetAction
+class CORE_EXPORT IconAction : public TriggerAction
 {
-public:
-
-    /** Label widget class for icon action */
-    class CORE_EXPORT Widget : public WidgetActionWidget {
-    protected:
-
-        /**
-         * Construct with pointer to \p parent widget, pointer to \p iconAction and \p widgetFlags
-         * @param parent Pointer to parent widget
-         * @param iconAction Pointer to icon action
-         * @param widgetFlags Widget flags
-         */
-        Widget(QWidget* parent, IconAction* iconAction, const std::int32_t& widgetFlags);
-
-    protected:
-        IconAction*     _iconAction;    /** Pointer to icon action */
-        QLabel          _iconLabel;     /** Label which will display the icon */
-
-        friend class IconAction;
-    };
-
-protected:
-
-    /**
-     * Get widget representation of the icon action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
-     */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override
-    {
-        return new Widget(parent, this, widgetFlags);
-    }
-
 public:
 
     /**

@@ -4,13 +4,17 @@
 
 #include "IconAction.h"
 
+#include <QBuffer>
+
 using namespace mv::util;
 
 namespace mv::gui {
 
 IconAction::IconAction(QObject* parent, const QString& title) :
-    WidgetAction(parent, title)
+    TriggerAction(parent, title)
 {
+    setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
+    setIconByName("exclamation-circle");
 }
 
 void IconAction::setIconFromImage(const QImage& image)
@@ -22,59 +26,27 @@ void IconAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    const auto rawDataMap = variantMap["RawData"].toMap();
+    QPixmap pixmap;
 
-    variantMapMustContain(rawDataMap, "RawData");
+    pixmap.loadFromData(QByteArray::fromBase64(variantMap["Value"].toByteArray()));
 
-    QByteArray iconByteArray;
-
-    QDataStream iconDataStream(&iconByteArray, QIODevice::ReadOnly);
-
-    const auto clustersRawDataSize = rawDataMap["ClustersRawDataSize"].toInt();
-
-    iconByteArray.resize(clustersRawDataSize);
-
-    populateDataBufferFromVariantMap(rawDataMap["ClustersRawData"].toMap(), (char*)iconByteArray.data());
-
-    //QImage image;
-
-    //image.loadFromData(QByteArray::fromBase64(variantMap["Value"].toByteArray()));
-
-    //setImage(image);
-
-    //_filePathAction.fromParentVariantMap(variantMap);
-    //_fileNameAction.fromParentVariantMap(variantMap);
+    setIcon(createIcon(pixmap));
 }
 
 QVariantMap IconAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
-    /*QByteArray previewImageByteArray;
+    QByteArray previewImageByteArray;
     QBuffer previewImageBuffer(&previewImageByteArray);
 
-    _image.save(&previewImageBuffer, "PNG");
+    icon().pixmap(QSize(32, 32)).save(&previewImageBuffer, "PNG");
 
     variantMap.insert({
-        { "Value", QVariant::fromValue(previewImageByteArray.toBase64()) }
-        });
-
-    _filePathAction.insertIntoVariantMap(variantMap);
-    _fileNameAction.insertIntoVariantMap(variantMap);*/
+    { "Value", QVariant::fromValue(previewImageByteArray.toBase64()) }
+    });
 
     return variantMap;
-}
-
-IconAction::Widget::Widget(QWidget* parent, IconAction* iconAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, iconAction, widgetFlags)
-{
-    auto layout = new QVBoxLayout();
-
-    layout->addWidget(&_iconLabel);
-
-    setLayout(layout);
-
-    _iconLabel.setPixmap(iconAction->icon().pixmap(12, 12));
 }
 
 }
