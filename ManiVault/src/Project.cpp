@@ -9,8 +9,6 @@
 
 #include "util/Serialization.h"
 
-#include <stdlib.h>
-
 using namespace mv::gui;
 using namespace mv::util;
 

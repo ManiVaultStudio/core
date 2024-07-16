@@ -9,7 +9,7 @@
 #include "actions/StringsAction.h"
 #include "actions/VersionAction.h"
 #include "actions/VerticalGroupAction.h"
-#include "actions/ApplicationIconPickerAction.h"
+#include "actions/ApplicationIconAction.h"
 
 #include "ProjectCompressionAction.h"
 
@@ -81,7 +81,7 @@ public: // Action getters
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
     const gui::SplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
     const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
-    const gui::ApplicationIconPickerAction& getApplicationIconAction() const { return _applicationIconAction; }
+    const gui::ApplicationIconAction& getApplicationIconAction() const { return _applicationIconAction; }
     const ProjectCompressionAction& getCompressionAction() const { return _compressionAction; }
 
     gui::VersionAction& getApplicationVersionAction() { return _applicationVersionAction; }
@@ -94,23 +94,23 @@ public: // Action getters
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
     gui::SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
     gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
-    gui::ApplicationIconPickerAction& getApplicationIconAction() { return _applicationIconAction; }
+    gui::ApplicationIconAction& getApplicationIconAction() { return _applicationIconAction; }
     ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
 
 private:
-    Project*                            _project;                           /** Pointer to source project to get the meta data from */
-    gui::VersionAction                  _applicationVersionAction;          /** Action for storing the application version */
-    gui::VersionAction                  _projectVersionAction;              /** Action for storing the project version */
-    gui::ToggleAction                   _readOnlyAction;                    /** Read-only action */
-    gui::StringAction                   _titleAction;                       /** Title action */
-    gui::StringAction                   _descriptionAction;                 /** Description action */
-    gui::StringsAction                  _tagsAction;                        /** Tags action */
-    gui::StringAction                   _commentsAction;                    /** Comments action */
-    gui::StringsAction                  _contributorsAction;                /** Contributors action */
-    gui::SplashScreenAction             _splashScreenAction;                /** Action for configuring the project splash screen */
-    gui::ToggleAction                   _studioModeAction;                  /** Toggle between view- and studio mode action */
-    gui::ApplicationIconPickerAction    _applicationIconAction;             /** Application icon action (only used in application mode) */
-    ProjectCompressionAction            _compressionAction;                 /** Project compression action */
+    Project*                        _project;                           /** Pointer to source project to get the meta data from */
+    gui::VersionAction              _applicationVersionAction;          /** Action for storing the application version */
+    gui::VersionAction              _projectVersionAction;              /** Action for storing the project version */
+    gui::ToggleAction               _readOnlyAction;                    /** Read-only action */
+    gui::StringAction               _titleAction;                       /** Title action */
+    gui::StringAction               _descriptionAction;                 /** Description action */
+    gui::StringsAction              _tagsAction;                        /** Tags action */
+    gui::StringAction               _commentsAction;                    /** Comments action */
+    gui::StringsAction              _contributorsAction;                /** Contributors action */
+    gui::SplashScreenAction         _splashScreenAction;                /** Action for configuring the project splash screen */
+    gui::ToggleAction               _studioModeAction;                  /** Toggle between view- and studio mode action */
+    gui::ApplicationIconAction      _applicationIconAction;             /** Application icon action (only used in application mode) */
+    ProjectCompressionAction        _compressionAction;                 /** Project compression action */
 };
 
 }

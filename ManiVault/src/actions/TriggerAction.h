@@ -49,7 +49,7 @@ public:
         PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags);
 
     protected:
-        TriggerAction*   _triggersAction;      /** Pointer to trigger action */
+        TriggerAction*   _triggerAction;      /** Pointer to trigger action */
 
         friend class TriggerAction;
     };

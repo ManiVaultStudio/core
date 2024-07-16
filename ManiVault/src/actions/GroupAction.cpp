@@ -238,8 +238,11 @@ void GroupAction::setLabelWidthFixed(std::uint32_t labelWidthFixed)
 void GroupAction::sortActions()
 {
     std::sort(_actions.begin(), _actions.end(), [](const WidgetAction* lhs, const WidgetAction* rhs) {
+        if (lhs->getSortIndex() < 0 || rhs->getSortIndex() < 0)
+            return false;
+
         return rhs->getSortIndex() > lhs->getSortIndex();
-        });
+    });
 }
 
 QWidget* GroupAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

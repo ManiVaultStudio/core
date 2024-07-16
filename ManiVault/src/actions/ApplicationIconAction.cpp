@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ApplicationIconPickerAction.h"
+#include "ApplicationIconAction.h"
 
 #include <QMainWindow>
 
@@ -10,13 +10,18 @@
 
 namespace mv::gui {
 
-ApplicationIconPickerAction::ApplicationIconPickerAction(QObject* parent, const QString& title) :
-    IconPickerAction(parent, title),
-    _overrideAction(this, "Override application icon"),
+ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& title) :
+    HorizontalGroupAction(parent, title),
+    _overrideAction(this, "Override"),
+    _iconPickerAction(this, "IconPicker"),
     _testAction(this, "Test"),
     _testTimer(this)
 {
+    setShowLabels(false);
+
     addAction(&_overrideAction);
+    addAction(&_iconPickerAction.getInputFilePathPickerAction().getPickAction());
+    addAction(&_iconPickerAction.getIconAction());
     addAction(&_testAction);
 
     const auto testIconName = "play";
@@ -36,7 +41,7 @@ ApplicationIconPickerAction::ApplicationIconPickerAction(QObject* parent, const 
     });
 
     connect(&_testTimer, &QTimer::timeout, this, [this, testIconName]() -> void {
-        ApplicationIconPickerAction::resetApplicationIcon();
+        ApplicationIconAction::resetApplicationIcon();
 
         _testAction.setIconByName(testIconName);
     });
@@ -44,9 +49,8 @@ ApplicationIconPickerAction::ApplicationIconPickerAction(QObject* parent, const 
     const auto updateApplicationIconActionReadOnly = [this]() -> void {
         const auto overrideApplicationIcon = _overrideAction.isChecked();
 
-        getInputFilePathPickerAction().setEnabled(overrideApplicationIcon);
-        getIconAction().setEnabled(overrideApplicationIcon);
-        getTestAction().setEnabled(overrideApplicationIcon);
+        _iconPickerAction.getInputFilePathPickerAction().getPickAction().setEnabled(overrideApplicationIcon);
+        _iconPickerAction.getIconAction().setEnabled(overrideApplicationIcon);
     };
 
     updateApplicationIconActionReadOnly();
@@ -54,43 +58,47 @@ ApplicationIconPickerAction::ApplicationIconPickerAction(QObject* parent, const 
     connect(&_overrideAction, &ToggleAction::toggled, this, updateApplicationIconActionReadOnly);
 
     _overrideAction.setSortIndex(0);
+    _overrideAction.setStretch(1);
     _overrideAction.setToolTip("Whether to override the default ManiVault application icon when the project is in published mode");
 
     const auto updateTestActionReadOnly = [this]() -> void {
-        _testAction.setEnabled(!getIcon().isNull());
+        _testAction.setEnabled(_overrideAction.isChecked() && !_iconPickerAction.getIcon().isNull());
     };
 
     updateTestActionReadOnly();
 
-    connect(this, &IconPickerAction::iconChanged, this, updateTestActionReadOnly);
+    connect(&_iconPickerAction, &IconPickerAction::iconChanged, this, updateTestActionReadOnly);
+    connect(&_overrideAction, &ToggleAction::toggled, this, updateTestActionReadOnly);
 }
 
-void ApplicationIconPickerAction::overrideMainWindowIcon() const
+void ApplicationIconAction::overrideMainWindowIcon() const
 {
-    if (getIcon().isNull())
+    if (_iconPickerAction.getIcon().isNull())
         return;
 
-    Application::getMainWindow()->setWindowIcon(getIcon());
+    Application::getMainWindow()->setWindowIcon(_iconPickerAction.getIcon());
 }
 
-void ApplicationIconPickerAction::resetApplicationIcon()
+void ApplicationIconAction::resetApplicationIcon()
 {
     Application::getMainWindow()->setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 }
 
-void ApplicationIconPickerAction::fromVariantMap(const QVariantMap& variantMap)
+void ApplicationIconAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    IconPickerAction::fromVariantMap(variantMap);
+    HorizontalGroupAction::fromVariantMap(variantMap);
 
     _overrideAction.fromParentVariantMap(variantMap);
+    _iconPickerAction.fromParentVariantMap(variantMap);
     _testAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap ApplicationIconPickerAction::toVariantMap() const
+QVariantMap ApplicationIconAction::toVariantMap() const
 {
-    auto variantMap = IconPickerAction::toVariantMap();
+    auto variantMap = HorizontalGroupAction::toVariantMap();
 
     _overrideAction.insertIntoVariantMap(variantMap);
+    _iconPickerAction.insertIntoVariantMap(variantMap);
     _testAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

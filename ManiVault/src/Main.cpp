@@ -120,6 +120,8 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
+    application.setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
+
     Core core;
 
     application.setCore(&core);
@@ -153,6 +155,9 @@ int main(int argc, char *argv[])
                     splashScreenAction.fromVariantMap(projectMetaAction->getSplashScreenAction().toVariantMap());
 
                     application.setStartupProjectMetaAction(projectMetaAction);
+
+                    if (projectMetaAction->getApplicationIconAction().getOverrideAction().isChecked())
+                        application.setWindowIcon(projectMetaAction->getApplicationIconAction().getIconPickerAction().getIcon());
                 }
                 else {
                     splashScreenAction.addAlert(SplashScreenAction::Alert::info(QString("\
@@ -210,11 +215,6 @@ int main(int argc, char *argv[])
 
     application.setStyleSheet(styleSheet);
     loadGuiTask.setSubtaskFinished("Apply styles");
-
-    if (projects().hasProject() && projects().getCurrentProject()->getReadOnlyAction().isChecked())
-        projects().getCurrentProject()->getApplicationIconAction().overrideMainWindowIcon();
-    else
-        application.setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
     MainWindow mainWindow;
 
