@@ -70,6 +70,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
 
     _applicationVersionAction.fromParentVariantMap(variantMap);
     _projectVersionAction.fromParentVariantMap(variantMap);
+    _readOnlyAction.fromParentVariantMap(variantMap);
     _titleAction.fromParentVariantMap(variantMap);
     _descriptionAction.fromParentVariantMap(variantMap);
     _tagsAction.fromParentVariantMap(variantMap);
@@ -87,6 +88,7 @@ QVariantMap ProjectMetaAction::toVariantMap() const
 
     _applicationVersionAction.insertIntoVariantMap(variantMap);
     _projectVersionAction.insertIntoVariantMap(variantMap);
+    _readOnlyAction.insertIntoVariantMap(variantMap);
     _titleAction.insertIntoVariantMap(variantMap);
     _descriptionAction.insertIntoVariantMap(variantMap);
     _tagsAction.insertIntoVariantMap(variantMap);
