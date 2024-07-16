@@ -34,7 +34,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
 
     _groupAction.addAction(&project->getTitleAction());
     _groupAction.addAction(&project->getDescriptionAction());
-    _groupAction.addAction(&project->getIconAction());
+    _groupAction.addAction(&project->getApplicationIconAction());
     _groupAction.addAction(&project->getProjectVersionAction());
     _groupAction.addAction(&project->getTagsAction());
     _groupAction.addAction(&project->getCommentsAction());
