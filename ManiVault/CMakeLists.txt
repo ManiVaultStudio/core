@@ -123,7 +123,6 @@ CPMAddPackage(
   OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_LIBRARIES OFF"
 )
 
-set(MV_INSTALL_ZLIB ON)
 set_target_properties(zlibstatic PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
@@ -335,18 +334,16 @@ if(APPLE)
         COMPONENT MACOS_BUNDLE
     )
     
-    if(${MV_INSTALL_ZLIB})
-        install(CODE "execute_process(
-            COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
-            COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \$<TARGET_FILE:zlib>\" 
-                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
-            )
-            "
-            COMPONENT MACOS_BUNDLE
+    install(CODE "execute_process(
+        COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
+        COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                \$<TARGET_FILE:zlib>\" 
+                \"${BUNDLE_DIR}/Contents/Frameworks/\"
         )
-    endif()
+        "
+        COMPONENT MACOS_BUNDLE
+    )
     
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"
@@ -486,13 +483,8 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:zlib> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
-
-    if(${MV_INSTALL_ZLIB})
-        add_custom_command(TARGET ${MV_EXE} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:zlib> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-        )
-    endif()
 
     # Create symlink with slightly different name required on some linux distributions
     if(UNIX)
@@ -523,16 +515,11 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
 )
-
-if(${MV_INSTALL_ZLIB})
-    add_custom_command(TARGET ${MV_EXE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
-    )
-endif()
 
 # -----------------------------------------------------------------------------
 # Miscellaneous
