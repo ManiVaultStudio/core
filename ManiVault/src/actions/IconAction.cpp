@@ -14,7 +14,7 @@ IconAction::IconAction(QObject* parent, const QString& title) :
     TriggerAction(parent, title)
 {
     setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
-    setIconByName("exclamation-circle");
+    //setIconByName("exclamation-circle");
 }
 
 void IconAction::setIconFromImage(const QImage& image)
