@@ -12,26 +12,19 @@ from rules_support import CoreBranchInfo
 import subprocess
 import traceback
 import re
-
-def compatibility(os, compiler, compiler_version):
-    # On macos fallback to zlib apple-clang 13
-    if os == "Macos" and compiler == "apple-clang" and bool(re.match("14.*", compiler_version)):  
-        print("Compatibility match")
-        return ["zlib/1.3:compiler.version=13"]
-    return None
     
 class HdpsCoreConan(ConanFile):
     """Class to package hdps-core using conan
 
     Packages both RELEASE and DEBUG.
-    Uses rules_support (github.com/hdps/rulessupport) to derive
+    Uses rules_support (github.com/ManiVaultStudio/rulessupport) to derive
     versioninfo based on the branch naming convention
     as described in https://github.com/ManiVaultStudio/core/wiki/Branch-naming-rules
     """
 
     name = "hdps-core"
     description = (
-        "Core libraries and plugind for the High Dimensional Plugin System a.k.a. TBD"
+        "Core libraries and plugins for ManiVault"
     )
     # topics can get used for searches, GitHub topics, Bintray tags etc.
     # Add here keywords about the library
@@ -58,7 +51,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/6.3.2@lkeb/stable", "zlib/1.3")
+    requires = ("qt/6.3.2@lkeb/stable")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
@@ -160,9 +153,6 @@ class HdpsCoreConan(ConanFile):
         self.install_dir = pathlib.Path(os.environ["MV_INSTALL_DIR"]).as_posix()
         # Give the installation directory to CMake
         tc.variables["MV_INSTALL_DIR"] = self.install_dir
-        
-        zlibpath = pathlib.Path(self.deps_cpp_info["zlib"].rootpath).as_posix()
-        tc.variables["ZLIB_ROOT"] = zlibpath
 
         # Set some build options
         tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
