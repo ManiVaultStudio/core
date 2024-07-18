@@ -5,10 +5,10 @@
 #include "private/MainWindow.h"
 #include "private/Archiver.h"
 #include "private/Core.h"
+#include "private/StartupProjectSelectorDialog.h"
 
 #include <Application.h>
 #include <ProjectMetaAction.h>
-#include <BackgroundTask.h>
 #include <ManiVaultVersion.h>
 
 #include <QSurfaceFormat>
@@ -17,8 +17,7 @@
 #include <QQuickWindow>
 #include <QCommandLineParser>
 #include <QTemporaryDir>
-
-#include <iostream>
+#include <QFileInfo>
 
 using namespace mv;
 using namespace mv::util;
@@ -39,7 +38,7 @@ public:
     }
 };
 
-ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFilePath)
+QSharedPointer<ProjectMetaAction> getStartupProjectMetaAction(const QString& startupProjectFilePath)
 {
     try {
         const QString metaJsonFilePath("meta.json");
@@ -57,7 +56,7 @@ ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFile
         if (!QFileInfo(extractedMetaJsonFilePath).exists())
             throw std::runtime_error("Unable to extract meta.json");
 
-        return new ProjectMetaAction(extractedMetaJsonFilePath);
+        return QSharedPointer<ProjectMetaAction>(new ProjectMetaAction(extractedMetaJsonFilePath));
     }
     catch (std::exception& e)
     {
@@ -120,6 +119,45 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
+    QString startupProjectFilePath;
+    QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
+
+    if (commandLineParser.isSet("project")) {
+        QVector<QPair<QSharedPointer<mv::ProjectMetaAction>, QString>> startupProjectsMetaActionsCandidates;
+
+        auto startupProjectsFilePathsCandidates = commandLineParser.value("project").split(",");
+
+        for (const auto& startupProjectFilePathCandidate : QSet(startupProjectsFilePathsCandidates.begin(), startupProjectsFilePathsCandidates.end())) {
+            if (!QFileInfo(startupProjectFilePathCandidate).exists())
+                continue;
+
+            auto startupProjectMetaActionCandidate = getStartupProjectMetaAction(startupProjectFilePathCandidate);
+
+            if (startupProjectMetaActionCandidate.isNull())
+                continue;
+
+            startupProjectsMetaActionsCandidates << QPair<QSharedPointer<mv::ProjectMetaAction>, QString>(startupProjectMetaActionCandidate, startupProjectFilePathCandidate);
+        }
+
+        if (startupProjectsMetaActionsCandidates.count() >= 2) {
+            StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsMetaActionsCandidates);
+
+            if (startupProjectSelectorDialog.exec() == QDialog::Accepted) {
+                const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
+
+                if (selectedStartupProjectIndex >= 0) {
+                    startupProjectMetaAction    = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].first;
+                    startupProjectFilePath      = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
+                }
+            }
+        } else {
+            if (startupProjectsMetaActionsCandidates.count() == 1) {
+                startupProjectMetaAction    = startupProjectsMetaActionsCandidates.first().first;
+                startupProjectFilePath      = startupProjectsMetaActionsCandidates.first().second;
+            }
+        }
+    }
+
     Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
     Core core;
@@ -130,13 +168,8 @@ int main(int argc, char *argv[])
 
     SplashScreenAction splashScreenAction(&application, false);
 
-    if (commandLineParser.isSet("project")) {
+    if (!startupProjectMetaAction.isNull()) {
         try {
-            const auto startupProjectFilePath = commandLineParser.value("project");
-
-            if (startupProjectFilePath.isEmpty())
-                throw std::runtime_error("Project file path is empty");
-
             const auto startupProjectFileInfo = QFileInfo(startupProjectFilePath);
 
             if (startupProjectFileInfo.exists()) {
@@ -148,23 +181,13 @@ int main(int argc, char *argv[])
                 
                 application.getStartupTask().getLoadProjectTask().setEnabled(true, true);
 
-                auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
+                splashScreenAction.setProjectMetaAction(startupProjectMetaAction.get());
+                splashScreenAction.fromVariantMap(startupProjectMetaAction->getSplashScreenAction().toVariantMap());
 
-                if (projectMetaAction != nullptr) {
-                    splashScreenAction.setProjectMetaAction(projectMetaAction);
-                    splashScreenAction.fromVariantMap(projectMetaAction->getSplashScreenAction().toVariantMap());
+                application.setStartupProjectMetaAction(startupProjectMetaAction.get());
 
-                    application.setStartupProjectMetaAction(projectMetaAction);
-
-                    if (projectMetaAction->getReadOnlyAction().isChecked() && projectMetaAction->getApplicationIconAction().getOverrideAction().isChecked())
-                        application.setWindowIcon(projectMetaAction->getApplicationIconAction().getIconPickerAction().getIcon());
-                }
-                else {
-                    splashScreenAction.addAlert(SplashScreenAction::Alert::info(QString("\
-                        No project meta info found for project <b>%1</b>. \
-                        Re-configure the project settings and save the project to solve the problem. \
-                    ").arg(startupProjectFileInfo.fileName())));
-                }
+                if (startupProjectMetaAction->getReadOnlyAction().isChecked() && startupProjectMetaAction->getApplicationIconAction().getOverrideAction().isChecked())
+                    application.setWindowIcon(startupProjectMetaAction->getApplicationIconAction().getIconPickerAction().getIcon());
             }
             else {
                 splashScreenAction.addAlert(SplashScreenAction::Alert::warning(QString("\
