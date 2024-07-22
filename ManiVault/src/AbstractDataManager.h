@@ -315,9 +315,9 @@ public: // Dataset and selection grouping
 
     /**
      * Get selection grouping toggle action
-     * @return Reference to selection grouping toggle action
+     * @return Pointer to selection grouping toggle action (only valid if there is a current project)
      */
-    virtual gui::ToggleAction& getSelectionGroupingAction() = 0;
+    virtual gui::ToggleAction* getSelectionGroupingAction() = 0;
 
 public: // Model
 
