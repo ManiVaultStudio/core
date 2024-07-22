@@ -126,6 +126,7 @@ public: // Project meta action getters facade
     const gui::SplashScreenAction& getSplashScreenAction() const { return _projectMetaAction.getSplashScreenAction(); }
     const gui::ToggleAction& getStudioModeAction() const { return _projectMetaAction.getStudioModeAction(); }
     const gui::ApplicationIconAction& getApplicationIconAction() const { return _projectMetaAction.getApplicationIconAction(); }
+    const gui::ToggleAction& getSelectionGroupingAction() const { return _selectionGroupingAction; }
 
     gui::VersionAction& getApplicationVersionAction() { return _projectMetaAction.getApplicationVersionAction(); }
     gui::VersionAction& getProjectVersionAction() { return _projectMetaAction.getProjectVersionAction(); }
@@ -139,6 +140,7 @@ public: // Project meta action getters facade
     gui::SplashScreenAction& getSplashScreenAction() { return _projectMetaAction.getSplashScreenAction(); }
     gui::ToggleAction& getStudioModeAction() { return _projectMetaAction.getStudioModeAction(); }
     gui::ApplicationIconAction& getApplicationIconAction() { return _projectMetaAction.getApplicationIconAction(); }
+    gui::ToggleAction& getSelectionGroupingAction() { return _selectionGroupingAction; }
 
 signals:
 
@@ -149,10 +151,11 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
-    QString             _filePath;              /** Location on disk where the project resides */
-    bool                _startupProject;        /** Boolean determining whether this project is loaded at startup of ManiVault */
-    util::Version       _applicationVersion;    /** Version of the application with which the project is created */
-    ProjectMetaAction   _projectMetaAction;     /** Project meta info action (i.e. title and version) */
+    QString             _filePath;                  /** Location on disk where the project resides */
+    bool                _startupProject;            /** Boolean determining whether this project is loaded at startup of ManiVault */
+    util::Version       _applicationVersion;        /** Version of the application with which the project is created */
+    ProjectMetaAction   _projectMetaAction;         /** Project meta info action (i.e. title and version) */
+    gui::ToggleAction   _selectionGroupingAction;   /** Action for toggling whether dataset selection grouping is enabled or not */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

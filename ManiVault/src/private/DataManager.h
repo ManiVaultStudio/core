@@ -241,9 +241,9 @@ public: // Dataset and selection grouping
 
     /**
      * Get selection grouping toggle action
-     * @return Reference to selection grouping toggle action
+     * @return Pointer to selection grouping toggle action (only valid if there is a current project)
      */
-    gui::ToggleAction& getSelectionGroupingAction() override;
+    gui::ToggleAction* getSelectionGroupingAction() override;
 
 public: // Model
 
@@ -277,8 +277,7 @@ private:
     std::unordered_map<QString, plugin::RawData*>   _rawDataMap;                /** Maps raw data name to raw data plugin shared pointer (the plugins are owned by the plugin manager) */
     std::vector<std::unique_ptr<DatasetImpl>>       _datasets;                  /** Vector of pointers to datasets */
     std::vector<std::unique_ptr<DatasetImpl>>       _selections;                /** Vector of pointers to selection datasets */
-    gui::ToggleAction                               _selectionGroupingAction;   /** Action for toggling whether dataset selection grouping is enabled or not */
-    DatasetsListModel*                              _datasetsListModel;             /** Pointer to datasets model containing all the datasets */
+    DatasetsListModel*                              _datasetsListModel;         /** Pointer to datasets model containing all the datasets */
 };
 
 }
