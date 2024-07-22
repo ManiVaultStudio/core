@@ -66,18 +66,7 @@ protected:
      * @param dataset Smart pointer to dataset
      * @return Dataset model index
      */
-    QModelIndex getModelIndexByDataset(const mv::Dataset<mv::DatasetImpl>& dataset);
-
-protected:
-
-    /**
-     * Invoked when the dataset grouping action is toggled
-     * @param toggled Whether dataset grouping is enabled or not
-     */
-    void onGroupingActionToggled(const bool& toggled);
-
-    /** Update the visibility of the tree view columns */
-    void updateColumnsVisibility();
+    QModelIndex getModelIndexByDataset(const mv::Dataset<mv::DatasetImpl>& dataset) const;
 
     /**
      * Update the data hierarchy item to reflect the expansion state of the corresponding model item with \p filterModelIndex

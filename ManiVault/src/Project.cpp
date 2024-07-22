@@ -20,7 +20,8 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _filePath(),
     _startupProject(false),
     _applicationVersion(Application::current()->getVersion()),
-    _projectMetaAction(this)
+    _projectMetaAction(this),
+    _selectionGroupingAction(this, "Selection grouping")
 {
     initialize();
 }
@@ -98,6 +99,11 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     _projectMetaAction.getStudioModeAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getApplicationIconAction().fromParentVariantMap(variantMap);
 
+    if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
+        _selectionGroupingAction.fromParentVariantMap(variantMap);
+    else
+        _selectionGroupingAction.setChecked(true);
+
     dataHierarchy().fromParentVariantMap(variantMap);
     actions().fromParentVariantMap(variantMap);
     plugins().fromParentVariantMap(variantMap);
@@ -121,6 +127,8 @@ QVariantMap Project::toVariantMap() const
     _projectMetaAction.getSplashScreenAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getStudioModeAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getApplicationIconAction().insertIntoVariantMap(variantMap);
+
+    _selectionGroupingAction.insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);
@@ -213,6 +221,9 @@ void Project::initialize()
 
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
+
+    _selectionGroupingAction.setIconByName("object-group");
+    _selectionGroupingAction.setToolTip("Enable/disable dataset grouping");
 }
 
 }

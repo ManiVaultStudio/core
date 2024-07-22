@@ -200,9 +200,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     settingsGroupAction.setVisible(true);
     settingsGroupAction.setShowLabels(false);
 
-    auto& groupingAction = mv::data().getSelectionGroupingAction();
+    auto selectionGroupingAction = mv::data().getSelectionGroupingAction();
 
-    settingsGroupAction.addAction(&groupingAction);
+    settingsGroupAction.addAction(selectionGroupingAction);
     settingsGroupAction.addAction(&_resetAction);
 
     auto& toolbarAction = _hierarchyWidget.getToolbarAction();
@@ -248,10 +248,25 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsSubset, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
 
-    groupingAction.setIconByName("object-group");
-    groupingAction.setToolTip("Enable/disable dataset grouping");
+    const auto updateSelectionGroupIndexColumnVisibility = [this]() -> void {
+        if (!mv::projects().hasProject())
+            return;
 
-    connect(&groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);
+        _hierarchyWidget.getTreeView().setColumnHidden(AbstractDataHierarchyModel::Column::SelectionGroupIndex, !mv::projects().getCurrentProject()->getSelectionGroupingAction().isChecked());
+    };
+
+    const auto linkSelectionGroupingAction = [this, updateSelectionGroupIndexColumnVisibility]() -> void {
+        if (!mv::projects().hasProject())
+            return;
+
+        updateSelectionGroupIndexColumnVisibility();
+
+        connect(&mv::projects().getCurrentProject()->getSelectionGroupingAction(), &ToggleAction::toggled, this, updateSelectionGroupIndexColumnVisibility);
+    };
+
+    linkSelectionGroupingAction();
+
+    connect(&mv::projects(), &AbstractProjectManager::projectOpened, this, linkSelectionGroupingAction);
 
     connect(&_resetAction, &TriggerAction::triggered, &Application::core()->getDataManager(), &AbstractDataManager::reset);
 
@@ -378,9 +393,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         QTimer::singleShot(10, createContextMenu);
     });
 
-    connect(&groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::updateColumnsVisibility);
-
-    updateColumnsVisibility();
     initializeChildModelItemsExpansion();
     initializeSelection();
 
@@ -395,7 +407,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
 }
 
-QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
+QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset) const
 {
     const auto modelIndices = _treeModel.match(_treeModel.index(0, static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId), QModelIndex()), Qt::EditRole, dataset->getId(), 1, Qt::MatchFlag::MatchRecursive);
 
@@ -403,18 +415,6 @@ QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImp
         throw new std::runtime_error(QString("'%1' not found in the data hierarchy model").arg(dataset->text()).toLatin1());
 
     return modelIndices.first();
-}
-
-void DataHierarchyWidget::onGroupingActionToggled(const bool& toggled)
-{
-    updateColumnsVisibility();
-}
-
-void DataHierarchyWidget::updateColumnsVisibility()
-{
-    auto& treeView = _hierarchyWidget.getTreeView();
-
-    treeView.setColumnHidden(AbstractDataHierarchyModel::Column::SelectionGroupIndex, !mv::data().getSelectionGroupingAction().isChecked());
 }
 
 void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& modelIndex /*= QModelIndex()*/)
