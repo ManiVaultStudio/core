@@ -101,6 +101,8 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
         _selectionGroupingAction.fromParentVariantMap(variantMap);
+    else
+        _selectionGroupingAction.setChecked(true);
 
     dataHierarchy().fromParentVariantMap(variantMap);
     actions().fromParentVariantMap(variantMap);

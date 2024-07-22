@@ -255,10 +255,18 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         _hierarchyWidget.getTreeView().setColumnHidden(AbstractDataHierarchyModel::Column::SelectionGroupIndex, !mv::projects().getCurrentProject()->getSelectionGroupingAction().isChecked());
     };
 
-    connect(&mv::projects(), &AbstractProjectManager::projectOpened, this, [this, updateSelectionGroupIndexColumnVisibility](const Project& project) -> void {
+    const auto linkSelectionGroupingAction = [this, updateSelectionGroupIndexColumnVisibility]() -> void {
+        if (!mv::projects().hasProject())
+            return;
+
         updateSelectionGroupIndexColumnVisibility();
-        connect(&project.getSelectionGroupingAction(), &ToggleAction::toggled, this, updateSelectionGroupIndexColumnVisibility);
-    });
+
+        connect(&mv::projects().getCurrentProject()->getSelectionGroupingAction(), &ToggleAction::toggled, this, updateSelectionGroupIndexColumnVisibility);
+    };
+
+    linkSelectionGroupingAction();
+
+    connect(&mv::projects(), &AbstractProjectManager::projectOpened, this, linkSelectionGroupingAction);
 
     connect(&_resetAction, &TriggerAction::triggered, &Application::core()->getDataManager(), &AbstractDataManager::reset);
 
