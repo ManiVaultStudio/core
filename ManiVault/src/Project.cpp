@@ -219,6 +219,9 @@ void Project::initialize()
 
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
+
+    _selectionGroupingAction.setIconByName("object-group");
+    _selectionGroupingAction.setToolTip("Enable/disable dataset grouping");
 }
 
 }
