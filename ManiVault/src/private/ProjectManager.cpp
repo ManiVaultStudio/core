@@ -736,6 +736,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
         const auto scopedState = ScopedState(this, State::PublishingProject);
 
+        /*
         auto& readOnlyAction        = getCurrentProject()->getReadOnlyAction();
         auto& splashScreenAction    = getCurrentProject()->getSplashScreenAction();
 
@@ -744,8 +745,9 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
         
         readOnlyAction.setChecked(true);
         splashScreenAction.getEnabledAction().setChecked(true);
+        */
 
-        emit projectAboutToBePublished(*(_project.get()));
+        emit projectAboutToBePublished(*_project);
         {
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
@@ -875,16 +877,28 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
             workspaceLockingAction.setLocked(true);
             {
+                auto& readOnlyAction            = getCurrentProject()->getReadOnlyAction();
+                auto& splashScreenEnabledAction = getCurrentProject()->getSplashScreenAction().getEnabledAction();
+
+                QSignalBlocker readOnlyActionSignalBlocker(&readOnlyAction);
+                QSignalBlocker splashScreenEnabledActionSignalBlocker(&splashScreenEnabledAction);
+
+                readOnlyAction.cacheState();
+                readOnlyAction.setChecked(true);
+
+                splashScreenEnabledAction.cacheState();
+                splashScreenEnabledAction.setChecked(true);
+
                 saveProject(filePath, passwordAction.getString());
+
+                readOnlyAction.restoreState();
+                splashScreenEnabledAction.restoreState();
             }
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
 
             unsetTemporaryDirPath(TemporaryDirType::Publish);
         }
-        emit projectPublished(*(_project.get()));
-        
-        readOnlyAction.restoreState();
-        splashScreenAction.restoreState();
+        emit projectPublished(*_project);
     }
     catch (std::exception& e)
     {
