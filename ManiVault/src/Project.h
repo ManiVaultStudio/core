@@ -11,6 +11,8 @@
 #include "actions/StringAction.h"
 #include "actions/StringsAction.h"
 #include "actions/VersionAction.h"
+#include "actions/OptionsAction.h"
+#include "actions/HorizontalGroupAction.h"
 
 #include "ProjectMetaAction.h"
 
@@ -127,6 +129,9 @@ public: // Project meta action getters facade
     const gui::ToggleAction& getStudioModeAction() const { return _projectMetaAction.getStudioModeAction(); }
     const gui::ApplicationIconAction& getApplicationIconAction() const { return _projectMetaAction.getApplicationIconAction(); }
     const gui::ToggleAction& getSelectionGroupingAction() const { return _selectionGroupingAction; }
+    const gui::ToggleAction& getOverrideApplicationStatusBarAction() const { return _overrideApplicationStatusBarAction; }
+    const gui::OptionsAction& getStatusBarOptionsAction() const { return _statusBarOptionsAction; }
+    const gui::HorizontalGroupAction& getStatusBarSettingsGroupAction() const { return _statusBarSettingsGroupAction; }
 
     gui::VersionAction& getApplicationVersionAction() { return _projectMetaAction.getApplicationVersionAction(); }
     gui::VersionAction& getProjectVersionAction() { return _projectMetaAction.getProjectVersionAction(); }
@@ -141,6 +146,9 @@ public: // Project meta action getters facade
     gui::ToggleAction& getStudioModeAction() { return _projectMetaAction.getStudioModeAction(); }
     gui::ApplicationIconAction& getApplicationIconAction() { return _projectMetaAction.getApplicationIconAction(); }
     gui::ToggleAction& getSelectionGroupingAction() { return _selectionGroupingAction; }
+    gui::ToggleAction& getOverrideApplicationStatusBarAction() { return _overrideApplicationStatusBarAction; }
+    gui::OptionsAction& getStatusBarOptionsAction() { return _statusBarOptionsAction; }
+    gui::HorizontalGroupAction& getStatusBarSettingsGroupAction() { return _statusBarSettingsGroupAction; }
 
 signals:
 
@@ -151,11 +159,14 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
-    QString             _filePath;                  /** Location on disk where the project resides */
-    bool                _startupProject;            /** Boolean determining whether this project is loaded at startup of ManiVault */
-    util::Version       _applicationVersion;        /** Version of the application with which the project is created */
-    ProjectMetaAction   _projectMetaAction;         /** Project meta info action (i.e. title and version) */
-    gui::ToggleAction   _selectionGroupingAction;   /** Action for toggling whether dataset selection grouping is enabled or not */
+    QString                     _filePath;                              /** Location on disk where the project resides */
+    bool                        _startupProject;                        /** Boolean determining whether this project is loaded at startup of ManiVault */
+    util::Version               _applicationVersion;                    /** Version of the application with which the project is created */
+    ProjectMetaAction           _projectMetaAction;                     /** Project meta info action (i.e. title and version) */
+    gui::ToggleAction           _selectionGroupingAction;               /** Action for toggling whether dataset selection grouping is enabled or not */
+    gui::ToggleAction           _overrideApplicationStatusBarAction;    /** Action for toggling whether the project inherits the status bar settings from the application or not */
+    gui::OptionsAction          _statusBarOptionsAction;                /** Options action for toggling status bar items on/off */
+    gui::HorizontalGroupAction  _statusBarSettingsGroupAction;          /** For grouping together the former two actions */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

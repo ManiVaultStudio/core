@@ -95,6 +95,15 @@ public:
      */
     StatusBarAction(QObject* parent, const QString& title, const QString& icon = "");
 
+    /** Destructor for removing this action from StatusBarAction#statusBarActions */
+    ~StatusBarAction();
+
+    /**
+     * Get registered status bar action
+     * @return Status bar actions
+     */
+    static WidgetActions getStatusBarActions();
+
 public:
 
     /**
@@ -208,6 +217,8 @@ private:
     WidgetAction*           _popupAction;       /** Pointer to popup action (maybe nullptr) */
     WidgetActions           _menuActions;       /** Menu actions for the popup */
     std::int32_t            _index;             /** Position in the status bar where the action is inserted (zero: append, negative; right-to-left, positive: left-to-right) */
+
+    static WidgetActions statusBarActions;
 
     friend class WidgetActionToolButton;
 };

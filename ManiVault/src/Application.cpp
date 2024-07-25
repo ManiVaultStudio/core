@@ -6,7 +6,6 @@
 #include "CoreInterface.h"
 #include "BackgroundTask.h"
 #include "ForegroundTask.h"
-#include "AbstractManager.h"
 #include "ManiVaultVersion.h"
 
 #include "util/IconFonts.h"
@@ -14,11 +13,11 @@
 #include "util/Exception.h"
 
 #include "actions/WidgetAction.h"
+#include "actions/StatusBarAction.h"
 
 #include <stdexcept>
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QMainWindow>
 #include <QUuid>
 #include <QDir>

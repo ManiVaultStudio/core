@@ -11,6 +11,7 @@
 #include "util/Version.h"
 
 #include "actions/TriggerAction.h"
+#include "actions/OptionsAction.h"
 
 #include "ApplicationStartupTask.h"
 

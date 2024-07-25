@@ -21,9 +21,19 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _startupProject(false),
     _applicationVersion(Application::current()->getVersion()),
     _projectMetaAction(this),
-    _selectionGroupingAction(this, "Selection grouping")
+    _selectionGroupingAction(this, "Selection grouping"),
+    _overrideApplicationStatusBarAction(this, "Override application status bar"),
+    _statusBarOptionsAction(this, "Status bar items"),
+    _statusBarSettingsGroupAction(this, "Status bar settings group")
 {
     initialize();
+
+    _statusBarSettingsGroupAction.addAction(&_overrideApplicationStatusBarAction);
+    _statusBarSettingsGroupAction.addAction(&_statusBarOptionsAction);
+
+    //connect(&Application::current()->getStatusBarOptionsAction(), &OptionsAction::optionsChanged, [this](const QStringList& options) -> void {
+    //    _statusBarOptionsAction.setOptions(options);
+    //    });
 }
 
 Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
