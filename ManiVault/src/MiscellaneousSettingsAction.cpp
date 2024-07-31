@@ -15,23 +15,10 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     _askConfirmationBeforeRemovingDatasetsAction(this, "Ask confirmation before removing datasets", true),
     _keepDescendantsAfterRemovalAction(this, "Keep descendants after removal", true),
     _showSimplifiedGuidsAction(this, "Show simplified GUID's", true),
-    _showStatusBarAction(this, "Show status bar", true),
-    _statusBarOptionsAction(this, "Status bar options"),
-    _statusBarSettingsGroupAction(this, "Status bar settings group")
+    _statusBarVisibleAction(this, "Show status bar", true),
+    _statusBarOptionsAction(this, "Status bar options")
 {
-    setShowLabels(false);
-
-    updateStatusBarOptionsAction();
-
-    _showStatusBarAction.setSettingsPrefix(QString("%1StatusBar/Show").arg(getSettingsPrefix()));
-    _statusBarOptionsAction.setSettingsPrefix(QString("%1StatusBar/Options").arg(getSettingsPrefix()));
-
     _statusBarOptionsAction.setDefaultWidgetFlag(OptionsAction::WidgetFlag::Selection);
-
-    _statusBarSettingsGroupAction.setShowLabels(false);
-
-    _statusBarSettingsGroupAction.addAction(&_showStatusBarAction);
-    _statusBarSettingsGroupAction.addAction(&_statusBarOptionsAction);
 
     _askConfirmationBeforeRemovingDatasetsAction.setToolTip("Ask confirmation prior to removal of datasets");
     _keepDescendantsAfterRemovalAction.setToolTip("If checked, descendants will not be removed and become orphans (placed at the root of the hierarchy)");
@@ -40,21 +27,23 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     addAction(&_ignoreLoadingErrorsAction);
     addAction(&_askConfirmationBeforeRemovingDatasetsAction);
     addAction(&_keepDescendantsAfterRemovalAction);
-    addAction(&_statusBarSettingsGroupAction);
+    addAction(&_statusBarVisibleAction);
+    addAction(&_statusBarOptionsAction);
 }
 
 void MiscellaneousSettingsAction::updateStatusBarOptionsAction()
 {
-    QStringList statusBarOptions, selectedStatusBarOptions;
+    const auto previousStatusBarOptions = _statusBarOptionsAction.getOptions();
 
-    for (const auto statusBarAction : StatusBarAction::getStatusBarActions()) {
+    QStringList statusBarOptions;
+
+    for (const auto statusBarAction : StatusBarAction::getStatusBarActions())
         statusBarOptions << statusBarAction->text();
 
-        if (statusBarAction->isVisible())
-            selectedStatusBarOptions << statusBarAction->text();
-    }
+    for (const auto statusBarAction : StatusBarAction::getStatusBarActions())
+        qDebug() << statusBarAction->text() << statusBarAction->isVisible();
 
     _statusBarOptionsAction.setOptions(statusBarOptions);
-    _statusBarOptionsAction.setSelectedOptions(selectedStatusBarOptions);
 }
+
 }

@@ -28,6 +28,14 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QI
 
     StatusBarAction::statusBarActions << this;
 
+    const auto updateVisibility = [this]() -> void {
+        setVisible(mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().isOptionSelected(text()));
+    };
+
+    updateVisibility();
+
+    connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::selectedOptionsChanged, this, updateVisibility);
+
     mv::settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
 }
 

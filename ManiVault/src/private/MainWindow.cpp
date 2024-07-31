@@ -117,7 +117,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
 
         const auto updateStatusBarVisibility = [this]() -> void {
-            statusBar()->setVisible(mv::projects().hasProject() && mv::settings().getMiscellaneousSettings().getShowStatusBarAction().isChecked());
+            statusBar()->setVisible(mv::projects().hasProject() && mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction().isChecked());
         };
 
         const auto getNumberOfPermanentWidgets = [this]() -> std::int32_t {
@@ -203,7 +203,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         projectChanged();
         updateStatusBarVisibility();
 
-        connect(&mv::settings().getMiscellaneousSettings().getShowStatusBarAction(), &ToggleAction::toggled, this, updateStatusBarVisibility);
+        connect(&mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction(), &ToggleAction::toggled, this, updateStatusBarVisibility);
     }
 }
 

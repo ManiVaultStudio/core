@@ -130,8 +130,8 @@ public: // Project meta action getters facade
     const gui::ApplicationIconAction& getApplicationIconAction() const { return _projectMetaAction.getApplicationIconAction(); }
     const gui::ToggleAction& getSelectionGroupingAction() const { return _selectionGroupingAction; }
     const gui::ToggleAction& getOverrideApplicationStatusBarAction() const { return _overrideApplicationStatusBarAction; }
+    const gui::ToggleAction& getStatusBarVisibleAction() const { return _statusBarVisibleAction; }
     const gui::OptionsAction& getStatusBarOptionsAction() const { return _statusBarOptionsAction; }
-    const gui::HorizontalGroupAction& getStatusBarSettingsGroupAction() const { return _statusBarSettingsGroupAction; }
 
     gui::VersionAction& getApplicationVersionAction() { return _projectMetaAction.getApplicationVersionAction(); }
     gui::VersionAction& getProjectVersionAction() { return _projectMetaAction.getProjectVersionAction(); }
@@ -147,8 +147,8 @@ public: // Project meta action getters facade
     gui::ApplicationIconAction& getApplicationIconAction() { return _projectMetaAction.getApplicationIconAction(); }
     gui::ToggleAction& getSelectionGroupingAction() { return _selectionGroupingAction; }
     gui::ToggleAction& getOverrideApplicationStatusBarAction() { return _overrideApplicationStatusBarAction; }
+    gui::ToggleAction& getStatusBarVisibleAction() { return _statusBarVisibleAction; }
     gui::OptionsAction& getStatusBarOptionsAction() { return _statusBarOptionsAction; }
-    gui::HorizontalGroupAction& getStatusBarSettingsGroupAction() { return _statusBarSettingsGroupAction; }
 
 signals:
 
@@ -165,8 +165,8 @@ private:
     ProjectMetaAction           _projectMetaAction;                     /** Project meta info action (i.e. title and version) */
     gui::ToggleAction           _selectionGroupingAction;               /** Action for toggling whether dataset selection grouping is enabled or not */
     gui::ToggleAction           _overrideApplicationStatusBarAction;    /** Action for toggling whether the project inherits the status bar settings from the application or not */
+    gui::ToggleAction           _statusBarVisibleAction;                /** Action for toggling the status bar visibility */
     gui::OptionsAction          _statusBarOptionsAction;                /** Options action for toggling status bar items on/off */
-    gui::HorizontalGroupAction  _statusBarSettingsGroupAction;          /** For grouping together the former two actions */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

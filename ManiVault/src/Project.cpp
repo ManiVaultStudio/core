@@ -23,17 +23,45 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _projectMetaAction(this),
     _selectionGroupingAction(this, "Selection grouping"),
     _overrideApplicationStatusBarAction(this, "Override application status bar"),
-    _statusBarOptionsAction(this, "Status bar items"),
-    _statusBarSettingsGroupAction(this, "Status bar settings group")
+    _statusBarVisibleAction(this, "Show status bar"),
+    _statusBarOptionsAction(this, "Status bar items")
 {
     initialize();
 
-    _statusBarSettingsGroupAction.addAction(&_overrideApplicationStatusBarAction);
-    _statusBarSettingsGroupAction.addAction(&_statusBarOptionsAction);
+    const auto initStatusBarOptionsAction = [this]() -> void {
+        const auto& appStatusBarOptionsAction = mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction();
 
-    //connect(&Application::current()->getStatusBarOptionsAction(), &OptionsAction::optionsChanged, [this](const QStringList& options) -> void {
-    //    _statusBarOptionsAction.setOptions(options);
-    //    });
+        _statusBarOptionsAction.setOptions(mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().getOptions());
+    };
+
+    initStatusBarOptionsAction();
+
+    connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::optionsChanged, initStatusBarOptionsAction);
+
+    /*
+    const auto updateStatusBarActionsReadOnly = [this]() -> void {
+        const auto overrideApplicationStatusBar = _overrideApplicationStatusBarAction.isChecked();
+
+        _statusBarVisibleAction.setEnabled(overrideApplicationStatusBar);
+        _statusBarOptionsAction.setEnabled(overrideApplicationStatusBar);
+    };
+
+    updateStatusBarActionsReadOnly();
+
+    connect(&_overrideApplicationStatusBarAction, &ToggleAction::toggled, updateStatusBarActionsReadOnly);
+
+    
+
+    connect(&_statusBarOptionsAction, &OptionsAction::selectedOptionsChanged, [this](const QStringList& selectedOptions) -> void {
+        if (_overrideApplicationStatusBarAction.isChecked())
+            mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().setSelectedOptions(selectedOptions);
+    });
+
+    connect(&_statusBarVisibleAction, &ToggleAction::toggled, [this](bool toggled) -> void {
+        if (_overrideApplicationStatusBarAction.isChecked())
+            mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction().setChecked(toggled);
+    });
+    */
 }
 
 Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
@@ -114,6 +142,10 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     else
         _selectionGroupingAction.setChecked(true);
 
+    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
+    _statusBarVisibleAction.fromParentVariantMap(variantMap);
+    _statusBarOptionsAction.fromParentVariantMap(variantMap);
+
     dataHierarchy().fromParentVariantMap(variantMap);
     actions().fromParentVariantMap(variantMap);
     plugins().fromParentVariantMap(variantMap);
@@ -139,6 +171,10 @@ QVariantMap Project::toVariantMap() const
     _projectMetaAction.getApplicationIconAction().insertIntoVariantMap(variantMap);
 
     _selectionGroupingAction.insertIntoVariantMap(variantMap);
+
+    _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
+    _statusBarVisibleAction.insertIntoVariantMap(variantMap);
+    _statusBarOptionsAction.insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);

@@ -29,8 +29,11 @@ OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStrin
     setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(options, selectedOptions);
 
-    connect(&_optionsModel, &QAbstractItemModel::dataChanged, this, [this]() -> void {
-        selectedOptionsChanged(getSelectedOptions());
+    connect(&_optionsModel, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) -> void {
+        //if (roles.contains(Qt::CheckStateRole)) {
+            saveToSettings();
+            emit selectedOptionsChanged(getSelectedOptions());
+        //}
     });
 }
 
@@ -72,10 +75,10 @@ bool OptionsAction::hasOptions() const
 
 void OptionsAction::setOptions(const QStringList& options, bool clearSelection /*= false*/)
 {
-    const auto selectedOptions = getSelectedOptions();
-
     _optionsModel.setStrings(options);
-    _optionsModel.setCheckedIndicesFromStrings(selectedOptions);
+
+    if (clearSelection)
+        _optionsModel.setCheckedIndicesFromStrings({});
 
     emit optionsChanged(getOptions());
 }

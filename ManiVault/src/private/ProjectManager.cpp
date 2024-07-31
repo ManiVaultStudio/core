@@ -484,6 +484,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (_project->isStartupProject())
                 ModalTask::getGlobalHandler()->setEnabled(true);
 
+            if (_project->getOverrideApplicationStatusBarAction().isChecked() && _project->getStatusBarVisibleAction().isChecked())
+            {
+                auto& miscellaneousSettings = mv::settings().getMiscellaneousSettings();
+
+                miscellaneousSettings.getStatusBarVisibleAction().setChecked(_project->getStatusBarVisibleAction().isChecked());
+                miscellaneousSettings.getStatusBarOptionsAction().setSelectedOptions(_project->getStatusBarOptionsAction().getSelectedOptions());
+            }
+
             unsetTemporaryDirPath(TemporaryDirType::Open);
 
             qDebug().noquote() << filePath << "loaded successfully";
@@ -760,6 +768,14 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
             auto currentProject = getCurrentProject();
 
+            currentProject->getOverrideApplicationStatusBarAction().cacheState();
+            currentProject->getStatusBarVisibleAction().cacheState();
+            currentProject->getStatusBarOptionsAction().cacheState();
+
+            currentProject->getOverrideApplicationStatusBarAction().setChecked(true);
+            currentProject->getStatusBarVisibleAction().setChecked(true);
+            currentProject->getStatusBarOptionsAction().setSelectedOptions({ "Logging", "Background Tasks", "Foreground Tasks" });
+
             ToggleAction    passwordProtectedAction(this, "Password Protected");
             StringAction    passwordAction(this, "Password");
 
@@ -829,6 +845,9 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getTagsAction());
                     settingsGroupAction.addAction(&currentProject->getCommentsAction());
                     settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
+                    settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
+                    settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
+                    settingsGroupAction.addAction(&currentProject->getStatusBarOptionsAction());
 
                     auto titleLayout = new QHBoxLayout();
 
@@ -895,6 +914,10 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                 splashScreenEnabledAction.restoreState();
             }
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
+
+            currentProject->getOverrideApplicationStatusBarAction().restoreState();
+            currentProject->getStatusBarVisibleAction().restoreState();
+            currentProject->getStatusBarOptionsAction().restoreState();
 
             unsetTemporaryDirPath(TemporaryDirType::Publish);
         }

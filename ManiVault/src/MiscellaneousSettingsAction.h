@@ -7,7 +7,6 @@
 #include "GlobalSettingsGroupAction.h"
 
 #include "actions/ToggleAction.h"
-#include "actions/HorizontalGroupAction.h"
 
 namespace mv::gui
 {
@@ -38,18 +37,16 @@ public: // Action getters
     ToggleAction& getAskConfirmationBeforeRemovingDatasetsAction() { return _askConfirmationBeforeRemovingDatasetsAction; }
     ToggleAction& getKeepDescendantsAfterRemovalAction() { return _keepDescendantsAfterRemovalAction; }
     ToggleAction& getShowSimplifiedGuidsAction() { return _showSimplifiedGuidsAction; }
-    ToggleAction& getShowStatusBarAction() { return _showStatusBarAction; }
+    ToggleAction& getStatusBarVisibleAction() { return _statusBarVisibleAction; }
     OptionsAction& getStatusBarOptionsAction() { return _statusBarOptionsAction; }
-    HorizontalGroupAction& getStatusBarSettingsGroupAction() { return _statusBarSettingsGroupAction; }
 
 private:
     ToggleAction            _ignoreLoadingErrorsAction;                     /** Toggle between asking for ignoring loading errors or not */
     ToggleAction            _askConfirmationBeforeRemovingDatasetsAction;   /** Toggle between asking permission before removing datasets or not */
-    ToggleAction            _keepDescendantsAfterRemovalAction;             /** Toggle between asking permission before removing datasets or not */
-    ToggleAction            _showSimplifiedGuidsAction;                     /** Toggle between asking permission before removing datasets or not */
-    ToggleAction            _showStatusBarAction;                           /** Action for toggling the status bar visibility */
+    ToggleAction            _keepDescendantsAfterRemovalAction;             /** Toggle keep descendants when removing parent dataset or not */
+    ToggleAction            _showSimplifiedGuidsAction;                     /** Toggle between showing long or short GUIDS */
+    ToggleAction            _statusBarVisibleAction;                        /** Action for toggling the status bar visibility */
     OptionsAction           _statusBarOptionsAction;                        /** Options action for toggling status bar items on/off */
-    HorizontalGroupAction   _statusBarSettingsGroupAction;                  /** For grouping together the former two actions */
 };
 
 }
