@@ -38,30 +38,16 @@ Project::Project(QObject* parent /*= nullptr*/) :
 
     connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::optionsChanged, initStatusBarOptionsAction);
 
-    /*
-    const auto updateStatusBarActionsReadOnly = [this]() -> void {
+    const auto updateStatusBarActions = [this]() -> void {
         const auto overrideApplicationStatusBar = _overrideApplicationStatusBarAction.isChecked();
 
         _statusBarVisibleAction.setEnabled(overrideApplicationStatusBar);
         _statusBarOptionsAction.setEnabled(overrideApplicationStatusBar);
     };
 
-    updateStatusBarActionsReadOnly();
+    updateStatusBarActions();
 
-    connect(&_overrideApplicationStatusBarAction, &ToggleAction::toggled, updateStatusBarActionsReadOnly);
-
-    
-
-    connect(&_statusBarOptionsAction, &OptionsAction::selectedOptionsChanged, [this](const QStringList& selectedOptions) -> void {
-        if (_overrideApplicationStatusBarAction.isChecked())
-            mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().setSelectedOptions(selectedOptions);
-    });
-
-    connect(&_statusBarVisibleAction, &ToggleAction::toggled, [this](bool toggled) -> void {
-        if (_overrideApplicationStatusBarAction.isChecked())
-            mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction().setChecked(toggled);
-    });
-    */
+    connect(&_overrideApplicationStatusBarAction, &ToggleAction::toggled, updateStatusBarActions);
 }
 
 Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
