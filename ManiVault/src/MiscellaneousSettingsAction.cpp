@@ -24,6 +24,14 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     _keepDescendantsAfterRemovalAction.setToolTip("If checked, descendants will not be removed and become orphans (placed at the root of the hierarchy)");
     _showSimplifiedGuidsAction.setToolTip("If checked, views will show a truncated version of a globally unique identifier");
 
+    const auto updateStatusBarOptionsActionReadOnly = [this]() -> void {
+        _statusBarOptionsAction.setEnabled(_statusBarVisibleAction.isChecked());
+    };
+
+    updateStatusBarOptionsActionReadOnly();
+
+    connect(&_statusBarVisibleAction, &ToggleAction::toggled, updateStatusBarOptionsActionReadOnly);
+
     addAction(&_ignoreLoadingErrorsAction);
     addAction(&_askConfirmationBeforeRemovingDatasetsAction);
     addAction(&_keepDescendantsAfterRemovalAction);
