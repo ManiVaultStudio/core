@@ -22,7 +22,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _applicationVersion(Application::current()->getVersion()),
     _projectMetaAction(this),
     _selectionGroupingAction(this, "Selection grouping"),
-    _overrideApplicationStatusBarAction(this, "Override application status bar"),
+    _overrideApplicationStatusBarAction(this, "Override studio status bar"),
     _statusBarVisibleAction(this, "Show status bar"),
     _statusBarOptionsAction(this, "Status bar items")
 {

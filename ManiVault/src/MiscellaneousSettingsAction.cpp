@@ -40,9 +40,6 @@ void MiscellaneousSettingsAction::updateStatusBarOptionsAction()
     for (const auto statusBarAction : StatusBarAction::getStatusBarActions())
         statusBarOptions << statusBarAction->text();
 
-    for (const auto statusBarAction : StatusBarAction::getStatusBarActions())
-        qDebug() << statusBarAction->text() << statusBarAction->isVisible();
-
     _statusBarOptionsAction.setOptions(statusBarOptions);
 }
 
