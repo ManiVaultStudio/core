@@ -26,11 +26,15 @@ void IconAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    QPixmap pixmap;
+    if (variantMap.contains("Value"))
+    {
+        QPixmap pixmap;
 
-    pixmap.loadFromData(QByteArray::fromBase64(variantMap["Value"].toByteArray()));
+        pixmap.loadFromData(QByteArray::fromBase64(variantMap["Value"].toByteArray()));
 
-    setIcon(createIcon(pixmap));
+        if (!pixmap.isNull())
+            setIcon(createIcon(pixmap));
+    }
 }
 
 QVariantMap IconAction::toVariantMap() const
