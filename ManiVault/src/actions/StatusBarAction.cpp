@@ -46,9 +46,15 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QS
 
 StatusBarAction::~StatusBarAction()
 {
+    if (!core())
+        return;
+
+    if (!core()->isInitialized())
+        return;
+
     StatusBarAction::statusBarActions.removeOne(this);
 
-    mv::settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
+	mv::settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
 }
 
 WidgetActions StatusBarAction::getStatusBarActions()

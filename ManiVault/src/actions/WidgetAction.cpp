@@ -68,7 +68,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
 
     updateLocation();
 
-    if (core() != nullptr && core()->isInitialized())
+    if (core() && core()->isInitialized())
     {
         actions().addAction(this);
 
@@ -81,7 +81,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
 
 WidgetAction::~WidgetAction()
 {
-    if (core() == nullptr || !core()->isInitialized())
+    if (!core() || !core()->isInitialized())
         return;
 
     actions().removeAction(this);
