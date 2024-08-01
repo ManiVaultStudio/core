@@ -7,7 +7,6 @@
 #include "GlobalSettingsGroupAction.h"
 
 #include "actions/ToggleAction.h"
-#include "actions/OptionAction.h"
 
 namespace mv::gui
 {
@@ -29,18 +28,25 @@ public:
      */
     MiscellaneousSettingsAction(QObject* parent);
 
+    /** Update status bar options action to reflect the current status bar items */
+    void updateStatusBarOptionsAction();
+
 public: // Action getters
 
     ToggleAction& getIgnoreLoadingErrorsAction() { return _ignoreLoadingErrorsAction; }
     ToggleAction& getAskConfirmationBeforeRemovingDatasetsAction() { return _askConfirmationBeforeRemovingDatasetsAction; }
     ToggleAction& getKeepDescendantsAfterRemovalAction() { return _keepDescendantsAfterRemovalAction; }
     ToggleAction& getShowSimplifiedGuidsAction() { return _showSimplifiedGuidsAction; }
+    ToggleAction& getStatusBarVisibleAction() { return _statusBarVisibleAction; }
+    OptionsAction& getStatusBarOptionsAction() { return _statusBarOptionsAction; }
 
 private:
-    ToggleAction   _ignoreLoadingErrorsAction;                     /** Toggle between asking for ignoring loading errors or not */
-    ToggleAction   _askConfirmationBeforeRemovingDatasetsAction;   /** Toggle between asking permission before removing datasets or not */
-    ToggleAction   _keepDescendantsAfterRemovalAction;             /** Toggle between asking permission before removing datasets or not */
-    ToggleAction   _showSimplifiedGuidsAction;                      /** Toggle between asking permission before removing datasets or not */
+    ToggleAction            _ignoreLoadingErrorsAction;                     /** Toggle between asking for ignoring loading errors or not */
+    ToggleAction            _askConfirmationBeforeRemovingDatasetsAction;   /** Toggle between asking permission before removing datasets or not */
+    ToggleAction            _keepDescendantsAfterRemovalAction;             /** Toggle keep descendants when removing parent dataset or not */
+    ToggleAction            _showSimplifiedGuidsAction;                     /** Toggle between showing long or short GUIDS */
+    ToggleAction            _statusBarVisibleAction;                        /** Action for toggling the status bar visibility */
+    OptionsAction           _statusBarOptionsAction;                        /** Options action for toggling status bar items on/off */
 };
 
 }

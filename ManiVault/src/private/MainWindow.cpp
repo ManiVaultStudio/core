@@ -116,6 +116,10 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->insertPermanentWidget(5, foregroundTasksStatusBarAction->createWidget(this));
         statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
 
+        const auto updateStatusBarVisibility = [this]() -> void {
+            statusBar()->setVisible(mv::projects().hasProject() && mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction().isChecked());
+        };
+
         const auto getNumberOfPermanentWidgets = [this]() -> std::int32_t {
             return statusBar()->findChildren<QWidget*>(Qt::FindDirectChildrenOnly).count();
         };
@@ -135,7 +139,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             }
         }
 
-        const auto projectChanged = [this]() -> void {
+        const auto projectChanged = [this, updateStatusBarVisibility]() -> void {
             if (!projects().hasProject()) {
                 setWindowTitle("ManiVault");
             }
@@ -152,7 +156,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
                 }
             }
 
-            statusBar()->setVisible(projects().hasProject());
+            updateStatusBarVisibility();
         };
 
         connect(&projects(), &AbstractProjectManager::projectCreated, this, projectChanged);
@@ -197,6 +201,9 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             projects().openProject(Application::current()->getStartupProjectFilePath());
 
         projectChanged();
+        updateStatusBarVisibility();
+
+        connect(&mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction(), &ToggleAction::toggled, this, updateStatusBarVisibility);
     }
 }
 

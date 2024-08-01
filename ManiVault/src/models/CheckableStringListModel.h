@@ -27,7 +27,7 @@ public:
 private:
 
     /**
-     * We want to reset our internal CheckableStringListModel#_checkedItems every time the strings are changed.
+     * We want to reset our internal CheckableStringListModel#_checkStatesList every time the strings are changed.
      * We make the CheckableStringListModel::setStringList(...) private and replace it with
      * CheckableStringListModel::setStrings(...) so that we have control over the internals. This also prevents
      * accidental misuse of QStringListModel::setStringList(...), which would lead to problems with checked items.
@@ -104,7 +104,8 @@ public:
     void invertChecks();
 
 private:
-    CheckStatesList _checkStatesList;   /** Keeps track of the selected items */
+    QStringList     _checkedStrings;    /** Keeps track of the selected items by item string */
+    CheckStatesList _checkStatesList;   /** Keeps track of the selected items by item index */
     QStringList     _strings;           /** Model strings */
 };
 

@@ -14,6 +14,8 @@
 
 namespace mv::gui {
 
+WidgetActions StatusBarAction::statusBarActions;
+
 StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QIcon& icon /*= QIcon()*/) :
     WidgetAction(parent, title),
     _barGroupAction(this, "Bar Group"),
@@ -23,11 +25,35 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QI
     _index(-1)
 {
     initialize(icon);
+
+    StatusBarAction::statusBarActions << this;
+
+    const auto updateVisibility = [this]() -> void {
+        setVisible(mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().isOptionSelected(text()));
+    };
+
+    updateVisibility();
+
+    connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::selectedOptionsChanged, this, updateVisibility);
+
+    mv::settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
 }
 
 StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QString& icon /*= ""*/) :
     StatusBarAction(parent, title, icon.isEmpty() ? QIcon() : Application::getIconFont("FontAwesome").getIcon(icon))
 {
+}
+
+StatusBarAction::~StatusBarAction()
+{
+    StatusBarAction::statusBarActions.removeOne(this);
+
+    mv::settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
+}
+
+WidgetActions StatusBarAction::getStatusBarActions()
+{
+    return statusBarActions;
 }
 
 QWidget* StatusBarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -168,6 +194,17 @@ void StatusBarAction::initialize(const QIcon& icon)
     tooltipChanged();
 
     connect(this, &WidgetAction::changed, this, tooltipChanged);
+
+    const auto updateStatusBarActionsVisibility = [this]() -> void {
+        const auto selectedOptions = mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().getSelectedOptions();
+
+        for (auto statusBarAction : StatusBarAction::statusBarActions)
+            statusBarAction->setVisible(selectedOptions.contains(statusBarAction->text()));
+    };
+
+    updateStatusBarActionsVisibility();
+
+    connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::selectedOptionsChanged, this, updateStatusBarActionsVisibility);
 }
 
 StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags) :

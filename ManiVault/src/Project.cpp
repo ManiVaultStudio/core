@@ -21,9 +21,33 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _startupProject(false),
     _applicationVersion(Application::current()->getVersion()),
     _projectMetaAction(this),
-    _selectionGroupingAction(this, "Selection grouping")
+    _selectionGroupingAction(this, "Selection grouping"),
+    _overrideApplicationStatusBarAction(this, "Override studio status bar"),
+    _statusBarVisibleAction(this, "Show status bar"),
+    _statusBarOptionsAction(this, "Status bar items")
 {
     initialize();
+
+    const auto initStatusBarOptionsAction = [this]() -> void {
+        const auto& appStatusBarOptionsAction = mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction();
+
+        _statusBarOptionsAction.setOptions(mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().getOptions());
+    };
+
+    initStatusBarOptionsAction();
+
+    connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::optionsChanged, initStatusBarOptionsAction);
+
+    const auto updateStatusBarActions = [this]() -> void {
+        const auto overrideApplicationStatusBar = _overrideApplicationStatusBarAction.isChecked();
+
+        _statusBarVisibleAction.setEnabled(overrideApplicationStatusBar);
+        _statusBarOptionsAction.setEnabled(overrideApplicationStatusBar);
+    };
+
+    updateStatusBarActions();
+
+    connect(&_overrideApplicationStatusBarAction, &ToggleAction::toggled, updateStatusBarActions);
 }
 
 Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
@@ -104,6 +128,10 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     else
         _selectionGroupingAction.setChecked(true);
 
+    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
+    _statusBarVisibleAction.fromParentVariantMap(variantMap);
+    _statusBarOptionsAction.fromParentVariantMap(variantMap);
+
     dataHierarchy().fromParentVariantMap(variantMap);
     actions().fromParentVariantMap(variantMap);
     plugins().fromParentVariantMap(variantMap);
@@ -129,6 +157,10 @@ QVariantMap Project::toVariantMap() const
     _projectMetaAction.getApplicationIconAction().insertIntoVariantMap(variantMap);
 
     _selectionGroupingAction.insertIntoVariantMap(variantMap);
+
+    _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
+    _statusBarVisibleAction.insertIntoVariantMap(variantMap);
+    _statusBarOptionsAction.insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);
