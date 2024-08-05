@@ -181,6 +181,17 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     layout->addWidget(&_hierarchyWidget, 1);
 
+    auto optionsAction      = new OptionsAction(this, "Options", { "A", "B", "C" }, { "A", "B" });
+    auto resetOptionsAction = new TriggerAction(this, "Reset options");
+
+    layout->addWidget(optionsAction->createWidget(this));
+    layout->addWidget(resetOptionsAction->createWidget(this));
+
+    connect(resetOptionsAction, &TriggerAction::triggered, this, [this, optionsAction]() -> void
+    {
+        optionsAction->initialize();
+    });
+
     setLayout(layout);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
