@@ -14,7 +14,7 @@ using namespace mv::gui;
 namespace mv
 {
 
-ActionsListModel::ActionsListModel(QObject* parent, gui::WidgetAction* rootAction /*= nullptr*/) :
+ActionsListModel::ActionsListModel(QObject* parent /*= nullptr*/, gui::WidgetAction* rootAction /*= nullptr*/) :
     AbstractActionsModel(parent),
     _rootAction(rootAction)
 {

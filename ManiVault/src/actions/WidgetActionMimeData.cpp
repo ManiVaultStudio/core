@@ -9,33 +9,34 @@ namespace mv::gui {
 WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
     QMimeData(),
     _action(action),
-    _actionsListModel(this),
-    _actionsFilterModel(this),
     _highlightActions()
 {
-    _actionsFilterModel.setSourceModel(&_actionsListModel);
-    _actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Private" });
-    _actionsFilterModel.getTypeFilterAction().setString(getAction()->getTypeString());
+    ActionsListModel    actionsListModel;      /** Actions list model */
+    ActionsFilterModel  actionsFilterModel;    /** Filtered actions model */
 
-    for (int rowIndex = 0; rowIndex < _actionsFilterModel.rowCount(); ++rowIndex) {
-        auto action = _actionsFilterModel.getAction(rowIndex);
+    actionsFilterModel.setSourceModel(&actionsListModel);
+    actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Private" });
+    actionsFilterModel.getTypeFilterAction().setString(getAction()->getTypeString());
 
-        if (action == getAction())
+    for (int rowIndex = 0; rowIndex < actionsFilterModel.rowCount(); ++rowIndex) {
+        auto candidateAction = actionsFilterModel.getAction(rowIndex);
+
+        if (candidateAction == getAction())
             continue;
 
-        if (!action->isEnabled())
+        if (!candidateAction->isEnabled())
             continue;
 
-        if (!action->mayConnect(WidgetAction::Gui))
+        if (!candidateAction->mayConnect(WidgetAction::Gui))
             continue;
 
-        if (action->isHighlighted())
-            action->unHighlight();
+        if (candidateAction->isHighlighted())
+            candidateAction->unHighlight();
 
-        if (action->isConnected() && (action->getPublicAction() == getAction()))
+        if (candidateAction->isConnected() && (candidateAction->getPublicAction() == getAction()))
             continue;
 
-        _highlightActions << action;
+        _highlightActions << candidateAction;
     }
 
     for (auto highlightAction : _highlightActions)

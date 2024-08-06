@@ -30,7 +30,7 @@ public:
      * @param parent Pointer to parent object
      * @param rootAction When set, only list the root action and its descendants
      */
-    ActionsListModel(QObject* parent, gui::WidgetAction* rootAction = nullptr);
+    ActionsListModel(QObject* parent = nullptr, gui::WidgetAction* rootAction = nullptr);
 
     /** Initializes the model from the current state of the actions manager */
     void initialize() override;
