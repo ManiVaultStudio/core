@@ -46,7 +46,6 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<Q
 
     setLayout(layout);
 
-    _loadAction.setToolTip("Load the selected project");
     _quitAction.setToolTip("Do not load a project");
 
     _hierarchyWidget.setWindowIcon(windowIcon);
@@ -59,6 +58,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<Q
 
     const auto updateLoadAction = [this, &treeView]() -> void {
         _loadAction.setText(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load Project");
+        _loadAction.setToolTip(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load the selected project");
     };
 
     updateLoadAction();
