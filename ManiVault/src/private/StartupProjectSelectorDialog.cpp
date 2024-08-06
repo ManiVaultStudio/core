@@ -22,7 +22,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<Q
     _filterModel(this),
     _hierarchyWidget(this, "Startup project", _model, &_filterModel, false),
     _loadAction(this, "Load"),
-    _cancelAction(this, "Cancel")
+    _quitAction(this, "Quit")
 {
     _model.initialize(startupProjectsMetaActions);
 
@@ -38,16 +38,15 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<Q
 
     auto bottomLayout = new QHBoxLayout();
 
-    bottomLayout->addStretch(1);
     bottomLayout->addWidget(_loadAction.createWidget(this));
-    bottomLayout->addWidget(_cancelAction.createWidget(this));
+    bottomLayout->addStretch(1);
+    bottomLayout->addWidget(_quitAction.createWidget(this));
 
     layout->addLayout(bottomLayout);
 
     setLayout(layout);
 
-    _loadAction.setToolTip("Load the selected project");
-    _cancelAction.setToolTip("Do not load a project");
+    _quitAction.setToolTip("Do not load a project");
 
     _hierarchyWidget.setWindowIcon(windowIcon);
     _hierarchyWidget.getTreeView().setRootIsDecorated(false);
@@ -58,7 +57,8 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<Q
     treeView.setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 
     const auto updateLoadAction = [this, &treeView]() -> void {
-        _loadAction.setEnabled(!treeView.selectionModel()->selectedRows().isEmpty());
+        _loadAction.setText(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load Project");
+        _loadAction.setToolTip(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load the selected project");
     };
 
     updateLoadAction();
@@ -87,7 +87,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<Q
     treeViewHeader->setStretchLastSection(false);
 
     connect(&_loadAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::accept);
-    connect(&_cancelAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::reject);
+    connect(&_quitAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::reject);
 }
 
 std::int32_t StartupProjectSelectorDialog::getSelectedStartupProjectIndex()
