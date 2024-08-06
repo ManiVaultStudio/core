@@ -56,8 +56,6 @@ public:
 
 private:
     WidgetAction*       _action;                /** Pointer to mime data action */
-    ActionsListModel    _actionsListModel;      /** Actions list model */
-    ActionsFilterModel  _actionsFilterModel;    /** Filtered actions model */
     WidgetActions       _highlightActions;      /** Actions to be highlighted/un-highlighted */
 };
 

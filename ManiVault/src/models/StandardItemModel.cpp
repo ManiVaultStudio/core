@@ -18,7 +18,7 @@ using namespace gui;
 
 StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent),
-    _numberOfRowsAction(this, "Number of rows")
+    _numberOfRowsAction(nullptr, "Number of rows")
 {
     _numberOfRowsAction.initialize(this);
 }

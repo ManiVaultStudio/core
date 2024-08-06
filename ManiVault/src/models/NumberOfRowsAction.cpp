@@ -15,9 +15,16 @@ NumberOfRowsAction::NumberOfRowsAction(QObject* parent, const QString& title) :
     setEnabled(false);
 
     _updateTimer.setSingleShot(true);
-    _updateTimer.setInterval(100);
+    _updateTimer.setInterval(250);
 
     connect(&_updateTimer, &QTimer::timeout, this, &NumberOfRowsAction::updateString);
+}
+
+NumberOfRowsAction::~NumberOfRowsAction()
+{
+    disconnect(_model, &QAbstractItemModel::rowsInserted, this, nullptr);
+    disconnect(_model, &QAbstractItemModel::rowsRemoved, this, nullptr);
+    disconnect(_model, &QAbstractItemModel::layoutChanged, this, nullptr);
 }
 
 void NumberOfRowsAction::initialize(QAbstractItemModel* model)
@@ -37,6 +44,7 @@ void NumberOfRowsAction::initialize(QAbstractItemModel* model)
     }
 
     _model = model;
+
 
     connect(_model, &QAbstractItemModel::rowsInserted, this, &NumberOfRowsAction::numberOfRowsChanged);
     connect(_model, &QAbstractItemModel::rowsRemoved, this, &NumberOfRowsAction::numberOfRowsChanged);

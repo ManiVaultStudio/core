@@ -33,6 +33,9 @@ public:
      */
     Q_INVOKABLE NumberOfRowsAction(QObject* parent, const QString& title);
 
+    /** Ensure to disconnect from model to avoid receiving signals when the actions is already destructed */
+    ~NumberOfRowsAction() override;
+
     /**
      * Initialize the with a pointer to a \p model
      * @param model Pointer to model to synchronize with
