@@ -35,7 +35,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(400, 150);
+        return QSize(500, 150);
     }
 
     /** Get minimum size hint*/
@@ -54,5 +54,5 @@ private:
     StartupProjectsFilterModel  _filterModel;           /** Sorting and filtering model for the plugin manager model */
     mv::gui::HierarchyWidget    _hierarchyWidget;       /** Widget for displaying the loaded plugins */
     mv::gui::TriggerAction      _loadAction;            /** Load the selected project */
-    mv::gui::TriggerAction      _cancelAction;          /** Exit the dialog and don't load a project */
+    mv::gui::TriggerAction      _quitAction;          /** Exit the dialog and don't load a project */
 };

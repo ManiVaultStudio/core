@@ -142,7 +142,9 @@ int main(int argc, char *argv[])
         if (startupProjectsMetaActionsCandidates.count() >= 2) {
             StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsMetaActionsCandidates);
 
-            if (startupProjectSelectorDialog.exec() == QDialog::Accepted) {
+            const auto dialogResult = startupProjectSelectorDialog.exec();
+
+            if (dialogResult == QDialog::Accepted) {
                 const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
 
                 if (selectedStartupProjectIndex >= 0) {
@@ -151,7 +153,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (startupProjectSelectorDialog.exec() == QDialog::Rejected)
+            if (dialogResult == QDialog::Rejected)
                 return 0;
 
         } else {
