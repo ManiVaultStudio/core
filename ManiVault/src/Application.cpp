@@ -49,15 +49,27 @@ Application::Application(int& argc, char** argv) :
     qDebug() << "Initializing icon fonts";
 
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, { ":/IconFonts/FontAwesomeBrandsRegular-5.14.otf" }, false, "FontAwesomeBrands")));
-    //_iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, { ":/IconFonts/FontAwesomeRegular-5.14.otf" }, false, "FontAwesomeRegular")));
+
+#if defined(_WIN32) || defined(_WIN64)
+    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, { ":/IconFonts/FontAwesomeRegular-5.14.otf" }, false, "FontAwesomeRegular")));
+#endif
+
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, { ":/IconFonts/FontAwesomeSolid-5.14.otf" }, true, "FontAwesome")));
 
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, { ":/IconFonts/FontAwesomeBrandsRegular-6.4.otf" }, false, "FontAwesomeBrands")));
-    //_iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, { ":/IconFonts/FontAwesomeRegular-6.4.otf" }, false, "FontAwesomeRegular")));
+
+#if defined(_WIN32) || defined(_WIN64)
+    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, { ":/IconFonts/FontAwesomeRegular-6.4.otf" }, false, "FontAwesomeRegular")));
+#endif
+
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, { ":/IconFonts/FontAwesomeSolid-6.4.otf" }, false, "FontAwesome")));
 
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 5, { ":/IconFonts/FontAwesomeBrandsRegular-6.5.otf" }, false, "FontAwesomeBrands")));
-    //_iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 5, { ":/IconFonts/FontAwesomeRegular-6.5.otf" }, false, "FontAwesomeRegular")));
+
+#if defined(_WIN32) || defined(_WIN64)
+    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 5, { ":/IconFonts/FontAwesomeRegular-6.5.otf" }, false, "FontAwesomeRegular")));
+#endif
+
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 5, { ":/IconFonts/FontAwesomeSolid-6.5.otf" }, false, "FontAwesome")));
 
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
