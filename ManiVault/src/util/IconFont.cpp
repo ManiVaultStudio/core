@@ -31,6 +31,8 @@ IconFont::IconFont(const QString& name, const std::uint32_t& majorVersion, const
 {
     try
     {
+        qDebug() << "### Font resource names: " << fontResourceNames;
+
         for (const auto& fontResourceName : fontResourceNames) {
             const auto result = QFontDatabase::addApplicationFont(fontResourceName);
 
@@ -41,6 +43,8 @@ IconFont::IconFont(const QString& name, const std::uint32_t& majorVersion, const
 #ifdef ICON_FONT_VERBOSE
                 qDebug() << "Loaded" << getFullName() << QFontDatabase::applicationFontFamilies(result);
 #endif
+
+                qDebug() << "### Font families: " << QFontDatabase::applicationFontFamilies(result);
 
                 _fontFamily = QFontDatabase::applicationFontFamilies(result).first();
             }
