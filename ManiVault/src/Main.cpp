@@ -150,6 +150,10 @@ int main(int argc, char *argv[])
                     startupProjectFilePath      = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
                 }
             }
+
+            if (startupProjectSelectorDialog.exec() == QDialog::Rejected)
+                return 0;
+
         } else {
             if (startupProjectsMetaActionsCandidates.count() == 1) {
                 startupProjectMetaAction    = startupProjectsMetaActionsCandidates.first().first;
