@@ -5,8 +5,9 @@
 #pragma once
 
 #include <actions/StatusBarAction.h>
+#include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
-#include <actions/GroupAction.h>
+#include <actions/HorizontalGroupAction.h>
 
 /**
  * Workspace status bar action class
@@ -29,6 +30,7 @@ public:
     WorkspaceStatusBarAction(QObject* parent, const QString& title);
 
 private:
-    mv::gui::TriggerAction  _loadPluginBrowserAction;   /** Triggers loading the logging plugin */
-    mv::gui::GroupAction    _settingsAction;
+    mv::gui::HorizontalGroupAction  _settingsAction;        /** Horizontal group action for settings */
+    mv::gui::ToggleAction           _layoutLockedAction;    /** Toggles layout locked for the current workspace */
+    mv::gui::TriggerAction          _moreSettingsAction;    /** Triggers loading the project settings dialog */
 };

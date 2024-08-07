@@ -16,7 +16,7 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     _keepDescendantsAfterRemovalAction(this, "Keep descendants after removal", true),
     _showSimplifiedGuidsAction(this, "Show simplified GUID's", true),
     _statusBarVisibleAction(this, "Show status bar", true),
-    _statusBarOptionsAction(this, "Status bar options")
+    _statusBarOptionsAction(this, "Status bar options", {}, { "Example View OpenGL", "Start Page", "Version", "Plugins", "Logging", "Background Tasks", "Foreground Tasks", "Settings", "Workspace" })
 {
     _statusBarOptionsAction.setDefaultWidgetFlag(OptionsAction::WidgetFlag::Selection);
 
@@ -37,6 +37,8 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     addAction(&_keepDescendantsAfterRemovalAction);
     addAction(&_statusBarVisibleAction);
     addAction(&_statusBarOptionsAction);
+
+    qDebug() << _statusBarOptionsAction.getSelectedOptions();
 }
 
 void MiscellaneousSettingsAction::updateStatusBarOptionsAction()

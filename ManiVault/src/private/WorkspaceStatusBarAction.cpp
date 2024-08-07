@@ -15,82 +15,42 @@ using namespace mv::gui;
 
 WorkspaceStatusBarAction::WorkspaceStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title, "table"),
-    _loadPluginBrowserAction(this, "Plugin"),
-    _settingsAction(this, "Settings")
+    _settingsAction(this, "Workspace settings"),
+    _layoutLockedAction(this, "Layout locked"),
+    _moreSettingsAction(this, "More settings")
 {
     setPopupAction(&_settingsAction);
     setToolTip("Explore workspace settings");
 
-    connect(&mv::workspaces(), &AbstractWorkspaceManager::workspaceCreated, this, [this](const mv::Workspace& workspace) -> void {
-        _settingsAction.removeAllActions();
-        _settingsAction.addAction(const_cast<LockingAction*>(&workspace.getLockingAction()));
-    });
+    _settingsAction.addAction(&_layoutLockedAction);
+    _settingsAction.addAction(&_moreSettingsAction);
 
-    //_pluginsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
-    _settingsAction.setPopupSizeHint(QSize(300, 200));
+    _settingsAction.setShowLabels(false);
+    //_settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
+    _settingsAction.setDefaultWidgetFlag(GroupAction::WidgetFlag::NoMargins);
+    _settingsAction.setPopupSizeHint(QSize(250, 0));
 
-    /*
-    _settingsAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-        auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
+    _layoutLockedAction.setToolTip("Toggle workspace layout locking");
+    _layoutLockedAction.setStretch(1);
 
-        Q_ASSERT(hierarchyWidget != nullptr);
+    _moreSettingsAction.setIconByName("ellipsis-h");
+    _moreSettingsAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
+    _moreSettingsAction.setToolTip("More settings...");
 
-        if (hierarchyWidget == nullptr)
-            return;
-
-        hierarchyWidget->setHeaderHidden(true);
-        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
-        
-        hierarchyWidget->getFilterGroupAction().setVisible(false);
-        hierarchyWidget->getColumnsGroupAction().setVisible(false);
-
-        auto& toolbarAction = hierarchyWidget->getToolbarAction();
-
-        toolbarAction.addAction(&_loadPluginBrowserAction);
-
-        auto treeView = widget->findChild<QTreeView*>("TreeView");
-
-        Q_ASSERT(treeView != nullptr);
-
-        if (treeView == nullptr)
-            return;
-
-        treeView->setColumnHidden(static_cast<int>(AbstractPluginFactoriesModel::Column::NumberOfInstances), true);
-
-        auto treeViewHeader = treeView->header();
-
-        treeViewHeader->setStretchLastSection(false);
-
-        treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractPluginFactoriesModel::Column::Name), QHeaderView::Stretch);
-        treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractPluginFactoriesModel::Column::Version), QHeaderView::ResizeToContents);
-
-        treeViewHeader->resizeSections(QHeaderView::ResizeToContents);
-    });
-    
-
-    _loadPluginBrowserAction.setIconByName("window-maximize");
-    _loadPluginBrowserAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
-    _loadPluginBrowserAction.setToolTip("Load plugin browser");
-
-    connect(&_loadPluginBrowserAction, &TriggerAction::triggered, this, [this]() -> void {
-        projects().getPluginManagerAction().trigger();
-    });
-
-    auto& badge = getBarIconStringAction().getBadge();
-
-    badge.setScale(0.55f);
-    badge.setBackgroundColor(qApp->palette().highlight().color());
-
-    const auto updateBadge = [this, &badge]() -> void {
-        const auto numberPluginsLoaded = _listModel.rowCount();
-
-        badge.setEnabled(numberPluginsLoaded > 0);
-        badge.setNumber(numberPluginsLoaded);
+    const auto updateLayoutLockedAction = [this]() -> void {
+        _layoutLockedAction.setChecked(!(mv::workspaces().hasWorkspace() && workspaces().getLockingAction().getLockedAction().isChecked()));
+        _moreSettingsAction.setVisible(!(mv::projects().hasProject() && mv::projects().getCurrentProject()->getReadOnlyAction().isChecked()));
     };
 
-    updateBadge();
+    updateLayoutLockedAction();
 
-    connect(&_listModel, &QSortFilterProxyModel::rowsInserted, this, updateBadge);
-    connect(&_listModel, &QSortFilterProxyModel::rowsRemoved, this, updateBadge);
-    */
+    connect(&mv::workspaces(), &AbstractWorkspaceManager::workspaceCreated, this, updateLayoutLockedAction);
+
+    connect(&_layoutLockedAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        workspaces().getLockingAction().getLockedAction().setChecked(_layoutLockedAction.isChecked());
+    });
+
+    connect(&_moreSettingsAction, &TriggerAction::triggered, this, [this]() -> void {
+        projects().getEditProjectSettingsAction().trigger();
+    });
 }
