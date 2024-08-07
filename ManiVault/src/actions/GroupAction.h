@@ -182,6 +182,9 @@ public: // Actions management
     virtual void removeAction(WidgetAction* action) final;
 
     /** Remove all actions */
+    virtual void removeAllActions() final;
+
+    /** Remove all actions (alias for GroupAction::removeAllActions()) */
     virtual void clear() final;
 
     /**

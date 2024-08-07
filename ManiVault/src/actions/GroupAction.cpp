@@ -298,11 +298,16 @@ QVariantMap GroupAction::toVariantMap() const
     return variantMap;
 }
 
-void GroupAction::clear()
+void GroupAction::removeAllActions()
 {
     _actions.clear();
 
     emit actionsChanged(_actions);
+}
+
+void GroupAction::clear()
+{
+    removeAllActions();
 }
 
 mv::gui::StretchAction* GroupAction::addStretch(std::int32_t stretch /*= 1*/)
