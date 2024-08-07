@@ -27,12 +27,15 @@ set(TEXTDATA_SOURCES
     src/TextData.cpp
     src/InfoAction.h
     src/InfoAction.cpp
+    src/OrderedMap.h
+    src/OrderedMap.cpp
     src/TextData.json
 )
 
 set(TEXTDATA_HEADERS
     src/TextData.h
     src/InfoAction.h
+    src/OrderedMap.h
 )
 
 set(PLUGIN_MOC_HEADERS

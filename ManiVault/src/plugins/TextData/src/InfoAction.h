@@ -42,5 +42,5 @@ protected:
     Dataset<Text>                   _dataset;                           /** Text dataset reference */
     StringAction                    _dataStorageAction;                 /** Type of data storage action */
     StringAction                    _numberOfPointsAction;              /** Number of points action */
-    StringAction                    _rawDataSizeAction;                 /** Amount of memory for raw data */    
+    StringAction                    _rawDataSizeAction;                 /** Amount of memory for raw data */
 };
