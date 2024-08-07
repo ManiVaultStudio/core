@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QDir>
 #include <QVariantMap>
+#include <QStringList>
 
 inline constexpr auto DEFAULT_MAX_BLOCK_SIZE = std::numeric_limits<std::int32_t>::max() / 2;
 
@@ -66,4 +67,13 @@ QVariant storeQVariant(const QVariant& variant);
  */
 QVariant loadQVariant(const QVariant& variant);
 
+/**
+* Convenience function to store QStringList on disk
+*/
+CORE_EXPORT QVariantMap storeOnDisk(const QStringList& list);
+
+/**
+* Convenience function to load QStringList from disk
+*/
+CORE_EXPORT void loadFromDisk(const QVariantMap& variantMap, QStringList& list);
 }

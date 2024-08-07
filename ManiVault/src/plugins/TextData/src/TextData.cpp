@@ -26,6 +26,24 @@ Dataset<DatasetImpl> TextData::createDataSet(const QString& guid /*= ""*/) const
     return Dataset<DatasetImpl>(new Text(getName(), true, guid));
 }
 
+void TextData::fromVariantMap(const QVariantMap& variantMap)
+{
+    variantMapMustContain(variantMap, "OrderedMap");
+
+    _data.fromVariantMap(variantMap["OrderedMap"].toMap());
+}
+
+QVariantMap TextData::toVariantMap() const
+{
+    QVariantMap variantMap;
+
+    variantMap.insert({
+        { "OrderedMap", QVariant::fromValue(_data.toVariantMap()) }
+    });
+
+    return variantMap;
+}
+
 QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return Application::getIconFont("FontAwesome").getIcon("font", color);
@@ -101,6 +119,28 @@ void Text::selectNone()
 
 void Text::selectInvert()
 {
+}
+
+void Text::fromVariantMap(const QVariantMap& variantMap)
+{
+    DatasetImpl::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Data");
+
+    getRawData<TextData>()->fromVariantMap(variantMap["Data"].toMap());
+
+    events().notifyDatasetDataChanged(this);
+}
+
+QVariantMap Text::toVariantMap() const
+{
+    auto variantMap = DatasetImpl::toVariantMap();
+
+    QVariantMap rawData = getRawData<TextData>()->toVariantMap();
+
+    variantMap["Data"] = rawData;
+
+    return variantMap;
 }
 
 /* -------------------------------------------------------------------------- */

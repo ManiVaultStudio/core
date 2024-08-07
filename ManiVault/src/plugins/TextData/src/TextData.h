@@ -6,6 +6,8 @@
 
 #include "textdata_export.h"
 
+#include "OrderedMap.h"
+
 #include <RawData.h>
 #include <Set.h>
 
@@ -30,9 +32,13 @@ const mv::DataType TextType = mv::DataType(QString("Text"));
 class TEXTDATA_EXPORT TextData : public mv::plugin::RawData
 {
 public:
-    TextData(PluginFactory* factory) : mv::plugin::RawData(factory, TextType) { }
+    TextData(PluginFactory* factory) :
+        mv::plugin::RawData(factory, TextType)
+    {
+    }
+
     ~TextData(void) override;
-    
+
     void init() override;
 
     /**
@@ -42,18 +48,63 @@ public:
      */
     Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
-    void setData(std::vector<QString>& textData)
+    /**
+     * Get a column by the name of its header
+     * @return The column of text data associated with the given header name
+     */
+    const std::vector<QString>& getColumn(QString columnName) const
     {
-        _data = textData;
+        return _data.getColumn(columnName);
     }
 
-    size_t getNumPoints() const
+    void addColumn(QString columnName, std::vector<QString>& columnData)
     {
-        return _data.size();
+        _data.addColumn(columnName, columnData);
     }
+
+    /**
+     * Get the number of elements stored in each column.
+     * @return Number of rows per column
+     */
+    size_t getNumRows() const
+    {
+        return _data.getNumRows();
+    }
+
+    /**
+     * Get the number of columns.
+     * @return Number of columns
+     */
+    size_t getNumColumns() const
+    {
+        return _data.getNumColumns();
+    }
+
+    /**
+     * Get an ordered list of names associated to each column. Names are listed in the order their columns were added.
+     * @return Ordered list of column header names
+     */
+    const std::vector<QString>& getColumnNames() const
+    {
+        return _data.getColumnNames();
+    }
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+        * Save widget action to variant
+        * @return Variant representation of the widget action
+        */
+    QVariantMap toVariantMap() const override;
 
 private:
-    std::vector<QString> _data;
+    OrderedMap _data;
 };
 
 class TEXTDATA_EXPORT Text : public DatasetImpl
@@ -75,18 +126,33 @@ public:
 
         text->setText(this->text());
         text->indices = indices;
-        
+
         return text;
     }
 
-    void setData(std::vector<QString>& textData)
+    const std::vector<QString>& getColumn(QString columnName) const
     {
-        getRawData<TextData>()->setData(textData);
+        return getRawData<TextData>()->getColumn(columnName);
     }
 
-    size_t getNumPoints() const
+    void addColumn(QString columnName, std::vector<QString>& columnData)
     {
-        return getRawData<TextData>()->getNumPoints();
+        getRawData<TextData>()->addColumn(columnName, columnData);
+    }
+
+    size_t getNumRows() const
+    {
+        return getRawData<TextData>()->getNumRows();
+    }
+
+    size_t getNumColumns() const
+    {
+        return getRawData<TextData>()->getNumColumns();
+    }
+
+    const std::vector<QString>& getColumnNames() const
+    {
+        return getRawData<TextData>()->getColumnNames();
     }
 
     /**
@@ -107,6 +173,20 @@ public:
      * @return Icon
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+        * Save widget action to variant
+        * @return Variant representation of the widget action
+        */
+    QVariantMap toVariantMap() const override;
 
 public: // Action getters
     InfoAction& getInfoAction();
