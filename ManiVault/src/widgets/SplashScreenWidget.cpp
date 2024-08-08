@@ -318,7 +318,7 @@ void SplashScreenWidget::createBody()
         projectLogoLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
         const auto applicationVersion   = Application::current()->getVersion();
-        const auto versionString        = QString("%1.%2%3").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString(MV_VERSION_SUFFIX));
+        const auto versionString        = QString("%1.%2%3").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString(MV_VERSION_SUFFIX.data()));
 
         htmlLabel->setText(QString(" \
             <div> \
