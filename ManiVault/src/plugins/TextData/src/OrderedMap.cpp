@@ -77,7 +77,7 @@ namespace
         loadFromDisk(variantMap, combinedList);
 
         // Iterate over the big stringlist and extract the key-value pairs
-        for (int i = 0; i < combinedList.size(); )
+        for (size_t i = 0; i < static_cast<size_t>(combinedList.size()); )
         {
             QString key = combinedList[i];                          // Extract key
             size_t numElements = combinedList[i + 1].toULongLong(); // Extract number of rows in value
