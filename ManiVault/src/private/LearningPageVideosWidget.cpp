@@ -65,14 +65,20 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
             _videosListView.closePersistentEditor(_filterModel.index(rowIndex, static_cast<int>(LearningPageVideosModel::Column::Delegate)));
     });
 
-    connect(qApp, &QApplication::paletteChanged, this, &LearningPageVideosWidget::updateCustomStyle);
-
     updateCustomStyle();
 }
 
 void LearningPageVideosWidget::showEvent(QShowEvent* showEvent)
 {
     _model.populateFromServer();
+}
+
+bool LearningPageVideosWidget::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
+
+    return QWidget::event(event);
 }
 
 void LearningPageVideosWidget::updateCustomStyle()

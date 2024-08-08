@@ -83,6 +83,13 @@ public:
             return _filteredActionsAction;
         }
 
+    protected:
+        /**
+        * Override QObject's event handling
+        * @return Boolean Wheter the event was recognized and processed
+        */
+        bool event(QEvent* event) override;
+
     protected: // Internals
 
         /**

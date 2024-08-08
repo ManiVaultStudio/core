@@ -65,7 +65,14 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     toggleViews();
     
-    connect(qApp, &QApplication::paletteChanged, this, &StartPageOpenProjectWidget::updateCustomStyle);
+}
+
+bool StartPageOpenProjectWidget::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
+
+    return QWidget::event(event);
 }
 
 void StartPageOpenProjectWidget::updateActions()

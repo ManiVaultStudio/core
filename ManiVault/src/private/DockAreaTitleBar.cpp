@@ -86,10 +86,17 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     updateReadOnly();
 
     updateStyle();
-    connect(qApp, &QApplication::paletteChanged, this, &DockAreaTitleBar::updateStyle);
 }
 
 void DockAreaTitleBar::updateStyle()
 {
     _addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
+}
+
+bool DockAreaTitleBar::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateStyle();
+
+    return ads::CDockAreaTitleBar::event(event);
 }

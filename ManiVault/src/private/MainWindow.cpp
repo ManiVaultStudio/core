@@ -221,6 +221,14 @@ void MainWindow::resizeEvent(QResizeEvent* resizeEvent)
     QWidget::resizeEvent(resizeEvent);
 }
 
+bool MainWindow::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateStyle();
+
+    return QMainWindow::event(event);
+}
+
 void MainWindow::restoreWindowGeometryFromSettings()
 {
     const auto storedMainWindowGeometry = Application::current()->getSetting("MainWindow/Geometry", QVariant());
@@ -284,7 +292,6 @@ void MainWindow::checkGraphicsCapabilities()
 
     ctx.doneCurrent();
     
-    connect(qApp, &QApplication::paletteChanged, this, &MainWindow::updateStyle);
 }
 
 void MainWindow::updateStyle()

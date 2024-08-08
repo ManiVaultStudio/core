@@ -96,6 +96,12 @@ protected:
      */
     void leaveEvent(QEvent* leaveEvent) override;
 
+    /**
+     * Override QObject's event handling
+     * @return Boolean Wheter the event was recognized and processed
+     */
+    bool event(QEvent* event) override;
+
 private:
 
     /**

@@ -70,6 +70,13 @@ private:
          */
         void setTask(mv::Task* task);
 
+    protected:
+        /**
+         * Override QObject's event handling
+         * @return Boolean Wheter the event was recognized and processed
+         */
+        bool event(QEvent* event) override;
+
     private:
 
         /** Update the overlay visibility based on whether there is a task and, if yes, whether it is running or not */

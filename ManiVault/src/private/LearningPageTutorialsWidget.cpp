@@ -20,9 +20,15 @@ LearningPageTutorialsWidget::LearningPageTutorialsWidget(LearningPageContentWidg
 
     setLayout(&_mainLayout);
 
-    connect(qApp, &QApplication::paletteChanged, this, &LearningPageTutorialsWidget::updateCustomStyle);
-
     updateCustomStyle();
+}
+
+bool LearningPageTutorialsWidget::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
+
+    return QWidget::event(event);
 }
 
 void LearningPageTutorialsWidget::updateCustomStyle()

@@ -50,6 +50,12 @@ private: // Window geometry persistence
      */
     void setDefaultWindowGeometry(const float& coverage = 0.7f);
     
+    /**
+     * Override QObject's event handling
+     * @return Boolean Wheter the event was recognized and processed
+     */
+    bool event(QEvent* event) override;
+
 public: // Themes
     
     /** refresh the widget and its children according to new style */

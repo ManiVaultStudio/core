@@ -425,6 +425,13 @@ public: // Widgets
      */
     void setWidgetConfigurationFunction(const WidgetConfigurationFunction& widgetConfigurationFunction);
 
+protected:
+    /**
+     * Override QObject's event handling
+     * @return Boolean Wheter the event was recognized and processed
+     */
+    bool event(QEvent* event) override;
+
 public: // Visibility
 
     /**
