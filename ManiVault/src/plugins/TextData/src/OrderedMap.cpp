@@ -128,6 +128,7 @@ namespace mv
         catch (std::out_of_range& e)
         {
             qWarning() << "Failed to find column: " << columnName;
+            qWarning() << "Caught exception: " << e.what();
             return _columns.at(columnName);
         }
     }
