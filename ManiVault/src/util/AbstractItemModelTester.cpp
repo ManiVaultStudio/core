@@ -4,9 +4,10 @@
 
 #include "AbstractItemModelTester.h"
 
-#include <QStringList>
-#include <QSize>
 #include <QAbstractItemModel>
+#include <QSize>
+#include <QStringList>
+#include <QMetaType>
 
 /*!
     Connect to all of the models signals.  Whenever anything happens
@@ -386,23 +387,23 @@ void AbstractItemModelTester::data()
     // General Purpose roles that should return a QString
     QVariant variant = model->data(model->index(0, 0), Qt::ToolTipRole);
     if (variant.isValid())
-        Q_ASSERT(variant.canConvert(QVariant::String));
+        Q_ASSERT(variant.canConvert(QMetaType(QMetaType::QString)));
     variant = model->data(model->index(0, 0), Qt::StatusTipRole);
     if (variant.isValid())
-        Q_ASSERT(variant.canConvert(QVariant::String));
+        Q_ASSERT(variant.canConvert(QMetaType(QMetaType::QString)));
     variant = model->data(model->index(0, 0), Qt::WhatsThisRole);
     if (variant.isValid())
-        Q_ASSERT(variant.canConvert(QVariant::String));
+        Q_ASSERT(variant.canConvert(QMetaType(QMetaType::QString)));
 
     // General Purpose roles that should return a QSize
     variant = model->data(model->index(0, 0), Qt::SizeHintRole);
     if (variant.isValid())
-        Q_ASSERT(variant.canConvert(QVariant::Size));
+        Q_ASSERT(variant.canConvert(QMetaType(QMetaType::QSize)));
 
     // General Purpose roles that should return a QFont
     QVariant fontVariant = model->data(model->index(0, 0), Qt::FontRole);
     if (fontVariant.isValid())
-        Q_ASSERT(fontVariant.canConvert(QVariant::Font));
+        Q_ASSERT(fontVariant.canConvert(QMetaType(QMetaType::QFont)));
 
     // Check that the alignment is one we know about
     QVariant textAlignmentVariant = model->data(model->index(0, 0), Qt::TextAlignmentRole);
@@ -414,11 +415,11 @@ void AbstractItemModelTester::data()
     // General Purpose roles that should return a QColor
     QVariant colorVariant = model->data(model->index(0, 0), Qt::BackgroundRole);
     if (colorVariant.isValid())
-        Q_ASSERT(colorVariant.canConvert(QVariant::Color));
+        Q_ASSERT(colorVariant.canConvert(QMetaType(QMetaType::QColor)));
 
     colorVariant = model->data(model->index(0, 0), Qt::ForegroundRole);
     if (colorVariant.isValid())
-        Q_ASSERT(colorVariant.canConvert(QVariant::Color));
+        Q_ASSERT(colorVariant.canConvert(QMetaType(QMetaType::QColor)));
 
     // Check that the "check state" is one we know about.
     QVariant checkStateVariant = model->data(model->index(0, 0), Qt::CheckStateRole);

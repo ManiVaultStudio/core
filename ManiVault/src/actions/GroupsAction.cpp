@@ -346,7 +346,14 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     
     // We do all styling here
     updateCustomStyle();
-    connect(qApp, &QApplication::paletteChanged, this, &GroupsAction::Widget::updateCustomStyle);
+}
+
+bool GroupsAction::Widget::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
+
+    return QWidget::event(event);
 }
 
 void GroupsAction::Widget::updateToolbar()

@@ -193,7 +193,6 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _metaDataLabel.installEventFilter(this);
     
     updateCustomStyle();
-    connect(qApp, &QApplication::paletteChanged, this, &StartPageActionDelegateEditorWidget::updateCustomStyle);
 
     updateInfoWidgetVisibility();
 }
@@ -217,6 +216,10 @@ bool StartPageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* e
     {
         case QEvent::Resize:
             updateTextLabels();
+            break;
+
+        case QEvent::ApplicationPaletteChange:
+            updateCustomStyle();
             break;
 
         default:

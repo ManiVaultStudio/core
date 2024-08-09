@@ -25,6 +25,13 @@ protected:
      */
     LearningPageTutorialsWidget(LearningPageContentWidget* learningPageContentWidget);
 
+protected:
+    /**
+     * Override QObject's event handling
+     * @return Boolean Wheter the event was recognized and processed
+     */
+    bool event(QEvent* event) override;
+
 private:
 
     /** Update all custom style elements */

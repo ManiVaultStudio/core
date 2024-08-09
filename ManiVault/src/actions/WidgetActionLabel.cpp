@@ -52,7 +52,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
     _nameLabel.installEventFilter(this);
 
     updateCustomStyle();
-    connect(qApp, &QApplication::paletteChanged, this, &WidgetActionLabel::updateCustomStyle);
 }
 
 bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
@@ -133,8 +132,16 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
         }
 
         case QEvent::EnabledChange:
+        {
             updateNameLabel();
             break;
+        }
+
+        case QEvent::ApplicationPaletteChange:
+        {
+            updateCustomStyle();
+            break;
+        }
 
         default:
             break;

@@ -59,8 +59,6 @@ LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugi
 
     _actionsOverlayWidget.hide();
 
-    connect(qApp, &QApplication::paletteChanged, this, &LearningPagePluginActionsWidget::updateStyle);
-
     updateStyle();
 }
 
@@ -93,6 +91,14 @@ void LearningPagePluginActionsWidget::leaveEvent(QEvent* leaveEvent)
     _actionsOverlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
     updateStyle();
+}
+
+bool LearningPagePluginActionsWidget::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateStyle();
+
+    return QWidget::event(event);
 }
 
 bool LearningPagePluginActionsWidget::hasOverlay() const
