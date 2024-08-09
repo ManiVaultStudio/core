@@ -541,8 +541,6 @@ ViewPluginDockWidget::ProgressOverlayWidget::ProgressOverlayWidget(QWidget* pare
 
     updateVisibility();
 
-    connect(qApp, &QApplication::paletteChanged, this, &ProgressOverlayWidget::updateCustomStyle);
-
     updateCustomStyle();
 }
 
