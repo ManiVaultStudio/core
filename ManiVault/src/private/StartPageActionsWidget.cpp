@@ -93,7 +93,6 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent, const QString& t
             closePersistentEditor(rowIndex);
     });
     
-    connect(qApp, &QApplication::paletteChanged, this, &StartPageActionsWidget::updateCustomStyle);
 }
 
 bool StartPageActionsWidget::event(QEvent* event)

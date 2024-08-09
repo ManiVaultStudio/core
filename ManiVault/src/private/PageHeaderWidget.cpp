@@ -40,8 +40,6 @@ PageHeaderWidget::PageHeaderWidget(const QString& title, QWidget* parent /*= nul
     _layout.addWidget(&_iconLabel);
 
     updateCustomStyle();
-
-    connect(qApp, &QApplication::paletteChanged, this, &PageHeaderWidget::updateCustomStyle);
 }
 
 void PageHeaderWidget::resizeEvent(QResizeEvent* event)
@@ -52,6 +50,14 @@ void PageHeaderWidget::resizeEvent(QResizeEvent* event)
 void PageHeaderWidget::showEvent(QShowEvent* event)
 {
     resizeIcon(size());
+}
+
+bool PageHeaderWidget::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
+
+    return QWidget::event(event);
 }
 
 void PageHeaderWidget::resizeIcon(const QSize& newSize)
