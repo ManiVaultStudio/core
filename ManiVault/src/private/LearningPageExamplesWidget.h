@@ -30,6 +30,13 @@ private:
     /** Update all custom style elements */
     void updateCustomStyle();
 
+protected:
+    /**
+     * Override QObject's event handling
+     * @return Boolean Wheter the event was recognized and processed
+     */
+    bool event(QEvent* event) override;
+
 private:
     LearningPageContentWidget*  _learningPageContentWidget;     /** Pointer to owning learning page content widget */
     QVBoxLayout                 _mainLayout;                    /** Main vertical layout */

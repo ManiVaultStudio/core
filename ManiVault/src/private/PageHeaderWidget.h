@@ -38,6 +38,12 @@ protected:
      */
     void showEvent(QShowEvent* event) override;
 
+    /**
+     * Override QObject's event handling
+     * @return Boolean Wheter the event was recognized and processed
+     */
+    bool event(QEvent* event) override;
+
 private:
     /**
      * Resize the main icon shown in the header to newSize x newSize pixels
