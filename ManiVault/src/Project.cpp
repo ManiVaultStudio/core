@@ -256,6 +256,8 @@ void Project::initialize()
 
     _selectionGroupingAction.setIconByName("object-group");
     _selectionGroupingAction.setToolTip("Enable/disable dataset grouping");
+
+    _statusBarOptionsAction.setDefaultWidgetFlag(OptionsAction::WidgetFlag::Selection);
 }
 
 }

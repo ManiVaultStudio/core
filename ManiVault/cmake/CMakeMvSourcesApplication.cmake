@@ -28,6 +28,7 @@ set(PRIVATE_ACTIONS_HEADERS
     src/private/ForegroundTasksStatusBarAction.h
     src/private/FrontPagesStatusBarAction.h
     src/private/SettingsStatusBarAction.h
+    src/private/WorkspaceStatusBarAction.h
 )
 
 set(PRIVATE_ACTIONS_SOURCES
@@ -38,6 +39,7 @@ set(PRIVATE_ACTIONS_SOURCES
     src/private/ForegroundTasksStatusBarAction.cpp
     src/private/FrontPagesStatusBarAction.cpp
     src/private/SettingsStatusBarAction.cpp
+    src/private/WorkspaceStatusBarAction.cpp
 )
 
 set(PRIVATE_ACTIONS_FILES
