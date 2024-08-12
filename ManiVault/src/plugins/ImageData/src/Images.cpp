@@ -323,18 +323,18 @@ void Images::getScalarData(const std::vector<std::uint32_t>& dimensionIndices, Q
 void Images::getImageScalarData(std::uint32_t imageIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     try {
-        const auto numberOfPixels               = static_cast<std::int32_t>(getNumberOfPixels());
-        const auto numberOfComponentsPerPixel   = static_cast<std::int32_t>(getNumberOfComponentsPerPixel());
-        const auto numberOfElementsRequired     = numberOfPixels * numberOfComponentsPerPixel;
+        const std::uint32_t numberOfPixels               = getNumberOfPixels();
+        const std::uint32_t numberOfComponentsPerPixel   = getNumberOfComponentsPerPixel();
+        const std::uint32_t numberOfElementsRequired     = numberOfPixels * numberOfComponentsPerPixel;
 
         if (static_cast<std::uint32_t>(scalarData.count()) < numberOfElementsRequired)
             throw std::runtime_error("Scalar data vector number of elements is smaller than (nComponentsPerPixel * nPixels)");
 
-        const auto dimensionIndexOffset = imageIndex * getNumberOfComponentsPerPixel();
+        const std::uint32_t dimensionIndexOffset = imageIndex * numberOfComponentsPerPixel;
 
         std::vector<std::uint32_t> dimensionIndices;
 
-        dimensionIndices.resize(getNumberOfComponentsPerPixel());
+        dimensionIndices.resize(numberOfComponentsPerPixel);
 
         std::iota(dimensionIndices.begin(), dimensionIndices.end(), dimensionIndexOffset);
 
@@ -502,18 +502,18 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
         targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height())));
 
         points->visitData([this, points, dimensionIndex, &scalarData, sourceImageSize, targetImageSize](auto pointData) {
-            const auto dimensionId      = dimensionIndex;
-            const auto imageSize        = _imageData->getImageSize();
-            const auto noPixels         = getNumberOfPixels();
-            const auto selection        = points->getSelection<Points>();
-            const auto selectionIndices = selection->indices;
-            const auto selectionSize    = selectionIndices.size();
+            const auto dimensionId       = dimensionIndex;
+            const auto imageSize         = _imageData->getImageSize();
+            const auto noPixels          = getNumberOfPixels();
+            const auto selection         = points->getSelection<Points>();
+            const auto& selectionIndices = selection->indices;
+            const auto selectionSize     = selectionIndices.size();
 
             if (!selectionIndices.empty()) {
                 for (std::uint32_t p = 0; p < noPixels; p++) {
                     auto sum = 0.0f;
 
-                    for (auto selectionIndex : selectionIndices)
+                    for (const auto& selectionIndex : selectionIndices)
                         sum += pointData[selectionIndex][p];
 
                     scalarData[p] = static_cast<float>(sum / selectionSize);
