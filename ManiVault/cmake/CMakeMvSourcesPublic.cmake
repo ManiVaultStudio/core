@@ -340,6 +340,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/IconAction.h
     src/actions/IconPickerAction.h
     src/actions/ApplicationIconAction.h
+    src/actions/ViewTooltipAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -370,6 +371,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/IconAction.cpp
     src/actions/IconPickerAction.cpp
     src/actions/ApplicationIconAction.cpp
+    src/actions/ViewTooltipAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
