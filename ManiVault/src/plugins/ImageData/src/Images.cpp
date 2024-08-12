@@ -502,18 +502,18 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
         targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height())));
 
         points->visitData([this, points, dimensionIndex, &scalarData, sourceImageSize, targetImageSize](auto pointData) {
-            const auto dimensionId      = dimensionIndex;
-            const auto imageSize        = _imageData->getImageSize();
-            const auto noPixels         = getNumberOfPixels();
-            const auto selection        = points->getSelection<Points>();
-            const auto selectionIndices = selection->indices;
-            const auto selectionSize    = selectionIndices.size();
+            const auto dimensionId       = dimensionIndex;
+            const auto imageSize         = _imageData->getImageSize();
+            const auto noPixels          = getNumberOfPixels();
+            const auto selection         = points->getSelection<Points>();
+            const auto& selectionIndices = selection->indices;
+            const auto selectionSize     = selectionIndices.size();
 
             if (!selectionIndices.empty()) {
                 for (std::uint32_t p = 0; p < noPixels; p++) {
                     auto sum = 0.0f;
 
-                    for (auto selectionIndex : selectionIndices)
+                    for (const auto& selectionIndex : selectionIndices)
                         sum += pointData[selectionIndex][p];
 
                     scalarData[p] = static_cast<float>(sum / selectionSize);
