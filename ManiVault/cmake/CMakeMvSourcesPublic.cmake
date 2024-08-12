@@ -408,6 +408,7 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/MarkdownDocument.h
 	src/widgets/MarkdownDialog.h
 	src/widgets/YouTubeVideoDialog.h
+	src/widgets/ShortcutMapOverlayWidget.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
@@ -422,6 +423,7 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/MarkdownDocument.cpp
 	src/widgets/MarkdownDialog.cpp
 	src/widgets/YouTubeVideoDialog.cpp
+	src/widgets/ShortcutMapOverlayWidget.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES
