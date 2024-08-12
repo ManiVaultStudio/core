@@ -41,9 +41,15 @@ PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     _layout.addLayout(&_contentLayout, 2);
     _layout.addStretch(1);
 
-    connect(qApp, &QApplication::paletteChanged, this, &PageWidget::updateCustomStyle);
-
     updateCustomStyle();
+}
+
+bool PageWidget::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
+
+    return QWidget::event(event);
 }
 
 void PageWidget::paintEvent(QPaintEvent* paintEvent)

@@ -26,6 +26,7 @@
 #include "BackgroundTasksStatusBarAction.h"
 #include "ForegroundTasksStatusBarAction.h"
 #include "SettingsStatusBarAction.h"
+#include "WorkspaceStatusBarAction.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -107,14 +108,16 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
         auto foregroundTasksStatusBarAction = new ForegroundTasksStatusBarAction(this, "Foreground Tasks");
         auto settingsTasksStatusBarAction   = new SettingsStatusBarAction(this, "Settings");
+        auto workspaceStatusBarAction       = new WorkspaceStatusBarAction(this, "Workspace");
 
         statusBar()->insertPermanentWidget(0, startPageStatusBarAction->createWidget(this));
         statusBar()->insertPermanentWidget(1, versionStatusBarAction->createWidget(this));
         statusBar()->insertPermanentWidget(2, pluginsStatusBarAction->createWidget(this));
-        statusBar()->insertPermanentWidget(3, loggingStatusBarAction->createWidget(this), 4);
-        statusBar()->insertPermanentWidget(4, backgroundTasksStatusBarAction->createWidget(this), 1);
-        statusBar()->insertPermanentWidget(5, foregroundTasksStatusBarAction->createWidget(this));
-        statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(3, workspaceStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(4, loggingStatusBarAction->createWidget(this), 4);
+        statusBar()->insertPermanentWidget(5, backgroundTasksStatusBarAction->createWidget(this), 1);
+        statusBar()->insertPermanentWidget(6, foregroundTasksStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(7, settingsTasksStatusBarAction->createWidget(this));
 
         const auto updateStatusBarVisibility = [this]() -> void {
             statusBar()->setVisible(mv::projects().hasProject() && mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction().isChecked());
@@ -221,6 +224,14 @@ void MainWindow::resizeEvent(QResizeEvent* resizeEvent)
     QWidget::resizeEvent(resizeEvent);
 }
 
+bool MainWindow::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateStyle();
+
+    return QMainWindow::event(event);
+}
+
 void MainWindow::restoreWindowGeometryFromSettings()
 {
     const auto storedMainWindowGeometry = Application::current()->getSetting("MainWindow/Geometry", QVariant());
@@ -284,7 +295,6 @@ void MainWindow::checkGraphicsCapabilities()
 
     ctx.doneCurrent();
     
-    connect(qApp, &QApplication::paletteChanged, this, &MainWindow::updateStyle);
 }
 
 void MainWindow::updateStyle()

@@ -104,10 +104,10 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
         connect(&_selectedAction, &TriggerAction::triggered, widget, [this, treeView]() -> void {
             QModelIndexList persistentModelIndexes;
 
-            for (auto rowIndex : treeView->selectionModel()->selectedRows())
+            for (const auto& rowIndex : treeView->selectionModel()->selectedRows())
                 persistentModelIndexes << _listFilterModel.mapToSource(rowIndex.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
 
-            for (auto persistentModelIndex : persistentModelIndexes)
+            for (const auto& persistentModelIndex : persistentModelIndexes)
                 _listModel.unhideItem(persistentModelIndex);
         });
 
@@ -117,7 +117,7 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
             for (int rowIndex = 0; rowIndex < _listFilterModel.rowCount(); rowIndex++)
                 persistentModelIndexes << _listFilterModel.mapToSource(_listFilterModel.index(rowIndex, static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
 
-            for (auto persistentModelIndex : persistentModelIndexes)
+            for (const auto& persistentModelIndex : persistentModelIndexes)
                 _listModel.unhideItem(persistentModelIndex);
         });
     });
@@ -129,25 +129,32 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
     _triggersGroupAction.addAction(&_selectedAction);
     _triggersGroupAction.addAction(&_allAction);
 
-    const auto updateReadOnlyAndIcon = [this]() -> void {
-        const auto numberOfHiddenDatasets   = _listFilterModel.rowCount();
-        const auto mayUnhide                = numberOfHiddenDatasets >= 1;
-
-        setEnabled(mayUnhide);
-
-        auto& badge = getBadge();
-
-        badge.setEnabled(mayUnhide);
-        badge.setNumber(numberOfHiddenDatasets);
-        badge.setBackgroundColor(qApp->palette().highlight().color());
-    };
-
     updateReadOnlyAndIcon();
 
-    connect(qApp, &QApplication::paletteChanged, this, updateReadOnlyAndIcon);
+    connect(&_listFilterModel, &QSortFilterProxyModel::modelReset, this, &UnhideAction::updateReadOnlyAndIcon);
+    connect(&_listFilterModel, &QSortFilterProxyModel::rowsInserted, this, &UnhideAction::updateReadOnlyAndIcon);
+    connect(&_listFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &UnhideAction::updateReadOnlyAndIcon);
+    connect(&_listFilterModel, &QSortFilterProxyModel::layoutChanged, this, &UnhideAction::updateReadOnlyAndIcon);
+}
 
-    connect(&_listFilterModel, &QSortFilterProxyModel::modelReset, this, updateReadOnlyAndIcon);
-    connect(&_listFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateReadOnlyAndIcon);
-    connect(&_listFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateReadOnlyAndIcon);
-    connect(&_listFilterModel, &QSortFilterProxyModel::layoutChanged, this, updateReadOnlyAndIcon);
+void UnhideAction::updateReadOnlyAndIcon()
+{
+    const auto numberOfHiddenDatasets = _listFilterModel.rowCount();
+    const auto mayUnhide = numberOfHiddenDatasets >= 1;
+
+    setEnabled(mayUnhide);
+
+    auto& badge = getBadge();
+
+    badge.setEnabled(mayUnhide);
+    badge.setNumber(numberOfHiddenDatasets);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
+}
+
+bool UnhideAction::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateReadOnlyAndIcon();
+
+    return WidgetAction::event(event);
 }

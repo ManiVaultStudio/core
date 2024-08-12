@@ -124,8 +124,8 @@ void OptionsAction::selectOption(const QString& option, bool unselect /*= false*
 
 void OptionsAction::toggleOption(const QString& option)
 {
-    if (!hasOption(option))
-        return;
+    //if (!hasOption(option))
+    //    return;
 
     selectOption(option, isOptionSelected(option));
 }

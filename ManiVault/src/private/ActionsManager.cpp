@@ -13,6 +13,8 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QDialogButtonBox>
+#include <QMetaType>
+#include <QMetaObject>
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -84,22 +86,22 @@ void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
         {
             const auto publicActionMap      = publicActionVariant.toMap();
             const auto publicActionTitle    = publicActionMap["Title"].toString();
-            const auto metaType             = publicActionMap["ActionType"].toString();
+            const auto metaTypeName         = publicActionMap["ActionType"].toString();
 
-            if (metaType.isEmpty())
+            if (metaTypeName.isEmpty())
                 throw std::runtime_error(QString("Action type is not specified for %1").arg(publicActionTitle).toLatin1());
 
-            const auto metaTypeId   = QMetaType::type(metaType.toLatin1());
-            const auto metaObject   = QMetaType::metaObjectForType(metaTypeId);
+            const auto metaType     = QMetaType::fromName(metaTypeName.toLatin1());
+            const auto metaObject   = metaType.metaObject();
                 
             if (!metaObject)
-                throw std::runtime_error(QString("Meta object type '%1' for '%2' is not known. Did you forget to register the action correctly with Qt meta object system? See ToggleAction.h for an example.").arg(metaType, publicActionTitle).toLatin1());
+                throw std::runtime_error(QString("Meta object type '%1' for '%2' is not known. Did you forget to register the action correctly with Qt meta object system? See ToggleAction.h for an example.").arg(metaTypeName, publicActionTitle).toLatin1());
 
             auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, publicActionTitle));
             auto publicAction       = dynamic_cast<WidgetAction*>(metaObjectInstance);
 
             if (!publicAction)
-                throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(metaType).toLatin1());
+                throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(publicActionTitle).toLatin1());
 
             publicAction->fromVariantMap(publicActionMap);
 

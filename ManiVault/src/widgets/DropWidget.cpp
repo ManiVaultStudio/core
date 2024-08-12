@@ -97,7 +97,7 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
                     auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(layout()->itemAt(i)->widget());
 
                     if (dropRegionContainerWidget)
-                        dropRegionContainerWidget->setHighLight(dropRegionContainerWidget->geometry().contains(dragMoveEvent->pos()));
+                        dropRegionContainerWidget->setHighLight(dropRegionContainerWidget->geometry().contains(dragMoveEvent->position().toPoint()));
                 }
             }
 
@@ -129,7 +129,7 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
                 auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(layout()->itemAt(i)->widget());
 
                 if (dropRegionContainerWidget) {
-                    if (dropRegionContainerWidget->geometry().contains(dropEvent->pos()))
+                    if (dropRegionContainerWidget->geometry().contains(dropEvent->position().toPoint()))
                         dropRegionContainerWidget->getDropRegion()->drop();
                 }
             }

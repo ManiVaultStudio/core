@@ -34,6 +34,20 @@ public:
      */
     Q_INVOKABLE UnhideAction(QObject* parent, const QString& title);
 
+protected:
+    /**
+     * Override QObject's event handling
+     * @return Boolean Wheter the event was recognized and processed
+     */
+    bool event(QEvent* event) override;
+
+private:
+    /**
+     * Updates badge and enables/disables the action
+     * @return 
+     */
+    void updateReadOnlyAndIcon();
+
 private:
     mv::gui::TreeAction             _treeAction;                /** Tree action for displaying the model */
     mv::DataHierarchyListModel      _listModel;                 /** List model of the data hierarchy */

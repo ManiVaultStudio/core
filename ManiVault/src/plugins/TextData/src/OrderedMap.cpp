@@ -77,7 +77,7 @@ namespace
         loadFromDisk(variantMap, combinedList);
 
         // Iterate over the big stringlist and extract the key-value pairs
-        for (int i = 0; i < combinedList.size(); )
+        for (qsizetype i = 0; i < combinedList.size(); )
         {
             QString key = combinedList[i];                          // Extract key
             size_t numElements = combinedList[i + 1].toULongLong(); // Extract number of rows in value
@@ -125,7 +125,7 @@ namespace mv
         {
             return _columns.at(columnName);
         }
-        catch (std::out_of_range& e)
+        catch ([[maybe_unused]] std::out_of_range& e)
         {
             qWarning() << "Failed to find column: " << columnName;
             return _columns.at(columnName);

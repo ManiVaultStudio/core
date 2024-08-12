@@ -4,15 +4,6 @@ cmake_minimum_required(VERSION 3.17)
 # Project: ManiVault-core
 # -----------------------------------------------------------------------------
 set(MV_CORE "mv-core")
-
-set(MV_VERSION_MAJOR 1)
-set(MV_VERSION_MINOR 0)
-set(MV_VERSION_PATCH 0)
-set(MV_VERSION_SUFFIX "") # e.g. for release candidates rc1
-
-include(cmake/Utils.cmake)
-mv_set_version()
-
 project(${MV_CORE} VERSION ${MV_VERSION})
 
 # These three targets defined in this CMakeLists.txt

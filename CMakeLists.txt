@@ -32,6 +32,9 @@ if(MV_USE_AVX)
     message(STATUS "Using AVX: ON")
 endif()
 
+include(ManiVault/cmake/Utils.cmake)
+mv_set_version()
+
 # -----------------------------------------------------------------------------
 # Tests
 # -----------------------------------------------------------------------------

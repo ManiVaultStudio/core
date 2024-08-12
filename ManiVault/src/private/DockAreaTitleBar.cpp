@@ -78,7 +78,9 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     insertWidget(indexOf(button(ads::TitleBarButtonTabsMenu)) - 1, _addViewPluginToolButton);
 
     const auto updateReadOnly = [this]() -> void {
-        _addViewPluginToolButton->setVisible(!workspaces().getLockingAction().isLocked());
+        const auto projectIsReadOnly = mv::projects().hasProject() && mv::projects().getCurrentProject()->getReadOnlyAction().isChecked();
+
+        _addViewPluginToolButton->setVisible(!workspaces().getLockingAction().isLocked() && !projectIsReadOnly);
     };
 
     connect(&workspaces().getLockingAction().getLockedAction(), &ToggleAction::toggled, this, updateReadOnly);
@@ -86,10 +88,17 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     updateReadOnly();
 
     updateStyle();
-    connect(qApp, &QApplication::paletteChanged, this, &DockAreaTitleBar::updateStyle);
 }
 
 void DockAreaTitleBar::updateStyle()
 {
     _addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
+}
+
+bool DockAreaTitleBar::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateStyle();
+
+    return ads::CDockAreaTitleBar::event(event);
 }
