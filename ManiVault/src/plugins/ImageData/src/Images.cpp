@@ -323,18 +323,18 @@ void Images::getScalarData(const std::vector<std::uint32_t>& dimensionIndices, Q
 void Images::getImageScalarData(std::uint32_t imageIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     try {
-        const auto numberOfPixels               = static_cast<std::int32_t>(getNumberOfPixels());
-        const auto numberOfComponentsPerPixel   = static_cast<std::int32_t>(getNumberOfComponentsPerPixel());
-        const auto numberOfElementsRequired     = numberOfPixels * numberOfComponentsPerPixel;
+        const std::uint32_t numberOfPixels               = getNumberOfPixels();
+        const std::uint32_t numberOfComponentsPerPixel   = getNumberOfComponentsPerPixel();
+        const std::uint32_t numberOfElementsRequired     = numberOfPixels * numberOfComponentsPerPixel;
 
         if (static_cast<std::uint32_t>(scalarData.count()) < numberOfElementsRequired)
             throw std::runtime_error("Scalar data vector number of elements is smaller than (nComponentsPerPixel * nPixels)");
 
-        const auto dimensionIndexOffset = imageIndex * getNumberOfComponentsPerPixel();
+        const std::uint32_t dimensionIndexOffset = imageIndex * numberOfComponentsPerPixel;
 
         std::vector<std::uint32_t> dimensionIndices;
 
-        dimensionIndices.resize(getNumberOfComponentsPerPixel());
+        dimensionIndices.resize(numberOfComponentsPerPixel);
 
         std::iota(dimensionIndices.begin(), dimensionIndices.end(), dimensionIndexOffset);
 
