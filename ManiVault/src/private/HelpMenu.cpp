@@ -118,11 +118,13 @@ void HelpMenu::aboutThirdParties()
 {
     const QString message = QMessageBox::tr(
         "<p>ManiVault uses several third party libraries: </p>"
-        "&bull; Qt-Advanced-Docking-System (LGPL v2.1): <a href=\"http://%1/\">%1</a> <br>"
-        "&bull; Quazip (LGPL v2.1): <a href=\"http://%2/\">%2</a> <br>"
-        "&bull; Qt ((L)GPL): <a href=\"http://%3/\">%3</a> "
+        "&bull; Qt-Advanced-Docking-System (LGPL v2.1): <a href=\"https://%1/\">%1</a> <br>"
+        "&bull; Quazip (LGPL v2.1): <a href=\"https://%2/\">%2</a> <br>"
+        "&bull; zlib (zlib license): <a href=\"https://%3/\">%3</a> <br>"
+        "&bull; Qt ((L)GPL): <a href=\"https://%4/\">%4</a> "
     ).arg(QStringLiteral("github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"),
           QStringLiteral("github.com/stachenov/quazip"),
+          QStringLiteral("zlib.net"),
           QStringLiteral("qt.io"));
 
     auto msgBox = new QMessageBox(this->parentWidget());
