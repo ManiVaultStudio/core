@@ -152,7 +152,7 @@ public: // Action getters
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
     gui::TriggerAction& getHelpAction() { return _helpAction; }
     gui::PresetsAction& getPresetsAction() { return _presetsAction; }
-    gui::ViewPluginToolTipAction& getTooltipAction() { return _tooltipAction; }
+    gui::ViewPluginToolTipAction& getToolTipAction() { return _toolTipAction; }
 
 signals:
 
@@ -175,7 +175,7 @@ private:
     gui::ToggleAction               _visibleAction;             /** Action which determines whether the view plugin is visible or not */
     gui::TriggerAction              _helpAction;                /** Action which triggers documentation */
     gui::PresetsAction              _presetsAction;             /** Action for managing presets */
-    gui::ViewPluginToolTipAction    _tooltipAction;             /** Action for displaying a view-context aware tooltip */
+    gui::ViewPluginToolTipAction    _toolTipAction;             /** Action for displaying a view-context aware tooltip */
     QKeySequence                    _triggerShortcut;           /** Shortcut for triggering the plugin */
     gui::WidgetActions              _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
     gui::WidgetActions              _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
