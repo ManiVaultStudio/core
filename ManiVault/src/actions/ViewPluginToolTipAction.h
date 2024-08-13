@@ -10,35 +10,32 @@
 namespace mv::gui {
 
 /**
- * View tooltip action class
+ * View plugin tooltip action class
  *
- * For displaying mouse-aware content in a tooltip on a view
+ * For displaying mouse-aware content in a tooltip on a view plugin
+ *
+ * By default the action is disabled
  *
  * Note: This action is developed for internal use only
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ViewTooltipAction : public VerticalGroupAction
+class CORE_EXPORT ViewPluginToolTipAction : public VerticalGroupAction
 {
 public:
 
-    /** Context (data) with which the tooltip is created */
-    struct TooltipContext { 
-        
-    };
-
     /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
-    using TooltipGeneratorFunction = std::function<QString(TooltipContext)>;
+    using TooltipGeneratorFunction = std::function<QString(plugin::ViewPlugin*)>;
 
     /**
      * Construct with pointer to \p parent object and title
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    Q_INVOKABLE ViewTooltipAction(QObject* parent, const QString& title);
+    Q_INVOKABLE ViewPluginToolTipAction(QObject* parent, const QString& title);
 
     /**
-     * Initializes the action
+     * Initializes the action and enables tooltip display
      * @param viewWidget Pointer to view widget (may not be nullptr)
      * @param tooltipGeneratorFunction Function for generating the tooltip
      */
@@ -68,6 +65,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(mv::gui::ViewTooltipAction)
+Q_DECLARE_METATYPE(mv::gui::ViewPluginToolTipAction)
 
-inline const auto viewTooltipActionMetaTypeId = qRegisterMetaType<mv::gui::ViewTooltipAction*>("mv::gui::ViewTooltipAction");
+inline const auto viewPluginToolTipActionMetaTypeId = qRegisterMetaType<mv::gui::ViewPluginToolTipAction*>("mv::gui::ViewPluginToolTipAction");

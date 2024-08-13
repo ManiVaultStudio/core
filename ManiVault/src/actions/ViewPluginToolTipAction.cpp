@@ -2,13 +2,13 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ViewTooltipAction.h"
+#include "ViewPluginToolTipAction.h"
 
 using namespace mv::util;
 
 namespace mv::gui {
 
-ViewTooltipAction::ViewTooltipAction(QObject* parent, const QString& title) :
+ViewPluginToolTipAction::ViewPluginToolTipAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
     _viewWidget(nullptr),
     _tooltipGeneratorFunction(),
@@ -17,7 +17,7 @@ ViewTooltipAction::ViewTooltipAction(QObject* parent, const QString& title) :
     addAction(&_roiSizeAction);
 }
 
-void ViewTooltipAction::initialize(QWidget* viewWidget, const TooltipGeneratorFunction& tooltipGeneratorFunction)
+void ViewPluginToolTipAction::initialize(QWidget* viewWidget, const TooltipGeneratorFunction& tooltipGeneratorFunction)
 {
     if (_viewWidget)
         _viewWidget->removeEventFilter(this);
@@ -36,7 +36,7 @@ void ViewTooltipAction::initialize(QWidget* viewWidget, const TooltipGeneratorFu
     drawTooltip();
 }
 
-bool ViewTooltipAction::eventFilter(QObject* target, QEvent* event)
+bool ViewPluginToolTipAction::eventFilter(QObject* target, QEvent* event)
 {
     if (target != _viewWidget)
         return VerticalGroupAction::eventFilter(target, event);
@@ -56,7 +56,7 @@ bool ViewTooltipAction::eventFilter(QObject* target, QEvent* event)
     return VerticalGroupAction::eventFilter(target, event);
 }
 
-void ViewTooltipAction::drawTooltip()
+void ViewPluginToolTipAction::drawTooltip()
 {
     if (!isChecked())
         return;
