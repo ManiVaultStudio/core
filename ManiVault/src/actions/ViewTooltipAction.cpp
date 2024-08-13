@@ -2,55 +2,63 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "IconAction.h"
-
-#include <QBuffer>
+#include "ViewTooltipAction.h"
 
 using namespace mv::util;
 
 namespace mv::gui {
 
-IconAction::IconAction(QObject* parent, const QString& title) :
-    TriggerAction(parent, title)
+ViewTooltipAction::ViewTooltipAction(QObject* parent, const QString& title) :
+    VerticalGroupAction(parent, title),
+    _viewWidget(nullptr),
+    _tooltipGeneratorFunction(),
+    _roiSizeAction(this, "ROI size")
 {
-    setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
-    //setIconByName("exclamation-circle");
+    addAction(&_roiSizeAction);
 }
 
-void IconAction::setIconFromImage(const QImage& image)
+void ViewTooltipAction::initialize(QWidget* viewWidget, const TooltipGeneratorFunction& tooltipGeneratorFunction)
 {
-    setIcon(createIcon(QPixmap::fromImage(image)));
+    if (_viewWidget)
+        _viewWidget->removeEventFilter(this);
+
+    Q_ASSERT(viewWidget);
+
+    if (!viewWidget)
+        return;
+
+    _viewWidget                 = viewWidget;
+    _tooltipGeneratorFunction   = tooltipGeneratorFunction;
+
+    _viewWidget->setMouseTracking(true);
+    _viewWidget->installEventFilter(this);
+
+    updateTooltip();
 }
 
-void IconAction::fromVariantMap(const QVariantMap& variantMap)
+bool ViewTooltipAction::eventFilter(QObject* target, QEvent* event)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    if (target != _viewWidget)
+        return VerticalGroupAction::eventFilter(target, event);
 
-    if (variantMap.contains("Value"))
+    switch (event->type())
     {
-        QPixmap pixmap;
+        case QEvent::MouseMove:
+        {
+            updateTooltip();
+            break;
+        }
 
-        pixmap.loadFromData(QByteArray::fromBase64(variantMap["Value"].toByteArray()));
-
-        if (!pixmap.isNull())
-            setIcon(createIcon(pixmap));
+        default:
+            break;
     }
+
+    return VerticalGroupAction::eventFilter(target, event);
 }
 
-QVariantMap IconAction::toVariantMap() const
+void ViewTooltipAction::updateTooltip()
 {
-    auto variantMap = WidgetAction::toVariantMap();
-
-    QByteArray previewImageByteArray;
-    QBuffer previewImageBuffer(&previewImageByteArray);
-
-    icon().pixmap(QSize(32, 32)).save(&previewImageBuffer, "PNG");
-
-    variantMap.insert({
-    { "Value", QVariant::fromValue(previewImageByteArray.toBase64()) }
-    });
-
-    return variantMap;
+    qDebug() << __FUNCTION__;
 }
 
 }
