@@ -7,6 +7,14 @@
 #include "VerticalGroupAction.h"
 #include "DecimalAction.h"
 
+#include "widgets/OverlayWidget.h"
+
+#include <QLabel>
+
+namespace mv::plugin {
+    class ViewPlugin;
+}
+
 namespace mv::gui {
 
 /**
@@ -14,7 +22,7 @@ namespace mv::gui {
  *
  * For displaying mouse-aware content in a tooltip on a view plugin
  *
- * By default the action is disabled
+ * By default the action is disabled (enabled after initialization)
  *
  * Note: This action is developed for internal use only
  *
@@ -22,6 +30,8 @@ namespace mv::gui {
  */
 class CORE_EXPORT ViewPluginToolTipAction : public VerticalGroupAction
 {
+    Q_OBJECT
+
 public:
 
     /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
@@ -36,31 +46,61 @@ public:
 
     /**
      * Initializes the action and enables tooltip display
-     * @param viewWidget Pointer to view widget (may not be nullptr)
+     * @param viewPlugin Pointer to view plugin (may not be nullptr)
      * @param tooltipGeneratorFunction Function for generating the tooltip
      */
-    void initialize(QWidget* viewWidget, const TooltipGeneratorFunction& tooltipGeneratorFunction);
+    void initialize(plugin::ViewPlugin* viewPlugin, const TooltipGeneratorFunction& tooltipGeneratorFunction);
+
+    /** Request an update of the current tool tip */
+    void requestUpdate();
 
     /**
-     * Respond to \p target events
-     * @param target Object of which an event occurred
-     * @param event The event that took place
+     * Get tooltip HTML string
+     * @return HTML formatted string
      */
-    bool eventFilter(QObject* target, QEvent* event) override final;
+    QString getToolTipHtmlString() const;
 
 private:
 
+    /**
+     * Set tooltip HTML string to \p toolTipHtmlString
+     * @param toolTipHtmlString HTML formatted string
+     */
+    void setToolTipHtmlString(const QString& toolTipHtmlString);
+
     /** Draws the tooltip near the cursor */
-    void drawTooltip();
+    void drawToolTip();
+
+    /** Moves the tooltip label to the cursor */
+    void moveToolTipLabel();
+
+    /**
+     * Respond to \p target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
 
 public: // Action getters
 
     DecimalAction& getRoiSizeAction() { return _roiSizeAction; }
 
+signals:
+
+    /**
+     * Signals that the tooltip HTML string changed from \p previousToolTipHtmlString to \p currentToolTipHtmlString
+     * @param previousToolTipHtmlString Previous tooltip HTML string
+     * @param currentToolTipHtmlString Current tooltip HTML string
+     */
+    void toolTipHtmlStringChanged(const QString& previousToolTipHtmlString, const QString& currentToolTipHtmlString);
+
 private:
-    QWidget*                        _viewWidget;                    /** Pointer to view widget of which the mouse movements should be tracked */
+    plugin::ViewPlugin*             _viewPlugin;                    /** Pointer to view plugin for which to show the tooltips */
     TooltipGeneratorFunction        _tooltipGeneratorFunction;      /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
     DecimalAction                   _roiSizeAction;                 /** Action to control the size of the ROI (in pixels) */
+    QString                         _toolTipHtmlString;             /** HTML tooltip string */
+    std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;          /** Overlay widget for the tooltip */
+    QLabel                          _toolTipLabel;                  /** The text label which contains the actual tooltip text */
 };
 
 }
