@@ -36,6 +36,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction(this, "Visible", true),
     _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
+    _tooltipAction(this, "Tooltip"),
     _triggerShortcut(),
     _titleBarMenuActions(),
     _settingsActions(),
@@ -94,6 +95,11 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _helpAction.setConnectionPermissionsToForceNone();
+
+    _tooltipAction.setToolTip(QStringLiteral("View tooltip"));
+    _tooltipAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _tooltipAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
+    _tooltipAction.setConnectionPermissionsToForceNone();
 
     connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* viewPluginEditorDialog = new ViewPluginEditorDialog(nullptr, this);

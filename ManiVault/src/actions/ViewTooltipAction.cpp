@@ -33,7 +33,7 @@ void ViewTooltipAction::initialize(QWidget* viewWidget, const TooltipGeneratorFu
     _viewWidget->setMouseTracking(true);
     _viewWidget->installEventFilter(this);
 
-    updateTooltip();
+    drawTooltip();
 }
 
 bool ViewTooltipAction::eventFilter(QObject* target, QEvent* event)
@@ -45,7 +45,7 @@ bool ViewTooltipAction::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::MouseMove:
         {
-            updateTooltip();
+            drawTooltip();
             break;
         }
 
@@ -56,8 +56,11 @@ bool ViewTooltipAction::eventFilter(QObject* target, QEvent* event)
     return VerticalGroupAction::eventFilter(target, event);
 }
 
-void ViewTooltipAction::updateTooltip()
+void ViewTooltipAction::drawTooltip()
 {
+    if (!isChecked())
+        return;
+
     qDebug() << __FUNCTION__;
 }
 

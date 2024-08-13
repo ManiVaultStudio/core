@@ -9,9 +9,9 @@
 #include "actions/TriggerAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/OptionsAction.h"
-#include "actions/OptionAction.h"
 #include "actions/LockingAction.h"
 #include "actions/PresetsAction.h"
+#include "actions/ViewTooltipAction.h"
 
 #include "Plugin.h"
 #include "Task.h"
@@ -152,6 +152,7 @@ public: // Action getters
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
     gui::TriggerAction& getHelpAction() { return _helpAction; }
     gui::PresetsAction& getPresetsAction() { return _presetsAction; }
+    gui::ViewTooltipAction& getTooltipAction() { return _tooltipAction; }
 
 signals:
 
@@ -174,6 +175,7 @@ private:
     gui::ToggleAction       _visibleAction;             /** Action which determines whether the view plugin is visible or not */
     gui::TriggerAction      _helpAction;                /** Action which triggers documentation */
     gui::PresetsAction      _presetsAction;             /** Action for managing presets */
+    gui::ViewTooltipAction  _tooltipAction;             /** Action for displaying a view-context aware tooltip */
     QKeySequence            _triggerShortcut;           /** Shortcut for triggering the plugin */
     gui::WidgetActions      _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
     gui::WidgetActions      _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
@@ -235,8 +237,8 @@ protected:
     void setPreferredDockArea(const gui::DockAreaFlag& preferredDockArea);
 
 private:
-    const bool          _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
-    gui::DockAreaFlag   _preferredDockArea;             /** Preferred initial dock area when the view plugin is added to the workspace */
+    const bool              _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
+    gui::DockAreaFlag       _preferredDockArea;             /** Preferred initial dock area when the view plugin is added to the workspace */
 };
 
 }

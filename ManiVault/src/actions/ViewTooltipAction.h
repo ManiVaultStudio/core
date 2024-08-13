@@ -22,8 +22,13 @@ class CORE_EXPORT ViewTooltipAction : public VerticalGroupAction
 {
 public:
 
+    /** Context (data) with which the tooltip is created */
+    struct TooltipContext { 
+        
+    };
+
     /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
-    using TooltipGeneratorFunction = std::function<QString(Dataset<DatasetImpl>, Dataset<DatasetImpl>)>;
+    using TooltipGeneratorFunction = std::function<QString(TooltipContext)>;
 
     /**
      * Construct with pointer to \p parent object and title
@@ -48,7 +53,8 @@ public:
 
 private:
 
-    void updateTooltip();
+    /** Draws the tooltip near the cursor */
+    void drawTooltip();
 
 public: // Action getters
 
