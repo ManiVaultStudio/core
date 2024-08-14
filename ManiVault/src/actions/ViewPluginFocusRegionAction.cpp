@@ -39,6 +39,9 @@ void ViewPluginFocusRegionAction::initialize(plugin::ViewPlugin* viewPlugin, con
     _toolTipLabel.setParent(_toolTipOverlayWidget.get());
     _toolTipLabel.raise();
     _toolTipLabel.setWindowFlag(Qt::WindowStaysOnTopHint);
+    _toolTipLabel.setAutoFillBackground(true);
+    _toolTipLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    _toolTipLabel.setWordWrap(true);
 
     _updateTimer.setInterval(250);
     
@@ -84,7 +87,7 @@ void ViewPluginFocusRegionAction::setToolTipHtmlString(const QString& toolTipHtm
 
     _toolTipLabel.setVisible(!_toolTipHtmlString.isEmpty());
     _toolTipLabel.setText(_toolTipHtmlString);
-    _toolTipLabel.setMinimumSize(QSize(200, 100));
+    _toolTipLabel.adjustSize();
 
     drawToolTip();
 
