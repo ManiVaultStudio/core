@@ -64,12 +64,19 @@ namespace mv
             glVertexAttribDivisor(ATTRIBUTE_POSITIONS, 1);
             glEnableVertexAttribArray(ATTRIBUTE_POSITIONS);
 
-            // Highlight buffer, disabled by default
+            // Highlights buffer, disabled by default
             _highlightBuffer.create();
             _highlightBuffer.bind();
 
             glVertexAttribIPointer(ATTRIBUTE_HIGHLIGHTS, 1, GL_BYTE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_HIGHLIGHTS, 1);
+
+            // Focus highlights buffer, disabled by default
+            _focusHighlightsBuffer.create();
+            _focusHighlightsBuffer.bind();
+
+            glVertexAttribIPointer(ATTRIBUTE_FOCUS_HIGHLIGHTS, 1, GL_BYTE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_FOCUS_HIGHLIGHTS, 1);
 
             // Color buffer, disabled by default
             _colorBuffer.create();
@@ -112,6 +119,13 @@ namespace mv
             _highlights = highlights;
 
             _dirtyHighlights = true;
+        }
+
+        void PointArrayObject::setFocusHighlights(const std::vector<char>& focusHighlights)
+        {
+            _focusHighlights = focusHighlights;
+
+            _dirtyFocusHighlights = true;
         }
 
         void PointArrayObject::setScalars(const std::vector<float>& scalars, bool adjustColorMapRange)
@@ -194,6 +208,16 @@ namespace mv
                 _dirtyHighlights = false;
             }
 
+            if (_dirtyFocusHighlights)
+            {
+                _focusHighlightsBuffer.bind();
+                _focusHighlightsBuffer.setData(_focusHighlights);
+
+                enableAttribute(ATTRIBUTE_FOCUS_HIGHLIGHTS, true);
+
+                _dirtyFocusHighlights = false;
+            }
+
             if (_dirtyColors)
             {
                 _colorBuffer.bind();
@@ -260,6 +284,13 @@ namespace mv
             _gpuPoints.setHighlights(highlights);
 
             _numSelectedPoints = numSelectedPoints;
+        }
+
+        void PointRenderer::setFocusHighlights(const std::vector<char>& focusHighlights,const std::int32_t& numberOfFocusHighlights)
+        {
+            _gpuPoints.setFocusHighlights(focusHighlights);
+
+            _numberOfFocusHighlights = numberOfFocusHighlights;
         }
 
         void PointRenderer::setColorChannelScalars(const std::vector<float>& scalars, bool adjustColorMapRange)
@@ -430,6 +461,56 @@ namespace mv
             _selectionHaloEnabled = selectionHaloEnabled;
         }
 
+        Vector3f PointRenderer::getFocusRegionColor() const
+        {
+            return _focusRegionColor;
+        }
+
+        void PointRenderer::setFocusRegionColor(Vector3f focusRegionColor)
+        {
+            _focusRegionColor = focusRegionColor;
+        }
+
+        float PointRenderer::getFocusRegionOpacity() const
+        {
+            return _focusRegionOpacity;
+        }
+
+        void PointRenderer::setFocusRegionOpacity(float focusRegionOpacity)
+        {
+            _focusRegionOpacity = focusRegionOpacity;
+        }
+
+        Vector3f PointRenderer::getFocusOutlineColor() const
+        {
+            return _focusOutlineColor;
+        }
+
+        void PointRenderer::setFocusOutlineColor(Vector3f focusOutlineColor)
+        {
+            _focusOutlineColor = focusOutlineColor;
+        }
+
+        float PointRenderer::getFocusOutlineScale() const
+        {
+            return _focusOutlineScale;
+        }
+
+        void PointRenderer::setFocusOutlineScale(float focusOutlineScale)
+        {
+            _focusOutlineScale = focusOutlineScale;
+        }
+
+        float PointRenderer::getFocusOutlineOpacity() const
+        {
+            return _focusOutlineOpacity;
+        }
+
+        void PointRenderer::setFocusOutlineOpacity(float focusOutlineOpacity)
+        {
+            _focusOutlineOpacity = focusOutlineOpacity;
+        }
+
         bool PointRenderer::getRandomizedDepthEnabled() const
         {
             return _randomizedDepthEnabled;
@@ -493,9 +574,16 @@ namespace mv
             _shader.uniform1f("selectionOutlineOpacity", _selectionOutlineOpacity);
             _shader.uniform1i("selectionHaloEnabled", _selectionHaloEnabled);
 
+            _shader.uniform3f("focusRegionColor", _focusRegionColor);
+            _shader.uniform1f("focusRegionOpacity", _focusRegionOpacity);
+            _shader.uniform3f("focusOutlineColor", _focusOutlineColor);
+            _shader.uniform1f("focusOutlineScale", _focusOutlineScale);
+            _shader.uniform1f("focusOutlineOpacity", _focusOutlineOpacity);
+
             _shader.uniform1i("randomizedDepthEnabled", _randomizedDepthEnabled);
 
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
+            _shader.uniform1i("hasFocusHighlights", _gpuPoints.hasFocusHighlights());
             _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
             _shader.uniform1i("hasColors", _gpuPoints.hasColors());
             _shader.uniform1i("hasSizes", _gpuPoints.hasSizeScalars());

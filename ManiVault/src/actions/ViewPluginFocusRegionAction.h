@@ -96,8 +96,8 @@ private:
 
 public: // Action getters
 
-    TriggerAction& getEnabledAction() { return _enabledAction; }
-    DecimalAction& getFocusRegionSizeAction() { return _regionSizeAction; }
+    ToggleAction& getEnabledAction() { return _enabledAction; }
+    DecimalAction& getSizeAction() { return _sizeAction; }
 
 signals:
 
@@ -111,8 +111,8 @@ signals:
 private:
     plugin::ViewPlugin*             _viewPlugin;                    /** Pointer to view plugin for which to show the tooltips */
     SummaryGeneratorFunction        _summaryGeneratorFunction;      /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
-    TriggerAction                   _enabledAction;                 /** Action to toggle computation on/off */
-    DecimalAction                   _regionSizeAction;              /** Action to control the size of the focus region (in pixels) */
+    ToggleAction                    _enabledAction;                 /** Action to toggle computation on/off */
+    DecimalAction                   _sizeAction;                    /** Action to control the size of the focus region (in pixels) */
     QVariantMap                     _toolTipContext;                /** Context for the tooltip */
     QString                         _toolTipHtmlString;             /** HTML tooltip string */
     std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;          /** Overlay widget for the tooltip */

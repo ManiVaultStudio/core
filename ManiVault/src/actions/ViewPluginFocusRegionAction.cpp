@@ -12,11 +12,11 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
     _enabledAction(this, "Enabled"),
-    _regionSizeAction(this, "Region size", 0.f, 1000.f, 100.f, 1),
+    _sizeAction(this, "Region size", 0.f, 1000.f, 100.f, 1),
     _toolTipDirty(true)
 {
     addAction(&_enabledAction);
-    addAction(&_regionSizeAction);
+    addAction(&_sizeAction);
 }
 
 void ViewPluginFocusRegionAction::initialize(plugin::ViewPlugin* viewPlugin, const SummaryGeneratorFunction& summaryGeneratorFunction)
