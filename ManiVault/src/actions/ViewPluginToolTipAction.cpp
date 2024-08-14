@@ -9,14 +9,14 @@ using namespace mv::util;
 namespace mv::gui {
 
 ViewPluginToolTipAction::ViewPluginToolTipAction(QObject* parent, const QString& title) :
-    VerticalGroupAction(parent, title),
+    HoriontalGroupAction(parent, title),
     _viewPlugin(nullptr),
-    _roiSizeAction(this, "ROI size")
+    _enabledAction(this, "Enabled"),
+    _regionSizeAction(this, "Region size", 0.f, 1000.f, 100.f, 1),
+    _toolTipDirty(true)
 {
-    addAction(&_roiSizeAction);
-
-    //_toolTipLabel.setWindowFlag(Qt::Popup);
-    //_toolTipLabel.setWindowFlag(Qt::WindowStaysOnTopHint);
+    addAction(&_enabledAction);
+    addAction(&_regionSizeAction);
 }
 
 void ViewPluginToolTipAction::initialize(plugin::ViewPlugin* viewPlugin, const TooltipGeneratorFunction& tooltipGeneratorFunction)
@@ -39,14 +39,33 @@ void ViewPluginToolTipAction::initialize(plugin::ViewPlugin* viewPlugin, const T
     _toolTipLabel.setParent(_toolTipOverlayWidget.get());
     _toolTipLabel.raise();
     _toolTipLabel.setWindowFlag(Qt::WindowStaysOnTopHint);
+
+    _updateTimer.setInterval(250);
+    
+    connect(&_updateTimer, &QTimer::timeout, this, [this]() -> void {
+        if (!_toolTipDirty || !_tooltipGeneratorFunction)
+            return;
+
+        setToolTipHtmlString(_tooltipGeneratorFunction(_toolTipContext));
+
+        _toolTipDirty = false;
+    });
+
+    _updateTimer.start();
 }
 
-void ViewPluginToolTipAction::requestUpdate()
+void ViewPluginToolTipAction::requestUpdate(const QVariantMap& toolTipContext)
 {
-    if (!_tooltipGeneratorFunction)
+    if (toolTipContext == _toolTipContext)
         return;
 
-    setToolTipHtmlString(_tooltipGeneratorFunction(_viewPlugin));
+    _toolTipContext = toolTipContext;
+    _toolTipDirty   = true;
+}
+
+QVariantMap ViewPluginToolTipAction::getToolTipContext() const
+{
+    return _toolTipContext;
 }
 
 QString ViewPluginToolTipAction::getToolTipHtmlString() const
