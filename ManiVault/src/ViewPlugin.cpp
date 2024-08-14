@@ -36,7 +36,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction(this, "Visible", true),
     _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
-    _focusRegionAction(this, "Focus region summary"),
+    _focusRegionAction(this, "Focus region"),
     _triggerShortcut(),
     _titleBarMenuActions(),
     _settingsActions(),

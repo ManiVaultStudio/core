@@ -12,14 +12,42 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
     _enabledAction(this, "Enabled"),
+    _settingsAction(this, "Settings"),
     _sizeAction(this, "Region size", 0.f, 1000.f, 100.f, 1),
+    _maximumNumberOfPointsAction(this, "Max. number of points", 0, 1000, 100),
     _toolTipDirty(true)
 {
+    setShowLabels(false);
+
     addAction(&_enabledAction);
-    addAction(&_sizeAction);
+    addAction(&_settingsAction);
+
+    _settingsAction.addAction(&_sizeAction);
+    _settingsAction.addAction(&_maximumNumberOfPointsAction);
+
+    _enabledAction.setStretch(1);
+
+    _settingsAction.setIconByName("cog");
+    _settingsAction.setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
+    _settingsAction.setPopupSizeHint(QSize(400, 0));
+
+    _enabledAction.setToolTip("Toggle focus region visibility");
+    _settingsAction.setToolTip("Additional focus region settings");
+    _sizeAction.setToolTip("Controls the focus region size");
+    _maximumNumberOfPointsAction.setToolTip("Puts a cap on the amount of points captured by the focus region");
+
+    _sizeAction.setSuffix("px");
+
+    const auto updateSettingsActionReadOnly = [this]() -> void {
+        _settingsAction.setEnabled(_enabledAction.isChecked());
+    };
+
+    updateSettingsActionReadOnly();
+
+    connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
 }
 
-void ViewPluginFocusRegionAction::initialize(plugin::ViewPlugin* viewPlugin, const SummaryGeneratorFunction& summaryGeneratorFunction)
+void ViewPluginFocusRegionAction::initialize(plugin::ViewPlugin* viewPlugin, const ToolTipGeneratorFunction& toolTipGeneratorFunction)
 {
     Q_ASSERT(viewPlugin);
 
@@ -30,7 +58,7 @@ void ViewPluginFocusRegionAction::initialize(plugin::ViewPlugin* viewPlugin, con
         _viewPlugin->getWidget().removeEventFilter(this);
 
     _viewPlugin                 = viewPlugin;
-    _summaryGeneratorFunction   = summaryGeneratorFunction;
+    _toolTipGeneratorFunction   = toolTipGeneratorFunction;
     _toolTipOverlayWidget       = std::make_unique<OverlayWidget>(&_viewPlugin->getWidget());
 
     _viewPlugin->getWidget().setMouseTracking(true);
@@ -46,10 +74,11 @@ void ViewPluginFocusRegionAction::initialize(plugin::ViewPlugin* viewPlugin, con
     _updateTimer.setInterval(250);
     
     connect(&_updateTimer, &QTimer::timeout, this, [this]() -> void {
-        if (!_toolTipDirty || !_summaryGeneratorFunction)
+        if (!_toolTipDirty || !_toolTipGeneratorFunction)
             return;
 
-        setToolTipHtmlString(_summaryGeneratorFunction(_toolTipContext));
+        if (_enabledAction.isChecked())
+            setToolTipHtmlString(_toolTipGeneratorFunction(_toolTipContext));
 
         _toolTipDirty = false;
     });

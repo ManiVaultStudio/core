@@ -5,8 +5,10 @@
 #pragma once
 
 #include "HorizontalGroupAction.h"
-#include "TriggerAction.h"
+#include "VerticalGroupAction.h"
+#include "ToggleAction.h"
 #include "DecimalAction.h"
+#include "IntegralAction.h"
 
 #include "widgets/OverlayWidget.h"
 
@@ -20,106 +22,108 @@ namespace mv::plugin {
 
 namespace mv::gui {
 
-/**
- * View plugin focus region summary action class
- *
- * For displaying a summary tooltip for a focus region in a target view plugin
- *
- * Note: This action is developed for internal use only
- *
- * @author Thomas Kroes
- */
-class CORE_EXPORT ViewPluginFocusRegionAction : public HorizontalGroupAction
-{
-    Q_OBJECT
-
-public:
-
-    /** Context with which the summary is created */
-    using SummaryContext = QVariantMap;
-
-    /** Summary generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
-    using SummaryGeneratorFunction = std::function<QString(const SummaryContext&)>;
-
     /**
-     * Construct with pointer to \p parent object and title
-     * @param parent Pointer to parent object
-     * @param title Title of the action
+     * View plugin focus region summary action class
+     *
+     * For displaying a summary tooltip for a focus region in a target view plugin
+     *
+     * Note: This action is developed for internal use only
+     *
+     * @author Thomas Kroes
      */
-    Q_INVOKABLE ViewPluginFocusRegionAction(QObject* parent, const QString& title);
+    class CORE_EXPORT ViewPluginFocusRegionAction : public HorizontalGroupAction
+    {
+        Q_OBJECT
 
-    /**
-     * Initializes the action and enables tooltip display
-     * @param viewPlugin Pointer to view plugin (may not be nullptr)
-     * @param summaryGeneratorFunction Function for generating the tooltip summary
-     */
-    void initialize(plugin::ViewPlugin* viewPlugin, const SummaryGeneratorFunction& summaryGeneratorFunction);
+    public:
 
-    /**
-     * Request an update of the current tool tip for \p
-     * @param toolTipContext Context for the tooltip
-     */
-    void requestUpdate(const QVariantMap& toolTipContext);
+        /** Context with which the tooltip is created */
+        using ToolTipContext = QVariantMap;
 
-    /**
-     * Get tooltip context
-     * @return Context variant map
-     */
-    QVariantMap getToolTipContext() const;
+        /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
+        using ToolTipGeneratorFunction = std::function<QString(const ToolTipContext&)>;
 
-    /**
-     * Get tooltip HTML string
-     * @return HTML formatted string
-     */
-    QString getToolTipHtmlString() const;
+        /**
+         * Construct with pointer to \p parent object and title
+         * @param parent Pointer to parent object
+         * @param title Title of the action
+         */
+        Q_INVOKABLE ViewPluginFocusRegionAction(QObject* parent, const QString& title);
 
-private:
+        /**
+         * Initializes the action and enables tooltip display
+         * @param viewPlugin Pointer to view plugin (may not be nullptr)
+         * @param toolTipGeneratorFunction Function for generating the tooltip
+         */
+        void initialize(plugin::ViewPlugin* viewPlugin, const ToolTipGeneratorFunction& toolTipGeneratorFunction);
 
-    /**
-     * Set tooltip HTML string to \p toolTipHtmlString
-     * @param toolTipHtmlString HTML formatted string
-     */
-    void setToolTipHtmlString(const QString& toolTipHtmlString);
+        /**
+         * Request an update of the current tool tip for \p
+         * @param toolTipContext Context for the tooltip
+         */
+        void requestUpdate(const QVariantMap& toolTipContext);
 
-    /** Draws the tooltip near the cursor */
-    void drawToolTip();
+        /**
+         * Get tooltip context
+         * @return Context variant map
+         */
+        QVariantMap getToolTipContext() const;
 
-    /** Moves the tooltip label to the cursor */
-    void moveToolTipLabel();
+        /**
+         * Get tooltip HTML string
+         * @return HTML formatted string
+         */
+        QString getToolTipHtmlString() const;
 
-    /**
-     * Respond to \p target object events
-     * @param target Object of which an event occurred
-     * @param event The event that took place
-     */
-    bool eventFilter(QObject* target, QEvent* event) override;
+    private:
 
-public: // Action getters
+        /**
+         * Set tooltip HTML string to \p toolTipHtmlString
+         * @param toolTipHtmlString HTML formatted string
+         */
+        void setToolTipHtmlString(const QString& toolTipHtmlString);
 
-    ToggleAction& getEnabledAction() { return _enabledAction; }
-    DecimalAction& getSizeAction() { return _sizeAction; }
+        /** Draws the tooltip near the cursor */
+        void drawToolTip();
 
-signals:
+        /** Moves the tooltip label to the cursor */
+        void moveToolTipLabel();
 
-    /**
-     * Signals that the tooltip HTML string changed from \p previousToolTipHtmlString to \p currentToolTipHtmlString
-     * @param previousToolTipHtmlString Previous tooltip HTML string
-     * @param currentToolTipHtmlString Current tooltip HTML string
-     */
-    void toolTipHtmlStringChanged(const QString& previousToolTipHtmlString, const QString& currentToolTipHtmlString);
+        /**
+         * Respond to \p target object events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event) override;
 
-private:
-    plugin::ViewPlugin*             _viewPlugin;                    /** Pointer to view plugin for which to show the tooltips */
-    SummaryGeneratorFunction        _summaryGeneratorFunction;      /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
-    ToggleAction                    _enabledAction;                 /** Action to toggle computation on/off */
-    DecimalAction                   _sizeAction;                    /** Action to control the size of the focus region (in pixels) */
-    QVariantMap                     _toolTipContext;                /** Context for the tooltip */
-    QString                         _toolTipHtmlString;             /** HTML tooltip string */
-    std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;          /** Overlay widget for the tooltip */
-    QLabel                          _toolTipLabel;                  /** The text label which contains the actual tooltip text */
-    QTimer                          _updateTimer;                   /** Periodically updates the HTML tooltip string */
-    bool                            _toolTipDirty;                  /** Indicates that the HTML tooltip string needs to be re-established */
-};
+    public: // Action getters
+
+        ToggleAction& getEnabledAction() { return _enabledAction; }
+        DecimalAction& getSizeAction() { return _sizeAction; }
+
+    signals:
+
+        /**
+         * Signals that the tooltip HTML string changed from \p previousToolTipHtmlString to \p currentToolTipHtmlString
+         * @param previousToolTipHtmlString Previous tooltip HTML string
+         * @param currentToolTipHtmlString Current tooltip HTML string
+         */
+        void toolTipHtmlStringChanged(const QString& previousToolTipHtmlString, const QString& currentToolTipHtmlString);
+
+    private:
+        plugin::ViewPlugin*             _viewPlugin;                    /** Pointer to view plugin for which to show the tooltips */
+        ToolTipGeneratorFunction        _toolTipGeneratorFunction;      /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
+        ToggleAction                    _enabledAction;                 /** Action to toggle computation on/off */
+        VerticalGroupAction             _settingsAction;                /** Additional vertical group action for settings */
+        DecimalAction                   _sizeAction;                    /** Action to control the size of the focus region (in pixels) */
+        IntegralAction                  _maximumNumberOfPointsAction;   /** Action to control the maximum number of points in the focus region */
+        QVariantMap                     _toolTipContext;                /** Context for the tooltip */
+        QString                         _toolTipHtmlString;             /** HTML tooltip string */
+        std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;          /** Overlay widget for the tooltip */
+        QLabel                          _toolTipLabel;                  /** The text label which contains the actual tooltip text */
+        QTimer                          _updateTimer;                   /** Periodically updates the HTML tooltip string */
+        bool                            _toolTipDirty;                  /** Indicates that the HTML tooltip string needs to be re-established */
+    };
 
 }
 
