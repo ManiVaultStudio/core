@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "HoriontalGroupAction.h"
+#include "HorizontalGroupAction.h"
 #include "TriggerAction.h"
 #include "DecimalAction.h"
 
@@ -21,40 +21,39 @@ namespace mv::plugin {
 namespace mv::gui {
 
 /**
- * View plugin tooltip action class
+ * View plugin focus region summary action class
  *
- * For displaying mouse-aware content in a tooltip on a view plugin
- *
- * By default the action is disabled (enabled after initialization)
+ * For displaying a summary tooltip for a focus region in a target view plugin
  *
  * Note: This action is developed for internal use only
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ViewPluginToolTipAction : public HoriontalGroupAction
+class CORE_EXPORT ViewPluginFocusRegionAction : public HorizontalGroupAction
 {
     Q_OBJECT
 
 public:
 
-    using Context = QVariantMap;
+    /** Context with which the summary is created */
+    using SummaryContext = QVariantMap;
 
-    /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
-    using TooltipGeneratorFunction = std::function<QString(const Context&)>;
+    /** Summary generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
+    using SummaryGeneratorFunction = std::function<QString(const SummaryContext&)>;
 
     /**
      * Construct with pointer to \p parent object and title
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    Q_INVOKABLE ViewPluginToolTipAction(QObject* parent, const QString& title);
+    Q_INVOKABLE ViewPluginFocusRegionAction(QObject* parent, const QString& title);
 
     /**
      * Initializes the action and enables tooltip display
      * @param viewPlugin Pointer to view plugin (may not be nullptr)
-     * @param tooltipGeneratorFunction Function for generating the tooltip
+     * @param summaryGeneratorFunction Function for generating the tooltip summary
      */
-    void initialize(plugin::ViewPlugin* viewPlugin, const TooltipGeneratorFunction& tooltipGeneratorFunction);
+    void initialize(plugin::ViewPlugin* viewPlugin, const SummaryGeneratorFunction& summaryGeneratorFunction);
 
     /**
      * Request an update of the current tool tip for \p
@@ -111,7 +110,7 @@ signals:
 
 private:
     plugin::ViewPlugin*             _viewPlugin;                    /** Pointer to view plugin for which to show the tooltips */
-    TooltipGeneratorFunction        _tooltipGeneratorFunction;      /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
+    SummaryGeneratorFunction        _summaryGeneratorFunction;      /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
     TriggerAction                   _enabledAction;                 /** Action to toggle computation on/off */
     DecimalAction                   _regionSizeAction;              /** Action to control the size of the focus region (in pixels) */
     QVariantMap                     _toolTipContext;                /** Context for the tooltip */
@@ -124,6 +123,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(mv::gui::ViewPluginToolTipAction)
+Q_DECLARE_METATYPE(mv::gui::ViewPluginFocusRegionAction)
 
-inline const auto viewPluginToolTipActionMetaTypeId = qRegisterMetaType<mv::gui::ViewPluginToolTipAction*>("mv::gui::ViewPluginToolTipAction");
+inline const auto viewPluginFocusRegionActionMetaTypeId = qRegisterMetaType<mv::gui::ViewPluginFocusRegionAction*>("mv::gui::ViewPluginFocusRegionAction");

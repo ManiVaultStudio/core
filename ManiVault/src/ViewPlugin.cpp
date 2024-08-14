@@ -36,7 +36,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction(this, "Visible", true),
     _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
-    _toolTipAction(this, "Focus region summary"),
+    _focusRegionAction(this, "Focus region summary"),
     _triggerShortcut(),
     _titleBarMenuActions(),
     _settingsActions(),
@@ -96,10 +96,10 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _helpAction.setConnectionPermissionsToForceNone();
 
-    _toolTipAction.setToolTip(QStringLiteral("View tooltip"));
-    _toolTipAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _toolTipAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
-    _toolTipAction.setConnectionPermissionsToForceNone();
+    _focusRegionAction.setToolTip(QStringLiteral("View tooltip"));
+    _focusRegionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _focusRegionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
+    _focusRegionAction.setConnectionPermissionsToForceNone();
 
     connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* viewPluginEditorDialog = new ViewPluginEditorDialog(nullptr, this);
