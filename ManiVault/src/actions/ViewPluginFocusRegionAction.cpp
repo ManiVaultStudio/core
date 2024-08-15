@@ -14,7 +14,7 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
     _enabledAction(this, "Enabled"),
     _settingsAction(this, "Settings"),
     _sizeAction(this, "Region size", 0.f, 1000.f, 100.f, 1),
-    _maximumNumberOfPointsAction(this, "Max. number of points", 0, 1000, 100),
+    _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
     _toolTipDirty(true)
 {
     setShowLabels(false);
@@ -23,7 +23,7 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
     addAction(&_settingsAction);
 
     _settingsAction.addAction(&_sizeAction);
-    _settingsAction.addAction(&_maximumNumberOfPointsAction);
+    _settingsAction.addAction(&_maximumNumberOfElementsAction);
 
     _enabledAction.setStretch(1);
 
@@ -34,7 +34,7 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
     _enabledAction.setToolTip("Toggle focus region visibility");
     _settingsAction.setToolTip("Additional focus region settings");
     _sizeAction.setToolTip("Controls the focus region size");
-    _maximumNumberOfPointsAction.setToolTip("Puts a cap on the amount of points captured by the focus region");
+    _maximumNumberOfElementsAction.setToolTip("Puts a cap on the amount of points captured by the focus region");
 
     _sizeAction.setSuffix("px");
 
@@ -169,7 +169,7 @@ void ViewPluginFocusRegionAction::fromVariantMap(const QVariantMap& variantMap)
 
     _enabledAction.fromParentVariantMap(variantMap);
     _sizeAction.fromParentVariantMap(variantMap);
-    _maximumNumberOfPointsAction.fromParentVariantMap(variantMap);
+    _maximumNumberOfElementsAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ViewPluginFocusRegionAction::toVariantMap() const
@@ -178,7 +178,7 @@ QVariantMap ViewPluginFocusRegionAction::toVariantMap() const
 
     _enabledAction.insertIntoVariantMap(variantMap);
     _sizeAction.insertIntoVariantMap(variantMap);
-    _maximumNumberOfPointsAction.insertIntoVariantMap(variantMap);
+    _maximumNumberOfElementsAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
