@@ -162,4 +162,24 @@ bool ViewPluginFocusRegionAction::eventFilter(QObject* target, QEvent* event)
 
     return HorizontalGroupAction::eventFilter(target, event);
 }
+
+void ViewPluginFocusRegionAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    HorizontalGroupAction::fromVariantMap(variantMap);
+
+    _enabledAction.fromParentVariantMap(variantMap);
+    _sizeAction.fromParentVariantMap(variantMap);
+    _maximumNumberOfPointsAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap ViewPluginFocusRegionAction::toVariantMap() const
+{
+    auto variantMap = HorizontalGroupAction::toVariantMap();
+
+    _enabledAction.insertIntoVariantMap(variantMap);
+    _sizeAction.insertIntoVariantMap(variantMap);
+    _maximumNumberOfPointsAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
 }
