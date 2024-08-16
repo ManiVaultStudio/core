@@ -15,9 +15,7 @@
 
 class QPainter;
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 /**
  * Pixel selection tool class
@@ -215,5 +213,4 @@ public:
     static constexpr float CP_RADIUS_CLOSING    = 2.5f * CP_RADIUS_LINE;    /** Radius of the closing control point (e.g. for finishing polygon selection) */
 };
 
-}
 }

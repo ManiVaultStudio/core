@@ -12,9 +12,7 @@
 #include <QPainterPath>
 #include <QtMath>
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enabled /*= true*/) :
     QObject(targetWidget),
@@ -808,5 +806,4 @@ void PixelSelectionTool::endSelection()
     _aborted    = false;
 }
 
-}
 }
