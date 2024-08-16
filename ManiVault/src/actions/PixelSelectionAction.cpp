@@ -181,7 +181,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     });
 
     const auto updateType = [this]() {
-        _brushRadiusAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Brush));
+        _brushRadiusAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Brush) || _typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Sample));
     };
 
     updateType();

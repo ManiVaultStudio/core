@@ -456,6 +456,19 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
+                /*
+                case PixelSelectionType::ROI:
+                {
+                    if (!_mousePositions.isEmpty())
+                        _mousePositions.last() = mouseEvent->pos();
+
+                    if (isActive())
+                        shouldPaint = true;
+
+                    break;
+                }
+                */
+
                 case PixelSelectionType::Sample:
                 {
                     _mousePositions = { _mousePosition };
@@ -516,7 +529,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
 void PixelSelectionTool::paint()
 {
-    if (_type != PixelSelectionType::ROI && !_enabled)
+    if (!_enabled) // _type != PixelSelectionType::ROI && 
         return;
 
     auto shapePixmap    = _shapePixmap;
@@ -677,7 +690,7 @@ void PixelSelectionTool::paint()
             const auto mousePosition = _mousePositions.last();
 
             areaPainter.setBrush(_areaBrush);
-            areaPainter.setPen(QPen(_areaBrush, 5, Qt::SolidLine, Qt::RoundCap));
+            areaPainter.setPen(QPen(_areaBrush, _brushRadius, Qt::SolidLine, Qt::RoundCap));
             areaPainter.drawPoint(mousePosition);
 
             shapePainter.setBrush(Qt::NoBrush);
@@ -691,7 +704,7 @@ void PixelSelectionTool::paint()
             shapePainter.drawPolyline(QVector<QPoint>({
                 QPoint(0, mousePosition.y()),
                 QPoint(shapePixmap.size().width(), mousePosition.y())
-                }));
+            }));
 
             break;
         }
@@ -723,6 +736,7 @@ void PixelSelectionTool::paint()
                 rectangle.center() + QPointF(0.0f, crossHairSize)
                 }));
 
+            qDebug() << rectangle;
             break;
         }
 

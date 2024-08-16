@@ -854,6 +854,12 @@ public: // Serialization
 public: // State caching
 
     /**
+     * Determine whether cache with name exists
+     * @param name Name to use for the cached widget action state
+     */
+    virtual bool hasCacheState(const QString& name) const final;
+
+    /**
      * Cache the state of a widget action under \p name in the action itself (for global presets use the presets action)
      * @param name Name to use for the cached widget action state
      */
