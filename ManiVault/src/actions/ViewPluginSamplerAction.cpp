@@ -2,20 +2,18 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ViewPluginFocusRegionAction.h"
+#include "ViewPluginSamplerAction.h"
 
 using namespace mv::util;
 
 namespace mv::gui {
 
-ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const QString& title) :
+    ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
     _enabledAction(this, "Enabled", true),
     _highlightFocusedElementsAction(this, "Highlight focused elements", true),
-    _showFocusRegionAction(this, "Show focus region", true),
     _settingsAction(this, "Settings"),
-    _sizeAction(this, "Region size", 0.f, 1000.f, 100.f, 1),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
     _toolTipDirty(true)
 {
@@ -25,8 +23,6 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
     addAction(&_settingsAction);
 
     _settingsAction.addAction(&_highlightFocusedElementsAction);
-    _settingsAction.addAction(&_showFocusRegionAction);
-    _settingsAction.addAction(&_sizeAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
 
     _enabledAction.setStretch(1);
@@ -37,12 +33,8 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
 
     _enabledAction.setToolTip("Toggle focus region visibility");
     _highlightFocusedElementsAction.setToolTip("Toggle highlighting of focused elements");
-    _showFocusRegionAction.setToolTip("Toggle display of the focus region");
     _settingsAction.setToolTip("Additional focus region settings");
-    _sizeAction.setToolTip("Controls the focus region size");
     _maximumNumberOfElementsAction.setToolTip("Puts a cap on the amount of points captured by the focus region");
-
-    _sizeAction.setSuffix("px");
 
     const auto updateSettingsActionReadOnly = [this]() -> void {
         _settingsAction.setEnabled(_enabledAction.isChecked());
@@ -53,7 +45,7 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
 }
 
-void ViewPluginFocusRegionAction::initialize(plugin::ViewPlugin* viewPlugin, const ToolTipGeneratorFunction& toolTipGeneratorFunction)
+void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, const ToolTipGeneratorFunction& toolTipGeneratorFunction)
 {
     Q_ASSERT(viewPlugin);
 
@@ -92,7 +84,7 @@ void ViewPluginFocusRegionAction::initialize(plugin::ViewPlugin* viewPlugin, con
     _updateTimer.start();
 }
 
-void ViewPluginFocusRegionAction::requestUpdate(const QVariantMap& toolTipContext)
+void ViewPluginSamplerAction::requestUpdate(const QVariantMap& toolTipContext)
 {
     if (toolTipContext == _toolTipContext)
         return;
@@ -101,17 +93,17 @@ void ViewPluginFocusRegionAction::requestUpdate(const QVariantMap& toolTipContex
     _toolTipDirty   = true;
 }
 
-QVariantMap ViewPluginFocusRegionAction::getToolTipContext() const
+QVariantMap ViewPluginSamplerAction::getToolTipContext() const
 {
     return _toolTipContext;
 }
 
-QString ViewPluginFocusRegionAction::getToolTipHtmlString() const
+QString ViewPluginSamplerAction::getToolTipHtmlString() const
 {
     return _toolTipHtmlString;
 }
 
-void ViewPluginFocusRegionAction::setToolTipHtmlString(const QString& toolTipHtmlString)
+void ViewPluginSamplerAction::setToolTipHtmlString(const QString& toolTipHtmlString)
 {
     if (toolTipHtmlString == _toolTipHtmlString)
         return;
@@ -129,7 +121,7 @@ void ViewPluginFocusRegionAction::setToolTipHtmlString(const QString& toolTipHtm
     emit toolTipHtmlStringChanged(previousToolTipHtmlString, _toolTipHtmlString);
 }
 
-void ViewPluginFocusRegionAction::drawToolTip()
+void ViewPluginSamplerAction::drawToolTip()
 {
     //if (!isChecked())
     //    return;
@@ -142,12 +134,12 @@ void ViewPluginFocusRegionAction::drawToolTip()
     moveToolTipLabel();
 }
 
-void ViewPluginFocusRegionAction::moveToolTipLabel()
+void ViewPluginSamplerAction::moveToolTipLabel()
 {
     _toolTipLabel.move(_viewPlugin->getWidget().mapFromGlobal(_viewPlugin->getWidget().cursor().pos()));
 }
 
-bool ViewPluginFocusRegionAction::eventFilter(QObject* target, QEvent* event)
+bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 {
     Q_ASSERT(_viewPlugin);
 
@@ -182,25 +174,21 @@ bool ViewPluginFocusRegionAction::eventFilter(QObject* target, QEvent* event)
     return HorizontalGroupAction::eventFilter(target, event);
 }
 
-void ViewPluginFocusRegionAction::fromVariantMap(const QVariantMap& variantMap)
+void ViewPluginSamplerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     HorizontalGroupAction::fromVariantMap(variantMap);
 
     _enabledAction.fromParentVariantMap(variantMap);
     _highlightFocusedElementsAction.fromParentVariantMap(variantMap);
-    _showFocusRegionAction.fromParentVariantMap(variantMap);
-    _sizeAction.fromParentVariantMap(variantMap);
     _maximumNumberOfElementsAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap ViewPluginFocusRegionAction::toVariantMap() const
+QVariantMap ViewPluginSamplerAction::toVariantMap() const
 {
     auto variantMap = HorizontalGroupAction::toVariantMap();
 
     _enabledAction.insertIntoVariantMap(variantMap);
     _highlightFocusedElementsAction.insertIntoVariantMap(variantMap);
-    _showFocusRegionAction.insertIntoVariantMap(variantMap);
-    _sizeAction.insertIntoVariantMap(variantMap);
     _maximumNumberOfElementsAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

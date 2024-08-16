@@ -11,7 +11,7 @@
 #include "actions/OptionsAction.h"
 #include "actions/LockingAction.h"
 #include "actions/PresetsAction.h"
-#include "actions/ViewPluginFocusRegionAction.h"
+#include "actions/ViewPluginSamplerAction.h"
 
 #include "Plugin.h"
 #include "Task.h"
@@ -152,7 +152,7 @@ public: // Action getters
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
     gui::TriggerAction& getHelpAction() { return _helpAction; }
     gui::PresetsAction& getPresetsAction() { return _presetsAction; }
-    gui::ViewPluginFocusRegionAction& getFocusRegionAction() { return _focusRegionAction; }
+    gui::ViewPluginSamplerAction& getSamplerAction() { return _samplerAction; }
 
 signals:
 
@@ -175,7 +175,7 @@ private:
     gui::ToggleAction                   _visibleAction;             /** Action which determines whether the view plugin is visible or not */
     gui::TriggerAction                  _helpAction;                /** Action which triggers documentation */
     gui::PresetsAction                  _presetsAction;             /** Action for managing presets */
-    gui::ViewPluginFocusRegionAction    _focusRegionAction;         /** Action for displaying a focus region summary tooltip */
+    gui::ViewPluginSamplerAction        _samplerAction;             /** Action for displaying a tooltip for sampled elements */
     QKeySequence                        _triggerShortcut;           /** Shortcut for triggering the plugin */
     gui::WidgetActions                  _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
     gui::WidgetActions                  _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */

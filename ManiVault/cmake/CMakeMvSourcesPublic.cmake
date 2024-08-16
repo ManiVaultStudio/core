@@ -340,7 +340,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/IconAction.h
     src/actions/IconPickerAction.h
     src/actions/ApplicationIconAction.h
-    src/actions/ViewPluginFocusRegionAction.h
+    src/actions/ViewPluginSamplerAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -371,7 +371,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/IconAction.cpp
     src/actions/IconPickerAction.cpp
     src/actions/ApplicationIconAction.cpp
-    src/actions/ViewPluginFocusRegionAction.cpp
+    src/actions/ViewPluginSamplerAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
