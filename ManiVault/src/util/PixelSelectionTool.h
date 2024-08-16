@@ -180,6 +180,7 @@ signals:
 
 protected:
     bool                        _enabled;                   /** Whether the tool is enabled or not */
+    std::int32_t                _drawFlags;                 /** Draw options */
     PixelSelectionType          _type;                      /** Current selection type */
     PixelSelectionModifierType  _modifier;                  /** Current selection modifier */
     bool                        _active;                    /** Whether the selection process is active */

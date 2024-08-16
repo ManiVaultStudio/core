@@ -697,13 +697,26 @@ void PixelSelectionTool::paint()
             shapePainter.setBrush(Qt::NoBrush);
             shapePainter.setPen(_penLineBackGround);
 
+            constexpr auto gap  = 5.0;
+            const auto radius   = 0.5f * _brushRadius;
+
             shapePainter.drawPolyline(QVector<QPoint>({
-                QPoint(mousePosition.x(), 0),
+                QPoint(mousePosition.x(), mousePosition.y() - radius - gap),
+                QPoint(mousePosition.x(), 0.0)
+            }));
+
+            shapePainter.drawPolyline(QVector<QPoint>({
+                QPoint(mousePosition.x(), mousePosition.y() + radius + gap),
                 QPoint(mousePosition.x(), shapePixmap.size().height())
             }));
 
             shapePainter.drawPolyline(QVector<QPoint>({
-                QPoint(0, mousePosition.y()),
+                QPoint(mousePosition.x() - radius - gap, mousePosition.y()),
+                QPoint(0.0, mousePosition.y())
+            }));
+
+            shapePainter.drawPolyline(QVector<QPoint>({
+                QPoint(mousePosition.x() + radius + gap, mousePosition.y()),
                 QPoint(shapePixmap.size().width(), mousePosition.y())
             }));
 
