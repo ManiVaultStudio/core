@@ -192,23 +192,6 @@ namespace mv
             bool getSelectionHaloEnabled() const;
             void setSelectionHaloEnabled(bool selectionHaloEnabled);
 
-        public: // Focus region visualization
-
-            Vector3f getFocusRegionColor() const;
-            void setFocusRegionColor(Vector3f focusRegionColor);
-
-            float getFocusRegionOpacity() const;
-            void setFocusRegionOpacity(float focusRegionOpacity);
-
-            Vector3f getFocusOutlineColor() const;
-            void setFocusOutlineColor(Vector3f focusOutlineColor);
-
-            float getFocusOutlineScale() const;
-            void setFocusOutlineScale(float focusOutlineScale);
-
-            float getFocusOutlineOpacity() const;
-            void setFocusOutlineOpacity(float focusOutlineOpacity);
-
             bool getRandomizedDepthEnabled() const;
             void setRandomizedDepthEnabled(bool randomizedDepth);
 
@@ -232,13 +215,6 @@ namespace mv
             float                       _selectionOutlineScale              = 1.75f;
             float                       _selectionOutlineOpacity            = 0.5f;
             bool                        _selectionHaloEnabled               = false;
-
-            /** Focus visualization */
-            Vector3f                    _focusRegionColor                   = Vector3f(0, 0, 0);
-            float                       _focusRegionOpacity                 = 0.5f;
-            Vector3f                    _focusOutlineColor                  = Vector3f(0, 0, 0);
-            float                       _focusOutlineScale                  = 1.75f;
-            float                       _focusOutlineOpacity                = 0.5f;
 
             /* Depth control */
             bool                        _randomizedDepthEnabled             = true;

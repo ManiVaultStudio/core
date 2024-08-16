@@ -113,6 +113,8 @@ public: // Serialization
 public: // Action getters
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
+    ToggleAction& getHighlightFocusedElementsAction() { return _highlightFocusedElementsAction; }
+    ToggleAction& getShowFocusRegionAction() { return _showFocusRegionAction; }
     DecimalAction& getSizeAction() { return _sizeAction; }
     IntegralAction& getMaximumNumberOfElementsAction() { return _maximumNumberOfElementsAction; }
 
@@ -129,6 +131,8 @@ private:
     plugin::ViewPlugin*             _viewPlugin;                        /** Pointer to view plugin for which to show the tooltips */
     ToolTipGeneratorFunction        _toolTipGeneratorFunction;          /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
     ToggleAction                    _enabledAction;                     /** Action to toggle computation on/off */
+    ToggleAction                    _highlightFocusedElementsAction;    /** Action to toggle focus elements highlighting */
+    ToggleAction                    _showFocusRegionAction;             /** Action to toggle focus region visibility */
     VerticalGroupAction             _settingsAction;                    /** Additional vertical group action for settings */
     DecimalAction                   _sizeAction;                        /** Action to control the size of the focus region (in pixels) */
     IntegralAction                  _maximumNumberOfElementsAction;     /** Action to restrict the maximum number of elements in the focus region */

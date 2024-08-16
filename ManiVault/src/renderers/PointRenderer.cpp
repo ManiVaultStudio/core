@@ -461,56 +461,6 @@ namespace mv
             _selectionHaloEnabled = selectionHaloEnabled;
         }
 
-        Vector3f PointRenderer::getFocusRegionColor() const
-        {
-            return _focusRegionColor;
-        }
-
-        void PointRenderer::setFocusRegionColor(Vector3f focusRegionColor)
-        {
-            _focusRegionColor = focusRegionColor;
-        }
-
-        float PointRenderer::getFocusRegionOpacity() const
-        {
-            return _focusRegionOpacity;
-        }
-
-        void PointRenderer::setFocusRegionOpacity(float focusRegionOpacity)
-        {
-            _focusRegionOpacity = focusRegionOpacity;
-        }
-
-        Vector3f PointRenderer::getFocusOutlineColor() const
-        {
-            return _focusOutlineColor;
-        }
-
-        void PointRenderer::setFocusOutlineColor(Vector3f focusOutlineColor)
-        {
-            _focusOutlineColor = focusOutlineColor;
-        }
-
-        float PointRenderer::getFocusOutlineScale() const
-        {
-            return _focusOutlineScale;
-        }
-
-        void PointRenderer::setFocusOutlineScale(float focusOutlineScale)
-        {
-            _focusOutlineScale = focusOutlineScale;
-        }
-
-        float PointRenderer::getFocusOutlineOpacity() const
-        {
-            return _focusOutlineOpacity;
-        }
-
-        void PointRenderer::setFocusOutlineOpacity(float focusOutlineOpacity)
-        {
-            _focusOutlineOpacity = focusOutlineOpacity;
-        }
-
         bool PointRenderer::getRandomizedDepthEnabled() const
         {
             return _randomizedDepthEnabled;
@@ -573,12 +523,6 @@ namespace mv
             _shader.uniform1i("selectionOutlineOverrideColor", _selectionOutlineOverrideColor);
             _shader.uniform1f("selectionOutlineOpacity", _selectionOutlineOpacity);
             _shader.uniform1i("selectionHaloEnabled", _selectionHaloEnabled);
-
-            _shader.uniform3f("focusRegionColor", _focusRegionColor);
-            _shader.uniform1f("focusRegionOpacity", _focusRegionOpacity);
-            _shader.uniform3f("focusOutlineColor", _focusOutlineColor);
-            _shader.uniform1f("focusOutlineScale", _focusOutlineScale);
-            _shader.uniform1f("focusOutlineOpacity", _focusOutlineOpacity);
 
             _shader.uniform1i("randomizedDepthEnabled", _randomizedDepthEnabled);
 

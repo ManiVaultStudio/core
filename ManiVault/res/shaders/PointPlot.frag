@@ -27,11 +27,11 @@ uniform bool selectionHaloEnabled; 				/** Whether selection outline halo is ena
 uniform float selectionHaloScale;     			/** Selection halo scale */
 
 // Focus
+uniform bool  	focusRegionVisible;				/** Focus region visibility toggle */
+uniform vec2  	focusRegionCenter;				/** Focus region center */
+uniform float 	focusRegionRadius;     			/** Focus region radius */
 uniform vec3  	focusRegionColor;				/** Focus region color */
 uniform float 	focusRegionOpacity;     		/** Focus region opacity */
-uniform vec3  	focusOutlineColor;				/** Focus outline color */
-uniform float 	focusOutlineScale;     			/** Focus outline scale */
-uniform float 	focusOutlineOpacity;     		/** Focus outline opacity */
 
 // Colormap to use if current effect is EFFECT_COLOR
 uniform sampler2D colormap;
@@ -59,6 +59,9 @@ float normalize(float minPixelValue, float maxPixelValue, float pixelValue)
 
 void main()
 {
+	if ((length(vTexCoord - focusRegionCenter) < focusRegionRadius)) // focusRegionVisible && 
+		fragColor = vec4(1, 0, 0, 1);//vec4(focusRegionColor, focusRegionOpacity);
+		
 	bool isSelectionHighlighted	= vHighlight == 1;
 	bool isFocusHighlighted 	= vFocusHighlight == 1;
 	bool isHighlighted			= isSelectionHighlighted || isFocusHighlighted;

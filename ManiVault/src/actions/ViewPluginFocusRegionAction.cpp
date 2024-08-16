@@ -11,7 +11,9 @@ namespace mv::gui {
 ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
-    _enabledAction(this, "Enabled"),
+    _enabledAction(this, "Enabled", true),
+    _highlightFocusedElementsAction(this, "Highlight focused elements", true),
+    _showFocusRegionAction(this, "Show focus region", true),
     _settingsAction(this, "Settings"),
     _sizeAction(this, "Region size", 0.f, 1000.f, 100.f, 1),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
@@ -22,6 +24,8 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
     addAction(&_enabledAction);
     addAction(&_settingsAction);
 
+    _settingsAction.addAction(&_highlightFocusedElementsAction);
+    _settingsAction.addAction(&_showFocusRegionAction);
     _settingsAction.addAction(&_sizeAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
 
@@ -32,6 +36,8 @@ ViewPluginFocusRegionAction::ViewPluginFocusRegionAction(QObject* parent, const 
     _settingsAction.setPopupSizeHint(QSize(400, 0));
 
     _enabledAction.setToolTip("Toggle focus region visibility");
+    _highlightFocusedElementsAction.setToolTip("Toggle highlighting of focused elements");
+    _showFocusRegionAction.setToolTip("Toggle display of the focus region");
     _settingsAction.setToolTip("Additional focus region settings");
     _sizeAction.setToolTip("Controls the focus region size");
     _maximumNumberOfElementsAction.setToolTip("Puts a cap on the amount of points captured by the focus region");
@@ -155,6 +161,19 @@ bool ViewPluginFocusRegionAction::eventFilter(QObject* target, QEvent* event)
                 moveToolTipLabel();
                 break;
 
+            case QEvent::Paint:
+            {
+                QPainter painter(&_viewPlugin->getWidget());
+
+                painter.setRenderHint(QPainter::Antialiasing);
+
+                painter.setBrush(QColor(0, 0, 255, 127));
+                painter.setPen(Qt::NoPen);
+                painter.drawRect(_viewPlugin->getWidget().rect());
+
+                break;
+            }
+
         default:
             break;
         }
@@ -168,6 +187,8 @@ void ViewPluginFocusRegionAction::fromVariantMap(const QVariantMap& variantMap)
     HorizontalGroupAction::fromVariantMap(variantMap);
 
     _enabledAction.fromParentVariantMap(variantMap);
+    _highlightFocusedElementsAction.fromParentVariantMap(variantMap);
+    _showFocusRegionAction.fromParentVariantMap(variantMap);
     _sizeAction.fromParentVariantMap(variantMap);
     _maximumNumberOfElementsAction.fromParentVariantMap(variantMap);
 }
@@ -177,6 +198,8 @@ QVariantMap ViewPluginFocusRegionAction::toVariantMap() const
     auto variantMap = HorizontalGroupAction::toVariantMap();
 
     _enabledAction.insertIntoVariantMap(variantMap);
+    _highlightFocusedElementsAction.insertIntoVariantMap(variantMap);
+    _showFocusRegionAction.insertIntoVariantMap(variantMap);
     _sizeAction.insertIntoVariantMap(variantMap);
     _maximumNumberOfElementsAction.insertIntoVariantMap(variantMap);
 
