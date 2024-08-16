@@ -11,6 +11,8 @@ namespace mv::gui {
     ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
+    _pixelSelectionAction(nullptr),
+    _samplerPixelSelectionAction(nullptr),
     _enabledAction(this, "Enabled", true),
     _highlightFocusedElementsAction(this, "Highlight focused elements", true),
     _settingsAction(this, "Settings"),
@@ -45,19 +47,21 @@ namespace mv::gui {
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
 }
 
-void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, const ToolTipGeneratorFunction& toolTipGeneratorFunction)
+void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSelectionAction* pixelSelectionAction, PixelSelectionAction* samplerPixelSelectionAction, const ToolTipGeneratorFunction& toolTipGeneratorFunction)
 {
-    Q_ASSERT(viewPlugin);
+    Q_ASSERT(viewPlugin && pixelSelectionAction && samplerPixelSelectionAction);
 
-    if (!viewPlugin)
+    if (!viewPlugin || !pixelSelectionAction || !samplerPixelSelectionAction)
         return;
 
     if (_viewPlugin)
         _viewPlugin->getWidget().removeEventFilter(this);
 
-    _viewPlugin                 = viewPlugin;
-    _toolTipGeneratorFunction   = toolTipGeneratorFunction;
-    _toolTipOverlayWidget       = std::make_unique<OverlayWidget>(&_viewPlugin->getWidget());
+    _viewPlugin                     = viewPlugin;
+    _pixelSelectionAction           = pixelSelectionAction;
+    _samplerPixelSelectionAction    = samplerPixelSelectionAction;
+    _toolTipGeneratorFunction       = toolTipGeneratorFunction;
+    _toolTipOverlayWidget           = std::make_unique<OverlayWidget>(&_viewPlugin->getWidget());
 
     _viewPlugin->getWidget().setMouseTracking(true);
     _viewPlugin->getWidget().installEventFilter(this);
@@ -141,12 +145,14 @@ void ViewPluginSamplerAction::moveToolTipLabel()
 
 bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 {
-    Q_ASSERT(_viewPlugin);
+    Q_ASSERT(_viewPlugin && _pixelSelectionAction && _samplerPixelSelectionAction);
 
-    if (!_viewPlugin)
+    if (!_viewPlugin || !_pixelSelectionAction || !_samplerPixelSelectionAction)
         return HorizontalGroupAction::eventFilter(target, event);
 
     if (target == &_viewPlugin->getWidget()) {
+        auto& selectionTypeAction = _pixelSelectionAction->getTypeAction();
+
         switch (event->type())
         {
             case QEvent::MouseMove:
@@ -162,6 +168,19 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
                 painter.setBrush(QColor(0, 0, 255, 127));
                 painter.setPen(Qt::NoPen);
                 painter.drawRect(_viewPlugin->getWidget().rect());
+
+                break;
+            }
+
+            case QEvent::MouseButtonPress:
+            {
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
+                break;
+            }
+
+            case QEvent::MouseButtonRelease:
+            {
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(true);
 
                 break;
             }

@@ -493,6 +493,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
 
                 case PixelSelectionType::Brush:
+                case PixelSelectionType::Sample:
                 {
                     if (wheelEvent->angleDelta().y() < 0)
                         setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
@@ -691,8 +692,10 @@ void PixelSelectionTool::paint()
             areaPainter.setPen(QPen(_areaBrush, _brushRadius, Qt::SolidLine, Qt::RoundCap));
             areaPainter.drawPoint(mousePosition);
 
+            shapePainter.setOpacity(0.2);
+
             shapePainter.setBrush(Qt::NoBrush);
-            shapePainter.setPen(_mouseButtons & Qt::LeftButton ? _penLineForeGround : _penLineBackGround);
+            shapePainter.setPen(_penLineBackGround);
 
             shapePainter.drawPolyline(QVector<QPoint>({
                 QPoint(mousePosition.x(), 0),
@@ -734,7 +737,6 @@ void PixelSelectionTool::paint()
                 rectangle.center() + QPointF(0.0f, crossHairSize)
                 }));
 
-            qDebug() << rectangle;
             break;
         }
 

@@ -9,6 +9,7 @@
 #include "ToggleAction.h"
 #include "DecimalAction.h"
 #include "IntegralAction.h"
+#include "PixelSelectionAction.h"
 
 #include "widgets/OverlayWidget.h"
 
@@ -57,9 +58,11 @@ public:
     /**
      * Initializes the action and enables tooltip display
      * @param viewPlugin Pointer to view plugin (may not be nullptr)
+     * @param pixelSelectionAction Pointer to pixel selection action to use (may not be nullptr)
+     * @param samplerPixelSelectionAction Pointer to sampler pixel selection action to use (may not be nullptr)
      * @param toolTipGeneratorFunction Function for generating the tooltip
      */
-    void initialize(plugin::ViewPlugin* viewPlugin, const ToolTipGeneratorFunction& toolTipGeneratorFunction);
+    void initialize(plugin::ViewPlugin* viewPlugin, PixelSelectionAction* pixelSelectionAction, PixelSelectionAction* samplerPixelSelectionAction, const ToolTipGeneratorFunction& toolTipGeneratorFunction);
 
     /**
      * Request an update of the current tool tip for \p
@@ -131,6 +134,8 @@ signals:
 
 private:
     plugin::ViewPlugin*             _viewPlugin;                        /** Pointer to view plugin for which to show the tooltips */
+    PixelSelectionAction*           _pixelSelectionAction;              /** Pointer to pixel selection tool to use */
+    PixelSelectionAction*           _samplerPixelSelectionAction;       /** Pointer to sampler pixel selection tool to use */
     ToolTipGeneratorFunction        _toolTipGeneratorFunction;          /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
     ToggleAction                    _enabledAction;                     /** Action to toggle computation on/off */
     ToggleAction                    _highlightFocusedElementsAction;    /** Action to toggle focus elements highlighting */
