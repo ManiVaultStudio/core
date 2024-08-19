@@ -131,6 +131,7 @@ public: // Action getters
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
     ToggleAction& getHighlightFocusedElementsAction() { return _highlightFocusedElementsAction; }
+    ToggleAction& getRestrictNumberOfElementsAction() { return _restrictNumberOfElementsAction; }
     IntegralAction& getMaximumNumberOfElementsAction() { return _maximumNumberOfElementsAction; }
     IntegralAction& getToolTipLazyUpdateIntervalAction() { return _toolTipLazyUpdateIntervalAction; }
 
@@ -151,6 +152,7 @@ private:
     ToggleAction                    _enabledAction;                     /** Action to toggle computation on/off */
     ToggleAction                    _highlightFocusedElementsAction;    /** Action to toggle focus elements highlighting */
     VerticalGroupAction             _settingsAction;                    /** Additional vertical group action for settings */
+    ToggleAction                    _restrictNumberOfElementsAction;    /** Action to toggle the restriction of the maximum number of elements in the focus region */
     IntegralAction                  _maximumNumberOfElementsAction;     /** Action to restrict the maximum number of elements in the focus region */
     IntegralAction                  _toolTipLazyUpdateIntervalAction;   /** Action to control the size of the tooltip lazy update timer interval */
     QVariantMap                     _toolTipContext;                    /** Context for the tooltip */

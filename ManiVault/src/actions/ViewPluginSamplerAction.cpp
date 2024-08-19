@@ -16,6 +16,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _enabledAction(this, "Enabled", true),
     _highlightFocusedElementsAction(this, "Highlight focused elements", true),
     _settingsAction(this, "Settings"),
+    _restrictNumberOfElementsAction(this, "Restrict number of elements", true),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
     _toolTipLazyUpdateIntervalAction(this, "Tooltip lazy update interval", 50, 1000, 100),
     _toolTipDirty(true)
@@ -26,6 +27,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     addAction(&_settingsAction);
 
     _settingsAction.addAction(&_highlightFocusedElementsAction);
+    _settingsAction.addAction(&_restrictNumberOfElementsAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
     _settingsAction.addAction(&_toolTipLazyUpdateIntervalAction);
 
@@ -193,7 +195,9 @@ void ViewPluginSamplerAction::fromVariantMap(const QVariantMap& variantMap)
 
     _enabledAction.fromParentVariantMap(variantMap);
     _highlightFocusedElementsAction.fromParentVariantMap(variantMap);
+    _restrictNumberOfElementsAction.fromParentVariantMap(variantMap);
     _maximumNumberOfElementsAction.fromParentVariantMap(variantMap);
+    _toolTipLazyUpdateIntervalAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ViewPluginSamplerAction::toVariantMap() const
@@ -202,7 +206,9 @@ QVariantMap ViewPluginSamplerAction::toVariantMap() const
 
     _enabledAction.insertIntoVariantMap(variantMap);
     _highlightFocusedElementsAction.insertIntoVariantMap(variantMap);
+    _restrictNumberOfElementsAction.insertIntoVariantMap(variantMap);
     _maximumNumberOfElementsAction.insertIntoVariantMap(variantMap);
+    _toolTipLazyUpdateIntervalAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
