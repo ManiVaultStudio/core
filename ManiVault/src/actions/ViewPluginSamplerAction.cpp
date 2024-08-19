@@ -8,7 +8,7 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-    ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title) :
+ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
     _pixelSelectionAction(nullptr),
@@ -17,6 +17,7 @@ namespace mv::gui {
     _highlightFocusedElementsAction(this, "Highlight focused elements", true),
     _settingsAction(this, "Settings"),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
+    _lazyUpdateIntervalAction(this, "Lazy update interval", 50, 1000, 100),
     _toolTipDirty(true)
 {
     setShowLabels(false);
@@ -26,6 +27,7 @@ namespace mv::gui {
 
     _settingsAction.addAction(&_highlightFocusedElementsAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
+    _settingsAction.addAction(&_lazyUpdateIntervalAction);
 
     _enabledAction.setStretch(1);
 
@@ -45,9 +47,17 @@ namespace mv::gui {
     updateSettingsActionReadOnly();
 
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
+
+    const auto updateLazyUpdateTimerInterval = [this]() -> void {
+        _lazyUpdateTimer.setInterval(_lazyUpdateIntervalAction.getValue());
+    };
+
+    updateLazyUpdateTimerInterval();
+
+    connect(&_lazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateLazyUpdateTimerInterval);
 }
 
-void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSelectionAction* pixelSelectionAction, PixelSelectionAction* samplerPixelSelectionAction, const ToolTipGeneratorFunction& toolTipGeneratorFunction)
+void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSelectionAction* pixelSelectionAction, PixelSelectionAction* samplerPixelSelectionAction)
 {
     Q_ASSERT(viewPlugin && pixelSelectionAction && samplerPixelSelectionAction);
 
@@ -60,7 +70,6 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
     _viewPlugin                     = viewPlugin;
     _pixelSelectionAction           = pixelSelectionAction;
     _samplerPixelSelectionAction    = samplerPixelSelectionAction;
-    _toolTipGeneratorFunction       = toolTipGeneratorFunction;
     _toolTipOverlayWidget           = std::make_unique<OverlayWidget>(&_viewPlugin->getWidget());
 
     _viewPlugin->getWidget().setMouseTracking(true);
@@ -72,10 +81,8 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
     _toolTipLabel.setAutoFillBackground(true);
     _toolTipLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _toolTipLabel.setWordWrap(true);
-
-    _updateTimer.setInterval(250);
     
-    connect(&_updateTimer, &QTimer::timeout, this, [this]() -> void {
+    connect(&_lazyUpdateTimer, &QTimer::timeout, this, [this]() -> void {
         if (!_toolTipDirty || !_toolTipGeneratorFunction)
             return;
 
@@ -85,7 +92,12 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _toolTipDirty = false;
     });
 
-    _updateTimer.start();
+    _lazyUpdateTimer.start();
+}
+
+void ViewPluginSamplerAction::setTooltipGeneratorFunction(const ToolTipGeneratorFunction& toolTipGeneratorFunction)
+{
+    _toolTipGeneratorFunction = toolTipGeneratorFunction;
 }
 
 void ViewPluginSamplerAction::requestUpdate(const QVariantMap& toolTipContext)
@@ -140,7 +152,7 @@ void ViewPluginSamplerAction::drawToolTip()
 
 void ViewPluginSamplerAction::moveToolTipLabel()
 {
-    _toolTipLabel.move(_viewPlugin->getWidget().mapFromGlobal(_viewPlugin->getWidget().cursor().pos()));
+    _toolTipLabel.move(_viewPlugin->getWidget().mapFromGlobal(_viewPlugin->getWidget().cursor().pos() + QPoint(10, 10)));
 }
 
 bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
@@ -159,31 +171,13 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
                 moveToolTipLabel();
                 break;
 
-            case QEvent::Paint:
-            {
-                QPainter painter(&_viewPlugin->getWidget());
-
-                painter.setRenderHint(QPainter::Antialiasing);
-
-                painter.setBrush(QColor(0, 0, 255, 127));
-                painter.setPen(Qt::NoPen);
-                painter.drawRect(_viewPlugin->getWidget().rect());
-
-                break;
-            }
-
             case QEvent::MouseButtonPress:
-            {
                 _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
                 break;
-            }
 
             case QEvent::MouseButtonRelease:
-            {
-                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(true);
-
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked());
                 break;
-            }
 
         default:
             break;
