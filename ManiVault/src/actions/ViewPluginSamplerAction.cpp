@@ -35,7 +35,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
     _settingsAction.setIconByName("cog");
     _settingsAction.setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
-    _settingsAction.setPopupSizeHint(QSize(400, 0));
+    _settingsAction.setPopupSizeHint(QSize(500, 0));
 
     _enabledAction.setToolTip("Toggle focus region visibility");
     _highlightFocusedElementsAction.setToolTip("Toggle highlighting of focused elements");
