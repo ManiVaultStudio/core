@@ -17,9 +17,9 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _enabledAction(this, "Enabled", true),
     _highlightFocusedElementsAction(this, "Highlight focused elements", true),
     _settingsAction(this, "Settings"),
-    _restrictNumberOfElementsAction(this, "Restrict number of elements", true),
+    _restrictNumberOfElementsAction(this, "Restrict number of elements", false),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
-    _sampleContextLazyUpdateIntervalAction(this, "Tooltip lazy update interval", 50, 1000, 100)
+    _sampleContextLazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100)
 {
     setShowLabels(false);
 
