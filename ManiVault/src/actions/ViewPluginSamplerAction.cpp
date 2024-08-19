@@ -52,6 +52,14 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
     //_sampleContextLazyUpdateTimer.setSingleShot(true);
 
+    const auto updateMaximumNumberOfElementsAction = [this]() -> void {
+        _maximumNumberOfElementsAction.setEnabled(_restrictNumberOfElementsAction.isChecked());
+    };
+
+    updateMaximumNumberOfElementsAction();
+
+    connect(&_restrictNumberOfElementsAction, &ToggleAction::toggled, this, updateMaximumNumberOfElementsAction);
+
     const auto updateSampleContextLazyUpdateTimerInterval = [this]() -> void {
         _sampleContextLazyUpdateTimer.setInterval(_sampleContextLazyUpdateIntervalAction.getValue());
     };
@@ -66,7 +74,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
         emit sampleContextRequested();
 
-        //_sampleContextDirty = false;
+        _sampleContextDirty = false;
     });
 }
 
