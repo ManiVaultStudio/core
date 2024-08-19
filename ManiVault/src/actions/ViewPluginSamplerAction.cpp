@@ -17,7 +17,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _highlightFocusedElementsAction(this, "Highlight focused elements", true),
     _settingsAction(this, "Settings"),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
-    _lazyUpdateIntervalAction(this, "Lazy update interval", 50, 1000, 100),
+    _toolTipLazyUpdateIntervalAction(this, "Tooltip lazy update interval", 50, 1000, 100),
     _toolTipDirty(true)
 {
     setShowLabels(false);
@@ -27,7 +27,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
     _settingsAction.addAction(&_highlightFocusedElementsAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
-    _settingsAction.addAction(&_lazyUpdateIntervalAction);
+    _settingsAction.addAction(&_toolTipLazyUpdateIntervalAction);
 
     _enabledAction.setStretch(1);
 
@@ -49,12 +49,12 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
 
     const auto updateLazyUpdateTimerInterval = [this]() -> void {
-        _lazyUpdateTimer.setInterval(_lazyUpdateIntervalAction.getValue());
+        _toolTipLazyUpdateTimer.setInterval(_toolTipLazyUpdateIntervalAction.getValue());
     };
 
     updateLazyUpdateTimerInterval();
 
-    connect(&_lazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateLazyUpdateTimerInterval);
+    connect(&_toolTipLazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateLazyUpdateTimerInterval);
 }
 
 void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSelectionAction* pixelSelectionAction, PixelSelectionAction* samplerPixelSelectionAction)
@@ -82,7 +82,7 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
     _toolTipLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _toolTipLabel.setWordWrap(true);
     
-    connect(&_lazyUpdateTimer, &QTimer::timeout, this, [this]() -> void {
+    connect(&_toolTipLazyUpdateTimer, &QTimer::timeout, this, [this]() -> void {
         if (!_toolTipDirty || !_toolTipGeneratorFunction)
             return;
 
@@ -92,7 +92,7 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _toolTipDirty = false;
     });
 
-    _lazyUpdateTimer.start();
+    _toolTipLazyUpdateTimer.start();
 }
 
 void ViewPluginSamplerAction::setTooltipGeneratorFunction(const ToolTipGeneratorFunction& toolTipGeneratorFunction)

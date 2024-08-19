@@ -132,6 +132,7 @@ public: // Action getters
     ToggleAction& getEnabledAction() { return _enabledAction; }
     ToggleAction& getHighlightFocusedElementsAction() { return _highlightFocusedElementsAction; }
     IntegralAction& getMaximumNumberOfElementsAction() { return _maximumNumberOfElementsAction; }
+    IntegralAction& getToolTipLazyUpdateIntervalAction() { return _toolTipLazyUpdateIntervalAction; }
 
 signals:
 
@@ -151,12 +152,12 @@ private:
     ToggleAction                    _highlightFocusedElementsAction;    /** Action to toggle focus elements highlighting */
     VerticalGroupAction             _settingsAction;                    /** Additional vertical group action for settings */
     IntegralAction                  _maximumNumberOfElementsAction;     /** Action to restrict the maximum number of elements in the focus region */
-    IntegralAction                  _lazyUpdateIntervalAction;          /** Action to control the size of the lazy update timer interval */
+    IntegralAction                  _toolTipLazyUpdateIntervalAction;   /** Action to control the size of the tooltip lazy update timer interval */
     QVariantMap                     _toolTipContext;                    /** Context for the tooltip */
     QString                         _toolTipHtmlString;                 /** HTML tooltip string */
     std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;              /** Overlay widget for the tooltip */
     QLabel                          _toolTipLabel;                      /** The text label which contains the actual tooltip text */
-    QTimer                          _lazyUpdateTimer;                   /** Lazily periodically updates the HTML tooltip string */
+    QTimer                          _toolTipLazyUpdateTimer;            /** Lazily (periodically) updates the HTML tooltip string */
     bool                            _toolTipDirty;                      /** Indicates that the HTML tooltip string needs to be re-established */
 };
 
