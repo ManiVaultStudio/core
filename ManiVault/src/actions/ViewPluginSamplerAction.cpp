@@ -50,6 +50,8 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
 
+    //_sampleContextLazyUpdateTimer.setSingleShot(true);
+
     const auto updateSampleContextLazyUpdateTimerInterval = [this]() -> void {
         _sampleContextLazyUpdateTimer.setInterval(_sampleContextLazyUpdateIntervalAction.getValue());
     };
@@ -64,7 +66,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
         emit sampleContextRequested();
 
-        _sampleContextDirty = false;
+        //_sampleContextDirty = false;
     });
 }
 
@@ -90,6 +92,14 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
 
         _viewPlugin->getWidget().setMouseTracking(true);
         _viewPlugin->getWidget().installEventFilter(this);
+
+        connect(_samplerPixelSelectionAction->getPixelSelectionTool(), &PixelSelectionTool::areaChanged, this, [this]() {
+            _sampleContextDirty = true;
+        });
+
+        connect(_samplerPixelSelectionAction->getPixelSelectionTool(), &PixelSelectionTool::ended, this, [this]() {
+            _sampleContextDirty = true;
+        });
 
         _toolTipLabel.setParent(_toolTipOverlayWidget.get());
         _toolTipLabel.raise();
