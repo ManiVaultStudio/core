@@ -48,10 +48,10 @@ class CORE_EXPORT ViewPluginSamplerAction : public HorizontalGroupAction
 public:
 
     /** Context with which the tooltip is created */
-    using ToolTipContext = QVariantMap;
+    using SampleContext = QVariantMap;
 
     /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
-    using ToolTipGeneratorFunction = std::function<QString(const ToolTipContext&)>;
+    using ToolTipGeneratorFunction = std::function<QString(const SampleContext&)>;
 
     /**
      * Construct with pointer to \p parent object and title
@@ -75,16 +75,16 @@ public:
     void setTooltipGeneratorFunction(const ToolTipGeneratorFunction& toolTipGeneratorFunction);
 
     /**
-     * Request an update of the current tool tip for \p
-     * @param toolTipContext Context for the tooltip
+     * Get sample context
+     * @return Sample variant map
      */
-    void requestUpdate(const QVariantMap& toolTipContext);
+    SampleContext getSampleContext() const;
 
     /**
-     * Get tooltip context
-     * @return Context variant map
+     * Set the sample context and flag request an update
+     * @param sampleContext Sample context
      */
-    QVariantMap getToolTipContext() const;
+    void setSampleContext(const SampleContext& sampleContext);
 
     /**
      * Get tooltip HTML string
@@ -133,7 +133,7 @@ public: // Action getters
     ToggleAction& getHighlightFocusedElementsAction() { return _highlightFocusedElementsAction; }
     ToggleAction& getRestrictNumberOfElementsAction() { return _restrictNumberOfElementsAction; }
     IntegralAction& getMaximumNumberOfElementsAction() { return _maximumNumberOfElementsAction; }
-    IntegralAction& getToolTipLazyUpdateIntervalAction() { return _toolTipLazyUpdateIntervalAction; }
+    IntegralAction& getToolTipLazyUpdateIntervalAction() { return _sampleContextLazyUpdateIntervalAction; }
 
 signals:
 
@@ -144,23 +144,28 @@ signals:
      */
     void toolTipHtmlStringChanged(const QString& previousToolTipHtmlString, const QString& currentToolTipHtmlString);
 
+    /** Signals that a new sample context is required */
+    void sampleContextRequested();
+
 private:
-    plugin::ViewPlugin*             _viewPlugin;                        /** Pointer to view plugin for which to show the tooltips */
-    PixelSelectionAction*           _pixelSelectionAction;              /** Pointer to pixel selection tool to use */
-    PixelSelectionAction*           _samplerPixelSelectionAction;       /** Pointer to sampler pixel selection tool to use */
-    ToolTipGeneratorFunction        _toolTipGeneratorFunction;          /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
-    ToggleAction                    _enabledAction;                     /** Action to toggle computation on/off */
-    ToggleAction                    _highlightFocusedElementsAction;    /** Action to toggle focus elements highlighting */
-    VerticalGroupAction             _settingsAction;                    /** Additional vertical group action for settings */
-    ToggleAction                    _restrictNumberOfElementsAction;    /** Action to toggle the restriction of the maximum number of elements in the focus region */
-    IntegralAction                  _maximumNumberOfElementsAction;     /** Action to restrict the maximum number of elements in the focus region */
-    IntegralAction                  _toolTipLazyUpdateIntervalAction;   /** Action to control the size of the tooltip lazy update timer interval */
-    QVariantMap                     _toolTipContext;                    /** Context for the tooltip */
-    QString                         _toolTipHtmlString;                 /** HTML tooltip string */
-    std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;              /** Overlay widget for the tooltip */
-    QLabel                          _toolTipLabel;                      /** The text label which contains the actual tooltip text */
-    QTimer                          _toolTipLazyUpdateTimer;            /** Lazily (periodically) updates the HTML tooltip string */
-    bool                            _toolTipDirty;                      /** Indicates that the HTML tooltip string needs to be re-established */
+    plugin::ViewPlugin*             _viewPlugin;                                /** Pointer to view plugin for which to show the tooltips */
+    bool                            _isInitialized;                             /** Boolean determining whether the sampler is initialized or not */
+    PixelSelectionAction*           _pixelSelectionAction;                      /** Pointer to pixel selection tool to use */
+    PixelSelectionAction*           _samplerPixelSelectionAction;               /** Pointer to sampler pixel selection tool to use */
+    ToolTipGeneratorFunction        _toolTipGeneratorFunction;                  /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
+    ToggleAction                    _enabledAction;                             /** Action to toggle computation on/off */
+    ToggleAction                    _highlightFocusedElementsAction;            /** Action to toggle focus elements highlighting */
+    VerticalGroupAction             _settingsAction;                            /** Additional vertical group action for settings */
+    ToggleAction                    _restrictNumberOfElementsAction;            /** Action to toggle the restriction of the maximum number of elements in the focus region */
+    IntegralAction                  _maximumNumberOfElementsAction;             /** Action to restrict the maximum number of elements in the focus region */
+    IntegralAction                  _sampleContextLazyUpdateIntervalAction;     /** Action to control the size of the tooltip lazy update timer interval */
+    SampleContext                   _sampleContext;                             /** Context for the tooltip */
+    QTimer                          _sampleContextLazyUpdateTimer;              /** Lazily (periodically) updates the sample context tooltip string */
+    bool                            _sampleContextDirty;                        /** Indicates that the sample context is dirty */
+    QString                         _toolTipHtmlString;                         /** HTML tooltip string */
+    std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                      /** Overlay widget for the tooltip */
+    QLabel                          _toolTipLabel;                              /** The text label which contains the actual tooltip text */
+    
 };
 
 }

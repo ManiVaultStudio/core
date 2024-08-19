@@ -11,6 +11,7 @@ namespace mv::gui {
 ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
+    _isInitialized(false),
     _pixelSelectionAction(nullptr),
     _samplerPixelSelectionAction(nullptr),
     _enabledAction(this, "Enabled", true),
@@ -18,8 +19,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _settingsAction(this, "Settings"),
     _restrictNumberOfElementsAction(this, "Restrict number of elements", true),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
-    _toolTipLazyUpdateIntervalAction(this, "Tooltip lazy update interval", 50, 1000, 100),
-    _toolTipDirty(true)
+    _sampleContextLazyUpdateIntervalAction(this, "Tooltip lazy update interval", 50, 1000, 100)
 {
     setShowLabels(false);
 
@@ -29,7 +29,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _settingsAction.addAction(&_highlightFocusedElementsAction);
     _settingsAction.addAction(&_restrictNumberOfElementsAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
-    _settingsAction.addAction(&_toolTipLazyUpdateIntervalAction);
+    _settingsAction.addAction(&_sampleContextLazyUpdateIntervalAction);
 
     _enabledAction.setStretch(1);
 
@@ -50,51 +50,63 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
 
-    const auto updateLazyUpdateTimerInterval = [this]() -> void {
-        _toolTipLazyUpdateTimer.setInterval(_toolTipLazyUpdateIntervalAction.getValue());
+    const auto updateSampleContextLazyUpdateTimerInterval = [this]() -> void {
+        _sampleContextLazyUpdateTimer.setInterval(_sampleContextLazyUpdateIntervalAction.getValue());
     };
 
-    updateLazyUpdateTimerInterval();
+    updateSampleContextLazyUpdateTimerInterval();
 
-    connect(&_toolTipLazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateLazyUpdateTimerInterval);
+    connect(&_sampleContextLazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateSampleContextLazyUpdateTimerInterval);
+
+    connect(&_sampleContextLazyUpdateTimer, &QTimer::timeout, this, [this]() -> void {
+        if (!_sampleContextDirty || !_toolTipGeneratorFunction)
+            return;
+
+        emit sampleContextRequested();
+
+        _sampleContextDirty = false;
+    });
 }
 
 void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSelectionAction* pixelSelectionAction, PixelSelectionAction* samplerPixelSelectionAction)
 {
-    Q_ASSERT(viewPlugin && pixelSelectionAction && samplerPixelSelectionAction);
+    try
+    {
+        if (_isInitialized)
+            throw std::runtime_error("Sampler is already initialized");
 
-    if (!viewPlugin || !pixelSelectionAction || !samplerPixelSelectionAction)
-        return;
+        Q_ASSERT(viewPlugin && pixelSelectionAction && samplerPixelSelectionAction);
 
-    if (_viewPlugin)
-        _viewPlugin->getWidget().removeEventFilter(this);
-
-    _viewPlugin                     = viewPlugin;
-    _pixelSelectionAction           = pixelSelectionAction;
-    _samplerPixelSelectionAction    = samplerPixelSelectionAction;
-    _toolTipOverlayWidget           = std::make_unique<OverlayWidget>(&_viewPlugin->getWidget());
-
-    _viewPlugin->getWidget().setMouseTracking(true);
-    _viewPlugin->getWidget().installEventFilter(this);
-
-    _toolTipLabel.setParent(_toolTipOverlayWidget.get());
-    _toolTipLabel.raise();
-    _toolTipLabel.setWindowFlag(Qt::WindowStaysOnTopHint);
-    _toolTipLabel.setAutoFillBackground(true);
-    _toolTipLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _toolTipLabel.setWordWrap(true);
-    
-    connect(&_toolTipLazyUpdateTimer, &QTimer::timeout, this, [this]() -> void {
-        if (!_toolTipDirty || !_toolTipGeneratorFunction)
+        if (!viewPlugin || !pixelSelectionAction || !samplerPixelSelectionAction)
             return;
 
-        if (_enabledAction.isChecked())
-            setToolTipHtmlString(_toolTipGeneratorFunction(_toolTipContext));
+        if (_viewPlugin)
+            _viewPlugin->getWidget().removeEventFilter(this);
 
-        _toolTipDirty = false;
-    });
+        _viewPlugin                     = viewPlugin;
+        _pixelSelectionAction           = pixelSelectionAction;
+        _samplerPixelSelectionAction    = samplerPixelSelectionAction;
+        _toolTipOverlayWidget           = std::make_unique<OverlayWidget>(&_viewPlugin->getWidget());
 
-    _toolTipLazyUpdateTimer.start();
+        _viewPlugin->getWidget().setMouseTracking(true);
+        _viewPlugin->getWidget().installEventFilter(this);
+
+        _toolTipLabel.setParent(_toolTipOverlayWidget.get());
+        _toolTipLabel.raise();
+        _toolTipLabel.setWindowFlag(Qt::WindowStaysOnTopHint);
+        _toolTipLabel.setAutoFillBackground(true);
+        _toolTipLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        _toolTipLabel.setWordWrap(true);
+
+        _sampleContextLazyUpdateTimer.start();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to initialize view plugin sampler action", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to initialize view plugin sampler action");
+    }
 }
 
 void ViewPluginSamplerAction::setTooltipGeneratorFunction(const ToolTipGeneratorFunction& toolTipGeneratorFunction)
@@ -102,18 +114,21 @@ void ViewPluginSamplerAction::setTooltipGeneratorFunction(const ToolTipGenerator
     _toolTipGeneratorFunction = toolTipGeneratorFunction;
 }
 
-void ViewPluginSamplerAction::requestUpdate(const QVariantMap& toolTipContext)
+QVariantMap ViewPluginSamplerAction::getSampleContext() const
 {
-    if (toolTipContext == _toolTipContext)
-        return;
-
-    _toolTipContext = toolTipContext;
-    _toolTipDirty   = true;
+    return _sampleContext;
 }
 
-QVariantMap ViewPluginSamplerAction::getToolTipContext() const
+void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContext)
 {
-    return _toolTipContext;
+    if (sampleContext == _sampleContext)
+        return;
+
+    _sampleContext      = sampleContext;
+    _sampleContextDirty = true;
+
+    if (_enabledAction.isChecked())
+        setToolTipHtmlString(_toolTipGeneratorFunction(_sampleContext));
 }
 
 QString ViewPluginSamplerAction::getToolTipHtmlString() const
@@ -170,16 +185,23 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
         switch (event->type())
         {
             case QEvent::MouseMove:
+            {
+                _sampleContextDirty = true;
                 moveToolTipLabel();
                 break;
+            }
 
             case QEvent::MouseButtonPress:
+            {
                 _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
                 break;
+            }
 
             case QEvent::MouseButtonRelease:
+            {
                 _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked());
                 break;
+            }
 
         default:
             break;
@@ -197,7 +219,7 @@ void ViewPluginSamplerAction::fromVariantMap(const QVariantMap& variantMap)
     _highlightFocusedElementsAction.fromParentVariantMap(variantMap);
     _restrictNumberOfElementsAction.fromParentVariantMap(variantMap);
     _maximumNumberOfElementsAction.fromParentVariantMap(variantMap);
-    _toolTipLazyUpdateIntervalAction.fromParentVariantMap(variantMap);
+    _sampleContextLazyUpdateIntervalAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ViewPluginSamplerAction::toVariantMap() const
@@ -208,7 +230,7 @@ QVariantMap ViewPluginSamplerAction::toVariantMap() const
     _highlightFocusedElementsAction.insertIntoVariantMap(variantMap);
     _restrictNumberOfElementsAction.insertIntoVariantMap(variantMap);
     _maximumNumberOfElementsAction.insertIntoVariantMap(variantMap);
-    _toolTipLazyUpdateIntervalAction.insertIntoVariantMap(variantMap);
+    _sampleContextLazyUpdateIntervalAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
