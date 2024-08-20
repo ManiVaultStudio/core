@@ -13,7 +13,9 @@ namespace mv::util {
  *
  * Helper class for storing a map of categorized shortcuts and
  * creating a shortcut cheatsheet overlay widget
- * 
+ *
+ * Note: This class is developed for internal use only
+ *
  * @author Thomas Kroes
  */
 class CORE_EXPORT ShortcutMap : public QObject
@@ -29,7 +31,7 @@ public:
     explicit ShortcutMap(QObject* parent = nullptr);
 
     /** No need for custom destructor */
-    virtual ~ShortcutMap() = default;
+    virtual ~ShortcutMap() override = default;
 
 signals:
 

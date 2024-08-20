@@ -13,6 +13,8 @@
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 
+#include "util/ShortcutMap.h"
+
 #include <QString>
 #include <QMap>
 #include <QVariant>
@@ -175,6 +177,7 @@ protected:
     EventListener               _eventListener;     /** Listen to public events */
     gui::StringAction           _guiNameAction;     /** Action for the GUI name */
     gui::TriggerAction          _destroyAction;     /** Action for destroying the plugin */
+    util::ShortcutMap           _shortcutMap;       /** Shortcut cheatsheet map */
 
     friend class PluginFactory;
 };
