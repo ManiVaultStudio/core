@@ -45,8 +45,9 @@ public:
      * Construct with pointer to \p source widget and pointer to \p viewPlugin
      * @param source Pointer to source widget
      * @param viewPlugin Pointer to the view plugin for which to create the overlay
+     * @param alignment Alignment w.r.t. to the \p source widget
      */
-    ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin);
+    ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom | Qt::AlignRight);
 
     /**
      * Get widget fader
@@ -56,6 +57,7 @@ public:
 
 private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
+    const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
     mv::util::WidgetOverlayer   _widgetOverlayer;   /** Utility for layering on top of the target widget */
     mv::util::WidgetFader       _widgetFader;       /** Widget fader for animating the widget opacity */
     QHBoxLayout                 _horizontalLayout;  /** For horizontal alignment of the learning center icon */

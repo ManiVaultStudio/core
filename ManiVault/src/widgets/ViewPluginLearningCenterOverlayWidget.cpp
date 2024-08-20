@@ -13,14 +13,17 @@
 namespace mv::gui
 {
     
-ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin) :
+ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment /*= Qt::AlignBottom | Qt::AlignRight*/) :
     OverlayWidget(source),
     _viewPlugin(viewPlugin),
+    _alignment(alignment),
     _widgetOverlayer(this, this, source),
     _widgetFader(this, this, 1.f, 0.f, 1.f, 120, 60),
     _horizontalLayout(),
     _verticalLayout()
 {
+    _horizontalLayout.setAlignment(_alignment);
+
     _verticalLayout.addWidget(&_popupWidget);
 
     _horizontalLayout.addLayout(&_verticalLayout);
@@ -34,7 +37,8 @@ mv::util::WidgetFader& ViewPluginLearningCenterOverlayWidget::getWidgetFader()
 }
 
 ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(QWidget* parent) :
-    QWidget(parent)
+    QWidget(parent),
+    _label("Test", this)
 {
     auto layout = new QHBoxLayout();
 
