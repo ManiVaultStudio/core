@@ -9,30 +9,30 @@
 #include "util/WidgetFader.h"
 #include "util/WidgetOverlayer.h"
 
-namespace mv::util {
-    class ShortcutMap;
+namespace mv::plugin {
+    class ViewPlugin;
 }
 
 namespace mv::gui
 {
 
 /**
- * Shortcut map overlay widget class
+ * View plugin learning center overlay widget class
  *
- * Overlays the source widget with a shortcut map cheat sheet
+ * Overlays the source widget with a view plugin learning center icon popup
  *  
  * @author Thomas Kroes
  */
-class ShortcutMapOverlayWidget : public OverlayWidget
+class ViewPluginLearningCenterOverlayWidget : public OverlayWidget
 {
 public:
 
     /**
-     * Construct with pointer to \p source widget and \p shortcutMap
+     * Construct with pointer to \p source widget and pointer to \p viewPlugin
      * @param source Pointer to source widget
-     * @param shortcutMap Const reference to the shortcut map for which to create the overlay
+     * @param viewPlugin Pointer to the view plugin for which to create the overlay
      */
-    ShortcutMapOverlayWidget(QWidget* source, const util::ShortcutMap& shortcutMap);
+    ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin);
 
     /**
      * Get widget fader
@@ -41,7 +41,7 @@ public:
     util::WidgetFader& getWidgetFader();
 
 private:
-    const util::ShortcutMap&    _shortcutMap;       /** Const reference to the shortcut map for which to create the overlay */
+    const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     mv::util::WidgetOverlayer   _widgetOverlayer;   /** Utility for layering on top of the target widget */
     mv::util::WidgetFader       _widgetFader;       /** Widget fader for animating the widget opacity */
 };
