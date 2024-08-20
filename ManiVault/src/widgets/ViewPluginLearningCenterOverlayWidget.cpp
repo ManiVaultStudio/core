@@ -24,9 +24,9 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 {
     _horizontalLayout.setAlignment(_alignment);
 
-    _verticalLayout.addWidget(&_popupWidget);
+    _horizontalLayout.addWidget(&_popupWidget);
 
-    _horizontalLayout.addLayout(&_verticalLayout);
+    //_horizontalLayout.addLayout(&_verticalLayout);
 
     setLayout(&_horizontalLayout);
 }
