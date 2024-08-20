@@ -59,9 +59,9 @@ public:
     virtual QIcon getIcon() const final;
 
     /**
-    * Returns the kind of plugin. The kind is specific to the
-    * particular implementation of a plugin type.
-    */
+     * Returns the kind of plugin. The kind is specific to the
+     * particular implementation of a plugin type.
+     */
     QString getKind() const;
 
     /**
@@ -75,6 +75,12 @@ public:
      */
     virtual QString getVersion() const;
 
+    /**
+     * Get shortcut map
+     * @return Reference to the shortcut map
+     */
+    virtual util::ShortcutMap& getShortcutMap() final;
+    
 public: // Help
 
     /**

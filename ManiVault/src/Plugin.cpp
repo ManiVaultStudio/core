@@ -82,6 +82,11 @@ QString Plugin::getVersion() const
     return _factory->getVersion();
 }
 
+util::ShortcutMap& Plugin::getShortcutMap()
+{
+    return _shortcutMap;
+}
+
 bool Plugin::hasHelp()
 {
     return const_cast<PluginFactory*>(_factory)->hasHelp();
