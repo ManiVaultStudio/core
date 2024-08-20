@@ -510,6 +510,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/DockWidgetPermission.h
     src/util/NumericalRange.h
     src/util/FileDownloader.h
+    src/util/ShortcutMap.h
 )
 
 if(APPLE)
@@ -555,6 +556,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/DockWidgetPermission.cpp
     src/util/NumericalRange.cpp
     src/util/FileDownloader.cpp
+    src/util/ShortcutMap.cpp
 )
 
 if(APPLE)
