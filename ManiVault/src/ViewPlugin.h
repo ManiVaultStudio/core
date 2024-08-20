@@ -77,6 +77,14 @@ public:
      */
     virtual void setTriggerShortcut(const QKeySequence& keySequence) final;
 
+protected:
+
+    /**
+     * Get learning center overlay widget
+     * @return Reference to learning center overlay widget
+     */
+    gui::ViewPluginLearningCenterOverlayWidget& getLearningCenterOverlayWidget();
+
 public: // Title bar settings menu
 
     /**

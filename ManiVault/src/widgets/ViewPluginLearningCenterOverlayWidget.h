@@ -50,18 +50,15 @@ public:
     ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom | Qt::AlignRight);
 
     /**
-     * Get widget fader
-     * @return Reference to widget fader
+     * Set target widget to \p targetWidget
+     * @param targetWidget Pointer to target widget
      */
-    util::WidgetFader& getWidgetFader();
+    void setTargetWidget(QWidget* targetWidget);
 
 private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
-    mv::util::WidgetOverlayer   _widgetOverlayer;   /** Utility for layering on top of the target widget */
-    mv::util::WidgetFader       _widgetFader;       /** Widget fader for animating the widget opacity */
-    QHBoxLayout                 _horizontalLayout;  /** For horizontal alignment of the learning center icon */
-    QVBoxLayout                 _verticalLayout;    /** For Vertical alignment of the learning center icon */
+    QHBoxLayout                 _layout;            /** For alignment of the learning center icon */
     PopupWidget                 _popupWidget;       /** Icon with popup */
 };
 

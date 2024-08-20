@@ -238,6 +238,11 @@ void ViewPlugin::setTriggerShortcut(const QKeySequence& keySequence)
     _triggerShortcut = keySequence;
 }
 
+gui::ViewPluginLearningCenterOverlayWidget& ViewPlugin::getLearningCenterOverlayWidget()
+{
+    return _learningCenterOverlayWidget;
+}
+
 void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
 {
     Plugin::fromVariantMap(variantMap);

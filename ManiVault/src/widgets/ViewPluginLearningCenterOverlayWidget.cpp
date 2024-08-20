@@ -17,23 +17,20 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     OverlayWidget(source),
     _viewPlugin(viewPlugin),
     _alignment(alignment),
-    _widgetOverlayer(this, this, source),
-    _widgetFader(this, this, 1.f, 0.f, 1.f, 120, 60),
-    _horizontalLayout(),
-    _verticalLayout()
+    _layout()
 {
-    _horizontalLayout.setAlignment(_alignment);
+    _layout.setAlignment(_alignment);
 
-    _horizontalLayout.addWidget(&_popupWidget);
+    _layout.addWidget(&_popupWidget);
 
-    //_horizontalLayout.addLayout(&_verticalLayout);
+    //_layout.addLayout(&_verticalLayout);
 
-    setLayout(&_horizontalLayout);
+    setLayout(&_layout);
 }
 
-mv::util::WidgetFader& ViewPluginLearningCenterOverlayWidget::getWidgetFader()
+void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidget)
 {
-    return _widgetFader;
+    getWidgetOverlayer().setTargetWidget(targetWidget);
 }
 
 ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(QWidget* parent) :
