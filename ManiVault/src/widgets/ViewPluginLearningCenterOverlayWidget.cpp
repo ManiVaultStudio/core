@@ -12,18 +12,35 @@
 
 namespace mv::gui
 {
-
+    
 ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin) :
     OverlayWidget(source),
     _viewPlugin(viewPlugin),
     _widgetOverlayer(this, this, source),
-    _widgetFader(this, this, 1.f, 0.f, 1.f, 120, 60)
+    _widgetFader(this, this, 1.f, 0.f, 1.f, 120, 60),
+    _horizontalLayout(),
+    _verticalLayout()
 {
+    _verticalLayout.addWidget(&_popupWidget);
+
+    _horizontalLayout.addLayout(&_verticalLayout);
+
+    setLayout(&_horizontalLayout);
 }
 
 mv::util::WidgetFader& ViewPluginLearningCenterOverlayWidget::getWidgetFader()
 {
     return _widgetFader;
+}
+
+ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(QWidget* parent) :
+    QWidget(parent)
+{
+    auto layout = new QHBoxLayout();
+
+    layout->addWidget(&_label);
+
+    setLayout(layout);
 }
 
 }

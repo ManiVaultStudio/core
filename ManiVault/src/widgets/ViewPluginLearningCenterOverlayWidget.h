@@ -9,6 +9,10 @@
 #include "util/WidgetFader.h"
 #include "util/WidgetOverlayer.h"
 
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+
 namespace mv::plugin {
     class ViewPlugin;
 }
@@ -25,6 +29,16 @@ namespace mv::gui
  */
 class ViewPluginLearningCenterOverlayWidget : public OverlayWidget
 {
+private:
+
+    class PopupWidget : public QWidget {
+    public:
+        PopupWidget(QWidget* parent = nullptr);
+
+    private:
+        QLabel  _label;
+    };
+
 public:
 
     /**
@@ -44,6 +58,9 @@ private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     mv::util::WidgetOverlayer   _widgetOverlayer;   /** Utility for layering on top of the target widget */
     mv::util::WidgetFader       _widgetFader;       /** Widget fader for animating the widget opacity */
+    QHBoxLayout                 _horizontalLayout;  /** For horizontal alignment of the learning center icon */
+    QVBoxLayout                 _verticalLayout;    /** For Vertical alignment of the learning center icon */
+    PopupWidget                 _popupWidget;       /** Icon with popup */
 };
 
 }
