@@ -18,16 +18,33 @@ namespace mv::util {
 WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget* targetWidget, float initialOpacity /*= 1.0f*/) :
     QObject(parent),
     _sourceWidget(sourceWidget),
-    _targetWidget(targetWidget)
+    _targetWidget()
 {
-    Q_ASSERT(_sourceWidget != nullptr);
-    Q_ASSERT(_targetWidget != nullptr);
-    
     setObjectName("WidgetOverlayer");
 
-    _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
+    Q_ASSERT(_sourceWidget);
 
+    if (!sourceWidget)
+        return;
+
+    _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     _sourceWidget->installEventFilter(this);
+
+    setTargetWidget(targetWidget);
+}
+
+void WidgetOverlayer::setTargetWidget(QWidget* targetWidget)
+{
+    Q_ASSERT(targetWidget);
+
+    if (!targetWidget)
+        return;
+
+    if (_targetWidget)
+        _targetWidget->removeEventFilter(this);
+
+    _targetWidget = targetWidget;
+
     _targetWidget->installEventFilter(this);
 
     _sourceWidget->resize(_targetWidget->size());
@@ -42,7 +59,7 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
             if (dynamic_cast<QWidget*>(target) != _targetWidget)
                 break;
 
-            _sourceWidget->setFixedSize(static_cast<QResizeEvent*>(event)->size());
+            _sourceWidget->setFixedSize(dynamic_cast<QResizeEvent*>(event)->size());
 
             break;
         }
