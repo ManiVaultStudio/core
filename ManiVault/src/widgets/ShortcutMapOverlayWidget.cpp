@@ -13,9 +13,10 @@
 namespace mv::gui
 {
 
-ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* parent) :
-    OverlayWidget(parent),
-    _widgetOverlayer(this, this, parent),
+ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::ShortcutMap& shortcutMap) :
+    OverlayWidget(source),
+    _shortcutMap(shortcutMap),
+    _widgetOverlayer(this, this, source),
     _widgetFader(this, this, 1.f, 0.f, 1.f, 120, 60)
 {
 }

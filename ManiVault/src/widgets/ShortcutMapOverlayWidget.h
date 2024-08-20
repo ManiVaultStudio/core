@@ -9,6 +9,10 @@
 #include "util/WidgetFader.h"
 #include "util/WidgetOverlayer.h"
 
+namespace mv::util {
+    class ShortcutMap;
+}
+
 namespace mv::gui
 {
 
@@ -24,10 +28,11 @@ class CORE_EXPORT ShortcutMapOverlayWidget : public OverlayWidget
 public:
 
     /**
-     * Construct with \p parent
-     * @param parent Pointer to parent widget
+     * Construct with pointer to \p source widget and \p shortcutMap
+     * @param source Pointer to source widget
+     * @param shortcutMap Const reference to the shortcut map for which to create the overlay
      */
-    ShortcutMapOverlayWidget(QWidget* parent);
+    ShortcutMapOverlayWidget(QWidget* source, const util::ShortcutMap& shortcutMap);
 
     /**
      * Get widget fader
@@ -36,6 +41,7 @@ public:
     util::WidgetFader& getWidgetFader();
 
 private:
+    const util::ShortcutMap&    _shortcutMap;       /** Const reference to the shortcut map for which to create the overlay */
     mv::util::WidgetOverlayer   _widgetOverlayer;   /** Utility for layering on top of the target widget */
     mv::util::WidgetFader       _widgetFader;       /** Widget fader for animating the widget opacity */
 };

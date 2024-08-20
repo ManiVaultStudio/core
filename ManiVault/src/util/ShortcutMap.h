@@ -6,6 +6,8 @@
 
 #include <QObject>
 
+#include "widgets/ShortcutMapOverlayWidget.h"
+
 namespace mv::util {
 
 /**
@@ -18,7 +20,7 @@ namespace mv::util {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ShortcutMap : public QObject
+class CORE_EXPORT ShortcutMap final : public QObject
 {
     Q_OBJECT
 
@@ -32,6 +34,13 @@ public:
 
     /** No need for custom destructor */
     virtual ~ShortcutMap() override = default;
+
+    /**
+     * Create shortcut cheat sheet overlay widget on top of the \p source widget
+     * @param source Pointer to source widget
+     * @return Shared pointer to shortcut map overlay widget
+     */
+    std::shared_ptr<gui::ShortcutMapOverlayWidget> createShortcutMapOverlayWidget(QWidget* source) const;
 
 signals:
 

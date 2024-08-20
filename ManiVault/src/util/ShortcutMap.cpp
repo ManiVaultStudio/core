@@ -4,11 +4,20 @@
 
 #include "ShortcutMap.h"
 
+#ifdef _DEBUG
+    #define SHORTCUT_MAP_VERBOSE
+#endif
+
 namespace mv::util {
 
 ShortcutMap::ShortcutMap(QObject* parent) :
     QObject(parent)
 {
+}
+
+std::shared_ptr<gui::ShortcutMapOverlayWidget> ShortcutMap::createShortcutMapOverlayWidget(QWidget* source) const
+{
+    return std::make_shared<gui::ShortcutMapOverlayWidget>(source, *this);
 }
 
 }
