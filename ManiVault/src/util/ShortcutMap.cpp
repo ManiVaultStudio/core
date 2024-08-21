@@ -20,6 +20,22 @@ std::shared_ptr<gui::ShortcutMapOverlayWidget> ShortcutMap::createShortcutMapOve
     return std::make_shared<gui::ShortcutMapOverlayWidget>(source, *this);
 }
 
+void ShortcutMap::addShortcut(const Shortcut& shortcut)
+{
+    _shortcuts.push_back(shortcut);
+
+    emit shortcutAdded(shortcut);
+}
+
+void ShortcutMap::removeShortcut(const Shortcut& shortcut)
+{
+    emit shortcutAboutToBeRemoved(shortcut);
+    {
+        _shortcuts.erase(std::remove(_shortcuts.begin(), _shortcuts.end(), shortcut), _shortcuts.end());
+    }
+    emit shortcutRemoved(shortcut);
+}
+
 ShortcutMap::Shortcuts ShortcutMap::getShortcuts(const QStringList& categories /*= QStringList()*/) const
 {
     if (categories.isEmpty())

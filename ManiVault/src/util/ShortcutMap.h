@@ -32,6 +32,19 @@ public:
         QKeySequence    _keySequence;
         QString         _category;
         QString         _title;
+
+        bool operator==(const Shortcut& other) const {
+            if (other._keySequence != _keySequence)
+                return false;
+
+            if (other._category != _category)
+                return false;
+
+            if (other._title != _title)
+                return false;
+
+            return true;
+        }
     };
 
     using Shortcuts = std::vector<Shortcut>;
@@ -51,6 +64,18 @@ public:
      * @return Shared pointer to shortcut map overlay widget
      */
     std::shared_ptr<gui::ShortcutMapOverlayWidget> createShortcutMapOverlayWidget(QWidget* source) const;
+
+    /**
+     * Add \p shortcut to the map
+     * @param shortcut Shortcut to add
+     */
+    void addShortcut(const Shortcut& shortcut);
+
+    /**
+     * Remove \p shortcut from the map
+     * @param shortcut Shortcut to remove
+     */
+    void removeShortcut(const Shortcut& shortcut);
 
     /**
      * Get shortcuts for \p categories
