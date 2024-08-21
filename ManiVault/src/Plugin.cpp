@@ -22,7 +22,8 @@ Plugin::Plugin(const PluginFactory* factory) :
     _properties(),
     _eventListener(),
     _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "1" : QString::number(factory->getNumberOfInstances() + 1)))),
-    _destroyAction(this, "Remove")
+    _destroyAction(this, "Remove"),
+    _viewShortcutMapAction(this, "Shortcut map")
 {
     setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::ForceNone);
 
@@ -35,7 +36,13 @@ Plugin::Plugin(const PluginFactory* factory) :
     _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _destroyAction.setConnectionPermissionsToForceNone();
 
+    _viewShortcutMapAction.setToolTip("View shortcut map");
+    _viewShortcutMapAction.setIconByName("keyboard");
+    _viewShortcutMapAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _viewShortcutMapAction.setConnectionPermissionsToForceNone();
+
     connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
+    connect(&_viewShortcutMapAction, &TriggerAction::triggered, this, &Plugin::viewShortcutMap);
 }
 
 Plugin::~Plugin()
@@ -84,12 +91,32 @@ QString Plugin::getVersion() const
 
 util::ShortcutMap& Plugin::getShortcutMap()
 {
-    return _shortcutMap;
+    return const_cast<PluginFactory*>(_factory)->getShortcutMap();
 }
 
 const util::ShortcutMap& Plugin::getShortcutMap() const
 {
-    return _shortcutMap;
+    return const_cast<Plugin*>(this)->getShortcutMap();
+}
+
+void Plugin::addShortcut(const util::ShortcutMap::Shortcut& shortcut)
+{
+    getShortcutMap().addShortcut(shortcut);
+}
+
+void Plugin::removeShortcut(const util::ShortcutMap::Shortcut& shortcut)
+{
+    getShortcutMap().removeShortcut(shortcut);
+}
+
+util::ShortcutMap::Shortcuts Plugin::getShortcuts(const QStringList& categories) const
+{
+    return getShortcutMap().getShortcuts(categories);
+}
+
+bool Plugin::hasShortcuts(const QStringList& categories) const
+{
+    return getShortcutMap().hasShortcuts(categories);
 }
 
 bool Plugin::hasHelp()
@@ -166,6 +193,11 @@ QVariantMap Plugin::toVariantMap() const
     });
 
     return variantMap;
+}
+
+void Plugin::viewShortcutMap()
+{
+    qDebug() << __FUNCTION__ << "not implemented yet...";
 }
 
 void Plugin::destroy()

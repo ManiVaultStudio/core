@@ -12,11 +12,11 @@
 
 #include "actions/PluginTriggerAction.h"
 
+#include "util/ShortcutMap.h"
+
 #include <QObject>
 #include <QIcon>
 #include <QVariant>
-
-//#define ON_LEARNING_CENTER_FEATURE_BRANCH
 
 namespace mv {
     class DatasetImpl;
@@ -233,6 +233,20 @@ public:
             pluginTriggerAction->initialize();
     }
 
+public: // Shortcut map
+
+    /**
+     * Get shortcut map
+     * @return Reference to the shortcut map
+     */
+    virtual util::ShortcutMap& getShortcutMap() final;
+
+    /**
+     * Get shortcut map
+     * @return Const reference to the shortcut map
+     */
+    virtual const util::ShortcutMap& getShortcutMap() const final;
+
 public: // Number of instances
 
     /** Get number of plugin instances currently loaded */
@@ -310,6 +324,7 @@ private:
     gui::TriggerAction                      _visitRepositoryAction;                 /** Trigger action that opens an external browser and visits the GitHub repository */
     gui::PluginGlobalSettingsGroupAction*   _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
+    util::ShortcutMap                       _shortcutMap;                           /** Shortcut cheatsheet map */
 };
 
 }

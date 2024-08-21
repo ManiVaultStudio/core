@@ -15,6 +15,7 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataHierarchyWidget(nullptr)
 {
+    getShortcutMap().addShortcut({ QKeySequence(Qt::CTRL | Qt::Key_P), "General", "This is a test shortcut" });
 }
 
 void DataHierarchyPlugin::init()

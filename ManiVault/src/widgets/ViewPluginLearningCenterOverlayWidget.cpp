@@ -21,7 +21,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     _layout(),
     _popupWidget(viewPlugin)
 {
-    //setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
 
     _layout.setAlignment(_alignment);
 
@@ -103,10 +103,10 @@ bool ViewPluginLearningCenterOverlayWidget::PopupWidget::eventFilter(QObject* ta
             if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
                 QMenu learningCenterMenu;
 
-                if (_viewPlugin->getShortcutMap().hasShortcuts())
-                    learningCenterMenu.addMenu("Do this");
-
                 auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(_viewPlugin->getFactory());
+
+                if (_viewPlugin->hasShortcuts())
+                    learningCenterMenu.addAction(&const_cast<plugin::ViewPlugin*>(_viewPlugin)->getViewShortcutMapAction());
 
                 if (nonConstPluginFactory->hasHelp())
                     learningCenterMenu.addAction(&nonConstPluginFactory->getTriggerHelpAction());

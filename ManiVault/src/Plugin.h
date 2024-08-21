@@ -13,8 +13,6 @@
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 
-#include "util/ShortcutMap.h"
-
 #include <QString>
 #include <QMap>
 #include <QVariant>
@@ -75,18 +73,46 @@ public:
      */
     virtual QString getVersion() const;
 
-    /**
-     * Get shortcut map
-     * @return Reference to the shortcut map
-     */
-    virtual util::ShortcutMap& getShortcutMap() final;
+public: // Shortcuts
 
     /**
-     * Get shortcut map
-     * @return Const reference to the shortcut map
+     * Get the shortcut map
+     * @return Shortcut map
      */
-    virtual const util::ShortcutMap& getShortcutMap() const final;
-    
+    util::ShortcutMap& getShortcutMap();
+
+    /**
+     * Get the shortcut map
+     * @return Shortcut map
+     */
+    const util::ShortcutMap& getShortcutMap() const;
+
+    /**
+     * Add \p shortcut to the map
+     * @param shortcut Shortcut to add
+     */
+    void addShortcut(const util::ShortcutMap::Shortcut& shortcut);
+
+    /**
+     * Remove \p shortcut from the map
+     * @param shortcut Shortcut to remove
+     */
+    void removeShortcut(const util::ShortcutMap::Shortcut& shortcut);
+
+    /**
+     * Get shortcuts for \p categories
+     * @param categories Categories to retrieve shortcuts for (all shortcuts if empty)
+     * @return Vector of shortcuts
+     */
+    util::ShortcutMap::Shortcuts getShortcuts(const QStringList& categories = QStringList()) const;
+
+    /**
+     * Establish whether any shortcut exists for \p categories
+     * @param categories Categories to check (all categories if empty)
+     * @return Boolean determining whether any shortcut exists
+     */
+    bool hasShortcuts(const QStringList& categories = QStringList()) const;
+
 public: // Help
 
     /**
@@ -171,6 +197,11 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Shortcuts
+
+    /** View the shortcut map */
+    virtual void viewShortcutMap();
+
 public: // Miscellaneous
 
     /** Destroys the plugin and removes it from the plugin manager */
@@ -180,16 +211,17 @@ public: // Action getters
 
     gui::StringAction& getGuiNameAction() { return _guiNameAction; };
     gui::TriggerAction& getDestroyAction() { return _destroyAction; }
+    gui::TriggerAction& getViewShortcutMapAction() { return _viewShortcutMapAction; }
 
 protected:
-    CoreInterface*              _core;              /** Pointer to the core interface */
-    const PluginFactory*        _factory;           /** Pointer to plugin factory */
-    const QString               _name;              /** Unique plugin name */
-    QMap<QString, QVariant>     _properties;        /** Properties map */
-    EventListener               _eventListener;     /** Listen to public events */
-    gui::StringAction           _guiNameAction;     /** Action for the GUI name */
-    gui::TriggerAction          _destroyAction;     /** Action for destroying the plugin */
-    util::ShortcutMap           _shortcutMap;       /** Shortcut cheatsheet map */
+    CoreInterface*              _core;                      /** Pointer to the core interface */
+    const PluginFactory*        _factory;                   /** Pointer to plugin factory */
+    const QString               _name;                      /** Unique plugin name */
+    QMap<QString, QVariant>     _properties;                /** Properties map */
+    EventListener               _eventListener;             /** Listen to public events */
+    gui::StringAction           _guiNameAction;             /** Action for the GUI name */
+    gui::TriggerAction          _destroyAction;             /** Action for destroying the plugin */
+    gui::TriggerAction          _viewShortcutMapAction;     /** Trigger action that displays the plugin shortcut map */
 
     friend class PluginFactory;
 };

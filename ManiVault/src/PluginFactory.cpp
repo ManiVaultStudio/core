@@ -168,6 +168,16 @@ mv::gui::PluginTriggerAction& PluginFactory::getPluginTriggerAction()
     return _pluginTriggerAction;
 }
 
+util::ShortcutMap& PluginFactory::getShortcutMap()
+{
+    return _shortcutMap;
+}
+
+const util::ShortcutMap& PluginFactory::getShortcutMap() const
+{
+    return _shortcutMap;
+}
+
 std::uint32_t PluginFactory::getNumberOfInstances() const
 {
     return _numberOfInstances;
