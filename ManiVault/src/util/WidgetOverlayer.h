@@ -35,6 +35,12 @@ public:
     WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget* targetWidget, float initialOpacity = 1.0f);
 
     /**
+     * Get target widget
+     * @param targetWidget Pointer to target widget
+     */
+    QWidget* getTargetWidget();
+
+    /**
      * Set target widget to \p targetWidget
      * @param targetWidget Pointer to target widget
      */

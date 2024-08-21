@@ -30,9 +30,11 @@ public:
     struct Shortcut
     {
         QKeySequence    _keySequence;
+        QString         _category;
         QString         _title;
-        QString         _description;
     };
+
+    using Shortcuts = std::vector<Shortcut>;
 
     /**
      * Construct with pointer to \p parent object
@@ -49,6 +51,20 @@ public:
      * @return Shared pointer to shortcut map overlay widget
      */
     std::shared_ptr<gui::ShortcutMapOverlayWidget> createShortcutMapOverlayWidget(QWidget* source) const;
+
+    /**
+     * Get shortcuts for \p categories
+     * @param categories Categories to retrieve shortcuts for (all shortcuts if empty)
+     * @return Vector of shortcuts
+     */
+    Shortcuts getShortcuts(const QStringList& categories = QStringList()) const;
+
+    /**
+     * Establish whether any shortcut exists for \p categories
+     * @param categories Categories to check (all categories if empty)
+     * @return Boolean determining whether any shortcut exists
+     */
+    bool hasShortcuts(const QStringList& categories = QStringList()) const;
 
 signals:
 
@@ -71,6 +87,7 @@ signals:
     void shortcutRemoved(const Shortcut& shortcut);
 
 private:
+    Shortcuts   _shortcuts;     /** All shortcuts */
 };
 
 }

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "widgets/OverlayWidget.h"
+#include "util/WidgetFader.h"
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -61,6 +62,13 @@ public:
     ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom | Qt::AlignRight);
 
     /**
+     * Respond to target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
+    /**
      * Set target widget to \p targetWidget
      * @param targetWidget Pointer to target widget
      */
@@ -77,6 +85,7 @@ private:
 private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
+    util::WidgetFader           _widgetFader;       /** For fading in on view plugin mouse enter and fading out on view plugin widget mouse leave*/
     QVBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
     PopupWidget                 _popupWidget;       /** Icon with popup */
 };

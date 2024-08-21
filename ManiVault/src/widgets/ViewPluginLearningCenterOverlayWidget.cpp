@@ -17,10 +17,11 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     OverlayWidget(source),
     _viewPlugin(viewPlugin),
     _alignment(alignment),
+    _widgetFader(this, this),
     _layout(),
     _popupWidget(viewPlugin)
 {
-    setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    //setAttribute(Qt::WA_TransparentForMouseEvents, false);
 
     _layout.setAlignment(_alignment);
 
@@ -29,11 +30,41 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     setLayout(&_layout);
 
     setContentsMargins(4);
+
+    getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
+}
+
+bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent* event)
+{
+    if (target != getWidgetOverlayer().getTargetWidget())
+        return OverlayWidget::eventFilter(target, event);
+
+    switch (event->type())
+    {
+        case QEvent::Enter:
+        {
+            _widgetFader.fadeIn();
+            break;
+        }
+
+        case QEvent::Leave:
+        {
+            _widgetFader.fadeOut();
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return OverlayWidget::eventFilter(target, event);
 }
 
 void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidget)
 {
+    getWidgetOverlayer().getTargetWidget()->removeEventFilter(this);
     getWidgetOverlayer().setTargetWidget(targetWidget);
+    getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
 }
 
 void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t margin)
@@ -46,6 +77,8 @@ ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::Vi
     _viewPlugin(viewPlugin),
     _label("Test", this)
 {
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
+
     _layout.addWidget(&_label);
 
     _label.installEventFilter(this);
@@ -53,7 +86,7 @@ ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::Vi
 
     setLayout(&_layout);
 
-    setContentsMargins(4);
+    setContentsMargins(6);
 
     //setStyleSheet("background-color: green;");
 }
@@ -70,7 +103,19 @@ bool ViewPluginLearningCenterOverlayWidget::PopupWidget::eventFilter(QObject* ta
             if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
                 QMenu learningCenterMenu;
 
-                learningCenterMenu.addMenu("Do this");
+                if (_viewPlugin->getShortcutMap().hasShortcuts())
+                    learningCenterMenu.addMenu("Do this");
+
+                auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(_viewPlugin->getFactory());
+
+                if (nonConstPluginFactory->hasHelp())
+                    learningCenterMenu.addAction(&nonConstPluginFactory->getTriggerHelpAction());
+
+                if (nonConstPluginFactory->getReadmeMarkdownUrl().isValid())
+                    learningCenterMenu.addAction(&nonConstPluginFactory->getTriggerReadmeAction());
+
+                if (nonConstPluginFactory->getRespositoryUrl().isValid())
+                    learningCenterMenu.addAction(&nonConstPluginFactory->getVisitRepositoryAction());
 
                 learningCenterMenu.exec(mapToGlobal(mouseEvent->pos()));
                 

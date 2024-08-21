@@ -33,6 +33,11 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
     setTargetWidget(targetWidget);
 }
 
+QWidget* WidgetOverlayer::getTargetWidget()
+{
+    return _targetWidget;
+}
+
 void WidgetOverlayer::setTargetWidget(QWidget* targetWidget)
 {
     Q_ASSERT(targetWidget);
