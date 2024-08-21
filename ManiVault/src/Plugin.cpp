@@ -87,6 +87,11 @@ util::ShortcutMap& Plugin::getShortcutMap()
     return _shortcutMap;
 }
 
+const util::ShortcutMap& Plugin::getShortcutMap() const
+{
+    return _shortcutMap;
+}
+
 bool Plugin::hasHelp()
 {
     return const_cast<PluginFactory*>(_factory)->hasHelp();

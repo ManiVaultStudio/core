@@ -59,7 +59,7 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
             if (dynamic_cast<QWidget*>(target) != _targetWidget)
                 break;
 
-            _sourceWidget->setFixedSize(dynamic_cast<QResizeEvent*>(event)->size());
+            _sourceWidget->setGeometry(_targetWidget->geometry());
 
             break;
         }

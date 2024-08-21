@@ -80,6 +80,12 @@ public:
      * @return Reference to the shortcut map
      */
     virtual util::ShortcutMap& getShortcutMap() final;
+
+    /**
+     * Get shortcut map
+     * @return Const reference to the shortcut map
+     */
+    virtual const util::ShortcutMap& getShortcutMap() const final;
     
 public: // Help
 

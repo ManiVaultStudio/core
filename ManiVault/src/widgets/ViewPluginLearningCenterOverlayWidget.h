@@ -6,11 +6,7 @@
 
 #include "widgets/OverlayWidget.h"
 
-#include "util/WidgetFader.h"
-#include "util/WidgetOverlayer.h"
-
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QLabel>
 
 namespace mv::plugin {
@@ -27,16 +23,17 @@ namespace mv::gui
  *  
  * @author Thomas Kroes
  */
-class ViewPluginLearningCenterOverlayWidget : public OverlayWidget
+class CORE_EXPORT ViewPluginLearningCenterOverlayWidget : public OverlayWidget
 {
 private:
 
     class PopupWidget : public QWidget {
     public:
-        PopupWidget(QWidget* parent = nullptr);
+        PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
 
     private:
-        QLabel  _label;
+        const plugin::ViewPlugin*   _viewPlugin;
+        QLabel                      _label;
     };
 
 public:
@@ -54,6 +51,13 @@ public:
      * @param targetWidget Pointer to target widget
      */
     void setTargetWidget(QWidget* targetWidget);
+
+private:
+    /**
+     * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }
+     * @param margin Contents margins
+     */
+    void setContentsMargins(std::int32_t margin);
 
 private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */

@@ -17,7 +17,8 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     OverlayWidget(source),
     _viewPlugin(viewPlugin),
     _alignment(alignment),
-    _layout()
+    _layout(),
+    _popupWidget(viewPlugin)
 {
     _layout.setAlignment(_alignment);
 
@@ -26,6 +27,10 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     //_layout.addLayout(&_verticalLayout);
 
     setLayout(&_layout);
+
+    setContentsMargins(4);
+
+    //setStyleSheet("background-color: red;");
 }
 
 void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidget)
@@ -33,15 +38,26 @@ void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidge
     getWidgetOverlayer().setTargetWidget(targetWidget);
 }
 
-ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(QWidget* parent) :
+void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t margin)
+{
+    _layout.setContentsMargins(margin, margin, margin, margin);
+}
+
+ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent) :
     QWidget(parent),
+    _viewPlugin(viewPlugin),
     _label("Test", this)
 {
     auto layout = new QHBoxLayout();
 
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(&_label);
 
+    _label.setPixmap(Application::getIconFont("FontAwesome").getIcon("info-circle").pixmap(QSize(16, 16)));
+
     setLayout(layout);
+
+    //setStyleSheet("background-color: green;");
 }
 
 }

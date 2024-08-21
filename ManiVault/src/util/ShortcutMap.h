@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QObject>
+#include <QKeySequence>
 
 #include "widgets/ShortcutMapOverlayWidget.h"
 
@@ -26,6 +27,13 @@ class CORE_EXPORT ShortcutMap final : public QObject
 
 public:
 
+    struct Shortcut
+    {
+        QKeySequence    _keySequence;
+        QString         _title;
+        QString         _description;
+    };
+
     /**
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
@@ -43,6 +51,24 @@ public:
     std::shared_ptr<gui::ShortcutMapOverlayWidget> createShortcutMapOverlayWidget(QWidget* source) const;
 
 signals:
+
+    /**
+     * Signals that \p shortcut is added
+     * @param shortcut Shortcut that is added
+     */
+    void shortcutAdded(const Shortcut& shortcut);
+
+    /**
+     * Signals that \p shortcut is about to be removed
+     * @param shortcut Shortcut that is about to be removed
+     */
+    void shortcutAboutToBeRemoved(const Shortcut& shortcut);
+
+    /**
+     * Signals that \p shortcut is removed
+     * @param shortcut Shortcut that is removed
+     */
+    void shortcutRemoved(const Shortcut& shortcut);
 
 private:
 };
