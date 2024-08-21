@@ -6,7 +6,7 @@
 
 #include "widgets/OverlayWidget.h"
 
-#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QLabel>
 
 namespace mv::plugin {
@@ -31,9 +31,23 @@ private:
     public:
         PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
 
+        /**
+         * Respond to target object events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event) override;
+
+        /**
+         * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }
+         * @param margin Contents margins
+         */
+        void setContentsMargins(std::int32_t margin);
+
     private:
-        const plugin::ViewPlugin*   _viewPlugin;
-        QLabel                      _label;
+        const plugin::ViewPlugin*   _viewPlugin;    /** Const pointer to source view plugin */
+        QVBoxLayout                 _layout;        /** For alignment of the icon label */
+        QLabel                      _label;         /** Label containing the icon */
     };
 
 public:
@@ -53,6 +67,7 @@ public:
     void setTargetWidget(QWidget* targetWidget);
 
 private:
+
     /**
      * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }
      * @param margin Contents margins
@@ -62,7 +77,7 @@ private:
 private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
-    QHBoxLayout                 _layout;            /** For alignment of the learning center icon */
+    QVBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
     PopupWidget                 _popupWidget;       /** Icon with popup */
 };
 

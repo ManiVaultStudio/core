@@ -20,17 +20,15 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     _layout(),
     _popupWidget(viewPlugin)
 {
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
+
     _layout.setAlignment(_alignment);
 
     _layout.addWidget(&_popupWidget);
 
-    //_layout.addLayout(&_verticalLayout);
-
     setLayout(&_layout);
 
     setContentsMargins(4);
-
-    //setStyleSheet("background-color: red;");
 }
 
 void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidget)
@@ -48,16 +46,49 @@ ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::Vi
     _viewPlugin(viewPlugin),
     _label("Test", this)
 {
-    auto layout = new QHBoxLayout();
+    _layout.addWidget(&_label);
 
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(&_label);
+    _label.installEventFilter(this);
+    _label.setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(12, 12)));
 
-    _label.setPixmap(Application::getIconFont("FontAwesome").getIcon("info-circle").pixmap(QSize(16, 16)));
+    setLayout(&_layout);
 
-    setLayout(layout);
+    setContentsMargins(4);
 
     //setStyleSheet("background-color: green;");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::PopupWidget::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::MouseButtonPress:
+        {
+            if (target != &_label)
+                break;
+
+            if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
+                QMenu learningCenterMenu;
+
+                learningCenterMenu.addMenu("Do this");
+
+                learningCenterMenu.exec(mapToGlobal(mouseEvent->pos()));
+                
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QWidget::eventFilter(target, event);
+}
+
+void ViewPluginLearningCenterOverlayWidget::PopupWidget::setContentsMargins(std::int32_t margin)
+{
+    _layout.setContentsMargins(margin, margin, margin, margin);
 }
 
 }
