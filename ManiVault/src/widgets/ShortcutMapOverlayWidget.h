@@ -7,7 +7,6 @@
 #include "widgets/OverlayWidget.h"
 
 #include "util/WidgetFader.h"
-#include "util/WidgetOverlayer.h"
 
 namespace mv::util {
     class ShortcutMap;
@@ -40,9 +39,11 @@ public:
      */
     util::WidgetFader& getWidgetFader();
 
+    void showEvent(QShowEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
+
 private:
     const util::ShortcutMap&    _shortcutMap;       /** Const reference to the shortcut map for which to create the overlay */
-    mv::util::WidgetOverlayer   _widgetOverlayer;   /** Utility for layering on top of the target widget */
     mv::util::WidgetFader       _widgetFader;       /** Widget fader for animating the widget opacity */
 };
 

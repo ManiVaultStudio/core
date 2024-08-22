@@ -16,7 +16,6 @@ namespace mv::gui
 ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::ShortcutMap& shortcutMap) :
     OverlayWidget(source),
     _shortcutMap(shortcutMap),
-    _widgetOverlayer(this, this, source),
     _widgetFader(this, this, 1.f, 0.f, 1.f, 120, 60)
 {
 }
@@ -24,6 +23,20 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
 mv::util::WidgetFader& ShortcutMapOverlayWidget::getWidgetFader()
 {
     return _widgetFader;
+}
+
+void ShortcutMapOverlayWidget::showEvent(QShowEvent* event)
+{
+    _widgetFader.fadeIn();
+
+    OverlayWidget::showEvent(event);
+}
+
+void ShortcutMapOverlayWidget::hideEvent(QHideEvent* event)
+{
+    _widgetFader.fadeOut();
+
+    OverlayWidget::hideEvent(event);
 }
 
 }
