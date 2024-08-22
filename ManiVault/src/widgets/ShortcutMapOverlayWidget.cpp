@@ -18,6 +18,11 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
     _shortcutMap(shortcutMap),
     _widgetFader(this, this, 1.f, 0.f, 1.f, 120, 60)
 {
+    setAutoFillBackground(true);
+
+    _layout.addWidget(&_label);
+
+    setLayout(&_layout);
 }
 
 mv::util::WidgetFader& ShortcutMapOverlayWidget::getWidgetFader()

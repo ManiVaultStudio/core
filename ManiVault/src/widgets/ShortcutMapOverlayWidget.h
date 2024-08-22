@@ -8,6 +8,9 @@
 
 #include "util/WidgetFader.h"
 
+#include <QVBoxLayout>
+#include <QLabel>
+
 namespace mv::util {
     class ShortcutMap;
 }
@@ -45,6 +48,8 @@ public:
 private:
     const util::ShortcutMap&    _shortcutMap;       /** Const reference to the shortcut map for which to create the overlay */
     mv::util::WidgetFader       _widgetFader;       /** Widget fader for animating the widget opacity */
+    QVBoxLayout                 _layout;            /** Main layout */
+    QLabel                      _label;             /** Cheatsheet HTML */
 };
 
 }
