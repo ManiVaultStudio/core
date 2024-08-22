@@ -10,10 +10,15 @@
 
 namespace mv::util {
 
-ShortcutMap::ShortcutMap(const QString& title, QObject* parent) :
+ShortcutMap::ShortcutMap(const QString& title /*= ""*/, QObject* parent) :
     QObject(parent),
     _title(title)
 {
+}
+
+QString ShortcutMap::getTitle() const
+{
+    return _title;
 }
 
 void ShortcutMap::setTitle(const QString& title)

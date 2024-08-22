@@ -54,10 +54,16 @@ public:
      * @param title Shortcut map title
      * @param parent Pointer to parent object
      */
-    explicit ShortcutMap(const QString& title, QObject* parent = nullptr);
+    explicit ShortcutMap(const QString& title = "", QObject* parent = nullptr);
 
     /** No need for custom destructor */
     virtual ~ShortcutMap() override = default;
+
+    /**
+     * Get shortcut map title
+     * @return Shortcut map title
+     */
+    QString getTitle() const;
 
     /**
      * Set shortcut map title to \p title

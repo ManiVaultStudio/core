@@ -23,6 +23,11 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
     _layout.addWidget(&_label);
 
     setLayout(&_layout);
+
+    const QString header = " \
+        <p> \
+            <b>%1</b> \
+        </p>;").arg(_shortcutMap.getTitle());
 }
 
 mv::util::WidgetFader& ShortcutMapOverlayWidget::getWidgetFader()

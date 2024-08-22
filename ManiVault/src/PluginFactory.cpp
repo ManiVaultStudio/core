@@ -64,6 +64,7 @@ void PluginFactory::setKind(const QString& kind)
     _kind = kind;
 
     _pluginTriggerAction.setText(_kind);
+    _shortcutMap.setTitle(_kind);
 }
 
 mv::plugin::Type PluginFactory::getType() const
