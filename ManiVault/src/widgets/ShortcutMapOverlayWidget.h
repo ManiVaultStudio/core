@@ -8,8 +8,11 @@
 
 #include "util/WidgetFader.h"
 
+#include "actions/TriggerAction.h"
+
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QMouseEvent>
 
 namespace mv::util {
     class ShortcutMap;
@@ -37,19 +40,37 @@ public:
     ShortcutMapOverlayWidget(QWidget* source, const util::ShortcutMap& shortcutMap);
 
     /**
+     * Respond to target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
+    /**
      * Get widget fader
      * @return Reference to widget fader
      */
     util::WidgetFader& getWidgetFader();
 
     void showEvent(QShowEvent* event) override;
-    void hideEvent(QHideEvent* event) override;
+    //void hideEvent(QHideEvent* event) override;
+//
+//public: // Ignore mouse events for only this overlay widget
+//
+//    void mouseMoveEvent(QMouseEvent* event) override { event->ignore(); };
+//    void mousePressEvent(QMouseEvent* event) override { event->ignore(); };
+//    void mouseReleaseEvent(QMouseEvent* event) override { event->ignore(); };
+//    void mouseDoubleClickEvent(QMouseEvent* event) override { event->ignore(); };
+//    void wheelEvent(QWheelEvent* event) override { event->ignore(); };
+//    void enterEvent(QEnterEvent* event) override { event->ignore(); };
+//    void leaveEvent(QEvent* event) override { event->ignore(); };
 
 private:
     const util::ShortcutMap&    _shortcutMap;       /** Const reference to the shortcut map for which to create the overlay */
     mv::util::WidgetFader       _widgetFader;       /** Widget fader for animating the widget opacity */
     QVBoxLayout                 _layout;            /** Main layout */
     QLabel                      _label;             /** Cheatsheet HTML */
+    TriggerAction               _closeAction;       /** Trigger action for closing the shortcut cheat sheet */
 };
 
 }

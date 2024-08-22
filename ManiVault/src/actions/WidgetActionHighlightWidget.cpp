@@ -13,6 +13,8 @@ WidgetActionHighlightWidget::WidgetActionHighlightWidget(QWidget* parent, Widget
 {
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setStyleSheet(QString("background-color: %1;").arg(palette().highlight().color().name()));
+
+    setAttribute(Qt::WA_TransparentForMouseEvents);
 }
 
 WidgetAction* WidgetActionHighlightWidget::getAction()

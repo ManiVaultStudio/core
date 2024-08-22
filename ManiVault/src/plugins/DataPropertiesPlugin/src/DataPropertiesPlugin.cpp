@@ -40,6 +40,8 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
         
         viewPluginEditorDialog->open();
     });
+
+    addShortcut({ QKeySequence(Qt::CTRL | Qt::Key_P), "General", "This is a test shortcut" });
 }
 
 void DataPropertiesPlugin::updateWindowTitle(DataHierarchyItems selectedDataHierarchyItems)

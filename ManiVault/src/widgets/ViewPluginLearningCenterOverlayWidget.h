@@ -9,6 +9,7 @@
 
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QMouseEvent>
 
 namespace mv::plugin {
     class ViewPlugin;
@@ -73,6 +74,16 @@ public:
      * @param targetWidget Pointer to target widget
      */
     void setTargetWidget(QWidget* targetWidget);
+
+public: // Ignore mouse events for only this overlay widget
+
+    //void mouseMoveEvent(QMouseEvent* event) override { event->ignore(); };
+    //void mousePressEvent(QMouseEvent* event) override { event->ignore(); };
+    //void mouseReleaseEvent(QMouseEvent* event) override { event->ignore(); };
+    //void mouseDoubleClickEvent(QMouseEvent* event) override { event->ignore(); };
+    //void wheelEvent(QWheelEvent* event) override { event->ignore(); };
+    //void enterEvent(QEnterEvent* event) override { event->ignore(); };
+    //void leaveEvent(QEvent* event) override { event->ignore(); };
 
 private:
 

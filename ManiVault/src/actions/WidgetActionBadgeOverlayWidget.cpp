@@ -14,6 +14,7 @@ WidgetActionBadgeOverlayWidget::WidgetActionBadgeOverlayWidget(QWidget* parent, 
     OverlayWidget(parent, 0.0f),
     _action(action)
 {
+    setAttribute(Qt::WA_TransparentForMouseEvents);
 }
 
 void WidgetActionBadgeOverlayWidget::paintEvent(QPaintEvent* paintEvent)

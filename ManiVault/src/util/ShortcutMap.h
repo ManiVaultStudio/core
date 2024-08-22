@@ -74,9 +74,9 @@ public:
     /**
      * Create shortcut cheat sheet overlay widget on top of the \p source widget
      * @param source Pointer to source widget
-     * @return Shared pointer to shortcut map overlay widget
+     * @return Guarded pointer to shortcut map overlay widget
      */
-    std::shared_ptr<gui::ShortcutMapOverlayWidget> createShortcutMapOverlayWidget(QWidget* source) const;
+    QPointer<QWidget> createShortcutMapOverlayWidget(QWidget* source) const;
 
     /**
      * Add \p shortcut to the map

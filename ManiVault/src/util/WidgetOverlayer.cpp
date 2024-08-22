@@ -6,7 +6,6 @@
 
 #include <QDebug>
 #include <QWidget>
-#include <QVBoxLayout>
 #include <QResizeEvent>
 
 #ifdef _DEBUG
@@ -27,10 +26,15 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
     if (!sourceWidget)
         return;
 
-    _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
+    _sourceWidget->setMouseTracking(true);
     _sourceWidget->installEventFilter(this);
 
     setTargetWidget(targetWidget);
+}
+
+QWidget* WidgetOverlayer::getSourceWidget()
+{
+    return _sourceWidget;
 }
 
 QWidget* WidgetOverlayer::getTargetWidget()
@@ -78,6 +82,18 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
 
             break;
         }
+
+        //case QEvent::Enter:
+        //case QEvent::Leave:
+        //case QEvent::MouseMove:
+        //case QEvent::MouseButtonPress:
+        //case QEvent::MouseButtonRelease:
+        //{
+        //    if (dynamic_cast<QWidget*>(target) == _sourceWidget)
+        //        return true;
+
+        //    break;
+        //}
 
         default:
             break;

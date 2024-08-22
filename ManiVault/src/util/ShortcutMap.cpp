@@ -31,9 +31,9 @@ void ShortcutMap::setTitle(const QString& title)
     emit titleChanged(_title);
 }
 
-std::shared_ptr<gui::ShortcutMapOverlayWidget> ShortcutMap::createShortcutMapOverlayWidget(QWidget* source) const
+QPointer<QWidget> ShortcutMap::createShortcutMapOverlayWidget(QWidget* source) const
 {
-    return std::make_shared<gui::ShortcutMapOverlayWidget>(source, *this);
+    return new gui::ShortcutMapOverlayWidget(source, *this);
 }
 
 void ShortcutMap::addShortcut(const Shortcut& shortcut)

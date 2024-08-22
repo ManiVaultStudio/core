@@ -24,9 +24,7 @@ namespace mv::plugin
 
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
-    _widget(),
     _learningCenterOverlayWidget(&_widget, this),
-    _shortcutMapOverlayWidget(&_widget, factory->getShortcutMap()),
     _editorAction(this, "Edit..."),
     _screenshotAction(this, "Screenshot..."),
     _isolateAction(this, "Isolate"),
@@ -38,9 +36,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction(this, "Visible", true),
     _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
-    _triggerShortcut(),
-    _titleBarMenuActions(),
-    _settingsActions(),
     _progressTask(nullptr)
 {
     setText(isSystemViewPlugin() ? getKind() : getGuiName());
@@ -331,7 +326,16 @@ void ViewPlugin::setProgressTask(Task* progressTask)
 
 void ViewPlugin::viewShortcutMap()
 {
-    _shortcutMapOverlayWidget.show();
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (!_shortcutMapOverlayWidget.isNull())
+        return;
+
+    _shortcutMapOverlayWidget = getShortcutMap().createShortcutMapOverlayWidget(&_widget);
+
+    _shortcutMapOverlayWidget->show();
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
