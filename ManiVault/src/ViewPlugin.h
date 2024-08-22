@@ -14,6 +14,7 @@
 #include "actions/PresetsAction.h"
 
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
+#include "widgets/ShortcutMapOverlayWidget.h"
 
 #include "Plugin.h"
 #include "Task.h"
@@ -121,7 +122,7 @@ public: // Settings actions
     /** Get vector of pointers to docking actions */
     gui::WidgetActions getDockingActions() const;
 
-public:
+public: // Progress
 
     /**
      * Get progress task
@@ -134,6 +135,11 @@ public:
      * @param progressTask Pointer to progress task (maybe nullptr)
      */
     void setProgressTask(Task* progressTask);
+
+public: // Shortcuts
+
+    /** View the shortcut map */
+    void viewShortcutMap() override;
 
 public: // Serialization
 
@@ -174,6 +180,7 @@ signals:
 private:
     QWidget                                         _widget;                            /** Widget representation of the plugin */
     gui::ViewPluginLearningCenterOverlayWidget      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
+    gui::ShortcutMapOverlayWidget                   _shortcutMapOverlayWidget;          /** Shortcut cheat sheet overlay widget */
     gui::TriggerAction                              _editorAction;                      /** Trigger action to start the view plugin editor */
     gui::TriggerAction                              _screenshotAction;                  /** Trigger action to create a screenshot */
     gui::ToggleAction                               _isolateAction;                     /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */

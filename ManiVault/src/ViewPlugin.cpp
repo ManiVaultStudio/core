@@ -26,6 +26,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
     _learningCenterOverlayWidget(&_widget, this),
+    _shortcutMapOverlayWidget(&_widget, factory->getShortcutMap()),
     _editorAction(this, "Edit..."),
     _screenshotAction(this, "Screenshot..."),
     _isolateAction(this, "Isolate"),
@@ -326,6 +327,11 @@ void ViewPlugin::setProgressTask(Task* progressTask)
     _progressTask = progressTask;
 
     emit progressTaskChanged(_progressTask);
+}
+
+void ViewPlugin::viewShortcutMap()
+{
+    _shortcutMapOverlayWidget.show();
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
