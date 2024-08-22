@@ -50,13 +50,20 @@ public:
     using Shortcuts = std::vector<Shortcut>;
 
     /**
-     * Construct with pointer to \p parent object
+     * Construct with \p title and pointer to \p parent object
+     * @param title Shortcut map title
      * @param parent Pointer to parent object
      */
-    explicit ShortcutMap(QObject* parent = nullptr);
+    explicit ShortcutMap(const QString& title, QObject* parent = nullptr);
 
     /** No need for custom destructor */
     virtual ~ShortcutMap() override = default;
+
+    /**
+     * Set shortcut map title to \p title
+     * @param title Shortcut map title
+     */
+    void setTitle(const QString& title);
 
     /**
      * Create shortcut cheat sheet overlay widget on top of the \p source widget
@@ -94,6 +101,12 @@ public:
 signals:
 
     /**
+     * Signals that the shortcut map \p title has changed
+     * @param title Updated shortcut map title
+     */
+    void titleChanged(const QString& title);
+
+    /**
      * Signals that \p shortcut is added
      * @param shortcut Shortcut that is added
      */
@@ -112,7 +125,8 @@ signals:
     void shortcutRemoved(const Shortcut& shortcut);
 
 private:
-    Shortcuts   _shortcuts;     /** All shortcuts */
+    QString         _title;         /** Shortcut map title */
+    Shortcuts       _shortcuts;     /** All shortcuts */
 };
 
 }

@@ -10,9 +10,20 @@
 
 namespace mv::util {
 
-ShortcutMap::ShortcutMap(QObject* parent) :
-    QObject(parent)
+ShortcutMap::ShortcutMap(const QString& title, QObject* parent) :
+    QObject(parent),
+    _title(title)
 {
+}
+
+void ShortcutMap::setTitle(const QString& title)
+{
+    if (title == _title)
+        return;
+
+    _title = title;
+
+    emit titleChanged(_title);
 }
 
 std::shared_ptr<gui::ShortcutMapOverlayWidget> ShortcutMap::createShortcutMapOverlayWidget(QWidget* source) const

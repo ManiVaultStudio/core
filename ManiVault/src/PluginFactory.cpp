@@ -29,7 +29,8 @@ PluginFactory::PluginFactory(Type type) :
     _triggerReadmeAction(nullptr, "Readme"),
     _visitRepositoryAction(nullptr, "Go to repository"),
     _pluginGlobalSettingsGroupAction(nullptr),
-    _statusBarAction(nullptr)
+    _statusBarAction(nullptr),
+    _shortcutMap()
 {
     _triggerReadmeAction.setIconByName("book");
 
