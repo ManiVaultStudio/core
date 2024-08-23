@@ -410,6 +410,7 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/YouTubeVideoDialog.h
 	src/widgets/ShortcutMapOverlayWidget.h
 	src/widgets/ViewPluginLearningCenterOverlayWidget.h
+	src/widgets/IconLabel.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
@@ -426,6 +427,7 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/YouTubeVideoDialog.cpp
 	src/widgets/ShortcutMapOverlayWidget.cpp
 	src/widgets/ViewPluginLearningCenterOverlayWidget.cpp
+	src/widgets/IconLabel.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES

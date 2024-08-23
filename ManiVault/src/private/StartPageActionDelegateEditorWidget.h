@@ -28,51 +28,6 @@ class StartPageActionDelegateEditorWidget : public QWidget
     Q_OBJECT
 
 public:
-
-    /** Icon label with tooltip (obtained with tooltip callback function) */
-    class IconLabel : public QLabel {
-    public:
-
-        using TooltipCallback = std::function<QString()>;    /** Callback function that is called when a tooltip is required */
-
-    public:
-
-        /**
-         * Construct from \p icon and \p parent widget
-         * @param icon Label icon
-         * @param parent Pointer to parent widget
-         */
-        IconLabel(const QIcon& icon, QWidget* parent = nullptr);
-
-        /**
-         * Set the tooltip callback
-         * @param tooltipCallback Callback function that is called when a tooltip is required
-         */
-        void setTooltipCallback(const TooltipCallback& tooltipCallback);
-
-        /**
-         * Triggered on mouse hover
-         * @param enterEvent Pointer to enter event
-         */
-        void enterEvent(QEnterEvent* enterEvent) override;
-
-        /**
-         * Triggered on mouse leave
-         * @param event Pointer to event
-         */
-        void leaveEvent(QEvent* event) override;
-
-    private:
-
-        /** Updates the label opacity depending on whether the mouse is hovering over the label */
-        void updateOpacityEffect();
-
-    private:
-        QGraphicsOpacityEffect  _opacityEffect;         /** Effect for modulating label opacity */
-        TooltipCallback         _tooltipCallback;       /** Callback function that is called when a tooltip is required */
-    };
-
-public:
     
     /**
      * Construct delegate editor widget with \p parent widget

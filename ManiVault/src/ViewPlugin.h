@@ -139,6 +139,16 @@ public: // Shortcuts
     /** View the shortcut map */
     void viewShortcutMap() override;
 
+public: // Miscellaneous
+
+    /**
+     * Respond to target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     * @return Boolean determining whether the event was handled or not
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
 public: // Serialization
 
     /**

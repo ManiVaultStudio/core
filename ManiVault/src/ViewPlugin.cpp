@@ -172,6 +172,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         _mayFloatAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Float"));
         _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
     });
+
+    _widget.installEventFilter(this);
 }
 
 void ViewPlugin::init()
@@ -330,12 +332,31 @@ void ViewPlugin::viewShortcutMap()
     qDebug() << __FUNCTION__;
 #endif
 
-    if (!_shortcutMapOverlayWidget.isNull())
-        return;
+    getShortcutMap().createShortcutMapOverlayWidget(&_widget);
+    //_shortcutMapOverlayWidget.getWidgetFader().fadeIn();
+}
 
-    _shortcutMapOverlayWidget = getShortcutMap().createShortcutMapOverlayWidget(&_widget);
+bool ViewPlugin::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Enter:
+        {
+            _learningCenterOverlayWidget.show();
+            break;
+        }
 
-    _shortcutMapOverlayWidget->show();
+        case QEvent::Leave:
+        {
+            _learningCenterOverlayWidget.hide();
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return Plugin::eventFilter(target, event);
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

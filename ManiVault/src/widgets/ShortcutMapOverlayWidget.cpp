@@ -69,7 +69,7 @@ mv::util::WidgetFader& ShortcutMapOverlayWidget::getWidgetFader()
 
 void ShortcutMapOverlayWidget::showEvent(QShowEvent* event)
 {
-    _widgetFader.fadeIn();
+    //_widgetFader.fadeIn();
 
     OverlayWidget::showEvent(event);
 }

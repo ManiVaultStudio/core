@@ -28,6 +28,7 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
 
     _sourceWidget->setMouseTracking(true);
     _sourceWidget->installEventFilter(this);
+    _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
 
     setTargetWidget(targetWidget);
 }

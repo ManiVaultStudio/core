@@ -7,9 +7,8 @@
 #include "widgets/OverlayWidget.h"
 #include "util/WidgetFader.h"
 
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QLabel>
-#include <QMouseEvent>
 
 namespace mv::plugin {
     class ViewPlugin;
@@ -33,12 +32,7 @@ private:
     public:
         PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
 
-        /**
-         * Respond to target object events
-         * @param target Object of which an event occurred
-         * @param event The event that took place
-         */
-        bool eventFilter(QObject* target, QEvent* event) override;
+        void showEvent(QShowEvent* event) override;
 
         /**
          * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }
@@ -48,8 +42,8 @@ private:
 
     private:
         const plugin::ViewPlugin*   _viewPlugin;    /** Const pointer to source view plugin */
-        QVBoxLayout                 _layout;        /** For alignment of the icon label */
-        QLabel                      _label;         /** Label containing the icon */
+        QHBoxLayout                 _layout;        /** For alignment of the icon label */
+        std::vector<QLabel>         _labels;        /** Labels */
     };
 
 public:
@@ -66,6 +60,7 @@ public:
      * Respond to target object events
      * @param target Object of which an event occurred
      * @param event The event that took place
+     * @return Boolean determining whether the event was handled or not
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
@@ -74,6 +69,8 @@ public:
      * @param targetWidget Pointer to target widget
      */
     void setTargetWidget(QWidget* targetWidget);
+
+    void showEvent(QShowEvent* event) override;
 
 public: // Ignore mouse events for only this overlay widget
 
@@ -97,7 +94,7 @@ private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
     util::WidgetFader           _widgetFader;       /** For fading in on view plugin mouse enter and fading out on view plugin widget mouse leave*/
-    QVBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
+    QHBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
     PopupWidget                 _popupWidget;       /** Icon with popup */
 };
 
