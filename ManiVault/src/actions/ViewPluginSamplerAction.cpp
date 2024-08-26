@@ -117,6 +117,8 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _toolTipLabel.setWordWrap(true);
 
         _sampleContextLazyUpdateTimer.start();
+
+        _isInitialized = true;
     }
     catch (std::exception& e)
     {
