@@ -4,6 +4,8 @@
 
 #include "ShortcutMap.h"
 
+#include <set>
+
 #ifdef _DEBUG
     #define SHORTCUT_MAP_VERBOSE
 #endif
@@ -69,6 +71,17 @@ ShortcutMap::Shortcuts ShortcutMap::getShortcuts(const QStringList& categories /
 bool ShortcutMap::hasShortcuts(const QStringList& categories /*= QStringList()*/) const
 {
     return !getShortcuts(categories).empty();
+}
+
+QStringList ShortcutMap::getCategories() const
+{
+    QStringList categories;
+
+    for (const auto& shortcut : _shortcuts)
+        if (!categories.contains(shortcut._category))
+            categories << shortcut._category;
+
+    return categories;
 }
 
 }

@@ -332,7 +332,12 @@ void ViewPlugin::viewShortcutMap()
     qDebug() << __FUNCTION__;
 #endif
 
-    getShortcutMap().createShortcutMapOverlayWidget(&_widget);
+    if (!_shortcutMapOverlayWidget.isNull())
+        return;
+
+    _shortcutMapOverlayWidget = getShortcutMap().createShortcutMapOverlayWidget(&_widget);
+
+    _shortcutMapOverlayWidget->show();
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

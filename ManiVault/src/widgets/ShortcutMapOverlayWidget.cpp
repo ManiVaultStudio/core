@@ -28,11 +28,31 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
     _layout.addStretch(1);
     _layout.addWidget(_closeAction.createWidget(this));
 
+    //_label.setStyleSheet("background-color: rgba(0, 0, 0, 20)");
+
     setLayout(&_layout);
 
-    const auto header = QString("<p><b>%1</b> shortcuts</p>").arg(_shortcutMap.getTitle());
+    const auto header = QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(_shortcutMap.getTitle());
 
-    _label.setText(header);
+    QString categories;
+
+    const auto createShortcutMapCategoryTable = [this](const QString& category) -> QString {
+        const auto header = QString("<p style='font-size: 12pt;'><b>%1</b></p>").arg(category);
+
+        QString rows;
+
+        for (const auto& shortcut : _shortcutMap.getShortcuts({ category }))
+            rows += QString("<tr><td style='width: 100px;'><b>%1</b></td><td>%2</td></tr>").arg(shortcut._keySequence.toString(), shortcut._title);
+
+        const auto table = QString("<table>%1</table>").arg(rows);
+
+        return header + table;
+    };
+
+    for (const auto& category : _shortcutMap.getCategories())
+        categories += createShortcutMapCategoryTable(category);
+
+    _label.setText(header + categories);
 
     connect(&_closeAction, &TriggerAction::triggered, &_widgetFader, [this]() -> void {
         connect(&_widgetFader, &WidgetFader::fadedOut, this, &ShortcutMapOverlayWidget::deleteLater);
@@ -40,6 +60,8 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
     });
 
     this->installEventFilter(this);
+
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
 }
 
 bool ShortcutMapOverlayWidget::eventFilter(QObject* target, QEvent* event)
@@ -69,7 +91,7 @@ mv::util::WidgetFader& ShortcutMapOverlayWidget::getWidgetFader()
 
 void ShortcutMapOverlayWidget::showEvent(QShowEvent* event)
 {
-    //_widgetFader.fadeIn();
+    _widgetFader.fadeIn();
 
     OverlayWidget::showEvent(event);
 }

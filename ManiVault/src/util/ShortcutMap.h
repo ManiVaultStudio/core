@@ -104,6 +104,12 @@ public:
      */
     bool hasShortcuts(const QStringList& categories = QStringList()) const;
 
+    /**
+     * Get shortcut categories
+     * @return Shortcut categories
+     */
+    QStringList getCategories() const;
+
 signals:
 
     /**

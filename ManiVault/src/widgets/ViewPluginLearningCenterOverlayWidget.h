@@ -56,7 +56,7 @@ private:
     //    IconLabel                   _iconLabel;     /** Icon label */
     //};
 
-    class PopupWidget : public QLabel {
+    class PopupWidget : public QWidget {
     public:
         PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
 
@@ -79,7 +79,7 @@ private:
     private:
         const plugin::ViewPlugin*   _viewPlugin;    /** Const pointer to source view plugin */
         QHBoxLayout                 _layout;        /** For alignment of the icon label */
-        IconLabel                   _iconLabel;     /** Icon label */
+        QLabel                   _iconLabel;     /** Icon label */
     };
 
 public:
@@ -100,34 +100,34 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
-    bool event(QEvent* event) override {
-        if (event->type() == QEvent::MouseButtonPress) {
-            qDebug() << "Mouse press event in WidgetB";
-        }
-        return QWidget::event(event);  // Call the base class event handler
-    }
+    //bool event(QEvent* event) override {
+    //    if (event->type() == QEvent::MouseButtonPress) {
+    //        qDebug() << "Mouse press event in WidgetB";
+    //    }
+    //    return QWidget::event(event);  // Call the base class event handler
+    //}
 
-    void enterEvent(QEnterEvent* event) override
-    {
-        qDebug() << __FUNCTION__;
-        event->ignore();
-    }
+    //void enterEvent(QEnterEvent* event) override
+    //{
+    //    qDebug() << __FUNCTION__;
+    //    event->ignore();
+    //}
 
-    void leaveEvent(QEvent* event) override
-    {
-        qDebug() << __FUNCTION__;
-        event->ignore();
-    }
+    //void leaveEvent(QEvent* event) override
+    //{
+    //    qDebug() << __FUNCTION__;
+    //    event->ignore();
+    //}
 
-    void mouseMoveEvent(QMouseEvent* event) override {
-        qDebug() << __FUNCTION__;
-        event->ignore();
-    }
+    //void mouseMoveEvent(QMouseEvent* event) override {
+    //    qDebug() << __FUNCTION__;
+    //    event->ignore();
+    //}
 
-    void mousePressEvent(QMouseEvent* event) override {
-        qDebug() << __FUNCTION__;
-        event->ignore();
-    }
+    //void mousePressEvent(QMouseEvent* event) override {
+    //    qDebug() << __FUNCTION__;
+    //    event->ignore();
+    //}
 
     /**
      * Set target widget to \p targetWidget
@@ -147,9 +147,9 @@ private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
     util::WidgetFader           _widgetFader;       /** For fading in on view plugin mouse enter and fading out on view plugin widget mouse leave*/
-    //QHBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
-    //PopupWidget                 _popupWidget;       /** Icon with popup */
-    OverlayWidget               _hoverOverlayWidget;
+    QHBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
+    PopupWidget                 _popupWidget;       /** Icon with popup */
+    //OverlayWidget               _hoverOverlayWidget;
 };
 
 }
