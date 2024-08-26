@@ -87,8 +87,8 @@ namespace mv
             const uint ATTRIBUTE_POSITIONS          = 1;
             const uint ATTRIBUTE_HIGHLIGHTS         = 2;
             const uint ATTRIBUTE_FOCUS_HIGHLIGHTS   = 3;
-            const uint ATTRIBUTE_COLORS             = 4;
-            const uint ATTRIBUTE_SCALARS_COLOR      = 5;
+            const uint ATTRIBUTE_COLORS             = 5;
+            const uint ATTRIBUTE_SCALARS_COLOR      = 4;
             const uint ATTRIBUTE_SCALARS_SIZE       = 6;
             const uint ATTRIBUTE_SCALARS_OPACITY    = 7;
 

@@ -59,9 +59,6 @@ float normalize(float minPixelValue, float maxPixelValue, float pixelValue)
 
 void main()
 {
-	if ((length(vTexCoord - focusRegionCenter) < focusRegionRadius)) // focusRegionVisible && 
-		fragColor = vec4(1, 0, 0, 1);//vec4(focusRegionColor, focusRegionOpacity);
-		
 	bool isSelectionHighlighted	= vHighlight == 1;
 	bool isFocusHighlighted 	= vFocusHighlight == 1;
 	bool isHighlighted			= isSelectionHighlighted || isFocusHighlighted;
@@ -100,10 +97,10 @@ void main()
 
     if (scalarEffect == EFFECT_COLOR_2D)
 	{
-            float channel1 = normalize(dataBounds[0], dataBounds[1], vPosOrig[0]);
-            float channel2 = normalize(dataBounds[2], dataBounds[3], vPosOrig[1]);
+        float channel1 = normalize(dataBounds[0], dataBounds[1], vPosOrig[0]);
+        float channel2 = normalize(dataBounds[2], dataBounds[3], vPosOrig[1]);
             
-            color = texture(colormap, vec2(channel1, channel2)).rgb;
+        color = texture(colormap, vec2(channel1, channel2)).rgb;
 	}
 
 	float opacity = 1.0;
