@@ -189,7 +189,23 @@ void ViewPluginSamplerAction::drawToolTip()
 
 void ViewPluginSamplerAction::moveToolTipLabel()
 {
-    _toolTipLabel.move(_viewPlugin->getWidget().mapFromGlobal(_viewPlugin->getWidget().cursor().pos() + QPoint(10, 10)));
+    auto parentWidget   = &_viewPlugin->getWidget();
+    auto targetWidget   = _pixelSelectionAction->getTargetWidget();
+    auto globalPosition = _viewPlugin->getWidget().mapFromGlobal(parentWidget->cursor().pos());
+
+    if (globalPosition.x() + _toolTipLabel.width() > targetWidget->width())
+        globalPosition.setX(parentWidget->width() - _toolTipLabel.width());
+
+    if (globalPosition.x() < 0)
+        globalPosition.setX(0);
+
+    if (globalPosition.y() + _toolTipLabel.height() > targetWidget->height())
+        globalPosition.setY(parentWidget->height() - (_toolTipLabel.height() + targetWidget->y()));
+
+    if (globalPosition.y() < 0)
+        globalPosition.setY(0);
+
+    _toolTipLabel.move(globalPosition);
 }
 
 bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)

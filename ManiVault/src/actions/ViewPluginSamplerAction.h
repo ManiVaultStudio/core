@@ -165,7 +165,6 @@ private:
     QString                         _toolTipHtmlString;                         /** HTML tooltip string */
     std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                      /** Overlay widget for the tooltip */
     QLabel                          _toolTipLabel;                              /** The text label which contains the actual tooltip text */
-    
 };
 
 }
