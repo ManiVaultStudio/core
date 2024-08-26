@@ -5,10 +5,12 @@
 #pragma once
 
 #include "widgets/OverlayWidget.h"
+#include "widgets/IconLabel.h"
+
 #include "util/WidgetFader.h"
 
 #include <QHBoxLayout>
-#include <QLabel>
+#include <QMouseEvent>
 
 namespace mv::plugin {
     class ViewPlugin;
@@ -28,11 +30,45 @@ class CORE_EXPORT ViewPluginLearningCenterOverlayWidget : public OverlayWidget
 {
 private:
 
-    class PopupWidget : public QWidget {
+    //class LearningCenterIconLabel : public QLabel {
+    //public:
+    //    LearningCenterIconLabel(QWidget* parent = nullptr);
+
+    //    void mousePressEvent(QMouseEvent* event) override;
+
+    //private:
+
+    //    /**
+    //     * Get view plugin learning center context menu
+    //     * @return View plugin learning center context menu
+    //     */
+    //    QMenu* getContextMenu(QWidget* parent = nullptr) const;
+
+    //    /**
+    //     * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }
+    //     * @param margin Contents margins
+    //     */
+    //    void setContentsMargins(std::int32_t margin);
+
+    //private:
+    //    const plugin::ViewPlugin* _viewPlugin;    /** Const pointer to source view plugin */
+    //    QHBoxLayout                 _layout;        /** For alignment of the icon label */
+    //    IconLabel                   _iconLabel;     /** Icon label */
+    //};
+
+    class PopupWidget : public QLabel {
     public:
         PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
 
-        void showEvent(QShowEvent* event) override;
+        void mousePressEvent(QMouseEvent* event) override;
+
+    private:
+
+        /**
+         * Get view plugin learning center context menu
+         * @return View plugin learning center context menu
+         */
+        QMenu* getContextMenu(QWidget* parent = nullptr) const;
 
         /**
          * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }
@@ -43,18 +79,18 @@ private:
     private:
         const plugin::ViewPlugin*   _viewPlugin;    /** Const pointer to source view plugin */
         QHBoxLayout                 _layout;        /** For alignment of the icon label */
-        std::vector<QLabel>         _labels;        /** Labels */
+        IconLabel                   _iconLabel;     /** Icon label */
     };
 
 public:
 
     /**
-     * Construct with pointer to \p source widget and pointer to \p viewPlugin
-     * @param source Pointer to source widget
+     * Construct with pointer to \p target widget, \p viewPlugin and initial \p alignment
+     * @param target Pointer to parent widget (overlay widget will be layered on top of this widget)
      * @param viewPlugin Pointer to the view plugin for which to create the overlay
      * @param alignment Alignment w.r.t. to the \p source widget
      */
-    ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom | Qt::AlignRight);
+    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom | Qt::AlignRight);
 
     /**
      * Respond to target object events
@@ -64,23 +100,40 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
+    bool event(QEvent* event) override {
+        if (event->type() == QEvent::MouseButtonPress) {
+            qDebug() << "Mouse press event in WidgetB";
+        }
+        return QWidget::event(event);  // Call the base class event handler
+    }
+
+    void enterEvent(QEnterEvent* event) override
+    {
+        qDebug() << __FUNCTION__;
+        event->ignore();
+    }
+
+    void leaveEvent(QEvent* event) override
+    {
+        qDebug() << __FUNCTION__;
+        event->ignore();
+    }
+
+    void mouseMoveEvent(QMouseEvent* event) override {
+        qDebug() << __FUNCTION__;
+        event->ignore();
+    }
+
+    void mousePressEvent(QMouseEvent* event) override {
+        qDebug() << __FUNCTION__;
+        event->ignore();
+    }
+
     /**
      * Set target widget to \p targetWidget
      * @param targetWidget Pointer to target widget
      */
     void setTargetWidget(QWidget* targetWidget);
-
-    void showEvent(QShowEvent* event) override;
-
-public: // Ignore mouse events for only this overlay widget
-
-    //void mouseMoveEvent(QMouseEvent* event) override { event->ignore(); };
-    //void mousePressEvent(QMouseEvent* event) override { event->ignore(); };
-    //void mouseReleaseEvent(QMouseEvent* event) override { event->ignore(); };
-    //void mouseDoubleClickEvent(QMouseEvent* event) override { event->ignore(); };
-    //void wheelEvent(QWheelEvent* event) override { event->ignore(); };
-    //void enterEvent(QEnterEvent* event) override { event->ignore(); };
-    //void leaveEvent(QEvent* event) override { event->ignore(); };
 
 private:
 
@@ -94,8 +147,9 @@ private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
     util::WidgetFader           _widgetFader;       /** For fading in on view plugin mouse enter and fading out on view plugin widget mouse leave*/
-    QHBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
-    PopupWidget                 _popupWidget;       /** Icon with popup */
+    //QHBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
+    //PopupWidget                 _popupWidget;       /** Icon with popup */
+    OverlayWidget               _hoverOverlayWidget;
 };
 
 }

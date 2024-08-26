@@ -13,38 +13,73 @@
 namespace mv::gui
 {
     
-ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* source, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment /*= Qt::AlignBottom | Qt::AlignRight*/) :
-    OverlayWidget(source),
+ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment /*= Qt::AlignBottom | Qt::AlignRight*/) :
+    OverlayWidget(target),
     _viewPlugin(viewPlugin),
     _alignment(alignment),
     _widgetFader(this, this),
-    _popupWidget(viewPlugin)
+    _hoverOverlayWidget(target)
+    //_popupWidget(viewPlugin)
 {
-    ////setAttribute(Qt::WA_TransparentForMouseEvents);
-    //_popupWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    Q_ASSERT(target);
 
-    _layout.setAlignment(_alignment);
+    if (!target)
+        return;
 
-    _layout.addWidget(&_popupWidget);
+    //_popupWidget.installEventFilter(this);
+    target->installEventFilter(this);
 
-    setLayout(&_layout);
+    //_layout.setAlignment(_alignment);
+
+    //_layout.addWidget(new QLabel("Hello world!"));
+
+    //setLayout(&_layout);
 
     setContentsMargins(4);
+    setMouseTracking(true);
+    //setAutoFillBackground(true);
 
-    //this->installEventFilter(this);
+    //setStyleSheet("background-color: rgba(0, 0, 0, 20)");
+
+    auto layout = new QVBoxLayout();
+
+    layout->addWidget(new QPushButton("Hello world!"));
+
+    _hoverOverlayWidget.setLayout(layout);
+    _hoverOverlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    //hoverOverlayWidget->raise();
 }
 
 bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent* event)
 {
+    //if (target != getWidgetOverlayer().getTargetWidget())
+    //    return OverlayWidget::eventFilter(target, event);
+
     switch (event->type())
     {
         case QEvent::Enter:
+        {
+            if (target == getWidgetOverlayer().getTargetWidget())
+                _widgetFader.fadeIn();
+
+            break;
+        }
+
         case QEvent::Leave:
-        case QEvent::MouseMove:
+        {
+            if (target == getWidgetOverlayer().getTargetWidget())
+                _widgetFader.fadeOut();
+
+            break;
+        }
+
         case QEvent::MouseButtonPress:
-        case QEvent::MouseButtonRelease:
-            //qDebug() << __FUNCTION__ << event->type();
-            return true;
+        {
+            //if (target == &_popupWidget)
+            qDebug() << "-----------";
+
+            break;
+        }
 
         default:
             break;
@@ -55,56 +90,78 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
 
 void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidget)
 {
-    //getWidgetOverlayer().getTargetWidget()->removeEventFilter(this);
+    getWidgetOverlayer().getTargetWidget()->removeEventFilter(this);
     getWidgetOverlayer().setTargetWidget(targetWidget);
-    //getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
-}
-
-void ViewPluginLearningCenterOverlayWidget::showEvent(QShowEvent* event)
-{
-    OverlayWidget::showEvent(event);
-
-    _widgetFader.fadeIn();
+    getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
 }
 
 void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t margin)
 {
-    _layout.setContentsMargins(margin, margin, margin, margin);
+    //_layout.setContentsMargins(margin, margin, margin, margin);
 }
+
+//ViewPluginLearningCenterOverlayWidget::LearningCenterIconLabel::LearningCenterIconLabel(QWidget* parent)
+//{
+//}
+//
+//void ViewPluginLearningCenterOverlayWidget::LearningCenterIconLabel::mousePressEvent(QMouseEvent* event)
+//{
+//    QLabel::mousePressEvent(event);
+//}
 
 ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent) :
-    QWidget(parent),
-    _viewPlugin(viewPlugin)
+    QLabel(parent),
+    _viewPlugin(viewPlugin),
+    _iconLabel(Application::getIconFont("FontAwesome").getIcon("chalkboard"))
 {
-    setLayout(&_layout);
+    setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(12, 12)));
+    setMouseTracking(true);
+    //_layout.addWidget(&_iconLabel);
+    //_layout.addWidget(new QPushButton("asdasd"));
 
-    setContentsMargins(6);
+    //setLayout(&_layout);
+
+    //setContentsMargins(6);
+
+    //setFocusPolicy(Qt::StrongFocus);
+    setStyleSheet("background-color: lightblue;");
+    //setFocusPolicy(Qt::StrongFocus); // Set focus policy
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    raise();
+    setFocus();
+    stackUnder(parent);
 }
 
-void ViewPluginLearningCenterOverlayWidget::PopupWidget::showEvent(QShowEvent* event)
+void ViewPluginLearningCenterOverlayWidget::PopupWidget::mousePressEvent(QMouseEvent* event)
 {
-    QWidget::showEvent(event);
+    QLabel::mousePressEvent(event);
 
-    QLayoutItem* layoutItem;
+    qDebug() << __FUNCTION__;
 
-    while ((layoutItem = _layout.takeAt(0)) != nullptr) {
-        delete layoutItem->widget();
-        delete layoutItem;
-    }
+    QScopedPointer<QMenu> contextMenu(getContextMenu(this));
+
+    contextMenu->exec(mapToGlobal(event->pos()));
+}
+
+QMenu* ViewPluginLearningCenterOverlayWidget::PopupWidget::getContextMenu(QWidget* parent /*= nullptr*/) const
+{
+    auto contextMenu = new QMenu(parent);
 
     auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(_viewPlugin->getFactory());
 
     if (_viewPlugin->hasShortcuts())
-        _layout.addWidget(const_cast<plugin::ViewPlugin*>(_viewPlugin)->getViewShortcutMapAction().createWidget(this, TriggerAction::WidgetFlag::Icon));
+        contextMenu->addAction(&const_cast<plugin::ViewPlugin*>(_viewPlugin)->getViewShortcutMapAction());
 
     if (nonConstPluginFactory->hasHelp())
-        _layout.addWidget(nonConstPluginFactory->getTriggerHelpAction().createWidget(this, TriggerAction::WidgetFlag::Icon));
+        contextMenu->addAction(&nonConstPluginFactory->getTriggerHelpAction());
 
     if (nonConstPluginFactory->getReadmeMarkdownUrl().isValid())
-        _layout.addWidget(nonConstPluginFactory->getTriggerReadmeAction().createWidget(this, TriggerAction::WidgetFlag::Icon));
+        contextMenu->addAction(&nonConstPluginFactory->getTriggerReadmeAction());
 
     if (nonConstPluginFactory->getRespositoryUrl().isValid())
-        _layout.addWidget(nonConstPluginFactory->getVisitRepositoryAction().createWidget(this, TriggerAction::WidgetFlag::Icon));
+        contextMenu->addAction(&nonConstPluginFactory->getVisitRepositoryAction());
+
+    return contextMenu;
 }
 
 void ViewPluginLearningCenterOverlayWidget::PopupWidget::setContentsMargins(std::int32_t margin)

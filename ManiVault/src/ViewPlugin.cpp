@@ -173,7 +173,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
     });
 
-    _widget.installEventFilter(this);
+    _learningCenterOverlayWidget.show();
 }
 
 void ViewPlugin::init()
@@ -333,30 +333,6 @@ void ViewPlugin::viewShortcutMap()
 #endif
 
     getShortcutMap().createShortcutMapOverlayWidget(&_widget);
-    //_shortcutMapOverlayWidget.getWidgetFader().fadeIn();
-}
-
-bool ViewPlugin::eventFilter(QObject* target, QEvent* event)
-{
-    switch (event->type())
-    {
-        case QEvent::Enter:
-        {
-            _learningCenterOverlayWidget.show();
-            break;
-        }
-
-        case QEvent::Leave:
-        {
-            _learningCenterOverlayWidget.hide();
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    return Plugin::eventFilter(target, event);
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

@@ -26,7 +26,7 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
     if (!sourceWidget)
         return;
 
-    _sourceWidget->setMouseTracking(true);
+    //_sourceWidget->setMouseTracking(true);
     _sourceWidget->installEventFilter(this);
     _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
 
@@ -57,7 +57,7 @@ void WidgetOverlayer::setTargetWidget(QWidget* targetWidget)
 
     _targetWidget->installEventFilter(this);
 
-    _sourceWidget->resize(_targetWidget->size());
+    synchronizeGeometry();
 }
 
 bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
@@ -69,7 +69,7 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
             if (dynamic_cast<QWidget*>(target) != _targetWidget)
                 break;
 
-            _sourceWidget->setGeometry(_targetWidget->geometry());
+            synchronizeGeometry();
 
             break;
         }
@@ -84,23 +84,16 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
             break;
         }
 
-        //case QEvent::Enter:
-        //case QEvent::Leave:
-        //case QEvent::MouseMove:
-        //case QEvent::MouseButtonPress:
-        //case QEvent::MouseButtonRelease:
-        //{
-        //    if (dynamic_cast<QWidget*>(target) == _sourceWidget)
-        //        return true;
-
-        //    break;
-        //}
-
         default:
             break;
     }
 
     return QObject::eventFilter(target, event);
+}
+
+void WidgetOverlayer::synchronizeGeometry() const
+{
+    _sourceWidget->setGeometry(_targetWidget->geometry());
 }
 
 }

@@ -4,17 +4,13 @@
 
 #pragma once
 
-#include <QGraphicsOpacityEffect>
-#include <QGridLayout>
+#include <widgets/IconLabel.h>
+
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPersistentModelIndex>
 #include <QString>
-#include <QStyleOptionViewItem>
-#include <QVBoxLayout>
 #include <QWidget>
-
-#include <functional>
 
 /**
  * Start page action delegate editor widget class
@@ -84,8 +80,8 @@ private:
     QLabel                      _subtitleLabel;             /** Subtitle label */
     QWidget                     _infoWidget;                /** Widget for info labels */
     QHBoxLayout                 _infoLayout;                /** Layout for preview, tags and meta info popups */
-    IconLabel                   _previewIconLabel;          /** Icon label for preview image */
-    IconLabel                   _metaDataIconLabel;         /** Icon label for meta data */
-    IconLabel                   _tagsIconLabel;             /** Icon label for tags */
-    IconLabel                   _contributorsIconLabel;     /** Icon label for contributors */
+    mv::gui::IconLabel          _previewIconLabel;          /** Icon label for preview image */
+    mv::gui::IconLabel          _metaDataIconLabel;         /** Icon label for meta data */
+    mv::gui::IconLabel          _tagsIconLabel;             /** Icon label for tags */
+    mv::gui::IconLabel          _contributorsIconLabel;     /** Icon label for contributors */
 };
