@@ -17,16 +17,14 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     OverlayWidget(target),
     _viewPlugin(viewPlugin),
     _alignment(alignment),
-    _widgetFader(this, this),
-    //_hoverOverlayWidget(target),
-    _popupWidget(viewPlugin)
+    _popupWidget(viewPlugin),
+    _widgetFader(this, this)
 {
     Q_ASSERT(target);
 
     if (!target)
         return;
 
-    //_popupWidget.installEventFilter(this);
     getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
 
     _layout.setAlignment(_alignment);
@@ -55,8 +53,6 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
     {
         case QEvent::Enter:
         {
-            qDebug() << "Enter";
-
             if (target == getWidgetOverlayer().getTargetWidget())
                 _widgetFader.fadeIn();
 
@@ -65,18 +61,8 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
 
         case QEvent::Leave:
         {
-            qDebug() << "Leave";
-
             if (target == getWidgetOverlayer().getTargetWidget())
                 _widgetFader.fadeOut();
-
-            break;
-        }
-
-        case QEvent::MouseButtonPress:
-        {
-            //if (target == &_popupWidget)
-            qDebug() << "-----------";
 
             break;
         }
@@ -111,17 +97,20 @@ void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t marg
 
 ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent) :
     QWidget(parent),
-    _viewPlugin(viewPlugin)
+    _viewPlugin(viewPlugin),
+    _opacityEffect(this)
 {
-    _iconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(12, 12)));
-    
+    setGraphicsEffect(&_opacityEffect);
     setMouseTracking(true);
+    setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
+
+    _iconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(16, 16)));
 
     _layout.addWidget(&_iconLabel);
 
     setLayout(&_layout);
 
-    setContentsMargins(6);
+    setContentsMargins(8);
 
     //setFocusPolicy(Qt::StrongFocus);
     //setStyleSheet("background-color: lightblue;");
@@ -130,17 +119,33 @@ ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::Vi
     //raise();
     //setFocus();
     //stackUnder(parent);
+
+    _opacityEffect.setOpacity(.5f);
 }
 
 void ViewPluginLearningCenterOverlayWidget::PopupWidget::mousePressEvent(QMouseEvent* event)
 {
     QWidget::mousePressEvent(event);
 
-    qDebug() << __FUNCTION__;
-
     QScopedPointer<QMenu> contextMenu(getContextMenu(this));
 
     contextMenu->exec(mapToGlobal(event->pos()));
+}
+
+void ViewPluginLearningCenterOverlayWidget::PopupWidget::enterEvent(QEnterEvent* event)
+{
+    QWidget::enterEvent(event);
+
+    //setStyleSheet("opacity: 1;");
+    //_opacityEffect.setOpacity(1.f);
+}
+
+void ViewPluginLearningCenterOverlayWidget::PopupWidget::leaveEvent(QEvent* event)
+{
+    QWidget::leaveEvent(event);
+
+    //_opacityEffect.setOpacity(.5f);
+    //setStyleSheet("opacity: 0.5;");
 }
 
 QMenu* ViewPluginLearningCenterOverlayWidget::PopupWidget::getContextMenu(QWidget* parent /*= nullptr*/) const
@@ -160,6 +165,14 @@ QMenu* ViewPluginLearningCenterOverlayWidget::PopupWidget::getContextMenu(QWidge
 
     if (nonConstPluginFactory->getRespositoryUrl().isValid())
         contextMenu->addAction(&nonConstPluginFactory->getVisitRepositoryAction());
+
+    auto other = new QMenu("Other");
+
+    other->setIcon(Application::getIconFont("FontAwesome").getIcon("ellipsis-h"));
+
+    contextMenu->addMenu(other);
+
+    other->addAction(&mv::help().getShowLearningCenterAction());
 
     return contextMenu;
 }

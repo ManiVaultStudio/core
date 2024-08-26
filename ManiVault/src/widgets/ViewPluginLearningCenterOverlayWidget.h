@@ -62,6 +62,9 @@ private:
 
         void mousePressEvent(QMouseEvent* event) override;
 
+        void enterEvent(QEnterEvent* event) override;
+        void leaveEvent(QEvent* event) override;
+
     private:
 
         /**
@@ -77,9 +80,10 @@ private:
         void setContentsMargins(std::int32_t margin);
 
     private:
-        const plugin::ViewPlugin*   _viewPlugin;    /** Const pointer to source view plugin */
-        QHBoxLayout                 _layout;        /** For alignment of the icon label */
-        QLabel                   _iconLabel;     /** Icon label */
+        const plugin::ViewPlugin*   _viewPlugin;        /** Const pointer to source view plugin */
+        QHBoxLayout                 _layout;            /** For alignment of the icon label */
+        QLabel                      _iconLabel;         /** Icon label */
+        QGraphicsOpacityEffect      _opacityEffect;     /** Effect for modulating opacity */
     };
 
 public:
@@ -146,10 +150,9 @@ private:
 private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
-    util::WidgetFader           _widgetFader;       /** For fading in on view plugin mouse enter and fading out on view plugin widget mouse leave*/
     QHBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
     PopupWidget                 _popupWidget;       /** Icon with popup */
-    //OverlayWidget               _hoverOverlayWidget;
+    util::WidgetFader           _widgetFader;       /** For fading in on view plugin mouse enter and fading out on view plugin widget mouse leave */
 };
 
 }
