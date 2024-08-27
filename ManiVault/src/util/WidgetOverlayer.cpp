@@ -27,7 +27,8 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
         return;
 
     _sourceWidget->installEventFilter(this);
-    _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
+    _sourceWidget->setMouseTracking(true);
+    //_sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
 
     setTargetWidget(targetWidget);
 }
@@ -56,6 +57,7 @@ void WidgetOverlayer::setTargetWidget(QWidget* targetWidget)
 
     _targetWidget->setMouseTracking(true);
     _targetWidget->installEventFilter(this);
+    
 
     //_targetWidget->setStyleSheet("background-color: red;");
 
@@ -75,6 +77,15 @@ void WidgetOverlayer::removeMouseEventReceiverWidget(const QWidget* mouseEventRe
 WidgetOverlayer::MouseEventReceiverWidgets WidgetOverlayer::getMouseEventReceiverWidgets()
 {
     return _mouseEventReceiverWidgets;
+}
+
+bool WidgetOverlayer::shouldReceiveMouseEvents() const
+{
+    for (const auto mouseEventReceiverWidget : _mouseEventReceiverWidgets)
+        if (mouseEventReceiverWidget->underMouse())
+            return true;
+
+    return false;
 }
 
 bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
@@ -100,23 +111,56 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
             break;
         }
 
+        case QEvent::MouseButtonPress:
+        {
+            if (dynamic_cast<QWidget*>(target) == _targetWidget)
+                qDebug() << "Target widget QEvent::MouseButtonPress:" << dynamic_cast<QMouseEvent*>(event)->position();
+
+            break;
+        }
+
+        case QEvent::MouseButtonRelease:
+        {
+            if (dynamic_cast<QWidget*>(target) == _targetWidget)
+                qDebug() << "Target widget QEvent::MouseButtonRelease:" << dynamic_cast<QMouseEvent*>(event)->position();
+
+            break;
+        }
+
+        case QEvent::MouseMove:
+        {
+            //event->ignore();
+            //return false;
+            //if (dynamic_cast<QWidget*>(target) == _targetWidget)
+            //    qDebug() << "Target widget QEvent::MouseMove:" << dynamic_cast<QMouseEvent*>(event)->position();
+
+            break;
+        }
+
         //case QEvent::Enter:
         //case QEvent::Leave:
-        //case QEvent::MouseMove:
+        
         //case QEvent::MouseButtonPress:
+        //case QEvent::MouseButtonRelease:
+        //case QEvent::MouseMove:
         //{
         //    if (dynamic_cast<QWidget*>(target) != _sourceWidget)
         //        break;
 
+        //    auto underMouseEventReceiverWidget = false;
+
         //    for (const auto mouseEventReceiverWidget : _mouseEventReceiverWidgets) {
         //        if (mouseEventReceiverWidget->underMouse()) {
-        //            qDebug() << "QEvent::MouseMove || QEvent::MouseButtonPress";
-        //            return true;
+        //            underMouseEventReceiverWidget = true;
+        //            break;
         //        }
         //    }
 
-        //    //event->ignore();
-        //    //return false;
+        //    if (!underMouseEventReceiverWidget) {
+        //        QCoreApplication::sendEvent(_targetWidget, event);
+        //        qDebug() << "Sending event";
+        //    }
+
         //    break;
         //}
 

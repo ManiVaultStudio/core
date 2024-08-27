@@ -62,9 +62,9 @@ private:
 
         void mousePressEvent(QMouseEvent* event) override;
 
-        void enterEvent(QEnterEvent* event) override;
-        void leaveEvent(QEvent* event) override;
-
+        //void enterEvent(QEnterEvent* event) override;
+        //void leaveEvent(QEvent* event) override;
+        //bool eventFilter(QObject* watched, QEvent* event) override;
     private:
 
         /**
@@ -102,7 +102,7 @@ public:
      * @param event The event that took place
      * @return Boolean determining whether the event was handled or not
      */
-    bool eventFilter(QObject* target, QEvent* event) override;
+    //bool eventFilter(QObject* target, QEvent* event) override;
 
     /**
      * Set target widget to \p targetWidget
@@ -123,7 +123,7 @@ private:
     const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
     QHBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
     PopupWidget                 _popupWidget;       /** Icon with popup */
-    util::WidgetFader           _widgetFader;       /** For fading in on view plugin mouse enter and fading out on view plugin widget mouse leave */
+    //util::WidgetFader           _widgetFader;       /** For fading in on view plugin mouse enter and fading out on view plugin widget mouse leave */
 };
 
 }

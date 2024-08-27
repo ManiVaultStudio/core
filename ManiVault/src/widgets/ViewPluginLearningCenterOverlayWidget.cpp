@@ -17,8 +17,8 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     OverlayWidget(target),
     _viewPlugin(viewPlugin),
     _alignment(alignment),
-    _popupWidget(viewPlugin),
-    _widgetFader(this, this)
+    _popupWidget(viewPlugin)//,
+    //_widgetFader(this, this, 1.f)
 {
     Q_ASSERT(target);
 
@@ -26,51 +26,46 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         return;
 
     getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
-    getWidgetOverlayer().addMouseEventReceiverWidget(&_popupWidget);
+
+    addMouseEventReceiverWidget(&_popupWidget);
 
     _layout.setAlignment(_alignment);
 
     _layout.addWidget(&_popupWidget);
-
-    auto pb = new QPushButton("asdsa");
-
-    pb->setAttribute(Qt::WA_TransparentForMouseEvents, false);
-
-    _layout.addWidget(pb);
 
     setLayout(&_layout);
 
     setContentsMargins(4);
     setMouseTracking(true);
 
-    
+    raise();
 }
 
-bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent* event)
-{
-    if (target != getWidgetOverlayer().getTargetWidget())
-        return OverlayWidget::eventFilter(target, event);
-
-    switch (event->type())
-    {
-        case QEvent::Enter:
-        {
-            _widgetFader.fadeIn();
-            break;
-        }
-
-        case QEvent::Leave:
-        {
-            _widgetFader.fadeOut();
-            break;
-        }
-
-        default:
-            break;
-    }
-    
-    return OverlayWidget::eventFilter(target, event);
-}
+//bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent* event)
+//{
+//    if (target != getWidgetOverlayer().getTargetWidget())
+//        return OverlayWidget::eventFilter(target, event);
+//
+//    switch (event->type())
+//    {
+//        case QEvent::Enter:
+//        {
+//            _widgetFader.fadeIn();
+//            break;
+//        }
+//
+//        case QEvent::Leave:
+//        {
+//            _widgetFader.fadeOut();
+//            break;
+//        }
+//
+//        default:
+//            break;
+//    }
+//    
+//    return OverlayWidget::eventFilter(target, event);
+//}
 
 void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidget)
 {
@@ -92,6 +87,7 @@ ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::Vi
     setGraphicsEffect(&_opacityEffect);
     setMouseTracking(true);
     setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
 
     _iconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(16, 16)));
 
@@ -113,21 +109,40 @@ void ViewPluginLearningCenterOverlayWidget::PopupWidget::mousePressEvent(QMouseE
     contextMenu->exec(mapToGlobal(event->pos()));
 }
 
-void ViewPluginLearningCenterOverlayWidget::PopupWidget::enterEvent(QEnterEvent* event)
-{
-    QWidget::enterEvent(event);
+//void ViewPluginLearningCenterOverlayWidget::PopupWidget::enterEvent(QEnterEvent* event)
+//{
+//    QWidget::enterEvent(event);
+//
+//    //setStyleSheet("opacity: 1;");
+//    //_opacityEffect.setOpacity(1.f);
+//}
+//
+//void ViewPluginLearningCenterOverlayWidget::PopupWidget::leaveEvent(QEvent* event)
+//{
+//    QWidget::leaveEvent(event);
+//
+//    //_opacityEffect.setOpacity(.5f);
+//    //setStyleSheet("opacity: 0.5;");
+//}
 
-    //setStyleSheet("opacity: 1;");
-    //_opacityEffect.setOpacity(1.f);
-}
-
-void ViewPluginLearningCenterOverlayWidget::PopupWidget::leaveEvent(QEvent* event)
-{
-    QWidget::leaveEvent(event);
-
-    //_opacityEffect.setOpacity(.5f);
-    //setStyleSheet("opacity: 0.5;");
-}
+//bool ViewPluginLearningCenterOverlayWidget::PopupWidget::eventFilter(QObject* watched, QEvent* event)
+//{
+//    switch (event->type())
+//    {
+//        case QEvent::MouseButtonPress:
+//        case QEvent::MouseButtonRelease:
+//        case QEvent::MouseMove:
+//        {
+//            qDebug() << "====================";
+//            //if (parent() != nullptr && !_widgetOverlayer.shouldReceiveMouseEvents())
+//                //QCoreApplication::sendEvent(parent(), event);
+//
+//            break;
+//        }
+//    }
+//
+//    return QWidget::event(event);
+//}
 
 QMenu* ViewPluginLearningCenterOverlayWidget::PopupWidget::getContextMenu(QWidget* parent /*= nullptr*/) const
 {

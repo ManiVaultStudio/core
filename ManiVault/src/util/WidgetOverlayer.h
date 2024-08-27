@@ -74,6 +74,12 @@ public:
     MouseEventReceiverWidgets getMouseEventReceiverWidgets();
 
     /**
+     * Determine the source widget should receive mouse events or not
+     * @return Boolean determining whether the mouse cursor is under any of the mouse event receiver widgets
+     */
+    bool shouldReceiveMouseEvents() const;
+
+    /**
      * Respond to \p target events
      * @param target Object of which an event occurred
      * @param event The event that took place

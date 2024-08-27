@@ -16,7 +16,11 @@ namespace mv::gui
 /**
  * Overlay widget class
  *
- * Overlays the parent widget with a custom widget (and synchronizes with its geometry) .
+ * Overlays the parent widget with a custom widget (and synchronizes with its geometry).
+ *
+ * By default, the overlay widget and its children are immune to mouse events. This can be
+ * circumvented by adding explicitly adding a widget that should receive mouse events, see
+ * OverlayWidget::addMouseEventReceiverWidget(...) and WidgetOverlayer::addMouseEventReceiverWidget().
  *  
  * @author Thomas Kroes
  */
@@ -37,6 +41,27 @@ public:
      */
     mv::util::WidgetOverlayer& getWidgetOverlayer();
 
+    /**
+     * Add \p mouseEventReceiverWidget
+     * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be added
+     */
+    void addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget);
+
+    /**
+     * Remove \p mouseEventReceiverWidget
+     * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be removed
+     */
+    void removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget);
+
+protected:
+    //bool event(QEvent* event) override;
+    //void enterEvent(QEnterEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+
+    void propagateMouseEvent(QMouseEvent* event);
+    //bool eventFilter(QObject* watched, QEvent* event) override;
 private:
     mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */
 };

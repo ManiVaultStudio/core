@@ -175,6 +175,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _unhideAction(this, "Unhide"),
     _statisticsAction(this, "Statistics")
 {
+    setObjectName("DataHierarchyWidget");
+
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
