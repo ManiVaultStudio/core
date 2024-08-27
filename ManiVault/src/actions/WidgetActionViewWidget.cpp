@@ -3,11 +3,12 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WidgetActionViewWidget.h"
+
+#include "CoreInterface.h"
+#include "WidgetAction.h"
 #include "WidgetActionCollapsedWidget.h"
 #include "WidgetActionHighlightWidget.h"
 #include "WidgetActionMimeData.h"
-#include "WidgetAction.h"
-#include "CoreInterface.h"
 
 #include <QDebug>
 #include <QDragEnterEvent>

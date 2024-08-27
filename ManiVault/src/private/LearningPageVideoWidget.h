@@ -4,11 +4,15 @@
 
 #pragma once
 
-#include <QWidget>
-#include <QVBoxLayout>
-#include <QTextBrowser>
-
 #include <util/FileDownloader.h>
+#include <util/WidgetOverlayer.h>
+
+#include <QLabel>
+#include <QPersistentModelIndex>
+#include <QPixmap>
+#include <QTextBrowser>
+#include <QVBoxLayout>
+#include <QWidget>
 
 class LearningPageVideosWidget;
 

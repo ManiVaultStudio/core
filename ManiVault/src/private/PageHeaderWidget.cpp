@@ -5,13 +5,11 @@
 #include "PageHeaderWidget.h"
 #include "PageWidget.h"
 
+#include <QApplication>
 #include <QDebug>
 #include <QResizeEvent>
 
 #include <algorithm>
-
-using namespace mv;
-using namespace mv::gui;
 
 PageHeaderWidget::PageHeaderWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),

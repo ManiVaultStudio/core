@@ -4,6 +4,8 @@
 
 #include "LearningPageContentWidget.h"
 
+#include <CoreInterface.h>
+
 #include <QDebug>
 
 using namespace mv::gui;

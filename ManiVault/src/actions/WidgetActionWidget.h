@@ -6,6 +6,9 @@
 
 #include "WidgetActionViewWidget.h"
 
+#include <QSize>
+#include <QWidget>
+
 namespace mv::gui {
 
 class WidgetAction;

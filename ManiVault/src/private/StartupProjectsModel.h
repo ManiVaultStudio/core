@@ -5,6 +5,7 @@
 #pragma once
 
 #include <models/StandardItemModel.h>
+#include <ProjectMetaAction.h>
 
 #include <QList>
 #include <QStandardItem>

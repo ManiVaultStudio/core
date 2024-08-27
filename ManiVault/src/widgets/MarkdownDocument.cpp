@@ -8,8 +8,6 @@
     #define MARKDOWN_DOCUMENT_VERBOSE
 #endif
 
-using namespace mv::gui;
-
 namespace mv::util {
 
 MarkdownDocument::MarkdownDocument(QObject* parent /*= nullptr*/) :

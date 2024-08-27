@@ -11,6 +11,8 @@
 #include <ProjectMetaAction.h>
 #include <ManiVaultVersion.h>
 
+#include <util/Icon.h>
+
 #include <QSurfaceFormat>
 #include <QStyleFactory>
 #include <QProxyStyle>
