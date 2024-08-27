@@ -19,12 +19,19 @@ uniform vec4 dataBounds;
 
 // Selection
 uniform int	selectionDisplayMode;				/** Type of selection display (e.g. outline, override) */
-uniform float selectionOutlineScale;     		/** Selection outline scale (relative to point size) */
 uniform vec3  selectionOutlineColor;			/** Selection outline color (when mode is override) */
 uniform bool  selectionOutlineOverrideColor;	/** Whether the selection outline color should be the point color or a custom color */
+uniform float selectionOutlineScale;     		/** Selection outline scale (relative to point size) */
 uniform float selectionOutlineOpacity;     		/** Selection outline opacity */
 uniform bool selectionHaloEnabled; 				/** Whether selection outline halo is enabled */
 uniform float selectionHaloScale;     			/** Selection halo scale */
+
+// Focus
+uniform bool  	focusRegionVisible;				/** Focus region visibility toggle */
+uniform vec2  	focusRegionCenter;				/** Focus region center */
+uniform float 	focusRegionRadius;     			/** Focus region radius */
+uniform vec3  	focusRegionColor;				/** Focus region color */
+uniform float 	focusRegionOpacity;     		/** Focus region opacity */
 
 // Colormap to use if current effect is EFFECT_COLOR
 uniform sampler2D colormap;
@@ -32,6 +39,7 @@ uniform sampler2D colormap;
 // Input variables
 smooth in vec2  vTexCoord;
 flat   in int   vHighlight;
+flat   in int   vFocusHighlight;
 smooth in float vScalar;
 smooth in vec3  vColor;
 smooth in float vOpacity;
@@ -51,11 +59,11 @@ float normalize(float minPixelValue, float maxPixelValue, float pixelValue)
 
 void main()
 {
-	bool isHighlighted = vHighlight == 1;
-
-    float len = length(vTexCoord);
-	
-	float outlineStart = (1.0 / selectionOutlineScale);
+	bool isSelectionHighlighted	= vHighlight == 1;
+	bool isFocusHighlighted 	= vFocusHighlight == 1;
+	bool isHighlighted			= isSelectionHighlighted || isFocusHighlighted;
+    float len 					= length(vTexCoord);	
+	float selectionOutlineStart = (1.0 / selectionOutlineScale);
 	
 	if (isHighlighted) {
 		switch (selectionDisplayMode) {
@@ -70,7 +78,7 @@ void main()
 	} else {
 		switch (selectionDisplayMode) {
 			case 0: // Outline
-				if (len > outlineStart)	discard;
+				if (len > selectionOutlineStart)	discard;
 				break;
 			
 			case 1: // Override
@@ -89,10 +97,10 @@ void main()
 
     if (scalarEffect == EFFECT_COLOR_2D)
 	{
-            float channel1 = normalize(dataBounds[0], dataBounds[1], vPosOrig[0]);
-            float channel2 = normalize(dataBounds[2], dataBounds[3], vPosOrig[1]);
+        float channel1 = normalize(dataBounds[0], dataBounds[1], vPosOrig[0]);
+        float channel2 = normalize(dataBounds[2], dataBounds[3], vPosOrig[1]);
             
-            color = texture(colormap, vec2(channel1, channel2)).rgb;
+        color = texture(colormap, vec2(channel1, channel2)).rgb;
 	}
 
 	float opacity = 1.0;
@@ -100,14 +108,17 @@ void main()
 	switch (selectionDisplayMode) {
 		case 0:
 		{
-			if (vHighlight == 1 && len > outlineStart) {
+			if ((isHighlighted || isFocusHighlighted) && len > selectionOutlineStart) {
 				if (selectionOutlineOverrideColor)
 					color = selectionOutlineColor;
-					
+				
 				opacity = selectionOutlineOpacity;
-
+				
+				if (isFocusHighlighted)
+					opacity = isSelectionHighlighted ? 1.f : .5f * selectionOutlineOpacity;
+				
 				if (selectionHaloEnabled)
-					opacity *= 1.0 - smoothstep(outlineStart, 1.0, len);
+					opacity *= 1.0 - smoothstep(selectionOutlineStart, 1.0, len);
 			} else {
 				opacity *= a * vOpacity;
 			}		
@@ -118,7 +129,7 @@ void main()
 		
 		case 1:
 		{
-			if (vHighlight == 1)
+			if (isHighlighted)
 				fragColor = vec4(selectionOutlineColor, a);
 			else
 				fragColor = vec4(color, a * vOpacity);

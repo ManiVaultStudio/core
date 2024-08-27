@@ -64,12 +64,19 @@ namespace mv
             glVertexAttribDivisor(ATTRIBUTE_POSITIONS, 1);
             glEnableVertexAttribArray(ATTRIBUTE_POSITIONS);
 
-            // Highlight buffer, disabled by default
+            // Highlights buffer, disabled by default
             _highlightBuffer.create();
             _highlightBuffer.bind();
 
             glVertexAttribIPointer(ATTRIBUTE_HIGHLIGHTS, 1, GL_BYTE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_HIGHLIGHTS, 1);
+
+            // Focus highlights buffer, disabled by default
+            _focusHighlightsBuffer.create();
+            _focusHighlightsBuffer.bind();
+
+            glVertexAttribIPointer(ATTRIBUTE_FOCUS_HIGHLIGHTS, 1, GL_BYTE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_FOCUS_HIGHLIGHTS, 1);
 
             // Color buffer, disabled by default
             _colorBuffer.create();
@@ -112,6 +119,13 @@ namespace mv
             _highlights = highlights;
 
             _dirtyHighlights = true;
+        }
+
+        void PointArrayObject::setFocusHighlights(const std::vector<char>& focusHighlights)
+        {
+            _focusHighlights = focusHighlights;
+
+            _dirtyFocusHighlights = true;
         }
 
         void PointArrayObject::setScalars(const std::vector<float>& scalars, bool adjustColorMapRange)
@@ -194,6 +208,16 @@ namespace mv
                 _dirtyHighlights = false;
             }
 
+            if (_dirtyFocusHighlights)
+            {
+                _focusHighlightsBuffer.bind();
+                _focusHighlightsBuffer.setData(_focusHighlights);
+
+                enableAttribute(ATTRIBUTE_FOCUS_HIGHLIGHTS, true);
+
+                _dirtyFocusHighlights = false;
+            }
+
             if (_dirtyColors)
             {
                 _colorBuffer.bind();
@@ -260,6 +284,13 @@ namespace mv
             _gpuPoints.setHighlights(highlights);
 
             _numSelectedPoints = numSelectedPoints;
+        }
+
+        void PointRenderer::setFocusHighlights(const std::vector<char>& focusHighlights,const std::int32_t& numberOfFocusHighlights)
+        {
+            _gpuPoints.setFocusHighlights(focusHighlights);
+
+            _numberOfFocusHighlights = numberOfFocusHighlights;
         }
 
         void PointRenderer::setColorChannelScalars(const std::vector<float>& scalars, bool adjustColorMapRange)
@@ -496,6 +527,7 @@ namespace mv
             _shader.uniform1i("randomizedDepthEnabled", _randomizedDepthEnabled);
 
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
+            _shader.uniform1i("hasFocusHighlights", _gpuPoints.hasFocusHighlights());
             _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
             _shader.uniform1i("hasColors", _gpuPoints.hasColors());
             _shader.uniform1i("hasSizes", _gpuPoints.hasSizeScalars());
