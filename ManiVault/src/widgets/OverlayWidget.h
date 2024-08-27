@@ -25,11 +25,11 @@ class CORE_EXPORT OverlayWidget : public QWidget
 public:
 
     /**
-     * Construct with \p parent
-     * @param parent Pointer to parent widget
+     * Construct with pointer to \p target widget and initial opacity
+     * @param target Pointer to target widget
      * @param initialOpacity Opacity at initialization
      */
-    OverlayWidget(QWidget* parent, float initialOpacity = 1.0f);
+    OverlayWidget(QWidget* target, float initialOpacity = 1.0f);
 
     /**
      * Get the utility class for overlaying the widget

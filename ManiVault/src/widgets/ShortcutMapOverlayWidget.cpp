@@ -58,30 +58,6 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
         connect(&_widgetFader, &WidgetFader::fadedOut, this, &ShortcutMapOverlayWidget::deleteLater);
         getWidgetFader().fadeOut();
     });
-
-    this->installEventFilter(this);
-
-    setAttribute(Qt::WA_TransparentForMouseEvents, false);
-}
-
-bool ShortcutMapOverlayWidget::eventFilter(QObject* target, QEvent* event)
-{
-    switch (event->type())
-    {
-        case QEvent::Enter:
-        case QEvent::Leave:
-        case QEvent::MouseMove:
-        case QEvent::MouseButtonPress:
-        case QEvent::MouseButtonRelease:
-            //qDebug() << __FUNCTION__ << event->type();
-            event->ignore();
-            return true;
-
-        default:
-            break;
-    }
-
-    return OverlayWidget::eventFilter(target, event);
 }
 
 mv::util::WidgetFader& ShortcutMapOverlayWidget::getWidgetFader()

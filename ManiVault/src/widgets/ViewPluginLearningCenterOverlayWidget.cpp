@@ -26,44 +26,42 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         return;
 
     getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
+    getWidgetOverlayer().addMouseEventReceiverWidget(&_popupWidget);
 
     _layout.setAlignment(_alignment);
 
     _layout.addWidget(&_popupWidget);
 
+    auto pb = new QPushButton("asdsa");
+
+    pb->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+
+    _layout.addWidget(pb);
+
     setLayout(&_layout);
 
     setContentsMargins(4);
     setMouseTracking(true);
-    //setAutoFillBackground(true);
 
-    //setStyleSheet("background-color: rgba(0, 0, 0, 20)");
-
-    //_hoverOverlayWidget.setLayout(layout);
-    setAttribute(Qt::WA_TransparentForMouseEvents, false);
-    //hoverOverlayWidget->raise();
+    
 }
 
 bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent* event)
 {
-    //if (target != getWidgetOverlayer().getTargetWidget())
-    //    return OverlayWidget::eventFilter(target, event);
+    if (target != getWidgetOverlayer().getTargetWidget())
+        return OverlayWidget::eventFilter(target, event);
 
     switch (event->type())
     {
         case QEvent::Enter:
         {
-            if (target == getWidgetOverlayer().getTargetWidget())
-                _widgetFader.fadeIn();
-
+            _widgetFader.fadeIn();
             break;
         }
 
         case QEvent::Leave:
         {
-            if (target == getWidgetOverlayer().getTargetWidget())
-                _widgetFader.fadeOut();
-
+            _widgetFader.fadeOut();
             break;
         }
 
@@ -86,15 +84,6 @@ void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t marg
     _layout.setContentsMargins(margin, margin, margin, margin);
 }
 
-//ViewPluginLearningCenterOverlayWidget::LearningCenterIconLabel::LearningCenterIconLabel(QWidget* parent)
-//{
-//}
-//
-//void ViewPluginLearningCenterOverlayWidget::LearningCenterIconLabel::mousePressEvent(QMouseEvent* event)
-//{
-//    QLabel::mousePressEvent(event);
-//}
-
 ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent) :
     QWidget(parent),
     _viewPlugin(viewPlugin),
@@ -111,14 +100,6 @@ ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::Vi
     setLayout(&_layout);
 
     setContentsMargins(8);
-
-    //setFocusPolicy(Qt::StrongFocus);
-    //setStyleSheet("background-color: lightblue;");
-    //setFocusPolicy(Qt::StrongFocus); // Set focus policy
-    _iconLabel.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-    //raise();
-    //setFocus();
-    //stackUnder(parent);
 
     _opacityEffect.setOpacity(.5f);
 }

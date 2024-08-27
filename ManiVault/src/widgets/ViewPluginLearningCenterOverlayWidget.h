@@ -104,35 +104,6 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
-    //bool event(QEvent* event) override {
-    //    if (event->type() == QEvent::MouseButtonPress) {
-    //        qDebug() << "Mouse press event in WidgetB";
-    //    }
-    //    return QWidget::event(event);  // Call the base class event handler
-    //}
-
-    //void enterEvent(QEnterEvent* event) override
-    //{
-    //    qDebug() << __FUNCTION__;
-    //    event->ignore();
-    //}
-
-    //void leaveEvent(QEvent* event) override
-    //{
-    //    qDebug() << __FUNCTION__;
-    //    event->ignore();
-    //}
-
-    //void mouseMoveEvent(QMouseEvent* event) override {
-    //    qDebug() << __FUNCTION__;
-    //    event->ignore();
-    //}
-
-    //void mousePressEvent(QMouseEvent* event) override {
-    //    qDebug() << __FUNCTION__;
-    //    event->ignore();
-    //}
-
     /**
      * Set target widget to \p targetWidget
      * @param targetWidget Pointer to target widget

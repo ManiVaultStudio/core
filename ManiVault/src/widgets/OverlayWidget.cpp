@@ -15,9 +15,9 @@
 namespace mv::gui
 {
 
-OverlayWidget::OverlayWidget(QWidget* parent, float initialOpacity /*= 1.0f*/) :
-    QWidget(parent),
-    _widgetOverlayer(this, this, parent, initialOpacity)
+OverlayWidget::OverlayWidget(QWidget* target, float initialOpacity /*= 1.0f*/) :
+    QWidget(target->parentWidget()),
+    _widgetOverlayer(this, this, target, initialOpacity)
 {
 }
 
