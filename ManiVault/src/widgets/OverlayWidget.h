@@ -16,12 +16,15 @@ namespace mv::gui
 /**
  * Overlay widget class
  *
- * Overlays the parent widget with a custom widget (and synchronizes with its geometry).
+ * Overlays the target widget with an overlay widget and keeps its geometry in sync with the target widget.
  *
- * By default, the overlay widget and its children are immune to mouse events. This can be
- * circumvented by adding explicitly adding a widget that should receive mouse events, see
- * OverlayWidget::addMouseEventReceiverWidget(...) and WidgetOverlayer::addMouseEventReceiverWidget().
- *  
+ * By default, the overlay widget and its children are immune to mouse events (similar to the Qt widget
+ * attribute Qt::WA_TransparentForMouseEvents). To enable/disable child widget mouse events, call
+ * OverlayWidget::addMouseEventReceiverWidget(...) or OverlayWidget::removeMouseEventReceiverWidget(...)
+ * respectively.
+ *
+ * For more information, refer to the mv::util::WidgetOverlayer class.
+ *
  * @author Thomas Kroes
  */
 class CORE_EXPORT OverlayWidget : public QWidget
@@ -30,7 +33,7 @@ public:
 
     /**
      * Construct with pointer to \p target widget and initial opacity
-     * @param target Pointer to target widget
+     * @param target Pointer to target widget (used to synchronize the geometry with)
      * @param initialOpacity Opacity at initialization
      */
     OverlayWidget(QWidget* target, float initialOpacity = 1.0f);

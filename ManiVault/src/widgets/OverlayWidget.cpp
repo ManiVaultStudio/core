@@ -22,7 +22,6 @@ OverlayWidget::OverlayWidget(QWidget* target, float initialOpacity /*= 1.0f*/) :
     setObjectName("OverlayWidget");
 
     setMouseTracking(true);
-    //setAttribute(Qt::WA_TransparentForMouseEvents, false);
 }
 
 mv::util::WidgetOverlayer& OverlayWidget::getWidgetOverlayer()
