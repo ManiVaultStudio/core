@@ -35,8 +35,6 @@ void OverlayWidget::addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidge
         return;
 
     _widgetOverlayer.addMouseEventReceiverWidget(mouseEventReceiverWidget);
-
-    //setMask(reg);
 }
 
 void OverlayWidget::removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget)
@@ -58,12 +56,12 @@ void OverlayWidget::resizeEvent(QResizeEvent* event)
 
 void OverlayWidget::updateMask()
 {
-    QRegion reg(geometry());
+    QRegion maskRegion(geometry());
 
-    reg -= QRegion(geometry());
-    reg += childrenRegion();
+    maskRegion -= QRegion(geometry());
+    maskRegion += childrenRegion();
 
-    setMask(reg);
+    setMask(maskRegion);
 }
 
 }
