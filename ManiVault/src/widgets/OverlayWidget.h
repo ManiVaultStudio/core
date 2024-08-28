@@ -48,13 +48,13 @@ public:
      * Add \p mouseEventReceiverWidget
      * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be added
      */
-    void addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget);
+    virtual void addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget) final;
 
     /**
      * Remove \p mouseEventReceiverWidget
      * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be removed
      */
-    void removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget);
+    virtual void removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget) final;
 
 protected:
 
@@ -63,6 +63,11 @@ protected:
      * @param event Pointer to resize event that occurred
      */
     void resizeEvent(QResizeEvent* event) override;
+
+private:
+
+    /** Update widget mask to selectively process mouse events */
+    virtual void updateMask() final;
 
 private:
     mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */

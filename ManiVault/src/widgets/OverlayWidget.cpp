@@ -5,8 +5,6 @@
 #include "OverlayWidget.h"
 
 #include <QDebug>
-#include <QHBoxLayout>
-#include <QLabel>
 
 #ifdef _DEBUG
     #define OVERLAY_WIDGET_VERBOSE
@@ -55,16 +53,17 @@ void OverlayWidget::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
 
-    QRegion circularRegion(QRect(0, 0, 1000, 20), QRegion::Rectangle);
+    updateMask();
+}
 
+void OverlayWidget::updateMask()
+{
     QRegion reg(geometry());
 
     reg -= QRegion(geometry());
     reg += childrenRegion();
 
     setMask(reg);
-
-    qDebug() << childrenRegion();
 }
 
 }
