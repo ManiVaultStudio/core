@@ -54,14 +54,13 @@ public:
     void removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget);
 
 protected:
-    //bool event(QEvent* event) override;
-    //void enterEvent(QEnterEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
+
+    /**
+     * Update the mask region when the overlay widget changes size
+     * @param event Pointer to resize event that occurred
+     */
     void resizeEvent(QResizeEvent* event) override;
-    void propagateMouseEvent(QMouseEvent* event);
-    bool eventFilter(QObject* watched, QEvent* event) override;
+
 private:
     mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */
 };
