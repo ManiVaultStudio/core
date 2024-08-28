@@ -59,9 +59,9 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
-
+    void resizeEvent(QResizeEvent* event) override;
     void propagateMouseEvent(QMouseEvent* event);
-    //bool eventFilter(QObject* watched, QEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 private:
     mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */
 };

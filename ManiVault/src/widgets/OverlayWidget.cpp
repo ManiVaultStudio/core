@@ -23,6 +23,8 @@ OverlayWidget::OverlayWidget(QWidget* target, float initialOpacity /*= 1.0f*/) :
 
     setMouseTracking(true);
     setAttribute(Qt::WA_TransparentForMouseEvents, false);
+
+    this->installEventFilter(this);
 }
 
 mv::util::WidgetOverlayer& OverlayWidget::getWidgetOverlayer()
@@ -39,7 +41,12 @@ void OverlayWidget::addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidge
 
     _widgetOverlayer.addMouseEventReceiverWidget(mouseEventReceiverWidget);
 
-    mouseEventReceiverWidget->installEventFilter(this);
+    //mouseEventReceiverWidget->installEventFilter(this);
+
+    //QRegion circularRegion(mouseEventReceiverWidget->rect(), QRegion::Rectangle);
+    
+
+    //setMask(reg);
 }
 
 void OverlayWidget::removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget)
@@ -51,7 +58,7 @@ void OverlayWidget::removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWi
 
     _widgetOverlayer.removeMouseEventReceiverWidget(mouseEventReceiverWidget);
 
-    mouseEventReceiverWidget->removeEventFilter(this);
+    //mouseEventReceiverWidget->removeEventFilter(this);
 }
 
 //bool OverlayWidget::event(QEvent* event)
@@ -83,29 +90,46 @@ void OverlayWidget::removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWi
 void OverlayWidget::mousePressEvent(QMouseEvent* event)
 {
     //event->ignore();
-    if (!_widgetOverlayer.shouldReceiveMouseEvents())
-        propagateMouseEvent(event);
+    //if (!_widgetOverlayer.shouldReceiveMouseEvents())
+    //    propagateMouseEvent(event);
 }
 
 void OverlayWidget::mouseReleaseEvent(QMouseEvent* event)
 {
     //event->ignore();
-    if (!_widgetOverlayer.shouldReceiveMouseEvents())
-        propagateMouseEvent(event);
+    //if (!_widgetOverlayer.shouldReceiveMouseEvents())
+    //    propagateMouseEvent(event);
 }
 
 void OverlayWidget::mouseMoveEvent(QMouseEvent* event)
 {
     //event->ignore();
-    if (!_widgetOverlayer.shouldReceiveMouseEvents())
-        propagateMouseEvent(event);
+    //if (!_widgetOverlayer.shouldReceiveMouseEvents())
+    //    propagateMouseEvent(event);
 
     //qDebug() << __FUNCTION__;
     //QCoreApplication::sendEvent(parent(), event);
 }
 
+void OverlayWidget::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+
+    QRegion circularRegion(QRect(0, 0, 1000, 20), QRegion::Rectangle);
+
+    QRegion reg(geometry());
+
+    reg -= QRegion(geometry());
+    reg += childrenRegion();
+
+    setMask(reg);
+
+    qDebug() << childrenRegion();
+}
+
 void OverlayWidget::propagateMouseEvent(QMouseEvent* event)
 {
+    return;
     //qDebug() << __FUNCTION__ << parent()->metaObject()->className() << parent()->objectName() << _widgetOverlayer.getTargetWidget()->objectName();
 
     const auto positionInParentWidget = mapToParent(event->pos());
@@ -120,16 +144,21 @@ void OverlayWidget::propagateMouseEvent(QMouseEvent* event)
 
             if (childWidget !=this && childWidget->geometry().contains(positionInParentWidget))
             {
-                auto targetWidget   = childWidget->childAt(positionInParentWidget);
-                auto mouseEvent     = new QMouseEvent(event->type(), positionInParentWidget, event->globalPos(), event->button(), event->buttons(), event->modifiers());
+                if (auto targetWidget = childWidget->childAt(positionInParentWidget)) {
+                    auto positionInTargetWidget = targetWidget->mapFromGlobal(event->globalPosition());
 
-                //QCoreApplication::sendEvent(parentWidget(), mouseEvent);
-                //QCoreApplication::sendEvent(childWidget, mouseEvent);
-                QCoreApplication::postEvent(targetWidget, mouseEvent);
+                    //qDebug() << positionInTargetWidget;
+                    auto mouseEvent             = new QMouseEvent(event->type(), positionInTargetWidget, event->globalPosition(), event->button(), event->buttons(), event->modifiers());
 
-                event->ignore();
+                    //QCoreApplication::sendEvent(parentWidget(), mouseEvent)
+                    //QCoreApplication::sendEvent(childWidget, mouseEvent);
+                    QCoreApplication::postEvent(targetWidget, mouseEvent);
 
-                qDebug() << "    " << childWidget << targetWidget << childWidget->geometry().contains(positionInParentWidget) << childWidget->geometry();
+                    event->accept();
+
+                    //qDebug() << "    " << childWidget << targetWidget << childWidget->geometry().contains(positionInParentWidget) << childWidget->geometry();
+                }
+               
             }
         }
 
@@ -141,17 +170,24 @@ void OverlayWidget::propagateMouseEvent(QMouseEvent* event)
     
 }
 
-//bool OverlayWidget::eventFilter(QObject* watched, QEvent* event)
-//{
-//    switch (event->type())
-//    {
-//        case QEvent::MouseButtonPress:
-//        case QEvent::MouseButtonRelease:
-//        case QEvent::MouseMove:
-//            return false;
-//    }
-//
-//    return QWidget::eventFilter(watched, event);
-//}
+bool OverlayWidget::eventFilter(QObject* watched, QEvent* event)
+{
+    //switch (event->type())
+    //{
+        //case QEvent::MouseButtonPress:
+        //case QEvent::MouseButtonRelease:
+        //case QEvent::MouseMove:
+        //{
+            //if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
+                //if (!mask().contains(mouseEvent->pos()))
+                //    QCoreApplication::sendEvent(parentWidget(), event);
+            //}
+
+        //    break;
+        //}
+    //}
+
+    return QWidget::eventFilter(watched, event);
+}
 
 }
