@@ -28,7 +28,6 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
 
     _sourceWidget->installEventFilter(this);
     _sourceWidget->setMouseTracking(true);
-    //_sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
 
     setTargetWidget(targetWidget);
 }
@@ -57,9 +56,6 @@ void WidgetOverlayer::setTargetWidget(QWidget* targetWidget)
 
     _targetWidget->setMouseTracking(true);
     _targetWidget->installEventFilter(this);
-    
-
-    //_targetWidget->setStyleSheet("background-color: red;");
 
     synchronizeGeometry();
 }
@@ -94,9 +90,6 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::Resize:
         {
-            //if (dynamic_cast<QWidget*>(target) == _sourceWidget)
-            //    updateSourceWidgetMask();
-
             if (dynamic_cast<QWidget*>(target) == _targetWidget)
                 synchronizeGeometry();
 
@@ -111,59 +104,6 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
             break;
         }
 
-        case QEvent::MouseButtonPress:
-        {
-            if (dynamic_cast<QWidget*>(target) == _targetWidget)
-                qDebug() << "Target widget QEvent::MouseButtonPress:" << dynamic_cast<QMouseEvent*>(event)->position();
-
-            break;
-        }
-
-        case QEvent::MouseButtonRelease:
-        {
-            if (dynamic_cast<QWidget*>(target) == _targetWidget)
-                qDebug() << "Target widget QEvent::MouseButtonRelease:" << dynamic_cast<QMouseEvent*>(event)->position();
-
-            break;
-        }
-
-        case QEvent::MouseMove:
-        {
-            //event->ignore();
-            //return false;
-            //if (dynamic_cast<QWidget*>(target) == _targetWidget)
-            //    qDebug() << "Target widget QEvent::MouseMove:" << dynamic_cast<QMouseEvent*>(event)->position();
-
-            break;
-        }
-
-        //case QEvent::Enter:
-        //case QEvent::Leave:
-        
-        //case QEvent::MouseButtonPress:
-        //case QEvent::MouseButtonRelease:
-        //case QEvent::MouseMove:
-        //{
-        //    if (dynamic_cast<QWidget*>(target) != _sourceWidget)
-        //        break;
-
-        //    auto underMouseEventReceiverWidget = false;
-
-        //    for (const auto mouseEventReceiverWidget : _mouseEventReceiverWidgets) {
-        //        if (mouseEventReceiverWidget->underMouse()) {
-        //            underMouseEventReceiverWidget = true;
-        //            break;
-        //        }
-        //    }
-
-        //    if (!underMouseEventReceiverWidget) {
-        //        QCoreApplication::sendEvent(_targetWidget, event);
-        //        qDebug() << "Sending event";
-        //    }
-
-        //    break;
-        //}
-
         default:
             break;
     }
@@ -173,7 +113,6 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
 
 void WidgetOverlayer::synchronizeGeometry() const
 {
-    //_sourceWidget->move(_targetWidget->pos());
     _sourceWidget->resize(_targetWidget->size());
 }
 
