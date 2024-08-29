@@ -152,7 +152,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon
 {
     WidgetActionBadge badge(nullptr, getViewPlugin()->getShortcutMap().getShortcuts().size());
 
-    badge.setScale(0.5);
+    badge.setScale(0.6);
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
@@ -221,6 +221,27 @@ bool ViewPluginLearningCenterOverlayWidget::ShowReadmeToolbarItemWidget::shouldD
     return nonConstPluginFactory->getReadmeMarkdownUrl().isValid();
 }
 
+void ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    AbstractToolbarItemWidget::mousePressEvent(event);
+
+    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
+
+    nonConstPluginFactory->getTriggerHelpAction().trigger();
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("file-prescription");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::shouldDisplay() const
+{
+    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
+
+    return nonConstPluginFactory->hasHelp();
+}
+
 ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     QWidget(overlayWidget),
     _viewPlugin(viewPlugin),
@@ -234,6 +255,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     _layout.setSpacing(10);
 
     _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget, "View shortcuts"));
+    _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget, "View full documentation"));
     _layout.addWidget(new ShowReadmeToolbarItemWidget(viewPlugin, overlayWidget, "Show readme information from the Github repository"));
     _layout.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, overlayWidget, "Visit the Github repository website"));
     _layout.addWidget(new VisitLearningCenterToolbarItemWidget(viewPlugin, overlayWidget, "Go to the main learning center"));

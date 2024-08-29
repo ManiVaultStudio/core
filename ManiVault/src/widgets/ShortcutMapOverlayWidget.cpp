@@ -61,7 +61,7 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
     _toolbarLayout.addWidget(&_closeIconLabel);
 
     _closeIconLabel.setStyleSheet("opacity: 0.5");
-    _closeIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("times").pixmap(QSize(14, 14)));
+    _closeIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("times", QColor(0, 0, 0, 150)).pixmap(QSize(14, 14)));
 
     _headerLayout.addWidget(&_headerIconLabel);
     _headerLayout.addWidget(&_headerTextLabel);
