@@ -46,16 +46,14 @@ void ShortcutMapOverlayWidget::CloseLabel::mousePressEvent(QMouseEvent* event)
 
 ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::ShortcutMap& shortcutMap) :
     OverlayWidget(source),
-    _shortcutMap(shortcutMap)
+    _shortcutMap(shortcutMap),
+    _closeIconLabel(this)
 {
     setAutoFillBackground(true);
-    //setStyleSheet("background-color: white;");
 
     _mainLayout.addLayout(&_toolbarLayout);
     _mainLayout.addLayout(&_headerLayout);
     _mainLayout.addWidget(&_bodyLabel);
-
-    //_bodyLabel.setStyleSheet("background-color: rgba(0, 0, 0, 20)");
 
     setLayout(&_mainLayout);
 
@@ -68,8 +66,9 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
     _headerLayout.addWidget(&_headerIconLabel);
     _headerLayout.addWidget(&_headerTextLabel);
     _headerLayout.addStretch(1);
+    _headerLayout.setSpacing(10);
 
-    _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("keyboard").pixmap(QSize(22, 22)));
+    _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("keyboard").pixmap(QSize(24, 24)));
     _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(_shortcutMap.getTitle()));
 
     QString categories;
