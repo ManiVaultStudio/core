@@ -81,7 +81,7 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
         QString rows;
 
         for (const auto& shortcut : _shortcutMap.getShortcuts({ category }))
-            rows += QString("<tr><td style='width: 100px;'><b>%1</b></td><td>     %2</td></tr>").arg(shortcut._keySequence.toString(), shortcut._title);
+            rows += QString("<tr><td width='60'><b>%1</b></td><td>%2</td></tr>").arg(shortcut._keySequence.toString(), shortcut._title);
 
         const auto table = QString("<table>%1</table>").arg(rows);
 
