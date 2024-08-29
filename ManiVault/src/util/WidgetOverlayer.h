@@ -16,7 +16,6 @@ namespace mv::util {
  * Widget overlayer utility class
  *
  * Helper class for layering a widget on top of another widget and synchronizing its geometry.
- * The source widget will be set transparent to mouse events, except for its children.
  *
  * @author Thomas Kroes
  */
@@ -90,6 +89,15 @@ private:
 
     /** Source widget geometry is synchronized with the target widget geometry */
     void synchronizeGeometry() const;
+
+signals:
+
+    /**
+     * Signals that the target widget changed from \p previousTargetWidget to \p currentTargetWidget
+     * @param previousTargetWidget Pointer to previous target widget
+     * @param currentTargetWidget Pointer to current target widget
+     */
+    void targetWidgetChanged(QWidget* previousTargetWidget, QWidget* currentTargetWidget);
 
 private:
     QWidget*                    _sourceWidget;                  /** Pointer to source widget (will be layered on top of the \p targetWidget) */

@@ -10,28 +10,29 @@
     #define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv::gui
 {
-    
+
 ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment /*= Qt::AlignBottom | Qt::AlignRight*/) :
     OverlayWidget(target),
     _viewPlugin(viewPlugin),
     _alignment(alignment),
-    _popupWidget(viewPlugin)//,
-    //_widgetFader(this, this, 1.f)
+    _toolbarWidget(viewPlugin, this)
 {
+    //setStyleSheet("background-color: green;");
+
     Q_ASSERT(target);
 
     if (!target)
         return;
 
-    getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
-
-    addMouseEventReceiverWidget(&_popupWidget);
+    addMouseEventReceiverWidget(&_toolbarWidget);
 
     _layout.setAlignment(_alignment);
 
-    _layout.addWidget(&_popupWidget);
+    _layout.addWidget(&_toolbarWidget);
 
     setLayout(&_layout);
 
@@ -41,37 +42,9 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     raise();
 }
 
-//bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent* event)
-//{
-//    if (target != getWidgetOverlayer().getTargetWidget())
-//        return OverlayWidget::eventFilter(target, event);
-//
-//    switch (event->type())
-//    {
-//        case QEvent::Enter:
-//        {
-//            _widgetFader.fadeIn();
-//            break;
-//        }
-//
-//        case QEvent::Leave:
-//        {
-//            _widgetFader.fadeOut();
-//            break;
-//        }
-//
-//        default:
-//            break;
-//    }
-//    
-//    return OverlayWidget::eventFilter(target, event);
-//}
-
 void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidget)
 {
-    getWidgetOverlayer().getTargetWidget()->removeEventFilter(this);
     getWidgetOverlayer().setTargetWidget(targetWidget);
-    getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
 }
 
 void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t margin)
@@ -79,28 +52,73 @@ void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t marg
     _layout.setContentsMargins(margin, margin, margin, margin);
 }
 
-ViewPluginLearningCenterOverlayWidget::PopupWidget::PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent) :
-    QWidget(parent),
-    _viewPlugin(viewPlugin),
-    _opacityEffect(this)
+ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::ToolbarItemWidget(const QIcon& icon) :
+    QWidget(),
+    _widgetFader(nullptr, this)
 {
-    setGraphicsEffect(&_opacityEffect);
+    _iconLabel.setPixmap(icon.pixmap(QSize(16, 16)));
+
+    _layout.addWidget(&_iconLabel);
+
+    setLayout(&_layout);
+}
+
+void ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::enterEvent(QEnterEvent* event)
+{
+    QWidget::enterEvent(event);
+
+    _widgetFader.fadedIn();
+}
+
+void ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::leaveEvent(QEvent* event)
+{
+    QWidget::leaveEvent(event);
+
+    _widgetFader.fadedOut();
+}
+
+ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+    QWidget(overlayWidget),
+    _viewPlugin(viewPlugin),
+    _overlayWidget(overlayWidget),
+    _widgetFader(this, this, 0.f)
+{
     setMouseTracking(true);
     setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
     setAttribute(Qt::WA_TransparentForMouseEvents, false);
 
-    _iconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(16, 16)));
+    //_iconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(16, 16)));
 
-    _layout.addWidget(&_iconLabel);
+    _layout.addWidget(new ToolbarItemWidget(Application::getIconFont("FontAwesome").getIcon("keyboard")));
+    _layout.addWidget(new ToolbarItemWidget(Application::getIconFont("FontAwesome").getIcon("book")));
+    _layout.addWidget(new ToolbarItemWidget(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher")));
 
     setLayout(&_layout);
 
     setContentsMargins(8);
 
-    _opacityEffect.setOpacity(.5f);
+    //_overlayWidget->getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
+
+    //return;
+    const auto installEventFilterOnTargetWidget = [this](QWidget* previousTargetWidget, QWidget* currentTargetWidget) ->void
+    {
+        Q_ASSERT(currentTargetWidget);
+
+        if (!currentTargetWidget)
+            return;
+
+        if (previousTargetWidget)
+            previousTargetWidget->removeEventFilter(this);
+
+        currentTargetWidget->installEventFilter(this);
+    };
+
+    installEventFilterOnTargetWidget(nullptr, _overlayWidget->getWidgetOverlayer().getTargetWidget());
+
+    connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
 }
 
-void ViewPluginLearningCenterOverlayWidget::PopupWidget::mousePressEvent(QMouseEvent* event)
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::mousePressEvent(QMouseEvent* event)
 {
     QWidget::mousePressEvent(event);
 
@@ -109,42 +127,30 @@ void ViewPluginLearningCenterOverlayWidget::PopupWidget::mousePressEvent(QMouseE
     contextMenu->exec(mapToGlobal(event->pos()));
 }
 
-//void ViewPluginLearningCenterOverlayWidget::PopupWidget::enterEvent(QEnterEvent* event)
-//{
-//    QWidget::enterEvent(event);
-//
-//    //setStyleSheet("opacity: 1;");
-//    //_opacityEffect.setOpacity(1.f);
-//}
-//
-//void ViewPluginLearningCenterOverlayWidget::PopupWidget::leaveEvent(QEvent* event)
-//{
-//    QWidget::leaveEvent(event);
-//
-//    //_opacityEffect.setOpacity(.5f);
-//    //setStyleSheet("opacity: 0.5;");
-//}
+bool ViewPluginLearningCenterOverlayWidget::ToolbarWidget::eventFilter(QObject* watched, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Enter:
+        {
+            _widgetFader.fadeIn();
+            break;
+        }
+    
+        case QEvent::Leave:
+        {
+            _widgetFader.fadeOut();
+            break;
+        }
+    
+        default:
+            break;
+    }
 
-//bool ViewPluginLearningCenterOverlayWidget::PopupWidget::eventFilter(QObject* watched, QEvent* event)
-//{
-//    switch (event->type())
-//    {
-//        case QEvent::MouseButtonPress:
-//        case QEvent::MouseButtonRelease:
-//        case QEvent::MouseMove:
-//        {
-//            qDebug() << "====================";
-//            //if (parent() != nullptr && !_widgetOverlayer.shouldReceiveMouseEvents())
-//                //QCoreApplication::sendEvent(parent(), event);
-//
-//            break;
-//        }
-//    }
-//
-//    return QWidget::event(event);
-//}
+    return QWidget::eventFilter(watched, event);
+}
 
-QMenu* ViewPluginLearningCenterOverlayWidget::PopupWidget::getContextMenu(QWidget* parent /*= nullptr*/) const
+QMenu* ViewPluginLearningCenterOverlayWidget::ToolbarWidget::getContextMenu(QWidget* parent /*= nullptr*/) const
 {
     auto contextMenu = new QMenu(parent);
 
@@ -173,7 +179,7 @@ QMenu* ViewPluginLearningCenterOverlayWidget::PopupWidget::getContextMenu(QWidge
     return contextMenu;
 }
 
-void ViewPluginLearningCenterOverlayWidget::PopupWidget::setContentsMargins(std::int32_t margin)
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::setContentsMargins(std::int32_t margin)
 {
     _layout.setContentsMargins(margin, margin, margin, margin);
 }

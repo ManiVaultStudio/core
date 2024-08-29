@@ -30,41 +30,32 @@ class CORE_EXPORT ViewPluginLearningCenterOverlayWidget : public OverlayWidget
 {
 private:
 
-    //class LearningCenterIconLabel : public QLabel {
-    //public:
-    //    LearningCenterIconLabel(QWidget* parent = nullptr);
-
-    //    void mousePressEvent(QMouseEvent* event) override;
-
-    //private:
-
-    //    /**
-    //     * Get view plugin learning center context menu
-    //     * @return View plugin learning center context menu
-    //     */
-    //    QMenu* getContextMenu(QWidget* parent = nullptr) const;
-
-    //    /**
-    //     * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }
-    //     * @param margin Contents margins
-    //     */
-    //    void setContentsMargins(std::int32_t margin);
-
-    //private:
-    //    const plugin::ViewPlugin* _viewPlugin;    /** Const pointer to source view plugin */
-    //    QHBoxLayout                 _layout;        /** For alignment of the icon label */
-    //    IconLabel                   _iconLabel;     /** Icon label */
-    //};
-
-    class PopupWidget : public QWidget {
+    class ToolbarItemWidget : public QWidget {
     public:
-        PopupWidget(const plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
+        ToolbarItemWidget(const QIcon& icon);
+
+        void enterEvent(QEnterEvent* event) override;
+        void leaveEvent(QEvent* event) override;
+
+    private:
+        QHBoxLayout                 _layout;            /** For alignment of the icon label */
+        QLabel                      _iconLabel;         /** Icon label */
+        mv::util::WidgetFader       _widgetFader;       /** For fading in/out */
+    };
+
+    class ToolbarWidget : public QWidget {
+    public:
+        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
         void mousePressEvent(QMouseEvent* event) override;
 
-        //void enterEvent(QEnterEvent* event) override;
-        //void leaveEvent(QEvent* event) override;
-        //bool eventFilter(QObject* watched, QEvent* event) override;
+        /**
+         * Respond to \p target events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event) override;
+
     private:
 
         /**
@@ -81,9 +72,10 @@ private:
 
     private:
         const plugin::ViewPlugin*   _viewPlugin;        /** Const pointer to source view plugin */
+        OverlayWidget*              _overlayWidget;     /** Pointer to owning overlay widget */
         QHBoxLayout                 _layout;            /** For alignment of the icon label */
         QLabel                      _iconLabel;         /** Icon label */
-        QGraphicsOpacityEffect      _opacityEffect;     /** Effect for modulating opacity */
+        mv::util::WidgetFader       _widgetFader;       /** For fading in/out */
     };
 
 public:
@@ -95,14 +87,6 @@ public:
      * @param alignment Alignment w.r.t. to the \p source widget
      */
     ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom | Qt::AlignRight);
-
-    /**
-     * Respond to target object events
-     * @param target Object of which an event occurred
-     * @param event The event that took place
-     * @return Boolean determining whether the event was handled or not
-     */
-    //bool eventFilter(QObject* target, QEvent* event) override;
 
     /**
      * Set target widget to \p targetWidget
@@ -122,8 +106,7 @@ private:
     const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
     const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
     QHBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
-    PopupWidget                 _popupWidget;       /** Icon with popup */
-    //util::WidgetFader           _widgetFader;       /** For fading in on view plugin mouse enter and fading out on view plugin widget mouse leave */
+    ToolbarWidget               _toolbarWidget;     /** Toolbar widget which contains the actions */
 };
 
 }

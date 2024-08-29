@@ -49,6 +49,11 @@ void WidgetOverlayer::setTargetWidget(QWidget* targetWidget)
     if (!targetWidget)
         return;
 
+    //if (targetWidget == _targetWidget)
+    //    return;
+
+    auto previousTargetWidget = _targetWidget;
+
     if (_targetWidget)
         _targetWidget->removeEventFilter(this);
 
@@ -58,6 +63,8 @@ void WidgetOverlayer::setTargetWidget(QWidget* targetWidget)
     _targetWidget->installEventFilter(this);
 
     synchronizeGeometry();
+
+    emit targetWidgetChanged(previousTargetWidget, _targetWidget);
 }
 
 void WidgetOverlayer::addMouseEventReceiverWidget(const QWidget* mouseEventReceiverWidget)
