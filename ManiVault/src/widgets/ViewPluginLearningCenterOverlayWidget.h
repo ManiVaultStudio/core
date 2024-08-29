@@ -12,6 +12,8 @@
 #include <QHBoxLayout>
 #include <QMouseEvent>
 
+#include "ViewPlugin.h"
+
 namespace mv::plugin {
     class ViewPlugin;
 }
@@ -30,24 +32,37 @@ class CORE_EXPORT ViewPluginLearningCenterOverlayWidget : public OverlayWidget
 {
 private:
 
+    /** Base class for toolbar item widgets */
     class ToolbarItemWidget : public QWidget {
     public:
-        ToolbarItemWidget(const QIcon& icon);
 
+        /**
+         * Construct with pointer to \p overlayWidget and \p icon
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         * @param icon Item icon
+         */
+        ToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QIcon& icon, const QString& tooltip);
+
+        /**
+         * Invoked when the mouse enters the toolbar item widget
+         * @param event Pointer to enter event
+         */
         void enterEvent(QEnterEvent* event) override;
+
+        /**
+         * Invoked when the mouse leaves the toolbar item widget
+         * @param event Pointer to event
+         */
         void leaveEvent(QEvent* event) override;
 
-    private:
-        QHBoxLayout                 _layout;            /** For alignment of the icon label */
-        QLabel                      _iconLabel;         /** Icon label */
-        mv::util::WidgetFader       _widgetFader;       /** For fading in/out */
-    };
+    protected:
 
-    class ToolbarWidget : public QWidget {
-    public:
-        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
-
-        void mousePressEvent(QMouseEvent* event) override;
+        /**
+         * Get view plugin
+         * @return Pointer to view plugin
+         */
+        const plugin::ViewPlugin* getViewPlugin() const;
 
         /**
          * Respond to \p target events
@@ -55,6 +70,33 @@ private:
          * @param event The event that took place
          */
         bool eventFilter(QObject* target, QEvent* event) override;
+
+    private:
+        const plugin::ViewPlugin*   _viewPlugin;        /** Const pointer to source view plugin */
+        OverlayWidget*              _overlayWidget;     /** Pointer to overlay widget */
+        QHBoxLayout                 _layout;            /** For placing the icon label */
+        QLabel                      _iconLabel;         /** Icon label */
+        mv::util::WidgetFader       _widgetFader;       /** For fading in/out */
+    };
+
+    /** Toolbar item widget for showing the shortcut map */
+    class ShortcutsToolbarItemWidget final : public ToolbarItemWidget
+    {
+    public:
+
+        /** No need for custom constructor */
+        using ToolbarItemWidget::ToolbarItemWidget;
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+    };
+
+    class ToolbarWidget : public QWidget {
+    public:
+        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
     private:
 
@@ -75,7 +117,6 @@ private:
         OverlayWidget*              _overlayWidget;     /** Pointer to owning overlay widget */
         QHBoxLayout                 _layout;            /** For alignment of the icon label */
         QLabel                      _iconLabel;         /** Icon label */
-        mv::util::WidgetFader       _widgetFader;       /** For fading in/out */
     };
 
 public:

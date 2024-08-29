@@ -52,56 +52,23 @@ void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t marg
     _layout.setContentsMargins(margin, margin, margin, margin);
 }
 
-ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::ToolbarItemWidget(const QIcon& icon) :
+ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::ToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QIcon& icon, const QString& tooltip) :
     QWidget(),
-    _widgetFader(nullptr, this)
+    _viewPlugin(viewPlugin),
+    _overlayWidget(overlayWidget),
+    _widgetFader(nullptr, &_iconLabel, .0f)
 {
+    setObjectName("ToolbarItemWidget");
+    setToolTip(tooltip);
+
     _iconLabel.setPixmap(icon.pixmap(QSize(16, 16)));
 
+    _layout.setContentsMargins(0, 0, 0, 0);
     _layout.addWidget(&_iconLabel);
 
     setLayout(&_layout);
-}
 
-void ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::enterEvent(QEnterEvent* event)
-{
-    QWidget::enterEvent(event);
-
-    _widgetFader.fadedIn();
-}
-
-void ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::leaveEvent(QEvent* event)
-{
-    QWidget::leaveEvent(event);
-
-    _widgetFader.fadedOut();
-}
-
-ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
-    QWidget(overlayWidget),
-    _viewPlugin(viewPlugin),
-    _overlayWidget(overlayWidget),
-    _widgetFader(this, this, 0.f)
-{
-    setMouseTracking(true);
-    setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
-    setAttribute(Qt::WA_TransparentForMouseEvents, false);
-
-    //_iconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(16, 16)));
-
-    _layout.addWidget(new ToolbarItemWidget(Application::getIconFont("FontAwesome").getIcon("keyboard")));
-    _layout.addWidget(new ToolbarItemWidget(Application::getIconFont("FontAwesome").getIcon("book")));
-    _layout.addWidget(new ToolbarItemWidget(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher")));
-
-    setLayout(&_layout);
-
-    setContentsMargins(8);
-
-    //_overlayWidget->getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
-
-    //return;
-    const auto installEventFilterOnTargetWidget = [this](QWidget* previousTargetWidget, QWidget* currentTargetWidget) ->void
-    {
+    const auto installEventFilterOnTargetWidget = [this](QWidget* previousTargetWidget, QWidget* currentTargetWidget) -> void {
         Q_ASSERT(currentTargetWidget);
 
         if (!currentTargetWidget)
@@ -118,36 +85,78 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
 }
 
-void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::mousePressEvent(QMouseEvent* event)
+void ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::enterEvent(QEnterEvent* event)
 {
-    QWidget::mousePressEvent(event);
+    QWidget::enterEvent(event);
 
-    QScopedPointer<QMenu> contextMenu(getContextMenu(this));
-
-    contextMenu->exec(mapToGlobal(event->pos()));
+    _widgetFader.setOpacity(1.f, 150);
 }
 
-bool ViewPluginLearningCenterOverlayWidget::ToolbarWidget::eventFilter(QObject* watched, QEvent* event)
+void ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::leaveEvent(QEvent* event)
+{
+    QWidget::leaveEvent(event);
+
+    _widgetFader.setOpacity(.25f, 250);
+}
+
+const plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::getViewPlugin() const
+{
+    return _viewPlugin;
+}
+
+bool ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::eventFilter(QObject* watched, QEvent* event)
 {
     switch (event->type())
     {
         case QEvent::Enter:
         {
-            _widgetFader.fadeIn();
+            _widgetFader.setOpacity(.25f, 350);
             break;
         }
-    
+
         case QEvent::Leave:
         {
-            _widgetFader.fadeOut();
+            _widgetFader.setOpacity(0.f, 350);
             break;
         }
-    
+
         default:
             break;
     }
 
     return QWidget::eventFilter(watched, event);
+}
+
+void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    const_cast<plugin::ViewPlugin*>(getViewPlugin())->getViewShortcutMapAction().trigger();
+}
+
+ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+    QWidget(overlayWidget),
+    _viewPlugin(viewPlugin),
+    _overlayWidget(overlayWidget)//,
+    //_widgetFader(this, this, 0.f)
+{
+    setObjectName("ToolbarWidget");
+    setMouseTracking(true);
+    setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
+
+    //_iconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(16, 16)));
+
+    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget, Application::getIconFont("FontAwesome").getIcon("keyboard"), "View shortcuts"));
+    //_layout.addWidget(new ToolbarItemWidget(viewPlugin, overlayWidget, Application::getIconFont("FontAwesome").getIcon("book")));
+    //_layout.addWidget(new ToolbarItemWidget(viewPlugin, overlayWidget, Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher")));
+
+    setLayout(&_layout);
+
+    setContentsMargins(8);
+
+    //_overlayWidget->getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
+
+    //return;
+    
 }
 
 QMenu* ViewPluginLearningCenterOverlayWidget::ToolbarWidget::getContextMenu(QWidget* parent /*= nullptr*/) const

@@ -14,25 +14,63 @@ using namespace mv::util;
 
 namespace mv::gui
 {
+ShortcutMapOverlayWidget::CloseLabel::CloseLabel(ShortcutMapOverlayWidget* shortcutMapOverlayWidget) :
+    QLabel(shortcutMapOverlayWidget),
+    _shortcutMapOverlayWidget(shortcutMapOverlayWidget)
+{
+    setGraphicsEffect(&_opacityEffect);
+
+    _opacityEffect.setOpacity(.5f);
+}
+
+void ShortcutMapOverlayWidget::CloseLabel::enterEvent(QEnterEvent* event)
+{
+    QLabel::enterEvent(event);
+
+    _opacityEffect.setOpacity(1.f);
+}
+
+void ShortcutMapOverlayWidget::CloseLabel::leaveEvent(QEvent* event)
+{
+    QLabel::leaveEvent(event);
+
+    _opacityEffect.setOpacity(.5f);
+}
+
+void ShortcutMapOverlayWidget::CloseLabel::mousePressEvent(QMouseEvent* event)
+{
+    QLabel::mousePressEvent(event);
+
+    _shortcutMapOverlayWidget->deleteLater();
+}
 
 ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::ShortcutMap& shortcutMap) :
     OverlayWidget(source),
-    _shortcutMap(shortcutMap),
-    _widgetFader(this, this, 0.f, 0.f, 1.0f, 250, 250),
-    _closeAction(this, "Close")
+    _shortcutMap(shortcutMap)
 {
     setAutoFillBackground(true);
-    setStyleSheet("background-color: white;");
+    //setStyleSheet("background-color: white;");
 
-    _layout.addWidget(&_label);
-    _layout.addStretch(1);
-    _layout.addWidget(_closeAction.createWidget(this));
+    _mainLayout.addLayout(&_toolbarLayout);
+    _mainLayout.addLayout(&_headerLayout);
+    _mainLayout.addWidget(&_bodyLabel);
 
-    //_label.setStyleSheet("background-color: rgba(0, 0, 0, 20)");
+    //_bodyLabel.setStyleSheet("background-color: rgba(0, 0, 0, 20)");
 
-    setLayout(&_layout);
+    setLayout(&_mainLayout);
 
-    const auto header = QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(_shortcutMap.getTitle());
+    _toolbarLayout.addStretch(1);
+    _toolbarLayout.addWidget(&_closeIconLabel);
+
+    _closeIconLabel.setStyleSheet("opacity: 0.5");
+    _closeIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("times").pixmap(QSize(14, 14)));
+
+    _headerLayout.addWidget(&_headerIconLabel);
+    _headerLayout.addWidget(&_headerTextLabel);
+    _headerLayout.addStretch(1);
+
+    _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("keyboard").pixmap(QSize(22, 22)));
+    _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(_shortcutMap.getTitle()));
 
     QString categories;
 
@@ -52,23 +90,10 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
     for (const auto& category : _shortcutMap.getCategories())
         categories += createShortcutMapCategoryTable(category);
 
-    _label.setText(header + categories);
+    _bodyLabel.setText(categories);
 
-    connect(&_closeAction, &TriggerAction::triggered, &_widgetFader, [this]() -> void {
-        connect(&_widgetFader, &WidgetFader::fadedOut, this, &ShortcutMapOverlayWidget::deleteLater);
-        getWidgetFader().fadeOut();
-    });
+    _mainLayout.addStretch(1);
+    //connect(&_closeIconLabel, &QLabel::cli,this, &ShortcutMapOverlayWidget::deleteLater);
 }
 
-mv::util::WidgetFader& ShortcutMapOverlayWidget::getWidgetFader()
-{
-    return _widgetFader;
-}
-
-void ShortcutMapOverlayWidget::showEvent(QShowEvent* event)
-{
-    _widgetFader.fadeIn();
-
-    OverlayWidget::showEvent(event);
-}
 }

@@ -59,7 +59,9 @@ void OverlayWidget::updateMask()
     QRegion maskRegion(geometry());
 
     maskRegion -= QRegion(geometry());
-    maskRegion += childrenRegion();
+
+    for (auto mouseEventReceiverWidget : _widgetOverlayer.getMouseEventReceiverWidgets())
+        maskRegion += mouseEventReceiverWidget->geometry();
 
     setMask(maskRegion);
 }

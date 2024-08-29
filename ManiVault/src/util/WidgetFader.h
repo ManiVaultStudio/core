@@ -110,6 +110,11 @@ public:
      */
     QGraphicsOpacityEffect& getOpacityEffect();
 
+private:
+
+    /** Start the opacity animation */
+    void startAnimation();
+
 signals:
 
     /** Signals that the animation has faded in */
