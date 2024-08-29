@@ -33,16 +33,22 @@ class CORE_EXPORT ViewPluginLearningCenterOverlayWidget : public OverlayWidget
 private:
 
     /** Base class for toolbar item widgets */
-    class ToolbarItemWidget : public QWidget {
+    class AbstractToolbarItemWidget : public QWidget {
     public:
 
         /**
          * Construct with pointer to \p overlayWidget and \p icon
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
-         * @param icon Item icon
+         * @param tooltip Item tooltip
          */
-        ToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QIcon& icon, const QString& tooltip);
+        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QString& tooltip);
+
+        /**
+         * Invoked when the widget is shown
+         * @param event Pointer to show event
+         */
+        void showEvent(QShowEvent* event) override;
 
         /**
          * Invoked when the mouse enters the toolbar item widget
@@ -56,6 +62,18 @@ private:
          */
         void leaveEvent(QEvent* event) override;
 
+        /**
+         * Get icon
+         * @return Icon
+         */
+        virtual QIcon getIcon() const = 0;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        virtual bool shouldDisplay() const = 0;
+
     protected:
 
         /**
@@ -65,11 +83,22 @@ private:
         const plugin::ViewPlugin* getViewPlugin() const;
 
         /**
+         * Get non-const pointer to view plugin
+         * @return Non-const pointer to view plugin
+         */
+        plugin::ViewPlugin* getViewPlugin();
+
+        /**
          * Respond to \p target events
          * @param target Object of which an event occurred
          * @param event The event that took place
          */
         bool eventFilter(QObject* target, QEvent* event) override;
+
+    private:
+
+        /** Updates the item icon (for badge update) */
+        void updateIcon();
 
     private:
         const plugin::ViewPlugin*   _viewPlugin;        /** Const pointer to source view plugin */
@@ -80,18 +109,111 @@ private:
     };
 
     /** Toolbar item widget for showing the shortcut map */
-    class ShortcutsToolbarItemWidget final : public ToolbarItemWidget
+    class ShortcutsToolbarItemWidget final : public AbstractToolbarItemWidget
     {
     public:
 
         /** No need for custom constructor */
-        using ToolbarItemWidget::ToolbarItemWidget;
+        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
 
         /**
          * Invoked when the mouse button is pressed
          * @param event Pointer to mouse event
          */
         void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
+    };
+
+    /** Toolbar item widget for visiting the Github repository website */
+    class VisitGithubRepoToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /** No need for custom constructor */
+        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
+    };
+
+    /** Toolbar item widget for visiting the global learning center */
+    class VisitLearningCenterToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /** No need for custom constructor */
+        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
+    };
+
+    /** Toolbar item widget for showing the readme */
+    class ShowReadmeToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /** No need for custom constructor */
+        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
     };
 
     class ToolbarWidget : public QWidget {

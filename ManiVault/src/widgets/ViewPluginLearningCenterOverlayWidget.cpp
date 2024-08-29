@@ -4,6 +4,8 @@
 
 #include "ViewPluginLearningCenterOverlayWidget.h"
 
+#include "util/Icon.h"
+
 #include <QDebug>
 
 #ifdef _DEBUG
@@ -52,7 +54,7 @@ void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t marg
     _layout.setContentsMargins(margin, margin, margin, margin);
 }
 
-ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::ToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QIcon& icon, const QString& tooltip) :
+ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QString& tooltip) :
     QWidget(),
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
@@ -60,8 +62,6 @@ ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::ToolbarItemWidget(cons
 {
     setObjectName("ToolbarItemWidget");
     setToolTip(tooltip);
-
-    _iconLabel.setPixmap(icon.pixmap(QSize(16, 16)));
 
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.addWidget(&_iconLabel);
@@ -85,31 +85,49 @@ ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::ToolbarItemWidget(cons
     connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
 }
 
-void ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::enterEvent(QEnterEvent* event)
+void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::showEvent(QShowEvent* event)
+{
+    QWidget::showEvent(event);
+
+    updateIcon();
+}
+
+void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::enterEvent(QEnterEvent* event)
 {
     QWidget::enterEvent(event);
 
-    _widgetFader.setOpacity(1.f, 150);
+    _widgetFader.setOpacity(0.7f, 150);
 }
 
-void ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::leaveEvent(QEvent* event)
+void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::leaveEvent(QEvent* event)
 {
     QWidget::leaveEvent(event);
 
     _widgetFader.setOpacity(.25f, 250);
 }
 
-const plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::getViewPlugin() const
+void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateIcon()
+{
+    _iconLabel.setPixmap(getIcon().pixmap(QSize(18, 18)));
+}
+
+const plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin() const
 {
     return _viewPlugin;
 }
 
-bool ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::eventFilter(QObject* watched, QEvent* event)
+plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin()
+{
+    return const_cast<plugin::ViewPlugin*>(_viewPlugin);
+}
+
+bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilter(QObject* watched, QEvent* event)
 {
     switch (event->type())
     {
         case QEvent::Enter:
         {
+            setVisible(shouldDisplay());
             _widgetFader.setOpacity(.25f, 350);
             break;
         }
@@ -129,34 +147,102 @@ bool ViewPluginLearningCenterOverlayWidget::ToolbarItemWidget::eventFilter(QObje
 
 void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
-    const_cast<plugin::ViewPlugin*>(getViewPlugin())->getViewShortcutMapAction().trigger();
+    getViewPlugin()->getViewShortcutMapAction().trigger();
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon() const
+{
+    WidgetActionBadge badge(nullptr, getViewPlugin()->getShortcutMap().getShortcuts().size());
+
+    badge.setScale(0.5);
+    badge.setEnabled(true);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
+
+    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("keyboard"), badge);
+}
+
+bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDisplay() const
+{
+    return getViewPlugin()->getShortcutMap().hasShortcuts();
+}
+
+void ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    AbstractToolbarItemWidget::mousePressEvent(event);
+
+    mv::help().getToRepositoryAction().trigger();
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::getIcon() const
+{
+    return Application::getIconFont("FontAwesomeBrands").getIcon("github");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::shouldDisplay() const
+{
+    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
+
+    return nonConstPluginFactory->getRespositoryUrl().isValid();
+}
+
+void ViewPluginLearningCenterOverlayWidget::VisitLearningCenterToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    AbstractToolbarItemWidget::mousePressEvent(event);
+
+    mv::help().getShowLearningCenterAction().trigger();
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::VisitLearningCenterToolbarItemWidget::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::VisitLearningCenterToolbarItemWidget::shouldDisplay() const
+{
+    return true;
+}
+
+void ViewPluginLearningCenterOverlayWidget::ShowReadmeToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    AbstractToolbarItemWidget::mousePressEvent(event);
+
+    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
+
+    nonConstPluginFactory->getTriggerReadmeAction().trigger();
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::ShowReadmeToolbarItemWidget::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("book");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::ShowReadmeToolbarItemWidget::shouldDisplay() const
+{
+    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
+
+    return nonConstPluginFactory->getReadmeMarkdownUrl().isValid();
 }
 
 ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     QWidget(overlayWidget),
     _viewPlugin(viewPlugin),
-    _overlayWidget(overlayWidget)//,
-    //_widgetFader(this, this, 0.f)
+    _overlayWidget(overlayWidget)
 {
     setObjectName("ToolbarWidget");
     setMouseTracking(true);
     setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
     setAttribute(Qt::WA_TransparentForMouseEvents, false);
 
-    //_iconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher").pixmap(QSize(16, 16)));
+    _layout.setSpacing(10);
 
-    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget, Application::getIconFont("FontAwesome").getIcon("keyboard"), "View shortcuts"));
-    //_layout.addWidget(new ToolbarItemWidget(viewPlugin, overlayWidget, Application::getIconFont("FontAwesome").getIcon("book")));
-    //_layout.addWidget(new ToolbarItemWidget(viewPlugin, overlayWidget, Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher")));
+    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget, "View shortcuts"));
+    _layout.addWidget(new ShowReadmeToolbarItemWidget(viewPlugin, overlayWidget, "Show readme information from the Github repository"));
+    _layout.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, overlayWidget, "Visit the Github repository website"));
+    _layout.addWidget(new VisitLearningCenterToolbarItemWidget(viewPlugin, overlayWidget, "Go to the main learning center"));
 
     setLayout(&_layout);
 
     setContentsMargins(8);
-
-    //_overlayWidget->getWidgetOverlayer().getTargetWidget()->installEventFilter(this);
-
-    //return;
-    
 }
 
 QMenu* ViewPluginLearningCenterOverlayWidget::ToolbarWidget::getContextMenu(QWidget* parent /*= nullptr*/) const
@@ -173,9 +259,6 @@ QMenu* ViewPluginLearningCenterOverlayWidget::ToolbarWidget::getContextMenu(QWid
 
     if (nonConstPluginFactory->getReadmeMarkdownUrl().isValid())
         contextMenu->addAction(&nonConstPluginFactory->getTriggerReadmeAction());
-
-    if (nonConstPluginFactory->getRespositoryUrl().isValid())
-        contextMenu->addAction(&nonConstPluginFactory->getVisitRepositoryAction());
 
     auto other = new QMenu("Other");
 
