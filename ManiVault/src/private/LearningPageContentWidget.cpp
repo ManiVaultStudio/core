@@ -77,11 +77,13 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     _toolbarAction.addAction(new StretchAction(this, "Stretch"));
     _toolbarAction.addAction(&_settingsAction);
     _toolbarAction.addAction(&_toStartPageAction);
+    _toolbarAction.addAction(&mv::projects().getBackToProjectAction());
 
     getMainLayout().addWidget(_toolbarAction.createWidget(this));
 
     connect(&_toStartPageAction, &TriggerAction::triggered, this, []() -> void {
         mv::help().getShowLearningCenterAction().setChecked(false);
-        mv::projects().getShowStartPageAction().setChecked(true);\
+        mv::projects().getShowStartPageAction().setChecked(true);
     });
 }
+

@@ -58,6 +58,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toolbarAction.addAction(new StretchAction(this, "Left stretch"));
     _toolbarAction.addAction(&_settingsAction);
     _toolbarAction.addAction(&_toLearningCenterAction);
+    _toolbarAction.addAction(&mv::projects().getBackToProjectAction());
 
     getMainLayout().addWidget(_toolbarAction.createWidget(this));
 

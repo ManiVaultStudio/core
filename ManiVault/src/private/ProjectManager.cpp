@@ -49,7 +49,8 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _importDataMenu(),
     _publishAction(nullptr, "Publish"),
     _pluginManagerAction(nullptr, "Plugin Browser..."),
-    _showStartPageAction(nullptr, "Start Page...", true)
+    _showStartPageAction(nullptr, "Start Page...", true),
+    _backToProjectAction(nullptr, "Back to project")
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -110,6 +111,12 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _showStartPageAction.setIconByName("door-open");
     _showStartPageAction.setToolTip("Show the ManiVault start page");
     //_showStartPageAction.setChecked(!Application::current()->shouldOpenProjectAtStartup());
+
+    //_backToProjectAction.setShortcut(QKeySequence("Alt+W"));
+    //_backToProjectAction.setShortcutContext(Qt::ApplicationShortcut);
+    _backToProjectAction.setIconByName("undo");
+    _backToProjectAction.setToolTip("Go back to the current project");
+    //_backToProjectAction.setChecked(!Application::current()->shouldOpenProjectAtStartup());
 
     auto mainWindow = Application::topLevelWidgets().first();
 
@@ -188,6 +195,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
         _importDataMenu.setEnabled(hasProject());
         _pluginManagerAction.setEnabled(hasProject());
         _publishAction.setEnabled(hasProject());
+        _backToProjectAction.setVisible(hasProject());
     };
 
     connect(this, &ProjectManager::projectCreated, this, updateActionsReadOnly);
@@ -205,6 +213,11 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     connect(&_publishAction, &TriggerAction::triggered, this, [this]() -> void {
         publishProject();
+    });
+
+    connect(&_backToProjectAction, &TriggerAction::triggered, this, [this]() -> void {
+        mv::help().getShowLearningCenterAction().setChecked(false);
+        getShowStartPageAction().setChecked(false);
     });
 }
 
