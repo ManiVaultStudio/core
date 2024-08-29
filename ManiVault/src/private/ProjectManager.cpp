@@ -114,8 +114,9 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     //_backToProjectAction.setShortcut(QKeySequence("Alt+W"));
     //_backToProjectAction.setShortcutContext(Qt::ApplicationShortcut);
-    _backToProjectAction.setIconByName("undo");
+    _backToProjectAction.setIconByName("reply");
     _backToProjectAction.setToolTip("Go back to the current project");
+    _backToProjectAction.setDefaultWidgetFlags(TriggerAction::Icon);
     //_backToProjectAction.setChecked(!Application::current()->shouldOpenProjectAtStartup());
 
     auto mainWindow = Application::topLevelWidgets().first();
