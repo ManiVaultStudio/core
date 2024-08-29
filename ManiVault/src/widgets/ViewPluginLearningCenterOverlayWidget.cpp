@@ -23,8 +23,6 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     _alignment(alignment),
     _toolbarWidget(viewPlugin, this)
 {
-    //setStyleSheet("background-color: green;");
-
     Q_ASSERT(target);
 
     if (!target)
@@ -108,7 +106,7 @@ void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::leaveEven
 
 void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateIcon()
 {
-    _iconLabel.setPixmap(getIcon().pixmap(QSize(18, 18)));
+    _iconLabel.setPixmap(getIcon().pixmap(QSize(16, 16)));
 }
 
 const plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin() const
