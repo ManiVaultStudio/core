@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QScrollArea>
 #include <QGraphicsOpacityEffect>
 
 namespace mv::util {
@@ -73,14 +74,17 @@ public:
     ShortcutMapOverlayWidget(QWidget* source, const util::ShortcutMap& shortcutMap);
 
 private:
-    const util::ShortcutMap&    _shortcutMap;       /** Const reference to the shortcut map for which to create the overlay */
-    QVBoxLayout                 _mainLayout;        /** Main layout */
-    QHBoxLayout                 _toolbarLayout;     /** Layout for the toolbar */
-    CloseLabel                  _closeIconLabel;    /** Label for close icon */
-    QHBoxLayout                 _headerLayout;      /** Layout for the header */
-    QLabel                      _headerIconLabel;   /** Label for header icon */
-    QLabel                      _headerTextLabel;   /** Label for header text */
-    QLabel                      _bodyLabel;         /** Shortcut cheatsheet HTML */
+    const util::ShortcutMap&    _shortcutMap;               /** Const reference to the shortcut map for which to create the overlay */
+    QVBoxLayout                 _mainLayout;                /** Main layout */
+    QHBoxLayout                 _toolbarLayout;             /** Layout for the toolbar */
+    CloseLabel                  _closeIconLabel;            /** Label for close icon */
+    QHBoxLayout                 _headerLayout;              /** Layout for the header */
+    QLabel                      _headerIconLabel;           /** Label for header icon */
+    QLabel                      _headerTextLabel;           /** Label for header text */
+    QScrollArea                 _shortcutsScrollArea;       /** Scroll area for the shortcut */
+    QWidget                     _shortcutsWidget;           /** Widget with the shortcuts label */
+    QVBoxLayout                 _shortcutsWidgetLayout;     /** Widget with the shortcuts label */
+    QLabel                      _bodyLabel;                 /** Shortcut cheatsheet HTML */
 };
 
 }

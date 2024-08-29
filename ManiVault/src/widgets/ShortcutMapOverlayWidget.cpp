@@ -53,7 +53,7 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
 
     _mainLayout.addLayout(&_toolbarLayout);
     _mainLayout.addLayout(&_headerLayout);
-    _mainLayout.addWidget(&_bodyLabel);
+    _mainLayout.addWidget(&_shortcutsScrollArea);
 
     setLayout(&_mainLayout);
 
@@ -69,6 +69,8 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
     _headerLayout.setSpacing(10);
 
     _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("keyboard").pixmap(QSize(24, 24)));
+    _headerIconLabel.setStyleSheet("padding-top: 2px;");
+
     _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(_shortcutMap.getTitle()));
 
     QString categories;
@@ -89,10 +91,18 @@ ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::
     for (const auto& category : _shortcutMap.getCategories())
         categories += createShortcutMapCategoryTable(category);
 
-    _bodyLabel.setText(categories);
+    _shortcutsScrollArea.setWidgetResizable(true);
+    _shortcutsScrollArea.setWidget(&_shortcutsWidget);
+    _shortcutsScrollArea.setObjectName("Shortcuts");
+    _shortcutsScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
 
-    _mainLayout.addStretch(1);
-    //connect(&_closeIconLabel, &QLabel::cli,this, &ShortcutMapOverlayWidget::deleteLater);
+    _shortcutsWidgetLayout.setContentsMargins(0, 0, 0, 0);
+    _shortcutsWidgetLayout.addWidget(&_bodyLabel);
+    _shortcutsWidgetLayout.setAlignment(Qt::AlignTop);
+
+    _shortcutsWidget.setLayout(&_shortcutsWidgetLayout);
+
+    _bodyLabel.setText(categories);
 }
 
 }
