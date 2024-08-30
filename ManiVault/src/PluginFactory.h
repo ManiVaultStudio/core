@@ -114,24 +114,6 @@ public: // Help
     virtual bool hasHelp();
 
     /**
-     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
-     * @return Reference to show help trigger action
-     */
-    virtual gui::TriggerAction& getTriggerHelpAction() final;
-
-    /**
-     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
-     * @return Reference to show help trigger action
-     */
-    virtual gui::TriggerAction& getTriggerReadmeAction() final;
-
-    /**
-     * Get trigger action that launches the GitHub repository website
-     * @return Reference to visit repository action
-     */
-    virtual gui::TriggerAction& getVisitRepositoryAction() final;
-
-    /**
      * Get the read me markdown file URL
      * @return URL of the read me markdown file
      */
@@ -316,6 +298,17 @@ protected:
      * @return Number of datasets of \p datasetType
      */
     static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const DataType& dataType);
+
+public: // Views
+
+    /** View the shortcut map */
+    virtual void viewShortcutMap();
+
+public: // Action getters
+
+    gui::TriggerAction& getTriggerHelpAction() { return _triggerHelpAction; };
+    gui::TriggerAction& getTriggerReadmeAction() { return _triggerReadmeAction; };
+    gui::TriggerAction& getVisitRepositoryAction() { return _visitRepositoryAction; };
 
 signals:
 

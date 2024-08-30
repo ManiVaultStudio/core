@@ -19,8 +19,8 @@ namespace mv::plugin
 
 PluginFactory::PluginFactory(Type type) :
     _type(type),
-    _numberOfInstances(0),
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
+    _numberOfInstances(0),
     _maximumNumberOfInstances(-1),
     _triggerHelpAction(nullptr, "Trigger plugin help"),
     _triggerReadmeAction(nullptr, "Readme"),
@@ -28,6 +28,8 @@ PluginFactory::PluginFactory(Type type) :
     _pluginGlobalSettingsGroupAction(nullptr),
     _statusBarAction(nullptr)
 {
+    _triggerHelpAction.setShortcut(QKeySequence(Qt::CTRL, Qt::Key_F2));
+
     _triggerReadmeAction.setIconByName("book");
 
     connect(&_triggerReadmeAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -113,21 +115,6 @@ void PluginFactory::setStatusBarAction(PluginStatusBarAction* statusBarAction)
 bool PluginFactory::hasHelp()
 {
     return false;
-}
-
-TriggerAction& PluginFactory::getTriggerHelpAction()
-{
-    return _triggerHelpAction;
-}
-
-TriggerAction& PluginFactory::getTriggerReadmeAction()
-{
-    return _triggerReadmeAction;
-}
-
-TriggerAction& PluginFactory::getVisitRepositoryAction()
-{
-    return _visitRepositoryAction;
 }
 
 QString PluginFactory::getGuiName() const
@@ -264,6 +251,11 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
             numberOfDatasetsForType++;
 
     return numberOfDatasetsForType;
+}
+
+void PluginFactory::viewShortcutMap()
+{
+    qDebug() << __FUNCTION__ << "not implemented yet...";
 }
 
 QUrl PluginFactory::getReadmeMarkdownUrl() const

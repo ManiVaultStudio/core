@@ -7,6 +7,7 @@
 #include <Application.h>
 
 #include <QDesktopServices>
+#include <QMainWindow>
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -24,27 +25,33 @@ HelpManager::HelpManager() :
     _toDiscordAction(this, "Join us..."),
     _toWebsiteAction(this, "Website"),
     _toWikiAction(this, "Wiki"),
-    _toRepositoryAction(this, "Repository")
+    _toRepositoryAction(this, "Repository"),
+    _toLearningCenterAction(this, "Go to learning center")
 {
     _showLearningCenterAction.setIconByName("chalkboard-teacher");
     _showLearningCenterAction.setToolTip("Go to the learning center");
 
     _toDiscordAction.setIcon(Application::getIconFont("FontAwesomeBrands", 5, 14).getIcon("discord"));
+    _toDiscordAction.setToolTip("Get in touch on our Discord");
     _toDiscordAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _toWebsiteAction.setIconByName("globe");
+    _toWebsiteAction.setToolTip("Visit our website");
     _toWebsiteAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _toWikiAction.setIconByName("book");
+    _toWikiAction.setToolTip("Visit our wiki");
     _toWikiAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _toRepositoryAction.setIcon(Application::getIconFont("FontAwesomeBrands", 6, 5).getIcon("github"));
-    _toRepositoryAction.setDefaultWidgetFlags(TriggerAction::Icon);
-
-    _toDiscordAction.setToolTip("Get in touch on our Discord");
-    _toWebsiteAction.setToolTip("Visit our website");
-    _toWikiAction.setToolTip("Visit our wiki");
     _toRepositoryAction.setToolTip("Contribute to ManiVault on Github");
+    _toRepositoryAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    //_toRepositoryAction.setShortcut(QKeySequence("Ctrl+F4"));
+    //_toRepositoryAction.setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
+
+    _toLearningCenterAction.setIconByName("chalkboard-teacher");
+    //_toLearningCenterAction.setShortcut(QKeySequence(tr("Ctrl+F5")));
+    //_toLearningCenterAction.setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
 
     connect(&_toDiscordAction, &TriggerAction::triggered, this, []() -> void {
         QDesktopServices::openUrl(QUrl("https://discord.gg/pVxmC2cSzA"));
@@ -60,6 +67,10 @@ HelpManager::HelpManager() :
 
     connect(&_toRepositoryAction, &TriggerAction::triggered, this, []() -> void {
         QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio"));
+    });
+
+    connect(&_toLearningCenterAction, &TriggerAction::triggered, this, [this]() -> void {
+        _showLearningCenterAction.setChecked(true);
     });
 }
 

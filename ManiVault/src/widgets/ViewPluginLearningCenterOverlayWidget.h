@@ -202,6 +202,37 @@ private:
         bool shouldDisplay() const override;
     };
 
+    /** Toolbar item widget for showing the documentation */
+    class ShowDocumentationToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
+    };
+
     /** Toolbar item widget for showing the shortcut map */
     class ShortcutsToolbarItemWidget final : public AbstractToolbarItemWidget
     {
@@ -265,7 +296,7 @@ private:
     };
 
     /** Toolbar item widget for visiting the global learning center */
-    class VisitLearningCenterToolbarItemWidget final : public AbstractToolbarItemWidget
+    class ToLearningCenterToolbarItemWidget final : public AbstractToolbarItemWidget
     {
     public:
 
@@ -274,7 +305,7 @@ private:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        VisitLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        ToLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -293,37 +324,9 @@ private:
          * @return Boolean determining whether the item should be visible or not
          */
         bool shouldDisplay() const override;
-    };
 
-    /** Toolbar item widget for showing the documentation */
-    class ShowDocumentationToolbarItemWidget final : public AbstractToolbarItemWidget
-    {
-    public:
-
-        /**
-         * Construct with pointer to \p viewPlugin and \p overlayWidget
-         * @param viewPlugin Pointer to view plugin
-         * @param overlayWidget Pointer to overlay widget
-         */
-        ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
-
-        /**
-         * Invoked when the mouse button is pressed
-         * @param event Pointer to mouse event
-         */
-        void mousePressEvent(QMouseEvent* event) override;
-
-        /**
-         * Get icon
-         * @return Icon
-         */
-        QIcon getIcon() const override;
-
-        /**
-         * Determine whether the item should be visible or not
-         * @return Boolean determining whether the item should be visible or not
-         */
-        bool shouldDisplay() const override;
+    private:
+        
     };
 
     class ToolbarWidget : public QWidget {

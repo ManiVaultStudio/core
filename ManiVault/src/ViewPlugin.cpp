@@ -37,9 +37,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
     _samplerAction(this, "Sampler"),
-    _triggerShortcut(),
-    _titleBarMenuActions(),
-    _settingsActions(),
     _progressTask(nullptr)
 {
     setText(isSystemViewPlugin() ? getKind() : getGuiName());
@@ -250,6 +247,27 @@ gui::ViewPluginLearningCenterOverlayWidget& ViewPlugin::getLearningCenterOverlay
     return _learningCenterOverlayWidget;
 }
 
+void ViewPlugin::viewShortcutMap()
+{
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (!_shortcutMapOverlayWidget.isNull())
+        return;
+
+    _shortcutMapOverlayWidget = getShortcutMap().createShortcutMapOverlayWidget(&_widget);
+
+    _shortcutMapOverlayWidget->show();
+}
+
+void ViewPlugin::viewDescription()
+{
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
 void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
 {
     Plugin::fromVariantMap(variantMap);
@@ -335,20 +353,6 @@ void ViewPlugin::setProgressTask(Task* progressTask)
     _progressTask = progressTask;
 
     emit progressTaskChanged(_progressTask);
-}
-
-void ViewPlugin::viewShortcutMap()
-{
-#ifdef VIEW_PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (!_shortcutMapOverlayWidget.isNull())
-        return;
-
-    _shortcutMapOverlayWidget = getShortcutMap().createShortcutMapOverlayWidget(&_widget);
-
-    _shortcutMapOverlayWidget->show();
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

@@ -31,13 +31,16 @@ public: // Action getters
     mv::gui::TriggerAction& getToWebsiteAction() override { return _toWebsiteAction; };
     mv::gui::TriggerAction& getToWikiAction() override { return _toWikiAction; };
     mv::gui::TriggerAction& getToRepositoryAction() override { return _toRepositoryAction; };
+    mv::gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; };
 
 private:
-    mv::gui::ToggleAction      _showLearningCenterAction;   /** Toggle action for toggling the learning center */
-    mv::gui::TriggerAction     _toDiscordAction;            /** External link to discord */
-    mv::gui::TriggerAction     _toWebsiteAction;            /** External link to website */
-    mv::gui::TriggerAction     _toWikiAction;               /** External link to wiki */
-    mv::gui::TriggerAction     _toRepositoryAction;         /** External link to repository */
+    mv::gui::ToggleAction       _showLearningCenterAction;      /** Toggle action for toggling the learning center */
+    mv::gui::TriggerAction      _toDiscordAction;               /** External link to discord */
+    mv::gui::TriggerAction      _toWebsiteAction;               /** External link to website */
+    mv::gui::TriggerAction      _toWikiAction;                  /** External link to wiki */
+    mv::gui::TriggerAction      _toRepositoryAction;            /** External link to repository */
+    mv::gui::TriggerAction      _toLearningCenterAction;        /** Trigger action to go the learning center */
+    
 };
 
 }

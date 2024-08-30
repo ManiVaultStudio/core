@@ -85,6 +85,14 @@ protected:
      */
     gui::ViewPluginLearningCenterOverlayWidget& getLearningCenterOverlayWidget();
 
+private: // Views
+
+    /** View plugin shortcut map */
+    void viewShortcutMap() override;
+
+    /** View plugin description */
+    void viewDescription() override;
+
 public: // Title bar settings menu
 
     /**
@@ -134,11 +142,6 @@ public: // Progress
      * @param progressTask Pointer to progress task (maybe nullptr)
      */
     void setProgressTask(Task* progressTask);
-
-public: // Shortcuts
-
-    /** View the shortcut map */
-    void viewShortcutMap() override;
 
 public: // Serialization
 

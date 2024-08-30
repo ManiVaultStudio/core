@@ -19,10 +19,9 @@ Plugin::Plugin(const PluginFactory* factory) :
     _core(Application::core()),
     _factory(factory),
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
-    _properties(),
-    _eventListener(),
     _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "1" : QString::number(factory->getNumberOfInstances() + 1)))),
     _destroyAction(this, "Remove"),
+    _viewDescriptionAction(this, "View description"),
     _viewShortcutMapAction(this, "Shortcut map")
 {
     setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::ForceNone);
@@ -36,12 +35,22 @@ Plugin::Plugin(const PluginFactory* factory) :
     _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _destroyAction.setConnectionPermissionsToForceNone();
 
+    connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
+
+    _viewDescriptionAction.setToolTip("View description");
+    _viewDescriptionAction.setIconByName("sticky-note");
+    _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _viewDescriptionAction.setConnectionPermissionsToForceNone();
+    _viewDescriptionAction.setShortcut(QKeySequence(Qt::CTRL, Qt::Key_F1));
+
+    connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &Plugin::viewDescription);
+
     _viewShortcutMapAction.setToolTip("View shortcut map");
     _viewShortcutMapAction.setIconByName("keyboard");
     _viewShortcutMapAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _viewShortcutMapAction.setConnectionPermissionsToForceNone();
+    _viewShortcutMapAction.setShortcut(QKeySequence(Qt::CTRL, Qt::Key_F3));
 
-    connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
     connect(&_viewShortcutMapAction, &TriggerAction::triggered, this, &Plugin::viewShortcutMap);
 }
 
@@ -193,11 +202,6 @@ QVariantMap Plugin::toVariantMap() const
     });
 
     return variantMap;
-}
-
-void Plugin::viewShortcutMap()
-{
-    qDebug() << __FUNCTION__ << "not implemented yet...";
 }
 
 void Plugin::destroy()

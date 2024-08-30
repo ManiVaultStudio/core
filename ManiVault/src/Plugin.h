@@ -183,6 +183,14 @@ public: // Settings
      */
     gui::PluginGlobalSettingsGroupAction* getGlobalSettingsAction() const;
 
+public: // Views
+
+    /** View plugin description */
+    virtual void viewDescription() { qDebug() << __FUNCTION__ << "not yet implemented..."; };
+
+    /** View plugin shortcut map */
+    virtual void viewShortcutMap() { qDebug() << __FUNCTION__ << "not yet implemented..."; };
+
 public: // Serialization
 
     /**
@@ -197,11 +205,6 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-public: // Shortcuts
-
-    /** View the shortcut map */
-    virtual void viewShortcutMap();
-
 public: // Miscellaneous
 
     /** Destroys the plugin and removes it from the plugin manager */
@@ -211,7 +214,8 @@ public: // Action getters
 
     gui::StringAction& getGuiNameAction() { return _guiNameAction; };
     gui::TriggerAction& getDestroyAction() { return _destroyAction; }
-    gui::TriggerAction& getViewShortcutMapAction() { return _viewShortcutMapAction; }
+    gui::TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; };
+    gui::TriggerAction& getViewShortcutMapAction() { return _viewShortcutMapAction; };
 
 protected:
     CoreInterface*              _core;                      /** Pointer to the core interface */
@@ -221,6 +225,7 @@ protected:
     EventListener               _eventListener;             /** Listen to public events */
     gui::StringAction           _guiNameAction;             /** Action for the GUI name */
     gui::TriggerAction          _destroyAction;             /** Action for destroying the plugin */
+    gui::TriggerAction          _viewDescriptionAction;     /** Trigger action that displays the plugin description */
     gui::TriggerAction          _viewShortcutMapAction;     /** Trigger action that displays the plugin shortcut map */
 
     friend class PluginFactory;

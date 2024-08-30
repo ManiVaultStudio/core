@@ -42,6 +42,7 @@ public: // Action getters
     virtual mv::gui::TriggerAction& getToWebsiteAction() = 0;
     virtual mv::gui::TriggerAction& getToWikiAction() = 0;
     virtual mv::gui::TriggerAction& getToRepositoryAction() = 0;
+    virtual mv::gui::TriggerAction& getToLearningCenterAction() = 0;
 };
 
 }
