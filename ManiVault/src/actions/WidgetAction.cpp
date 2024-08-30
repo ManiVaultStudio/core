@@ -812,6 +812,15 @@ void WidgetAction::setWidgetConfigurationFunction(const WidgetConfigurationFunct
     emit widgetConfigurationFunctionChanged(_widgetConfigurationFunction);
 }
 
+bool WidgetAction::hasCacheState(const QString& name) const
+{
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << name;
+#endif
+
+    return _cachedStates.contains(name);
+}
+
 void WidgetAction::cacheState(const QString& name /*= "cache"*/)
 {
 #ifdef WIDGET_ACTION_VERBOSE

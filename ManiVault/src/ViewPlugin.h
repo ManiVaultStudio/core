@@ -9,9 +9,9 @@
 #include "actions/TriggerAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/OptionsAction.h"
-#include "actions/OptionAction.h"
 #include "actions/LockingAction.h"
 #include "actions/PresetsAction.h"
+#include "actions/ViewPluginSamplerAction.h"
 
 #include "Plugin.h"
 #include "Task.h"
@@ -152,6 +152,7 @@ public: // Action getters
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
     gui::TriggerAction& getHelpAction() { return _helpAction; }
     gui::PresetsAction& getPresetsAction() { return _presetsAction; }
+    gui::ViewPluginSamplerAction& getSamplerAction() { return _samplerAction; }
 
 signals:
 
@@ -162,22 +163,23 @@ signals:
     void progressTaskChanged(Task* progressTask);
 
 private:
-    QWidget                 _widget;                    /** Widget representation of the plugin */
-    gui::TriggerAction      _editorAction;              /** Trigger action to start the view plugin editor */
-    gui::TriggerAction      _screenshotAction;          /** Trigger action to create a screenshot */
-    gui::ToggleAction       _isolateAction;             /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */
-    gui::ToggleAction       _mayCloseAction;            /** Action for toggling whether the view plugin may be closed */
-    gui::ToggleAction       _mayFloatAction;            /** Action for toggling whether the view plugin may float */
-    gui::ToggleAction       _mayMoveAction;             /** Action for toggling whether the view plugin may be moved */
-    gui::OptionsAction      _dockingOptionsAction;      /** Action for toggling docking options */
-    gui::LockingAction      _lockingAction;             /** Action for toggling whether the view plugin is locked */
-    gui::ToggleAction       _visibleAction;             /** Action which determines whether the view plugin is visible or not */
-    gui::TriggerAction      _helpAction;                /** Action which triggers documentation */
-    gui::PresetsAction      _presetsAction;             /** Action for managing presets */
-    QKeySequence            _triggerShortcut;           /** Shortcut for triggering the plugin */
-    gui::WidgetActions      _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
-    gui::WidgetActions      _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
-    Task*                   _progressTask;              /** When set and running, a thin progress bar will be displayed on top of the view plugin dock widget */
+    QWidget                             _widget;                    /** Widget representation of the plugin */
+    gui::TriggerAction                  _editorAction;              /** Trigger action to start the view plugin editor */
+    gui::TriggerAction                  _screenshotAction;          /** Trigger action to create a screenshot */
+    gui::ToggleAction                   _isolateAction;             /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */
+    gui::ToggleAction                   _mayCloseAction;            /** Action for toggling whether the view plugin may be closed */
+    gui::ToggleAction                   _mayFloatAction;            /** Action for toggling whether the view plugin may float */
+    gui::ToggleAction                   _mayMoveAction;             /** Action for toggling whether the view plugin may be moved */
+    gui::OptionsAction                  _dockingOptionsAction;      /** Action for toggling docking options */
+    gui::LockingAction                  _lockingAction;             /** Action for toggling whether the view plugin is locked */
+    gui::ToggleAction                   _visibleAction;             /** Action which determines whether the view plugin is visible or not */
+    gui::TriggerAction                  _helpAction;                /** Action which triggers documentation */
+    gui::PresetsAction                  _presetsAction;             /** Action for managing presets */
+    gui::ViewPluginSamplerAction        _samplerAction;             /** Action for displaying a tooltip for sampled elements */
+    QKeySequence                        _triggerShortcut;           /** Shortcut for triggering the plugin */
+    gui::WidgetActions                  _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
+    gui::WidgetActions                  _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
+    Task*                               _progressTask;              /** When set and running, a thin progress bar will be displayed on top of the view plugin dock widget */
 };
 
 class CORE_EXPORT ViewPluginFactory : public PluginFactory
@@ -235,8 +237,8 @@ protected:
     void setPreferredDockArea(const gui::DockAreaFlag& preferredDockArea);
 
 private:
-    const bool          _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
-    gui::DockAreaFlag   _preferredDockArea;             /** Preferred initial dock area when the view plugin is added to the workspace */
+    const bool              _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
+    gui::DockAreaFlag       _preferredDockArea;             /** Preferred initial dock area when the view plugin is added to the workspace */
 };
 
 }

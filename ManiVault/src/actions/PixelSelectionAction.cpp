@@ -181,7 +181,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     });
 
     const auto updateType = [this]() {
-        _brushRadiusAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Brush));
+        _brushRadiusAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Brush) || _typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Sample));
     };
 
     updateType();
@@ -528,10 +528,8 @@ void PixelSelectionAction::fromVariantMap(const QVariantMap& variantMap)
     _overlayOpacityAction.fromParentVariantMap(variantMap);
     _typeAction.fromParentVariantMap(variantMap);
     _modifierAction.fromParentVariantMap(variantMap);
+    _brushRadiusAction.fromParentVariantMap(variantMap);
     _notifyDuringSelectionAction.fromParentVariantMap(variantMap);
-
-    if (isPublic())
-        qDebug() << text() << _typeAction.getOptions();
 }
 
 QVariantMap PixelSelectionAction::toVariantMap() const
@@ -542,6 +540,7 @@ QVariantMap PixelSelectionAction::toVariantMap() const
     _overlayOpacityAction.insertIntoVariantMap(variantMap);
     _typeAction.insertIntoVariantMap(variantMap);
     _modifierAction.insertIntoVariantMap(variantMap);
+    _brushRadiusAction.insertIntoVariantMap(variantMap);
     _notifyDuringSelectionAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

@@ -36,6 +36,7 @@ namespace mv
 
             BufferObject _positionBuffer;
             BufferObject _highlightBuffer;
+            BufferObject _focusHighlightsBuffer;
             BufferObject _colorScalarBuffer;
             BufferObject _sizeScalarBuffer;
             BufferObject _opacityScalarBuffer;
@@ -45,6 +46,7 @@ namespace mv
             void init();
             void setPositions(const std::vector<Vector2f>& positions);
             void setHighlights(const std::vector<char>& highlights);
+            void setFocusHighlights(const std::vector<char>& focusHighlights);
             void setScalars(const std::vector<float>& scalars, bool adjustColorMapRange);
             void setSizeScalars(const std::vector<float>& scalars);
             void setOpacityScalars(const std::vector<float>& scalars);
@@ -52,6 +54,7 @@ namespace mv
 
             const std::vector<Vector2f>& getPositions() const { return _positions; }
             const std::vector<char>& getHighlights() const { return _highlights; }
+            const std::vector<char>& getFocusHighlights() const { return _focusHighlights; }
             const std::vector<float>& getScalars() const { return _colorScalars; }
             const std::vector<float>& getSizeScalars() const { return _sizeScalars; }
             const std::vector<float>& getOpacityScalars() const { return _opacityScalars; }
@@ -60,6 +63,7 @@ namespace mv
             void enableAttribute(uint index, bool enable);
 
             bool hasHighlights() const { return !_highlights.empty(); }
+            bool hasFocusHighlights() const { return !_focusHighlights.empty(); }
             bool hasColorScalars() const { return !_colorScalars.empty(); }
             bool hasSizeScalars() const { return !_sizeScalars.empty(); }
             bool hasOpacityScalars() const { return !_opacityScalars.empty(); }
@@ -82,15 +86,17 @@ namespace mv
             const uint ATTRIBUTE_VERTICES           = 0;
             const uint ATTRIBUTE_POSITIONS          = 1;
             const uint ATTRIBUTE_HIGHLIGHTS         = 2;
-            const uint ATTRIBUTE_COLORS             = 4;
-            const uint ATTRIBUTE_SCALARS_COLOR      = 3;
-            const uint ATTRIBUTE_SCALARS_SIZE       = 5;
-            const uint ATTRIBUTE_SCALARS_OPACITY    = 6;
+            const uint ATTRIBUTE_FOCUS_HIGHLIGHTS   = 3;
+            const uint ATTRIBUTE_COLORS             = 5;
+            const uint ATTRIBUTE_SCALARS_COLOR      = 4;
+            const uint ATTRIBUTE_SCALARS_SIZE       = 6;
+            const uint ATTRIBUTE_SCALARS_OPACITY    = 7;
 
             /* Point attributes */
             std::vector<Vector2f>   _positions;
             std::vector<Vector3f>   _colors;
             std::vector<char>       _highlights;
+            std::vector<char>       _focusHighlights;
             
             /** Scalar channels */
             std::vector<float>  _colorScalars;      /** Point color scalar channel */
@@ -102,6 +108,7 @@ namespace mv
 
             bool _dirtyPositions        = false;
             bool _dirtyHighlights       = false;
+            bool _dirtyFocusHighlights  = false;
             bool _dirtyColorScalars     = false;
             bool _dirtySizeScalars      = false;
             bool _dirtyOpacityScalars   = false;
@@ -125,6 +132,7 @@ namespace mv
         public:
             void setData(const std::vector<Vector2f>& points);
             void setHighlights(const std::vector<char>& highlights, const std::int32_t& numSelectedPoints);
+            void setFocusHighlights(const std::vector<char>& focusHighlights, const std::int32_t& numberOfFocusHighlights);
             void setColorChannelScalars(const std::vector<float>& scalars, bool adjustColorMapRange = true);
             void setSizeChannelScalars(const std::vector<float>& scalars);
             void setOpacityChannelScalars(const std::vector<float>& scalars);
@@ -164,6 +172,8 @@ namespace mv
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
 
+        public: // Selection visualization
+
             PointSelectionDisplayMode getSelectionDisplayMode() const;
             void setSelectionDisplayMode(PointSelectionDisplayMode selectionDisplayMode);
 
@@ -197,7 +207,8 @@ namespace mv
             /* Point properties */
             PointSettings               _pointSettings;
             PointEffect                 _pointEffect = PointEffect::Size;
-            
+
+            /** Selection visualization */
             PointSelectionDisplayMode   _selectionDisplayMode               = PointSelectionDisplayMode::Outline;
             Vector3f                    _selectionOutlineColor              = Vector3f(0, 0, 1);
             bool                        _selectionOutlineOverrideColor      = true;
@@ -222,6 +233,7 @@ namespace mv
             Bounds                      _boundsData                         = Bounds(-1, 1, -1, 1);         /** Used for scaling the 2d _colormap */
 
             std::int32_t                _numSelectedPoints                  = 0;                            /** Number of selected (highlighted points) */
+            std::int32_t                _numberOfFocusHighlights            = 0;                            /** Number of focus highlights */
         };
 
     } // namespace gui
