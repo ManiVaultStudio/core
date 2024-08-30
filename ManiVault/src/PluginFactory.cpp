@@ -47,10 +47,11 @@ PluginFactory::PluginFactory(Type type) :
     _visitRepositoryAction.setIconByName("github");
 
     connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
-        if (!getRespositoryUrl().isValid())
-            return;
+        if (getReadmeMarkdownUrl().isValid())
+            QDesktopServices::openUrl(getRespositoryUrl());
 
-        QDesktopServices::openUrl(getRespositoryUrl());
+        if (getRespositoryUrl().isValid())
+            QDesktopServices::openUrl(getRespositoryUrl());
     });
 }
 
