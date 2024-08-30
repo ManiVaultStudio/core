@@ -47,7 +47,7 @@ QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl DataHierarchyPluginFactory::getRespositoryUrl() const
+QUrl DataHierarchyPluginFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin");
 }

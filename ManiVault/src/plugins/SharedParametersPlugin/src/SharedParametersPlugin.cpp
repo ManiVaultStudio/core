@@ -74,7 +74,7 @@ QUrl SharedParametersPluginFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl SharedParametersPluginFactory::getRespositoryUrl() const
+QUrl SharedParametersPluginFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }

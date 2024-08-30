@@ -167,6 +167,7 @@ bool ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::shouldDispla
 ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
+    setToolTip(QString("Watch %1 related videos").arg(viewPlugin->getKind()));
 }
 
 void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -187,7 +188,7 @@ bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDispl
 ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip(QString("View description <b>%1</b>").arg(getViewPlugin()->getViewDescriptionAction().shortcut().toString()));
+    setToolTip(getViewPlugin()->getViewDescriptionAction().toolTip());
 }
 
 void ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -199,7 +200,7 @@ void ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::mouseP
 
 QIcon ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("sticky-note");
+    return getViewPlugin()->getViewDescriptionAction().icon();
 }
 
 bool ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::shouldDisplay() const
@@ -210,18 +211,14 @@ bool ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::should
 ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
-
-    setToolTip(QString("Head over to the documentation <b>%1</b>").arg(nonConstPluginFactory->getTriggerHelpAction().shortcut().toString()));
+    setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getTriggerHelpAction().toolTip());
 }
 
 void ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
 
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
-
-    nonConstPluginFactory->getTriggerHelpAction().trigger();
+    const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getTriggerHelpAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::getIcon() const
@@ -231,15 +228,13 @@ QIcon ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget:
 
 bool ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::shouldDisplay() const
 {
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
-
-    return nonConstPluginFactory->hasHelp();
+    return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->hasHelp();
 }
 
 ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip(QString("View shortcuts <b>%1</b>").arg(getViewPlugin()->getViewShortcutMapAction().shortcut().toString()));
+    setToolTip("View shortcuts");
 }
 
 void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -266,38 +261,30 @@ bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDi
 ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
-
-    setToolTip(QString("Visit the Github repository website <b>%1</b>").arg(nonConstPluginFactory->getVisitRepositoryAction().shortcut().toString()));
+    setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getVisitRepositoryAction().toolTip());
 }
 
 void ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
 
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
-
-    nonConstPluginFactory->getVisitRepositoryAction().trigger();
+    const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getVisitRepositoryAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::getIcon() const
 {
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
-
-    return nonConstPluginFactory->getVisitRepositoryAction().icon();
+    return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getVisitRepositoryAction().icon();
 }
 
 bool ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::shouldDisplay() const
 {
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
-
-    return nonConstPluginFactory->getRespositoryUrl().isValid();
+    return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getRepositoryUrl().isValid();
 }
 
 ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::ToLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip("Go to the learning center");//QString("Go to the learning center").arg(mv::help().getToLearningCenterAction().shortcut().toString()));
+    setToolTip(mv::help().getToLearningCenterAction().toolTip());
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -329,14 +316,14 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
 
     _layout.setSpacing(8);
 
-    _layout.addWidget(new CloseToolbarItemWidget(viewPlugin, overlayWidget));//, "Close this toolbar"));
+    _layout.addWidget(new CloseToolbarItemWidget(viewPlugin, overlayWidget));
     _layout.addStretch(1);
-    _layout.addWidget(new VideosToolbarItemWidget(viewPlugin, overlayWidget));//, "View shortcuts <b>F1</b>"));
-    _layout.addWidget(new DescriptionToolbarItemWidget(viewPlugin, overlayWidget));//, "View shortcuts <b>F1</b>"));
-    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget));//, "View shortcuts <b>F1</b>"));
-    _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget));//, "View full documentation <b>F2</b>"));
+    _layout.addWidget(new VideosToolbarItemWidget(viewPlugin, overlayWidget));
+    _layout.addWidget(new DescriptionToolbarItemWidget(viewPlugin, overlayWidget));
+    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget));
+    _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget));
     _layout.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, overlayWidget));
-    _layout.addWidget(new ToLearningCenterToolbarItemWidget(viewPlugin, overlayWidget));//, "Go to the main learning center"));
+    _layout.addWidget(new ToLearningCenterToolbarItemWidget(viewPlugin, overlayWidget));
 
     setLayout(&_layout);
 

@@ -222,6 +222,11 @@ public: // Action getters
     gui::TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; };
     gui::TriggerAction& getViewShortcutMapAction() { return _viewShortcutMapAction; };
 
+    const gui::StringAction& getGuiNameAction() const { return _guiNameAction; };
+    const gui::TriggerAction& getDestroyAction() const { return _destroyAction; }
+    const gui::TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; };
+    const gui::TriggerAction& getViewShortcutMapAction() const { return _viewShortcutMapAction; };
+
 protected:
     CoreInterface*              _core;                      /** Pointer to the core interface */
     const PluginFactory*        _factory;                   /** Pointer to plugin factory */

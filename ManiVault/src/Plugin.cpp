@@ -37,7 +37,7 @@ Plugin::Plugin(const PluginFactory* factory) :
 
     connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
 
-    _viewDescriptionAction.setToolTip("View description");
+    _viewDescriptionAction.setToolTip(QString("View %1 description").arg(getKind()));
     _viewDescriptionAction.setIconByName("sticky-note");
     _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _viewDescriptionAction.setConnectionPermissionsToForceNone();
@@ -45,7 +45,7 @@ Plugin::Plugin(const PluginFactory* factory) :
 
     connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &Plugin::viewDescription);
 
-    _viewShortcutMapAction.setToolTip("View shortcut map");
+    _viewShortcutMapAction.setToolTip(QString("View %1 shortcuts").arg(getKind()));
     _viewShortcutMapAction.setIconByName("keyboard");
     _viewShortcutMapAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _viewShortcutMapAction.setConnectionPermissionsToForceNone();

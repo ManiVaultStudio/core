@@ -485,7 +485,7 @@ QUrl ClusterDataFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl ClusterDataFactory::getRespositoryUrl() const
+QUrl ClusterDataFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }

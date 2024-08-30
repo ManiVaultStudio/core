@@ -103,7 +103,7 @@ bool LearningPagePluginActionsWidget::event(QEvent* event)
 
 bool LearningPagePluginActionsWidget::hasOverlay() const
 {
-    return _pluginFactory->getReadmeMarkdownUrl().isValid() || _pluginFactory->getRespositoryUrl().isValid();
+    return _pluginFactory->getReadmeMarkdownUrl().isValid() || _pluginFactory->getRepositoryUrl().isValid();
 }
 
 void LearningPagePluginActionsWidget::updateStyle()
@@ -126,7 +126,7 @@ LearningPagePluginActionsWidget::ActionsOverlayWidget::ActionsOverlayWidget(Lear
     _mainLayout.addStretch(1);
 
     const auto hasReadmeMarkdownUrl = _learningPagePluginActionWidget->getPluginFactory()->getReadmeMarkdownUrl().isValid();
-    const auto hasRespositoryUrl    = _learningPagePluginActionWidget->getPluginFactory()->getRespositoryUrl().isValid();
+    const auto hasRespositoryUrl    = _learningPagePluginActionWidget->getPluginFactory()->getRepositoryUrl().isValid();
 
     if (hasReadmeMarkdownUrl) {
         auto triggerReadmeActionWidget = new ActionWidget("book", [this]() -> void {

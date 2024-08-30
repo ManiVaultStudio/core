@@ -86,7 +86,7 @@ QUrl DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl DataPropertiesPluginFactory::getRespositoryUrl() const
+QUrl DataPropertiesPluginFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }

@@ -123,7 +123,7 @@ public: // Help
      * Get the URL of the GitHub repository
      * @return URL of the GitHub repository (or readme markdown URL if set)
      */
-    virtual QUrl getRespositoryUrl() const;
+    virtual QUrl getRepositoryUrl() const;
 
 public: // GUI name
 

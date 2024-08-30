@@ -117,7 +117,7 @@ QUrl TasksPluginFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl TasksPluginFactory::getRespositoryUrl() const
+QUrl TasksPluginFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }

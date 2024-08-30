@@ -28,8 +28,6 @@ PluginFactory::PluginFactory(Type type) :
     _pluginGlobalSettingsGroupAction(nullptr),
     _statusBarAction(nullptr)
 {
-    _triggerHelpAction.setShortcut(QKeySequence(Qt::CTRL, Qt::Key_F2));
-
     _triggerReadmeAction.setIconByName("book");
 
     connect(&_triggerReadmeAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -43,11 +41,10 @@ PluginFactory::PluginFactory(Type type) :
     });
 
     _visitRepositoryAction.setIconByName("github");
-    _visitRepositoryAction.setShortcut(QKeySequence(Qt::CTRL, Qt::Key_F3));
 
     connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
-        if (getRespositoryUrl().isValid())
-            QDesktopServices::openUrl(getRespositoryUrl());
+        if (getRepositoryUrl().isValid())
+            QDesktopServices::openUrl(getRepositoryUrl());
     });
 }
 
@@ -260,7 +257,7 @@ void PluginFactory::viewShortcutMap()
 
 QUrl PluginFactory::getReadmeMarkdownUrl() const
 {
-    const auto githubRepositoryUrl = getRespositoryUrl();
+    const auto githubRepositoryUrl = getRepositoryUrl();
 
     if (!githubRepositoryUrl.isValid())
         return {};
@@ -273,7 +270,7 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
     return {};
 }
 
-QUrl PluginFactory::getRespositoryUrl() const
+QUrl PluginFactory::getRepositoryUrl() const
 {
     return {};
 }
