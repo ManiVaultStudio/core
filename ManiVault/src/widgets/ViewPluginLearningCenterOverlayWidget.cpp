@@ -170,7 +170,7 @@ void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePre
 
 QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon() const
 {
-    WidgetActionBadge badge(nullptr, getViewPlugin()->getShortcutMap().getShortcuts().size());
+    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getShortcutMap().getShortcuts().size()));
 
     badge.setScale(0.6);
     badge.setEnabled(true);
@@ -220,27 +220,6 @@ bool ViewPluginLearningCenterOverlayWidget::VisitLearningCenterToolbarItemWidget
     return true;
 }
 
-void ViewPluginLearningCenterOverlayWidget::ShowReadmeToolbarItemWidget::mousePressEvent(QMouseEvent* event)
-{
-    AbstractToolbarItemWidget::mousePressEvent(event);
-
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
-
-    nonConstPluginFactory->getTriggerReadmeAction().trigger();
-}
-
-QIcon ViewPluginLearningCenterOverlayWidget::ShowReadmeToolbarItemWidget::getIcon() const
-{
-    return Application::getIconFont("FontAwesome").getIcon("book");
-}
-
-bool ViewPluginLearningCenterOverlayWidget::ShowReadmeToolbarItemWidget::shouldDisplay() const
-{
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
-
-    return nonConstPluginFactory->getReadmeMarkdownUrl().isValid();
-}
-
 void ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
@@ -278,7 +257,6 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     _layout.addStretch(1);
     _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget, "View shortcuts <b>F1</b>"));
     _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget, "View full documentation <b>F2</b>"));
-    _layout.addWidget(new ShowReadmeToolbarItemWidget(viewPlugin, overlayWidget, "Show readme information from the Github repository"));
     _layout.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, overlayWidget, "Visit the Github repository website"));
     _layout.addWidget(new VisitLearningCenterToolbarItemWidget(viewPlugin, overlayWidget, "Go to the main learning center"));
 

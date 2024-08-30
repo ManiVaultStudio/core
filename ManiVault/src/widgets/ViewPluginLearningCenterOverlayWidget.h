@@ -222,33 +222,6 @@ private:
         bool shouldDisplay() const override;
     };
 
-    /** Toolbar item widget for showing the readme */
-    class ShowReadmeToolbarItemWidget final : public AbstractToolbarItemWidget
-    {
-    public:
-
-        /** No need for custom constructor */
-        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
-
-        /**
-         * Invoked when the mouse button is pressed
-         * @param event Pointer to mouse event
-         */
-        void mousePressEvent(QMouseEvent* event) override;
-
-        /**
-         * Get icon
-         * @return Icon
-         */
-        QIcon getIcon() const override;
-
-        /**
-         * Determine whether the item should be visible or not
-         * @return Boolean determining whether the item should be visible or not
-         */
-        bool shouldDisplay() const override;
-    };
-
     /** Toolbar item widget for showing the documentation */
     class ShowDocumentationToolbarItemWidget final : public AbstractToolbarItemWidget
     {
