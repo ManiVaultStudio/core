@@ -211,8 +211,20 @@ public: // Miscellaneous
     /** Destroys the plugin and removes it from the plugin manager */
     virtual void destroy() final;
 
+public: // Video tags
+
+    /**
+     * Get video tags
+     * @return Video tags
+     */
+    const QStringListModel& getVideoTags() const;
+
 protected: // Video tags
 
+    /**
+     * Get video tags
+     * @return Video tags
+     */
     QStringListModel& getVideoTags();
 
 public: // Action getters

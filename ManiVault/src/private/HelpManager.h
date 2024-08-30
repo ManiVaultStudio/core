@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AbstractHelpManager.h"
+#include "HelpManagerVideosModel.h"
 
 namespace mv
 {
@@ -24,6 +25,13 @@ public:
     /** Resets the contents of the event manager */
     void reset() override;
 
+    /**
+     * Get videos for \p tags
+     * @param tags Fitler tags (returns all videos if empty)
+     * @return Vector of videos
+     */
+    util::Videos getVideos(const QStringList& tags) const override;
+
 public: // Action getters
 
     mv::gui::ToggleAction& getShowLearningCenterAction() override { return _showLearningCenterAction; }
@@ -40,6 +48,7 @@ private:
     mv::gui::TriggerAction      _toWikiAction;                  /** External link to wiki */
     mv::gui::TriggerAction      _toRepositoryAction;            /** External link to repository */
     mv::gui::TriggerAction      _toLearningCenterAction;        /** Trigger action to go the learning center */
+    HelpManagerVideosModel      _videosModel;                   /** Videos model */
     
 };
 

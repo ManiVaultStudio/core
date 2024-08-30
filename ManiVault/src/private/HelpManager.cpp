@@ -4,6 +4,9 @@
 
 #include "HelpManager.h"
 
+#include "HelpManagerVideosModel.h"
+#include "HelpManagerVideosFilterModel.h"
+
 #include <Application.h>
 
 #include <QDesktopServices>
@@ -72,6 +75,8 @@ HelpManager::HelpManager() :
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, [this]() -> void {
         _showLearningCenterAction.setChecked(true);
     });
+
+    _videosModel.populateFromServer();
 }
 
 void HelpManager::initialize()
@@ -91,6 +96,31 @@ void HelpManager::initialize()
 
 void HelpManager::reset()
 {
+}
+
+Videos HelpManager::getVideos(const QStringList& tags) const
+{
+    HelpManagerVideosFilterModel videosFilterModel;
+
+    videosFilterModel.setSourceModel(&const_cast<HelpManager*>(this)->_videosModel);
+    videosFilterModel.getTagsFilterAction().initialize(tags, tags);
+
+    Videos videos;
+
+    for (int rowIndex = 0; rowIndex < videosFilterModel.rowCount(); rowIndex++) {
+        const auto videoIndex = videosFilterModel.mapToSource(videosFilterModel.index(rowIndex, 0));
+
+        videos.emplace_back(Video({
+            videoIndex.siblingAtColumn(0).data().toString(),        // Title
+            videoIndex.siblingAtColumn(1).data().toStringList(),    // Tags
+            videoIndex.siblingAtColumn(2).data().toDateTime(),      // Date
+            videoIndex.siblingAtColumn(3).data().toString(),        // Summary
+            videoIndex.siblingAtColumn(4).data().toString(),        // YouTubeId
+            videoIndex.siblingAtColumn(5).data().toString()         // YouTubeUrl
+        }));
+    }
+
+    return videos;
 }
 
 }

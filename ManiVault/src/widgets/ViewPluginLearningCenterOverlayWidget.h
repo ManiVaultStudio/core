@@ -13,6 +13,7 @@
 #include <QMouseEvent>
 
 #include "ViewPlugin.h"
+#include "util/Video.h"
 
 namespace mv::plugin {
     class ViewPlugin;
@@ -169,6 +170,14 @@ private:
          * @return Boolean determining whether the item should be visible or not
          */
         bool shouldDisplay() const override;
+
+    private:
+
+        /**
+         * Get videos
+         * @return Videos for view plugin video tag(s)
+         */
+        util::Videos getVideos() const;
     };
 
     /** Toolbar item widget for showing the view plugin description */

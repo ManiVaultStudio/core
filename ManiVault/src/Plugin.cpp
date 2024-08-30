@@ -207,6 +207,11 @@ void Plugin::destroy()
     plugins().destroyPlugin(this);
 }
 
+const QStringListModel& Plugin::getVideoTags() const
+{
+    return _videoTags;
+}
+
 QStringListModel& Plugin::getVideoTags()
 {
     return _videoTags;

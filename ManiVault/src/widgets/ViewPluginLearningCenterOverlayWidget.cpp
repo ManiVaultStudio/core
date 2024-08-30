@@ -3,12 +3,12 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ViewPluginLearningCenterOverlayWidget.h"
-#include "ViewPluginLearningCenterOverlayWidget.h"
 
 #include "util/Icon.h"
 
 #include <QDebug>
 #include <QMainWindow>
+#include <QDesktopServices>
 
 #ifdef _DEBUG
     #define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
@@ -167,22 +167,59 @@ bool ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::shouldDispla
 ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip(QString("Watch %1 related videos").arg(viewPlugin->getKind()));
+    setToolTip("Watch related videos");
 }
 
 void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
+
+    auto contextMenu = new QMenu(this);
+
+    for (const auto& video : getVideos())
+    {
+        auto watchVideoAction = new QAction(video._title);
+
+        watchVideoAction->setIcon(Application::getIconFont("FontAwesomeBrands").getIcon("youtube"));
+
+        connect(watchVideoAction, &QAction::triggered, this, [video]() -> void {
+#ifdef USE_YOUTUBE_DIALOG
+            YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::YouTubeId)).data().toString());
+#else
+            QDesktopServices::openUrl(video._youTubeUrl);
+#endif
+        });
+
+        contextMenu->addAction(watchVideoAction);
+    }
+        
+    contextMenu->exec(mapToGlobal(event->pos()));
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("video");
+    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getVideos().size()));
+
+    badge.setScale(.6f);
+    badge.setEnabled(true);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
+
+    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("video"), badge);
 }
 
 bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDisplay() const
 {
-    return true;
+    return !getVideos().empty();
+}
+
+Videos ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::getVideos() const
+{
+    const auto tags = getViewPlugin()->getVideoTags().stringList();
+
+    if (tags.isEmpty())
+        return {};
+
+    return mv::help().getVideos(tags);
 }
 
 ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :

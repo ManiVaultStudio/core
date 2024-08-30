@@ -15,6 +15,7 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataHierarchyWidget(nullptr)
 {
+    getVideoTags().setStringList({ "Practitioner", "Developer" });
 }
 
 void DataHierarchyPlugin::init()

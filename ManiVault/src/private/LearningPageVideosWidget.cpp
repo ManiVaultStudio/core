@@ -17,11 +17,7 @@ using namespace mv::gui;
 
 LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _mainLayout(),
-    _settingsAction(this, "Settings"),
-    _videosListView(),
-    _videosModel(),
-    _videosFilterModel()
+    _settingsAction(this, "Settings")
 {
     _mainLayout.setContentsMargins(0, 0, 0, 0);
     _mainLayout.setSpacing(20);
