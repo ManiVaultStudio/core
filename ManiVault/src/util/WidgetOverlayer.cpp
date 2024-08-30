@@ -27,7 +27,7 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
         return;
 
     _sourceWidget->installEventFilter(this);
-    _sourceWidget->setMouseTracking(true);
+    //_sourceWidget->setMouseTracking(true);
 
     setTargetWidget(targetWidget);
 }
@@ -120,6 +120,7 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
 
 void WidgetOverlayer::synchronizeGeometry() const
 {
+    //_sourceWidget->move(_targetWidget->pos());
     _sourceWidget->resize(_targetWidget->size());
 }
 

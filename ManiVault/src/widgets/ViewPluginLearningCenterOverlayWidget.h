@@ -140,13 +140,79 @@ private:
         bool shouldDisplay() const override;
     };
 
+    /** Toolbar item widget for showing the view plugin related videos */
+    class VideosToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
+    };
+
+    /** Toolbar item widget for showing the view plugin description */
+    class DescriptionToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
+    };
+
     /** Toolbar item widget for showing the shortcut map */
     class ShortcutsToolbarItemWidget final : public AbstractToolbarItemWidget
     {
     public:
 
-        /** No need for custom constructor */
-        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -173,7 +239,7 @@ private:
     public:
 
         /**
-         * Construct with pointer to \p overlayWidget and \p icon
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
@@ -203,8 +269,12 @@ private:
     {
     public:
 
-        /** No need for custom constructor */
-        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        VisitLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -230,8 +300,12 @@ private:
     {
     public:
 
-        /** No need for custom constructor */
-        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed

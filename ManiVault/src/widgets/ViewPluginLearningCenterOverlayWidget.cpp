@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ViewPluginLearningCenterOverlayWidget.h"
+#include "ViewPluginLearningCenterOverlayWidget.h"
 
 #include "util/Icon.h"
 
@@ -52,14 +53,13 @@ void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t marg
     _layout.setContentsMargins(margin, margin, margin, margin);
 }
 
-ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QString& tooltip) :
+ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     QWidget(),
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
     _widgetFader(nullptr, &_iconLabel, .0f)
 {
     setObjectName("ToolbarItemWidget");
-    setToolTip(tooltip);
 
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.addWidget(&_iconLabel);
@@ -163,6 +163,51 @@ bool ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::shouldDispla
     return true;
 }
 
+ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget)
+{
+}
+
+void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    AbstractToolbarItemWidget::mousePressEvent(event);
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("video");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDisplay() const
+{
+    return true;
+}
+
+ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget)
+{
+}
+
+void ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    AbstractToolbarItemWidget::mousePressEvent(event);
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("sticky-note");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::shouldDisplay() const
+{
+    return true;
+}
+
+ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget)
+{
+}
+
 void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     getViewPlugin()->getViewShortcutMapAction().trigger();
@@ -187,7 +232,9 @@ bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDi
 ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip(QString("Visit the Github repository website <b>%1</b>").arg())
+    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
+
+    //setToolTip(QString("Visit the Github repository website <b>%1</b>").arg(nonConstPluginFactory->getVisitRepositoryAction().keyse().()));
 }
 
 void ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -211,6 +258,11 @@ bool ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::sh
     return nonConstPluginFactory->getRespositoryUrl().isValid();
 }
 
+ViewPluginLearningCenterOverlayWidget::VisitLearningCenterToolbarItemWidget::VisitLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget)
+{
+}
+
 void ViewPluginLearningCenterOverlayWidget::VisitLearningCenterToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
@@ -226,6 +278,11 @@ QIcon ViewPluginLearningCenterOverlayWidget::VisitLearningCenterToolbarItemWidge
 bool ViewPluginLearningCenterOverlayWidget::VisitLearningCenterToolbarItemWidget::shouldDisplay() const
 {
     return true;
+}
+
+ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget)
+{
 }
 
 void ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -261,12 +318,14 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
 
     _layout.setSpacing(8);
 
-    _layout.addWidget(new CloseToolbarItemWidget(viewPlugin, overlayWidget, "Close this toolbar"));
+    _layout.addWidget(new CloseToolbarItemWidget(viewPlugin, overlayWidget));//, "Close this toolbar"));
     _layout.addStretch(1);
-    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget, "View shortcuts <b>F1</b>"));
-    _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget, "View full documentation <b>F2</b>"));
+    _layout.addWidget(new VideosToolbarItemWidget(viewPlugin, overlayWidget));//, "View shortcuts <b>F1</b>"));
+    _layout.addWidget(new DescriptionToolbarItemWidget(viewPlugin, overlayWidget));//, "View shortcuts <b>F1</b>"));
+    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget));//, "View shortcuts <b>F1</b>"));
+    _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget));//, "View full documentation <b>F2</b>"));
     _layout.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, overlayWidget));
-    _layout.addWidget(new VisitLearningCenterToolbarItemWidget(viewPlugin, overlayWidget, "Go to the main learning center"));
+    _layout.addWidget(new VisitLearningCenterToolbarItemWidget(viewPlugin, overlayWidget));//, "Go to the main learning center"));
 
     setLayout(&_layout);
 

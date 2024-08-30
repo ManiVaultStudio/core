@@ -18,19 +18,15 @@ namespace mv::plugin
 {
 
 PluginFactory::PluginFactory(Type type) :
-    _kind(),
     _type(type),
-    _guiName(),
-    _version(),
     _numberOfInstances(0),
-    _maximumNumberOfInstances(-1),
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
+    _maximumNumberOfInstances(-1),
     _triggerHelpAction(nullptr, "Trigger plugin help"),
     _triggerReadmeAction(nullptr, "Readme"),
     _visitRepositoryAction(nullptr, "Go to repository"),
     _pluginGlobalSettingsGroupAction(nullptr),
-    _statusBarAction(nullptr),
-    _shortcutMap()
+    _statusBarAction(nullptr)
 {
     _triggerReadmeAction.setIconByName("book");
 
@@ -177,6 +173,40 @@ util::ShortcutMap& PluginFactory::getShortcutMap()
 const util::ShortcutMap& PluginFactory::getShortcutMap() const
 {
     return _shortcutMap;
+}
+
+QString PluginFactory::getShortDescription() const
+{
+    return _shortDescription;
+}
+
+void PluginFactory::setShortDescription(const QString& shortDescription)
+{
+    if (shortDescription == _shortDescription)
+        return;
+
+    const auto previousShortDescription = _shortDescription;
+
+    _shortDescription = shortDescription;
+
+    emit shortDescriptionChanged(previousShortDescription, _shortDescription);
+}
+
+QString PluginFactory::getLongDescription() const
+{
+    return _shortDescription;
+}
+
+void PluginFactory::setLongDescription(const QString& longDescription)
+{
+    if (longDescription == _longDescription)
+        return;
+
+    const auto previouslongDescription = _longDescription;
+
+    _longDescription = longDescription;
+
+    emit longDescriptionChanged(previouslongDescription, _longDescription);
 }
 
 std::uint32_t PluginFactory::getNumberOfInstances() const

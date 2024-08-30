@@ -247,6 +247,32 @@ public: // Shortcut map
      */
     virtual const util::ShortcutMap& getShortcutMap() const final;
 
+public: // Description
+
+    /**
+     * Get short description
+     * @return String that shortly describes the plugin
+     */
+    QString getShortDescription() const;
+
+    /**
+     * Set short description to \p shortDescription
+     * @param shortDescription String that shortly describes the plugin
+     */
+    void setShortDescription(const QString& shortDescription);
+
+    /**
+     * Get extended description
+     * @return Extended description in HTML format
+     */
+    QString getLongDescription() const;
+
+    /**
+     * Set long description to \p longDescription
+     * @param longDescription Extended description in HTML format
+     */
+    void setLongDescription(const QString& longDescription);
+
 public: // Number of instances
 
     /** Get number of plugin instances currently loaded */
@@ -311,6 +337,20 @@ signals:
      */
     void statusBarActionChanged(gui::PluginStatusBarAction* statusBarAction);
 
+    /**
+     * Signals that the short description changed from \p previousShortDescription to \p currentShortDescription
+     * @param previousShortDescription Previous short description
+     * @param currentShortDescription Current short description
+     */
+    void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
+    
+    /**
+     * Signals that the long description changed from \p previousLongDescription to \p currentLongDescription
+     * @param previousLongDescription Previous long description
+     * @param currentLongDescription Current long description
+     */
+    void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
+
 private:
     QString                                 _kind;                                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
     Type                                    _type;                                  /** Type of plugin (e.g. analysis, data, loader, writer & view) */
@@ -325,6 +365,8 @@ private:
     gui::PluginGlobalSettingsGroupAction*   _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
     util::ShortcutMap                       _shortcutMap;                           /** Shortcut cheatsheet map */
+    QString                                 _shortDescription;                      /** Shortly describes the plugin */
+    QString                                 _longDescription;                       /** Extended description in HTML format */
 };
 
 }

@@ -152,40 +152,6 @@ QStringList Plugin::propertyNames() const
     return _properties.keys();
 }
 
-QString Plugin::getShortDescription() const
-{
-    return _shortDescription;
-}
-
-void Plugin::setShortDescription(const QString& shortDescription)
-{
-    if (shortDescription == _shortDescription)
-        return;
-
-    const auto previousShortDescription = _shortDescription;
-
-    _shortDescription = shortDescription;
-
-    emit shortDescriptionChanged(previousShortDescription, _shortDescription);
-}
-
-QString Plugin::getLongDescription() const
-{
-    return _shortDescription;
-}
-
-void Plugin::setLongDescription(const QString& longDescription)
-{
-    if (longDescription == _longDescription)
-        return;
-
-    const auto previouslongDescription = _longDescription;
-
-    _longDescription = longDescription;
-
-    emit longDescriptionChanged(previouslongDescription, _longDescription);
-}
-
 QVariant Plugin::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
 {
     return Application::current()->getSetting(QString("%1%2").arg(getGlobalSettingsPrefix(), path), defaultValue);
