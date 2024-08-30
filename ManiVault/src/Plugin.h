@@ -25,6 +25,8 @@ namespace mv::plugin
 
 class CORE_EXPORT Plugin : public mv::gui::WidgetAction
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -154,6 +156,32 @@ public: // Properties
     /** Returns a list of available property names */
     QStringList propertyNames() const;
 
+public: // Description
+
+    /**
+     * Get short description
+     * @return String that shortly describes the plugin
+     */
+    QString getShortDescription() const;
+
+    /**
+     * Set short description to \p shortDescription
+     * @param shortDescription String that shortly describes the plugin
+     */
+    void setShortDescription(const QString& shortDescription);
+
+    /**
+     * Get extended description
+     * @return Extended description in HTML format
+     */
+    QString getLongDescription() const;
+
+    /**
+     * Set long description to \p longDescription
+     * @param longDescription Extended description in HTML format
+     */
+    void setLongDescription(const QString& longDescription);
+
 public: // Settings
 
     /**
@@ -213,11 +241,29 @@ public: // Action getters
     gui::TriggerAction& getDestroyAction() { return _destroyAction; }
     gui::TriggerAction& getViewShortcutMapAction() { return _viewShortcutMapAction; }
 
+signals:
+
+    /**
+     * Signals that the short description changed from \p previousShortDescription to \p currentShortDescription
+     * @param previousShortDescription Previous short description
+     * @param currentShortDescription Current short description
+     */
+    void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
+
+    /**
+     * Signals that the long description changed from \p previousLongDescription to \p currentLongDescription
+     * @param previousLongDescription Previous long description
+     * @param currentLongDescription Current long description
+     */
+    void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
+
 protected:
     CoreInterface*              _core;                      /** Pointer to the core interface */
     const PluginFactory*        _factory;                   /** Pointer to plugin factory */
     const QString               _name;                      /** Unique plugin name */
     QMap<QString, QVariant>     _properties;                /** Properties map */
+    QString                     _shortDescription;          /** Shortly describes the plugin */
+    QString                     _longDescription;           /** Extended description in HTML format */
     EventListener               _eventListener;             /** Listen to public events */
     gui::StringAction           _guiNameAction;             /** Action for the GUI name */
     gui::TriggerAction          _destroyAction;             /** Action for destroying the plugin */
