@@ -209,4 +209,9 @@ void Plugin::destroy()
     plugins().destroyPlugin(this);
 }
 
+QStringListModel& Plugin::getVideoTags()
+{
+    return _videoTags;
+}
+
 }

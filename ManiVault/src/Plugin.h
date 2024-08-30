@@ -17,6 +17,7 @@
 #include <QMap>
 #include <QVariant>
 #include <QIcon>
+#include <QStringListModel>
 
 class QMenu;
 
@@ -210,6 +211,10 @@ public: // Miscellaneous
     /** Destroys the plugin and removes it from the plugin manager */
     virtual void destroy() final;
 
+protected: // Video tags
+
+    QStringListModel& getVideoTags();
+
 public: // Action getters
 
     gui::StringAction& getGuiNameAction() { return _guiNameAction; };
@@ -227,6 +232,7 @@ protected:
     gui::TriggerAction          _destroyAction;             /** Action for destroying the plugin */
     gui::TriggerAction          _viewDescriptionAction;     /** Trigger action that displays the plugin description */
     gui::TriggerAction          _viewShortcutMapAction;     /** Trigger action that displays the plugin shortcut map */
+    QStringListModel            _videoTags;                 /** For linking to the learning center videos */
 
     friend class PluginFactory;
 };
