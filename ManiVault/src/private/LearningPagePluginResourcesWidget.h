@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QVBoxLayout>
 
+#include <actions/OptionsAction.h> 
 #include <widgets/FlowLayout.h> 
 
 class LearningPageContentWidget;

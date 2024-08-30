@@ -6,6 +6,8 @@
 
 #include "actions/HorizontalGroupAction.h"
 #include "actions/IconPickerAction.h"
+#include "actions/ToggleAction.h"
+#include "actions/TriggerAction.h"
 
 #include <QTimer>
 

@@ -4,6 +4,12 @@
 
 #include "ViewPluginSamplerAction.h"
 
+#include "ViewPlugin.h"
+
+#include "util/Exception.h"
+
+#include <QEvent>
+
 using namespace mv::util;
 
 namespace mv::gui {

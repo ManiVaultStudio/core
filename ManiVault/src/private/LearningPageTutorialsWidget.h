@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <QVBoxLayout>
 #include <QWidget>
 
 class LearningPageContentWidget;

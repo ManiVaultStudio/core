@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QGroupBox>
+#include <QLayout>
 
 namespace mv::gui {
 

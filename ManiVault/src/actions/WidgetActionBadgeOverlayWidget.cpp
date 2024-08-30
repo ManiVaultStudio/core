@@ -4,6 +4,8 @@
 
 #include "WidgetActionBadgeOverlayWidget.h"
 
+#include "WidgetAction.h"
+
 #include "util/Icon.h"
 
 #include <QPainter>

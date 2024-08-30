@@ -5,6 +5,7 @@
 #include "StatusBarAction.h"
 
 #include "Application.h"
+#include "CoreInterface.h"
 
 #ifdef _DEBUG
     #define STATUS_BAR_ACTION_VERBOSE
