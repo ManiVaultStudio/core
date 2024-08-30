@@ -45,11 +45,9 @@ PluginFactory::PluginFactory(Type type) :
     });
 
     _visitRepositoryAction.setIconByName("github");
+    _visitRepositoryAction.setShortcut(QKeySequence(Qt::CTRL, Qt::Key_F3));
 
     connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
-        if (getReadmeMarkdownUrl().isValid())
-            QDesktopServices::openUrl(getRespositoryUrl());
-
         if (getRespositoryUrl().isValid())
             QDesktopServices::openUrl(getRespositoryUrl());
     });

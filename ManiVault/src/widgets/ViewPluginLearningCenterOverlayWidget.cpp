@@ -119,7 +119,7 @@ plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWi
     return const_cast<plugin::ViewPlugin*>(_viewPlugin);
 }
 
-OverlayWidget* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getOverlayWidget()
+OverlayWidget* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getOverlayWidget() const
 {
     return const_cast<OverlayWidget*>(_overlayWidget);
 }
@@ -184,11 +184,19 @@ bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDi
     return getViewPlugin()->getShortcutMap().hasShortcuts();
 }
 
+ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget)
+{
+    setToolTip(QString("Visit the Github repository website <b>%1</b>").arg())
+}
+
 void ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
 
-    mv::help().getToRepositoryAction().trigger();
+    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory());
+
+    nonConstPluginFactory->getVisitRepositoryAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::getIcon() const
@@ -257,7 +265,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     _layout.addStretch(1);
     _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget, "View shortcuts <b>F1</b>"));
     _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget, "View full documentation <b>F2</b>"));
-    _layout.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, overlayWidget, "Visit the Github repository website"));
+    _layout.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, overlayWidget));
     _layout.addWidget(new VisitLearningCenterToolbarItemWidget(viewPlugin, overlayWidget, "Go to the main learning center"));
 
     setLayout(&_layout);

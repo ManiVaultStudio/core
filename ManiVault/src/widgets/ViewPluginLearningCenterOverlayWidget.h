@@ -40,9 +40,8 @@ private:
          * Construct with pointer to \p overlayWidget and \p icon
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
-         * @param tooltip Item tooltip
          */
-        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QString& tooltip);
+        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
         /**
          * Invoked when the widget is shown
@@ -92,7 +91,7 @@ private:
          * Get non-const pointer to overlay widget
          * @return Non-const pointer to overlay widget
          */
-        OverlayWidget* getOverlayWidget();
+        OverlayWidget* getOverlayWidget() const;
 
         /**
          * Respond to \p target events
@@ -173,8 +172,12 @@ private:
     {
     public:
 
-        /** No need for custom constructor */
-        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
+        /**
+         * Construct with pointer to \p overlayWidget and \p icon
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
