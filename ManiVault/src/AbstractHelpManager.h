@@ -8,6 +8,8 @@
 
 #include "actions/TriggerAction.h"
 
+#include "util/Video.h"
+
 #include <QObject>
 #include <QMenu>
 
@@ -34,6 +36,13 @@ public:
         AbstractManager(parent, "Help")
     {
     }
+
+    /**
+     * Get videos for \p tags
+     * @param tags Fitler tags (returns all videos if empty)
+     * @return Vector of videos
+     */
+    virtual util::Videos getVideos(const QStringList& tags) const = 0;
 
 public: // Action getters
 

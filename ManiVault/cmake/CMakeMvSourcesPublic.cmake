@@ -517,6 +517,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/NumericalRange.h
     src/util/FileDownloader.h
     src/util/ShortcutMap.h
+    src/util/Video.h
 )
 
 if(APPLE)
@@ -563,6 +564,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/NumericalRange.cpp
     src/util/FileDownloader.cpp
     src/util/ShortcutMap.cpp
+    src/util/Video.cpp
 )
 
 if(APPLE)
