@@ -3,7 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "LearningPageVideoWidget.h"
-#include "LearningPageVideosModel.h"
+#include "HelpManagerVideosModel.h"
 
 #include <Application.h>
 
@@ -32,7 +32,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _propertiesTextBrowser(),
     _overlayWidget(index, &_thumbnailLabel)
 {
-    const auto title = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Title)).data().toString();
+    const auto title = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Title)).data().toString();
 
     _propertiesTextBrowser.setReadOnly(true);
     _propertiesTextBrowser.setStyleSheet("background-color: transparent; border: none; margin: 0px; padding: 0px;");
@@ -89,7 +89,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
         _thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
     });
 
-    const auto youTubeId            = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::YouTubeId)).data().toString();
+    const auto youTubeId            = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::YouTubeId)).data().toString();
     const auto youtTubeThumbnailUrl = getYouTubeThumbnailUrl(youTubeId);
 
     _thumbnailDownloader.download(QUrl(youtTubeThumbnailUrl));
@@ -167,11 +167,11 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     
     QLocale locale;
 
-    const auto summary      = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Summary)).data().toString();
-    const auto date         = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Date)).data(Qt::EditRole).toString();
+    const auto summary      = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Summary)).data().toString();
+    const auto date         = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Date)).data(Qt::EditRole).toString();
     const auto dateTime     = QDateTime::fromString(date, Qt::ISODate);
     const auto dateString   = locale.toString(dateTime.date());
-    const auto tags         = _index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::Tags)).data().toStringList();
+    const auto tags         = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Tags)).data().toStringList();
 
     _playIconLabel.setToolTip("Click to start the video");
     _summaryIconLabel.setToolTip(summary);
@@ -215,9 +215,9 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
         {
             if (target == &_playIconLabel) {
 #ifdef USE_YOUTUBE_DIALOG
-                YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::YouTubeId)).data().toString());
+                YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::YouTubeId)).data().toString());
 #else
-                QDesktopServices::openUrl(_index.sibling(_index.row(), static_cast<int>(LearningPageVideosModel::Column::YouTubeUrl)).data().toString());
+                QDesktopServices::openUrl(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::YouTubeUrl)).data().toString());
 #endif
             }
 

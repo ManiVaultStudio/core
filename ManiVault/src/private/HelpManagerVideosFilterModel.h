@@ -6,20 +6,19 @@
 
 #include <models/SortFilterProxyModel.h>
 
-#include <actions/StringAction.h>
 #include <actions/OptionsAction.h>
 #include <actions/HorizontalGroupAction.h>
 
-class LearningPageVideosModel;
+class HelpManagerVideosModel;
 
 /**
- * Learning page videos filter model class
+ * Help manager videos filter model class
  *
- * Sorting and filtering model for the learning page videos model
+ * Sorting and filtering model for the help manager videos model
  *
  * @author Thomas Kroes
  */
-class LearningPageVideosFilterModel : public mv::SortFilterProxyModel
+class HelpManagerVideosFilterModel : public mv::SortFilterProxyModel
 {
 public:
 
@@ -27,7 +26,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
     */
-    LearningPageVideosFilterModel(QObject* parent = nullptr);
+    HelpManagerVideosFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether \p row with \p parent is filtered out (false) or in (true)
@@ -56,7 +55,7 @@ public: // Action getters
     mv::gui::HorizontalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
-    LearningPageVideosModel*        _learningPageVideosModel;   /** Pointer to source model */
-    mv::gui::OptionsAction          _tagsFilterAction;          /** Filter based on tag(s) */
-    mv::gui::HorizontalGroupAction  _filterGroupAction;         /** Groups the filter text and the the filter settings */
+    HelpManagerVideosModel*         _videosModel;           /** Pointer to source model */
+    mv::gui::OptionsAction          _tagsFilterAction;      /** Filter based on tag(s) */
+    mv::gui::HorizontalGroupAction  _filterGroupAction;     /** Groups the filter text and the the filter settings */
 };

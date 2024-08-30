@@ -8,16 +8,15 @@
 
 #include <QMap>
 #include <QStandardItemModel>
-#include <QJsonObject>
 
 /**
- * Learning page videos model class
+ * Help manager videos model class
  *
- * Model class which contains learning page video content
+ * Model class which contains help manager video content
  *
  * @author Thomas Kroes
  */
-class LearningPageVideosModel final : public QStandardItemModel
+class HelpManagerVideosModel final : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -321,7 +320,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    LearningPageVideosModel(QObject* parent = nullptr);
+    HelpManagerVideosModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role

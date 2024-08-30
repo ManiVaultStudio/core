@@ -26,12 +26,12 @@ public:
 
 public: // Action getters
 
-    mv::gui::ToggleAction& getShowLearningCenterAction() override { return _showLearningCenterAction; };
-    mv::gui::TriggerAction& getToDiscordAction() override { return _toDiscordAction; };
-    mv::gui::TriggerAction& getToWebsiteAction() override { return _toWebsiteAction; };
-    mv::gui::TriggerAction& getToWikiAction() override { return _toWikiAction; };
-    mv::gui::TriggerAction& getToRepositoryAction() override { return _toRepositoryAction; };
-    mv::gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; };
+    mv::gui::ToggleAction& getShowLearningCenterAction() override { return _showLearningCenterAction; }
+    mv::gui::TriggerAction& getToDiscordAction() override { return _toDiscordAction; }
+    mv::gui::TriggerAction& getToWebsiteAction() override { return _toWebsiteAction; }
+    mv::gui::TriggerAction& getToWikiAction() override { return _toWikiAction; }
+    mv::gui::TriggerAction& getToRepositoryAction() override { return _toRepositoryAction; }
+    mv::gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; }
 
 private:
     mv::gui::ToggleAction       _showLearningCenterAction;      /** Toggle action for toggling the learning center */
