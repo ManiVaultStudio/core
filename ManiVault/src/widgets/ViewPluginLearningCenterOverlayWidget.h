@@ -89,6 +89,12 @@ private:
         plugin::ViewPlugin* getViewPlugin();
 
         /**
+         * Get non-const pointer to overlay widget
+         * @return Non-const pointer to overlay widget
+         */
+        OverlayWidget* getOverlayWidget();
+
+        /**
          * Respond to \p target events
          * @param target Object of which an event occurred
          * @param event The event that took place
@@ -106,6 +112,33 @@ private:
         QHBoxLayout                 _layout;            /** For placing the icon label */
         QLabel                      _iconLabel;         /** Icon label */
         mv::util::WidgetFader       _widgetFader;       /** For fading in/out */
+    };
+
+    /** Toolbar item widget for hiding the toolbar widget */
+    class CloseToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /** No need for custom constructor */
+        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
     };
 
     /** Toolbar item widget for showing the shortcut map */
@@ -248,6 +281,13 @@ private:
         ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
     private:
+
+        /**
+         * Respond to \p target events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event) override;
 
         /**
          * Get view plugin learning center context menu

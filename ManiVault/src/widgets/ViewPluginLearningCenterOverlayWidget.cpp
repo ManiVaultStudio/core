@@ -119,6 +119,11 @@ plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWi
     return const_cast<plugin::ViewPlugin*>(_viewPlugin);
 }
 
+OverlayWidget* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getOverlayWidget()
+{
+    return const_cast<OverlayWidget*>(_overlayWidget);
+}
+
 bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilter(QObject* watched, QEvent* event)
 {
     switch (event->type())
@@ -141,6 +146,21 @@ bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilt
     }
 
     return QWidget::eventFilter(watched, event);
+}
+
+void ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    parentWidget()->hide();
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("times");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::shouldDisplay() const
+{
+    return true;
 }
 
 void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -252,10 +272,12 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
     setAttribute(Qt::WA_TransparentForMouseEvents, false);
 
-    _layout.setSpacing(10);
+    _layout.setSpacing(8);
 
-    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget, "View shortcuts"));
-    _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget, "View full documentation"));
+    _layout.addWidget(new CloseToolbarItemWidget(viewPlugin, overlayWidget, "Close this toolbar"));
+    _layout.addStretch(1);
+    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget, "View shortcuts <b>F1</b>"));
+    _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget, "View full documentation <b>F2</b>"));
     _layout.addWidget(new ShowReadmeToolbarItemWidget(viewPlugin, overlayWidget, "Show readme information from the Github repository"));
     _layout.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, overlayWidget, "Visit the Github repository website"));
     _layout.addWidget(new VisitLearningCenterToolbarItemWidget(viewPlugin, overlayWidget, "Go to the main learning center"));
@@ -263,6 +285,39 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     setLayout(&_layout);
 
     setContentsMargins(8);
+
+    const auto installEventFilterOnTargetWidget = [this](QWidget* previousTargetWidget, QWidget* currentTargetWidget) -> void {
+        Q_ASSERT(currentTargetWidget);
+
+        if (!currentTargetWidget)
+            return;
+
+        if (previousTargetWidget)
+            previousTargetWidget->removeEventFilter(this);
+
+        currentTargetWidget->installEventFilter(this);
+    };
+
+    installEventFilterOnTargetWidget(nullptr, _overlayWidget->getWidgetOverlayer().getTargetWidget());
+
+    connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
+}
+
+bool ViewPluginLearningCenterOverlayWidget::ToolbarWidget::eventFilter(QObject* watched, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Enter:
+        {
+            show();
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QWidget::eventFilter(watched, event);
 }
 
 QMenu* ViewPluginLearningCenterOverlayWidget::ToolbarWidget::getContextMenu(QWidget* parent /*= nullptr*/) const
