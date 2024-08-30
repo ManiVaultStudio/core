@@ -40,7 +40,8 @@ PluginFactory::PluginFactory(Type type) :
         markdownDialog.exec();
     });
 
-    _visitRepositoryAction.setIconByName("github");
+    _visitRepositoryAction.setToolTip("Browse to the Github repository");
+    _visitRepositoryAction.setIcon(Application::getIconFont("FontAwesomeBrands").getIcon("code-branch"));
 
     connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
         if (getRepositoryUrl().isValid())

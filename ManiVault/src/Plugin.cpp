@@ -38,7 +38,7 @@ Plugin::Plugin(const PluginFactory* factory) :
     connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
 
     _viewDescriptionAction.setToolTip("View description");
-    _viewDescriptionAction.setIconByName("sticky-note");
+    _viewDescriptionAction.setIconByName("book-reader");
     _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _viewDescriptionAction.setConnectionPermissionsToForceNone();
 

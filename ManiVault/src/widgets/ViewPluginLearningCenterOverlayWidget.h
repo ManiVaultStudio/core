@@ -41,8 +41,9 @@ private:
          * Construct with pointer to \p overlayWidget and \p icon
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
+         * @param iconSize Size of the item icon
          */
-        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QSize& iconSize = QSize(16, 16));
 
         /**
          * Invoked when the widget is shown
@@ -109,6 +110,7 @@ private:
     private:
         const plugin::ViewPlugin*   _viewPlugin;        /** Const pointer to source view plugin */
         OverlayWidget*              _overlayWidget;     /** Pointer to overlay widget */
+        const QSize                 _iconSize;          /** Size of the item icon */
         QHBoxLayout                 _layout;            /** For placing the icon label */
         QLabel                      _iconLabel;         /** Icon label */
         mv::util::WidgetFader       _widgetFader;       /** For fading in/out */
@@ -119,8 +121,12 @@ private:
     {
     public:
 
-        /** No need for custom constructor */
-        using AbstractToolbarItemWidget::AbstractToolbarItemWidget;
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        CloseToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed

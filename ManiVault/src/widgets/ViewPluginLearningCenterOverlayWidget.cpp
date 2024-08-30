@@ -54,13 +54,16 @@ void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t marg
     _layout.setContentsMargins(margin, margin, margin, margin);
 }
 
-ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(16, 16)*/) :
     QWidget(),
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
+    _iconSize(iconSize),
     _widgetFader(nullptr, &_iconLabel, .0f)
 {
     setObjectName("ToolbarItemWidget");
+
+    _iconLabel.setAlignment(Qt::AlignCenter);
 
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.addWidget(&_iconLabel);
@@ -95,19 +98,20 @@ void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::enterEven
 {
     QWidget::enterEvent(event);
 
-    _widgetFader.setOpacity(0.7f, 150);
+    _widgetFader.setOpacity(0.8f, 100);
 }
 
 void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::leaveEvent(QEvent* event)
 {
     QWidget::leaveEvent(event);
 
-    _widgetFader.setOpacity(.25f, 250);
+    _widgetFader.setOpacity(.35f, 350);
 }
 
 void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateIcon()
 {
-    _iconLabel.setPixmap(getIcon().pixmap(QSize(16, 16)));
+    _iconLabel.setFixedSize(QSize(16, 16));
+    _iconLabel.setPixmap(getIcon().pixmap(_iconSize));
 }
 
 const plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin() const
@@ -132,7 +136,7 @@ bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilt
         case QEvent::Enter:
         {
             setVisible(shouldDisplay());
-            _widgetFader.setOpacity(.25f, 350);
+            _widgetFader.setOpacity(.35f, 350);
             break;
         }
 
@@ -147,6 +151,12 @@ bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilt
     }
 
     return QWidget::eventFilter(watched, event);
+}
+
+ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::CloseToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(12, 12))
+{
+    setToolTip("Hide the toolbar");
 }
 
 void ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -283,7 +293,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon
 {
     WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getShortcutMap().getShortcuts().size()));
 
-    badge.setScale(0.6);
+    badge.setScale(.6f);
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
