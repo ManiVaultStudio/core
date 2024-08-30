@@ -18,6 +18,7 @@ uniform int   	scalarEffect;
 uniform float 	pointOpacity;     		/** Point opacity */
 uniform mat3 	orthoM;            		/** Projection matrix from bounds space to clip space */
 uniform bool 	hasHighlights;     		/** Whether a highlight buffer is used */
+uniform bool 	hasFocusHighlights;		/** Whether a focus highlight buffer is used */
 uniform bool 	hasScalars;        		/** Whether a scalar buffer is used */
 uniform vec3 	colorMapRange;     		/** Color map scalar range */
 uniform bool 	hasColors;         		/** Whether a color buffer is used */
@@ -32,19 +33,28 @@ uniform vec3  	selectionOutlineColor;		/** Selection outline color */
 uniform bool 	selectionHaloEnabled; 		/** Whether selection halo is enabled */
 uniform float 	selectionHaloScale;		/** Selection halo scale */
 
+// Focus visualization
+uniform vec3  	focusRegionColor;			/** Focus region color */
+uniform float  	focusRegionOpacity;			/** Focus region opacity */
+uniform vec3  	focusOutlineColor;			/** Focus outline color */
+uniform float 	focusOutlineScale;     		/** Focus outline scale */
+uniform float 	focusOutlineOpacity;		/** Focus outline opacity */
+
 uniform bool 	randomizedDepthEnabled;		/** Whether to randomize the z-order */
 
-layout(location = 0) in vec2    vertex;         /** Vertex input, always a [-1, 1] quad */
-layout(location = 1) in vec2    position;       /** 2-Dimensional positions of points */
-layout(location = 2) in int     highlight;      /** Mask of highlights over the points */
-layout(location = 3) in float   scalar;         /** Point scalar */
-layout(location = 4) in vec3    color;          /** Point color */
-layout(location = 5) in float   size;           /** Point size */
-layout(location = 6) in float   opacity;        /** Point opacity */
+layout(location = 0) in vec2    vertex;         	/** Vertex input, always a [-1, 1] quad */
+layout(location = 1) in vec2    position;       	/** 2-Dimensional positions of points */
+layout(location = 2) in int     highlight;      	/** Mask of highlights over the points */
+layout(location = 3) in int     focusHighlight;		/** Mask of focus highlights over the points */
+layout(location = 4) in float   scalar;         	/** Point scalar */
+layout(location = 5) in vec3    color;          	/** Point color */
+layout(location = 6) in float   size;           	/** Point size */
+layout(location = 7) in float   opacity;        	/** Point opacity */
 
 // Output variables
 smooth out vec2  vTexCoord;
 flat   out int   vHighlight;
+flat   out int   vFocusHighlight;
 smooth out float vScalar;
 smooth out vec3  vColor;
 smooth out float vOpacity;
@@ -106,18 +116,19 @@ void main()
     // The texture coordinates match vertex coordinates
     vTexCoord = vertex;
 
-    // Pass input attributes to fragment shader if they are defined
-    vHighlight = hasHighlights ? highlight : 0;
+    // Selection and focus highlighting
+    vHighlight 		= hasHighlights ? highlight : 0;
+	vFocusHighlight = hasFocusHighlights ? focusHighlight : 0;
     
     vScalar = hasScalars ? (scalar - colorMapRange.x) / colorMapRange.z : 0;
     
     vColor = hasColors ? color : vec3(0.5);
 
     vOpacity = pointOpacity;
+	
     if (hasOpacities)
         vOpacity = opacity;
 
-    // use data position for 2D colormap
     vPosOrig = position;
 
     // Transform position to clip space

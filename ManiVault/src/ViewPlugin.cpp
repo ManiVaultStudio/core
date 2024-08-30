@@ -36,6 +36,10 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction(this, "Visible", true),
     _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
+    _samplerAction(this, "Sampler"),
+    _triggerShortcut(),
+    _titleBarMenuActions(),
+    _settingsActions(),
     _progressTask(nullptr)
 {
     setText(isSystemViewPlugin() ? getKind() : getGuiName());
@@ -91,6 +95,11 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _helpAction.setConnectionPermissionsToForceNone();
+
+    _samplerAction.setToolTip(QStringLiteral("Element sampler"));
+    _samplerAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _samplerAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
+    _samplerAction.setConnectionPermissionsToForceNone();
 
     connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* viewPluginEditorDialog = new ViewPluginEditorDialog(nullptr, this);
@@ -250,6 +259,7 @@ void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
     _mayMoveAction.fromParentVariantMap(variantMap);
     _lockingAction.fromParentVariantMap(variantMap);
     _visibleAction.fromParentVariantMap(variantMap);
+    _samplerAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ViewPlugin::toVariantMap() const
@@ -261,6 +271,7 @@ QVariantMap ViewPlugin::toVariantMap() const
     _mayMoveAction.insertIntoVariantMap(variantMap);
     _lockingAction.insertIntoVariantMap(variantMap);
     _visibleAction.insertIntoVariantMap(variantMap);
+    _samplerAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

@@ -12,9 +12,7 @@
 #include <QPainterPath>
 #include <QtMath>
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enabled /*= true*/) :
     QObject(targetWidget),
@@ -456,6 +454,19 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
+                /*
+                case PixelSelectionType::ROI:
+                {
+                    if (!_mousePositions.isEmpty())
+                        _mousePositions.last() = mouseEvent->pos();
+
+                    if (isActive())
+                        shouldPaint = true;
+
+                    break;
+                }
+                */
+
                 case PixelSelectionType::Sample:
                 {
                     _mousePositions = { _mousePosition };
@@ -482,6 +493,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
 
                 case PixelSelectionType::Brush:
+                case PixelSelectionType::Sample:
                 {
                     if (wheelEvent->angleDelta().y() < 0)
                         setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
@@ -516,7 +528,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
 void PixelSelectionTool::paint()
 {
-    if (_type != PixelSelectionType::ROI && !_enabled)
+    if (!_enabled) // _type != PixelSelectionType::ROI && 
         return;
 
     auto shapePixmap    = _shapePixmap;
@@ -677,21 +689,36 @@ void PixelSelectionTool::paint()
             const auto mousePosition = _mousePositions.last();
 
             areaPainter.setBrush(_areaBrush);
-            areaPainter.setPen(QPen(_areaBrush, 5, Qt::SolidLine, Qt::RoundCap));
+            areaPainter.setPen(QPen(_areaBrush, _brushRadius, Qt::SolidLine, Qt::RoundCap));
             areaPainter.drawPoint(mousePosition);
 
+            shapePainter.setOpacity(0.2);
+
             shapePainter.setBrush(Qt::NoBrush);
-            shapePainter.setPen(_mouseButtons & Qt::LeftButton ? _penLineForeGround : _penLineBackGround);
+            shapePainter.setPen(_penLineBackGround);
+
+            constexpr auto gap  = 5.0;
+            const auto radius   = 0.5f * _brushRadius;
 
             shapePainter.drawPolyline(QVector<QPoint>({
-                QPoint(mousePosition.x(), 0),
+                QPoint(mousePosition.x(), mousePosition.y() - radius - gap),
+                QPoint(mousePosition.x(), 0.0)
+            }));
+
+            shapePainter.drawPolyline(QVector<QPoint>({
+                QPoint(mousePosition.x(), mousePosition.y() + radius + gap),
                 QPoint(mousePosition.x(), shapePixmap.size().height())
             }));
 
             shapePainter.drawPolyline(QVector<QPoint>({
-                QPoint(0, mousePosition.y()),
+                QPoint(mousePosition.x() - radius - gap, mousePosition.y()),
+                QPoint(0.0, mousePosition.y())
+            }));
+
+            shapePainter.drawPolyline(QVector<QPoint>({
+                QPoint(mousePosition.x() + radius + gap, mousePosition.y()),
                 QPoint(shapePixmap.size().width(), mousePosition.y())
-                }));
+            }));
 
             break;
         }
@@ -794,5 +821,4 @@ void PixelSelectionTool::endSelection()
     _aborted    = false;
 }
 
-}
 }

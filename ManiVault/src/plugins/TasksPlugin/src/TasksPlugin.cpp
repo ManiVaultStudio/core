@@ -12,6 +12,9 @@
 #include <actions/OptionAction.h>
 #include <actions/TriggerAction.h>
 
+#include <QMetaType>
+#include <QMetaObject>
+
 Q_PLUGIN_METADATA(IID "studio.manivault.TasksPlugin")
 
 using namespace mv;
@@ -69,18 +72,18 @@ void TasksPlugin::addTestSuite()
 
     connect(modalTaskStartTestAction, &TriggerAction::triggered, this, [this, modalTaskTestTypeAction]() -> void {
         try {
-            const auto metaType     = modalTaskTestTypeAction->getCurrentText();
-            const auto metaTypeId   = QMetaType::type(metaType.toLatin1());
-            const auto metaObject   = QMetaType::metaObjectForType(metaTypeId);
+            const auto metaTypeName = modalTaskTestTypeAction->getCurrentText();
+            const auto metaType     = QMetaType::fromName(metaTypeName.toLatin1());
+            const auto metaObject   = metaType.metaObject();
 
             if (!metaObject)
-                throw std::runtime_error(QString("Meta object type '%1' is not registered. Did you forget to register the tester correctly with the Qt meta object system?").arg(metaType).toLatin1());
+                throw std::runtime_error(QString("Meta object type '%1' is not registered. Did you forget to register the tester correctly with the Qt meta object system?").arg(metaTypeName).toLatin1());
 
-            auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, metaType));
+            auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, metaTypeName));
             auto taskTester         = dynamic_cast<AbstractTaskTester*>(metaObjectInstance);
 
             if (!taskTester)
-                throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(metaType).toLatin1());
+                throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(metaTypeName).toLatin1());
         }
         catch (std::exception& e)
         {
