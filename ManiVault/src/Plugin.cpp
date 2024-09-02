@@ -22,7 +22,7 @@ Plugin::Plugin(const PluginFactory* factory) :
     _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "1" : QString::number(factory->getNumberOfInstances() + 1)))),
     _destroyAction(this, "Remove"),
     _viewDescriptionAction(this, "View description"),
-    _viewShortcutMapAction(this, "Shortcut map")
+    
 {
     setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::ForceNone);
 
@@ -94,36 +94,6 @@ mv::plugin::Type Plugin::getType() const
 QString Plugin::getVersion() const
 {
     return _factory->getVersion();
-}
-
-util::ShortcutMap& Plugin::getShortcutMap()
-{
-    return const_cast<PluginFactory*>(_factory)->getShortcutMap();
-}
-
-const util::ShortcutMap& Plugin::getShortcutMap() const
-{
-    return const_cast<Plugin*>(this)->getShortcutMap();
-}
-
-void Plugin::addShortcut(const util::ShortcutMap::Shortcut& shortcut)
-{
-    getShortcutMap().addShortcut(shortcut);
-}
-
-void Plugin::removeShortcut(const util::ShortcutMap::Shortcut& shortcut)
-{
-    getShortcutMap().removeShortcut(shortcut);
-}
-
-util::ShortcutMap::Shortcuts Plugin::getShortcuts(const QStringList& categories) const
-{
-    return getShortcutMap().getShortcuts(categories);
-}
-
-bool Plugin::hasShortcuts(const QStringList& categories) const
-{
-    return getShortcutMap().hasShortcuts(categories);
 }
 
 bool Plugin::hasHelp()

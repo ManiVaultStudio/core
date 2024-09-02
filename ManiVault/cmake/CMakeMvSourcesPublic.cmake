@@ -341,6 +341,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/IconPickerAction.h
     src/actions/ApplicationIconAction.h
     src/actions/ViewPluginSamplerAction.h
+    src/actions/PluginLearningCenterAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -372,6 +373,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/IconPickerAction.cpp
     src/actions/ApplicationIconAction.cpp
     src/actions/ViewPluginSamplerAction.cpp
+    src/actions/PluginLearningCenterAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -658,6 +660,7 @@ set(PUBLIC_PLUGIN_HEADERS
     src/AnalysisPlugin.h
     src/TransformationPlugin.h
     src/ViewPlugin.h
+    src/PluginShortcuts.h
 )
 
 set(PUBLIC_PLUGIN_SOURCES
@@ -669,6 +672,7 @@ set(PUBLIC_PLUGIN_SOURCES
     src/AnalysisPlugin.cpp
     src/TransformationPlugin.cpp
     src/ViewPlugin.cpp
+    src/PluginShortcuts.cpp
 )
 
 list(APPEND PUBLIC_PLUGIN_FILES
