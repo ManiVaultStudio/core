@@ -4,13 +4,15 @@
 
 #pragma once
 
+#include "actions/TriggerAction.h"
+
 #include <QObject>
 
 namespace mv::plugin {
     class Plugin;
 }
 
-namespace mv::gui {
+namespace mv {
 
 /**
  * Plugin shortcuts class
@@ -25,7 +27,6 @@ public:
     /**
      * Construct with pointer to \p plugin and \p parent object
      * @param plugin Pointer to plugin
-     * @param parent Pointer to parent object
      */
     PluginShortcuts(plugin::Plugin* plugin);
 
@@ -35,25 +36,25 @@ public: // Shortcuts
      * Get the shortcut map
      * @return Shortcut map
      */
-    util::ShortcutMap& getShortcutMap();
+    util::ShortcutMap& getMap();
 
     /**
      * Get the shortcut map
      * @return Shortcut map
      */
-    const util::ShortcutMap& getShortcutMap() const;
+    const util::ShortcutMap& getMap() const;
 
     /**
      * Add \p shortcut to the map
      * @param shortcut Shortcut to add
      */
-    void addShortcut(const util::ShortcutMap::Shortcut& shortcut);
+    void add(const util::ShortcutMap::Shortcut& shortcut);
 
     /**
      * Remove \p shortcut from the map
      * @param shortcut Shortcut to remove
      */
-    void removeShortcut(const util::ShortcutMap::Shortcut& shortcut);
+    void remove(const util::ShortcutMap::Shortcut& shortcut);
 
     /**
      * Get shortcuts for \p categories
@@ -70,19 +71,19 @@ public: // Shortcuts
     bool hasShortcuts(const QStringList& categories = QStringList()) const;
 
     /** View shortcut map */
-    void viewShortcutMap();
+    void view();
 
 public: // Action getters
 
     //TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; };
-    TriggerAction& getViewShortcutMapAction() { return _viewShortcutMapAction; };
+    gui::TriggerAction& getViewShortcutMapAction() { return _viewAction; };
 
     //const TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; };
-    const TriggerAction& getViewShortcutMapAction() const { return _viewShortcutMapAction; };
+    const gui::TriggerAction& getViewShortcutMapAction() const { return _viewAction; };
 
 protected:
-    const plugin::Plugin*   _plugin;                    /** Pointer to parent plugin */
-    TriggerAction           _viewShortcutMapAction;     /** Trigger action that displays the plugin shortcuts */
+    const plugin::Plugin*   _plugin;        /** Pointer to parent plugin */
+    gui::TriggerAction      _viewAction;    /** Trigger action that displays the plugin shortcuts */
 };
 
 }

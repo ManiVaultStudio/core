@@ -186,7 +186,7 @@ void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressE
 
     auto contextMenu = new QMenu(this);
 
-    for (const auto& video : getVideos())
+    for (const auto& video : getViewPlugin()->getLearningCenterAction().getVideos())
     {
         auto watchVideoAction = new QAction(video._title);
 
@@ -208,7 +208,7 @@ void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressE
 
 QIcon ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::getIcon() const
 {
-    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getVideos().size()));
+    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getLearningCenterAction().getVideos().size()));
 
     badge.setScale(.6f);
     badge.setEnabled(true);
@@ -219,35 +219,25 @@ QIcon ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::getIcon() 
 
 bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDisplay() const
 {
-    return !getVideos().empty();
-}
-
-Videos ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::getVideos() const
-{
-    const auto tags = getViewPlugin()->getVideoTags().stringList();
-
-    if (tags.isEmpty())
-        return {};
-
-    return mv::help().getVideos(tags);
+    return !getViewPlugin()->getLearningCenterAction().getVideos().empty();
 }
 
 ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip(getViewPlugin()->getViewDescriptionAction().toolTip());
+    setToolTip(getViewPlugin()->getLearningCenterAction().getViewDescriptionAction().toolTip());
 }
 
 void ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
 
-    getViewPlugin()->getViewDescriptionAction().trigger();
+    getViewPlugin()->getLearningCenterAction().getViewDescriptionAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::getIcon() const
 {
-    return getViewPlugin()->getViewDescriptionAction().icon();
+    return getViewPlugin()->getLearningCenterAction().getViewDescriptionAction().icon();
 }
 
 bool ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::shouldDisplay() const
@@ -286,12 +276,12 @@ ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsTool
 
 void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
-    getViewPlugin()->getViewShortcutMapAction().trigger();
+    getViewPlugin()->getLearningCenterAction().getViewShortcutMapAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon() const
 {
-    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getShortcutMap().getShortcuts().size()));
+    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getShortcuts().getMap().getShortcuts().size()));
 
     badge.setScale(.6f);
     badge.setEnabled(true);
@@ -302,7 +292,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon
 
 bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDisplay() const
 {
-    return getViewPlugin()->getShortcutMap().hasShortcuts();
+    return getViewPlugin()->getShortcuts().hasShortcuts();
 }
 
 ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
@@ -408,32 +398,6 @@ bool ViewPluginLearningCenterOverlayWidget::ToolbarWidget::eventFilter(QObject* 
     }
 
     return QWidget::eventFilter(watched, event);
-}
-
-QMenu* ViewPluginLearningCenterOverlayWidget::ToolbarWidget::getContextMenu(QWidget* parent /*= nullptr*/) const
-{
-    auto contextMenu = new QMenu(parent);
-
-    auto nonConstPluginFactory = const_cast<plugin::PluginFactory*>(_viewPlugin->getFactory());
-
-    if (_viewPlugin->hasShortcuts())
-        contextMenu->addAction(&const_cast<plugin::ViewPlugin*>(_viewPlugin)->getViewShortcutMapAction());
-
-    if (nonConstPluginFactory->hasHelp())
-        contextMenu->addAction(&nonConstPluginFactory->getTriggerHelpAction());
-
-    if (nonConstPluginFactory->getReadmeMarkdownUrl().isValid())
-        contextMenu->addAction(&nonConstPluginFactory->getTriggerReadmeAction());
-
-    auto other = new QMenu("Other");
-
-    other->setIcon(Application::getIconFont("FontAwesome").getIcon("ellipsis-h"));
-
-    contextMenu->addMenu(other);
-
-    other->addAction(&mv::help().getShowLearningCenterAction());
-
-    return contextMenu;
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::setContentsMargins(std::int32_t margin)

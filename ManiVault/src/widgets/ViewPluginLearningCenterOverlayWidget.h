@@ -176,14 +176,6 @@ private:
          * @return Boolean determining whether the item should be visible or not
          */
         bool shouldDisplay() const override;
-
-    private:
-
-        /**
-         * Get videos
-         * @return Videos for view plugin video tag(s)
-         */
-        util::Videos getVideos() const;
     };
 
     /** Toolbar item widget for showing the view plugin description */
@@ -356,12 +348,6 @@ private:
          * @param event The event that took place
          */
         bool eventFilter(QObject* target, QEvent* event) override;
-
-        /**
-         * Get view plugin learning center context menu
-         * @return View plugin learning center context menu
-         */
-        QMenu* getContextMenu(QWidget* parent = nullptr) const;
 
         /**
          * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }

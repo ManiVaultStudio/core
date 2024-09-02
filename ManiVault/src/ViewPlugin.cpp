@@ -247,27 +247,6 @@ gui::ViewPluginLearningCenterOverlayWidget& ViewPlugin::getLearningCenterOverlay
     return _learningCenterOverlayWidget;
 }
 
-void ViewPlugin::viewShortcutMap()
-{
-#ifdef VIEW_PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (!_shortcutMapOverlayWidget.isNull())
-        return;
-
-    _shortcutMapOverlayWidget = getShortcutMap().createShortcutMapOverlayWidget(&_widget);
-
-    _shortcutMapOverlayWidget->show();
-}
-
-void ViewPlugin::viewDescription()
-{
-#ifdef VIEW_PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-}
-
 void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
 {
     Plugin::fromVariantMap(variantMap);

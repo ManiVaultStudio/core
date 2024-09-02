@@ -6,6 +6,7 @@
 
 #include "PluginFactory.h"
 #include "PluginType.h"
+#include "PluginShortcuts.h"
 
 #include "event/EventListener.h"
 
@@ -18,6 +19,8 @@
 #include <QVariant>
 #include <QIcon>
 #include <QStringListModel>
+
+#include "actions/PluginLearningCenterAction.h"
 
 class QMenu;
 
@@ -74,59 +77,17 @@ public:
      */
     virtual QString getVersion() const;
 
-public: // Shortcuts
+    /**
+     * Get shortcuts
+     * @return Plugin shortcuts
+     */
+    PluginShortcuts& getShortcuts();
 
     /**
-     * Get the shortcut map
-     * @return Shortcut map
+     * Get shortcuts
+     * @return Plugin shortcuts
      */
-    util::ShortcutMap& getShortcutMap();
-
-    /**
-     * Get the shortcut map
-     * @return Shortcut map
-     */
-    const util::ShortcutMap& getShortcutMap() const;
-
-    /**
-     * Add \p shortcut to the map
-     * @param shortcut Shortcut to add
-     */
-    void addShortcut(const util::ShortcutMap::Shortcut& shortcut);
-
-    /**
-     * Remove \p shortcut from the map
-     * @param shortcut Shortcut to remove
-     */
-    void removeShortcut(const util::ShortcutMap::Shortcut& shortcut);
-
-    /**
-     * Get shortcuts for \p categories
-     * @param categories Categories to retrieve shortcuts for (all shortcuts if empty)
-     * @return Vector of shortcuts
-     */
-    util::ShortcutMap::Shortcuts getShortcuts(const QStringList& categories = QStringList()) const;
-
-    /**
-     * Establish whether any shortcut exists for \p categories
-     * @param categories Categories to check (all categories if empty)
-     * @return Boolean determining whether any shortcut exists
-     */
-    bool hasShortcuts(const QStringList& categories = QStringList()) const;
-
-public: // Help
-
-    /**
-     * Get whether the plugin has help information or not
-     * @return Boolean determining whether the plugin has help information or not
-     */
-    virtual bool hasHelp();
-
-    /**
-     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
-     * @return Reference to show help trigger action (maybe nullptr if the plugin does not provide any help)
-     */
-    virtual gui::TriggerAction& getTriggerHelpAction() final;
+    const PluginShortcuts& getShortcuts() const;
 
 public: // Properties
 
@@ -184,14 +145,6 @@ public: // Settings
      */
     gui::PluginGlobalSettingsGroupAction* getGlobalSettingsAction() const;
 
-public: // Views
-
-    /** View plugin description */
-    virtual void viewDescription() { qDebug() << __FUNCTION__ << "not yet implemented..."; };
-
-    /** View plugin shortcut map */
-    virtual void viewShortcutMap() { qDebug() << __FUNCTION__ << "not yet implemented..."; };
-
 public: // Serialization
 
     /**
@@ -211,45 +164,26 @@ public: // Miscellaneous
     /** Destroys the plugin and removes it from the plugin manager */
     virtual void destroy() final;
 
-public: // Video tags
-
-    /**
-     * Get video tags
-     * @return Video tags
-     */
-    const QStringListModel& getVideoTags() const;
-
-protected: // Video tags
-
-    /**
-     * Get video tags
-     * @return Video tags
-     */
-    QStringListModel& getVideoTags();
-
 public: // Action getters
 
     gui::StringAction& getGuiNameAction() { return _guiNameAction; };
     gui::TriggerAction& getDestroyAction() { return _destroyAction; }
-    gui::TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; };
-    gui::TriggerAction& getViewShortcutMapAction() { return _viewShortcutMapAction; };
+    gui::PluginLearningCenterAction& getLearningCenterAction() { return _learningCenterAction; }
 
     const gui::StringAction& getGuiNameAction() const { return _guiNameAction; };
     const gui::TriggerAction& getDestroyAction() const { return _destroyAction; }
-    const gui::TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; };
-    const gui::TriggerAction& getViewShortcutMapAction() const { return _viewShortcutMapAction; };
+    const gui::PluginLearningCenterAction& getLearningCenterAction() const { return _learningCenterAction; }
 
 protected:
-    CoreInterface*              _core;                      /** Pointer to the core interface */
-    const PluginFactory*        _factory;                   /** Pointer to plugin factory */
-    const QString               _name;                      /** Unique plugin name */
-    QMap<QString, QVariant>     _properties;                /** Properties map */
-    EventListener               _eventListener;             /** Listen to public events */
-    gui::StringAction           _guiNameAction;             /** Action for the GUI name */
-    gui::TriggerAction          _destroyAction;             /** Action for destroying the plugin */
-    gui::TriggerAction          _viewDescriptionAction;     /** Trigger action that displays the plugin description */
-    gui::TriggerAction          _viewShortcutMapAction;     /** Trigger action that displays the plugin shortcut map */
-    QStringListModel            _videoTags;                 /** For linking to the learning center videos */
+    CoreInterface*                      _core;                      /** Pointer to the core interface */
+    const PluginFactory*                _factory;                   /** Pointer to plugin factory */
+    const QString                       _name;                      /** Unique plugin name */
+    QMap<QString, QVariant>             _properties;                /** Properties map */
+    EventListener                       _eventListener;             /** Listen to public events */
+    gui::StringAction                   _guiNameAction;             /** Action for the GUI name */
+    gui::TriggerAction                  _destroyAction;             /** Action for destroying the plugin */
+    PluginShortcuts                     _shortcuts;                 /** Plugin shortcuts */
+    gui::PluginLearningCenterAction     _learningCenterAction;      /** Action for everything plugin learning related */
 
     friend class PluginFactory;
 };

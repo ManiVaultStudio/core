@@ -6,49 +6,55 @@
 
 #include "Plugin.h"
 
-using namespace mv::util;
+using namespace mv::gui;
 using namespace mv::plugin;
 
-namespace mv::gui {
+namespace mv {
 
 PluginShortcuts::PluginShortcuts(plugin::Plugin* plugin) :
     QObject(plugin),
     _plugin(plugin),
-    _viewShortcutMapAction(this, "Shortcut map")
+    _viewAction(this, "Shortcut map")
 {
+    _viewAction.setToolTip("View shortcuts");
+    _viewAction.setIconByName("keyboard");
+    _viewAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _viewAction.setConnectionPermissionsToForceNone();
+
+    connect(&_viewAction, &TriggerAction::triggered, this, &PluginShortcuts::view);
 }
 
-util::ShortcutMap& PluginShortcuts::getShortcutMap()
+util::ShortcutMap& PluginShortcuts::getMap()
 {
     return const_cast<PluginFactory*>(_plugin->getFactory())->getShortcutMap();
 }
 
-const util::ShortcutMap& PluginShortcuts::getShortcutMap() const
+const util::ShortcutMap& PluginShortcuts::getMap() const
 {
-    return const_cast<PluginShortcuts*>(this)->getShortcutMap();
+    return const_cast<PluginShortcuts*>(this)->getMap();
 }
 
-void PluginShortcuts::addShortcut(const util::ShortcutMap::Shortcut& shortcut)
+void PluginShortcuts::add(const util::ShortcutMap::Shortcut& shortcut)
 {
-    getShortcutMap().addShortcut(shortcut);
+    getMap().addShortcut(shortcut);
 }
 
-void PluginShortcuts::removeShortcut(const util::ShortcutMap::Shortcut& shortcut)
+void PluginShortcuts::remove(const util::ShortcutMap::Shortcut& shortcut)
 {
-    getShortcutMap().removeShortcut(shortcut);
+    getMap().removeShortcut(shortcut);
 }
 
 util::ShortcutMap::Shortcuts PluginShortcuts::getShortcuts(const QStringList& categories) const
 {
-    return getShortcutMap().getShortcuts(categories);
+    return getMap().getShortcuts(categories);
 }
 
 bool PluginShortcuts::hasShortcuts(const QStringList& categories) const
 {
-    return getShortcutMap().hasShortcuts(categories);
+    return getMap().hasShortcuts(categories);
 }
 
-void PluginShortcuts::viewShortcutMap()
+void PluginShortcuts::view()
 {
     qDebug() << __FUNCTION__ << "not yet implemented...";
 }

@@ -85,14 +85,6 @@ protected:
      */
     gui::ViewPluginLearningCenterOverlayWidget& getLearningCenterOverlayWidget();
 
-private: // Views
-
-    /** View plugin shortcut map */
-    void viewShortcutMap() override;
-
-    /** View plugin description */
-    void viewDescription() override;
-
 public: // Title bar settings menu
 
     /**

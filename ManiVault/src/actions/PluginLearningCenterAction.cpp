@@ -8,241 +8,98 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent /*= nullptr*/) :
-    VerticalGroupAction(parent)
+PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
+    _plugin(nullptr),
+    _actions(this, "Actions"),
+    _viewDescriptionAction(this, "View description"),
+    _viewHelpAction(this, "View help"),
+    _viewShortcutMapAction(this, "View shortcuts")
 {
-    initialize();
+    //connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &Plugin::viewDescription);
 
-    const auto initStatusBarOptionsAction = [this]() -> void {
-        const auto& appStatusBarOptionsAction = mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction();
-
-        _statusBarOptionsAction.setOptions(mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().getOptions());
-    };
-
-    initStatusBarOptionsAction();
-
-    connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::optionsChanged, initStatusBarOptionsAction);
-
-    const auto updateStatusBarActions = [this]() -> void {
-        const auto overrideApplicationStatusBar = _overrideApplicationStatusBarAction.isChecked();
-
-        _statusBarVisibleAction.setEnabled(overrideApplicationStatusBar);
-        _statusBarOptionsAction.setEnabled(overrideApplicationStatusBar);
-    };
-
-    updateStatusBarActions();
-
-    connect(&_overrideApplicationStatusBarAction, &ToggleAction::toggled, updateStatusBarActions);
+    //_viewDescriptionAction.setToolTip("View description");
+    //_viewDescriptionAction.setIconByName("book-reader");
+    //_viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    //_viewDescriptionAction.setConnectionPermissionsToForceNone();
 }
 
-Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
-    Project(parent)
+void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
 {
-    setFilePath(filePath);
-    initialize();
+    Q_ASSERT(plugin);
 
-    try {
-        if (!QFileInfo(_filePath).exists())
-            throw std::runtime_error("File does not exist");
+    if (!plugin)
+        return;
 
-        QFile projectJsonFile(_filePath);
-
-        if (!projectJsonFile.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Unable to open file for reading");
-
-        QByteArray projectByteArray = projectJsonFile.readAll();
-
-        QJsonDocument jsonDocument;
-
-        jsonDocument = QJsonDocument::fromJson(projectByteArray);
-
-        if (jsonDocument.isNull() || jsonDocument.isEmpty())
-            throw std::runtime_error("JSON document is invalid");
-
-        fromVariantMap(jsonDocument.toVariant().toMap()["Project"].toMap());
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "Unable to load project from file:" << e.what();
-    }
-    catch (...)
-    {
-        qDebug() << "Unable to load project from file";
-    }
+    _plugin = plugin;
 }
 
-QString Project::getFilePath() const
+void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    return _filePath;
+    WidgetAction::fromVariantMap(variantMap);
 }
 
-void Project::setFilePath(const QString& filePath)
+QVariantMap PluginLearningCenterAction::toVariantMap() const
 {
-    _filePath       = filePath;
-    _startupProject = filePath == Application::current()->getStartupProjectFilePath();
-
-    emit filePathChanged(_filePath);
-}
-
-bool Project::isStartupProject() const
-{
-    return _startupProject;
-}
-
-void Project::fromVariantMap(const QVariantMap& variantMap)
-{
-    Serializable::fromVariantMap(variantMap);
-
-    projects().getProjectSerializationTask().setName("Load project");
-
-    _projectMetaAction.getApplicationVersionAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getProjectVersionAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getReadOnlyAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getTitleAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getDescriptionAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getTagsAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getCommentsAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getContributorsAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getCompressionAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getSplashScreenAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getStudioModeAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getApplicationIconAction().fromParentVariantMap(variantMap);
-
-    if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
-        _selectionGroupingAction.fromParentVariantMap(variantMap);
-    else
-        _selectionGroupingAction.setChecked(true);
-
-    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
-    _statusBarVisibleAction.fromParentVariantMap(variantMap);
-    _statusBarOptionsAction.fromParentVariantMap(variantMap);
-
-    dataHierarchy().fromParentVariantMap(variantMap);
-    actions().fromParentVariantMap(variantMap);
-    plugins().fromParentVariantMap(variantMap);
-}
-
-QVariantMap Project::toVariantMap() const
-{
-    projects().getProjectSerializationTask().setName("Save project");
-
-    auto variantMap = Serializable::toVariantMap();
-    
-    _projectMetaAction.getApplicationVersionAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getProjectVersionAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getReadOnlyAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getTitleAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getDescriptionAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getTagsAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getCommentsAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getContributorsAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getCompressionAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getSplashScreenAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getStudioModeAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getApplicationIconAction().insertIntoVariantMap(variantMap);
-
-    _selectionGroupingAction.insertIntoVariantMap(variantMap);
-
-    _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
-    _statusBarVisibleAction.insertIntoVariantMap(variantMap);
-    _statusBarOptionsAction.insertIntoVariantMap(variantMap);
-
-    plugins().insertIntoVariantMap(variantMap);
-    dataHierarchy().insertIntoVariantMap(variantMap);
-    actions().insertIntoVariantMap(variantMap);
+    auto variantMap = WidgetAction::toVariantMap();
 
     return variantMap;
 }
 
-util::Version Project::getVersion() const
+void PluginLearningCenterAction::addVideo(const util::Video& video)
 {
-    return _applicationVersion;
+    _videos.push_back(video);
 }
 
-void Project::updateContributors()
+void PluginLearningCenterAction::addVideos(const util::Videos& videos)
 {
-    QString currentUserName;
-
-#ifdef __APPLE__
-    currentUserName = qgetenv("USER");
-#else
-    currentUserName = qgetenv("USERNAME");
-#endif
-
-    if (!currentUserName.isEmpty() && !_projectMetaAction.getContributorsAction().getStrings().contains(currentUserName))
-        _projectMetaAction.getContributorsAction().addString(currentUserName);
+    _videos.insert(_videos.end(), videos.begin(), videos.end());
 }
 
-void Project::setStudioMode(bool studioMode)
+void PluginLearningCenterAction::addVideos(const QString& tag)
 {
-    auto plugins    = mv::plugins().getPluginsByTypes();  // by default gets all plugin types
-    auto datasets   = mv::data().getAllDatasets();
-
-    if (studioMode) {
-        for (auto plugin : plugins)
-            plugin->cacheConnectionPermissions(true);
-
-        for (auto plugin : plugins)
-            plugin->setConnectionPermissionsToAll(true);
-
-        for (auto& dataset : datasets)
-        {
-            for (auto& action : dataset.get()->getActions())
-                action->cacheConnectionPermissions(true);
-
-            for (auto& action : dataset.get()->getActions())
-                action->setConnectionPermissionsToAll(true);
-        }
-    }
-    else {
-        for (auto plugin : plugins)
-            plugin->restoreConnectionPermissions(true);
-
-        for (auto& dataset : datasets)
-            for (auto& action : dataset.get()->getActions())
-                action->restoreConnectionPermissions(true);
-    }
-
+    addVideos(mv::help().getVideos({ tag }));
 }
 
-ProjectMetaAction& Project::getProjectMetaAction()
+void PluginLearningCenterAction::addVideos(const QStringList& tags)
 {
-    return _projectMetaAction;
+    addVideos(mv::help().getVideos(tags));
 }
 
-QSharedPointer<ProjectMetaAction> Project::getProjectMetaActionFromProjectFilePath(const QString& projectFilePath)
+const util::Videos& PluginLearningCenterAction::getVideos() const
 {
-    const auto projectMetaJsonFilePath = projects().extractFileFromManiVaultProject(projectFilePath, Application::current()->getTemporaryDir(), "meta.json");
-
-    if (projectMetaJsonFilePath.isEmpty())
-        return {};
-
-    return QSharedPointer<ProjectMetaAction>::create(projectMetaJsonFilePath);
-}
-
-void Project::initialize()
-{
-    getProjectMetaAction().getSplashScreenAction().setMayCloseSplashScreenWidget(true);
-
-    updateContributors();
-
-    getStudioModeAction().setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
-
-    connect(&getStudioModeAction(), &ToggleAction::toggled, this, &Project::setStudioMode);
-
-    const auto updateStudioModeActionReadOnly = [&]() -> void {
-        getStudioModeAction().setEnabled(projects().hasProject());
-    };
-
-    updateStudioModeActionReadOnly();
-
-    connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
-    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
-
-    _selectionGroupingAction.setIconByName("object-group");
-    _selectionGroupingAction.setToolTip("Enable/disable dataset grouping");
-
-    _statusBarOptionsAction.setDefaultWidgetFlag(OptionsAction::WidgetFlag::Selection);
+    return _videos;
 }
 
 }
+
+//void ViewPlugin::view()
+//{
+//#ifdef VIEW_PLUGIN_VERBOSE
+//    qDebug() << __FUNCTION__;
+//#endif
+//
+//    if (!_shortcutMapOverlayWidget.isNull())
+//        return;
+//
+//    _shortcutMapOverlayWidget = getMap().createShortcutMapOverlayWidget(&_widget);
+//
+//    _shortcutMapOverlayWidget->show();
+//}
+//
+//void ViewPlugin::viewDescription()
+//{
+//#ifdef VIEW_PLUGIN_VERBOSE
+//    qDebug() << __FUNCTION__;
+//#endif
+//}
+
+//bool Plugin::hasHelp()
+//{
+//    return const_cast<PluginFactory*>(_factory)->hasHelp();
+//}
+//
+//mv::gui::TriggerAction& Plugin::getTriggerHelpAction()
+//{
+//    return const_cast<PluginFactory*>(_factory)->getTriggerHelpAction();
+//}

@@ -21,8 +21,8 @@ Plugin::Plugin(const PluginFactory* factory) :
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "1" : QString::number(factory->getNumberOfInstances() + 1)))),
     _destroyAction(this, "Remove"),
-    _viewDescriptionAction(this, "View description"),
-    
+    _shortcuts(this),
+    _learningCenterAction(this, "Plugin learning center")
 {
     setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::ForceNone);
 
@@ -36,20 +36,6 @@ Plugin::Plugin(const PluginFactory* factory) :
     _destroyAction.setConnectionPermissionsToForceNone();
 
     connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
-
-    _viewDescriptionAction.setToolTip("View description");
-    _viewDescriptionAction.setIconByName("book-reader");
-    _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
-    _viewDescriptionAction.setConnectionPermissionsToForceNone();
-
-    connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &Plugin::viewDescription);
-
-    _viewShortcutMapAction.setToolTip("View shortcuts");
-    _viewShortcutMapAction.setIconByName("keyboard");
-    _viewShortcutMapAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
-    _viewShortcutMapAction.setConnectionPermissionsToForceNone();
-
-    connect(&_viewShortcutMapAction, &TriggerAction::triggered, this, &Plugin::viewShortcutMap);
 }
 
 Plugin::~Plugin()
@@ -96,14 +82,14 @@ QString Plugin::getVersion() const
     return _factory->getVersion();
 }
 
-bool Plugin::hasHelp()
+PluginShortcuts& Plugin::getShortcuts()
 {
-    return const_cast<PluginFactory*>(_factory)->hasHelp();
+    return _shortcuts;
 }
 
-mv::gui::TriggerAction& Plugin::getTriggerHelpAction()
+const PluginShortcuts& Plugin::getShortcuts() const
 {
-    return const_cast<PluginFactory*>(_factory)->getTriggerHelpAction();
+    return _shortcuts;
 }
 
 QVariant Plugin::getProperty(const QString& name, const QVariant& defaultValue /*= QVariant()*/) const
@@ -175,16 +161,6 @@ QVariantMap Plugin::toVariantMap() const
 void Plugin::destroy()
 {
     plugins().destroyPlugin(this);
-}
-
-const QStringListModel& Plugin::getVideoTags() const
-{
-    return _videoTags;
-}
-
-QStringListModel& Plugin::getVideoTags()
-{
-    return _videoTags;
 }
 
 }
