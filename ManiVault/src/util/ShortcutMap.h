@@ -7,7 +7,7 @@
 #include <QObject>
 #include <QKeySequence>
 
-#include "widgets/ShortcutMapOverlayWidget.h"
+#include "widgets/ShortcutMapViewPluginOverlayWidget.h"
 
 namespace mv::util {
 

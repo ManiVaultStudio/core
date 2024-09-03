@@ -412,6 +412,8 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/MarkdownDocument.h
 	src/widgets/MarkdownDialog.h
 	src/widgets/YouTubeVideoDialog.h
+	src/widgets/ViewPluginOverlayWidget.h
+	src/widgets/ViewPluginDescriptionOverlayWidget.h
 	src/widgets/ShortcutMapOverlayWidget.h
 	src/widgets/ViewPluginLearningCenterOverlayWidget.h
 	src/widgets/IconLabel.h
@@ -429,6 +431,8 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/MarkdownDocument.cpp
 	src/widgets/MarkdownDialog.cpp
 	src/widgets/YouTubeVideoDialog.cpp
+	src/widgets/ViewPluginOverlayWidget.cpp
+	src/widgets/ViewPluginDescriptionOverlayWidget.cpp
 	src/widgets/ShortcutMapOverlayWidget.cpp
 	src/widgets/ViewPluginLearningCenterOverlayWidget.cpp
 	src/widgets/IconLabel.cpp

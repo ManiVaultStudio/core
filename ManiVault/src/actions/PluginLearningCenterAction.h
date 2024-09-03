@@ -126,7 +126,7 @@ public: // Serialization
 private:
 
     /**
-     * Get whether PluginLearningCenterAction#_plugin is a view plugin
+     * Get whether PluginLearningCenterAction#_viewPlugin is a view plugin
      * @return Boolean determining whether PluginLearningCenterAction#_plugin is a view plugin or not
      */
     bool isViewPlugin() const;

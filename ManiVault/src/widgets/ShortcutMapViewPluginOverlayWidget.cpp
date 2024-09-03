@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ShortcutMapOverlayWidget.h"
+#include "ShortcutMapViewPluginOverlayWidget.h"
 
 #include <QDebug>
 
@@ -14,54 +14,15 @@ using namespace mv::util;
 
 namespace mv::gui
 {
-ShortcutMapOverlayWidget::CloseLabel::CloseLabel(ShortcutMapOverlayWidget* shortcutMapOverlayWidget) :
-    QLabel(shortcutMapOverlayWidget),
-    _shortcutMapOverlayWidget(shortcutMapOverlayWidget)
-{
-    setGraphicsEffect(&_opacityEffect);
 
-    _opacityEffect.setOpacity(.5f);
-}
-
-void ShortcutMapOverlayWidget::CloseLabel::enterEvent(QEnterEvent* event)
-{
-    QLabel::enterEvent(event);
-
-    _opacityEffect.setOpacity(1.f);
-}
-
-void ShortcutMapOverlayWidget::CloseLabel::leaveEvent(QEvent* event)
-{
-    QLabel::leaveEvent(event);
-
-    _opacityEffect.setOpacity(.5f);
-}
-
-void ShortcutMapOverlayWidget::CloseLabel::mousePressEvent(QMouseEvent* event)
-{
-    QLabel::mousePressEvent(event);
-
-    _shortcutMapOverlayWidget->deleteLater();
-}
-
-ShortcutMapOverlayWidget::ShortcutMapOverlayWidget(QWidget* source, const util::ShortcutMap& shortcutMap) :
-    OverlayWidget(source),
-    _shortcutMap(shortcutMap),
-    _closeIconLabel(this)
+ShortcutMapViewPluginOverlayWidget::ShortcutMapViewPluginOverlayWidget(plugin::ViewPlugin* viewPlugin) :
+    ViewPluginOverlayWidget(viewPlugin),
+    _shortcutMap(viewPlugin->getShortcuts().getMap())
 {
     setAutoFillBackground(true);
 
-    _mainLayout.addLayout(&_toolbarLayout);
-    _mainLayout.addLayout(&_headerLayout);
-    _mainLayout.addWidget(&_shortcutsScrollArea);
-
-    setLayout(&_mainLayout);
-
-    _toolbarLayout.addStretch(1);
-    _toolbarLayout.addWidget(&_closeIconLabel);
-
-    _closeIconLabel.setStyleSheet("opacity: 0.5");
-    _closeIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("times", QColor(0, 0, 0, 150)).pixmap(QSize(14, 14)));
+    getMainLayout().addLayout(&_headerLayout);
+    getMainLayout().addWidget(&_shortcutsScrollArea);
 
     _headerLayout.addWidget(&_headerIconLabel);
     _headerLayout.addWidget(&_headerTextLabel);

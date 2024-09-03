@@ -35,7 +35,7 @@ void ShortcutMap::setTitle(const QString& title)
 
 QPointer<QWidget> ShortcutMap::createShortcutMapOverlayWidget(QWidget* source) const
 {
-    return new gui::ShortcutMapOverlayWidget(source, *this);
+    return new gui::ShortcutMapViewPluginOverlayWidget(source, *this);
 }
 
 void ShortcutMap::addShortcut(const Shortcut& shortcut)
