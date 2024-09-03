@@ -174,7 +174,6 @@ signals:
 private:
     QWidget                                         _widget;                            /** Widget representation of the plugin */
     gui::ViewPluginLearningCenterOverlayWidget      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
-    QPointer<QWidget>                               _shortcutMapOverlayWidget;          /** Guarded pointer to shortcut cheatsheet overlay widget  */
     gui::TriggerAction                              _editorAction;                      /** Trigger action to start the view plugin editor */
     gui::TriggerAction                              _screenshotAction;                  /** Trigger action to create a screenshot */
     gui::ToggleAction                               _isolateAction;                     /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */

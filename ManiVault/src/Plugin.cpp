@@ -36,6 +36,8 @@ Plugin::Plugin(const PluginFactory* factory) :
     _destroyAction.setConnectionPermissionsToForceNone();
 
     connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
+
+    _learningCenterAction.initialize(this);
 }
 
 Plugin::~Plugin()

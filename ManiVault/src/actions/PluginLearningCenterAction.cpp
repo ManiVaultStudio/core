@@ -5,6 +5,7 @@
 #include "PluginLearningCenterAction.h"
 
 using namespace mv::util;
+using namespace mv::plugin;
 
 namespace mv::gui {
 
@@ -37,6 +38,8 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
 
         const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getTriggerHelpAction().trigger();
     });
+
+    connect(&_viewShortcutMapAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcutMap);
 }
 
 void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
@@ -86,33 +89,36 @@ void PluginLearningCenterAction::addVideos(const QStringList& tags)
     addVideos(mv::help().getVideos(tags));
 }
 
-const util::Videos& PluginLearningCenterAction::getVideos() const
+const Videos& PluginLearningCenterAction::getVideos() const
 {
     return _videos;
 }
 
+bool PluginLearningCenterAction::isViewPlugin() const
+{
+    return dynamic_cast<ViewPlugin*>(_plugin);
 }
 
-//void ViewPlugin::view()
-//{
-//#ifdef VIEW_PLUGIN_VERBOSE
-//    qDebug() << __FUNCTION__;
-//#endif
-//
-//    if (!_shortcutMapOverlayWidget.isNull())
-//        return;
-//
-//    _shortcutMapOverlayWidget = getMap().createShortcutMapOverlayWidget(&_widget);
-//
-//    _shortcutMapOverlayWidget->show();
-//}
-//
-//void ViewPlugin::viewDescription()
-//{
-//#ifdef VIEW_PLUGIN_VERBOSE
-//    qDebug() << __FUNCTION__;
-//#endif
-//}
+void PluginLearningCenterAction::viewShortcutMap()
+{
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (isViewPlugin())
+    {
+        if (!_shortcutMapOverlayWidget.isNull())
+            return;
+
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(_plugin);
+
+        _shortcutMapOverlayWidget = _plugin->getShortcuts().getMap().createShortcutMapOverlayWidget(&viewPlugin->getWidget());
+
+        _shortcutMapOverlayWidget->show();
+    }
+}
+
+}
 
 //bool Plugin::hasHelp()
 //{
