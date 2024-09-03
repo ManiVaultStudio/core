@@ -20,6 +20,8 @@ namespace mv::gui {
  */
 class CORE_EXPORT PluginLearningCenterAction final : public WidgetAction
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -35,6 +37,38 @@ public:
      */
     void initialize(plugin::Plugin* plugin);
 
+public: // Plugin description
+
+    /**
+     * Get short description
+     * @return Short description in plain text format
+     */
+    QString getShortDescription() const;
+
+    /**
+     * Set short description to \p shortDescription
+     * @param shortDescription Short plugin description in plain text format
+     */
+    void setShortDescription(const QString& shortDescription);
+
+    /**
+     * Get long description
+     * @return Long description in plain text format
+     */
+    QString getLongDescription() const;
+
+    /**
+     * Set long description to \p longDescription
+     * @param longDescription Long plugin description in plain text format
+     */
+    void setLongDescription(const QString& longDescription);
+
+    /**
+     * Get whether the plugin has a description or not
+     * @return Boolean determining whether the plugin has a description or not
+     */
+    bool hasDescription() const;
+
 public: // Help
 
     /**
@@ -42,20 +76,6 @@ public: // Help
      * @return Boolean determining whether the plugin has help information or not
      */
     bool hasHelp() const;
-
-public: // Serialization
-
-    /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
 
 public: // Videos
 
@@ -89,6 +109,20 @@ public: // Videos
      */
     const util::Videos& getVideos() const;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param variantMap Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 private:
 
     /**
@@ -97,6 +131,10 @@ private:
      */
     bool isViewPlugin() const;
 
+    /** View plugin description (view depends on the type of plugin) */
+    void viewDescription();
+
+    /** View shortcut map (view depends on the type of plugin) */
     void viewShortcutMap();
 
 public: // Action getters
@@ -109,6 +147,21 @@ public: // Action getters
     const TriggerAction& getViewHelpAction() const { return _viewHelpAction; }
     const TriggerAction& getViewShortcutMapAction() const { return _viewShortcutMapAction; }
 
+signals:
+
+    /**
+     * Signals that the short description changed from \p previousShortDescription to \p currentShortDescription
+     * @param previousShortDescription Previous short description
+     * @param currentShortDescription Current short description
+     */
+    void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
+
+    /**
+     * Signals that the long description changed from \p previousShortDescription to \p currentShortDescription
+     * @param previousLongDescription Previous long description
+     * @param currentLongDescription Current long description
+     */
+    void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
 
 private:
     plugin::Plugin*         _plugin;                        /** Pointer to associated plugin */
@@ -116,6 +169,8 @@ private:
     TriggerAction           _viewDescriptionAction;         /** Trigger action that displays the plugin help */
     TriggerAction           _viewHelpAction;                /** Trigger action that displays the plugin description */
     TriggerAction           _viewShortcutMapAction;         /** Trigger action that displays the plugin shortcut map */
+    QString                 _shortDescription;              /** Short plugin description in plain text format */
+    QString                 _longDescription;               /** Long plugin description in HTML-formatted text */
     util::Videos            _videos;                        /** Plugin related videos */
     QPointer<QWidget>       _shortcutMapOverlayWidget;      /** Guarded pointer to shortcut cheatsheet overlay widget  */
 

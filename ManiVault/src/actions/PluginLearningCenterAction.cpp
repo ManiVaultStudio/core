@@ -17,12 +17,12 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _viewHelpAction(this, "View help"),
     _viewShortcutMapAction(this, "View shortcuts")
 {
-    //connect(&_viewDescriptionAction, &TriggerAction::triggered, _plugin, &Plugin::viewDescription);
-
-    _viewDescriptionAction.setToolTip("View description");
+    _viewDescriptionAction.setToolTip(getShortDescription());
     _viewDescriptionAction.setIconByName("book-reader");
     _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _viewDescriptionAction.setConnectionPermissionsToForceNone();
+
+    connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewDescription);
 
     //_viewHelpAction.setToolTip(QString("Shows %1 documentation").arg(factory->getKind()));
     //_viewHelpAction.setShortcut(tr("F1"));
@@ -50,6 +50,51 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
         return;
 
     _plugin = plugin;
+
+    if (_shortDescription.isEmpty())
+        setShortDescription(QString("View %1 description").arg(_plugin->getKind()));
+
+    if (_longDescription.isEmpty())
+        setShortDescription("No description available yet, stay tuned");
+}
+
+QString PluginLearningCenterAction::getShortDescription() const
+{
+    return _shortDescription;
+}
+
+void PluginLearningCenterAction::setShortDescription(const QString& shortDescription)
+{
+    if (shortDescription == _shortDescription)
+        return;
+
+    const auto previousShortDescription = _shortDescription;
+
+    _shortDescription = shortDescription;
+
+    emit shortDescriptionChanged(previousShortDescription, _shortDescription);
+}
+
+QString PluginLearningCenterAction::getLongDescription() const
+{
+    return _longDescription;
+}
+
+void PluginLearningCenterAction::setLongDescription(const QString& longDescription)
+{
+    if (longDescription == _longDescription)
+        return;
+
+    const auto previousLongDescription = _longDescription;
+
+    _longDescription = longDescription;
+
+    emit longDescriptionChanged(previousLongDescription, _longDescription);
+}
+
+bool PluginLearningCenterAction::hasDescription() const
+{
+    return !_longDescription.isEmpty();
 }
 
 bool PluginLearningCenterAction::hasHelp() const
@@ -97,6 +142,25 @@ const Videos& PluginLearningCenterAction::getVideos() const
 bool PluginLearningCenterAction::isViewPlugin() const
 {
     return dynamic_cast<ViewPlugin*>(_plugin);
+}
+
+void PluginLearningCenterAction::viewDescription()
+{
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (hasDescription())
+    {
+        if (!_shortcutMapOverlayWidget.isNull())
+            return;
+
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(_plugin);
+
+        _shortcutMapOverlayWidget = _plugin->getShortcuts().getMap().createShortcutMapOverlayWidget(&viewPlugin->getWidget());
+
+        _shortcutMapOverlayWidget->show();
+}
 }
 
 void PluginLearningCenterAction::viewShortcutMap()
