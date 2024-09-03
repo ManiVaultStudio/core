@@ -7,10 +7,8 @@
 #include "widgets/ViewPluginOverlayWidget.h"
 
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QLabel>
 #include <QScrollArea>
-#include <QGraphicsOpacityEffect>
 
 namespace mv::util {
     class ShortcutMap;
