@@ -4,6 +4,8 @@
 
 #include "PluginLearningCenterAction.h"
 
+#include "widgets/ViewPluginDescriptionOverlayWidget.h"
+
 using namespace mv::util;
 using namespace mv::plugin;
 
@@ -150,17 +152,15 @@ void PluginLearningCenterAction::viewDescription()
     qDebug() << __FUNCTION__;
 #endif
 
-    if (hasDescription())
+    if (isViewPlugin() && hasDescription())
     {
-        if (!_shortcutMapOverlayWidget.isNull())
+        if (!_descriptionOverlayWidget.isNull())
             return;
 
-        auto viewPlugin = dynamic_cast<ViewPlugin*>(_plugin);
+        _descriptionOverlayWidget = new gui::ViewPluginDescriptionOverlayWidget(dynamic_cast<ViewPlugin*>(_plugin));
 
-        _shortcutMapOverlayWidget = _plugin->getShortcuts().getMap().createShortcutMapOverlayWidget(&viewPlugin->getWidget());
-
-        _shortcutMapOverlayWidget->show();
-}
+        _descriptionOverlayWidget->show();
+    }
 }
 
 void PluginLearningCenterAction::viewShortcutMap()
@@ -169,27 +169,15 @@ void PluginLearningCenterAction::viewShortcutMap()
     qDebug() << __FUNCTION__;
 #endif
 
-    if (isViewPlugin())
+    if (isViewPlugin() && _plugin->getShortcuts().hasShortcuts())
     {
         if (!_shortcutMapOverlayWidget.isNull())
             return;
 
-        auto viewPlugin = dynamic_cast<ViewPlugin*>(_plugin);
-
-        _shortcutMapOverlayWidget = _plugin->getShortcuts().getMap().createShortcutMapOverlayWidget(&viewPlugin->getWidget());
+        _shortcutMapOverlayWidget = new gui::ViewPluginShortcutsOverlayWidget(dynamic_cast<ViewPlugin*>(_plugin));
 
         _shortcutMapOverlayWidget->show();
     }
 }
 
 }
-
-//bool Plugin::hasHelp()
-//{
-//    return const_cast<PluginFactory*>(_factory)->hasHelp();
-//}
-//
-//mv::gui::TriggerAction& Plugin::getTriggerHelpAction()
-//{
-//    return const_cast<PluginFactory*>(_factory)->getTriggerHelpAction();
-//}

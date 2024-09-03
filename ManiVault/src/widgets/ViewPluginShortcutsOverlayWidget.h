@@ -18,13 +18,13 @@ namespace mv::gui
 {
 
 /**
- * Shortcut map view plugin overlay widget class
+ * View plugin shortcuts overlay widget class
  *
- * Overlays the view plugin source widget with a shortcut map cheat sheet
+ * Overlays the view plugin widget with a shortcuts cheat sheet overlay widget
  *  
  * @author Thomas Kroes
  */
-class ShortcutMapViewPluginOverlayWidget : public ViewPluginOverlayWidget
+class ViewPluginShortcutsOverlayWidget : public ViewPluginOverlayWidget
 {
 public:
 
@@ -32,7 +32,7 @@ public:
      * Construct with pointer to source \p view plugin
      * @param viewPlugin Pointer to source view plugin
      */
-    ShortcutMapViewPluginOverlayWidget(plugin::ViewPlugin* viewPlugin);
+    ViewPluginShortcutsOverlayWidget(plugin::ViewPlugin* viewPlugin);
 
 private:
     const util::ShortcutMap&    _shortcutMap;               /** Const reference to the shortcut map for which to create the overlay */

@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ShortcutMapViewPluginOverlayWidget.h"
+#include "ViewPluginShortcutsOverlayWidget.h"
 
 #include <QDebug>
 
@@ -15,7 +15,7 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-ShortcutMapViewPluginOverlayWidget::ShortcutMapViewPluginOverlayWidget(plugin::ViewPlugin* viewPlugin) :
+ViewPluginShortcutsOverlayWidget::ViewPluginShortcutsOverlayWidget(plugin::ViewPlugin* viewPlugin) :
     ViewPluginOverlayWidget(viewPlugin),
     _shortcutMap(viewPlugin->getShortcuts().getMap())
 {

@@ -172,10 +172,8 @@ private:
     QString                 _shortDescription;              /** Short plugin description in plain text format */
     QString                 _longDescription;               /** Long plugin description in HTML-formatted text */
     util::Videos            _videos;                        /** Plugin related videos */
+    QPointer<QWidget>       _descriptionOverlayWidget;      /** Guarded pointer to description overlay widget  */
     QPointer<QWidget>       _shortcutMapOverlayWidget;      /** Guarded pointer to shortcut cheatsheet overlay widget  */
-
-    //
-//    friend class PluginFactory;
 };
 
 }

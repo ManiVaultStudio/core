@@ -242,7 +242,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::getIc
 
 bool ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::shouldDisplay() const
 {
-    return true;
+    return getViewPlugin()->getLearningCenterAction().hasDescription();
 }
 
 ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :

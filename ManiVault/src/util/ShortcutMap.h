@@ -7,7 +7,7 @@
 #include <QObject>
 #include <QKeySequence>
 
-#include "widgets/ShortcutMapViewPluginOverlayWidget.h"
+#include "widgets/ViewPluginShortcutsOverlayWidget.h"
 
 namespace mv::util {
 
@@ -70,13 +70,6 @@ public:
      * @param title Shortcut map title
      */
     void setTitle(const QString& title);
-
-    /**
-     * Create shortcut cheat sheet overlay widget on top of the \p source widget
-     * @param source Pointer to source widget
-     * @return Guarded pointer to shortcut map overlay widget
-     */
-    QPointer<QWidget> createShortcutMapOverlayWidget(QWidget* source) const;
 
     /**
      * Add \p shortcut to the map

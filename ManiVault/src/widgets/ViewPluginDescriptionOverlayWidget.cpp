@@ -28,29 +28,28 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
     _headerLayout.addStretch(1);
     _headerLayout.setSpacing(10);
 
-    _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("keyboard").pixmap(QSize(24, 24)));
+    _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("book-reader").pixmap(QSize(24, 24)));
     _headerIconLabel.setStyleSheet("padding-top: 2px;");
 
-    /*
-    _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(_shortcutMap.getTitle()));
+    _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b></p>").arg(viewPlugin->getKind()));
 
-    QString categories;
+    //QString categories;
 
-    const auto createShortcutMapCategoryTable = [this](const QString& category) -> QString {
-        const auto header = QString("<p style='font-size: 12pt;'><b>%1</b></p>").arg(category);
+    //const auto createShortcutMapCategoryTable = [this](const QString& category) -> QString {
+    //    const auto header = QString("<p style='font-size: 12pt;'><b>%1</b></p>").arg(category);
 
-        QString rows;
+    //    QString rows;
 
-        for (const auto& shortcut : _shortcutMap.getShortcuts({ category }))
-            rows += QString("<tr><td width='50'><b>%1</b></td><td>%2</td></tr>").arg(shortcut._keySequence.toString(), shortcut._title);
+    //    for (const auto& shortcut : _shortcutMap.getShortcuts({ category }))
+    //        rows += QString("<tr><td width='50'><b>%1</b></td><td>%2</td></tr>").arg(shortcut._keySequence.toString(), shortcut._title);
 
-        const auto table = QString("<table>%1</table>").arg(rows);
+    //    const auto table = QString("<table>%1</table>").arg(rows);
 
-        return header + table;
-        };
+    //    return header + table;
+    //    };
 
-    for (const auto& category : _shortcutMap.getCategories())
-        categories += createShortcutMapCategoryTable(category);
+    //for (const auto& category : _shortcutMap.getCategories())
+    //    categories += createShortcutMapCategoryTable(category);
 
     _shortcutsScrollArea.setWidgetResizable(true);
     _shortcutsScrollArea.setWidget(&_shortcutsWidget);
@@ -63,8 +62,7 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
 
     _shortcutsWidget.setLayout(&_shortcutsWidgetLayout);
 
-    _bodyLabel.setText(categories);
-    */
+    _bodyLabel.setText(viewPlugin->getLearningCenterAction().getLongDescription());
 }
 
 }
