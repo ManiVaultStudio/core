@@ -16,12 +16,27 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _viewHelpAction(this, "View help"),
     _viewShortcutMapAction(this, "View shortcuts")
 {
-    //connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &Plugin::viewDescription);
+    //connect(&_viewDescriptionAction, &TriggerAction::triggered, _plugin, &Plugin::viewDescription);
 
-    //_viewDescriptionAction.setToolTip("View description");
-    //_viewDescriptionAction.setIconByName("book-reader");
-    //_viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
-    //_viewDescriptionAction.setConnectionPermissionsToForceNone();
+    _viewDescriptionAction.setToolTip("View description");
+    _viewDescriptionAction.setIconByName("book-reader");
+    _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _viewDescriptionAction.setConnectionPermissionsToForceNone();
+
+    //_viewHelpAction.setToolTip(QString("Shows %1 documentation").arg(factory->getKind()));
+    //_viewHelpAction.setShortcut(tr("F1"));
+    //_viewHelpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    //_viewHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
+    //_viewHelpAction.setConnectionPermissionsToForceNone();
+
+    connect(&_viewHelpAction, &TriggerAction::triggered, this, [this]() -> void {
+        Q_ASSERT(_plugin);
+
+        if (!_plugin)
+            return;
+
+        const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getTriggerHelpAction().trigger();
+    });
 }
 
 void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
@@ -32,6 +47,11 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
         return;
 
     _plugin = plugin;
+}
+
+bool PluginLearningCenterAction::hasHelp() const
+{
+    return _plugin->getFactory()->hasHelp();
 }
 
 void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)

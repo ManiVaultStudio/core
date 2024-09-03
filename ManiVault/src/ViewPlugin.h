@@ -160,7 +160,6 @@ public: // Action getters
     gui::OptionsAction& getDockingOptionsAction() { return _dockingOptionsAction; }
     gui::LockingAction& getLockingAction() { return _lockingAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
-    gui::TriggerAction& getHelpAction() { return _helpAction; }
     gui::PresetsAction& getPresetsAction() { return _presetsAction; }
     gui::ViewPluginSamplerAction& getSamplerAction() { return _samplerAction; }
 
@@ -185,7 +184,6 @@ private:
     gui::OptionsAction                              _dockingOptionsAction;              /** Action for toggling docking options */
     gui::LockingAction                              _lockingAction;                     /** Action for toggling whether the view plugin is locked */
     gui::ToggleAction                               _visibleAction;                     /** Action which determines whether the view plugin is visible or not */
-    gui::TriggerAction                              _helpAction;                        /** Action which triggers documentation */
     gui::PresetsAction                              _presetsAction;                     /** Action for managing presets */
     gui::ViewPluginSamplerAction                    _samplerAction;                     /** Action for displaying a tooltip for sampled elements */
     QKeySequence                                    _triggerShortcut;                   /** Shortcut for triggering the plugin */

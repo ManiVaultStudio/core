@@ -111,7 +111,7 @@ public: // Help
      * Get whether the plugin has help information or not
      * @return Boolean determining whether the plugin has help information or not
      */
-    virtual bool hasHelp();
+    virtual bool hasHelp() const;
 
     /**
      * Get the read me markdown file URL

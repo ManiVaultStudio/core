@@ -15,7 +15,10 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataHierarchyWidget(nullptr)
 {
-    getVideoTags().setStringList({ "Practitioner", "Developer" });
+    getShortcuts().add({ QKeySequence(Qt::CTRL | Qt::Key_Minus), "Expand/collapse", "Collapse all" });
+    getShortcuts().add({ QKeySequence(Qt::CTRL | Qt::Key_Plus), "Expand/collapse", "Expand all" });
+
+    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
 
 void DataHierarchyPlugin::init()

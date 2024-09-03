@@ -90,7 +90,7 @@ void ViewPluginDockWidget::initialize()
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
 
     connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
-        _viewPlugin->getTriggerHelpAction().trigger();
+        _viewPlugin->getLearningCenterAction().getViewHelpAction().trigger();
     });
 
     connect(&plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
@@ -116,7 +116,7 @@ void ViewPluginDockWidget::initialize()
             _settingsMenu.addSeparator();
         }
 
-        if (_viewPlugin->hasHelp())
+        if (_viewPlugin->getLearningCenterAction().hasHelp())
             _settingsMenu.addAction(&_helpAction);
 
         if (_viewPlugin->getFactory()->getReadmeMarkdownUrl().isValid())

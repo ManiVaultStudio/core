@@ -110,7 +110,7 @@ void PluginFactory::setStatusBarAction(PluginStatusBarAction* statusBarAction)
     emit statusBarActionChanged(_statusBarAction);
 }
 
-bool PluginFactory::hasHelp()
+bool PluginFactory::hasHelp() const
 {
     return false;
 }

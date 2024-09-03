@@ -35,20 +35,14 @@ public:
      */
     void initialize(plugin::Plugin* plugin);
 
-//public: // Help
-//
-//    /**
-//     * Get whether the plugin has help information or not
-//     * @return Boolean determining whether the plugin has help information or not
-//     */
-//    virtual bool hasHelp();
-//
-//    /**
-//     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
-//     * @return Reference to show help trigger action (maybe nullptr if the plugin does not provide any help)
-//     */
-//    virtual gui::TriggerAction& getTriggerHelpAction() final;
-//
+public: // Help
+
+    /**
+     * Get whether the plugin has help information or not
+     * @return Boolean determining whether the plugin has help information or not
+     */
+    bool hasHelp() const;
+
 public: // Serialization
 
     /**

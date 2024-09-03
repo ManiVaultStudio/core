@@ -212,6 +212,26 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     toolbarAction.addAction(&_unhideAction);
     toolbarAction.addAction(&_statisticsAction);
 
+    auto collapseAllAction = new QAction(this);
+
+    collapseAllAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Minus));
+
+    this->addAction(collapseAllAction);
+
+    connect(collapseAllAction, &TriggerAction::triggered, this, [this]() -> void {
+        _hierarchyWidget.getCollapseAllAction().trigger();
+    });
+
+    auto expandAllAction = new QAction(this);
+
+    expandAllAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Plus));
+
+    this->addAction(expandAllAction);
+
+    connect(expandAllAction, &TriggerAction::triggered, this, [this]() -> void {
+        _hierarchyWidget.getExpandAllAction().trigger();
+        });
+
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setItemDelegate(new ItemDelegate(this));
