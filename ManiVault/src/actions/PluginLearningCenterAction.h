@@ -141,11 +141,11 @@ public: // Action getters
 
     TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; }
     TriggerAction& getViewHelpAction() { return _viewHelpAction; }
-    TriggerAction& getViewShortcutMapAction() { return _viewShortcutMapAction; }
+    TriggerAction& getViewShortcutsAction() { return _viewShortcutsAction; }
 
     const TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; }
     const TriggerAction& getViewHelpAction() const { return _viewHelpAction; }
-    const TriggerAction& getViewShortcutMapAction() const { return _viewShortcutMapAction; }
+    const TriggerAction& getViewShortcutMapAction() const { return _viewShortcutsAction; }
 
 signals:
 
@@ -168,12 +168,12 @@ private:
     HorizontalGroupAction   _actions;                       /** Learning center actions */
     TriggerAction           _viewDescriptionAction;         /** Trigger action that displays the plugin help */
     TriggerAction           _viewHelpAction;                /** Trigger action that displays the plugin description */
-    TriggerAction           _viewShortcutMapAction;         /** Trigger action that displays the plugin shortcut map */
+    TriggerAction           _viewShortcutsAction;           /** Trigger action that displays the plugin shortcut map */
     QString                 _shortDescription;              /** Short plugin description in plain text format */
     QString                 _longDescription;               /** Long plugin description in HTML-formatted text */
     util::Videos            _videos;                        /** Plugin related videos */
-    QPointer<QWidget>       _descriptionOverlayWidget;      /** Guarded pointer to description overlay widget  */
-    QPointer<QWidget>       _shortcutMapOverlayWidget;      /** Guarded pointer to shortcut cheatsheet overlay widget  */
+    QPointer<QWidget>       _descriptionOverlayWidget;      /** Guarded pointer to description overlay widget */
+    QPointer<QWidget>       _shortcutsOverlayWidget;        /** Guarded pointer to shortcuts overlay widget */
 };
 
 }

@@ -276,7 +276,7 @@ ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsTool
 
 void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
-    getViewPlugin()->getLearningCenterAction().getViewShortcutMapAction().trigger();
+    getViewPlugin()->getLearningCenterAction().getViewShortcutsAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon() const

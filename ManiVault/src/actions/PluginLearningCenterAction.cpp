@@ -17,7 +17,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _actions(this, "Actions"),
     _viewDescriptionAction(this, "View description"),
     _viewHelpAction(this, "View help"),
-    _viewShortcutMapAction(this, "View shortcuts")
+    _viewShortcutsAction(this, "View shortcuts")
 {
     _viewDescriptionAction.setToolTip(getShortDescription());
     _viewDescriptionAction.setIconByName("book-reader");
@@ -38,7 +38,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
         const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getTriggerHelpAction().trigger();
     });
 
-    connect(&_viewShortcutMapAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcutMap);
+    connect(&_viewShortcutsAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcutMap);
 }
 
 void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
@@ -170,12 +170,12 @@ void PluginLearningCenterAction::viewShortcutMap()
 
     if (isViewPlugin() && _plugin->getShortcuts().hasShortcuts())
     {
-        if (!_shortcutMapOverlayWidget.isNull())
+        if (!_shortcutsOverlayWidget.isNull())
             return;
 
-        _shortcutMapOverlayWidget = new gui::ViewPluginShortcutsOverlayWidget(dynamic_cast<ViewPlugin*>(_plugin));
+        _shortcutsOverlayWidget = new gui::ViewPluginShortcutsOverlayWidget(dynamic_cast<ViewPlugin*>(_plugin));
 
-        _shortcutMapOverlayWidget->show();
+        _shortcutsOverlayWidget->show();
     }
 }
 
