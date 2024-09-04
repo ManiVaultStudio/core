@@ -102,22 +102,29 @@ private:
          */
         bool eventFilter(QObject* target, QEvent* event) override;
 
-    private:
-
         /** Updates the item icon (for badge update) */
         void updateIcon();
 
+        /** Toggles item visibility based on the learning center visibility action status */
+        void installVisibilityToggle();
+
     private:
-        const plugin::ViewPlugin*   _viewPlugin;        /** Const pointer to source view plugin */
-        OverlayWidget*              _overlayWidget;     /** Pointer to overlay widget */
-        const QSize                 _iconSize;          /** Size of the item icon */
-        QHBoxLayout                 _layout;            /** For placing the icon label */
-        QLabel                      _iconLabel;         /** Icon label */
-        mv::util::WidgetFader       _widgetFader;       /** For fading in/out */
+
+        /** Update visibility based on current settings */
+        void updateVisibility();
+
+    private:
+        const plugin::ViewPlugin*   _viewPlugin;            /** Const pointer to source view plugin */
+        OverlayWidget*              _overlayWidget;         /** Pointer to overlay widget */
+        const QSize                 _iconSize;              /** Size of the item icon */
+        QHBoxLayout                 _layout;                /** For placing the icon label */
+        QLabel                      _iconLabel;             /** Icon label */
+        mv::util::WidgetFader       _widgetFader;           /** For fading in/out */
+        bool                        _hasVisibilityToggle;   /** Boolean determining whether a visibility toggle is installed */
     };
 
-    /** Toolbar item widget for hiding the toolbar widget */
-    class CloseToolbarItemWidget final : public AbstractToolbarItemWidget
+    /** Toolbar item widget for hiding the other toolbar widget items */
+    class VisibleToolbarItemWidget final : public AbstractToolbarItemWidget
     {
     public:
 
@@ -126,7 +133,7 @@ private:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        CloseToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        VisibleToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed

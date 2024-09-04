@@ -142,6 +142,8 @@ void Plugin::fromVariantMap(const QVariantMap& variantMap)
     WidgetAction::fromVariantMap(variantMap);
 
     Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
+
+    _learningCenterAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap Plugin::toVariantMap() const
@@ -156,6 +158,8 @@ QVariantMap Plugin::toVariantMap() const
         { "Type", static_cast<std::uint32_t>(_factory->getType()) },
         { "Version", _factory->getVersion() }
     });
+
+    _learningCenterAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

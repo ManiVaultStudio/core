@@ -17,7 +17,8 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _actions(this, "Actions"),
     _viewDescriptionAction(this, "View description"),
     _viewHelpAction(this, "View help"),
-    _viewShortcutsAction(this, "View shortcuts")
+    _viewShortcutsAction(this, "View shortcuts"),
+    _viewPluginOverlayVisibleAction(this, "View plugin overlay visible", true)
 {
     _viewDescriptionAction.setToolTip(getShortDescription());
     _viewDescriptionAction.setIconByName("book-reader");
@@ -38,7 +39,19 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
         const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getTriggerHelpAction().trigger();
     });
 
-    connect(&_viewShortcutsAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcutMap);
+    connect(&_viewShortcutsAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcuts);
+
+    _viewPluginOverlayVisibleAction.setToolTip("Toggle view plugin learning center toolbar visibility");
+    _viewPluginOverlayVisibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _viewPluginOverlayVisibleAction.setConnectionPermissionsToForceNone();
+
+    const auto updateViewPluginOverlayVisibleActionIcon = [this]() -> void {
+        _viewPluginOverlayVisibleAction.setIconByName(_viewPluginOverlayVisibleAction.isChecked() ? "eye" : "eye-slash");
+    };
+
+    updateViewPluginOverlayVisibleActionIcon();
+
+    connect(&_viewPluginOverlayVisibleAction, &ToggleAction::toggled, this, updateViewPluginOverlayVisibleActionIcon);
 }
 
 void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
@@ -103,18 +116,6 @@ bool PluginLearningCenterAction::hasHelp() const
     return _plugin->getFactory()->hasHelp();
 }
 
-void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)
-{
-    WidgetAction::fromVariantMap(variantMap);
-}
-
-QVariantMap PluginLearningCenterAction::toVariantMap() const
-{
-    auto variantMap = WidgetAction::toVariantMap();
-
-    return variantMap;
-}
-
 void PluginLearningCenterAction::addVideo(const util::Video& video)
 {
     _videos.push_back(video);
@@ -162,7 +163,7 @@ void PluginLearningCenterAction::viewDescription()
     }
 }
 
-void PluginLearningCenterAction::viewShortcutMap()
+void PluginLearningCenterAction::viewShortcuts()
 {
 #ifdef VIEW_PLUGIN_VERBOSE
     qDebug() << __FUNCTION__;
@@ -177,6 +178,22 @@ void PluginLearningCenterAction::viewShortcutMap()
 
         _shortcutsOverlayWidget->show();
     }
+}
+
+void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    _viewPluginOverlayVisibleAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap PluginLearningCenterAction::toVariantMap() const
+{
+    auto variantMap = WidgetAction::toVariantMap();
+
+    _viewPluginOverlayVisibleAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 }

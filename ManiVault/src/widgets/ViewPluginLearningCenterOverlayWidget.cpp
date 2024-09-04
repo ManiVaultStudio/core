@@ -59,7 +59,8 @@ ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolba
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
     _iconSize(iconSize),
-    _widgetFader(nullptr, &_iconLabel, .0f)
+    _widgetFader(nullptr, &_iconLabel, .0f),
+    _hasVisibilityToggle(false)
 {
     setObjectName("ToolbarItemWidget");
 
@@ -98,20 +99,47 @@ void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::enterEven
 {
     QWidget::enterEvent(event);
 
-    _widgetFader.setOpacity(0.8f, 100);
+    updateVisibility();
+
+    if (getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked())
+        _widgetFader.setOpacity(0.8f, 100);
 }
 
 void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::leaveEvent(QEvent* event)
 {
     QWidget::leaveEvent(event);
 
-    _widgetFader.setOpacity(.35f, 350);
+    if (getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked())
+        _widgetFader.setOpacity(.35f, 350);
 }
 
 void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateIcon()
 {
     _iconLabel.setFixedSize(QSize(16, 16));
     _iconLabel.setPixmap(getIcon().pixmap(_iconSize));
+}
+
+void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::installVisibilityToggle()
+{
+    if (_hasVisibilityToggle)
+        return;
+
+    updateVisibility();
+
+    connect(&getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction(), &ToggleAction::toggled, this, &AbstractToolbarItemWidget::updateVisibility);
+
+    _hasVisibilityToggle = true;
+}
+
+void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateVisibility()
+{
+    if (!_hasVisibilityToggle)
+        return;
+
+    if (getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked())
+        _widgetFader.setOpacity(.35f, 350);
+    else
+        _widgetFader.setOpacity(.0f, 350);
 }
 
 const plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin() const
@@ -136,7 +164,10 @@ bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilt
         case QEvent::Enter:
         {
             setVisible(shouldDisplay());
-            _widgetFader.setOpacity(.35f, 350);
+
+            if (!_hasVisibilityToggle || (_hasVisibilityToggle && getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked()))
+                _widgetFader.setOpacity(.35f, 350);
+
             break;
         }
 
@@ -153,23 +184,25 @@ bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilt
     return QWidget::eventFilter(watched, event);
 }
 
-ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::CloseToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::VisibleToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(12, 12))
 {
-    setToolTip("Hide the toolbar");
+    setToolTip("Hide the learning center");
+
+    connect(&getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction(), &ToggleAction::toggled, this, [this]() -> void { updateIcon();});
 }
 
-void ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+void ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
-    parentWidget()->hide();
+    getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().toggle();
 }
 
-QIcon ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::getIcon() const
+QIcon ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("times");
+    return getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().icon();
 }
 
-bool ViewPluginLearningCenterOverlayWidget::CloseToolbarItemWidget::shouldDisplay() const
+bool ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::shouldDisplay() const
 {
     return true;
 }
@@ -178,6 +211,8 @@ ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarIte
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip("Watch related videos");
+
+    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -226,6 +261,8 @@ ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::Description
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(getViewPlugin()->getLearningCenterAction().getViewDescriptionAction().toolTip());
+
+    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -249,6 +286,8 @@ ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowD
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getTriggerHelpAction().toolTip());
+
+    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -272,6 +311,8 @@ ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsTool
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip("View shortcuts");
+
+    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -299,6 +340,8 @@ ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGi
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getVisitRepositoryAction().toolTip());
+
+    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -322,6 +365,8 @@ ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::ToLear
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(mv::help().getToLearningCenterAction().toolTip());
+
+    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -353,7 +398,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
 
     _layout.setSpacing(8);
 
-    _layout.addWidget(new CloseToolbarItemWidget(viewPlugin, overlayWidget));
+    _layout.addWidget(new VisibleToolbarItemWidget(viewPlugin, overlayWidget));
     _layout.addStretch(1);
     _layout.addWidget(new VideosToolbarItemWidget(viewPlugin, overlayWidget));
     _layout.addWidget(new DescriptionToolbarItemWidget(viewPlugin, overlayWidget));

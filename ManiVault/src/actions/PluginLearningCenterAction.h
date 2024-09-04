@@ -6,6 +6,7 @@
 
 #include "actions/WidgetAction.h"
 #include "actions/HorizontalGroupAction.h"
+#include "actions/ToggleAction.h"
 
 #include "util/Video.h"
 
@@ -109,6 +110,20 @@ public: // Videos
      */
     const util::Videos& getVideos() const;
 
+private:
+
+    /**
+     * Get whether PluginLearningCenterAction#_viewPlugin is a view plugin
+     * @return Boolean determining whether PluginLearningCenterAction#_plugin is a view plugin or not
+     */
+    bool isViewPlugin() const;
+
+    /** View plugin description (view depends on the type of plugin) */
+    void viewDescription();
+
+    /** View shortcuts (view depends on the type of plugin) */
+    void viewShortcuts();
+
 public: // Serialization
 
     /**
@@ -123,29 +138,17 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-private:
-
-    /**
-     * Get whether PluginLearningCenterAction#_viewPlugin is a view plugin
-     * @return Boolean determining whether PluginLearningCenterAction#_plugin is a view plugin or not
-     */
-    bool isViewPlugin() const;
-
-    /** View plugin description (view depends on the type of plugin) */
-    void viewDescription();
-
-    /** View shortcut map (view depends on the type of plugin) */
-    void viewShortcutMap();
-
 public: // Action getters
 
     TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; }
     TriggerAction& getViewHelpAction() { return _viewHelpAction; }
     TriggerAction& getViewShortcutsAction() { return _viewShortcutsAction; }
+    ToggleAction& getViewPluginOverlayVisibleAction() { return _viewPluginOverlayVisibleAction; }
 
     const TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; }
     const TriggerAction& getViewHelpAction() const { return _viewHelpAction; }
-    const TriggerAction& getViewShortcutMapAction() const { return _viewShortcutsAction; }
+    const TriggerAction& getViewShortcutsAction() const { return _viewShortcutsAction; }
+    const ToggleAction& getViewPluginOverlayVisibleAction() const  { return _viewPluginOverlayVisibleAction; }
 
 signals:
 
@@ -164,16 +167,17 @@ signals:
     void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
 
 private:
-    plugin::Plugin*         _plugin;                        /** Pointer to associated plugin */
-    HorizontalGroupAction   _actions;                       /** Learning center actions */
-    TriggerAction           _viewDescriptionAction;         /** Trigger action that displays the plugin help */
-    TriggerAction           _viewHelpAction;                /** Trigger action that displays the plugin description */
-    TriggerAction           _viewShortcutsAction;           /** Trigger action that displays the plugin shortcut map */
-    QString                 _shortDescription;              /** Short plugin description in plain text format */
-    QString                 _longDescription;               /** Long plugin description in HTML-formatted text */
-    util::Videos            _videos;                        /** Plugin related videos */
-    QPointer<QWidget>       _descriptionOverlayWidget;      /** Guarded pointer to description overlay widget */
-    QPointer<QWidget>       _shortcutsOverlayWidget;        /** Guarded pointer to shortcuts overlay widget */
+    plugin::Plugin*         _plugin;                            /** Pointer to associated plugin */
+    HorizontalGroupAction   _actions;                           /** Learning center actions */
+    TriggerAction           _viewDescriptionAction;             /** Trigger action that displays the plugin help */
+    TriggerAction           _viewHelpAction;                    /** Trigger action that displays the plugin description */
+    TriggerAction           _viewShortcutsAction;               /** Trigger action that displays the plugin shortcut map */
+    ToggleAction            _viewPluginOverlayVisibleAction;    /** Toggles view plugin overlay widget visibility on/off */
+    QString                 _shortDescription;                  /** Short plugin description in plain text format */
+    QString                 _longDescription;                   /** Long plugin description in HTML-formatted text */
+    util::Videos            _videos;                            /** Plugin related videos */
+    QPointer<QWidget>       _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
+    QPointer<QWidget>       _shortcutsOverlayWidget;            /** Guarded pointer to shortcuts overlay widget */
 };
 
 }
