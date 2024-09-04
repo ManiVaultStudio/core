@@ -7,10 +7,7 @@
 #include "AbstractHelpManager.h"
 #include "HelpManagerVideosModel.h"
 
-namespace mv
-{
-
-class HelpManager final : public AbstractHelpManager
+class HelpManager final : public mv::AbstractHelpManager
 {
     Q_OBJECT
 
@@ -30,7 +27,7 @@ public:
      * @param tags Fitler tags (returns all videos if empty)
      * @return Vector of videos
      */
-    util::Videos getVideos(const QStringList& tags) const override;
+    mv::util::Videos getVideos(const QStringList& tags) const override;
 
 public: // Action getters
 
@@ -51,5 +48,3 @@ private:
     HelpManagerVideosModel      _videosModel;                   /** Videos model */
     
 };
-
-}

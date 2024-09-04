@@ -26,11 +26,8 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
 
     connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewDescription);
 
-    //_viewHelpAction.setToolTip(QString("Shows %1 documentation").arg(factory->getKind()));
-    //_viewHelpAction.setShortcut(tr("F1"));
-    //_viewHelpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    //_viewHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
-    //_viewHelpAction.setConnectionPermissionsToForceNone();
+    _viewHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
+    _viewHelpAction.setConnectionPermissionsToForceNone();
 
     connect(&_viewHelpAction, &TriggerAction::triggered, this, [this]() -> void {
         Q_ASSERT(_plugin);
@@ -52,6 +49,8 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
         return;
 
     _plugin = plugin;
+
+    _viewHelpAction.setToolTip(QString("Shows %1 documentation").arg(_plugin->getKind()));
 
     if (_shortDescription.isEmpty())
         setShortDescription(QString("View %1 description").arg(_plugin->getKind()));

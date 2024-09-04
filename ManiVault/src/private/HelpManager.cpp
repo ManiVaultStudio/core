@@ -12,15 +12,13 @@
 #include <QDesktopServices>
 #include <QMainWindow>
 
+using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
 #ifdef _DEBUG
     //#define HELP_MANAGER_VERBOSE
 #endif
-
-namespace mv
-{
 
 HelpManager::HelpManager() :
     AbstractHelpManager(),
@@ -121,6 +119,4 @@ Videos HelpManager::getVideos(const QStringList& tags) const
     }
 
     return videos;
-}
-
 }
