@@ -245,6 +245,19 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
                 break;
             }
 
+            case QEvent::Enter:
+            {
+
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked());
+                break;
+            }
+
+            case QEvent::Leave:
+            {
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
+                break;
+            }
+
         default:
             break;
         }
