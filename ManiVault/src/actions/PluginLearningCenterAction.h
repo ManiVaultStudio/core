@@ -50,7 +50,12 @@ public:
      * Get view plugin overlay widget
      * @return Pointer to plugin overlay widget (maybe nullptr)
      */
-    ViewPluginLearningCenterOverlayWidget* getViewPluginOverlayWidget();
+    ViewPluginLearningCenterOverlayWidget* getViewPluginOverlayWidget() const;
+
+protected:
+
+    /** Create the view plugin overlay widget (should only be called by the view plugin) */
+    void createViewPluginOverlayWidget();
 
 public: // Plugin description
 
@@ -199,6 +204,8 @@ private:
     ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
     QPointer<QWidget>                           _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
     QPointer<QWidget>                           _shortcutsOverlayWidget;            /** Guarded pointer to shortcuts overlay widget */
+
+    friend class plugin::ViewPlugin;
 };
 
 }

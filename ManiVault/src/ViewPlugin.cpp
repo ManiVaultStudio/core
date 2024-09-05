@@ -165,6 +165,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         _mayFloatAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Float"));
         _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
     });
+
+    getLearningCenterAction().createViewPluginOverlayWidget();
 }
 
 void ViewPlugin::init()

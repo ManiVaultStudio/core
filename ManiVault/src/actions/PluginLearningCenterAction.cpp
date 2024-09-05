@@ -75,16 +75,17 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
 
     if (_learningCenterOverlayWidget)
         _learningCenterOverlayWidget->deleteLater();
-
-    if (isViewPlugin()) {
-        _learningCenterOverlayWidget = new ViewPluginLearningCenterOverlayWidget(&getViewPlugin()->getWidget(), getViewPlugin());
-        _learningCenterOverlayWidget->show();
-    }
 }
 
-ViewPluginLearningCenterOverlayWidget* PluginLearningCenterAction::getViewPluginOverlayWidget()
+ViewPluginLearningCenterOverlayWidget* PluginLearningCenterAction::getViewPluginOverlayWidget() const
 {
     return _learningCenterOverlayWidget;
+}
+
+void PluginLearningCenterAction::createViewPluginOverlayWidget()
+{
+    _learningCenterOverlayWidget = new ViewPluginLearningCenterOverlayWidget(&getViewPlugin()->getWidget(), getViewPlugin());
+    _learningCenterOverlayWidget->show();
 }
 
 QString PluginLearningCenterAction::getShortDescription() const
@@ -158,10 +159,15 @@ const Videos& PluginLearningCenterAction::getVideos() const
 
 bool PluginLearningCenterAction::isViewPlugin() const
 {
-    return dynamic_cast<ViewPlugin*>(_plugin);
+    Q_ASSERT(_plugin);
+
+    if (!_plugin)
+        return false;
+
+    return _plugin->getType() == plugin::Type::VIEW;
 }
 
-ViewPlugin* PluginLearningCenterAction::getViewPlugin() const
+plugin::ViewPlugin* PluginLearningCenterAction::getViewPlugin() const
 {
     return dynamic_cast<ViewPlugin*>(_plugin);
 }
