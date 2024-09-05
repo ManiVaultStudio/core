@@ -61,14 +61,16 @@ ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolba
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
     _iconSize(iconSize),
-    _widgetFader(nullptr, &_iconLabel, .0f),
+    _widgetFader(nullptr, this, .0f),
     _hasVisibilityToggle(false)
 {
     setObjectName("ToolbarItemWidget");
 
     _iconLabel.setAlignment(Qt::AlignCenter);
 
-    _layout.setContentsMargins(0, 0, 0, 0);
+    constexpr auto margin = 3;
+
+    _layout.setContentsMargins(margin, margin, margin, margin);
     _layout.addWidget(&_iconLabel);
 
     setLayout(&_layout);
@@ -398,7 +400,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
     setAttribute(Qt::WA_TransparentForMouseEvents, false);
 
-    _layout.setSpacing(8);
+    _layout.setSpacing(0);
 
     _layout.addWidget(new VisibleToolbarItemWidget(viewPlugin, overlayWidget));
     _layout.addStretch(1);
