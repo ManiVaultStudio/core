@@ -47,6 +47,8 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidget)
 {
     getWidgetOverlayer().setTargetWidget(targetWidget);
+
+    setParent(targetWidget);
 }
 
 void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t margin)

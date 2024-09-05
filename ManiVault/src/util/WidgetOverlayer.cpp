@@ -120,7 +120,6 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
 
 void WidgetOverlayer::synchronizeGeometry() const
 {
-    //_sourceWidget->move(_targetWidget->pos());
     _sourceWidget->resize(_targetWidget->size());
 }
 
