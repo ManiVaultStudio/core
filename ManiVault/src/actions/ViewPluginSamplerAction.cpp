@@ -225,8 +225,6 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
     if (!_enabledAction.isChecked() || !_viewPlugin || !_pixelSelectionAction || !_samplerPixelSelectionAction || !_samplerPixelSelectionAction->isEnabled())
         return HorizontalGroupAction::eventFilter(target, event);
 
-    qDebug() << __FUNCTION__;
-
     if (target == &_viewPlugin->getWidget()) {
         auto& selectionTypeAction = _pixelSelectionAction->getTypeAction();
 
