@@ -25,7 +25,8 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _settingsAction(this, "Settings"),
     _restrictNumberOfElementsAction(this, "Restrict number of elements", false),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
-    _sampleContextLazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100)
+    _sampleContextLazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100),
+    _openSampleContextWindow(this, "Open sample scope window")
 {
     setShowLabels(false);
 
@@ -84,6 +85,12 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
         emit sampleContextRequested();
 
         _sampleContextDirty = false;
+    });
+
+    
+
+    connect(&_openSampleContextWindow, &TriggerAction::triggered, this, []() -> void {
+        
     });
 }
 

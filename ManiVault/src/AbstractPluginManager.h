@@ -88,13 +88,22 @@ private:
 public:
 
     /**
-     * Create a view plugin plugin of \p kind and dock it to \p dockToViewPlugin at \p dockArea
+     * Create a view plugin of \p kind, dock it to \p dockToViewPlugin at \p dockArea and assign the \p datasets
      * @param kind Kind of plugin (name of the plugin)
      * @param dockToViewPlugin View plugin instance to dock to
      * @param dockArea Dock area to dock in
+     * @param datasets Datasets to assign to the view plugin
      * @return Pointer of view plugin type to created view plugin, nullptr if creation failed
      */
     virtual plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) = 0;
+
+    /**
+     * Create a view plugin of \p kind and float it on top of the main window
+     * @param kind Kind of plugin (name of the plugin)
+     * @param datasets Datasets to assign to the view plugin
+     * @return Pointer of view plugin type to created view plugin, nullptr if creation failed
+     */
+    virtual plugin::ViewPlugin* requestViewPluginFloated(const QString& kind, Datasets datasets = Datasets()) = 0;
 
     /**
      * Destroy \p plugin

@@ -142,6 +142,7 @@ public: // Action getters
     ToggleAction& getRestrictNumberOfElementsAction() { return _restrictNumberOfElementsAction; }
     IntegralAction& getMaximumNumberOfElementsAction() { return _maximumNumberOfElementsAction; }
     IntegralAction& getToolTipLazyUpdateIntervalAction() { return _sampleContextLazyUpdateIntervalAction; }
+    TriggerAction& getOpenSampleContextWindow() { return _openSampleContextWindow; }
 
 signals:
 
@@ -173,6 +174,7 @@ private:
     QString                         _toolTipHtmlString;                         /** HTML tooltip string */
     std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                      /** Overlay widget for the tooltip */
     QLabel                          _toolTipLabel;                              /** The text label which contains the actual tooltip text */
+    TriggerAction                   _openSampleContextWindow;                   /** Opens a sample context window */
 };
 
 }

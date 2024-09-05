@@ -351,6 +351,16 @@ plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin
     return viewPlugin;
 }
 
+plugin::ViewPlugin* PluginManager::requestViewPluginFloated(const QString& kind, Datasets datasets)
+{
+    const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
+
+    if (viewPlugin != nullptr)
+        mv::workspaces().addViewPluginFloated(viewPlugin);
+
+    return viewPlugin;
+}
+
 void PluginManager::addPlugin(plugin::Plugin* plugin)
 {
     Q_ASSERT(plugin != nullptr);
