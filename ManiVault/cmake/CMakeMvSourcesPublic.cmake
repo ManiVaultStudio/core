@@ -266,6 +266,7 @@ set(PUBLIC_TOOLBAR_ACTIONS_FILES
 set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/Actions.h
     src/actions/DatasetPickerAction.h
+    src/actions/PluginPickerAction.h
     src/actions/ImageAction.h
     src/actions/PixelSelectionAction.h
     src/actions/WindowLevelAction.h
@@ -280,6 +281,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/DatasetPickerAction.cpp
+    src/actions/PluginPickerAction.cpp
     src/actions/ImageAction.cpp
     src/actions/PixelSelectionAction.cpp
     src/actions/WindowLevelAction.cpp

@@ -14,35 +14,78 @@ using namespace mv;
 
 namespace mv {
 
-PluginsListModel::PluginsListModel(QObject* parent /*= nullptr*/) :
-    AbstractPluginsModel(parent)
+PluginsListModel::PluginsListModel(PopulationMode populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
+    AbstractPluginsModel(populationMode, parent)
 {
-    setColumnCount(static_cast<int>(AbstractPluginsModel::Column::Count));
+    setColumnCount(static_cast<int>(Column::Count));
 
-    const auto pluginTypes = plugin::Types{
-        plugin::Type::ANALYSIS,
-        plugin::Type::DATA,
-        plugin::Type::LOADER,
-        plugin::Type::WRITER,
-        plugin::Type::TRANSFORMATION,
-        plugin::Type::VIEW
-    };
+    populateFromPluginManager();
+}
 
-    for (auto pluginType : pluginTypes) {
-        for (auto pluginFactory : plugins().getPluginFactoriesByType(pluginType)) {
-            for (auto plugin : plugins().getPluginsByFactory(pluginFactory)) {
-                auto pluginRow = new QStandardItem(plugin->getGuiName());
-                auto pluginId = new QStandardItem(plugin->getId());
+plugin::Plugins PluginsListModel::getPlugins() const
+{
+    plugin::Plugins plugins;
 
-                pluginId->setEditable(false);
+    for (int rowIndex = 0; rowIndex < rowCount(); rowIndex++)
+        plugins.push_back(dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getPlugin());
 
-                pluginRow->setData(QVariant::fromValue(plugin));
-                pluginRow->setEditable(false);
+    return plugins;
+}
 
-                appendRow({ pluginRow, new QStandardItem("Instance"), pluginId });
-            }
-        }
-    }
+plugin::Plugin* PluginsListModel::getPlugin(const QModelIndex& modelIndex) const
+{
+    auto item = dynamic_cast<Item*>(itemFromIndex(modelIndex.siblingAtColumn(static_cast<int>(AbstractPluginsModel::Column::Name))));
+
+    if (!item)
+        return {};
+
+    return item->getPlugin();
+}
+
+void PluginsListModel::setPlugins(const plugin::Plugins& plugins)
+{
+    setRowCount(0);
+
+    for (const auto plugin : plugins)
+        addPlugin(plugin);
+}
+
+void PluginsListModel::populateFromPluginManager()
+{
+    setPlugins(mv::plugins().getPluginsByTypes());
+}
+
+void PluginsListModel::addPlugin(plugin::Plugin* plugin)
+{
+    Q_ASSERT(plugin);
+
+    if (!plugin)
+        return;
+
+    auto pluginRow  = new QStandardItem(plugin->getGuiName());
+    auto pluginId   = new QStandardItem(plugin->getId());
+
+    pluginRow->setData(QVariant::fromValue(plugin));
+    pluginRow->setEditable(false);
+
+    pluginId->setEditable(false);
+
+    appendRow({ pluginRow, new QStandardItem("Instance"), pluginId });
+}
+
+void PluginsListModel::removePlugin(plugin::Plugin* plugin)
+{
+    Q_ASSERT(plugin);
+
+    if (!plugin)
+        return;
+
+    const auto matches = match(index(0, static_cast<int>(AbstractPluginsModel::Column::Id)), Qt::EditRole, plugin->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+
+    if (matches.isEmpty())
+        return;
+
+    removeRow(matches.first().row());
 }
 
 }

@@ -284,13 +284,13 @@ void AbstractDatasetsModel::setPopulationMode(PopulationMode populationMode)
 
     switch (_populationMode)
     {
-        case AbstractDatasetsModel::PopulationMode::Manual: {
+        case PopulationMode::Manual: {
             disconnect(&mv::data(), &AbstractDataManager::datasetAdded, this, nullptr);
 
             break;
         }
 
-        case AbstractDatasetsModel::PopulationMode::Automatic: {
+        case PopulationMode::Automatic: {
             connect(&mv::data(), &AbstractDataManager::datasetAdded, this, [this](Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true) -> void {
                 addDataset(dataset);
             });

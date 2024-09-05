@@ -20,10 +20,45 @@ class CORE_EXPORT PluginsListModel : public AbstractPluginsModel
 public:
 
     /**
-     * Construct plugin manager model with \p parent
+     * Construct with \p populationMode and pointer to \p parent object
+     * @param populationMode Population mode
      * @param parent Pointer to parent object
      */
-    PluginsListModel(QObject* parent = nullptr);
+    PluginsListModel(PopulationMode populationMode = PopulationMode::Automatic, QObject* parent = nullptr);
+
+    /**
+     * Get plugins
+     * @return Vector of plugins
+     */
+    plugin::Plugins getPlugins() const override;
+
+    /**
+     * Get plugin for \p modelIndex
+     * @param modelIndex Index to retrieve
+     * @return Pointer to plugin (maybe nullptr)
+     */
+    plugin::Plugin* getPlugin(const QModelIndex& modelIndex) const override;
+
+    /**
+     * Set the \p plugins from which can be picked (mode is set to Mode::Manual)
+     * @param plugins Vector of plugins
+     */
+    void setPlugins(const plugin::Plugins& plugins) override;
+
+    /** Synchronize the plugins with the core */
+    void populateFromPluginManager() override;
+
+    /**
+     * Add \p plugin to the model
+     * @param plugin Pointer to plugin
+     */
+    void addPlugin(plugin::Plugin* plugin) override;
+
+    /**
+     * Remove \p plugin from the model
+     * @param plugin Pointer to plugin
+     */
+    void removePlugin(plugin::Plugin* plugin) override;
 };
 
 }
