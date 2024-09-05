@@ -8,9 +8,11 @@
 
 #include <ViewPlugin.h>
 
-#include <actions/TriggerAction.h>
+#include <actions/HorizontalGroupAction.h>
+#include <actions/PluginPickerAction.h>
 
 using namespace mv::plugin;
+using namespace mv::gui;
 
 /**
  * Sample context plugin
@@ -35,7 +37,9 @@ public:
     void init() override;
 
 private:
-    SampleContextWidget    _sampleContextWidget;      /** Sample context widget */
+    SampleContextWidget     _sampleContextWidget;       /** Sample context widget */
+    HorizontalGroupAction   _horizontalGroupAction;     /** Horizontal group action for settings */
+    PluginPickerAction      _sourcePluginPickerAction;  /** Action for picking the source plugin */
 };
 
 class SampleContextPluginFactory : public ViewPluginFactory

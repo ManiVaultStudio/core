@@ -12,8 +12,11 @@ using namespace mv;
 
 SampleContextPlugin::SampleContextPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
-    _sampleContextWidget(this, nullptr)
+    _sampleContextWidget(this, nullptr),
+    _horizontalGroupAction(this, "Settings"),
+    _sourcePluginPickerAction(this, "Source plugin")
 {
+    _horizontalGroupAction.addAction(&_sourcePluginPickerAction);
 }
 
 void SampleContextPlugin::init()
@@ -22,7 +25,8 @@ void SampleContextPlugin::init()
 
     layout->setContentsMargins(6, 6, 6, 6);
 
-    layout->addWidget(&_sampleContextWidget);
+    layout->addWidget(_horizontalGroupAction.createWidget(&getWidget()));
+    layout->addWidget(&_sampleContextWidget, 1);
 
     getWidget().setLayout(layout);
 }
