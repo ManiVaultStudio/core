@@ -16,9 +16,62 @@ Q_DECLARE_METATYPE(mv::plugin::Plugin*);
 
 namespace mv {
 
-AbstractPluginsModel::AbstractPluginsModel(QObject* parent /*= nullptr*/) :
-    StandardItemModel(parent)
+AbstractPluginsModel::Item::Item(plugin::Plugin* plugin, const QString& title) :
+    QStandardItem(title),
+    _plugin(plugin)
 {
+}
+
+plugin::Plugin* AbstractPluginsModel::Item::getPlugin() const
+{
+    return _plugin;
+}
+
+AbstractPluginsModel::AbstractPluginsModel(PopulationMode populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
+
+    StandardItemModel(parent),
+
+    _populationMode()
+
+{
+
+    setPopulationMode(populationMode);
+
+}
+
+
+AbstractPluginsModel::PopulationMode AbstractPluginsModel::getPopulationMode() const
+{
+    return _populationMode;
+}
+
+void AbstractPluginsModel::setPopulationMode(PopulationMode populationMode)
+{
+#ifdef ABSTRACT_PLUGINS_MODEL_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
+    _populationMode = populationMode;
+
+    switch (_populationMode)
+    {
+        case PopulationMode::Manual: {
+            disconnect(&mv::plugins(), &AbstractPluginManager::pluginAdded, this, nullptr);
+            disconnect(&mv::plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, nullptr);
+
+            break;
+        }
+
+        case PopulationMode::Automatic: {
+            connect(&mv::plugins(), &AbstractPluginManager::pluginAdded, this, &AbstractPluginsModel::addPlugin);
+            connect(&mv::plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, &AbstractPluginsModel::removePlugin);
+
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 QVariant AbstractPluginsModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -31,7 +84,7 @@ QVariant AbstractPluginsModel::headerData(int section, Qt::Orientation orientati
         case Column::Category:
             return CategoryItem::headerData(orientation, role);
 
-        case Column::ID:
+        case Column::Id:
             return IdItem::headerData(orientation, role);
 
         default:

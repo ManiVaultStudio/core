@@ -12,22 +12,21 @@
 
 #include "event/EventListener.h"
 
-#include "models/DatasetsListModel.h"
-#include "models/DatasetsFilterModel.h"
+#include "models/PluginsListModel.h"
+#include "models/PluginsFilterModel.h"
 
 #include <QAbstractListModel>
 
 namespace mv::gui {
 
 /**
- * Dataset picker action class
+ * Plugin picker action class
  *
- * Action class for picking a dataset from a list
- * Automatically removes items when datasets are removed and renamed
+ * Action class for picking a plugin from a list.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT DatasetPickerAction : public OptionAction
+class CORE_EXPORT PluginPickerAction : public OptionAction
 {
 Q_OBJECT
 
@@ -39,7 +38,7 @@ public:
      * @param title Title of the action
      * @param mode Picker mode
      */
-    Q_INVOKABLE DatasetPickerAction(QObject* parent, const QString& title);
+    Q_INVOKABLE PluginPickerAction(QObject* parent, const QString& title);
 
     /**
      * Get datasets
@@ -94,13 +93,13 @@ public: // Population
      * Get current population mode
      * @return Population mode
      */
-    AbstractDatasetsModel::PopulationMode getPopulationMode() const;
+    AbstractPluginsModel::PopulationMode getPopulationMode() const;
 
     /**
      * Set population mode to \p populationMode
      * @param populationMode Population mode
      */
-    void setPopulationMode(AbstractDatasetsModel::PopulationMode populationMode);
+    void setPopulationMode(AbstractPluginsModel::PopulationMode populationMode);
 
 private:
 
@@ -108,10 +107,10 @@ private:
     void populationModeChanged();
 
     /** Blocks the DatasetPickerAction::datasetsChanged() signal from being emitted */
-    void blockDatasetsChangedSignal();
+    void blockPluginsChangedSignal();
 
     /** Allows the DatasetPickerAction::datasetsChanged() signal to be emitted */
-    void unblockDatasetsChangedSignal();
+    void unblockPluginsChangedSignal();
 
     /**
      * Get whether the DatasetPickerAction::datasetsChanged() may be emitted
@@ -151,36 +150,36 @@ public: // Serialization
 signals:
 
     /**
-     * Signals that a dataset has been picked
-     * @param Smart pointer to picked dataset
+     * Signals that \p pickedPlugin is picked
+     * @param pickedPlugin Pointer to picked plugin
      */
-    void datasetPicked(mv::Dataset<mv::DatasetImpl> pickedDataset);
+    void pluginPicked(plugin::Plugin* pickedPlugin);
 
     /**
-     * Signals that selectable datasets changed
-     * @param datasets Selectable datasets
+     * Signals that selectable plugins changed
+     * @param plugins Selectable plugins
      */
-    void datasetsChanged(mv::Datasets datasets);
+    void pluginsChanged(const plugin::Plugins& plugins);
 
     /**
      * Signals that the population mode changed from \p previousPopulationMode to \p populationMode
      * @param previousPopulationMode Previous population mode
      * @param populationMode Previous population mode
      */
-    void populationModeChanged(AbstractDatasetsModel::PopulationMode previousPopulationMode, AbstractDatasetsModel::PopulationMode populationMode);
+    void populationModeChanged(AbstractPluginsModel::PopulationMode previousPopulationMode, AbstractPluginsModel::PopulationMode populationMode);
 
 private:
-    AbstractDatasetsModel::PopulationMode   _populationMode;                /** Population mode (e.g. manual or automatic) */
-    DatasetsListModel                       _datasetsListModel;             /** Datasets list model for manual population (mv::data().getDatasetsListModel() otherwise) */
-    DatasetsFilterModel                     _datasetsFilterModel;           /** Filter model for the datasets model above */
+    AbstractPluginsModel::PopulationMode    _populationMode;                /** Population mode (e.g. manual or automatic) */
+    PluginsListModel                        _pluginsListModel;              /** Plugins list model */
+    PluginsFilterModel                      _pluginsFilterModel;            /** Filter model for the plugins model above */
     bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_pluginsFilterModel */
     QStringList                             _currentDatasetsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
 
-    friend class AbstractActionsManager;
+    friend class AbstractPluginsManager;
 };
 
 }
 
-Q_DECLARE_METATYPE(mv::gui::DatasetPickerAction)
+Q_DECLARE_METATYPE(mv::gui::PluginPickerAction)
 
-inline const auto datasetPickerActionMetaTypeId = qRegisterMetaType<mv::gui::DatasetPickerAction*>("mv::gui::DatasetPickerAction");
+inline const auto pluginPickerActionMetaTypeId = qRegisterMetaType<mv::gui::PluginPickerAction*>("mv::gui::PluginPickerAction");

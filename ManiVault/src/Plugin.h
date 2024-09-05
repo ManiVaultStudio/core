@@ -179,4 +179,6 @@ protected:
     friend class PluginFactory;
 };
 
+using Plugins = std::vector<Plugin*>;
+
 }

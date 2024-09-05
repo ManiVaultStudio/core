@@ -36,7 +36,7 @@ public: // Action getters
     OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
 
 private:
-    StringAction   _applicationSessionIdAction;    /** String action for the application session ID */
+    StringAction   _applicationSessionIdAction;    /** String action for the application session Id */
     OptionAction   _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
 };
 
