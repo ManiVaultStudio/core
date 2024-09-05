@@ -7,6 +7,7 @@
 #include <QMainWindow>
 
 #include "Application.h"
+#include "util/Icon.h"
 
 namespace mv::gui {
 

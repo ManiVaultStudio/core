@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AbstractManager.h"
+#include "Application.h"
 #include "Project.h"
 #include "ProjectSerializationTask.h"
 

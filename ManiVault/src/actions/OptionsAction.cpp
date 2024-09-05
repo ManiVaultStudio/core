@@ -6,6 +6,7 @@
 #include "ModelSelectionAction.h"
 
 #include "Application.h"
+#include "util/Miscellaneous.h"
 
 #include <QDebug>
 #include <QHeaderView>

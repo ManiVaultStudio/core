@@ -5,8 +5,10 @@
 #include "LearningPagePluginAction.h"
 
 #include <Application.h>
+#include <PluginFactory.h>
 
 #include <QDebug>
+#include <QEnterEvent>
 #include <QEvent>
 
 using namespace mv;

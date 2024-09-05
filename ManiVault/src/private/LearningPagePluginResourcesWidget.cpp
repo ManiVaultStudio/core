@@ -8,6 +8,7 @@
 #include "LearningPagePluginAction.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <QDebug>
 

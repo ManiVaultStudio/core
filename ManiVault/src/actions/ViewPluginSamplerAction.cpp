@@ -4,6 +4,12 @@
 
 #include "ViewPluginSamplerAction.h"
 
+#include "ViewPlugin.h"
+
+#include "util/Exception.h"
+
+#include <QEvent>
+
 using namespace mv::util;
 
 namespace mv::gui {
@@ -242,6 +248,19 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
             case QEvent::MouseButtonRelease:
             {
                 _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked());
+                break;
+            }
+
+            case QEvent::Enter:
+            {
+
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked());
+                break;
+            }
+
+            case QEvent::Leave:
+            {
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
                 break;
             }
 

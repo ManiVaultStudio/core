@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "util/FileDownloader.h"
+#include <util/FileDownloader.h>
 
 #include <QMap>
 #include <QStandardItemModel>

@@ -4,7 +4,10 @@
 
 #include "StartupProjectsModel.h"
 
+#include <ProjectMetaAction.h>
 #include <util/Icon.h>
+
+#include <QString>
 
 #ifdef _DEBUG
     #define STARTUP_PROJECTS_MODEL_VERBOSE

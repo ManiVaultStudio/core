@@ -4,6 +4,8 @@
 
 #include "IconAction.h"
 
+#include "util/Icon.h"
+
 #include <QBuffer>
 
 using namespace mv::util;

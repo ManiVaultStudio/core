@@ -13,8 +13,6 @@
 
 namespace mv::gui {
 
-class WidgetAction;
-
 /**
  * Widget action collapsed widget class
  * 

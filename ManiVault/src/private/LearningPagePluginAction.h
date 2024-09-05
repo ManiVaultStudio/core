@@ -6,8 +6,11 @@
 
 #include "util/WidgetOverlayer.h"
 
-#include <QWidget>
+#include <QLabel>
 #include <QHBoxLayout>
+#include <QWidget>
+
+#include <functional>
 
 namespace mv::plugin {
     class PluginFactory;

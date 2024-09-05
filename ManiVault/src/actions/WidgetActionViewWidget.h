@@ -9,6 +9,8 @@
 
 #include <QWidget>
 
+#include <cstdint>
+
 namespace mv::gui {
 
 class WidgetAction;

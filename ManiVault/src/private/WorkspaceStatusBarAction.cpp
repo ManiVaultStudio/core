@@ -5,6 +5,7 @@
 #include "WorkspaceStatusBarAction.h"
 
 #include <actions/LockingAction.h>
+#include <CoreInterface.h>
 
 #ifdef _DEBUG
     #define WORKSPACE_STATUS_BAR_ACTION_VERBOSE

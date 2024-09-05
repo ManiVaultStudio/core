@@ -6,9 +6,10 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "Dataset.h"
 #include "StandardItemModel.h"
 
-#include "Dataset.h"
+#include "actions/ToggleAction.h"
 
 #include <QList>
 #include <QStandardItem>

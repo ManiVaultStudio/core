@@ -4,9 +4,11 @@
 
 #pragma once
 
-#include <QWidget>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QString>
+#include <QVBoxLayout>
+#include <QWidget>
 
 /**
  * Page content widget class

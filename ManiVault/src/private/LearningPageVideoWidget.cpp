@@ -11,10 +11,14 @@
 
 #include <widgets/YouTubeVideoDialog.h>
 
-#include <QDebug>
 #include <QAbstractTextDocumentLayout>
-#include <QEvent>
+#include <QDateTime>
+#include <QDebug>
 #include <QDesktopServices>
+#include <QEvent>
+#include <QLocale>
+#include <QModelIndex>
+#include <QString>
 
 //#define USE_YOUTUBE_DIALOG
 

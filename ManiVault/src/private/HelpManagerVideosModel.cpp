@@ -68,7 +68,7 @@ QSet<QString> HelpManagerVideosModel::getTagsSet() const
 
 void HelpManagerVideosModel::populateFromServer()
 {
-    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
+    connect(&_fileDownloader, &mv::util::FileDownloader::downloaded, this, [this]() -> void {
         setRowCount(0);
 
         const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
