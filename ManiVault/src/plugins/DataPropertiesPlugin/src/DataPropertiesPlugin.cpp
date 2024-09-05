@@ -42,7 +42,7 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     });
 
     getLearningCenterAction().setShortDescription("Data properties of the selected dataset(s)");
-    getLearningCenterAction().setLongDescription("This plugin shows the properties of dataset(s) which are currently selected (for instance in the <b>data hierarchy plugin</b>). The properties are arranged in collapsible sections and are changes are saved with the project.");
+    getLearningCenterAction().setLongDescription("This plugin shows the properties of dataset(s) which are currently selected (for instance in the <b>data hierarchy plugin</b>). The properties are arranged in collapsible sections and changes are saved with the project.");
 
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }

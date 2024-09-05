@@ -5,6 +5,7 @@
 #include "ViewPluginDescriptionOverlayWidget.h"
 
 #include <QDebug>
+#include <QScrollBar>
 
 #ifdef _DEBUG
     #define VIEW_PLUGIN_DESCRIPTION_OVERLAY_WIDGET_VERBOSE
@@ -55,6 +56,7 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
     _shortcutsScrollArea.setWidget(&_shortcutsWidget);
     _shortcutsScrollArea.setObjectName("Shortcuts");
     _shortcutsScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
+    _shortcutsScrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     _shortcutsWidgetLayout.setContentsMargins(0, 0, 0, 0);
     _shortcutsWidgetLayout.addWidget(&_bodyLabel);
@@ -63,6 +65,7 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
     _shortcutsWidget.setLayout(&_shortcutsWidgetLayout);
 
     _bodyLabel.setText(viewPlugin->getLearningCenterAction().getLongDescription());
+    _bodyLabel.setWordWrap(true);
 }
 
 }
