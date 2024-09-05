@@ -42,6 +42,11 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     hierarchyWidget.getFilterGroupAction().setPopupSizeHint(QSize(350, 0));
 
     hierarchyWidget.getToolbarAction().addAction(&mv::settings().getParametersSettings().getExpertModeAction(), ToggleAction::PushButtonIcon);
+
+    getLearningCenterAction().setShortDescription("Explore all shared parameters in the project");
+    getLearningCenterAction().setLongDescription("This plugin shows the linkages between <b>parameters</b> through <b>shared</b> parameters. Shared parameters are <b>public</b> parameters to which private (plugin) parameters can connect.");
+
+    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
 
 void SharedParametersPlugin::init()
