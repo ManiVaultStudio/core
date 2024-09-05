@@ -83,12 +83,6 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
         _sampleContextDirty = false;
     });
-
-    
-
-    connect(&_openSampleContextWindow, &TriggerAction::triggered, this, []() -> void {
-        
-    });
 }
 
 void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSelectionAction* pixelSelectionAction, PixelSelectionAction* samplerPixelSelectionAction)
@@ -130,6 +124,15 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _toolTipLabel.setWordWrap(true);
 
         _sampleContextLazyUpdateTimer.start();
+
+        _viewPlugin->getWidget().addAction(&_openSampleContextWindow);
+
+        _openSampleContextWindow.setShortcut(QKeySequence(Qt::Key_F4));
+
+        connect(&_openSampleContextWindow, &TriggerAction::triggered, this, []() -> void {
+            qDebug() << __FUNCTION__;
+            auto sampleScopePlugin = mv::plugins().requestViewPluginFloated("Sample scope");
+        });
 
         _isInitialized = true;
     }

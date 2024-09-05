@@ -801,12 +801,14 @@ set(PUBLIC_TASKS_MODEL_FILES
 set(PUBLIC_PLUGINS_MODEL_HEADERS
     src/models/AbstractPluginsModel.h
     src/models/PluginsTreeModel.h
+    src/models/PluginsListModel.h
     src/models/PluginsFilterModel.h
 )
 
 set(PUBLIC_PLUGINS_MODEL_SOURCES
     src/models/AbstractPluginsModel.cpp
     src/models/PluginsTreeModel.cpp
+    src/models/PluginsListModel.cpp
     src/models/PluginsFilterModel.cpp
 )
 
