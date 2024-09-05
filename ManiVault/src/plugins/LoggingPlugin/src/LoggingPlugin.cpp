@@ -17,6 +17,10 @@ LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _loggingWidget(nullptr)
 {
+    getLearningCenterAction().setShortDescription("Shows <b>ManiVault</b> logging");
+    getLearningCenterAction().setLongDescription("This plugin shows the <b>ManiVault</b> logging information. It contains all the logs produced by the core of <b>ManiVault</b> and its plugins.");
+
+    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
 
 void LoggingPlugin::init()
