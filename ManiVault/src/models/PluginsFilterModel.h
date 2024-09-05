@@ -56,7 +56,9 @@ public:
     void setFilterFunction(const FilterFunction& filterFunction);
 
 public:
-    mv::gui::ToggleAction& getInstantiatedPluginsOnlyAction() { return _instantiatedPluginsOnlyAction; }
+
+    gui::ToggleAction& getUseFilterFunctionAction() { return _useFilterFunctionAction; }
+    gui::ToggleAction& getInstantiatedPluginsOnlyAction() { return _instantiatedPluginsOnlyAction; }
 
 private:
     bool hasPluginInstances(const QModelIndex& index, int level = 0) const;

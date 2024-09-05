@@ -33,25 +33,24 @@ Q_OBJECT
 public:
 
     /**
-     * Constructor
+     * Construct with pointer to \p parent object and \p title
      * @param parent Pointer to parent object
      * @param title Title of the action
-     * @param mode Picker mode
      */
     Q_INVOKABLE PluginPickerAction(QObject* parent, const QString& title);
 
     /**
-     * Get datasets
-     * @return Datasets
+     * Get plugins
+     * @return Vector of plugins
      */
-    mv::Datasets getDatasets() const;
+    plugin::Plugins getPlugins() const;
 
     /**
-     * Set the datasets from which can be picked (mode is set to Mode::Manual)
-     * @param datasets Datasets from which can be picked
-     * @param silent Whether the signal datasetsChanged is emitted
+     * Set the \p plugins from which can be picked (mode is set to Mode::Manual)
+     * @param plugins Plugins from which can be picked
+     * @param silent Whether the signal pluginsChanged is emitted
      */
-    void setDatasets(mv::Datasets datasets, bool silent = false);
+    void setPlugins(const plugin::Plugins& plugins, bool silent = false);
 
     /**
      * Set plugins filter function to \p filterFunction
@@ -59,33 +58,39 @@ public:
      */
     void setFilterFunction(const PluginsFilterModel::FilterFunction& filterFunction);
 
-    /** Get the current dataset */
-    mv::Dataset<mv::DatasetImpl> getCurrentDataset() const;
+    /**
+     * Get selected plugin
+     * @return Pointer to selected plugin (maybe nullptr)
+     */
+    plugin::Plugin* getCurrentPlugin() const;
 
-    /** Get the current dataset */
-    template<typename DatasetType>
-    inline mv::Dataset<DatasetType> getCurrentDataset() const
+    /**
+     * Get selected plugin of \p PluginType
+     * @return Pointer to selected plugin of \p PluginType (maybe nullptr)
+     */
+    template<typename PluginType>
+    inline PluginType* getCurrentPlugin() const
     {
-        return getCurrentDataset();
+        return dynamic_cast<PluginType>(getCurrentPlugin());
     }
 
     /**
-     * Set current dataset to \p currentDataset
-     * @param currentDataset Smart pointer to current dataset
+     * Set current plugin to \p currentPlugin
+     * @param currentPlugin Pointer to current plugin (maybe nullptr)
      */
-    void setCurrentDataset(mv::Dataset<mv::DatasetImpl> currentDataset);
+    void setCurrentPlugin(const plugin::Plugin* currentPlugin);
 
     /**
-     * Set current dataset by \p datasetId
-     * @param datasetId Current dataset globally unique identifier
+     * Set current plugin by \p pluginId
+     * @param pluginId Current plugin globally unique identifier
      */
-    void setCurrentDataset(const QString& datasetId);
+    void setCurrentPlugin(const QString& pluginId);
 
     /**
-     * Get current dataset globally unique identifier
-     * @return The globally unique identifier of the currently selected dataset (if any)
+     * Get current plugin globally unique identifier
+     * @return The globally unique identifier of the currently selected plugin (if any)
      */
-    QString getCurrentDatasetId() const;
+    QString getCurrentPluginId() const;
 
 public: // Population
 
@@ -113,10 +118,10 @@ private:
     void unblockPluginsChangedSignal();
 
     /**
-     * Get whether the DatasetPickerAction::datasetsChanged() may be emitted
-     * @return Boolean determining whether the DatasetPickerAction::datasetsChanged() may be emitted
+     * Get whether the PluginPickerAction::pluginsChanged() may be emitted
+     * @return Boolean determining whether the PluginPickerAction::pluginsChanged() may be emitted
      */
-    bool isDatasetsChangedSignalBlocked() const;
+    bool isPluginsChangedSignalBlocked() const;
 
 protected: // Linking
 
@@ -173,7 +178,7 @@ private:
     PluginsListModel                        _pluginsListModel;              /** Plugins list model */
     PluginsFilterModel                      _pluginsFilterModel;            /** Filter model for the plugins model above */
     bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_pluginsFilterModel */
-    QStringList                             _currentDatasetsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
+    QStringList                             _currentPluginsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
 
     friend class AbstractPluginsManager;
 };

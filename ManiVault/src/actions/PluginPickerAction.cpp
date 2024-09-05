@@ -15,6 +15,7 @@
 #endif
 
 using namespace mv::util;
+using namespace mv::plugin;
 
 namespace mv::gui {
 
@@ -51,24 +52,22 @@ PluginPickerAction::PluginPickerAction(QObject* parent, const QString& title) :
     });
 
     const auto filterModelChanged = [this]() -> void {
-        /*
-        if (isDatasetsChangedSignalBlocked())
+        if (isPluginsChangedSignalBlocked())
             return;
 
-        const auto datasets = getDatasets();
+        const auto plugins = getPlugins();
 
-        QStringList datasetsIds;
+        QStringList pluginIds;
 
-        for (const auto& dataset : datasets)
-            datasetsIds << dataset->getId();
+        for (const auto& dataset : plugins)
+            pluginIds << dataset->getId();
 
-        if (datasetsIds == _currentDatasetsIds)
+        if (pluginIds == _currentPluginsIds)
             return;
 
-        _currentDatasetsIds = datasetsIds;
+        _currentPluginsIds = pluginIds;
 
-        emit pluginsChanged(datasets);
-        */
+        emit pluginsChanged(plugins);
     };
 
     connect(&_pluginsFilterModel, &QSortFilterProxyModel::rowsInserted, this, filterModelChanged);
@@ -79,10 +78,9 @@ PluginPickerAction::PluginPickerAction(QObject* parent, const QString& title) :
     populationModeChanged();
 }
 
-Datasets PluginPickerAction::getDatasets() const
+Plugins PluginPickerAction::getPlugins() const
 {
-    
-    Datasets datasets;
+    Plugins plugins;
 
     /*
     for (std::int32_t filterModelRowIndex = 0; filterModelRowIndex < _pluginsFilterModel.rowCount(); ++filterModelRowIndex) {
@@ -106,36 +104,33 @@ Datasets PluginPickerAction::getDatasets() const
         }
     }
     */
-    return datasets;
+
+    return plugins;
 }
 
-void PluginPickerAction::setDatasets(Datasets datasets, bool silent /*= false*/)
+void PluginPickerAction::setPlugins(const plugin::Plugins& plugins, bool silent /*= false*/)
 {
 #ifdef DATASET_PICKER_ACTION_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    /*
-    setPopulationMode(AbstractDatasetsModel::PopulationMode::Manual);
+    setPopulationMode(AbstractPluginsModel::PopulationMode::Manual);
 
     if (silent) {
         blockPluginsChangedSignal();
         {
-            _pluginsListModel.setDatasets(datasets);
+            _pluginsListModel.setPlugins(plugins);
         }
         unblockPluginsChangedSignal();
     }
     else {
-        _pluginsListModel.setDatasets(datasets);
+        _pluginsListModel.setPlugins(plugins);
 
-        emit datasetsChanged(_pluginsListModel.getDatasets());
+        emit pluginsChanged(_pluginsListModel.getPlugins());
     }
 
-    auto publicPluginPickerAction = dynamic_cast<PluginPickerAction*>(getPublicAction());
-
-    if (publicPluginPickerAction)
-        setCurrentDataset(publicPluginPickerAction->getCurrentDataset());
-    */
+    if (auto publicPluginPickerAction = dynamic_cast<PluginPickerAction*>(getPublicAction()))
+        setCurrentPlugin(publicPluginPickerAction->getCurrentPlugin());
 }
 
 void PluginPickerAction::setFilterFunction(const PluginsFilterModel::FilterFunction& filterFunction)
@@ -144,10 +139,10 @@ void PluginPickerAction::setFilterFunction(const PluginsFilterModel::FilterFunct
     qDebug() << __FUNCTION__;
 #endif
 
-    //_pluginsFilterModel.setFilterFunction(filterFunction);
+    _pluginsFilterModel.setFilterFunction(filterFunction);
 }
 
-Dataset<DatasetImpl> PluginPickerAction::getCurrentDataset() const
+plugin::Plugin* PluginPickerAction::getCurrentPlugin() const
 {
     /*
     if (getCurrentIndex() < 0)
@@ -179,50 +174,51 @@ Dataset<DatasetImpl> PluginPickerAction::getCurrentDataset() const
     return {};
 }
 
-void PluginPickerAction::setCurrentDataset(Dataset<DatasetImpl> currentDataset)
+void PluginPickerAction::setCurrentPlugin(const plugin::Plugin* currentPlugin)
 {
-    /*
-    QModelIndex datasetIndex;
+    Q_ASSERT(currentPlugin);
 
-    if (currentDataset.isValid()) {
-        switch (_populationMode)
-        {
-            case AbstractDatasetsModel::PopulationMode::Manual:
-                datasetIndex = _pluginsListModel.getIndexFromDataset(currentDataset);
-                break;
-
-            case AbstractDatasetsModel::PopulationMode::Automatic:
-                datasetIndex = mv::data().getDatasetsListModel().getIndexFromDataset(currentDataset);
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    if (!datasetIndex.isValid())
+    if (!currentPlugin)
         return;
 
-    setCurrentIndex(_pluginsFilterModel.mapFromSource(datasetIndex).row());
-    */
-}
-
-void PluginPickerAction::setCurrentDataset(const QString& datasetId)
-{
-    /*
-    if (datasetId.isEmpty())
-        return;
-
-    QModelIndex datasetIndex;
+    QModelIndex pluginIndex;
 
     switch (_populationMode)
     {
+        case AbstractPluginsModel::PopulationMode::Manual:
+            pluginIndex = _pluginsListModel.getIndexFromPlugin(currentPlugin);
+            break;
+
+        case AbstractPluginsModel::PopulationMode::Automatic:
+            //pluginIndex = mv::data().getDatasetsListModel().getIndexFromDataset(currentDataset);
+            break;
+
+        default:
+            break;
+    }
+
+    if (!pluginIndex.isValid())
+        return;
+
+    setCurrentIndex(_pluginsFilterModel.mapFromSource(pluginIndex).row());
+}
+
+void PluginPickerAction::setCurrentPlugin(const QString& pluginId)
+{
+    if (pluginId.isEmpty())
+        return;
+
+    QModelIndex datasetIndex;
+
+    /*
+    switch (_populationMode)
+    {
         case AbstractDatasetsModel::PopulationMode::Manual:
-            datasetIndex = _pluginsListModel.getIndexFromDataset(datasetId);
+            datasetIndex = _pluginsListModel.getIndexFromPlugin(datasetId);
             break;
 
         case AbstractDatasetsModel::PopulationMode::Automatic:
-            datasetIndex = mv::data().getDatasetsListModel().getIndexFromDataset(datasetId);
+            datasetIndex = mv::data().getDatasetsListModel().getIndexFromPlugin(datasetId);
             break;
 
         default:
@@ -236,9 +232,12 @@ void PluginPickerAction::setCurrentDataset(const QString& datasetId)
     */
 }
 
-QString PluginPickerAction::getCurrentDatasetId() const
+QString PluginPickerAction::getCurrentPluginId() const
 {
-    return getCurrentDataset().getDatasetId();
+    if (auto currentPlugin = getCurrentPlugin())
+        return currentPlugin->getId();
+
+    return {};
 }
 
 AbstractPluginsModel::PopulationMode PluginPickerAction::getPopulationMode() const
@@ -266,16 +265,16 @@ void PluginPickerAction::setPopulationMode(AbstractPluginsModel::PopulationMode 
 
 void PluginPickerAction::populationModeChanged()
 {
-    /*
     switch (_populationMode)
     {
-        case AbstractDatasetsModel::PopulationMode::Manual: {
+        case AbstractPluginsModel::PopulationMode::Manual:
+        {
             _pluginsFilterModel.getUseFilterFunctionAction().setChecked(false);
             _pluginsFilterModel.setSourceModel(&_pluginsListModel);
             break;
         }
 
-        case AbstractDatasetsModel::PopulationMode::Automatic:
+        case AbstractPluginsModel::PopulationMode::Automatic:
         {
             _pluginsFilterModel.getUseFilterFunctionAction().setChecked(true);
             _pluginsFilterModel.setSourceModel(&const_cast<DatasetsListModel&>(mv::data().getDatasetsListModel()));
@@ -285,7 +284,6 @@ void PluginPickerAction::populationModeChanged()
         default:
             break;
     }
-    */
 }
 
 void PluginPickerAction::blockPluginsChangedSignal()
@@ -298,7 +296,7 @@ void PluginPickerAction::unblockPluginsChangedSignal()
     _blockDatasetsChangedSignal = false;
 }
 
-bool PluginPickerAction::isDatasetsChangedSignalBlocked() const
+bool PluginPickerAction::isPluginsChangedSignalBlocked() const
 {
     return _blockDatasetsChangedSignal;
 }
@@ -313,10 +311,10 @@ void PluginPickerAction::connectToPublicAction(WidgetAction* publicAction, bool 
     if (publicPluginPickerAction == nullptr)
         return;
 
-    connect(this, &PluginPickerAction::datasetPicked, publicPluginPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&PluginPickerAction::setCurrentDataset));
-    connect(publicPluginPickerAction, &PluginPickerAction::datasetPicked, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&PluginPickerAction::setCurrentDataset));
+    connect(this, &PluginPickerAction::datasetPicked, publicPluginPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&PluginPickerAction::setCurrentPlugin));
+    connect(publicPluginPickerAction, &PluginPickerAction::datasetPicked, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&PluginPickerAction::setCurrentPlugin));
 
-    setCurrentDataset(publicPluginPickerAction->getCurrentDataset());
+    setCurrentPlugin(publicPluginPickerAction->getCurrentPlugin());
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
     */
@@ -335,8 +333,8 @@ void PluginPickerAction::disconnectFromPublicAction(bool recursive)
     if (publicPluginPickerAction == nullptr)
         return;
 
-    disconnect(this, &PluginPickerAction::datasetPicked, publicPluginPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&PluginPickerAction::setCurrentDataset));
-    disconnect(publicPluginPickerAction, &PluginPickerAction::datasetPicked, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&PluginPickerAction::setCurrentDataset));
+    disconnect(this, &PluginPickerAction::datasetPicked, publicPluginPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&PluginPickerAction::setCurrentPlugin));
+    disconnect(publicPluginPickerAction, &PluginPickerAction::datasetPicked, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&PluginPickerAction::setCurrentPlugin));
 
     WidgetAction::disconnectFromPublicAction(recursive);
     */
@@ -348,7 +346,7 @@ void PluginPickerAction::fromVariantMap(const QVariantMap& variantMap)
 
     variantMapMustContain(variantMap, "Value");
 
-    setCurrentDataset(variantMap["Value"].toString());
+    setCurrentPlugin(variantMap["Value"].toString());
 }
 
 QVariantMap PluginPickerAction::toVariantMap() const
@@ -356,7 +354,7 @@ QVariantMap PluginPickerAction::toVariantMap() const
     QVariantMap variantMap = OptionAction::toVariantMap();
 
     variantMap.insert({
-        { "Value", getCurrentDatasetId() }
+        { "Value", getCurrentPluginId() }
     });
 
     return variantMap;
