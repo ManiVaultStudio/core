@@ -23,6 +23,11 @@ class CORE_EXPORT PluginsFilterModel : public SortFilterProxyModel
 {
 public:
 
+    /** Filter function signature, the input are all datasets in the core and it returns the filtered datasets */
+    using FilterFunction = std::function<bool(plugin::Plugin*)>;
+
+public:
+
     /** 
      * Construct the filter model with \p parent
      * @param parent Pointer to parent object
