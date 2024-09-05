@@ -54,10 +54,10 @@ public:
     void setDatasets(mv::Datasets datasets, bool silent = false);
 
     /**
-     * Set datasets filter function
-     * @param datasetsFilterFunction Filter lambda (triggered when datasets are added and/or removed from the global datasets model)
+     * Set plugins filter function to \p filterFunction
+     * @param filterFunction Filter lambda (triggered when plugins are added and/or removed)
      */
-    void setFilterFunction(const DatasetsFilterModel::FilterFunction& filterFunction);
+    void setFilterFunction(const PluginsFilterModel::FilterFunction& filterFunction);
 
     /** Get the current dataset */
     mv::Dataset<mv::DatasetImpl> getCurrentDataset() const;
