@@ -12,6 +12,8 @@ using namespace mv;
     #define PLUGINS_LIST_MODEL_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv {
 
 PluginsListModel::PluginsListModel(PopulationMode populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
@@ -86,6 +88,41 @@ void PluginsListModel::removePlugin(plugin::Plugin* plugin)
         return;
 
     removeRow(matches.first().row());
+}
+
+QModelIndex PluginsListModel::getIndexFromPlugin(const plugin::Plugin* plugin) const
+{
+    try {
+        Q_ASSERT(plugin);
+
+        if (!plugin)
+            throw std::runtime_error("Plugin is nullptr");
+
+        return getItemFromPlugin(plugin)->index();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get index from plugin in plugins list model", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to get index from plugin in plugins list model");
+    }
+
+    return {};
+}
+
+QStandardItem* PluginsListModel::getItemFromPlugin(const plugin::Plugin* plugin) const
+{
+    if (!plugin)
+        throw std::runtime_error("Supplied plugin is not valid");
+
+    const auto matches = match(index(0, static_cast<int>(Column::Id)), Qt::EditRole, plugin->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+
+    if (matches.isEmpty())
+        throw std::runtime_error(QString("%1 (%2) not found").arg(plugin->getGuiName(), plugin->getId()).toStdString());
+
+    return itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)));
 }
 
 }

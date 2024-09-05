@@ -59,6 +59,23 @@ public:
      * @param plugin Pointer to plugin
      */
     void removePlugin(plugin::Plugin* plugin) override;
+
+    /**
+     * Get index from pointer to \p plugin
+     * @param plugin Const pointer to plugin
+     * @return Model index (invalid if not found)
+     */
+    QModelIndex getIndexFromPlugin(const plugin::Plugin* plugin) const;
+
+
+public: // Item access
+
+    /**
+     * Get item from pointer to \p plugin
+     * @param plugin Const pointer to plugin
+     * @return Pointer to found item, nullptr otherwise
+     */
+    QStandardItem* getItemFromPlugin(const plugin::Plugin* plugin) const;
 };
 
 }
