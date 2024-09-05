@@ -49,6 +49,12 @@ public:
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
+    /**
+     * Set plugins filter function to \p filterFunction
+     * @param filterFunction Filter lambda (triggered when plugins are added and/or removed)
+     */
+    void setFilterFunction(const FilterFunction& filterFunction);
+
 public:
     mv::gui::ToggleAction& getInstantiatedPluginsOnlyAction() { return _instantiatedPluginsOnlyAction; }
 
@@ -56,7 +62,9 @@ private:
     bool hasPluginInstances(const QModelIndex& index, int level = 0) const;
 
 private:
-    mv::gui::ToggleAction     _instantiatedPluginsOnlyAction;      /** Show only instantiated plugins */
+    FilterFunction      _filterFunction;                    /** Filter lambda */
+    gui::ToggleAction   _useFilterFunctionAction;           /** Toggle the use of a filter function */
+    gui::ToggleAction   _instantiatedPluginsOnlyAction;     /** Show only instantiated plugins */
 };
 
 }

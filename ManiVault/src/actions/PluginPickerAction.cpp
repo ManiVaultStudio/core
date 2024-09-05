@@ -138,7 +138,7 @@ void PluginPickerAction::setDatasets(Datasets datasets, bool silent /*= false*/)
     */
 }
 
-void PluginPickerAction::setFilterFunction(const DatasetsFilterModel::FilterFunction& filterFunction)
+void PluginPickerAction::setFilterFunction(const PluginsFilterModel::FilterFunction& filterFunction)
 {
 #ifdef DATASET_PICKER_ACTION_VERBOSE
     qDebug() << __FUNCTION__;
