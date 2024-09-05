@@ -17,7 +17,13 @@ namespace mv::plugin {
 namespace mv::gui {
 
 /**
+ * Plugin learning center action
+ *
+ * All plugin-related action interface
+ *
  * Note: This action is developed for internal use only
+ *
+ * @author Thomas Kroes
  */
 class CORE_EXPORT PluginLearningCenterAction final : public WidgetAction
 {
