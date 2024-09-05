@@ -9,6 +9,8 @@
 
 #include <Application.h>
 
+#include <util/Miscellaneous.h>
+
 #include <QDesktopServices>
 #include <QMainWindow>
 
@@ -108,13 +110,18 @@ Videos HelpManager::getVideos(const QStringList& tags) const
     for (int rowIndex = 0; rowIndex < videosFilterModel.rowCount(); rowIndex++) {
         const auto videoIndex = videosFilterModel.mapToSource(videosFilterModel.index(rowIndex, 0));
 
+        //const auto videoUrlString = videoIndex.siblingAtColumn(5).data().toString();
+
+        //if (!urlExists(videoUrlString))
+        //    continue;
+
         videos.emplace_back(Video({
             videoIndex.siblingAtColumn(0).data().toString(),        // Title
             videoIndex.siblingAtColumn(1).data().toStringList(),    // Tags
             videoIndex.siblingAtColumn(2).data().toDateTime(),      // Date
             videoIndex.siblingAtColumn(3).data().toString(),        // Summary
             videoIndex.siblingAtColumn(4).data().toString(),        // YouTubeId
-            videoIndex.siblingAtColumn(5).data().toString()         // YouTubeUrl
+            videoIndex.siblingAtColumn(5).data().toString()         // Url
         }));
     }
 

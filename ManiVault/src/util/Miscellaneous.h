@@ -7,12 +7,12 @@
 #include "ManiVaultGlobals.h"
 
 #include <QString>
-#include <QVector>
 #include <QWidget>
 #include <QPointer>
 #include <QDebug>
 
 #include <algorithm>
+#include <qtcpsocket.h>
 
 class QAction;
 
@@ -94,5 +94,12 @@ CORE_EXPORT inline QString getTabIndentedMessage(QString message, const std::uin
  * @return Color as rgb(...) or rgba(...)
  */
 CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha = true);
+
+/**
+ * Get whether \p URL is valid
+ * @param urlString Url string 
+ * @return Boolean determining whether the URL is valid
+ */
+CORE_EXPORT bool urlExists(const QString& urlString);
 
 }

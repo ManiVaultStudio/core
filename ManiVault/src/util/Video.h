@@ -20,7 +20,7 @@ struct CORE_EXPORT Video final
     QDateTime       _date;          /** Date and time */
     QString         _summary;       /** Summary */
     QString         _youTubeId;     /** Global unique identifier of the YouTube video */
-    QString         _youTubeUrl;    /** URL of the YouTube video */
+    QString         _url;           /** URL of the video */
 };
 
 using Videos = std::vector<Video>;

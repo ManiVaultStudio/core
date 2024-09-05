@@ -225,13 +225,13 @@ void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressE
     {
         auto watchVideoAction = new QAction(video._title);
 
-        watchVideoAction->setIcon(Application::getIconFont("FontAwesomeBrands").getIcon("youtube"));
+        watchVideoAction->setIcon(Application::getIconFont("FontAwesomeBrands").getIcon(video._youTubeId.isEmpty() ? "video" : "youtube"));
 
         connect(watchVideoAction, &QAction::triggered, this, [video]() -> void {
 #ifdef USE_YOUTUBE_DIALOG
             YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::YouTubeId)).data().toString());
 #else
-            QDesktopServices::openUrl(video._youTubeUrl);
+            QDesktopServices::openUrl(video._url);
 #endif
         });
 
