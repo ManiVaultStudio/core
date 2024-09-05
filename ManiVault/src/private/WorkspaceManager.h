@@ -77,6 +77,12 @@ public:
     void addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right) override;
 
     /**
+     * Add a \p viewPlugin on top of the main window
+     * @param viewPlugin Pointer to view plugin to add
+     */
+    void addViewPluginFloated(plugin::ViewPlugin* viewPlugin) override;
+
+    /**
      * Set whether \p viewPlugin is isolated or not (closes all other view plugins when isolated)
      * @param viewPlugin Pointer to view plugin to add to layout
      * @param isolate Whether to isolate \p viewPlugin or to reset the view layout prior to isolation

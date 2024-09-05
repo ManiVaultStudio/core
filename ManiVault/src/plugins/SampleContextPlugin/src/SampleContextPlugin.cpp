@@ -28,7 +28,7 @@ void SampleContextPlugin::init()
 }
 
 SampleContextPluginFactory::SampleContextPluginFactory() :
-    ViewPluginFactory(true)
+    ViewPluginFactory()
 {
 }
 
