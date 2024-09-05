@@ -16,6 +16,8 @@ namespace mv::plugin {
 
 namespace mv::gui {
 
+class ViewPluginLearningCenterOverlayWidget;
+
 /**
  * Plugin learning center action
  *
@@ -43,6 +45,12 @@ public:
      * @param plugin Pointer to plugin
      */
     void initialize(plugin::Plugin* plugin);
+
+    /**
+     * Get view plugin overlay widget
+     * @return Pointer to plugin overlay widget (maybe nullptr)
+     */
+    ViewPluginLearningCenterOverlayWidget* getViewPluginOverlayWidget();
 
 public: // Plugin description
 
@@ -124,6 +132,12 @@ private:
      */
     bool isViewPlugin() const;
 
+    /**
+     * Get view plugin
+     * @return Pointer to view plugin (maybe nullptr)
+     */
+    plugin::ViewPlugin* getViewPlugin() const;
+
     /** View plugin description (view depends on the type of plugin) */
     void viewDescription();
 
@@ -173,17 +187,18 @@ signals:
     void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
 
 private:
-    plugin::Plugin*         _plugin;                            /** Pointer to associated plugin */
-    HorizontalGroupAction   _actions;                           /** Learning center actions */
-    TriggerAction           _viewDescriptionAction;             /** Trigger action that displays the plugin help */
-    TriggerAction           _viewHelpAction;                    /** Trigger action that displays the plugin description */
-    TriggerAction           _viewShortcutsAction;               /** Trigger action that displays the plugin shortcut map */
-    ToggleAction            _viewPluginOverlayVisibleAction;    /** Toggles view plugin overlay widget visibility on/off */
-    QString                 _shortDescription;                  /** Short plugin description in plain text format */
-    QString                 _longDescription;                   /** Long plugin description in HTML-formatted text */
-    util::Videos            _videos;                            /** Plugin related videos */
-    QPointer<QWidget>       _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
-    QPointer<QWidget>       _shortcutsOverlayWidget;            /** Guarded pointer to shortcuts overlay widget */
+    plugin::Plugin*                             _plugin;                            /** Pointer to associated plugin */
+    HorizontalGroupAction                       _actions;                           /** Learning center actions */
+    TriggerAction                               _viewDescriptionAction;             /** Trigger action that displays the plugin help */
+    TriggerAction                               _viewHelpAction;                    /** Trigger action that displays the plugin description */
+    TriggerAction                               _viewShortcutsAction;               /** Trigger action that displays the plugin shortcut map */
+    ToggleAction                                _viewPluginOverlayVisibleAction;    /** Toggles view plugin overlay widget visibility on/off */
+    QString                                     _shortDescription;                  /** Short plugin description in plain text format */
+    QString                                     _longDescription;                   /** Long plugin description in HTML-formatted text */
+    util::Videos                                _videos;                            /** Plugin related videos */
+    ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
+    QPointer<QWidget>                           _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
+    QPointer<QWidget>                           _shortcutsOverlayWidget;            /** Guarded pointer to shortcuts overlay widget */
 };
 
 }
@@ -191,3 +206,11 @@ private:
 Q_DECLARE_METATYPE(mv::gui::PluginLearningCenterAction)
 
 inline const auto pluginLearningCenterActionMetaTypeId = qRegisterMetaType<mv::gui::PluginLearningCenterAction*>("mv::gui::PluginLearningCenterAction");
+
+//protected:
+//
+//    /**
+//     * Get learning center overlay widget
+//     * @return Reference to learning center overlay widget
+//     */
+//    gui::ViewPluginLearningCenterOverlayWidget& getViewPluginOverlayWidget();

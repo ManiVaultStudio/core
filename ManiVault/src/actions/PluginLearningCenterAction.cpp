@@ -4,6 +4,7 @@
 
 #include "PluginLearningCenterAction.h"
 
+#include "widgets/ViewPluginLearningCenterOverlayWidget.h"
 #include "widgets/ViewPluginDescriptionOverlayWidget.h"
 
 using namespace mv::util;
@@ -18,7 +19,8 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _viewDescriptionAction(this, "View description"),
     _viewHelpAction(this, "View help"),
     _viewShortcutsAction(this, "View shortcuts"),
-    _viewPluginOverlayVisibleAction(this, "View plugin overlay visible", true)
+    _viewPluginOverlayVisibleAction(this, "View plugin overlay visible", true),
+    _learningCenterOverlayWidget(nullptr)
 {
     _viewDescriptionAction.setToolTip(getShortDescription());
     _viewDescriptionAction.setIconByName("book-reader");
@@ -70,6 +72,19 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
 
     if (_longDescription.isEmpty())
         setShortDescription("No description available yet, stay tuned");
+
+    if (_learningCenterOverlayWidget)
+        _learningCenterOverlayWidget->deleteLater();
+
+    if (isViewPlugin()) {
+        _learningCenterOverlayWidget = new ViewPluginLearningCenterOverlayWidget(&getViewPlugin()->getWidget(), getViewPlugin());
+        _learningCenterOverlayWidget->show();
+    }
+}
+
+ViewPluginLearningCenterOverlayWidget* PluginLearningCenterAction::getViewPluginOverlayWidget()
+{
+    return _learningCenterOverlayWidget;
 }
 
 QString PluginLearningCenterAction::getShortDescription() const
@@ -142,6 +157,11 @@ const Videos& PluginLearningCenterAction::getVideos() const
 }
 
 bool PluginLearningCenterAction::isViewPlugin() const
+{
+    return dynamic_cast<ViewPlugin*>(_plugin);
+}
+
+ViewPlugin* PluginLearningCenterAction::getViewPlugin() const
 {
     return dynamic_cast<ViewPlugin*>(_plugin);
 }

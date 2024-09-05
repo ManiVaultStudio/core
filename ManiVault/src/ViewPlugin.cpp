@@ -24,7 +24,6 @@ namespace mv::plugin
 
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
-    _learningCenterOverlayWidget(&_widget, this),
     _editorAction(this, "Edit..."),
     _screenshotAction(this, "Screenshot..."),
     _isolateAction(this, "Isolate"),
@@ -166,8 +165,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         _mayFloatAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Float"));
         _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
     });
-
-    _learningCenterOverlayWidget.show();
 }
 
 void ViewPlugin::init()
@@ -228,11 +225,6 @@ QKeySequence ViewPlugin::getTriggerShortcut() const
 void ViewPlugin::setTriggerShortcut(const QKeySequence& keySequence)
 {
     _triggerShortcut = keySequence;
-}
-
-gui::ViewPluginLearningCenterOverlayWidget& ViewPlugin::getLearningCenterOverlayWidget()
-{
-    return _learningCenterOverlayWidget;
 }
 
 void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
