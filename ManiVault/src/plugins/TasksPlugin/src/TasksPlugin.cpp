@@ -34,6 +34,11 @@ TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     AbstractTaskTester::registerTester("mv::ModalTaskTester");
     AbstractTaskTester::registerTester("mv::BackgroundTaskTester");
     AbstractTaskTester::registerTester("mv::ForegroundTaskTester");
+
+    getLearningCenterAction().setShortDescription("ManiVault tasks");
+    getLearningCenterAction().setLongDescription("This plugin shows the tasks that are currently in <b>ManiVault</b>. It is primarily used for debugging purposes, for instance to find bottlenecks in slow projects.");
+
+    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
 
 void TasksPlugin::init()
