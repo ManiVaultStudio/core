@@ -117,11 +117,17 @@ public:
     };
 
     /** Standard model item class for displaying the plugin Id */
-    class CORE_EXPORT IdItem final : public Item {
+    class CORE_EXPORT IdItem final : public Item, public QObject {
     public:
 
         /** No need for specialized constructor */
         using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
 
         /**
          * Get header data for \p orientation and \p role

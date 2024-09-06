@@ -64,15 +64,7 @@ void PluginsListModel::addPlugin(plugin::Plugin* plugin)
     if (!plugin)
         return;
 
-    auto pluginRow  = new QStandardItem(plugin->getGuiName());
-    auto pluginId   = new QStandardItem(plugin->getId());
-
-    pluginRow->setData(QVariant::fromValue(plugin));
-    pluginRow->setEditable(false);
-
-    pluginId->setEditable(false);
-
-    appendRow(Row(plugin, plugin->getGuiName(), "Instance", plugin->getId()));
+    appendRow(Row(plugin, plugin->getGuiName(), "Instance", plugin->getId(), plugin->getIcon()));
 }
 
 void PluginsListModel::removePlugin(plugin::Plugin* plugin)
@@ -82,7 +74,7 @@ void PluginsListModel::removePlugin(plugin::Plugin* plugin)
     if (!plugin)
         return;
 
-    const auto matches = match(index(0, static_cast<int>(AbstractPluginsModel::Column::Id)), Qt::EditRole, plugin->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+    const auto matches = match(index(0, static_cast<int>(Column::Id)), Qt::DisplayRole, plugin->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
 
     if (matches.isEmpty())
         return;
