@@ -20,10 +20,8 @@ namespace mv::gui {
 
 OptionAction::OptionAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/) :
     WidgetAction(parent, title),
-    _defaultModel(),
     _customModel(nullptr),
-    _currentIndex(-1),
-    _placeholderString()
+    _currentIndex(-1)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -389,6 +387,9 @@ void OptionAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     auto styleOptionComboBox = QStyleOptionComboBox();
 
     initStyleOption(&styleOptionComboBox);
+
+    if (_optionAction->getCurrentIndex())
+        styleOptionComboBox.currentIcon = Application::getIconFont("FontAwesome").getIcon("mouse-pointer");
 
     painter->drawComplexControl(QStyle::CC_ComboBox, styleOptionComboBox);
 
