@@ -88,6 +88,21 @@ void PluginLearningCenterAction::createViewPluginOverlayWidget()
     _learningCenterOverlayWidget->show();
 }
 
+QString PluginLearningCenterAction::getPluginTitle() const
+{
+    return _pluginTitle.isEmpty() ? _plugin->getKind() : _pluginTitle;
+}
+
+void PluginLearningCenterAction::setPluginTitle(const QString& pluginTitle)
+{
+    if (pluginTitle == _pluginTitle)
+        return;
+
+    _pluginTitle = pluginTitle;
+
+    emit pluginTitleChanged(_pluginTitle);
+}
+
 QString PluginLearningCenterAction::getShortDescription() const
 {
     return _shortDescription;

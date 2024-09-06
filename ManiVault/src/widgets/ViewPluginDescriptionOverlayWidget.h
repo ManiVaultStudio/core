@@ -35,13 +35,13 @@ public:
     ViewPluginDescriptionOverlayWidget(plugin::ViewPlugin* viewPlugin);
 
 private:
-    QHBoxLayout     _headerLayout;              /** Layout for the header */
-    QLabel          _headerIconLabel;           /** Label for header icon */
-    QLabel          _headerTextLabel;           /** Label for header text */
-    QScrollArea     _shortcutsScrollArea;       /** Scroll area for the shortcut */
-    QWidget         _shortcutsWidget;           /** Widget with the shortcuts label */
-    QVBoxLayout     _shortcutsWidgetLayout;     /** Widget with the shortcuts label */
-    QLabel          _bodyLabel;                 /** Shortcut cheatsheet HTML */
+    QHBoxLayout     _headerLayout;          /** Layout for the header */
+    QLabel          _headerIconLabel;       /** Label for header icon */
+    QLabel          _headerTextLabel;       /** Label for header text */
+    QScrollArea     _textScrollArea;        /** Scroll area for the shortcut */
+    QWidget         _textWidget;            /** Widget with the shortcuts label */
+    QVBoxLayout     _textWidgetLayout;      /** Widget with the shortcuts label */
+    QLabel          _textBodyLabel;         /** Shortcut cheatsheet HTML */
 };
 
 }

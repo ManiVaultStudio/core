@@ -22,7 +22,7 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
     setAutoFillBackground(true);
 
     getMainLayout().addLayout(&_headerLayout);
-    getMainLayout().addWidget(&_shortcutsScrollArea);
+    getMainLayout().addWidget(&_textScrollArea);
 
     _headerLayout.addWidget(&_headerIconLabel);
     _headerLayout.addWidget(&_headerTextLabel);
@@ -32,40 +32,23 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
     _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("book-reader").pixmap(QSize(24, 24)));
     _headerIconLabel.setStyleSheet("padding-top: 2px;");
 
-    _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b></p>").arg(viewPlugin->getKind()));
+    _headerTextLabel.setWordWrap(true);
+    _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b></p>").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
 
-    //QString categories;
+    _textScrollArea.setWidgetResizable(true);
+    _textScrollArea.setWidget(&_textWidget);
+    _textScrollArea.setObjectName("Shortcuts");
+    _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
+    _textScrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    //const auto createShortcutMapCategoryTable = [this](const QString& category) -> QString {
-    //    const auto header = QString("<p style='font-size: 12pt;'><b>%1</b></p>").arg(category);
+    _textWidgetLayout.setContentsMargins(0, 0, 0, 0);
+    _textWidgetLayout.addWidget(&_textBodyLabel);
+    _textWidgetLayout.setAlignment(Qt::AlignTop);
 
-    //    QString rows;
+    _textWidget.setLayout(&_textWidgetLayout);
 
-    //    for (const auto& shortcut : _shortcutMap.getShortcuts({ category }))
-    //        rows += QString("<tr><td width='50'><b>%1</b></td><td>%2</td></tr>").arg(shortcut._keySequence.toString(), shortcut._title);
-
-    //    const auto table = QString("<table>%1</table>").arg(rows);
-
-    //    return header + table;
-    //    };
-
-    //for (const auto& category : _shortcutMap.getCategories())
-    //    categories += createShortcutMapCategoryTable(category);
-
-    _shortcutsScrollArea.setWidgetResizable(true);
-    _shortcutsScrollArea.setWidget(&_shortcutsWidget);
-    _shortcutsScrollArea.setObjectName("Shortcuts");
-    _shortcutsScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
-    _shortcutsScrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    _shortcutsWidgetLayout.setContentsMargins(0, 0, 0, 0);
-    _shortcutsWidgetLayout.addWidget(&_bodyLabel);
-    _shortcutsWidgetLayout.setAlignment(Qt::AlignTop);
-
-    _shortcutsWidget.setLayout(&_shortcutsWidgetLayout);
-
-    _bodyLabel.setText(viewPlugin->getLearningCenterAction().getLongDescription());
-    _bodyLabel.setWordWrap(true);
+    _textBodyLabel.setText(viewPlugin->getLearningCenterAction().getLongDescription());
+    _textBodyLabel.setWordWrap(true);
 }
 
 }

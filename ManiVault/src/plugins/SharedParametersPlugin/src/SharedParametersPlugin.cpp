@@ -43,6 +43,8 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
 
     hierarchyWidget.getToolbarAction().addAction(&mv::settings().getParametersSettings().getExpertModeAction(), ToggleAction::PushButtonIcon);
 
+    getLearningCenterAction().setPluginTitle("Shared parameters view");
+
     getLearningCenterAction().setShortDescription("Explore all shared parameters in the project");
     getLearningCenterAction().setLongDescription("This plugin shows the linkages between <b>parameters</b> through <b>shared</b> parameters. Shared parameters are <b>public</b> parameters to which private (plugin) parameters can connect.");
 

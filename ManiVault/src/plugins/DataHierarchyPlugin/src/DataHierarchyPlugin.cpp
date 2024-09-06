@@ -18,6 +18,8 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     getShortcuts().add({ QKeySequence(Qt::CTRL | Qt::Key_Minus), "Expand/collapse", "Collapse all" });
     getShortcuts().add({ QKeySequence(Qt::CTRL | Qt::Key_Plus), "Expand/collapse", "Expand all" });
 
+    getLearningCenterAction().setPluginTitle("Data hierarchy view");
+
     getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
     getLearningCenterAction().setLongDescription("Hierarchical overview of all loaded data");
 

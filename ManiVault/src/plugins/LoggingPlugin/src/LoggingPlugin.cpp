@@ -17,6 +17,8 @@ LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _loggingWidget(nullptr)
 {
+    getLearningCenterAction().setPluginTitle("Logging");
+
     getLearningCenterAction().setShortDescription("Shows <b>ManiVault</b> logging");
     getLearningCenterAction().setLongDescription("This plugin shows the <b>ManiVault</b> logging information. It contains all the logs produced by the core of <b>ManiVault</b> and its plugins.");
 
@@ -32,7 +34,7 @@ void LoggingPlugin::init()
     layout->addWidget(&_loggingWidget);
 
     getWidget().setLayout(layout);
-    getWidget().setWindowTitle("Logging");
+    getWidget().setWindowTitle("Logging view");
 }
 
 LoggingPluginFactory::LoggingPluginFactory() :

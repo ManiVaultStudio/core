@@ -22,7 +22,7 @@ ViewPluginShortcutsOverlayWidget::ViewPluginShortcutsOverlayWidget(plugin::ViewP
     setAutoFillBackground(true);
 
     getMainLayout().addLayout(&_headerLayout);
-    getMainLayout().addWidget(&_shortcutsScrollArea);
+    getMainLayout().addWidget(&_textScrollArea);
 
     _headerLayout.addWidget(&_headerIconLabel);
     _headerLayout.addWidget(&_headerTextLabel);
@@ -32,7 +32,8 @@ ViewPluginShortcutsOverlayWidget::ViewPluginShortcutsOverlayWidget(plugin::ViewP
     _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("keyboard").pixmap(QSize(24, 24)));
     _headerIconLabel.setStyleSheet("padding-top: 2px;");
 
-    _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(_shortcutMap.getTitle()));
+    _headerTextLabel.setWordWrap(true);
+    _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
 
     QString categories;
 
@@ -52,18 +53,18 @@ ViewPluginShortcutsOverlayWidget::ViewPluginShortcutsOverlayWidget(plugin::ViewP
     for (const auto& category : _shortcutMap.getCategories())
         categories += createShortcutMapCategoryTable(category);
 
-    _shortcutsScrollArea.setWidgetResizable(true);
-    _shortcutsScrollArea.setWidget(&_shortcutsWidget);
-    _shortcutsScrollArea.setObjectName("Shortcuts");
-    _shortcutsScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
+    _textScrollArea.setWidgetResizable(true);
+    _textScrollArea.setWidget(&_textWidget);
+    _textScrollArea.setObjectName("Shortcuts");
+    _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
 
-    _shortcutsWidgetLayout.setContentsMargins(0, 0, 0, 0);
-    _shortcutsWidgetLayout.addWidget(&_bodyLabel);
-    _shortcutsWidgetLayout.setAlignment(Qt::AlignTop);
+    _textWidgetLayout.setContentsMargins(0, 0, 0, 0);
+    _textWidgetLayout.addWidget(&_textBodyLabel);
+    _textWidgetLayout.setAlignment(Qt::AlignTop);
 
-    _shortcutsWidget.setLayout(&_shortcutsWidgetLayout);
+    _textWidget.setLayout(&_textWidgetLayout);
 
-    _bodyLabel.setText(categories);
+    _textBodyLabel.setText(categories);
 }
 
 }

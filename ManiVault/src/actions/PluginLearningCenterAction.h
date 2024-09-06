@@ -60,6 +60,18 @@ protected:
 public: // Plugin description
 
     /**
+     * Get plugin title
+     * @return Human-readable plugin title in plain text format
+     */
+    QString getPluginTitle() const;
+
+    /**
+     * Set plugin title to \p pluginTitle
+     * @param pluginTitle Human-readable plugin title in plain text format
+     */
+    void setPluginTitle(const QString& pluginTitle);
+
+    /**
      * Get short description
      * @return Short description in plain text format
      */
@@ -178,6 +190,12 @@ public: // Action getters
 signals:
 
     /**
+     * Signals that the plugin title changed to \p pluginTitle
+     * @param pluginTitle Plugin title
+     */
+    void pluginTitleChanged(const QString& pluginTitle);
+
+    /**
      * Signals that the short description changed from \p previousShortDescription to \p currentShortDescription
      * @param previousShortDescription Previous short description
      * @param currentShortDescription Current short description
@@ -198,6 +216,7 @@ private:
     TriggerAction                               _viewHelpAction;                    /** Trigger action that displays the plugin description */
     TriggerAction                               _viewShortcutsAction;               /** Trigger action that displays the plugin shortcut map */
     ToggleAction                                _viewPluginOverlayVisibleAction;    /** Toggles view plugin overlay widget visibility on/off */
+    QString                                     _pluginTitle;                       /** Human-readable plugin title in plain text format */
     QString                                     _shortDescription;                  /** Short plugin description in plain text format */
     QString                                     _longDescription;                   /** Long plugin description in HTML-formatted text */
     util::Videos                                _videos;                            /** Plugin related videos */
