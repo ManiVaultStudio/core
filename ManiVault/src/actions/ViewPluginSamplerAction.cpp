@@ -130,8 +130,9 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _openSampleContextWindow.setShortcut(QKeySequence(Qt::Key_F4));
 
         connect(&_openSampleContextWindow, &TriggerAction::triggered, this, []() -> void {
-            qDebug() << __FUNCTION__;
             auto sampleScopePlugin = mv::plugins().requestViewPluginFloated("Sample scope");
+
+            sampleScopePlugin->findChildByPath("Source plugin")->setVisible(false);
         });
 
         _isInitialized = true;

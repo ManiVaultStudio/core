@@ -17,6 +17,9 @@
 namespace mv
 {
 
+class PluginsListModel;
+class PluginsTreeModel;
+
 namespace plugin {
     class Plugin;
     class PluginFactory;
@@ -220,6 +223,20 @@ public: // Plugin query
      * @return Plugin icon name of the plugin, null icon if the plugin kind was not found
      */
     virtual QIcon getPluginIcon(const QString& pluginKind) const = 0;
+
+public: // Model access
+
+    /**
+     * Get list model of all loaded plugins
+     * @return Reference to plugins list model
+     */
+    virtual const PluginsListModel& getListModel() const = 0;
+
+    /**
+     * Get tree model of all loaded plugins
+     * @return Reference to plugins tree model
+     */
+    virtual const PluginsTreeModel& getTreeModel() const = 0;
 
 protected:
 

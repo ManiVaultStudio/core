@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <models/PluginsListModel.h>
+#include <models/PluginsTreeModel.h>
+
 #include <AbstractPluginManager.h>
 #include <PluginFactory.h>
 
@@ -205,6 +208,20 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Model access
+
+    /**
+     * Get list model of all loaded plugins
+     * @return Reference to plugins list model
+     */
+    const PluginsListModel& getListModel() const override;
+
+    /**
+     * Get tree model of all loaded plugins
+     * @return Reference to plugins tree model
+     */
+    const PluginsTreeModel& getTreeModel() const override;
+
 protected:
 
     /**
@@ -217,6 +234,8 @@ protected:
 private:
     QHash<QString, PluginFactory*>                  _pluginFactories;   /** All loaded plugin factories */
     std::vector<std::unique_ptr<plugin::Plugin>>    _plugins;           /** Vector of plugin instances */
+    PluginsListModel                                _listModel;         /** List model of all loaded plugins */
+    PluginsTreeModel                                _treeModel;         /** Tree model of all loaded plugins */
 };
 
 }
