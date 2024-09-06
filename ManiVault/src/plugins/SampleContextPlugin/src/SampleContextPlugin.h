@@ -10,6 +10,7 @@
 
 #include <actions/HorizontalGroupAction.h>
 #include <actions/PluginPickerAction.h>
+#include <actions/ViewPluginSamplerAction.h>
 
 using namespace mv::plugin;
 using namespace mv::gui;
@@ -37,9 +38,10 @@ public:
     void init() override;
 
 private:
-    SampleContextWidget     _sampleContextWidget;       /** Sample context widget */
-    HorizontalGroupAction   _horizontalGroupAction;     /** Horizontal group action for settings */
-    PluginPickerAction      _sourcePluginPickerAction;  /** Action for picking the source plugin */
+    SampleContextWidget         _sampleContextWidget;           /** Sample context widget */
+    HorizontalGroupAction       _horizontalGroupAction;         /** Horizontal group action for settings */
+    PluginPickerAction          _sourcePluginPickerAction;      /** Action for picking the source plugin */
+    ViewPluginSamplerAction*    _viewPluginSamplerAction;       /** Pointer to current view plugin sampler action */
 };
 
 class SampleContextPluginFactory : public ViewPluginFactory
