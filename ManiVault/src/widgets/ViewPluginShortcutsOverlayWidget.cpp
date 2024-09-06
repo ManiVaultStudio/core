@@ -25,15 +25,15 @@ ViewPluginShortcutsOverlayWidget::ViewPluginShortcutsOverlayWidget(plugin::ViewP
     getMainLayout().addWidget(&_textScrollArea);
 
     _headerLayout.addWidget(&_headerIconLabel);
-    _headerLayout.addWidget(&_headerTextLabel);
+    _headerLayout.addWidget(&_headerTextLabel, 1);
     _headerLayout.addStretch(1);
     _headerLayout.setSpacing(10);
 
     _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("keyboard").pixmap(QSize(24, 24)));
     _headerIconLabel.setStyleSheet("padding-top: 2px;");
 
-    _headerTextLabel.setWordWrap(true);
     _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
+    _headerTextLabel.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 
     QString categories;
 

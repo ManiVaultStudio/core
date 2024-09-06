@@ -191,9 +191,17 @@ bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilt
 ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::VisibleToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(12, 12))
 {
-    setToolTip("Hide the learning center");
+    const auto updateTooltip = [this]() -> void {
+        setToolTip(QString("%1 the plugin learning center").arg(getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked() ? "Hide" : "Show"));
+    };
 
-    connect(&getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction(), &ToggleAction::toggled, this, [this]() -> void { updateIcon();});
+    updateTooltip();
+
+    connect(&getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction(), &ToggleAction::toggled, this, [this, updateTooltip]() -> void
+    {
+        updateTooltip();
+        updateIcon();
+    });
 }
 
 void ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::mousePressEvent(QMouseEvent* event)
