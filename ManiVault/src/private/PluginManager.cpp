@@ -42,8 +42,8 @@ using namespace plugin;
 using namespace gui;
 
 PluginManager::PluginManager() :
-    _listModel(AbstractPluginsModel::PopulationMode::Automatic, this),
-    _treeModel(AbstractPluginsModel::PopulationMode::Automatic, this)
+    _listModel(nullptr),
+    _treeModel(nullptr)
 {
     setObjectName("Plugins");
 }
@@ -67,6 +67,9 @@ void PluginManager::initialize()
     beginInitialization();
     {
         loadPluginFactories();
+
+        _listModel = new PluginsListModel(AbstractPluginsModel::PopulationMode::Automatic, this);
+        _treeModel = new PluginsTreeModel(AbstractPluginsModel::PopulationMode::Automatic, this);
     }
     endInitialization();
 }
@@ -743,12 +746,12 @@ QVariantMap PluginManager::toVariantMap() const
 
 const PluginsListModel& PluginManager::getListModel() const
 {
-    return _listModel;
+    return *_listModel;
 }
 
 const PluginsTreeModel& PluginManager::getTreeModel() const
 {
-    return _treeModel;
+    return *_treeModel;
 }
 
 }

@@ -234,8 +234,8 @@ protected:
 private:
     QHash<QString, PluginFactory*>                  _pluginFactories;   /** All loaded plugin factories */
     std::vector<std::unique_ptr<plugin::Plugin>>    _plugins;           /** Vector of plugin instances */
-    PluginsListModel                                _listModel;         /** List model of all loaded plugins */
-    PluginsTreeModel                                _treeModel;         /** Tree model of all loaded plugins */
+    PluginsListModel*                               _listModel;         /** List model of all loaded plugins */
+    PluginsTreeModel*                               _treeModel;         /** Tree model of all loaded plugins */
 };
 
 }
