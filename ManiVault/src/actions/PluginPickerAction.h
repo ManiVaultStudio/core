@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include "Dataset.h"
-#include "Set.h"
-
 #include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
 
@@ -111,10 +108,10 @@ private:
     /** Handle changes to the population mode */
     void populationModeChanged();
 
-    /** Blocks the DatasetPickerAction::datasetsChanged() signal from being emitted */
+    /** Blocks the PluginPickerAction::pluginsChanged() signal from being emitted */
     void blockPluginsChangedSignal();
 
-    /** Allows the DatasetPickerAction::datasetsChanged() signal to be emitted */
+    /** Allows the PluginPickerAction::pluginsChanged() signal to be emitted */
     void unblockPluginsChangedSignal();
 
     /**
@@ -167,18 +164,18 @@ signals:
     void pluginsChanged(const plugin::Plugins& plugins);
 
     /**
-     * Signals that the population mode changed from \p previousPopulationMode to \p populationMode
+     * Signals that the population mode changed from \p previousPopulationMode to \p currentPopulationMode
      * @param previousPopulationMode Previous population mode
-     * @param populationMode Previous population mode
+     * @param currentPopulationMode Current population mode
      */
-    void populationModeChanged(AbstractPluginsModel::PopulationMode previousPopulationMode, AbstractPluginsModel::PopulationMode populationMode);
+    void populationModeChanged(AbstractPluginsModel::PopulationMode previousPopulationMode, AbstractPluginsModel::PopulationMode currentPopulationMode);
 
 private:
     AbstractPluginsModel::PopulationMode    _populationMode;                /** Population mode (e.g. manual or automatic) */
-    PluginsListModel                        _pluginsListModel;              /** Plugins list model */
-    PluginsFilterModel                      _pluginsFilterModel;            /** Filter model for the plugins model above */
-    bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_pluginsFilterModel */
-    QStringList                             _currentPluginsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
+    PluginsListModel                        _listModel;                     /** Plugins list model */
+    PluginsFilterModel                      _filterModel;                   /** Filter model for the plugins model above */
+    bool                                    _blockPluginsChangedSignal;     /** Boolean determining whether the PluginPickerAction::pluginsChanged(...) signal may be engaged in response to change in the PluginPickerAction#_filterModel */
+    QStringList                             _currentPluginsIds;             /** Keep a list of current plugins identifiers so that we can avoid unnecessary emits of the PluginPickerAction::pluginsChanged(...) signal */
 
     friend class AbstractPluginsManager;
 };

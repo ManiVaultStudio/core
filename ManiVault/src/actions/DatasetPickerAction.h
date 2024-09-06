@@ -163,17 +163,17 @@ signals:
     void datasetsChanged(mv::Datasets datasets);
 
     /**
-     * Signals that the population mode changed from \p previousPopulationMode to \p populationMode
+     * Signals that the population mode changed from \p previousPopulationMode to \p currentPopulationMode
      * @param previousPopulationMode Previous population mode
-     * @param populationMode Previous population mode
+     * @param currentPopulationMode Current population mode
      */
-    void populationModeChanged(AbstractDatasetsModel::PopulationMode previousPopulationMode, AbstractDatasetsModel::PopulationMode populationMode);
+    void populationModeChanged(AbstractDatasetsModel::PopulationMode previousPopulationMode, AbstractDatasetsModel::PopulationMode currentPopulationMode);
 
 private:
     AbstractDatasetsModel::PopulationMode   _populationMode;                /** Population mode (e.g. manual or automatic) */
     DatasetsListModel                       _datasetsListModel;             /** Datasets list model for manual population (mv::data().getDatasetsListModel() otherwise) */
     DatasetsFilterModel                     _datasetsFilterModel;           /** Filter model for the datasets model above */
-    bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_pluginsFilterModel */
+    bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_filterModel */
     QStringList                             _currentDatasetsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
 
     friend class AbstractActionsManager;

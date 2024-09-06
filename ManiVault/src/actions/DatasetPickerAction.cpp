@@ -22,9 +22,7 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
     OptionAction(parent, title),
     _populationMode(AbstractDatasetsModel::PopulationMode::Automatic),
     _datasetsListModel(AbstractDatasetsModel::PopulationMode::Manual),
-    _datasetsFilterModel(),
-    _blockDatasetsChangedSignal(false),
-    _currentDatasetsIds()
+    _blockDatasetsChangedSignal(false)
 {
     setText(title);
     setIconByName("database");

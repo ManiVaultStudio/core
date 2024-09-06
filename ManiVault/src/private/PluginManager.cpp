@@ -29,6 +29,8 @@
 #include <assert.h>
 #include <stdexcept>
 
+#include "models/AbstractPluginsModel.h"
+
 #ifdef _DEBUG
     //#define PLUGIN_MANAGER_VERBOSE
 #endif
@@ -40,7 +42,8 @@ using namespace plugin;
 using namespace gui;
 
 PluginManager::PluginManager() :
-    AbstractPluginManager()
+    _listModel(AbstractPluginsModel::PopulationMode::Automatic, this),
+    _treeModel(AbstractPluginsModel::PopulationMode::Automatic, this)
 {
     setObjectName("Plugins");
 }
@@ -736,6 +739,16 @@ QVariantMap PluginManager::toVariantMap() const
     });
 
     return variantMap;
+}
+
+const PluginsListModel& PluginManager::getListModel() const
+{
+    return _listModel;
+}
+
+const PluginsTreeModel& PluginManager::getTreeModel() const
+{
+    return _treeModel;
 }
 
 }
