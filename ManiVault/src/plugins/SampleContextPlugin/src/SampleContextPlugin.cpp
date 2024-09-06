@@ -32,9 +32,13 @@ SampleContextPlugin::SampleContextPlugin(const PluginFactory* factory) :
         _viewPluginSamplerAction = dynamic_cast<ViewPluginSamplerAction*>(plugin->findChildByPath("Sampler"));
 
         if (_viewPluginSamplerAction) {
-            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::toolTipHtmlStringChanged, this, [this](const QString& tooltip) -> void {
-                _sampleContextWidget.setHtmlText(tooltip);
-            });
+            const auto updateHtmlText = [this]() -> void {
+                _sampleContextWidget.setHtmlText(_viewPluginSamplerAction->getToolTipHtmlString());
+            };
+
+            updateHtmlText();
+
+            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::toolTipHtmlStringChanged, this, updateHtmlText);
         }
     });
 }
@@ -43,7 +47,7 @@ void SampleContextPlugin::init()
 {
     auto layout = new QVBoxLayout();
 
-    layout->setContentsMargins(6, 6, 6, 6);
+    //layout->setContentsMargins(6, 6, 6, 6);
 
     layout->addWidget(_horizontalGroupAction.createWidget(&getWidget()));
     layout->addWidget(&_sampleContextWidget, 1);

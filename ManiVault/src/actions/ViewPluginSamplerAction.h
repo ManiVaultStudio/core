@@ -92,6 +92,18 @@ public:
      */
     QString getToolTipHtmlString() const;
 
+    /**
+     * Get force tooltip
+     * @return Boolean determining whether to always show the tooltip (not taking into account the size)
+     */
+    bool getForceTooltip() const;
+
+    /**
+     * Set force tooltip to \p forceTooltip
+     * @param forceTooltip Boolean determining whether to always show the tooltip (not taking into account the size)
+     */
+    void setForceTooltip(bool forceTooltip);
+
 private:
 
     /**
@@ -148,6 +160,12 @@ signals:
     /** Signals that a new sample context is required */
     void sampleContextRequested();
 
+    /**
+     * Signals that force tooltip changed to \p forceTooltip
+     * @param forceTooltip Boolean determining whether to always show the tooltip (not taking into account the size)
+     */
+    void forceTooltipChanged(bool forceTooltip);
+
 private:
     plugin::ViewPlugin*             _viewPlugin;                                /** Pointer to view plugin for which to show the tooltips */
     bool                            _isInitialized;                             /** Boolean determining whether the sampler is initialized or not */
@@ -166,7 +184,9 @@ private:
     QString                         _toolTipHtmlString;                         /** HTML tooltip string */
     std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                      /** Overlay widget for the tooltip */
     QLabel                          _toolTipLabel;                              /** The text label which contains the actual tooltip text */
+    bool                            _forceTooltip;                              /** Boolean determining whether to always show the tooltip (not taking into account the size) */
     TriggerAction                   _openSampleContextWindow;                   /** Opens a sample context window */
+    plugin::ViewPlugin*             _sampleContextPlugin;                       /** Pointer to sample context plugin (maybe nullptr) */
 };
 
 }
