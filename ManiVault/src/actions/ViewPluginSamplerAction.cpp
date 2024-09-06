@@ -10,6 +10,8 @@
 
 #include <QEvent>
 
+#include "PluginPickerAction.h"
+
 using namespace mv::util;
 
 namespace mv::gui {
@@ -26,7 +28,9 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _restrictNumberOfElementsAction(this, "Restrict number of elements", false),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
     _sampleContextLazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100),
-    _openSampleContextWindow(this, "Open sample scope window")
+    _forceTooltip(false),
+    _openSampleContextWindow(this, "Open sample scope window"),
+    _sampleContextPlugin(nullptr)
 {
     setShowLabels(false);
 
@@ -133,10 +137,17 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
 
         _openSampleContextWindow.setShortcut(QKeySequence(Qt::Key_F4));
 
-        connect(&_openSampleContextWindow, &TriggerAction::triggered, this, []() -> void {
-            auto sampleScopePlugin = mv::plugins().requestViewPluginFloated("Sample scope");
+        connect(&_openSampleContextWindow, &TriggerAction::triggered, this, [this]() -> void {
+            if (_sampleContextPlugin) {
+                _sampleContextPlugin->getVisibleAction().setChecked(true);
+            } else {
+                _sampleContextPlugin = mv::plugins().requestViewPluginFloated("Sample scope");
 
-            sampleScopePlugin->findChildByPath("Source plugin")->setVisible(false);
+                if (auto sourcePluginPickerAction = dynamic_cast<PluginPickerAction*>(_sampleContextPlugin->findChildByPath("Source plugin"))) {
+                    sourcePluginPickerAction->setCurrentPlugin(_viewPlugin);
+                    sourcePluginPickerAction->setEnabled(false);
+                }
+            }
         });
 
         _isInitialized = true;
@@ -177,6 +188,23 @@ QString ViewPluginSamplerAction::getToolTipHtmlString() const
     return _toolTipHtmlString;
 }
 
+bool ViewPluginSamplerAction::getForceTooltip() const
+{
+    return _forceTooltip;
+}
+
+void ViewPluginSamplerAction::setForceTooltip(bool forceTooltip)
+{
+    if (forceTooltip == _forceTooltip)
+        return;
+
+    _forceTooltip = forceTooltip;
+
+    _sampleContextDirty = true;
+
+    emit forceTooltipChanged(_forceTooltip);
+}
+
 void ViewPluginSamplerAction::setToolTipHtmlString(const QString& toolTipHtmlString)
 {
     if (toolTipHtmlString == _toolTipHtmlString)
@@ -187,7 +215,7 @@ void ViewPluginSamplerAction::setToolTipHtmlString(const QString& toolTipHtmlStr
     _toolTipHtmlString = toolTipHtmlString;
 
     _toolTipLabel.setVisible(!_toolTipHtmlString.isEmpty());
-    _toolTipLabel.setText(_toolTipHtmlString);
+    _toolTipLabel.setText(_forceTooltip ? _toolTipHtmlString : _sampleContextPlugin && _sampleContextPlugin->getVisibleAction().isChecked() ? "" : "<i>Press <b>F4</b> for sample information</i>");
     _toolTipLabel.adjustSize();
 
     drawToolTip();
@@ -212,7 +240,7 @@ void ViewPluginSamplerAction::moveToolTipLabel()
 {
     auto parentWidget   = &_viewPlugin->getWidget();
     auto targetWidget   = _pixelSelectionAction->getTargetWidget();
-    auto globalPosition = _viewPlugin->getWidget().mapFromGlobal(parentWidget->cursor().pos());
+    auto globalPosition = _viewPlugin->getWidget().mapFromGlobal(parentWidget->cursor().pos() + QPoint(15, 10));
 
     if (globalPosition.x() + _toolTipLabel.width() > targetWidget->width())
         globalPosition.setX(parentWidget->width() - _toolTipLabel.width());
