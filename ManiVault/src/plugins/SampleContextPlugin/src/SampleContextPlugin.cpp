@@ -17,6 +17,8 @@ SampleContextPlugin::SampleContextPlugin(const PluginFactory* factory) :
     _sourcePluginPickerAction(this, "Source plugin")
 {
     _horizontalGroupAction.addAction(&_sourcePluginPickerAction);
+
+    _sourcePluginPickerAction.setFilterPluginTypes({ plugin::Type::VIEW });
 }
 
 void SampleContextPlugin::init()

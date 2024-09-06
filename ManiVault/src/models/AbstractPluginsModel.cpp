@@ -6,7 +6,7 @@
 
 #include "Plugin.h"
 
-using namespace mv;
+using namespace mv::gui;
 
 #ifdef _DEBUG
     #define ABSTRACT_PLUGINS_MODEL_VERBOSE
@@ -27,6 +27,22 @@ plugin::Plugin* AbstractPluginsModel::Item::getPlugin() const
     return _plugin;
 }
 
+QVariant AbstractPluginsModel::IdItem::data(int role) const
+{
+    switch (role)
+    {
+        case Qt::DisplayRole:
+        case Qt::EditRole:
+        case Qt::ToolTipRole:
+            return getPlugin() ? getPlugin()->getId() : "";
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 AbstractPluginsModel::AbstractPluginsModel(PopulationMode populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
 
     StandardItemModel(parent),
@@ -34,11 +50,8 @@ AbstractPluginsModel::AbstractPluginsModel(PopulationMode populationMode /*= Pop
     _populationMode()
 
 {
-
     setPopulationMode(populationMode);
-
 }
-
 
 AbstractPluginsModel::PopulationMode AbstractPluginsModel::getPopulationMode() const
 {
