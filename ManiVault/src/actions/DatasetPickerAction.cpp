@@ -42,9 +42,6 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
             case AbstractDatasetsModel::PopulationMode::Automatic:
                 emit datasetPicked(mv::data().getDatasetsListModel().getDataset(sourceModelRow));
                 break;
-
-            default:
-                break;
         }
     });
 
@@ -94,9 +91,6 @@ Datasets DatasetPickerAction::getDatasets() const
             case AbstractDatasetsModel::PopulationMode::Automatic:
                 datasets << mv::data().getDatasetsListModel().getDataset(sourceModelIndex.row());
                 break;
-
-            default:
-                break;
         }
     }
 
@@ -124,9 +118,7 @@ void DatasetPickerAction::setDatasets(Datasets datasets, bool silent /*= false*/
         emit datasetsChanged(_datasetsListModel.getDatasets());
     }
 
-    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
-
-    if (publicDatasetPickerAction)
+    if (auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction()))
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 }
 
@@ -161,9 +153,6 @@ Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
 
         case AbstractDatasetsModel::PopulationMode::Automatic:
             return mv::data().getDatasetsListModel().getDataset(sourceModelIndex.row());
-
-        default:
-            break;
     }
 
     return {};
@@ -182,9 +171,6 @@ void DatasetPickerAction::setCurrentDataset(Dataset<DatasetImpl> currentDataset)
 
             case AbstractDatasetsModel::PopulationMode::Automatic:
                 datasetIndex = mv::data().getDatasetsListModel().getIndexFromDataset(currentDataset);
-                break;
-
-            default:
                 break;
         }
     }
@@ -210,9 +196,6 @@ void DatasetPickerAction::setCurrentDataset(const QString& datasetId)
 
         case AbstractDatasetsModel::PopulationMode::Automatic:
             datasetIndex = mv::data().getDatasetsListModel().getIndexFromDataset(datasetId);
-            break;
-
-        default:
             break;
     }
 
@@ -266,9 +249,6 @@ void DatasetPickerAction::populationModeChanged()
             _datasetsFilterModel.setSourceModel(&const_cast<DatasetsListModel&>(mv::data().getDatasetsListModel()));
             break;
         }
-
-        default:
-            break;
     }
 }
 

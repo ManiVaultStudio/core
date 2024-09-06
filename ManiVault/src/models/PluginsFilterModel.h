@@ -55,6 +55,18 @@ public:
      */
     void setFilterFunction(const FilterFunction& filterFunction);
 
+    /**
+     * Get plugin types to filter
+     * @return Plugin types
+     */
+    plugin::Types getFilterPluginTypes() const;
+
+    /**
+     * Set plugin filter types to \p filterPluginTypes
+     * @param filterPluginTypes Plugin filter types
+     */
+    void setFilterPluginTypes(const plugin::Types& filterPluginTypes);
+
 public:
 
     gui::ToggleAction& getUseFilterFunctionAction() { return _useFilterFunctionAction; }
@@ -65,6 +77,7 @@ private:
 
 private:
     FilterFunction      _filterFunction;                    /** Filter lambda */
+    plugin::Types       _filterPluginTypes;                 /** Filter on plugin types */
     gui::ToggleAction   _useFilterFunctionAction;           /** Toggle the use of a filter function */
     gui::ToggleAction   _instantiatedPluginsOnlyAction;     /** Show only instantiated plugins */
 };
