@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <QLabel>
+#include <QScrollArea>
 #include <QWidget>
 #include <QVBoxLayout>
 
@@ -27,7 +29,17 @@ public:
      */
     SampleContextWidget(SampleContextPlugin* sampleContextPlugin, QWidget* parent = nullptr);
 
+    /**
+     * Set text
+     * @param htmlText Text in HTML format
+     */
+    void setHtmlText(const QString& htmlText);
+
 protected:
-    SampleContextPlugin*    _sampleContextPlugin;   /** Pointer to parent sample context plugin */
-    QVBoxLayout             _layout;                /** Main layout */
+    SampleContextPlugin*    _sampleContextPlugin;       /** Pointer to parent sample context plugin */
+    QVBoxLayout             _layout;                    /** Main layout */
+    QScrollArea             _textScrollArea;            /** Scroll area for the label */
+    QWidget                 _textWidget;                /** Widget with the shortcuts label */
+    QVBoxLayout             _textWidgetLayout;          /** Layout for the label */
+    QLabel                  _textBodyLabel;             /** Label for the body HTML text */
 };
