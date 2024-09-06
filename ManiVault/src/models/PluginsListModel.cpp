@@ -21,7 +21,7 @@ PluginsListModel::PluginsListModel(PopulationMode populationMode /*= PopulationM
 {
     setColumnCount(static_cast<int>(Column::Count));
 
-    populateFromPluginManager();
+    PluginsListModel::populateFromPluginManager();
 }
 
 plugin::Plugins PluginsListModel::getPlugins() const
@@ -72,7 +72,7 @@ void PluginsListModel::addPlugin(plugin::Plugin* plugin)
 
     pluginId->setEditable(false);
 
-    appendRow({ pluginRow, new QStandardItem("Instance"), pluginId });
+    appendRow(Row(plugin, plugin->getGuiName(), "Instance", plugin->getId()));
 }
 
 void PluginsListModel::removePlugin(plugin::Plugin* plugin)
@@ -107,6 +107,28 @@ QModelIndex PluginsListModel::getIndexFromPlugin(const plugin::Plugin* plugin) c
     catch (...)
     {
         exceptionMessageBox("Unable to get index from plugin in plugins list model");
+    }
+
+    return {};
+}
+
+QModelIndex PluginsListModel::getIndexFromPlugin(const QString& pluginId) const
+{
+    try {
+        const auto matches = match(index(0, static_cast<int>(AbstractPluginsModel::Column::Id)), Qt::EditRole, pluginId, 1, Qt::MatchExactly | Qt::MatchRecursive);
+
+        if (matches.isEmpty())
+            return {};
+
+        return matches.first();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get index from plugin ID in plugins model", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to get index from plugin ID in plugins model");
     }
 
     return {};

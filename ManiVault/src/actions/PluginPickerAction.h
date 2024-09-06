@@ -7,8 +7,6 @@
 #include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
 
-#include "event/EventListener.h"
-
 #include "models/PluginsListModel.h"
 #include "models/PluginsFilterModel.h"
 
@@ -20,6 +18,8 @@ namespace mv::gui {
  * Plugin picker action class
  *
  * Action class for picking a plugin from a list.
+ *
+ * Note: This class is not fully production yet, it needs some thorough testing
  *
  * @author Thomas Kroes
  */
@@ -103,6 +103,20 @@ public: // Population
      */
     void setPopulationMode(AbstractPluginsModel::PopulationMode populationMode);
 
+public: // Plugin type filtering
+
+    /**
+     * Get plugin types to filter
+     * @return Plugin types
+     */
+    plugin::Types getFilterPluginTypes() const;
+
+    /**
+     * Set plugin filter types to \p filterPluginTypes
+     * @param filterPluginTypes Plugin filter types
+     */
+    void setFilterPluginTypes(const plugin::Types& filterPluginTypes);
+
 private:
 
     /** Handle changes to the population mode */
@@ -169,6 +183,13 @@ signals:
      * @param currentPopulationMode Current population mode
      */
     void populationModeChanged(AbstractPluginsModel::PopulationMode previousPopulationMode, AbstractPluginsModel::PopulationMode currentPopulationMode);
+
+    /**
+     * Signals that the filter plugin types changed from \p previousPopulationMode to \p currentPopulationMode
+     * @param previousFilterPluginTypes Previous filter plugin types
+     * @param currentFilterPluginTypes Current filter plugin types
+     */
+    void filterPluginTypesChanged(const plugin::Types& previousFilterPluginTypes, const plugin::Types& currentFilterPluginTypes);
 
 private:
     AbstractPluginsModel::PopulationMode    _populationMode;                /** Population mode (e.g. manual or automatic) */

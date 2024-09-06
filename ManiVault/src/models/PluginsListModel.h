@@ -67,6 +67,12 @@ public:
      */
     QModelIndex getIndexFromPlugin(const plugin::Plugin* plugin) const;
 
+    /**
+     * Get index from \p pluginId
+     * @param pluginId Plugin globally unique identifier to retrieve the row index for
+     * @return Model index (invalid if not found)
+     */
+    QModelIndex getIndexFromPlugin(const QString& pluginId) const;
 
 public: // Item access
 

@@ -27,6 +27,8 @@ PluginPickerAction::PluginPickerAction(QObject* parent, const QString& title) :
     setPlaceHolderString("--choose plugin--");
     setCustomModel(&_filterModel);
 
+    _filterModel.getInstantiatedPluginsOnlyAction().setChecked(false);
+
     connect(this, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
         const auto sourceModelRow = _filterModel.mapToSource(_filterModel.index(currentIndex, 0)).row();
 
@@ -73,7 +75,6 @@ Plugins PluginPickerAction::getPlugins() const
 {
     Plugins plugins;
 
-    /*
     for (std::int32_t filterModelRowIndex = 0; filterModelRowIndex < _filterModel.rowCount(); ++filterModelRowIndex) {
         const auto sourceModelIndex = _filterModel.mapToSource(_filterModel.index(filterModelRowIndex, 0));
 
@@ -82,19 +83,15 @@ Plugins PluginPickerAction::getPlugins() const
 
         switch (_populationMode)
         {
-            case AbstractDatasetsModel::PopulationMode::Manual:
-                datasets << _listModel.getDataset(sourceModelIndex.row());
+            case AbstractPluginsModel::PopulationMode::Manual:
+                plugins.push_back(_listModel.getPlugin(_listModel.index(sourceModelIndex.row(), 0)));
                 break;
 
-            case AbstractDatasetsModel::PopulationMode::Automatic:
-                datasets << mv::data().getDatasetsListModel().getDataset(sourceModelIndex.row());
-                break;
-
-            default:
+            case AbstractPluginsModel::PopulationMode::Automatic:
+                plugins.push_back(mv::plugins().getListModel().getPlugin(mv::plugins().getListModel().index(sourceModelIndex.row(), 0)));
                 break;
         }
     }
-    */
 
     return plugins;
 }
@@ -135,7 +132,6 @@ void PluginPickerAction::setFilterFunction(const PluginsFilterModel::FilterFunct
 
 plugin::Plugin* PluginPickerAction::getCurrentPlugin() const
 {
-    /*
     if (getCurrentIndex() < 0)
         return {};
 
@@ -151,16 +147,12 @@ plugin::Plugin* PluginPickerAction::getCurrentPlugin() const
 
     switch (_populationMode)
     {
-        case AbstractDatasetsModel::PopulationMode::Manual:
-            return _listModel.getDataset(sourceModelIndex.row());
+        case AbstractPluginsModel::PopulationMode::Manual:
+            return _listModel.getPlugin(_listModel.index(sourceModelIndex.row(), 0));
 
-        case AbstractDatasetsModel::PopulationMode::Automatic:
-            return mv::data().getDatasetsListModel().getDataset(sourceModelIndex.row());
-
-        default:
-            break;
+        case AbstractPluginsModel::PopulationMode::Automatic:
+            return mv::plugins().getListModel().getPlugin(mv::plugins().getListModel().index(sourceModelIndex.row(), 0));
     }
-    */
 
     return {};
 }
@@ -181,10 +173,7 @@ void PluginPickerAction::setCurrentPlugin(const plugin::Plugin* currentPlugin)
             break;
 
         case AbstractPluginsModel::PopulationMode::Automatic:
-            //pluginIndex = mv::data().getDatasetsListModel().getIndexFromDataset(currentDataset);
-            break;
-
-        default:
+            pluginIndex = mv::plugins().getListModel().getIndexFromPlugin(currentPlugin);
             break;
     }
 
@@ -201,18 +190,14 @@ void PluginPickerAction::setCurrentPlugin(const QString& pluginId)
 
     QModelIndex datasetIndex;
 
-    /*
     switch (_populationMode)
     {
-        case AbstractDatasetsModel::PopulationMode::Manual:
-            datasetIndex = _listModel.getIndexFromPlugin(datasetId);
+        case AbstractPluginsModel::PopulationMode::Manual:
+            datasetIndex = _listModel.getIndexFromPlugin(pluginId);
             break;
 
-        case AbstractDatasetsModel::PopulationMode::Automatic:
-            datasetIndex = mv::data().getDatasetsListModel().getIndexFromPlugin(datasetId);
-            break;
-
-        default:
+        case AbstractPluginsModel::PopulationMode::Automatic:
+            datasetIndex = mv::plugins().getListModel().getIndexFromPlugin(pluginId);
             break;
     }
 
@@ -220,7 +205,6 @@ void PluginPickerAction::setCurrentPlugin(const QString& pluginId)
         return;
 
     setCurrentIndex(_filterModel.mapFromSource(datasetIndex).row());
-    */
 }
 
 QString PluginPickerAction::getCurrentPluginId() const
@@ -254,6 +238,23 @@ void PluginPickerAction::setPopulationMode(AbstractPluginsModel::PopulationMode 
     emit populationModeChanged(previousPopulationMode, _populationMode);
 }
 
+plugin::Types PluginPickerAction::getFilterPluginTypes() const
+{
+    return _filterModel.getFilterPluginTypes();
+}
+
+void PluginPickerAction::setFilterPluginTypes(const plugin::Types& filterPluginTypes)
+{
+    if (filterPluginTypes == _filterModel.getFilterPluginTypes())
+        return;
+
+    const auto previousFilterPluginTypes = _filterModel.getFilterPluginTypes();
+
+    _filterModel.setFilterPluginTypes(filterPluginTypes);
+
+    emit filterPluginTypesChanged(previousFilterPluginTypes, _filterModel.getFilterPluginTypes());
+}
+
 void PluginPickerAction::populationModeChanged()
 {
     switch (_populationMode)
@@ -268,12 +269,9 @@ void PluginPickerAction::populationModeChanged()
         case AbstractPluginsModel::PopulationMode::Automatic:
         {
             _filterModel.getUseFilterFunctionAction().setChecked(true);
-            _filterModel.setSourceModel(&const_cast<DatasetsListModel&>(mv::data().getDatasetsListModel()));
+            _filterModel.setSourceModel(&const_cast<PluginsListModel&>(mv::plugins().getListModel()));
             break;
         }
-
-        default:
-            break;
     }
 }
 

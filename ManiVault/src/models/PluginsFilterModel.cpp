@@ -57,8 +57,13 @@ bool PluginsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
 
     auto abstractPluginsModel = dynamic_cast<AbstractPluginsModel*>(sourceModel());
 
+    auto plugin = dynamic_cast<AbstractPluginsModel::Item*>(abstractPluginsModel->itemFromIndex(index))->getPlugin();
+
     if (_useFilterFunctionAction.isChecked() && _filterFunction)
-        return _filterFunction(dynamic_cast<AbstractPluginsModel::Item*>(abstractPluginsModel->itemFromIndex(index))->getPlugin());
+        return _filterFunction(plugin);
+
+    if (!_filterPluginTypes.isEmpty())
+        return _filterPluginTypes.contains(plugin->getType());
 
     return true;
 }
@@ -71,6 +76,18 @@ bool PluginsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs
 void PluginsFilterModel::setFilterFunction(const FilterFunction& filterFunction)
 {
     _filterFunction = filterFunction;
+
+    invalidate();
+}
+
+plugin::Types PluginsFilterModel::getFilterPluginTypes() const
+{
+    return _filterPluginTypes;
+}
+
+void PluginsFilterModel::setFilterPluginTypes(const plugin::Types& filterPluginTypes)
+{
+    _filterPluginTypes = filterPluginTypes;
 
     invalidate();
 }

@@ -19,7 +19,7 @@ PluginsTreeModel::PluginsTreeModel(PopulationMode populationMode /*= PopulationM
 {
     setColumnCount(static_cast<int>(AbstractPluginsModel::Column::Count));
 
-    populateFromPluginManager();
+    PluginsTreeModel::populateFromPluginManager();
 }
 
 plugin::Plugins PluginsTreeModel::getPlugins() const
