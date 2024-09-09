@@ -22,6 +22,8 @@ namespace mv::gui {
  */
 class CORE_EXPORT ApplicationIconAction : public HorizontalGroupAction
 {
+    Q_OBJECT
+    
 public:
 
     /**

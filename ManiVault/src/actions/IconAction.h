@@ -19,6 +19,8 @@ namespace mv::gui {
  */
 class CORE_EXPORT IconAction : public TriggerAction
 {
+    Q_OBJECT
+    
 public:
 
     /**
