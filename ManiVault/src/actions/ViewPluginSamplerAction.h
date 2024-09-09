@@ -113,6 +113,14 @@ private:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
+private:
+
+    /**
+     * Get pointer to target widget
+     * @return Pointer to target widget (maybe nullptr)
+     */
+    QWidget* getTargetWidget() const;
+
 public: // Serialization
 
     /**

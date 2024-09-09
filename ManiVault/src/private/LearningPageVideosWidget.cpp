@@ -9,9 +9,6 @@
 
 #include <Application.h>
 
-#include <QDebug>
-#include <QStyledItemDelegate>
-
 #ifdef _DEBUG
     #define LEARNING_PAGE_VIDEOS_WIDGET_VERBOSE
 #endif
@@ -20,33 +17,29 @@ using namespace mv::gui;
 
 LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _mainLayout(),
-    _settingsAction(this, "Settings"),
-    _videosListView(),
-    _model(),
-    _filterModel()
+    _settingsAction(this, "Settings")
 {
     _mainLayout.setContentsMargins(0, 0, 0, 0);
     _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Videos", "Videos"));
-    _mainLayout.addWidget(_filterModel.getTagsFilterAction().createWidget(this));
-    _mainLayout.addWidget(_filterModel.getFilterGroupAction().createWidget(this));
+    _mainLayout.addWidget(_videosFilterModel.getTagsFilterAction().createWidget(this));
+    _mainLayout.addWidget(_videosFilterModel.getFilterGroupAction().createWidget(this));
     _mainLayout.addWidget(&_videosListView, 1);
 
-    _filterModel.setSourceModel(&_model);
-    _filterModel.getTagsFilterAction().setStretch(2);
+    _videosFilterModel.setSourceModel(&_videosModel);
+    _videosFilterModel.getTagsFilterAction().setStretch(2);
 
     _videosListView.setObjectName("Videos");
     _videosListView.setViewMode(QListView::IconMode);
-    _videosListView.setModel(&_filterModel);
-    _videosListView.setModelColumn(static_cast<int>(LearningPageVideosModel::Column::Delegate));
-    _videosListView.setItemDelegateForColumn(static_cast<int>(LearningPageVideosModel::Column::Delegate), new LearningPageVideoStyledItemDelegate(this));
+    _videosListView.setModel(&_videosFilterModel);
+    _videosListView.setModelColumn(static_cast<int>(HelpManagerVideosModel::Column::Delegate));
+    _videosListView.setItemDelegateForColumn(static_cast<int>(HelpManagerVideosModel::Column::Delegate), new LearningPageVideoStyledItemDelegate(this));
 
     setLayout(&_mainLayout);
 
     const auto openPersistentEditors = [this]() -> void {
-        for (int rowIndex = 0; rowIndex <= _filterModel.rowCount(); rowIndex++) {
-            const auto index = _filterModel.index(rowIndex, static_cast<int>(LearningPageVideosModel::Column::Delegate));
+        for (int rowIndex = 0; rowIndex <= _videosFilterModel.rowCount(); rowIndex++) {
+            const auto index = _videosFilterModel.index(rowIndex, static_cast<int>(HelpManagerVideosModel::Column::Delegate));
 
             //if (_videosListView.isPersistentEditorOpen(index))
             //    return;
@@ -58,11 +51,11 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
 
     openPersistentEditors();
 
-    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, openPersistentEditors);
+    connect(&_videosFilterModel, &QSortFilterProxyModel::layoutChanged, this, openPersistentEditors);
 
-    connect(&_filterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+    connect(&_videosFilterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            _videosListView.closePersistentEditor(_filterModel.index(rowIndex, static_cast<int>(LearningPageVideosModel::Column::Delegate)));
+            _videosListView.closePersistentEditor(_videosFilterModel.index(rowIndex, static_cast<int>(HelpManagerVideosModel::Column::Delegate)));
     });
 
     updateCustomStyle();
@@ -70,7 +63,7 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
 
 void LearningPageVideosWidget::showEvent(QShowEvent* showEvent)
 {
-    _model.populateFromServer();
+    _videosModel.populateFromServer();
 }
 
 bool LearningPageVideosWidget::event(QEvent* event)

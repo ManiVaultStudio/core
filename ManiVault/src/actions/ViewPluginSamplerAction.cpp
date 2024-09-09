@@ -50,6 +50,9 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
     const auto updateSettingsActionReadOnly = [this]() -> void {
         _settingsAction.setEnabled(_enabledAction.isChecked());
+
+        if (_samplerPixelSelectionAction)
+            _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(_enabledAction.isChecked());
     };
 
     updateSettingsActionReadOnly();
@@ -96,16 +99,17 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         if (!viewPlugin || !pixelSelectionAction || !samplerPixelSelectionAction)
             return;
 
-        if (_viewPlugin)
-            _viewPlugin->getWidget().removeEventFilter(this);
+        if (getTargetWidget())
+            getTargetWidget()->removeEventFilter(this);
 
         _viewPlugin                     = viewPlugin;
         _pixelSelectionAction           = pixelSelectionAction;
         _samplerPixelSelectionAction    = samplerPixelSelectionAction;
         _toolTipOverlayWidget           = std::make_unique<OverlayWidget>(&_viewPlugin->getWidget());
 
-        _viewPlugin->getWidget().setMouseTracking(true);
-        _viewPlugin->getWidget().installEventFilter(this);
+        _toolTipOverlayWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+        getTargetWidget()->installEventFilter(this);
 
         connect(_samplerPixelSelectionAction->getPixelSelectionTool(), &PixelSelectionTool::areaChanged, this, [this]() {
             _sampleContextDirty = true;
@@ -218,7 +222,7 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 {
     Q_ASSERT(_viewPlugin && _pixelSelectionAction && _samplerPixelSelectionAction);
 
-    if (!_viewPlugin || !_pixelSelectionAction || !_samplerPixelSelectionAction)
+    if (!_enabledAction.isChecked() || !_viewPlugin || !_pixelSelectionAction || !_samplerPixelSelectionAction || !_samplerPixelSelectionAction->isEnabled())
         return HorizontalGroupAction::eventFilter(target, event);
 
     if (target == &_viewPlugin->getWidget()) {
@@ -264,6 +268,14 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
     }
 
     return HorizontalGroupAction::eventFilter(target, event);
+}
+
+QWidget* ViewPluginSamplerAction::getTargetWidget() const
+{
+    if (!_samplerPixelSelectionAction)
+        return nullptr;
+
+    return _samplerPixelSelectionAction->getTargetWidget();
 }
 
 void ViewPluginSamplerAction::fromVariantMap(const QVariantMap& variantMap)

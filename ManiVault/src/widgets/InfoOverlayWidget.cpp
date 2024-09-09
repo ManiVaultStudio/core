@@ -18,6 +18,8 @@ InfoOverlayWidget::InfoOverlayWidget(QWidget* parent) :
     _widgetOverlayer(this, this, parent),
     _widgetFader(this, this, 1.f, 0.f, 1.f, 120, 60)
 {
+    setAttribute(Qt::WA_TransparentForMouseEvents);
+
     setColors(Qt::black, Qt::lightGray);
 }
 

@@ -8,10 +8,8 @@
 #include <QScrollArea>
 #include <QListView>
 
-#include "LearningPageVideosModel.h"
-#include "LearningPageVideosFilterModel.h"
-
-#include <widgets/FlowLayout.h>
+#include "HelpManagerVideosModel.h"
+#include "HelpManagerVideosFilterModel.h"
 
 #include <actions/HorizontalGroupAction.h>
 
@@ -54,11 +52,10 @@ private:
 private:
     QVBoxLayout                     _mainLayout;            /** Main vertical layout */
     mv::gui::HorizontalGroupAction  _settingsAction;        /** For searching etc. */
-    QScrollArea                     _videosScrollArea;      /** Videos scroll area */
     QWidget                         _videosWidget;          /** Container for the videos list view */
     QListView                       _videosListView;        /** List view which shows videos with styled item delegates */
-    LearningPageVideosModel         _model;                 /** Videos model */
-    LearningPageVideosFilterModel   _filterModel;           /** Videos filter model */
+    HelpManagerVideosModel          _videosModel;           /** Videos model */
+    HelpManagerVideosFilterModel    _videosFilterModel;     /** Videos filter model */
 
     friend class LearningPageContentWidget;
 };

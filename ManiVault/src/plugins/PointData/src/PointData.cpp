@@ -1050,7 +1050,7 @@ QUrl PointDataFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl PointDataFactory::getRespositoryUrl() const
+QUrl PointDataFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }

@@ -2,34 +2,34 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "LearningPageVideosModel.h"
+#include "HelpManagerVideosModel.h"
 
 #include <QJsonArray>
-#include <QJsonDocument>
+#include <QJsonObject>
 
 #ifdef _DEBUG
-    //#define LEARNING_PAGE_VIDEOS_MODEL_VERBOSE
+    //#define HELP_MANAGER_VIDEOS_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
 
-QMap<LearningPageVideosModel::Column, LearningPageVideosModel::ColumHeaderInfo> LearningPageVideosModel::columnInfo = QMap<LearningPageVideosModel::Column, LearningPageVideosModel::ColumHeaderInfo>({
-    { LearningPageVideosModel::Column::Title, { "Title" , "Title", "Video title" } },
-    { LearningPageVideosModel::Column::Tags, { "Tags" , "Tags", "Video tags" } },
-    { LearningPageVideosModel::Column::Date, { "Date" , "Date", "Video date" } },
-    { LearningPageVideosModel::Column::Summary, { "Summary" , "Summary", "Video description" } },
-    { LearningPageVideosModel::Column::YouTubeId, { "YouTube ID" , "YouTube ID", "YouTube video identifier" } },
-    { LearningPageVideosModel::Column::YouTubeUrl, { "YouTube URL" , "YouTube URL", "Video URL" } },
-    { LearningPageVideosModel::Column::Delegate, { "Delegate" , "Delegate", "Delegate" } }
+QMap<HelpManagerVideosModel::Column, HelpManagerVideosModel::ColumHeaderInfo> HelpManagerVideosModel::columnInfo = QMap<HelpManagerVideosModel::Column, HelpManagerVideosModel::ColumHeaderInfo>({
+    { HelpManagerVideosModel::Column::Title, { "Title" , "Title", "Video title" } },
+    { HelpManagerVideosModel::Column::Tags, { "Tags" , "Tags", "Video tags" } },
+    { HelpManagerVideosModel::Column::Date, { "Date" , "Date", "Video date" } },
+    { HelpManagerVideosModel::Column::Summary, { "Summary" , "Summary", "Video description" } },
+    { HelpManagerVideosModel::Column::YouTubeId, { "YouTube ID" , "YouTube ID", "YouTube video identifier" } },
+    { HelpManagerVideosModel::Column::YouTubeUrl, { "YouTube URL" , "YouTube URL", "Video URL" } },
+    { HelpManagerVideosModel::Column::Delegate, { "Delegate" , "Delegate", "Delegate" } }
 });
 
-LearningPageVideosModel::LearningPageVideosModel(QObject* parent /*= nullptr*/) :
+HelpManagerVideosModel::HelpManagerVideosModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 }
 
-QVariant LearningPageVideosModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant HelpManagerVideosModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
     switch (static_cast<Column>(section))
     {
@@ -61,12 +61,12 @@ QVariant LearningPageVideosModel::headerData(int section, Qt::Orientation orient
     return {};
 }
 
-QSet<QString> LearningPageVideosModel::getTagsSet() const
+QSet<QString> HelpManagerVideosModel::getTagsSet() const
 {
     return _tags;
 }
 
-void LearningPageVideosModel::populateFromServer()
+void HelpManagerVideosModel::populateFromServer()
 {
     connect(&_fileDownloader, &mv::util::FileDownloader::downloaded, this, [this]() -> void {
         setRowCount(0);
@@ -89,18 +89,18 @@ void LearningPageVideosModel::populateFromServer()
     _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
 }
 
-LearningPageVideosModel::Item::Item(QVariantMap variantMap, bool editable /*= false*/) :
+HelpManagerVideosModel::Item::Item(QVariantMap variantMap, bool editable /*= false*/) :
     QStandardItem(),
     _variantMap(variantMap)
 {
 }
 
-const QVariantMap& LearningPageVideosModel::Item::getVariantMap() const
+const QVariantMap& HelpManagerVideosModel::Item::getVariantMap() const
 {
     return _variantMap;
 }
 
-QVariant LearningPageVideosModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant HelpManagerVideosModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -117,7 +117,7 @@ QVariant LearningPageVideosModel::TitleItem::data(int role /*= Qt::UserRole + 1*
     return Item::data(role);
 }
 
-QVariant LearningPageVideosModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant HelpManagerVideosModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -136,7 +136,7 @@ QVariant LearningPageVideosModel::TagsItem::data(int role /*= Qt::UserRole + 1*/
     return Item::data(role);
 }
 
-QVariant LearningPageVideosModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant HelpManagerVideosModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -153,7 +153,7 @@ QVariant LearningPageVideosModel::DateItem::data(int role /*= Qt::UserRole + 1*/
     return Item::data(role);
 }
 
-QVariant LearningPageVideosModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant HelpManagerVideosModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -170,7 +170,7 @@ QVariant LearningPageVideosModel::SummaryItem::data(int role /*= Qt::UserRole + 
     return Item::data(role);
 }
 
-QVariant LearningPageVideosModel::YouTubeIdItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant HelpManagerVideosModel::YouTubeIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -187,7 +187,7 @@ QVariant LearningPageVideosModel::YouTubeIdItem::data(int role /*= Qt::UserRole 
     return Item::data(role);
 }
 
-QVariant LearningPageVideosModel::YouTubeUrlItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant HelpManagerVideosModel::YouTubeUrlItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:

@@ -12,11 +12,11 @@
 
 #include "actions/PluginTriggerAction.h"
 
+#include "util/ShortcutMap.h"
+
 #include <QObject>
 #include <QIcon>
 #include <QVariant>
-
-//#define ON_LEARNING_CENTER_FEATURE_BRANCH
 
 namespace mv {
     class DatasetImpl;
@@ -111,25 +111,7 @@ public: // Help
      * Get whether the plugin has help information or not
      * @return Boolean determining whether the plugin has help information or not
      */
-    virtual bool hasHelp();
-
-    /**
-     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
-     * @return Reference to show help trigger action
-     */
-    virtual gui::TriggerAction& getTriggerHelpAction() final;
-
-    /**
-     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
-     * @return Reference to show help trigger action
-     */
-    virtual gui::TriggerAction& getTriggerReadmeAction() final;
-
-    /**
-     * Get trigger action that launches the GitHub repository website
-     * @return Reference to visit repository action
-     */
-    virtual gui::TriggerAction& getVisitRepositoryAction() final;
+    virtual bool hasHelp() const;
 
     /**
      * Get the read me markdown file URL
@@ -139,9 +121,9 @@ public: // Help
 
     /**
      * Get the URL of the GitHub repository
-     * @return URL of the GitHub repository
+     * @return URL of the GitHub repository (or readme markdown URL if set)
      */
-    virtual QUrl getRespositoryUrl() const;
+    virtual QUrl getRepositoryUrl() const;
 
 public: // GUI name
 
@@ -233,6 +215,46 @@ public:
             pluginTriggerAction->initialize();
     }
 
+public: // Shortcut map
+
+    /**
+     * Get shortcut map
+     * @return Reference to the shortcut map
+     */
+    virtual util::ShortcutMap& getShortcutMap() final;
+
+    /**
+     * Get shortcut map
+     * @return Const reference to the shortcut map
+     */
+    virtual const util::ShortcutMap& getShortcutMap() const final;
+
+public: // Description
+
+    /**
+     * Get short description
+     * @return String that shortly describes the plugin
+     */
+    QString getShortDescription() const;
+
+    /**
+     * Set short description to \p shortDescription
+     * @param shortDescription String that shortly describes the plugin
+     */
+    void setShortDescription(const QString& shortDescription);
+
+    /**
+     * Get extended description
+     * @return Extended description in HTML format
+     */
+    QString getLongDescription() const;
+
+    /**
+     * Set long description to \p longDescription
+     * @param longDescription Extended description in HTML format
+     */
+    void setLongDescription(const QString& longDescription);
+
 public: // Number of instances
 
     /** Get number of plugin instances currently loaded */
@@ -277,6 +299,17 @@ protected:
      */
     static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const DataType& dataType);
 
+public: // Views
+
+    /** View the shortcut map */
+    virtual void viewShortcutMap();
+
+public: // Action getters
+
+    gui::TriggerAction& getTriggerHelpAction() { return _triggerHelpAction; };
+    gui::TriggerAction& getTriggerReadmeAction() { return _triggerReadmeAction; };
+    gui::TriggerAction& getVisitRepositoryAction() { return _visitRepositoryAction; };
+
 signals:
 
     /**
@@ -297,6 +330,20 @@ signals:
      */
     void statusBarActionChanged(gui::PluginStatusBarAction* statusBarAction);
 
+    /**
+     * Signals that the short description changed from \p previousShortDescription to \p currentShortDescription
+     * @param previousShortDescription Previous short description
+     * @param currentShortDescription Current short description
+     */
+    void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
+    
+    /**
+     * Signals that the long description changed from \p previousLongDescription to \p currentLongDescription
+     * @param previousLongDescription Previous long description
+     * @param currentLongDescription Current long description
+     */
+    void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
+
 private:
     QString                                 _kind;                                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
     Type                                    _type;                                  /** Type of plugin (e.g. analysis, data, loader, writer & view) */
@@ -310,6 +357,9 @@ private:
     gui::TriggerAction                      _visitRepositoryAction;                 /** Trigger action that opens an external browser and visits the GitHub repository */
     gui::PluginGlobalSettingsGroupAction*   _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
+    util::ShortcutMap                       _shortcutMap;                           /** Shortcut cheatsheet map */
+    QString                                 _shortDescription;                      /** Shortly describes the plugin */
+    QString                                 _longDescription;                       /** Extended description in HTML format */
 };
 
 }

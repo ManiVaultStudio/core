@@ -19,10 +19,10 @@ Plugin::Plugin(const PluginFactory* factory) :
     _core(Application::core()),
     _factory(factory),
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
-    _properties(),
-    _eventListener(),
     _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "1" : QString::number(factory->getNumberOfInstances() + 1)))),
-    _destroyAction(this, "Remove")
+    _destroyAction(this, "Remove"),
+    _shortcuts(this),
+    _learningCenterAction(this, "Plugin learning center")
 {
     setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::ForceNone);
 
@@ -36,6 +36,8 @@ Plugin::Plugin(const PluginFactory* factory) :
     _destroyAction.setConnectionPermissionsToForceNone();
 
     connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
+
+    _learningCenterAction.initialize(this);
 }
 
 Plugin::~Plugin()
@@ -82,14 +84,14 @@ QString Plugin::getVersion() const
     return _factory->getVersion();
 }
 
-bool Plugin::hasHelp()
+PluginShortcuts& Plugin::getShortcuts()
 {
-    return const_cast<PluginFactory*>(_factory)->hasHelp();
+    return _shortcuts;
 }
 
-mv::gui::TriggerAction& Plugin::getTriggerHelpAction()
+const PluginShortcuts& Plugin::getShortcuts() const
 {
-    return const_cast<PluginFactory*>(_factory)->getTriggerHelpAction();
+    return _shortcuts;
 }
 
 QVariant Plugin::getProperty(const QString& name, const QVariant& defaultValue /*= QVariant()*/) const
@@ -140,6 +142,8 @@ void Plugin::fromVariantMap(const QVariantMap& variantMap)
     WidgetAction::fromVariantMap(variantMap);
 
     Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
+
+    _learningCenterAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap Plugin::toVariantMap() const
@@ -154,6 +158,8 @@ QVariantMap Plugin::toVariantMap() const
         { "Type", static_cast<std::uint32_t>(_factory->getType()) },
         { "Version", _factory->getVersion() }
     });
+
+    _learningCenterAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

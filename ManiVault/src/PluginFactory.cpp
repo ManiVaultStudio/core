@@ -18,13 +18,10 @@ namespace mv::plugin
 {
 
 PluginFactory::PluginFactory(Type type) :
-    _kind(),
     _type(type),
-    _guiName(),
-    _version(),
+    _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
     _numberOfInstances(0),
     _maximumNumberOfInstances(-1),
-    _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
     _triggerHelpAction(nullptr, "Trigger plugin help"),
     _triggerReadmeAction(nullptr, "Readme"),
     _visitRepositoryAction(nullptr, "Go to repository"),
@@ -43,13 +40,12 @@ PluginFactory::PluginFactory(Type type) :
         markdownDialog.exec();
     });
 
-    _visitRepositoryAction.setIconByName("github");
+    _visitRepositoryAction.setToolTip("Browse to the Github repository");
+    _visitRepositoryAction.setIcon(Application::getIconFont("FontAwesomeBrands").getIcon("code-branch"));
 
     connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
-        if (!getRespositoryUrl().isValid())
-            return;
-
-        QDesktopServices::openUrl(getRespositoryUrl());
+        if (getRepositoryUrl().isValid())
+            QDesktopServices::openUrl(getRepositoryUrl());
     });
 }
 
@@ -63,6 +59,7 @@ void PluginFactory::setKind(const QString& kind)
     _kind = kind;
 
     _pluginTriggerAction.setText(_kind);
+    _shortcutMap.setTitle(_kind);
 }
 
 mv::plugin::Type PluginFactory::getType() const
@@ -113,24 +110,9 @@ void PluginFactory::setStatusBarAction(PluginStatusBarAction* statusBarAction)
     emit statusBarActionChanged(_statusBarAction);
 }
 
-bool PluginFactory::hasHelp()
+bool PluginFactory::hasHelp() const
 {
     return false;
-}
-
-TriggerAction& PluginFactory::getTriggerHelpAction()
-{
-    return _triggerHelpAction;
-}
-
-TriggerAction& PluginFactory::getTriggerReadmeAction()
-{
-    return _triggerReadmeAction;
-}
-
-TriggerAction& PluginFactory::getVisitRepositoryAction()
-{
-    return _visitRepositoryAction;
 }
 
 QString PluginFactory::getGuiName() const
@@ -166,6 +148,50 @@ bool PluginFactory::mayProduce() const
 mv::gui::PluginTriggerAction& PluginFactory::getPluginTriggerAction()
 {
     return _pluginTriggerAction;
+}
+
+util::ShortcutMap& PluginFactory::getShortcutMap()
+{
+    return _shortcutMap;
+}
+
+const util::ShortcutMap& PluginFactory::getShortcutMap() const
+{
+    return _shortcutMap;
+}
+
+QString PluginFactory::getShortDescription() const
+{
+    return _shortDescription;
+}
+
+void PluginFactory::setShortDescription(const QString& shortDescription)
+{
+    if (shortDescription == _shortDescription)
+        return;
+
+    const auto previousShortDescription = _shortDescription;
+
+    _shortDescription = shortDescription;
+
+    emit shortDescriptionChanged(previousShortDescription, _shortDescription);
+}
+
+QString PluginFactory::getLongDescription() const
+{
+    return _shortDescription;
+}
+
+void PluginFactory::setLongDescription(const QString& longDescription)
+{
+    if (longDescription == _longDescription)
+        return;
+
+    const auto previouslongDescription = _longDescription;
+
+    _longDescription = longDescription;
+
+    emit longDescriptionChanged(previouslongDescription, _longDescription);
 }
 
 std::uint32_t PluginFactory::getNumberOfInstances() const
@@ -225,9 +251,14 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
     return numberOfDatasetsForType;
 }
 
+void PluginFactory::viewShortcutMap()
+{
+    qDebug() << __FUNCTION__ << "not implemented yet...";
+}
+
 QUrl PluginFactory::getReadmeMarkdownUrl() const
 {
-    const auto githubRepositoryUrl = getRespositoryUrl();
+    const auto githubRepositoryUrl = getRepositoryUrl();
 
     if (!githubRepositoryUrl.isValid())
         return {};
@@ -240,7 +271,7 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
     return {};
 }
 
-QUrl PluginFactory::getRespositoryUrl() const
+QUrl PluginFactory::getRepositoryUrl() const
 {
     return {};
 }

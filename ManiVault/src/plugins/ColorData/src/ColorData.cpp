@@ -97,7 +97,7 @@ QUrl ColorDataFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl ColorDataFactory::getRespositoryUrl() const
+QUrl ColorDataFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }

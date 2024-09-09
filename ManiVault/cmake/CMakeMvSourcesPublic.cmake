@@ -341,6 +341,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/IconPickerAction.h
     src/actions/ApplicationIconAction.h
     src/actions/ViewPluginSamplerAction.h
+    src/actions/PluginLearningCenterAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -372,6 +373,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/IconPickerAction.cpp
     src/actions/ApplicationIconAction.cpp
     src/actions/ViewPluginSamplerAction.cpp
+    src/actions/PluginLearningCenterAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -412,6 +414,11 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/MarkdownDocument.h
 	src/widgets/MarkdownDialog.h
 	src/widgets/YouTubeVideoDialog.h
+	src/widgets/ViewPluginOverlayWidget.h
+	src/widgets/ViewPluginDescriptionOverlayWidget.h
+	src/widgets/ViewPluginShortcutsOverlayWidget.h
+	src/widgets/ViewPluginLearningCenterOverlayWidget.h
+	src/widgets/IconLabel.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
@@ -426,6 +433,11 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/MarkdownDocument.cpp
 	src/widgets/MarkdownDialog.cpp
 	src/widgets/YouTubeVideoDialog.cpp
+	src/widgets/ViewPluginOverlayWidget.cpp
+	src/widgets/ViewPluginDescriptionOverlayWidget.cpp
+	src/widgets/ViewPluginShortcutsOverlayWidget.cpp
+	src/widgets/ViewPluginLearningCenterOverlayWidget.cpp
+	src/widgets/IconLabel.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES
@@ -512,6 +524,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/DockWidgetPermission.h
     src/util/NumericalRange.h
     src/util/FileDownloader.h
+    src/util/ShortcutMap.h
+    src/util/Video.h
 )
 
 if(APPLE)
@@ -557,6 +571,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/DockWidgetPermission.cpp
     src/util/NumericalRange.cpp
     src/util/FileDownloader.cpp
+    src/util/ShortcutMap.cpp
+    src/util/Video.cpp
 )
 
 if(APPLE)
@@ -650,6 +666,7 @@ set(PUBLIC_PLUGIN_HEADERS
     src/AnalysisPlugin.h
     src/TransformationPlugin.h
     src/ViewPlugin.h
+    src/PluginShortcuts.h
 )
 
 set(PUBLIC_PLUGIN_SOURCES
@@ -661,6 +678,7 @@ set(PUBLIC_PLUGIN_SOURCES
     src/AnalysisPlugin.cpp
     src/TransformationPlugin.cpp
     src/ViewPlugin.cpp
+    src/PluginShortcuts.cpp
 )
 
 list(APPEND PUBLIC_PLUGIN_FILES

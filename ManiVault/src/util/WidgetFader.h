@@ -32,8 +32,8 @@ public:
      * @param opacity Initial opacity [0, 1]
      * @param minimumOpacity Target fade in opacity [0, 1]
      * @param maximumOpacity Target fade out opacity [0, 1]
-     * @param animationDuration Duration of the fade in animation
-     * @param animationDuration Duration of the fade out animation
+     * @param fadeInDuration Duration of the fade in animation
+     * @param fadeOutDuration Duration of the fade out animation
      */
     WidgetFader(QObject* parent, QWidget* targetWidget, float opacity = 0.0f, float minimumOpacity = 0.0f, float maximumOpacity = 1.0f, std::int32_t fadeInDuration = 150, std::int32_t fadeOutDuration = 150);
 
@@ -109,6 +109,11 @@ public:
      * @return Reference to opacity effect
      */
     QGraphicsOpacityEffect& getOpacityEffect();
+
+private:
+
+    /** Start the opacity animation */
+    void startAnimation();
 
 signals:
 
