@@ -308,8 +308,6 @@ if(APPLE)
     install(CODE "
             message(\"**** MacOS bundle install ****\")
             file(MAKE_DIRECTORY \"${BUNDLE_DIR}\")
-            file(MAKE_DIRECTORY  \"${BUNDLE_DIR}/Frameworks\")
-            file(MAKE_DIRECTORY \"${BUNDLE_DIR}/Contents/Frameworks\")
             message(\"**** Run macdeployqt for \"${BUNDLE_DIR}\" ****\")
             execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite RESULT_VARIABLE retval)
             if(NOT retval EQUAL 0)
