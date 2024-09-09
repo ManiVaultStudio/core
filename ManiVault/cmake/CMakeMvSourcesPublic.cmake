@@ -382,6 +382,7 @@ set(PUBLIC_ACTIONS_INTERNAL_FILES
 set(PUBLIC_WIDGETS_HEADERS
     src/widgets/WebWidget.h
     src/widgets/DropWidget.h
+    src/widgets/OpenGLWidget.h
     src/widgets/Divider.h
     src/widgets/ElidedLabel.h
 )
@@ -389,6 +390,7 @@ set(PUBLIC_WIDGETS_HEADERS
 set(PUBLIC_WIDGETS_SOURCES
     src/widgets/WebWidget.cpp
     src/widgets/DropWidget.cpp
+    src/widgets/OpenGLWidget.cpp
     src/widgets/Divider.cpp
     src/widgets/ElidedLabel.cpp
 )
