@@ -235,7 +235,7 @@ class HdpsCoreConan(ConanFile):
             for pfile in pdb_files:
                 shutil.copy(pfile, pdb_dest)
 
-        self.copy(pattern="*", src=self.install_dir)
+        self.copy(pattern="*", src=self.install_dir, symlinks=True)
 
     def package_info(self):
         self.cpp_info.debug.libdirs = ["Debug/lib"]
