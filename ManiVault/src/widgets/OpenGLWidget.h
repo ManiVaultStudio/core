@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QDropEvent>
@@ -10,7 +12,7 @@ namespace mv
 namespace gui
 {
 
-class OpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
+class CORE_EXPORT OpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
