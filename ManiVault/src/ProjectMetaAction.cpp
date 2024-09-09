@@ -3,8 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ProjectMetaAction.h"
-#include "Project.h"
 
+#include "Application.h"
+#include "Project.h"
 #include "util/Serialization.h"
 
 using namespace mv::gui;

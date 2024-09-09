@@ -13,6 +13,8 @@
 #include "ModelSelectionAction.h"
 #include "HorizontalHeaderAction.h"
 
+#include "WidgetActionWidget.h"
+
 #include "widgets/InfoOverlayWidget.h"
 
 #include <QWidget>

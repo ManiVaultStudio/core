@@ -5,7 +5,10 @@
 #include "PageContentWidget.h"
 #include "PageWidget.h"
 
+#include <QApplication>
 #include <QDebug>
+#include <QLabel>
+#include <QString>
 
 PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget* parent /*= nullptr*/) :
     QWidget(parent),

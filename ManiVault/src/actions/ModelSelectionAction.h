@@ -8,6 +8,7 @@
 #include "TriggerAction.h"
 
 class QItemSelectionModel;
+class QAbstractItemModel;
 
 namespace mv::gui {
 

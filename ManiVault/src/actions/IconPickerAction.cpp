@@ -4,6 +4,8 @@
 
 #include "IconPickerAction.h"
 
+#include "util/Icon.h"
+
 #include <QFileInfo>
 
 namespace mv::gui {

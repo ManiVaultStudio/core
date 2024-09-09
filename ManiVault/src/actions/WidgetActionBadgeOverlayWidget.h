@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "actions/WidgetAction.h"
 #include "widgets/OverlayWidget.h"
 
 namespace mv::gui {

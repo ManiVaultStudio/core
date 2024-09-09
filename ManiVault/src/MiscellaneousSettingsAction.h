@@ -6,6 +6,7 @@
 
 #include "GlobalSettingsGroupAction.h"
 
+#include "actions/OptionsAction.h"
 #include "actions/ToggleAction.h"
 
 namespace mv::gui

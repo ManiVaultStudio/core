@@ -3,8 +3,11 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "LearningPageExamplesWidget.h"
-#include "LearningPageContentWidget.h"
 
+#include "LearningPageContentWidget.h"
+#include "PageContentWidget.h"
+
+#include <QApplication>
 #include <QDebug>
 #include <QStyledItemDelegate>
 
