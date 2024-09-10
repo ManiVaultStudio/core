@@ -10,11 +10,13 @@
 
 #include <QEvent>
 
+#include "PluginPickerAction.h"
+
 using namespace mv::util;
 
 namespace mv::gui {
 
-ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title, const ViewingMode& viewingMode /*= ViewingMode::Windowed*/) :
+ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title, const ViewingMode& viewingMode /*= ViewingMode::None*/) :
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
     _viewingMode(ViewingMode::None),
@@ -26,7 +28,9 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _settingsAction(this, "Settings"),
     _restrictNumberOfElementsAction(this, "Restrict number of elements", false),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
-    _lazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100)
+    _lazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100),
+    _openSampleScopeWindow(this, "Open sample scope window"),
+    _sampleScopePlugin(nullptr)
 {
     setShowLabels(false);
 
@@ -48,6 +52,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _highlightFocusedElementsAction.setToolTip("Toggle highlighting of focused elements");
     _settingsAction.setToolTip("Additional focus region settings");
     _maximumNumberOfElementsAction.setToolTip("Puts a cap on the amount of points captured by the focus region");
+    _openSampleScopeWindow.setToolTip("Open a sample scope window to inspect the samples");
 
     const auto updateSettingsActionReadOnly = [this]() -> void {
         _settingsAction.setEnabled(_enabledAction.isChecked());
@@ -59,8 +64,6 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     updateSettingsActionReadOnly();
 
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
-
-    //_sampleContextLazyUpdateTimer.setSingleShot(true);
 
     const auto updateMaximumNumberOfElementsAction = [this]() -> void {
         _maximumNumberOfElementsAction.setEnabled(_restrictNumberOfElementsAction.isChecked());
@@ -79,7 +82,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     connect(&_lazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateSampleContextLazyUpdateTimerInterval);
 
     connect(&_sampleContextLazyUpdateTimer, &QTimer::timeout, this, [this]() -> void {
-        if (!_sampleContextDirty || !_viewGeneratorFunction)
+        if (!_sampleContextDirty || !_viewGeneratorFunction || getViewingMode() == ViewingMode::None)
             return;
 
         emit sampleContextRequested();
@@ -129,6 +132,24 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
 
         _sampleContextLazyUpdateTimer.start();
 
+        _viewPlugin->getWidget().addAction(&_openSampleScopeWindow);
+
+        _openSampleScopeWindow.setShortcut(QKeySequence(Qt::Key_F4));
+
+        connect(&_openSampleScopeWindow, &TriggerAction::triggered, this, [this]() -> void {
+            if (_sampleScopePlugin) {
+                _sampleScopePlugin->getVisibleAction().setChecked(true);
+            }
+            else {
+                _sampleScopePlugin = mv::plugins().requestViewPluginFloated("Sample scope");
+
+                if (auto sourcePluginPickerAction = dynamic_cast<PluginPickerAction*>(_sampleScopePlugin->findChildByPath("Source plugin"))) {
+                    sourcePluginPickerAction->setCurrentPlugin(_viewPlugin);
+                    sourcePluginPickerAction->setEnabled(false);
+                }
+            }
+        });
+
         _isInitialized = true;
     }
     catch (std::exception& e)
@@ -165,6 +186,8 @@ bool ViewPluginSamplerAction::canView() const
 void ViewPluginSamplerAction::setViewGeneratorFunction(const ViewGeneratorFunction& viewGeneratorFunction)
 {
     _viewGeneratorFunction = viewGeneratorFunction;
+
+    setViewingMode(viewGeneratorFunction ? ViewingMode::Windowed : ViewingMode::None);
 }
 
 QVariantMap ViewPluginSamplerAction::getSampleContext() const
@@ -199,8 +222,22 @@ void ViewPluginSamplerAction::setViewString(const QString& viewString)
     _viewString = viewString;
 
     _toolTipLabel.setVisible(!_viewString.isEmpty());
-    _toolTipLabel.setText(_viewString);
     _toolTipLabel.adjustSize();
+
+    switch (getViewingMode())
+    {
+        case ViewingMode::None:
+            _toolTipLabel.setText("");
+            break;
+
+        case ViewingMode::Tooltip:
+            _toolTipLabel.setText(_viewString);
+            break;
+
+        case ViewingMode::Windowed:
+            _toolTipLabel.setText(_sampleScopePlugin && _sampleScopePlugin->getVisibleAction().isChecked() ? "" : "<i>Press <b>F4</b> for sample information</i>");
+            break;
+    }
 
     drawToolTip();
 
@@ -214,7 +251,7 @@ void ViewPluginSamplerAction::drawToolTip()
 
     Q_ASSERT(_viewPlugin);
 
-    if (!_viewPlugin)
+    if (!_viewPlugin || getViewingMode() == ViewingMode::None)
         return;
 
     moveToolTipLabel();

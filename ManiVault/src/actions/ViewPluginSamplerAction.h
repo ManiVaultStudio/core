@@ -66,7 +66,7 @@ public:
      * @param title Title of the action
      * @param viewingMode Viewing mode
      */
-    Q_INVOKABLE ViewPluginSamplerAction(QObject* parent, const QString& title, const ViewingMode& viewingMode = ViewingMode::Windowed);
+    Q_INVOKABLE ViewPluginSamplerAction(QObject* parent, const QString& title, const ViewingMode& viewingMode = ViewingMode::None);
 
     /**
      * Initializes the action and enables tooltip display
@@ -209,6 +209,8 @@ private:
     QString                         _viewString;                                /** HTML-formatted view string */
     std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                      /** Overlay widget for the tooltip */
     QLabel                          _toolTipLabel;                              /** The text label which contains the actual tooltip text */
+    TriggerAction                   _openSampleScopeWindow;                   /** Opens a sample scope window */
+    plugin::ViewPlugin*             _sampleScopePlugin;                       /** Pointer to sample scope plugin (maybe nullptr) */
 };
 
 }
