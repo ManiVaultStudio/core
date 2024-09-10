@@ -27,18 +27,18 @@ SampleContextPlugin::SampleContextPlugin(const PluginFactory* factory) :
             return;
 
         if (_viewPluginSamplerAction)
-            disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::toolTipHtmlStringChanged, this, nullptr);
+            disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewStringChanged, this, nullptr);
 
         _viewPluginSamplerAction = dynamic_cast<ViewPluginSamplerAction*>(plugin->findChildByPath("Sampler"));
 
         if (_viewPluginSamplerAction) {
             const auto updateHtmlText = [this]() -> void {
-                _sampleContextWidget.setHtmlText(_viewPluginSamplerAction->getToolTipHtmlString());
+                _sampleContextWidget.setHtmlText(_viewPluginSamplerAction->getViewString());
             };
 
             updateHtmlText();
 
-            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::toolTipHtmlStringChanged, this, updateHtmlText);
+            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewStringChanged, this, updateHtmlText);
         }
     });
 }
@@ -65,7 +65,7 @@ QIcon SampleContextPluginFactory::getIcon(const QColor& color /*= Qt::black*/) c
     return Application::getIconFont("FontAwesome").getIcon("microscope", color);
 }
 
-QUrl SampleContextPluginFactory::getRespositoryUrl() const
+QUrl SampleContextPluginFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }
