@@ -35,7 +35,7 @@ namespace mv::gui {
  * - Sampling pixel selection action (enabled when selection is idle)
  *
  * In addition, this class can display a tooltip generated elsewhere with a
- * tooltip generator function, see ViewPluginSamplerAction::setTooltipGeneratorFunction(...)
+ * tooltip generator function, see ViewPluginSamplerAction::setViewGeneratorFunction(...)
  *
  * Note: This action is developed for internal use only
  *
@@ -47,18 +47,26 @@ class CORE_EXPORT ViewPluginSamplerAction : public HorizontalGroupAction
 
 public:
 
+    /** Viewing modes */
+    enum class ViewingMode {
+        None,       /** Do not show shamples */
+        Tooltip,    /** Force tooltip view (regardless of the size of the tooltip) */
+        Windowed    /** Force sample scope view plugin based view */
+    };
+
     /** Context with which the tooltip is created */
     using SampleContext = QVariantMap;
 
-    /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
-    using ToolTipGeneratorFunction = std::function<QString(const SampleContext&)>;
+    /** View generator function which is called periodically when the mouse moves in the view (should return an HTML formatted string) */
+    using ViewGeneratorFunction = std::function<QString(const SampleContext&)>;
 
     /**
      * Construct with pointer to \p parent object and title
      * @param parent Pointer to parent object
      * @param title Title of the action
+     * @param viewingMode Viewing mode
      */
-    Q_INVOKABLE ViewPluginSamplerAction(QObject* parent, const QString& title);
+    Q_INVOKABLE ViewPluginSamplerAction(QObject* parent, const QString& title, const ViewingMode& viewingMode = ViewingMode::Windowed);
 
     /**
      * Initializes the action and enables tooltip display
@@ -69,10 +77,30 @@ public:
     void initialize(plugin::ViewPlugin* viewPlugin, PixelSelectionAction* pixelSelectionAction, PixelSelectionAction* samplerPixelSelectionAction);
 
     /**
-     * Sets the tooltip generator function to \p toolTipGeneratorFunction
-     * @param toolTipGeneratorFunction Tooltip generator function
+     * Get viewing mode
+     * @return Viewing mode
      */
-    void setTooltipGeneratorFunction(const ToolTipGeneratorFunction& toolTipGeneratorFunction);
+    ViewingMode getViewingMode() const;
+
+    /**
+     * Set viewing mode to \p viewingMode
+     * @param viewingMode Viewing mode
+     */
+    void setViewingMode(const ViewingMode& viewingMode);
+
+    /**
+     * Whether this sampler can be viewed, two criteria must be met:
+     * - ViewPluginSamplerAction#_viewingMode must be either Mode::Tooltip or Mode::Windowed
+     * - ViewPluginSamplerAction#_viewGeneratorFunction must be valid
+     * @return 
+     */
+    bool canView() const;
+
+    /**
+     * Sets the view generator function to \p viewGeneratorFunction
+     * @param viewGeneratorFunction View generator function
+     */
+    void setViewGeneratorFunction(const ViewGeneratorFunction& viewGeneratorFunction);
 
     /**
      * Get sample context
@@ -87,30 +115,18 @@ public:
     void setSampleContext(const SampleContext& sampleContext);
 
     /**
-     * Get tooltip HTML string
+     * Get view string
      * @return HTML formatted string
      */
-    QString getToolTipHtmlString() const;
-
-    /**
-     * Get force tooltip
-     * @return Boolean determining whether to always show the tooltip (not taking into account the size)
-     */
-    bool getForceTooltip() const;
-
-    /**
-     * Set force tooltip to \p forceTooltip
-     * @param forceTooltip Boolean determining whether to always show the tooltip (not taking into account the size)
-     */
-    void setForceTooltip(bool forceTooltip);
+    QString getViewString() const;
 
 private:
 
     /**
-     * Set tooltip HTML string to \p toolTipHtmlString
-     * @param toolTipHtmlString HTML formatted string
+     * Set view string to \p viewString
+     * @param viewString HTML formatted string
      */
-    void setToolTipHtmlString(const QString& toolTipHtmlString);
+    void setViewString(const QString& viewString);
 
     /** Draws the tooltip near the cursor */
     void drawToolTip();
@@ -124,6 +140,14 @@ private:
      * @param event The event that took place
      */
     bool eventFilter(QObject* target, QEvent* event) override;
+
+private:
+
+    /**
+     * Get pointer to target widget
+     * @return Pointer to target widget (maybe nullptr)
+     */
+    QWidget* getTargetWidget() const;
 
 public: // Serialization
 
@@ -145,48 +169,46 @@ public: // Action getters
     ToggleAction& getHighlightFocusedElementsAction() { return _highlightFocusedElementsAction; }
     ToggleAction& getRestrictNumberOfElementsAction() { return _restrictNumberOfElementsAction; }
     IntegralAction& getMaximumNumberOfElementsAction() { return _maximumNumberOfElementsAction; }
-    IntegralAction& getToolTipLazyUpdateIntervalAction() { return _sampleContextLazyUpdateIntervalAction; }
-    TriggerAction& getOpenSampleContextWindow() { return _openSampleContextWindow; }
+    IntegralAction& getLazyUpdateIntervalAction() { return _lazyUpdateIntervalAction; }
 
 signals:
 
     /**
-     * Signals that the tooltip HTML string changed from \p previousToolTipHtmlString to \p currentToolTipHtmlString
-     * @param previousToolTipHtmlString Previous tooltip HTML string
-     * @param currentToolTipHtmlString Current tooltip HTML string
+     * Signals that the viewing mode changed from \p previousViewingMode to \p currentViewingMode
+     * @param previousViewingMode Previous viewing mode
+     * @param currentViewingMode Current viewing mode
      */
-    void toolTipHtmlStringChanged(const QString& previousToolTipHtmlString, const QString& currentToolTipHtmlString);
+    void viewingModeChanged(const ViewingMode& previousViewingMode, const ViewingMode& currentViewingMode);
+
+    /**
+     * Signals that the view HTML string changed from \p previousViewString to \p currentViewString
+     * @param previousViewString Previous view HTML string
+     * @param currentViewString Current view HTML string
+     */
+    void viewStringChanged(const QString& previousToolTipHtmlString, const QString& currentToolTipHtmlString);
 
     /** Signals that a new sample context is required */
     void sampleContextRequested();
 
-    /**
-     * Signals that force tooltip changed to \p forceTooltip
-     * @param forceTooltip Boolean determining whether to always show the tooltip (not taking into account the size)
-     */
-    void forceTooltipChanged(bool forceTooltip);
-
 private:
     plugin::ViewPlugin*             _viewPlugin;                                /** Pointer to view plugin for which to show the tooltips */
+    ViewingMode                     _viewingMode;                               /** Current viewing mode */
     bool                            _isInitialized;                             /** Boolean determining whether the sampler is initialized or not */
     PixelSelectionAction*           _pixelSelectionAction;                      /** Pointer to pixel selection tool to use */
     PixelSelectionAction*           _samplerPixelSelectionAction;               /** Pointer to sampler pixel selection tool to use */
-    ToolTipGeneratorFunction        _toolTipGeneratorFunction;                  /** Tooltip generator function which is called periodically when the mouse moves in the view (returns an HTML formatted string) */
+    ViewGeneratorFunction           _viewGeneratorFunction;                     /** View generator function which is called periodically when the mouse moves in the view (should return an HTML formatted string) */
     ToggleAction                    _enabledAction;                             /** Action to toggle computation on/off */
     ToggleAction                    _highlightFocusedElementsAction;            /** Action to toggle focus elements highlighting */
     VerticalGroupAction             _settingsAction;                            /** Additional vertical group action for settings */
     ToggleAction                    _restrictNumberOfElementsAction;            /** Action to toggle the restriction of the maximum number of elements in the focus region */
     IntegralAction                  _maximumNumberOfElementsAction;             /** Action to restrict the maximum number of elements in the focus region */
-    IntegralAction                  _sampleContextLazyUpdateIntervalAction;     /** Action to control the size of the tooltip lazy update timer interval */
+    IntegralAction                  _lazyUpdateIntervalAction;                  /** Action to control the view update timer interval */
     SampleContext                   _sampleContext;                             /** Context for the tooltip */
     QTimer                          _sampleContextLazyUpdateTimer;              /** Lazily (periodically) updates the sample context tooltip string */
     bool                            _sampleContextDirty;                        /** Indicates that the sample context is dirty */
-    QString                         _toolTipHtmlString;                         /** HTML tooltip string */
+    QString                         _viewString;                                /** HTML-formatted view string */
     std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                      /** Overlay widget for the tooltip */
     QLabel                          _toolTipLabel;                              /** The text label which contains the actual tooltip text */
-    bool                            _forceTooltip;                              /** Boolean determining whether to always show the tooltip (not taking into account the size) */
-    TriggerAction                   _openSampleContextWindow;                   /** Opens a sample context window */
-    plugin::ViewPlugin*             _sampleContextPlugin;                       /** Pointer to sample context plugin (maybe nullptr) */
 };
 
 }

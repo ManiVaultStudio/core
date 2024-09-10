@@ -10,15 +10,14 @@
 
 #include <QEvent>
 
-#include "PluginPickerAction.h"
-
 using namespace mv::util;
 
 namespace mv::gui {
 
-ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title) :
+ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title, const ViewingMode& viewingMode /*= ViewingMode::Windowed*/) :
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
+    _viewingMode(ViewingMode::None),
     _isInitialized(false),
     _pixelSelectionAction(nullptr),
     _samplerPixelSelectionAction(nullptr),
@@ -27,10 +26,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _settingsAction(this, "Settings"),
     _restrictNumberOfElementsAction(this, "Restrict number of elements", false),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
-    _sampleContextLazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100),
-    _forceTooltip(false),
-    _openSampleContextWindow(this, "Open sample scope window"),
-    _sampleContextPlugin(nullptr)
+    _lazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100)
 {
     setShowLabels(false);
 
@@ -40,7 +36,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _settingsAction.addAction(&_highlightFocusedElementsAction);
     _settingsAction.addAction(&_restrictNumberOfElementsAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
-    _settingsAction.addAction(&_sampleContextLazyUpdateIntervalAction);
+    _settingsAction.addAction(&_lazyUpdateIntervalAction);
 
     _enabledAction.setStretch(1);
 
@@ -55,6 +51,9 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
     const auto updateSettingsActionReadOnly = [this]() -> void {
         _settingsAction.setEnabled(_enabledAction.isChecked());
+
+        if (_samplerPixelSelectionAction)
+            _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(_enabledAction.isChecked());
     };
 
     updateSettingsActionReadOnly();
@@ -72,15 +71,15 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     connect(&_restrictNumberOfElementsAction, &ToggleAction::toggled, this, updateMaximumNumberOfElementsAction);
 
     const auto updateSampleContextLazyUpdateTimerInterval = [this]() -> void {
-        _sampleContextLazyUpdateTimer.setInterval(_sampleContextLazyUpdateIntervalAction.getValue());
+        _sampleContextLazyUpdateTimer.setInterval(_lazyUpdateIntervalAction.getValue());
     };
 
     updateSampleContextLazyUpdateTimerInterval();
 
-    connect(&_sampleContextLazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateSampleContextLazyUpdateTimerInterval);
+    connect(&_lazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateSampleContextLazyUpdateTimerInterval);
 
     connect(&_sampleContextLazyUpdateTimer, &QTimer::timeout, this, [this]() -> void {
-        if (!_sampleContextDirty || !_toolTipGeneratorFunction)
+        if (!_sampleContextDirty || !_viewGeneratorFunction)
             return;
 
         emit sampleContextRequested();
@@ -101,16 +100,17 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         if (!viewPlugin || !pixelSelectionAction || !samplerPixelSelectionAction)
             return;
 
-        if (_viewPlugin)
-            _viewPlugin->getWidget().removeEventFilter(this);
+        if (getTargetWidget())
+            getTargetWidget()->removeEventFilter(this);
 
         _viewPlugin                     = viewPlugin;
         _pixelSelectionAction           = pixelSelectionAction;
         _samplerPixelSelectionAction    = samplerPixelSelectionAction;
         _toolTipOverlayWidget           = std::make_unique<OverlayWidget>(&_viewPlugin->getWidget());
 
-        _viewPlugin->getWidget().setMouseTracking(true);
-        _viewPlugin->getWidget().installEventFilter(this);
+        _toolTipOverlayWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+        getTargetWidget()->installEventFilter(this);
 
         connect(_samplerPixelSelectionAction->getPixelSelectionTool(), &PixelSelectionTool::areaChanged, this, [this]() {
             _sampleContextDirty = true;
@@ -129,23 +129,6 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
 
         _sampleContextLazyUpdateTimer.start();
 
-        _viewPlugin->getWidget().addAction(&_openSampleContextWindow);
-
-        _openSampleContextWindow.setShortcut(QKeySequence(Qt::Key_F4));
-
-        connect(&_openSampleContextWindow, &TriggerAction::triggered, this, [this]() -> void {
-            if (_sampleContextPlugin) {
-                _sampleContextPlugin->getVisibleAction().setChecked(true);
-            } else {
-                _sampleContextPlugin = mv::plugins().requestViewPluginFloated("Sample scope");
-
-                if (auto sourcePluginPickerAction = dynamic_cast<PluginPickerAction*>(_sampleContextPlugin->findChildByPath("Source plugin"))) {
-                    sourcePluginPickerAction->setCurrentPlugin(_viewPlugin);
-                    sourcePluginPickerAction->setEnabled(false);
-                }
-            }
-        });
-
         _isInitialized = true;
     }
     catch (std::exception& e)
@@ -157,9 +140,31 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
     }
 }
 
-void ViewPluginSamplerAction::setTooltipGeneratorFunction(const ToolTipGeneratorFunction& toolTipGeneratorFunction)
+ViewPluginSamplerAction::ViewingMode ViewPluginSamplerAction::getViewingMode() const
 {
-    _toolTipGeneratorFunction = toolTipGeneratorFunction;
+    return _viewingMode;
+}
+
+void ViewPluginSamplerAction::setViewingMode(const ViewingMode& viewingMode)
+{
+    if (viewingMode == _viewingMode)
+        return;
+
+    const auto previousViewingMode = _viewingMode;
+
+    _viewingMode = viewingMode;
+
+    emit viewingModeChanged(previousViewingMode, _viewingMode);
+}
+
+bool ViewPluginSamplerAction::canView() const
+{
+    return _viewGeneratorFunction && _viewingMode != ViewingMode::None;
+}
+
+void ViewPluginSamplerAction::setViewGeneratorFunction(const ViewGeneratorFunction& viewGeneratorFunction)
+{
+    _viewGeneratorFunction = viewGeneratorFunction;
 }
 
 QVariantMap ViewPluginSamplerAction::getSampleContext() const
@@ -176,47 +181,30 @@ void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContex
     _sampleContextDirty = true;
 
     if (_enabledAction.isChecked())
-        setToolTipHtmlString(_toolTipGeneratorFunction(_sampleContext));
+        setViewString(_viewGeneratorFunction(_sampleContext));
 }
 
-QString ViewPluginSamplerAction::getToolTipHtmlString() const
+QString ViewPluginSamplerAction::getViewString() const
 {
-    return _toolTipHtmlString;
+    return _viewString;
 }
 
-bool ViewPluginSamplerAction::getForceTooltip() const
+void ViewPluginSamplerAction::setViewString(const QString& viewString)
 {
-    return _forceTooltip;
-}
-
-void ViewPluginSamplerAction::setForceTooltip(bool forceTooltip)
-{
-    if (forceTooltip == _forceTooltip)
+    if (viewString == _viewString)
         return;
 
-    _forceTooltip = forceTooltip;
+    const auto previousViewString = _viewString;
 
-    _sampleContextDirty = true;
+    _viewString = viewString;
 
-    emit forceTooltipChanged(_forceTooltip);
-}
-
-void ViewPluginSamplerAction::setToolTipHtmlString(const QString& toolTipHtmlString)
-{
-    if (toolTipHtmlString == _toolTipHtmlString)
-        return;
-
-    const auto previousToolTipHtmlString = _toolTipHtmlString;
-
-    _toolTipHtmlString = toolTipHtmlString;
-
-    _toolTipLabel.setVisible(!_toolTipHtmlString.isEmpty());
-    _toolTipLabel.setText(_forceTooltip ? _toolTipHtmlString : _sampleContextPlugin && _sampleContextPlugin->getVisibleAction().isChecked() ? "" : "<i>Press <b>F4</b> for sample information</i>");
+    _toolTipLabel.setVisible(!_viewString.isEmpty());
+    _toolTipLabel.setText(_viewString);
     _toolTipLabel.adjustSize();
 
     drawToolTip();
 
-    emit toolTipHtmlStringChanged(previousToolTipHtmlString, _toolTipHtmlString);
+    emit viewStringChanged(previousViewString, _viewString);
 }
 
 void ViewPluginSamplerAction::drawToolTip()
@@ -236,7 +224,7 @@ void ViewPluginSamplerAction::moveToolTipLabel()
 {
     auto parentWidget   = &_viewPlugin->getWidget();
     auto targetWidget   = _pixelSelectionAction->getTargetWidget();
-    auto globalPosition = _viewPlugin->getWidget().mapFromGlobal(parentWidget->cursor().pos() + QPoint(15, 10));
+    auto globalPosition = _viewPlugin->getWidget().mapFromGlobal(parentWidget->cursor().pos());
 
     if (globalPosition.x() + _toolTipLabel.width() > targetWidget->width())
         globalPosition.setX(parentWidget->width() - _toolTipLabel.width());
@@ -257,7 +245,7 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 {
     Q_ASSERT(_viewPlugin && _pixelSelectionAction && _samplerPixelSelectionAction);
 
-    if (!_viewPlugin || !_pixelSelectionAction || !_samplerPixelSelectionAction)
+    if (!_enabledAction.isChecked() || !_viewPlugin || !_pixelSelectionAction || !_samplerPixelSelectionAction || !_samplerPixelSelectionAction->isEnabled())
         return HorizontalGroupAction::eventFilter(target, event);
 
     if (target == &_viewPlugin->getWidget()) {
@@ -305,6 +293,14 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
     return HorizontalGroupAction::eventFilter(target, event);
 }
 
+QWidget* ViewPluginSamplerAction::getTargetWidget() const
+{
+    if (!_samplerPixelSelectionAction)
+        return nullptr;
+
+    return _samplerPixelSelectionAction->getTargetWidget();
+}
+
 void ViewPluginSamplerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     HorizontalGroupAction::fromVariantMap(variantMap);
@@ -313,7 +309,7 @@ void ViewPluginSamplerAction::fromVariantMap(const QVariantMap& variantMap)
     _highlightFocusedElementsAction.fromParentVariantMap(variantMap);
     _restrictNumberOfElementsAction.fromParentVariantMap(variantMap);
     _maximumNumberOfElementsAction.fromParentVariantMap(variantMap);
-    _sampleContextLazyUpdateIntervalAction.fromParentVariantMap(variantMap);
+    _lazyUpdateIntervalAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ViewPluginSamplerAction::toVariantMap() const
@@ -324,7 +320,7 @@ QVariantMap ViewPluginSamplerAction::toVariantMap() const
     _highlightFocusedElementsAction.insertIntoVariantMap(variantMap);
     _restrictNumberOfElementsAction.insertIntoVariantMap(variantMap);
     _maximumNumberOfElementsAction.insertIntoVariantMap(variantMap);
-    _sampleContextLazyUpdateIntervalAction.insertIntoVariantMap(variantMap);
+    _lazyUpdateIntervalAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
