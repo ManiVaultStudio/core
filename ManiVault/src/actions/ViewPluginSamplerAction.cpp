@@ -181,6 +181,8 @@ void ViewPluginSamplerAction::setViewingMode(const ViewingMode& viewingMode)
     _viewingMode = viewingMode;
 
     emit viewingModeChanged(previousViewingMode, _viewingMode);
+
+    drawToolTip();
 }
 
 bool ViewPluginSamplerAction::canView() const
