@@ -141,13 +141,15 @@ private:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
-private:
+    /** Updates the action read-only status based on if it can view sample information */
+    void updateReadOnly();
 
     /**
      * Get pointer to target widget
      * @return Pointer to target widget (maybe nullptr)
      */
     QWidget* getTargetWidget() const;
+
 
 public: // Serialization
 

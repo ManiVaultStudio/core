@@ -64,6 +64,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     updateSettingsActionReadOnly();
 
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
+    connect(&_enabledAction, &ToggleAction::toggled, this, &ViewPluginSamplerAction::updateReadOnly);
 
     const auto updateMaximumNumberOfElementsAction = [this]() -> void {
         _maximumNumberOfElementsAction.setEnabled(_restrictNumberOfElementsAction.isChecked());
@@ -89,6 +90,8 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
         _sampleContextDirty = false;
     });
+
+    updateReadOnly();
 }
 
 void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSelectionAction* pixelSelectionAction, PixelSelectionAction* samplerPixelSelectionAction)
@@ -147,6 +150,8 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         });
 
         _isInitialized = true;
+
+        drawToolTip();
     }
     catch (std::exception& e)
     {
@@ -176,7 +181,7 @@ void ViewPluginSamplerAction::setViewingMode(const ViewingMode& viewingMode)
 
 bool ViewPluginSamplerAction::canView() const
 {
-    return _viewGeneratorFunction && _viewingMode != ViewingMode::None;
+    return _enabledAction.isChecked() && _viewGeneratorFunction && _viewingMode != ViewingMode::None;
 }
 
 void ViewPluginSamplerAction::setViewGeneratorFunction(const ViewGeneratorFunction& viewGeneratorFunction)
@@ -184,6 +189,7 @@ void ViewPluginSamplerAction::setViewGeneratorFunction(const ViewGeneratorFuncti
     _viewGeneratorFunction = viewGeneratorFunction;
 
     setViewingMode(viewGeneratorFunction ? ViewingMode::Windowed : ViewingMode::None);
+    updateReadOnly();
 }
 
 QVariantMap ViewPluginSamplerAction::getSampleContext() const
@@ -244,7 +250,7 @@ void ViewPluginSamplerAction::drawToolTip()
             break;
     }
 
-    _toolTipLabel.setVisible(!_viewString.isEmpty());
+    _toolTipLabel.setVisible(getEnabledAction().isChecked() && !_viewString.isEmpty() && canView());
     _toolTipLabel.adjustSize();
 
     moveToolTipLabel();
@@ -299,7 +305,7 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
             case QEvent::MouseButtonRelease:
             case QEvent::Enter:
             {
-                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked());
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked() && canView());
                 break;
             }
 
@@ -315,6 +321,11 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
     }
 
     return HorizontalGroupAction::eventFilter(target, event);
+}
+
+void ViewPluginSamplerAction::updateReadOnly()
+{
+    setEnabled(_viewGeneratorFunction ? true : false);
 }
 
 QWidget* ViewPluginSamplerAction::getTargetWidget() const
