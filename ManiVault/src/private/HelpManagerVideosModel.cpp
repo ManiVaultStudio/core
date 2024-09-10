@@ -4,8 +4,12 @@
 
 #include "HelpManagerVideosModel.h"
 
+#include <util/FileDownloader.h>
+
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
+#include <QUrl>
 
 #ifdef _DEBUG
     //#define HELP_MANAGER_VIDEOS_MODEL_VERBOSE

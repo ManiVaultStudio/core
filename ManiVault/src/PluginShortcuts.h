@@ -5,6 +5,7 @@
 #pragma once
 
 #include "actions/TriggerAction.h"
+#include "util/ShortcutMap.h"
 
 #include <QObject>
 

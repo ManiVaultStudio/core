@@ -5,6 +5,7 @@
 #include "WidgetFader.h"
 
 #include <QDebug>
+#include <QTimer>
 #include <QWidget>
 
 #ifdef _DEBUG

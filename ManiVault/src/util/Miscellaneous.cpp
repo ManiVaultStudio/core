@@ -4,8 +4,10 @@
 
 #include "Miscellaneous.h"
 
-#include <QStringList>
 #include <QAction>
+#include <QStringList>
+#include <QTcpSocket>
+#include <QUrl>
 
 namespace mv::util
 {

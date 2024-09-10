@@ -4,8 +4,13 @@
 
 #include "PluginLearningCenterAction.h"
 
+#include "CoreInterface.h"
+#include "Plugin.h"
+#include "ViewPlugin.h"
+
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
 #include "widgets/ViewPluginDescriptionOverlayWidget.h"
+#include "widgets/ViewPluginShortcutsOverlayWidget.h"
 
 using namespace mv::util;
 using namespace mv::plugin;

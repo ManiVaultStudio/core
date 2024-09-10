@@ -4,6 +4,10 @@
 
 #include "ViewPluginShortcutsOverlayWidget.h"
 
+#include "Application.h"
+#include "util/ShortcutMap.h"
+#include "ViewPlugin.h"
+
 #include <QDebug>
 
 #ifdef _DEBUG
