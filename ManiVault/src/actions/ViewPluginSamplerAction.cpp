@@ -128,7 +128,7 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _toolTipLabel.setWindowFlag(Qt::WindowStaysOnTopHint);
         _toolTipLabel.setAutoFillBackground(true);
         _toolTipLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        _toolTipLabel.setWordWrap(true);
+        //_toolTipLabel.setWordWrap(true);
 
         _sampleContextLazyUpdateTimer.start();
 
@@ -221,8 +221,17 @@ void ViewPluginSamplerAction::setViewString(const QString& viewString)
 
     _viewString = viewString;
 
-    _toolTipLabel.setVisible(!_viewString.isEmpty());
-    _toolTipLabel.adjustSize();
+    drawToolTip();
+
+    emit viewStringChanged(previousViewString, _viewString);
+}
+
+void ViewPluginSamplerAction::drawToolTip()
+{
+    Q_ASSERT(_viewPlugin);
+
+    if (!_viewPlugin)
+        return;
 
     switch (getViewingMode())
     {
@@ -239,20 +248,8 @@ void ViewPluginSamplerAction::setViewString(const QString& viewString)
             break;
     }
 
-    drawToolTip();
-
-    emit viewStringChanged(previousViewString, _viewString);
-}
-
-void ViewPluginSamplerAction::drawToolTip()
-{
-    //if (!isChecked())
-    //    return;
-
-    Q_ASSERT(_viewPlugin);
-
-    if (!_viewPlugin || getViewingMode() == ViewingMode::None)
-        return;
+    _toolTipLabel.setVisible(!_viewString.isEmpty());
+    _toolTipLabel.adjustSize();
 
     moveToolTipLabel();
 }
