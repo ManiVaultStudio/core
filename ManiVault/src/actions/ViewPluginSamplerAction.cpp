@@ -103,9 +103,6 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         if (!viewPlugin || !pixelSelectionAction || !samplerPixelSelectionAction)
             return;
 
-        if (getTargetWidget())
-            getTargetWidget()->removeEventFilter(this);
-
         _viewPlugin                     = viewPlugin;
         _pixelSelectionAction           = pixelSelectionAction;
         _samplerPixelSelectionAction    = samplerPixelSelectionAction;
@@ -113,7 +110,7 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
 
         _toolTipOverlayWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
 
-        getTargetWidget()->installEventFilter(this);
+        _viewPlugin->getWidget().installEventFilter(this);
 
         connect(_samplerPixelSelectionAction->getPixelSelectionTool(), &PixelSelectionTool::areaChanged, this, [this]() {
             _sampleContextDirty = true;
@@ -128,7 +125,6 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _toolTipLabel.setWindowFlag(Qt::WindowStaysOnTopHint);
         _toolTipLabel.setAutoFillBackground(true);
         _toolTipLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        //_toolTipLabel.setWordWrap(true);
 
         _sampleContextLazyUpdateTimer.start();
 
@@ -258,7 +254,7 @@ void ViewPluginSamplerAction::moveToolTipLabel()
 {
     auto parentWidget   = &_viewPlugin->getWidget();
     auto targetWidget   = _pixelSelectionAction->getTargetWidget();
-    auto globalPosition = _viewPlugin->getWidget().mapFromGlobal(parentWidget->cursor().pos());
+    auto globalPosition = _viewPlugin->getWidget().mapFromGlobal(QCursor::pos()) + QPoint(12, 12);
 
     if (globalPosition.x() + _toolTipLabel.width() > targetWidget->width())
         globalPosition.setX(parentWidget->width() - _toolTipLabel.width());
@@ -301,14 +297,8 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
             }
 
             case QEvent::MouseButtonRelease:
-            {
-                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked());
-                break;
-            }
-
             case QEvent::Enter:
             {
-
                 _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked());
                 break;
             }
