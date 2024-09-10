@@ -128,6 +128,7 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _toolTipLabel.setWindowFlag(Qt::WindowStaysOnTopHint);
         _toolTipLabel.setAutoFillBackground(true);
         _toolTipLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        _toolTipLabel.setWordWrap(getViewingMode() == ViewingMode::Tooltip);
 
         _sampleContextLazyUpdateTimer.start();
 
@@ -136,6 +137,9 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _openSampleScopeWindow.setShortcut(QKeySequence(Qt::Key_F4));
 
         connect(&_openSampleScopeWindow, &TriggerAction::triggered, this, [this]() -> void {
+            if (getViewingMode() != ViewingMode::Windowed)
+                return;
+
             if (_sampleScopePlugin) {
                 _sampleScopePlugin->getVisibleAction().setChecked(true);
             }
