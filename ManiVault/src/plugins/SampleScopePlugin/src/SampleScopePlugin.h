@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "SampleContextWidget.h"
+#include "SampleScopeWidget.h"
 
 #include <ViewPlugin.h>
 
@@ -12,17 +12,14 @@
 #include <actions/PluginPickerAction.h>
 #include <actions/ViewPluginSamplerAction.h>
 
-using namespace mv::plugin;
-using namespace mv::gui;
-
 /**
- * Sample context plugin
+ * Sample scope plugin
  *
  * This plugin provides a user interface for exploring the sample context of another view.
  *
  * @author Thomas Kroes
  */
-class SampleContextPlugin : public ViewPlugin
+class SampleScopePlugin : public mv::plugin::ViewPlugin
 {
     Q_OBJECT
     
@@ -32,29 +29,26 @@ public:
      * Construct with pointer to plugin \p factory
      * @param factory Pointer to plugin factory
      */
-    SampleContextPlugin(const PluginFactory* factory);
+    SampleScopePlugin(const mv::plugin::PluginFactory* factory);
 
     /** Perform plugin initialization */
     void init() override;
 
 private:
-    SampleContextWidget         _sampleContextWidget;           /** Sample context widget */
-    HorizontalGroupAction       _horizontalGroupAction;         /** Horizontal group action for settings */
-    PluginPickerAction          _sourcePluginPickerAction;      /** Action for picking the source plugin */
-    ViewPluginSamplerAction*    _viewPluginSamplerAction;       /** Pointer to current view plugin sampler action */
+    SampleScopeWidget                   _sampleScopeWidget;             /** Sample scope widget */
+    mv::gui::HorizontalGroupAction      _horizontalGroupAction;         /** Horizontal group action for settings */
+    mv::gui::PluginPickerAction         _sourcePluginPickerAction;      /** Action for picking the source plugin */
+    mv::gui::ViewPluginSamplerAction*   _viewPluginSamplerAction;       /** Pointer to current view plugin sampler action */
 };
 
-class SampleContextPluginFactory : public ViewPluginFactory
+class SampleScopePluginFactory : public mv::plugin::ViewPluginFactory
 {
     Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "studio.manivault.SampleContextPlugin"
-                      FILE  "SampleContextPlugin.json")
+    Q_PLUGIN_METADATA(IID   "studio.manivault.SampleScopePlugin"
+                      FILE  "SampleScopePlugin.json")
     
 public:
-
-    /** Constructor */
-    SampleContextPluginFactory();
 
     /**
      * Get plugin icon
@@ -73,5 +67,5 @@ public:
      * Produces the plugin
      * @return Pointer to the produced plugin
      */
-    ViewPlugin* produce() override;
+    mv::plugin::ViewPlugin* produce() override;
 };

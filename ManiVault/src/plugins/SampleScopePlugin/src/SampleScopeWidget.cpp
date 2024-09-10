@@ -2,17 +2,17 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "SampleContextWidget.h"
-#include "SampleContextPlugin.h"
+#include "SampleScopeWidget.h"
+#include "SampleScopePlugin.h"
 
 #include <QDebug>
 
 using namespace mv;
 using namespace mv::gui;
 
-SampleContextWidget::SampleContextWidget(SampleContextPlugin* sampleContextPlugin, QWidget* parent /*= nullptr*/) :
+SampleScopeWidget::SampleScopeWidget(SampleScopePlugin* sampleScopePlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _sampleContextPlugin(sampleContextPlugin)
+    _sampleScopePlugin(sampleScopePlugin)
 {
     setAutoFillBackground(true);
     setLayout(&_layout);
@@ -35,7 +35,7 @@ SampleContextWidget::SampleContextWidget(SampleContextPlugin* sampleContextPlugi
     _textBodyLabel.setWordWrap(true);
 }
 
-void SampleContextWidget::setHtmlText(const QString& htmlText)
+void SampleScopeWidget::setHtmlText(const QString& htmlText)
 {
     _textBodyLabel.setText(htmlText);
 }

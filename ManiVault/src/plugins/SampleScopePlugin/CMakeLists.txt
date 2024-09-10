@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 
-set(SAMPLE_CONTEXT_PLUGIN "SampleContextPlugin")
+set(SAMPLE_CONTEXT_PLUGIN "SampleScopePlugin")
 PROJECT(${SAMPLE_CONTEXT_PLUGIN})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -23,24 +23,24 @@ file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(PLUGIN
-    src/SampleContextPlugin.h
-    src/SampleContextPlugin.cpp
+    src/SampleScopePlugin.h
+    src/SampleScopePlugin.cpp
 )
 
 set(PLUGIN_MOC_HEADERS
-	src/SampleContextPlugin.h
+	src/SampleScopePlugin.h
 )
 
 set(WIDGETS
-    src/SampleContextWidget.h
-    src/SampleContextWidget.cpp
+    src/SampleScopeWidget.h
+    src/SampleScopeWidget.cpp
 )
 
 set(AUX
-    src/SampleContextPlugin.json
+    src/SampleScopePlugin.json
 )
 
-set(SAMPLE_CONTEXT_PLUGIN_SOURCES
+set(SAMPLE_SCOPE_PLUGIN_SOURCES
     ${PLUGIN}
     ${WIDGETS}
     ${AUX}
@@ -50,7 +50,7 @@ source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 
-add_library(${SAMPLE_CONTEXT_PLUGIN} SHARED ${SAMPLE_CONTEXT_PLUGIN_SOURCES})
+add_library(${SAMPLE_CONTEXT_PLUGIN} SHARED ${SAMPLE_SCOPE_PLUGIN_SOURCES})
 
 qt_wrap_cpp(DATAPROPERTIES_MOC ${PLUGIN_MOC_HEADERS} TARGET ${SAMPLE_CONTEXT_PLUGIN})
 target_sources(${SAMPLE_CONTEXT_PLUGIN} PRIVATE ${DATAPROPERTIES_MOC})

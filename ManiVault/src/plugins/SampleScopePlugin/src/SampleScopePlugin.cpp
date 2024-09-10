@@ -2,18 +2,19 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "SampleContextPlugin.h"
+#include "SampleScopePlugin.h"
 
 #include <Application.h>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.SampleContextPlugin")
+Q_PLUGIN_METADATA(IID "studio.manivault.SampleScopePlugin")
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::plugin;
 
-SampleContextPlugin::SampleContextPlugin(const PluginFactory* factory) :
+SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
-    _sampleContextWidget(this, nullptr),
+    _sampleScopeWidget(this, nullptr),
     _horizontalGroupAction(this, "Settings"),
     _sourcePluginPickerAction(this, "Source plugin"),
     _viewPluginSamplerAction(nullptr)
@@ -33,7 +34,7 @@ SampleContextPlugin::SampleContextPlugin(const PluginFactory* factory) :
 
         if (_viewPluginSamplerAction) {
             const auto updateHtmlText = [this]() -> void {
-                _sampleContextWidget.setHtmlText(_viewPluginSamplerAction->getViewString());
+                _sampleScopeWidget.setHtmlText(_viewPluginSamplerAction->getViewString());
             };
 
             updateHtmlText();
@@ -43,34 +44,29 @@ SampleContextPlugin::SampleContextPlugin(const PluginFactory* factory) :
     });
 }
 
-void SampleContextPlugin::init()
+void SampleScopePlugin::init()
 {
     auto layout = new QVBoxLayout();
 
     //layout->setContentsMargins(6, 6, 6, 6);
 
     layout->addWidget(_horizontalGroupAction.createWidget(&getWidget()));
-    layout->addWidget(&_sampleContextWidget, 1);
+    layout->addWidget(&_sampleScopeWidget, 1);
 
     getWidget().setLayout(layout);
 }
 
-SampleContextPluginFactory::SampleContextPluginFactory() :
-    ViewPluginFactory()
-{
-}
-
-QIcon SampleContextPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon SampleScopePluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return Application::getIconFont("FontAwesome").getIcon("microscope", color);
 }
 
-QUrl SampleContextPluginFactory::getRepositoryUrl() const
+QUrl SampleScopePluginFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }
 
-ViewPlugin* SampleContextPluginFactory::produce()
+ViewPlugin* SampleScopePluginFactory::produce()
 {
-    return new SampleContextPlugin(this);
+    return new SampleScopePlugin(this);
 }
