@@ -21,9 +21,18 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
 {
     _horizontalGroupAction.addAction(&_sourcePluginPickerAction);
 
-    _sourcePluginPickerAction.setFilterPluginTypes({ plugin::Type::VIEW });
+    _sourcePluginPickerAction.setFilterPluginTypes({ Type::VIEW });
+    _sourcePluginPickerAction.setFilterFunction([this](Plugin* plugin) -> bool {
+        if (plugin == this)
+            return false;
 
-    connect(&_sourcePluginPickerAction, &PluginPickerAction::pluginPicked, this, [this](plugin::Plugin* plugin) -> void {
+        if (auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin))
+            return viewPlugin->getSamplerAction().canView();
+
+        return false;
+    });
+
+    connect(&_sourcePluginPickerAction, &PluginPickerAction::pluginPicked, this, [this](Plugin* plugin) -> void {
         if (!plugin)
             return;
 
@@ -47,8 +56,6 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
 void SampleScopePlugin::init()
 {
     auto layout = new QVBoxLayout();
-
-    //layout->setContentsMargins(6, 6, 6, 6);
 
     layout->addWidget(_horizontalGroupAction.createWidget(&getWidget()));
     layout->addWidget(&_sampleScopeWidget, 1);
