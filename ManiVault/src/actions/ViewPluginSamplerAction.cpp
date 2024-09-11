@@ -114,15 +114,12 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
             case ViewingMode::Windowed:
             {
-                //if (_isInitialized)
-                //    openSampleWindow();
+                if (!mv::projects().isOpeningProject())
+                    openSampleWindow();
 
                 break;
             }
         }
-
-        if (_sampleScopePlugin && _sampleScopePlugin->getVisibleAction().isChecked())
-            _sampleScopePlugin->getVisibleAction().setChecked(false);
     };
 
     updateViewingMode();
