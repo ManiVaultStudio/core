@@ -4,10 +4,13 @@
 
 #pragma once
 
-#include <QObject>
-#include <QKeySequence>
+#include <ManiVaultGlobals.h>
 
-#include "widgets/ViewPluginShortcutsOverlayWidget.h"
+#include <QKeySequence>
+#include <QObject>
+#include <QString>
+
+#include <vector>
 
 namespace mv::util {
 

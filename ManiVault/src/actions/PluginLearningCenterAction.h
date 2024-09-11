@@ -7,11 +7,13 @@
 #include "actions/WidgetAction.h"
 #include "actions/HorizontalGroupAction.h"
 #include "actions/ToggleAction.h"
+#include "actions/TriggerAction.h"
 
 #include "util/Video.h"
 
 namespace mv::plugin {
     class Plugin;
+    class ViewPlugin;
 }
 
 namespace mv::gui {
@@ -153,7 +155,7 @@ private:
      * Get view plugin
      * @return Pointer to view plugin (maybe nullptr)
      */
-    plugin::ViewPlugin* getViewPlugin() const;
+    mv::plugin::ViewPlugin* getViewPlugin() const;
 
     /** View plugin description (view depends on the type of plugin) */
     void viewDescription();

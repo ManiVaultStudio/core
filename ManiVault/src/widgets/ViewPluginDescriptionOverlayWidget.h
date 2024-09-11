@@ -14,6 +14,10 @@ namespace mv::util {
     class ShortcutMap;
 }
 
+namespace mv::plugin {
+    class ViewPlugin;
+}
+
 namespace mv::gui
 {
 
@@ -32,7 +36,7 @@ public:
      * Construct with pointer to source \p view plugin
      * @param viewPlugin Pointer to source view plugin
      */
-    ViewPluginDescriptionOverlayWidget(plugin::ViewPlugin* viewPlugin);
+    ViewPluginDescriptionOverlayWidget(mv::plugin::ViewPlugin* viewPlugin);
 
 private:
     QHBoxLayout     _headerLayout;          /** Layout for the header */

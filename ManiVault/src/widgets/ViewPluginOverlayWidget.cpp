@@ -4,6 +4,7 @@
 
 #include "ViewPluginOverlayWidget.h"
 
+#include "Application.h"
 #include "ViewPlugin.h"
 
 #include <QDebug>
