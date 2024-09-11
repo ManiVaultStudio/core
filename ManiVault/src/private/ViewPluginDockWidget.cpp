@@ -380,14 +380,17 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
         if (autoHide) {
             switch (settingsDockWidget->autoHideDockContainer()->sideBarLocation())
             {
-                case SideBarLocation::SideBarLeft:
-                case SideBarLocation::SideBarRight:
+                case SideBarLeft:
+                case SideBarRight:
                     settingsDockWidget->autoHideDockContainer()->setSize(settingsWidget->minimumSizeHint().width());
                     break;
 
-                case SideBarLocation::SideBarTop:
-                case SideBarLocation::SideBarBottom:
+                case SideBarTop:
+                case SideBarBottom:
                     settingsDockWidget->autoHideDockContainer()->setSize(settingsWidget->minimumSizeHint().height());
+                    break;
+
+                case SideBarNone:
                     break;
 
                 default:
