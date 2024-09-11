@@ -47,8 +47,16 @@ class CORE_EXPORT ViewPluginSamplerAction : public HorizontalGroupAction
 
 public:
 
+    /** Sampling modes */
+    enum class SamplingMode
+    {
+	    Selection,      /** Sampling is based on the current selection */
+        FocusRegion,    /** Sampling is based on the current focus region */
+    };
+
     /** Viewing modes */
-    enum class ViewingMode {
+    enum class ViewingMode
+	{
         None,       /** Do not show shamples */
         Tooltip,    /** Force tooltip view (regardless of the size of the tooltip) */
         Windowed    /** Force sample scope view plugin based view */
@@ -89,7 +97,20 @@ public:
     void setViewingMode(const ViewingMode& viewingMode);
 
     /**
-     * Whether this sampler can be viewed, two criteria must be met:
+     * Get sampling mode
+     * @return Sampling mode
+     */
+    SamplingMode getSamplingMode() const;
+
+    /**
+     * Set sampling mode to \p samplingMode
+     * @param samplingMode Viewing mode
+     */
+    void setSamplingMode(const SamplingMode& samplingMode);
+
+    /**
+     * Whether this sampler can be viewed, three criteria must be met:
+     * - ViewPluginSamplerAction._enabledAction must be checked
      * - ViewPluginSamplerAction#_viewingMode must be either Mode::Tooltip or Mode::Windowed
      * - ViewPluginSamplerAction#_viewGeneratorFunction must be valid
      * @return 
@@ -157,7 +178,7 @@ public: // Serialization
 
     /**
      * Load view plugin from variant
-     * @param Variant representation of the view plugin
+     * @param variantMap Variant representation of the view plugin
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -174,6 +195,7 @@ public: // Action getters
     ToggleAction& getRestrictNumberOfElementsAction() { return _restrictNumberOfElementsAction; }
     IntegralAction& getMaximumNumberOfElementsAction() { return _maximumNumberOfElementsAction; }
     IntegralAction& getLazyUpdateIntervalAction() { return _lazyUpdateIntervalAction; }
+    OptionAction& getSamplingModeAction() { return _samplingModeAction; }
     OptionAction& getViewingModeAction() { return _viewingModeAction; }
 
 signals:
@@ -190,7 +212,7 @@ signals:
      * @param previousViewString Previous view HTML string
      * @param currentViewString Current view HTML string
      */
-    void viewStringChanged(const QString& previousToolTipHtmlString, const QString& currentToolTipHtmlString);
+    void viewStringChanged(const QString& previousViewString, const QString& currentViewString);
 
     /** Signals that a new sample context is required */
     void sampleContextRequested();
@@ -207,7 +229,8 @@ private:
     ToggleAction                    _restrictNumberOfElementsAction;            /** Action to toggle the restriction of the maximum number of elements in the focus region */
     IntegralAction                  _maximumNumberOfElementsAction;             /** Action to restrict the maximum number of elements in the focus region */
     IntegralAction                  _lazyUpdateIntervalAction;                  /** Action to control the view update timer interval */
-    OptionAction                    _viewingModeAction;                         /** Action to control the viewing mode */
+    OptionAction                    _samplingModeAction;                        /** Action to control the sampling mode */
+	OptionAction                    _viewingModeAction;                         /** Action to control the viewing mode */
     SampleContext                   _sampleContext;                             /** Context for the tooltip */
     QTimer                          _sampleContextLazyUpdateTimer;              /** Lazily (periodically) updates the sample context tooltip string */
     bool                            _sampleContextDirty;                        /** Indicates that the sample context is dirty */

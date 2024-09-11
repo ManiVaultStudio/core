@@ -28,7 +28,8 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _restrictNumberOfElementsAction(this, "Restrict number of elements", false),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
     _lazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100),
-    _viewingModeAction(this, "Viewing mode", { "None", "Tooltip", "Windowed" }),
+    _samplingModeAction(this, "Sampling mode", { "Selection", "Focus Region" }, "Focus Region"),
+	_viewingModeAction(this, "Viewing mode", { "None", "Tooltip", "Windowed" }, "None"),
     _openSampleScopeWindow(this, "Open sample scope window"),
     _sampleScopePlugin(nullptr)
 {
@@ -41,6 +42,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _settingsAction.addAction(&_restrictNumberOfElementsAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
     _settingsAction.addAction(&_lazyUpdateIntervalAction);
+    _settingsAction.addAction(&_samplingModeAction);
     _settingsAction.addAction(&_viewingModeAction);
 
     _enabledAction.setStretch(1);
@@ -54,6 +56,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _settingsAction.setToolTip("Additional focus region settings");
     _maximumNumberOfElementsAction.setToolTip("Puts a cap on the amount of points captured by the focus region");
     _lazyUpdateIntervalAction.setToolTip("Controls the time interval between successive sample collection updates");
+    _samplingModeAction.setToolTip("Determines how to collect samples");
     _viewingModeAction.setToolTip("Determines how the collected samples will be displayed");
     _openSampleScopeWindow.setToolTip("Open a sample scope window to inspect the samples");
 
@@ -89,7 +92,8 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
         if (!_sampleContextDirty || !_viewGeneratorFunction || getViewingMode() == ViewingMode::None)
             return;
 
-        emit sampleContextRequested();
+        if (getSamplingMode() == SamplingMode::FocusRegion)
+			emit sampleContextRequested();
 
         _sampleContextDirty = false;
     });
@@ -194,6 +198,16 @@ ViewPluginSamplerAction::ViewingMode ViewPluginSamplerAction::getViewingMode() c
 void ViewPluginSamplerAction::setViewingMode(const ViewingMode& viewingMode)
 {
     _viewingModeAction.setCurrentIndex(static_cast<std::int32_t>(viewingMode));
+}
+
+ViewPluginSamplerAction::SamplingMode ViewPluginSamplerAction::getSamplingMode() const
+{
+    return static_cast<SamplingMode>(_samplingModeAction.getCurrentIndex());
+}
+
+void ViewPluginSamplerAction::setSamplingMode(const SamplingMode& samplingMode)
+{
+    _samplingModeAction.setCurrentIndex(static_cast<std::int32_t>(samplingMode));
 }
 
 bool ViewPluginSamplerAction::canView() const
