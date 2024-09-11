@@ -334,7 +334,7 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
             case QEvent::MouseButtonRelease:
             case QEvent::Enter:
             {
-                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getEnabledAction().isChecked() && canView());
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getSamplingMode() == SamplingMode::FocusRegion && getEnabledAction().isChecked() && canView());
                 break;
             }
 
