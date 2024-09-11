@@ -392,9 +392,6 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
                 case SideBarNone:
                     break;
-
-                default:
-                    break;
             }
         }
 
