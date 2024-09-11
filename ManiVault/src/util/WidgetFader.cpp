@@ -8,7 +8,7 @@
 #include <QWidget>
 
 #ifdef _DEBUG
-    #define WIDGET_FADER_VERBOSE
+    //#define WIDGET_FADER_VERBOSE
 #endif
 
 namespace mv::util {

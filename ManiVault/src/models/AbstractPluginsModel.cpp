@@ -81,9 +81,6 @@ void AbstractPluginsModel::setPopulationMode(PopulationMode populationMode)
 
             break;
         }
-
-        default:
-            break;
     }
 }
 

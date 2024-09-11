@@ -150,6 +150,8 @@ private:
      */
     QWidget* getTargetWidget() const;
 
+    /** Creates a sample scope plugin instance and shows it on the screen */
+    void openSampleWindow();
 
 public: // Serialization
 
@@ -172,6 +174,7 @@ public: // Action getters
     ToggleAction& getRestrictNumberOfElementsAction() { return _restrictNumberOfElementsAction; }
     IntegralAction& getMaximumNumberOfElementsAction() { return _maximumNumberOfElementsAction; }
     IntegralAction& getLazyUpdateIntervalAction() { return _lazyUpdateIntervalAction; }
+    OptionAction& getViewingModeAction() { return _viewingModeAction; }
 
 signals:
 
@@ -194,7 +197,6 @@ signals:
 
 private:
     plugin::ViewPlugin*             _viewPlugin;                                /** Pointer to view plugin for which to show the tooltips */
-    ViewingMode                     _viewingMode;                               /** Current viewing mode */
     bool                            _isInitialized;                             /** Boolean determining whether the sampler is initialized or not */
     PixelSelectionAction*           _pixelSelectionAction;                      /** Pointer to pixel selection tool to use */
     PixelSelectionAction*           _samplerPixelSelectionAction;               /** Pointer to sampler pixel selection tool to use */
@@ -205,14 +207,15 @@ private:
     ToggleAction                    _restrictNumberOfElementsAction;            /** Action to toggle the restriction of the maximum number of elements in the focus region */
     IntegralAction                  _maximumNumberOfElementsAction;             /** Action to restrict the maximum number of elements in the focus region */
     IntegralAction                  _lazyUpdateIntervalAction;                  /** Action to control the view update timer interval */
+    OptionAction                    _viewingModeAction;                         /** Action to control the viewing mode */
     SampleContext                   _sampleContext;                             /** Context for the tooltip */
     QTimer                          _sampleContextLazyUpdateTimer;              /** Lazily (periodically) updates the sample context tooltip string */
     bool                            _sampleContextDirty;                        /** Indicates that the sample context is dirty */
     QString                         _viewString;                                /** HTML-formatted view string */
     std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                      /** Overlay widget for the tooltip */
     QLabel                          _toolTipLabel;                              /** The text label which contains the actual tooltip text */
-    TriggerAction                   _openSampleScopeWindow;                   /** Opens a sample scope window */
-    plugin::ViewPlugin*             _sampleScopePlugin;                       /** Pointer to sample scope plugin (maybe nullptr) */
+    TriggerAction                   _openSampleScopeWindow;                     /** Opens a sample scope window */
+    plugin::ViewPlugin*             _sampleScopePlugin;                         /** Pointer to sample scope plugin (maybe nullptr) */
 };
 
 }

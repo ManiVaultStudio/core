@@ -18,7 +18,6 @@
 #include <QMap>
 #include <QVariant>
 #include <QIcon>
-#include <QStringListModel>
 
 #include "actions/PluginLearningCenterAction.h"
 

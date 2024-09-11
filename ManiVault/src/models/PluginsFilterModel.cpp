@@ -55,15 +55,15 @@ bool PluginsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
             return false;
     }
 
-    auto abstractPluginsModel = dynamic_cast<AbstractPluginsModel*>(sourceModel());
+    auto abstractPluginsModel   = dynamic_cast<AbstractPluginsModel*>(sourceModel());
 
-    auto plugin = dynamic_cast<AbstractPluginsModel::Item*>(abstractPluginsModel->itemFromIndex(index))->getPlugin();
+    if (auto plugin = dynamic_cast<AbstractPluginsModel::Item*>(abstractPluginsModel->itemFromIndex(index))->getPlugin()) {
+        if (!_filterPluginTypes.isEmpty() && !_filterPluginTypes.contains(plugin->getType()))
+            return false;
 
-    if (_useFilterFunctionAction.isChecked() && _filterFunction)
-        return _filterFunction(plugin);
-
-    if (!_filterPluginTypes.isEmpty())
-        return _filterPluginTypes.contains(plugin->getType());
+        if (_useFilterFunctionAction.isChecked() && _filterFunction)
+            return _filterFunction(plugin);
+    }
 
     return true;
 }

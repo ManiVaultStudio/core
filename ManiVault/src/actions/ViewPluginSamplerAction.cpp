@@ -19,7 +19,6 @@ namespace mv::gui {
 ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString& title, const ViewingMode& viewingMode /*= ViewingMode::None*/) :
     HorizontalGroupAction(parent, title),
     _viewPlugin(nullptr),
-    _viewingMode(ViewingMode::None),
     _isInitialized(false),
     _pixelSelectionAction(nullptr),
     _samplerPixelSelectionAction(nullptr),
@@ -29,6 +28,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _restrictNumberOfElementsAction(this, "Restrict number of elements", false),
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
     _lazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100),
+    _viewingModeAction(this, "Viewing mode", { "None", "Tooltip", "Windowed" }),
     _openSampleScopeWindow(this, "Open sample scope window"),
     _sampleScopePlugin(nullptr)
 {
@@ -41,6 +41,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _settingsAction.addAction(&_restrictNumberOfElementsAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
     _settingsAction.addAction(&_lazyUpdateIntervalAction);
+    _settingsAction.addAction(&_viewingModeAction);
 
     _enabledAction.setStretch(1);
 
@@ -52,6 +53,8 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _highlightFocusedElementsAction.setToolTip("Toggle highlighting of focused elements");
     _settingsAction.setToolTip("Additional focus region settings");
     _maximumNumberOfElementsAction.setToolTip("Puts a cap on the amount of points captured by the focus region");
+    _lazyUpdateIntervalAction.setToolTip("Controls the time interval between successive sample collection updates");
+    _viewingModeAction.setToolTip("Determines how the collected samples will be displayed");
     _openSampleScopeWindow.setToolTip("Open a sample scope window to inspect the samples");
 
     const auto updateSettingsActionReadOnly = [this]() -> void {
@@ -90,6 +93,41 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
         _sampleContextDirty = false;
     });
+
+
+    const auto updateViewingMode = [this]() -> void {
+        if (!_isInitialized)
+            return;
+
+        drawToolTip();
+
+        switch (getViewingMode())
+        {
+            case ViewingMode::None:
+            case ViewingMode::Tooltip:
+            {
+                if (_sampleScopePlugin && _sampleScopePlugin->getVisibleAction().isChecked())
+                    _sampleScopePlugin->getVisibleAction().setChecked(false);
+
+                break;
+            }
+
+            case ViewingMode::Windowed:
+            {
+                //if (_isInitialized)
+                //    openSampleWindow();
+
+                break;
+            }
+        }
+
+        if (_sampleScopePlugin && _sampleScopePlugin->getVisibleAction().isChecked())
+            _sampleScopePlugin->getVisibleAction().setChecked(false);
+    };
+
+    updateViewingMode();
+
+    connect(&_viewingModeAction, &OptionAction::currentIndexChanged, this, updateViewingMode);
 
     updateReadOnly();
 }
@@ -136,22 +174,7 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
 
         _openSampleScopeWindow.setShortcut(QKeySequence(Qt::Key_F4));
 
-        connect(&_openSampleScopeWindow, &TriggerAction::triggered, this, [this]() -> void {
-            if (getViewingMode() != ViewingMode::Windowed)
-                return;
-
-            if (_sampleScopePlugin) {
-                _sampleScopePlugin->getVisibleAction().setChecked(true);
-            }
-            else {
-                _sampleScopePlugin = mv::plugins().requestViewPluginFloated("Sample scope");
-
-                if (auto sourcePluginPickerAction = dynamic_cast<PluginPickerAction*>(_sampleScopePlugin->findChildByPath("Source plugin"))) {
-                    sourcePluginPickerAction->setCurrentPlugin(_viewPlugin);
-                    sourcePluginPickerAction->setEnabled(false);
-                }
-            }
-        });
+        connect(&_openSampleScopeWindow, &TriggerAction::triggered, this, &ViewPluginSamplerAction::openSampleWindow);
 
         _isInitialized = true;
 
@@ -168,26 +191,17 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
 
 ViewPluginSamplerAction::ViewingMode ViewPluginSamplerAction::getViewingMode() const
 {
-    return _viewingMode;
+    return static_cast<ViewingMode>(_viewingModeAction.getCurrentIndex());
 }
 
 void ViewPluginSamplerAction::setViewingMode(const ViewingMode& viewingMode)
 {
-    if (viewingMode == _viewingMode)
-        return;
-
-    const auto previousViewingMode = _viewingMode;
-
-    _viewingMode = viewingMode;
-
-    emit viewingModeChanged(previousViewingMode, _viewingMode);
-
-    drawToolTip();
+    _viewingModeAction.setCurrentIndex(static_cast<std::int32_t>(viewingMode));
 }
 
 bool ViewPluginSamplerAction::canView() const
 {
-    return _enabledAction.isChecked() && _viewGeneratorFunction && _viewingMode != ViewingMode::None;
+    return _enabledAction.isChecked() && _viewGeneratorFunction && getViewingMode() != ViewingMode::None;
 }
 
 void ViewPluginSamplerAction::setViewGeneratorFunction(const ViewGeneratorFunction& viewGeneratorFunction)
@@ -291,8 +305,6 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
         return HorizontalGroupAction::eventFilter(target, event);
 
     if (target == &_viewPlugin->getWidget()) {
-        auto& selectionTypeAction = _pixelSelectionAction->getTypeAction();
-
         switch (event->type())
         {
             case QEvent::MouseMove:
@@ -342,6 +354,26 @@ QWidget* ViewPluginSamplerAction::getTargetWidget() const
     return _samplerPixelSelectionAction->getTargetWidget();
 }
 
+void ViewPluginSamplerAction::openSampleWindow()
+{
+    drawToolTip();
+
+    if (getViewingMode() != ViewingMode::Windowed)
+        return;
+
+    if (_sampleScopePlugin) {
+        _sampleScopePlugin->getVisibleAction().setChecked(true);
+    }
+    else {
+        _sampleScopePlugin = mv::plugins().requestViewPluginFloated("Sample scope");
+
+        if (auto sourcePluginPickerAction = dynamic_cast<PluginPickerAction*>(_sampleScopePlugin->findChildByPath("Source plugin"))) {
+            sourcePluginPickerAction->setCurrentPlugin(_viewPlugin);
+            sourcePluginPickerAction->setEnabled(false);
+        }
+    }
+}
+
 void ViewPluginSamplerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     HorizontalGroupAction::fromVariantMap(variantMap);
@@ -351,6 +383,7 @@ void ViewPluginSamplerAction::fromVariantMap(const QVariantMap& variantMap)
     _restrictNumberOfElementsAction.fromParentVariantMap(variantMap);
     _maximumNumberOfElementsAction.fromParentVariantMap(variantMap);
     _lazyUpdateIntervalAction.fromParentVariantMap(variantMap);
+    _viewingModeAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ViewPluginSamplerAction::toVariantMap() const
@@ -362,6 +395,7 @@ QVariantMap ViewPluginSamplerAction::toVariantMap() const
     _restrictNumberOfElementsAction.insertIntoVariantMap(variantMap);
     _maximumNumberOfElementsAction.insertIntoVariantMap(variantMap);
     _lazyUpdateIntervalAction.insertIntoVariantMap(variantMap);
+    _viewingModeAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
