@@ -73,7 +73,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     connect(&_enabledAction, &ToggleAction::toggled, this, &ViewPluginSamplerAction::updateReadOnly);
 
     const auto updateMaximumNumberOfElementsAction = [this]() -> void {
-        _maximumNumberOfElementsAction.setEnabled(_restrictNumberOfElementsAction.isChecked());
+        _maximumNumberOfElementsAction.setEnabled(_restrictNumberOfElementsAction.isChecked() && getSamplingMode() == SamplingMode::FocusRegion);
     };
 
     updateMaximumNumberOfElementsAction();
@@ -98,6 +98,19 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
         _sampleContextDirty = false;
     });
 
+    const auto updateActionsReadOnly = [this, updateMaximumNumberOfElementsAction]() -> void {
+        const auto isFocusRegion = getSamplingMode() == SamplingMode::FocusRegion;
+
+        _highlightFocusedElementsAction.setEnabled(isFocusRegion);
+        _restrictNumberOfElementsAction.setEnabled(isFocusRegion);
+        _lazyUpdateIntervalAction.setEnabled(isFocusRegion);
+
+        updateMaximumNumberOfElementsAction();
+	};
+
+    updateActionsReadOnly();
+
+    connect(&_samplingModeAction, &OptionAction::currentIndexChanged, this, updateActionsReadOnly);
 
     const auto updateViewingMode = [this]() -> void {
         if (!_isInitialized)
@@ -394,6 +407,7 @@ void ViewPluginSamplerAction::fromVariantMap(const QVariantMap& variantMap)
     _restrictNumberOfElementsAction.fromParentVariantMap(variantMap);
     _maximumNumberOfElementsAction.fromParentVariantMap(variantMap);
     _lazyUpdateIntervalAction.fromParentVariantMap(variantMap);
+    _samplingModeAction.fromParentVariantMap(variantMap);
     _viewingModeAction.fromParentVariantMap(variantMap);
 }
 
@@ -406,6 +420,7 @@ QVariantMap ViewPluginSamplerAction::toVariantMap() const
     _restrictNumberOfElementsAction.insertIntoVariantMap(variantMap);
     _maximumNumberOfElementsAction.insertIntoVariantMap(variantMap);
     _lazyUpdateIntervalAction.insertIntoVariantMap(variantMap);
+    _samplingModeAction.insertIntoVariantMap(variantMap);
     _viewingModeAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
