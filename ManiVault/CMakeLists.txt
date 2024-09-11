@@ -4,7 +4,10 @@ cmake_minimum_required(VERSION 3.17)
 # Project: ManiVault-core
 # -----------------------------------------------------------------------------
 set(MV_CORE "mv-core")
-project(${MV_CORE} VERSION ${MV_VERSION})
+project(${MV_CORE} 
+    VERSION ${MV_VERSION} 
+    DESCRIPTION "Core application and library of ManiVault Studio, a flexible and extensible visual analytics framework for high-dimensional data"
+    LANGUAGES CXX C)
 
 # These three targets defined in this CMakeLists.txt
 set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
@@ -18,7 +21,11 @@ message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
 # CMake Settings
 # -----------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INSTALL_MESSAGE LAZY)
@@ -89,7 +96,7 @@ endif()
 # Windows compiler and linker flags
 # -----------------------------------------------------------------------------
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus /Zc:preprocessor")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
