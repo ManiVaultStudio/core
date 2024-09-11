@@ -38,14 +38,11 @@ QMap<QString, Task*> ViewPluginDockWidget::serializationTasks = QMap<QString, Ta
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidget* parent /*= nullptr*/) :
     DockWidget(title, parent),
     _viewPlugin(nullptr),
-    _viewPluginKind(),
-    _viewPluginMap(),
     _settingsMenu(this),
     _toggleMenu("Toggle", this),
     _helpAction(this, "Help"),
     _cachedVisibility(false),
     _dockManager(this),
-    _settingsDockWidgetsMap(),
     _progressOverlayWidget(this)
 {
     active << this;
@@ -320,6 +317,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
     _viewPlugin = viewPlugin;
 
+    setWindowIcon(_viewPlugin->getIcon());
     setProperty("ViewPluginId", _viewPlugin->getId());
 
     auto centralDockWidget = new CDockWidget("Central");
