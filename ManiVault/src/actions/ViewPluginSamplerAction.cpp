@@ -34,16 +34,19 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _sampleScopePlugin(nullptr)
 {
     setShowLabels(false);
+    setIconByName("eye-dropper");
+    setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    setPopupSizeHint(QSize(200, 0));
 
     addAction(&_enabledAction);
     addAction(&_settingsAction);
 
+    _settingsAction.addAction(&_samplingModeAction);
+    _settingsAction.addAction(&_viewingModeAction);
     _settingsAction.addAction(&_highlightFocusedElementsAction);
     _settingsAction.addAction(&_restrictNumberOfElementsAction);
     _settingsAction.addAction(&_maximumNumberOfElementsAction);
     _settingsAction.addAction(&_lazyUpdateIntervalAction);
-    _settingsAction.addAction(&_samplingModeAction);
-    _settingsAction.addAction(&_viewingModeAction);
 
     _enabledAction.setStretch(1);
 
@@ -98,7 +101,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
         _sampleContextDirty = false;
     });
 
-    const auto updateActionsReadOnly = [this, updateMaximumNumberOfElementsAction]() -> void {
+    const auto samplingModeChanged = [this, updateMaximumNumberOfElementsAction]() -> void {
         const auto isFocusRegion = getSamplingMode() == SamplingMode::FocusRegion;
 
         _highlightFocusedElementsAction.setEnabled(isFocusRegion);
@@ -106,11 +109,14 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
         _lazyUpdateIntervalAction.setEnabled(isFocusRegion);
 
         updateMaximumNumberOfElementsAction();
+
+        if (getSamplingMode() == SamplingMode::FocusRegion)
+            _sampleContextDirty = true;
 	};
 
-    updateActionsReadOnly();
+    samplingModeChanged();
 
-    connect(&_samplingModeAction, &OptionAction::currentIndexChanged, this, updateActionsReadOnly);
+    connect(&_samplingModeAction, &OptionAction::currentIndexChanged, this, samplingModeChanged);
 
     const auto updateViewingMode = [this]() -> void {
         if (!_isInitialized)
@@ -294,7 +300,7 @@ void ViewPluginSamplerAction::drawToolTip()
             break;
     }
 
-    _toolTipLabel.setVisible(getEnabledAction().isChecked() && !_viewString.isEmpty() && canView());
+    _toolTipLabel.setVisible(getEnabledAction().isChecked() && !_viewString.isEmpty() && canView() && getSamplingMode() == SamplingMode::FocusRegion);
     _toolTipLabel.adjustSize();
 
     moveToolTipLabel();
