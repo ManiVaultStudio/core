@@ -137,8 +137,8 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
             case ViewingMode::Windowed:
             {
-                if (!mv::projects().isOpeningProject())
-                    openSampleWindow();
+                //if (!mv::projects().isOpeningProject())
+                //    openSampleWindow();
 
                 break;
             }

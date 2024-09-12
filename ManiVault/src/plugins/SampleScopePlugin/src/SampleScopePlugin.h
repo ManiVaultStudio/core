@@ -34,10 +34,30 @@ public:
     /** Perform plugin initialization */
     void init() override;
 
+public: // Serialization
+
+    /**
+     * Load plugin from variant map
+     * @param variantMap Variant map representation of the plugin
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save plugin to variant map
+     * @return Variant map representation of the plugin
+     */
+    QVariantMap toVariantMap() const override;
+
+protected: // Action getters
+
+    mv::gui::PluginPickerAction& getSourcePluginPickerAction() { return _sourcePluginPickerAction; }
+    mv::gui::ToggleAction& getFreezeAction() { return _freezeViewAction; }
+
 private:
     SampleScopeWidget                   _sampleScopeWidget;             /** Sample scope widget */
     mv::gui::HorizontalGroupAction      _horizontalGroupAction;         /** Horizontal group action for settings */
     mv::gui::PluginPickerAction         _sourcePluginPickerAction;      /** Action for picking the source plugin */
+    mv::gui::ToggleAction               _freezeViewAction;              /** Action for freezing the current view */
     mv::gui::ViewPluginSamplerAction*   _viewPluginSamplerAction;       /** Pointer to current view plugin sampler action */
 };
 
