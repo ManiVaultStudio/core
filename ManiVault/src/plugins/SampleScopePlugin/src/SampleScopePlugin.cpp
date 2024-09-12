@@ -7,7 +7,9 @@
 #include <Application.h>
 #include <actions/ViewPluginSamplerAction.h>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.SampleScopePlugin")using namespace mv;
+Q_PLUGIN_METADATA(IID "studio.manivault.SampleScopePlugin")
+
+using namespace mv;
 using namespace mv::gui;
 using namespace mv::plugin;
 
@@ -34,13 +36,27 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
 		return dynamic_cast<ViewPlugin*>(plugin);
     });
 
-    connect(&_sourcePluginPickerAction, &PluginPickerAction::pluginPicked, this, [this](Plugin* plugin) -> void {
+    const auto updateNoSamplesOverlayWidget = [this]() -> void {
+        const auto canView = _viewPluginSamplerAction && _viewPluginSamplerAction->canView();
+
+        auto& widgetfader = _sampleScopeWidget.getNoSamplesOverlayWidget().getWidgetFader();
+
+        if (canView)
+            widgetfader.fadeOut();
+        else
+            widgetfader.fadeIn();
+    };
+
+    updateNoSamplesOverlayWidget();
+
+    connect(&_sourcePluginPickerAction, &PluginPickerAction::pluginPicked, this, [this, updateNoSamplesOverlayWidget](Plugin* plugin) -> void {
         if (!plugin)
             return;
 
         if (_viewPluginSamplerAction) {
             disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewStringChanged, this, nullptr);
             disconnect(&_viewPluginSamplerAction->getSamplingModeAction(), &OptionAction::currentIndexChanged, this, nullptr);
+            disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::canViewChanged, this, nullptr);
         }
 
         _viewPluginSamplerAction = dynamic_cast<ViewPluginSamplerAction*>(plugin->findChildByPath("Sampler"));
@@ -48,7 +64,7 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
         if (_viewPluginSamplerAction) {
             const auto updateHtmlText = [this]() -> void {
                 if (!_freezeViewAction.isChecked())
-					_sampleScopeWidget.setHtmlText(_viewPluginSamplerAction->canView() ? _viewPluginSamplerAction->getViewString() : "Samples not available...");
+					_sampleScopeWidget.setHtmlText(_viewPluginSamplerAction->getViewString());
             };
 
             updateHtmlText();
@@ -62,6 +78,10 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
             updateFreezeActionReadOnly();
 
             connect(&_viewPluginSamplerAction->getSamplingModeAction(), &OptionAction::currentIndexChanged, this, updateFreezeActionReadOnly);
+
+            updateNoSamplesOverlayWidget();
+
+            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::canViewChanged, this, updateNoSamplesOverlayWidget);
         }
     });
 }

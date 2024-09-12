@@ -48,7 +48,7 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-protected: // Action getters
+public: // Action getters
 
     mv::gui::PluginPickerAction& getSourcePluginPickerAction() { return _sourcePluginPickerAction; }
     mv::gui::ToggleAction& getFreezeAction() { return _freezeViewAction; }

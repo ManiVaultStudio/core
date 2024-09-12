@@ -235,6 +235,12 @@ signals:
     /** Signals that a new sample context is required */
     void sampleContextRequested();
 
+    /**
+     * Signals that the view-ability changed to \p canView
+     * @param canView Current view-ability
+     */
+    void canViewChanged(bool canView);
+
 private:
     plugin::ViewPlugin*             _viewPlugin;                                /** Pointer to view plugin for which to show the tooltips */
     bool                            _isInitialized;                             /** Boolean determining whether the sampler is initialized or not */

@@ -35,6 +35,9 @@ void ShortcutMap::setTitle(const QString& title)
 
 void ShortcutMap::addShortcut(const Shortcut& shortcut)
 {
+    if (std::find(_shortcuts.begin(), _shortcuts.end(), shortcut) != _shortcuts.end())
+        return;
+
     _shortcuts.push_back(shortcut);
 
     emit shortcutAdded(shortcut);

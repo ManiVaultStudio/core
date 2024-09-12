@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <widgets/InfoOverlayWidget.h>
+
 #include <QLabel>
 #include <QScrollArea>
 #include <QWidget>
@@ -35,11 +37,18 @@ public:
      */
     void setHtmlText(const QString& htmlText);
 
-protected:
-    SampleScopePlugin*  _sampleScopePlugin;     /** Pointer to parent sample scope plugin */
-    QVBoxLayout         _layout;                /** Main layout */
-    QScrollArea         _textScrollArea;        /** Scroll area for the label */
-    QWidget             _textWidget;            /** Widget with the shortcuts label */
-    QVBoxLayout         _textWidgetLayout;      /** Layout for the label */
-    QLabel              _textBodyLabel;         /** Label for the body HTML text */
+    /**
+     * Get no samples overlay widget
+     * @return No samples overlay widget
+     */
+    mv::gui::InfoOverlayWidget& getNoSamplesOverlayWidget();
+
+private:
+    SampleScopePlugin*              _sampleScopePlugin;         /** Pointer to parent sample scope plugin */
+    QVBoxLayout                     _layout;                    /** Main layout */
+    QScrollArea                     _textScrollArea;            /** Scroll area for the label */
+    QWidget                         _textWidget;                /** Widget with the shortcuts label */
+    QVBoxLayout                     _textWidgetLayout;          /** Layout for the label */
+    QLabel                          _textBodyLabel;             /** Label for the body HTML text */
+    mv::gui::InfoOverlayWidget      _noSamplesOverlayWidget;    /** Overlay widget with a message saying there are no samples available */
 };

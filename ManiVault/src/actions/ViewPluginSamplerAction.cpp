@@ -63,16 +63,18 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _viewingModeAction.setToolTip("Determines how the collected samples will be displayed");
     _openSampleScopeWindow.setToolTip("Open a sample scope window to inspect the samples");
 
-    const auto updateSettingsActionReadOnly = [this]() -> void {
+    const auto enabledChanged = [this]() -> void {
         _settingsAction.setEnabled(_enabledAction.isChecked());
 
         if (_samplerPixelSelectionAction)
             _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(_enabledAction.isChecked());
+
+        emit canViewChanged(canView());
     };
 
-    updateSettingsActionReadOnly();
+    enabledChanged();
 
-    connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
+    connect(&_enabledAction, &ToggleAction::toggled, this, enabledChanged);
     connect(&_enabledAction, &ToggleAction::toggled, this, &ViewPluginSamplerAction::updateReadOnly);
 
     const auto updateMaximumNumberOfElementsAction = [this]() -> void {
@@ -118,7 +120,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
     connect(&_samplingModeAction, &OptionAction::currentIndexChanged, this, samplingModeChanged);
 
-    const auto updateViewingMode = [this]() -> void {
+    const auto viewingModeChanged = [this]() -> void {
         if (!_isInitialized)
             return;
 
@@ -143,11 +145,13 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
                 break;
             }
         }
+
+        emit canViewChanged(canView());
     };
 
-    updateViewingMode();
+    viewingModeChanged();
 
-    connect(&_viewingModeAction, &OptionAction::currentIndexChanged, this, updateViewingMode);
+    connect(&_viewingModeAction, &OptionAction::currentIndexChanged, this, viewingModeChanged);
 
     updateReadOnly();
 }
@@ -240,6 +244,8 @@ void ViewPluginSamplerAction::setViewGeneratorFunction(const ViewGeneratorFuncti
 
     setViewingMode(viewGeneratorFunction ? ViewingMode::Windowed : ViewingMode::None);
     updateReadOnly();
+
+    emit canViewChanged(canView());
 }
 
 QVariantMap ViewPluginSamplerAction::getSampleContext() const
