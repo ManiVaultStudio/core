@@ -14,6 +14,10 @@ namespace mv::util {
     class ShortcutMap;
 }
 
+namespace mv::plugin {
+    class ViewPlugin;
+}
+
 namespace mv::gui
 {
 
@@ -24,7 +28,7 @@ namespace mv::gui
  *  
  * @author Thomas Kroes
  */
-class ViewPluginShortcutsOverlayWidget : public ViewPluginOverlayWidget
+class CORE_EXPORT ViewPluginShortcutsOverlayWidget : public ViewPluginOverlayWidget
 {
 public:
 
@@ -32,10 +36,10 @@ public:
      * Construct with pointer to source \p view plugin
      * @param viewPlugin Pointer to source view plugin
      */
-    ViewPluginShortcutsOverlayWidget(plugin::ViewPlugin* viewPlugin);
+    ViewPluginShortcutsOverlayWidget(mv::plugin::ViewPlugin* viewPlugin);
 
 private:
-    const util::ShortcutMap&    _shortcutMap;           /** Const reference to the shortcut map for which to create the overlay */
+    const mv::util::ShortcutMap& _shortcutMap;          /** Const reference to the shortcut map for which to create the overlay */
     QHBoxLayout                 _headerLayout;          /** Layout for the header */
     QLabel                      _headerIconLabel;       /** Label for header icon */
     QLabel                      _headerTextLabel;       /** Label for header text */

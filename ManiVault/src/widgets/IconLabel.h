@@ -6,7 +6,14 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <QEnterEvent>
+#include <QEvent>
+#include <QIcon>
+#include <QGraphicsOpacityEffect>
 #include <QLabel>
+#include <QString>
+
+#include <functional>
 
 namespace mv::gui
 {
