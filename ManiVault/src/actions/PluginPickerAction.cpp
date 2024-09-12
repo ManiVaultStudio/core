@@ -4,6 +4,7 @@
 
 #include "PluginPickerAction.h"
 
+#include "CoreInterface.h"
 #include "event/Event.h"
 
 #ifdef _DEBUG

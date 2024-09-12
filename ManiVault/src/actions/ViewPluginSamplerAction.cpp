@@ -4,6 +4,7 @@
 
 #include "ViewPluginSamplerAction.h"
 
+#include "CoreInterface.h"
 #include "ViewPlugin.h"
 
 #include "util/Exception.h"
