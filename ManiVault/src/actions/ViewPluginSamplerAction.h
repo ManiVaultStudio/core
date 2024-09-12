@@ -76,8 +76,8 @@ public:
     enum class ViewingMode
 	{
         None,       /** Do not show samples */
-        Tooltip,    /** Force tooltip view (regardless of the size of the tooltip) */
-        Windowed    /** Force sample scope view plugin based view */
+        Windowed,   /** Force sample scope view plugin based view */
+        Tooltip     /** Force tooltip view (regardless of the size of the tooltip) */
     };
 
     /** Context with which the tooltip is created */

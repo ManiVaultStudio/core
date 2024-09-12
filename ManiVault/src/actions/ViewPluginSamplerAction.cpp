@@ -30,7 +30,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
     _lazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100),
     _samplingModeAction(this, "Sampling mode", { "Selection", "Focus Region" }, "Focus Region"),
-	_viewingModeAction(this, "Viewing mode", { "None", "Tooltip", "Windowed" }, "None"),
+	_viewingModeAction(this, "Viewing mode", { "None", "Windowed", "Tooltip" }, "None"),
     _openSampleScopeWindow(this, "Open sample scope window"),
     _sampleScopePlugin(nullptr)
 {
@@ -113,8 +113,20 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
         updateMaximumNumberOfElementsAction();
 
-        if (getSamplingMode() == SamplingMode::FocusRegion)
-            _sampleContextDirty = true;
+        switch (getSamplingMode()) {
+        	case SamplingMode::FocusRegion:
+			{
+                _viewingModeAction.setOptions({ "None", "Windowed", "Tooltip" });
+                _sampleContextDirty = true;
+                break;
+        	}
+
+            case SamplingMode::Selection:
+            {
+                _viewingModeAction.setOptions({ "None", "Windowed" });
+                break;
+            }
+        }
 	};
 
     samplingModeChanged();
