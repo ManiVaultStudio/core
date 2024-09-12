@@ -53,7 +53,7 @@ public:
 
 private:
 
-    /** Re-populate the columns option action */
+    /** Re-populateFromPluginManager the columns option action */
     void updateColumnsOptionsAction();
 
 public: // Action getters

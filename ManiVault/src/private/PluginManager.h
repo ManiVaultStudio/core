@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <models/PluginsListModel.h>
+#include <models/PluginsTreeModel.h>
+
 #include <AbstractPluginManager.h>
 #include <PluginFactory.h>
 
@@ -48,13 +51,22 @@ public: // Plugin creation/destruction
     plugin::Plugin* requestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets()) override;
     
     /**
-     * Create a view plugin plugin of \p kind and dock it to \p dockToViewPlugin at \p dockArea
+     * Create a view plugin of \p kind, dock it to \p dockToViewPlugin at \p dockArea and assign the \p datasets
      * @param kind Kind of plugin (name of the plugin)
      * @param dockToViewPlugin View plugin instance to dock to
      * @param dockArea Dock area to dock in
+     * @param datasets Datasets to assign to the view plugin
      * @return Pointer of view plugin type to created view plugin, nullptr if creation failed
      */
     plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) override;
+
+    /**
+     * Create a view plugin of \p kind, assign the \p datasets and float it on top of the main window
+     * @param kind Kind of plugin (name of the plugin)
+     * @param datasets Datasets to assign to the view plugin
+     * @return Pointer of view plugin type to created view plugin, nullptr if creation failed
+     */
+    plugin::ViewPlugin* requestViewPluginFloated(const QString& kind, Datasets datasets = Datasets()) override;
 
 private:
 
@@ -196,6 +208,20 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Model access
+
+    /**
+     * Get list model of all loaded plugins
+     * @return Reference to plugins list model
+     */
+    const PluginsListModel& getListModel() const override;
+
+    /**
+     * Get tree model of all loaded plugins
+     * @return Reference to plugins tree model
+     */
+    const PluginsTreeModel& getTreeModel() const override;
+
 protected:
 
     /**
@@ -208,6 +234,8 @@ protected:
 private:
     QHash<QString, PluginFactory*>                  _pluginFactories;   /** All loaded plugin factories */
     std::vector<std::unique_ptr<plugin::Plugin>>    _plugins;           /** Vector of plugin instances */
+    PluginsListModel*                               _listModel;         /** List model of all loaded plugins */
+    PluginsTreeModel*                               _treeModel;         /** Tree model of all loaded plugins */
 };
 
 }

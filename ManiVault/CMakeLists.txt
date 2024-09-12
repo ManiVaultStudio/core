@@ -292,6 +292,7 @@ add_subdirectory(src/plugins/DataPropertiesPlugin)
 add_subdirectory(src/plugins/SharedParametersPlugin)
 add_subdirectory(src/plugins/LoggingPlugin)
 add_subdirectory(src/plugins/TasksPlugin)
+add_subdirectory(src/plugins/SampleScopePlugin)
 
 # Data plugins
 add_subdirectory(src/plugins/PointData)

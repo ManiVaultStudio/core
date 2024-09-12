@@ -29,6 +29,8 @@
 #include <assert.h>
 #include <stdexcept>
 
+#include "models/AbstractPluginsModel.h"
+
 #ifdef _DEBUG
     //#define PLUGIN_MANAGER_VERBOSE
 #endif
@@ -40,7 +42,8 @@ using namespace plugin;
 using namespace gui;
 
 PluginManager::PluginManager() :
-    AbstractPluginManager()
+    _listModel(nullptr),
+    _treeModel(nullptr)
 {
     setObjectName("Plugins");
 }
@@ -64,6 +67,9 @@ void PluginManager::initialize()
     beginInitialization();
     {
         loadPluginFactories();
+
+        _listModel = new PluginsListModel(AbstractPluginsModel::PopulationMode::Automatic, this);
+        _treeModel = new PluginsTreeModel(AbstractPluginsModel::PopulationMode::Automatic, this);
     }
     endInitialization();
 }
@@ -347,6 +353,16 @@ plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin
 
     if (viewPlugin != nullptr)
         mv::workspaces().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
+
+    return viewPlugin;
+}
+
+plugin::ViewPlugin* PluginManager::requestViewPluginFloated(const QString& kind, Datasets datasets)
+{
+    const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
+
+    if (viewPlugin != nullptr)
+        mv::workspaces().addViewPluginFloated(viewPlugin);
 
     return viewPlugin;
 }
@@ -726,6 +742,16 @@ QVariantMap PluginManager::toVariantMap() const
     });
 
     return variantMap;
+}
+
+const PluginsListModel& PluginManager::getListModel() const
+{
+    return *_listModel;
+}
+
+const PluginsTreeModel& PluginManager::getTreeModel() const
+{
+    return *_treeModel;
 }
 
 }

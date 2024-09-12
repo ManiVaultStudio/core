@@ -47,6 +47,7 @@ DockManager::DockManager(const QString& name, QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DockAreaHasTabsMenuButton, true);
     CDockManager::setConfigFlag(CDockManager::DockAreaDynamicTabsMenuButtonVisibility, false);
     CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
+    CDockManager::setConfigFlag(CDockManager::FloatingContainerHasWidgetIcon, true);
 }
 
 DockManager::~DockManager()

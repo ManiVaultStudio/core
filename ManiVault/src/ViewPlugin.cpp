@@ -166,6 +166,15 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
     });
 
+    auto& shortcuts = getShortcuts();
+
+    shortcuts.add({ QKeySequence(Qt::Key_F2), "General", "Make a screenshot" });
+
+    if (!isSystemViewPlugin())
+		shortcuts.add({ QKeySequence(Qt::Key_F3), "General", "Toggle view isolation (hides the other views)" });
+
+    shortcuts.add({ QKeySequence(Qt::Key_F12), "General", "Edit the view parameters" });
+
     getLearningCenterAction().createViewPluginOverlayWidget();
 }
 

@@ -40,6 +40,7 @@ public:
     using CDockManager::dockWidgetsMap;
     using CDockManager::grab;
     using CDockManager::setStyleSheet;
+    using CDockManager::addDockWidgetFloating;
     
     
     /**

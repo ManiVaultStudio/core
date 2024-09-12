@@ -9,13 +9,13 @@
 namespace mv {
 
 /**
- * Plugins tree model class
+ * Plugins list model class
  *
- * Tree model for loaded plugins
+ * List model for loaded plugins
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT PluginsTreeModel : public AbstractPluginsModel
+class CORE_EXPORT PluginsListModel : public AbstractPluginsModel
 {
 public:
 
@@ -24,7 +24,7 @@ public:
      * @param populationMode Population mode
      * @param parent Pointer to parent object
      */
-    PluginsTreeModel(PopulationMode populationMode = PopulationMode::Automatic, QObject* parent = nullptr);
+    PluginsListModel(PopulationMode populationMode = PopulationMode::Automatic, QObject* parent = nullptr);
 
     /**
      * Get plugins
@@ -59,6 +59,29 @@ public:
      * @param plugin Pointer to plugin
      */
     void removePlugin(plugin::Plugin* plugin) override;
+
+    /**
+     * Get index from pointer to \p plugin
+     * @param plugin Const pointer to plugin
+     * @return Model index (invalid if not found)
+     */
+    QModelIndex getIndexFromPlugin(const plugin::Plugin* plugin) const;
+
+    /**
+     * Get index from \p pluginId
+     * @param pluginId Plugin globally unique identifier to retrieve the row index for
+     * @return Model index (invalid if not found)
+     */
+    QModelIndex getIndexFromPlugin(const QString& pluginId) const;
+
+public: // Item access
+
+    /**
+     * Get item from pointer to \p plugin
+     * @param plugin Const pointer to plugin
+     * @return Pointer to found item, nullptr otherwise
+     */
+    QStandardItem* getItemFromPlugin(const plugin::Plugin* plugin) const;
 };
 
 }
