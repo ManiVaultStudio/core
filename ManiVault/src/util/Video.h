@@ -4,6 +4,14 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
+#include <QDateTime>
+#include <QString>
+#include <QStringList>
+
+#include <vector>
+
 namespace mv::util {
 
 /**

@@ -4,6 +4,9 @@
 
 #include "ViewPluginDescriptionOverlayWidget.h"
 
+#include "Application.h"
+#include "ViewPlugin.h"
+
 #include <QDebug>
 #include <QScrollBar>
 

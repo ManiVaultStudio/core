@@ -4,10 +4,13 @@
 
 #include "ViewPluginLearningCenterOverlayWidget.h"
 
+#include "Application.h"
+#include "CoreInterface.h"
 #include "util/Icon.h"
 
 #include <QDebug>
 #include <QMainWindow>
+#include <QMenu>
 #include <QDesktopServices>
 
 #ifdef _DEBUG

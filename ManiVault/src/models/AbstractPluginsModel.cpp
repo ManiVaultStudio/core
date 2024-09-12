@@ -4,6 +4,7 @@
 
 #include "AbstractPluginsModel.h"
 
+#include "CoreInterface.h"
 #include "Plugin.h"
 
 using namespace mv::gui;

@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "PluginType.h"
 #include "SortFilterProxyModel.h"
 
 #include "actions/ToggleAction.h"

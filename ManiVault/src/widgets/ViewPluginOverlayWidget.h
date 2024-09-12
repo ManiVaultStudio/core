@@ -28,7 +28,7 @@ namespace mv::gui
  *  
  * @author Thomas Kroes
  */
-class ViewPluginOverlayWidget : public OverlayWidget
+class CORE_EXPORT ViewPluginOverlayWidget : public OverlayWidget
 {
 private:
 
