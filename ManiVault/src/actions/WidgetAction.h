@@ -871,20 +871,20 @@ public: // State caching
      * Determine whether cache with name exists
      * @param name Name to use for the cached widget action state
      */
-    virtual bool hasCacheState(const QString& name) const final;
+    bool hasCacheState(const QString& name) const;
 
     /**
      * Cache the state of a widget action under \p name in the action itself (for global presets use the presets action)
      * @param name Name to use for the cached widget action state
      */
-    virtual void cacheState(const QString& name = "cache") final;
+    void cacheState(const QString& name = "cache");
 
     /**
      * Restore the state of under \p name
      * @param name Name of the cached widget action state to restore
      * @param remove Whether to remove the cache
      */
-    virtual void restoreState(const QString& name = "cache", bool remove = true) final;
+    void restoreState(const QString& name = "cache", bool remove = true);
 
 public: // Studio mode
     
