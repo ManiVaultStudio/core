@@ -235,7 +235,7 @@ public: // Hierarchy queries
      */
     template<typename WidgetActionType = WidgetAction>
     std::int32_t getDepth() const {
-        return getAncestors<WidgetActionType>().count();
+        return static_cast<std::int32_t>(getAncestors<WidgetActionType>().count());
     }
 
     /**
