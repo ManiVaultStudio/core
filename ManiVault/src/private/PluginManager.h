@@ -152,7 +152,7 @@ public: // Plugin trigger actions
      * @param datasets Vector of input datasets
      * @return Vector of plugin trigger actions
      */
-    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const;
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const override;
 
     /**
      * Get plugin trigger actions by \p pluginType and \p dataTypes
@@ -160,7 +160,7 @@ public: // Plugin trigger actions
      * @param dataTypes Vector of input data types
      * @return Vector of plugin trigger actions
      */
-    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const;
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const override;
 
     /**
      * Get plugin trigger actions by \p pluginKind and \p datasets
@@ -185,14 +185,14 @@ public: // Plugin query
      * @param pluginKind Kind of plugin
      * @param GUI name of the plugin, empty if the plugin kind was not found
      */
-    QString getPluginGuiName(const QString& pluginKind) const;
+    QString getPluginGuiName(const QString& pluginKind) const override;
 
     /**
      * Get plugin icon from plugin kind
      * @param pluginKind Kind of plugin
      * @return Plugin icon name of the plugin, null icon the plugin kind was not found
      */
-    QIcon getPluginIcon(const QString& pluginKind) const;
+    QIcon getPluginIcon(const QString& pluginKind) const override;
 
 public: // Serialization
 
