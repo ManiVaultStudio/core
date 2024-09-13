@@ -187,7 +187,7 @@ public: // Widgets
              * Invoked when the user presses the mouse
              * @param event Pointer to mouse event
              */
-            void mousePressEvent(QMouseEvent* event);
+            void mousePressEvent(QMouseEvent* event) override;
 
             /**
              * Triggered on mouse hover

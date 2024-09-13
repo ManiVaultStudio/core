@@ -44,7 +44,7 @@ public:
      * @param editor Pointer to editor widget
      * @param index Model index
      */
-    void setEditorData(QWidget* editor, const QModelIndex& index) const;
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
 
     /**
      * Updates \p editor widget geometry

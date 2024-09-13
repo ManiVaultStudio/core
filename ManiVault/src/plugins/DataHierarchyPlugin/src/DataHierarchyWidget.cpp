@@ -121,7 +121,7 @@ public:
      * @param index Model index to create the editor for
      * @return Pointer to widget if progress column, nullptr otherwise
      */
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
         if (static_cast<AbstractDataHierarchyModel::Column>(index.column()) != AbstractDataHierarchyModel::Column::Progress)
             return QStyledItemDelegate::createEditor(parent, option, index);
 
@@ -136,7 +136,7 @@ public:
      * @param option Style option
      * @param index Model index of the cell for which the geometry changed
      */
-    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
         Q_UNUSED(index)
 
         if (editor == nullptr)

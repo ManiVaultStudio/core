@@ -36,7 +36,7 @@ protected:
      * Invoked when the widget is shown
      * @param showEvent Pointer to show event
      */
-    void showEvent(QShowEvent* showEvent);
+    void showEvent(QShowEvent* showEvent) override;
 
     /**
      * Override QObject's event handling
