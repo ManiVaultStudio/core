@@ -4,13 +4,21 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "WidgetActionWidget.h"
 #include "WidgetActionBadge.h"
 
 #include "util/Serializable.h"
 
+#include <QEvent>
+#include <QMap>
+#include <QWidget>
 #include <QWidgetAction>
 #include <QPointer>
+#include <QString>
+
+#include <functional>
 
 class QLabel;
 class QMenu;
