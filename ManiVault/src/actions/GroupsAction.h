@@ -4,12 +4,17 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "GroupAction.h"
 #include "StringAction.h"
 #include "TriggerAction.h"
+#include "WidgetAction.h"
+#include "WidgetActionWidget.h"
 
 #include "Task.h"
 
+#include <QEvent>
 #include <QStyledItemDelegate>
 #include <QTreeWidget>
 
@@ -88,7 +93,13 @@ public:
         * Override QObject's event handling
         * @return Boolean Wheter the event was recognized and processed
         */
-        bool event(QEvent* event) override;
+        bool event(QEvent* event) override
+        {
+            if (event->type() == QEvent::ApplicationPaletteChange)
+                updateCustomStyle();
+
+            return WidgetActionWidget::event(event);
+        }
 
     protected: // Internals
 

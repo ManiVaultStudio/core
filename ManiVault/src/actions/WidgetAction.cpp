@@ -85,13 +85,6 @@ WidgetAction::~WidgetAction()
 
     actions().removeAction(this);
 }
-bool WidgetAction::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidgetAction::event(event);
-}
 
 QString WidgetAction::getLocation(bool recompute /*= false*/) const
 {

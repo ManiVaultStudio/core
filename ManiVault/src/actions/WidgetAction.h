@@ -438,7 +438,13 @@ protected:
      * Override QObject's event handling
      * @return Boolean Wheter the event was recognized and processed
      */
-    bool event(QEvent* event) override;
+    bool event(QEvent* event) override
+    {
+        if (event->type() == QEvent::ApplicationPaletteChange)
+            updateCustomStyle();
+
+        return QWidgetAction::event(event);
+    }
 
 public: // Visibility
 
