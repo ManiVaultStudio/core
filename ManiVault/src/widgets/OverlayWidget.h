@@ -8,6 +8,7 @@
 
 #include "util/WidgetOverlayer.h"
 
+#include <QResizeEvent>
 #include <QWidget>
 
 namespace mv::gui
@@ -62,7 +63,12 @@ protected:
      * Update the mask region when the overlay widget changes size
      * @param event Pointer to resize event that occurred
      */
-    void resizeEvent(QResizeEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override
+    {
+        QWidget::resizeEvent(event);
+
+        updateMask();
+    }
 
 private:
 
