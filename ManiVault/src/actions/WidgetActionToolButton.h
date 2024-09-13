@@ -49,7 +49,7 @@ public:
      * Paint event
      * @param paintEvent Pointer to paint event
      */
-    void paintEvent(QPaintEvent* paintEvent);
+    void paintEvent(QPaintEvent* paintEvent) override;
 
     /**
      * Get action

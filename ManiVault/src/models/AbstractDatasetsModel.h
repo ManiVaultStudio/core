@@ -295,7 +295,7 @@ protected:
      * Remove \p dataset from the model (this method is called when a dataset is about to be removed from the manager)
      * @param dataset Smart pointer to dataset to remove
      */
-    virtual void removeDataset(Dataset<DatasetImpl> dataset) final;
+    void removeDataset(Dataset<DatasetImpl> dataset);
 
 public: // Action getters
 

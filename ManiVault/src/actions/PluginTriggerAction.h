@@ -107,6 +107,7 @@ public:
 
     /**
      * Override base class to also update location
+     * Intentially hides WidgetAction::setText
      * @param text Action text
      */
     void setText(const QString& text);

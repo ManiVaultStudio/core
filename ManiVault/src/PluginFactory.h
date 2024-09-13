@@ -77,7 +77,7 @@ public: // Global settings
      * Get settings prefix
      * @return Plugin factory global settings prefix
      */
-    virtual QString getGlobalSettingsPrefix() const final;
+    QString getGlobalSettingsPrefix() const;
 
     /**
      * Get global settings group action
@@ -89,7 +89,7 @@ public: // Global settings
      * Set plugin global settings group action to \p pluginGlobalSettingsGroupAction
      * @param pluginGlobalSettingsGroupAction Pointer to plugin global settings group action (maybe a nullptr)
      */
-    virtual void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction) final;
+    void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction);
 
 public: // Status bar
 
@@ -97,13 +97,13 @@ public: // Status bar
      * Get plugin status bar action
      * @return Pointer to plugin status bar action (maybe nullptr)
      */
-    virtual gui::PluginStatusBarAction* getStatusBarAction() const final;
+    gui::PluginStatusBarAction* getStatusBarAction() const;
 
     /**
      * Set plugin status bar action to \p statusBarAction
      * @param statusBarAction Pointer to plugin status bar action (maybe a nullptr)
      */
-    virtual void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction) final;
+    void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction);
 
 public: // Help
 
@@ -172,7 +172,7 @@ public:
      * Get whether a plugin may be produced
      * @return Boolean determining whether a plugin may be produced
      */
-    virtual bool mayProduce() const final;
+    bool mayProduce() const;
 
     /**
      * Get the data types that the plugin supports
@@ -221,13 +221,13 @@ public: // Shortcut map
      * Get shortcut map
      * @return Reference to the shortcut map
      */
-    virtual util::ShortcutMap& getShortcutMap() final;
+    util::ShortcutMap& getShortcutMap();
 
     /**
      * Get shortcut map
      * @return Const reference to the shortcut map
      */
-    virtual const util::ShortcutMap& getShortcutMap() const final;
+    const util::ShortcutMap& getShortcutMap() const;
 
 public: // Description
 

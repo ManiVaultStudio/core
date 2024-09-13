@@ -221,7 +221,7 @@ public:
      * @param color Icon color for flat (font) icons
      * @return Icon for \p storageType
      */
-    virtual QIcon getIcon(StorageType storageType, const QColor& color = Qt::black) const final;
+    QIcon getIcon(StorageType storageType, const QColor& color = Qt::black) const;
 
     /**
      * Makes this set a subset of a full dataset
@@ -263,10 +263,14 @@ public: // Hierarchy
     /** Get reference to data hierarchy item */
     const DataHierarchyItem& getDataHierarchyItem() const;
 
-    /** Get parent dataset (if any) */
-    Dataset<DatasetImpl> getParent() const;
+    /** Get parent dataset (if any) 
+    * Intentionally hides WidgetAction::getParent
+    */
+        Dataset<DatasetImpl> getParent() const;
 
-    /** Get parent dataset (if any) */
+    /** Get parent dataset (if any)
+    * Intentionally hides WidgetAction::getParent
+    */
     template<typename DatasetType>
     Dataset<DatasetType> getParent() const {
         return Dataset<DatasetType>(getParent());
@@ -274,6 +278,7 @@ public: // Hierarchy
 
     /**
      * Get child datasets (if any) of the specified type(s)
+     * Intentionally hides WidgetAction::getChildren
      * @param dataTypes Dataset type(s) to filter out (no filtering if \p dataTypes is empty)
      * @param recursively Whether to collect children recursively
      * @return Child datasets of the dataset type(s)
@@ -282,6 +287,7 @@ public: // Hierarchy
 
     /**
      * Get child datasets (if any) of the specified type
+     * Intentionally hides WidgetAction::getChildren
      * @param filterDataType Type of data to filter
      * @return Child datasets of the dataset type
      */
@@ -564,6 +570,7 @@ public: // Operators
 
     /**
      * Assignment operator
+     * Intentionally hides WidgetAction::operator=
      * @param other Reference to assign from
      */
     DatasetImpl& operator=(const DatasetImpl& other) {

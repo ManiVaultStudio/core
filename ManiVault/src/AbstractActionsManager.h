@@ -56,7 +56,7 @@ public:
      * Get all actions in the manager
      * @return List of all actions in the manager
      */
-    virtual const gui::WidgetActions& getActions() const final {
+    const gui::WidgetActions& getActions() const {
         return _actions;
     }
 
@@ -64,7 +64,7 @@ public:
      * Get all public actions in the manager
      * @return List of all public actions in the manager
      */
-    virtual const gui::WidgetActions& getPublicActions() const final {
+    const gui::WidgetActions& getPublicActions() const {
         return _publicActions;
     }
 
@@ -72,7 +72,7 @@ public:
      * Get action with \p id
      * @return Pointer to widget action (may return nullptr)
      */
-    virtual gui::WidgetAction* getAction(const QString& id) final {
+    gui::WidgetAction* getAction(const QString& id) {
         for (const auto action : _actions)
             if (id == action->getId())
                 return action;
@@ -168,7 +168,7 @@ private: // Public actions
      * Add \p publicAction to the manager
      * @param publicAction Pointer to public action
      */
-    virtual void addPublicAction(gui::WidgetAction* publicAction) final {
+    void addPublicAction(gui::WidgetAction* publicAction) {
         try
         {
             Q_ASSERT(publicAction != nullptr);
@@ -194,7 +194,7 @@ private: // Public actions
      * Remove \p publicAction from the manager
      * @param publicAction Pointer to public action
      */
-    virtual void removePublicAction(gui::WidgetAction* publicAction) final {
+    void removePublicAction(gui::WidgetAction* publicAction) {
         try
         {
             Q_ASSERT(publicAction != nullptr);
@@ -242,7 +242,7 @@ public: // Linking
      * @param publicAction Pointer to public action
      * @param recursive Whether to also connect descendant child actions
      */
-    virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) final {
+    void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) {
         
         try
         {
@@ -282,7 +282,7 @@ public: // Linking
      * @param privateTargetAction Pointer to private target action (private source action will be connected to published private target action)
      * @param publicActionName Name of the public action (ask for name if empty)
      */
-    virtual void connectPrivateActions(gui::WidgetAction* privateSourceAction, gui::WidgetAction* privateTargetAction, const QString& publicActionName = "") final {
+    void connectPrivateActions(gui::WidgetAction* privateSourceAction, gui::WidgetAction* privateTargetAction, const QString& publicActionName = "") {
 
         try
         {
@@ -313,7 +313,7 @@ public: // Linking
      * @param privateAction Pointer to private action
      * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction, bool recursive) final {
+    void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction, bool recursive) {
 
         try
         {
@@ -344,7 +344,7 @@ protected:
      * @param privateAction Pointer to private action
      * @param publicAction Pointer to public action
      */
-    virtual void addPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) final {
+    void addPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
 
         try
         {
@@ -380,7 +380,7 @@ protected:
      * @param privateAction Pointer to private action
      * @param publicAction Pointer to public action
      */
-    virtual void removePrivateActionFromPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) final {
+    void removePrivateActionFromPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
         
         try
         {
@@ -491,7 +491,7 @@ protected:
      * Make widget \p action public
      * @param action Pointer to action
      */
-    virtual void makeActionPublic(gui::WidgetAction* action) final {
+    void makeActionPublic(gui::WidgetAction* action) {
         Q_ASSERT(action != nullptr);
 
         if (action == nullptr)

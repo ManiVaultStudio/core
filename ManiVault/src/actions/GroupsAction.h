@@ -59,7 +59,7 @@ public:
     public:
 
         /** Update item geometries */
-        void updateGeometries()
+        void updateGeometries() override
         {
             QTreeWidget::updateGeometries();
         }

@@ -13,7 +13,9 @@
     Connect to all of the models signals.  Whenever anything happens
     recheck everything.
 */
-AbstractItemModelTester::AbstractItemModelTester(QAbstractItemModel *_model, QObject *parent) : QObject(parent), model(_model)
+AbstractItemModelTester::AbstractItemModelTester(QAbstractItemModel *_model, QObject *parent) : 
+    QObject(parent), 
+    model(_model)
 {
     Q_ASSERT(model);
 

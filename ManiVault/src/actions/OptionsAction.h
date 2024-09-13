@@ -122,7 +122,7 @@ public: // Widgets
          * @param target Object of which an event occurred
          * @param event The event that took place
          */
-        bool eventFilter(QObject* target, QEvent* event);
+        bool eventFilter(QObject* target, QEvent* event) override;
 
         /** Updates the line edit text to the joined selected strings */
         void updateCurrentText();

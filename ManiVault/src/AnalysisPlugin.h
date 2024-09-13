@@ -26,7 +26,8 @@ public:
     ~AnalysisPlugin() override {};
 
     /**
-     * Set name of the object
+     * Set name of the object, prefixes with "Plugins/Analysis/"
+     * Intentially hides QObject::setObjectName
      * @param name Name of the object
      */
     void setObjectName(const QString& name);

@@ -40,7 +40,7 @@ public:
      * Get task
      * @return Pointer to task
      */
-    virtual Task* getTask() final;
+    Task* getTask();
 
     /**
      * Get the minimum duration
@@ -72,7 +72,7 @@ protected:
      * Set handle \p task
      * @param task Pointer to task to handle
      */
-    virtual void setTask(Task* task) final;
+    void setTask(Task* task);
 
 signals:
     

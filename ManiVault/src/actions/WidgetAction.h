@@ -296,7 +296,7 @@ private: // Location
      * Compute the location of the action and update the cached location if it changed
      * @param recursive Whether to also update child actions recursively
      */
-    virtual void updateLocation(bool recursive = true) final;
+    void updateLocation(bool recursive = true);
 
 public:
 
@@ -325,13 +325,13 @@ public:
      * Establish whether this action is positioned at the top of the hierarchy
      * @return Boolean determining whether this action is positioned at the top of the hierarchy
      */
-    virtual bool isRoot() const final;
+    bool isRoot() const;
 
     /**
      * Establish whether this action is positioned at the bottom of the hierarchy
      * @return Boolean determining whether this action is positioned at the bottom of the hierarchy
      */
-    virtual bool isLeaf() const final;
+    bool isLeaf() const;
 
 public: // Widgets
 
@@ -340,7 +340,7 @@ public: // Widgets
      * @param parent Parent widget
      * @return Pointer to created widget
      */
-    virtual QWidget* createWidget(QWidget* parent) override final;
+    QWidget* createWidget(QWidget* parent) final;
 
     /**
      * Create widget with pointer to \p parent widget and \p widgetFlags
@@ -348,7 +348,7 @@ public: // Widgets
      * @param widgetFlags Widget flags
      * @return Pointer to created widget
      */
-    virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags) final;
+    QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
     /**
      * Create widget with pointer to \p parent widget, \p widgetFlags and \p widgetConfigurationFunction
@@ -357,7 +357,7 @@ public: // Widgets
      * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to created widget
      */
-    virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
+    QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction);
 
     /**
      * Create widget with pointer to \p parent widget and \p widgetConfigurationFunction
@@ -365,7 +365,7 @@ public: // Widgets
      * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to created widget
      */
-    virtual QWidget* createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
+    QWidget* createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction);
 
     /**
      * Create collapsed widget
@@ -374,7 +374,7 @@ public: // Widgets
      * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to collapsed widget
      */
-    virtual QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags = 0) const final;
+    QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags = 0) const;
 
     /**
      * Create collapsed widget
@@ -383,7 +383,7 @@ public: // Widgets
      * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to collapsed widget
      */
-    virtual QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) const final;
+    QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) const;
 
     /**
      * Create label widget
@@ -391,7 +391,7 @@ public: // Widgets
      * @param widgetFlags Label widget configuration flags
      * @return Pointer to widget
      */
-    virtual QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00001) const final;
+    QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00001) const;
 
     /**
      * Get the context menu for the action
@@ -401,25 +401,25 @@ public: // Widgets
     virtual QMenu* getContextMenu(QWidget* parent = nullptr);
 
     /** Get the sort index */
-    virtual std::int32_t getSortIndex() const final;
+    std::int32_t getSortIndex() const;
 
     /**
      * Set the sort index
      * @param sortIndex Sorting index
      */
-    virtual void setSortIndex(const std::int32_t& sortIndex) final;
+    void setSortIndex(const std::int32_t& sortIndex);
 
     /**
      * Get stretch
      * @return The stretch factor
      */
-   virtual std::int32_t getStretch() const final;
+   std::int32_t getStretch() const;
 
     /**
      * Set stretch to \p stretch
      * @param stretch Stretch factor
      */
-    virtual void setStretch(const std::int32_t& stretch) final;
+    void setStretch(const std::int32_t& stretch);
 
     /**
      * Get widget configuration function
@@ -452,19 +452,20 @@ public: // Visibility
      * Get force hidden
      * @return Boolean determining whether the widget action should be forcibly hidden (regardless of the visibility setting in the base QWidgetAction class)
      */
-    virtual bool getForceHidden() const final;
+    bool getForceHidden() const;
 
     /**
      * Set force hidden to \p forceHidden
      * @param forceHidden Boolean determining whether the widget action should be forcibly hidden (regardless of the enabled visibility in the base QWidgetAction class)
      */
-    virtual void setForceHidden(bool forceHidden) final;
+    void setForceHidden(bool forceHidden);
 
     /**
      * Re-implement the isVisible() getter from the base QWidgetAction class to support the force hidden functionality
+     * Intentionaly hides QAction::isVisible
      * @return Boolean determining whether the widget action is visible or not
      */
-    virtual bool isVisible() const final;
+    bool isVisible() const;
 
 public: // Disabled
 
@@ -472,24 +473,26 @@ public: // Disabled
      * Get force disabled
      * @return Boolean determining whether the widget action should be forcibly disabled (regardless of the enabled setting in the base QWidgetAction class)
      */
-    virtual bool getForceDisabled() const final;
+    bool getForceDisabled() const;
 
     /**
      * Set force disabled to \p forceDisabled
      * @param forceDisabled Boolean determining whether the widget action should be forcibly disabled (regardless of the enabled setting in the base QWidgetAction class)
      */
-    virtual void setForceDisabled(bool forceDisabled) final;
+    void setForceDisabled(bool forceDisabled);
 
     /**
      * Re-implement the isEnabled() getter from the base QWidgetAction class to support the force disabled functionality
+     * Intentionaly hides QAction::isEnabled
      * @return Boolean determining whether the widget action is enabled or not
      */
-    virtual bool isEnabled() const final;
+    bool isEnabled() const;
 
 public: // Text
 
     /**
      * Re-implement the setText(...) setter from the base QWidgetAction class to support updating the location
+     * Intentionaly hides QAction::setText
      * @param text Text to set
      */
     void setText(const QString& text);
@@ -497,20 +500,20 @@ public: // Text
 public: // Widget flags
 
     /** Gets the default widget flags */
-    virtual std::int32_t getDefaultWidgetFlags() const final;
+    std::int32_t getDefaultWidgetFlags() const;
 
     /**
      * Set the widget flags
      * @param widgetFlags Widget flags
      */
-    virtual void setDefaultWidgetFlags(const std::int32_t& widgetFlags) final;
+    void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
     /**
      * Set a single widget flag on/off
      * @param widgetFlag Widget flag to set on/off
      * @param unset Whether to unset the default widget flag
      */
-    virtual void setDefaultWidgetFlag(const std::int32_t& widgetFlag, bool unset = false) final;
+    void setDefaultWidgetFlag(const std::int32_t& widgetFlag, bool unset = false);
 
 public: // Highlighting
 
@@ -518,31 +521,31 @@ public: // Highlighting
      * Get highlighting
      * @return Highlight option
      */
-    virtual HighlightOption getHighlighting() const final;
+    HighlightOption getHighlighting() const;
 
     /**
      * Determine whether the action is in a highlighted state or not
      * @return Boolean determining whether the action is in a highlighted state or not
      */
-    virtual bool isHighlighted() const final;
+    bool isHighlighted() const;
 
     /**
      * Set highlighting to \p highlighting
      * @param highlighting Highlighting state
      */
-    virtual void setHighlighting(const HighlightOption& highlighting) final;
+    void setHighlighting(const HighlightOption& highlighting);
 
     /**
      * Set highlighted to \p highlighted
      * @param highlighted Boolean determining whether the action is in a normal highlighted state or not
      */
-    virtual void setHighlighted(bool highlighted) final;
+    void setHighlighted(bool highlighted);
 
     /** Convenience method to highlight the action */
-    virtual void highlight() final;
+    void highlight();
 
     /** Convenience method to un-highlight the action */
-    virtual void unHighlight() final;
+    void unHighlight();
 
 public: // Scope
 
@@ -550,19 +553,19 @@ public: // Scope
      * Get widget action scope
      * @return Widget action scope enum
      */
-    virtual Scope getScope() const final;
+    Scope getScope() const;
 
     /**
      * Get whether this action is in the private actions pool
      * @return Boolean determining whether this action is in the private actions pool
      */
-    virtual bool isPrivate() const final;
+    bool isPrivate() const;
 
     /**
      * Get whether this action is in the public actions pool
      * @return Boolean determining whether this action is in the private public pool
      */
-    virtual bool isPublic() const final;
+    bool isPublic() const;
 
 protected: // Connections
 
@@ -570,7 +573,7 @@ protected: // Connections
      * Make widget action public (and possibly all of its descendant widget actions)
      * @param recursive Whether to also make all descendant widget actions public
      */
-    virtual void makePublic(bool recursive = true) final;
+    void makePublic(bool recursive = true);
 
 public: // Connections and publishing
 
@@ -578,20 +581,20 @@ public: // Connections and publishing
      * Get whether the action is published
      * @return Boolean indicating whether the action is published
      */
-    virtual bool isPublished() const final;
+    bool isPublished() const;
 
     /**
      * Get whether the action is connect to a public action
      * @return Boolean indicating whether the action is connect to a public action
      */
-    virtual bool isConnected() const final;
+    bool isConnected() const;
 
     /**
      * Get whether the action may connect to \p publicAction
      * @param publicAction Pointer to public action
      * @return Boolean determining whether the action may connect to \p publicAction
      */
-    virtual bool mayConnectToPublicAction(const WidgetAction* publicAction) const final;
+    bool mayConnectToPublicAction(const WidgetAction* publicAction) const;
 
     /**
      * Publish this action so that other actions can connect to it
@@ -599,7 +602,7 @@ public: // Connections and publishing
      * @param allowDuplicateName Boolean determining whether publishing will take place when a public with the same name already exists in the public actions database
      * @return Boolean determining whether the action is successfully published or not
      */
-    virtual bool publish(const QString& name = "", bool allowDuplicateName = false) final;
+    bool publish(const QString& name = "", bool allowDuplicateName = false);
 
 protected: 
 
@@ -615,7 +618,7 @@ protected:
      * @param publicAction Pointer to public action to connect to
      */
     [[deprecated("This function will be deprecated in version 1.0 of ManiVault, Please establish connections with the connections GUI instead.")]]
-    virtual void connectToPublicActionByName(const QString& publicActionName) final;
+    void connectToPublicActionByName(const QString& publicActionName);
 
     /**
      * Disconnect this action from its public action
@@ -629,25 +632,25 @@ public:
      * Get the public action to which the action is connected
      * @return Pointer to the public action (returns nullptr if not connected to a public action)
      */
-    virtual WidgetAction* getPublicAction() final;
+    WidgetAction* getPublicAction();
 
     /**
      * Get public copy of the action (other compatible actions can connect to it)
      * @return Pointer to public copy of the action
      */
-    virtual WidgetAction* getPublicCopy() const final;
+    WidgetAction* getPublicCopy() const;
 
     /**
      * Get connected actions
      * @return Vector of pointers to connected actions
      */
-    virtual const WidgetActions getConnectedActions() const final;
+    const WidgetActions getConnectedActions() const;
 
     /**
      * Get connected actions
      * @return Vector of pointers to connected actions
      */
-    virtual WidgetActions& getConnectedActions() final;
+    WidgetActions& getConnectedActions();
 
 public: // Connection permissions
 
@@ -656,34 +659,34 @@ public: // Connection permissions
      * @param connectionContextFlags The context from which the action will be published (API and/or GUI)
      * @return Boolean determining whether a copy of this action may published and shared, depending on the \p connectionContextFlags
      */
-    virtual bool mayPublish(ConnectionContextFlag connectionContextFlags) const final;
+    bool mayPublish(ConnectionContextFlag connectionContextFlags) const;
 
     /**
      * Get whether this action may connect to a public action, depending on the \p connectionContextFlags
      * @param connectionContextFlags The context from which the connection will be made (API and/or GUI)
      * @return Boolean determining whether this action may connect to a public action, depending on the \p connectionContextFlags
      */
-    virtual bool mayConnect(ConnectionContextFlag connectionContextFlags) const final;
+    bool mayConnect(ConnectionContextFlag connectionContextFlags) const;
 
     /**
      * Get whether this action may disconnect from a public action, depending on the \p connectionContextFlags
      * @param connectionContextFlags The context from which the disconnection will be initiated (API and/or GUI)
      * @return Boolean determining whether this action may disconnect from a public action, depending on the \p connectionContextFlags
      */
-    virtual bool mayDisconnect(ConnectionContextFlag connectionContextFlags) const final;
+    bool mayDisconnect(ConnectionContextFlag connectionContextFlags) const;
 
     /**
      * Get connection permission flags
      * @return Connection permission flags
      */
-    virtual std::int32_t getConnectionPermissions() const final;
+    std::int32_t getConnectionPermissions() const;
 
     /**
      * Check whether \p connectionPermissionsFlag is set or not
      * @param connectionPermissionsFlag Connection permissions flag
      * @return Boolean determining whether \p connectionPermissionsFlag is set or not
      */
-    virtual bool isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag) final;
+    bool isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag);
 
     /**
      * Set connection permissions flag
@@ -691,49 +694,49 @@ public: // Connection permissions
      * @param unset Whether to unset the connection permissions flag
      * @param recursive Whether to recursively set child connection permissions
      */
-    virtual void setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset = false, bool recursive = false) final;
+    void setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset = false, bool recursive = false);
 
     /**
      * Set connection permissions
      * @param connectionPermissions Connection permissions value
      * @param recursive Whether to recursively set child connection permissions
      */
-    virtual void setConnectionPermissions(std::int32_t connectionPermissions, bool recursive = false) final;
+    void setConnectionPermissions(std::int32_t connectionPermissions, bool recursive = false);
 
     /**
      * Reset connection permissions to none
      * @param recursive Whether to recursively set child connection permissions
      */
-    virtual void setConnectionPermissionsToNone(bool recursive = false) final;
+    void setConnectionPermissionsToNone(bool recursive = false);
 
     /**
      * Set connection permissions to force none (connections fully disabled, regardless of other connection permission flags)
      * @param recursive Whether to recursively set child connection permissions
      */
-    virtual void setConnectionPermissionsToForceNone(bool recursive = false) final;
+    void setConnectionPermissionsToForceNone(bool recursive = false);
 
     /**
      * Set connection permissions to all
      * @param recursive Whether to recursively set child connection permissions
      */
-    virtual void setConnectionPermissionsToAll(bool recursive = false) final;
+    void setConnectionPermissionsToAll(bool recursive = false);
 
     /**
      * Cache connection permissions
      * @param recursive Whether to recursively cache child connection permissions
      */
-    virtual void cacheConnectionPermissions(bool recursive = false) final;
+    void cacheConnectionPermissions(bool recursive = false);
 
     /**
      * Restore connection permissions
      * @param recursive Whether to recursively restore child connection permissions
      */
-    virtual void restoreConnectionPermissions(bool recursive = false) final;
+    void restoreConnectionPermissions(bool recursive = false);
 
 public: // Drag and drop
 
     /** Start drag process */
-    virtual void startDrag() final;
+    void startDrag();
 
 public: // Settings
 
@@ -742,18 +745,18 @@ public: // Settings
      * @return Whether the action can be reset to its default
      */
     [[deprecated("This method is a placeholder and not operational yet")]]
-    virtual bool isResettable() const final;
+    bool isResettable() const;
 
     /** Reset to default */
     [[deprecated("This method is a placeholder and not operational yet")]]
-    virtual void reset() final;
+    void reset();
 
     /**
      * Set settings prefix
      * @param load Whether to restore settings after setting the prefix
      * @param settingsPrefix Settings prefix
      */
-    virtual void setSettingsPrefix(const QString& settingsPrefix, const bool& load = true) final;
+    void setSettingsPrefix(const QString& settingsPrefix, const bool& load = true);
 
     /**
      * Set settings prefix in the context of a plugin (the combined settings prefix will be: Plugins/PluginKind/SettingsPrefix)
@@ -761,7 +764,7 @@ public: // Settings
      * @param plugin Pointer to plugin context
      * @param settingsPrefix Settings prefix
      */
-    virtual void setSettingsPrefix(plugin::Plugin* plugin, const QString& settingsPrefix, const bool& load = true) final;
+    void setSettingsPrefix(plugin::Plugin* plugin, const QString& settingsPrefix, const bool& load = true);
 
     /**
      * Get settings prefix
@@ -770,10 +773,10 @@ public: // Settings
     virtual QString getSettingsPrefix() const;
 
     /** Load from settings (if the settings prefix is set) */
-    virtual void loadFromSettings() final;
+    void loadFromSettings();
 
     /** Save to settings (if the settings prefix is set) */
-    virtual void saveToSettings() final;
+    void saveToSettings();
 
 public: // Popups
 
@@ -781,27 +784,27 @@ public: // Popups
      * Get size hint of popups (in case of collapsed actions)
      * @return Popup size hint
      */
-    virtual QSize getPopupSizeHint() const final;
+    QSize getPopupSizeHint() const;
 
     /**
      * Set size hint of popups (in case of collapsed actions)
      * @param popupSizeHint Popup size hint
      */
-    virtual void setPopupSizeHint(const QSize& popupSizeHint) final;
+    void setPopupSizeHint(const QSize& popupSizeHint);
 
     /**
      * Get override size hint
      * @return Override size hint
      */
     [[deprecated("This method is a placeholder and not operational yet")]]
-    virtual QSize getOverrideSizeHint() const final;
+    QSize getOverrideSizeHint() const;
 
     /**
      * Set override size hint
      * @param overrideSizeHint Override size hint
      */
     [[deprecated("This method is a placeholder and not operational yet")]]
-    virtual void setOverrideSizeHint(const QSize& overrideSizeHint) final;
+    void setOverrideSizeHint(const QSize& overrideSizeHint);
 
 public: // Configuration flags
 
@@ -809,14 +812,14 @@ public: // Configuration flags
      * Get configuration
      * @return Configuration
      */
-    virtual std::int32_t getConfiguration() const final;
+    std::int32_t getConfiguration() const;
 
     /**
      * Check whether \p configurationFlag is set or not
      * @param configurationFlag Configuration flag
      * @return Boolean determining whether \p configurationFlag is set or not
      */
-    virtual bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) const final;
+    bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) const;
 
     /**
      * Set configuration flag
@@ -824,14 +827,14 @@ public: // Configuration flags
      * @param unset Whether to unset the \p configurationFlag flag
      * @param recursive Whether to recursively set child child configuration flag
      */
-    virtual void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false, bool recursive = false) final;
+    void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false, bool recursive = false);
 
     /**
      * Set configuration
      * @param configuration Configuration value
      * @param recursive Whether to recursively set child child configuration flag
      */
-    virtual void setConfiguration(std::int32_t configuration, bool recursive = false) final;
+    void setConfiguration(std::int32_t configuration, bool recursive = false);
 
 public: // Type string
 
@@ -840,7 +843,7 @@ public: // Type string
      * @param humanFriendly Whether to return a type string where the namespace is omitted
      * @return Widget action type in string format
      */
-    virtual QString getTypeString(bool humanFriendly = false) const final;
+    QString getTypeString(bool humanFriendly = false) const;
 
 protected: // Widgets
 
@@ -893,7 +896,7 @@ public: // Studio mode
      * @param studioMode Boolean determining whether studio mode is on or off
      * @param recursive Boolean determining whether to also apply the studio mode to child actions recursively
      */
-    virtual void setStudioMode(bool studioMode, bool recursive = true) final;
+    void setStudioMode(bool studioMode, bool recursive = true);
     
 public: // Font Icon
     
@@ -901,7 +904,7 @@ public: // Font Icon
      * Set the icon using a icon font name (i.e., fontawesome)
      * @param setIcon the name of the icon in fontawesome v5
      */
-    virtual void setIconByName(QString namedIcon) final;
+    void setIconByName(QString namedIcon);
 
 private:
     

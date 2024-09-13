@@ -43,7 +43,7 @@ protected:
      * Get group action
      * @return Reference to group action
      */
-    virtual GroupAction& getGroupAction() final;
+    GroupAction& getGroupAction();
 
     /**
      * Get action items for the toolbar
@@ -59,33 +59,33 @@ public: // Actions management
      * @param autoExpandPriority Priority with which the action should be auto-expanded
      * @param widgetFlags Action widget flags (default flags if -1)
      */
-    virtual void addAction(WidgetAction* action, const std::int32_t& autoExpandPriority = -1, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction()) final;
+    void addAction(WidgetAction* action, const std::int32_t& autoExpandPriority = -1, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction());
 
     /**
      * Remove \p action from the group
      * @param action Pointer to action to add
      */
-    virtual void removeAction(WidgetAction* action) final;
+    void removeAction(WidgetAction* action);
 
     /**
      * Add stretch action to the group with \p stretch factor
      * @param stretch Stretch factor
      * @return Pointer to stretch action (the toolbar remains the owner)
      */
-    virtual StretchAction* addStretch(std::int32_t stretch = 1) final;
+    StretchAction* addStretch(std::int32_t stretch = 1);
 
     /**
      * Get actions
      * @return Vector of pointers to actions
      */
-    virtual WidgetActions getActions() final;
+    WidgetActions getActions();
 
     /**
      * Set \p action auto expand priority to \p autoExpandPriority
      * @param action Pointer to action for which to set the auto expand priority
      * @param autoExpandPriority Priority with which the action should be auto-expanded
      */
-    virtual void setActionAutoExpandPriority(const WidgetAction* action, const std::int32_t& autoExpandPriority) final;
+    void setActionAutoExpandPriority(const WidgetAction* action, const std::int32_t& autoExpandPriority);
 
 private:
 

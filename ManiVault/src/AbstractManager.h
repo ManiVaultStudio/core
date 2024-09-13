@@ -53,7 +53,7 @@ public:
     };
 
     /** Begin reset operation */
-    virtual void beginReset() final {
+    void beginReset() {
 #ifdef ABSTRACT_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
@@ -72,7 +72,7 @@ public:
     }
 
     /** End reset operation */
-    virtual void endReset() final {
+    void endReset() {
 #ifdef ABSTRACT_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
@@ -81,7 +81,7 @@ public:
     }
 
     /** Begin the initialization process */
-    virtual void beginInitialization() final {
+    void beginInitialization() {
 #ifdef ABSTRACT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -95,7 +95,7 @@ public:
     }
 
     /** End the initialization process */
-    virtual void endInitialization() final {
+    void endInitialization() {
 #ifdef ABSTRACT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -109,7 +109,7 @@ public:
      * Get whether the manager is initialized or not
      * @return Boolean determining whether the manager is initialized or not
      */
-    virtual bool isInitialized() const final {
+    bool isInitialized() const {
         return _initialized;
     }
 
@@ -127,7 +127,7 @@ public:
      * Get manager settings prefix
      * @return Settings manager prefix
      */
-    virtual QString getSettingsPrefix() const final {
+    QString getSettingsPrefix() const {
         return QString("Managers/%1/").arg(getSerializationName());
     }
 

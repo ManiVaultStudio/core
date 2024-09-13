@@ -48,7 +48,7 @@ public:
      * Get the source action
      * @return Pointer to source action
      */
-    virtual WidgetAction* getAction() final;
+    WidgetAction* getAction();
 
     /**
      * Set the source action
@@ -66,7 +66,7 @@ public:
      * Get whether the widget is in a popup state
      * @return Boolean determining whether the widget is in a popup state
      */
-    virtual bool isPopup() const final;
+    bool isPopup() const;
 
 private: // Badge
 

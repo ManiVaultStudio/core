@@ -52,7 +52,7 @@ public:
          * @param target Object of which an event occurred
          * @param event The event that took place
          */
-        bool eventFilter(QObject* target, QEvent* event) override final;
+        bool eventFilter(QObject* target, QEvent* event) final;
 
     protected:
         GroupAction*            _widgetActionGroup;         /** Pointer to widget action group */

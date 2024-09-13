@@ -78,6 +78,7 @@ public:
 
     /**
      * Set name of the object
+     * Intentially hides QObject::setObjectName
      * @param name Name of the object
      */
     void setObjectName(const QString& name)

@@ -76,7 +76,7 @@ protected:
          * Invoked when the dialog is closed
          * @param event Pointer to the close event
          */
-        void closeEvent(QCloseEvent* event);
+        void closeEvent(QCloseEvent* event) override;
 
     private:
         WidgetActions           _actions;               /** Widget actions to edit */

@@ -38,19 +38,19 @@ protected Q_SLOTS:
 private:
     void checkChildren(const QModelIndex &parent, int currentDepth = 0);
 
-    QAbstractItemModel *model;
+    QAbstractItemModel *model = nullptr;
 
     struct Changing
     {
-        QModelIndex parent;
-        int oldSize;
-        QVariant last;
-        QVariant next;
+        QModelIndex parent = {};
+        int oldSize = 0;
+        QVariant last = {};
+        QVariant next = {};
     };
-    QStack<Changing> insert;
-    QStack<Changing> remove;
+    QStack<Changing> insert = {};
+    QStack<Changing> remove = {};
 
     bool fetchingMore = false;
 
-    QList<QPersistentModelIndex> changing;
+    QList<QPersistentModelIndex> changing = {};
 };

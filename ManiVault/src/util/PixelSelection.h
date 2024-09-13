@@ -120,20 +120,20 @@ public:
      * Returns the number of pixel selection types in the model
      * @param parent Parent index
      */
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * Returns the the number of model columns
      * @param parent Parent index
      */
-    int columnCount(const QModelIndex& parent = QModelIndex()) const;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * Returns model data for the given index
      * @param index Index
      * @param role The data role
      */
-    QVariant data(const QModelIndex& index, int role) const;
+    QVariant data(const QModelIndex& index, int role) const override;
 
 protected:
     PixelSelectionTypes     _pixelSelectionTypes;       /** Allowed pixel selection types */

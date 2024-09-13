@@ -69,7 +69,7 @@ public: // Actions management
      * @param widgetFlags Action widget flags (default flags if -1)
      * @param widgetConfigurationFunction When set, overrides the standard widget configuration function in the widget action
      */
-    void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, mv::gui::WidgetConfigurationFunction widgetConfigurationFunction = mv::gui::WidgetConfigurationFunction()) override final;
+    void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, mv::gui::WidgetConfigurationFunction widgetConfigurationFunction = mv::gui::WidgetConfigurationFunction()) final;
 };
 
 }

@@ -48,13 +48,13 @@ public:
      * Add \p mouseEventReceiverWidget
      * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be added
      */
-    virtual void addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget) final;
+    void addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget);
 
     /**
      * Remove \p mouseEventReceiverWidget
      * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be removed
      */
-    virtual void removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget) final;
+    void removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget);
 
 protected:
 
@@ -67,7 +67,7 @@ protected:
 private:
 
     /** Update widget mask to selectively process mouse events */
-    virtual void updateMask() final;
+    void updateMask();
 
 private:
     mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */

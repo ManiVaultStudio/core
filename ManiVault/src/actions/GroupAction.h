@@ -118,7 +118,7 @@ public:
      * Get item alignment
      * @return Item alignment
      */
-    virtual Qt::AlignmentFlag getAlignment() const final;
+    Qt::AlignmentFlag getAlignment() const;
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);
@@ -179,25 +179,25 @@ public: // Actions management
      * Remove \p action from the group
      * @param action Pointer to action to add
      */
-    virtual void removeAction(WidgetAction* action) final;
+    void removeAction(WidgetAction* action);
 
     /** Remove all actions */
-    virtual void removeAllActions() final;
+    void removeAllActions();
 
     /** Remove all actions (alias for GroupAction::removeAllActions()) */
-    virtual void clear() final;
+    void clear();
 
     /**
      * Get actions
      * @return Vector of pointers to actions
      */
-    virtual WidgetActions getActions() final;
+    WidgetActions getActions();
 
     /**
      * Get const actions
      * @return Vector of const pointers to actions
      */
-    virtual ConstWidgetActions getConstActions() final;
+    ConstWidgetActions getConstActions();
 
     /**
      * Get widget flags map (maps widget action pointer to widget creation flags)
@@ -246,7 +246,7 @@ public: // Label sizing for vertical layout
 private:
 
     /** Sort added actions based on their sort index */
-    virtual void sortActions() final;
+    void sortActions() ;
 
 public: // Serialization
 

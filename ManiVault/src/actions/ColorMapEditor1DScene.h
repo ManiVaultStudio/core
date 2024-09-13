@@ -26,6 +26,7 @@ class ColorMapEditor1DWidget;
 class CORE_EXPORT ColorMapEditor1DScene : public QGraphicsScene
 {
     Q_OBJECT
+
 public:
 
     /**
@@ -40,7 +41,7 @@ protected:
      * Invoked when a mouse button is pressed
      * @param graphicsSceneMouseEvent Pointer to graphics scene mouse event
      */
-    void mousePressEvent(QGraphicsSceneMouseEvent* graphicsSceneMouseEvent);
+    void mousePressEvent(QGraphicsSceneMouseEvent* graphicsSceneMouseEvent) override;
 
 private:
     ColorMapEditor1DWidget&     _colorMapEditor1DWidget;        /** Reference to owning one-dimensional color map edit widget */

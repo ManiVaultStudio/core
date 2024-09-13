@@ -114,20 +114,6 @@ protected:
     /** Removes all items from the data hierarchy manager in a top-down manner */
     virtual void removeAllItems() = 0;
 
-public: // Serialization
-
-    /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
-     */
-    virtual void fromVariantMap(const QVariantMap& variantMap) override = 0;
-
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    virtual QVariantMap toVariantMap() const override = 0;
-
 signals:
 
     /**

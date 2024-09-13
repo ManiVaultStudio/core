@@ -462,14 +462,14 @@ public:
      * @param column Column to retrieve the action index for
      * @return Found model index
      */
-    virtual QModelIndex getActionIndex(const gui::WidgetAction* action, const Column& column = Column::Name) const final;
+    QModelIndex getActionIndex(const gui::WidgetAction* action, const Column& column = Column::Name) const;
 
     /**
      * Get action item for \p action
      * @param action Pointer to action to retrieve the model item for
      * @return Pointer to standard item (nullptr if not found)
      */
-    virtual QStandardItem* getActionItem(const gui::WidgetAction* action) const final;
+    QStandardItem* getActionItem(const gui::WidgetAction* action) const;
 
 protected: // Drag-and-drop behavior
 

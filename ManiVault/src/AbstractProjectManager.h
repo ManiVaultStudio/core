@@ -263,7 +263,7 @@ public: // State
      * Get the state of the project manager
      * @return State of the project manager
      */
-    virtual State getState() const final {
+    State getState() const {
         return _state;
     }
 
@@ -271,7 +271,7 @@ public: // State
      * Set the state of the serializable object to \p state
      * @param state State of the serializable object
      */
-    virtual void setState(const State& state) final {
+    void setState(const State& state) {
         if (state == _state)
             return;
 
@@ -284,7 +284,7 @@ public: // State
      * Get whether the project manager is opening a project
      * @return Boolean determining whether the project manager is opening a project
      */
-    virtual bool isOpeningProject() const final {
+    bool isOpeningProject() const {
         return _state == State::OpeningProject;
     }
 
@@ -292,7 +292,7 @@ public: // State
      * Get whether the project manager is importing a project
      * @return Boolean determining whether the project manager is importing a project
      */
-    virtual bool isImportingProject() const final {
+    bool isImportingProject() const {
         return _state == State::ImportingProject;
     }
 
@@ -300,7 +300,7 @@ public: // State
      * Get whether the project manager is saving a project
      * @return Boolean determining whether the project manager is saving a project
      */
-    virtual bool isSavingProject() const final {
+    bool isSavingProject() const {
         return _state == State::SavingProject;
     }
 
@@ -308,7 +308,7 @@ public: // State
      * Get whether the project manager is publishing a project
      * @return Boolean determining whether the project manager is publishing a project
      */
-    virtual bool isPublishingProject() const final {
+    bool isPublishingProject() const {
         return _state == State::PublishingProject;
     }
 

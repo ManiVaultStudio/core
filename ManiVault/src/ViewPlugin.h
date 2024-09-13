@@ -55,7 +55,7 @@ public:
      * Get whether this plugin is a system view plugin or not
      * @return Boolean determining whether this plugin is a system view plugin or not
      */
-    virtual bool isSystemViewPlugin() const final;
+    bool isSystemViewPlugin() const;
 
     /**
      * Create screenshot from the view plugin
@@ -67,13 +67,13 @@ public:
      * Get shortcut for triggering the plugin
      * @return Shortcut key sequence
      */
-    virtual QKeySequence getTriggerShortcut() const final;
+    QKeySequence getTriggerShortcut() const;
 
     /**
      * Set shortcut for triggering the plugin
      * @param keySequence Shortcut key sequence
      */
-    virtual void setTriggerShortcut(const QKeySequence& keySequence) final;
+    void setTriggerShortcut(const QKeySequence& keySequence);
 
 public: // Title bar settings menu
 

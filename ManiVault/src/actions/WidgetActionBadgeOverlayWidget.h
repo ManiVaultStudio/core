@@ -34,7 +34,7 @@ public:
      * Paint event
      * @param paintEvent Pointer to paint event
      */
-    void paintEvent(QPaintEvent* paintEvent);
+    void paintEvent(QPaintEvent* paintEvent) override;
 
 private:
     WidgetAction*   _action;    /** Pointer to owning widget action */

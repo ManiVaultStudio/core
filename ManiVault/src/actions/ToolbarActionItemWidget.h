@@ -42,7 +42,7 @@ protected:
          * Overload set visible to enabled fading
          * @param visible whether the state widget is visible or not
          */
-        void setVisible(bool visible);
+        void setVisible(bool visible) override;
 
     private:
         //util::WidgetFader   _widgetFader;   /** For fading in/out the widget */

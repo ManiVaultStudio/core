@@ -50,7 +50,7 @@ class CORE_EXPORT GroupWidgetTreeItem : public QTreeWidgetItem
          * @param target Object of which an event occurred
          * @param event The event that took place
          */
-        bool eventFilter(QObject* target, QEvent* event) override final;
+        bool eventFilter(QObject* target, QEvent* event) final;
 
     protected:
         GroupWidgetTreeItem*  _groupTreeItem;   /** Pointer to group tree item */

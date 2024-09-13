@@ -42,7 +42,7 @@ public: // Construction/destruction
     FontAwesome(const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont = false, const QString& name = "FontAwesome");
 
     /** Destructor */
-    ~FontAwesome() {};
+    virtual ~FontAwesome() {};
 
 public: // Initialization
 

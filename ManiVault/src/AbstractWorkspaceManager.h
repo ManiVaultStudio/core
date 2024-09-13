@@ -164,7 +164,7 @@ public:
      * Get the file path of the loaded workspace
      * @return File path of the loaded workspace
      */
-    virtual QString getWorkspaceFilePath() const final {
+    QString getWorkspaceFilePath() const {
         if (!hasWorkspace())
             return "";
 
@@ -175,7 +175,7 @@ public:
      * Set the file path of the loaded workspace
      * @param filePath File path of the loaded workspace
      */
-    virtual void setWorkspaceFilePath(const QString& filePath) final {
+    void setWorkspaceFilePath(const QString& filePath) {
         if (!hasWorkspace())
             return;
 
@@ -192,7 +192,7 @@ public:
     }
 
     /** Begin the workspace loading process */
-    virtual void beginLoadWorkspace() final {
+    void beginLoadWorkspace() {
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -206,7 +206,7 @@ public:
     }
 
     /** End the workspace loading process */
-    virtual void endLoadWorkspace() final {
+    void endLoadWorkspace() {
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -220,7 +220,7 @@ public:
     }
 
     /** Begin the workspace saving process */
-    virtual void beginSaveWorkspace() final {
+    void beginSaveWorkspace() {
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -234,7 +234,7 @@ public:
     }
 
     /** End the workspace saving process */
-    virtual void endSaveWorkspace() final {
+    void endSaveWorkspace() {
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif

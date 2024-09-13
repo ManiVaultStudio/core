@@ -75,7 +75,7 @@ public:
     }
 
     /** Gets the current value */
-    virtual NumericalType getValue() const final {
+    NumericalType getValue() const {
         return _value;
     }
 
@@ -101,7 +101,7 @@ public:
     }
 
     /** Gets the minimum value */
-    virtual NumericalType getMinimum() const final {
+    NumericalType getMinimum() const {
         return _minimum;
     }
 
@@ -109,7 +109,7 @@ public:
      * Sets the minimum value
      * @param minimum Minimum value
      */
-    virtual void setMinimum(NumericalType minimum) final {
+    void setMinimum(NumericalType minimum) {
         if (minimum == _minimum)
             return;
 
@@ -119,7 +119,7 @@ public:
     }
 
     /** Gets the maximum value */
-    virtual NumericalType getMaximum() const final {
+    NumericalType getMaximum() const {
         return _maximum;
     }
     
@@ -127,7 +127,7 @@ public:
      * Sets the maximum value
      * @param maximum Maximum value
      */
-    virtual void setMaximum(NumericalType maximum) final {
+    void setMaximum(NumericalType maximum) {
         if (maximum == _maximum)
             return;
 
@@ -140,7 +140,7 @@ public:
      * Gets the value range
      * @return Range
      */
-    virtual util::NumericalRange<NumericalType> getRange() const final {
+    util::NumericalRange<NumericalType> getRange() const {
         return { getMinimum(), getMaximum() };
     }
 
@@ -148,7 +148,7 @@ public:
      * Sets the value range
      * @param range Range
      */
-    virtual void setRange(util::NumericalRange<NumericalType> range) final {
+    void setRange(util::NumericalRange<NumericalType> range) {
         setMinimum(range.getMinimum());
         setMaximum(range.getMaximum());
     }
@@ -158,13 +158,13 @@ public:
      * @param minimum Minimum value
      * @param maximum Maximum value
      */
-    virtual void setRange(NumericalType minimum, NumericalType maximum) final {
+    void setRange(NumericalType minimum, NumericalType maximum) {
         setMinimum(minimum);
         setMaximum(maximum);
     }
 
     /** Gets the prefix */
-    virtual QString getPrefix() const final {
+    QString getPrefix() const {
         return _prefix;
     }
 
@@ -172,7 +172,7 @@ public:
      * Sets the prefix
      * @param prefix Prefix
      */
-    virtual void setPrefix(const QString& prefix) final {
+    void setPrefix(const QString& prefix) {
         if (prefix == _prefix)
             return;
 
@@ -182,7 +182,7 @@ public:
     }
 
     /** Gets the suffix */
-    virtual QString getSuffix() const final {
+    QString getSuffix() const {
         return _suffix;
     }
 
@@ -190,7 +190,7 @@ public:
      * Sets the suffix
      * @param suffix Suffix
      */
-    virtual void setSuffix(const QString& suffix) final {
+    void setSuffix(const QString& suffix) {
         if (suffix == _suffix)
             return;
 
@@ -200,7 +200,7 @@ public:
     }
 
     /** Gets the number of decimals */
-    virtual std::uint32_t getNumberOfDecimals() const final {
+    std::uint32_t getNumberOfDecimals() const {
         return _numberOfDecimals;
     }
 
@@ -208,7 +208,7 @@ public:
      * Sets the number of decimals
      * @param numberOfDecimals number of decimals
      */
-    virtual void setNumberOfDecimals(std::uint32_t numberOfDecimals) final {
+    void setNumberOfDecimals(std::uint32_t numberOfDecimals) {
         if (numberOfDecimals == _numberOfDecimals)
             return;
 
@@ -218,7 +218,7 @@ public:
     }
 
     /** Gets whether the value should update during interaction */
-    virtual bool getUpdateDuringDrag() const final {
+    bool getUpdateDuringDrag() const {
         return _updateDuringDrag;
     }
 
@@ -226,7 +226,7 @@ public:
      * Sets whether the value should update during interaction
      * @param updateDuringDrag Whether the value should update during interaction
      */
-    virtual void setUpdateDuringDrag(bool updateDuringDrag) final {
+    void setUpdateDuringDrag(bool updateDuringDrag) {
         if (updateDuringDrag == _updateDuringDrag)
             return;
 
@@ -234,22 +234,22 @@ public:
     }
 
     /** Returns whether the current value is at its minimum */
-    virtual bool isAtMinimum() const final {
+    bool isAtMinimum() const {
         return _value == _minimum;
     }
 
     /** Returns whether the current value is at its maximum */
-    virtual bool isAtMaximum() const final {
+    bool isAtMaximum() const {
         return _value == _maximum;
     }
 
     /** Returns the length of the interval defined by the minimum and maximum value */
-    virtual double getIntervalLength() const final {
+    double getIntervalLength() const {
         return static_cast<double>(_maximum) - static_cast<double>(_minimum);
     }
 
     /** Returns the normalized value */
-    virtual double getNormalized() const final {
+    double getNormalized() const {
         const auto offset = static_cast<double>(_value) - static_cast<double>(_minimum);
         return static_cast<double>(offset / getIntervalLength());
     }

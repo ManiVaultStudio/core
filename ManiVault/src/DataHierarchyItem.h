@@ -61,6 +61,7 @@ public:
 
     /**
      * Get parent item
+     * Intentionally hides WidgetAction::getParent
      * @return Pointer to parent item (nullptr if the item has not parent item)
      */
     DataHierarchyItem* getParent() const {
@@ -69,6 +70,7 @@ public:
 
     /**
      * Set pointer to parent hierarchy item to \p parent
+     * Intentionally hides WidgetAction::setParent
      * @param parent Pointer to parent hierarchy item (root item if nullptr)
      */
     void setParent(DataHierarchyItem* parent) {
@@ -79,12 +81,13 @@ public:
 
     /**
      * Get ancestors
+     * Intentionally hides WidgetAction::getAncestors
      * @return Pointers to data hierarchy item ancestors (bottom-up)
      */
     DataHierarchyItems getAncestors() const {
         DataHierarchyItems ancestors;
 
-        for (auto ancestor : WidgetAction::getAncestors<DataHierarchyItem>())
+        for (const auto& ancestor : WidgetAction::getAncestors<DataHierarchyItem>())
             ancestors << static_cast<DataHierarchyItem*>(ancestor);
 
         return ancestors;
@@ -92,6 +95,7 @@ public:
 
     /**
      * Get children, possibly \p recursively
+     * Intentionally hides WidgetAction::getChildren
      * @param recursively Get children recursively
      * @return Vector of pointers to child items
      */
@@ -101,6 +105,7 @@ public:
 
     /**
      * Get number of children
+     * Intentionally hides WidgetAction::getNumberOfChildren
      * @param recursively Count recursively
      * @returm Number of children
      */
@@ -110,6 +115,7 @@ public:
 
     /**
      * Establishes whether the item has any children
+     * Intentionally hides WidgetAction::hasChildren
      * @return Boolean determining whether the item has any children
      */
     template<typename WidgetActionType = WidgetAction>
@@ -119,6 +125,7 @@ public:
 
     /**
      * Get the depth of the item w.r.t. its furthest ancestor
+     * Intentionally hides WidgetAction::getDepth
      * @return Item depth (root starts at zero)
      */
     std::int32_t getDepth() const {
@@ -136,6 +143,7 @@ public:
 
     /**
      * Determine whether the item is a child of one of \p items
+     * Intentionally hides WidgetAction::isChildOf
      * @param items Items to check for
      * @return Boolean determining whether the action is child of one of \p actions or not
      */

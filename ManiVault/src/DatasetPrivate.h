@@ -55,7 +55,7 @@ protected: // Construction/destruction
     DatasetPrivate& operator=(const DatasetPrivate& other) = delete;
 
     /** Remove the destructor */
-    ~DatasetPrivate() override = default;
+    virtual ~DatasetPrivate() = default;
 
 public: // Member access and reset
 
