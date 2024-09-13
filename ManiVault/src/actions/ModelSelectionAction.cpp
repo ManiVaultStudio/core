@@ -14,6 +14,7 @@ namespace mv::gui {
 ModelSelectionAction::ModelSelectionAction(QObject* parent, const QString& title, QItemSelectionModel* selectionModel /*= nullptr*/) :
     HorizontalGroupAction(parent, title),
     _selectionModel(nullptr),
+    _sourceModel(nullptr),
     _selectAllAction(this, "All"),
     _clearSelectionAction(this, "Clear"),
     _invertSelectionAction(this, "Invert")

@@ -10,6 +10,7 @@ namespace mv::gui {
 
 ModelFilterAction::ModelFilterAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
+    _model(nullptr),
     _filterModel(nullptr),
     _filterNameAction(this, "Name"),
     _filterColumnAction(this, "Column"),
