@@ -1052,3 +1052,7 @@ protected:
 
 }
 }
+
+Q_DECLARE_METATYPE(mv::gui::WidgetAction)
+
+inline const auto widgetActionMetaTypeId = qRegisterMetaType<mv::gui::WidgetAction*>("mv::gui::WidgetAction");

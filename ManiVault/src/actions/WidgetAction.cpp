@@ -10,6 +10,7 @@
 #include "WidgetActionMimeData.h"
 #include "Application.h"
 #include "AbstractActionsManager.h"
+#include "CoreInterface.h"
 
 #include "util/Exception.h"
 
@@ -29,7 +30,7 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-bool isInPopupMode(QWidget* parent) {
+    static bool isInPopupMode(QWidget* parent) {
     return parent->property("Popup").isValid() ? parent->property("Popup").toBool() : false;
 }
 
@@ -968,5 +969,3 @@ QSize WidgetAction::getOverrideSizeHint() const
 }
 
 }
-
-
