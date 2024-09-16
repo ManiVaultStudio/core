@@ -93,13 +93,7 @@ public:
         * Override QObject's event handling
         * @return Boolean Wheter the event was recognized and processed
         */
-        bool event(QEvent* event) override
-        {
-            if (event->type() == QEvent::ApplicationPaletteChange)
-                updateCustomStyle();
-
-            return WidgetActionWidget::event(event);
-        }
+        bool event(QEvent* event) override;
 
     protected: // Internals
 

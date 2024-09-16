@@ -348,6 +348,14 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     updateCustomStyle();
 }
 
+bool GroupsAction::Widget::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
+
+    return WidgetActionWidget::event(event);
+}
+
 void GroupsAction::Widget::updateToolbar()
 {
     // Set toolbar read-only status based on whether a dataset is loaded
