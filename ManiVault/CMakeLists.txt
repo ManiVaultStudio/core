@@ -147,6 +147,15 @@ CPMAddPackage(
   OPTIONS "BUILD_EXAMPLES OFF"
 )
 
+enable_testing()
+
+# Google test
+CPMAddPackage(
+  NAME GTest
+  GITHUB_REPOSITORY google/googletest
+  VERSION 1.13.0
+)
+
 if(MV_UNITY_BUILD)
     set_target_properties(qt6advanceddocking PROPERTIES UNITY_BUILD ON)
 endif()
@@ -203,6 +212,9 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE GTest::gtest)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE GTest::gtest_main)
+
 
 # Use AVX if enabled and available
 check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
@@ -281,7 +293,6 @@ if(APPLE)
     set_target_properties( ${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 endif()
 
-
 # -----------------------------------------------------------------------------
 # Plugin projects
 # -----------------------------------------------------------------------------
@@ -301,6 +312,14 @@ add_subdirectory(src/plugins/TextData)
 add_subdirectory(src/plugins/ClusterData)
 add_subdirectory(src/plugins/ImageData)
 
+# -----------------------------------------------------------------------------
+# Test project(s)
+# -----------------------------------------------------------------------------
+
+# Test the public part of the ManiVault core
+if (MV_PUBLIC_TEST)
+	add_subdirectory(test/MV_Public_test)
+endif()
 
 # -----------------------------------------------------------------------------
 # Installation
@@ -473,6 +492,14 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:zlib> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
+	
+	if (MV_PUBLIC_TEST)
+		add_custom_command(TARGET ${MV_EXE} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E echo "Installing: Google test runtime libraries"
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:gtest> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:gtest_main> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+		)
+	endif()
 
     # Create symlink with slightly different name required on some linux distributions
     if(UNIX)
