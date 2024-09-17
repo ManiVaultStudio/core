@@ -1,13 +1,16 @@
 
-#include <NumericalAction.h>
+#include "IntegralAction.h"
 
 #include <gtest/gtest.h>
 
 using namespace mv::gui;
 
-// Simple test example
-TEST(NumericalAction, CheckInitialization) {
-    NumericalAction numericalAction(nullptr, "", 0, 100, 50);
+TEST(IntegralAction, CheckInitialization) {
+    IntegralAction integralAction(nullptr, "", 0, 100, 50);
 
-    EXPECT_EQ(1 + 1, 2);
+    EXPECT_EQ(integralAction.getMinimum(), 0);
+    EXPECT_EQ(integralAction.getMaximum(), 100);
+    EXPECT_EQ(integralAction.getValue(), 50);
+    EXPECT_EQ(integralAction.getPrefix(), "");
+    EXPECT_EQ(integralAction.getSuffix(), "");
 }

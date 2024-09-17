@@ -20,6 +20,8 @@ if(NOT DEFINED MV_INSTALL_DIR)
 endif()
 file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
+find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
+
 enable_testing()
 
 CPMAddPackage(
@@ -38,7 +40,12 @@ endforeach()
 
 add_executable(${MV_PUBLIC_TEST} ${MV_PUBLIC_TESTS})
 
-target_link_libraries(${MV_PUBLIC_TEST} PRIVATE ${MV_PUBLIC_LIB} GTest::gtest GTest::gtest_main)
+target_include_directories(${MV_PUBLIC_TEST} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
+
+target_link_libraries(${MV_PUBLIC_TEST} PRIVATE Qt6::Core)
+target_link_libraries(${MV_PUBLIC_TEST} PRIVATE Qt6::Widgets)
+target_link_libraries(${MV_PUBLIC_TEST} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${MV_PUBLIC_TEST} PRIVATE ${MV_PUBLIC_LIB})
 target_link_libraries(${MV_PUBLIC_TEST} PRIVATE GTest::gtest)
 target_link_libraries(${MV_PUBLIC_TEST} PRIVATE GTest::gtest_main)
 
@@ -49,7 +56,7 @@ target_link_libraries(${MV_PUBLIC_TEST} PRIVATE GTest::gtest_main)
 target_compile_features(${MV_PUBLIC_TEST} PRIVATE cxx_std_17)
 
 install(TARGETS ${MV_PUBLIC_TEST}
-	RUNTIME DESTINATION ${MV_INSTALL_DIR} COMPONENT MV_PUBLIC_TEST
+	RUNTIME DESTINATION ${MV_INSTALL_DIR}/$<CONFIGURATION> COMPONENT MV_PUBLIC_TEST
 )
 
 add_custom_command(TARGET ${MV_PUBLIC_TEST} POST_BUILD
