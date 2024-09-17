@@ -94,8 +94,11 @@ set(PUBLIC_NUMERICAL_ACTIONS_HEADERS
 
 set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
     src/actions/NumericalAction.cpp
+    src/actions/NumericalAction_test.cpp
     src/actions/DecimalAction.cpp
+    src/actions/DecimalAction_test.cpp
     src/actions/IntegralAction.cpp
+    src/actions/IntegralAction_test.cpp
     src/actions/NumericalRangeAction.cpp
     src/actions/DecimalRangeAction.cpp
     src/actions/IntegralRangeAction.cpp

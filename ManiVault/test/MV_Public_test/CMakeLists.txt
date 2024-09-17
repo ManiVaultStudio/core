@@ -39,6 +39,8 @@ endforeach()
 add_executable(${MV_PUBLIC_TEST} ${MV_PUBLIC_TESTS})
 
 target_link_libraries(${MV_PUBLIC_TEST} PRIVATE ${MV_PUBLIC_LIB} GTest::gtest GTest::gtest_main)
+target_link_libraries(${MV_PUBLIC_TEST} PRIVATE GTest::gtest)
+target_link_libraries(${MV_PUBLIC_TEST} PRIVATE GTest::gtest_main)
 
 #add_test(NAME ${MV_PUBLIC_TEST} COMMAND ${MV_PUBLIC_TEST})
 

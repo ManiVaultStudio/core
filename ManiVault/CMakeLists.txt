@@ -147,6 +147,15 @@ CPMAddPackage(
   OPTIONS "BUILD_EXAMPLES OFF"
 )
 
+enable_testing()
+
+# Google test
+CPMAddPackage(
+  NAME GTest
+  GITHUB_REPOSITORY google/googletest
+  VERSION 1.13.0
+)
+
 if(MV_UNITY_BUILD)
     set_target_properties(qt6advanceddocking PROPERTIES UNITY_BUILD ON)
 endif()
@@ -203,6 +212,9 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE GTest::gtest)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE GTest::gtest_main)
+
 
 # Use AVX if enabled and available
 check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
