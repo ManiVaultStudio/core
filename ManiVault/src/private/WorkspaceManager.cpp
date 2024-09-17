@@ -500,6 +500,11 @@ void WorkspaceManager::saveWorkspaceAs()
 
 void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, DockAreaFlag dockArea /*= DockAreaFlag::Right*/)
 {
+    Q_ASSERT(viewPlugin);
+
+    if (!viewPlugin)
+        return;
+
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
     if (viewPlugin->isSystemViewPlugin())
@@ -511,6 +516,21 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
         return;
 
     viewPlugin->getPresetsAction().loadDefaultPreset();
+}
+
+void WorkspaceManager::addViewPluginFloated(plugin::ViewPlugin* viewPlugin)
+{
+    Q_ASSERT(viewPlugin);
+
+    if (!viewPlugin)
+        return;
+
+    auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
+
+    if (viewPlugin->isSystemViewPlugin())
+        _mainDockManager->addDockWidgetFloating(viewPluginDockWidget);
+    else
+        _viewPluginsDockManager->addDockWidgetFloating(viewPluginDockWidget);
 }
 
 void WorkspaceManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate)

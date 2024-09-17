@@ -16,8 +16,15 @@ namespace mv::gui
 /**
  * Overlay widget class
  *
- * Overlays the parent widget with a custom widget (and synchronizes with its geometry) .
- *  
+ * Overlays the target widget with an overlay widget and keeps its geometry in sync with the target widget.
+ *
+ * By default, the overlay widget and its children are immune to mouse events (similar to the Qt widget
+ * attribute Qt::WA_TransparentForMouseEvents). To enable/disable child widget mouse events, call
+ * OverlayWidget::addMouseEventReceiverWidget(...) or OverlayWidget::removeMouseEventReceiverWidget(...)
+ * respectively.
+ *
+ * For more information, refer to the mv::util::WidgetOverlayer class.
+ *
  * @author Thomas Kroes
  */
 class CORE_EXPORT OverlayWidget : public QWidget
@@ -25,17 +32,42 @@ class CORE_EXPORT OverlayWidget : public QWidget
 public:
 
     /**
-     * Construct with \p parent
-     * @param parent Pointer to parent widget
+     * Construct with pointer to \p target widget and initial opacity
+     * @param target Pointer to target widget (used to synchronize the geometry with)
      * @param initialOpacity Opacity at initialization
      */
-    OverlayWidget(QWidget* parent, float initialOpacity = 1.0f);
+    OverlayWidget(QWidget* target, float initialOpacity = 1.0f);
 
     /**
      * Get the utility class for overlaying the widget
      * @return Widget overlayer
      */
     mv::util::WidgetOverlayer& getWidgetOverlayer();
+
+    /**
+     * Add \p mouseEventReceiverWidget
+     * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be added
+     */
+    virtual void addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget) final;
+
+    /**
+     * Remove \p mouseEventReceiverWidget
+     * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be removed
+     */
+    virtual void removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget) final;
+
+protected:
+
+    /**
+     * Update the mask region when the overlay widget changes size
+     * @param event Pointer to resize event that occurred
+     */
+    void resizeEvent(QResizeEvent* event) override;
+
+private:
+
+    /** Update widget mask to selectively process mouse events */
+    virtual void updateMask() final;
 
 private:
     mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */

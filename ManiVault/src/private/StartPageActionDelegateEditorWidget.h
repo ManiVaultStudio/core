@@ -4,17 +4,13 @@
 
 #pragma once
 
-#include <QGraphicsOpacityEffect>
-#include <QGridLayout>
+#include <widgets/IconLabel.h>
+
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPersistentModelIndex>
 #include <QString>
-#include <QStyleOptionViewItem>
-#include <QVBoxLayout>
 #include <QWidget>
-
-#include <functional>
 
 /**
  * Start page action delegate editor widget class
@@ -26,51 +22,6 @@
 class StartPageActionDelegateEditorWidget : public QWidget
 {
     Q_OBJECT
-
-public:
-
-    /** Icon label with tooltip (obtained with tooltip callback function) */
-    class IconLabel : public QLabel {
-    public:
-
-        using TooltipCallback = std::function<QString()>;    /** Callback function that is called when a tooltip is required */
-
-    public:
-
-        /**
-         * Construct from \p icon and \p parent widget
-         * @param icon Label icon
-         * @param parent Pointer to parent widget
-         */
-        IconLabel(const QIcon& icon, QWidget* parent = nullptr);
-
-        /**
-         * Set the tooltip callback
-         * @param tooltipCallback Callback function that is called when a tooltip is required
-         */
-        void setTooltipCallback(const TooltipCallback& tooltipCallback);
-
-        /**
-         * Triggered on mouse hover
-         * @param enterEvent Pointer to enter event
-         */
-        void enterEvent(QEnterEvent* enterEvent) override;
-
-        /**
-         * Triggered on mouse leave
-         * @param event Pointer to event
-         */
-        void leaveEvent(QEvent* event) override;
-
-    private:
-
-        /** Updates the label opacity depending on whether the mouse is hovering over the label */
-        void updateOpacityEffect();
-
-    private:
-        QGraphicsOpacityEffect  _opacityEffect;         /** Effect for modulating label opacity */
-        TooltipCallback         _tooltipCallback;       /** Callback function that is called when a tooltip is required */
-    };
 
 public:
     
@@ -129,8 +80,8 @@ private:
     QLabel                      _subtitleLabel;             /** Subtitle label */
     QWidget                     _infoWidget;                /** Widget for info labels */
     QHBoxLayout                 _infoLayout;                /** Layout for preview, tags and meta info popups */
-    IconLabel                   _previewIconLabel;          /** Icon label for preview image */
-    IconLabel                   _metaDataIconLabel;         /** Icon label for meta data */
-    IconLabel                   _tagsIconLabel;             /** Icon label for tags */
-    IconLabel                   _contributorsIconLabel;     /** Icon label for contributors */
+    mv::gui::IconLabel          _previewIconLabel;          /** Icon label for preview image */
+    mv::gui::IconLabel          _metaDataIconLabel;         /** Icon label for meta data */
+    mv::gui::IconLabel          _tagsIconLabel;             /** Icon label for tags */
+    mv::gui::IconLabel          _contributorsIconLabel;     /** Icon label for contributors */
 };

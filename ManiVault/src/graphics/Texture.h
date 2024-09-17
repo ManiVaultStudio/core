@@ -8,7 +8,7 @@
 * OpenGL Texture convenience classes.
 * Encapsulates most of the functionality possible with OpenGL textures.
 * If functionality is missing getHandle() can be called to retrieve
-* the raw OpenGL texture ID.
+* the raw OpenGL texture Id.
 */
 
 #pragma once
@@ -47,7 +47,7 @@ public:
 
     /**
     * Initializes the use of OpenGL functions in this context and
-    * generates the raw OpenGL ID of the texture. This function
+    * generates the raw OpenGL Id of the texture. This function
     * should be called before doing any other texture operations
     * and only when an OpenGL context is current and active.
     */
@@ -61,7 +61,7 @@ public:
     }
 
     /**
-    * Deletes the OpenGL texture ID and invalidates this texture
+    * Deletes the OpenGL texture Id and invalidates this texture
     * until create() is called again.
     */
     void destroy()
@@ -114,7 +114,7 @@ public:
     }
 
     /**
-    * Return the raw OpenGL texture ID.
+    * Return the raw OpenGL texture Id.
     */
     GLuint getHandle()
     {

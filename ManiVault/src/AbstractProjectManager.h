@@ -325,6 +325,7 @@ public: // Action getters
     virtual mv::gui::TriggerAction& getPublishAction() = 0;
     virtual mv::gui::TriggerAction& getPluginManagerAction() = 0;
     virtual mv::gui::ToggleAction& getShowStartPageAction() = 0;
+    virtual mv::gui::TriggerAction& getBackToProjectAction() = 0;
 
 signals:
 

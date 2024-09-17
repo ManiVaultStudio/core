@@ -5,16 +5,6 @@
 #pragma once
 
 #include <QStyledItemDelegate>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QTextBrowser>
-
-#include "LearningPageVideosModel.h"
-
-#include "util/FileDownloader.h"
-
-#include "widgets/FlowLayout.h"
 
 /**
  * Learning page video styled item delegate class

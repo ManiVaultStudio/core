@@ -11,20 +11,22 @@
     #define PLUGINS_FILTER_MODEL_VERBOSE
 #endif
 
-namespace mv {
+using namespace mv::gui;
 
-using namespace gui;
+namespace mv {
 
 PluginsFilterModel::PluginsFilterModel(QObject* parent /*= nullptr*/) :
     SortFilterProxyModel(parent),
+    _useFilterFunctionAction(this, "Use filter function", false),
     _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", true)
 {
     _instantiatedPluginsOnlyAction.setToolTip("Show only instantiated plugins are all available plugins");
-    //_instantiatedPluginsOnlyAction.setSettingsPrefix("PluginManager/ShowInstantiatedPluginsOnly", true);
 
     setRecursiveFilteringEnabled(true);
 
     connect(&_instantiatedPluginsOnlyAction, &ToggleAction::toggled, this, &PluginsFilterModel::invalidate);
+
+    invalidate();
 }
 
 bool PluginsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -53,12 +55,41 @@ bool PluginsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
             return false;
     }
 
+    auto abstractPluginsModel   = dynamic_cast<AbstractPluginsModel*>(sourceModel());
+
+    if (auto plugin = dynamic_cast<AbstractPluginsModel::Item*>(abstractPluginsModel->itemFromIndex(index))->getPlugin()) {
+        if (!_filterPluginTypes.isEmpty() && !_filterPluginTypes.contains(plugin->getType()))
+            return false;
+
+        if (_useFilterFunctionAction.isChecked() && _filterFunction)
+            return _filterFunction(plugin);
+    }
+
     return true;
 }
 
 bool PluginsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     return lhs.data().toString() < rhs.data().toString();
+}
+
+void PluginsFilterModel::setFilterFunction(const FilterFunction& filterFunction)
+{
+    _filterFunction = filterFunction;
+
+    invalidate();
+}
+
+plugin::Types PluginsFilterModel::getFilterPluginTypes() const
+{
+    return _filterPluginTypes;
+}
+
+void PluginsFilterModel::setFilterPluginTypes(const plugin::Types& filterPluginTypes)
+{
+    _filterPluginTypes = filterPluginTypes;
+
+    invalidate();
 }
 
 bool PluginsFilterModel::hasPluginInstances(const QModelIndex& index, int level /*= 0*/) const

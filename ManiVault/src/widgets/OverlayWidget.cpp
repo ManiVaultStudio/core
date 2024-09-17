@@ -5,8 +5,6 @@
 #include "OverlayWidget.h"
 
 #include <QDebug>
-#include <QHBoxLayout>
-#include <QLabel>
 
 #ifdef _DEBUG
     #define OVERLAY_WIDGET_VERBOSE
@@ -15,15 +13,57 @@
 namespace mv::gui
 {
 
-OverlayWidget::OverlayWidget(QWidget* parent, float initialOpacity /*= 1.0f*/) :
-    QWidget(parent),
-    _widgetOverlayer(this, this, parent, initialOpacity)
+OverlayWidget::OverlayWidget(QWidget* target, float initialOpacity /*= 1.0f*/) :
+    QWidget(target),
+    _widgetOverlayer(this, this, target, initialOpacity)
 {
+    setObjectName("OverlayWidget");
+
+    setMouseTracking(true);
 }
 
 mv::util::WidgetOverlayer& OverlayWidget::getWidgetOverlayer()
 {
     return _widgetOverlayer;
+}
+
+void OverlayWidget::addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget)
+{
+    Q_ASSERT(mouseEventReceiverWidget);
+
+    if (!mouseEventReceiverWidget)
+        return;
+
+    _widgetOverlayer.addMouseEventReceiverWidget(mouseEventReceiverWidget);
+}
+
+void OverlayWidget::removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget)
+{
+    Q_ASSERT(mouseEventReceiverWidget);
+
+    if (!mouseEventReceiverWidget)
+        return;
+
+    _widgetOverlayer.removeMouseEventReceiverWidget(mouseEventReceiverWidget);
+}
+
+void OverlayWidget::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+
+    updateMask();
+}
+
+void OverlayWidget::updateMask()
+{
+    QRegion maskRegion(geometry());
+
+    maskRegion -= QRegion(geometry());
+
+    for (auto mouseEventReceiverWidget : _widgetOverlayer.getMouseEventReceiverWidgets())
+        maskRegion += mouseEventReceiverWidget->geometry();
+
+    setMask(maskRegion);
 }
 
 }

@@ -4,8 +4,10 @@
 
 #include "Miscellaneous.h"
 
-#include <QStringList>
 #include <QAction>
+#include <QStringList>
+#include <QTcpSocket>
+#include <QUrl>
 
 namespace mv::util
 {
@@ -48,4 +50,24 @@ CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha /*= true
         return QString("rgb(%1, %2, %3)").arg(QString::number(color.red()), QString::number(color.green()), QString::number(color.blue()));
 }
 
+bool urlExists(const QString& urlString)
+{
+    QUrl url(urlString);
+
+    QTcpSocket socket;
+
+    socket.connectToHost(url.host(), 80);
+
+    if (socket.waitForConnected()) {
+        socket.write("HEAD " + url.path().toUtf8() + " HTTP/1.1\r\n" "Host: " + url.host().toUtf8() + "\r\n\r\n");
+
+        if (socket.waitForReadyRead()) {
+            QByteArray bytes = socket.readAll();
+
+            if (bytes.contains("200 OK"))
+                return true;
+        }
+    }
+    return false;
+}
 }

@@ -15,7 +15,7 @@ namespace mv::util {
 /**
  * Widget overlayer utility class
  *
- * Helper class for layering a widget on top of another widget and synchronizing its geometry
+ * Helper class for layering a widget on top of another widget and synchronizing its geometry.
  *
  * @author Thomas Kroes
  */
@@ -25,14 +25,58 @@ class CORE_EXPORT WidgetOverlayer : public QObject
 
 public:
 
+    using MouseEventReceiverWidgets = QVector<const QWidget*>;
+
     /**
-     * Construct widget overlayer with \p parent object, \p sourceWidget and \p targetWidget
+     * Construct widget overlayer with pointer to \p parent object, \p sourceWidget, \p targetWidget and \p initialOpacity
      * @param parent Pointer to parent object
      * @param sourceWidget Pointer to source widget (will be layered on top of the \p targetWidget)
-     * @param targetWidget Pointer to target widget
+     * @param targetWidget Pointer to target widget (\p sourceWidget will be layered on top of it)
      * @param initialOpacity Opacity of \p sourceWidget at initialization
      */
     WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget* targetWidget, float initialOpacity = 1.0f);
+
+    /**
+     * Get source widget
+     * @return Pointer to source widget
+     */
+    QWidget* getSourceWidget();
+
+    /**
+     * Get target widget
+     * @return Pointer to target widget
+     */
+    QWidget* getTargetWidget();
+
+    /**
+     * Set target widget to \p targetWidget
+     * @param targetWidget Pointer to target widget
+     */
+    void setTargetWidget(QWidget* targetWidget);
+
+    /**
+     * Add \p mouseEventReceiverWidget
+     * @param mouseEventReceiverWidget Const pointer to mouse event receiver widget that should be added
+     */
+    void addMouseEventReceiverWidget(const QWidget* mouseEventReceiverWidget);
+
+    /**
+     * Remove \p mouseEventReceiverWidget
+     * @param mouseEventReceiverWidget Const pointer to mouse event receiver widget that should be removed
+     */
+    void removeMouseEventReceiverWidget(const QWidget* mouseEventReceiverWidget);
+
+    /**
+     * Get mouse event receiver widgets
+     * @return Vector of mouse event receiver widgets
+     */
+    MouseEventReceiverWidgets getMouseEventReceiverWidgets();
+
+    /**
+     * Determine the source widget should receive mouse events or not
+     * @return Boolean determining whether the mouse cursor is under any of the mouse event receiver widgets
+     */
+    bool shouldReceiveMouseEvents() const;
 
     /**
      * Respond to \p target events
@@ -42,8 +86,23 @@ public:
     bool eventFilter(QObject* target, QEvent* event) override;
 
 private:
-    QWidget*    _sourceWidget;      /** Pointer to source widget (will be layered on top of the \p targetWidget) */
-    QWidget*    _targetWidget;      /** Pointer to target widget */
+
+    /** Source widget geometry is synchronized with the target widget geometry */
+    void synchronizeGeometry() const;
+
+signals:
+
+    /**
+     * Signals that the target widget changed from \p previousTargetWidget to \p currentTargetWidget
+     * @param previousTargetWidget Pointer to previous target widget
+     * @param currentTargetWidget Pointer to current target widget
+     */
+    void targetWidgetChanged(QWidget* previousTargetWidget, QWidget* currentTargetWidget);
+
+private:
+    QWidget*                    _sourceWidget;                  /** Pointer to source widget (will be layered on top of the \p targetWidget) */
+    QWidget*                    _targetWidget;                  /** Pointer to target widget */
+    MouseEventReceiverWidgets   _mouseEventReceiverWidgets;     /** Child widgets of the source widget that should receive mouse events, despite te \p Qt::WA_TransparentForMouseEvents attribute of the source widget */
 };
 
 }

@@ -941,7 +941,7 @@ public:
      * Get the URL of the GitHub repository
      * @return URL of the GitHub repository
      */
-    QUrl getRespositoryUrl() const override;
+    QUrl getRepositoryUrl() const override;
 
     mv::plugin::RawData* produce() override;
 };

@@ -8,6 +8,8 @@
 
 #include "actions/TriggerAction.h"
 
+#include "util/Video.h"
+
 #include <QObject>
 #include <QMenu>
 
@@ -35,6 +37,13 @@ public:
     {
     }
 
+    /**
+     * Get videos for \p tags
+     * @param tags Fitler tags (returns all videos if empty)
+     * @return Vector of videos
+     */
+    virtual util::Videos getVideos(const QStringList& tags) const = 0;
+
 public: // Action getters
 
     virtual mv::gui::ToggleAction& getShowLearningCenterAction() = 0;
@@ -42,6 +51,7 @@ public: // Action getters
     virtual mv::gui::TriggerAction& getToWebsiteAction() = 0;
     virtual mv::gui::TriggerAction& getToWikiAction() = 0;
     virtual mv::gui::TriggerAction& getToRepositoryAction() = 0;
+    virtual mv::gui::TriggerAction& getToLearningCenterAction() = 0;
 };
 
 }

@@ -105,7 +105,7 @@ QUrl ImageDataFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl ImageDataFactory::getRespositoryUrl() const
+QUrl ImageDataFactory::getRepositoryUrl() const
 {
     return QUrl("https://github.com/ManiVaultStudio/core");
 }

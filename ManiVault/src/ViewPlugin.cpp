@@ -24,7 +24,6 @@ namespace mv::plugin
 
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
-    _widget(),
     _editorAction(this, "Edit..."),
     _screenshotAction(this, "Screenshot..."),
     _isolateAction(this, "Isolate"),
@@ -34,12 +33,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _dockingOptionsAction(this, "Docking options", { "May Close", "May Float", "May Move" }),
     _lockingAction(this),
     _visibleAction(this, "Visible", true),
-    _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
     _samplerAction(this, "Sampler"),
-    _triggerShortcut(),
-    _titleBarMenuActions(),
-    _settingsActions(),
     _progressTask(nullptr)
 {
     setText(isSystemViewPlugin() ? getKind() : getGuiName());
@@ -49,7 +44,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget.addAction(&_editorAction);
     _widget.addAction(&_screenshotAction);
     _widget.addAction(&_isolateAction);
-    _widget.addAction(&_helpAction);
 
     _editorAction.setIconByName("cog");
     _editorAction.setShortcut(tr("F12"));
@@ -89,12 +83,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction.setToolTip("Determines whether the view plugin is visible or not");
     _visibleAction.setIcon(getIcon());
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
-
-    _helpAction.setToolTip(QString("Shows %1 documentation").arg(factory->getKind()));
-    _helpAction.setShortcut(tr("F1"));
-    _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
-    _helpAction.setConnectionPermissionsToForceNone();
 
     _samplerAction.setToolTip(QStringLiteral("Element sampler"));
     _samplerAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -137,10 +125,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     updateDockWidgetPermissionsReadOnly();
 
-    connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
-        getTriggerHelpAction().trigger();
-    });
-
     connect(&getGuiNameAction(), &StringAction::stringChanged, this, [this](const QString& guiName) -> void {
         _widget.setWindowTitle(guiName);
     });
@@ -181,6 +165,17 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         _mayFloatAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Float"));
         _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
     });
+
+    auto& shortcuts = getShortcuts();
+
+    shortcuts.add({ QKeySequence(Qt::Key_F2), "General", "Make a screenshot" });
+
+    if (!isSystemViewPlugin())
+		shortcuts.add({ QKeySequence(Qt::Key_F3), "General", "Toggle view isolation (hides the other views)" });
+
+    shortcuts.add({ QKeySequence(Qt::Key_F12), "General", "Edit the view parameters" });
+
+    getLearningCenterAction().createViewPluginOverlayWidget();
 }
 
 void ViewPlugin::init()

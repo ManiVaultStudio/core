@@ -6,6 +6,7 @@
 
 #include "PluginFactory.h"
 #include "PluginType.h"
+#include "PluginShortcuts.h"
 
 #include "event/EventListener.h"
 
@@ -17,6 +18,8 @@
 #include <QMap>
 #include <QVariant>
 #include <QIcon>
+
+#include "actions/PluginLearningCenterAction.h"
 
 class QMenu;
 
@@ -57,9 +60,9 @@ public:
     virtual QIcon getIcon() const final;
 
     /**
-    * Returns the kind of plugin. The kind is specific to the
-    * particular implementation of a plugin type.
-    */
+     * Returns the kind of plugin. The kind is specific to the
+     * particular implementation of a plugin type.
+     */
     QString getKind() const;
 
     /**
@@ -73,19 +76,17 @@ public:
      */
     virtual QString getVersion() const;
 
-public: // Help
+    /**
+     * Get shortcuts
+     * @return Plugin shortcuts
+     */
+    PluginShortcuts& getShortcuts();
 
     /**
-     * Get whether the plugin has help information or not
-     * @return Boolean determining whether the plugin has help information or not
+     * Get shortcuts
+     * @return Plugin shortcuts
      */
-    virtual bool hasHelp();
-
-    /**
-     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
-     * @return Reference to show help trigger action (maybe nullptr if the plugin does not provide any help)
-     */
-    virtual gui::TriggerAction& getTriggerHelpAction() final;
+    const PluginShortcuts& getShortcuts() const;
 
 public: // Properties
 
@@ -166,17 +167,26 @@ public: // Action getters
 
     gui::StringAction& getGuiNameAction() { return _guiNameAction; };
     gui::TriggerAction& getDestroyAction() { return _destroyAction; }
+    gui::PluginLearningCenterAction& getLearningCenterAction() { return _learningCenterAction; }
+
+    const gui::StringAction& getGuiNameAction() const { return _guiNameAction; };
+    const gui::TriggerAction& getDestroyAction() const { return _destroyAction; }
+    const gui::PluginLearningCenterAction& getLearningCenterAction() const { return _learningCenterAction; }
 
 protected:
-    CoreInterface*              _core;              /** Pointer to the core interface */
-    const PluginFactory*        _factory;           /** Pointer to plugin factory */
-    const QString               _name;              /** Unique plugin name */
-    QMap<QString, QVariant>     _properties;        /** Properties map */
-    EventListener               _eventListener;     /** Listen to public events */
-    gui::StringAction           _guiNameAction;     /** Action for the GUI name */
-    gui::TriggerAction          _destroyAction;     /** Action for destroying the plugin */
+    CoreInterface*                      _core;                      /** Pointer to the core interface */
+    const PluginFactory*                _factory;                   /** Pointer to plugin factory */
+    const QString                       _name;                      /** Unique plugin name */
+    QMap<QString, QVariant>             _properties;                /** Properties map */
+    EventListener                       _eventListener;             /** Listen to public events */
+    gui::StringAction                   _guiNameAction;             /** Action for the GUI name */
+    gui::TriggerAction                  _destroyAction;             /** Action for destroying the plugin */
+    PluginShortcuts                     _shortcuts;                 /** Plugin shortcuts */
+    gui::PluginLearningCenterAction     _learningCenterAction;      /** Action for everything plugin learning related */
 
     friend class PluginFactory;
 };
+
+using Plugins = std::vector<Plugin*>;
 
 }

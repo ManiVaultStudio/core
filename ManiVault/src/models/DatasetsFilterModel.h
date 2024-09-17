@@ -11,9 +11,6 @@
 #include "Dataset.h"
 
 #include "actions/ToggleAction.h"
-#include "actions/StringAction.h"
-
-#include <QSortFilterProxyModel>
 
 namespace mv
 {

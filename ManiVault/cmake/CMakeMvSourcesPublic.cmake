@@ -266,6 +266,7 @@ set(PUBLIC_TOOLBAR_ACTIONS_FILES
 set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/Actions.h
     src/actions/DatasetPickerAction.h
+    src/actions/PluginPickerAction.h
     src/actions/ImageAction.h
     src/actions/PixelSelectionAction.h
     src/actions/WindowLevelAction.h
@@ -280,6 +281,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/DatasetPickerAction.cpp
+    src/actions/PluginPickerAction.cpp
     src/actions/ImageAction.cpp
     src/actions/PixelSelectionAction.cpp
     src/actions/WindowLevelAction.cpp
@@ -341,6 +343,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/IconPickerAction.h
     src/actions/ApplicationIconAction.h
     src/actions/ViewPluginSamplerAction.h
+    src/actions/PluginLearningCenterAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -372,6 +375,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/IconPickerAction.cpp
     src/actions/ApplicationIconAction.cpp
     src/actions/ViewPluginSamplerAction.cpp
+    src/actions/PluginLearningCenterAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -382,6 +386,7 @@ set(PUBLIC_ACTIONS_INTERNAL_FILES
 set(PUBLIC_WIDGETS_HEADERS
     src/widgets/WebWidget.h
     src/widgets/DropWidget.h
+    src/widgets/OpenGLWidget.h
     src/widgets/Divider.h
     src/widgets/ElidedLabel.h
 )
@@ -389,6 +394,7 @@ set(PUBLIC_WIDGETS_HEADERS
 set(PUBLIC_WIDGETS_SOURCES
     src/widgets/WebWidget.cpp
     src/widgets/DropWidget.cpp
+    src/widgets/OpenGLWidget.cpp
     src/widgets/Divider.cpp
     src/widgets/ElidedLabel.cpp
 )
@@ -410,6 +416,11 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/MarkdownDocument.h
 	src/widgets/MarkdownDialog.h
 	src/widgets/YouTubeVideoDialog.h
+	src/widgets/ViewPluginOverlayWidget.h
+	src/widgets/ViewPluginDescriptionOverlayWidget.h
+	src/widgets/ViewPluginShortcutsOverlayWidget.h
+	src/widgets/ViewPluginLearningCenterOverlayWidget.h
+	src/widgets/IconLabel.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
@@ -424,6 +435,11 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/MarkdownDocument.cpp
 	src/widgets/MarkdownDialog.cpp
 	src/widgets/YouTubeVideoDialog.cpp
+	src/widgets/ViewPluginOverlayWidget.cpp
+	src/widgets/ViewPluginDescriptionOverlayWidget.cpp
+	src/widgets/ViewPluginShortcutsOverlayWidget.cpp
+	src/widgets/ViewPluginLearningCenterOverlayWidget.cpp
+	src/widgets/IconLabel.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES
@@ -510,6 +526,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/DockWidgetPermission.h
     src/util/NumericalRange.h
     src/util/FileDownloader.h
+    src/util/ShortcutMap.h
+    src/util/Video.h
 )
 
 if(APPLE)
@@ -555,6 +573,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/DockWidgetPermission.cpp
     src/util/NumericalRange.cpp
     src/util/FileDownloader.cpp
+    src/util/ShortcutMap.cpp
+    src/util/Video.cpp
 )
 
 if(APPLE)
@@ -648,6 +668,7 @@ set(PUBLIC_PLUGIN_HEADERS
     src/AnalysisPlugin.h
     src/TransformationPlugin.h
     src/ViewPlugin.h
+    src/PluginShortcuts.h
 )
 
 set(PUBLIC_PLUGIN_SOURCES
@@ -659,6 +680,7 @@ set(PUBLIC_PLUGIN_SOURCES
     src/AnalysisPlugin.cpp
     src/TransformationPlugin.cpp
     src/ViewPlugin.cpp
+    src/PluginShortcuts.cpp
 )
 
 list(APPEND PUBLIC_PLUGIN_FILES
@@ -801,12 +823,14 @@ set(PUBLIC_TASKS_MODEL_FILES
 set(PUBLIC_PLUGINS_MODEL_HEADERS
     src/models/AbstractPluginsModel.h
     src/models/PluginsTreeModel.h
+    src/models/PluginsListModel.h
     src/models/PluginsFilterModel.h
 )
 
 set(PUBLIC_PLUGINS_MODEL_SOURCES
     src/models/AbstractPluginsModel.cpp
     src/models/PluginsTreeModel.cpp
+    src/models/PluginsListModel.cpp
     src/models/PluginsFilterModel.cpp
 )
 

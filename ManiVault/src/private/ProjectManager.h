@@ -160,6 +160,7 @@ public: // Action getters
     mv::gui::TriggerAction& getPublishAction() override { return _publishAction; }
     mv::gui::TriggerAction& getPluginManagerAction() override { return _pluginManagerAction; }
     mv::gui::ToggleAction& getShowStartPageAction() override { return _showStartPageAction; }
+    mv::gui::TriggerAction& getBackToProjectAction() override { return _backToProjectAction; }
 
 private:
     QScopedPointer<mv::Project>         _project;                           /** Current project */
@@ -176,4 +177,5 @@ private:
     mv::gui::TriggerAction              _publishAction;                     /** Action for publishing the project to an end-user */
     mv::gui::TriggerAction              _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
     mv::gui::ToggleAction               _showStartPageAction;               /** Action for toggling the start page */
+    mv::gui::TriggerAction              _backToProjectAction;               /** Action for going back to the project */
 };

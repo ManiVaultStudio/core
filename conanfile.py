@@ -185,11 +185,15 @@ class HdpsCoreConan(ConanFile):
         )
 
         cmake = self._configure_cmake()
+        print("**** Build DEBUG *****")
         cmake.build(build_type="Debug")
+        print("**** Install DEBUG *****")
         cmake.install(build_type="Debug")
 
         # cmake_release = self._configure_cmake()
+        print("**** Build RELEASE *****")
         cmake.build(build_type="Release")
+        print("**** Install RELEASE *****")
         cmake.install(build_type="Release")
 
     def package(self):
@@ -203,11 +207,11 @@ class HdpsCoreConan(ConanFile):
 
         print("Packaging install dir: ", self.install_dir)
         if self.settings.os == "Macos": 
-            git = tools.Git()
-            branch_name = str(git.get_branch())
-            release_tag = re.search(r"^release-|release\/(.*)$", branch_name)
-            if (self.settings.os == "Macos") and (release_tag is not None):
-                self.options.macos_bundle = True
+            #git = tools.Git()
+            #branch_name = str(git.get_branch())
+            #release_tag = re.search(r"^release-|release\/(.*)$", branch_name)
+            #if (self.settings.os == "Macos") and (release_tag is not None):
+            self.options.macos_bundle = True
         print("Options macos: ", self.options.macos_bundle)
         if self.options.macos_bundle:
             print("Macos including bundle")
@@ -231,7 +235,7 @@ class HdpsCoreConan(ConanFile):
             for pfile in pdb_files:
                 shutil.copy(pfile, pdb_dest)
 
-        self.copy(pattern="*", src=self.install_dir)
+        self.copy(pattern="*", src=self.install_dir, symlinks=True)
 
     def package_info(self):
         self.cpp_info.debug.libdirs = ["Debug/lib"]

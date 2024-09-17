@@ -15,6 +15,17 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataHierarchyWidget(nullptr)
 {
+    auto& shortcuts = getShortcuts();
+
+    shortcuts.add({ QKeySequence(Qt::CTRL | Qt::Key_Minus), "Expand/collapse", "Collapse all" });
+    shortcuts.add({ QKeySequence(Qt::CTRL | Qt::Key_Plus), "Expand/collapse", "Expand all" });
+
+    getLearningCenterAction().setPluginTitle("Data hierarchy view");
+
+    getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
+    getLearningCenterAction().setLongDescription("Hierarchical overview of all loaded data");
+
+    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
 
 void DataHierarchyPlugin::init()
@@ -47,9 +58,9 @@ QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 #endif
 }
 
-QUrl DataHierarchyPluginFactory::getRespositoryUrl() const
+QUrl DataHierarchyPluginFactory::getRepositoryUrl() const
 {
-    return QUrl("https://github.com/ManiVaultStudio/core");
+    return QUrl("https://github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin");
 }
 
 ViewPlugin* DataHierarchyPluginFactory::produce()

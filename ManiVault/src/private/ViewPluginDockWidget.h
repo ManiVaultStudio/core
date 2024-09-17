@@ -115,7 +115,7 @@ public:
     ViewPluginDockWidget(const QVariantMap& variantMap);
 
     /** Destructor (needed to update the active dock widgets) */
-    ~ViewPluginDockWidget();
+    ~ViewPluginDockWidget() override;
 
     /**
      * Get string that describes the dock widget type
@@ -153,7 +153,7 @@ public: // Serialization
 
     /**
      * Load view plugin dock widget from variant
-     * @param Variant representation of the view plugin dock widget
+     * @param variantMap Variant representation of the view plugin dock widget
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 

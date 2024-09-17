@@ -4,7 +4,10 @@ cmake_minimum_required(VERSION 3.17)
 # Project: ManiVault-core
 # -----------------------------------------------------------------------------
 set(MV_CORE "mv-core")
-project(${MV_CORE} VERSION ${MV_VERSION})
+project(${MV_CORE} 
+    VERSION ${MV_VERSION} 
+    DESCRIPTION "Core application and library of ManiVault Studio, a flexible and extensible visual analytics framework for high-dimensional data"
+    LANGUAGES CXX C)
 
 # These three targets defined in this CMakeLists.txt
 set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
@@ -18,7 +21,14 @@ message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
 # CMake Settings
 # -----------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+if (NOT (MSVC AND MSVC_VERSION LESS_EQUAL 1929))
+    set(CMAKE_C_STANDARD 17)
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+    set(CMAKE_C_EXTENSIONS OFF)
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INSTALL_MESSAGE LAZY)
@@ -44,6 +54,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAK
 if(APPLE)
     # These are the properties for the Info.plist in the mac bindle
     set(MACOSX_BUNDLE_BUNDLE_NAME "ManiVault Studio")
+    set(MACOSX_BUNDLE_PATHNAME "ManiVault\ Studio")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
@@ -190,6 +201,7 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Core)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
 # Use AVX if enabled and available
@@ -280,6 +292,7 @@ add_subdirectory(src/plugins/DataPropertiesPlugin)
 add_subdirectory(src/plugins/SharedParametersPlugin)
 add_subdirectory(src/plugins/LoggingPlugin)
 add_subdirectory(src/plugins/TasksPlugin)
+add_subdirectory(src/plugins/SampleScopePlugin)
 
 # Data plugins
 add_subdirectory(src/plugins/PointData)
@@ -295,7 +308,8 @@ add_subdirectory(src/plugins/ImageData)
 
 # Install the ManiVault executable 
 if(APPLE)
-    set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
+    # set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
+    set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/ManiVault Studio.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
     install(TARGETS ${MV_EXE}
         RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
@@ -303,39 +317,21 @@ if(APPLE)
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-    install(CODE "execute_process(
-            COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
-        	RESULT_VARIABLE retval
-            COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \"$<TARGET_FILE:qt6advanceddocking>\" 
-                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \"$<TARGET_FILE:QuaZip>\" 
-                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" 
-                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
-        )
-        
-        if(NOT retval EQUAL 0)
-        	message(FATAL_ERROR \"macdeployqt failed\")
-        endif()
+    install(CODE "
+            message(\"**** MacOS bundle install ****\")
+            file(MAKE_DIRECTORY \"${BUNDLE_DIR}\")
+            message(\"**** Run macdeployqt for \"${BUNDLE_DIR}\" ****\")
+            execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite RESULT_VARIABLE retval)
+            if(NOT retval EQUAL 0)
+        	    message(FATAL_ERROR \"macdeployqt failed\")
+            endif()
+            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:QuaZip>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" \"$<TARGET_FILE:zlib>\")
+            message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
+            file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")       
         "
         COMPONENT MACOS_BUNDLE
     )
-    
-    install(CODE "execute_process(
-        COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
-        COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                \$<TARGET_FILE:zlib>\" 
-                \"${BUNDLE_DIR}/Contents/Frameworks/\"
-        )
-        "
-        COMPONENT MACOS_BUNDLE
-    )
-    
+      
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"
         )"
@@ -448,12 +444,13 @@ add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
 # Install the ManiVault executable
 if(APPLE)
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault executable bundle to ${MV_INSTALL_DIR}/$<CONFIGURATION>"
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault MacOS bundle to ${MV_INSTALL_DIR}/$<CONFIGURATION>"
         COMMAND ${CMAKE_COMMAND}
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
             --component MACOS_BUNDLE
-            --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>/
+            --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
+            --verbose
     )
 endif()
 
