@@ -31,6 +31,10 @@
 
 #include "models/AbstractPluginsModel.h"
 
+#ifdef WIN32
+#include <windows.h>
+#endif // WIN32
+
 #ifdef _DEBUG
     //#define PLUGIN_MANAGER_VERBOSE
 #endif
@@ -109,12 +113,96 @@ void PluginManager::loadPluginFactories()
     
     _pluginFactories.clear();
 
+    auto getPluginDependencyDir = [](const QDir& dir, const QString& name) -> std::pair<QDir, bool> {
+        QDir dependenciesDir = dir;
+        dependenciesDir.cdUp();
+        if (!dependenciesDir.cd("PluginDependencies"))
+            return { dependenciesDir, false };
+        if (!dependenciesDir.cd(name))
+            return { dependenciesDir, false };
+        dependenciesDir.cd(name);
+        return { dependenciesDir, true };
+        };
+
+    auto getLibraryName = [](const QString& libFileName) -> QString {
+        // Use QFileInfo to get the base name without the suffix (.dll, .so, .dylib)
+        QFileInfo fileInfo(libFileName);
+        QString baseName = fileInfo.baseName();
+
+        // Check for common "lib" prefix on UNIX systems and remove it
+        if (baseName.startsWith("lib")) {
+            baseName = baseName.mid(3);  // Remove the first 3 characters ("lib")
+        }
+
+        return baseName;
+        };
+
+    auto addDependencySearchPath = [](const QDir& dir, const QString& name) -> void {
+#ifdef WIN32
+        SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_USER_DIRS);
+
+        const auto dllDir = dir.absolutePath();
+        HANDLE dllDirectoryHandle = AddDllDirectory(reinterpret_cast<LPCWSTR>(dllDir.utf16()));
+
+        if (!dllDirectoryHandle) {
+            qWarning() << "Failed to add dependency directory for " << name << ": " << GetLastError();
+            return;
+        }
+
+        QSet<QString> dllsToLoad;
+        QStringList filters;
+        filters << "*.dll";
+        QFileInfoList fileInfoList = dir.entryInfoList(filters, QDir::Files);
+
+        for(const QFileInfo& fileInfo: fileInfoList) {
+            dllsToLoad.insert(fileInfo.absoluteFilePath());
+        }
+
+        const size_t maxTries = dllsToLoad.size();
+        size_t currentTry = 0;
+        while (!dllsToLoad.isEmpty()) {
+            for (const QString& dllPath: dllsToLoad) {
+                HMODULE hModule = LoadLibraryEx(reinterpret_cast<LPCWSTR>(dllPath.utf16()), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_USER_DIRS);
+                if (hModule) {
+                    qDebug() << "Successfully loaded DLL:" << dllPath;
+                    dllsToLoad.remove(dllPath);
+                }
+                else {
+                    qWarning() << "Failed to load DLL:" << dllPath << "Error:" << GetLastError();
+                }
+            }
+
+            if (++currentTry >= maxTries)
+            {
+
+                qWarning() << "Could not load all dependencies for " << name;
+                break;
+            }
+
+            // Optionally, you can add a delay here if needed to give time for any dependency DLLs to be resolved
+            Sleep(10); // Sleep for 10 ms
+        }
+
+        RemoveDllDirectory(dllDirectoryHandle);
+#endif // WIN_32
+        };
+
     // List of filenames of dependency resolved plugins
     const QStringList resolvedPlugins = resolveDependencies(pluginDir);
 
     // For each of the plugin files which are resolved, load them and add them in their proper menu category
     for (const auto& fileName: resolvedPlugins)
     {
+        const auto pluginName = getLibraryName(fileName);
+        const auto [pluginDependenciesDir, pluginDependenciesExists] = getPluginDependencyDir(pluginDir, pluginName);
+
+        if (pluginDependenciesExists)
+        {
+            qDebug() << "pluginPath: " << pluginDir.absolutePath();
+            qDebug() << "pluginDependenciesDir: " << pluginDependenciesDir.absolutePath();
+            addDependencySearchPath(pluginDependenciesDir, pluginName);
+        }
+
         // Dynamic loader of plugin shared library
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
         
@@ -122,7 +210,7 @@ void PluginManager::loadPluginFactories()
         QString pluginKind      = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
         QString menuName        = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
         QString version         = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
-        
+
         // Create an instance of the plugin, i.e. the factory
         auto pluginFactory = dynamic_cast<PluginFactory*>(pluginLoader.instance());
 
