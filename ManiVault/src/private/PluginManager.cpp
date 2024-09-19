@@ -144,30 +144,32 @@ void PluginManager::loadPluginFactories()
         if (!pluginDependenciesExists)
             return;
 
-        QSet<QString> dllsToLoad;
-        for(const QFileInfo& fileInfo: pluginDependenciesDir.entryInfoList({}, QDir::Files))
-            dllsToLoad.insert(fileInfo.absoluteFilePath());
+        QSet<QString> dynamicLibsToLoad;
+        for (const QFileInfo& fileInfo : pluginDependenciesDir.entryInfoList({}, QDir::Files))
+        {
+            const auto filePath = fileInfo.absoluteFilePath();
+            if (!QLibrary::isLibrary(filePath))
+                continue;
+
+            dynamicLibsToLoad.insert(filePath);
+        }
 
         // Some dependencies might depend on other dynamic libraries
         // We could build a dependency tree, but this works just as well
-        const size_t maxTries = dllsToLoad.size();
+        const size_t maxTries = dynamicLibsToLoad.size();
         size_t currentTry = 0;
-        while (!dllsToLoad.isEmpty()) {
-            for (const QString& dllPath : dllsToLoad) {
-                if (QLibrary::isLibrary(dllPath)) {
-                    QLibrary lib(dllPath);
-                    if (lib.load()) {
-                        qDebug() << "Loaded dependency:" << dllPath;
-                        dllsToLoad.remove(dllPath);
-                    }
+        while (!dynamicLibsToLoad.isEmpty()) {
+            for (const QString& dynamicLibPath : dynamicLibsToLoad) {
+                QLibrary lib(dynamicLibPath);
+                if (lib.load()) {
+                    qDebug() << "Loaded dependency: " << dynamicLibPath;
+                    dynamicLibsToLoad.remove(dynamicLibPath);
                 }
-                else
-                    dllsToLoad.remove(dllPath); // remove if not a library
             }
 
             if (++currentTry >= maxTries)
             {
-                qWarning() << "Could not load all dependencies for " << pluginName << ". Missing: " << dllsToLoad;
+                qWarning() << "Could not load all dependencies for " << pluginName << ". Missing: " << dynamicLibsToLoad;
                 break;
             }
         }
