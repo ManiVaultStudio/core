@@ -351,9 +351,10 @@ private:
          * Construct with pointer to \p viewPlugin, parent \p overlayWidget  and \p alignment
          * @param viewPlugin Pointer to the view plugin
          * @param overlayWidget Pointer to parent overlay widget
-         * @param alignment Item alignment (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight)
+         * @param alignment Item alignment (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter)
+         * @param alwaysVisible Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting
          */
-        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const Qt::Alignment& alignment);
+        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const Qt::Alignment& alignment, bool alwaysVisible = false);
 
         /**
          * Add \p widget to the toolbar
@@ -384,7 +385,7 @@ public:
      * @param viewPlugin Pointer to the view plugin for which to create the overlay
      * @param alignment Alignment w.r.t. to the \p source widget
      */
-    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignRight);
+    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom);
 
     /**
      * Set target widget to \p targetWidget
@@ -402,7 +403,7 @@ private:
 
 private:
     const plugin::ViewPlugin*   _viewPlugin;                /** Pointer to the view plugin for which to create the overlay */
-    const Qt::Alignment&        _alignment;                 /** Alignment w.r.t. to the source widget (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight) */
+    const Qt::Alignment&        _alignment;                 /** Alignment w.r.t. to the source widget (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
     QHBoxLayout                 _layout;                    /** For alignment of the learning center popup widget */
     QBoxLayout*                 _toolbarsLayout;            /** Layout for the settings and actions toolbars */
     QVBoxLayout                 _verticalToolbarLayout;     /** Vertical toolbar for the top and bottom alignment */
