@@ -23,17 +23,16 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLibrary>
 #include <QMessageBox>
 #include <QPluginLoader>
+#include <QSet>
 
-#include <assert.h>
+#include <cassert>
+#include <utility>
 #include <stdexcept>
 
 #include "models/AbstractPluginsModel.h"
-
-#ifdef WIN32
-#include <windows.h>
-#endif // WIN32
 
 #ifdef _DEBUG
     //#define PLUGIN_MANAGER_VERBOSE
@@ -116,7 +115,7 @@ void PluginManager::loadPluginFactories()
     auto getPluginDependencyDir = [](const QDir& dir, const QString& name) -> std::pair<QDir, bool> {
         QDir dependenciesDir = dir;
         dependenciesDir.cdUp();
-        if (!dependenciesDir.cd("PluginDependencies"))
+        if (!dependenciesDir.cd("PluginDependencies"))  // name by convention
             return { dependenciesDir, false };
         if (!dependenciesDir.cd(name))
             return { dependenciesDir, false };
@@ -137,54 +136,41 @@ void PluginManager::loadPluginFactories()
         return baseName;
         };
 
-    auto addDependencySearchPath = [](const QDir& dir, const QString& name) -> void {
-#ifdef WIN32
-        SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_USER_DIRS);
+    auto loadPluginDependencies = [&getLibraryName, &getPluginDependencyDir](const QDir& pluginDir, const QString& fileName) -> void {
 
-        const auto dllDir = dir.absolutePath();
-        HANDLE dllDirectoryHandle = AddDllDirectory(reinterpret_cast<LPCWSTR>(dllDir.utf16()));
+        const auto pluginName = getLibraryName(fileName);
+        const auto [pluginDependenciesDir, pluginDependenciesExists] = getPluginDependencyDir(pluginDir, pluginName);
 
-        if (!dllDirectoryHandle) {
-            qWarning() << "Failed to add dependency directory for " << name << ": " << GetLastError();
+        if (!pluginDependenciesExists)
             return;
-        }
 
         QSet<QString> dllsToLoad;
-        QStringList filters;
-        filters << "*.dll";
-        QFileInfoList fileInfoList = dir.entryInfoList(filters, QDir::Files);
-
-        for(const QFileInfo& fileInfo: fileInfoList) {
+        for(const QFileInfo& fileInfo: pluginDependenciesDir.entryInfoList({}, QDir::Files))
             dllsToLoad.insert(fileInfo.absoluteFilePath());
-        }
 
+        // Some dependencies might depend on other dynamic libraries
+        // We could build a dependency tree, but this works just as well
         const size_t maxTries = dllsToLoad.size();
         size_t currentTry = 0;
         while (!dllsToLoad.isEmpty()) {
-            for (const QString& dllPath: dllsToLoad) {
-                HMODULE hModule = LoadLibraryEx(reinterpret_cast<LPCWSTR>(dllPath.utf16()), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_USER_DIRS);
-                if (hModule) {
-                    qDebug() << "Successfully loaded DLL:" << dllPath;
-                    dllsToLoad.remove(dllPath);
+            for (const QString& dllPath : dllsToLoad) {
+                if (QLibrary::isLibrary(dllPath)) {
+                    QLibrary lib(dllPath);
+                    if (lib.load()) {
+                        qDebug() << "Loaded dependency:" << dllPath;
+                        dllsToLoad.remove(dllPath);
+                    }
                 }
-                else {
-                    qWarning() << "Failed to load DLL:" << dllPath << "Error:" << GetLastError();
-                }
+                else
+                    dllsToLoad.remove(dllPath); // remove if not a library
             }
 
             if (++currentTry >= maxTries)
             {
-
-                qWarning() << "Could not load all dependencies for " << name;
+                qWarning() << "Could not load all dependencies for " << pluginName << ". Missing: " << dllsToLoad;
                 break;
             }
-
-            // Optionally, you can add a delay here if needed to give time for any dependency DLLs to be resolved
-            Sleep(10); // Sleep for 10 ms
         }
-
-        RemoveDllDirectory(dllDirectoryHandle);
-#endif // WIN_32
         };
 
     // List of filenames of dependency resolved plugins
@@ -193,15 +179,8 @@ void PluginManager::loadPluginFactories()
     // For each of the plugin files which are resolved, load them and add them in their proper menu category
     for (const auto& fileName: resolvedPlugins)
     {
-        const auto pluginName = getLibraryName(fileName);
-        const auto [pluginDependenciesDir, pluginDependenciesExists] = getPluginDependencyDir(pluginDir, pluginName);
-
-        if (pluginDependenciesExists)
-        {
-            qDebug() << "pluginPath: " << pluginDir.absolutePath();
-            qDebug() << "pluginDependenciesDir: " << pluginDependenciesDir.absolutePath();
-            addDependencySearchPath(pluginDependenciesDir, pluginName);
-        }
+        // Load plugin dependencies, if there are any
+        loadPluginDependencies(pluginDir, fileName);
 
         // Dynamic loader of plugin shared library
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
