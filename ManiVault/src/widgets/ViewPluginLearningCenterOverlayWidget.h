@@ -343,9 +343,23 @@ private:
         
     };
 
+    /** Toolbar widget to align items horizontally or vertically */
     class ToolbarWidget : public QWidget {
     public:
-        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+
+        /**
+         * Construct with pointer to \p viewPlugin, parent \p overlayWidget  and \p alignment
+         * @param viewPlugin Pointer to the view plugin
+         * @param overlayWidget Pointer to parent overlay widget
+         * @param alignment Item alignment (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight)
+         */
+        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const Qt::Alignment& alignment);
+
+        /**
+         * Add \p widget to the toolbar
+         * @param widget Pointer to widget to add
+         */
+        void addWidget(QWidget* widget);
 
     private:
 
@@ -356,17 +370,10 @@ private:
          */
         bool eventFilter(QObject* target, QEvent* event) override;
 
-        /**
-         * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }
-         * @param margin Contents margins
-         */
-        void setContentsMargins(std::int32_t margin);
-
     private:
         const plugin::ViewPlugin*   _viewPlugin;        /** Const pointer to source view plugin */
         OverlayWidget*              _overlayWidget;     /** Pointer to owning overlay widget */
-        QHBoxLayout                 _layout;            /** For alignment of the icon label */
-        QLabel                      _iconLabel;         /** Icon label */
+        QBoxLayout*                 _layout;            /** For alignment of items */
     };
 
 public:
@@ -377,7 +384,7 @@ public:
      * @param viewPlugin Pointer to the view plugin for which to create the overlay
      * @param alignment Alignment w.r.t. to the \p source widget
      */
-    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom | Qt::AlignRight);
+    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom);
 
     /**
      * Set target widget to \p targetWidget
@@ -394,10 +401,13 @@ private:
     void setContentsMargins(std::int32_t margin);
 
 private:
-    const plugin::ViewPlugin*   _viewPlugin;        /** Pointer to the view plugin for which to create the overlay */
-    const Qt::Alignment&        _alignment;         /** Alignment w.r.t. to the source widget */
-    QHBoxLayout                 _layout;            /** For alignment of the learning center popup widget */
-    ToolbarWidget               _toolbarWidget;     /** Toolbar widget which contains the actions */
+    const plugin::ViewPlugin*   _viewPlugin;                /** Pointer to the view plugin for which to create the overlay */
+    const Qt::Alignment&        _alignment;                 /** Alignment w.r.t. to the source widget (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight) */
+    QHBoxLayout                 _layout;                    /** For alignment of the learning center popup widget */
+    QBoxLayout*                 _toolbarsLayout;            /** Layout for the settings and actions toolbars */
+    QVBoxLayout                 _verticalToolbarLayout;     /** Vertical toolbar for the top and bottom alignment */
+    ToolbarWidget               _settingsToolbarWidget;     /** Toolbar widget for learning center settings such as the visibility */
+    ToolbarWidget               _actionsToolbarWidget;      /** Toolbar widget which contains the various learning center actions */
 };
 
 }
