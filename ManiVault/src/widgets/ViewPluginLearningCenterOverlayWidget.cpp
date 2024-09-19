@@ -519,10 +519,12 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
             if (alwaysVisible)
                 return;
 
-            if (_viewPlugin->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked())
+            if (_viewPlugin->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked()) {
                 _overlayWidget->addMouseEventReceiverWidget(this);
-            else
+                update();
+            } else {
                 _overlayWidget->removeMouseEventReceiverWidget(this);
+            }
 
             //setAttribute(Qt::WA_TransparentForMouseEvents, !_viewPlugin->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked());
 
