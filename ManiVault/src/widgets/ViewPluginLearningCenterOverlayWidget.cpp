@@ -446,7 +446,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
         static const std::vector<Qt::Alignment> supportedAlignments{
             Qt::AlignTop,
             Qt::AlignBottom,
-            Qt::AlignBottom,
+            Qt::AlignLeft,
             Qt::AlignRight
         };
 

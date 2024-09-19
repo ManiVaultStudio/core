@@ -384,7 +384,7 @@ public:
      * @param viewPlugin Pointer to the view plugin for which to create the overlay
      * @param alignment Alignment w.r.t. to the \p source widget
      */
-    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom);
+    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignRight);
 
     /**
      * Set target widget to \p targetWidget
