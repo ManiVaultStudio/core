@@ -37,7 +37,6 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
             throw std::runtime_error("Target widget may not be a nullptr");
 
         addMouseEventReceiverWidget(&_settingsToolbarWidget);
-        addMouseEventReceiverWidget(&_actionsToolbarWidget);
 
         static const std::vector<Qt::Alignment> supportedAlignments{
                 Qt::AlignTop,
@@ -479,7 +478,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
         };
 
         if (std::find(supportedAlignments.begin(), supportedAlignments.end(), alignment) == supportedAlignments.end())
-            throw std::runtime_error("Supported toolbar alignment options are: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft and Qt::AlignRight");
+            throw std::runtime_error("Supported toolbar alignment options are: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight and Qt::AlignCenter");
 
         if (alignment & Qt::AlignLeft || alignment & Qt::AlignRight)
             _layout = new QVBoxLayout(this);
@@ -520,7 +519,15 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
             if (alwaysVisible)
                 return;
 
-            setAttribute(Qt::WA_TransparentForMouseEvents, !_viewPlugin->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked());
+            if (_viewPlugin->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked())
+                _overlayWidget->addMouseEventReceiverWidget(this);
+            else
+                _overlayWidget->removeMouseEventReceiverWidget(this);
+
+            //setAttribute(Qt::WA_TransparentForMouseEvents, !_viewPlugin->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked());
+
+            //for (auto childWidget : findChildren<QWidget*>())
+            //    childWidget->setAttribute(Qt::WA_TransparentForMouseEvents, !_viewPlugin->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked());
         };
 
         updateTransparentForMouseEvents();
