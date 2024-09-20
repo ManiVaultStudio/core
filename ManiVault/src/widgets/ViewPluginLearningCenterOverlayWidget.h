@@ -393,6 +393,13 @@ public:
      */
     void setTargetWidget(QWidget* targetWidget);
 
+    /**
+     * Respond to \p target events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
 private:
 
     /**
@@ -401,14 +408,19 @@ private:
      */
     void setContentsMargins(std::int32_t margin);
 
+    /** Updates the background gradient */
+    void updateBackgroundStyle();
+
 private:
-    const plugin::ViewPlugin*   _viewPlugin;                /** Pointer to the view plugin for which to create the overlay */
-    const Qt::Alignment&        _alignment;                 /** Alignment w.r.t. to the source widget (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
-    QHBoxLayout                 _layout;                    /** For alignment of the learning center popup widget */
-    QBoxLayout*                 _toolbarsLayout;            /** Layout for the settings and actions toolbars */
-    QVBoxLayout                 _verticalToolbarLayout;     /** Vertical toolbar for the top and bottom alignment */
-    ToolbarWidget               _settingsToolbarWidget;     /** Toolbar widget for learning center settings such as the visibility */
-    ToolbarWidget               _actionsToolbarWidget;      /** Toolbar widget which contains the various learning center actions */
+    const plugin::ViewPlugin*   _viewPlugin;                        /** Pointer to the view plugin for which to create the overlay */
+    const Qt::Alignment         _alignment;                         /** Alignment w.r.t. to the source widget (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
+    QHBoxLayout                 _layout;                            /** For alignment of the learning center popup widget */
+    QBoxLayout*                 _toolbarsLayout;                    /** Layout for the settings and actions toolbars */
+    QVBoxLayout                 _verticalToolbarLayout;             /** Vertical toolbar for the top and bottom alignment */
+    ToolbarWidget               _settingsToolbarWidget;             /** Toolbar widget for learning center settings such as the visibility */
+    ToolbarWidget               _actionsToolbarWidget;              /** Toolbar widget which contains the various learning center actions */
+    OverlayWidget               _backgroundOverlayWidget;           /** Widget with background content */
+    mv::util::WidgetFader       _backgroundOverlayWidgetFader;      /** For fading in/out the background overlay widget */
 };
 
 }

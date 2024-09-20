@@ -22,13 +22,15 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment /*= Qt::AlignBottom | Qt::AlignRight*/) :
+ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment /*= Qt::AlignBottom */) :
     OverlayWidget(target),
     _viewPlugin(viewPlugin),
     _alignment(alignment),
     _toolbarsLayout(nullptr),
     _settingsToolbarWidget(viewPlugin, this, alignment, true),
-    _actionsToolbarWidget(viewPlugin, this, alignment)
+    _actionsToolbarWidget(viewPlugin, this, alignment),
+    _backgroundOverlayWidget(target),
+    _backgroundOverlayWidgetFader(this, &_backgroundOverlayWidget)
 {
     try {
         Q_ASSERT(target);
@@ -39,11 +41,11 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         addMouseEventReceiverWidget(&_settingsToolbarWidget);
 
         static const std::vector<Qt::Alignment> supportedAlignments{
-                Qt::AlignTop,
-                Qt::AlignBottom,
-                Qt::AlignLeft,
-                Qt::AlignRight,
-                Qt::AlignCenter
+            Qt::AlignTop,
+            Qt::AlignBottom,
+            Qt::AlignLeft,
+            Qt::AlignRight,
+            Qt::AlignCenter
         };
 
         if (std::find(supportedAlignments.begin(), supportedAlignments.end(), alignment) == supportedAlignments.end())
@@ -84,6 +86,15 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         setMouseTracking(true);
 
         raise();
+
+        _backgroundOverlayWidget.setAutoFillBackground(true);
+        
+        _backgroundOverlayWidget.lower();
+        _backgroundOverlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+        target->installEventFilter(this);
+
+        updateBackgroundStyle();
     }
     catch (std::exception& e)
     {
@@ -101,13 +112,77 @@ void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidge
     setParent(targetWidget);
 }
 
+bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Resize:
+            updateBackgroundStyle();
+            break;
+
+        case QEvent::Enter:
+            _backgroundOverlayWidgetFader.fadeIn();
+            break;
+
+        case QEvent::Leave:
+            _backgroundOverlayWidgetFader.fadeOut();
+            break;
+
+        default:
+            break;
+    }
+
+    return OverlayWidget::eventFilter(target, event);
+}
+
 void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t margin)
 {
     _layout.setContentsMargins(margin, margin, margin, margin);
 }
 
+void ViewPluginLearningCenterOverlayWidget::updateBackgroundStyle()
+{
+    const auto height               = getWidgetOverlayer().getTargetWidget()->height();
+    const auto applicationPalette   = QApplication::palette();
+    const auto windowColor          = applicationPalette.color(QPalette::Window);
+
+    QColor gradientColors[2] {
+        windowColor,
+        windowColor
+    };
+
+    gradientColors[0].setAlpha(200);
+    gradientColors[1].setAlpha(0);
+
+    const QStringList gradientColorsStrings{
+        getColorAsCssString(gradientColors[0]),
+        getColorAsCssString(gradientColors[1])
+    };
+
+    constexpr float stopsInPixels[2] = { 20.f, 50.f };
+
+    QStringList rangeStrings{ "0", "1" };
+
+    if (_alignment == Qt::AlignTop || _alignment == Qt::AlignBottom) {
+        const QStringList stopsNormalizedStrings = {
+                QString::number(stopsInPixels[0] / static_cast<float>(height)),
+                QString::number(stopsInPixels[1] / static_cast<float>(height))
+        };
+
+        if (_alignment == Qt::AlignBottom)
+            std::reverse(rangeStrings.begin(), rangeStrings.end());
+
+        _backgroundOverlayWidget.setStyleSheet(QString(
+            "background: qlineargradient(x1: 0, y1: %1, x2: 0, y2: %2,"
+            "stop: 0 %5"
+            "stop: %3 %5"
+            "stop: %4 %6,"
+            "stop: 1 %6);"
+        ).arg(rangeStrings.first(), rangeStrings.last(), stopsNormalizedStrings[0], stopsNormalizedStrings[1], gradientColorsStrings.first(), gradientColorsStrings.last()));
+    }
+}
+
 ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(16, 16)*/) :
-    QWidget(),
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
     _iconSize(iconSize),
@@ -497,7 +572,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
             _layout->setContentsMargins(margin, margin, margin, margin);
         };
 
-        setContentsMargins(8);
+        setContentsMargins(4);
 
         const auto installEventFilterOnTargetWidget = [this](QWidget* previousTargetWidget, QWidget* currentTargetWidget) -> void {
             Q_ASSERT(currentTargetWidget);
@@ -525,11 +600,6 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
             } else {
                 _overlayWidget->removeMouseEventReceiverWidget(this);
             }
-
-            //setAttribute(Qt::WA_TransparentForMouseEvents, !_viewPlugin->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked());
-
-            //for (auto childWidget : findChildren<QWidget*>())
-            //    childWidget->setAttribute(Qt::WA_TransparentForMouseEvents, !_viewPlugin->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked());
         };
 
         updateTransparentForMouseEvents();
