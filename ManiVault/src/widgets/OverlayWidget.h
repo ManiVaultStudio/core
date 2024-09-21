@@ -64,7 +64,7 @@ protected:
      */
     void resizeEvent(QResizeEvent* event) override;
 
-private:
+public:
 
     /** Update widget mask to selectively process mouse events */
     virtual void updateMask() final;

@@ -65,7 +65,7 @@ inline WidgetClass* findParent(const QWidget* widget)
         parentWidget = parentWidget->parentWidget();
     }
 
-    return 0;
+    return {};
 }
 
 /**
@@ -102,4 +102,5 @@ CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha = true);
  */
 CORE_EXPORT bool urlExists(const QString& urlString);
 
+ CORE_EXPORT void replaceLayout(QWidget* widget, QLayout* newLayout, bool removeWidgets = false);
 }

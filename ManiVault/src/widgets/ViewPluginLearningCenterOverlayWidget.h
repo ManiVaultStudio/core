@@ -43,7 +43,7 @@ private:
          * @param overlayWidget Pointer to overlay widget
          * @param iconSize Size of the item icon
          */
-        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QSize& iconSize = QSize(16, 16));
+        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize = QSize(16, 16));
 
         /**
          * Invoked when the widget is shown
@@ -93,7 +93,7 @@ private:
          * Get non-const pointer to overlay widget
          * @return Non-const pointer to overlay widget
          */
-        OverlayWidget* getOverlayWidget() const;
+        ViewPluginLearningCenterOverlayWidget* getOverlayWidget() const;
 
         /**
          * Respond to \p target events
@@ -114,13 +114,13 @@ private:
         void updateVisibility();
 
     private:
-        const plugin::ViewPlugin*   _viewPlugin;            /** Const pointer to source view plugin */
-        OverlayWidget*              _overlayWidget;         /** Pointer to overlay widget */
-        const QSize                 _iconSize;              /** Size of the item icon */
-        QHBoxLayout                 _layout;                /** For placing the icon label */
-        QLabel                      _iconLabel;             /** Icon label */
-        mv::util::WidgetFader       _widgetFader;           /** For fading in/out */
-        bool                        _hasVisibilityToggle;   /** Boolean determining whether a visibility toggle is installed */
+        const plugin::ViewPlugin*                   _viewPlugin;            /** Const pointer to source view plugin */
+        ViewPluginLearningCenterOverlayWidget*      _overlayWidget;         /** Pointer to overlay widget */
+        const QSize                                 _iconSize;              /** Size of the item icon */
+        QHBoxLayout                                 _layout;                /** For placing the icon label */
+        QLabel                                      _iconLabel;             /** Icon label */
+        mv::util::WidgetFader                       _widgetFader;           /** For fading in/out */
+        bool                                        _hasVisibilityToggle;   /** Boolean determining whether a visibility toggle is installed */
     };
 
     /** Toolbar item widget for hiding the other toolbar widget items */
@@ -133,7 +133,38 @@ private:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        VisibleToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        VisibleToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
+    };
+
+    /** Toolbar item widget for configuring settings */
+    class SettingsToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        SettingsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -164,7 +195,7 @@ private:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -195,7 +226,7 @@ private:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -226,7 +257,7 @@ private:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -257,7 +288,7 @@ private:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -288,7 +319,7 @@ private:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -319,7 +350,7 @@ private:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        ToLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget);
+        ToLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -354,7 +385,19 @@ private:
          * @param alignment Item alignment (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter)
          * @param alwaysVisible Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting
          */
-        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const Qt::Alignment& alignment, bool alwaysVisible = false);
+        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const Qt::Alignment& alignment, bool alwaysVisible = false);
+
+        /**
+         * Get alignment
+         * @return Alignment flag
+         */
+        Qt::Alignment getAlignment() const;
+
+        /**
+         * Set alignment to \p alignment
+         * @param alignment Alignment flag
+         */
+        void setAlignment(const Qt::Alignment& alignment);
 
         /**
          * Add \p widget to the toolbar
@@ -371,10 +414,15 @@ private:
          */
         bool eventFilter(QObject* target, QEvent* event) override;
 
+        /** Invoked when the plugin learning center visibility changed */
+        void visibilityChanged();
+
     private:
         const plugin::ViewPlugin*   _viewPlugin;        /** Const pointer to source view plugin */
         OverlayWidget*              _overlayWidget;     /** Pointer to owning overlay widget */
-        QBoxLayout*                 _layout;            /** For alignment of items */
+        Qt::Alignment               _alignment;         /** Alignment of the items (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
+        bool                        _alwaysVisible;     /** Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting */
+        std::vector<QWidget*>       _widgets;           /** Registered widgets */
     };
 
 public:
@@ -400,6 +448,18 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
+    /**
+     * Get alignment
+     * @return Alignment flag
+     */
+    Qt::Alignment getAlignment() const;
+
+    /**
+     * Set alignment to \p alignment
+     * @param alignment Alignment flag
+     */
+    void setAlignment(const Qt::Alignment& alignment);
+
 private:
 
     /**
@@ -413,10 +473,10 @@ private:
 
 private:
     const plugin::ViewPlugin*   _viewPlugin;                        /** Pointer to the view plugin for which to create the overlay */
-    const Qt::Alignment         _alignment;                         /** Alignment w.r.t. to the source widget (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
-    QHBoxLayout                 _layout;                            /** For alignment of the learning center popup widget */
-    QBoxLayout*                 _toolbarsLayout;                    /** Layout for the settings and actions toolbars */
+    Qt::Alignment               _alignment;                         /** Alignment w.r.t. to the source widget (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
+    QVBoxLayout                 _layout;                            /** For alignment of the learning center toolbar */
     QVBoxLayout                 _verticalToolbarLayout;             /** Vertical toolbar for the top and bottom alignment */
+    QWidget                     _toolbarsWidget;                    /** Widget containing the settings and actions toolbar widgets */
     ToolbarWidget               _settingsToolbarWidget;             /** Toolbar widget for learning center settings such as the visibility */
     ToolbarWidget               _actionsToolbarWidget;              /** Toolbar widget which contains the various learning center actions */
     OverlayWidget               _backgroundOverlayWidget;           /** Widget with background content */

@@ -70,4 +70,40 @@ bool urlExists(const QString& urlString)
     }
     return false;
 }
+
+void replaceLayout(QWidget* widget, QLayout* newLayout, bool removeWidgets)
+{
+    Q_ASSERT(widget && newLayout);
+
+    try {
+        if (!widget)
+            throw std::runtime_error("Widget may not be a nullptr");
+
+        if (!newLayout)
+            throw std::runtime_error("New layout may not be a nullptr");
+
+        if (auto oldLayout = widget->layout()) {
+            QLayoutItem* item = nullptr;
+
+            while ((item = oldLayout->takeAt(0)) != nullptr) {
+                if (removeWidgets)
+                    delete item->widget();
+
+                delete item;
+            }
+
+            delete oldLayout;
+        }
+
+        widget->setLayout(newLayout);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to replace widget layout", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to replace widget layout");
+    }
+}
+
 }
