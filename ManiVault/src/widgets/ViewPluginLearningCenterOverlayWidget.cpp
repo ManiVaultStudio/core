@@ -53,7 +53,9 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 
         setLayout(&_layout);
 
+        _layout.addStretch(1);
         _layout.addWidget(&_toolbarsWidget);
+        _layout.addStretch(1);
 
         setAlignment(alignment);
 
@@ -166,6 +168,37 @@ void ViewPluginLearningCenterOverlayWidget::setAlignment(const Qt::Alignment& al
         toolbarsLayout->addWidget(&_settingsToolbarWidget);
         toolbarsLayout->addStretch(1);
         toolbarsLayout->addWidget(&_actionsToolbarWidget);
+
+    }
+
+    switch (_alignment) {
+	    case Qt::AlignLeft:
+        {
+            _layout.setStretch(0, 0);
+            _layout.setStretch(2, 1);
+            break;
+        }
+
+	    case Qt::AlignRight:
+	    {
+            _layout.setStretch(0, 1);
+            _layout.setStretch(2, 0);
+	        break;
+	    }
+
+	    case Qt::AlignTop:
+        {
+            _layout.setStretch(0, 0);
+            _layout.setStretch(2, 1);
+            break;
+        }
+
+	    case Qt::AlignBottom:
+	    {
+            _layout.setStretch(0, 1);
+            _layout.setStretch(2, 0);
+	        break;
+	    }
     }
 
     updateBackgroundStyle();
@@ -649,7 +682,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     setObjectName("ToolbarWidget");
     setMouseTracking(true);
     setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
-
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     try {
         Q_ASSERT(_viewPlugin && _overlayWidget);
 
@@ -716,6 +749,24 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::setAlignment(const Qt
 
     if (std::find(supportedAlignments.begin(), supportedAlignments.end(), _alignment) == supportedAlignments.end())
         throw std::runtime_error("Supported toolbar alignment options are: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight and Qt::AlignCenter");
+
+    /*
+    switch (_alignment) {
+    	case Qt::AlignLeft:
+		case Qt::AlignRight:
+    	{
+            //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+            break;
+    	}
+
+        case Qt::AlignTop:
+        case Qt::AlignBottom:
+        {
+            //setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+            break;
+        }
+    }
+    */
 
     QBoxLayout* layout = nullptr;
 
