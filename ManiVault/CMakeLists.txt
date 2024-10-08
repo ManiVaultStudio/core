@@ -372,6 +372,16 @@ install(EXPORT "ManiVaultPublicExport"
         COMPONENT MVPUBLIC_EXPORT
 )
 
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies_utils.cmake"
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_CMAKE_HELPER
+)
+
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_CMAKE_HELPER
+)
+
 if(MSVC)
     # Install program database (.pdb) files
     install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
@@ -433,6 +443,13 @@ add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_EXPORT
+        --prefix ${MV_INSTALL_DIR}
+        --verbose
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake helper files"
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component MVPUBLIC_CMAKE_HELPER
         --prefix ${MV_INSTALL_DIR}
         --verbose
     # If no plugin directory exists, ManiVault might try to import 
