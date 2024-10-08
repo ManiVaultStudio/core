@@ -31,6 +31,9 @@ namespace mv::gui
  */
 class CORE_EXPORT ViewPluginLearningCenterOverlayWidget : public OverlayWidget
 {
+
+Q_OBJECT
+
 protected:
 
     /** Base class for toolbar item widgets */
@@ -75,6 +78,9 @@ protected:
          */
         virtual bool shouldDisplay() const = 0;
 
+        /** Updates the item icon (for badge update) */
+        void updateIcon();
+
     protected:
 
         /**
@@ -101,9 +107,6 @@ protected:
          * @param event The event that took place
          */
         bool eventFilter(QObject* target, QEvent* event) override;
-
-        /** Updates the item icon (for badge update) */
-        void updateIcon();
 
         /** Toggles item visibility based on the learning center visibility action status */
         void installVisibilityToggle();
@@ -432,6 +435,8 @@ protected:
         Qt::Alignment               _alignment;         /** Alignment of the items (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
         bool                        _alwaysVisible;     /** Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting */
         std::vector<QWidget*>       _widgets;           /** Registered widgets */
+        QVBoxLayout                 _verticalLayout;    /** For laying out items vertically */
+        QHBoxLayout                 _horizontalLayout;  /** For laying out items horizontally */
     };
 
 public:
@@ -480,11 +485,20 @@ private:
     /** Updates the background gradient */
     void updateBackgroundStyle();
 
+signals:
+
+    
+    /**
+     * Signals that the alignment changed from \p previousAlignment to \p currentAlignment
+     * @param previousAlignment Previous alignment
+     * @param currentAlignment Current alignment
+     */
+    void alignmentChanged(const Qt::Alignment& previousAlignment, const Qt::Alignment& currentAlignment);
+
 private:
     const plugin::ViewPlugin*   _viewPlugin;                        /** Pointer to the view plugin for which to create the overlay */
     Qt::Alignment               _alignment;                         /** Alignment w.r.t. to the source widget (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
     QVBoxLayout                 _layout;                            /** For alignment of the learning center toolbar */
-    QVBoxLayout                 _verticalToolbarLayout;             /** Vertical toolbar for the top and bottom alignment */
     QWidget                     _toolbarsWidget;                    /** Widget containing the settings and actions toolbar widgets */
     ToolbarWidget               _settingsToolbarWidget;             /** Toolbar widget for learning center settings such as the visibility */
     ToolbarWidget               _actionsToolbarWidget;              /** Toolbar widget which contains the various learning center actions */

@@ -56,6 +56,8 @@ void OverlayWidget::resizeEvent(QResizeEvent* event)
 
 void OverlayWidget::updateMask()
 {
+    updateGeometry();
+
     QRegion maskRegion(geometry());
 
     maskRegion -= QRegion(geometry());
@@ -64,6 +66,8 @@ void OverlayWidget::updateMask()
         maskRegion += mouseEventReceiverWidget->geometry();
 
     setMask(maskRegion);
+
+    update();
 }
 
 }

@@ -53,9 +53,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 
         setLayout(&_layout);
 
-        _layout.addStretch(1);
         _layout.addWidget(&_toolbarsWidget);
-        _layout.addStretch(1);
 
         setAlignment(alignment);
 
@@ -83,6 +81,8 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         target->installEventFilter(this);
 
         updateBackgroundStyle();
+
+        connect(this, &ViewPluginLearningCenterOverlayWidget::alignmentChanged, this, &ViewPluginLearningCenterOverlayWidget::updateMask);
     }
     catch (std::exception& e)
     {
@@ -137,6 +137,8 @@ void ViewPluginLearningCenterOverlayWidget::setAlignment(const Qt::Alignment& al
     
 #endif
 
+    const auto previousAlignment = _alignment;
+
     _alignment = alignment;
 
     _layout.setAlignment(_alignment);
@@ -173,35 +175,27 @@ void ViewPluginLearningCenterOverlayWidget::setAlignment(const Qt::Alignment& al
 
     switch (_alignment) {
 	    case Qt::AlignLeft:
+        case Qt::AlignRight:
         {
-            _layout.setStretch(0, 0);
-            _layout.setStretch(2, 1);
+            _toolbarsWidget.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
             break;
         }
-
-	    case Qt::AlignRight:
-	    {
-            _layout.setStretch(0, 1);
-            _layout.setStretch(2, 0);
-	        break;
-	    }
 
 	    case Qt::AlignTop:
+        case Qt::AlignBottom:
         {
-            _layout.setStretch(0, 0);
-            _layout.setStretch(2, 1);
+            _toolbarsWidget.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
             break;
         }
-
-	    case Qt::AlignBottom:
-	    {
-            _layout.setStretch(0, 1);
-            _layout.setStretch(2, 0);
-	        break;
-	    }
     }
 
     updateBackgroundStyle();
+
+    update();
+    updateGeometry();
+    updateMask();
+
+    emit alignmentChanged(previousAlignment, _alignment);
 }
 
 void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t margin)
@@ -375,7 +369,7 @@ plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWi
 
 ViewPluginLearningCenterOverlayWidget* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getOverlayWidget() const
 {
-    return const_cast<ViewPluginLearningCenterOverlayWidget*>(_overlayWidget);
+    return _overlayWidget;
 }
 
 bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilter(QObject* watched, QEvent* event)
@@ -406,7 +400,7 @@ bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilt
 }
 
 ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::VisibleToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
-    AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(10, 10))
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(11, 11))
 {
     const auto updateTooltip = [this]() -> void {
         setToolTip(QString("%1 the plugin learning center").arg(getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked() ? "Hide" : "Show"));
@@ -439,7 +433,7 @@ bool ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::shouldDisp
 std::vector<ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::Alignment> ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::alignments = {};
 
 ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::AlignmentToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
-    AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(10, 10))
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(11, 11))
 {
     setToolTip("Move the toolbar");
 
@@ -452,6 +446,8 @@ ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::AlignmentTool
 		    { Qt::AlignRight, "Move to right", getDockAreaIcon(DockAreaFlag::Right) }
         };
     }
+
+    //connect(getOverlayWidget(), &ViewPluginLearningCenterOverlayWidget::alignmentChanged, this, &AbstractToolbarItemWidget::updateIcon);
 }
 
 void ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -483,14 +479,7 @@ void ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::mousePre
 
 QIcon ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::getIcon() const
 {
-    const auto it = std::find_if(alignments.begin(), alignments.end(), [this](const auto& alignment) -> bool {
-	    return alignment._alignment == getOverlayWidget()->getAlignment();
-    });
-
-    if (it == alignments.end())
-        return {};
-    else
-		return it->_icon;
+    return Application::getIconFont("FontAwesome").getIcon("arrows-alt");
 }
 
 bool ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::shouldDisplay() const
@@ -687,7 +676,19 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     setObjectName("ToolbarWidget");
     setMouseTracking(true);
     setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    setLayoutContentsMargins(&_verticalLayout, 4);
+    setLayoutContentsMargins(&_horizontalLayout, 4);
+
+    auto layout = new QVBoxLayout();
+
+    layout->addLayout(&_verticalLayout);
+    layout->addLayout(&_horizontalLayout);
+
+    setLayout(layout);
+
+    setStyleSheet("background-color: red;");
+
     try {
         Q_ASSERT(_viewPlugin && _overlayWidget);
 
@@ -755,55 +756,49 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::setAlignment(const Qt
     if (std::find(supportedAlignments.begin(), supportedAlignments.end(), _alignment) == supportedAlignments.end())
         throw std::runtime_error("Supported toolbar alignment options are: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight and Qt::AlignCenter");
 
-    /*
     switch (_alignment) {
     	case Qt::AlignLeft:
 		case Qt::AlignRight:
     	{
-            //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+            setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+
+            clearLayout(&_horizontalLayout);
+
+            for (auto widget : _widgets)
+                _verticalLayout.addWidget(widget);
+
             break;
     	}
 
         case Qt::AlignTop:
         case Qt::AlignBottom:
         {
-            //setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+            setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+
+            clearLayout(&_verticalLayout);
+
+            for (auto widget : _widgets)
+                _horizontalLayout.addWidget(widget);
+
             break;
         }
     }
-    */
 
-    QBoxLayout* layout = nullptr;
+    QTimer::singleShot(25, [this]() -> void {
+        /*layout()->invalidate();
 
-    if (_alignment & Qt::AlignLeft || _alignment & Qt::AlignRight)
-        layout = new QVBoxLayout();
 
-    if (_alignment & Qt::AlignTop || _alignment & Qt::AlignCenter || _alignment & Qt::AlignBottom)
-        layout = new QHBoxLayout();
+        _verticalLayout.invalidate();
+        _horizontalLayout.invalidate();
 
-    if (!layout)
-        return;
+        updateGeometry();
+        update();
+        adjustSize();*/
 
-    layout->setSpacing(0);
+        _overlayWidget->updateMask();
+    });
 
-    if (_alignment == Qt::AlignCenter)
-        layout->setAlignment(Qt::AlignLeft);
-
-    const auto setContentsMargins = [this, layout](std::int32_t margin) -> void {
-        layout->setContentsMargins(margin, margin, margin, margin);
-    };
-
-    setContentsMargins(4);
-
-    for (auto widget : _widgets)
-        layout->addWidget(widget);
-
-    replaceLayout(this, layout);
-
-    update();
-    updateGeometry();
-
-    _overlayWidget->updateMask();
+    
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::addWidget(QWidget* widget)
@@ -817,7 +812,21 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::addWidget(QWidget* wi
 
         _widgets.push_back(widget);
 
-        layout()->addWidget(widget);
+        switch (_alignment) {
+	        case Qt::AlignLeft:
+	        case Qt::AlignRight:
+	        {
+	            _verticalLayout.addWidget(widget);
+	            break;
+	        }
+
+	        case Qt::AlignTop:
+	        case Qt::AlignBottom:
+	        {
+				_horizontalLayout.addWidget(widget);
+	            break;
+	        }
+        }
     }
     catch (std::exception& e)
     {

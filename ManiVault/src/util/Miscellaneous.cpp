@@ -106,4 +106,26 @@ void replaceLayout(QWidget* widget, QLayout* newLayout, bool removeWidgets)
     }
 }
 
+void clearLayout(QLayout* layout, bool removeWidgets)
+{
+    QLayoutItem* layoutItem;
+
+    while ((layoutItem = layout->takeAt(0)) != nullptr) {
+        if (removeWidgets)
+			delete layoutItem->widget();
+
+        delete layoutItem;
+    }
+}
+
+void setLayoutContentsMargins(QLayout* layout, std::int32_t margin)
+{
+    Q_ASSERT(layout);
+
+    if (!layout)
+        return;
+
+    layout->setContentsMargins(margin, margin, margin, margin);
+}
+
 }
