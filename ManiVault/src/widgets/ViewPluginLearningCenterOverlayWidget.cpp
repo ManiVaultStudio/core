@@ -436,6 +436,14 @@ bool ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::shouldDisp
     return true;
 }
 
+const std::vector<ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::Alignment> ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::alignments = {
+    { Qt::AlignTop, "Move to top", getDockAreaIcon(DockAreaFlag::Top) },
+    { Qt::AlignBottom, "Move to bottom", getDockAreaIcon(DockAreaFlag::Bottom) },
+    { Qt::AlignLeft, "Move to left", getDockAreaIcon(DockAreaFlag::Left) },
+    { Qt::AlignCenter, "Move to center", getDockAreaIcon(DockAreaFlag::Center) },
+    { Qt::AlignRight, "Move to right", getDockAreaIcon(DockAreaFlag::Right) }
+};
+
 ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::SettingsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(10, 10))
 {
@@ -448,19 +456,9 @@ void ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::mousePres
 
     auto contextMenu = new QMenu(this);
 
-    struct Alignment {
-        Qt::Alignment   _alignment;
-        QString         _title;
-        QIcon           _icon;
-    };
+    
 
-    static const std::vector<Alignment> alignments{
-        { Qt::AlignTop, "Move to top", getDockAreaIcon(DockAreaFlag::Top) },
-        { Qt::AlignBottom, "Move to bottom", getDockAreaIcon(DockAreaFlag::Bottom) },
-        { Qt::AlignLeft, "Move to left", getDockAreaIcon(DockAreaFlag::Left) },
-        { Qt::AlignCenter, "Move to center", getDockAreaIcon(DockAreaFlag::Center) },
-        { Qt::AlignRight, "Move to right", getDockAreaIcon(DockAreaFlag::Right) }
-    };
+    
 
     std::vector<Alignment> candidateAlignments;
 

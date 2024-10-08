@@ -31,7 +31,7 @@ namespace mv::gui
  */
 class CORE_EXPORT ViewPluginLearningCenterOverlayWidget : public OverlayWidget
 {
-private:
+protected:
 
     /** Base class for toolbar item widgets */
     class AbstractToolbarItemWidget : public QWidget {
@@ -157,6 +157,14 @@ private:
     /** Toolbar item widget for configuring settings */
     class SettingsToolbarItemWidget final : public AbstractToolbarItemWidget
     {
+    private:
+
+    	struct Alignment {
+            Qt::Alignment   _alignment;
+            QString         _title;
+            QIcon           _icon;
+        };
+
     public:
 
         /**
@@ -183,6 +191,9 @@ private:
          * @return Boolean determining whether the item should be visible or not
          */
         bool shouldDisplay() const override;
+
+    private:
+        static const std::vector<Alignment> alignments;
     };
 
     /** Toolbar item widget for showing the view plugin related videos */
@@ -481,6 +492,8 @@ private:
     ToolbarWidget               _actionsToolbarWidget;              /** Toolbar widget which contains the various learning center actions */
     OverlayWidget               _backgroundOverlayWidget;           /** Widget with background content */
     mv::util::WidgetFader       _backgroundOverlayWidgetFader;      /** For fading in/out the background overlay widget */
+
+    friend class SettingsToolbarItemWidget;
 };
 
 }
