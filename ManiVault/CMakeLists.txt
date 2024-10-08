@@ -39,6 +39,9 @@ include(CMakePackageConfigHelpers)
 # Test hardware avx capabilities
 include(mv_check_and_set_AVX)
 
+# Helper function to install runtime dependencies
+include(mv_install_dependencies_utils)
+
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
 
