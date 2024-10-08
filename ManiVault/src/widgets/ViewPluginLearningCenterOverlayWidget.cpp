@@ -62,7 +62,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         _settingsToolbarWidget.layout()->setSpacing(0);
 
         _settingsToolbarWidget.addWidget(new VisibleToolbarItemWidget(viewPlugin, this));
-        _settingsToolbarWidget.addWidget(new SettingsToolbarItemWidget(viewPlugin, this));
+        _settingsToolbarWidget.addWidget(new AlignmentToolbarItemWidget(viewPlugin, this));
 
         _actionsToolbarWidget.addWidget(new VideosToolbarItemWidget(viewPlugin, this));
         _actionsToolbarWidget.addWidget(new DescriptionToolbarItemWidget(viewPlugin, this));
@@ -436,29 +436,29 @@ bool ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::shouldDisp
     return true;
 }
 
-const std::vector<ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::Alignment> ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::alignments = {
-    { Qt::AlignTop, "Move to top", getDockAreaIcon(DockAreaFlag::Top) },
-    { Qt::AlignBottom, "Move to bottom", getDockAreaIcon(DockAreaFlag::Bottom) },
-    { Qt::AlignLeft, "Move to left", getDockAreaIcon(DockAreaFlag::Left) },
-    { Qt::AlignCenter, "Move to center", getDockAreaIcon(DockAreaFlag::Center) },
-    { Qt::AlignRight, "Move to right", getDockAreaIcon(DockAreaFlag::Right) }
-};
+std::vector<ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::Alignment> ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::alignments = {};
 
-ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::SettingsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::AlignmentToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(10, 10))
 {
     setToolTip("Move the toolbar");
+
+    if (alignments.empty()) {
+        alignments = {
+		    { Qt::AlignTop, "Move to top", getDockAreaIcon(DockAreaFlag::Top) },
+		    { Qt::AlignBottom, "Move to bottom", getDockAreaIcon(DockAreaFlag::Bottom) },
+		    { Qt::AlignLeft, "Move to left", getDockAreaIcon(DockAreaFlag::Left) },
+		    { Qt::AlignCenter, "Move to center", getDockAreaIcon(DockAreaFlag::Center) },
+		    { Qt::AlignRight, "Move to right", getDockAreaIcon(DockAreaFlag::Right) }
+        };
+    }
 }
 
-void ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+void ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
 
     auto contextMenu = new QMenu(this);
-
-    
-
-    
 
     std::vector<Alignment> candidateAlignments;
 
@@ -481,12 +481,19 @@ void ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::mousePres
     contextMenu->exec(mapToGlobal(event->pos()));
 }
 
-QIcon ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::getIcon() const
+QIcon ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("arrows-alt");
+    const auto it = std::find_if(alignments.begin(), alignments.end(), [this](const auto& alignment) -> bool {
+	    return alignment._alignment == getOverlayWidget()->getAlignment();
+    });
+
+    if (it == alignments.end())
+        return {};
+    else
+		return it->_icon;
 }
 
-bool ViewPluginLearningCenterOverlayWidget::SettingsToolbarItemWidget::shouldDisplay() const
+bool ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::shouldDisplay() const
 {
     return true;
 }

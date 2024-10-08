@@ -154,11 +154,9 @@ protected:
         bool shouldDisplay() const override;
     };
 
-    /** Toolbar item widget for configuring settings */
-    class SettingsToolbarItemWidget final : public AbstractToolbarItemWidget
+    /** Toolbar item widget for configuring the alignment */
+    class AlignmentToolbarItemWidget final : public AbstractToolbarItemWidget
     {
-    private:
-
     	struct Alignment {
             Qt::Alignment   _alignment;
             QString         _title;
@@ -172,7 +170,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        SettingsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        AlignmentToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -193,7 +191,7 @@ protected:
         bool shouldDisplay() const override;
 
     private:
-        static const std::vector<Alignment> alignments;
+        static std::vector<Alignment> alignments;
     };
 
     /** Toolbar item widget for showing the view plugin related videos */
@@ -493,7 +491,7 @@ private:
     OverlayWidget               _backgroundOverlayWidget;           /** Widget with background content */
     mv::util::WidgetFader       _backgroundOverlayWidgetFader;      /** For fading in/out the background overlay widget */
 
-    friend class SettingsToolbarItemWidget;
+    friend class AlignmentToolbarItemWidget;
 };
 
 }
