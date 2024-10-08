@@ -37,7 +37,7 @@ set(CMAKE_INSTALL_MESSAGE LAZY)
 include(CMakePackageConfigHelpers)
 
 # Test hardware avx capabilities
-include(CMakeCheckSetAVX)
+include(mv_check_and_set_AVX)
 
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
@@ -205,7 +205,7 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
 # Use AVX if enabled and available
-check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
+mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
 
 if(MV_PRECOMPILE_HEADERS)
     target_precompile_headers(${MV_PUBLIC_LIB} PRIVATE 
@@ -256,7 +256,7 @@ target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
-check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
+mv_check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
 
 if(MV_PRECOMPILE_HEADERS)
     target_precompile_headers(${MV_EXE} PRIVATE 
@@ -378,6 +378,11 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies_utils.c
 )
 
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_CMAKE_HELPER
+)
+
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
         DESTINATION cmake/mv
         COMPONENT MVPUBLIC_CMAKE_HELPER
 )

@@ -66,7 +66,7 @@ target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
-check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${MV_USE_AVX})
+mv_check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${MV_USE_AVX})
 
 install(TARGETS ${SHARED_PARAMETERS_PLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll

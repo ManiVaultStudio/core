@@ -2,10 +2,10 @@
 # Check for and link to AVX instruction sets
 # -----------------------------------------------------------------------------
 # usage:
-#  check_and_set_AVX(${TARGET} ${USE_AVX})
-#  check_and_set_AVX(${TARGET} ${USE_AVX} 1)    # optional argument, only use AVX (not AVX2 even if available)
+#  mv_check_and_set_AVX(${TARGET} ${USE_AVX})
+#  mv_check_and_set_AVX(${TARGET} ${USE_AVX} 1)    # optional argument, only use AVX (not AVX2 even if available)
 
-macro(check_and_set_AVX target useavx)
+macro(mv_check_and_set_AVX target useavx)
 
 	if(${useavx})
 		# Use cmake hardware checks to see whether AVX should be activated

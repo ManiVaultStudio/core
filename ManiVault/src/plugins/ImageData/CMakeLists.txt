@@ -80,7 +80,7 @@ target_link_libraries(${IMAGEDATA} PRIVATE PointData)
 target_link_libraries(${IMAGEDATA} PRIVATE ClusterData)
 
 # Use AVX if enabled and available
-check_and_set_AVX(${IMAGEDATA} ${MV_USE_AVX})
+mv_check_and_set_AVX(${IMAGEDATA} ${MV_USE_AVX})
 
 set_target_properties(${IMAGEDATA} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
 
