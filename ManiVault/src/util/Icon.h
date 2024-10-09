@@ -35,7 +35,7 @@ CORE_EXPORT QIcon createIcon(const QPixmap& pixmap, const QList<QSize>& pixmapSi
 CORE_EXPORT QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay);
 
 /**
- * Combine icons \p iconA and \p iconB into one
+ * Draws \p iconB on top of \p iconA
  * @param iconA Icon A
  * @param iconB Icon B (overlays iconA)
  * @return Combined icon

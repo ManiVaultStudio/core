@@ -10,10 +10,6 @@
 #include "util/WidgetFader.h"
 
 #include <QHBoxLayout>
-#include <QMouseEvent>
-
-#include "ViewPlugin.h"
-#include "util/Video.h"
 
 namespace mv::plugin {
     class ViewPlugin;
@@ -46,7 +42,7 @@ protected:
          * @param overlayWidget Pointer to overlay widget
          * @param iconSize Size of the item icon
          */
-        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize = QSize(16, 16));
+        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize = QSize(14, 14));
 
         /**
          * Invoked when the widget is shown
@@ -388,34 +384,58 @@ protected:
 
     /** Toolbar widget to align items horizontally or vertically */
     class ToolbarWidget : public QWidget {
+    private:
+
+        /** Overlay widget for background */
+        class BackgroundWidget : public OverlayWidget
+        {
+        public:
+            
+	        /**
+             * Construct with pointer to \p target widget and \p viewPlugin
+             * @param target Pointer to target widget
+             * @param viewPlugin Pointer to view plugin
+             */
+            BackgroundWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin);
+
+        protected:
+
+	        /**
+             * Override paint event to do some custom background painting
+             * @param event Pointer to paint event
+             */
+            void paintEvent(QPaintEvent* event) override;
+
+        private:
+            const plugin::ViewPlugin*   _viewPlugin;      /** Pointer to view plugin */
+        };
+
     public:
 
         /**
-         * Construct with pointer to \p viewPlugin, parent \p overlayWidget  and \p alignment
+         * Construct with pointer to \p viewPlugin and pointer to parent \p overlayWidget
          * @param viewPlugin Pointer to the view plugin
          * @param overlayWidget Pointer to parent overlay widget
-         * @param alignment Item alignment (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter)
          * @param alwaysVisible Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting
          */
-        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const Qt::Alignment& alignment, bool alwaysVisible = false);
-
-        /**
-         * Get alignment
-         * @return Alignment flag
-         */
-        Qt::Alignment getAlignment() const;
-
-        /**
-         * Set alignment to \p alignment
-         * @param alignment Alignment flag
-         */
-        void setAlignment(const Qt::Alignment& alignment);
+        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, bool alwaysVisible = false);
 
         /**
          * Add \p widget to the toolbar
          * @param widget Pointer to widget to add
          */
         void addWidget(QWidget* widget);
+
+    protected:
+
+        /**
+         * Invoked when the widget is shown
+         * @param event Pointer to show event that occurred
+         */
+        void showEvent(QShowEvent* event) override;
+
+        /** Update the alignment in response to the plugin center alignment changing*/
+        void updateAlignment();
 
     private:
 
@@ -429,25 +449,36 @@ protected:
         /** Invoked when the plugin learning center visibility changed */
         void visibilityChanged();
 
+        /**
+         * Get the learning center action
+         * @return Reference to the view plugin learning center action
+         */
+        PluginLearningCenterAction& getLearningCenterAction();
+
     private:
-        const plugin::ViewPlugin*   _viewPlugin;        /** Const pointer to source view plugin */
-        OverlayWidget*              _overlayWidget;     /** Pointer to owning overlay widget */
-        Qt::Alignment               _alignment;         /** Alignment of the items (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
-        bool                        _alwaysVisible;     /** Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting */
-        std::vector<QWidget*>       _widgets;           /** Registered widgets */
-        QVBoxLayout                 _verticalLayout;    /** For laying out items vertically */
-        QHBoxLayout                 _horizontalLayout;  /** For laying out items horizontally */
+        const plugin::ViewPlugin*   _viewPlugin;                /** Const pointer to source view plugin */
+        OverlayWidget*              _overlayWidget;             /** Pointer to owning overlay widget */
+        bool                        _alwaysVisible;             /** Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting */
+        std::vector<QWidget*>       _widgets;                   /** Registered widgets */
+        QVBoxLayout                 _layout;                    /** Main layout */
+        QVBoxLayout                 _verticalLayout;            /** For laying out items vertically */
+        QHBoxLayout                 _horizontalLayout;          /** For laying out items horizontally */
+        BackgroundWidget            _backgroundWidget;          /** Widget with background content */
+        util::WidgetFader           _backgroundWidgetFader;     /** For fading in/out the background widget */
+
+        static constexpr std::int32_t margin = 4;
+
+        friend class ViewPluginLearningCenterOverlayWidget;
     };
 
 public:
 
     /**
-     * Construct with pointer to \p target widget, \p viewPlugin and initial \p alignment
+     * Construct with pointer to \p target widget and pointer to \p viewPlugin
      * @param target Pointer to parent widget (overlay widget will be layered on top of this widget)
      * @param viewPlugin Pointer to the view plugin for which to create the overlay
-     * @param alignment Alignment w.r.t. to the \p source widget
      */
-    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment = Qt::AlignBottom);
+    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin);
 
     /**
      * Set target widget to \p targetWidget
@@ -455,55 +486,23 @@ public:
      */
     void setTargetWidget(QWidget* targetWidget);
 
-    /**
-     * Respond to \p target events
-     * @param target Object of which an event occurred
-     * @param event The event that took place
-     */
-    bool eventFilter(QObject* target, QEvent* event) override;
-
-    /**
-     * Get alignment
-     * @return Alignment flag
-     */
-    Qt::Alignment getAlignment() const;
-
-    /**
-     * Set alignment to \p alignment
-     * @param alignment Alignment flag
-     */
-    void setAlignment(const Qt::Alignment& alignment);
-
 private:
 
+    /** Update the alignment in response to the plugin center alignment changing*/
+    void updateAlignment();
+
     /**
-     * Set layout contents margins to { \p margin, \p margin, \p margin, \p margin }
-     * @param margin Contents margins
+     * Get the learning center action
+     * @return Reference to the view plugin learning center action
      */
-    void setContentsMargins(std::int32_t margin);
-
-    /** Updates the background gradient */
-    void updateBackgroundStyle();
-
-signals:
-
-    
-    /**
-     * Signals that the alignment changed from \p previousAlignment to \p currentAlignment
-     * @param previousAlignment Previous alignment
-     * @param currentAlignment Current alignment
-     */
-    void alignmentChanged(const Qt::Alignment& previousAlignment, const Qt::Alignment& currentAlignment);
+    PluginLearningCenterAction& getLearningCenterAction();
 
 private:
     const plugin::ViewPlugin*   _viewPlugin;                        /** Pointer to the view plugin for which to create the overlay */
-    Qt::Alignment               _alignment;                         /** Alignment w.r.t. to the source widget (supported alignment flags: Qt::AlignTop, Qt::AlignBottom, Qt::AlignLeft, Qt::AlignRight, Qt::AlignCenter) */
     QVBoxLayout                 _layout;                            /** For alignment of the learning center toolbar */
     QWidget                     _toolbarsWidget;                    /** Widget containing the settings and actions toolbar widgets */
     ToolbarWidget               _settingsToolbarWidget;             /** Toolbar widget for learning center settings such as the visibility */
     ToolbarWidget               _actionsToolbarWidget;              /** Toolbar widget which contains the various learning center actions */
-    OverlayWidget               _backgroundOverlayWidget;           /** Widget with background content */
-    mv::util::WidgetFader       _backgroundOverlayWidgetFader;      /** For fading in/out the background overlay widget */
 
     friend class AlignmentToolbarItemWidget;
 };

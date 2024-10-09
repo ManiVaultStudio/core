@@ -8,6 +8,7 @@
 #include "actions/HorizontalGroupAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/TriggerAction.h"
+#include "actions/OptionAction.h"
 
 #include "util/Video.h"
 
@@ -53,6 +54,18 @@ public:
      * @return Pointer to plugin overlay widget (maybe nullptr)
      */
     ViewPluginLearningCenterOverlayWidget* getViewPluginOverlayWidget() const;
+
+    /**
+     * Get view plugin overlay alignment as a Qt flag
+     * @return Alignment flag
+     */
+    Qt::Alignment getAlignment() const;
+
+    /**
+     * Set view plugin overlay alignment to \p alignment
+     * @param alignment Alignment flag
+     */
+    void setAlignment(const Qt::Alignment& alignment);
 
 protected:
 
@@ -182,12 +195,14 @@ public: // Action getters
     TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; }
     TriggerAction& getViewHelpAction() { return _viewHelpAction; }
     TriggerAction& getViewShortcutsAction() { return _viewShortcutsAction; }
-    ToggleAction& getViewPluginOverlayVisibleAction() { return _viewPluginOverlayVisibleAction; }
+    ToggleAction& getOverlayVisibleAction() { return _overlayVisibleAction; }
+    OptionAction& getAlignmentAction() { return _alignmentAction; }
 
     const TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; }
     const TriggerAction& getViewHelpAction() const { return _viewHelpAction; }
     const TriggerAction& getViewShortcutsAction() const { return _viewShortcutsAction; }
-    const ToggleAction& getViewPluginOverlayVisibleAction() const  { return _viewPluginOverlayVisibleAction; }
+    const ToggleAction& getOverlayVisibleAction() const  { return _overlayVisibleAction; }
+    const OptionAction& getAlignmentAction() const  { return _alignmentAction; }
 
 signals:
 
@@ -211,13 +226,18 @@ signals:
      */
     void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
 
+public:
+    static const QStringList alignmentOptions;                                      /** Names of the supported alignments in the case of a view plugin */
+    static const std::vector<Qt::Alignment> alignmentFlags;                         /** Supported Qt alignment flags in the case of a view plugin */
+
 private:
     plugin::Plugin*                             _plugin;                            /** Pointer to associated plugin */
     HorizontalGroupAction                       _actions;                           /** Learning center actions */
     TriggerAction                               _viewDescriptionAction;             /** Trigger action that displays the plugin help */
     TriggerAction                               _viewHelpAction;                    /** Trigger action that displays the plugin description */
     TriggerAction                               _viewShortcutsAction;               /** Trigger action that displays the plugin shortcut map */
-    ToggleAction                                _viewPluginOverlayVisibleAction;    /** Toggles view plugin overlay widget visibility on/off */
+    ToggleAction                                _overlayVisibleAction;              /** Toggles view plugin overlay widget visibility on/off */
+    OptionAction                                _alignmentAction;                   /** Determines the view plugin overlay alignment */
     QString                                     _pluginTitle;                       /** Human-readable plugin title in plain text format */
     QString                                     _shortDescription;                  /** Short plugin description in plain text format */
     QString                                     _longDescription;                   /** Long plugin description in HTML-formatted text */
@@ -234,11 +254,3 @@ private:
 Q_DECLARE_METATYPE(mv::gui::PluginLearningCenterAction)
 
 inline const auto pluginLearningCenterActionMetaTypeId = qRegisterMetaType<mv::gui::PluginLearningCenterAction*>("mv::gui::PluginLearningCenterAction");
-
-//protected:
-//
-//    /**
-//     * Get learning center overlay widget
-//     * @return Reference to learning center overlay widget
-//     */
-//    gui::ViewPluginLearningCenterOverlayWidget& getViewPluginOverlayWidget();

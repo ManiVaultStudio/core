@@ -10,6 +10,8 @@
     #define OVERLAY_WIDGET_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv::gui
 {
 
@@ -20,6 +22,9 @@ OverlayWidget::OverlayWidget(QWidget* target, float initialOpacity /*= 1.0f*/) :
     setObjectName("OverlayWidget");
 
     setMouseTracking(true);
+
+    connect(&_widgetOverlayer, &WidgetOverlayer::mouseEventReceiverWidgetAdded, this, &OverlayWidget::updateMask);
+    connect(&_widgetOverlayer, &WidgetOverlayer::mouseEventReceiverWidgetRemoved, this, &OverlayWidget::updateMask);
 }
 
 mv::util::WidgetOverlayer& OverlayWidget::getWidgetOverlayer()
