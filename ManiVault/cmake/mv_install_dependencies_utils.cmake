@@ -7,7 +7,7 @@ function(mv_install_dependencies main_target)
     endforeach()
 
     include(CMakePackageConfigHelpers)
-    set(CONFIG_FILE_IN "${ManiVault_INSTALL_DIR}/cmake/mv/mv_install_dependencies.cmake.in")
+    set(CONFIG_FILE_IN "${ManiVault_DIR}/mv_install_dependencies.cmake.in")
     set(CONFIG_FILE_OUT "${CMAKE_CURRENT_BINARY_DIR}/mv_install_dependencies_${main_target}.cmake")
     configure_file("${CONFIG_FILE_IN}" "${CONFIG_FILE_OUT}" @ONLY)
 
