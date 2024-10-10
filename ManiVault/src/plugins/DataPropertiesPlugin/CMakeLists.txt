@@ -65,7 +65,7 @@ target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
-check_and_set_AVX(${DATAPROPERTIESPLUGIN} ${MV_USE_AVX})
+mv_check_and_set_AVX(${DATAPROPERTIESPLUGIN} ${MV_USE_AVX})
 
 if(MV_UNITY_BUILD)
     set_target_properties(${DATAPROPERTIESPLUGIN} PROPERTIES UNITY_BUILD ON)

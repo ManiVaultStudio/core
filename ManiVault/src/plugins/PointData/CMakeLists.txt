@@ -131,7 +131,7 @@ target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${POINTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
-check_and_set_AVX(${POINTDATA} ${MV_USE_AVX})
+mv_check_and_set_AVX(${POINTDATA} ${MV_USE_AVX})
 
 if(UNIX AND NOT APPLE)
    find_package(TBB REQUIRED)
