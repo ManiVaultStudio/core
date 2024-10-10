@@ -6,6 +6,9 @@
 
 #include <QDebug>
 
+#include <QPainterPath>
+#include <QRegion>
+
 #ifdef _DEBUG
     #define OVERLAY_WIDGET_VERBOSE
 #endif
@@ -21,6 +24,7 @@ OverlayWidget::OverlayWidget(QWidget* target, float initialOpacity /*= 1.0f*/) :
 {
     setObjectName("OverlayWidget");
     setMouseTracking(true);
+    setAttribute(Qt::WA_NoSystemBackground);
 
     connect(&_widgetOverlayer, &WidgetOverlayer::mouseEventReceiverWidgetAdded, this, &OverlayWidget::updateMask);
     connect(&_widgetOverlayer, &WidgetOverlayer::mouseEventReceiverWidgetRemoved, this, &OverlayWidget::updateMask);
@@ -58,6 +62,8 @@ void OverlayWidget::resizeEvent(QResizeEvent* event)
     updateMask();
 }
 
+
+
 void OverlayWidget::updateMask()
 {
     
@@ -68,11 +74,39 @@ void OverlayWidget::updateMask()
     maskRegion -= QRegion(geometry());
 
     for (auto mouseEventReceiverWidget : _widgetOverlayer.getMouseEventReceiverWidgets())
-		maskRegion += QRect(mouseEventReceiverWidget->pos(), mouseEventReceiverWidget->size());
+		maskRegion += QRect(mapFromGlobal(mapToGlobal(mouseEventReceiverWidget->pos())), mouseEventReceiverWidget->size());
 
     setMask(maskRegion);
 
     update();
+
+
+    QRect boundingRect = maskRegion.boundingRect();
+    QImage image(boundingRect.size(), QImage::Format_ARGB32);
+    image.fill(Qt::transparent); // Fill with transparency
+
+    // Create a QPainter to draw on the image
+    QPainter painter(&image);
+
+    // Set the desired color to fill the region
+    painter.setBrush(Qt::red); // You can change the color as needed
+    painter.setPen(Qt::NoPen); // Optional: Set the pen to no pen to avoid borders
+
+    // Create a QPainterPath from the QRegion
+    QPainterPath path;
+    path.addRegion(maskRegion);
+
+    // Fill the path
+    painter.drawPath(path);
+
+    // Save the image to a file
+    if (image.save("mask.png")) {
+        qDebug() << "Region saved as bitmap:" << "mask.png";
+    }
+    else {
+        qDebug() << "Failed to save the bitmap.";
+    }
+
 }
 
 }
