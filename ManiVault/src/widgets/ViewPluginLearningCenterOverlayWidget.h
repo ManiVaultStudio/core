@@ -10,6 +10,7 @@
 #include "util/WidgetFader.h"
 
 #include <QHBoxLayout>
+#include <QGraphicsBlurEffect>
 
 namespace mv::plugin {
     class ViewPlugin;
@@ -466,6 +467,7 @@ protected:
         BackgroundWidget            _backgroundWidget;          /** Widget with background content */
         util::WidgetFader           _backgroundWidgetFader;     /** For fading in/out the background widget */
 
+    protected:
         static constexpr std::int32_t margin = 4;
 
         friend class ViewPluginLearningCenterOverlayWidget;
@@ -498,11 +500,12 @@ private:
     PluginLearningCenterAction& getLearningCenterAction();
 
 private:
-    const plugin::ViewPlugin*   _viewPlugin;                        /** Pointer to the view plugin for which to create the overlay */
-    QVBoxLayout                 _layout;                            /** For alignment of the learning center toolbar */
-    QWidget                     _toolbarsWidget;                    /** Widget containing the settings and actions toolbar widgets */
-    ToolbarWidget               _settingsToolbarWidget;             /** Toolbar widget for learning center settings such as the visibility */
-    ToolbarWidget               _actionsToolbarWidget;              /** Toolbar widget which contains the various learning center actions */
+    const plugin::ViewPlugin*   _viewPlugin;                /** Pointer to the view plugin for which to create the overlay */
+    QVBoxLayout                 _layout;                    /** For alignment of the learning center toolbar */
+    QWidget                     _toolbarsWidget;            /** Widget containing the settings and actions toolbar widgets */
+    ToolbarWidget               _settingsToolbarWidget;     /** Toolbar widget for learning center settings such as the visibility */
+    ToolbarWidget               _actionsToolbarWidget;      /** Toolbar widget which contains the various learning center actions */
+    QGraphicsBlurEffect         _blurEffect;                /** Blurs the toolbars */
 
     friend class AlignmentToolbarItemWidget;
 };

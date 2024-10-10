@@ -20,7 +20,6 @@ OverlayWidget::OverlayWidget(QWidget* target, float initialOpacity /*= 1.0f*/) :
     _widgetOverlayer(this, this, target, initialOpacity)
 {
     setObjectName("OverlayWidget");
-
     setMouseTracking(true);
 
     connect(&_widgetOverlayer, &WidgetOverlayer::mouseEventReceiverWidgetAdded, this, &OverlayWidget::updateMask);
@@ -61,6 +60,7 @@ void OverlayWidget::resizeEvent(QResizeEvent* event)
 
 void OverlayWidget::updateMask()
 {
+    
     updateGeometry();
 
     QRegion maskRegion(geometry());
@@ -68,7 +68,7 @@ void OverlayWidget::updateMask()
     maskRegion -= QRegion(geometry());
 
     for (auto mouseEventReceiverWidget : _widgetOverlayer.getMouseEventReceiverWidgets())
-        maskRegion += mouseEventReceiverWidget->geometry();
+		maskRegion += QRect(mouseEventReceiverWidget->pos(), mouseEventReceiverWidget->size());
 
     setMask(maskRegion);
 

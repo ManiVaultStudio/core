@@ -12,6 +12,7 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QDesktopServices>
+#include <QGraphicsPixmapItem>
 
 #ifdef _DEBUG
     #define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
@@ -42,11 +43,13 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 
         setLayout(&_layout);
 
-        setLayoutContentsMargins(&_layout, 0);
+        _layout.setContentsMargins(ToolbarWidget::margin, 0, ToolbarWidget::margin, 0);
 
         _layout.setSpacing(0);
 
         _layout.addWidget(&_toolbarsWidget);
+
+        hide();
 
         updateAlignment();
 
@@ -62,13 +65,15 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         _actionsToolbarWidget.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, this));
         _actionsToolbarWidget.addWidget(new ToLearningCenterToolbarItemWidget(viewPlugin, this));
 
-        setMouseTracking(true);
-
+        //setMouseTracking(true);
+        target->setMouseTracking(true);
         raise();
 
         target->installEventFilter(this);
 
         connect(&getLearningCenterAction().getAlignmentAction(), &OptionAction::currentIndexChanged, this, &ViewPluginLearningCenterOverlayWidget::updateAlignment);
+
+        //setGraphicsEffect(&_blurEffect);
 
         /*connect(&getLearningCenterAction().getOverlayVisibleAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
             _actionsToolbarWidget.setAttribute(Qt::WA_TransparentForMouseEvents, !toggled);
@@ -555,47 +560,70 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
     painter.setRenderHint(QPainter::RenderHint::Antialiasing);
 
-    QStyleOption styleOption;
+    const auto margin           = 5;
+    const auto backgroundColor  = qApp->palette().mid().color();
 
-    styleOption.initFrom(this);
+    QPixmap backgroundPixmap(size());
 
-    const auto margin               = 5;
-    const auto backgroundColor      = styleOption.palette.color(QPalette::Inactive, QPalette::Window);
+    backgroundPixmap.fill(Qt::transparent);
 
-	auto backgroundEdgeColor  = backgroundColor;
+    QPainter pixmapPainter(&backgroundPixmap);
 
-    backgroundEdgeColor.setAlphaF(0.5f);
+    pixmapPainter.setPen(Qt::NoPen);
+    pixmapPainter.setBrush(backgroundColor);
+
+    auto backgroundRectangle = rect();
+
+    std::int32_t radius = 1;
 
     switch (const_cast<plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction().getAlignment()) {
 	    case Qt::AlignLeft:
 	    case Qt::AlignRight:
 	    {
-            const auto size     = rect().width();
-            const auto radius   = size / 2;
+            radius = (width() - 2 * margin) / 2;
 
-            painter.setPen(QPen(backgroundColor, size - 2 * margin, Qt::PenStyle::SolidLine, Qt::PenCapStyle::RoundCap));
-            painter.drawLine(radius, rect().top() + radius - margin, radius, rect().bottom() - radius + margin);
-
-            painter.setPen(QPen(backgroundEdgeColor, 2 + (size - 2 * margin), Qt::PenStyle::SolidLine, Qt::PenCapStyle::RoundCap));
-            painter.drawLine(radius, rect().top() + radius - margin, radius, rect().bottom() - radius + margin);
+            backgroundRectangle = rect().adjusted(margin, margin, -margin, -margin);
 	        break;
 	    }
 
 	    case Qt::AlignTop:
 	    case Qt::AlignBottom:
 	    {
-            const auto size     = rect().height();
-            const auto radius   = size / 2;
+            radius = (height() - 2 * margin) / 2;
 
-            painter.setPen(QPen(backgroundColor, size - 2 * margin, Qt::PenStyle::SolidLine, Qt::PenCapStyle::RoundCap));
-            painter.drawLine(radius - margin, radius, rect().right() - radius + margin, radius);
-
-            painter.setPen(QPen(backgroundEdgeColor, 2 + (size - 2 * margin), Qt::PenStyle::SolidLine, Qt::PenCapStyle::RoundCap));
-            painter.drawLine(radius, rect().top() + radius - margin, radius, rect().bottom() - radius + margin);
-
+            backgroundRectangle = rect().adjusted(margin, margin, -margin, -margin);
 	        break;
 	    }
+
+        default:
+            break;
     }
+
+    pixmapPainter.drawRoundedRect(backgroundRectangle, radius, radius);
+
+    QGraphicsScene scene;
+
+    auto pixmapItem = new QGraphicsPixmapItem(backgroundPixmap);
+
+    auto blurEffect = new QGraphicsBlurEffect;
+
+    blurEffect->setBlurRadius(margin);
+    blurEffect->setBlurHints(QGraphicsBlurEffect::QualityHint);
+
+    pixmapItem->setGraphicsEffect(blurEffect);
+
+    scene.addItem(pixmapItem);
+
+    QPixmap blurredBackgroundPixmap(size());
+
+    blurredBackgroundPixmap.fill(Qt::transparent);
+
+    QPainter scenePainter(&blurredBackgroundPixmap);
+
+    scene.render(&scenePainter);
+    scenePainter.end();
+
+    painter.drawPixmap(0, 0, blurredBackgroundPixmap);
 
     QWidget::paintEvent(event);
 }
@@ -617,7 +645,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     _layout.addLayout(&_verticalLayout);
     _layout.addLayout(&_horizontalLayout);
 
-    setLayoutContentsMargins(&_layout, 0);
+    _layout.setContentsMargins(ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin);
 
     setLayout(&_layout);
 
@@ -744,10 +772,12 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::visibilityChanged()
         return;
 
     if (_viewPlugin->getLearningCenterAction().getOverlayVisibleAction().isChecked()) {
+        _backgroundWidgetFader.fadeIn();
         _overlayWidget->addMouseEventReceiverWidget(this);
         update();
     }
     else {
+        _backgroundWidgetFader.fadeOut();
         _overlayWidget->removeMouseEventReceiverWidget(this);
     }
 }
