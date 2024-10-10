@@ -17,13 +17,13 @@ using namespace mv::plugin;
 
 namespace mv::gui {
 
-const QStringList PluginLearningCenterAction::alignmentOptions = { "Top", "Bottom", "Left", "Right" };
+const QStringList PluginLearningCenterAction::alignmentOptions = { "TopLeft", "TopRight", "BottomLeft", "BottomRight" };
 
 const std::vector<Qt::Alignment> PluginLearningCenterAction::alignmentFlags = {
-        Qt::AlignTop,
-        Qt::AlignBottom,
-        Qt::AlignLeft,
-        Qt::AlignRight
+        Qt::AlignTop | Qt::AlignLeft,
+        Qt::AlignTop | Qt::AlignRight,
+        Qt::AlignBottom | Qt::AlignLeft,
+        Qt::AlignBottom | Qt::AlignRight
 };
 
 PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QString& title) :
@@ -34,9 +34,11 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _viewHelpAction(this, "View help"),
     _viewShortcutsAction(this, "View shortcuts"),
     _overlayVisibleAction(this, "View plugin overlay visible", true),
-    _alignmentAction(this, "View plugin overlay alignment", alignmentOptions, "Bottom"),
+    _alignmentAction(this, "View plugin overlay alignment", alignmentOptions, "BottomRight"),
     _learningCenterOverlayWidget(nullptr)
 {
+    setIconByName("question-circle");
+
     _viewDescriptionAction.setToolTip(getShortDescription());
     _viewDescriptionAction.setIconByName("book-reader");
     _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);

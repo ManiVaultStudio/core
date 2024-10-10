@@ -80,7 +80,7 @@ void OverlayWidget::updateMask()
 
     update();
 
-
+    /*
     QRect boundingRect = maskRegion.boundingRect();
     QImage image(boundingRect.size(), QImage::Format_ARGB32);
     image.fill(Qt::transparent); // Fill with transparency
@@ -106,7 +106,7 @@ void OverlayWidget::updateMask()
     else {
         qDebug() << "Failed to save the bitmap.";
     }
-
+    */
 }
 
 }

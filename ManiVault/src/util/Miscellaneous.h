@@ -102,9 +102,9 @@ CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha = true);
  */
 CORE_EXPORT bool urlExists(const QString& urlString);
 
- CORE_EXPORT void replaceLayout(QWidget* widget, QLayout* newLayout, bool removeWidgets = false);
- CORE_EXPORT void clearLayout(QLayout* layout, bool removeWidgets = false);
- CORE_EXPORT void setLayoutContentsMargins(QLayout* layout, std::int32_t margin);
-
+CORE_EXPORT void replaceLayout(QWidget* widget, QLayout* newLayout, bool removeWidgets = false);
+CORE_EXPORT void clearLayout(QLayout* layout, bool removeWidgets = false);
+CORE_EXPORT void setLayoutContentsMargins(QLayout* layout, std::int32_t margin);
+CORE_EXPORT QIcon getAlignmentIcon(const Qt::Alignment& alignment);
 
 }
