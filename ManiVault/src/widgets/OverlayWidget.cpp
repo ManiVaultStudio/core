@@ -67,7 +67,7 @@ void OverlayWidget::updateMask()
 
     QRegion maskRegion(geometry());
 
-    maskRegion -= QRegion(geometry());
+    maskRegion -= QRegion(QRect(geometry()));
 
     for (auto mouseEventReceiverWidget : _widgetOverlayer.getMouseEventReceiverWidgets())
 		maskRegion += QRect(mapFromGlobal(mapToGlobal(mouseEventReceiverWidget->pos())), mouseEventReceiverWidget->size());

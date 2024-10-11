@@ -131,8 +131,6 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
             if (target == getWidgetOverlayer().getTargetWidget()) {
                 _learningCenterToolbarItemWidget.show();
                 _learningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
-
-                QTimer::singleShot(5, &_toolbarWidget, &ToolbarWidget::updateBackgroundWidgetGeometry);
             }
 
             if (target == &_learningCenterToolbarItemWidget)
@@ -171,11 +169,11 @@ bool ViewPluginLearningCenterOverlayWidget::isExpanded()
 {
     const auto numberOfDisplayableToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
         return toolbarItemWidget->shouldDisplay();
-        });
+	});
 
     const auto numberOfVisibleToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
         return toolbarItemWidget->isVisible();
-        });
+    });
 
     return numberOfVisibleToolbarItemWidgets == numberOfDisplayableToolbarItemWidgets;
 }
@@ -184,11 +182,11 @@ bool ViewPluginLearningCenterOverlayWidget::isCollapsed()
 {
     const auto numberOfDisplayableToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
         return toolbarItemWidget->shouldDisplay();
-        });
+	});
 
     const auto numberOfHiddenToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
         return toolbarItemWidget->isHidden();
-        });
+    });
 
     return numberOfHiddenToolbarItemWidgets == numberOfDisplayableToolbarItemWidgets;
 }
@@ -236,16 +234,16 @@ void ViewPluginLearningCenterOverlayWidget::expand()
     _toLearningCenterToolbarItemWidget.showConditionally();
     _alignmentToolbarItemWidget.showConditionally();
 
-    constexpr auto delay            = 30;
+    constexpr auto delay            = animationDuration / 3;
     constexpr auto fadeInDuration   = animationDuration / 2;
 
-    _videosToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 0 * delay);
-    _descriptionToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 1 * delay);
-    _shortcutsToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 2 * delay);
-    _showDocumentationToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 3 * delay);
-    _visitGithubRepoToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 4 * delay);
-    _toLearningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 5 * delay);
-    _alignmentToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 6 * delay);
+    _videosToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _descriptionToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _shortcutsToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _showDocumentationToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _visitGithubRepoToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _toLearningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _alignmentToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
 }
 
 void ViewPluginLearningCenterOverlayWidget::collapse()
@@ -254,7 +252,7 @@ void ViewPluginLearningCenterOverlayWidget::collapse()
     qDebug() << __FUNCTION__;
 #endif
 
-    constexpr auto fadeOutDuration = animationDuration;
+    constexpr auto fadeOutDuration = animationDuration / 4;
 
     _videosToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
     _descriptionToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
@@ -590,7 +588,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::Backgrou
     _sizeAnimation(this, "geometry")
 {
     
-    _sizeAnimation.setEasingCurve(QEasingCurve::OutQuad);
+    //_sizeAnimation.setEasingCurve(QEasingCurve::InOutQuint);
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::setGeometry(const QRect& geometry, bool animate /*= true*/)
@@ -599,6 +597,8 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::set
     qDebug() << __FUNCTION__ << geometry;
 #endif
 
+    qDebug() << __FUNCTION__ << geometry << QDateTime::currentDateTime().time().toString();
+
     if (_sizeAnimation.state() == QPropertyAnimation::Running) {
         const auto currentGeometry = _sizeAnimation.currentValue().value<QRect>();
 
@@ -606,7 +606,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::set
         _sizeAnimation.setStartValue(currentGeometry);
     }
 
-    _sizeAnimation.setDuration(animate ? ViewPluginLearningCenterOverlayWidget::animationDuration / 5 : 0);
+    _sizeAnimation.setDuration(animate ? ViewPluginLearningCenterOverlayWidget::animationDuration / 2 : 0);
     _sizeAnimation.setEndValue(geometry);
     _sizeAnimation.start();
 }
@@ -620,14 +620,8 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
     constexpr auto  rectangleMargin = 5;
     const auto      backgroundColor = qApp->palette().light().color();
 
-    QPixmap backgroundPixmap(size());
-
-    backgroundPixmap.fill(Qt::transparent);
-
-    QPainter pixmapPainter(&backgroundPixmap);
-
-    pixmapPainter.setPen(Qt::NoPen);
-    pixmapPainter.setBrush(backgroundColor);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(backgroundColor);
 
     auto backgroundRectangle = rect();
 
@@ -645,31 +639,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
         backgroundRectangle = rect().adjusted(rectangleMargin, rectangleMargin, -rectangleMargin, -rectangleMargin);
     }
 
-    pixmapPainter.drawRoundedRect(backgroundRectangle, radius, radius);
-
-    QGraphicsScene scene;
-
-    auto pixmapItem = new QGraphicsPixmapItem(backgroundPixmap);
-
-    auto blurEffect = new QGraphicsBlurEffect;
-
-    blurEffect->setBlurRadius(2.5);
-    blurEffect->setBlurHints(QGraphicsBlurEffect::QualityHint);
-
-    //pixmapItem->setGraphicsEffect(blurEffect);
-
-    scene.addItem(pixmapItem);
-
-    QPixmap blurredBackgroundPixmap(size());
-
-    blurredBackgroundPixmap.fill(Qt::transparent);
-
-    QPainter scenePainter(&blurredBackgroundPixmap);
-
-    scene.render(&scenePainter);
-    scenePainter.end();
-
-    painter.drawPixmap(0, 0, blurredBackgroundPixmap);
+    painter.drawRoundedRect(backgroundRectangle, radius, radius);
 
     QWidget::paintEvent(event);
 }
@@ -725,7 +695,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
     	});
 
         connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::collapsed, this, [this]() -> void {
-            QTimer::singleShot(5, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
+            QTimer::singleShot(25, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
 		});
 
         connect(&_viewPlugin->getLearningCenterAction().getOverlayVisibleAction(), &ToggleAction::toggled, this, &ToolbarWidget::visibilityChanged);
@@ -808,11 +778,13 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::showEvent(QShowEvent*
     _backgroundWidget.lower();
     _backgroundWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-    _backgroundWidgetFader.setOpacity(0.f);
+    _backgroundWidgetFader.setOpacity(1.f);
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::updateBackgroundWidgetGeometry()
 {
+    updateGeometry();
+
     _backgroundWidget.setGeometry(geometry());
 }
 
@@ -855,7 +827,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::alignmentChanged()
 
     QTimer::singleShot(5, [this]() -> void {
         _overlayWidget->updateMask();
-    	//updateBackgroundWidgetGeometry();
+    	updateBackgroundWidgetGeometry();
 	});
 }
 
