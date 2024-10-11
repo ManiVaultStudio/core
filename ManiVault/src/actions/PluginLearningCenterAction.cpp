@@ -10,7 +10,7 @@
 
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
 #include "widgets/ViewPluginDescriptionOverlayWidget.h"
-#include "widgets/ViewPluginShortcutsOverlayWidget.h"
+#include "widgets/ViewPluginShortcutsDialog.h"
 
 using namespace mv::util;
 using namespace mv::plugin;
@@ -251,12 +251,9 @@ void PluginLearningCenterAction::viewShortcuts()
 
     if (isViewPlugin() && _plugin->getShortcuts().hasShortcuts())
     {
-        if (!_shortcutsOverlayWidget.isNull())
-            return;
+        ViewPluginShortcutsDialog viewPluginShortcutsDialog(dynamic_cast<ViewPlugin*>(_plugin));
 
-        _shortcutsOverlayWidget = new gui::ViewPluginShortcutsOverlayWidget(dynamic_cast<ViewPlugin*>(_plugin));
-
-        _shortcutsOverlayWidget->show();
+        viewPluginShortcutsDialog.exec();
     }
 }
 

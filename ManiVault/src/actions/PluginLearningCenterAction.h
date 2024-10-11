@@ -244,7 +244,6 @@ private:
     util::Videos                                _videos;                            /** Plugin related videos */
     ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
     QPointer<QWidget>                           _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
-    QPointer<QWidget>                           _shortcutsOverlayWidget;            /** Guarded pointer to shortcuts overlay widget */
 
     friend class plugin::ViewPlugin;
 };

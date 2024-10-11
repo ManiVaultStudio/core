@@ -418,7 +418,7 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/YouTubeVideoDialog.h
 	src/widgets/ViewPluginOverlayWidget.h
 	src/widgets/ViewPluginDescriptionOverlayWidget.h
-	src/widgets/ViewPluginShortcutsOverlayWidget.h
+	src/widgets/ViewPluginShortcutsDialog.h
 	src/widgets/ViewPluginLearningCenterOverlayWidget.h
 	src/widgets/IconLabel.h
 )
@@ -437,7 +437,7 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/YouTubeVideoDialog.cpp
 	src/widgets/ViewPluginOverlayWidget.cpp
 	src/widgets/ViewPluginDescriptionOverlayWidget.cpp
-	src/widgets/ViewPluginShortcutsOverlayWidget.cpp
+	src/widgets/ViewPluginShortcutsDialog.cpp
 	src/widgets/ViewPluginLearningCenterOverlayWidget.cpp
 	src/widgets/IconLabel.cpp
 )
