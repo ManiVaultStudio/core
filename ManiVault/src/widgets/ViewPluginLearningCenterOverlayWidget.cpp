@@ -588,7 +588,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::Backgrou
     _sizeAnimation(this, "geometry")
 {
     
-    //_sizeAnimation.setEasingCurve(QEasingCurve::InOutQuint);
+    _sizeAnimation.setEasingCurve(QEasingCurve::InOutSine);
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::setGeometry(const QRect& geometry, bool animate /*= true*/)
@@ -596,8 +596,6 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::set
 #ifdef VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
     qDebug() << __FUNCTION__ << geometry;
 #endif
-
-    qDebug() << __FUNCTION__ << geometry << QDateTime::currentDateTime().time().toString();
 
     if (_sizeAnimation.state() == QPropertyAnimation::Running) {
         const auto currentGeometry = _sizeAnimation.currentValue().value<QRect>();
@@ -617,8 +615,12 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
     painter.setRenderHint(QPainter::RenderHint::Antialiasing);
 
-    constexpr auto  rectangleMargin = 5;
+    constexpr auto  rectangleMargin = 4;
     const auto      backgroundColor = qApp->palette().light().color();
+
+    QPixmap backgroundPixmap(size());
+
+    backgroundPixmap.fill(Qt::transparent);
 
     painter.setPen(Qt::NoPen);
     painter.setBrush(backgroundColor);
@@ -663,7 +665,6 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
 
     setLayout(&_layout);
 
-    //setStyleSheet("background-color: red;");
     try {
         Q_ASSERT(_viewPlugin && _overlayWidget);
 
@@ -690,12 +691,12 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
         connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
 
     	connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::expanded, this, [this]() -> void {
-            QTimer::singleShot(5, _overlayWidget, &ViewPluginLearningCenterOverlayWidget::updateMask);
-            QTimer::singleShot(5, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
+            QTimer::singleShot(50, _overlayWidget, &ViewPluginLearningCenterOverlayWidget::updateMask);
+            QTimer::singleShot(50, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
     	});
 
         connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::collapsed, this, [this]() -> void {
-            QTimer::singleShot(5, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
+            QTimer::singleShot(50, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
 		});
 
         connect(&_viewPlugin->getLearningCenterAction().getOverlayVisibleAction(), &ToggleAction::toggled, this, &ToolbarWidget::visibilityChanged);
@@ -752,8 +753,7 @@ bool ViewPluginLearningCenterOverlayWidget::ToolbarWidget::eventFilter(QObject* 
     {
 	    case QEvent::Enter:
 	    {
-	        show();
-
+            //updateBackgroundWidgetGeometry();
 	        _backgroundWidgetFader.setOpacity(1.f, animationDuration);
 	        break;
 	    }
