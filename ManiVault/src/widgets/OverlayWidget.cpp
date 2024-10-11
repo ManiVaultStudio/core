@@ -6,9 +6,14 @@
 
 #include <QDebug>
 
+#include <QPainterPath>
+#include <QRegion>
+
 #ifdef _DEBUG
     #define OVERLAY_WIDGET_VERBOSE
 #endif
+
+using namespace mv::util;
 
 namespace mv::gui
 {
@@ -18,8 +23,10 @@ OverlayWidget::OverlayWidget(QWidget* target, float initialOpacity /*= 1.0f*/) :
     _widgetOverlayer(this, this, target, initialOpacity)
 {
     setObjectName("OverlayWidget");
-
     setMouseTracking(true);
+
+    connect(&_widgetOverlayer, &WidgetOverlayer::mouseEventReceiverWidgetAdded, this, &OverlayWidget::updateMask);
+    connect(&_widgetOverlayer, &WidgetOverlayer::mouseEventReceiverWidgetRemoved, this, &OverlayWidget::updateMask);
 }
 
 mv::util::WidgetOverlayer& OverlayWidget::getWidgetOverlayer()
@@ -56,12 +63,14 @@ void OverlayWidget::resizeEvent(QResizeEvent* event)
 
 void OverlayWidget::updateMask()
 {
+    updateGeometry();
+
     QRegion maskRegion(geometry());
 
-    maskRegion -= QRegion(geometry());
+    maskRegion -= QRegion(QRect(geometry()));
 
     for (auto mouseEventReceiverWidget : _widgetOverlayer.getMouseEventReceiverWidgets())
-        maskRegion += mouseEventReceiverWidget->geometry();
+		maskRegion += QRect(mapFromGlobal(mapToGlobal(mouseEventReceiverWidget->pos())), mouseEventReceiverWidget->size());
 
     setMask(maskRegion);
 }

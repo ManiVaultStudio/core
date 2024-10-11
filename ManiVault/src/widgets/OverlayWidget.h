@@ -10,6 +10,8 @@
 
 #include <QWidget>
 
+class QMouseMoveEvent;
+
 namespace mv::gui
 {
 
@@ -64,10 +66,10 @@ protected:
      */
     void resizeEvent(QResizeEvent* event) override;
 
-private:
+public:
 
     /** Update widget mask to selectively process mouse events */
-    virtual void updateMask() final;
+    void updateMask();
 
 private:
     mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */

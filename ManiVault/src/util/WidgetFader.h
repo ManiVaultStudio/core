@@ -46,15 +46,17 @@ public:
     /**
      * Fade out the target widget
      * @param duration Only used if duration >= 0, otherwise uses _fadeOutDuration
+     * @param autoHideAfterFade The widget automatically hides itself once the fade-out process completes
      */
-    void fadeOut(std::int32_t duration = -1);
+    void fadeOut(std::int32_t duration = -1, bool autoHideAfterFade = false);
 
     /**
      * Set opacity
      * @param opacity Opacity
-     * @param duration Animation duration
+     * @param duration Animation duration in milliseconds
+     * @param delay Animation delay in milliseconds
      */
-    void setOpacity(float opacity, std::uint32_t duration = 0);
+    void setOpacity(float opacity, std::uint32_t duration = 0, std::uint32_t delay = 0);
 
     /**
      * Get whether the target widget is faded in
@@ -122,6 +124,12 @@ signals:
 
     /** Signals that the animation has faded out */
     void fadedOut();
+
+    /**
+     * Signals that the opacity changed to \p opacity
+     * @param opacity Current opacity
+     */
+    void opacityChanged(float opacity);
 
 private:
     QWidget*                _targetWidget;          /** Pointer to target widget to fade */

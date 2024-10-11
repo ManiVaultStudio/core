@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Miscellaneous.h"
+#include "Icon.h"
 
 #include <QAction>
 #include <QStringList>
@@ -70,4 +71,111 @@ bool urlExists(const QString& urlString)
     }
     return false;
 }
+
+void replaceLayout(QWidget* widget, QLayout* newLayout, bool removeWidgets)
+{
+    Q_ASSERT(widget && newLayout);
+
+    try {
+        if (!widget)
+            throw std::runtime_error("Widget may not be a nullptr");
+
+        if (!newLayout)
+            throw std::runtime_error("New layout may not be a nullptr");
+
+        if (auto oldLayout = widget->layout()) {
+            QLayoutItem* item = nullptr;
+
+            while ((item = oldLayout->takeAt(0)) != nullptr) {
+                if (removeWidgets)
+                    delete item->widget();
+
+                delete item;
+            }
+
+            delete oldLayout;
+        }
+
+        widget->setLayout(newLayout);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to replace widget layout", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to replace widget layout");
+    }
+}
+
+void clearLayout(QLayout* layout, bool removeWidgets)
+{
+    QLayoutItem* layoutItem;
+
+    while ((layoutItem = layout->takeAt(0)) != nullptr) {
+        if (removeWidgets)
+			delete layoutItem->widget();
+
+        delete layoutItem;
+    }
+}
+
+void setLayoutContentsMargins(QLayout* layout, std::int32_t margin)
+{
+    Q_ASSERT(layout);
+
+    if (!layout)
+        return;
+
+    layout->setContentsMargins(margin, margin, margin, margin);
+}
+
+QIcon getAlignmentIcon(const Qt::Alignment& alignment)
+{
+    constexpr auto size     = 128;
+    constexpr auto halfSize = size / 2;
+
+    QPixmap pixmap(size, size);
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setRenderHint(QPainter::RenderHint::Antialiasing);
+    painter.setWindow(0, 0, size, size);
+
+    constexpr auto offset           = 35.0;
+    constexpr auto lineThickness    = 5.0;
+    constexpr auto borderRectangle  = QRect(0, 0, size, size);
+
+    painter.setPen(QPen(Qt::black, lineThickness));
+    painter.drawRect(borderRectangle.adjusted(2, 2, -2, -2));
+
+    constexpr auto dotRadius = 30;
+
+    QPoint dotPosition;
+
+    if (alignment & Qt::AlignLeft)
+        dotPosition.setX(offset);
+
+    if (alignment & Qt::AlignHCenter)
+        dotPosition.setX(halfSize);
+
+    if (alignment & Qt::AlignRight)
+        dotPosition.setX(size - offset);
+
+    if (alignment & Qt::AlignTop)
+        dotPosition.setY(offset);
+
+    if (alignment & Qt::AlignVCenter)
+        dotPosition.setY(halfSize);
+
+    if (alignment & Qt::AlignBottom)
+        dotPosition.setY(size - offset);
+
+    painter.setPen(QPen(Qt::black, dotRadius, Qt::SolidLine, Qt::RoundCap));
+    painter.drawPoint(dotPosition);
+
+    return gui::createIcon(pixmap);
+}
+
 }

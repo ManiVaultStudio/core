@@ -99,6 +99,18 @@ signals:
      */
     void targetWidgetChanged(QWidget* previousTargetWidget, QWidget* currentTargetWidget);
 
+    /**
+     * Signals that \p mouseEventReceiverWidget is added
+     * @param mouseEventReceiverWidget Pointer to mouse receiver widget
+     */
+    void mouseEventReceiverWidgetAdded(const QWidget* mouseEventReceiverWidget);
+
+    /**
+     * Signals that \p mouseEventReceiverWidget is removed
+     * @param mouseEventReceiverWidget Pointer to mouse receiver widget
+     */
+    void mouseEventReceiverWidgetRemoved(const QWidget* mouseEventReceiverWidget);
+
 private:
     QWidget*                    _sourceWidget;                  /** Pointer to source widget (will be layered on top of the \p targetWidget) */
     QWidget*                    _targetWidget;                  /** Pointer to target widget */

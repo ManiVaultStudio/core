@@ -69,12 +69,26 @@ void WidgetOverlayer::setTargetWidget(QWidget* targetWidget)
 
 void WidgetOverlayer::addMouseEventReceiverWidget(const QWidget* mouseEventReceiverWidget)
 {
+    Q_ASSERT(mouseEventReceiverWidget);
+
+    if (!mouseEventReceiverWidget)
+        return;
+
     _mouseEventReceiverWidgets << mouseEventReceiverWidget;
+
+    emit mouseEventReceiverWidgetAdded(mouseEventReceiverWidget);
 }
 
 void WidgetOverlayer::removeMouseEventReceiverWidget(const QWidget* mouseEventReceiverWidget)
 {
+    Q_ASSERT(mouseEventReceiverWidget);
+
+    if (!mouseEventReceiverWidget)
+        return;
+
     _mouseEventReceiverWidgets.removeOne(mouseEventReceiverWidget);
+
+    emit mouseEventReceiverWidgetRemoved(mouseEventReceiverWidget);
 }
 
 WidgetOverlayer::MouseEventReceiverWidgets WidgetOverlayer::getMouseEventReceiverWidgets()
