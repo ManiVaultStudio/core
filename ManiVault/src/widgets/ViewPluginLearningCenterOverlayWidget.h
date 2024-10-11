@@ -10,7 +10,6 @@
 #include "util/WidgetFader.h"
 
 #include <QHBoxLayout>
-#include <QGraphicsBlurEffect>
 
 namespace mv::plugin {
     class ViewPlugin;
@@ -330,10 +329,11 @@ protected:
     /** Toolbar item widget for configuring the alignment */
     class AlignmentToolbarItemWidget final : public AbstractToolbarItemWidget
     {
+        /** Bundle Qt alignment, description and icon */
         struct Alignment {
-            Qt::Alignment   _alignment;
-            QString         _title;
-            QIcon           _icon;
+            Qt::Alignment   _alignment;     /** Alignment */
+            QString         _title;         /** Description */
+            QIcon           _icon;          /** Icon representation of the alignment */
         };
 
     public:
@@ -364,7 +364,7 @@ protected:
         bool shouldDisplay() const override;
 
     private:
-        static std::vector<Alignment> alignments;
+        static std::vector<Alignment> alignments;   /** Allowed alignment */
     };
 
 
@@ -451,7 +451,7 @@ protected:
         util::WidgetFader           _backgroundWidgetFader;     /** For fading in/out the background widget */
 
     protected:
-        static constexpr std::int32_t margin = 4;
+        static constexpr std::int32_t margin = 4;   /** Overall margin */
 
         friend class ViewPluginLearningCenterOverlayWidget;
     };
@@ -471,6 +471,10 @@ public:
      */
     void setTargetWidget(QWidget* targetWidget);
 
+    /**
+     * Get toolbar widget
+     * @return Reference to toolbar widget
+     */
     ToolbarWidget& getToolbarWidget();
 
     /**
@@ -504,8 +508,8 @@ private:
     ToLearningCenterToolbarItemWidget   _toLearningCenterToolbarItemWidget;
     AlignmentToolbarItemWidget          _alignmentToolbarItemWidget;
 
-    static constexpr auto animationDuration     = 200;
-    static constexpr auto intermediateOpacity   = .3f;
+    static constexpr auto animationDuration     = 200;      /** Overall animation duration */
+    static constexpr auto intermediateOpacity   = .3f;      /** Intermediate opacity of items */
 
     friend class AlignmentToolbarItemWidget;
 };

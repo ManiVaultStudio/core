@@ -118,7 +118,7 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
 
                 _toolbarWidget.layout()->setContentsMargins(ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin);
 
-                updateMask();
+                QTimer::singleShot(5, this, &ViewPluginLearningCenterOverlayWidget::updateMask);
             }
 
             if (target == &_learningCenterToolbarItemWidget) {
@@ -136,15 +136,17 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
                 _toLearningCenterToolbarItemWidget.showConditionally();
                 _alignmentToolbarItemWidget.showConditionally();
 
-                _videosToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
-                _descriptionToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
-                _shortcutsToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
-                _showDocumentationToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
-                _visitGithubRepoToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
-                _toLearningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
-                _alignmentToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
+                constexpr auto delay = 50;
 
-                QTimer::singleShot(25, this, &ViewPluginLearningCenterOverlayWidget::updateMask);
+                _videosToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
+                _descriptionToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
+                _shortcutsToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
+                _showDocumentationToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
+                _visitGithubRepoToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
+                _toLearningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
+                _alignmentToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
+
+                QTimer::singleShot(5, this, &ViewPluginLearningCenterOverlayWidget::updateMask);
             }
 
             break;
@@ -155,14 +157,10 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
             if (target == getWidgetOverlayer().getTargetWidget()) {
                 _learningCenterToolbarItemWidget.getWidgetFader().fadeOut();
 
-                updateMask();
+                QTimer::singleShot(5, this, &ViewPluginLearningCenterOverlayWidget::updateMask);
             }
 
-            if (target == &_toolbarWidget) {
-                _toolbarWidget.layout()->setContentsMargins(ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin);
-
-                _learningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
-
+            const auto fadeOut = [this]() -> void {
                 _videosToolbarItemWidget.getWidgetFader().fadeOut(-1, true);
                 _descriptionToolbarItemWidget.getWidgetFader().fadeOut(-1, true);
                 _shortcutsToolbarItemWidget.getWidgetFader().fadeOut(-1, true);
@@ -170,7 +168,21 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
                 _visitGithubRepoToolbarItemWidget.getWidgetFader().fadeOut(-1, true);
                 _toLearningCenterToolbarItemWidget.getWidgetFader().fadeOut(-1, true);
                 _alignmentToolbarItemWidget.getWidgetFader().fadeOut(-1, true);
+                };
+
+            if (target == &_toolbarWidget) {
+                _toolbarWidget.layout()->setContentsMargins(ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin);
+
+                _learningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
+
+                fadeOut();
             }
+
+            if (target == &_learningCenterToolbarItemWidget) {
+                if (!_toolbarWidget.underMouse())
+					fadeOut();
+            }
+
             break;
         }
 
@@ -529,8 +541,8 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
     painter.setRenderHint(QPainter::RenderHint::Antialiasing);
 
-    const auto margin           = 5;
-    const auto backgroundColor  = qApp->palette().light().color();
+    constexpr auto  margin          = 5;
+    const auto      backgroundColor = qApp->palette().light().color();
 
     QPixmap backgroundPixmap(size());
 
@@ -565,7 +577,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
     auto blurEffect = new QGraphicsBlurEffect;
 
-    blurEffect->setBlurRadius(2);
+    blurEffect->setBlurRadius(1.5);
     blurEffect->setBlurHints(QGraphicsBlurEffect::QualityHint);
 
     pixmapItem->setGraphicsEffect(blurEffect);
@@ -657,7 +669,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::addWidget(QWidget* wi
             throw std::runtime_error("No layout present");
 
         if (!widget)
-            throw std::runtime_error("Supplied wWidget is a nullptr");
+            throw std::runtime_error("Supplied widget is a nullptr");
 
         _widgets.push_back(widget);
 
@@ -702,9 +714,7 @@ bool ViewPluginLearningCenterOverlayWidget::ToolbarWidget::eventFilter(QObject* 
 
         case QEvent::Leave:
         {
-            show();
-
-            _backgroundWidgetFader.fadeOut();
+            _backgroundWidgetFader.setOpacity(0.f, animationDuration, animationDuration);
             break;
         }
 
@@ -721,12 +731,12 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::visibilityChanged()
         return;
 
     if (_viewPlugin->getLearningCenterAction().getOverlayVisibleAction().isChecked()) {
-        _backgroundWidgetFader.fadeIn();
+        _backgroundWidgetFader.setOpacity(1.f, animationDuration);
         _overlayWidget->addMouseEventReceiverWidget(this);
         update();
     }
     else {
-        _backgroundWidgetFader.fadeOut();
+        _backgroundWidgetFader.setOpacity(0.f, animationDuration);
         _overlayWidget->removeMouseEventReceiverWidget(this);
     }
 }
@@ -752,7 +762,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::alignmentChanged()
             _layout.insertWidget(0, widget);
     }
 
-    QTimer::singleShot(25, [this]() -> void {
+    QTimer::singleShot(5, [this]() -> void {
         _overlayWidget->updateMask();
 	});
 }
