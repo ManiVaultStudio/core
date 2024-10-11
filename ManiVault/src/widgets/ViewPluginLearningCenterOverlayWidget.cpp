@@ -579,7 +579,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::getIcon
 
 bool ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::shouldDisplay() const
 {
-    return true;
+    return false;
 }
 
 ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::BackgroundWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin) :
@@ -615,7 +615,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
     painter.setRenderHint(QPainter::RenderHint::Antialiasing);
 
-    constexpr auto  rectangleMargin = 4;
+    constexpr auto  rectangleMargin = 3;
     const auto      backgroundColor = qApp->palette().light().color();
 
     QPixmap backgroundPixmap(size());
@@ -697,6 +697,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
 
         connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::collapsed, this, [this]() -> void {
             QTimer::singleShot(50, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
+            QTimer::singleShot(50 + animationDuration, _overlayWidget, &ViewPluginLearningCenterOverlayWidget::updateMask);
 		});
 
         connect(&_viewPlugin->getLearningCenterAction().getOverlayVisibleAction(), &ToggleAction::toggled, this, &ToolbarWidget::visibilityChanged);
@@ -753,8 +754,9 @@ bool ViewPluginLearningCenterOverlayWidget::ToolbarWidget::eventFilter(QObject* 
     {
 	    case QEvent::Enter:
 	    {
-            //updateBackgroundWidgetGeometry();
-	        _backgroundWidgetFader.setOpacity(1.f, animationDuration);
+            
+
+	        _backgroundWidgetFader.setOpacity(.95f, animationDuration);
 	        break;
 	    }
 
@@ -778,7 +780,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::showEvent(QShowEvent*
     _backgroundWidget.lower();
     _backgroundWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-    _backgroundWidgetFader.setOpacity(1.f);
+    _backgroundWidgetFader.setOpacity(0.95f);
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::updateBackgroundWidgetGeometry()

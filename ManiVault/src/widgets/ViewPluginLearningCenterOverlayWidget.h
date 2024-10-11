@@ -483,7 +483,7 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
-protected:
+protected: // Expand/collapse
 
     /** Collapse all visible items in the toolbar */
     void collapse();
@@ -528,22 +528,25 @@ private:
 
 signals:
 
+    /** Signals that the toolbar got expanded */
     void expanded();
+
+    /** Signals that the toolbar got collapsed */
     void collapsed();
 
 private:
     const plugin::ViewPlugin*                   _viewPlugin;                            /** Pointer to the view plugin for which to create the overlay */
     QVBoxLayout                                 _layout;                                /** For alignment of the learning center toolbar */
     ToolbarWidget                               _toolbarWidget;                         /** Toolbar widget which contains the various learning center actions */
-    LearningCenterToolbarItemWidget             _learningCenterToolbarItemWidget;
-    VideosToolbarItemWidget                     _videosToolbarItemWidget;
-    DescriptionToolbarItemWidget                _descriptionToolbarItemWidget;
-    ShortcutsToolbarItemWidget                  _shortcutsToolbarItemWidget;
-    ShowDocumentationToolbarItemWidget          _showDocumentationToolbarItemWidget;
-    VisitGithubRepoToolbarItemWidget            _visitGithubRepoToolbarItemWidget;
-    ToLearningCenterToolbarItemWidget           _toLearningCenterToolbarItemWidget;
-    AlignmentToolbarItemWidget                  _alignmentToolbarItemWidget;
-    std::vector<AbstractToolbarItemWidget*>     _toolbarItemWidgets;
+    LearningCenterToolbarItemWidget             _learningCenterToolbarItemWidget;       /** Primary learning center toolbar item widget */
+    VideosToolbarItemWidget                     _videosToolbarItemWidget;               /** Videos toolbar item widget */
+    DescriptionToolbarItemWidget                _descriptionToolbarItemWidget;          /** Plugin description toolbar item widget */
+    ShortcutsToolbarItemWidget                  _shortcutsToolbarItemWidget;            /** Plugin shortcuts toolbar item widget */
+    ShowDocumentationToolbarItemWidget          _showDocumentationToolbarItemWidget;    /** Documentation toolbar item widget */
+    VisitGithubRepoToolbarItemWidget            _visitGithubRepoToolbarItemWidget;      /** Link to GitHub repository toolbar item widget */
+    ToLearningCenterToolbarItemWidget           _toLearningCenterToolbarItemWidget;     /** Go the main learning center toolbar item widget */
+    AlignmentToolbarItemWidget                  _alignmentToolbarItemWidget;            /** Toolbar alignment item widget */
+    std::vector<AbstractToolbarItemWidget*>     _toolbarItemWidgets;                    /** All toolbar item widgets except the learning center toolbar item widget */
 
     static constexpr auto animationDuration     = 500;      /** Overall animation duration */
     static constexpr auto intermediateOpacity   = .3f;      /** Intermediate opacity of items */
