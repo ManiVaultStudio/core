@@ -490,10 +490,29 @@ protected:
 
     /** Expand all visible items in the toolbar */
     void expand();
-
+    
+	/**
+     * Get whether all displayable items in the toolbar are visible
+     * @return Boolean determining whether all displayable items in the toolbar are visible
+     */
     bool isExpanded();
+
+    /**
+     * Get whether all displayable items in the toolbar are hidden
+     * @return Boolean determining whether all displayable items in the toolbar are hidden
+     */
     bool isCollapsed();
+    
+    /**
+     * Invoked when \p toolbarItemWidget is shown
+     * @param toolbarItemWidget Pointer to toolbar item widget which is shown
+     */
     void toolbarItemWidgetShown(QWidget* toolbarItemWidget);
+
+    /**
+     * Invoked when \p toolbarItemWidget is hidden
+     * @param toolbarItemWidget Pointer to toolbar item widget which is hidden
+     */
     void toolbarItemWidgetHidden(QWidget* toolbarItemWidget);
 
 private:
@@ -513,17 +532,18 @@ signals:
     void collapsed();
 
 private:
-    const plugin::ViewPlugin*           _viewPlugin;                            /** Pointer to the view plugin for which to create the overlay */
-    QVBoxLayout                         _layout;                                /** For alignment of the learning center toolbar */
-    ToolbarWidget                       _toolbarWidget;                         /** Toolbar widget which contains the various learning center actions */
-    LearningCenterToolbarItemWidget     _learningCenterToolbarItemWidget;
-    VideosToolbarItemWidget             _videosToolbarItemWidget;
-    DescriptionToolbarItemWidget        _descriptionToolbarItemWidget;
-    ShortcutsToolbarItemWidget          _shortcutsToolbarItemWidget;
-    ShowDocumentationToolbarItemWidget  _showDocumentationToolbarItemWidget;
-    VisitGithubRepoToolbarItemWidget    _visitGithubRepoToolbarItemWidget;
-    ToLearningCenterToolbarItemWidget   _toLearningCenterToolbarItemWidget;
-    AlignmentToolbarItemWidget          _alignmentToolbarItemWidget;
+    const plugin::ViewPlugin*                   _viewPlugin;                            /** Pointer to the view plugin for which to create the overlay */
+    QVBoxLayout                                 _layout;                                /** For alignment of the learning center toolbar */
+    ToolbarWidget                               _toolbarWidget;                         /** Toolbar widget which contains the various learning center actions */
+    LearningCenterToolbarItemWidget             _learningCenterToolbarItemWidget;
+    VideosToolbarItemWidget                     _videosToolbarItemWidget;
+    DescriptionToolbarItemWidget                _descriptionToolbarItemWidget;
+    ShortcutsToolbarItemWidget                  _shortcutsToolbarItemWidget;
+    ShowDocumentationToolbarItemWidget          _showDocumentationToolbarItemWidget;
+    VisitGithubRepoToolbarItemWidget            _visitGithubRepoToolbarItemWidget;
+    ToLearningCenterToolbarItemWidget           _toLearningCenterToolbarItemWidget;
+    AlignmentToolbarItemWidget                  _alignmentToolbarItemWidget;
+    std::vector<AbstractToolbarItemWidget*>     _toolbarItemWidgets;
 
     static constexpr auto animationDuration     = 500;      /** Overall animation duration */
     static constexpr auto intermediateOpacity   = .3f;      /** Intermediate opacity of items */

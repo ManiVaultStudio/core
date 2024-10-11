@@ -19,7 +19,7 @@
     #define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
 #endif
 
-#define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
+//#define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
 
 using namespace mv::util;
 
@@ -77,6 +77,19 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 
         raise();
 
+        _toolbarItemWidgets = {
+	        &_videosToolbarItemWidget,
+	        &_descriptionToolbarItemWidget,
+	        &_shortcutsToolbarItemWidget,
+	        &_showDocumentationToolbarItemWidget,
+	        &_visitGithubRepoToolbarItemWidget,
+	        &_toLearningCenterToolbarItemWidget,
+	        &_alignmentToolbarItemWidget
+        };
+
+        for (auto toolbarItemWidget : _toolbarItemWidgets)
+            toolbarItemWidget->installEventFilter(this);
+
         target->installEventFilter(this);
 
         _learningCenterToolbarItemWidget.installEventFilter(this);
@@ -111,10 +124,6 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
 {
     const auto alignment = getLearningCenterAction().getAlignment();
 
-	const auto updateToolbar = [this]() -> void {
-        updateMask();
-    };
-
     switch (event->type())
     {
         case QEvent::Enter:
@@ -123,27 +132,30 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
                 _learningCenterToolbarItemWidget.show();
                 _learningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
 
-                QTimer::singleShot(5, updateToolbar);
                 QTimer::singleShot(5, &_toolbarWidget, &ToolbarWidget::updateBackgroundWidgetGeometry);
             }
 
-            if (target == &_learningCenterToolbarItemWidget) {
-                qDebug() << "Entering _learningCenterToolbarItemWidget";
+            if (target == &_learningCenterToolbarItemWidget)
                 expand();
-            }
+
+            if (auto toolbarItemWidget = dynamic_cast<AbstractToolbarItemWidget*>(target))
+                if (std::find(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), target) != _toolbarItemWidgets.end())
+                    toolbarItemWidget->getWidgetFader().setOpacity(1.f, animationDuration / 5);
 
             break;
         }
 
         case QEvent::Leave:
         {
-            //if (target == getWidgetOverlayer().getTargetWidget())
-            //    collapse();
+            if (target == getWidgetOverlayer().getTargetWidget())
+                _learningCenterToolbarItemWidget.getWidgetFader().setOpacity(0.f, animationDuration);
 
-            if (target == &_toolbarWidget) {
-                qDebug() << "Leaving _toolbarWidget";
+            if (target == &_toolbarWidget)
                 collapse();
-            }
+
+            if (auto toolbarItemWidget = dynamic_cast<AbstractToolbarItemWidget*>(target))
+                if (std::find(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), target) != _toolbarItemWidgets.end())
+                    toolbarItemWidget->getWidgetFader().setOpacity(intermediateOpacity, animationDuration / 2);
 
             break;
         }
@@ -157,21 +169,11 @@ bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent*
 
 bool ViewPluginLearningCenterOverlayWidget::isExpanded()
 {
-    std::vector<AbstractToolbarItemWidget*> toolbarItemWidgets = {
-        &_videosToolbarItemWidget,
-        &_descriptionToolbarItemWidget,
-        &_shortcutsToolbarItemWidget,
-        &_showDocumentationToolbarItemWidget,
-        &_visitGithubRepoToolbarItemWidget,
-        &_toLearningCenterToolbarItemWidget,
-        &_alignmentToolbarItemWidget
-    };
-
-    const auto numberOfDisplayableToolbarItemWidgets = std::count_if(toolbarItemWidgets.begin(), toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
+    const auto numberOfDisplayableToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
         return toolbarItemWidget->shouldDisplay();
         });
 
-    const auto numberOfVisibleToolbarItemWidgets = std::count_if(toolbarItemWidgets.begin(), toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
+    const auto numberOfVisibleToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
         return toolbarItemWidget->isVisible();
         });
 
@@ -180,21 +182,11 @@ bool ViewPluginLearningCenterOverlayWidget::isExpanded()
 
 bool ViewPluginLearningCenterOverlayWidget::isCollapsed()
 {
-    std::vector<AbstractToolbarItemWidget*> toolbarItemWidgets = {
-        &_videosToolbarItemWidget,
-        &_descriptionToolbarItemWidget,
-        &_shortcutsToolbarItemWidget,
-        &_showDocumentationToolbarItemWidget,
-        &_visitGithubRepoToolbarItemWidget,
-        &_toLearningCenterToolbarItemWidget,
-        &_alignmentToolbarItemWidget
-    };
-
-    const auto numberOfDisplayableToolbarItemWidgets = std::count_if(toolbarItemWidgets.begin(), toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
+    const auto numberOfDisplayableToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
         return toolbarItemWidget->shouldDisplay();
         });
 
-    const auto numberOfHiddenToolbarItemWidgets = std::count_if(toolbarItemWidgets.begin(), toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
+    const auto numberOfHiddenToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
         return toolbarItemWidget->isHidden();
         });
 
@@ -206,7 +198,6 @@ void ViewPluginLearningCenterOverlayWidget::toolbarItemWidgetShown(QWidget* tool
     if (!isExpanded())
         return;
 
-    updateMask();
 	emit expanded();
 }
 
@@ -215,7 +206,6 @@ void ViewPluginLearningCenterOverlayWidget::toolbarItemWidgetHidden(QWidget* too
     if (!isCollapsed())
         return;
 
-    updateMask();
 	emit collapsed();
 }
 
@@ -246,15 +236,16 @@ void ViewPluginLearningCenterOverlayWidget::expand()
     _toLearningCenterToolbarItemWidget.showConditionally();
     _alignmentToolbarItemWidget.showConditionally();
 
-    constexpr auto delay = 0;
+    constexpr auto delay            = 30;
+    constexpr auto fadeInDuration   = animationDuration / 2;
 
-    _videosToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
-    _descriptionToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
-    _shortcutsToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
-    _showDocumentationToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
-    _visitGithubRepoToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
-    _toLearningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
-    _alignmentToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration, delay);
+    _videosToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 0 * delay);
+    _descriptionToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 1 * delay);
+    _shortcutsToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 2 * delay);
+    _showDocumentationToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 3 * delay);
+    _visitGithubRepoToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 4 * delay);
+    _toLearningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 5 * delay);
+    _alignmentToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, 6 * delay);
 }
 
 void ViewPluginLearningCenterOverlayWidget::collapse()
@@ -610,6 +601,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::set
 
     if (_sizeAnimation.state() == QPropertyAnimation::Running) {
         const auto currentGeometry = _sizeAnimation.currentValue().value<QRect>();
+
         _sizeAnimation.stop();
         _sizeAnimation.setStartValue(currentGeometry);
     }
@@ -661,10 +653,10 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
     auto blurEffect = new QGraphicsBlurEffect;
 
-    blurEffect->setBlurRadius(1.5);
+    blurEffect->setBlurRadius(2.5);
     blurEffect->setBlurHints(QGraphicsBlurEffect::QualityHint);
 
-    pixmapItem->setGraphicsEffect(blurEffect);
+    //pixmapItem->setGraphicsEffect(blurEffect);
 
     scene.addItem(pixmapItem);
 
@@ -728,7 +720,8 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
         connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
 
     	connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::expanded, this, [this]() -> void {
-            QTimer::singleShot(5, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
+            QTimer::singleShot(25, _overlayWidget, &ViewPluginLearningCenterOverlayWidget::updateMask);
+            QTimer::singleShot(25, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
     	});
 
         connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::collapsed, this, [this]() -> void {
@@ -820,7 +813,6 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::showEvent(QShowEvent*
 
 void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::updateBackgroundWidgetGeometry()
 {
-    //_overlayWidget->updateMask();
     _backgroundWidget.setGeometry(geometry());
 }
 
@@ -862,8 +854,8 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::alignmentChanged()
     }
 
     QTimer::singleShot(5, [this]() -> void {
-        updateBackgroundWidgetGeometry();
         _overlayWidget->updateMask();
+    	//updateBackgroundWidgetGeometry();
 	});
 }
 
