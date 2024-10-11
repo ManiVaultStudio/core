@@ -62,11 +62,8 @@ void OverlayWidget::resizeEvent(QResizeEvent* event)
     updateMask();
 }
 
-
-
 void OverlayWidget::updateMask()
 {
-    
     updateGeometry();
 
     QRegion maskRegion(geometry());
@@ -79,34 +76,6 @@ void OverlayWidget::updateMask()
     setMask(maskRegion);
 
     update();
-
-    /*
-    QRect boundingRect = maskRegion.boundingRect();
-    QImage image(boundingRect.size(), QImage::Format_ARGB32);
-    image.fill(Qt::transparent); // Fill with transparency
-
-    // Create a QPainter to draw on the image
-    QPainter painter(&image);
-
-    // Set the desired color to fill the region
-    painter.setBrush(Qt::red); // You can change the color as needed
-    painter.setPen(Qt::NoPen); // Optional: Set the pen to no pen to avoid borders
-
-    // Create a QPainterPath from the QRegion
-    QPainterPath path;
-    path.addRegion(maskRegion);
-
-    // Fill the path
-    painter.drawPath(path);
-
-    // Save the image to a file
-    if (image.save("mask.png")) {
-        qDebug() << "Region saved as bitmap:" << "mask.png";
-    }
-    else {
-        qDebug() << "Failed to save the bitmap.";
-    }
-    */
 }
 
 }
