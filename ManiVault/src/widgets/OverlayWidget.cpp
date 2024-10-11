@@ -24,7 +24,6 @@ OverlayWidget::OverlayWidget(QWidget* target, float initialOpacity /*= 1.0f*/) :
 {
     setObjectName("OverlayWidget");
     setMouseTracking(true);
-    setAttribute(Qt::WA_NoSystemBackground);
 
     connect(&_widgetOverlayer, &WidgetOverlayer::mouseEventReceiverWidgetAdded, this, &OverlayWidget::updateMask);
     connect(&_widgetOverlayer, &WidgetOverlayer::mouseEventReceiverWidgetRemoved, this, &OverlayWidget::updateMask);
