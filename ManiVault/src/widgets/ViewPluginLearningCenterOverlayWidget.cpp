@@ -690,12 +690,12 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
         connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
 
     	connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::expanded, this, [this]() -> void {
-            QTimer::singleShot(25, _overlayWidget, &ViewPluginLearningCenterOverlayWidget::updateMask);
-            QTimer::singleShot(25, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
+            QTimer::singleShot(5, _overlayWidget, &ViewPluginLearningCenterOverlayWidget::updateMask);
+            QTimer::singleShot(5, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
     	});
 
         connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::collapsed, this, [this]() -> void {
-            QTimer::singleShot(25, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
+            QTimer::singleShot(5, this, &ToolbarWidget::updateBackgroundWidgetGeometry);
 		});
 
         connect(&_viewPlugin->getLearningCenterAction().getOverlayVisibleAction(), &ToggleAction::toggled, this, &ToolbarWidget::visibilityChanged);
