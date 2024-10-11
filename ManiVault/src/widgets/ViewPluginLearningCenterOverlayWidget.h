@@ -54,16 +54,10 @@ protected:
         void showEvent(QShowEvent* event) override;
 
         /**
-         * Invoked when the mouse enters the toolbar item widget
-         * @param event Pointer to enter event
+         * Invoked when the widget is hidden
+         * @param event Pointer to hide event
          */
-        void enterEvent(QEnterEvent* event) override;
-
-        /**
-         * Invoked when the mouse leaves the toolbar item widget
-         * @param event Pointer to event
-         */
-        void leaveEvent(QEvent* event) override;
+        void hideEvent(QHideEvent* event) override;
 
         /**
          * Get icon
@@ -373,7 +367,7 @@ protected:
     private:
 
         /** Overlay widget for background */
-        class BackgroundWidget : public OverlayWidget
+        class BackgroundWidget : public QWidget
         {
         public:
             
@@ -383,6 +377,8 @@ protected:
              * @param viewPlugin Pointer to view plugin
              */
             BackgroundWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin);
+
+            void setGeometry(const QRect& geometry, bool animate = true);
 
         protected:
 
@@ -394,6 +390,7 @@ protected:
 
         private:
             const plugin::ViewPlugin*   _viewPlugin;      /** Pointer to view plugin */
+            QPropertyAnimation          _sizeAnimation;
         };
 
     public:
@@ -415,6 +412,13 @@ protected:
     protected:
 
         /**
+         * Respond to \p target events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event) override;
+
+        /**
          * Invoked when the widget is shown
          * @param event Pointer to show event that occurred
          */
@@ -425,12 +429,7 @@ protected:
 
     private:
 
-        /**
-         * Respond to \p target events
-         * @param target Object of which an event occurred
-         * @param event The event that took place
-         */
-        bool eventFilter(QObject* target, QEvent* event) override;
+        void updateBackgroundWidgetGeometry();
 
         /** Invoked when the plugin learning center visibility changed */
         void visibilityChanged();
@@ -442,13 +441,13 @@ protected:
         PluginLearningCenterAction& getLearningCenterAction();
 
     private:
-        const plugin::ViewPlugin*   _viewPlugin;                /** Const pointer to source view plugin */
-        OverlayWidget*              _overlayWidget;             /** Pointer to owning overlay widget */
-        bool                        _alwaysVisible;             /** Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting */
-        std::vector<QWidget*>       _widgets;                   /** Registered widgets */
-        QHBoxLayout                 _layout;                    /** Main layout */
-        BackgroundWidget            _backgroundWidget;          /** Widget with background content */
-        util::WidgetFader           _backgroundWidgetFader;     /** For fading in/out the background widget */
+        const plugin::ViewPlugin*               _viewPlugin;                /** Const pointer to source view plugin */
+        ViewPluginLearningCenterOverlayWidget*  _overlayWidget;             /** Pointer to owning overlay widget */
+        bool                                    _alwaysVisible;             /** Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting */
+        std::vector<QWidget*>                   _widgets;                   /** Registered widgets */
+        QHBoxLayout                             _layout;                    /** Main layout */
+        BackgroundWidget                        _backgroundWidget;          /** Widget with background content */
+        util::WidgetFader                       _backgroundWidgetFader;     /** For fading in/out the background widget */
 
     protected:
         static constexpr std::int32_t margin = 4;   /** Overall margin */
@@ -484,6 +483,19 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
+protected:
+
+    /** Collapse all visible items in the toolbar */
+    void collapse();
+
+    /** Expand all visible items in the toolbar */
+    void expand();
+
+    bool isExpanded();
+    bool isCollapsed();
+    void toolbarItemWidgetShown(QWidget* toolbarItemWidget);
+    void toolbarItemWidgetHidden(QWidget* toolbarItemWidget);
+
 private:
 
     /** Invoked when the plugin learning center alignment changes */
@@ -494,6 +506,11 @@ private:
      * @return Reference to the view plugin learning center action
      */
     PluginLearningCenterAction& getLearningCenterAction();
+
+signals:
+
+    void expanded();
+    void collapsed();
 
 private:
     const plugin::ViewPlugin*           _viewPlugin;                            /** Pointer to the view plugin for which to create the overlay */
@@ -508,9 +525,10 @@ private:
     ToLearningCenterToolbarItemWidget   _toLearningCenterToolbarItemWidget;
     AlignmentToolbarItemWidget          _alignmentToolbarItemWidget;
 
-    static constexpr auto animationDuration     = 200;      /** Overall animation duration */
+    static constexpr auto animationDuration     = 500;      /** Overall animation duration */
     static constexpr auto intermediateOpacity   = .3f;      /** Intermediate opacity of items */
 
+    friend class AbstractToolbarItemWidget;
     friend class AlignmentToolbarItemWidget;
 };
 
