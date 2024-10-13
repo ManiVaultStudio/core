@@ -235,7 +235,7 @@ void ViewPluginLearningCenterOverlayWidget::expand()
     _alignmentToolbarItemWidget.showConditionally();
 
     constexpr auto delay            = animationDuration / 2;
-    constexpr auto fadeInDuration   = animationDuration / 2;
+    constexpr auto fadeInDuration   = animationDuration;
 
     _videosToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
     _descriptionToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
@@ -252,7 +252,7 @@ void ViewPluginLearningCenterOverlayWidget::collapse()
     qDebug() << __FUNCTION__;
 #endif
 
-    constexpr auto fadeOutDuration = animationDuration / 4;
+    constexpr auto fadeOutDuration = animationDuration;
 
     _videosToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
     _descriptionToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
@@ -624,14 +624,16 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
     painter.setRenderHint(QPainter::RenderHint::Antialiasing);
 
     constexpr auto  rectangleMargin = 3;
-    const auto      backgroundColor = qApp->palette().light().color();
+    const auto      backgroundColor = qApp->palette().highlightedText().color();
 
     QPixmap backgroundPixmap(size());
 
     backgroundPixmap.fill(Qt::transparent);
 
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(backgroundColor);
+    QPainter pixmapPainter(&backgroundPixmap);
+
+    pixmapPainter.setPen(Qt::NoPen);
+    pixmapPainter.setBrush(backgroundColor);
 
     auto backgroundRectangle = rect();
 
@@ -649,7 +651,30 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
         backgroundRectangle = rect().adjusted(rectangleMargin, rectangleMargin, -rectangleMargin, -rectangleMargin);
     }
 
-    painter.drawRoundedRect(backgroundRectangle, radius, radius);
+    pixmapPainter.drawRoundedRect(backgroundRectangle, radius, radius);
+
+    QGraphicsScene scene;
+
+    auto pixmapItem = new QGraphicsPixmapItem(backgroundPixmap);
+    auto blurEffect = new QGraphicsBlurEffect;
+
+    blurEffect->setBlurRadius(2.5);
+    blurEffect->setBlurHints(QGraphicsBlurEffect::QualityHint);
+
+    pixmapItem->setGraphicsEffect(blurEffect);
+
+    scene.addItem(pixmapItem);
+
+    QPixmap blurredBackgroundPixmap(size());
+
+    blurredBackgroundPixmap.fill(Qt::transparent);
+
+    QPainter scenePainter(&blurredBackgroundPixmap);
+
+    scene.render(&scenePainter);
+    scenePainter.end();
+
+    painter.drawPixmap(0, 0, blurredBackgroundPixmap);
 
     QWidget::paintEvent(event);
 }

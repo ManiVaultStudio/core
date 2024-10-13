@@ -562,7 +562,7 @@ private:
     AlignmentToolbarItemWidget                  _alignmentToolbarItemWidget;            /** Toolbar alignment item widget */
     std::vector<AbstractToolbarItemWidget*>     _toolbarItemWidgets;                    /** All toolbar item widgets except the learning center toolbar item widget */
 
-    static constexpr auto animationDuration                 = 1000;     /** Overall animation duration */
+    static constexpr auto animationDuration                 = 300;      /** Overall animation duration */
     static constexpr auto intermediateOpacity               = .3f;      /** Intermediate opacity of items */
     static constexpr auto widgetAsyncUpdateTimerInterval    = 10;       /** Prevent QWidget a-synchronicity problems (like show()) by deferring some operations with a timer (of which this variable determines the interval in ms) */
 
