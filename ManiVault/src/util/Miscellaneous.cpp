@@ -147,7 +147,7 @@ QIcon getAlignmentIcon(const Qt::Alignment& alignment)
     constexpr auto lineThickness    = 15.0;
     constexpr auto dotRadiusOuter   = 15;
 
-    const auto drawCorner = [&painter, lineThickness, dotRadiusOuter](const Qt::Alignment& alignment, std::uint32_t radius = 7) -> void {
+    const auto drawCorner = [&painter, offset, size, halfSize](const Qt::Alignment& alignment, std::uint32_t radius = 7) -> void {
         QPoint dotPosition;
 
         if (alignment & Qt::AlignLeft)
