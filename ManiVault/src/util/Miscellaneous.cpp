@@ -133,6 +133,7 @@ QIcon getAlignmentIcon(const Qt::Alignment& alignment)
 {
     constexpr auto size     = 128;
     constexpr auto halfSize = size / 2;
+    constexpr auto offset   = 25;
 
     QPixmap pixmap(size, size);
 
@@ -143,11 +144,7 @@ QIcon getAlignmentIcon(const Qt::Alignment& alignment)
     painter.setRenderHint(QPainter::RenderHint::Antialiasing);
     painter.setWindow(0, 0, size, size);
 
-    constexpr auto offset           = 25.0;
-    constexpr auto lineThickness    = 15.0;
-    constexpr auto dotRadiusOuter   = 15;
-
-    const auto drawCorner = [&painter, offset, size, halfSize](const Qt::Alignment& alignment, std::uint32_t radius = 7) -> void {
+    const auto drawCorner = [&painter, offset, size, halfSize](const Qt::Alignment& alignment, int radius = 7) -> void {
         QPoint dotPosition;
 
         if (alignment & Qt::AlignLeft)

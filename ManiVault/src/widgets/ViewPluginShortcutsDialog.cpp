@@ -56,7 +56,7 @@ ViewPluginShortcutsDialog::ViewPluginShortcutsDialog(plugin::ViewPlugin* viewPlu
     _textScrollArea.setObjectName("Shortcuts");
     _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
 
-    _textWidgetLayout.setContentsMargins(0, 0, 0, 0);
+    _textWidgetLayout.setContentsMargins(5, 5, 5, 5);
     _textWidgetLayout.addWidget(&_textBodyLabel);
     _textWidgetLayout.setAlignment(Qt::AlignTop);
 
