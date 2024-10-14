@@ -126,6 +126,18 @@ public:
     QString getDirectoryName() const;
 
     /**
+     * Set whether to use native or Qt file dialog
+     * @param useNativeDialog Whether to use native or Qt file dialog
+     */
+    void setUseNativeFileDialog(bool useNativeDialog);
+
+    /**
+     * Get whether to use native or Qt file dialog
+     * @return Bool whether to use native or Qt file dialog
+     */
+    bool getUseNativeFileDialog() const;
+
+    /**
      * Get whether the directory is valid or not
      * @return Boolean indication whether the directory is valid or not
      */
@@ -178,6 +190,7 @@ private:
     QStringList                 _nameFilters;       /** File type filters */
     QString                     _defaultSuffix;     /** Default suffix */
     QString                     _fileType;          /** File type (e.g. image and project)*/
+    bool                        _useNativeDialog;   /** Whether to use native or Qt file dialog */
 };
 
 }
