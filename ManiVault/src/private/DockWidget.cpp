@@ -75,9 +75,7 @@ void DockWidget::showEvent(QShowEvent* showEvent)
     CDockWidget::showEvent(showEvent);
 
     if (_settingsToolButton != nullptr) {
-        auto settingsMenu = this->getSettingsMenu();
-
-        if (settingsMenu)
+        if (auto settingsMenu = this->getSettingsMenu())
             _settingsToolButton->setMenu(settingsMenu);
     }
 }

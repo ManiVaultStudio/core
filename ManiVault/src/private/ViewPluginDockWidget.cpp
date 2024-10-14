@@ -148,7 +148,13 @@ void ViewPluginDockWidget::initialize()
 			_settingsMenu.addSeparator();
 
 			for (auto titleBarMenuAction : _viewPlugin->getTitleBarMenuActions())
-				_settingsMenu.addAction(titleBarMenuAction);
+			{
+			    if (auto contextMenu = titleBarMenuAction->getContextMenu())
+                    _settingsMenu.addMenu(contextMenu);
+                else
+                    _settingsMenu.addAction(titleBarMenuAction);
+			}
+				
 		}
 	});
 }
