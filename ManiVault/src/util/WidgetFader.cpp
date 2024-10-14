@@ -36,6 +36,10 @@ WidgetFader::WidgetFader(QObject* parent, QWidget* targetWidget, float opacity /
             emit fadedOut();
     });
 
+    connect(&_opacityAnimation, &QPropertyAnimation::valueChanged, this, [this](const QVariant& value) -> void {
+        emit opacityChanged(value.toFloat());
+    });
+
     _opacityEffect.setOpacity(opacity);
 }
 
@@ -48,34 +52,46 @@ void WidgetFader::fadeIn(std::int32_t duration /*= -1*/)
     setOpacity(_maximumOpacity, duration >= 0 ? duration : _fadeInDuration);
 }
 
-void WidgetFader::fadeOut(std::int32_t duration /*= -1*/)
+void WidgetFader::fadeOut(std::int32_t duration /*= -1*/, bool autoHideAfterFade /*= false*/)
 {
 #ifdef WIDGET_FADER_VERBOSE
     qDebug() << __FUNCTION__ << _targetWidget->objectName() << duration;
 #endif
 
     setOpacity(_minimumOpacity, duration >= 0 ? duration : _fadeOutDuration);
+
+    if (autoHideAfterFade) {
+        connect(&_opacityAnimation, &QPropertyAnimation::finished, this, [this]() {
+            _targetWidget->hide();
+		}, Qt::SingleShotConnection);
+    }
 }
 
-void WidgetFader::setOpacity(float opacity, std::uint32_t duration /*= 0*/)
+void WidgetFader::setOpacity(float opacity, std::uint32_t duration /*= 0*/, std::uint32_t delay /*= 0*/)
 {
 #ifdef WIDGET_FADER_VERBOSE
     //qDebug() << __FUNCTION__;
 #endif
 
-    if (duration == 0) {
-        _opacityEffect.setOpacity(opacity);
-    }
-    else {
-        //if (_opacityAnimation.state() == QPropertyAnimation::Running)
-        _opacityAnimation.stop();
+    const auto startOpacityAnimation = [this, opacity, duration, delay]() -> void {
+        if (duration == 0) {
+            _opacityEffect.setOpacity(opacity);
+        }
+        else {
+            _opacityAnimation.stop();
 
-        _opacityAnimation.setDuration(static_cast<int>(duration));
-        _opacityAnimation.setStartValue(_opacityEffect.opacity());
-        _opacityAnimation.setEndValue(opacity);
+            _opacityAnimation.setDuration(static_cast<int>(duration));
+            _opacityAnimation.setStartValue(_opacityEffect.opacity());
+            _opacityAnimation.setEndValue(opacity);
 
-        QTimer::singleShot(50, this, &WidgetFader::startAnimation);
-    }
+            QTimer::singleShot(50, this, &WidgetFader::startAnimation);
+        }
+	};
+
+    if (delay > 0)
+        QTimer::singleShot(delay, startOpacityAnimation);
+    else
+        startOpacityAnimation();
 }
 
 bool WidgetFader::isFadedIn() const

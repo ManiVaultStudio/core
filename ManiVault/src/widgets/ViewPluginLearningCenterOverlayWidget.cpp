@@ -12,39 +12,100 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QDesktopServices>
+#include <QGraphicsPixmapItem>
+#include <QResizeEvent>
 
 #ifdef _DEBUG
     #define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
 #endif
+
+//#define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
 
 using namespace mv::util;
 
 namespace mv::gui
 {
 
-ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin, const Qt::Alignment& alignment /*= Qt::AlignBottom | Qt::AlignRight*/) :
+ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin) :
     OverlayWidget(target),
     _viewPlugin(viewPlugin),
-    _alignment(alignment),
-    _toolbarWidget(viewPlugin, this)
+    _toolbarWidget(viewPlugin, this),
+    _learningCenterToolbarItemWidget(_viewPlugin, this),
+    _videosToolbarItemWidget(_viewPlugin, this),
+    _descriptionToolbarItemWidget(_viewPlugin, this),
+    _shortcutsToolbarItemWidget(_viewPlugin, this),
+    _showDocumentationToolbarItemWidget(_viewPlugin, this),
+    _visitGithubRepoToolbarItemWidget(_viewPlugin, this),
+    _toLearningCenterToolbarItemWidget(_viewPlugin, this),
+    _alignmentToolbarItemWidget(_viewPlugin, this)
 {
-    Q_ASSERT(target);
+    try {
+        Q_ASSERT(target);
 
-    if (!target)
-        return;
+        if (!target)
+            throw std::runtime_error("Target widget may not be a nullptr");
 
-    addMouseEventReceiverWidget(&_toolbarWidget);
+        addMouseEventReceiverWidget(&_toolbarWidget);
 
-    _layout.setAlignment(_alignment);
+        if (std::find(PluginLearningCenterAction::alignmentFlags.begin(), PluginLearningCenterAction::alignmentFlags.end(), getLearningCenterAction().getAlignment()) == PluginLearningCenterAction::alignmentFlags.end())
+            throw std::runtime_error("Supported toolbar alignment options are: Qt::AlignTop | Qt::AlignLeft, Qt::AlignTop | Qt::AlignRight, Qt::AlignBottom | Qt::AlignLeft and Qt::AlignBottom | Qt::AlignRight");
 
-    _layout.addWidget(&_toolbarWidget);
+        setLayout(&_layout);
 
-    setLayout(&_layout);
+        setLayoutContentsMargins(&_layout, 0);
+        
+        _layout.setSpacing(0);
 
-    setContentsMargins(4);
-    setMouseTracking(true);
+        _layout.addWidget(&_toolbarWidget);
 
-    raise();
+        _videosToolbarItemWidget.hide();
+        _descriptionToolbarItemWidget.hide();
+        _shortcutsToolbarItemWidget.hide();
+        _showDocumentationToolbarItemWidget.hide();
+        _visitGithubRepoToolbarItemWidget.hide();
+        _toLearningCenterToolbarItemWidget.hide();
+        _alignmentToolbarItemWidget.hide();
+
+        _toolbarWidget.addWidget(&_learningCenterToolbarItemWidget);
+        _toolbarWidget.addWidget(&_videosToolbarItemWidget);
+        _toolbarWidget.addWidget(&_descriptionToolbarItemWidget);
+        _toolbarWidget.addWidget(&_shortcutsToolbarItemWidget);
+        _toolbarWidget.addWidget(&_showDocumentationToolbarItemWidget);
+        _toolbarWidget.addWidget(&_visitGithubRepoToolbarItemWidget);
+        _toolbarWidget.addWidget(&_toLearningCenterToolbarItemWidget);
+        _toolbarWidget.addWidget(&_alignmentToolbarItemWidget);
+
+        raise();
+
+        _toolbarItemWidgets = {
+	        &_videosToolbarItemWidget,
+	        &_descriptionToolbarItemWidget,
+	        &_shortcutsToolbarItemWidget,
+	        &_showDocumentationToolbarItemWidget,
+	        &_visitGithubRepoToolbarItemWidget,
+	        &_toLearningCenterToolbarItemWidget,
+	        &_alignmentToolbarItemWidget
+        };
+
+        for (auto toolbarItemWidget : _toolbarItemWidgets)
+            toolbarItemWidget->installEventFilter(this);
+
+        target->installEventFilter(this);
+
+        _learningCenterToolbarItemWidget.installEventFilter(this);
+        _toolbarWidget.installEventFilter(this);
+
+        connect(&getLearningCenterAction().getAlignmentAction(), &OptionAction::currentIndexChanged, this, &ViewPluginLearningCenterOverlayWidget::alignmentChanged);
+
+        alignmentChanged();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to initialize ViewPluginLearningCenterOverlayWidget::ToolbarWidget", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to initialize ViewPluginLearningCenterOverlayWidget::ToolbarWidget");
+    }
 }
 
 void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidget)
@@ -54,18 +115,159 @@ void ViewPluginLearningCenterOverlayWidget::setTargetWidget(QWidget* targetWidge
     setParent(targetWidget);
 }
 
-void ViewPluginLearningCenterOverlayWidget::setContentsMargins(std::int32_t margin)
+ViewPluginLearningCenterOverlayWidget::ToolbarWidget& ViewPluginLearningCenterOverlayWidget::getToolbarWidget()
 {
-    _layout.setContentsMargins(margin, margin, margin, margin);
+    return _toolbarWidget;
 }
 
-ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(16, 16)*/) :
-    QWidget(),
+bool ViewPluginLearningCenterOverlayWidget::eventFilter(QObject* target, QEvent* event)
+{
+    const auto alignment = getLearningCenterAction().getAlignment();
+
+    switch (event->type())
+    {
+        case QEvent::Enter:
+        {
+            if (target == getWidgetOverlayer().getTargetWidget()) {
+                _learningCenterToolbarItemWidget.show();
+                _learningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, animationDuration);
+            }
+
+            if (target == &_learningCenterToolbarItemWidget)
+                expand();
+
+            if (auto toolbarItemWidget = dynamic_cast<AbstractToolbarItemWidget*>(target))
+                if (std::find(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), target) != _toolbarItemWidgets.end())
+                    toolbarItemWidget->getWidgetFader().setOpacity(1.f, animationDuration / 5);
+
+            break;
+        }
+
+        case QEvent::Leave:
+        {
+            if (target == getWidgetOverlayer().getTargetWidget())
+                _learningCenterToolbarItemWidget.getWidgetFader().setOpacity(0.f, animationDuration);
+
+            if (target == &_toolbarWidget)
+                collapse();
+
+            if (auto toolbarItemWidget = dynamic_cast<AbstractToolbarItemWidget*>(target))
+                if (std::find(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), target) != _toolbarItemWidgets.end())
+                    toolbarItemWidget->getWidgetFader().setOpacity(intermediateOpacity, animationDuration / 2);
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+	return OverlayWidget::eventFilter(target, event);
+}
+
+bool ViewPluginLearningCenterOverlayWidget::isExpanded()
+{
+    const auto numberOfDisplayableToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
+        return toolbarItemWidget->shouldDisplay();
+	});
+
+    const auto numberOfVisibleToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
+        return toolbarItemWidget->isVisible();
+    });
+
+    return numberOfVisibleToolbarItemWidgets == numberOfDisplayableToolbarItemWidgets;
+}
+
+bool ViewPluginLearningCenterOverlayWidget::isCollapsed()
+{
+    const auto numberOfDisplayableToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
+        return toolbarItemWidget->shouldDisplay();
+	});
+
+    const auto numberOfHiddenToolbarItemWidgets = std::count_if(_toolbarItemWidgets.begin(), _toolbarItemWidgets.end(), [](auto toolbarItemWidget) -> bool {
+        return toolbarItemWidget->isHidden();
+    });
+
+    return numberOfHiddenToolbarItemWidgets == numberOfDisplayableToolbarItemWidgets;
+}
+
+void ViewPluginLearningCenterOverlayWidget::toolbarItemWidgetShown(QWidget* toolbarItemWidget)
+{
+    if (!isExpanded())
+        return;
+
+	emit expanded();
+}
+
+void ViewPluginLearningCenterOverlayWidget::toolbarItemWidgetHidden(QWidget* toolbarItemWidget)
+{
+    if (!isCollapsed())
+        return;
+
+	emit collapsed();
+}
+
+void ViewPluginLearningCenterOverlayWidget::alignmentChanged()
+{
+    _layout.setAlignment(getLearningCenterAction().getAlignment());
+}
+
+PluginLearningCenterAction& ViewPluginLearningCenterOverlayWidget::getLearningCenterAction() const
+{
+    return const_cast<plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction();
+}
+
+void ViewPluginLearningCenterOverlayWidget::expand()
+{
+#ifdef VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (isExpanded())
+        return;
+
+    _videosToolbarItemWidget.showConditionally();
+    _descriptionToolbarItemWidget.showConditionally();
+    _shortcutsToolbarItemWidget.showConditionally();
+    _showDocumentationToolbarItemWidget.showConditionally();
+    _visitGithubRepoToolbarItemWidget.showConditionally();
+    _toLearningCenterToolbarItemWidget.showConditionally();
+    _alignmentToolbarItemWidget.showConditionally();
+
+    constexpr auto delay            = animationDuration / 2;
+    constexpr auto fadeInDuration   = animationDuration;
+
+    _videosToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _descriptionToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _shortcutsToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _showDocumentationToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _visitGithubRepoToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _toLearningCenterToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+    _alignmentToolbarItemWidget.getWidgetFader().setOpacity(intermediateOpacity, fadeInDuration, delay);
+}
+
+void ViewPluginLearningCenterOverlayWidget::collapse()
+{
+#ifdef VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    constexpr auto fadeOutDuration = animationDuration;
+
+    _videosToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
+    _descriptionToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
+    _shortcutsToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
+    _showDocumentationToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
+    _visitGithubRepoToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
+    _toLearningCenterToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
+    _alignmentToolbarItemWidget.getWidgetFader().fadeOut(fadeOutDuration, true);
+}
+
+ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(14, 14)*/) :
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
     _iconSize(iconSize),
-    _widgetFader(nullptr, this, .0f),
-    _hasVisibilityToggle(false)
+    _widgetFader(nullptr, this, .0f)
 {
     setObjectName("ToolbarItemWidget");
 
@@ -78,21 +280,15 @@ ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolba
 
     setLayout(&_layout);
 
-    const auto installEventFilterOnTargetWidget = [this](QWidget* previousTargetWidget, QWidget* currentTargetWidget) -> void {
-        Q_ASSERT(currentTargetWidget);
+    _overlayWidget->getToolbarWidget().installEventFilter(this);
+}
 
-        if (!currentTargetWidget)
-            return;
+void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::showConditionally()
+{
+    if (!shouldDisplay())
+        return;
 
-        if (previousTargetWidget)
-            previousTargetWidget->removeEventFilter(this);
-
-        currentTargetWidget->installEventFilter(this);
-    };
-
-    installEventFilterOnTargetWidget(nullptr, _overlayWidget->getWidgetOverlayer().getTargetWidget());
-
-    connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
+    show();
 }
 
 void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::showEvent(QShowEvent* event)
@@ -100,24 +296,15 @@ void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::showEvent
     QWidget::showEvent(event);
 
     updateIcon();
+
+    _overlayWidget->toolbarItemWidgetShown(this);
 }
 
-void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::enterEvent(QEnterEvent* event)
+void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::hideEvent(QHideEvent* event)
 {
-    QWidget::enterEvent(event);
+	QWidget::hideEvent(event);
 
-    updateVisibility();
-
-    if (getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked())
-        _widgetFader.setOpacity(0.8f, 100);
-}
-
-void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::leaveEvent(QEvent* event)
-{
-    QWidget::leaveEvent(event);
-
-    if (getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked())
-        _widgetFader.setOpacity(.35f, 350);
+    _overlayWidget->toolbarItemWidgetHidden(this);
 }
 
 void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateIcon()
@@ -126,27 +313,9 @@ void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateIco
     _iconLabel.setPixmap(getIcon().pixmap(_iconSize));
 }
 
-void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::installVisibilityToggle()
+WidgetFader& ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getWidgetFader()
 {
-    if (_hasVisibilityToggle)
-        return;
-
-    updateVisibility();
-
-    connect(&getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction(), &ToggleAction::toggled, this, &AbstractToolbarItemWidget::updateVisibility);
-
-    _hasVisibilityToggle = true;
-}
-
-void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateVisibility()
-{
-    if (!_hasVisibilityToggle)
-        return;
-
-    if (getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked())
-        _widgetFader.setOpacity(.35f, 350);
-    else
-        _widgetFader.setOpacity(.0f, 350);
+    return _widgetFader;
 }
 
 const plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin() const
@@ -159,75 +328,43 @@ plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWi
     return const_cast<plugin::ViewPlugin*>(_viewPlugin);
 }
 
-OverlayWidget* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getOverlayWidget() const
+ViewPluginLearningCenterOverlayWidget* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getOverlayWidget() const
 {
-    return const_cast<OverlayWidget*>(_overlayWidget);
+    return _overlayWidget;
 }
 
-bool ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::eventFilter(QObject* watched, QEvent* event)
-{
-    switch (event->type())
-    {
-        case QEvent::Enter:
-        {
-            setVisible(shouldDisplay());
-
-            if (!_hasVisibilityToggle || (_hasVisibilityToggle && getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked()))
-                _widgetFader.setOpacity(.35f, 350);
-
-            break;
-        }
-
-        case QEvent::Leave:
-        {
-            _widgetFader.setOpacity(0.f, 350);
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    return QWidget::eventFilter(watched, event);
-}
-
-ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::VisibleToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
-    AbstractToolbarItemWidget(viewPlugin, overlayWidget, QSize(12, 12))
+ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::LearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     const auto updateTooltip = [this]() -> void {
-        setToolTip(QString("%1 the plugin learning center").arg(getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().isChecked() ? "Hide" : "Show"));
+        setToolTip(QString("%1 learning center").arg(getViewPlugin()->getKind()));
     };
 
     updateTooltip();
 
-    connect(&getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction(), &ToggleAction::toggled, this, [this, updateTooltip]() -> void
+    connect(&getViewPlugin()->getLearningCenterAction().getOverlayVisibleAction(), &ToggleAction::toggled, this, [this, updateTooltip]() -> void
     {
         updateTooltip();
         updateIcon();
     });
+
+    getWidgetFader().setOpacity(0.f);
 }
 
-void ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+QIcon ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::getIcon() const
 {
-    getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().toggle();
+    return getViewPlugin()->getLearningCenterAction().icon();
 }
 
-QIcon ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::getIcon() const
+bool ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::shouldDisplay() const
 {
-    return getViewPlugin()->getLearningCenterAction().getViewPluginOverlayVisibleAction().icon();
+    return getViewPlugin()->getLearningCenterAction().getOverlayVisibleAction().isChecked();
 }
 
-bool ViewPluginLearningCenterOverlayWidget::VisibleToolbarItemWidget::shouldDisplay() const
-{
-    return true;
-}
-
-ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip("Watch related videos");
-
-    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -272,12 +409,10 @@ bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDispl
     return !getViewPlugin()->getLearningCenterAction().getVideos().empty();
 }
 
-ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(getViewPlugin()->getLearningCenterAction().getViewDescriptionAction().toolTip());
-
-    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -297,12 +432,10 @@ bool ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::should
     return getViewPlugin()->getLearningCenterAction().hasDescription();
 }
 
-ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getTriggerHelpAction().toolTip());
-
-    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -322,12 +455,10 @@ bool ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::
     return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->hasHelp();
 }
 
-ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip("View shortcuts");
-
-    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -351,12 +482,10 @@ bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDi
     return getViewPlugin()->getShortcuts().hasShortcuts();
 }
 
-ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getVisitRepositoryAction().toolTip());
-
-    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -376,12 +505,10 @@ bool ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::sh
     return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getRepositoryUrl().isValid();
 }
 
-ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::ToLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::ToLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(mv::help().getToLearningCenterAction().toolTip());
-
-    installVisibilityToggle();
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -401,68 +528,363 @@ bool ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::s
     return true;
 }
 
-ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin::ViewPlugin* viewPlugin, OverlayWidget* overlayWidget) :
-    QWidget(overlayWidget),
-    _viewPlugin(viewPlugin),
-    _overlayWidget(overlayWidget)
+std::vector<ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::Alignment> ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::alignments = {};
+
+ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::AlignmentToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setObjectName("ToolbarWidget");
-    setMouseTracking(true);
-    setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
-    setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    setToolTip("Move the toolbar");
 
-    _layout.setSpacing(0);
-
-    _layout.addWidget(new VisibleToolbarItemWidget(viewPlugin, overlayWidget));
-    _layout.addStretch(1);
-    _layout.addWidget(new VideosToolbarItemWidget(viewPlugin, overlayWidget));
-    _layout.addWidget(new DescriptionToolbarItemWidget(viewPlugin, overlayWidget));
-    _layout.addWidget(new ShortcutsToolbarItemWidget(viewPlugin, overlayWidget));
-    _layout.addWidget(new ShowDocumentationToolbarItemWidget(viewPlugin, overlayWidget));
-    _layout.addWidget(new VisitGithubRepoToolbarItemWidget(viewPlugin, overlayWidget));
-    _layout.addWidget(new ToLearningCenterToolbarItemWidget(viewPlugin, overlayWidget));
-
-    setLayout(&_layout);
-
-    setContentsMargins(8);
-
-    const auto installEventFilterOnTargetWidget = [this](QWidget* previousTargetWidget, QWidget* currentTargetWidget) -> void {
-        Q_ASSERT(currentTargetWidget);
-
-        if (!currentTargetWidget)
-            return;
-
-        if (previousTargetWidget)
-            previousTargetWidget->removeEventFilter(this);
-
-        currentTargetWidget->installEventFilter(this);
-    };
-
-    installEventFilterOnTargetWidget(nullptr, _overlayWidget->getWidgetOverlayer().getTargetWidget());
-
-    connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
+    if (alignments.empty()) {
+        alignments = {
+            { Qt::AlignTop | Qt::AlignLeft, "Move to top-left", getAlignmentIcon(Qt::AlignTop | Qt::AlignLeft) },
+            { Qt::AlignTop | Qt::AlignRight, "Move to top-right", getAlignmentIcon(Qt::AlignTop | Qt::AlignRight) },
+            { Qt::AlignBottom | Qt::AlignLeft, "Move to bottom-left", getAlignmentIcon(Qt::AlignBottom | Qt::AlignLeft) },
+            { Qt::AlignBottom | Qt::AlignRight, "Move to bottom-right", getAlignmentIcon(Qt::AlignBottom | Qt::AlignRight) }
+        };
+    }
 }
 
-bool ViewPluginLearningCenterOverlayWidget::ToolbarWidget::eventFilter(QObject* watched, QEvent* event)
+void ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    AbstractToolbarItemWidget::mousePressEvent(event);
+
+    auto contextMenu = new QMenu(this);
+
+    std::vector<Alignment> candidateAlignments;
+
+    std::copy_if(alignments.begin(), alignments.end(), std::back_inserter(candidateAlignments), [this](const auto& alignment) {
+        return alignment._alignment != getViewPlugin()->getLearningCenterAction().getAlignment();
+	});
+
+    for (const auto& candidateAlignment : candidateAlignments) {
+        auto alignAction = new TriggerAction(contextMenu, candidateAlignment._title);
+
+        alignAction->setIcon(candidateAlignment._icon);
+
+        connect(alignAction, &TriggerAction::triggered, this, [this, candidateAlignment]() -> void {
+            getViewPlugin()->getLearningCenterAction().setAlignment(candidateAlignment._alignment);
+		});
+
+        contextMenu->addAction(alignAction);
+    }
+
+    contextMenu->exec(mapToGlobal(event->pos()));
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("arrows-alt");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::shouldDisplay() const
+{
+    return true;
+}
+
+ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::BackgroundWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin) :
+    QWidget(target),
+    _viewPlugin(viewPlugin),
+    _geometryAnimation(this, "geometry")
+{
+    _geometryAnimation.setEasingCurve(QEasingCurve::OutExpo);
+}
+
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::transitionGeometry(const QRect& geometry, bool animate /*= true*/)
+{
+#ifdef VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << geometry;
+#endif
+
+    if (_previousGeometry.isValid()) {
+        if (_geometryAnimation.state() == QPropertyAnimation::Running) {
+            _previousGeometry = _geometryAnimation.currentValue().value<QRect>();
+
+            _geometryAnimation.stop();
+        }
+
+        _geometryAnimation.setDuration(animate ? ViewPluginLearningCenterOverlayWidget::animationDuration / 2 : 0);
+
+        if (_previousGeometry.isValid())
+            _geometryAnimation.setStartValue(_previousGeometry);
+
+        _geometryAnimation.setEndValue(geometry);
+        _geometryAnimation.start();
+    } else {
+        setGeometry(geometry);
+    }
+
+    _previousGeometry = geometry;
+}
+
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::paintEvent(QPaintEvent* event)
+{
+    QPainter painter(this);
+
+    painter.setRenderHint(QPainter::RenderHint::Antialiasing);
+
+    constexpr auto  rectangleMargin = 3;
+    const auto      backgroundColor = qApp->palette().highlightedText().color();
+
+    QPixmap backgroundPixmap(size());
+
+    backgroundPixmap.fill(Qt::transparent);
+
+    QPainter pixmapPainter(&backgroundPixmap);
+
+    pixmapPainter.setPen(Qt::NoPen);
+    pixmapPainter.setBrush(backgroundColor);
+
+    auto backgroundRectangle = rect();
+
+    std::int32_t radius = 0;
+
+    const auto alignment = const_cast<plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction().getAlignment();
+
+    if (alignment & Qt::AlignLeft || alignment & Qt::AlignRight) {
+        radius              = (width() - 2 * rectangleMargin) / 2;
+        backgroundRectangle = rect().adjusted(rectangleMargin, rectangleMargin, -rectangleMargin, -rectangleMargin);
+    }
+
+    if (alignment & Qt::AlignTop || alignment & Qt::AlignBottom) {
+        radius              = (height() - 2 * rectangleMargin) / 2;
+        backgroundRectangle = rect().adjusted(rectangleMargin, rectangleMargin, -rectangleMargin, -rectangleMargin);
+    }
+
+    pixmapPainter.drawRoundedRect(backgroundRectangle, radius, radius);
+
+    QGraphicsScene scene;
+
+    auto pixmapItem = new QGraphicsPixmapItem(backgroundPixmap);
+    auto blurEffect = new QGraphicsBlurEffect;
+
+    blurEffect->setBlurRadius(2.5);
+    blurEffect->setBlurHints(QGraphicsBlurEffect::QualityHint);
+
+    pixmapItem->setGraphicsEffect(blurEffect);
+
+    scene.addItem(pixmapItem);
+
+    QPixmap blurredBackgroundPixmap(size());
+
+    blurredBackgroundPixmap.fill(Qt::transparent);
+
+    QPainter scenePainter(&blurredBackgroundPixmap);
+
+    scene.render(&scenePainter);
+    scenePainter.end();
+
+    painter.drawPixmap(0, 0, blurredBackgroundPixmap);
+
+    QWidget::paintEvent(event);
+}
+
+ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, bool alwaysVisible /*= false*/) :
+    QWidget(overlayWidget),
+    _viewPlugin(viewPlugin),
+    _overlayWidget(overlayWidget),
+    _alwaysVisible(alwaysVisible),
+    _backgroundWidget(overlayWidget, viewPlugin),
+    _backgroundWidgetFader(this, &_backgroundWidget),
+    _numberOfShowEvents(0)
+{
+    try {
+        Q_ASSERT(_viewPlugin && _overlayWidget);
+
+        if (!_viewPlugin)
+            throw std::runtime_error("View plugin is a nullptr");
+
+        if (!_overlayWidget)
+            throw std::runtime_error("Overlay widget is a nullptr");
+
+        setObjectName("ToolbarWidget");
+        setMouseTracking(true);
+        setToolTip(QString("%1 learning center").arg(viewPlugin->getKind()));
+        setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
+        _layout.setSpacing(0);
+
+        _layout.setContentsMargins(ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin, ToolbarWidget::margin);
+
+        setLayout(&_layout);
+
+        const auto installEventFilterOnTargetWidget = [this](QWidget* previousTargetWidget, QWidget* currentTargetWidget) -> void {
+            Q_ASSERT(currentTargetWidget);
+
+            if (!currentTargetWidget)
+                return;
+
+            if (previousTargetWidget)
+                previousTargetWidget->removeEventFilter(this);
+
+            currentTargetWidget->installEventFilter(this);
+        };
+
+        installEventFilterOnTargetWidget(nullptr, _overlayWidget->getWidgetOverlayer().getTargetWidget());
+
+        connect(&_overlayWidget->getWidgetOverlayer(), &WidgetOverlayer::targetWidgetChanged, this, installEventFilterOnTargetWidget);
+
+    	connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::expanded, this, [this]() -> void {
+            QTimer::singleShot(widgetAsyncUpdateTimerInterval, _overlayWidget, &ViewPluginLearningCenterOverlayWidget::updateMask);
+            QTimer::singleShot(widgetAsyncUpdateTimerInterval, this, &ToolbarWidget::synchronizeBackgroundWidgetGeometry);
+    	});
+
+        connect(_overlayWidget, &ViewPluginLearningCenterOverlayWidget::collapsed, this, [this]() -> void {
+            QTimer::singleShot(widgetAsyncUpdateTimerInterval, this, &ToolbarWidget::synchronizeBackgroundWidgetGeometry);
+            QTimer::singleShot(widgetAsyncUpdateTimerInterval + animationDuration, _overlayWidget, &ViewPluginLearningCenterOverlayWidget::updateMask);
+		});
+
+        connect(&_viewPlugin->getLearningCenterAction().getOverlayVisibleAction(), &ToggleAction::toggled, this, &ToolbarWidget::visibilityChanged);
+
+        connect(&_viewPlugin->getLearningCenterAction().getAlignmentAction(), &OptionAction::currentIndexChanged, this, &ToolbarWidget::alignmentChanged);
+
+        alignmentChanged();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to initialize ViewPluginLearningCenterOverlayWidget::ToolbarWidget", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to initialize ViewPluginLearningCenterOverlayWidget::ToolbarWidget");
+    }
+}
+
+PluginLearningCenterAction& ViewPluginLearningCenterOverlayWidget::ToolbarWidget::getLearningCenterAction() const
+{
+    return const_cast<plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction();
+}
+
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::addWidget(QWidget* widget)
+{
+    try {
+        if (!layout())
+            throw std::runtime_error("No layout present");
+
+        if (!widget)
+            throw std::runtime_error("Supplied widget is a nullptr");
+
+        _widgets.push_back(widget);
+
+        const auto alignment = getLearningCenterAction().getAlignment();
+
+        if (alignment & Qt::AlignLeft)
+	         _layout.addWidget(widget);
+
+        if (alignment & Qt::AlignRight)
+            _layout.insertWidget(0, widget);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add widget to ViewPluginLearningCenterOverlayWidget::ToolbarWidget", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to add widget to ViewPluginLearningCenterOverlayWidget::ToolbarWidget");
+    }
+}
+
+bool ViewPluginLearningCenterOverlayWidget::ToolbarWidget::eventFilter(QObject* target, QEvent* event)
 {
     switch (event->type())
     {
-        case QEvent::Enter:
-        {
-            show();
-            break;
-        }
+	    case QEvent::Enter:
+	    {
+	        _backgroundWidgetFader.setOpacity(.95f, animationDuration);
+	        break;
+	    }
 
-        default:
-            break;
+	    case QEvent::Leave:
+	    {
+	        _backgroundWidgetFader.setOpacity(0.f, animationDuration);
+	        break;
+	    }
+
+	    default:
+	        break;
     }
 
-    return QWidget::eventFilter(watched, event);
+    return QWidget::eventFilter(target, event);
 }
 
-void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::setContentsMargins(std::int32_t margin)
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::showEvent(QShowEvent* event)
 {
-    _layout.setContentsMargins(margin, margin, margin, margin);
+#ifdef VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << _numberOfShowEvents << _viewPlugin->getKind() << geometry();
+#endif
+
+    QWidget::showEvent(event);
+
+    if (_numberOfShowEvents == 0)
+        firstShowEvent(event);
+
+    _numberOfShowEvents++;
+
+    QTimer::singleShot(widgetAsyncUpdateTimerInterval, [this]() -> void {
+        _backgroundWidget.transitionGeometry(geometry());
+	});
+}
+
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::synchronizeBackgroundWidgetGeometry()
+{
+    _backgroundWidget.transitionGeometry(geometry());
+}
+
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::visibilityChanged()
+{
+    if (_alwaysVisible)
+        return;
+
+    if (_viewPlugin->getLearningCenterAction().getOverlayVisibleAction().isChecked()) {
+        _backgroundWidgetFader.setOpacity(0.95f, animationDuration);
+        _overlayWidget->addMouseEventReceiverWidget(this);
+        update();
+    }
+    else {
+        _backgroundWidgetFader.setOpacity(0.f, animationDuration);
+        _overlayWidget->removeMouseEventReceiverWidget(this);
+    }
+}
+
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::firstShowEvent(QShowEvent* showEvent)
+{
+#ifdef VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << _viewPlugin->getKind();
+#endif
+
+    _backgroundWidget.lower();
+    _backgroundWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+    _backgroundWidgetFader.setOpacity(0.f);
+
+    QTimer::singleShot(widgetAsyncUpdateTimerInterval, [this]() -> void {
+        _backgroundWidget.transitionGeometry(geometry());
+	});
+}
+
+void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::alignmentChanged()
+{
+    const auto alignment = getLearningCenterAction().getAlignment();
+
+    if (std::find(PluginLearningCenterAction::alignmentFlags.begin(), PluginLearningCenterAction::alignmentFlags.end(), alignment) == PluginLearningCenterAction::alignmentFlags.end())
+        throw std::runtime_error("Supported toolbar alignment options are: Qt::AlignTop | Qt::AlignLeft, Qt::AlignTop | Qt::AlignRight, Qt::AlignBottom | Qt::AlignLeft and Qt::AlignBottom | Qt::AlignRight");
+
+    clearLayout(&_layout);
+
+    if (alignment & Qt::AlignLeft) {
+        for (auto widget : _widgets)
+            _layout.addWidget(widget);
+    }
+
+    _layout.addStretch(1);
+
+    if (alignment & Qt::AlignRight) {
+        for (auto widget : _widgets)
+            _layout.insertWidget(0, widget);
+    }
+
+    QTimer::singleShot(widgetAsyncUpdateTimerInterval, [this]() -> void {
+        _overlayWidget->updateMask();
+    	synchronizeBackgroundWidgetGeometry();
+	});
 }
 
 }

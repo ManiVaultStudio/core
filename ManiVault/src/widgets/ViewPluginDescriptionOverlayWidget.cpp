@@ -27,15 +27,16 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
     getMainLayout().addLayout(&_headerLayout);
     getMainLayout().addWidget(&_textScrollArea);
 
+    _headerLayout.setContentsMargins(5, 0, 5, 0);
+    _headerLayout.setSpacing(10);
+
     _headerLayout.addWidget(&_headerIconLabel);
     _headerLayout.addWidget(&_headerTextLabel);
     _headerLayout.addStretch(1);
-    _headerLayout.setSpacing(10);
 
     _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("book-reader").pixmap(QSize(24, 24)));
     _headerIconLabel.setStyleSheet("padding-top: 2px;");
 
-    _headerTextLabel.setWordWrap(true);
     _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b></p>").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
 
     _textScrollArea.setWidgetResizable(true);
@@ -44,7 +45,7 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
     _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
     _textScrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    _textWidgetLayout.setContentsMargins(0, 0, 0, 0);
+    _textWidgetLayout.setContentsMargins(5, 0, 5, 0);
     _textWidgetLayout.addWidget(&_textBodyLabel);
     _textWidgetLayout.setAlignment(Qt::AlignTop);
 

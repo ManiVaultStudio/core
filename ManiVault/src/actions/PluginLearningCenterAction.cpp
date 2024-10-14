@@ -10,12 +10,21 @@
 
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
 #include "widgets/ViewPluginDescriptionOverlayWidget.h"
-#include "widgets/ViewPluginShortcutsOverlayWidget.h"
+#include "widgets/ViewPluginShortcutsDialog.h"
 
 using namespace mv::util;
 using namespace mv::plugin;
 
 namespace mv::gui {
+
+const QStringList PluginLearningCenterAction::alignmentOptions = { "TopLeft", "TopRight", "BottomLeft", "BottomRight" };
+
+const std::vector<Qt::Alignment> PluginLearningCenterAction::alignmentFlags = {
+        Qt::AlignTop | Qt::AlignLeft,
+        Qt::AlignTop | Qt::AlignRight,
+        Qt::AlignBottom | Qt::AlignLeft,
+        Qt::AlignBottom | Qt::AlignRight
+};
 
 PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
@@ -24,9 +33,12 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _viewDescriptionAction(this, "View description"),
     _viewHelpAction(this, "View help"),
     _viewShortcutsAction(this, "View shortcuts"),
-    _viewPluginOverlayVisibleAction(this, "View plugin overlay visible", true),
+    _overlayVisibleAction(this, "View plugin overlay visible", true),
+    _alignmentAction(this, "View plugin overlay alignment", alignmentOptions, "BottomRight"),
     _learningCenterOverlayWidget(nullptr)
 {
+    setIconByName("question-circle");
+
     _viewDescriptionAction.setToolTip(getShortDescription());
     _viewDescriptionAction.setIconByName("book-reader");
     _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
@@ -48,17 +60,21 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
 
     connect(&_viewShortcutsAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcuts);
 
-    _viewPluginOverlayVisibleAction.setToolTip("Toggle view plugin learning center toolbar visibility");
-    _viewPluginOverlayVisibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
-    _viewPluginOverlayVisibleAction.setConnectionPermissionsToForceNone();
+    _overlayVisibleAction.setToolTip("Toggle view plugin learning center toolbar visibility");
+    _overlayVisibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _overlayVisibleAction.setConnectionPermissionsToForceNone();
+
+    _alignmentAction.setToolTip("View plugin learning center toolbar alignment");
+    _alignmentAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _alignmentAction.setConnectionPermissionsToForceNone();
 
     const auto updateViewPluginOverlayVisibleActionIcon = [this]() -> void {
-        _viewPluginOverlayVisibleAction.setIconByName(_viewPluginOverlayVisibleAction.isChecked() ? "eye" : "eye-slash");
+        _overlayVisibleAction.setIconByName(_overlayVisibleAction.isChecked() ? "eye" : "eye-slash");
     };
 
     updateViewPluginOverlayVisibleActionIcon();
 
-    connect(&_viewPluginOverlayVisibleAction, &ToggleAction::toggled, this, updateViewPluginOverlayVisibleActionIcon);
+    connect(&_overlayVisibleAction, &ToggleAction::toggled, this, updateViewPluginOverlayVisibleActionIcon);
 }
 
 void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
@@ -85,6 +101,24 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
 ViewPluginLearningCenterOverlayWidget* PluginLearningCenterAction::getViewPluginOverlayWidget() const
 {
     return _learningCenterOverlayWidget;
+}
+
+Qt::Alignment PluginLearningCenterAction::getAlignment() const
+{
+    const auto currentAlignmentText = _alignmentAction.getCurrentText();
+
+    if (!alignmentOptions.contains(currentAlignmentText))
+        return Qt::AlignCenter;
+
+    return alignmentFlags[alignmentOptions.indexOf(currentAlignmentText)];
+}
+
+void PluginLearningCenterAction::setAlignment(const Qt::Alignment& alignment)
+{
+	const auto it = std::find(alignmentFlags.begin(), alignmentFlags.end(), alignment);
+
+    if (it != alignmentFlags.end())
+        _alignmentAction.setCurrentIndex(std::distance(alignmentFlags.begin(), it));
 }
 
 void PluginLearningCenterAction::createViewPluginOverlayWidget()
@@ -217,12 +251,9 @@ void PluginLearningCenterAction::viewShortcuts()
 
     if (isViewPlugin() && _plugin->getShortcuts().hasShortcuts())
     {
-        if (!_shortcutsOverlayWidget.isNull())
-            return;
+        ViewPluginShortcutsDialog viewPluginShortcutsDialog(dynamic_cast<ViewPlugin*>(_plugin));
 
-        _shortcutsOverlayWidget = new gui::ViewPluginShortcutsOverlayWidget(dynamic_cast<ViewPlugin*>(_plugin));
-
-        _shortcutsOverlayWidget->show();
+        viewPluginShortcutsDialog.exec();
     }
 }
 
@@ -230,14 +261,16 @@ void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    _viewPluginOverlayVisibleAction.fromParentVariantMap(variantMap);
+    _overlayVisibleAction.fromParentVariantMap(variantMap);
+    _alignmentAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap PluginLearningCenterAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
-    _viewPluginOverlayVisibleAction.insertIntoVariantMap(variantMap);
+    _overlayVisibleAction.insertIntoVariantMap(variantMap);
+    _alignmentAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

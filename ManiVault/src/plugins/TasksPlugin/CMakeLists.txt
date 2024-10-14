@@ -59,7 +59,7 @@ target_link_libraries(${TASKS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${TASKS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
-check_and_set_AVX(${TASKS_PLUGIN} ${MV_USE_AVX})
+mv_check_and_set_AVX(${TASKS_PLUGIN} ${MV_USE_AVX})
 
 install(TARGETS ${TASKS_PLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
