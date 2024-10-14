@@ -361,7 +361,6 @@ protected:
         static std::vector<Alignment> alignments;   /** Allowed alignment */
     };
 
-
     /** Toolbar widget to align items horizontally or vertically */
     class ToolbarWidget : public QWidget {
     private:
@@ -378,7 +377,13 @@ protected:
              */
             BackgroundWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin);
 
-            void setGeometry(const QRect& geometry, bool animate = true);
+            
+	        /**
+             * Transition to \p geometry over time
+             * @param geometry Geometry at the end of the animation
+             * @param animate Whether to animate the geometry over time
+             */
+            void transitionGeometry(const QRect& geometry, bool animate = true);
 
         protected:
 
@@ -389,8 +394,9 @@ protected:
             void paintEvent(QPaintEvent* event) override;
 
         private:
-            const plugin::ViewPlugin*   _viewPlugin;      /** Pointer to view plugin */
-            QPropertyAnimation          _sizeAnimation;
+            const plugin::ViewPlugin*   _viewPlugin;            /** Pointer to view plugin */
+            QPropertyAnimation          _geometryAnimation;     /** Animates the position and size of the background widget */
+            QRect                       _previousGeometry;      /** Previous geometry, used as start value for geometry animation */
         };
 
     public:
@@ -429,16 +435,23 @@ protected:
 
     private:
 
-        void updateBackgroundWidgetGeometry();
+        /** Synchronizes the background widget geometry with our geometry */
+        void synchronizeBackgroundWidgetGeometry();
 
         /** Invoked when the plugin learning center visibility changed */
         void visibilityChanged();
 
         /**
+         * Invoked when the widget is first shown
+         * @param showEvent Pointer to show event
+         */
+        void firstShowEvent(QShowEvent* showEvent);
+
+        /**
          * Get the learning center action
          * @return Reference to the view plugin learning center action
          */
-        PluginLearningCenterAction& getLearningCenterAction();
+        PluginLearningCenterAction& getLearningCenterAction() const;
 
     private:
         const plugin::ViewPlugin*               _viewPlugin;                /** Const pointer to source view plugin */
@@ -448,6 +461,7 @@ protected:
         QHBoxLayout                             _layout;                    /** Main layout */
         BackgroundWidget                        _backgroundWidget;          /** Widget with background content */
         util::WidgetFader                       _backgroundWidgetFader;     /** For fading in/out the background widget */
+        std::uint32_t                           _numberOfShowEvents;        /** The number of times the widget has been shown */
 
     protected:
         static constexpr std::int32_t margin = 4;   /** Overall margin */
@@ -524,7 +538,7 @@ private:
      * Get the learning center action
      * @return Reference to the view plugin learning center action
      */
-    PluginLearningCenterAction& getLearningCenterAction();
+    PluginLearningCenterAction& getLearningCenterAction() const;
 
 signals:
 
@@ -548,8 +562,9 @@ private:
     AlignmentToolbarItemWidget                  _alignmentToolbarItemWidget;            /** Toolbar alignment item widget */
     std::vector<AbstractToolbarItemWidget*>     _toolbarItemWidgets;                    /** All toolbar item widgets except the learning center toolbar item widget */
 
-    static constexpr auto animationDuration     = 500;      /** Overall animation duration */
-    static constexpr auto intermediateOpacity   = .3f;      /** Intermediate opacity of items */
+    static constexpr auto animationDuration                 = 300;      /** Overall animation duration */
+    static constexpr auto intermediateOpacity               = .3f;      /** Intermediate opacity of items */
+    static constexpr auto widgetAsyncUpdateTimerInterval    = 10;       /** Prevent QWidget a-synchronicity problems (like show()) by deferring some operations with a timer (of which this variable determines the interval in ms) */
 
     friend class AbstractToolbarItemWidget;
     friend class AlignmentToolbarItemWidget;

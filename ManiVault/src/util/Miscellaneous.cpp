@@ -143,37 +143,42 @@ QIcon getAlignmentIcon(const Qt::Alignment& alignment)
     painter.setRenderHint(QPainter::RenderHint::Antialiasing);
     painter.setWindow(0, 0, size, size);
 
-    constexpr auto offset           = 35.0;
-    constexpr auto lineThickness    = 5.0;
-    constexpr auto borderRectangle  = QRect(0, 0, size, size);
+    constexpr auto offset           = 25.0;
+    constexpr auto lineThickness    = 15.0;
+    constexpr auto dotRadiusOuter   = 15;
 
-    painter.setPen(QPen(Qt::black, lineThickness));
-    painter.drawRect(borderRectangle.adjusted(2, 2, -2, -2));
+    const auto drawCorner = [&painter, lineThickness, dotRadiusOuter](const Qt::Alignment& alignment, std::uint32_t radius = 7) -> void {
+        QPoint dotPosition;
 
-    constexpr auto dotRadius = 30;
+        if (alignment & Qt::AlignLeft)
+            dotPosition.setX(offset);
 
-    QPoint dotPosition;
+        if (alignment & Qt::AlignHCenter)
+            dotPosition.setX(halfSize);
 
-    if (alignment & Qt::AlignLeft)
-        dotPosition.setX(offset);
+        if (alignment & Qt::AlignRight)
+            dotPosition.setX(size - offset);
 
-    if (alignment & Qt::AlignHCenter)
-        dotPosition.setX(halfSize);
+        if (alignment & Qt::AlignTop)
+            dotPosition.setY(offset);
 
-    if (alignment & Qt::AlignRight)
-        dotPosition.setX(size - offset);
+        if (alignment & Qt::AlignVCenter)
+            dotPosition.setY(halfSize);
 
-    if (alignment & Qt::AlignTop)
-        dotPosition.setY(offset);
+        if (alignment & Qt::AlignBottom)
+            dotPosition.setY(size - offset);
 
-    if (alignment & Qt::AlignVCenter)
-        dotPosition.setY(halfSize);
+        painter.setBrush(QBrush(Qt::black));
+        painter.setPen(Qt::NoPen);
+        painter.drawEllipse(dotPosition, radius, radius);
+	};
 
-    if (alignment & Qt::AlignBottom)
-        dotPosition.setY(size - offset);
+    drawCorner(Qt::AlignTop | Qt::AlignLeft);
+    drawCorner(Qt::AlignTop | Qt::AlignRight);
+    drawCorner(Qt::AlignBottom | Qt::AlignLeft);
+    drawCorner(Qt::AlignBottom | Qt::AlignRight);
 
-    painter.setPen(QPen(Qt::black, dotRadius, Qt::SolidLine, Qt::RoundCap));
-    painter.drawPoint(dotPosition);
+    drawCorner(alignment, 25);
 
     return gui::createIcon(pixmap);
 }
