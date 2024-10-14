@@ -176,6 +176,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     shortcuts.add({ QKeySequence(Qt::Key_F12), "General", "Edit the view parameters" });
 
     getLearningCenterAction().createViewPluginOverlayWidget();
+
+    addTitleBarMenuAction(&getLearningCenterAction());
 }
 
 void ViewPlugin::init()

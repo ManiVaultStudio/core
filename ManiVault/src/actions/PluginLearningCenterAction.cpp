@@ -33,8 +33,13 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _viewDescriptionAction(this, "View description"),
     _viewHelpAction(this, "View help"),
     _viewShortcutsAction(this, "View shortcuts"),
-    _overlayVisibleAction(this, "View plugin overlay visible", true),
-    _alignmentAction(this, "View plugin overlay alignment", alignmentOptions, "BottomRight"),
+    _toolbarVisibleAction(this, "Visible", true),
+    _hideToolbarAction(this, "Hide toolbar"),
+    _alignmentAction(this, "View plugin overlay alignment", alignmentOptions, "BottomLeft"),
+    _moveToTopLeftAction(this, "Move to top-left"),
+    _moveToTopRightAction(this, "Move to top-right"),
+    _moveToBottomLeftAction(this, "Move to bottom-left"),
+    _moveToBottomRightAction(this, "Move to bottom-right"),
     _learningCenterOverlayWidget(nullptr)
 {
     setIconByName("question-circle");
@@ -60,21 +65,38 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
 
     connect(&_viewShortcutsAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcuts);
 
-    _overlayVisibleAction.setToolTip("Toggle view plugin learning center toolbar visibility");
-    _overlayVisibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
-    _overlayVisibleAction.setConnectionPermissionsToForceNone();
+    _toolbarVisibleAction.setToolTip("Toggle toolbar visibility");
+    _toolbarVisibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _toolbarVisibleAction.setConnectionPermissionsToForceNone();
+
+    _hideToolbarAction.setToolTip("Hide toolbar");
+    _hideToolbarAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _hideToolbarAction.setConnectionPermissionsToForceNone();
+    _hideToolbarAction.setIconByName("eye-slash");
+
+    connect(&_hideToolbarAction, &TriggerAction::triggered, this, [this]() -> void { _toolbarVisibleAction.setChecked(false); });
 
     _alignmentAction.setToolTip("View plugin learning center toolbar alignment");
     _alignmentAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _alignmentAction.setConnectionPermissionsToForceNone();
 
     const auto updateViewPluginOverlayVisibleActionIcon = [this]() -> void {
-        _overlayVisibleAction.setIconByName(_overlayVisibleAction.isChecked() ? "eye" : "eye-slash");
+        _toolbarVisibleAction.setIconByName(_toolbarVisibleAction.isChecked() ? "eye" : "eye-slash");
     };
 
     updateViewPluginOverlayVisibleActionIcon();
 
-    connect(&_overlayVisibleAction, &ToggleAction::toggled, this, updateViewPluginOverlayVisibleActionIcon);
+    connect(&_toolbarVisibleAction, &ToggleAction::toggled, this, updateViewPluginOverlayVisibleActionIcon);
+
+    _moveToTopLeftAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignLeft));
+    _moveToTopRightAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignRight));
+    _moveToBottomLeftAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignLeft));
+    _moveToBottomRightAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignLeft));
+
+    connect(&_moveToTopLeftAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("TopLeft"); });
+    connect(&_moveToTopRightAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("TopRight"); });
+    connect(&_moveToBottomLeftAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("BottomLeft"); });
+    connect(&_moveToBottomRightAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("BottomRight"); });
 }
 
 void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
@@ -96,6 +118,39 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
 
     if (_learningCenterOverlayWidget)
         _learningCenterOverlayWidget->deleteLater();
+}
+
+QMenu* PluginLearningCenterAction::getContextMenu(QWidget* parent)
+{
+    auto contextMenu = new QMenu("Learning center", parent);
+
+    contextMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher"));
+
+    contextMenu->addAction(&_toolbarVisibleAction);
+    contextMenu->addMenu(getAlignmentContextMenu());
+
+    return contextMenu;
+}
+
+QMenu* PluginLearningCenterAction::getAlignmentContextMenu(QWidget* parent)
+{
+    auto contextMenu = new QMenu("Alignment", parent);
+
+    contextMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("arrows-alt"));
+
+    if (getAlignment() != (Qt::AlignTop | Qt::AlignLeft))
+        contextMenu->addAction(&_moveToTopLeftAction);
+
+    if (getAlignment() != (Qt::AlignTop | Qt::AlignRight))
+        contextMenu->addAction(&_moveToTopRightAction);
+
+    if (getAlignment() != (Qt::AlignBottom | Qt::AlignLeft))
+        contextMenu->addAction(&_moveToBottomLeftAction);
+
+    if (getAlignment() != (Qt::AlignBottom | Qt::AlignRight))
+        contextMenu->addAction(&_moveToBottomRightAction);
+
+    return contextMenu;
 }
 
 ViewPluginLearningCenterOverlayWidget* PluginLearningCenterAction::getViewPluginOverlayWidget() const
@@ -261,7 +316,7 @@ void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    _overlayVisibleAction.fromParentVariantMap(variantMap);
+    _toolbarVisibleAction.fromParentVariantMap(variantMap);
     _alignmentAction.fromParentVariantMap(variantMap);
 }
 
@@ -269,7 +324,7 @@ QVariantMap PluginLearningCenterAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
-    _overlayVisibleAction.insertIntoVariantMap(variantMap);
+    _toolbarVisibleAction.insertIntoVariantMap(variantMap);
     _alignmentAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

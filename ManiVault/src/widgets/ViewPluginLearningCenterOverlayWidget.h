@@ -320,6 +320,37 @@ protected:
         bool shouldDisplay() const override;
     };
 
+    /** Toolbar item widget for hiding the toolbar */
+    class HideToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        HideToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
+    };
+
     /** Toolbar item widget for configuring the alignment */
     class AlignmentToolbarItemWidget final : public AbstractToolbarItemWidget
     {
@@ -559,6 +590,7 @@ private:
     ShowDocumentationToolbarItemWidget          _showDocumentationToolbarItemWidget;    /** Documentation toolbar item widget */
     VisitGithubRepoToolbarItemWidget            _visitGithubRepoToolbarItemWidget;      /** Link to GitHub repository toolbar item widget */
     ToLearningCenterToolbarItemWidget           _toLearningCenterToolbarItemWidget;     /** Go the main learning center toolbar item widget */
+    HideToolbarItemWidget                       _hideToolbarItemWidget;                 /** Toolbar hide item widget */
     AlignmentToolbarItemWidget                  _alignmentToolbarItemWidget;            /** Toolbar alignment item widget */
     std::vector<AbstractToolbarItemWidget*>     _toolbarItemWidgets;                    /** All toolbar item widgets except the learning center toolbar item widget */
 
