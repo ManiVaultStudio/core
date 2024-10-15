@@ -6,9 +6,14 @@
 
 #include "widgets/ViewPluginOverlayWidget.h"
 
+#include "MarkdownDocument.h"
+
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QScrollArea>
+#include <QWebEngineView>
+#include <QWebEnginePage>
+#include <QWebChannel>
 
 namespace mv::util {
     class ShortcutMap;
@@ -36,16 +41,21 @@ public:
      * Construct with pointer to source \p view plugin
      * @param viewPlugin Pointer to source view plugin
      */
-    ViewPluginDescriptionOverlayWidget(mv::plugin::ViewPlugin* viewPlugin);
+    ViewPluginDescriptionOverlayWidget(plugin::ViewPlugin* viewPlugin);
 
 private:
-    QHBoxLayout     _headerLayout;          /** Layout for the header */
-    QLabel          _headerIconLabel;       /** Label for header icon */
-    QLabel          _headerTextLabel;       /** Label for header text */
-    QScrollArea     _textScrollArea;        /** Scroll area for the shortcut */
-    QWidget         _textWidget;            /** Widget with the shortcuts label */
-    QVBoxLayout     _textWidgetLayout;      /** Widget with the shortcuts label */
-    QLabel          _textBodyLabel;         /** Shortcut cheatsheet HTML */
+    QHBoxLayout                 _headerLayout;          /** Layout for the header */
+    QLabel                      _headerIconLabel;       /** Label for header icon */
+    QLabel                      _headerTextLabel;       /** Label for header text */
+    QScrollArea                 _textScrollArea;        /** Scroll area for the shortcut */
+    QWidget                     _textWidget;            /** Widget with the shortcuts label */
+    QVBoxLayout                 _textWidgetLayout;      /** Widget with the shortcuts label */
+    QLabel                      _textBodyLabel;         /** Shortcut cheatsheet HTML */
+    QWebChannel                 _markdownChannel;       /** Markdown web channel */
+    QUrl                        _markdownUrl;           /** Location of the Markdown file */
+    QWebEngineView              _webEngineView;         /** Browser to show the Markdown in */
+    QWebEnginePage              _markdownPage;          /** Browser page to show the Markdown in */
+    util::MarkdownDocument      _markdownDocument;      /** Document for synchronizing the Markdown text with the browser */
 };
 
 }

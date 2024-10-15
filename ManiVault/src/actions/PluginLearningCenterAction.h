@@ -110,7 +110,7 @@ public: // Plugin description
      * Set short description to \p shortDescription
      * @param shortDescription Short plugin description in plain text format
      */
-    void setShortDescription(const QString& shortDescription);
+    void setShortDescription(const QString& shortDescription) const;
 
     /**
      * Get long description
@@ -122,7 +122,19 @@ public: // Plugin description
      * Set long description to \p longDescription
      * @param longDescription Long plugin description in plain text format
      */
-    void setLongDescription(const QString& longDescription);
+    void setLongDescription(const QString& longDescription) const;
+
+    /**
+     * Get Markdown-formatted long description
+     * @return Long description in Markdown format
+     */
+    QString getLongDescriptionMarkdown() const;
+
+    /**
+     * Set Markdown-formatted long description to \p longDescriptionMarkdown
+     * @param longDescriptionMarkdown Long plugin description in Markdown format
+     */
+    void setLongDescriptionMarkdown(const QString& longDescriptionMarkdown) const;
 
     /**
      * Get whether the plugin has a description or not
@@ -188,7 +200,7 @@ private:
     void viewDescription();
 
     /** View shortcuts (view depends on the type of plugin) */
-    void viewShortcuts();
+    void viewShortcuts() const;
 
 public: // Serialization
 
@@ -243,11 +255,18 @@ signals:
     void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
 
     /**
-     * Signals that the long description changed from \p previousShortDescription to \p currentShortDescription
-     * @param previousLongDescription Previous long description
-     * @param currentLongDescription Current long description
+     * Signals that the HTML-formatted long description changed from \p previousLongDescription to \p currentLongDescription
+     * @param previousLongDescription Previous long description in HTML format
+     * @param currentLongDescription Current long description in HTML format
      */
     void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
+
+    /**
+     * Signals that the Markdown-formatted long description format changed from \p previousLongDescriptionMarkdown to \p currentLongDescriptionMarkdown
+     * @param previousLongDescriptionMarkdown Previous long description in Markdown format
+     * @param currentLongDescriptionMarkdown Current long description in Markdown format
+     */
+    void longDescriptionMarkdownChanged(const QString& previousLongDescriptionMarkdown, const QString& currentLongDescriptionMarkdown);
 
 public:
     static const QStringList alignmentOptions;                                      /** Names of the supported alignments in the case of a view plugin */
@@ -267,8 +286,6 @@ private:
     TriggerAction                               _moveToBottomLeftAction;            /** Trigger action that moves the view plugin overlay to the bottom-left of the widget */
     TriggerAction                               _moveToBottomRightAction;           /** Trigger action that moves the view plugin overlay to the bottom-right of the widget */
     QString                                     _pluginTitle;                       /** Human-readable plugin title in plain text format */
-    QString                                     _shortDescription;                  /** Short plugin description in plain text format */
-    QString                                     _longDescription;                   /** Long plugin description in HTML-formatted text */
     util::Videos                                _videos;                            /** Plugin related videos */
     ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
     QPointer<QWidget>                           _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */

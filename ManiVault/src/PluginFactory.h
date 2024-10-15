@@ -244,16 +244,28 @@ public: // Description
     void setShortDescription(const QString& shortDescription);
 
     /**
-     * Get extended description
+     * Get extended description in HTML format
      * @return Extended description in HTML format
      */
     QString getLongDescription() const;
+
+    /**
+     * Get extended description in Markdown format
+     * @return Extended description in Markdown format
+     */
+    QString getLongDescriptionMarkdown() const;
 
     /**
      * Set long description to \p longDescription
      * @param longDescription Extended description in HTML format
      */
     void setLongDescription(const QString& longDescription);
+
+    /**
+     * Set long description Markdown to \p longDescription
+     * @param longDescriptionMarkdown Extended description in Markdown format
+     */
+    void setLongDescriptionMarkdown(const QString& longDescriptionMarkdown);
 
 public: // Number of instances
 
@@ -338,11 +350,18 @@ signals:
     void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
     
     /**
-     * Signals that the long description changed from \p previousLongDescription to \p currentLongDescription
-     * @param previousLongDescription Previous long description
-     * @param currentLongDescription Current long description
+     * Signals that the HTML-formatted long description changed from \p previousLongDescription to \p currentLongDescription
+     * @param previousLongDescription Previous long description in HTML format
+     * @param currentLongDescription Current long description in HTML format
      */
     void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
+
+    /**
+     * Signals that the Markdown-formatted long description format changed from \p previousLongDescriptionMarkdown to \p currentLongDescriptionMarkdown
+     * @param previousLongDescriptionMarkdown Previous long description in Markdown format
+     * @param currentLongDescriptionMarkdown Current long description in Markdown format
+     */
+    void longDescriptionMarkdownChanged(const QString& previousLongDescriptionMarkdown, const QString& currentLongDescriptionMarkdown);
 
 private:
     QString                                 _kind;                                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
@@ -360,6 +379,7 @@ private:
     util::ShortcutMap                       _shortcutMap;                           /** Shortcut cheatsheet map */
     QString                                 _shortDescription;                      /** Shortly describes the plugin */
     QString                                 _longDescription;                       /** Extended description in HTML format */
+    QString                                 _longDescriptionMarkdown;               /** Extended description in Markdown format */
 };
 
 }
