@@ -23,7 +23,54 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     getLearningCenterAction().setPluginTitle("Data hierarchy view");
 
     getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
-    getLearningCenterAction().setLongDescription("Hierarchical overview of all loaded data");
+    getLearningCenterAction().setLongDescriptionMarkdown(R"(
+This view plugin displays all the loaded data in a hierarchical way.
+With this plugin, you can **import**, **export**, **analyze**, **transform**, and **view** data.
+
+<details>
+  <summary>Import data</summary>
+
+- **RMB** in an empty area of the data hierarchy to show the context menu
+- **LMB** on **Import**, this will show all data import plugins (this menu is not available when there are no compatible exporter plugins)
+- **LMB** to start the importer of choice
+</details>
+
+<details>
+  <summary>Export data</summary>
+
+- Select one (or more) items
+- **RMB** to show the context menu
+- **LMB** on **Export**, this will show all data export plugins (this menu is not available when there are no compatible exporter plugins)
+- **LMB** the exporter of choice
+</details>
+
+<details>
+  <summary>Analyze data</summary>
+
+- Select one (or more) items
+- **RMB** to show the context menu
+- **LMB** on **Analyze**, this will show all compatible analysis plugins (this menu is not available when there are no compatible analysis plugins)
+- **LMB** on the analysis of choice
+</details>
+
+<details>
+  <summary>Transform data</summary>
+
+- Select one (or more) items"
+- **RMB** to show the context menu
+- **LMB** on **Transform**, this will show all compatible analysis plugins (this menu is not available when there are no compatible transform plugins)
+- **LMB** the transform plugin of choice
+</details>
+
+<details>
+  <summary>View data</summary>
+
+- Select one (or more) items"
+- **RMB** to show the context menu
+- **LMB** on **View**, this will show all compatible view plugins (this menu is not available when there are no compatible view plugins)
+- **LMB** the view plugin of choice
+</details>
+)");
 
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }

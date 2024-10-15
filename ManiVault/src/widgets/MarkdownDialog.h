@@ -24,7 +24,7 @@ namespace mv::util {
  */
 class MarkdownWebEnginePage : public QWebEnginePage
 {
-protected:
+public:
 
     /**
      * Construct with pointer to \p parent object
@@ -39,8 +39,6 @@ protected:
      * @param isMainFrame Boolean determining if in the main frame or not
      */
     bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override;
-
-    friend class MarkdownDialog;
 };
 
 /**
@@ -76,7 +74,7 @@ private:
     QWebEngineView              _webEngineView;         /** Browser to show the markdown in */
     MarkdownWebEnginePage       _markdownPage;          /** Browser page to show the markdown in */
     mv::util::FileDownloader    _fileDownloader;        /** For downloading the markdown file */
-    MarkdownDocument            _markdownDocument;      /** Document for synchronizing the markdown text with the browser */
+    MarkdownDocument            _markdownDocument;      /** Document for synchronizing the Markdown text with the browser */
 };
 
 }

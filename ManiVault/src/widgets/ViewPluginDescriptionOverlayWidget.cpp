@@ -40,19 +40,41 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
     _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b></p>").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
 
     _textScrollArea.setWidgetResizable(true);
-    _textScrollArea.setWidget(&_textWidget);
+    
     _textScrollArea.setObjectName("Shortcuts");
     _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
     _textScrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    _textWidgetLayout.setContentsMargins(5, 0, 5, 0);
-    _textWidgetLayout.addWidget(&_textBodyLabel);
-    _textWidgetLayout.setAlignment(Qt::AlignTop);
+    const auto longDescriptionMarkdown = viewPlugin->getLearningCenterAction().getLongDescriptionMarkdown();
 
-    _textWidget.setLayout(&_textWidgetLayout);
+    if (!longDescriptionMarkdown.isEmpty()) {
+        _markdownChannel.registerObject(QStringLiteral("content"), &_markdownDocument);
 
-    _textBodyLabel.setText(viewPlugin->getLearningCenterAction().getLongDescription());
-    _textBodyLabel.setWordWrap(true);
+        _markdownPage.setWebChannel(&_markdownChannel);
+
+        connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this, viewPlugin]() -> void {
+            _markdownDocument.setText(viewPlugin->getLearningCenterAction().getLongDescriptionMarkdown());
+		});
+
+        _webEngineView.setPage(&_markdownPage);
+        _webEngineView.load(QUrl("qrc:/HTML/MarkdownReadme"));
+
+        _textScrollArea.setWidget(&_webEngineView);
+
+    } else {
+        const auto longDescription = viewPlugin->getLearningCenterAction().getLongDescription();
+
+        _textScrollArea.setWidget(&_textWidget);
+
+        _textWidgetLayout.setContentsMargins(5, 0, 5, 0);
+        _textWidgetLayout.setAlignment(Qt::AlignTop);
+        _textWidgetLayout.addWidget(&_textBodyLabel);
+
+        _textWidget.setLayout(&_textWidgetLayout);
+
+        _textBodyLabel.setText(longDescription);
+        _textBodyLabel.setWordWrap(true);
+    }
 }
 
 }
