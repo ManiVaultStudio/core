@@ -9,7 +9,7 @@
 #include "ViewPlugin.h"
 
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
-#include "widgets/ViewPluginDescriptionOverlayWidget.h"
+#include "widgets/ViewPluginDescriptionDialog.h"
 #include "widgets/ViewPluginShortcutsDialog.h"
 
 using namespace mv::util;
@@ -284,7 +284,7 @@ plugin::ViewPlugin* PluginLearningCenterAction::getViewPlugin() const
     return dynamic_cast<ViewPlugin*>(_plugin);
 }
 
-void PluginLearningCenterAction::viewDescription()
+void PluginLearningCenterAction::viewDescription() const
 {
 #ifdef VIEW_PLUGIN_VERBOSE
     qDebug() << __FUNCTION__;
@@ -295,9 +295,9 @@ void PluginLearningCenterAction::viewDescription()
         if (!_descriptionOverlayWidget.isNull())
             return;
 
-        _descriptionOverlayWidget = new gui::ViewPluginDescriptionOverlayWidget(dynamic_cast<ViewPlugin*>(_plugin));
+        ViewPluginDescriptionDialog viewPluginDescriptionDialog(dynamic_cast<ViewPlugin*>(_plugin));
 
-        _descriptionOverlayWidget->show();
+        viewPluginDescriptionDialog.exec();
     }
 }
 

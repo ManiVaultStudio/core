@@ -4,10 +4,9 @@
 
 #pragma once
 
-#include "widgets/ViewPluginOverlayWidget.h"
-
 #include "MarkdownDocument.h"
 
+#include <QDialog>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QScrollArea>
@@ -27,26 +26,34 @@ namespace mv::gui
 {
 
 /**
- * View plugin description overlay widget class
+ * View plugin description dialog class
  *
- * Overlays the view plugin widget with a view plugin description overlay widget
+ * Dialog with a view plugin description
  *
  * @author Thomas Kroes
  */
-class ViewPluginDescriptionOverlayWidget : public ViewPluginOverlayWidget
+class ViewPluginDescriptionDialog : public QDialog
 {
 public:
 
     /**
-     * Construct with pointer to source \p view plugin
+     * Construct with pointer to source \p view plugin and pointer to \p parent widget
      * @param viewPlugin Pointer to source view plugin
+     * @param parent Pointer to parent widget (maybe nullptr)
      */
-    ViewPluginDescriptionOverlayWidget(plugin::ViewPlugin* viewPlugin);
+    ViewPluginDescriptionDialog(mv::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
+
+    /** Get preferred size */
+    QSize sizeHint() const override {
+        return { 600, 800 };
+    }
+
+    /** Get minimum size hint*/
+    QSize minimumSizeHint() const override {
+        return sizeHint();
+    }
 
 private:
-    QHBoxLayout                 _headerLayout;          /** Layout for the header */
-    QLabel                      _headerIconLabel;       /** Label for header icon */
-    QLabel                      _headerTextLabel;       /** Label for header text */
     QScrollArea                 _textScrollArea;        /** Scroll area for the shortcut */
     QWidget                     _textWidget;            /** Widget with the shortcuts label */
     QVBoxLayout                 _textWidgetLayout;      /** Widget with the shortcuts label */

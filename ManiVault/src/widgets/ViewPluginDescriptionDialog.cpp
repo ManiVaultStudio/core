@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ViewPluginDescriptionOverlayWidget.h"
+#include "ViewPluginDescriptionDialog.h"
 
 #include "Application.h"
 #include "ViewPlugin.h"
@@ -11,7 +11,7 @@
 #include <QScrollBar>
 
 #ifdef _DEBUG
-    #define VIEW_PLUGIN_DESCRIPTION_OVERLAY_WIDGET_VERBOSE
+    #define VIEW_PLUGIN_DESCRIPTION_DIALOG_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -19,31 +19,24 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::ViewPlugin* viewPlugin) :
-    ViewPluginOverlayWidget(viewPlugin)
+ViewPluginDescriptionDialog::ViewPluginDescriptionDialog(plugin::ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
+    QDialog(parent)
 {
     setAutoFillBackground(true);
+    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("book-reader"));
+    setWindowTitle(QString("%1 overview").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
 
-    getMainLayout().addLayout(&_headerLayout);
-    getMainLayout().addWidget(&_textScrollArea);
+    auto layout = new QVBoxLayout();
 
-    _headerLayout.setContentsMargins(5, 0, 5, 0);
-    _headerLayout.setSpacing(10);
+    layout->addWidget(&_textScrollArea);
 
-    _headerLayout.addWidget(&_headerIconLabel);
-    _headerLayout.addWidget(&_headerTextLabel);
-    _headerLayout.addStretch(1);
+    setLayout(layout);
 
-    _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("book-reader").pixmap(QSize(24, 24)));
-    _headerIconLabel.setStyleSheet("padding-top: 2px;");
-
-    _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b></p>").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
+    layout->addWidget(&_textScrollArea);
 
     _textScrollArea.setWidgetResizable(true);
-    
     _textScrollArea.setObjectName("Shortcuts");
     _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
-    _textScrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     const auto longDescriptionMarkdown = viewPlugin->getLearningCenterAction().getLongDescriptionMarkdown();
 
@@ -54,6 +47,17 @@ ViewPluginDescriptionOverlayWidget::ViewPluginDescriptionOverlayWidget(plugin::V
 
         connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this, viewPlugin]() -> void {
             _markdownDocument.setText(viewPlugin->getLearningCenterAction().getLongDescriptionMarkdown());
+            _markdownPage.runJavaScript(QString("document.body.style.backgroundColor = '%1';").arg(getColorAsCssString(qApp->palette().window().color())));
+
+            const auto appFont      = qApp->font();
+            const auto fontFamily   = appFont.family();
+            const auto fontSize     = appFont.pointSize();
+            const auto fontColor    = qApp->palette().color(QPalette::Text);
+            const auto colorHex     = fontColor.name();
+
+            _markdownPage.runJavaScript(QString("document.body.style.fontFamily = '%1';").arg(fontFamily));
+            _markdownPage.runJavaScript(QString("document.body.style.fontSize = '%1';").arg(QString::number(fontSize)));
+            _markdownPage.runJavaScript(QString("document.body.style.color = '%1';").arg(colorHex));
 		});
 
         _webEngineView.setPage(&_markdownPage);

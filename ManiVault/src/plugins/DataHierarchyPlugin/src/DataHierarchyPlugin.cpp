@@ -48,56 +48,85 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     getLearningCenterAction().setPluginTitle("Data hierarchy view");
 
     getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
-    getLearningCenterAction().setLongDescriptionMarkdown(QString(R"(
+    const std::string longDescriptionMarkdown = R"(
 This view plugin displays all the loaded data in a hierarchical way.
-With this plugin, you can **import**, **export**, **analyze**, **transform**, and **view** data.
-
+With this plugin, you can **import**, **export**, **analyze**, **transform**, **view** and **interact** with data.
+View examples below to get started.
 <details>
   <summary>Import data</summary>
 
-- **RMB** in an empty area of the data hierarchy to show the context menu
-- **LMB** on **Import**, this will show all data import plugins (this menu is not available when there are no compatible exporter plugins)
-- **LMB** to start the importer of choice
-%1
+- Click **RMB** in an empty area of the data hierarchy to show the context menu
+- Click **LMB** on **Import**, this will show all data import plugins (this menu is not available when there are no compatible exporter plugins)
+- Click **LMB** to start the importer of choice
+)"
+	+ util::embedGifFromResource(":/animation/ImportDataScaled.gif").toStdString() +
+R"(
 </details>
-
 <details>
   <summary>Export data</summary>
 
-- Select one (or more) items
-- **RMB** to show the context menu
-- **LMB** on **Export**, this will show all data export plugins (this menu is not available when there are no compatible exporter plugins)
-- **LMB** the exporter of choice
-%2
+- Select one (or more) datasets (hold **CTRL** to add a dataset and **SHIFT** to select a range of datasets)
+- Click **RMB** to show the context menu
+- Click **LMB** on **Export**, this will show all data export plugins (this menu is not available when there are no compatible exporter plugins)
+- Click **LMB** the exporter of choice
+)"
++ util::embedGifFromResource(":/animation/ImportDataScaled.gif").toStdString() +
+R"(
 </details>
-
 <details>
   <summary>Analyze data</summary>
 
-- Select one (or more) items
-- **RMB** to show the context menu
-- **LMB** on **Analyze**, this will show all compatible analysis plugins (this menu is not available when there are no compatible analysis plugins)
-- **LMB** on the analysis of choice
+- Select one (or more) datasets (hold **CTRL** to add a dataset and **SHIFT** to select a range of datasets)
+- Click **RMB** to show the context menu
+- Click **LMB** on **Analyze**, this will show all compatible analysis plugins (this menu is not available when there are no compatible analysis plugins)
+- Click **LMB** on the analysis of choice
+)"
++ util::embedGifFromResource(":/animation/AnalyzeDataScaled.gif").toStdString() +
+R"(
 </details>
-
 <details>
   <summary>Transform data</summary>
 
-- Select one (or more) items"
-- **RMB** to show the context menu
-- **LMB** on **Transform**, this will show all compatible analysis plugins (this menu is not available when there are no compatible transform plugins)
-- **LMB** the transform plugin of choice
+- Select one (or more) datasets (hold **CTRL** to add a dataset and **SHIFT** to select a range of datasets)
+- Click **RMB** to show the context menu
+- Click **LMB** on **Transform**, this will show all compatible analysis plugins (this menu is not available when there are no compatible transform plugins)
+- Click **LMB** the transform plugin of choice
+)"
++ util::embedGifFromResource(":/animation/TransformDataScaled.gif").toStdString() +
+R"(
 </details>
-
 <details>
   <summary>View data</summary>
 
-- Select one (or more) items"
-- **RMB** to show the context menu
-- **LMB** on **View**, this will show all compatible view plugins (this menu is not available when there are no compatible view plugins)
-- **LMB** the view plugin of choice
+### View single dataset
+- Select a single dataset
+- Click **RMB** to show the context menu
+- Click **LMB** on **View**, this will show all compatible view plugins (this menu is not available when there are no compatible view plugins)
+- Click **LMB** the view plugin of choice
+)"
++ util::embedGifFromResource(":/animation/ViewDataContextMenuScaled.gif").toStdString() +
+R"(
+
+### View multiple datasets
+- Select multiple datasets (hold **CTRL** to add a dataset and **SHIFT** to select a range of datasets)
+- Click **RMB** to show the context menu
+- Click **LMB** on **View**, this will show all compatible view plugins (this menu is not available when there are no compatible view plugins)
+- Click **LMB** the view plugin of choice
+)"
++ util::embedGifFromResource(":/animation/ViewDataContextMenuMultipleScaled.gif").toStdString() +
+R"(
+
+### View dataset with drag and drop
+- Select dataset(s)
+- Hold **LMB** down and move to view plugin in which you want to show the data
+- Drop the data by releasing the **LMB**
+)"
++ util::embedGifFromResource(":/animation/ViewDataDragAndDropScaled.gif").toStdString() +
+R"(
 </details>
-)").arg(util::embedGifFromResource(":/animation/ImportDataScaled.gif"), util::embedGifFromResource(":/animation/ExportDataScaled.gif")));
+)";
+
+    getLearningCenterAction().setLongDescriptionMarkdown(QString::fromStdString(longDescriptionMarkdown));
 
 	getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
