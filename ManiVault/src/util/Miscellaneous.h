@@ -123,6 +123,7 @@ CORE_EXPORT QVariant setValueByPath(QVariant root, const QString& path, const QV
  */
 CORE_EXPORT QVariant getValueByPath(const QVariant& root, const QString& path, const QVariant& valueIfNotFound = QVariant());
 
+/**
  * Convert \p gifByteArray to base64 encoded string
  * @param gifByteArray GIF image raw bytes
  * @return Base64-encoded GIF string
