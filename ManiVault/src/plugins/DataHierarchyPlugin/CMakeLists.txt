@@ -51,17 +51,25 @@ set(AUX
     src/DataHierarchyPlugin.json
 )
 
+set(QRESOURCES
+    res/Resources.qrc
+)
+
+qt_add_resources(RESOURCE_FILES ${QRESOURCES})
+
 set(DATAHIERARCHY_SOURCES
     ${PLUGIN}
     ${ACTIONS}
     ${WIDGETS}
     ${AUX}
+    ${RESOURCE_FILES}
 )
 
 source_group(Plugin FILES ${PLUGIN})
 source_group(Actions FILES ${ACTIONS})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
+source_group(Resources FILES ${QRESOURCES})
 
 add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
 
