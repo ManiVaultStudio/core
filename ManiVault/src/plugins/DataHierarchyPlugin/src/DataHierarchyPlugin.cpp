@@ -59,7 +59,7 @@ View examples below to get started.
 - Click **LMB** on **Import**, this will show all data import plugins (this menu is not available when there are no compatible exporter plugins)
 - Click **LMB** to start the importer of choice
 )"
-	+ util::embedGifFromResource(":/animation/ImportDataScaled.gif").toStdString() +
+	+ util::embedGifFromResource(":/animation/ImportDatasetScaled.gif").toStdString() +
 R"(
 </details>
 <details>
@@ -70,7 +70,7 @@ R"(
 - Click **LMB** on **Export**, this will show all data export plugins (this menu is not available when there are no compatible exporter plugins)
 - Click **LMB** the exporter of choice
 )"
-+ util::embedGifFromResource(":/animation/ImportDataScaled.gif").toStdString() +
++ util::embedGifFromResource(":/animation/ImportDatasetScaled.gif").toStdString() +
 R"(
 </details>
 <details>
@@ -81,7 +81,7 @@ R"(
 - Click **LMB** on **Analyze**, this will show all compatible analysis plugins (this menu is not available when there are no compatible analysis plugins)
 - Click **LMB** on the analysis of choice
 )"
-+ util::embedGifFromResource(":/animation/AnalyzeDataScaled.gif").toStdString() +
++ util::embedGifFromResource(":/animation/AnalyzeDatasetScaled.gif").toStdString() +
 R"(
 </details>
 <details>
@@ -92,7 +92,7 @@ R"(
 - Click **LMB** on **Transform**, this will show all compatible analysis plugins (this menu is not available when there are no compatible transform plugins)
 - Click **LMB** the transform plugin of choice
 )"
-+ util::embedGifFromResource(":/animation/TransformDataScaled.gif").toStdString() +
++ util::embedGifFromResource(":/animation/TransformDatasetScaled.gif").toStdString() +
 R"(
 </details>
 <details>
@@ -104,7 +104,7 @@ R"(
 - Click **LMB** on **View**, this will show all compatible view plugins (this menu is not available when there are no compatible view plugins)
 - Click **LMB** the view plugin of choice
 )"
-+ util::embedGifFromResource(":/animation/ViewDataContextMenuScaled.gif").toStdString() +
++ util::embedGifFromResource(":/animation/ViewDatasetContextMenuScaled.gif").toStdString() +
 R"(
 
 ### View multiple datasets
@@ -113,7 +113,7 @@ R"(
 - Click **LMB** on **View**, this will show all compatible view plugins (this menu is not available when there are no compatible view plugins)
 - Click **LMB** the view plugin of choice
 )"
-+ util::embedGifFromResource(":/animation/ViewDataContextMenuMultipleScaled.gif").toStdString() +
++ util::embedGifFromResource(":/animation/ViewDatasetContextMenuMultipleScaled.gif").toStdString() +
 R"(
 
 ### View dataset with drag and drop
@@ -121,7 +121,61 @@ R"(
 - Hold **LMB** down and move to view plugin in which you want to show the data
 - Drop the data by releasing the **LMB**
 )"
-+ util::embedGifFromResource(":/animation/ViewDataDragAndDropScaled.gif").toStdString() +
++ util::embedGifFromResource(":/animation/ViewDatasetDragAndDropScaled.gif").toStdString() +
+R"(
+</details>
+<details>
+  <summary>Interact with data</summary>
+
+### Edit data properties
+- Select a single dataset
+- Edit the data properties in the **Data properties** view plugin
+)"
++ util::embedGifFromResource(":/animation/EditDatasetPropertiesScaled.gif").toStdString() +
+R"(
+
+### Hide dataset
+- Select a dataset
+- Click **RMB**
+- Click **LMB** on **Hide**
+- Click **LMB** on **Selected**
+)"
++ util::embedGifFromResource(":/animation/HideSelectedDatasetScaled.gif").toStdString() +
+R"(
+
+### Unhide dataset
+- Select a dataset
+- Click **RMB**
+- Click **LMB** on **Unhide**
+- Click **LMB** on **Selected**
+)"
++ util::embedGifFromResource(":/animation/UnhideDatasetScaled.gif").toStdString() +
+R"(
+
+### Unhide all datasets
+- Click **RMB** in empty area
+- Click **LMB** on **Unhide**
+- Click **LMB** on **All**
+)"
++ util::embedGifFromResource(":/animation/UnhideAllDatasetsScaled.gif").toStdString() +
+R"(
+
+### Lock selected dataset(s)
+- Select a dataset
+- Click **RMB**
+- Click **LMB** on **Lock**
+- Click **LMB** on **Selected**
+)"
++ util::embedGifFromResource(":/animation/LockDatasetScaled.gif").toStdString() +
+R"(
+
+### Unlock dataset
+- Select a dataset
+- Click **RMB**
+- Click **LMB** on **Unlock**
+- Click **LMB** on **Selected**
+)"
++ util::embedGifFromResource(":/animation/UnlockDatasetScaled.gif").toStdString() +
 R"(
 </details>
 )";
