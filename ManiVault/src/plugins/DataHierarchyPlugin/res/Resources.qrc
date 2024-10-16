@@ -1,16 +1,32 @@
 <RCC>
     <qresource prefix="/">
-        <file>animation/AnalyzeDataScaled.gif</file>
-        <file>animation/EditDataPropertiesScaled.gif</file>
-        <file>animation/ExportDataScaled.gif</file>
-        <file>animation/HideDataScaled.gif</file>
-        <file>animation/ImportDataScaled.gif</file>
-        <file>animation/LockDataScaled.gif</file>
-        <file>animation/RemoveSimpleScaled.gif</file>
-        <file>animation/TransformDataScaled.gif</file>
-        <file>animation/UnlockDataScaled.gif</file>
-        <file>animation/ViewDataContextMenuMultipleScaled.gif</file>
-        <file>animation/ViewDataContextMenuScaled.gif</file>
-        <file>animation/ViewDataDragAndDropScaled.gif</file>
+        <file>animation/AnalyzeDataset.gif</file>
+        <file>animation/AnalyzeDatasetScaled.gif</file>
+        <file>animation/EditDatasetProperties.gif</file>
+        <file>animation/EditDatasetPropertiesScaled.gif</file>
+        <file>animation/ExportDataset.gif</file>
+        <file>animation/ExportDatasetScaled.gif</file>
+        <file>animation/HideSelectedDataset.gif</file>
+        <file>animation/HideSelectedDatasetScaled.gif</file>
+        <file>animation/ImportDataset.gif</file>
+        <file>animation/ImportDatasetScaled.gif</file>
+        <file>animation/LockDataset.gif</file>
+        <file>animation/LockDatasetScaled.gif</file>
+        <file>animation/RemoveDatasetSimple.gif</file>
+        <file>animation/RemoveDatasetSimpleScaled.gif</file>
+        <file>animation/TransformDataset.gif</file>
+        <file>animation/TransformDatasetScaled.gif</file>
+        <file>animation/UnhideAllDatasets.gif</file>
+        <file>animation/UnhideAllDatasetsScaled.gif</file>
+        <file>animation/UnhideDataset.gif</file>
+        <file>animation/UnhideDatasetScaled.gif</file>
+        <file>animation/UnlockDataset.gif</file>
+        <file>animation/UnlockDatasetScaled.gif</file>
+        <file>animation/ViewDatasetContextMenu.gif</file>
+        <file>animation/ViewDatasetContextMenuMultiple.gif</file>
+        <file>animation/ViewDatasetContextMenuMultipleScaled.gif</file>
+        <file>animation/ViewDatasetContextMenuScaled.gif</file>
+        <file>animation/ViewDatasetDragAndDrop.gif</file>
+        <file>animation/ViewDatasetDragAndDropScaled.gif</file>
     </qresource>
 </RCC>
