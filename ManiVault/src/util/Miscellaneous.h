@@ -107,4 +107,25 @@ CORE_EXPORT void clearLayout(QLayout* layout, bool removeWidgets = false);
 CORE_EXPORT void setLayoutContentsMargins(QLayout* layout, std::int32_t margin);
 CORE_EXPORT QIcon getAlignmentIcon(const Qt::Alignment& alignment);
 
+/**
+ * Convert \p gifByteArray to base64 encoded string
+ * @param gifByteArray GIF image raw bytes
+ * @return Base64-encoded GIF string
+ */
+CORE_EXPORT QString gifToBase64(const QByteArray& gifByteArray);
+
+/**
+ * Embed \p gifBase64-encoded GIF in an HTML <img> tag
+ * @param gifBase64 GIF image as base64-encoded string
+ * @return GIF image embedded in HTML <img> tag
+ */
+CORE_EXPORT QString embedGifFromBase64(const QString& gifBase64);
+
+/**
+ * Embed GIF image from \p resourcePath into an HTML <img> tag
+ * @param resourcePath Path of the GIF image in the resources
+ * @return GIF image embedded in HTML <img> tag
+ */
+CORE_EXPORT QString embedGifFromResource(const QString& resourcePath);
+
 }

@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>animation/AnalyzeDataScaled.gif</file>
+        <file>animation/EditDataPropertiesScaled.gif</file>
+        <file>animation/ExportDataScaled.gif</file>
+        <file>animation/HideDataScaled.gif</file>
+        <file>animation/ImportDataScaled.gif</file>
+        <file>animation/LockDataScaled.gif</file>
+        <file>animation/RemoveSimpleScaled.gif</file>
+        <file>animation/TransformDataScaled.gif</file>
+        <file>animation/UnlockDataScaled.gif</file>
+        <file>animation/ViewDataContextMenuMultipleScaled.gif</file>
+        <file>animation/ViewDataContextMenuScaled.gif</file>
+        <file>animation/ViewDataDragAndDropScaled.gif</file>
+    </qresource>
+</RCC>

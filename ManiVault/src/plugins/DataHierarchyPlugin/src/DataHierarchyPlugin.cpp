@@ -6,10 +6,35 @@
 
 #include <Application.h>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
+#include "util/Miscellaneous.h"
 
-using namespace mv;
+Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
 using namespace mv::gui;
+
+void listResources(const QString& resourcePath) {
+    // Create a QDir object for the resource path
+    QDir resourceDir(resourcePath);
+
+    // Check if the directory exists
+    if (!resourceDir.exists()) {
+        qDebug() << "Resource directory does not exist:" << resourcePath;
+        return;
+    }
+
+    // Get the list of all files and directories in the resource path
+    QFileInfoList resourceList = resourceDir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+
+    // Print out each resource
+    for (const QFileInfo& fileInfo : resourceList) {
+        if (fileInfo.isDir()) {
+            // Recursively list resources in subdirectories
+            listResources(fileInfo.absoluteFilePath());
+        }
+        else {
+            qDebug() << "Resource found:" << fileInfo.absoluteFilePath();
+        }
+    }
+}
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
@@ -23,7 +48,7 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     getLearningCenterAction().setPluginTitle("Data hierarchy view");
 
     getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
-    getLearningCenterAction().setLongDescriptionMarkdown(R"(
+    getLearningCenterAction().setLongDescriptionMarkdown(QString(R"(
 This view plugin displays all the loaded data in a hierarchical way.
 With this plugin, you can **import**, **export**, **analyze**, **transform**, and **view** data.
 
@@ -33,6 +58,7 @@ With this plugin, you can **import**, **export**, **analyze**, **transform**, an
 - **RMB** in an empty area of the data hierarchy to show the context menu
 - **LMB** on **Import**, this will show all data import plugins (this menu is not available when there are no compatible exporter plugins)
 - **LMB** to start the importer of choice
+%1
 </details>
 
 <details>
@@ -42,6 +68,7 @@ With this plugin, you can **import**, **export**, **analyze**, **transform**, an
 - **RMB** to show the context menu
 - **LMB** on **Export**, this will show all data export plugins (this menu is not available when there are no compatible exporter plugins)
 - **LMB** the exporter of choice
+%2
 </details>
 
 <details>
@@ -70,9 +97,9 @@ With this plugin, you can **import**, **export**, **analyze**, **transform**, an
 - **LMB** on **View**, this will show all compatible view plugins (this menu is not available when there are no compatible view plugins)
 - **LMB** the view plugin of choice
 </details>
-)");
+)").arg(util::embedGifFromResource(":/animation/ImportDataScaled.gif"), util::embedGifFromResource(":/animation/ExportDataScaled.gif")));
 
-    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+	getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
 
 void DataHierarchyPlugin::init()
