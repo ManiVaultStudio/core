@@ -32,7 +32,7 @@ class CORE_EXPORT ViewPluginShortcutsDialog : public QDialog
 public:
 
     /**
-     * Construct with pointer to source \p view plugin
+     * Construct with pointer to source \p view plugin and pointer to \p parent widget
      * @param viewPlugin Pointer to source view plugin
      * @param parent Pointer to parent widget (maybe nullptr)
      */
@@ -40,7 +40,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(450, 600);
+        return { 450, 600 };
     }
 
     /** Get minimum size hint*/

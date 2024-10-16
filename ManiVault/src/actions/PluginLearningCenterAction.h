@@ -197,7 +197,7 @@ private:
     mv::plugin::ViewPlugin* getViewPlugin() const;
 
     /** View plugin description (view depends on the type of plugin) */
-    void viewDescription();
+    void viewDescription() const;
 
     /** View shortcuts (view depends on the type of plugin) */
     void viewShortcuts() const;
