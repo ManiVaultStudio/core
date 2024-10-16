@@ -56,6 +56,7 @@ ViewPluginDescriptionDialog::ViewPluginDescriptionDialog(plugin::ViewPlugin* vie
             const auto colorHex     = fontColor.name();
 
             _markdownPage.runJavaScript(QString("document.body.style.fontFamily = '%1';").arg(fontFamily));
+
             _markdownPage.runJavaScript(QString("document.body.style.color = '%1';").arg(colorHex));
 
             const auto setFontSizeJs = R"(
@@ -67,6 +68,8 @@ ViewPluginDescriptionDialog::ViewPluginDescriptionDialog(plugin::ViewPlugin* vie
 			)";
 
             _markdownPage.runJavaScript(setFontSizeJs);
+            // _markdownPage.runJavaScript(QString("document.body.style.fontSize = '%1';").arg(QString::number(fontSize)));
+            _markdownPage.runJavaScript(QString("document.body.style.color = '%1';").arg(colorHex));
 		});
 
         _webEngineView.setPage(&_markdownPage);
