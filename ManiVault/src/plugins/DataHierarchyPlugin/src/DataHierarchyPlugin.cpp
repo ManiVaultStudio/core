@@ -8,7 +8,9 @@
 
 #include "util/Miscellaneous.h"
 
-Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
+Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
+
+using namespace mv;
 using namespace mv::gui;
 
 void listResources(const QString& resourcePath) {
@@ -70,7 +72,7 @@ R"(
 - Click **LMB** on **Export**, this will show all data export plugins (this menu is not available when there are no compatible exporter plugins)
 - Click **LMB** the exporter of choice
 )"
-+ util::embedGifFromResource(":/animation/ImportDatasetScaled.gif").toStdString() +
++ util::embedGifFromResource(":/animation/ExportDatasetScaled.gif").toStdString() +
 R"(
 </details>
 <details>
@@ -132,6 +134,14 @@ R"(
 - Edit the data properties in the **Data properties** view plugin
 )"
 + util::embedGifFromResource(":/animation/EditDatasetPropertiesScaled.gif").toStdString() +
+R"(
+
+### Remove dataset (simple)
+- Select one (or more) datasets (hold **CTRL** to add a dataset and **SHIFT** to select a range of datasets)
+- Click **RMB**
+- Click **LMB** on **Remove**
+)"
++ util::embedGifFromResource(":/animation/RemoveDatasetSimpleScaled.gif").toStdString() +
 R"(
 
 ### Hide dataset
