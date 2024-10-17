@@ -60,7 +60,7 @@ ViewPluginDescriptionDialog::ViewPluginDescriptionDialog(plugin::ViewPlugin* vie
 
             const auto setFontSizeJs = R"(
 				var style = document.createElement('style');
-				style.innerHTML = `body, * {
+				style.innerHTML = `body {
 					font-size:)" + QString::number(fontSize) + R"(pt !important;
 				}`;
 				document.head.appendChild(style);

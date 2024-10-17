@@ -51,11 +51,13 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
 
     getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
     const std::string longDescriptionMarkdown = R"(
+# Introduction
 This view plugin displays all the loaded data in a hierarchical way.
 With this plugin, you can **import**, **export**, **analyze**, **transform**, **view** and **interact** with data.
 It also allows for advanced **search and filtering** of datasets and
 other manipulations of the data hierarchy such as toggling **columns**.
 View categorized examples below to get started.
+## Examples
 <details>
   <summary id='ImportData'>Import data</summary>
 
