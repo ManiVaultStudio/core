@@ -45,7 +45,6 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
 
     getLearningCenterAction().setShortDescription("Data properties of the selected dataset(s)");
     //getLearningCenterAction().setLongDescriptionMarkdown(QString::fromStdString(longDescriptionMarkdown));
-
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
 
