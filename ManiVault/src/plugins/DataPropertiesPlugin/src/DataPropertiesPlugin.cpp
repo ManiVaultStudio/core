@@ -41,10 +41,27 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
         viewPluginEditorDialog->open();
     });
 
-    getLearningCenterAction().setPluginTitle("Data properties view");
+    getLearningCenterAction().setPluginTitle("Data properties");
 
     getLearningCenterAction().setShortDescription("Data properties of the selected dataset(s)");
-    getLearningCenterAction().setLongDescription("This plugin shows the properties of dataset(s) which are currently selected (for instance in the <b>data hierarchy plugin</b>). The properties are arranged in collapsible sections and changes are saved with the project.");
+
+    const std::string longDescriptionMarkdown = R"(
+# Introduction
+This plugin shows the properties of the currently selected dataset (and possibly its attached **analysis**). The properties are arranged in collapsible sections and the changes are saved with the project.
+
+## Examples
+### View and edit dataset properties
+)"
++ util::embedGifFromResource(":/animation/ViewEditPropertiesScaled.gif").toStdString() +
+R"(
+
+### Search properties
+)"
++ util::embedGifFromResource(":/animation/SearchScaled.gif").toStdString() +
+R"()";
+
+    getLearningCenterAction().setLongDescriptionMarkdown(QString::fromStdString(longDescriptionMarkdown));
+
 
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
