@@ -28,5 +28,9 @@
         <file>animation/ViewDatasetContextMenuScaled.gif</file>
         <file>animation/ViewDatasetDragAndDrop.gif</file>
         <file>animation/ViewDatasetDragAndDropScaled.gif</file>
+        <file>animation/Columns.gif</file>
+        <file>animation/ColumnsScaled.gif</file>
+        <file>animation/SearchAndFilterDatasets.gif</file>
+        <file>animation/SearchAndFilterDatasetsScaled.gif</file>
     </qresource>
 </RCC>

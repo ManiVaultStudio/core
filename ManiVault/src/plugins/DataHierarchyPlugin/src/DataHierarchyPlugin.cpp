@@ -53,9 +53,11 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     const std::string longDescriptionMarkdown = R"(
 This view plugin displays all the loaded data in a hierarchical way.
 With this plugin, you can **import**, **export**, **analyze**, **transform**, **view** and **interact** with data.
-View examples below to get started.
+It also allows for advanced **search and filtering** of datasets and
+other manipulations of the data hierarchy such as toggling **columns**.
+View categorized examples below to get started.
 <details>
-  <summary>Import data</summary>
+  <summary id='ImportData'>Import data</summary>
 
 - Click **RMB** in an empty area of the data hierarchy to show the context menu
 - Click **LMB** on **Import**, this will show all data import plugins (this menu is not available when there are no compatible exporter plugins)
@@ -65,7 +67,7 @@ View examples below to get started.
 R"(
 </details>
 <details>
-  <summary>Export data</summary>
+  <summary id='ExportData'>Export data</summary>
 
 - Select one (or more) datasets (hold **CTRL** to add a dataset and **SHIFT** to select a range of datasets)
 - Click **RMB** to show the context menu
@@ -76,7 +78,7 @@ R"(
 R"(
 </details>
 <details>
-  <summary>Analyze data</summary>
+  <summary id='AnalyzeData'>Analyze data</summary>
 
 - Select one (or more) datasets (hold **CTRL** to add a dataset and **SHIFT** to select a range of datasets)
 - Click **RMB** to show the context menu
@@ -87,7 +89,7 @@ R"(
 R"(
 </details>
 <details>
-  <summary>Transform data</summary>
+  <summary id='TransformData'>Transform data</summary>
 
 - Select one (or more) datasets (hold **CTRL** to add a dataset and **SHIFT** to select a range of datasets)
 - Click **RMB** to show the context menu
@@ -97,7 +99,7 @@ R"(
 + util::embedGifFromResource(":/animation/TransformDatasetScaled.gif").toStdString() +
 R"(
 </details>
-<details>
+<details id='ViewData'>
   <summary>View data</summary>
 
 ### View single dataset
@@ -126,14 +128,25 @@ R"(
 + util::embedGifFromResource(":/animation/ViewDatasetDragAndDropScaled.gif").toStdString() +
 R"(
 </details>
-<details>
-  <summary>Interact with data</summary>
+<details id='Interact'>
+  <summary>Interact with the data hierarchy</summary>
 
 ### Edit data properties
 - Select a single dataset
 - Edit the data properties in the **Data properties** view plugin
 )"
 + util::embedGifFromResource(":/animation/EditDatasetPropertiesScaled.gif").toStdString() +
+R"(
+
+### Search and filter datasets
+<a id="target-section"></a>
+)"
++ util::embedGifFromResource(":/animation/SearchAndFilterDatasetsScaled.gif").toStdString() +
+R"(
+
+### Columns
+)"
++ util::embedGifFromResource(":/animation/ColumnsScaled.gif").toStdString() +
 R"(
 
 ### Remove dataset (simple)
