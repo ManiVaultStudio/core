@@ -23,10 +23,13 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLibrary>
 #include <QMessageBox>
 #include <QPluginLoader>
+#include <QSet>
 
-#include <assert.h>
+#include <cassert>
+#include <utility>
 #include <stdexcept>
 
 #include "models/AbstractPluginsModel.h"
@@ -109,12 +112,78 @@ void PluginManager::loadPluginFactories()
     
     _pluginFactories.clear();
 
+    auto getPluginDependencyDir = [](const QDir& dir, const QString& name) -> std::pair<QDir, bool> {
+        QDir dependenciesDir = dir;
+        dependenciesDir.cdUp();
+        if (!dependenciesDir.cd("PluginDependencies"))  // name by convention
+            return { dependenciesDir, false };
+        if (!dependenciesDir.cd(name))
+            return { dependenciesDir, false };
+        dependenciesDir.cd(name);
+        return { dependenciesDir, true };
+        };
+
+    auto getLibraryName = [](const QString& libFileName) -> QString {
+        // Use QFileInfo to get the base name without the suffix (.dll, .so, .dylib)
+        QFileInfo fileInfo(libFileName);
+        QString baseName = fileInfo.baseName();
+
+        // Check for common "lib" prefix on UNIX systems and remove it
+        if (baseName.startsWith("lib")) {
+            baseName = baseName.mid(3);  // Remove the first 3 characters ("lib")
+        }
+
+        return baseName;
+        };
+
+    auto loadPluginDependencies = [&getLibraryName, &getPluginDependencyDir](const QDir& pluginDir, const QString& fileName) -> void {
+
+        const auto pluginName = getLibraryName(fileName);
+        const auto [pluginDependenciesDir, pluginDependenciesExists] = getPluginDependencyDir(pluginDir, pluginName);
+
+        if (!pluginDependenciesExists)
+            return;
+
+        QSet<QString> dynamicLibsToLoad;
+        for (const QFileInfo& fileInfo : pluginDependenciesDir.entryInfoList({}, QDir::Files))
+        {
+            const auto filePath = fileInfo.absoluteFilePath();
+            if (!QLibrary::isLibrary(filePath))
+                continue;
+
+            dynamicLibsToLoad.insert(filePath);
+        }
+
+        // Some dependencies might depend on other dynamic libraries
+        // We could build a dependency tree, but this works just as well
+        const size_t maxTries = dynamicLibsToLoad.size();
+        size_t currentTry = 0;
+        while (!dynamicLibsToLoad.isEmpty()) {
+            for (const QString& dynamicLibPath : dynamicLibsToLoad) {
+                QLibrary lib(dynamicLibPath);
+                if (lib.load()) {
+                    qDebug() << "Loaded dependency: " << dynamicLibPath;
+                    dynamicLibsToLoad.remove(dynamicLibPath);
+                }
+            }
+
+            if (++currentTry >= maxTries)
+            {
+                qWarning() << "Could not load all dependencies for " << pluginName << ". Missing: " << dynamicLibsToLoad;
+                break;
+            }
+        }
+        };
+
     // List of filenames of dependency resolved plugins
     const QStringList resolvedPlugins = resolveDependencies(pluginDir);
 
     // For each of the plugin files which are resolved, load them and add them in their proper menu category
     for (const auto& fileName: resolvedPlugins)
     {
+        // Load plugin dependencies, if there are any
+        loadPluginDependencies(pluginDir, fileName);
+
         // Dynamic loader of plugin shared library
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
         
@@ -122,7 +191,7 @@ void PluginManager::loadPluginFactories()
         QString pluginKind      = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
         QString menuName        = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
         QString version         = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
-        
+
         // Create an instance of the plugin, i.e. the factory
         auto pluginFactory = dynamic_cast<PluginFactory*>(pluginLoader.instance());
 

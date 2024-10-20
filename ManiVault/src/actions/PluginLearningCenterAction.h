@@ -8,6 +8,7 @@
 #include "actions/HorizontalGroupAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/TriggerAction.h"
+#include "actions/OptionAction.h"
 
 #include "util/Video.h"
 
@@ -49,10 +50,36 @@ public:
     void initialize(plugin::Plugin* plugin);
 
     /**
+     * Get the context menu for the action
+     * @param parent Parent widget
+     * @return Context menu
+     */
+    QMenu* getContextMenu(QWidget* parent = nullptr) override;
+
+    /**
+     * Get the context menu for the alignment
+     * @param parent Parent widget
+     * @return Pointer to alignment context menu
+     */
+    QMenu* getAlignmentContextMenu(QWidget* parent = nullptr);
+
+    /**
      * Get view plugin overlay widget
      * @return Pointer to plugin overlay widget (maybe nullptr)
      */
     ViewPluginLearningCenterOverlayWidget* getViewPluginOverlayWidget() const;
+
+    /**
+     * Get view plugin overlay alignment as a Qt flag
+     * @return Alignment flag
+     */
+    Qt::Alignment getAlignment() const;
+
+    /**
+     * Set view plugin overlay alignment to \p alignment
+     * @param alignment Alignment flag
+     */
+    void setAlignment(const Qt::Alignment& alignment);
 
 protected:
 
@@ -182,12 +209,23 @@ public: // Action getters
     TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; }
     TriggerAction& getViewHelpAction() { return _viewHelpAction; }
     TriggerAction& getViewShortcutsAction() { return _viewShortcutsAction; }
-    ToggleAction& getViewPluginOverlayVisibleAction() { return _viewPluginOverlayVisibleAction; }
+    ToggleAction& getToolbarVisibleAction() { return _toolbarVisibleAction; }
+    TriggerAction& getHideToolbarAction() { return _hideToolbarAction; }
+    OptionAction& getAlignmentAction() { return _alignmentAction; }
+    TriggerAction& getMoveToTopLeftAction() { return _moveToTopLeftAction; }
+    TriggerAction& getMoveToTopRightAction() { return _moveToTopRightAction; }
+    TriggerAction& getMoveToBottomLeftAction() { return _moveToBottomLeftAction; }
+    TriggerAction& getMoveToBottomRightAction() { return _moveToBottomRightAction; }
 
     const TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; }
     const TriggerAction& getViewHelpAction() const { return _viewHelpAction; }
     const TriggerAction& getViewShortcutsAction() const { return _viewShortcutsAction; }
-    const ToggleAction& getViewPluginOverlayVisibleAction() const  { return _viewPluginOverlayVisibleAction; }
+    const ToggleAction& getOverlayVisibleAction() const { return _toolbarVisibleAction; }
+    const TriggerAction& getHideToolbarAction() const { return _hideToolbarAction; }
+    const OptionAction& getAlignmentAction() const { return _alignmentAction; }
+    const TriggerAction& getMoveToTopRightAction() const { return _moveToTopRightAction; }
+    const TriggerAction& getMoveToBottomLeftAction() const { return _moveToBottomLeftAction; }
+    const TriggerAction& getMoveToBottomRightAction() const { return _moveToBottomRightAction; }
 
 signals:
 
@@ -211,20 +249,29 @@ signals:
      */
     void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
 
+public:
+    static const QStringList alignmentOptions;                                      /** Names of the supported alignments in the case of a view plugin */
+    static const std::vector<Qt::Alignment> alignmentFlags;                         /** Supported Qt alignment flags in the case of a view plugin */
+
 private:
     plugin::Plugin*                             _plugin;                            /** Pointer to associated plugin */
     HorizontalGroupAction                       _actions;                           /** Learning center actions */
     TriggerAction                               _viewDescriptionAction;             /** Trigger action that displays the plugin help */
     TriggerAction                               _viewHelpAction;                    /** Trigger action that displays the plugin description */
     TriggerAction                               _viewShortcutsAction;               /** Trigger action that displays the plugin shortcut map */
-    ToggleAction                                _viewPluginOverlayVisibleAction;    /** Toggles view plugin overlay widget visibility on/off */
+    ToggleAction                                _toolbarVisibleAction;              /** Toggles toolbar widget visibility */
+    TriggerAction                               _hideToolbarAction;                 /** Hides the view plugin overlay toolbar widget */
+    OptionAction                                _alignmentAction;                   /** Determines the view plugin overlay alignment */
+    TriggerAction                               _moveToTopLeftAction;               /** Trigger action that moves the view plugin overlay to the top-left of the widget */
+    TriggerAction                               _moveToTopRightAction;              /** Trigger action that moves the view plugin overlay to the top-right of the widget */
+    TriggerAction                               _moveToBottomLeftAction;            /** Trigger action that moves the view plugin overlay to the bottom-left of the widget */
+    TriggerAction                               _moveToBottomRightAction;           /** Trigger action that moves the view plugin overlay to the bottom-right of the widget */
     QString                                     _pluginTitle;                       /** Human-readable plugin title in plain text format */
     QString                                     _shortDescription;                  /** Short plugin description in plain text format */
     QString                                     _longDescription;                   /** Long plugin description in HTML-formatted text */
     util::Videos                                _videos;                            /** Plugin related videos */
     ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
     QPointer<QWidget>                           _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
-    QPointer<QWidget>                           _shortcutsOverlayWidget;            /** Guarded pointer to shortcuts overlay widget */
 
     friend class plugin::ViewPlugin;
 };
@@ -234,11 +281,3 @@ private:
 Q_DECLARE_METATYPE(mv::gui::PluginLearningCenterAction)
 
 inline const auto pluginLearningCenterActionMetaTypeId = qRegisterMetaType<mv::gui::PluginLearningCenterAction*>("mv::gui::PluginLearningCenterAction");
-
-//protected:
-//
-//    /**
-//     * Get learning center overlay widget
-//     * @return Reference to learning center overlay widget
-//     */
-//    gui::ViewPluginLearningCenterOverlayWidget& getViewPluginOverlayWidget();

@@ -64,7 +64,7 @@ target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
-check_and_set_AVX(${LOGGINGPLUGIN} ${MV_USE_AVX})
+mv_check_and_set_AVX(${LOGGINGPLUGIN} ${MV_USE_AVX})
 
 install(TARGETS ${LOGGINGPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll

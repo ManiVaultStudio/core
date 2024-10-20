@@ -24,7 +24,8 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     _pickAction(this, "Pick"),
     _nameFilters(),
     _defaultSuffix(),
-    _fileType("File")
+    _fileType("File"),
+    _useNativeDialog(true)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -73,7 +74,9 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
         fileDialog->setNameFilters(getNameFilters());
         fileDialog->setDefaultSuffix(getDefaultSuffix());
         fileDialog->setDirectory(Application::current()->getSetting(getSettingsPrefix(), QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-        fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
+        
+        if(!_useNativeDialog)
+            fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
 		connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
             if (fileDialog->selectedFiles().count() != 1)
@@ -164,6 +167,16 @@ void FilePickerAction::setPlaceHolderString(const QString& placeholderString)
 QString FilePickerAction::getDirectoryName() const
 {
     return QDir(getFilePath()).dirName();
+}
+
+void FilePickerAction::setUseNativeFileDialog(bool useNativeDialog)
+{
+    _useNativeDialog = useNativeDialog;
+}
+
+bool FilePickerAction::getUseNativeFileDialog() const
+{
+    return _useNativeDialog;
 }
 
 bool FilePickerAction::isValid() const

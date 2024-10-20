@@ -52,6 +52,8 @@ ViewPluginOverlayWidget::ViewPluginOverlayWidget(plugin::ViewPlugin* viewPlugin)
 {
     setAutoFillBackground(true);
 
+    _mainLayout.setSpacing(10);
+
     _mainLayout.addLayout(&_toolbarLayout);
 
     setLayout(&_mainLayout);

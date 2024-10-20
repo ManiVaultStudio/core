@@ -77,7 +77,7 @@ target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
-check_and_set_AVX(${DATAHIERARCHYPLUGIN} ${MV_USE_AVX})
+mv_check_and_set_AVX(${DATAHIERARCHYPLUGIN} ${MV_USE_AVX})
 
 if(MV_UNITY_BUILD)
     set_target_properties(${DATAHIERARCHYPLUGIN} PROPERTIES UNITY_BUILD ON)

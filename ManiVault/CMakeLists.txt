@@ -37,7 +37,10 @@ set(CMAKE_INSTALL_MESSAGE LAZY)
 include(CMakePackageConfigHelpers)
 
 # Test hardware avx capabilities
-include(CMakeCheckSetAVX)
+include(mv_check_and_set_AVX)
+
+# Helper function to install runtime dependencies
+include(mv_install_dependencies_utils)
 
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
@@ -205,7 +208,7 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
 # Use AVX if enabled and available
-check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
+mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
 
 if(MV_PRECOMPILE_HEADERS)
     target_precompile_headers(${MV_PUBLIC_LIB} PRIVATE 
@@ -256,7 +259,7 @@ target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
-check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
+mv_check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
 
 if(MV_PRECOMPILE_HEADERS)
     target_precompile_headers(${MV_EXE} PRIVATE 
@@ -372,6 +375,21 @@ install(EXPORT "ManiVaultPublicExport"
         COMPONENT MVPUBLIC_EXPORT
 )
 
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies_utils.cmake"
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_CMAKE_HELPER
+)
+
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_CMAKE_HELPER
+)
+
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_CMAKE_HELPER
+)
+
 if(MSVC)
     # Install program database (.pdb) files
     install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
@@ -401,9 +419,11 @@ install(FILES
         COMPONENT MVPUBLIC_PACKAGE
 )
 
+# setup variables that find_packge config would define, for building core and plugins in the same project
 set(ManiVault_INCLUDE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/" CACHE INTERNAL "")
 set(ManiVault_LIB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/" CACHE INTERNAL "")
 set(ManiVault_INSTALL_DIR "${MV_INSTALL_DIR}" CACHE INTERNAL "")
+set(ManiVault_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" CACHE INTERNAL "") # this differs from config
 
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
@@ -433,6 +453,13 @@ add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_EXPORT
+        --prefix ${MV_INSTALL_DIR}
+        --verbose
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake helper files"
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component MVPUBLIC_CMAKE_HELPER
         --prefix ${MV_INSTALL_DIR}
         --verbose
     # If no plugin directory exists, ManiVault might try to import 

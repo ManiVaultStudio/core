@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ViewPluginShortcutsOverlayWidget.h"
+#include "ViewPluginShortcutsDialog.h"
 
 #include "Application.h"
 #include "util/ShortcutMap.h"
@@ -11,7 +11,7 @@
 #include <QDebug>
 
 #ifdef _DEBUG
-    #define SHORTCUT_MAP_OVERLAY_WIDGET_VERBOSE
+    #define VIEW_PLUGIN_SHORTCUTS_DIALOG_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -19,25 +19,19 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-ViewPluginShortcutsOverlayWidget::ViewPluginShortcutsOverlayWidget(plugin::ViewPlugin* viewPlugin) :
-    ViewPluginOverlayWidget(viewPlugin),
+ViewPluginShortcutsDialog::ViewPluginShortcutsDialog(plugin::ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
+    QDialog(parent),
     _shortcutMap(viewPlugin->getShortcuts().getMap())
 {
     setAutoFillBackground(true);
+    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("keyboard"));
+    setWindowTitle(QString("%1 shortcuts").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
 
-    getMainLayout().addLayout(&_headerLayout);
-    getMainLayout().addWidget(&_textScrollArea);
+    auto layout = new QVBoxLayout();
 
-    _headerLayout.addWidget(&_headerIconLabel);
-    _headerLayout.addWidget(&_headerTextLabel, 1);
-    _headerLayout.addStretch(1);
-    _headerLayout.setSpacing(10);
+    layout->addWidget(&_textScrollArea);
 
-    _headerIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("keyboard").pixmap(QSize(24, 24)));
-    _headerIconLabel.setStyleSheet("padding-top: 2px;");
-
-    _headerTextLabel.setText(QString("<p style='font-size: 16pt;'><b>%1</b> shortcuts</p>").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
-    _headerTextLabel.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    setLayout(layout);
 
     QString categories;
 
@@ -62,7 +56,7 @@ ViewPluginShortcutsOverlayWidget::ViewPluginShortcutsOverlayWidget(plugin::ViewP
     _textScrollArea.setObjectName("Shortcuts");
     _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
 
-    _textWidgetLayout.setContentsMargins(0, 0, 0, 0);
+    _textWidgetLayout.setContentsMargins(5, 5, 5, 5);
     _textWidgetLayout.addWidget(&_textBodyLabel);
     _textWidgetLayout.setAlignment(Qt::AlignTop);
 

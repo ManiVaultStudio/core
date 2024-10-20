@@ -65,7 +65,7 @@ target_link_libraries(${SAMPLE_CONTEXT_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${SAMPLE_CONTEXT_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
-check_and_set_AVX(${SAMPLE_CONTEXT_PLUGIN} ${MV_USE_AVX})
+mv_check_and_set_AVX(${SAMPLE_CONTEXT_PLUGIN} ${MV_USE_AVX})
 
 if(MV_UNITY_BUILD)
     set_target_properties(${SAMPLE_CONTEXT_PLUGIN} PROPERTIES UNITY_BUILD ON)
