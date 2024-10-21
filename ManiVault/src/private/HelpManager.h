@@ -53,6 +53,12 @@ public:
      */
     const mv::VideosModel& getVideosModel() const override;
 
+    /**
+     * Get videos model
+     * @return Const reference to videos model
+     */
+    const mv::VideosModel& getVideosModel() const override;
+
 public: // Action getters
 
     gui::ToggleAction& getShowLearningCenterAction() override { return _showLearningCenterAction; }

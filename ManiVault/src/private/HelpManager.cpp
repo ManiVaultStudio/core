@@ -131,6 +131,11 @@ void HelpManager::addVideo(const Video* video)
     _videosModel.addVideo(video);
 }
 
+void HelpManager::addVideo(const Video* video)
+{
+    _videosModel.addVideo(video);
+}
+
 Videos HelpManager::getVideos(const QStringList& tags) const
 {
     VideosFilterModel videosFilterModel;
@@ -162,4 +167,3 @@ const VideosModel& HelpManager::getVideosModel() const
 }
 
 }
-

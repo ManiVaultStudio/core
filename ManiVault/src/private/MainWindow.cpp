@@ -244,8 +244,6 @@ void MainWindow::restoreWindowGeometryFromSettings()
         restoreGeometry(storedMainWindowGeometry.toByteArray());
     else
         setDefaultWindowGeometry();
-
-    resize(800, 600);
 }
 
 void MainWindow::saveWindowGeometryToSettings()

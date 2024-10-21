@@ -9,9 +9,7 @@
 #include <util/Miscellaneous.h>
 #include <util/Video.h>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
-
-using namespace mv;
+Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -54,6 +52,8 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
     //getLearningCenterAction().setLongDescriptionMarkdown(QString::fromStdString(longDescriptionMarkdown));
 	getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+
+    
 }
 
 void DataHierarchyPlugin::init()
