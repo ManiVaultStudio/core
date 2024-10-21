@@ -4,21 +4,25 @@
 
 #pragma once
 
-#include <models/SortFilterProxyModel.h>
+#include "ManiVaultGlobals.h"
 
-#include <actions/OptionsAction.h>
-#include <actions/HorizontalGroupAction.h>
+#include "models/SortFilterProxyModel.h"
 
-class HelpManagerVideosModel;
+#include "actions/OptionsAction.h"
+#include "actions/HorizontalGroupAction.h"
+
+namespace mv {
+
+class VideosModel;
 
 /**
- * Help manager videos filter model class
+ * Videos filter model class
  *
- * Sorting and filtering model for the help manager videos model
+ * Sorting and filtering model for the videos model
  *
  * @author Thomas Kroes
  */
-class HelpManagerVideosFilterModel : public mv::SortFilterProxyModel
+class CORE_EXPORT VideosFilterModel : public SortFilterProxyModel
 {
 public:
 
@@ -26,7 +30,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
     */
-    HelpManagerVideosFilterModel(QObject* parent = nullptr);
+    VideosFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether \p row with \p parent is filtered out (false) or in (true)
@@ -51,11 +55,13 @@ public:
 
 public: // Action getters
 
-    mv::gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
-    mv::gui::HorizontalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
+    gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
+    gui::HorizontalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
-    HelpManagerVideosModel*         _videosModel;           /** Pointer to source model */
-    mv::gui::OptionsAction          _tagsFilterAction;      /** Filter based on tag(s) */
-    mv::gui::HorizontalGroupAction  _filterGroupAction;     /** Groups the filter text and the the filter settings */
+    VideosModel*                _videosModel;           /** Pointer to source model */
+    gui::OptionsAction          _tagsFilterAction;      /** Filter based on tag(s) */
+    gui::HorizontalGroupAction  _filterGroupAction;     /** Groups the filter text and the filter settings */
 };
+
+}

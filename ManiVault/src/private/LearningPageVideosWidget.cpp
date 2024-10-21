@@ -13,6 +13,7 @@
     #define LEARNING_PAGE_VIDEOS_WIDGET_VERBOSE
 #endif
 
+using namespace mv;
 using namespace mv::gui;
 
 LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/) :
@@ -26,20 +27,20 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
     _mainLayout.addWidget(_videosFilterModel.getFilterGroupAction().createWidget(this));
     _mainLayout.addWidget(&_videosListView, 1);
 
-    _videosFilterModel.setSourceModel(&_videosModel);
+    _videosFilterModel.setSourceModel(&(const_cast<VideosModel&>(mv::help().getVideosModel())));
     _videosFilterModel.getTagsFilterAction().setStretch(2);
 
     _videosListView.setObjectName("Videos");
     _videosListView.setViewMode(QListView::IconMode);
     _videosListView.setModel(&_videosFilterModel);
-    _videosListView.setModelColumn(static_cast<int>(HelpManagerVideosModel::Column::Delegate));
-    _videosListView.setItemDelegateForColumn(static_cast<int>(HelpManagerVideosModel::Column::Delegate), new LearningPageVideoStyledItemDelegate(this));
+    _videosListView.setModelColumn(static_cast<int>(VideosModel::Column::Delegate));
+    _videosListView.setItemDelegateForColumn(static_cast<int>(VideosModel::Column::Delegate), new LearningPageVideoStyledItemDelegate(this));
 
     setLayout(&_mainLayout);
 
     const auto openPersistentEditors = [this]() -> void {
         for (int rowIndex = 0; rowIndex <= _videosFilterModel.rowCount(); rowIndex++) {
-            const auto index = _videosFilterModel.index(rowIndex, static_cast<int>(HelpManagerVideosModel::Column::Delegate));
+            const auto index = _videosFilterModel.index(rowIndex, static_cast<int>(VideosModel::Column::Delegate));
 
             //if (_videosListView.isPersistentEditorOpen(index))
             //    return;
@@ -55,15 +56,10 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
 
     connect(&_videosFilterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            _videosListView.closePersistentEditor(_videosFilterModel.index(rowIndex, static_cast<int>(HelpManagerVideosModel::Column::Delegate)));
+            _videosListView.closePersistentEditor(_videosFilterModel.index(rowIndex, static_cast<int>(VideosModel::Column::Delegate)));
     });
 
     updateCustomStyle();
-}
-
-void LearningPageVideosWidget::showEvent(QShowEvent* showEvent)
-{
-    _videosModel.populateFromServer();
 }
 
 bool LearningPageVideosWidget::event(QEvent* event)

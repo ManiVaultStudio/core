@@ -4,8 +4,11 @@
 
 #pragma once
 
-#include "AbstractHelpManager.h"
-#include "HelpManagerVideosModel.h"
+#include <AbstractHelpManager.h>
+
+#include <models/VideosModel.h>
+
+#include <util/FileDownloader.h>
 
 namespace mv
 {
@@ -32,11 +35,23 @@ public:
     void reset() override;
 
     /**
+     * Add \p video
+     * @param video Pointer to video to add
+     */
+    void addVideo(const mv::util::Video* video) override;
+
+    /**
      * Get videos for \p tags
-     * @param tags Fitler tags (returns all videos if empty)
+     * @param tags Filter tags (returns all videos if empty)
      * @return Vector of videos
      */
     util::Videos getVideos(const QStringList& tags) const override;
+
+    /**
+     * Get videos model
+     * @return Const reference to videos model
+     */
+    const mv::VideosModel& getVideosModel() const override;
 
 public: // Action getters
 
@@ -48,14 +63,14 @@ public: // Action getters
     gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; }
 
 private:
-    gui::ToggleAction       _showLearningCenterAction;      /** Toggle action for toggling the learning center */
-    gui::TriggerAction      _toDiscordAction;               /** External link to discord */
-    gui::TriggerAction      _toWebsiteAction;               /** External link to website */
-    gui::TriggerAction      _toWikiAction;                  /** External link to wiki */
-    gui::TriggerAction      _toRepositoryAction;            /** External link to repository */
-    gui::TriggerAction      _toLearningCenterAction;        /** Trigger action to go the learning center */
-    HelpManagerVideosModel  _videosModel;                   /** Videos model */
-    
+    mv::gui::ToggleAction       _showLearningCenterAction;  /** Toggle action for toggling the learning center */
+    mv::gui::TriggerAction      _toDiscordAction;           /** External link to discord */
+    mv::gui::TriggerAction      _toWebsiteAction;           /** External link to website */
+    mv::gui::TriggerAction      _toWikiAction;              /** External link to wiki */
+    mv::gui::TriggerAction      _toRepositoryAction;        /** External link to repository */
+    mv::gui::TriggerAction      _toLearningCenterAction;    /** Trigger action to go the learning center */
+    mv::VideosModel             _videosModel;               /** Videos model */
+    mv::util::FileDownloader    _fileDownloader;            /** For downloading the learning center JSON file */
 };
 
 }

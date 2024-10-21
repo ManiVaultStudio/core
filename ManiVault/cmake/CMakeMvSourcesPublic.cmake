@@ -345,6 +345,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/ApplicationIconAction.h
     src/actions/ViewPluginSamplerAction.h
     src/actions/PluginLearningCenterAction.h
+    src/actions/WatchVideoAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -378,6 +379,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/ApplicationIconAction.cpp
     src/actions/ViewPluginSamplerAction.cpp
     src/actions/PluginLearningCenterAction.cpp
+    src/actions/WatchVideoAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -892,6 +894,21 @@ set(PUBLIC_DATASETS_MODEL_FILES
     ${PUBLIC_DATASETS_MODEL_SOURCES}
 )
 
+set(PUBLIC_VIDEOS_MODEL_HEADERS
+    src/models/VideosModel.h
+	src/models/VideosFilterModel.h
+)
+
+set(PUBLIC_VIDEOS_MODEL_SOURCES
+    src/models/VideosModel.cpp
+	src/models/VideosFilterModel.cpp
+)
+
+set(PUBLIC_VIDEOS_MODEL_FILES
+    ${PUBLIC_VIDEOS_MODEL_HEADERS}
+    ${PUBLIC_VIDEOS_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -1006,6 +1023,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_PLUGIN_FACTORIES_MODEL_HEADERS}
     ${PUBLIC_MISCELLANEOUS_MODEL_HEADERS}
 	${PUBLIC_DATASETS_MODEL_HEADERS}
+	${PUBLIC_VIDEOS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_VERSION_HEADERS}
@@ -1050,6 +1068,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_PLUGIN_FACTORIES_MODEL_SOURCES}
     ${PUBLIC_MISCELLANEOUS_MODEL_SOURCES}
 	${PUBLIC_DATASETS_MODEL_SOURCES}
+	${PUBLIC_VIDEOS_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_HEADERS}
@@ -1107,5 +1126,6 @@ source_group(Models\\Plugins FILES ${PUBLIC_PLUGINS_MODEL_FILES})
 source_group(Models\\PluginFactories FILES ${PUBLIC_PLUGIN_FACTORIES_MODEL_FILES})
 source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
 source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
+source_group(Models\\Videos FILES ${PUBLIC_VIDEOS_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})

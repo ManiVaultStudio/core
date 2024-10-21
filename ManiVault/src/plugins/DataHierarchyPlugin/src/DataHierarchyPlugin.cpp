@@ -6,37 +6,12 @@
 
 #include <Application.h>
 
-#include "util/Miscellaneous.h"
+#include <util/Miscellaneous.h>
+#include <util/Video.h>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
-
-using namespace mv;
+Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
 using namespace mv::gui;
-
-void listResources(const QString& resourcePath) {
-    // Create a QDir object for the resource path
-    QDir resourceDir(resourcePath);
-
-    // Check if the directory exists
-    if (!resourceDir.exists()) {
-        qDebug() << "Resource directory does not exist:" << resourcePath;
-        return;
-    }
-
-    // Get the list of all files and directories in the resource path
-    QFileInfoList resourceList = resourceDir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-
-    // Print out each resource
-    for (const QFileInfo& fileInfo : resourceList) {
-        if (fileInfo.isDir()) {
-            // Recursively list resources in subdirectories
-            listResources(fileInfo.absoluteFilePath());
-        }
-        else {
-            qDebug() << "Resource found:" << fileInfo.absoluteFilePath();
-        }
-    }
-}
+using namespace mv::util;
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
@@ -64,9 +39,8 @@ View categorized examples below to get started.
 - Click **RMB** in an empty area of the data hierarchy to show the context menu
 - Click **LMB** on **Import**, this will show all data import plugins (this menu is not available when there are no compatible exporter plugins)
 - Click **LMB** to start the importer of choice
-)"
-	+ util::embedGifFromResource(":/animation/ImportDatasetScaled.gif").toStdString() +
-R"(
+
+![Import dataset](../animation/ImportDatasetScaled.gif)
 </details>
 <details>
   <summary id='ExportData'>Export data</summary>
@@ -208,6 +182,8 @@ R"(
     getLearningCenterAction().setLongDescriptionMarkdown(QString::fromStdString(longDescriptionMarkdown));
 
 	getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+
+    
 }
 
 void DataHierarchyPlugin::init()
@@ -224,6 +200,14 @@ void DataHierarchyPlugin::init()
 DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
     ViewPluginFactory(true)
 {
+}
+
+void DataHierarchyPluginFactory::initialize()
+{
+	ViewPluginFactory::initialize();
+
+    mv::help().addVideo(new Video(Video::Type::GIF, "Import data", { "Shorts", "Data Hierarchy", "Import" }, "", "Shows how to import data with the data hierarchy plugin", ":/animation/ImportDataset.gif"));
+    mv::help().addVideo(new Video(Video::Type::GIF, "Export data", { "Shorts", "Data Hierarchy", "Export" }, "", "Shows how to export data with the data hierarchy plugin", ":/animation/ExportDataset.gif"));
 }
 
 QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

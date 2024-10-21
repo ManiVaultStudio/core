@@ -4,19 +4,23 @@
 
 #pragma once
 
-#include <util/FileDownloader.h>
+#include "ManiVaultGlobals.h"
+
+#include "util/Video.h"
 
 #include <QMap>
 #include <QStandardItemModel>
 
+namespace mv {
+
 /**
- * Help manager videos model class
+ * Videos model class
  *
- * Model class which contains help manager video content
+ * Model class which contains video content for the learning center
  *
  * @author Thomas Kroes
  */
-class HelpManagerVideosModel final : public QStandardItemModel
+class CORE_EXPORT VideosModel final : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -24,12 +28,13 @@ public:
 
     /** Model columns */
     enum class Column {
-        Title,
+        Type,
+    	Title,
         Tags,
         Date,
         Summary,
-        YouTubeId,
-        YouTubeUrl,
+        Resource,
+        Thumbnail,
         Delegate,
 
         Count
@@ -45,26 +50,62 @@ public:
     /** Column name and tooltip */
     static QMap<Column, ColumHeaderInfo> columnInfo;
 
-protected:
-
     /** Base standard model item class for video */
-    class Item : public QStandardItem {
+    class CORE_EXPORT Item : public QStandardItem {
     public:
 
         /**
-         * Construct with \p variantMap of video
-         * @param variantMap Variant map describing the video
+         * Construct with pointer \p video
+         * @param video Const pointer to video object
          */
-        Item(QVariantMap variantMap, bool editable = false);
+        Item(const util::Video* video, bool editable = false);
 
         /**
-         * Get variant map
-         * return Const reference to the JSON object
+         * Get video
+         * return Const reference to video object
          */
-        const QVariantMap& getVariantMap() const;
+        const util::Video* getVideo() const;
 
     private:
-        QVariantMap _variantMap;      /** The video JSON object */
+        const util::Video*   _video;      /** The video config */
+    };
+
+protected:
+
+    /** Standard model item class for displaying the video type */
+    class TypeItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "Type";
+
+            case Qt::ToolTipRole:
+                return "Type of video";
+
+            default:
+                break;
+            }
+
+            return {};
+        }
     };
 
     /** Standard model item class for displaying the video title */
@@ -94,6 +135,9 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Video title";
+
+                default:
+                    break;
             }
 
             return {};
@@ -127,6 +171,9 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Video tags";
+
+                default:
+                    break;
             }
 
             return {};
@@ -160,6 +207,9 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Date at which the video was published";
+
+                default:
+                    break;
             }
 
             return {};
@@ -193,14 +243,17 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Video description";
+
+                default:
+                    break;
             }
 
             return {};
         }
     };
 
-    /** Standard model item class for displaying the video YouTube identifier */
-    class YouTubeIdItem final : public Item {
+    /** Standard model item class for displaying the video resource */
+    class ResourceItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -222,18 +275,21 @@ protected:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "ID";
+                    return "Resource";
 
                 case Qt::ToolTipRole:
-                    return "YouTube identifier";
+                    return "Video resource";
+
+                default:
+                    break;
             }
 
             return {};
         }
     };
 
-    /** Standard model item class for displaying the video YouTube URL */
-    class YouTubeUrlItem final : public Item {
+    /** Standard model item class for displaying the video thumbnail */
+    class ThumbnailItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -253,12 +309,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "URL";
+	            case Qt::DisplayRole:
+            	case Qt::EditRole:
+                    return "Thumbnail";
 
-                case Qt::ToolTipRole:
-                    return "YouTube URL";
+	            case Qt::ToolTipRole:
+	                return "Video thumbnail";
+
+	            default:
+	                break;
             }
 
             return {};
@@ -286,6 +345,9 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Video delegate item";
+
+                default:
+                    break;
             }
 
             return {};
@@ -298,19 +360,19 @@ protected:
     public:
 
         /**
-         * Construct with \p variantMap of video
-         * @param variantMap Variant map describing the video
+         * Construct with pointer to \p video object
+         * @param video Pointer to video object
          */
-        Row(QVariantMap variantMap) :
+        Row(const util::Video* video) :
             QList<QStandardItem*>()
         {
-            append(new TitleItem(variantMap));
-            append(new TagsItem(variantMap));
-            append(new DateItem(variantMap));
-            append(new SummaryItem(variantMap));
-            append(new YouTubeIdItem(variantMap));
-            append(new YouTubeUrlItem(variantMap));
-            append(new DelegateItem(variantMap));
+            append(new TypeItem(video));
+        	append(new TitleItem(video));
+            append(new TagsItem(video));
+            append(new DateItem(video));
+            append(new SummaryItem(video));
+            append(new ResourceItem(video));
+            append(new DelegateItem(video));
         }
     };
 
@@ -320,7 +382,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    HelpManagerVideosModel(QObject* parent = nullptr);
+    VideosModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -337,8 +399,14 @@ public:
      */
     QSet<QString> getTagsSet() const;
 
-    /** Loads learning center JSON file and picks out the videos */
-    void populateFromServer();
+    /**
+     * Add \p video
+     * @param video Pointer to video to add
+     */
+    void addVideo(const util::Video* video);
+
+    /** Builds a set of all video tags and emits VideosModel::tagsChanged(...) */
+    void updateTags();
 
 signals:
 
@@ -349,6 +417,8 @@ signals:
     void tagsChanged(const QSet<QString>& tags);
 
 private:
-    mv::util::FileDownloader    _fileDownloader;    /** For downloading the learning center JSON file */
-    QSet<QString>               _tags;              /** All tags */
+    util::Videos        _videos;    /** Model videos */
+    QSet<QString>       _tags;      /** All tags */
 };
+
+}

@@ -156,7 +156,7 @@ public: // Videos
      * Add \p video
      * @param video Video
      */
-    void addVideo(const util::Video& video);
+    void addVideo(const util::Video* video);
 
     /**
      * Add \p videos

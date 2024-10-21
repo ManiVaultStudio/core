@@ -3,11 +3,13 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "LearningPageVideoWidget.h"
-#include "HelpManagerVideosModel.h"
 
 #include <Application.h>
 
 #include <util/Miscellaneous.h>
+#include <util/Video.h>
+
+#include <models/VideosModel.h>
 
 #include <widgets/YouTubeVideoDialog.h>
 
@@ -32,11 +34,10 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _mainLayout(),
     _thumbnailLabel(),
     _thumbnailPixmap(),
-    _thumbnailDownloader(),
     _propertiesTextBrowser(),
     _overlayWidget(index, &_thumbnailLabel)
 {
-    const auto title = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Title)).data().toString();
+    const auto title = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Title)).data().toString();
 
     _propertiesTextBrowser.setReadOnly(true);
     _propertiesTextBrowser.setStyleSheet("background-color: transparent; border: none; margin: 0px; padding: 0px;");
@@ -81,22 +82,38 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
         border: 1px solid rgb(150, 150, 150); \
     }");
 
-    connect(&_thumbnailDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-        _thumbnailPixmap = QPixmap::fromImage(QImage::fromData(_thumbnailDownloader.downloadedData()));
+    const auto videoType = static_cast<util::Video::Type>(_index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Type)).data().toInt());
 
-        const auto marginToRemove   = 9;
-        const auto rectangleToCopy  = QRect(0, marginToRemove, _thumbnailPixmap.width(), _thumbnailPixmap.height() - (2 * marginToRemove));
+    /*
+    switch (videoType) {
+		case Video::Type::YouTube:
+		{
+            connect(&_thumbnailDownloader, &FileDownloader::downloaded, this, [this]() -> void {
+                _thumbnailPixmap = QPixmap::fromImage(QImage::fromData(_thumbnailDownloader.downloadedData()));
 
-        _thumbnailPixmap = _thumbnailPixmap.copy(rectangleToCopy).scaledToWidth(200, Qt::SmoothTransformation);
+                constexpr auto  marginToRemove  = 9;
+                const auto      rectangleToCopy = QRect(0, marginToRemove, _thumbnailPixmap.width(), _thumbnailPixmap.height() - (2 * marginToRemove));
 
-        _thumbnailLabel.setFixedSize(_thumbnailPixmap.size());
-        _thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
-    });
+                _thumbnailPixmap = _thumbnailPixmap.copy(rectangleToCopy).scaledToWidth(200, Qt::SmoothTransformation);
 
-    const auto youTubeId            = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::YouTubeId)).data().toString();
-    const auto youtTubeThumbnailUrl = getYouTubeThumbnailUrl(youTubeId);
+                _thumbnailLabel.setFixedSize(_thumbnailPixmap.size());
+                _thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
+			});
 
-    _thumbnailDownloader.download(QUrl(youtTubeThumbnailUrl));
+            const auto youTubeId            = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Resource)).data().toString();
+            const auto youtTubeThumbnailUrl = getYouTubeThumbnailUrl(youTubeId);
+
+            _thumbnailDownloader.download(QUrl(youtTubeThumbnailUrl));
+
+            break;
+    	}
+
+        case Video::Type::GIF:
+        {
+            break;
+        }
+    }
+    */
 
     _thumbnailLabel.installEventFilter(this);
 }
@@ -130,11 +147,6 @@ bool LearningPageVideoWidget::eventFilter(QObject* target, QEvent* event)
     }
 
     return QWidget::eventFilter(target, event);
-}
-
-QString LearningPageVideoWidget::getYouTubeThumbnailUrl(const QString& videoId, const QString& quality /*= "mqdefault"*/)
-{
-    return QString("https://img.youtube.com/vi/%1/%2.jpg").arg(videoId, quality);
 }
 
 LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, QWidget* parent) :
@@ -171,11 +183,11 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     
     QLocale locale;
 
-    const auto summary      = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Summary)).data().toString();
-    const auto date         = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Date)).data(Qt::EditRole).toString();
+    const auto summary      = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Summary)).data().toString();
+    const auto date         = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Date)).data(Qt::EditRole).toString();
     const auto dateTime     = QDateTime::fromString(date, Qt::ISODate);
     const auto dateString   = locale.toString(dateTime.date());
-    const auto tags         = _index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Tags)).data().toStringList();
+    const auto tags         = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Tags)).data().toStringList();
 
     _playIconLabel.setToolTip("Click to start the video");
     _summaryIconLabel.setToolTip(summary);
@@ -219,9 +231,9 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
         {
             if (target == &_playIconLabel) {
 #ifdef USE_YOUTUBE_DIALOG
-                YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::YouTubeId)).data().toString());
+                YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Resource)).data().toString());
 #else
-                QDesktopServices::openUrl(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::YouTubeUrl)).data().toString());
+                QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Resource)).data().toString()));
 #endif
             }
 

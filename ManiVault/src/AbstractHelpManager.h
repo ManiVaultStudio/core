@@ -10,6 +10,8 @@
 
 #include "util/Video.h"
 
+#include "models/VideosModel.h"
+
 #include <QObject>
 
 namespace mv {
@@ -37,11 +39,23 @@ public:
     }
 
     /**
+     * Add \p video
+     * @param video Pointer to video to add
+     */
+    virtual void addVideo(const util::Video* video) = 0;
+
+    /**
      * Get videos for \p tags
      * @param tags Filter tags (returns all videos if empty)
      * @return Vector of videos
      */
     virtual util::Videos getVideos(const QStringList& tags) const = 0;
+
+    /**
+     * Get videos model
+     * @return Const reference to videos model
+     */
+    virtual const VideosModel& getVideosModel() const = 0;
 
 public: // Action getters
 

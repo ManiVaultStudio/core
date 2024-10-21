@@ -5,6 +5,7 @@
 #include "LoggingPlugin.h"
 
 #include <Application.h>
+#include <util/Miscellaneous.h>
 
 #include <QVBoxLayout>
 
@@ -20,7 +21,27 @@ LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     getLearningCenterAction().setPluginTitle("Logging");
 
     getLearningCenterAction().setShortDescription("Shows <b>ManiVault</b> logging");
-    getLearningCenterAction().setLongDescription("This plugin shows the <b>ManiVault</b> logging information. It contains all the logs produced by the core of <b>ManiVault</b> and its plugins.");
+    getLearningCenterAction().setLongDescription("");
+
+    const std::string longDescriptionMarkdown = R"(
+# Introduction
+This plugin shows the **ManiVault** logging information. It contains all the logs produced by the core of **ManiVault** and its plugins.
+
+## Examples
+### View and edit dataset properties
+)"
++ util::embedGifFromResource(":/animation/ViewEditPropertiesScaled.gif").toStdString() +
+R"(
+
+### Search properties
+)"
++ util::embedGifFromResource(":/animation/SearchScaled.gif").toStdString() +
+R"()";
+
+    getLearningCenterAction().setLongDescriptionMarkdown(QString::fromStdString(longDescriptionMarkdown));
+
+
+
 
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }

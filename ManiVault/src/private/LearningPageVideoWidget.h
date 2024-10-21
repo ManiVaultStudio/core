@@ -78,19 +78,11 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
-    /**
-     * Get youTube thumbnail for \p videoId with \p quality
-     * @param videoId Globally unique identifier of the video
-     * @param quality String determining the quality: "default", "hqdefault", "mqdefault", "sddefault", "maxresdefault"
-     */
-    static QString getYouTubeThumbnailUrl(const QString& videoId, const QString& quality = "mqdefault");
-
 private:
     QPersistentModelIndex       _index;                     /** Pointer to owning learning page content widget */
     QVBoxLayout                 _mainLayout;                /** Main vertical layout */
     QLabel                      _thumbnailLabel;            /** Label that shows the thumbnail pixmap */
     QPixmap                     _thumbnailPixmap;           /** Thumbnail pixmap */
-    mv::util::FileDownloader    _thumbnailDownloader;       /** File downloader for downloading the thumbnail image */
     QTextBrowser                _propertiesTextBrowser;     /** Text browser for showing the video title */
     OverlayWidget               _overlayWidget;             /** Overlay widget widget that shows video-related actions */
 

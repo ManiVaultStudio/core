@@ -200,14 +200,10 @@ set(PRIVATE_TASK_MANAGER_FILES
 
 set(PRIVATE_HELP_MANAGER_HEADERS
     src/private/HelpManager.h
-	src/private/HelpManagerVideosModel.h
-	src/private/HelpManagerVideosFilterModel.h
 )
 
 set(PRIVATE_HELP_MANAGER_SOURCES
     src/private/HelpManager.cpp
-	src/private/HelpManagerVideosModel.cpp
-	src/private/HelpManagerVideosFilterModel.cpp
 )
 
 set(PRIVATE_HELP_MANAGER_FILES

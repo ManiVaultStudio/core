@@ -4,13 +4,16 @@
 
 #include "HelpManager.h"
 
-#include "HelpManagerVideosModel.h"
-#include "HelpManagerVideosFilterModel.h"
+#include "models/VideosFilterModel.h"
 
 #include <Application.h>
 
 #include <QDesktopServices>
 #include <QMainWindow>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QUrl>
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -76,7 +79,16 @@ HelpManager::HelpManager(QObject* parent) :
         _showLearningCenterAction.setChecked(true);
     });
 
-    _videosModel.populateFromServer();
+    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
+        const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
+        const auto videos = jsonDocument.object()["videos"].toArray();
+
+        for (const auto& video : videos) {
+            auto videoMap = video.toVariant().toMap();
+
+            addVideo(new Video(Video::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
+        }
+	});
 }
 
 HelpManager::~HelpManager()
@@ -96,6 +108,9 @@ void HelpManager::initialize()
         return;
 
     beginInitialization();
+    {
+        _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
+    }
     endInitialization();
 }
 
@@ -111,11 +126,18 @@ void HelpManager::reset()
     endReset();
 }
 
+void HelpManager::addVideo(const Video* video)
+{
+    _videosModel.addVideo(video);
+}
+
 Videos HelpManager::getVideos(const QStringList& tags) const
 {
-    HelpManagerVideosFilterModel videosFilterModel;
+    VideosFilterModel videosFilterModel;
 
-    videosFilterModel.setSourceModel(&const_cast<HelpManager*>(this)->_videosModel);
+    auto videosModel = &const_cast<HelpManager*>(this)->_videosModel;
+
+    videosFilterModel.setSourceModel(videosModel);
     videosFilterModel.getTagsFilterAction().initialize(tags, tags);
 
     Videos videos;
@@ -127,18 +149,17 @@ Videos HelpManager::getVideos(const QStringList& tags) const
 
         //if (!urlExists(videoUrlString))
         //    continue;
-
-        videos.emplace_back(Video({
-            videoIndex.siblingAtColumn(0).data().toString(),        // Title
-            videoIndex.siblingAtColumn(1).data().toStringList(),    // Tags
-            videoIndex.siblingAtColumn(2).data().toDateTime(),      // Date
-            videoIndex.siblingAtColumn(3).data().toString(),        // Summary
-            videoIndex.siblingAtColumn(4).data().toString(),        // YouTubeId
-            videoIndex.siblingAtColumn(5).data().toString()         // Url
-        }));
+        
+        //videos.emplace_back(dynamic_cast<VideosModel::Item*>(videosModel->itemFromIndex(videoIndex))->getVideo());
     }
 
     return videos;
 }
 
+const VideosModel& HelpManager::getVideosModel() const
+{
+    return _videosModel;
 }
+
+}
+

@@ -244,7 +244,7 @@ bool PluginLearningCenterAction::hasHelp() const
     return _plugin->getFactory()->hasHelp();
 }
 
-void PluginLearningCenterAction::addVideo(const util::Video& video)
+void PluginLearningCenterAction::addVideo(const util::Video* video)
 {
     _videos.push_back(video);
 }
