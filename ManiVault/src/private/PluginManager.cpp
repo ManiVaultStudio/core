@@ -167,6 +167,9 @@ void PluginManager::loadPluginFactories()
                 }
             }
 
+            if (dynamicLibsToLoad.isEmpty())
+                break;
+
             if (++currentTry >= maxTries)
             {
                 qWarning() << "Could not load all dependencies for " << pluginName << ". Missing: " << dynamicLibsToLoad;
