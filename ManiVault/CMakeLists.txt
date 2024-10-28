@@ -349,7 +349,7 @@ if(APPLE)
     add_custom_command(TARGET MV_EXE POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${LIBOMP_PATH}
-        "$<TARGET_FILE_DIR:MV_EXE>/../Frameworks/"
+        "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
         COMMENT "Copying libomp to Frameworks directory"
     )
 
