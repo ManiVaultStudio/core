@@ -245,22 +245,26 @@ target_include_directories(${MV_EXE} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
 )
 
-find_package(OpenMP REQUIRED) # Find OpenMP package
-
-# Link OpenMP
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(${MV_EXE} PRIVATE OpenMP::OpenMP_CXX)
-endif()
-
-# Force the compiler to use Homebrew's OpenMP library on macOS
+# Force OpenMP flags for macOS if not found automatically
 if(APPLE)
-    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I/usr/local/include")
-    set(OpenMP_CXX_LIB_NAMES "omp")
-    set(OpenMP_omp_LIBRARY "/usr/local/lib/libomp.dylib")
-endif()
+    find_package(OpenMP)  # Try to find OpenMP
 
-target_compile_options(${MV_EXE} PUBLIC ${OpenMP_CXX_FLAGS})
-target_link_libraries(${MV_EXE} PUBLIC ${OpenMP_omp_LIBRARY})
+    if(OpenMP_FOUND)
+        # If found, link normally
+        target_link_libraries(${MV_EXE} PUBLIC OpenMP::OpenMP_CXX)
+    else()
+        message(\"OpenMP not found...")
+        
+        # Manually specify OpenMP flags
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY "$(brew --prefix libomp)/lib/libomp.dylib")
+
+        # Apply flags and library to the target
+        target_compile_options(${MV_EXE} PUBLIC ${OpenMP_CXX_FLAGS})
+        target_link_libraries(${MV_EXE} PUBLIC ${OpenMP_omp_LIBRARY})
+    endif()
+endif()
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
 
