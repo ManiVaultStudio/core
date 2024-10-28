@@ -250,10 +250,12 @@ if(APPLE)
     find_package(OpenMP)  # Try to find OpenMP
 
     if(OpenMP_FOUND)
+        message("OpenMP found...")
+        
         # If found, link normally
         target_link_libraries(${MV_EXE} PUBLIC OpenMP::OpenMP_CXX)
     else()
-        message(\"OpenMP not found...")
+        message("OpenMP not found...")
         
         # Manually specify OpenMP flags
         set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include")
