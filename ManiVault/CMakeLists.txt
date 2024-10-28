@@ -194,6 +194,29 @@ target_sources(${MV_PUBLIC_LIB}
     ${SHADERS}
 )
 
+# Force OpenMP flags for macOS if not found automatically
+if(APPLE)
+    find_package(OpenMP)  # Try to find OpenMP
+
+    if(OpenMP_FOUND)
+        message("OpenMP found...")
+        
+        # If found, link normally
+        target_link_libraries(${MV_PUBLIC_LIB} PUBLIC OpenMP::OpenMP_CXX)
+    else()
+        message("OpenMP not found...")
+        
+        # Manually specify OpenMP flags
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY "$(brew --prefix libomp)/lib/libomp.dylib")
+
+        # Apply flags and library to the target
+        target_compile_options(${MV_PUBLIC_LIB} PUBLIC ${OpenMP_CXX_FLAGS})
+        target_link_libraries(${MV_PUBLIC_LIB} PUBLIC ${OpenMP_omp_LIBRARY})
+    endif()
+endif()
+
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
@@ -244,29 +267,6 @@ target_include_directories(${MV_EXE} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
 )
-
-# Force OpenMP flags for macOS if not found automatically
-if(APPLE)
-    find_package(OpenMP)  # Try to find OpenMP
-
-    if(OpenMP_FOUND)
-        message("OpenMP found...")
-        
-        # If found, link normally
-        target_link_libraries(${MV_EXE} PUBLIC OpenMP::OpenMP_CXX)
-    else()
-        message("OpenMP not found...")
-        
-        # Manually specify OpenMP flags
-        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include")
-        set(OpenMP_CXX_LIB_NAMES "omp")
-        set(OpenMP_omp_LIBRARY "$(brew --prefix libomp)/lib/libomp.dylib")
-
-        # Apply flags and library to the target
-        target_compile_options(${MV_EXE} PUBLIC ${OpenMP_CXX_FLAGS})
-        target_link_libraries(${MV_EXE} PUBLIC ${OpenMP_omp_LIBRARY})
-    endif()
-endif()
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
 
