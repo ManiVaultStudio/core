@@ -203,9 +203,9 @@ target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Core)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
@@ -245,12 +245,31 @@ target_include_directories(${MV_EXE} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
 )
 
+find_package(OpenMP REQUIRED) # Find OpenMP package
+
+# Link OpenMP
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(${MV_EXE} PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
+# Force the compiler to use Homebrew's OpenMP library on macOS
+if(APPLE)
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I/usr/local/include")
+    set(OpenMP_CXX_LIB_NAMES "omp")
+    set(OpenMP_omp_LIBRARY "/usr/local/lib/libomp.dylib")
+endif()
+
+target_compile_options(${MV_EXE} PUBLIC ${OpenMP_CXX_FLAGS})
+target_link_libraries(${MV_EXE} PUBLIC ${OpenMP_omp_LIBRARY})
+
 target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
 
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
+target_link_libraries(${MV_EXE} PRIVATE Qt6::Network)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${MV_EXE} PRIVATE Qt6::Positioning)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
