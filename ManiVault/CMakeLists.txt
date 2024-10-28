@@ -338,21 +338,13 @@ if(APPLE)
             if(NOT retval EQUAL 0)
         	    message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:QuaZip>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" \"$<TARGET_FILE:zlib>\")
+            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:QuaZip>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" \"$<TARGET_FILE:zlib>\"  \"$<TARGET_FILE:libomp>\")
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")       
         "
         COMPONENT MACOS_BUNDLE
     )
-
-    # Define a post-build step to copy libomp to the Frameworks folder
-    add_custom_command(TARGET MV_EXE POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        ${LIBOMP_PATH}
-        "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
-        COMMENT "Copying libomp to Frameworks directory"
-    )
-
+    
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"
         )"
