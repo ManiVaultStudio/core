@@ -2,7 +2,7 @@
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMake, CMakeToolchain
-from conans.tools import save, load
+from conans.tools import save, load, os_info, SystemPackageTool
 from conans import tools
 import os
 import sys
