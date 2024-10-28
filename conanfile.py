@@ -149,6 +149,11 @@ class HdpsCoreConan(ConanFile):
         qt_root = str(list(qtpath.glob("**/Qt6Config.cmake"))[0].parents[3].as_posix())
         tc.variables["CMAKE_PREFIX_PATH"] = f"{qt_root}"
         #tc.variables["Qt6_ROOT"] = qt_root
+
+        if os_info.is_macos:
+            proc = subprocess.run("brew --prefix libomp",  shell=True, capture_output=True)
+            prefix_path = prefix_path + f";{proc.stdout.decode('UTF-8').strip()}"
+        tc.variables["CMAKE_PREFIX_PATH"] = prefix_path
         
         # Set the installation directory for ManiVault based on the MV_INSTALL_DIR environment variable
         # or if none is specified, set it to the build/install dir.
