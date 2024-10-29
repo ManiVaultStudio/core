@@ -338,7 +338,7 @@ if(APPLE)
             if(NOT retval EQUAL 0)
         	    message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:QuaZip>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" \"$<TARGET_FILE:zlib>\"  \"$<TARGET_FILE:libomp>\")
+            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:QuaZip>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" \"$<TARGET_FILE:zlib>\")
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")       
         "
