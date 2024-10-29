@@ -209,7 +209,7 @@ public: // Hierarchy queries
      */
     template<typename WidgetActionType = WidgetAction>
     std::uint32_t getNumberOfChildren(bool recursively = false) const {
-        return getChildren<WidgetActionType>(recursively).count();
+        return static_cast<std::uint32_t>(getChildren<WidgetActionType>(recursively).count());
     }
 
     /**
@@ -227,7 +227,7 @@ public: // Hierarchy queries
      */
     template<typename WidgetActionType = WidgetAction>
     std::int32_t getDepth() const {
-        return getAncestors<WidgetActionType>().count();
+        return static_cast<std::int32_t>(getAncestors<WidgetActionType>().count());
     }
 
     /**
