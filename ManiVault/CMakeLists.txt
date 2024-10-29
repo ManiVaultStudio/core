@@ -349,7 +349,7 @@ if(APPLE)
     install(CODE "execute_process(COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\")" COMPONENT MACOS_BUNDLE)
 
     # Copy OpenMP library to Qt frameworks directory
-    install(CODE "file(COPY \"/lib/libomp.dylib\" DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")" COMPONENT MACOS_BUNDLE)
+    install(CODE "file(COPY \"/usr/local/lib/libomp.dylib\" DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")" COMPONENT MACOS_BUNDLE)
     
 else()
     install(TARGETS ${MV_EXE}
