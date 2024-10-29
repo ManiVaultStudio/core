@@ -17,7 +17,7 @@ using namespace mv::plugin;
 SampleScopeWidget::SampleScopeWidget(SampleScopePlugin* sampleScopePlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _sampleScopePlugin(sampleScopePlugin),
-    _noSamplesOverlayWidget(&_textScrollArea, Application::getIconFont("FontAwesome").getIcon("eye-dropper"), "No samples view", "There is currently no samples view available...")
+    _noSamplesOverlayWidget(&_textHtmlView, Application::getIconFont("FontAwesome").getIcon("eye-dropper"), "No samples view", "There is currently no samples view available...")
 {
     setAutoFillBackground(true);
     setLayout(&_layout);
@@ -30,28 +30,14 @@ SampleScopeWidget::SampleScopeWidget(SampleScopePlugin* sampleScopePlugin, QWidg
     widgetFader.setFadeOutDuration(300);
 
     _layout.setContentsMargins(0, 0, 0, 0);
-    _layout.addWidget(&_textScrollArea);
-
-    _textScrollArea.setWidgetResizable(true);
-    _textScrollArea.setWidget(&_textWidget);
-    _textScrollArea.setObjectName("Shortcuts");
-    //_textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
-    _textScrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    _textWidgetLayout.setContentsMargins(4, 4, 4, 4);
-    _textWidgetLayout.addWidget(&_textBodyLabel);
-    _textWidgetLayout.setAlignment(Qt::AlignTop);
-
-    _textWidget.setLayout(&_textWidgetLayout);
-    
-    _textBodyLabel.setWordWrap(true);
+    _layout.addWidget(&_textHtmlView);
 
     _noSamplesOverlayWidget.show();
 }
 
 void SampleScopeWidget::setHtmlText(const QString& htmlText)
 {
-    _textBodyLabel.setText(htmlText);
+    _textHtmlView.setHtml(htmlText);
 }
 
 InfoOverlayWidget& SampleScopeWidget::getNoSamplesOverlayWidget()

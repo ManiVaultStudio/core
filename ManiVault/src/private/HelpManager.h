@@ -7,6 +7,9 @@
 #include "AbstractHelpManager.h"
 #include "HelpManagerVideosModel.h"
 
+namespace mv
+{
+
 class HelpManager final : public mv::AbstractHelpManager
 {
     Q_OBJECT
@@ -48,3 +51,5 @@ private:
     HelpManagerVideosModel      _videosModel;                   /** Videos model */
     
 };
+
+}
