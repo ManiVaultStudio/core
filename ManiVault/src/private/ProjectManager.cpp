@@ -30,9 +30,11 @@
     //#define PROJECT_MANAGER_VERBOSE
 #endif
 
-using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;
+
+namespace mv
+{
 
 ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     AbstractProjectManager(parent),
@@ -1064,4 +1066,6 @@ QVariantMap ProjectManager::toVariantMap() const
         return _project->toVariantMap();
 
     return QVariantMap();
+}
+
 }

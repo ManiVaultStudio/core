@@ -7,7 +7,9 @@
 #include <AbstractProjectManager.h>
 
 #include <QObject>
-#include <QPointer>
+
+namespace mv
+{
 
 /**
  * Project manager class
@@ -179,3 +181,5 @@ private:
     mv::gui::ToggleAction               _showStartPageAction;               /** Action for toggling the start page */
     mv::gui::TriggerAction              _backToProjectAction;               /** Action for going back to the project */
 };
+
+}

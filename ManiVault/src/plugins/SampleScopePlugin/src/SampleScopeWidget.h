@@ -6,10 +6,9 @@
 
 #include <widgets/InfoOverlayWidget.h>
 
-#include <QLabel>
-#include <QScrollArea>
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QWebEngineView>
 
 class SampleScopePlugin;
 
@@ -46,9 +45,6 @@ public:
 private:
     SampleScopePlugin*              _sampleScopePlugin;         /** Pointer to parent sample scope plugin */
     QVBoxLayout                     _layout;                    /** Main layout */
-    QScrollArea                     _textScrollArea;            /** Scroll area for the label */
-    QWidget                         _textWidget;                /** Widget with the shortcuts label */
-    QVBoxLayout                     _textWidgetLayout;          /** Layout for the label */
-    QLabel                          _textBodyLabel;             /** Label for the body HTML text */
+    QWebEngineView                  _textHtmlView;              /** Web engine view in which the HTML is displayed */
     mv::gui::InfoOverlayWidget      _noSamplesOverlayWidget;    /** Overlay widget with a message saying there are no samples available */
 };
