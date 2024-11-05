@@ -96,8 +96,12 @@ Application::~Application()
 
 bool Application::event(QEvent* event)
 {
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        emit paletteChanged();
+    if (event->type() == QEvent::ApplicationPaletteChange) {
+        if (!paletteChangeTimer.isActive())
+            paletteChangeTimer.singleShot(250, this, [this] { emit paletteChanged(); });
+        
+        return true;
+    }
 
 	return QApplication::event(event);
 }
