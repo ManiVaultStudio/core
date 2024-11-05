@@ -6,25 +6,21 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QImage>
+#include <QObject>
 
 namespace mv::util {
 
 /**
- * Color map class
+ * Application pallette watcher
+ *
+ * Simple utility class which executes a lambda function when the application palette changes
+ *
+ * Create an instance of this class and set the watch function with applicationPaletteWatcher.setWatchFunction(...)
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ColorMap
+class CORE_EXPORT ApplicationPaletteWatcher
 {
-
-public: // Enumerations
-
-    /** Color map types */
-    enum class Type {
-        OneDimensional = 1,     /** One-dimensional color map */
-        TwoDimensional          /** Two-dimensional color map */
-    };
 
 public: // Construction/destruction
 

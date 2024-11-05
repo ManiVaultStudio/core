@@ -7,9 +7,7 @@
 #include <QPainter>
 #include <QDirIterator>
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 mv::util::ColorMapModel* ColorMapModel::globalInstance = nullptr;
 
@@ -190,5 +188,4 @@ mv::util::ColorMapModel* ColorMapModel::getGlobalInstance()
     return globalInstance;
 }
 
-}
 }

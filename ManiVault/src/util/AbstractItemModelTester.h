@@ -10,6 +10,8 @@
 #include <QObject>
 #include <QStack>
 
+namespace mv::util {
+
 class CORE_EXPORT AbstractItemModelTester : public QObject
 {
     Q_OBJECT
@@ -54,3 +56,5 @@ private:
 
     QList<QPersistentModelIndex> changing;
 };
+
+}

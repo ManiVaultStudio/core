@@ -85,11 +85,21 @@ Application::Application(int& argc, char** argv) :
         ForegroundTask::createHandler(Application::current());
         ModalTask::createHandler(Application::current());
     });
+
+    connect(this, &Application::paletteChanged, this, []() { qDebug() << "Palette changed"; });
 }
 
 Application::~Application()
 {
     _core = nullptr;
+}
+
+bool Application::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        emit paletteChanged();
+
+	return QApplication::event(event);
 }
 
 Application* Application::current()

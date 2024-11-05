@@ -83,7 +83,17 @@ public: // Construction
      */
     Application(int& argc, char** argv);
 
-    ~Application();
+    /** Do some cleanup */
+    ~Application() override;
+
+protected:
+
+    /**
+     * Invoked when \p event occurs
+     * @param event Pointer to event
+     * @return Whether the event was handled or not
+     */
+    bool event(QEvent* event) override;
 
 public: // Miscellaneous
 
@@ -243,6 +253,9 @@ signals:
      * @param core Pointer to core instance
      */
     void coreManagersCreated(CoreInterface* core);
+
+    /** Signals that the application palette changed */
+    void paletteChanged();
 
 protected:
     QString                     _id;                                /** Globally unique identifier of the application instance */

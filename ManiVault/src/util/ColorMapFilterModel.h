@@ -10,9 +10,7 @@
 
 #include <QSortFilterProxyModel>
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 /**
  * Color map filter model class
@@ -48,5 +46,4 @@ private:
     ColorMap::Type      _type;      /** Type of color map (e.g. 1D, 2D) */
 };
 
-}
 }

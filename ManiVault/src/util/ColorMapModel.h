@@ -10,9 +10,7 @@
 
 #include <QAbstractListModel>
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 /**
  * Color map model class
@@ -88,5 +86,4 @@ protected:
     static util::ColorMapModel*  globalInstance;
 };
 
-}
 }

@@ -5,9 +5,7 @@
 #include "ColorMapFilterModel.h"
 #include "ColorMapModel.h"
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 ColorMapFilterModel::ColorMapFilterModel(QObject *parent, const ColorMap::Type& type /*= ColorMap::Type::OneDimensional*/) :
     QSortFilterProxyModel(parent),
@@ -35,5 +33,4 @@ void ColorMapFilterModel::setType(const ColorMap::Type& type)
     invalidateFilter();
 }
 
-}
 }

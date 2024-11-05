@@ -7,9 +7,7 @@
 #include <QMap>
 #include <QString>
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 /** Color space types enum */
 enum class ColorSpaceType
@@ -30,5 +28,4 @@ static const QMap<ColorSpaceType, QString> colorSpaces = {
     { ColorSpaceType::LAB, "LAB" }
 };
 
-}
 }

@@ -4,9 +4,6 @@
 
 #include "ColorSpace.h"
 
-namespace mv {
+namespace mv::util {
 
-namespace util {
-
-}
 }

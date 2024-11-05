@@ -9,6 +9,8 @@
 #include <QStringList>
 #include <QMetaType>
 
+namespace mv::util {
+
 /*!
     Connect to all of the models signals.  Whenever anything happens
     recheck everything.
@@ -511,4 +513,6 @@ void AbstractItemModelTester::rowsRemoved(const QModelIndex & parent, int start,
     Q_ASSERT(c.oldSize - (end - start + 1) == model->rowCount(parent));
     Q_ASSERT(c.last == model->data(model->index(start - 1, 0, c.parent)));
     Q_ASSERT(c.next == model->data(model->index(start, 0, c.parent)));
+}
+
 }

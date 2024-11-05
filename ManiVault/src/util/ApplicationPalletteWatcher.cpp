@@ -4,7 +4,9 @@
 
 #include "ColorMap.h"
 
-namespace mv::util {
+namespace mv {
+
+namespace util {
 
 ColorMap::ColorMap(const QString& name /*= ""*/, const QString& resourcePath /*= ""*/, const Type& type /*= Type::OneDimensional*/, const QImage& image /*= QImage()*/) :
     _name(name),
@@ -39,4 +41,6 @@ std::uint32_t ColorMap::getNoDimensions() const
     return static_cast<int>(_type);
 }
 
+
+}
 }

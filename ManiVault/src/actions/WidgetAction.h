@@ -121,7 +121,7 @@ public:
     WidgetAction(QObject* parent, const QString& title);
 
     /** Destructor */
-    ~WidgetAction();
+    ~WidgetAction() override;
 
 public: // Hierarchy queries
 
