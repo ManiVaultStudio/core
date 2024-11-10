@@ -281,7 +281,8 @@ endif(MSVC)
 
 # find libraries relative to the executable in the macOS .app tree
 if(APPLE)
-    set_target_properties( ${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
+    set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
+    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "{MV_INSTALL_DIR}/$<CONFIGURATION>/ManiVault Studio.app")
 endif()
 
 
