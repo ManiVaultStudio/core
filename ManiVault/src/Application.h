@@ -19,7 +19,7 @@
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QLockFile>
-#include <QTimer>
+#include <QPalette>
 
 class QMainWindow;
 
@@ -274,7 +274,7 @@ protected:
     QTemporaryDir               _temporaryDir;                      /** Directory where application temporary files reside */
     TemporaryDirs               _temporaryDirs;                     /** ManiVault application temporary directories manager */
     QLockFile                   _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
-    QTimer                      _paletteChangeTimer;                /** Prevent unnecessary emissions of Application::paletteChanged() */
+    QPalette                    _currentPalette;                    /** Prevent unnecessary emissions of Application::paletteChanged() by comparing with a cached palette */
 };
 
 }

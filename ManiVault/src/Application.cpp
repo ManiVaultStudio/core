@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
+// SPDX-License-Identifier: LGPL-3.0-or-later
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
@@ -45,7 +45,9 @@ Application::Application(int& argc, char** argv) :
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock"))
 {
     _lockFile.lock();
-
+    
+    _currentPalette = current()->palette();
+    
     qDebug() << "Initializing icon fonts";
 
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, { ":/IconFonts/FontAwesomeBrandsRegular-5.14.otf" }, false, "FontAwesomeBrands")));
@@ -85,8 +87,6 @@ Application::Application(int& argc, char** argv) :
         ForegroundTask::createHandler(Application::current());
         ModalTask::createHandler(Application::current());
     });
-
-    connect(this, &Application::paletteChanged, this, []() { qDebug() << "Palette changed"; });
 }
 
 Application::~Application()
@@ -97,10 +97,13 @@ Application::~Application()
 bool Application::event(QEvent* event)
 {
     if (event->type() == QEvent::ApplicationPaletteChange) {
-        if (!paletteChangeTimer.isActive())
-            paletteChangeTimer.singleShot(250, this, [this] { emit paletteChanged(); });
+        auto currentPalette = current()->palette();
         
-        return true;
+        if (currentPalette != _currentPalette) {
+            emit paletteChanged();
+            
+            _currentPalette = currentPalette;
+        }
     }
 
 	return QApplication::event(event);

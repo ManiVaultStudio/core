@@ -582,6 +582,8 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::Backgrou
     _geometryAnimation(this, "geometry")
 {
     _geometryAnimation.setEasingCurve(QEasingCurve::OutExpo);
+    
+    connect(Application::current(), &Application::paletteChanged, this, [this]() { update(); });
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::transitionGeometry(const QRect& geometry, bool animate /*= true*/)
