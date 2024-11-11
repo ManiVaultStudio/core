@@ -808,6 +808,24 @@ void Points::resolveLinkedData(bool force /*= false*/)
     // Check for linked data in this dataset and resolve them
     for (const mv::LinkedData& linkedData : getLinkedData())
         resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
+
+    // Check for linked data in all source datasets and resolve them
+    // This and all source data share the same selection indices
+    mv::Dataset<Points> dataset = Dataset<Points>(this);
+    while (dataset->isDerivedData())
+    {
+        dataset = dataset->getSourceDataset<Points>();
+
+        if (dataset.isValid())
+        {
+            for (const mv::LinkedData& linkedData : dataset->getLinkedData())
+                resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
+
+        }
+        else
+            break;
+    }
+
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
