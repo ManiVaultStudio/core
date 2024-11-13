@@ -121,12 +121,12 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 # File compression: zlib
-CPMAddPackage(
-  NAME              ZLIB
-  GITHUB_REPOSITORY madler/zlib
-  GIT_TAG           v1.3.1
-  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON"
-)
+#CPMAddPackage(
+#  NAME              ZLIB
+#  GITHUB_REPOSITORY madler/zlib
+#  GIT_TAG           v1.3.1
+#  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON"
+#)
 
 set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
@@ -361,7 +361,7 @@ if(APPLE)
             if(NOT retval EQUAL 0)
         	    message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
+            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:QuaZip>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
             

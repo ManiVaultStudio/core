@@ -4,19 +4,6 @@
 # defines PUBLIC_SOURCES and PUBLIC_HEADERS
 
 
-set(PUBLIC_CORE_CMAKE_FILES
-    cmake/CMakeMvSourcesApplication.cmake
-    cmake/CMakeMvSourcesPublic.cmake
-    cmake/CMakeMvSourcesResources.cmake
-    cmake/CPM.cmake
-    cmake/MacOSXBundleInfo.cmake
-    cmake/mv_check_and_set_AVX.cmake
-    cmake/mv_install_dependencies_utils.cmake
-    cmake/mv_install_dependencies.cmake
-    cmake/MvCoreConfig.cmake
-    cmake/Utils.cmake
-)
-
 set(PUBLIC_CORE_INTERFACE_HEADERS
     src/CoreInterface.h
     src/AbstractManager.h
@@ -977,6 +964,31 @@ set(PUBLIC_GLOBALS_HEADERS
     src/ManiVaultGlobals.h
 )
 
+# Show CMake files in the IDE for convenience (useful for editing, not part of the build process)
+set(PUBLIC_CMAKE_FILES
+    cmake/CMakeMvSourcesApplication.cmake
+    cmake/CMakeMvSourcesPublic.cmake
+    cmake/CMakeMvSourcesResources.cmake
+    cmake/CMakeQuaZipSymlink.cmake
+    cmake/CPM.cmake
+    cmake/mv_check_and_set_AVX.cmake
+    cmake/mv_install_dependencies_utils.cmake
+    cmake/mv_install_dependencies.cmake
+    cmake/MvCoreConfig.cmake
+    cmake/Utils.cmake
+)
+
+# Show (Python) scripts in the IDE (useful for editing, not part of the build process)
+set(PUBLIC_SCRIPT_FILES
+    scripts/fix_xcode_scheme.py
+)
+
+# Header-only files are visible in the project IDE but are not part of the build process
+set(HEADER_ONLY_FILES
+	${PUBLIC_CMAKE_FILES}
+	${PUBLIC_SCRIPT_FILES}
+)
+
 set(PUBLIC_HEADERS
     ${PUBLIC_CORE_INTERFACE_HEADERS}
     ${PUBLIC_EVENT_HEADERS}
@@ -1020,6 +1032,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_VERSION_HEADERS}
     ${PUBLIC_GLOBALS_HEADERS}
+    #${HEADER_ONLY_FILES}
 )
 
 set(PUBLIC_SOURCES
@@ -1079,7 +1092,6 @@ set(PRECOMPILE_HEADERS
 list(REMOVE_DUPLICATES PUBLIC_HEADERS)
 list(REMOVE_DUPLICATES PUBLIC_SOURCES)
 
-source_group(CMake FILES ${PUBLIC_CORE_CMAKE_FILES})
 source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
 source_group(Event FILES ${PUBLIC_EVENT_FILES})
 source_group(Actions\\Colormap FILES ${PUBLIC_COLOR_MAP_ACTION_FILES})
@@ -1120,3 +1132,9 @@ source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
 source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
+
+# Make sure the /cmake and /script files are visible in the IDE but are not part of the build process
+set_source_files_properties(${HEADER_ONLY_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
+
+source_group(CMake FILES ${PUBLIC_CMAKE_FILES})
+source_group(Scripts FILES ${PUBLIC_SCRIPT_FILES})
