@@ -120,6 +120,20 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)
 
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
+# File compression: zlib
+CPMAddPackage(
+  NAME              ZLIB
+  GITHUB_REPOSITORY madler/zlib
+  GIT_TAG           v1.3.1
+  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON"
+)
+
+set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+# Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
+add_library(ZLIB::ZLIB ALIAS zlibstatic)
+set(ZLIB_LIBRARIES zlibstatic)
+
 # File compression: QuaZip
 CPMAddPackage(
   NAME              quazip
@@ -151,20 +165,6 @@ CPMAddPackage(
   EXCLUDE_FROM_ALL  YES
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
-
-# File compression: zlib
-CPMAddPackage(
-  NAME              ZLIB
-  GITHUB_REPOSITORY madler/zlib
-  GIT_TAG           v1.3.1
-  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON"
-)
-
-set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
-
-# Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
-add_library(ZLIB::ZLIB ALIAS zlibstatic)
-set(ZLIB_LIBRARIES zlibstatic)
 
 # -----------------------------------------------------------------------------
 # Source files
