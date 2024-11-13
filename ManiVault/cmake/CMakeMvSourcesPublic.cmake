@@ -3,6 +3,20 @@
 # -----------------------------------------------------------------------------
 # defines PUBLIC_SOURCES and PUBLIC_HEADERS
 
+
+set(PUBLIC_CORE_CMAKE_FILES
+    cmake/CMakeMvSourcesApplication.cmake
+    cmake/CMakeMvSourcesPublic.cmake
+    cmake/CMakeMvSourcesResources.cmake
+    cmake/CPM.cmake
+    cmake/MacOSXBundleInfo.cmake
+    cmake/mv_check_and_set_AVX.cmake
+    cmake/mv_install_dependencies_utils.cmake
+    cmake/mv_install_dependencies.cmake
+    cmake/MvCoreConfig.cmake
+    cmake/Utils.cmake
+)
+
 set(PUBLIC_CORE_INTERFACE_HEADERS
     src/CoreInterface.h
     src/AbstractManager.h
@@ -1065,6 +1079,7 @@ set(PRECOMPILE_HEADERS
 list(REMOVE_DUPLICATES PUBLIC_HEADERS)
 list(REMOVE_DUPLICATES PUBLIC_SOURCES)
 
+source_group(CMake FILES ${PUBLIC_CORE_CMAKE_FILES})
 source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
 source_group(Event FILES ${PUBLIC_EVENT_FILES})
 source_group(Actions\\Colormap FILES ${PUBLIC_COLOR_MAP_ACTION_FILES})

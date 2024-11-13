@@ -283,6 +283,37 @@ if(APPLE)
     
     # Find libraries relative to the executable in the macOS .app tree
     set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
+    
+    # To the best of my (TK) knowledge, using CMake generator expression to set
+    # MV_EXE XCODE_SCHEME_EXECUTABLE target properties does not work. For now, we
+    # set the default debug executable to debug /Debug/ManiVault Studio.app
+    #set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "/Volumes/1TB_SSD/TK/ManiVault/DevBundle/smalltest/install/Debug/ManiVault Studio.app")
+    #set_target_properties(${MV_EXE} PROPERTIES
+    #    XCODE_SCHEME_EXECUTABLE "/Volumes/1TB_SSD/TK/ManiVault/DevBundle/smalltest/install/Debug/ManiVault Studio.app/Contents/MacOS/ManiVault Studio"
+    #)
+    
+    #set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_WORKING_DIRECTORY "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app/Contents/MacOS")
+        
+    # MacOS document versioning adds command line arguments which prevent debugging, so turn it off
+    #set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING OFF)
+    
+    message(STATUS "${CMAKE_BINARY_DIR}/smalltest.xcodeproj/xcshareddata/xcschemes/MV_Application.xcscheme")
+    set(XCODE_SCHEME_FILE "${CMAKE_BINARY_DIR}/smalltest.xcodeproj/xcshareddata/xcschemes/MV_Application.xcscheme")
+    set(XCODE_DEBUG_EXECUTABLE "${MV_INSTALL_DIR}/debug/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
+    
+    # Define a custom command to run after CMake generation
+    add_custom_command(
+        OUTPUT ${XCODE_SCHEME_FILE}
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/core/ManiVault/scripts/fix_xcode_scheme.py ${XCODE_SCHEME_FILE} ${XCODE_DEBUG_EXECUTABLE}
+        COMMENT "Optimizing ManiVault application scheme."
+        VERBATIM
+    )
+
+    # Custom target to trigger this command after generation
+    add_custom_target(
+        UpdateXcodeScheme ALL
+        DEPENDS ${XCODE_SCHEME_FILE}
+    )
 
 endif()
 
