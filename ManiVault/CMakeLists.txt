@@ -489,11 +489,6 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
-    # Create symlink with slightly different name required on some linux distributions
-    if(UNIX)
-        include(CMakeQuaZipSymlink)
-        create_quazip_symlink()
-    endif()
 endif()
 
 # Install examples
