@@ -152,6 +152,20 @@ CPMAddPackage(
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
 
+# File compression: zlib
+CPMAddPackage(
+  NAME              ZLIB
+  GITHUB_REPOSITORY madler/zlib
+  GIT_TAG           v1.3.1
+  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON"
+)
+
+set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+# Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
+add_library(ZLIB::ZLIB ALIAS zlibstatic)
+set(ZLIB_LIBRARIES zlibstatic)
+
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
@@ -316,7 +330,7 @@ if(APPLE)
             if(NOT retval EQUAL 0)
         	    message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:QuaZip>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
+            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
             
@@ -486,7 +500,6 @@ if(NOT APPLE)
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
 endif()
@@ -513,6 +526,8 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
 )
