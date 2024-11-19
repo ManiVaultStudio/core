@@ -309,6 +309,11 @@ add_subdirectory(src/plugins/LoggingPlugin)
 add_subdirectory(src/plugins/TasksPlugin)
 add_subdirectory(src/plugins/SampleScopePlugin)
 
+set_target_properties(DataHierarchyPlugin DataPropertiesPlugin SharedParametersPlugin LoggingPlugin TasksPlugin SampleScopePlugin
+    PROPERTIES
+    FOLDER SystemPlugins
+)
+
 # Data plugins
 add_subdirectory(src/plugins/PointData)
 add_subdirectory(src/plugins/ColorData)
@@ -316,6 +321,10 @@ add_subdirectory(src/plugins/TextData)
 add_subdirectory(src/plugins/ClusterData)
 add_subdirectory(src/plugins/ImageData)
 
+set_target_properties(PointData ColorData TextData ClusterData ImageData
+    PROPERTIES
+    FOLDER DataPlugins
+)
 
 # -----------------------------------------------------------------------------
 # Installation
