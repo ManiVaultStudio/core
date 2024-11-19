@@ -286,6 +286,10 @@ if(APPLE)
 
 endif()
 
+set_target_properties(qt6advanceddocking QuaZip zlib zlibstatic
+    PROPERTIES
+    FOLDER CoreDependencies
+)
 
 # -----------------------------------------------------------------------------
 # Plugin projects
