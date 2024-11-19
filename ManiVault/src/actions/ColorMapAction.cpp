@@ -70,7 +70,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title, const Colo
 
     connect(&getCustomColorMapAction(), &ToggleAction::toggled, this, updateEditorActionReadOnly);
 
-    getEditor1DAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
+    //getEditor1DAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     getCustomColorMapGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
     getCustomColorMapGroupAction().addAction(&getCustomColorMapAction());
