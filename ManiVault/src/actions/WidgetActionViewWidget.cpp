@@ -108,13 +108,26 @@ void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
     if (!getAction()->mayConnect(WidgetAction::Gui))
         return;
 
-    if (actionMimeData->getAction()->getTypeString() != getAction()->getTypeString())
-        return;
+    auto candidates = actionMimeData->getAction()->getChildren(true);
 
-    if ((actionMimeData->getAction()->isConnected() && getAction()->isConnected()) && (actionMimeData->getAction()->getPublicAction() == getAction()->getPublicAction()))
-        return;
+    candidates << actionMimeData->getAction();
 
-    if (getAction()->isConnected() && (getAction()->getPublicAction() == actionMimeData->getAction()))
+    std::int32_t numberOfCandidateConnections = 0;
+
+    for (auto candidate : candidates) {
+        if (candidate->getTypeString() != getAction()->getTypeString())
+            continue;
+
+        if (candidate->isConnected() && getAction()->isConnected() && candidate->getPublicAction() == getAction()->getPublicAction())
+            continue;
+
+        if (getAction()->isConnected() && (getAction()->getPublicAction() == actionMimeData->getAction()))
+            continue;
+
+        numberOfCandidateConnections++;
+    }
+
+    if (numberOfCandidateConnections == 0)
         return;
 
     _cachedHighlighting = static_cast<std::int32_t>(getAction()->getHighlighting());
