@@ -38,6 +38,8 @@ WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
 
         _highlightActions << candidateAction;
     }
+    
+    qDebug() << "Highlighting" << _highlightActions.count();
 
     for (auto highlightAction : _highlightActions)
         highlightAction->highlight();
