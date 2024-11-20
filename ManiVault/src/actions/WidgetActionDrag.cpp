@@ -34,7 +34,7 @@ void WidgetActionDrag::start()
     if (!_dragAction)
         return;
 
-    _isDragging = true;
+    setIsDragging(true);
     {
         auto drag       = new QDrag(this);
         auto mimeData   = new WidgetActionMimeData(_dragAction);
@@ -44,7 +44,7 @@ void WidgetActionDrag::start()
 
         drag->exec();
     }
-    _isDragging = false;
+    QTimer::singleShot(100, [this]() { setIsDragging(false); });
 }
 
 void WidgetActionDrag::setIsDragging(bool dragging)

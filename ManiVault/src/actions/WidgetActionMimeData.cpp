@@ -7,9 +7,7 @@
 namespace mv::gui {
 
 WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
-    QMimeData(),
-    _action(action),
-    _highlightActions()
+    _action(action)
 {
     ActionsListModel    actionsListModel;      /** Actions list model */
     ActionsFilterModel  actionsFilterModel;    /** Filtered actions model */
