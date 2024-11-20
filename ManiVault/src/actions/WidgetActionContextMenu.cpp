@@ -86,7 +86,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
             actionsFilterModel.setSourceModel(&mv::actions().getActionsListModel());
             actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
-            actionsFilterModel.getTypeFilterAction().setString(firstAction->getTypeString());
+            actionsFilterModel.getTypeFilterAction().setStrings({ firstAction->getTypeString() });
 
             const auto numberOfRows = actionsFilterModel.rowCount();
 

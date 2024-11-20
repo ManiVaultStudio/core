@@ -15,6 +15,12 @@ WidgetActionHighlightWidget::WidgetActionHighlightWidget(QWidget* parent, Widget
     setStyleSheet(QString("background-color: %1;").arg(palette().highlight().color().name()));
 
     setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    auto layout = new QVBoxLayout();
+
+    layout->addWidget(&_descriptionLabel);
+
+    setLayout(layout);
 }
 
 WidgetAction* WidgetActionHighlightWidget::getAction()
@@ -24,8 +30,11 @@ WidgetAction* WidgetActionHighlightWidget::getAction()
 
 void WidgetActionHighlightWidget::setAction(WidgetAction* action)
 {
-    if (_action != nullptr)
-        disconnect(_action, &WidgetAction::highlightingChanged, this, nullptr);
+    if (_action != nullptr) {
+        disconnect(_action, &WidgetAction::highlightVisibilityChanged, this, nullptr);
+    	disconnect(_action, &WidgetAction::highlightModeChanged, this, nullptr);
+    	disconnect(_action, &WidgetAction::highlightDescriptionChanged, this, nullptr);
+    }
 
     _action = action;
 
@@ -35,38 +44,72 @@ void WidgetActionHighlightWidget::setAction(WidgetAction* action)
     if (_action->isPublic())
         return;
 
-    connect(_action, &WidgetAction::highlightingChanged, this, &WidgetActionHighlightWidget::highlightingChanged);
+    connect(_action, &WidgetAction::highlightVisibilityChanged, this, &WidgetActionHighlightWidget::highlightVisibilityChanged);
+    connect(_action, &WidgetAction::highlightModeChanged, this, &WidgetActionHighlightWidget::highlightModeChanged);
+    connect(_action, &WidgetAction::highlightDescriptionChanged, this, &WidgetActionHighlightWidget::highlightDescriptionChanged);
 
-    highlightingChanged(_action->getHighlighting());
+    highlightModeChanged(_action->getHighlightMode());
 }
 
-void WidgetActionHighlightWidget::highlightingChanged(const WidgetAction::HighlightOption& highlighting)
+QString WidgetActionHighlightWidget::getDescription() const
 {
-    switch (highlighting)
-    {
-        case WidgetAction::HighlightOption::None:
+    return _description;
+}
+
+void WidgetActionHighlightWidget::setHighlightDescription(const QString& description)
+{
+    if (description == _description)
+        return;
+
+    _description = description;
+    
+    _descriptionLabel.setText(_description);
+}
+
+void WidgetActionHighlightWidget::highlightVisibilityChanged(bool highlightVisible)
+{
+    updateHighlight();
+}
+
+void WidgetActionHighlightWidget::highlightModeChanged(const WidgetAction::HighlightMode& highlightMode)
+{
+    updateHighlight();
+}
+
+void WidgetActionHighlightWidget::highlightDescriptionChanged(const QString& highlightDescription)
+{
+    _descriptionLabel.setText(highlightDescription);
+}
+
+void WidgetActionHighlightWidget::updateHighlight()
+{
+    if (_action->isHighlightVisible()) {
+        switch (_action->getHighlightMode())
         {
-            _widgetFader.setOpacity(0.0f, 500);
+	        case WidgetAction::HighlightMode::Light:
+	        {
+	            _widgetFader.setOpacity(0.2f, 500);
 
-            break;
+	            break;
+	        }
+
+	        case WidgetAction::HighlightMode::Moderate:
+	        {
+	            _widgetFader.setOpacity(0.5f, 200);
+
+	            break;
+	        }
+
+	        case WidgetAction::HighlightMode::Strong:
+	        {
+	            _widgetFader.setOpacity(0.9f, 200);
+
+	            break;
+	        }
         }
-
-        case WidgetAction::HighlightOption::Moderate:
-        {
-            _widgetFader.setOpacity(0.25f, 200);
-            
-            break;
-        }
-
-        case WidgetAction::HighlightOption::Strong:
-        {
-            _widgetFader.setOpacity(0.6f, 200);
-
-            break;
-        }
-
-        default:
-            break;
+    }
+    else {
+        _widgetFader.setOpacity(0.0f, 500);
     }
 }
 

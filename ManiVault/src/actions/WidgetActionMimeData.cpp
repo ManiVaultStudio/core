@@ -4,22 +4,38 @@
 
 #include "WidgetActionMimeData.h"
 
+#include <set>
+
 namespace mv::gui {
 
 WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
-    QMimeData(),
-    _action(action),
-    _highlightActions()
+    _action(action)
 {
-    ActionsListModel    actionsListModel;      /** Actions list model */
-    ActionsFilterModel  actionsFilterModel;    /** Filtered actions model */
+    ActionsFilterModel  actionsFilterModel;
 
-    actionsFilterModel.setSourceModel(&actionsListModel);
+    actionsFilterModel.setSourceModel(& mv::actions().getActionsListModel());
     actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Private" });
-    actionsFilterModel.getTypeFilterAction().setString(getAction()->getTypeString());
+
+    QStringList actionTypes { getAction()->getTypeString() };
+
+    for (const auto& child : getAction()->getChildren(true))
+        actionTypes << child->getTypeString();
+
+    actionTypes.removeDuplicates();
+
+    qDebug() << actionTypes;
+
+    actionsFilterModel.getTypeFilterAction().setStrings(actionTypes);
 
     for (int rowIndex = 0; rowIndex < actionsFilterModel.rowCount(); ++rowIndex) {
         auto candidateAction = actionsFilterModel.getAction(rowIndex);
+
+        const auto connections = AbstractActionsManager::getCandidateConnectionsForDescendants(getAction(), candidateAction);
+
+        //qDebug() << candidateAction->text() << connections.size();
+
+        //if (connections.empty())
+        //    continue;
 
         if (candidateAction == getAction())
             continue;
@@ -30,12 +46,23 @@ WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
         if (!candidateAction->mayConnect(WidgetAction::Gui))
             continue;
 
-        if (candidateAction->isHighlighted())
+        if (candidateAction->isHighlightVisible())
             candidateAction->unHighlight();
 
-        if (candidateAction->isConnected() && (candidateAction->getPublicAction() == getAction()))
+        if (getAction()->getTypeString() != candidateAction->getTypeString()) {
+            if (connections.empty())
+                continue;
+
+        	candidateAction->setHighlightMode(WidgetAction::HighlightMode::Light);
+        	candidateAction->setHighlightDescription(QString("%1 indirect connection(1)").arg(QString::number(connections.size())));
+        } else {
+            candidateAction->setHighlightMode(WidgetAction::HighlightMode::Moderate);
+        }
+
+    	if (candidateAction->isConnected() && (candidateAction->getPublicAction() == getAction()))
             continue;
 
+        //candidateAction->highlight();
         _highlightActions << candidateAction;
     }
     

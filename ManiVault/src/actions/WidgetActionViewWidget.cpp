@@ -27,7 +27,7 @@ WidgetActionViewWidget::WidgetActionViewWidget(QWidget* parent, WidgetAction* ac
     _widgetFlags(widgetFlags),
     _highlightWidget(new WidgetActionHighlightWidget(this, action)),
     _badgeOverlayWidget(nullptr),
-    _cachedHighlighting(0)
+    _cachedHighlightMode(0)
 {
     setAcceptDrops(true);
 }
@@ -130,16 +130,16 @@ void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
     if (numberOfCandidateConnections == 0)
         return;
 
-    _cachedHighlighting = static_cast<std::int32_t>(getAction()->getHighlighting());
+    _cachedHighlightMode = static_cast<std::int32_t>(getAction()->getHighlightMode());
 
-    getAction()->setHighlighting(WidgetAction::HighlightOption::Strong);
+    getAction()->setHighlightMode(WidgetAction::HighlightMode::Strong);
 
     dragEnterEvent->acceptProposedAction();
 }
 
 void WidgetActionViewWidget::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
 {
-    getAction()->setHighlighting(static_cast<WidgetAction::HighlightOption>(_cachedHighlighting));
+    getAction()->setHighlightMode(static_cast<WidgetAction::HighlightMode>(_cachedHighlightMode));
 }
 
 void WidgetActionViewWidget::dropEvent(QDropEvent* dropEvent)

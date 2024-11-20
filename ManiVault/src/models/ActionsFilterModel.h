@@ -69,8 +69,8 @@ private:
 
 public: // Action getters
 
-    gui::StringAction& getTypeFilterAction() { return _typeFilterAction; }
-    gui::StringAction& getTypeFilterHumanReadableAction() { return _typeFilterHumanReadableAction; }
+    gui::StringsAction& getTypeFilterAction() { return _typeFilterAction; }
+    gui::StringsAction& getTypeFilterHumanReadableAction() { return _typeFilterHumanReadableAction; }
     gui::OptionsAction& getScopeFilterAction() { return _scopeFilterAction; }
     gui::OptionsAction& getFilterForceHiddenAction() { return _filterForceHiddenAction; }
     gui::OptionsAction& getFilterForceDisabledAction() { return _filterForceDisabledAction; }
@@ -81,8 +81,8 @@ public: // Action getters
     gui::TriggerAction& getRemoveFiltersAction() { return _removeFiltersAction; }
 
 private:
-    gui::StringAction   _typeFilterAction;                  /** Action for filtering by action type */
-    gui::StringAction   _typeFilterHumanReadableAction;     /** Action for filtering by human-readable action type */
+    gui::StringsAction  _typeFilterAction;                  /** Action for filtering by action type */
+    gui::StringsAction  _typeFilterHumanReadableAction;     /** Action for filtering by human-readable action type */
     QCompleter          _typeCompleter;                     /** Completer for human-readable action type filter */
     gui::OptionsAction  _scopeFilterAction;                 /** Action for filtering based on action scope */
     gui::OptionsAction  _filterForceHiddenAction;           /** Filter actions based on their force hidden state */

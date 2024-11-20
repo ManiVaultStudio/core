@@ -101,7 +101,7 @@ private:
     std::int32_t                                    _widgetFlags;           /** Widget creation flags */
     WidgetActionHighlightWidget*                    _highlightWidget;       /** Pointer to highlight widget */
     std::unique_ptr<WidgetActionBadgeOverlayWidget> _badgeOverlayWidget;    /** Pointer to badge overlay widget */
-    std::int32_t                                    _cachedHighlighting;    /** Cached highlighting */
+    std::int32_t                                    _cachedHighlightMode;   /** Cached highlighting */
 };
 
 }

@@ -50,15 +50,10 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _cachedConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
     _scope(Scope::Private),
     _publicAction(nullptr),
-    _connectedActions(),
-    _settingsPrefix(),
-    _highlighting(HighlightOption::None),
-    _popupSizeHint(),
-    _overrideSizeHint(),
+    _highlightVisible(false),
+    _highlightMode(HighlightMode::Light),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
-    _location(),
     _namedIcon(""),
-    _widgetConfigurationFunction(),
     _badge(this)
 {
     Q_ASSERT(!title.isEmpty());
@@ -75,7 +70,6 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
         if (projects().hasProject())
             setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
     }
-
 }
 
 WidgetAction::~WidgetAction()
@@ -230,39 +224,59 @@ void WidgetAction::setDefaultWidgetFlag(const std::int32_t& widgetFlag, bool uns
         _defaultWidgetFlags |= static_cast<std::int32_t>(widgetFlag);
 }
 
-WidgetAction::HighlightOption WidgetAction::getHighlighting() const
+WidgetAction::HighlightMode WidgetAction::getHighlightMode() const
 {
-    return _highlighting;
+    return _highlightMode;
 }
 
-bool WidgetAction::isHighlighted() const
+bool WidgetAction::isHighlightVisible() const
 {
-    return (_highlighting == HighlightOption::Moderate) || (_highlighting == HighlightOption::Strong);
+    return _highlightVisible;
 }
 
-void WidgetAction::setHighlighting(const HighlightOption& highlighting)
+void WidgetAction::setHighlightMode(const HighlightMode& highlightMode)
 {
-    if (highlighting == _highlighting)
+    if (highlightMode == _highlightMode)
         return;
 
-    _highlighting = highlighting;
+    _highlightMode = highlightMode;
 
-    emit highlightingChanged(_highlighting);
+    emit highlightModeChanged(_highlightMode);
 }
 
-void WidgetAction::setHighlighted(bool highlighted)
+void WidgetAction::setHighlightVisible(bool highlightVisible)
 {
-    setHighlighting(highlighted ? HighlightOption::Moderate : HighlightOption::None);
+    if (highlightVisible == _highlightVisible)
+        return;
+
+    _highlightVisible = highlightVisible;
+
+    emit highlightVisibilityChanged(_highlightVisible);
 }
 
 void WidgetAction::highlight()
 {
-    setHighlighted(true);
+    setHighlightVisible(true);
 }
 
 void WidgetAction::unHighlight()
 {
-    setHighlighted(false);
+    setHighlightVisible(false);
+}
+
+QString WidgetAction::getHighlightDescription() const
+{
+    return _highlightDescription;
+}
+
+void WidgetAction::setHighlightDescription(const QString& highlightDescription)
+{
+    if (highlightDescription == _highlightDescription)
+        return;
+
+    _highlightDescription = highlightDescription;
+
+    emit highlightDescriptionChanged(_highlightDescription);
 }
 
 WidgetAction::Scope WidgetAction::getScope() const

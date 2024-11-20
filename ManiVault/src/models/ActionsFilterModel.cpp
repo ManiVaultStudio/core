@@ -29,23 +29,23 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 {
     setRecursiveFilteringEnabled(true);
 
-    _typeFilterHumanReadableAction.setClearable(true);
-    _typeFilterHumanReadableAction.setCompleter(&_typeCompleter);
+    //_typeFilterHumanReadableAction.setClearable(true);
+    //_typeFilterHumanReadableAction.setCompleter(&_typeCompleter);
 
     _scopeFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
-    connect(&_typeFilterAction, &StringAction::stringChanged, this, &ActionsFilterModel::invalidate);
-    connect(&_typeFilterHumanReadableAction, &StringAction::stringChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_typeFilterAction, &StringsAction::stringsChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_typeFilterHumanReadableAction, &StringsAction::stringsChanged, this, &ActionsFilterModel::invalidate);
     connect(&_scopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
     connect(&_publicRootOnlyAction, &ToggleAction::toggled, this, &ActionsFilterModel::invalidate);
 
-    const auto updateTypeFilterActionCompleter = [this]() -> void {
-        _typeFilterHumanReadableAction.getCompleter()->setModel(new QStringListModel(actions().getActionTypesHumanFriendly()));
-    };
+    //const auto updateTypeFilterActionCompleter = [this]() -> void {
+    //    _typeFilterHumanReadableAction.getCompleter()->setModel(new QStringListModel(actions().getActionTypesHumanFriendly()));
+    //};
 
-    updateTypeFilterActionCompleter();
+    //updateTypeFilterActionCompleter();
 
-    connect(&actions(), &AbstractActionsManager::actionTypesHumanFriendlyChanged, this, updateTypeFilterActionCompleter);
+    //connect(&actions(), &AbstractActionsManager::actionTypesHumanFriendlyChanged, this, updateTypeFilterActionCompleter);
 
     //_filterInternalUseAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     //_filterForceHiddenAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
@@ -85,21 +85,21 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
             return false;
     }
     
-    const auto typeFilter = _typeFilterAction.getString();
+    const auto typeFilter = _typeFilterAction.getStrings();
 
     if (!typeFilter.isEmpty()) {
-        const auto type = getSourceData(index, AbstractActionsModel::Column::Type, Qt::EditRole).toString();
+        const auto actionType = getSourceData(index, AbstractActionsModel::Column::Type, Qt::EditRole).toString();
 
-        if (type != typeFilter)
+        if (!typeFilter.contains(actionType))
             return false;
     }
 
-    const auto typeFilterHumanReadable = _typeFilterHumanReadableAction.getString();
+    const auto typeFilterHumanReadable = _typeFilterHumanReadableAction.getStrings();
 
     if (!typeFilterHumanReadable.isEmpty()) {
-        const auto type = getSourceData(index, AbstractActionsModel::Column::Type, Qt::DisplayRole).toString();
+        const auto actionTypeHumanReadable = getSourceData(index, AbstractActionsModel::Column::Type, Qt::DisplayRole).toString();
 
-        if (type != typeFilter)
+        if (!typeFilterHumanReadable.contains(actionTypeHumanReadable))
             return false;
     }
 

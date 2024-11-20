@@ -247,7 +247,7 @@ void ActionsWidget::highlightActions(const QModelIndexList& selectedRows, bool h
 void ActionsWidget::highlightActions(const PersistentModelIndices& highlightModelIndices, bool highlight)
 {
     for (const auto& highlightedAction : _highlightedActions)
-        highlightedAction->setHighlighted(false);
+        highlightedAction->setHighlightVisible(false);
 
     _highlightedActions.clear();
 
@@ -259,13 +259,13 @@ void ActionsWidget::highlightActions(const PersistentModelIndices& highlightMode
 
         _highlightedActions << action;
 
-        action->setHighlighted(highlight);
+        action->setHighlightVisible(highlight);
 
         if (!action->isPublic())
             continue;
 
         for (auto connectedAction : action->getConnectedActions()) {
-            connectedAction->setHighlighted(highlight);
+            connectedAction->setHighlightVisible(highlight);
 
             _highlightedActions << connectedAction;
         }

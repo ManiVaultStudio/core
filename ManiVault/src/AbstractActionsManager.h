@@ -337,6 +337,28 @@ public: // Linking
         }
     }
 
+    /**
+     * Get a list of candidate connections between descendants of \p widgetActionLhs and \p widgetActionRhs
+     * @param widgetActionLhs Pointer to widget action
+     * @param widgetActionRhs Pointer to widget action
+     * @return List of candidate connections
+     */
+    static std::vector<std::pair<QWidgetAction*, QWidgetAction*>> getCandidateConnectionsForDescendants(const gui::WidgetAction* widgetActionLhs, const gui::WidgetAction* widgetActionRhs) {
+        const auto widgetActionDescendantsLhs = widgetActionLhs->getChildren(true);
+        const auto widgetActionDescendantsRhs = widgetActionRhs->getChildren(true);
+
+        std::vector<std::pair<QWidgetAction*, QWidgetAction*>> candidateConnections;
+
+        for (const auto widgetActionDescendantLhs : widgetActionDescendantsLhs) {
+            for (const auto widgetActionDescendantRhs : widgetActionDescendantsRhs) {
+                if (widgetActionDescendantLhs->getTypeString() == widgetActionDescendantRhs->getTypeString())
+                    candidateConnections.push_back({ widgetActionDescendantLhs, widgetActionDescendantRhs });
+            }
+        }
+
+        return candidateConnections;
+    }
+
 protected:
 
     /**

@@ -9,6 +9,8 @@
 
 #include "WidgetAction.h"
 
+#include <QLabel>
+
 namespace mv::gui {
 
 /**
@@ -43,17 +45,46 @@ public:
      */
     void setAction(WidgetAction* action);
 
+    /**
+     * Get the highlight description
+     * @return Highlight description string
+     */
+    QString getDescription() const ;
+
+    /**
+     * Set the description string to \p description
+     * @param description Highlight description string
+     */
+    void setHighlightDescription(const QString& description);
+
 private:
 
     /**
-     * Invoked when the action highlighting state changes (update the visual representation of the highlight)
-     * @param highlighting Action highlighting state
+     * Invoked when the action highlight visibility changes (update the visual representation of the highlight)
+     * @param highlightVisible Action highlighting visibility
      */
-    void highlightingChanged(const WidgetAction::HighlightOption& highlighting);
+    void highlightVisibilityChanged(bool highlightVisible);
+
+    /**
+     * Invoked when the action highlight mode changes (update the visual representation of the highlight)
+     * @param highlightMode Action highlight mode
+     */
+    void highlightModeChanged(const WidgetAction::HighlightMode& highlightMode);
+
+    /**
+     * Invoked when the action highlight description changes (update the text of the highlight label)
+     * @param highlightDescription Action highlight description
+     */
+    void highlightDescriptionChanged(const QString& highlightDescription);
+
+    /** Updates the highlight representation */
+    void updateHighlight();
 
 private:
-    WidgetAction*           _action;        /** Pointer to widget action to highlight */
-    mv::util::WidgetFader   _widgetFader;   /** Widget fader for animating the widget opacity */
+    WidgetAction*           _action;            /** Pointer to widget action to highlight */
+    mv::util::WidgetFader   _widgetFader;       /** Widget fader for animating the widget opacity */
+    QString                 _description;       /** Description related to the highlight */
+    QLabel                  _descriptionLabel;  /** Description label */
 };
 
 }

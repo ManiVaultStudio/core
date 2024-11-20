@@ -60,9 +60,9 @@ public:
     /** Map scope enum to scope name */
     static QMap<Scope, QString> scopeNames;
 
-    /** Describes the highlight options */
-    enum class HighlightOption {
-        None,       /** Action is not highlighted */
+    /** Describes the highlight modes */
+    enum class HighlightMode {
+        Light,      /** Action is slightly highlighted */
         Moderate,   /** Action is moderately highlighted */
         Strong      /** Action is strongly highlighted */
     };
@@ -121,7 +121,7 @@ public:
     WidgetAction(QObject* parent, const QString& title);
 
     /** Destructor */
-    ~WidgetAction();
+    ~WidgetAction() override;
 
 public: // Hierarchy queries
 
@@ -168,6 +168,46 @@ public: // Hierarchy queries
         }
 
         return ancestors;
+    }
+
+    /**
+     * Establish whether the widget action has an ancestor of \p WidgetActionType
+     * @return Boolean determining whether the widget action has an ancestor of the specified type
+     */
+    template<typename WidgetActionType = WidgetAction>
+    bool hasAncestorOfType() const {
+        auto currentParent = dynamic_cast<WidgetActionType*>(parent());
+
+        std::int32_t numberOfAncestorsOfType = 0;
+
+        while (currentParent) {
+            if (dynamic_cast<WidgetActionType*>(currentParent))
+                ++numberOfAncestorsOfType;
+
+            currentParent = currentParent->parent();
+        }
+
+        return numberOfAncestorsOfType > 0;
+    }
+
+    /**
+     * Establish whether the widget action has an ancestor of \p WidgetActionType
+     * @param typeString Widget action type string to search for
+     * @return Boolean determining whether the widget action has an ancestor of the specified type
+     */
+    bool hasAncestorOfType(const QString& typeString) const {
+        auto currentParent = parent();
+
+        std::int32_t numberOfAncestorsOfType = 0;
+
+        while (currentParent) {
+            if (typeString == getTypeString(currentParent))
+                ++numberOfAncestorsOfType;
+
+            currentParent = currentParent->parent();
+        }
+
+        return numberOfAncestorsOfType > 0;
     }
 
     /**
@@ -288,7 +328,7 @@ private: // Location
      * Compute the location of the action and update the cached location if it changed
      * @param recursive Whether to also update child actions recursively
      */
-    virtual void updateLocation(bool recursive = true) final;
+    void updateLocation(bool recursive = true);
 
 public:
 
@@ -317,13 +357,13 @@ public:
      * Establish whether this action is positioned at the top of the hierarchy
      * @return Boolean determining whether this action is positioned at the top of the hierarchy
      */
-    virtual bool isRoot() const final;
+    bool isRoot() const;
 
     /**
      * Establish whether this action is positioned at the bottom of the hierarchy
      * @return Boolean determining whether this action is positioned at the bottom of the hierarchy
      */
-    virtual bool isLeaf() const final;
+    bool isLeaf() const;
 
 public: // Widgets
 
@@ -332,7 +372,7 @@ public: // Widgets
      * @param parent Parent widget
      * @return Pointer to created widget
      */
-    virtual QWidget* createWidget(QWidget* parent) override final;
+    QWidget* createWidget(QWidget* parent) override;
 
     /**
      * Create widget with pointer to \p parent widget and \p widgetFlags
@@ -340,7 +380,7 @@ public: // Widgets
      * @param widgetFlags Widget flags
      * @return Pointer to created widget
      */
-    virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags) final;
+    QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
     /**
      * Create widget with pointer to \p parent widget, \p widgetFlags and \p widgetConfigurationFunction
@@ -349,7 +389,7 @@ public: // Widgets
      * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to created widget
      */
-    virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
+    QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction);
 
     /**
      * Create widget with pointer to \p parent widget and \p widgetConfigurationFunction
@@ -357,7 +397,7 @@ public: // Widgets
      * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to created widget
      */
-    virtual QWidget* createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
+    QWidget* createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction);
 
     /**
      * Create collapsed widget
@@ -366,7 +406,7 @@ public: // Widgets
      * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to collapsed widget
      */
-    virtual QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags = 0) const final;
+    QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags = 0) const;
 
     /**
      * Create collapsed widget
@@ -375,7 +415,7 @@ public: // Widgets
      * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to collapsed widget
      */
-    virtual QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) const final;
+    QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) const;
 
     /**
      * Create label widget
@@ -383,7 +423,7 @@ public: // Widgets
      * @param widgetFlags Label widget configuration flags
      * @return Pointer to widget
      */
-    virtual QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00001) const final;
+    QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00001) const;
 
     /**
      * Get the context menu for the action
@@ -393,25 +433,25 @@ public: // Widgets
     virtual QMenu* getContextMenu(QWidget* parent = nullptr);
 
     /** Get the sort index */
-    virtual std::int32_t getSortIndex() const final;
+    std::int32_t getSortIndex() const;
 
     /**
      * Set the sort index
      * @param sortIndex Sorting index
      */
-    virtual void setSortIndex(const std::int32_t& sortIndex) final;
+	void setSortIndex(const std::int32_t& sortIndex);
 
     /**
      * Get stretch
      * @return The stretch factor
      */
-   virtual std::int32_t getStretch() const final;
+   std::int32_t getStretch() const;
 
     /**
      * Set stretch to \p stretch
      * @param stretch Stretch factor
      */
-    virtual void setStretch(const std::int32_t& stretch) final;
+    void setStretch(const std::int32_t& stretch);
 
     /**
      * Get widget configuration function
@@ -438,19 +478,19 @@ public: // Visibility
      * Get force hidden
      * @return Boolean determining whether the widget action should be forcibly hidden (regardless of the visibility setting in the base QWidgetAction class)
      */
-    virtual bool getForceHidden() const final;
+    bool getForceHidden() const;
 
     /**
      * Set force hidden to \p forceHidden
      * @param forceHidden Boolean determining whether the widget action should be forcibly hidden (regardless of the enabled visibility in the base QWidgetAction class)
      */
-    virtual void setForceHidden(bool forceHidden) final;
+    void setForceHidden(bool forceHidden);
 
     /**
      * Re-implement the isVisible() getter from the base QWidgetAction class to support the force hidden functionality
      * @return Boolean determining whether the widget action is visible or not
      */
-    virtual bool isVisible() const final;
+    bool isVisible() const;
 
 public: // Disabled
 
@@ -458,19 +498,19 @@ public: // Disabled
      * Get force disabled
      * @return Boolean determining whether the widget action should be forcibly disabled (regardless of the enabled setting in the base QWidgetAction class)
      */
-    virtual bool getForceDisabled() const final;
+    bool getForceDisabled() const;
 
     /**
      * Set force disabled to \p forceDisabled
      * @param forceDisabled Boolean determining whether the widget action should be forcibly disabled (regardless of the enabled setting in the base QWidgetAction class)
      */
-    virtual void setForceDisabled(bool forceDisabled) final;
+    void setForceDisabled(bool forceDisabled);
 
     /**
      * Re-implement the isEnabled() getter from the base QWidgetAction class to support the force disabled functionality
      * @return Boolean determining whether the widget action is enabled or not
      */
-    virtual bool isEnabled() const final;
+    bool isEnabled() const;
 
 public: // Text
 
@@ -483,52 +523,64 @@ public: // Text
 public: // Widget flags
 
     /** Gets the default widget flags */
-    virtual std::int32_t getDefaultWidgetFlags() const final;
+    std::int32_t getDefaultWidgetFlags() const;
 
     /**
      * Set the widget flags
      * @param widgetFlags Widget flags
      */
-    virtual void setDefaultWidgetFlags(const std::int32_t& widgetFlags) final;
+    void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
     /**
      * Set a single widget flag on/off
      * @param widgetFlag Widget flag to set on/off
      * @param unset Whether to unset the default widget flag
      */
-    virtual void setDefaultWidgetFlag(const std::int32_t& widgetFlag, bool unset = false) final;
+    void setDefaultWidgetFlag(const std::int32_t& widgetFlag, bool unset = false);
 
 public: // Highlighting
 
     /**
-     * Get highlighting
-     * @return Highlight option
+     * Get highlight mode
+     * @return Highlight mode
      */
-    virtual HighlightOption getHighlighting() const final;
+    HighlightMode getHighlightMode() const;
 
     /**
      * Determine whether the action is in a highlighted state or not
      * @return Boolean determining whether the action is in a highlighted state or not
      */
-    virtual bool isHighlighted() const final;
+    bool isHighlightVisible() const;
 
     /**
-     * Set highlighting to \p highlighting
-     * @param highlighting Highlighting state
+     * Set highlight mode to \p highlightMode
+     * @param highlightMode Highlight mode
      */
-    virtual void setHighlighting(const HighlightOption& highlighting) final;
+    void setHighlightMode(const HighlightMode& highlightMode);
 
     /**
-     * Set highlighted to \p highlighted
-     * @param highlighted Boolean determining whether the action is in a normal highlighted state or not
+     * Set highlight visibility to \p highlightVisible
+     * @param highlightVisible Boolean determining whether the action is in a highlighted state or not
      */
-    virtual void setHighlighted(bool highlighted) final;
+    void setHighlightVisible(bool highlightVisible);
 
     /** Convenience method to highlight the action */
-    virtual void highlight() final;
+    void highlight();
 
     /** Convenience method to un-highlight the action */
-    virtual void unHighlight() final;
+    void unHighlight();
+
+    /**
+     * Get highlight description
+     * @return Highlight description
+     */
+    QString getHighlightDescription() const;
+
+    /**
+     * Set highlight description to \p highlightDescription
+     * @param highlightDescription Highlight description
+     */
+    void setHighlightDescription(const QString& highlightDescription);
 
 public: // Scope
 
@@ -938,10 +990,22 @@ signals:
     void forceDisabledChanged(bool forceDisabled);
 
     /**
-     * Signals that the highlighting options changed to \p highlightOption
-     * @param highlightOption Current highlight option
+     * Signals that the highlight visibility changed to \p highlightVisible
+     * @param highlightVisible Boolean determining whether the highlight is visible
      */
-    void highlightingChanged(const HighlightOption& highlightOption);
+    void highlightVisibilityChanged(bool highlightVisible);
+
+    /**
+     * Signals that the highlight mode changed to \p highlightMode
+     * @param highlightMode Current highlight mode
+     */
+    void highlightModeChanged(const HighlightMode& highlightMode);
+
+    /**
+     * Signals that the highlight description changed to \p highlightDescription
+     * @param highlightDescription Current highlight description
+     */
+    void highlightDescriptionChanged(const QString& highlightDescription);
 
     /**
      * Signals that the published state changed
@@ -1022,7 +1086,9 @@ private:
     QPointer<WidgetAction>          _publicAction;                  /** Public action to which this action is connected (nullptr if not connected) */
     QVector<WidgetAction*>          _connectedActions;              /** Pointers to widget actions that are connected to this action */
     QString                         _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
-    HighlightOption                 _highlighting;                  /** Highlighting state */
+    bool                            _highlightVisible;              /** Whether the action is highlighted in actions */
+	HighlightMode                   _highlightMode;                 /** Highlight mode */
+    QString                         _highlightDescription;          /** Highlight description */
     QSize                           _popupSizeHint;                 /** Size hint of the popup */
     QSize                           _overrideSizeHint;              /** Override size hint (use with caution) */
     std::int32_t                    _configuration;                 /** Configuration flags */
