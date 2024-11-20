@@ -101,6 +101,12 @@ public:
 
     /** Get the GUI name of the dataset */
     QString getGuiName() const;
+    
+    /**
+     * Set gui name to \p guiName
+     * @param guiName GUI name
+     */
+    void setGuiName(const QString& guiName);
 
     //void setText(const QString& text);
 
