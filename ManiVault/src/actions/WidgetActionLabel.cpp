@@ -75,7 +75,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (!getAction()->mayConnect(WidgetAction::Gui))
                         break;
 
-                    getAction()->startDrag();
+                    getAction()->getDrag().start();
 
                     break;
                 }
