@@ -17,9 +17,7 @@
 #include <QMenu>
 #include <QJsonArray>
 #include <QDrag>
-#include <QDialog>
 #include <QDialogButtonBox>
-#include <QEventLoop>
 
 #ifdef _DEBUG
     //#define WIDGET_ACTION_VERBOSE
@@ -34,13 +32,12 @@ bool isInPopupMode(QWidget* parent) {
 }
 
 QMap<WidgetAction::Scope, QString> WidgetAction::scopeNames {
-    { WidgetAction::Scope::Private, "Private" },
-    { WidgetAction::Scope::Public, "Public" }
+    { Scope::Private, "Private" },
+    { Scope::Public, "Public" }
 };
 
 WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     QWidgetAction(parent),
-    util::Serializable(),
     _defaultWidgetFlags(),
     _sortIndex(-1),
     _stretch(-1),
@@ -50,16 +47,11 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _cachedConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
     _scope(Scope::Private),
     _publicAction(nullptr),
-    _connectedActions(),
-    _settingsPrefix(),
     _highlighting(HighlightOption::None),
-    _popupSizeHint(),
-    _overrideSizeHint(),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
-    _location(),
     _namedIcon(""),
-    _widgetConfigurationFunction(),
-    _badge(this)
+    _badge(this),
+    _drag(this)
 {
     Q_ASSERT(!title.isEmpty());
 
@@ -581,20 +573,6 @@ void WidgetAction::restoreConnectionPermissions(bool recursive /*= false*/)
             childAction->restoreConnectionPermissions(recursive);
 }
 
-void WidgetAction::startDrag()
-{
-    if (!mayConnect(WidgetAction::Gui))
-        return;
-
-    auto drag       = new QDrag(this);
-    auto mimeData   = new WidgetActionMimeData(this);
-
-    drag->setMimeData(mimeData);
-    drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
-
-    drag->exec();
-}
-
 void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const bool& load /*= true*/)
 {
     _settingsPrefix = settingsPrefix;
@@ -962,6 +940,11 @@ void WidgetAction::updateCustomStyle()
 WidgetActionBadge& WidgetAction::getBadge()
 {
     return _badge;
+}
+
+WidgetActionDrag& WidgetAction::getDrag()
+{
+    return _drag;
 }
 
 void WidgetAction::setOverrideSizeHint(const QSize& sizeHint)
