@@ -388,6 +388,11 @@ QString DatasetImpl::getGuiName() const
     return text();
 }
 
+void DatasetImpl::setGuiName(const QString& guiName)
+{
+    setText(guiName);
+}
+
 //void DatasetImpl::setText(const QString& text)
 //{
 //    WidgetAction::setText(text);
