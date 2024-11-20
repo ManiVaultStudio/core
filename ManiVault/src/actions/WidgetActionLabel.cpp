@@ -19,10 +19,8 @@ namespace mv::gui {
 WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= ColonAfterName*/) :
     WidgetActionViewWidget(parent, action),
     _flags(flags),
-    _nameLabel(),
     _elide(false),
-    _drag(nullptr),
-    _lastMousePressPosition()
+    _drag(nullptr)
 {
     setAction(action);
     setAcceptDrops(true);
@@ -63,7 +61,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
             if (dynamic_cast<QWidget*>(target) != &_nameLabel)
                 break;
 
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
+            auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
             switch (mouseEvent->button())
             {
@@ -75,7 +73,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (!getAction()->mayConnect(WidgetAction::Gui))
                         break;
 
-                    getAction()->startDrag();
+					getAction()->getDrag().start();
 
                     break;
                 }
@@ -99,7 +97,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (contextMenu->actions().isEmpty())
                         return QWidget::eventFilter(target, event);
 
-                    contextMenu->exec(cursor().pos());
+                    contextMenu->exec(QCursor::pos());
 
                     break;
                 }

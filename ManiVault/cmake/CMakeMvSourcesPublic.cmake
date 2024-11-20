@@ -324,6 +324,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionMimeData.h
     src/actions/WidgetActionHighlightWidget.h
     src/actions/WidgetActionBadge.h
+    src/actions/WidgetActionDrag.h
     src/actions/TasksTreeAction.h
     src/actions/TasksListAction.h
     src/actions/SplashScreenAction.h
@@ -356,6 +357,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionMimeData.cpp
     src/actions/WidgetActionHighlightWidget.cpp
     src/actions/WidgetActionBadge.cpp
+    src/actions/WidgetActionDrag.cpp
     src/actions/TasksTreeAction.cpp
     src/actions/TasksListAction.cpp
     src/actions/SplashScreenAction.cpp
