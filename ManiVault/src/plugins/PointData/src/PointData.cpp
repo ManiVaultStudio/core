@@ -895,7 +895,7 @@ void Points::selectInvert()
 
     std::set<std::uint32_t> selectionSet(selection->indices.begin(), selection->indices.end());
 
-    const auto numberOfPoints = getNumPoints();
+    const auto numberOfPoints = getFullDataset<Points>()->getNumPoints();
 
     selectionIndices.reserve(numberOfPoints - selectionSet.size());
 
