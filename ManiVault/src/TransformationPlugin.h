@@ -5,13 +5,11 @@
 #pragma once
 
 #include "Plugin.h"
+#include "actions/OptionAction.h"
 
 #include "Set.h"
 
-namespace mv
-{
-
-namespace plugin
+namespace mv::plugin
 {
 
 /**
@@ -46,8 +44,8 @@ public:
     Dataset<DatasetType> getInputDataset() {
         if (_inputDatasets.size() > 0)
             return Dataset<DatasetType>(_inputDatasets[0].get<DatasetType>());
-        else
-            return Dataset<DatasetImpl>();
+        
+        return {};
     }
 
     /**
@@ -62,8 +60,16 @@ public:
      */
     void setInputDataset(const Dataset<DatasetImpl>& inputDataset);
 
+
+    /**
+     * Get type action
+     * @return Reference to type action
+     */
+    gui::OptionAction& getTypeAction();
+
 private:
-    Datasets    _inputDatasets;        /** One, or more, input dataset */
+    Datasets            _inputDatasets;     /** One, or more, input dataset */
+    gui::OptionAction   _typeAction;        /** Transformation type action */
 };
 
 /**
@@ -81,7 +87,7 @@ public:
     TransformationPluginFactory();
 
     /** Destructor */
-    ~TransformationPluginFactory() = default;
+    ~TransformationPluginFactory() override = default;
     
     /**
      * Get plugin icon
@@ -99,8 +105,6 @@ public:
     /** Produces an instance of a transformation plugin */
     TransformationPlugin* produce() override = 0;
 };
-
-}
 
 }
 
