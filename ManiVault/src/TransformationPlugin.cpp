@@ -5,17 +5,13 @@
 #include "TransformationPlugin.h"
 #include "Application.h"
 
-namespace mv
-{
-
-namespace plugin
+namespace mv::plugin
 {
 
 TransformationPlugin::TransformationPlugin(const PluginFactory* factory) :
     Plugin(factory),
-    _inputDatasets()
+    _typeAction(this, "Type")
 {
-
 }
 
 mv::Datasets TransformationPlugin::getInputDatasets() const
@@ -33,10 +29,14 @@ void TransformationPlugin::setInputDataset(const Dataset<DatasetImpl>& inputData
     setInputDatasets({ inputDataset });
 }
 
+gui::OptionAction& TransformationPlugin::getTypeAction()
+{
+    return _typeAction;
+}
+
 TransformationPluginFactory::TransformationPluginFactory() :
     PluginFactory(Type::TRANSFORMATION)
 {
-
 }
 
 QIcon TransformationPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
@@ -49,5 +49,4 @@ QIcon TransformationPluginFactory::getCategoryIcon() const
     return Application::getIconFont("FontAwesome").getIcon("random");
 }
 
-}
 }
