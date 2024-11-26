@@ -361,8 +361,8 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
     for (int i = 0; i < _clusterIds.size(); i++) {
 
         Vector2f currentCenter = _meanshiftPixels[i];
-        int x = (int)(currentCenter.x * (RESOLUTION - 1) + 0.5);
-        int y = (int)(currentCenter.y * (RESOLUTION - 1) + 0.5);
+        int x = static_cast<int>(currentCenter.x * (RESOLUTION - 1) + 0.5);
+        int y = static_cast<int>(currentCenter.y * (RESOLUTION - 1) + 0.5);
         int centerIdx = (x + y * RESOLUTION);
 
         if (centerIdx < 0 || centerIdx >= _clusterIds.size())
