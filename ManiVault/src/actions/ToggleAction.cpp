@@ -175,10 +175,8 @@ bool ToggleAction::CheckBoxWidget::eventFilter(QObject* target, QEvent* event)
 
             if (_toggleAction->isEnabled() && mouseEvent->button() == Qt::LeftButton && !_toggleAction->getDrag().isDragging())
             {
-                qDebug() << "Toggle!";
                 _toggleAction->setChecked(!_toggleAction->isChecked());
             }
-                
             
             return true;
         }

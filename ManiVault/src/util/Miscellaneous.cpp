@@ -9,6 +9,8 @@
 #include <QStringList>
 #include <QTcpSocket>
 #include <QUrl>
+#include <QVariant>
+#include <QString>
 
 namespace mv::util
 {
@@ -180,4 +182,74 @@ QIcon getAlignmentIcon(const Qt::Alignment& alignment)
     return gui::createIcon(pixmap);
 }
 
+void setValueByPath(QVariant& root, const QString& path, const QVariant& value)
+{
+	QStringList components = path.split('/', Qt::SkipEmptyParts);
+
+	if (components.isEmpty())
+        return;
+
+	QVariant* current = &root;
+
+	for (int i = 0; i < components.size(); ++i) {
+		const QString& key = components[i];
+
+		// If this is the last component, set the value
+		if (i == components.size() - 1) {
+			if (current->type() == QMetaType::QVariantMap || current->isNull()) {
+				QVariantMap map = current->toMap();
+				map[key]        = value;
+				*current        = map;
+			}
+			else {
+				qWarning() << "Cannot set value at path:" << path << "as current is not a map.";
+			}
+
+			return;
+		}
+
+		// Ensure the current level is a map
+		if (current->typeId() == QMetaType::QVariantMap || current->isNull()) {
+			QVariantMap map = current->toMap();
+
+			// If the key doesn't exist, initialize it with an empty map
+			if (!map.contains(key)) {
+				map[key] = QVariantMap();
+			}
+
+			*current = map;
+			current  = &((*current).toMap()[key]);
+		}
+		else {
+			qWarning() << "Cannot create intermediate path:" << key << "as current is not a map.";
+			return;
+		}
+	}
+}
+
+QVariant getValueByPath(const QVariant& root, const QString& path, const QVariant& valueIfNotFound /*= QVariant()*/)
+{
+	QStringList     components = path.split('/', Qt::SkipEmptyParts);
+	const QVariant* current    = &root;
+
+    QVariant foundValue;
+
+	for (const QString& key : components) {
+		if (current->typeId() == QMetaType::QVariantMap) {
+			const auto map = current->toMap();
+
+			if (map.contains(key)) {
+				foundValue = map[key];
+			}
+			else {
+				return valueIfNotFound; // Return invalid QVariant if the key doesn't exist
+			}
+		}
+		else {
+			return valueIfNotFound; // Return invalid QVariant if the current node isn't a map
+		}
+	}
+
+	return foundValue; // Return the found value
+}
 }
