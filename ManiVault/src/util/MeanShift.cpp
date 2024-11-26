@@ -365,6 +365,9 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
         int y = (int)(currentCenter.y * (RESOLUTION - 1) + 0.5);
         int centerIdx = (x + y * RESOLUTION);
 
+        if (centerIdx < 0 || centerIdx >= _clusterIds.size())
+            continue;
+
         if (_clusterIds[i] != _clusterIds[centerIdx] && _clusterIds[i] >= 0 && _clusterIds[centerIdx] >= 0)
         {
             //qDebug() << "Assigned from cluster " << _clusterIds[i] << " to " << _clusterIds[centerIdx] << "index: " << i << ", pos(" << currentCenter.x << ", " << currentCenter.y << ")";
