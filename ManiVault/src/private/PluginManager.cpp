@@ -51,7 +51,7 @@ PluginManager::PluginManager() :
     setObjectName("Plugins");
 }
 
-PluginManager::~PluginManager(void)
+PluginManager::~PluginManager()
 {
     reset();
 }

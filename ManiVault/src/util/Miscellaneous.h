@@ -112,7 +112,7 @@ CORE_EXPORT QIcon getAlignmentIcon(const Qt::Alignment& alignment);
  * @param path Path to the value
  * @param value Value to set
  */
-CORE_EXPORT void setValueByPath(QVariant& root, const QString& path, const QVariant& value);
+CORE_EXPORT QVariant setValueByPath(QVariant root, const QString& path, const QVariant& value);
     
 /**
  * Get child value of \root by \p path

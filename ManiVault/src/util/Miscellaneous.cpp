@@ -182,49 +182,51 @@ QIcon getAlignmentIcon(const Qt::Alignment& alignment)
     return gui::createIcon(pixmap);
 }
 
-void setValueByPath(QVariant& root, const QString& path, const QVariant& value)
+QVariant setValueByPath(QVariant variant, const QString& path, const QVariant& value)
 {
-	QStringList components = path.split('/', Qt::SkipEmptyParts);
+    QStringList components = path.split('/', Qt::SkipEmptyParts);
 
-	if (components.isEmpty())
-        return;
+    if (components.isEmpty()) {
+        qWarning() << "Path is empty. Cannot set value.";
+        return {};
+    }
 
-	QVariant* current = &root;
+    if (components.count() == 1) {
+        if (variant.typeId() == QMetaType::QVariantMap) {
+            auto map = variant.toMap();
 
-	for (int i = 0; i < components.size(); ++i) {
-		const QString& key = components[i];
+            map[components.first()] = value;
 
-		// If this is the last component, set the value
-		if (i == components.size() - 1) {
-			if (current->type() == QMetaType::QVariantMap || current->isNull()) {
-				QVariantMap map = current->toMap();
-				map[key]        = value;
-				*current        = map;
-			}
-			else {
-				qWarning() << "Cannot set value at path:" << path << "as current is not a map.";
-			}
+            return map;
+        }
 
-			return;
-		}
+        if (variant.typeId() == QMetaType::QVariantList) {
+            return {};
+        }
 
-		// Ensure the current level is a map
-		if (current->typeId() == QMetaType::QVariantMap || current->isNull()) {
-			QVariantMap map = current->toMap();
+    	qWarning() << "Cannot set value: leaf not QVariantMap nor QVariantList";
+        return {};
+    }
 
-			// If the key doesn't exist, initialize it with an empty map
-			if (!map.contains(key)) {
-				map[key] = QVariantMap();
-			}
+    auto map = variant.toMap();
 
-			*current = map;
-			current  = &((*current).toMap()[key]);
-		}
-		else {
-			qWarning() << "Cannot create intermediate path:" << key << "as current is not a map.";
-			return;
-		}
-	}
+    const auto name = components.first();
+
+    if (!map.contains(name)) {
+        map[name] = QVariantMap();
+
+        components.removeFirst();
+
+        map[name] = setValueByPath(map[name], components.join(","), value);
+
+        return map;
+    }
+
+	components.removeFirst();
+
+    map[components.first()] = setValueByPath(map[components.first()], components.join(","), value);
+
+    return map;
 }
 
 QVariant getValueByPath(const QVariant& root, const QString& path, const QVariant& valueIfNotFound /*= QVariant()*/)
