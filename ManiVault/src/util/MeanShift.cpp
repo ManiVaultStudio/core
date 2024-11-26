@@ -356,7 +356,7 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
     }
 
     // Check if clusters contain their own cluster center.
-    // If not it is likely that the center is just a variation of an exisiting cluster and those should be merged
+    // If not it is likely that the center is just a variation of an existing cluster and those should be merged
 #pragma omp parallel for
     for (int i = 0; i < _clusterIds.size(); i++) {
 
