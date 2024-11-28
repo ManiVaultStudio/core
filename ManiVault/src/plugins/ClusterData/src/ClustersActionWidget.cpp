@@ -195,14 +195,11 @@ void ClustersActionWidget::setupSelectionSynchronization()
         const auto& selectedClusters = clusterData->getSelectionIndices();
 
         QModelIndexList selectedRows = _selectionModel.selectedRows();
-        if (selectedRows.size() == selectedClusters.size())
-        {
+        if (selectedRows.size() == selectedClusters.size()) {
             bool alreadySelected = true;
 
-            for (size_t i = 0; i < selectedClusters.size(); ++i)
-            {
-                if (selectedRows[i].row() != static_cast<int>(selectedClusters[i]))
-                {
+            for (size_t i = 0; i < selectedClusters.size(); ++i) {
+                if (selectedRows[i].row() != static_cast<int>(selectedClusters[i])) {
                     alreadySelected = false;
                     break;
                 }
@@ -215,16 +212,18 @@ void ClustersActionWidget::setupSelectionSynchronization()
         QItemSelection selection;
 
         for (const auto& row : selectedClusters) {
-            const auto firstItemIndex = _filterModel.index(static_cast<int>(row), 0);
-            const auto lastItem = _filterModel.index(static_cast<int>(row), 0);
+            const auto firstItemIndex   = _filterModel.index(static_cast<int>(row), 0);
+            const auto lastItem         = _filterModel.index(static_cast<int>(row), 0);
+
             selection.select(firstItemIndex, lastItem);
         }
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
         {
             // Deselect all rows
-            const auto firstItemIndex = _filterModel.index(0, 0);
-            const auto lastItem = _filterModel.index(_filterModel.rowCount() - 1, 0);
+            const auto firstItemIndex   = _filterModel.index(0, 0);
+            const auto lastItem         = _filterModel.index(_filterModel.rowCount() - 1, 0);
+
             _selectionModel.select(QItemSelection(firstItemIndex, lastItem), QItemSelectionModel::Rows | QItemSelectionModel::Deselect);
 
             // Select rows
