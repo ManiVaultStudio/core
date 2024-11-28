@@ -261,7 +261,7 @@ public: // Selection
     /** Invert item selection */
     void selectInvert() override;
 
-    /** Gets concatenated indices for all selected clusters */
+    /** Gets point indices for all selected clusters, use getSelectionIndices() got selected cluster indices */
     std::vector<std::uint32_t> getSelectedIndices() const;
 
 public: // Serialization

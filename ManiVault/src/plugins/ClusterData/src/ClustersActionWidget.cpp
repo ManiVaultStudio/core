@@ -165,6 +165,7 @@ void ClustersActionWidget::setupSelectionSynchronization()
 
     // Remove previous connections
     disconnect(_clustersTreeView.selectionModel(), &QItemSelectionModel::selectionChanged, this, nullptr);
+    disconnect(&_clustersAction.getClustersDataset(), &Dataset<Clusters>::dataSelectionChanged, this, nullptr);
 
     // Select cluster points when the cluster selection changes
     connect(_clustersTreeView.selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) -> void {
@@ -179,13 +180,56 @@ void ClustersActionWidget::setupSelectionSynchronization()
         selectedClustersIndices.reserve(_clustersAction.getClusters()->size());
 
         // Gather point indices for selection
-        for (auto selectedIndex : selectedRows) {
-            auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());
-
+        for (const auto& selectedIndex : selectedRows)
             selectedClustersIndices.push_back(_filterModel.mapToSource(selectedIndex).row());
-        }
 
         // Select clusters
         _clustersAction.getClustersDataset()->setSelectionIndices(selectedClustersIndices);
+    });
+
+    // Highlight selected clusters (selection made elsewhere)
+    connect(&_clustersAction.getClustersDataset(), &Dataset<Clusters>::dataSelectionChanged, this, [this]() -> void {
+
+        // Get selected rows
+        auto& clusterData = _clustersAction.getClustersDataset();
+        const auto& selectedClusters = clusterData->getSelectionIndices();
+
+        QModelIndexList selectedRows = _selectionModel.selectedRows();
+        if (selectedRows.size() == selectedClusters.size()) {
+            bool alreadySelected = true;
+
+            for (size_t i = 0; i < selectedClusters.size(); ++i) {
+                if (selectedRows[i].row() != static_cast<int>(selectedClusters[i])) {
+                    alreadySelected = false;
+                    break;
+                }
+            }
+
+            if (alreadySelected)
+                return;
+        }
+
+        QItemSelection selection;
+
+        for (const auto& row : selectedClusters) {
+            const auto firstItemIndex   = _filterModel.index(static_cast<int>(row), 0);
+            const auto lastItem         = _filterModel.index(static_cast<int>(row), 0);
+
+            selection.select(firstItemIndex, lastItem);
+        }
+
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        {
+            // Deselect all rows
+            const auto firstItemIndex   = _filterModel.index(0, 0);
+            const auto lastItem         = _filterModel.index(_filterModel.rowCount() - 1, 0);
+
+            _selectionModel.select(QItemSelection(firstItemIndex, lastItem), QItemSelectionModel::Rows | QItemSelectionModel::Deselect);
+
+            // Select rows
+            _selectionModel.select(selection, QItemSelectionModel::Rows | QItemSelectionModel::Select);
+        }
+        QApplication::restoreOverrideCursor();
+
     });
 }
