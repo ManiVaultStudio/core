@@ -11,7 +11,6 @@
 #include "util/Video.h"
 
 #include <QObject>
-#include <QMenu>
 
 namespace mv {
 
@@ -29,29 +28,29 @@ class CORE_EXPORT AbstractHelpManager : public AbstractManager
 public:
 
     /**
-     * Construct with pointer to \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractHelpManager(QObject* parent = nullptr) :
+    AbstractHelpManager(QObject* parent) :
         AbstractManager(parent, "Help")
     {
     }
 
     /**
      * Get videos for \p tags
-     * @param tags Fitler tags (returns all videos if empty)
+     * @param tags Filter tags (returns all videos if empty)
      * @return Vector of videos
      */
     virtual util::Videos getVideos(const QStringList& tags) const = 0;
 
 public: // Action getters
 
-    virtual mv::gui::ToggleAction& getShowLearningCenterAction() = 0;
-    virtual mv::gui::TriggerAction& getToDiscordAction() = 0;
-    virtual mv::gui::TriggerAction& getToWebsiteAction() = 0;
-    virtual mv::gui::TriggerAction& getToWikiAction() = 0;
-    virtual mv::gui::TriggerAction& getToRepositoryAction() = 0;
-    virtual mv::gui::TriggerAction& getToLearningCenterAction() = 0;
+    virtual gui::ToggleAction& getShowLearningCenterAction() = 0;
+    virtual gui::TriggerAction& getToDiscordAction() = 0;
+    virtual gui::TriggerAction& getToWebsiteAction() = 0;
+    virtual gui::TriggerAction& getToWikiAction() = 0;
+    virtual gui::TriggerAction& getToRepositoryAction() = 0;
+    virtual gui::TriggerAction& getToLearningCenterAction() = 0;
 };
 
 }

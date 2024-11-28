@@ -35,10 +35,10 @@ public:
 
     /** Map enum type to name */
     static inline QMap<Type, QString> typeNames{
-            { Type::BuiltIn, "Built-in" },
-            { Type::Path, "Path" },
-            { Type::Recent, "Recent" },
-            { Type::All, "All" }
+        { BuiltIn, "Built-in" },
+        { Path, "Path" },
+        { Recent, "Recent" },
+        { All, "All" }
     };
 
     /**
@@ -52,11 +52,11 @@ public:
 public:
 
     /**
-        * Construct workspace location with \p filePath and \p type
-        * @param title Title of the workspace
-        * @param filePath Location of the workspace on disk
-        * @param type Location type of the workspace
-        */
+     * Construct workspace location with \p filePath and \p type
+     * @param title Title of the workspace
+     * @param filePath Location of the workspace on disk
+     * @param type Location type of the workspace
+     */
     explicit WorkspaceLocation(const QString& title, const QString& filePath, const Type& type) :
         _title(title),
         _filePath(filePath),
@@ -118,10 +118,10 @@ class CORE_EXPORT AbstractWorkspaceManager : public AbstractManager
 public:
 
     /**
-     * Construct workspace manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractWorkspaceManager(QObject* parent = nullptr) :
+    AbstractWorkspaceManager(QObject* parent) :
         AbstractManager(parent, "Workspace")
     {
     }
@@ -164,7 +164,7 @@ public:
      * Get the file path of the loaded workspace
      * @return File path of the loaded workspace
      */
-    virtual QString getWorkspaceFilePath() const final {
+    QString getWorkspaceFilePath() const {
         if (!hasWorkspace())
             return "";
 
@@ -175,7 +175,7 @@ public:
      * Set the file path of the loaded workspace
      * @param filePath File path of the loaded workspace
      */
-    virtual void setWorkspaceFilePath(const QString& filePath) final {
+    void setWorkspaceFilePath(const QString& filePath) {
         if (!hasWorkspace())
             return;
 
@@ -192,7 +192,7 @@ public:
     }
 
     /** Begin the workspace loading process */
-    virtual void beginLoadWorkspace() final {
+    void beginLoadWorkspace() {
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -206,7 +206,7 @@ public:
     }
 
     /** End the workspace loading process */
-    virtual void endLoadWorkspace() final {
+    void endLoadWorkspace() {
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -220,7 +220,7 @@ public:
     }
 
     /** Begin the workspace saving process */
-    virtual void beginSaveWorkspace() final {
+    void beginSaveWorkspace() {
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -234,7 +234,7 @@ public:
     }
 
     /** End the workspace saving process */
-    virtual void endSaveWorkspace() final {
+    void endSaveWorkspace() {
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif

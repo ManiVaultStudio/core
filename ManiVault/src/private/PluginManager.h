@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <models/PluginsListModel.h>
 #include <models/PluginsTreeModel.h>
 
 #include <AbstractPluginManager.h>
@@ -18,10 +17,13 @@ class PluginManager final : public AbstractPluginManager
 {
 public:
 
-    /** Default constructor */
-    PluginManager();
+    /**
+     * Construct manager with pointer to \p parent object
+     * @param parent Pointer to parent object
+     */
+    PluginManager(QObject* parent);
 
-    /** Default destructor */
+    /** Reset when destructed */
     ~PluginManager() override;
     
     /** Perform manager startup initialization */

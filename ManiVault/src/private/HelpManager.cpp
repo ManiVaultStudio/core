@@ -9,8 +9,6 @@
 
 #include <Application.h>
 
-#include <util/Miscellaneous.h>
-
 #include <QDesktopServices>
 #include <QMainWindow>
 
@@ -24,8 +22,8 @@ using namespace mv::util;
 namespace mv
 {
 
-HelpManager::HelpManager() :
-    AbstractHelpManager(),
+HelpManager::HelpManager(QObject* parent) :
+    AbstractHelpManager(parent),
     _showLearningCenterAction(this, "Learning center"),
     _toDiscordAction(this, "Join us..."),
     _toWebsiteAction(this, "Website"),
@@ -81,6 +79,11 @@ HelpManager::HelpManager() :
     _videosModel.populateFromServer();
 }
 
+HelpManager::~HelpManager()
+{
+    reset();
+}
+
 void HelpManager::initialize()
 {
 #ifdef HELP_MANAGER_VERBOSE
@@ -98,6 +101,14 @@ void HelpManager::initialize()
 
 void HelpManager::reset()
 {
+#ifdef HELP_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    beginReset();
+    {
+    }
+    endReset();
 }
 
 Videos HelpManager::getVideos(const QStringList& tags) const

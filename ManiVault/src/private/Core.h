@@ -27,7 +27,7 @@ public:
     Core();
 
     /** Reset plugin managers upon destruction */
-    ~Core();
+    ~Core() override;
 
 public:
 
@@ -57,6 +57,12 @@ public: // Initialization
      */
     bool isInitialized() const override;
 
+    /**
+     * Get whether the core is about to be destroyed or not
+     * @return Boolean determining whether the core is about to be destroyed or not
+     */
+    bool isAboutToBeDestroyed() const override;
+
 public: // Managers
 
     AbstractManager* getManager(const ManagerType& managerType) override;
@@ -73,8 +79,9 @@ public: // Managers
     AbstractHelpManager& getHelpManager() override;
 
 private:
-    QVector<AbstractManager*>   _managers;      /** All managers in the core */
-    bool                        _initialized;   /** Boolean determining whether the core is initialized or not */
+    std::vector<std::unique_ptr<AbstractManager>>   _managers;              /** All managers in the core */
+    bool                                            _initialized;           /** Boolean determining whether the core is initialized or not */
+    bool                                            _aboutToBeDestroyed;    /** Boolean determining whether the core is about to be destroyed or not */
 
     friend class DataHierarchyManager;
 };

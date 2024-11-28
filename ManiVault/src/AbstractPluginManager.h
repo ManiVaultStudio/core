@@ -40,10 +40,10 @@ class CORE_EXPORT AbstractPluginManager : public AbstractManager
 public:
 
     /**
-     * Construct plugin manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractPluginManager(QObject* parent = nullptr) :
+    AbstractPluginManager(QObject* parent) :
         AbstractManager(parent, "Plugins")
     {
     }

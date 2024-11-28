@@ -39,24 +39,19 @@ private:
 public:
 
     /**
-     * Construct actions manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractActionsManager(QObject* parent = nullptr) :
-        AbstractManager(parent, "Actions"),
-        _actions(),
-        _publicActions(),
-        _actionTypes()
+    AbstractActionsManager(QObject* parent) :
+        AbstractManager(parent, "Actions")
     {
     }
-
-    virtual ~AbstractActionsManager() { }
 
     /**
      * Get all actions in the manager
      * @return List of all actions in the manager
      */
-    virtual const gui::WidgetActions& getActions() const final {
+    const gui::WidgetActions& getActions() const {
         return _actions;
     }
 
@@ -64,7 +59,7 @@ public:
      * Get all public actions in the manager
      * @return List of all public actions in the manager
      */
-    virtual const gui::WidgetActions& getPublicActions() const final {
+    const gui::WidgetActions& getPublicActions() const {
         return _publicActions;
     }
 
@@ -72,7 +67,7 @@ public:
      * Get action with \p id
      * @return Pointer to widget action (may return nullptr)
      */
-    virtual gui::WidgetAction* getAction(const QString& id) final {
+    gui::WidgetAction* getAction(const QString& id) {
         for (const auto action : _actions)
             if (id == action->getId())
                 return action;
@@ -85,7 +80,7 @@ public:
      * @param action Pointer to action
      */
     template<typename ActionType>
-    inline void addAction(ActionType* action) {
+    void addAction(ActionType* action) {
         try
         {
             Q_ASSERT(action != nullptr);
@@ -129,8 +124,11 @@ public:
      * @param action Pointer to action
      */
     template<typename ActionType>
-    inline void removeAction(ActionType* action) {
-        
+    void removeAction(ActionType* action) {
+
+        if (isCoreDestroyed())
+            return;
+
         try
         {
             Q_ASSERT(action != nullptr);
@@ -168,7 +166,7 @@ private: // Public actions
      * Add \p publicAction to the manager
      * @param publicAction Pointer to public action
      */
-    virtual void addPublicAction(gui::WidgetAction* publicAction) final {
+    void addPublicAction(gui::WidgetAction* publicAction) {
         try
         {
             Q_ASSERT(publicAction != nullptr);
@@ -194,7 +192,7 @@ private: // Public actions
      * Remove \p publicAction from the manager
      * @param publicAction Pointer to public action
      */
-    virtual void removePublicAction(gui::WidgetAction* publicAction) final {
+    void removePublicAction(gui::WidgetAction* publicAction) {
         try
         {
             Q_ASSERT(publicAction != nullptr);
@@ -242,7 +240,7 @@ public: // Linking
      * @param publicAction Pointer to public action
      * @param recursive Whether to also connect descendant child actions
      */
-    virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) final {
+    void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) {
         
         try
         {
@@ -282,7 +280,7 @@ public: // Linking
      * @param privateTargetAction Pointer to private target action (private source action will be connected to published private target action)
      * @param publicActionName Name of the public action (ask for name if empty)
      */
-    virtual void connectPrivateActions(gui::WidgetAction* privateSourceAction, gui::WidgetAction* privateTargetAction, const QString& publicActionName = "") final {
+    void connectPrivateActions(gui::WidgetAction* privateSourceAction, gui::WidgetAction* privateTargetAction, const QString& publicActionName = "") {
 
         try
         {
@@ -313,7 +311,7 @@ public: // Linking
      * @param privateAction Pointer to private action
      * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction, bool recursive) final {
+    void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction, bool recursive) {
 
         try
         {
@@ -344,7 +342,7 @@ protected:
      * @param privateAction Pointer to private action
      * @param publicAction Pointer to public action
      */
-    virtual void addPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) final {
+    void addPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
 
         try
         {
@@ -380,7 +378,7 @@ protected:
      * @param privateAction Pointer to private action
      * @param publicAction Pointer to public action
      */
-    virtual void removePrivateActionFromPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) final {
+    void removePrivateActionFromPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
         
         try
         {
@@ -435,6 +433,9 @@ protected: // Action types
      * @param actionType Action type string to remove
      */
     void removeActionType(const QString& actionType) {
+        if (isCoreDestroyed())
+            return;
+
         const auto cachedActionTypes = getActionTypes();
 
         if (!_actionTypes.contains(actionType))
@@ -460,7 +461,7 @@ public: // Action types
      * Get set of action types
      * @return List of action types
      */
-    const QStringList getActionTypes() const {
+    QStringList getActionTypes() const {
         auto actionTypes = _actionTypes.keys();
 
         actionTypes.removeDuplicates();
@@ -472,7 +473,7 @@ public: // Action types
      * Get set of human-friendly action types (without prefixes)
      * @return List of human-friendly action types
      */
-    const QStringList getActionTypesHumanFriendly() const {
+    QStringList getActionTypesHumanFriendly() const {
         QStringList actionTypesHumanFriendly;
 
         for (const auto& actionType : _actionTypes)
@@ -491,7 +492,7 @@ protected:
      * Make widget \p action public
      * @param action Pointer to action
      */
-    virtual void makeActionPublic(gui::WidgetAction* action) final {
+    void makeActionPublic(gui::WidgetAction* action) {
         Q_ASSERT(action != nullptr);
 
         if (action == nullptr)
@@ -566,7 +567,7 @@ protected:
     gui::WidgetActions          _actions;               /** List of actions that are instantiated in the plugin system */
     gui::WidgetActions          _publicActions;         /** List of public actions that are instantiated in the plugin system */
     QMap<QString, ActionType>   _actionTypes;           /** Maps action type to counter and human-friendly action type string */
-    
+
     friend class gui::WidgetAction;
 };
 

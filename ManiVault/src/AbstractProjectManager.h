@@ -102,14 +102,13 @@ public:
 public:
 
     /**
-     * Construct project manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractProjectManager(QObject* parent = nullptr) :
+    AbstractProjectManager(QObject* parent) :
         AbstractManager(parent, "Project"),
         _state(State::Idle),
-        _projectSerializationTask(this, "Project serialization"),
-        _temporaryDirPaths()
+        _projectSerializationTask(this, "Project serialization")
     {
     }
 
@@ -185,7 +184,7 @@ public: // Temporary directories
      * @param temporaryDirType Type of temporary directory, see AbstractProjectManager#TemporaryDirType
      * @return Path of the temporary directory
      */
-    const QString getTemporaryDirPath(const TemporaryDirType& temporaryDirType) const {
+    QString getTemporaryDirPath(const TemporaryDirType& temporaryDirType) const {
         if (_temporaryDirPaths.contains(temporaryDirType)) {
             return _temporaryDirPaths[temporaryDirType];
         }
@@ -263,7 +262,7 @@ public: // State
      * Get the state of the project manager
      * @return State of the project manager
      */
-    virtual State getState() const final {
+    State getState() const {
         return _state;
     }
 
@@ -271,7 +270,7 @@ public: // State
      * Set the state of the serializable object to \p state
      * @param state State of the serializable object
      */
-    virtual void setState(const State& state) final {
+    void setState(const State& state) {
         if (state == _state)
             return;
 
@@ -284,7 +283,7 @@ public: // State
      * Get whether the project manager is opening a project
      * @return Boolean determining whether the project manager is opening a project
      */
-    virtual bool isOpeningProject() const final {
+    bool isOpeningProject() const {
         return _state == State::OpeningProject;
     }
 
@@ -292,7 +291,7 @@ public: // State
      * Get whether the project manager is importing a project
      * @return Boolean determining whether the project manager is importing a project
      */
-    virtual bool isImportingProject() const final {
+    bool isImportingProject() const {
         return _state == State::ImportingProject;
     }
 
@@ -300,7 +299,7 @@ public: // State
      * Get whether the project manager is saving a project
      * @return Boolean determining whether the project manager is saving a project
      */
-    virtual bool isSavingProject() const final {
+    bool isSavingProject() const {
         return _state == State::SavingProject;
     }
 
@@ -308,24 +307,24 @@ public: // State
      * Get whether the project manager is publishing a project
      * @return Boolean determining whether the project manager is publishing a project
      */
-    virtual bool isPublishingProject() const final {
+    bool isPublishingProject() const {
         return _state == State::PublishingProject;
     }
 
 public: // Action getters
 
-    virtual mv::gui::TriggerAction& getNewBlankProjectAction() = 0;
-    virtual mv::gui::TriggerAction& getNewProjectFromWorkspaceAction() = 0;
-    virtual mv::gui::TriggerAction& getOpenProjectAction() = 0;
-    virtual mv::gui::TriggerAction& getImportProjectAction() = 0;
-    virtual mv::gui::TriggerAction& getSaveProjectAction() = 0;
-    virtual mv::gui::TriggerAction& getSaveProjectAsAction() = 0;
-    virtual mv::gui::TriggerAction& getEditProjectSettingsAction() = 0;
-    virtual mv::gui::RecentFilesAction& getRecentProjectsAction() = 0;
-    virtual mv::gui::TriggerAction& getPublishAction() = 0;
-    virtual mv::gui::TriggerAction& getPluginManagerAction() = 0;
-    virtual mv::gui::ToggleAction& getShowStartPageAction() = 0;
-    virtual mv::gui::TriggerAction& getBackToProjectAction() = 0;
+    virtual gui::TriggerAction& getNewBlankProjectAction() = 0;
+    virtual gui::TriggerAction& getNewProjectFromWorkspaceAction() = 0;
+    virtual gui::TriggerAction& getOpenProjectAction() = 0;
+    virtual gui::TriggerAction& getImportProjectAction() = 0;
+    virtual gui::TriggerAction& getSaveProjectAction() = 0;
+    virtual gui::TriggerAction& getSaveProjectAsAction() = 0;
+    virtual gui::TriggerAction& getEditProjectSettingsAction() = 0;
+    virtual gui::RecentFilesAction& getRecentProjectsAction() = 0;
+    virtual gui::TriggerAction& getPublishAction() = 0;
+    virtual gui::TriggerAction& getPluginManagerAction() = 0;
+    virtual gui::ToggleAction& getShowStartPageAction() = 0;
+    virtual gui::TriggerAction& getBackToProjectAction() = 0;
 
 signals:
 
@@ -407,7 +406,7 @@ signals:
 private:
     State                               _state;                         /** Determines the state of the project manager */
     ProjectSerializationTask            _projectSerializationTask;      /** Task for project serialization */
-    QMap<TemporaryDirType, QString>     _temporaryDirPaths;                 /** Temporary directories for file open/save etc. */
+    QMap<TemporaryDirType, QString>     _temporaryDirPaths;             /** Temporary directories for file open/save etc. */
 };
 
 }

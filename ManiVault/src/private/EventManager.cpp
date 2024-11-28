@@ -21,9 +21,42 @@ using namespace mv::util;
 namespace mv
 {
 
-EventManager::EventManager() :
-    AbstractEventManager()
+EventManager::EventManager(QObject* parent) :
+    AbstractEventManager(parent)
 {
+}
+
+EventManager::~EventManager()
+{
+    reset();
+}
+
+void EventManager::initialize()
+{
+#ifdef EVENT_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    AbstractEventManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
+}
+
+void EventManager::reset()
+{
+#ifdef DATA_HIERARCHY_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    beginReset();
+    {
+        _eventListeners.clear();
+    }
+    endReset();
 }
 
 void EventManager::registerEventListener(EventListener* eventListener)
@@ -258,26 +291,6 @@ void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
     catch (...) {
         exceptionMessageBox("Unable to notify that a data was unlocked");
     }
-}
-
-void EventManager::initialize()
-{
-#ifdef EVENT_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    AbstractEventManager::initialize();
-
-    if (isInitialized())
-        return;
-
-    beginInitialization();
-    endInitialization();
-}
-
-void EventManager::reset()
-{
-    _eventListeners.clear();
 }
 
 }

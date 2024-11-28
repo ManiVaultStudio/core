@@ -35,15 +35,13 @@ class CORE_EXPORT AbstractDataManager : public AbstractManager
 public:
 
     /**
-     * Construct data manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractDataManager(QObject* parent = nullptr) :
+    explicit AbstractDataManager(QObject* parent) :
         AbstractManager(parent, "Data")
     {
     }
-
-    virtual ~AbstractDataManager() { }
 
 protected: // Raw data
 

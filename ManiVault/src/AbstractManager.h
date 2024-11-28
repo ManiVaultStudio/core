@@ -33,11 +33,11 @@ class CORE_EXPORT AbstractManager : public QObject, public util::Serializable
 public:
 
     /**
-     * Construct manager with \p parent object and \p name
+     * Construct manager with pointer to \p parent object and \p name
      * @param parent Pointer to parent object
      * @param name Manager name (serialization name)
      */
-    AbstractManager(QObject* parent = nullptr, const QString& name = "") :
+    AbstractManager(QObject* parent, const QString& name = "") :
         QObject(parent),
         Serializable(name),
         _initialized(false),
@@ -45,15 +45,13 @@ public:
     {
     }
 
-    virtual ~AbstractManager() { }
-
     /** Perform manager startup initialization */
     virtual void initialize() {
         _lockingAction = new gui::LockingAction(this, getSerializationName());
     };
 
     /** Begin reset operation */
-    virtual void beginReset() final {
+    void beginReset() {
 #ifdef ABSTRACT_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
@@ -72,7 +70,7 @@ public:
     }
 
     /** End reset operation */
-    virtual void endReset() final {
+    void endReset() {
 #ifdef ABSTRACT_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
@@ -81,7 +79,7 @@ public:
     }
 
     /** Begin the initialization process */
-    virtual void beginInitialization() final {
+    void beginInitialization() {
 #ifdef ABSTRACT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -95,7 +93,7 @@ public:
     }
 
     /** End the initialization process */
-    virtual void endInitialization() final {
+    void endInitialization() {
 #ifdef ABSTRACT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
@@ -109,7 +107,7 @@ public:
      * Get whether the manager is initialized or not
      * @return Boolean determining whether the manager is initialized or not
      */
-    virtual bool isInitialized() const final {
+    bool isInitialized() const {
         return _initialized;
     }
 
@@ -127,7 +125,7 @@ public:
      * Get manager settings prefix
      * @return Settings manager prefix
      */
-    virtual QString getSettingsPrefix() const final {
+    QString getSettingsPrefix() const {
         return QString("Managers/%1/").arg(getSerializationName());
     }
 
@@ -152,7 +150,22 @@ public: // Locking
     virtual bool mayUnlock() const {
         return true;
     };
-    
+
+public: // Core destruction
+
+    /** Mark core as destroyed */
+    void setCoreIsDestroyed() {
+        _coreIsDestroyed = true;
+    }
+
+    /**
+     * Establish whether the core is destroyed
+     * @return Boolean determining whether the core is destroyed
+     */
+    bool isCoreDestroyed() const {
+        return _coreIsDestroyed;
+    }
+
 signals:
 
     /** Signals that the initialization process has begun */
@@ -168,8 +181,9 @@ signals:
     void managerReset();
 
 private:
-    bool                    _initialized;           /** Whether the manager is initialized or not */
-    gui::LockingAction*     _lockingAction;         /** Manager locking action */
+    bool                    _initialized;       /** Whether the manager is initialized or not */
+    gui::LockingAction*     _lockingAction;     /** Manager locking action */
+    bool                    _coreIsDestroyed;   /** Boolean determining whether the core is destroyed */
 };
 
 }

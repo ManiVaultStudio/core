@@ -17,8 +17,14 @@ class EventManager final : public AbstractEventManager
 
 public:
 
-    /** Default constructor */
-    EventManager();
+    /**
+     * Construct manager with pointer to \p parent object
+     * @param parent Pointer to parent object
+     */
+    EventManager(QObject* parent);
+
+    /** Reset when destructed */
+    ~EventManager() override;
 
     /** Perform event manager startup initialization */
     void initialize() override;

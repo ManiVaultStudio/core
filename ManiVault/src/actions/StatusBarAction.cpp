@@ -55,7 +55,8 @@ StatusBarAction::~StatusBarAction()
 
     StatusBarAction::statusBarActions.removeOne(this);
 
-	mv::settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
+    if (!core()->isAboutToBeDestroyed())
+		settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
 }
 
 WidgetActions StatusBarAction::getStatusBarActions()

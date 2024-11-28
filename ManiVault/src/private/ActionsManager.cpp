@@ -10,8 +10,6 @@
 #include <actions/WidgetAction.h>
 #include <util/Exception.h>
 
-#include <QLabel>
-#include <QLineEdit>
 #include <QDialogButtonBox>
 #include <QMetaType>
 #include <QMetaObject>
@@ -26,8 +24,8 @@ using namespace mv::util;
 namespace mv
 {
 
-ActionsManager::ActionsManager() :
-    AbstractActionsManager(),
+ActionsManager::ActionsManager(QObject* parent) :
+    AbstractActionsManager(parent),
     _actionsListModel(nullptr)
 {
 }
@@ -125,9 +123,7 @@ QVariantMap ActionsManager::toVariantMap() const
     QVariantList publicActions;
 
     for (auto publicAction : getPublicActions()) {
-        auto parentPublicAction = dynamic_cast<WidgetAction*>(publicAction->getParent());
-
-        if (parentPublicAction)
+        if (auto parentPublicAction = dynamic_cast<WidgetAction*>(publicAction->getParent()))
             continue;
 
         auto actionVariantMap = publicAction->toVariantMap();

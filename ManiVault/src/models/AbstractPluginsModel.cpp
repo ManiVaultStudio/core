@@ -10,7 +10,7 @@
 using namespace mv::gui;
 
 #ifdef _DEBUG
-    #define ABSTRACT_PLUGINS_MODEL_VERBOSE
+    //#define ABSTRACT_PLUGINS_MODEL_VERBOSE
 #endif
 
 Q_DECLARE_METATYPE(mv::plugin::Plugin*);

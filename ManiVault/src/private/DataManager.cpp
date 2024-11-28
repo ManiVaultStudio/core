@@ -30,7 +30,7 @@ namespace mv
 
 using namespace plugin;
 
-DataManager::DataManager(QObject* parent /*= nullptr*/) :
+DataManager::DataManager(QObject* parent) :
     AbstractDataManager(parent),
     _datasetsListModel(nullptr)
 {

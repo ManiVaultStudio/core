@@ -4,8 +4,6 @@
 
 #include "TaskManager.h"
 
-#include <Application.h>
-
 #include <util/Exception.h>
 
 #include <Task.h>
@@ -19,9 +17,8 @@
 namespace mv
 {
 
-TaskManager::TaskManager(QObject* parent /*= nullptr*/) :
-    AbstractTaskManager(),
-    _tasks()
+TaskManager::TaskManager(QObject* parent) :
+    AbstractTaskManager(parent)
 {
 }
 
@@ -42,6 +39,8 @@ void TaskManager::initialize()
         return;
 
     beginInitialization();
+    {
+    }
     endInitialization();
 }
 
@@ -53,10 +52,14 @@ void TaskManager::reset()
 
     beginReset();
     {
-        QListIterator<Task*> it(_tasks);
-        it.toBack();
-        while (it.hasPrevious())
-            removeTask(it.previous());
+        if (!isCoreDestroyed()) {
+            QListIterator<Task*> it(_tasks);
+
+            it.toBack();
+
+            while (it.hasPrevious())
+                removeTask(it.previous());
+        }
     }
     endReset();
 }
