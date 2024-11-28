@@ -51,7 +51,7 @@ PluginManager::PluginManager() :
     setObjectName("Plugins");
 }
 
-PluginManager::~PluginManager(void)
+PluginManager::~PluginManager()
 {
     reset();
 }
@@ -383,6 +383,16 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
 
                 break;
             }
+
+            case plugin::Type::TRANSFORMATION: {
+                auto analysisPlugin = dynamic_cast<TransformationPlugin*>(pluginInstance);
+
+                if (!inputDatasets.isEmpty())
+                    analysisPlugin->setInputDatasets(inputDatasets);
+
+                break;
+            }
+
             case plugin::Type::WRITER: {
                 auto writerPlugin = dynamic_cast<WriterPlugin*>(pluginInstance);
 

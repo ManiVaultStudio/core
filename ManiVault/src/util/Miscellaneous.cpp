@@ -9,6 +9,8 @@
 #include <QStringList>
 #include <QTcpSocket>
 #include <QUrl>
+#include <QVariant>
+#include <QString>
 
 namespace mv::util
 {
@@ -180,4 +182,76 @@ QIcon getAlignmentIcon(const Qt::Alignment& alignment)
     return gui::createIcon(pixmap);
 }
 
+QVariant setValueByPath(QVariant variant, const QString& path, const QVariant& value)
+{
+    QStringList components = path.split('/', Qt::SkipEmptyParts);
+
+    if (components.isEmpty()) {
+        qWarning() << "Path is empty. Cannot set value.";
+        return {};
+    }
+
+    if (components.count() == 1) {
+        if (variant.typeId() == QMetaType::QVariantMap) {
+            auto map = variant.toMap();
+
+            map[components.first()] = value;
+
+            return map;
+        }
+
+        if (variant.typeId() == QMetaType::QVariantList) {
+            return {};
+        }
+
+    	qWarning() << "Cannot set value: leaf not QVariantMap nor QVariantList";
+        return {};
+    }
+
+    auto map = variant.toMap();
+
+    const auto name = components.first();
+
+    if (!map.contains(name)) {
+        map[name] = QVariantMap();
+
+        components.removeFirst();
+
+        map[name] = setValueByPath(map[name], components.join(","), value);
+
+        return map;
+    }
+
+	components.removeFirst();
+
+    map[components.first()] = setValueByPath(map[components.first()], components.join(","), value);
+
+    return map;
+}
+
+QVariant getValueByPath(const QVariant& root, const QString& path, const QVariant& valueIfNotFound /*= QVariant()*/)
+{
+	QStringList     components = path.split('/', Qt::SkipEmptyParts);
+	const QVariant* current    = &root;
+
+    QVariant foundValue;
+
+	for (const QString& key : components) {
+		if (current->typeId() == QMetaType::QVariantMap) {
+			const auto map = current->toMap();
+
+			if (map.contains(key)) {
+				foundValue = map[key];
+			}
+			else {
+				return valueIfNotFound; // Return invalid QVariant if the key doesn't exist
+			}
+		}
+		else {
+			return valueIfNotFound; // Return invalid QVariant if the current node isn't a map
+		}
+	}
+
+	return foundValue; // Return the found value
+}
 }

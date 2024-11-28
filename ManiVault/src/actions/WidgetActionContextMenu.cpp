@@ -205,7 +205,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         if (_actions.isEmpty())
             return;
 
-        _actions.first()->startDrag();
+        _actions.first()->getDrag().start();
     });
 
     connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {

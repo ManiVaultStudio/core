@@ -889,19 +889,29 @@ void Points::selectNone()
 
 void Points::selectInvert()
 {
-    std::vector<unsigned int> selectionIndices;
+    // Get the locally selected indices (the points in the subset that are selected)
+    std::vector<unsigned int> localSelectionIndices;
+    getLocalSelectionIndices(localSelectionIndices);
 
-    auto selection = getSelection<Points>();
-
-    std::set<std::uint32_t> selectionSet(selection->indices.begin(), selection->indices.end());
-
+    // Compute the inverse of this
     const auto numberOfPoints = getNumPoints();
+    std::set<std::uint32_t> selectionSet(localSelectionIndices.begin(), localSelectionIndices.end());
 
+    std::vector<unsigned int> selectionIndices;
     selectionIndices.reserve(numberOfPoints - selectionSet.size());
 
     for (std::uint32_t i = 0; i < numberOfPoints; i++)
         if (selectionSet.find(i) == selectionSet.end())
             selectionIndices.push_back(i);
+
+    // Convert the inverted indices back to global indices
+    std::vector<unsigned int> globalIndices;
+    getGlobalIndices(globalIndices);
+
+    for (unsigned int& index : selectionIndices)
+    {
+        index = globalIndices[index];
+    }
 
     setSelectionIndices(selectionIndices);
 

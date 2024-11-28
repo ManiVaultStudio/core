@@ -24,7 +24,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if (NOT (MSVC AND MSVC_VERSION LESS_EQUAL 1929))
+if (NOT (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION LESS 1930))
     set(CMAKE_C_STANDARD 17)
     set(CMAKE_C_STANDARD_REQUIRED ON)
     set(CMAKE_C_EXTENSIONS OFF)
@@ -128,18 +128,18 @@ CPMAddPackage(
   OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON"
 )
 
-set_target_properties(zlibstatic PROPERTIES EXCLUDE_FROM_ALL TRUE)
+set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
-add_library(ZLIB::ZLIB ALIAS zlib)
-set(ZLIB_LIBRARIES zlib)
+add_library(ZLIB::ZLIB ALIAS zlibstatic)
+set(ZLIB_LIBRARIES zlibstatic)
 
 # File compression: QuaZip
 CPMAddPackage(
   NAME              quazip
   GITHUB_REPOSITORY stachenov/quazip
   GIT_TAG           v1.4
-  OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF"
+  OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF" "BUILD_SHARED_LIBS OFF"
 )
 
 # Qt Advanced docking system
@@ -279,12 +279,17 @@ if(MSVC)
     )
 endif(MSVC)
 
-# find libraries relative to the executable in the macOS .app tree
 if(APPLE)
+    
+    # Find libraries relative to the executable in the macOS .app tree
     set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "{MV_INSTALL_DIR}/$<CONFIGURATION>/ManiVault Studio.app")
+
 endif()
 
+set_target_properties(qt6advanceddocking QuaZip zlib zlibstatic
+    PROPERTIES
+    FOLDER CoreDependencies
+)
 
 # -----------------------------------------------------------------------------
 # Plugin projects
@@ -298,6 +303,11 @@ add_subdirectory(src/plugins/LoggingPlugin)
 add_subdirectory(src/plugins/TasksPlugin)
 add_subdirectory(src/plugins/SampleScopePlugin)
 
+set_target_properties(DataHierarchyPlugin DataPropertiesPlugin SharedParametersPlugin LoggingPlugin TasksPlugin SampleScopePlugin
+    PROPERTIES
+    FOLDER SystemPlugins
+)
+
 # Data plugins
 add_subdirectory(src/plugins/PointData)
 add_subdirectory(src/plugins/ColorData)
@@ -305,6 +315,10 @@ add_subdirectory(src/plugins/TextData)
 add_subdirectory(src/plugins/ClusterData)
 add_subdirectory(src/plugins/ImageData)
 
+set_target_properties(PointData ColorData TextData ClusterData ImageData
+    PROPERTIES
+    FOLDER DataPlugins
+)
 
 # -----------------------------------------------------------------------------
 # Installation
@@ -329,9 +343,10 @@ if(APPLE)
             if(NOT retval EQUAL 0)
         	    message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:QuaZip>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" \"$<TARGET_FILE:zlib>\")
+            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
-            file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")       
+            file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
+            
         "
         COMPONENT MACOS_BUNDLE
     )
@@ -498,15 +513,8 @@ if(NOT APPLE)
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:zlib> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
-    # Create symlink with slightly different name required on some linux distributions
-    if(UNIX)
-        include(CMakeQuaZipSymlink)
-        create_quazip_symlink()
-    endif()
 endif()
 
 # Install examples
@@ -531,7 +539,7 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE

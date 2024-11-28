@@ -9,7 +9,6 @@
 #include <QString>
 #include <QWidget>
 #include <QPointer>
-#include <QDebug>
 
 #include <algorithm>
 #include <qtcpsocket.h>
@@ -107,4 +106,20 @@ CORE_EXPORT void clearLayout(QLayout* layout, bool removeWidgets = false);
 CORE_EXPORT void setLayoutContentsMargins(QLayout* layout, std::int32_t margin);
 CORE_EXPORT QIcon getAlignmentIcon(const Qt::Alignment& alignment);
 
+/**
+ * Set child \p value of \root by \p path
+ * @param root Root element
+ * @param path Path to the value
+ * @param value Value to set
+ */
+CORE_EXPORT QVariant setValueByPath(QVariant root, const QString& path, const QVariant& value);
+    
+/**
+ * Get child value of \root by \p path
+ * @param root Root element
+ * @param path Path to the value
+ * @param valueIfNotFound Value if not found
+ * @return Value, invalid when no value was found
+ */
+CORE_EXPORT QVariant getValueByPath(const QVariant& root, const QString& path, const QVariant& valueIfNotFound = QVariant());
 }
