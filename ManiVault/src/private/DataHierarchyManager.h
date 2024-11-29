@@ -22,12 +22,12 @@ class DataHierarchyManager final : public AbstractDataHierarchyManager
 public:
 
     /**
-     * Constructor
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    DataHierarchyManager(QObject* parent = nullptr);
+    DataHierarchyManager(QObject* parent);
 
-    /** Reset the data hierarchy manager when destructed */
+    /** Reset when destructed */
     ~DataHierarchyManager() override;
 
     /** Perform manager startup initialization */

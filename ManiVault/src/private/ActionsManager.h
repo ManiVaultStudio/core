@@ -24,10 +24,13 @@ class ActionsManager final : public AbstractActionsManager
 
 public:
 
-    /** Default constructor */
-    ActionsManager();
+    /**
+     * Construct manager with pointer to \p parent object
+     * @param parent Pointer to parent object
+     */
+    ActionsManager(QObject* parent);
 
-    /** Default destructor */
+    /** Reset when destructed */
     ~ActionsManager() override;
 
     /** Perform manager startup initialization */

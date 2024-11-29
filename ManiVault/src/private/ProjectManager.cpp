@@ -17,8 +17,6 @@
 #include <util/Exception.h>
 #include <util/Serialization.h>
 
-#include <Set.h>
-
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QGridLayout>
@@ -36,9 +34,8 @@ using namespace mv::gui;
 namespace mv
 {
 
-ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
+ProjectManager::ProjectManager(QObject* parent) :
     AbstractProjectManager(parent),
-    _project(),
     _newBlankProjectAction(nullptr, "Blank"),
     _newProjectFromWorkspaceAction(nullptr, "From Workspace..."),
     _openProjectAction(nullptr, "Open Project"),
@@ -47,8 +44,6 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAsAction(nullptr, "Save Project As..."),
     _editProjectSettingsAction(nullptr, "Project Settings..."),
     _recentProjectsAction(nullptr, getSettingsPrefix() + "RecentProjects"),
-    _newProjectMenu(),
-    _importDataMenu(),
     _publishAction(nullptr, "Publish"),
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
@@ -224,6 +219,11 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 }
 
+ProjectManager::~ProjectManager()
+{
+    reset();
+}
+
 void ProjectManager::initialize()
 {
 #ifdef PROJECT_MANAGER_VERBOSE
@@ -249,11 +249,13 @@ void ProjectManager::reset()
     {
         auto core = Application::core();
 
-        core->getActionsManager().reset();
-        core->getPluginManager().reset();
-        core->getDataHierarchyManager().reset();
-        core->getDataManager().reset();
-        core->getWorkspaceManager().reset();
+        if (!isCoreDestroyed()) {
+            core->getActionsManager().reset();
+            core->getPluginManager().reset();
+            core->getDataHierarchyManager().reset();
+            core->getDataManager().reset();
+            core->getWorkspaceManager().reset();
+        }
     }
     endReset();
 }

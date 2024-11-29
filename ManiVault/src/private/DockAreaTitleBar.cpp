@@ -42,6 +42,9 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
         };
 
         const auto updateToolButtonReadOnly = [this]() -> void {
+            if (core()->isAboutToBeDestroyed())
+                return;
+
             _addViewPluginToolButton->setEnabled(_loadSystemViewMenu->mayProducePlugins());
         };
 

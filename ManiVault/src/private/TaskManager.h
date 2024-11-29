@@ -16,13 +16,13 @@ class TaskManager final : public AbstractTaskManager
 public:
 
     /**
-     * Construct with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    TaskManager(QObject* parent = nullptr);
+    TaskManager(QObject* parent);
 
     /** Reset when destructed */
-    ~TaskManager();
+    ~TaskManager() override;
 
     /** Perform manager startup initialization */
     void initialize() override;

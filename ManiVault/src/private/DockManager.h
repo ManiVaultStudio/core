@@ -51,7 +51,7 @@ public:
     DockManager(const QString& name, QWidget* parent = nullptr);
 
     /** Destructor */
-    ~DockManager();
+    ~DockManager() override;
 
     /**
      * Get view plugin dock widgets

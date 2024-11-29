@@ -32,10 +32,10 @@ class CORE_EXPORT AbstractDataHierarchyManager : public AbstractManager
 public:
 
     /**
-     * Construct data hierarchy manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractDataHierarchyManager(QObject* parent = nullptr) :
+    AbstractDataHierarchyManager(QObject* parent) :
         AbstractManager(parent, "DataHierarchy")
     {
     }
@@ -52,7 +52,7 @@ public:
      * @param datasetId Dataset GUID
      * @return Pointer to data hierarchy item, nullptr if not found
      */
-    virtual DataHierarchyItem* getItem(const QString& datasetGuid) = 0;
+    virtual DataHierarchyItem* getItem(const QString& datasetId) = 0;
 
     /**
      * Get all items
@@ -117,16 +117,16 @@ protected:
 public: // Serialization
 
     /**
-     * Load widget action from variant
+     * Load from variant
      * @param Variant representation of the widget action
      */
-    virtual void fromVariantMap(const QVariantMap& variantMap) override = 0;
+    void fromVariantMap(const QVariantMap& variantMap) override = 0;
 
     /**
-     * Save widget action to variant
+     * Save to variant
      * @return Variant representation of the widget action
      */
-    virtual QVariantMap toVariantMap() const override = 0;
+    QVariantMap toVariantMap() const override = 0;
 
 signals:
 

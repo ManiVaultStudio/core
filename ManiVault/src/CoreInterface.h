@@ -24,9 +24,6 @@
 #include <QString>
 #include <QObject>
 
-#include <vector>
-#include <functional>
-
 namespace mv
 {
     class DatasetImpl;
@@ -79,8 +76,6 @@ public:
     /** Default constructor */
     CoreInterface() = default;
     
-    virtual ~CoreInterface() { }
-
     /** Creates the core managers */
     virtual void createManagers() = 0;
 
@@ -106,6 +101,12 @@ public: // Initialization
      * @return Boolean determining whether the core is initialized or not
      */
     virtual bool isInitialized() const = 0;
+
+    /**
+     * Get whether the core is about to be destroyed or not
+     * @return Boolean determining whether the core is about to be destroyed or not
+     */
+    virtual bool isAboutToBeDestroyed() const = 0;
 
 public: // Managers
 

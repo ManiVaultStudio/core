@@ -19,7 +19,6 @@
 #include "util/Icon.h"
 
 #include <QMainWindow>
-#include <QToolButton>
 #include <QPainter>
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -43,21 +42,15 @@ using namespace mv::gui;
 namespace mv
 {
 
-WorkspaceManager::WorkspaceManager() :
-    AbstractWorkspaceManager(),
-    _workspace(),
-    _mainDockManager(),
-    _viewPluginsDockManager(),
-    _viewPluginsDockWidget(),
+WorkspaceManager::WorkspaceManager(QObject* parent) :
+    AbstractWorkspaceManager(parent),
     _resetWorkspaceAction(this, "Reset"),
     _importWorkspaceAction(this, "Import"),
     _exportWorkspaceAction(this, "Export"),
     _exportWorkspaceAsAction(this, "Export As..."),
     _editWorkspaceSettingsAction(this, "Workspace Settings..."),
     _importWorkspaceFromProjectAction(this, "Import from project"),
-    _recentWorkspacesAction(this, getSettingsPrefix() + "RecentWorkspaces"),
-    _icon(),
-    _styleSheet()
+    _recentWorkspacesAction(this, getSettingsPrefix() + "RecentWorkspaces")
 {
     // Temporary solution for https://github.com/ManiVaultStudio/core/issues/274
     new QOpenGLWidget();
@@ -151,6 +144,11 @@ WorkspaceManager::WorkspaceManager() :
     styleSheetFile.close();
 }
 
+WorkspaceManager::~WorkspaceManager()
+{
+    reset();
+}
+
 void WorkspaceManager::initialize()
 {
 #ifdef WORKSPACE_MANAGER_VERBOSE
@@ -220,8 +218,9 @@ void WorkspaceManager::reset()
 
     beginReset();
     {
-        for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
-            plugin->destroy();
+        if (!isCoreDestroyed())
+			for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
+				plugin->destroy();
     }
     endReset();
 }

@@ -135,13 +135,16 @@ Task::~Task()
     for (auto& timer : _timers)
         timer.stop();
 
+    if (core() && core()->isAboutToBeDestroyed())
+        return;
+        
     if (hasParentTask())
         getParentTask()->removeChildTask(this);
 
     for (auto childTask : _childTasks)
         childTask->setParentTask(nullptr);
 
-    if (core() != nullptr && core()->isInitialized())
+    if (core() != nullptr && core()->isInitialized() && !core()->isAboutToBeDestroyed())
         tasks().removeTask(this);
 }
 

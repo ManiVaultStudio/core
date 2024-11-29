@@ -24,8 +24,8 @@ using namespace mv::util;
 namespace mv
 {
 
-SettingsManager::SettingsManager() :
-    AbstractSettingsManager(),
+SettingsManager::SettingsManager(QObject* parent) :
+    AbstractSettingsManager(parent),
     _editSettingsAction(this, "Settings..."),
     _parametersSettingsAction(this),
     _miscellaneousSettingsAction(this),
@@ -48,6 +48,11 @@ SettingsManager::SettingsManager() :
     auto mainWindow = Application::topLevelWidgets().first();
 
     mainWindow->addAction(&_editSettingsAction);
+}
+
+SettingsManager::~SettingsManager()
+{
+    reset();
 }
 
 void SettingsManager::initialize()

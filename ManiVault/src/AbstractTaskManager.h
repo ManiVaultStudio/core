@@ -7,7 +7,6 @@
 #include "AbstractManager.h"
 #include "Task.h"
 
-#include "models/TasksTreeModel.h"
 #include "models/TasksListModel.h"
 
 #ifdef _DEBUG
@@ -35,19 +34,16 @@ public:
 public:
 
     /**
-     * Construct progress manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractTaskManager(QObject* parent = nullptr) :
+    AbstractTaskManager(QObject* parent) :
         AbstractManager(parent, "Tasks")
     {
     }
 
-    virtual ~AbstractTaskManager() { }
-
     /** Perform manager startup initialization */
-    void initialize() override {
-    }
+    void initialize() override {}
 
     /**
      * Get all tasks
@@ -60,7 +56,7 @@ public:
      * @return Vector of tasks
      */
     template<typename TaskHandlerType>
-    inline Tasks getTasksByHandlerTypeAndStatus(const Task::Status& status) {
+    Tasks getTasksByHandlerTypeAndStatus(const Task::Status& status) {
         Tasks tasks = getTasks();
         Tasks tasksByHandlerType;
 

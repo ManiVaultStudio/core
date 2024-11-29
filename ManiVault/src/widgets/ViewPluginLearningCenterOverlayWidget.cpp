@@ -16,10 +16,8 @@
 #include <QResizeEvent>
 
 #ifdef _DEBUG
-    #define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
+    //#define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
 #endif
-
-//#define VIEW_PLUGIN_LEARNING_CENTER_OVERLAY_WIDGET_VERBOSE
 
 using namespace mv::util;
 

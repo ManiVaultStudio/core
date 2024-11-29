@@ -11,8 +11,6 @@
 
 #include <actions/RecentFilesAction.h>
 
-#include <DockAreaWidget.h>
-
 class QMainWindow;
 
 namespace mv
@@ -53,8 +51,14 @@ public:
 
 public:
 
-    /** Default constructor */
-    WorkspaceManager();
+    /**
+     * Construct manager with pointer to \p parent object
+     * @param parent Pointer to parent object
+     */
+    WorkspaceManager(QObject* parent);
+
+    /** Reset when destructed */
+    ~WorkspaceManager() override;
 
     /** Perform manager startup initialization */
     void initialize() override;

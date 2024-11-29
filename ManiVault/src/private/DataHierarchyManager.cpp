@@ -7,8 +7,6 @@
 
 #include <util/Exception.h>
 
-#include <QMessageBox>
-
 #include <algorithm>
 #include <stdexcept>
 
@@ -21,9 +19,8 @@ using namespace mv::util;
 namespace mv
 {
 
-DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
-    AbstractDataHierarchyManager(),
-    _items()
+DataHierarchyManager::DataHierarchyManager(QObject* parent) :
+    AbstractDataHierarchyManager(parent)
 {
 }
 

@@ -38,10 +38,10 @@ class CORE_EXPORT AbstractSettingsManager : public AbstractManager
 public:
 
     /**
-     * Construct settings manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractSettingsManager(QObject* parent = nullptr) :
+    AbstractSettingsManager(QObject* parent) :
         AbstractManager(parent, "Settings")
     {
     }
@@ -74,7 +74,7 @@ public: // Global settings actions
      * @return Pointer to plugin global settings of \p ActionType (if available, otherwise returns a nullptr)
      */
     template<typename ActionType>
-    inline ActionType* getPluginGlobalSettingsGroupAction(const QString& kind) {
+    ActionType* getPluginGlobalSettingsGroupAction(const QString& kind) {
         return dynamic_cast<ActionType*>(getPluginGlobalSettingsGroupAction(kind));
     }
 
@@ -91,7 +91,7 @@ public: // Global settings actions
     * @return Pointer to plugin global settings of \p ActionType (if available, otherwise returns a nullptr)
     */
     template<typename ActionType>
-    inline ActionType* getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin) {
+    ActionType* getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin) {
         return dynamic_cast<ActionType*>(getPluginGlobalSettingsGroupAction(plugin));
     }
 };

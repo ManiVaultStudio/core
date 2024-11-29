@@ -8,11 +8,8 @@
 
 #include <AbstractDataManager.h>
 
-#include <map>
 #include <unordered_map>
 #include <memory>
-#include <exception>
-#include <functional>
 
 namespace mv
 {
@@ -44,13 +41,13 @@ class DataManager final : public mv::AbstractDataManager
 public:
 
     /**
-     * Construct data manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    DataManager(QObject* parent = nullptr);
+    DataManager(QObject* parent);
 
-    /** Reset the data manager upon destruction */
-    ~DataManager();
+    /** Reset when destructed */
+    ~DataManager() override;
 
     /** Perform manager startup initialization */
     void initialize() override;

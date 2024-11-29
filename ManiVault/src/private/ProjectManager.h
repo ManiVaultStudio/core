@@ -25,10 +25,13 @@ class ProjectManager final : public mv::AbstractProjectManager
 public:
 
     /**
-     * Creates a new project manager from with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    ProjectManager(QObject* parent = nullptr);
+    ProjectManager(QObject* parent);
+
+    /** Reset when destructed */
+    ~ProjectManager() override;
 
     /** Perform manager startup initialization */
     void initialize() override;

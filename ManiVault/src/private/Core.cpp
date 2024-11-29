@@ -4,9 +4,6 @@
 
 #include "Core.h"
 
-#include "ModalTask.h"
-#include "ForegroundTask.h"
-
 #include "ActionsManager.h"
 #include "PluginManager.h"
 #include "EventManager.h"
@@ -17,6 +14,8 @@
 #include "ProjectManager.h"
 #include "SettingsManager.h"
 #include "HelpManager.h"
+
+#include "Application.h"
 
 //#define CORE_VERBOSE
 
@@ -29,33 +28,39 @@ namespace mv {
 
 Core::Core() :
     CoreInterface(),
-    _initialized(false)
+    _initialized(false),
+    _aboutToBeDestroyed(false)
 {
+    connect(Application::current(), &QCoreApplication::aboutToQuit, this, [this]() -> void {
+        _aboutToBeDestroyed = true;
+
+        for (auto& manager : _managers)
+            manager->setCoreIsDestroyed();
+
+    	reset();
+
+        _managers.clear();
+    });
 }
 
 Core::~Core()
 {
-    for (auto& manager : _managers)
-    {
-        qDebug() << "Reset " << manager->metaObject()->className();
-        manager->reset();
-    }
 }
 
 void Core::createManagers()
 {
     _managers.resize(static_cast<int>(ManagerType::Count));
 
-    _managers[static_cast<int>(ManagerType::Actions)]       = new ActionsManager();
-    _managers[static_cast<int>(ManagerType::Plugins)]       = new PluginManager();
-    _managers[static_cast<int>(ManagerType::Events)]        = new EventManager();
-    _managers[static_cast<int>(ManagerType::Data)]          = new DataManager();
-    _managers[static_cast<int>(ManagerType::DataHierarchy)] = new DataHierarchyManager();
-    _managers[static_cast<int>(ManagerType::Tasks)]         = new TaskManager();
-    _managers[static_cast<int>(ManagerType::Workspaces)]    = new WorkspaceManager();
-    _managers[static_cast<int>(ManagerType::Projects)]      = new ProjectManager();
-    _managers[static_cast<int>(ManagerType::Settings)]      = new SettingsManager();
-    _managers[static_cast<int>(ManagerType::Help)]          = new HelpManager();
+    _managers[static_cast<int>(ManagerType::Actions)]       = std::make_unique<ActionsManager>(this);
+    _managers[static_cast<int>(ManagerType::Plugins)]       = std::make_unique<PluginManager>(this);
+    _managers[static_cast<int>(ManagerType::Events)]        = std::make_unique<EventManager>(this);
+    _managers[static_cast<int>(ManagerType::Data)]          = std::make_unique<DataManager>(this);
+    _managers[static_cast<int>(ManagerType::DataHierarchy)] = std::make_unique<DataHierarchyManager>(this);
+    _managers[static_cast<int>(ManagerType::Tasks)]         = std::make_unique<TaskManager>(this);
+    _managers[static_cast<int>(ManagerType::Workspaces)]    = std::make_unique<WorkspaceManager>(this);
+    _managers[static_cast<int>(ManagerType::Projects)]      = std::make_unique<ProjectManager>(this);
+    _managers[static_cast<int>(ManagerType::Settings)]      = std::make_unique<SettingsManager>(this);
+    _managers[static_cast<int>(ManagerType::Help)]          = std::make_unique<HelpManager>(this);
 
     setManagersCreated();
 }
@@ -124,59 +129,64 @@ bool Core::isInitialized() const
     return _initialized;
 }
 
+bool Core::isAboutToBeDestroyed() const
+{
+    return _aboutToBeDestroyed;
+}
+
 AbstractManager* Core::getManager(const ManagerType& managerType)
 {
-    return _managers[static_cast<int>(managerType)];
+    return _managers[static_cast<int>(managerType)].get();
 }
 
 AbstractActionsManager& Core::getActionsManager()
 {
-    return *static_cast<AbstractActionsManager*>(getManager(ManagerType::Actions));
+    return *dynamic_cast<AbstractActionsManager*>(getManager(ManagerType::Actions));
 }
 
 AbstractPluginManager& Core::getPluginManager()
 {
-    return *static_cast<AbstractPluginManager*>(getManager(ManagerType::Plugins));
+    return *dynamic_cast<AbstractPluginManager*>(getManager(ManagerType::Plugins));
 }
 
 AbstractEventManager& Core::getEventManager()
 {
-    return *static_cast<AbstractEventManager*>(getManager(ManagerType::Events));
+    return *dynamic_cast<AbstractEventManager*>(getManager(ManagerType::Events));
 }
 
 AbstractDataManager& Core::getDataManager()
 {
-    return *static_cast<AbstractDataManager*>(getManager(ManagerType::Data));
+    return *dynamic_cast<AbstractDataManager*>(getManager(ManagerType::Data));
 }
 
 AbstractDataHierarchyManager& Core::getDataHierarchyManager()
 {
-    return *static_cast<AbstractDataHierarchyManager*>(getManager(ManagerType::DataHierarchy));
+    return *dynamic_cast<AbstractDataHierarchyManager*>(getManager(ManagerType::DataHierarchy));
 }
 
 AbstractWorkspaceManager& Core::getWorkspaceManager()
 {
-    return *static_cast<AbstractWorkspaceManager*>(getManager(ManagerType::Workspaces));
+    return *dynamic_cast<AbstractWorkspaceManager*>(getManager(ManagerType::Workspaces));
 }
 
 AbstractTaskManager& Core::getTaskManager()
 {
-    return *static_cast<AbstractTaskManager*>(getManager(ManagerType::Tasks));
+    return *dynamic_cast<AbstractTaskManager*>(getManager(ManagerType::Tasks));
 }
 
 AbstractProjectManager& Core::getProjectManager()
 {
-    return *static_cast<AbstractProjectManager*>(getManager(ManagerType::Projects));
+    return *dynamic_cast<AbstractProjectManager*>(getManager(ManagerType::Projects));
 }
 
 AbstractSettingsManager& Core::getSettingsManager()
 {
-    return *static_cast<AbstractSettingsManager*>(getManager(ManagerType::Settings));
+    return *dynamic_cast<AbstractSettingsManager*>(getManager(ManagerType::Settings));
 }
 
 mv::AbstractHelpManager& Core::getHelpManager()
 {
-    return *static_cast<AbstractHelpManager*>(getManager(ManagerType::Help));
+    return *dynamic_cast<AbstractHelpManager*>(getManager(ManagerType::Help));
 }
 
 }

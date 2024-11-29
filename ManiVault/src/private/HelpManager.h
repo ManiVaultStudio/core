@@ -16,8 +16,14 @@ class HelpManager final : public mv::AbstractHelpManager
 
 public:
 
-    /** Default constructor */
-    HelpManager();
+    /**
+     * Construct manager with pointer to \p parent object
+     * @param parent Pointer to parent object
+     */
+    HelpManager(QObject* parent);
+
+    /** Reset when destructed */
+    ~HelpManager() override;
 
     /** Perform event manager startup initialization */
     void initialize() override;
@@ -30,25 +36,25 @@ public:
      * @param tags Fitler tags (returns all videos if empty)
      * @return Vector of videos
      */
-    mv::util::Videos getVideos(const QStringList& tags) const override;
+    util::Videos getVideos(const QStringList& tags) const override;
 
 public: // Action getters
 
-    mv::gui::ToggleAction& getShowLearningCenterAction() override { return _showLearningCenterAction; }
-    mv::gui::TriggerAction& getToDiscordAction() override { return _toDiscordAction; }
-    mv::gui::TriggerAction& getToWebsiteAction() override { return _toWebsiteAction; }
-    mv::gui::TriggerAction& getToWikiAction() override { return _toWikiAction; }
-    mv::gui::TriggerAction& getToRepositoryAction() override { return _toRepositoryAction; }
-    mv::gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; }
+    gui::ToggleAction& getShowLearningCenterAction() override { return _showLearningCenterAction; }
+    gui::TriggerAction& getToDiscordAction() override { return _toDiscordAction; }
+    gui::TriggerAction& getToWebsiteAction() override { return _toWebsiteAction; }
+    gui::TriggerAction& getToWikiAction() override { return _toWikiAction; }
+    gui::TriggerAction& getToRepositoryAction() override { return _toRepositoryAction; }
+    gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; }
 
 private:
-    mv::gui::ToggleAction       _showLearningCenterAction;      /** Toggle action for toggling the learning center */
-    mv::gui::TriggerAction      _toDiscordAction;               /** External link to discord */
-    mv::gui::TriggerAction      _toWebsiteAction;               /** External link to website */
-    mv::gui::TriggerAction      _toWikiAction;                  /** External link to wiki */
-    mv::gui::TriggerAction      _toRepositoryAction;            /** External link to repository */
-    mv::gui::TriggerAction      _toLearningCenterAction;        /** Trigger action to go the learning center */
-    HelpManagerVideosModel      _videosModel;                   /** Videos model */
+    gui::ToggleAction       _showLearningCenterAction;      /** Toggle action for toggling the learning center */
+    gui::TriggerAction      _toDiscordAction;               /** External link to discord */
+    gui::TriggerAction      _toWebsiteAction;               /** External link to website */
+    gui::TriggerAction      _toWikiAction;                  /** External link to wiki */
+    gui::TriggerAction      _toRepositoryAction;            /** External link to repository */
+    gui::TriggerAction      _toLearningCenterAction;        /** Trigger action to go the learning center */
+    HelpManagerVideosModel  _videosModel;                   /** Videos model */
     
 };
 

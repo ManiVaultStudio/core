@@ -75,7 +75,8 @@ WidgetAction::~WidgetAction()
     if (!core() || !core()->isInitialized())
         return;
 
-    actions().removeAction(this);
+    if (!core()->isAboutToBeDestroyed())
+		actions().removeAction(this);
 }
 bool WidgetAction::event(QEvent* event)
 {

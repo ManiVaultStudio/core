@@ -21,10 +21,7 @@
 
 #include <QDebug>
 #include <QJsonArray>
-#include <QJsonObject>
 #include <QJsonValue>
-#include <QLibrary>
-#include <QMessageBox>
 #include <QPluginLoader>
 #include <QSet>
 
@@ -32,7 +29,7 @@
 #include <utility>
 #include <stdexcept>
 
-#include "models/AbstractPluginsModel.h"
+#include "models/PluginsListModel.h"
 
 #ifdef _DEBUG
     //#define PLUGIN_MANAGER_VERBOSE
@@ -44,7 +41,8 @@ using namespace util;
 using namespace plugin;
 using namespace gui;
 
-PluginManager::PluginManager() :
+PluginManager::PluginManager(QObject* parent) :
+    AbstractPluginManager(parent),
     _listModel(nullptr),
     _treeModel(nullptr)
 {

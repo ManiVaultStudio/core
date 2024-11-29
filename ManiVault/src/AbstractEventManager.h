@@ -26,15 +26,13 @@ class CORE_EXPORT AbstractEventManager : public AbstractManager
 public:
 
     /**
-     * Construct event manager with \p parent object
+     * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractEventManager(QObject* parent = nullptr) :
+    AbstractEventManager(QObject* parent) :
         AbstractManager(parent, "Events")
     {
     }
-
-    virtual ~AbstractEventManager() { }
 
     /**
      * Notify listeners that a new dataset has been added to the core
