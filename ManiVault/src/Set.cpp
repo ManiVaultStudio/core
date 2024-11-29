@@ -14,6 +14,8 @@
 
 #include "Application.h"
 
+#include <algorithm>
+
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -334,6 +336,31 @@ void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, m
 {
     _linkedData.emplace_back(toSmartPointer(), targetDataSet);
     _linkedData.back().setMapping(mapping);
+}
+
+void DatasetImpl::removeAllLinkedData()
+{
+    _linkedData.clear();
+}
+
+void DatasetImpl::removeLinkedDataset(const mv::Dataset<DatasetImpl>& targetDataSet)
+{
+    // erase-remove idiom (https://en.wikibooks.org/wiki/More_C++_Idioms/Erase-Remove) 
+    // removes all mappings to targetDataSet from _linkedData
+    _linkedData.erase(std::remove_if(_linkedData.begin(),
+        _linkedData.end(),
+        [targetDataSet](const mv::LinkedData& linkedSel) {return linkedSel.getTargetDataset() == targetDataSet; }),
+        _linkedData.end());
+}
+
+void DatasetImpl::removeLinkedDataMapping(const QString& mappingID)
+{
+    // removes specific mapping from _linkedData
+    _linkedData.erase(std::remove_if(_linkedData.begin(),
+        _linkedData.end(),
+        [mappingID](const mv::LinkedData& linkedSel) {return linkedSel.getId() == mappingID; }),
+        _linkedData.end());
+
 }
 
 DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/, const QString& id /*= ""*/) :

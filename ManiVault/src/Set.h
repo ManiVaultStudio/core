@@ -484,6 +484,23 @@ public: // Linked data
 
     void addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, mv::SelectionMap& mapping);
 
+    /**
+     * Removes all mappings of global selection indices from this dataset
+     */
+    void removeAllLinkedData();
+
+    /**
+     * Removes mappings of global selection indices from this dataset to a target dataset
+     * @param targetDataSet The target dataset
+     */
+    void removeLinkedDataset(const mv::Dataset<DatasetImpl>& targetDataSet);
+
+    /**
+     * Removes a mapping from this dataset
+     * @param mappingID unique identifier (as obtained with getId()) of to-be-removed mapping
+     */
+    void removeLinkedDataMapping(const QString& mappingID);
+
     const std::vector<mv::LinkedData>& getLinkedData() const;
 
     std::vector<mv::LinkedData>& getLinkedData();
