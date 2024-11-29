@@ -484,6 +484,8 @@ public: // Linked data
 
     void addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, mv::SelectionMap& mapping);
 
+    void addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, mv::SelectionMap&& mapping);
+
     /**
      * Removes all mappings of global selection indices from this dataset
      */

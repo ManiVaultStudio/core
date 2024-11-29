@@ -338,6 +338,12 @@ void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, m
     _linkedData.back().setMapping(mapping);
 }
 
+void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, mv::SelectionMap&& mapping)
+{
+    _linkedData.emplace_back(toSmartPointer(), targetDataSet);
+    _linkedData.back().setMapping(std::move(mapping));
+}
+
 void DatasetImpl::removeAllLinkedData()
 {
     _linkedData.clear();

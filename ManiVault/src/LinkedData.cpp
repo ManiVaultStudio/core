@@ -194,6 +194,11 @@ void LinkedData::setMapping(SelectionMap& mapping)
     _mapping = mapping;
 }
 
+void LinkedData::setMapping(SelectionMap&& mapping)
+{
+    _mapping = std::move(mapping);
+}
+
 void LinkedData::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
