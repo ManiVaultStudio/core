@@ -172,7 +172,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         assert(_sourceDataset.isValid());
     }
 
-    // For backwards compatability, check PluginVersion
+    // For backwards compatibility, check PluginVersion
     if (!(variantMap["PluginVersion"] == "No Version") && !variantMap["Full"].toBool())
     {        
         if (variantMap.contains("FullDatasetID"))
