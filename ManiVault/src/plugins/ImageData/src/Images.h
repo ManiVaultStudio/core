@@ -206,6 +206,18 @@ public:
     void getMaskData(std::vector<std::uint8_t>& maskData);
 
     /**
+     * Set mask image data
+     * @param maskData Mask scalar data
+     */
+    void setMaskData(const std::vector<std::uint8_t>& maskData);
+
+    /**
+     * Set mask image data
+     * @param maskData Mask scalar data
+     */
+    void setMaskData(std::vector<std::uint8_t>&& maskData);
+
+    /**
      * Get selection data
      * @param selectionImageData Image data for the selection
      * @param selectedIndices Selected pixel indices

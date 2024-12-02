@@ -356,6 +356,15 @@ void Images::getMaskData(std::vector<std::uint8_t>& maskData)
 
     maskData = _maskData;
 }
+
+void Images::setMaskData(const std::vector<std::uint8_t>& maskData)
+{
+    _maskData = maskData;
+}
+
+void Images::setMaskData(std::vector<std::uint8_t>&& maskData)
+{
+    _maskData = std::move(maskData);
 }
 
 void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std::vector<std::uint32_t>& selectedIndices, QRect& selectionBoundaries)
