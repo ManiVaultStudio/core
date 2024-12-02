@@ -656,21 +656,20 @@ void Images::computeMaskData()
 {
     //Timer timer(__FUNCTION__);
 
+    // Only compute if necessary
+    if (_maskData.size() == getNumberOfPixels())
+        return;
+    else
+        _maskData.resize(getNumberOfPixels(), 0);
+
     // Get reference to input dataset
     auto inputDataset = getParent();
-
-    // Allocate mask data
-    if (_maskData.size() != getNumberOfPixels())
-        _maskData.resize(getNumberOfPixels());
 
     // Generate mask data for points
     if (inputDataset->getDataType() == PointType) {
 
         // Obtain reference to the points dataset
         auto points = Dataset<Points>(inputDataset);
-
-        // All masked by default
-        std::fill(_maskData.begin(), _maskData.end(), 0);
 
         // Global indices into data
         std::vector<std::uint32_t> globalIndices;
@@ -713,9 +712,6 @@ void Images::computeMaskData()
 
         // Obtain reference to the clusters dataset
         auto clusters = Dataset<Clusters>(inputDataset);
-
-        // Mask out all points
-        std::fill(_maskData.begin(), _maskData.end(), 0);
 
         // Get clusters input points dataset
         auto points = clusters->getParent()->getSourceDataset<Points>();
