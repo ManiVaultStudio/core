@@ -351,7 +351,7 @@ void Images::getImageScalarData(std::uint32_t imageIndex, QVector<float>& scalar
 
 void Images::getMaskData(std::vector<std::uint8_t>& maskData)
 {
-    if (!_maskData.empty())
+    if (_maskData.empty())
         computeMaskData();
 
     maskData = _maskData;
