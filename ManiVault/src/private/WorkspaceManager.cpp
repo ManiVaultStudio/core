@@ -196,11 +196,13 @@ void WorkspaceManager::initialize()
 
             if (!viewPlugin)
                 return;
-            
-            if (_mainDockManager && viewPlugin->isSystemViewPlugin())
-                _mainDockManager->removeViewPluginDockWidget(viewPlugin);
-            else if(_viewPluginsDockManager)
-                _viewPluginsDockManager->removeViewPluginDockWidget(viewPlugin);
+
+            //if (!mv::plugins().isResetting()) {
+                if (_mainDockManager && viewPlugin->isSystemViewPlugin())
+                    _mainDockManager->removeViewPluginDockWidget(viewPlugin);
+                else if (_viewPluginsDockManager)
+                    _viewPluginsDockManager->removeViewPluginDockWidget(viewPlugin);
+            //}
         });
 
         connect(&Application::core()->getProjectManager(), &AbstractProjectManager::projectCreated, this, [this]() -> void {
@@ -219,8 +221,8 @@ void WorkspaceManager::reset()
     beginReset();
     {
         if (!isCoreDestroyed())
-			for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
-				plugin->destroy();
+            for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
+                plugin->destroy();
     }
     endReset();
 }
@@ -238,6 +240,7 @@ void WorkspaceManager::newWorkspace()
         qDebug() << __FUNCTION__;
 #endif
 
+        reset();
         createWorkspace();
     }
     catch (std::exception& e)
@@ -511,7 +514,7 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
     else
         _viewPluginsDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
 
-    if (projects().isOpeningProject() || projects().isOpeningProject())
+    if (projects().isOpeningProject() || projects().isImportingProject())
         return;
 
     viewPlugin->getPresetsAction().loadDefaultPreset();
@@ -693,7 +696,6 @@ WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocati
 
             workspaceLocations << WorkspaceLocation(workspace.getTitleAction().getString(), recentFilePath, WorkspaceLocation::Type::Recent);
         }
-            
     }
     
     return workspaceLocations;

@@ -17,7 +17,6 @@
 
 #include <DockWidgetTab.h>
 #include <DockAreaWidget.h>
-#include <DockAreaTitleBar.h>
 #include <AutoHideDockContainer.h>
 
 #ifdef _DEBUG
@@ -70,6 +69,9 @@ ViewPluginDockWidget::~ViewPluginDockWidget()
 #endif
 
 	serializationTasks.remove(getId());
+    active.removeOne(this);
+
+    //takeWidget();
 }
 
 QString ViewPluginDockWidget::getTypeString() const
@@ -88,19 +90,6 @@ void ViewPluginDockWidget::initialize()
 
 	connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
 		_viewPlugin->getLearningCenterAction().getViewHelpAction().trigger();
-	});
-
-	connect(&plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
-		if (plugin != _viewPlugin)
-			return;
-
-#ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
-        qDebug() << "Remove active view plugin dock widget" << plugin->getGuiName();
-#endif
-
-		active.removeOne(this);
-
-		takeWidget();
 	});
 
 	connect(&_settingsMenu, &QMenu::aboutToShow, this, [this]() -> void {
@@ -172,12 +161,12 @@ void ViewPluginDockWidget::loadViewPlugin()
 		setViewPlugin(viewPlugin);
 }
 
-ViewPlugin* ViewPluginDockWidget::getViewPlugin()
+ViewPlugin* ViewPluginDockWidget::getViewPlugin() const
 {
 	return _viewPlugin;
 }
 
-void ViewPluginDockWidget::restoreViewPluginState()
+void ViewPluginDockWidget::restoreViewPluginState() const
 {
 	if (!_viewPlugin)
 		return;
@@ -470,7 +459,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 		toggleView(toggled);
 	});
 
-	connect(this, &CDockWidget::viewToggled, this, [this, viewPlugin](bool toggled) {
+	connect(this, &CDockWidget::viewToggled, viewPlugin, [this, viewPlugin](bool toggled) {
 		QSignalBlocker toggleActionBlocker(&viewPlugin->getVisibleAction());
 
 		viewPlugin->getVisibleAction().setChecked(toggled);

@@ -133,10 +133,10 @@ public:
      * Get the view plugin
      * @return Pointer to view plugin (might be nullptr)
      */
-    mv::plugin::ViewPlugin* getViewPlugin();
+    mv::plugin::ViewPlugin* getViewPlugin() const;
 
     /** Restores the view plugin state */
-    void restoreViewPluginState();
+    void restoreViewPluginState() const;
 
     /** Restores the view plugin states of all active view plugins */
     static void restoreViewPluginStates();
@@ -222,5 +222,3 @@ protected:
     friend class ViewPluginsDockWidget;
     friend class WorkspaceManager;
 };
-
-using ViewPluginDockWidgets = QVector<QPointer<ViewPluginDockWidget>>;

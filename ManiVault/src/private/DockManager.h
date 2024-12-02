@@ -41,7 +41,8 @@ public:
     using CDockManager::grab;
     using CDockManager::setStyleSheet;
     using CDockManager::addDockWidgetFloating;
-    
+
+    using ViewPluginDockWidgets = std::vector<std::shared_ptr<ViewPluginDockWidget>>;
     
     /**
      * Constructs a dock manager derived from the advanced docking system
@@ -63,14 +64,14 @@ public:
      * Get view plugin dock widgets
      * @return Vector of pointers to plugin dock widgets
      */
-    const ViewPluginDockWidgets getViewPluginDockWidgets() const;
+    ViewPluginDockWidgets getViewPluginDockWidgets() const;
 
     /**
      * Find the dock area widget where the widget of \p viewPlugin resides
      * @param viewPlugin Pointer to view plugin that holds the widget
      * @return Pointer to ADS dock widget area (if found, otherwise nullptr)
      */
-    ads::CDockAreaWidget* findDockAreaWidget(mv::plugin::ViewPlugin* viewPlugin);
+    ads::CDockAreaWidget* findDockAreaWidget(mv::plugin::ViewPlugin* viewPlugin) const;
 
     /**
      * Remove \p viewPlugin from the dock manager
@@ -82,10 +83,10 @@ public:
     void reset();
 
     /** Adds a ViewPluginDockWidget */
-    void addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* Dockwidget, ads::CDockAreaWidget* DockAreaWidget = nullptr);
+    void addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* dockWidget, ads::CDockAreaWidget* dockAreaWidget = nullptr);
 
     /** Removes a ViewPluginDockWidget */
-    void removeViewPluginDockWidget(ads::CDockWidget* Dockwidget);
+    void removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDockWidget);
 
     /** get as QWidget pointer*/
     QWidget* getWidget();
@@ -93,7 +94,7 @@ public:
 public: // Serialization task
 
     /** Get task for reporting serialization progress */
-    mv::Task* getSerializationTask();
+    mv::Task* getSerializationTask() const;
 
     /**
      * Set task for reporting serialization progress to \p serializationTask
@@ -119,10 +120,8 @@ public: // Serialization
     friend class QPointer<DockManager>;
 
 private:
-    QString     _name;                  /** Dock manager name */
-    mv::Task*   _serializationTask;     /** For reporting serialization progress */
-    mv::Task    _layoutTask;            /** For reporting layout progress */
-
-private:
-    ViewPluginDockWidgets _orderedViewPluginDockWidgets; /* the ViewPluginDockWidgets in the order in which they were created */
+    QString                 _name;                      /** Dock manager name */
+    mv::Task*               _serializationTask;         /** For reporting serialization progress */
+    mv::Task                _layoutTask;                /** For reporting layout progress */
+    ViewPluginDockWidgets   _viewPluginDockWidgets;     /* The ViewPluginDockWidgets in the order in which they were created */
 };
