@@ -35,7 +35,7 @@ public:
     DockWidget(const QString& title, QWidget* parent = nullptr);
 
     /** Destructor */
-    ~DockWidget();
+    ~DockWidget() override;
 
     /**
      * Get string that describes the dock widget type
@@ -68,7 +68,7 @@ public:
 protected:
     /**
      * Override QObject's event handling
-     * @return Boolean Wheter the event was recognized and processed
+     * @return Boolean Whether the event was recognized and processed
      */
     bool event(QEvent* event) override;
 

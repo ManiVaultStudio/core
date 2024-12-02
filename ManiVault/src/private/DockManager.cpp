@@ -55,20 +55,21 @@ DockManager::~DockManager()
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
+
     reset();
 }
 
-ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
+DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
 {
-    return _orderedViewPluginDockWidgets;
+    return _viewPluginDockWidgets;
 }
 
-const ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
+DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
 {
     return const_cast<DockManager*>(this)->getViewPluginDockWidgets();
 }
 
-ads::CDockAreaWidget* DockManager::findDockAreaWidget(mv::plugin::ViewPlugin* viewPlugin)
+CDockAreaWidget* DockManager::findDockAreaWidget(mv::plugin::ViewPlugin* viewPlugin) const
 {
     if (viewPlugin == nullptr)
         return nullptr;
@@ -108,33 +109,40 @@ void DockManager::reset()
 
     CDockManager::removeAllDockAreas();
 
-    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
+    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
         removeViewPluginDockWidget(viewPluginDockWidget.get());
 }
 
-void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* Dockwidget, ads::CDockAreaWidget* DockAreaWidget)
+void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* dockWidget, ads::CDockAreaWidget* dockAreaWidget)
 {
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
     
-    ViewPluginDockWidget* viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(Dockwidget);
-    
-    if (viewPluginDockWidget)
-        _orderedViewPluginDockWidgets << viewPluginDockWidget;
+    if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
+        _viewPluginDockWidgets.push_back(std::shared_ptr<ViewPluginDockWidget>(viewPluginDockWidget));
 
-    CDockManager::addDockWidget(area, Dockwidget, DockAreaWidget);
+    CDockManager::addDockWidget(area, dockWidget, dockAreaWidget);
 }
 
-void DockManager::removeViewPluginDockWidget(ads::CDockWidget* Dockwidget)
+void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDockWidget)
 {
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
-    
-    CDockManager::removeDockWidget(Dockwidget);
 
-    _orderedViewPluginDockWidgets.removeAll(Dockwidget);
+    //viewPluginDockWidget->takeWidget();
+
+    auto shouldRemove = [viewPluginDockWidget](auto& viewPluginDockwidgetRemovalCandidate) -> bool {
+        return viewPluginDockwidgetRemovalCandidate->getId() == viewPluginDockWidget->getId();
+	};
+
+    //findDockAreaWidget(viewPluginDockWidget->getViewPlugin())->
+    //_viewPluginDockWidgets.erase(std::remove_if(_viewPluginDockWidgets.begin(), _viewPluginDockWidgets.end(), shouldRemove), _viewPluginDockWidgets.end());
+
+    CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
+
+    //delete viewPluginDockWidget;
 }
 
 QWidget* DockManager::getWidget()
@@ -236,7 +244,7 @@ QVariantMap DockManager::toVariantMap() const
     return variantMap;
 }
 
-Task* DockManager::getSerializationTask()
+Task* DockManager::getSerializationTask() const
 {
     return _serializationTask;
 }

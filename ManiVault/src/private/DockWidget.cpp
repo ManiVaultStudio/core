@@ -4,9 +4,6 @@
 
 #include "DockWidget.h"
 
-#include <ViewPlugin.h>
-
-#include <util/Serialization.h>
 #include <Application.h>
 
 #include <DockWidgetTab.h>

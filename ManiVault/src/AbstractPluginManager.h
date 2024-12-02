@@ -75,7 +75,7 @@ public: // Plugin creation/destruction
      * @return Pointer of \p PluginType to created plugin, nullptr if creation failed
      */
     template<typename PluginType>
-    inline PluginType* requestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets())
+    PluginType* requestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets())
     {
         return dynamic_cast<PluginType*>(requestPlugin(kind, inputDatasets, outputDatasets));
     }
@@ -108,12 +108,20 @@ public:
      */
     virtual plugin::ViewPlugin* requestViewPluginFloated(const QString& kind, Datasets datasets = Datasets()) = 0;
 
+public: // Destroy
+
     /**
      * Destroy \p plugin
      * @param plugin Pointer to the plugin that is to be destroyed
      */
     virtual void destroyPlugin(plugin::Plugin* plugin) = 0;
-    
+
+    /**
+     * Destroy plugin by \p pluginId
+     * @param pluginId Globally unique identifier of the plugin that is to be destroyed
+     */
+    virtual void destroyPluginById(const QString& pluginId) = 0;
+
 public: // Plugin factory
 
     /**
