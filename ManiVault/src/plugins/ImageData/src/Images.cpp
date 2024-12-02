@@ -273,7 +273,7 @@ void Images::getScalarData(const std::vector<std::uint32_t>& dimensionIndices, Q
                     getScalarDataForImageSequence(dimensionIndex, tempScalarData, tempScalarDataRange);
 
                     for (std::int32_t pixelIndex = 0; pixelIndex < numberOfPixels; pixelIndex++)
-                        scalarData[(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
+                        scalarData[static_cast<size_t>(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
 
                     componentIndex++;
                 }
@@ -289,7 +289,7 @@ void Images::getScalarData(const std::vector<std::uint32_t>& dimensionIndices, Q
                     getScalarDataForImageStack(dimensionIndex, tempScalarData, tempScalarDataRange);
 
                     for (std::int32_t pixelIndex = 0; pixelIndex < numberOfPixels; pixelIndex++)
-                        scalarData[(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
+                        scalarData[static_cast<size_t>(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
 
                     componentIndex++;
                 }
