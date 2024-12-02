@@ -360,11 +360,13 @@ void Images::getMaskData(std::vector<std::uint8_t>& maskData)
 void Images::setMaskData(const std::vector<std::uint8_t>& maskData)
 {
     _maskData = maskData;
+    updateVisibleRectangle();
 }
 
 void Images::setMaskData(std::vector<std::uint8_t>&& maskData)
 {
     _maskData = std::move(maskData);
+    updateVisibleRectangle();
 }
 
 void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std::vector<std::uint32_t>& selectedIndices, QRect& selectionBoundaries)
@@ -757,6 +759,11 @@ void Images::computeMaskData()
         }
     }
 
+    updateVisibleRectangle();
+}
+
+void Images::updateVisibleRectangle()
+{
     // Initialize visible rectangle with numeric extremes
     _visibleRectangle.setTop(std::numeric_limits<int>::max());
     _visibleRectangle.setBottom(std::numeric_limits<int>::lowest());
@@ -779,7 +786,6 @@ void Images::computeMaskData()
         _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinate.y()));
         _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), pixelCoordinate.y()));
     }
-    
 }
 
 QPoint Images::getPixelCoordinateFromPixelIndex(const std::int32_t& pixelIndex) const

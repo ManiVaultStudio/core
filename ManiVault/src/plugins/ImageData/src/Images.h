@@ -273,6 +273,12 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+private: // Internal Helper
+    /**
+     * Sets _visibleRectangle based on _maskData
+     */
+    void updateVisibleRectangle();
+
 private:
     std::vector<std::uint32_t>      _indices;               /** Selection indices */
     ImageData*                      _imageData;             /** Pointer to raw image data */
