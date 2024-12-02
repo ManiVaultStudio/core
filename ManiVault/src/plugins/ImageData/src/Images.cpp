@@ -352,9 +352,10 @@ void Images::getImageScalarData(std::uint32_t imageIndex, QVector<float>& scalar
 void Images::getMaskData(std::vector<std::uint8_t>& maskData)
 {
     if (!_maskData.empty())
-        maskData = _maskData;
-    else
         computeMaskData();
+
+    maskData = _maskData;
+}
 }
 
 void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std::vector<std::uint32_t>& selectedIndices, QRect& selectionBoundaries)
