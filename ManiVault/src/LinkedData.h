@@ -95,7 +95,9 @@ public:
     const Dataset<DatasetImpl> getTargetDataset() const { return _targetDataSet; }
 
     const SelectionMap& getMapping() const;
+
     void setMapping(SelectionMap& map);
+    void setMapping(SelectionMap&& map);
 
     /**
      * Load from variant map
