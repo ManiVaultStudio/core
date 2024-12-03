@@ -821,6 +821,19 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("ImageFilePaths"))
         setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
 
+    if (variantMap.contains("MaskData"))
+    {
+        auto size = _imageData->getImageSize();
+        _maskData.resize(static_cast<size_t>(size.width()) * size.height());
+        populateDataBufferFromVariantMap(variantMap["MaskData"].toMap(), (char*)_maskData.data());
+    }
+
+    if (variantMap.contains("VisibleRectangle"))
+    {
+        const auto visibleRectangle = variantMap["VisibleRectangle"].toMap();
+        _visibleRectangle = QRect(visibleRectangle["X"].toInt(), visibleRectangle["Y"].toInt(), visibleRectangle["Width"].toInt(), visibleRectangle["Height"].toInt());
+    }
+
     events().notifyDatasetDataChanged(this);
 }
 
@@ -834,6 +847,8 @@ QVariantMap Images::toVariantMap() const
     variantMap["ImageSize"]                     = QVariantMap({ { "Width", getImageSize().width() }, { "Height", getImageSize().height() } });
     variantMap["NumberOfComponentsPerPixel"]    = getNumberOfComponentsPerPixel();
     variantMap["ImageFilePaths"]                = getImageFilePaths();
+    variantMap["MaskData"]                      = rawDataToVariantMap((char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t), true);
+    variantMap["VisibleRectangle"]              = QVariantMap({ { "X", _visibleRectangle.x() }, { "Y", _visibleRectangle.y() },{ "Width", _visibleRectangle.width() }, { "Height", _visibleRectangle.height() } });
 
     return variantMap;
 }
