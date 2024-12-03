@@ -51,7 +51,7 @@ DockWidget::~DockWidget()
     qDebug() << __FUNCTION__ << getSerializationName();
 #endif
 
-    takeWidget();
+    //takeWidget();
 }
 
 bool DockWidget::event(QEvent* event)
