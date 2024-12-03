@@ -12,9 +12,16 @@
 
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
+#include <LinkedData.h>
 
 #include <ClusterData/ClusterData.h>
 #include <PointData/PointData.h>
+
+#include <cmath>
+#include <exception>
+#include <limits>
+#include <numeric>
+#include <stdexcept>
 
 #include <QDebug>
 
@@ -26,7 +33,8 @@ Images::Images(QString dataName, bool mayUnderive /*= false*/, const QString& gu
     _imageData(nullptr),
     _infoAction(),
     _visibleRectangle(),
-    _maskData()
+    _maskData(),
+    _maskDataGiven(false)
 {
     _imageData = getRawData<ImageData>();
 
@@ -273,7 +281,7 @@ void Images::getScalarData(const std::vector<std::uint32_t>& dimensionIndices, Q
                     getScalarDataForImageSequence(dimensionIndex, tempScalarData, tempScalarDataRange);
 
                     for (std::int32_t pixelIndex = 0; pixelIndex < numberOfPixels; pixelIndex++)
-                        scalarData[(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
+                        scalarData[static_cast<size_t>(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
 
                     componentIndex++;
                 }
@@ -289,7 +297,7 @@ void Images::getScalarData(const std::vector<std::uint32_t>& dimensionIndices, Q
                     getScalarDataForImageStack(dimensionIndex, tempScalarData, tempScalarDataRange);
 
                     for (std::int32_t pixelIndex = 0; pixelIndex < numberOfPixels; pixelIndex++)
-                        scalarData[(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
+                        scalarData[static_cast<size_t>(pixelIndex * numberOfComponentsPerPixel) + componentIndex] = tempScalarData[pixelIndex];
 
                     componentIndex++;
                 }
@@ -351,10 +359,31 @@ void Images::getImageScalarData(std::uint32_t imageIndex, QVector<float>& scalar
 
 void Images::getMaskData(std::vector<std::uint8_t>& maskData)
 {
-    if (!_maskData.empty())
-        maskData = _maskData;
-    else
+    if (_maskData.empty())
         computeMaskData();
+
+    maskData = _maskData;
+}
+
+void Images::setMaskData(const std::vector<std::uint8_t>& maskData)
+{
+    _maskData = maskData;
+    _maskDataGiven = true;
+    updateVisibleRectangle();
+}
+
+void Images::setMaskData(std::vector<std::uint8_t>&& maskData)
+{
+    _maskData = std::move(maskData);
+    _maskDataGiven = true;
+    updateVisibleRectangle();
+}
+
+void Images::resetMaskData()
+{
+    _maskData.clear();
+    _maskDataGiven = false;
+    updateVisibleRectangle();
 }
 
 void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std::vector<std::uint32_t>& selectedIndices, QRect& selectionBoundaries)
@@ -376,8 +405,6 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             // Clear the selected indices
             selectedIndices.clear();
             selectedIndices.reserve(getNumberOfPixels());
-
-            const auto imageWidth = getImageSize().width();
 
             // Fill selection data with non-selected
             std::fill(selectionImageData.begin(), selectionImageData.end(), 0);
@@ -418,8 +445,6 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             // Clear the selected indices
             selectedIndices.clear();
             selectedIndices.reserve(getNumberOfPixels());
-
-            const auto imageWidth = getImageSize().width();
 
             // Fill selection data with non-selected
             std::fill(selectionImageData.begin(), selectionImageData.end(), 0);
@@ -644,21 +669,25 @@ void Images::computeMaskData()
 {
     //Timer timer(__FUNCTION__);
 
-    // Get reference to input dataset
-    auto inputDataset = getParent();
-
+    // Only compute if necessary
+    if (_maskDataGiven)
+        return;
+        
     // Allocate mask data
     if (_maskData.size() != getNumberOfPixels())
         _maskData.resize(getNumberOfPixels());
+
+    // All masked by default
+    std::fill(_maskData.begin(), _maskData.end(), 0);
+
+    // Get reference to input dataset
+    auto inputDataset = getParent();
 
     // Generate mask data for points
     if (inputDataset->getDataType() == PointType) {
 
         // Obtain reference to the points dataset
         auto points = Dataset<Points>(inputDataset);
-
-        // All masked by default
-        std::fill(_maskData.begin(), _maskData.end(), 0);
 
         // Global indices into data
         std::vector<std::uint32_t> globalIndices;
@@ -702,9 +731,6 @@ void Images::computeMaskData()
         // Obtain reference to the clusters dataset
         auto clusters = Dataset<Clusters>(inputDataset);
 
-        // Mask out all points
-        std::fill(_maskData.begin(), _maskData.end(), 0);
-
         // Get clusters input points dataset
         auto points = clusters->getParent()->getSourceDataset<Points>();
         auto embedding = clusters->getParent();
@@ -747,6 +773,11 @@ void Images::computeMaskData()
         }
     }
 
+    updateVisibleRectangle();
+}
+
+void Images::updateVisibleRectangle()
+{
     // Initialize visible rectangle with numeric extremes
     _visibleRectangle.setTop(std::numeric_limits<int>::max());
     _visibleRectangle.setBottom(std::numeric_limits<int>::lowest());
@@ -769,7 +800,6 @@ void Images::computeMaskData()
         _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinate.y()));
         _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), pixelCoordinate.y()));
     }
-    
 }
 
 QPoint Images::getPixelCoordinateFromPixelIndex(const std::int32_t& pixelIndex) const
@@ -806,6 +836,22 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("ImageFilePaths"))
         setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
 
+    if (variantMap.contains("MaskData"))
+    {
+        auto size = _imageData->getImageSize();
+        _maskData.resize(static_cast<size_t>(size.width()) * size.height());
+        populateDataBufferFromVariantMap(variantMap["MaskData"].toMap(), (char*)_maskData.data());
+    }
+
+    if (variantMap.contains("MaskDataGiven"))
+        _maskDataGiven = variantMap["VisibleRectangle"].toBool();
+
+    if (variantMap.contains("VisibleRectangle"))
+    {
+        const auto visibleRectangle = variantMap["VisibleRectangle"].toMap();
+        _visibleRectangle = QRect(visibleRectangle["X"].toInt(), visibleRectangle["Y"].toInt(), visibleRectangle["Width"].toInt(), visibleRectangle["Height"].toInt());
+    }
+
     events().notifyDatasetDataChanged(this);
 }
 
@@ -819,6 +865,9 @@ QVariantMap Images::toVariantMap() const
     variantMap["ImageSize"]                     = QVariantMap({ { "Width", getImageSize().width() }, { "Height", getImageSize().height() } });
     variantMap["NumberOfComponentsPerPixel"]    = getNumberOfComponentsPerPixel();
     variantMap["ImageFilePaths"]                = getImageFilePaths();
+    variantMap["MaskData"]                      = rawDataToVariantMap((char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t), true);
+    variantMap["MaskDataGiven"]                 = _maskDataGiven;
+    variantMap["VisibleRectangle"]              = QVariantMap({ { "X", _visibleRectangle.x() }, { "Y", _visibleRectangle.y() },{ "Width", _visibleRectangle.width() }, { "Height", _visibleRectangle.height() } });
 
     return variantMap;
 }
