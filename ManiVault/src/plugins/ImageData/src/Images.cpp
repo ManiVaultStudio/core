@@ -692,6 +692,9 @@ void Images::computeMaskData()
         // Get global indices from points
         points->getGlobalIndices(globalIndices);
 
+        // All masked by default
+        std::fill(_maskData.begin(), _maskData.end(), 0);
+
         // Loop over all point indices and unmask them
         points->visitData([this, &points, &globalIndices](auto pointData) {
             for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
@@ -727,6 +730,9 @@ void Images::computeMaskData()
 
         // Obtain reference to the clusters dataset
         auto clusters = Dataset<Clusters>(inputDataset);
+
+        // Mask out all points
+        std::fill(_maskData.begin(), _maskData.end(), 0);
 
         // Get clusters input points dataset
         auto points = clusters->getParent()->getSourceDataset<Points>();
