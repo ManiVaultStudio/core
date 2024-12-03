@@ -396,8 +396,6 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectedIndices.clear();
             selectedIndices.reserve(getNumberOfPixels());
 
-            const auto imageWidth = getImageSize().width();
-
             // Fill selection data with non-selected
             std::fill(selectionImageData.begin(), selectionImageData.end(), 0);
 
@@ -437,8 +435,6 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             // Clear the selected indices
             selectedIndices.clear();
             selectedIndices.reserve(getNumberOfPixels());
-
-            const auto imageWidth = getImageSize().width();
 
             // Fill selection data with non-selected
             std::fill(selectionImageData.begin(), selectionImageData.end(), 0);
