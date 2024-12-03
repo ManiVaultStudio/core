@@ -6,7 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QtMath>
+#include <QtNumeric>
 #include <QPointF>
 #include <QRectF>
 #include <QSize>
