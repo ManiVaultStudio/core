@@ -33,7 +33,8 @@ Images::Images(QString dataName, bool mayUnderive /*= false*/, const QString& gu
     _imageData(nullptr),
     _infoAction(),
     _visibleRectangle(),
-    _maskData()
+    _maskData(),
+    _maskDataGiven(false)
 {
     _imageData = getRawData<ImageData>();
 
@@ -367,12 +368,14 @@ void Images::getMaskData(std::vector<std::uint8_t>& maskData)
 void Images::setMaskData(const std::vector<std::uint8_t>& maskData)
 {
     _maskData = maskData;
+    _maskDataGiven = true;
     updateVisibleRectangle();
 }
 
 void Images::setMaskData(std::vector<std::uint8_t>&& maskData)
 {
     _maskData = std::move(maskData);
+    _maskDataGiven = true;
     updateVisibleRectangle();
 }
 
@@ -655,15 +658,17 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
     }
 }
 
-void Images::computeMaskData(bool forceUpdate)
+void Images::computeMaskData()
 {
     //Timer timer(__FUNCTION__);
 
     // Only compute if necessary
-    if (!forceUpdate && _maskData.size() == getNumberOfPixels())
+    if (_maskDataGiven)
         return;
-    else
-        _maskData.resize(getNumberOfPixels(), 0);
+        
+    // Allocate mask data
+    if (_maskData.size() != getNumberOfPixels())
+        _maskData.resize(getNumberOfPixels());
 
     // Get reference to input dataset
     auto inputDataset = getParent();
@@ -828,6 +833,9 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
         populateDataBufferFromVariantMap(variantMap["MaskData"].toMap(), (char*)_maskData.data());
     }
 
+    if (variantMap.contains("MaskDataGiven"))
+        _maskDataGiven = variantMap["VisibleRectangle"].toBool();
+
     if (variantMap.contains("VisibleRectangle"))
     {
         const auto visibleRectangle = variantMap["VisibleRectangle"].toMap();
@@ -848,6 +856,7 @@ QVariantMap Images::toVariantMap() const
     variantMap["NumberOfComponentsPerPixel"]    = getNumberOfComponentsPerPixel();
     variantMap["ImageFilePaths"]                = getImageFilePaths();
     variantMap["MaskData"]                      = rawDataToVariantMap((char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t), true);
+    variantMap["MaskDataGiven"]                 = _maskDataGiven;
     variantMap["VisibleRectangle"]              = QVariantMap({ { "X", _visibleRectangle.x() }, { "Y", _visibleRectangle.y() },{ "Width", _visibleRectangle.width() }, { "Height", _visibleRectangle.height() } });
 
     return variantMap;
