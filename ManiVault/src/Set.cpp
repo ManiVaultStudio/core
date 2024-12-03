@@ -14,6 +14,8 @@
 
 #include "Application.h"
 
+#include <algorithm>
+
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -170,7 +172,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         assert(_sourceDataset.isValid());
     }
 
-    // For backwards compatability, check PluginVersion
+    // For backwards compatibility, check PluginVersion
     if (!(variantMap["PluginVersion"] == "No Version") && !variantMap["Full"].toBool())
     {        
         if (variantMap.contains("FullDatasetID"))
@@ -334,6 +336,34 @@ void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, m
 {
     _linkedData.emplace_back(toSmartPointer(), targetDataSet);
     _linkedData.back().setMapping(mapping);
+}
+
+void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, mv::SelectionMap&& mapping)
+{
+    _linkedData.emplace_back(toSmartPointer(), targetDataSet);
+    _linkedData.back().setMapping(std::move(mapping));
+}
+
+void DatasetImpl::removeAllLinkedData()
+{
+    _linkedData.clear();
+}
+
+void DatasetImpl::removeLinkedDataset(const mv::Dataset<DatasetImpl>& targetDataSet)
+{
+    // Erase-remove idiom (https://en.wikibooks.org/wiki/More_C++_Idioms/Erase-Remove) 
+    // Removes all mappings to targetDataSet from _linkedData
+    _linkedData.erase(std::remove_if(_linkedData.begin(), _linkedData.end(), [targetDataSet](const mv::LinkedData& linkedSel) {
+        return linkedSel.getTargetDataset() == targetDataSet;
+    }), _linkedData.end());
+}
+
+void DatasetImpl::removeLinkedDataMapping(const QString& mappingID)
+{
+    // Removes specific mapping from _linkedData
+    _linkedData.erase(std::remove_if(_linkedData.begin(), _linkedData.end(), [mappingID](const mv::LinkedData& linkedSel) {
+        return linkedSel.getId() == mappingID;
+    }), _linkedData.end());
 }
 
 DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/, const QString& id /*= ""*/) :
