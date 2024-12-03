@@ -351,22 +351,19 @@ void DatasetImpl::removeAllLinkedData()
 
 void DatasetImpl::removeLinkedDataset(const mv::Dataset<DatasetImpl>& targetDataSet)
 {
-    // erase-remove idiom (https://en.wikibooks.org/wiki/More_C++_Idioms/Erase-Remove) 
-    // removes all mappings to targetDataSet from _linkedData
-    _linkedData.erase(std::remove_if(_linkedData.begin(),
-        _linkedData.end(),
-        [targetDataSet](const mv::LinkedData& linkedSel) {return linkedSel.getTargetDataset() == targetDataSet; }),
-        _linkedData.end());
+    // Erase-remove idiom (https://en.wikibooks.org/wiki/More_C++_Idioms/Erase-Remove) 
+    // Removes all mappings to targetDataSet from _linkedData
+    _linkedData.erase(std::remove_if(_linkedData.begin(), _linkedData.end(), [targetDataSet](const mv::LinkedData& linkedSel) {
+        return linkedSel.getTargetDataset() == targetDataSet;
+    }), _linkedData.end());
 }
 
 void DatasetImpl::removeLinkedDataMapping(const QString& mappingID)
 {
-    // removes specific mapping from _linkedData
-    _linkedData.erase(std::remove_if(_linkedData.begin(),
-        _linkedData.end(),
-        [mappingID](const mv::LinkedData& linkedSel) {return linkedSel.getId() == mappingID; }),
-        _linkedData.end());
-
+    // Removes specific mapping from _linkedData
+    _linkedData.erase(std::remove_if(_linkedData.begin(), _linkedData.end(), [mappingID](const mv::LinkedData& linkedSel) {
+        return linkedSel.getId() == mappingID;
+    }), _linkedData.end());
 }
 
 DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/, const QString& id /*= ""*/) :
