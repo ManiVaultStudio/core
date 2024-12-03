@@ -813,7 +813,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::showEvent(QShowEvent*
 
     _numberOfShowEvents++;
 
-    QTimer::singleShot(widgetAsyncUpdateTimerInterval, [this]() -> void {
+    QTimer::singleShot(widgetAsyncUpdateTimerInterval, this, [this]() -> void {
         _backgroundWidget.transitionGeometry(geometry());
 	});
 }
