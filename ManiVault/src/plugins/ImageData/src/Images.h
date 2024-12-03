@@ -206,6 +206,23 @@ public:
     void getMaskData(std::vector<std::uint8_t>& maskData);
 
     /**
+     * Set mask image data
+     * @param maskData Mask scalar data
+     */
+    void setMaskData(const std::vector<std::uint8_t>& maskData);
+
+    /**
+     * Set mask image data
+     * @param maskData Mask scalar data
+     */
+    void setMaskData(std::vector<std::uint8_t>&& maskData);
+
+    /**
+     * Clears mask data
+     */
+    void resetMaskData();
+
+    /**
      * Get selection data
      * @param selectionImageData Image data for the selection
      * @param selectedIndices Selected pixel indices
@@ -231,7 +248,7 @@ protected:
      */
     void getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
 
-    /** Computes and caches the mask data */
+    /** Computes and caches the mask data, if mask data is not set by setMaskData, based on linked data set to parent's points */
     void computeMaskData();
 
     /**
@@ -261,10 +278,17 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+private: // Internal Helper
+    /**
+     * Sets _visibleRectangle based on _maskData
+     */
+    void updateVisibleRectangle();
+
 private:
     std::vector<std::uint32_t>      _indices;               /** Selection indices */
     ImageData*                      _imageData;             /** Pointer to raw image data */
     QSharedPointer<InfoAction>      _infoAction;            /** Shared pointer to info action */
     QRect                           _visibleRectangle;      /** Rectangle which bounds the visible pixels */
     std::vector<std::uint8_t>       _maskData;              /** Mask data */
+    bool                            _maskDataGiven;         /** Wheter mask data was set externally */
 };
