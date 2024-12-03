@@ -217,6 +217,11 @@ public:
      */
     void setMaskData(std::vector<std::uint8_t>&& maskData);
 
+    /** Computes and caches the mask data, if mask data is empty, based on linked data set to parent's points
+    * @param forceUpdate update mask data even if not empty (e.g. for when linked data changed)
+    */
+    void computeMaskData(bool forceUpdate = false);
+
     /**
      * Get selection data
      * @param selectionImageData Image data for the selection
@@ -242,9 +247,6 @@ protected:
      * @param scalarDataRange Scalar data range
      */
     void getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
-
-    /** Computes and caches the mask data */
-    void computeMaskData();
 
     /**
      * Get pixel coordinate from pixel index

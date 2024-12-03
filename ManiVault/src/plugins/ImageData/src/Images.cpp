@@ -652,12 +652,12 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
     }
 }
 
-void Images::computeMaskData()
+void Images::computeMaskData(bool forceUpdate)
 {
     //Timer timer(__FUNCTION__);
 
     // Only compute if necessary
-    if (_maskData.size() == getNumberOfPixels())
+    if (!forceUpdate && _maskData.size() == getNumberOfPixels())
         return;
     else
         _maskData.resize(getNumberOfPixels(), 0);
