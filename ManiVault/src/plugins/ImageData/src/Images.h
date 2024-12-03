@@ -218,6 +218,11 @@ public:
     void setMaskData(std::vector<std::uint8_t>&& maskData);
 
     /**
+     * Clears mask data
+     */
+    void resetMaskData();
+
+    /**
      * Get selection data
      * @param selectionImageData Image data for the selection
      * @param selectedIndices Selected pixel indices

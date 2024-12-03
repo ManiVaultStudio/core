@@ -379,6 +379,13 @@ void Images::setMaskData(std::vector<std::uint8_t>&& maskData)
     updateVisibleRectangle();
 }
 
+void Images::resetMaskData()
+{
+    _maskData.clear();
+    _maskDataGiven = false;
+    updateVisibleRectangle();
+}
+
 void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std::vector<std::uint32_t>& selectedIndices, QRect& selectionBoundaries)
 {
     try
