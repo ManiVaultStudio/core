@@ -12,9 +12,16 @@
 
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
+#include <LinkedData.h>
 
 #include <ClusterData/ClusterData.h>
 #include <PointData/PointData.h>
+
+#include <cmath>
+#include <exception>
+#include <limits>
+#include <numeric>
+#include <stdexcept>
 
 #include <QDebug>
 
