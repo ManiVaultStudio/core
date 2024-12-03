@@ -199,10 +199,10 @@ void WorkspaceManager::initialize()
                 return;
 
             //if (!mv::plugins().isResetting()) {
-                if (_mainDockManager && viewPlugin->isSystemViewPlugin())
-                    _mainDockManager->removeViewPluginDockWidget(viewPlugin);
-                else if (_viewPluginsDockManager)
-                    _viewPluginsDockManager->removeViewPluginDockWidget(viewPlugin);
+            if (_mainDockManager && viewPlugin->isSystemViewPlugin())
+                _mainDockManager->removeViewPluginDockWidget(viewPlugin);
+            else if (_viewPluginsDockManager)
+                _viewPluginsDockManager->removeViewPluginDockWidget(viewPlugin);
             //}
         });
 
@@ -627,17 +627,16 @@ void WorkspaceManager::createWorkspace()
 
         _workspace.reset(new Workspace());
     }
-    emit workspaceCreated(*(_workspace.get()));
+    emit workspaceCreated(*_workspace.get());
 }
 
 void WorkspaceManager::createIcon()
 {
-    const auto size             = 128;
-    const auto halfSize         = size / 2;
-    const auto margin           = 12;
-    const auto spacing          = 14;
-    const auto halfSpacing      = spacing / 2;
-    const auto lineThickness    = 7.0;
+    constexpr auto size             = 128;
+    constexpr auto halfSize         = size / 2;
+    constexpr auto margin           = 12;
+    constexpr auto spacing          = 14;
+    constexpr auto halfSpacing      = spacing / 2;
 
     QPixmap pixmap(size, size);
 
@@ -647,7 +646,7 @@ void WorkspaceManager::createIcon()
 
     painter.setWindow(0, 0, size, size);
 
-    const auto drawWindow = [&](QRectF rectangle) -> void {
+    const auto drawWindow = [&](const QRectF& rectangle) -> void {
         painter.setBrush(Qt::black);
         painter.setPen(Qt::NoPen);
         painter.drawRect(rectangle);
@@ -657,7 +656,7 @@ void WorkspaceManager::createIcon()
     drawWindow(QRectF(QPointF(halfSize + halfSpacing, margin), QPointF(size - margin, halfSize - halfSpacing)));
     drawWindow(QRectF(QPointF(halfSize + halfSpacing, halfSize + halfSpacing), QPointF(size - margin, size - margin)));
 
-    _icon = mv::gui::createIcon(pixmap);
+    _icon = gui::createIcon(pixmap);
 }
 
 WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocation::Types& types /*= WorkspaceLocation::Type::All*/)
@@ -733,9 +732,7 @@ QStringList WorkspaceManager::getViewPluginNames(const QString& workspaceJsonFil
 
     QByteArray data = jsonFile.readAll();
 
-    QJsonDocument jsonDocument;
-
-    jsonDocument = QJsonDocument::fromJson(data);
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(data);
 
     if (jsonDocument.isNull() || jsonDocument.isEmpty())
         return {};
@@ -747,7 +744,7 @@ QStringList WorkspaceManager::getViewPluginNames(const QString& workspaceJsonFil
     const auto getViewPluginNamesFromDockManager = [](const QVariantMap& dockManagerMap) -> QStringList {
         QStringList viewPluginNames;
 
-        for (auto viewPluginDockWidgetVariant : dockManagerMap["ViewPluginDockWidgets"].toList()) {
+        for (const auto& viewPluginDockWidgetVariant : dockManagerMap["ViewPluginDockWidgets"].toList()) {
             const auto viewPluginMap = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
 
             viewPluginNames << viewPluginMap["GuiName"].toMap()["Value"].toString();

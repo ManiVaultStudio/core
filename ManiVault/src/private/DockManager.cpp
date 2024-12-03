@@ -142,6 +142,7 @@ void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDoc
 
     CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
 
+    viewPluginDockWidget->deleteLater();
     //delete viewPluginDockWidget;
 }
 
