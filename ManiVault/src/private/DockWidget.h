@@ -89,7 +89,7 @@ public: // Serialization
 public: // Themes
     
     /** refresh the widget and its children according to new style */
-    void updateStyle();
+    void updateStyle() const;
 
 private:
     QToolButton*    _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */

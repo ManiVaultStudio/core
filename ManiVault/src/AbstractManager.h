@@ -177,12 +177,14 @@ public: // Locking
         return true;
     };
 
-public: // Core destruction
+protected: // Core destruction
 
     /** Mark core as destroyed */
     void setCoreIsDestroyed() {
         _coreIsDestroyed = true;
     }
+
+public: // Core destruction
 
     /**
      * Establish whether the core is destroyed
@@ -212,6 +214,8 @@ private:
     bool                    _coreIsDestroyed;   /** Boolean determining whether the core is destroyed */
     bool                    _isInitializing;    /** Boolean determining whether the manager is being initialized */
     bool                    _isResetting;       /** Boolean determining whether the manager is resetting */
+
+    friend class Core;
 };
 
 }

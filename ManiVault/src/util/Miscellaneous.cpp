@@ -45,6 +45,20 @@ QString getNoBytesHumanReadable(float noBytes)
     return QString::number(noBytes, 'f', 2) + " " + unit;
 }
 
+QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex)
+{
+	static constexpr std::uint32_t tabSize = 4;
+
+	QString indentation;
+
+	for (std::uint32_t i = 0; i < tabIndex * tabSize; i++)
+		indentation += " ";
+
+	message.insert(0, indentation);
+
+	return message;
+}
+
 CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha /*= true*/)
 {
     if (alpha)
@@ -254,4 +268,14 @@ QVariant getValueByPath(const QVariant& root, const QString& path, const QVarian
 
 	return foundValue; // Return the found value
 }
+
+void waitForDuration(int milliSeconds)
+{
+	QEventLoop localEventLoop;
+
+	QTimer::singleShot(milliSeconds, &localEventLoop, &QEventLoop::quit);
+
+	localEventLoop.exec();
+}
+
 }

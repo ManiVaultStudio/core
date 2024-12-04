@@ -219,7 +219,7 @@ QString DataManager::getRawDataType(const QString& rawDataName) const
     return "Undefined";
 }
 
-Dataset<DatasetImpl> DataManager::createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
+Dataset<> DataManager::createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
 {
 #ifdef DATA_MANAGER_VERBOSE
     qDebug() << "Create dataset" << kind << guiName;
@@ -251,7 +251,7 @@ Dataset<DatasetImpl> DataManager::createDataset(const QString& kind, const QStri
     return fullSet;
 }
 
-Dataset<DatasetImpl> DataManager::createDatasetWithoutSelection(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
+Dataset<> DataManager::createDatasetWithoutSelection(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
 {
 #ifdef DATA_MANAGER_VERBOSE
     qDebug() << "Create dataset without selection" << kind << guiName;

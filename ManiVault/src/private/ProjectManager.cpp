@@ -135,7 +135,13 @@ ProjectManager::ProjectManager(QObject* parent) :
     });
 
     connect(&_openProjectAction, &QAction::triggered, this, [this]() -> void {
-        openProject();
+        
+
+        // We defer opening the project with a timer because for some obscure reason, view plugin dock widgets are not
+        // properly removed (using deleteLater()) when openProject(...) is called immediately after resetting the
+        // workspace. QCoreApplication::processEvents() etc. is of no use here, tried numerous other things. This is a
+        // temporary solution, at some point we should revisit this issue...
+        QTimer::singleShot(1, this, [this] { openProject(); });
     });
 
     connect(&_importProjectAction, &QAction::triggered, this, [this]() -> void {
@@ -206,7 +212,13 @@ ProjectManager::ProjectManager(QObject* parent) :
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
     connect(&_recentProjectsAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
-        openProject(filePath);
+        workspaces().reset();
+
+        // We defer opening the project with a timer because for some obscure reason, view plugin dock widgets are not
+        // properly removed (using deleteLater()) when openProject(...) is called immediately after resetting the
+        // workspace. QCoreApplication::processEvents() etc. is of no use here, tried numerous other things. This is a
+        // temporary solution, at some point we should revisit this issue...
+        QTimer::singleShot(1, this, [this, filePath]() { openProject(filePath); });
     });
 
     connect(&_publishAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -247,14 +259,11 @@ void ProjectManager::reset()
 
     beginReset();
     {
-        auto core = Application::core();
-
         if (!isCoreDestroyed()) {
-            core->getActionsManager().reset();
-            core->getPluginManager().reset();
-            core->getDataHierarchyManager().reset();
-            core->getDataManager().reset();
-            core->getWorkspaceManager().reset();
+            actions().reset();
+            dataHierarchy().reset();
+            data().reset();
+            plugins().reset();
         }
     }
     endReset();
@@ -342,7 +351,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        emit projectAboutToBeOpened(*(_project.get()));
+        emit projectAboutToBeOpened(*_project);
         {
             const auto scopedState = ScopedState(this, State::OpeningProject);
 
@@ -425,7 +434,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
                 QEventLoop eventLoop;
                 
-                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
                 
                 eventLoop.exec();
 
@@ -441,6 +450,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             }
 
             qDebug().noquote() << "Open ManiVault project from" << filePath;
+
+            workspaces().reset();
+
+            QCoreApplication::processEvents();
 
             if (!importDataOnly)
                 newProject();
@@ -514,7 +527,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             qDebug().noquote() << filePath << "loaded successfully";
         }
-        emit projectOpened(*(_project.get()));
+        emit projectOpened(*_project);
     }
     catch (std::exception& e)
     {
@@ -566,7 +579,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
         const auto scopedState = ScopedState(this, State::SavingProject);
 
-        emit projectAboutToBeSaved(*(_project.get()));
+        emit projectAboutToBeSaved(*_project);
         {
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
@@ -728,7 +741,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             qDebug().noquote() << filePath << "saved successfully";
         }
-        emit projectSaved(*(_project.get()));
+        emit projectSaved(*_project);
     }
     catch (std::exception& e)
     {
@@ -978,12 +991,12 @@ QString ProjectManager::extractFileFromManiVaultProject(const QString& maniVault
 
     QFileInfo extractFileInfo(temporaryDirectoryPath, extractFilePath);
 
-    Archiver archiver;
-
     QString extractedFilePath = "";
 
     try
     {
+        Archiver archiver;
+
         archiver.extractSingleFile(maniVaultFilePath, extractFilePath, extractFileInfo.absoluteFilePath());
 
         extractedFilePath = extractFileInfo.absoluteFilePath();
@@ -1015,8 +1028,8 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
         
         if (!workspacePreviewImage.isNull())
             return workspacePreviewImage.scaled(targetSize, Qt::KeepAspectRatio);
-        else
-            return {};
+        
+		return {};
     }
     catch (std::exception& e)
     {
@@ -1044,17 +1057,15 @@ void ProjectManager::createProject()
 {
     emit projectAboutToBeCreated();
     {
-        mv::data().reset();
+        data().reset();
 
         reset();
 
         _project.reset(new Project());
     }
-    emit projectCreated(*(_project.get()));
+    emit projectCreated(*_project);
 
     _showStartPageAction.setChecked(false);
-
-    workspaces().reset();
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
@@ -1067,7 +1078,7 @@ QVariantMap ProjectManager::toVariantMap() const
     if (hasProject())
         return _project->toVariantMap();
 
-    return QVariantMap();
+    return {};
 }
 
 }
