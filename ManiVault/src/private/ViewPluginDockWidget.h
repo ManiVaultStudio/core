@@ -193,7 +193,7 @@ public: // View plugin isolation
 private:
 
     /**
-     * Assign \p viewPlugin to dock widget (configures the dock widget properties and sets the dock widget widget)
+     * Assign \p viewPlugin to dock widget (configures the dock widget properties and sets the dock widget)
      * @param viewPlugin Pointer to view plugin
      */
     void setViewPlugin(mv::plugin::ViewPlugin* viewPlugin);

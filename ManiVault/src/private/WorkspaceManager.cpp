@@ -226,8 +226,6 @@ void WorkspaceManager::reset()
 			plugin->destroy();
     }
     endReset();
-
-    //waitForDuration(100);
 }
 
 QIcon WorkspaceManager::getIcon() const
