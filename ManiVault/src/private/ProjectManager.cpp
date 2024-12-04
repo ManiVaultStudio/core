@@ -136,13 +136,13 @@ ProjectManager::ProjectManager(QObject* parent) :
     });
 
     connect(&_openProjectAction, &QAction::triggered, this, [this]() -> void {
-        
+        workspaces().reset();
 
         // We defer opening the project with a timer because for some obscure reason, view plugin dock widgets are not
         // properly removed (using deleteLater()) when openProject(...) is called immediately after resetting the
         // workspace. QCoreApplication::processEvents() etc. is of no use here, tried numerous other things. This is a
         // temporary solution, at some point we should revisit this issue...
-        QTimer::singleShot(1, this, [this] { openProject(); });
+        QTimer::singleShot(100, this, [this] { openProject(); });
     });
 
     connect(&_importProjectAction, &QAction::triggered, this, [this]() -> void {
@@ -219,7 +219,7 @@ ProjectManager::ProjectManager(QObject* parent) :
         // properly removed (using deleteLater()) when openProject(...) is called immediately after resetting the
         // workspace. QCoreApplication::processEvents() etc. is of no use here, tried numerous other things. This is a
         // temporary solution, at some point we should revisit this issue...
-        QTimer::singleShot(1, this, [this, filePath]() { openProject(filePath); });
+        QTimer::singleShot(100, this, [this, filePath]() { openProject(filePath); });
     });
 
     connect(&_publishAction, &TriggerAction::triggered, this, [this]() -> void {
