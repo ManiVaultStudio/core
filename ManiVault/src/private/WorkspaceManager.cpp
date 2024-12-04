@@ -198,12 +198,10 @@ void WorkspaceManager::initialize()
             if (!viewPlugin)
                 return;
 
-            //if (!mv::plugins().isResetting()) {
             if (_mainDockManager && viewPlugin->isSystemViewPlugin())
                 _mainDockManager->removeViewPluginDockWidget(viewPlugin);
             else if (_viewPluginsDockManager)
                 _viewPluginsDockManager->removeViewPluginDockWidget(viewPlugin);
-            //}
         });
 
         connect(&Application::core()->getProjectManager(), &AbstractProjectManager::projectCreated, this, [this]() -> void {
@@ -219,13 +217,17 @@ void WorkspaceManager::reset()
     qDebug() << __FUNCTION__;
 #endif
 
+    if (isCoreDestroyed())
+        return;
+
     beginReset();
     {
-        if (!isCoreDestroyed())
-            for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
-                plugin->destroy();
+		for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
+			plugin->destroy();
     }
     endReset();
+
+    waitForDuration(100);
 }
 
 QIcon WorkspaceManager::getIcon() const
@@ -241,7 +243,6 @@ void WorkspaceManager::newWorkspace()
         qDebug() << __FUNCTION__;
 #endif
 
-        reset();
         createWorkspace();
     }
     catch (std::exception& e)
@@ -627,7 +628,7 @@ void WorkspaceManager::createWorkspace()
 
         _workspace.reset(new Workspace());
     }
-    emit workspaceCreated(*_workspace.get());
+    emit workspaceCreated(*_workspace);
 }
 
 void WorkspaceManager::createIcon()
@@ -668,7 +669,7 @@ WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocati
 
         QDir workspaceExamplesDirectory(QString("%1/examples/workspaces/").arg(qApp->applicationDirPath()));
 
-        for (const auto workspaceFileName : workspaceExamplesDirectory.entryList(workspaceFilter))
+        for (const auto& workspaceFileName : workspaceExamplesDirectory.entryList(workspaceFilter))
             workspaceLocations << WorkspaceLocation(workspaceFileName, QString("%1/%2").arg(workspaceExamplesDirectory.absolutePath(), workspaceFileName), WorkspaceLocation::Type::BuiltIn);
     }
 
@@ -679,7 +680,7 @@ WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocati
     if (types.testFlag(WorkspaceLocation::Type::Recent)) {
         _recentWorkspacesAction.updateRecentFilePaths();
 
-        for (const auto recentFilePath : _recentWorkspacesAction.getRecentFilePaths()) {
+        for (const auto& recentFilePath : _recentWorkspacesAction.getRecentFilePaths()) {
             Workspace workspace(recentFilePath);
 
             workspaceLocations << WorkspaceLocation(workspace.getTitleAction().getString(), recentFilePath, WorkspaceLocation::Type::Recent);

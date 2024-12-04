@@ -42,7 +42,7 @@ public:
     using CDockManager::setStyleSheet;
     using CDockManager::addDockWidgetFloating;
 
-    using ViewPluginDockWidgets = std::vector<std::shared_ptr<ViewPluginDockWidget>>;
+    using ViewPluginDockWidgets = std::vector<ViewPluginDockWidget*>;
     
     /**
      * Constructs a dock manager derived from the advanced docking system
@@ -71,7 +71,7 @@ public:
      * @param viewPlugin Pointer to view plugin that holds the widget
      * @return Pointer to ADS dock widget area (if found, otherwise nullptr)
      */
-    ads::CDockAreaWidget* findDockAreaWidget(mv::plugin::ViewPlugin* viewPlugin) const;
+    ads::CDockAreaWidget* findDockAreaWidget(const mv::plugin::ViewPlugin* viewPlugin) const;
 
     /**
      * Remove \p viewPlugin from the dock manager
@@ -120,8 +120,7 @@ public: // Serialization
     friend class QPointer<DockManager>;
 
 private:
-    QString                 _name;                      /** Dock manager name */
-    mv::Task*               _serializationTask;         /** For reporting serialization progress */
-    mv::Task                _layoutTask;                /** For reporting layout progress */
-    ViewPluginDockWidgets   _viewPluginDockWidgets;     /* The ViewPluginDockWidgets in the order in which they were created */
+    QString     _name;                      /** Dock manager name */
+    mv::Task*   _serializationTask;         /** For reporting serialization progress */
+    mv::Task    _layoutTask;                /** For reporting layout progress */
 };

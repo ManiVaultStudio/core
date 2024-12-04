@@ -14,8 +14,6 @@
 
 #include <DockAreaWidget.h> 
 
-#include <QSplitter>
-
 #ifdef _DEBUG
     //#define DOCK_MANAGER_VERBOSE
 #endif
@@ -61,7 +59,13 @@ DockManager::~DockManager()
 
 DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
 {
-    return _viewPluginDockWidgets;
+    ViewPluginDockWidgets viewPluginDockWidgets;
+
+    for (auto dockWidget : dockWidgets())
+        if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
+            viewPluginDockWidgets.push_back(viewPluginDockWidget);
+
+    return viewPluginDockWidgets;
 }
 
 DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
@@ -69,7 +73,7 @@ DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
     return const_cast<DockManager*>(this)->getViewPluginDockWidgets();
 }
 
-CDockAreaWidget* DockManager::findDockAreaWidget(mv::plugin::ViewPlugin* viewPlugin) const
+CDockAreaWidget* DockManager::findDockAreaWidget(const ViewPlugin* viewPlugin) const
 {
     if (viewPlugin == nullptr)
         return nullptr;
@@ -110,7 +114,7 @@ void DockManager::reset()
     CDockManager::removeAllDockAreas();
 
     for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
-        removeViewPluginDockWidget(viewPluginDockWidget.get());
+        removeViewPluginDockWidget(viewPluginDockWidget);
 }
 
 void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* dockWidget, ads::CDockAreaWidget* dockAreaWidget)
@@ -119,9 +123,6 @@ void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWi
     qDebug() << __FUNCTION__ << objectName();
 #endif
     
-    if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
-        _viewPluginDockWidgets.push_back(std::shared_ptr<ViewPluginDockWidget>(viewPluginDockWidget));
-
     CDockManager::addDockWidget(area, dockWidget, dockAreaWidget);
 }
 
@@ -131,19 +132,9 @@ void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDoc
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    //viewPluginDockWidget->takeWidget();
-
-    auto shouldRemove = [viewPluginDockWidget](auto& viewPluginDockwidgetRemovalCandidate) -> bool {
-        return viewPluginDockwidgetRemovalCandidate->getId() == viewPluginDockWidget->getId();
-	};
-
-    //findDockAreaWidget(viewPluginDockWidget->getViewPlugin())->
-    //_viewPluginDockWidgets.erase(std::remove_if(_viewPluginDockWidgets.begin(), _viewPluginDockWidgets.end(), shouldRemove), _viewPluginDockWidgets.end());
-
     CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
 
     viewPluginDockWidget->deleteLater();
-    //delete viewPluginDockWidget;
 }
 
 QWidget* DockManager::getWidget()
