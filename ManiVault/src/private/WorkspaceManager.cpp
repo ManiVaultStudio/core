@@ -227,7 +227,7 @@ void WorkspaceManager::reset()
     }
     endReset();
 
-    waitForDuration(100);
+    //waitForDuration(100);
 }
 
 QIcon WorkspaceManager::getIcon() const
