@@ -111,14 +111,22 @@ void DockManager::reset()
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    CDockManager::removeAllDockAreas();
-
     for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
         removeViewPluginDockWidget(viewPluginDockWidget);
 
-    for (auto dockWidget : dockWidgets())
-        if (!dynamic_cast<ViewPluginDockWidget*>(dockWidget))
-            dockWidget->deleteLater();
+    for (auto dockWidget : dockWidgets()) {
+        if (dynamic_cast<ViewPluginDockWidget*>(dockWidget))
+            continue;
+
+        if (dockWidget->isCentralWidget())
+            continue;
+
+        CDockManager::removeDockWidget(dockWidget);
+
+        dockWidget->deleteLater();
+    }
+
+    CDockManager::removeAllDockAreas();
 }
 
 void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* dockWidget, ads::CDockAreaWidget* dockAreaWidget)
@@ -136,7 +144,7 @@ void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDoc
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
+    CDockManager::removeDockWidget(viewPluginDockWidget);
 
     viewPluginDockWidget->deleteLater();
 }
