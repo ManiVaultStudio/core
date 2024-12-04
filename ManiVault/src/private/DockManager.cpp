@@ -115,6 +115,10 @@ void DockManager::reset()
 
     for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
         removeViewPluginDockWidget(viewPluginDockWidget);
+
+    for (auto dockWidget : dockWidgets())
+        if (!dynamic_cast<ViewPluginDockWidget*>(dockWidget))
+            dockWidget->deleteLater();
 }
 
 void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* dockWidget, ads::CDockAreaWidget* dockAreaWidget)
