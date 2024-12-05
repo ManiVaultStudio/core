@@ -8,6 +8,8 @@
 #include "Plugin.h"
 #include "ViewPlugin.h"
 
+#include "util/Miscellaneous.h"
+
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
 #include "widgets/ViewPluginDescriptionOverlayWidget.h"
 #include "widgets/ViewPluginShortcutsDialog.h"

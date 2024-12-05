@@ -6,12 +6,14 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QString>
-#include <QWidget>
+#include <QIcon>
 #include <QPointer>
+#include <QString>
+#include <QVariant>
+#include <QVector>
+#include <QWidget>
 
 #include <algorithm>
-#include <qtcpsocket.h>
 
 class QAction;
 

@@ -3,14 +3,24 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Miscellaneous.h"
+
+#include "Exception.h"
 #include "Icon.h"
 
 #include <QAction>
+#include <QEventLoop>
+#include <QLayout>
+#include <QLayoutItem>
+#include <QPainter>
+#include <QPixmap>
+#include <QString>
 #include <QStringList>
+#include <QTimer>
 #include <QTcpSocket>
 #include <QUrl>
 #include <QVariant>
-#include <QString>
+
+#include <exception>
 
 namespace mv::util
 {

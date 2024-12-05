@@ -15,6 +15,10 @@ namespace mv::plugin {
     class ViewPlugin;
 }
 
+namespace mv::gui {
+    class PluginLearningCenterAction;
+}
+
 namespace mv::gui
 {
 
@@ -42,7 +46,7 @@ protected:
          * @param overlayWidget Pointer to overlay widget
          * @param iconSize Size of the item icon
          */
-        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize = QSize(14, 14));
+        AbstractToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize = QSize(14, 14));
 
         /** Show only when required (when AbstractToolbarItemWidget::shouldDisplay() returns true) */
         void showConditionally();
@@ -86,13 +90,13 @@ protected:
          * Get view plugin
          * @return Pointer to view plugin
          */
-        const plugin::ViewPlugin* getViewPlugin() const;
+        const mv::plugin::ViewPlugin* getViewPlugin() const;
 
         /**
          * Get non-const pointer to view plugin
          * @return Non-const pointer to view plugin
          */
-        plugin::ViewPlugin* getViewPlugin();
+        mv::plugin::ViewPlugin* getViewPlugin();
 
         /**
          * Get non-const pointer to overlay widget
@@ -101,7 +105,7 @@ protected:
         ViewPluginLearningCenterOverlayWidget* getOverlayWidget() const;
 
     private:
-        const plugin::ViewPlugin*                   _viewPlugin;            /** Const pointer to source view plugin */
+        const mv::plugin::ViewPlugin*               _viewPlugin;            /** Const pointer to source view plugin */
         ViewPluginLearningCenterOverlayWidget*      _overlayWidget;         /** Pointer to overlay widget */
         const QSize                                 _iconSize;              /** Size of the item icon */
         QHBoxLayout                                 _layout;                /** For placing the icon label */
@@ -119,7 +123,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        LearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        LearningCenterToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Get icon
@@ -144,7 +148,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        VideosToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -175,7 +179,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        DescriptionToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -206,7 +210,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        ShowDocumentationToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -237,7 +241,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        ShortcutsToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -268,7 +272,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        VisitGithubRepoToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -299,7 +303,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        ToLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        ToLearningCenterToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -330,7 +334,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        HideToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        HideToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -368,7 +372,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        AlignmentToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        AlignmentToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -406,7 +410,7 @@ protected:
              * @param target Pointer to target widget
              * @param viewPlugin Pointer to view plugin
              */
-            BackgroundWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin);
+            BackgroundWidget(QWidget* target, const mv::plugin::ViewPlugin* viewPlugin);
 
             
 	        /**
@@ -425,9 +429,9 @@ protected:
             void paintEvent(QPaintEvent* event) override;
 
         private:
-            const plugin::ViewPlugin*   _viewPlugin;            /** Pointer to view plugin */
-            QPropertyAnimation          _geometryAnimation;     /** Animates the position and size of the background widget */
-            QRect                       _previousGeometry;      /** Previous geometry, used as start value for geometry animation */
+            const mv::plugin::ViewPlugin*   _viewPlugin;            /** Pointer to view plugin */
+            QPropertyAnimation              _geometryAnimation;     /** Animates the position and size of the background widget */
+            QRect                           _previousGeometry;      /** Previous geometry, used as start value for geometry animation */
         };
 
     public:
@@ -438,7 +442,7 @@ protected:
          * @param overlayWidget Pointer to parent overlay widget
          * @param alwaysVisible Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting
          */
-        ToolbarWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, bool alwaysVisible = false);
+        ToolbarWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, bool alwaysVisible = false);
 
         /**
          * Add \p widget to the toolbar
@@ -485,7 +489,7 @@ protected:
         PluginLearningCenterAction& getLearningCenterAction() const;
 
     private:
-        const plugin::ViewPlugin*               _viewPlugin;                /** Const pointer to source view plugin */
+        const mv::plugin::ViewPlugin*           _viewPlugin;                /** Const pointer to source view plugin */
         ViewPluginLearningCenterOverlayWidget*  _overlayWidget;             /** Pointer to owning overlay widget */
         bool                                    _alwaysVisible;             /** Whether the toolbar widget should always be visible, regardless of the view plugin overlay visibility setting */
         std::vector<QWidget*>                   _widgets;                   /** Registered widgets */
@@ -507,7 +511,7 @@ public:
      * @param target Pointer to parent widget (overlay widget will be layered on top of this widget)
      * @param viewPlugin Pointer to the view plugin for which to create the overlay
      */
-    ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin);
+    ViewPluginLearningCenterOverlayWidget(QWidget* target, const mv::plugin::ViewPlugin* viewPlugin);
 
     /**
      * Set target widget to \p targetWidget
@@ -580,7 +584,7 @@ signals:
     void collapsed();
 
 private:
-    const plugin::ViewPlugin*                   _viewPlugin;                            /** Pointer to the view plugin for which to create the overlay */
+    const mv::plugin::ViewPlugin*               _viewPlugin;                            /** Pointer to the view plugin for which to create the overlay */
     QVBoxLayout                                 _layout;                                /** For alignment of the learning center toolbar */
     ToolbarWidget                               _toolbarWidget;                         /** Toolbar widget which contains the various learning center actions */
     LearningCenterToolbarItemWidget             _learningCenterToolbarItemWidget;       /** Primary learning center toolbar item widget */
