@@ -40,17 +40,10 @@ set(AUX
     src/DataPropertiesPlugin.json
 )
 
-set(QRESOURCES
-    res/Resources.qrc
-)
-
-qt_add_resources(RESOURCE_FILES ${QRESOURCES})
-
 set(DATAPROPERTIES_SOURCES
     ${PLUGIN}
     ${WIDGETS}
     ${AUX}
-    ${RESOURCE_FILES}
 )
 
 source_group(Plugin FILES ${PLUGIN})
