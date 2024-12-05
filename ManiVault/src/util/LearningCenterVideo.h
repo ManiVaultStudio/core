@@ -18,13 +18,13 @@
 namespace mv::util {
 
 /**
- * Video class
+ * Learning center video class
  *
- * Contains video meta data and offers ways to watch it
+ * Contains video properties
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT Video : public QObject
+class CORE_EXPORT LearningCenterVideo : public QObject
 {
     Q_OBJECT
 
@@ -46,7 +46,14 @@ public:
      * @param summary Brief video description
      * @param resource Identifier of the YouTube or GIF
      */
-    explicit Video(const Type& type, const QString& title, const QStringList& tags, const QString& date, const QString& summary, const QString& resource);
+    explicit LearningCenterVideo(const Type& type, const QString& title, const QStringList& tags, const QString& date, const QString& summary, const QString& resource);
+
+    /**
+     * Construct video from \p variantMap
+     * @param type Type of video
+     * @param variantMap Variant map containing the video properties
+     */
+    explicit LearningCenterVideo(const Type& type, const QVariantMap& variantMap);
 
     /**
      * Get video type
@@ -114,14 +121,14 @@ public:
      * @param rhs Right hand side video
      * @return Assigned video
      */
-    Video& operator=(const Video& rhs)
+    LearningCenterVideo& operator=(const LearningCenterVideo& rhs)
     {
-        _type           = rhs.getType();
-        _title          = rhs.getTitle();
-        _tags           = rhs.getTags();
-        _date           = rhs.getDate();
-        _summary        = rhs.getSummary();
-        _resource       = rhs.getResource();
+        _type       = rhs.getType();
+        _title      = rhs.getTitle();
+        _tags       = rhs.getTags();
+        _date       = rhs.getDate();
+        _summary    = rhs.getSummary();
+        _resource   = rhs.getResource();
 
         return *this;
     }
@@ -145,6 +152,6 @@ private:
     QImage          _thumbnailImage;            /** Cached thumbnail image */
 };
 
-using Videos = std::vector<const Video*>;
+using LearningCenterVideos = std::vector<const LearningCenterVideo*>;
 
 }

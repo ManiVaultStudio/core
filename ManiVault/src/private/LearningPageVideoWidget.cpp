@@ -7,9 +7,8 @@
 #include <Application.h>
 
 #include <util/Miscellaneous.h>
-#include <util/Video.h>
 
-#include <models/VideosModel.h>
+#include <models/LearningCenterVideosModel.h>
 
 #include <widgets/YouTubeVideoDialog.h>
 
@@ -33,7 +32,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _index(index),
     _overlayWidget(index, &_thumbnailLabel)
 {
-    const auto title = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Title)).data().toString();
+    const auto title = _index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Title)).data().toString();
 
     _propertiesTextBrowser.setReadOnly(true);
     _propertiesTextBrowser.setStyleSheet("background-color: transparent; border: none; margin: 0px; padding: 0px;");
@@ -80,7 +79,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
 
     const auto sourceModelIndex = dynamic_cast<const QSortFilterProxyModel*>(_index.model())->mapToSource(_index);
     const auto modelItem        = mv::help().getVideosModel().itemFromIndex(sourceModelIndex.siblingAtColumn(0));
-    const auto videoModelItem   = dynamic_cast<VideosModel::Item*>(modelItem);
+    const auto videoModelItem   = dynamic_cast<LearningCenterVideosModel::Item*>(modelItem);
 	const auto video            = videoModelItem->getVideo();
 
 	const auto updateThumbnailImage = [this, video]() -> void {
@@ -98,7 +97,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     if (video->hasThumbnailImage())
         updateThumbnailImage();
     else
-        connect(video, &Video::thumbnailImageReady, this, updateThumbnailImage);
+        connect(video, &LearningCenterVideo::thumbnailImageReady, this, updateThumbnailImage);
 
     _thumbnailLabel.installEventFilter(this);
 }
@@ -161,11 +160,11 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     
     QLocale locale;
 
-    const auto summary      = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Summary)).data().toString();
-    const auto date         = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Date)).data(Qt::EditRole).toString();
+    const auto summary      = _index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Summary)).data().toString();
+    const auto date         = _index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Date)).data(Qt::EditRole).toString();
     const auto dateTime     = QDateTime::fromString(date, Qt::ISODate);
     const auto dateString   = locale.toString(dateTime.date());
-    const auto tags         = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Tags)).data().toStringList();
+    const auto tags         = _index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Tags)).data().toStringList();
 
     _playIconLabel.setToolTip("Click to start the video");
     _summaryIconLabel.setToolTip(summary);
@@ -211,7 +210,7 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
 #ifdef USE_YOUTUBE_DIALOG
                 YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Resource)).data().toString());
 #else
-                QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Resource)).data().toString()));
+                QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Resource)).data().toString()));
 #endif
             }
 

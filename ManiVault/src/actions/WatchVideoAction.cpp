@@ -6,13 +6,13 @@
 
 #include <QDesktopServices>
 
-#include "util/Video.h"
+#include "util/LearningCenterVideo.h"
 
 using namespace mv::util;
 
 namespace mv::gui {
 
-WatchVideoAction::WatchVideoAction(QObject* parent, const QString& title, util::Video* video /*= nullptr*/) :
+WatchVideoAction::WatchVideoAction(QObject* parent, const QString& title, util::LearningCenterVideo* video /*= nullptr*/) :
     TriggerAction(parent, title),
     _video(video)
 {
@@ -20,11 +20,11 @@ WatchVideoAction::WatchVideoAction(QObject* parent, const QString& title, util::
 
     if (_video) {
         switch (_video->getType()) {
-			case Video::Type::YouTube:
+			case LearningCenterVideo::Type::YouTube:
 	            setIconByName("youtube");
 	            break;
 
-	        case Video::Type::GIF:
+	        case LearningCenterVideo::Type::GIF:
 	            setIconByName("video");
 	            break;
         }
@@ -41,12 +41,12 @@ void WatchVideoAction::watch()
         return;
 
     switch (_video->getType()) {
-	    case Video::Type::YouTube: {
+	    case LearningCenterVideo::Type::YouTube: {
 	    	QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_video->getResource()));
 	    	break;
 	    }
 
-    	case Video::Type::GIF: {
+    	case LearningCenterVideo::Type::GIF: {
 	    	qDebug() << "Watch GIF";
 	    	break;
     	}

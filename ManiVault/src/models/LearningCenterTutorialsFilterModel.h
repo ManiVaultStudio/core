@@ -13,16 +13,16 @@
 
 namespace mv {
 
-class VideosModel;
+class LearningCenterTutorialsModel;
 
 /**
- * Videos filter model class
+ * Learning center tutorials filter model class
  *
- * Sorting and filtering model for the videos model
+ * Sorting and filtering model for the learning center tutorials model
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT VideosFilterModel : public SortFilterProxyModel
+class CORE_EXPORT LearningCenterTutorialsFilterModel : public SortFilterProxyModel
 {
 public:
 
@@ -30,7 +30,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
     */
-    VideosFilterModel(QObject* parent = nullptr);
+    LearningCenterTutorialsFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether \p row with \p parent is filtered out (false) or in (true)
@@ -59,9 +59,9 @@ public: // Action getters
     gui::HorizontalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
-    VideosModel*                _videosModel;           /** Pointer to source model */
-    gui::OptionsAction          _tagsFilterAction;      /** Filter based on tag(s) */
-    gui::HorizontalGroupAction  _filterGroupAction;     /** Groups the filter text and the filter settings */
+    LearningCenterVideosModel*      _learningCenterTutorialsModel;     /** Pointer to source model */
+    gui::OptionsAction              _tagsFilterAction;              /** Filter based on tag(s) */
+    gui::HorizontalGroupAction      _filterGroupAction;             /** Groups the filter text and the filter settings */
 };
 
 }

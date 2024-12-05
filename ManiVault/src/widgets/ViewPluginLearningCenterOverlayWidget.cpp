@@ -364,7 +364,7 @@ void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressE
     auto contextMenu = new QMenu(this);
 
     for (const auto& video : getViewPlugin()->getLearningCenterAction().getVideos())
-        contextMenu->addAction(new WatchVideoAction(contextMenu, video->getTitle(), const_cast<Video*>(video)));
+        contextMenu->addAction(new WatchVideoAction(contextMenu, video->getTitle(), const_cast<LearningCenterVideo*>(video)));
         
     contextMenu->exec(mapToGlobal(event->pos()));
 }

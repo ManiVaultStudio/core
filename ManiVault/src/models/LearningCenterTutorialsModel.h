@@ -6,7 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "util/Video.h"
+#include "util/LearningCenterTutorial.h"
 
 #include <QMap>
 #include <QStandardItemModel>
@@ -14,13 +14,13 @@
 namespace mv {
 
 /**
- * Videos model class
+ * Learning center tutorial model class
  *
- * Model class which contains video content for the learning center
+ * Contains tutorial content for the learning center
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT VideosModel final : public QStandardItemModel
+class CORE_EXPORT LearningCenterTutorialsModel final : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -28,14 +28,13 @@ public:
 
     /** Model columns */
     enum class Column {
-        Type,
     	Title,
         Tags,
         Date,
+        IconName,
         Summary,
-        Resource,
-        Thumbnail,
-        Delegate,
+        Content,
+        Url,
 
         Count
     };
@@ -50,66 +49,30 @@ public:
     /** Column name and tooltip */
     static QMap<Column, ColumHeaderInfo> columnInfo;
 
-    /** Base standard model item class for video */
+    /** Base standard model item class for tutorial */
     class CORE_EXPORT Item : public QStandardItem {
     public:
 
         /**
-         * Construct with pointer \p video
-         * @param video Const pointer to video object
+         * Construct with pointer \p tutorial
+         * @param tutorial Const pointer to tutorial
          * @param editable Boolean determining whether the item is editable or not
          */
-        Item(const util::Video* video, bool editable = false);
+        Item(const util::LearningCenterTutorial* tutorial, bool editable = false);
 
         /**
-         * Get video
-         * return Const reference to video object
+         * Get tutorial
+         * return Pointer to the tutorial
          */
-        const util::Video* getVideo() const;
+        const util::LearningCenterTutorial* getTutorial() const;
 
     private:
-        const util::Video*   _video;      /** The video config */
+        const util::LearningCenterTutorial*   _tutorial;      /** The tutorial data */
     };
 
 protected:
 
-    /** Standard model item class for displaying the video type */
-    class TypeItem final : public Item {
-    public:
-
-        /** No need for custom constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-            case Qt::DisplayRole:
-            case Qt::EditRole:
-                return "Type";
-
-            case Qt::ToolTipRole:
-                return "Type of video";
-
-            default:
-                break;
-            }
-
-            return {};
-        }
-    };
-
-    /** Standard model item class for displaying the video title */
+    /** Standard model item class for displaying the tutorial title */
     class TitleItem final : public Item {
     public:
 
@@ -145,7 +108,7 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the video tags */
+    /** Standard model item class for displaying the tutorial tags */
     class TagsItem final : public Item {
     public:
 
@@ -181,7 +144,7 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the video date */
+    /** Standard model item class for displaying the tutorial date */
     class DateItem final : public Item {
     public:
 
@@ -207,7 +170,7 @@ protected:
                     return "Date";
 
                 case Qt::ToolTipRole:
-                    return "Date at which the video was published";
+                    return "Date at which the tutorial was published";
 
                 default:
                     break;
@@ -217,80 +180,8 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the video summary */
-    class SummaryItem final : public Item {
-    public:
-
-        /** No need for custom constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Summary";
-
-                case Qt::ToolTipRole:
-                    return "Video description";
-
-                default:
-                    break;
-            }
-
-            return {};
-        }
-    };
-
-    /** Standard model item class for displaying the video resource */
-    class ResourceItem final : public Item {
-    public:
-
-        /** No need for custom constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Resource";
-
-                case Qt::ToolTipRole:
-                    return "Video resource";
-
-                default:
-                    break;
-            }
-
-            return {};
-        }
-    };
-
-    /** Standard model item class for displaying the video thumbnail */
-    class ThumbnailItem final : public Item {
+    /** Standard model item class for displaying the tutorial icon name */
+    class IconNameItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -311,11 +202,11 @@ protected:
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
 	            case Qt::DisplayRole:
-            	case Qt::EditRole:
-                    return "Thumbnail";
+	            case Qt::EditRole:
+	                return "Icon name";
 
 	            case Qt::ToolTipRole:
-	                return "Video thumbnail";
+	                return "Tutorial Font Awesome icon name";
 
 	            default:
 	                break;
@@ -325,12 +216,90 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the video delegate */
-    class DelegateItem final : public Item {
+    /** Standard model item class for displaying the tutorial summary */
+    class SummaryItem final : public Item {
     public:
 
         /** No need for custom constructor */
         using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Summary";
+
+	            case Qt::ToolTipRole:
+	                return "Tutorial description";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the tutorial summary */
+    class ContentItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Content";
+
+	            case Qt::ToolTipRole:
+	                return "Tutorial content";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the tutorial URL */
+    class UrlItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
 
         /**
          * Get header data for \p orientation and \p role
@@ -342,10 +311,10 @@ protected:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "Delegate";
+                    return "URL";
 
                 case Qt::ToolTipRole:
-                    return "Video delegate item";
+                    return "Tutorial URL";
 
                 default:
                     break;
@@ -361,19 +330,19 @@ protected:
     public:
 
         /**
-         * Construct with pointer to \p video object
-         * @param video Pointer to video object
+         * Construct with pointer to \p tutorial object
+         * @param tutorial Pointer to tutorial object
          */
-        Row(const util::Video* video) :
+        Row(const util::LearningCenterTutorial* tutorial) :
             QList<QStandardItem*>()
         {
-            append(new TypeItem(video));
-        	append(new TitleItem(video));
-            append(new TagsItem(video));
-            append(new DateItem(video));
-            append(new SummaryItem(video));
-            append(new ResourceItem(video));
-            append(new DelegateItem(video));
+        	append(new TitleItem(tutorial));
+            append(new TagsItem(tutorial));
+            append(new DateItem(tutorial));
+            append(new IconNameItem(tutorial));
+            append(new SummaryItem(tutorial));
+            append(new ContentItem(tutorial));
+            append(new UrlItem(tutorial));
         }
     };
 
@@ -383,7 +352,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    VideosModel(QObject* parent = nullptr);
+    LearningCenterTutorialsModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -401,12 +370,12 @@ public:
     QSet<QString> getTagsSet() const;
 
     /**
-     * Add \p video
-     * @param video Pointer to video to add
+     * Add \p tutorial
+     * @param tutorial Pointer to tutorial to add
      */
-    void addVideo(const util::Video* video);
+    void addTutorial(const util::LearningCenterTutorial* tutorial);
 
-    /** Builds a set of all video tags and emits VideosModel::tagsChanged(...) */
+    /** Builds a set of all video tags and emits LearningCenterTutorialsModel::tagsChanged(...) */
     void updateTags();
 
 signals:
@@ -418,8 +387,8 @@ signals:
     void tagsChanged(const QSet<QString>& tags);
 
 private:
-    util::Videos        _videos;    /** Model videos */
-    QSet<QString>       _tags;      /** All tags */
+    util::LearningCenterTutorials   _tutorials;     /** Model tutorials */
+    QSet<QString>                   _tags;          /** All tags */
 };
 
 }

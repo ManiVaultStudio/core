@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "Video.h"
+#include "LearningCenterVideo.h"
 
 #include <QMovie>
 
@@ -10,7 +10,7 @@ using namespace mv::gui;
 
 namespace mv::util {
 
-Video::Video(const Type& type, const QString& title, const QStringList& tags, const QString& date, const QString& summary, const QString& resource) :
+LearningCenterVideo::LearningCenterVideo(const Type& type, const QString& title, const QStringList& tags, const QString& date, const QString& summary, const QString& resource) :
     _type(type),
     _title(title),
     _tags(tags),
@@ -23,16 +23,6 @@ Video::Video(const Type& type, const QString& title, const QStringList& tags, co
 	    {
 	        connect(&_thumbnailDownloader, &FileDownloader::downloaded, this, [this]() -> void {
                 setThumbnailImage(QImage::fromData(_thumbnailDownloader.downloadedData()));
-
-	            //constexpr auto  marginToRemove = 9;
-	            //const auto      rectangleToCopy = QRect(0, marginToRemove, _thumbnailPixmap.width(), _thumbnailPixmap.height() - (2 * marginToRemove));
-
-	            //_thumbnailPixmap = _thumbnailPixmap.copy(rectangleToCopy).scaledToWidth(200, Qt::SmoothTransformation);
-
-	            //_thumbnailLabel.setFixedSize(_thumbnailPixmap.size());
-	            //_thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
-
-                
 			});
 
 	        const auto youTubeThumbnailUrl = getYouTubeThumbnailUrl(_resource);
@@ -57,54 +47,64 @@ Video::Video(const Type& type, const QString& title, const QStringList& tags, co
     }
 }
 
-const Video::Type& Video::getType() const
+LearningCenterVideo::LearningCenterVideo(const Type& type, const QVariantMap& variantMap) :
+    _type(type),
+    _title(variantMap["title"].toString()),
+    _tags(variantMap["tags"].toStringList()),
+    _date(variantMap["date"].toString()),
+    _summary(variantMap["summary"].toString()),
+    _resource(variantMap["resource"].toString())
+{
+}
+
+const LearningCenterVideo::Type& LearningCenterVideo::getType() const
 {
     return _type;
 }
 
-const QString& Video::getTitle() const
+const QString& LearningCenterVideo::getTitle() const
 {
     return _title;
 }
 
-const QStringList& Video::getTags() const
+const QStringList& LearningCenterVideo::getTags() const
 {
     return _tags;
 }
 
-const QString& Video::getDate() const
+const QString& LearningCenterVideo::getDate() const
 {
     return _date;
 }
 
-const QString& Video::getSummary() const
+const QString& LearningCenterVideo::getSummary() const
 {
     return _summary;
 }
 
-const QString& Video::getResource() const
+const QString& LearningCenterVideo::getResource() const
 {
     return _resource;
 }
 
-QImage Video::getThumbnailImage() const
+QImage LearningCenterVideo::getThumbnailImage() const
 {
     return _thumbnailImage;
 }
 
-void Video::setThumbnailImage(const QImage& thumbnailImage)
+void LearningCenterVideo::setThumbnailImage(const QImage& thumbnailImage)
 {
     _thumbnailImage = thumbnailImage;
 
     emit thumbnailImageReady(_thumbnailImage);
 }
 
-bool Video::hasThumbnailImage() const
+bool LearningCenterVideo::hasThumbnailImage() const
 {
     return !_thumbnailImage.isNull();
 }
 
-QString Video::getYouTubeThumbnailUrl(const QString& videoId, const QString& quality /*= "mqdefault"*/)
+QString LearningCenterVideo::getYouTubeThumbnailUrl(const QString& videoId, const QString& quality /*= "mqdefault"*/)
 {
     return QString("https://img.youtube.com/vi/%1/%2.jpg").arg(videoId, quality);
 }

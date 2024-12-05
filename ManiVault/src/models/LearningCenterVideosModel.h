@@ -6,7 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "util/Video.h"
+#include "util/LearningCenterVideo.h"
 
 #include <QMap>
 #include <QStandardItemModel>
@@ -14,13 +14,13 @@
 namespace mv {
 
 /**
- * Videos model class
+ * Learning center videos model class
  *
- * Model class which contains video content for the learning center
+ * Contains video content for the learning center
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT VideosModel final : public QStandardItemModel
+class CORE_EXPORT LearningCenterVideosModel final : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -59,16 +59,16 @@ public:
          * @param video Const pointer to video object
          * @param editable Boolean determining whether the item is editable or not
          */
-        Item(const util::Video* video, bool editable = false);
+        Item(const util::LearningCenterVideo* video, bool editable = false);
 
         /**
          * Get video
-         * return Const reference to video object
+         * return Pointer to the video
          */
-        const util::Video* getVideo() const;
+        const util::LearningCenterVideo* getVideo() const;
 
     private:
-        const util::Video*   _video;      /** The video config */
+        const util::LearningCenterVideo*   _video;      /** The video data */
     };
 
 protected:
@@ -94,15 +94,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-            case Qt::DisplayRole:
-            case Qt::EditRole:
-                return "Type";
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Type";
 
-            case Qt::ToolTipRole:
-                return "Type of video";
+	            case Qt::ToolTipRole:
+	                return "Type of video";
 
-            default:
-                break;
+	            default:
+	                break;
             }
 
             return {};
@@ -364,7 +364,7 @@ protected:
          * Construct with pointer to \p video object
          * @param video Pointer to video object
          */
-        Row(const util::Video* video) :
+        Row(const util::LearningCenterVideo* video) :
             QList<QStandardItem*>()
         {
             append(new TypeItem(video));
@@ -383,7 +383,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    VideosModel(QObject* parent = nullptr);
+    LearningCenterVideosModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -404,9 +404,9 @@ public:
      * Add \p video
      * @param video Pointer to video to add
      */
-    void addVideo(const util::Video* video);
+    void addVideo(const util::LearningCenterVideo* video);
 
-    /** Builds a set of all video tags and emits VideosModel::tagsChanged(...) */
+    /** Builds a set of all video tags and emits LearningCenterVideosModel::tagsChanged(...) */
     void updateTags();
 
 signals:
@@ -418,8 +418,8 @@ signals:
     void tagsChanged(const QSet<QString>& tags);
 
 private:
-    util::Videos        _videos;    /** Model videos */
-    QSet<QString>       _tags;      /** All tags */
+    util::LearningCenterVideos      _videos;    /** Model videos */
+    QSet<QString>                   _tags;      /** All tags */
 };
 
 }

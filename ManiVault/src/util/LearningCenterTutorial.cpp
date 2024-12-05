@@ -8,7 +8,7 @@ using namespace mv::gui;
 
 namespace mv::util {
 
-Tutorial::Tutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url) :
+LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url) :
     _title(title),
     _tags(tags),
     _date(date),
@@ -19,7 +19,7 @@ Tutorial::Tutorial(const QString& title, const QStringList& tags, const QString&
 {
 }
 
-Tutorial::Tutorial(const QVariantMap& variantMap) :
+LearningCenterTutorial::LearningCenterTutorial(const QVariantMap& variantMap) :
     _title(variantMap["title"].toString()),
     _tags(variantMap["tags"].toStringList()),
     _date(variantMap["date"].toString()),
@@ -30,37 +30,37 @@ Tutorial::Tutorial(const QVariantMap& variantMap) :
 {
 }
 
-const QString& Tutorial::getTitle() const
+const QString& LearningCenterTutorial::getTitle() const
 {
     return _title;
 }
 
-const QStringList& Tutorial::getTags() const
+const QStringList& LearningCenterTutorial::getTags() const
 {
     return _tags;
 }
 
-const QString& Tutorial::getDate() const
+const QString& LearningCenterTutorial::getDate() const
 {
     return _date;
 }
 
-const QString& Tutorial::getIconName() const
+const QString& LearningCenterTutorial::getIconName() const
 {
     return _iconName;
 }
 
-const QString& Tutorial::getSummary() const
+const QString& LearningCenterTutorial::getSummary() const
 {
     return _summary;
 }
 
-const QString& Tutorial::getContent() const
+const QString& LearningCenterTutorial::getContent() const
 {
     return _content;
 }
 
-const QUrl& Tutorial::getUrl() const
+const QUrl& LearningCenterTutorial::getUrl() const
 {
     return _url;
 }

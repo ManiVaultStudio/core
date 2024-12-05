@@ -15,13 +15,13 @@
 namespace mv::util {
 
 /**
- * Tutorial class
+ * LearningCenterTutorial class
  *
  * Contains tutorial information
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT Tutorial : public QObject
+class CORE_EXPORT LearningCenterTutorial : public QObject
 {
     Q_OBJECT
 
@@ -37,13 +37,13 @@ public:
      * @param content Full tutorial content in HTML format
      * @param url ManiVault website tutorial URL
      */
-    explicit Tutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url);
+    explicit LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url);
 
     /**
      * Construct tutorial from \p variantMap
      * @param variantMap Variant map containing the tutorial properties
      */
-    explicit Tutorial(const QVariantMap& variantMap);
+    explicit LearningCenterTutorial(const QVariantMap& variantMap);
 
     /**
      * Get title
@@ -92,7 +92,7 @@ public:
      * @param rhs Right hand side tutorial
      * @return Assigned tutorial
      */
-    Tutorial& operator=(const Tutorial& rhs)
+    LearningCenterTutorial& operator=(const LearningCenterTutorial& rhs)
     {
         _title          = rhs.getTitle();
         _tags           = rhs.getTags();
@@ -110,11 +110,11 @@ private:
     QStringList     _tags;          /** Tags */
     QString         _date;          /** Issue date */
     QString         _iconName;      /** Font Awesome icon name */
-    QString         _summary;       /** Tutorial summary (brief description) */
+    QString         _summary;       /** Summary (brief description) */
     QString         _content;       /** Full tutorial content in HTML format */
     QUrl            _url;           /** ManiVault website tutorial URL */
 };
 
-using Tutorials = std::vector<const Tutorial*>;
+using LearningCenterTutorials = std::vector<const LearningCenterTutorial*>;
 
 }

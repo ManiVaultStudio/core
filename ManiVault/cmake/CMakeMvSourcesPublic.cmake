@@ -533,7 +533,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/NumericalRange.h
     src/util/FileDownloader.h
     src/util/ShortcutMap.h
-    src/util/Video.h
+    src/util/LearningCenterVideo.h
     src/util/LearningCenterTutorial.h
 )
 
@@ -581,7 +581,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/NumericalRange.cpp
     src/util/FileDownloader.cpp
     src/util/ShortcutMap.cpp
-    src/util/Video.cpp
+    src/util/LearningCenterVideo.cpp
     src/util/LearningCenterTutorial.cpp
 )
 
@@ -896,34 +896,34 @@ set(PUBLIC_DATASETS_MODEL_FILES
     ${PUBLIC_DATASETS_MODEL_SOURCES}
 )
 
-set(PUBLIC_VIDEOS_MODEL_HEADERS
-    src/models/VideosModel.h
-	src/models/VideosFilterModel.h
+set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS
+    src/models/LearningCenterVideosModel.h
+	src/models/LearningCenterVideosFilterModel.h
 )
 
-set(PUBLIC_VIDEOS_MODEL_SOURCES
-    src/models/VideosModel.cpp
-	src/models/VideosFilterModel.cpp
+set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES
+    src/models/LearningCenterVideosModel.cpp
+	src/models/LearningCenterVideosFilterModel.cpp
 )
 
-set(PUBLIC_VIDEOS_MODEL_FILES
-    ${PUBLIC_VIDEOS_MODEL_HEADERS}
-    ${PUBLIC_VIDEOS_MODEL_SOURCES}
+set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES
+    ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
+    ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
 )
 
-set(PUBLIC_TUTORIALS_MODEL_HEADERS
-    src/models/TutorialsModel.h
-	src/models/TutorialsFilterModel.h
+set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS
+    src/models/LearningCenterTutorialsModel.h
+	src/models/LearningCenterTutorialsFilterModel.h
 )
 
-set(PUBLIC_TUTORIALS_MODEL_SOURCES
-    src/models/TutorialsModel.cpp
-	src/models/TutorialsFilterModel.cpp
+set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES
+    src/models/LearningCenterTutorialsModel.cpp
+	src/models/LearningCenterTutorialsFilterModel.cpp
 )
 
-set(PUBLIC_TUTORIALS_MODEL_FILES
-    ${PUBLIC_TUTORIALS_MODEL_HEADERS}
-    ${PUBLIC_TUTORIALS_MODEL_SOURCES}
+set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
+    ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
+    ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
@@ -1040,8 +1040,8 @@ set(PUBLIC_HEADERS
     ${PUBLIC_PLUGIN_FACTORIES_MODEL_HEADERS}
     ${PUBLIC_MISCELLANEOUS_MODEL_HEADERS}
 	${PUBLIC_DATASETS_MODEL_HEADERS}
-	${PUBLIC_VIDEOS_MODEL_HEADERS}
-	${PUBLIC_TUTORIALS_MODEL_HEADERS}
+	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
+	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_VERSION_HEADERS}
@@ -1086,8 +1086,8 @@ set(PUBLIC_SOURCES
     ${PUBLIC_PLUGIN_FACTORIES_MODEL_SOURCES}
     ${PUBLIC_MISCELLANEOUS_MODEL_SOURCES}
 	${PUBLIC_DATASETS_MODEL_SOURCES}
-	${PUBLIC_VIDEOS_MODEL_SOURCES}
-	${PUBLIC_TUTORIALS_MODEL_SOURCES}
+	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
+	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_HEADERS}
@@ -1145,7 +1145,7 @@ source_group(Models\\Plugins FILES ${PUBLIC_PLUGINS_MODEL_FILES})
 source_group(Models\\PluginFactories FILES ${PUBLIC_PLUGIN_FACTORIES_MODEL_FILES})
 source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
 source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
-source_group(Models\\Videos FILES ${PUBLIC_VIDEOS_MODEL_FILES})
-source_group(Models\\Tutorials FILES ${PUBLIC_TUTORIALS_MODEL_FILES})
+source_group(Models\\LearningCenter\\Videos FILES ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES})
+source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})

@@ -10,7 +10,7 @@
 #include "actions/TriggerAction.h"
 #include "actions/OptionAction.h"
 
-#include "util/Video.h"
+#include "util/LearningCenterVideo.h"
 
 namespace mv::plugin {
     class Plugin;
@@ -154,15 +154,15 @@ public: // Videos
 
     /**
      * Add \p video
-     * @param video Video
+     * @param video Pointer to video
      */
-    void addVideo(const util::Video* video);
+    void addVideo(const util::LearningCenterVideo* video);
 
     /**
      * Add \p videos
      * @param videos Videos
      */
-    void addVideos(const util::Videos& videos);
+    void addVideos(const util::LearningCenterVideos& videos);
 
     /**
      * Add video by \p tag
@@ -180,7 +180,7 @@ public: // Videos
      * Get videos
      * @return Videos
      */
-    const util::Videos& getVideos() const;
+    const util::LearningCenterVideos& getVideos() const;
 
 private:
 
@@ -286,7 +286,7 @@ private:
     TriggerAction                               _moveToBottomLeftAction;            /** Trigger action that moves the view plugin overlay to the bottom-left of the widget */
     TriggerAction                               _moveToBottomRightAction;           /** Trigger action that moves the view plugin overlay to the bottom-right of the widget */
     QString                                     _pluginTitle;                       /** Human-readable plugin title in plain text format */
-    util::Videos                                _videos;                            /** Plugin related videos */
+    util::LearningCenterVideos                  _videos;                            /** Plugin related videos */
     ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
     QPointer<QWidget>                           _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
 

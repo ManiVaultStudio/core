@@ -7,7 +7,7 @@
 #include "TriggerAction.h"
 
 namespace mv::util {
-    class Video;
+    class LearningCenterVideo;
 }
 
 namespace mv::gui {
@@ -31,7 +31,7 @@ public:
      * @param title Title of the action
      * @param video Pointer to video
      */
-    Q_INVOKABLE WatchVideoAction(QObject* parent, const QString& title, util::Video* video = nullptr);
+    Q_INVOKABLE WatchVideoAction(QObject* parent, const QString& title, util::LearningCenterVideo* video = nullptr);
 
 private:
 
@@ -39,7 +39,7 @@ private:
     void watch();
 
 private:
-    util::Video*    _video;    /** Pointer to video to watch */
+    util::LearningCenterVideo*    _video;    /** Pointer to video to watch */
 
     friend class AbstractActionsManager;
 };

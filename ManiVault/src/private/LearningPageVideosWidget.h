@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <models/VideosFilterModel.h>
+#include <models/LearningCenterVideosFilterModel.h>
 
 #include <actions/HorizontalGroupAction.h>
 
@@ -42,11 +42,11 @@ private:
     void updateCustomStyle();
 
 private:
-    QVBoxLayout                         _mainLayout;            /** Main vertical layout */
-    mv::gui::HorizontalGroupAction      _settingsAction;        /** For searching etc. */
-    QWidget                             _videosWidget;          /** Container for the videos list view */
-    QListView                           _videosListView;        /** List view which shows videos with styled item delegates */
-    mv::VideosFilterModel               _videosFilterModel;     /** Videos filter model */
+    QVBoxLayout                             _mainLayout;            /** Main vertical layout */
+    mv::gui::HorizontalGroupAction          _settingsAction;        /** For searching etc. */
+    QWidget                                 _videosWidget;          /** Container for the videos list view */
+    QListView                               _videosListView;        /** List view which shows videos with styled item delegates */
+    mv::LearningCenterVideosFilterModel     _videosFilterModel;     /** Videos filter model */
 
     friend class LearningPageContentWidget;
 };

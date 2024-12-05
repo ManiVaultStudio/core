@@ -4,7 +4,8 @@
 
 #include "HelpManager.h"
 
-#include "models/VideosFilterModel.h"
+#include "models/LearningCenterVideosFilterModel.h"
+#include "models/LearningCenterTutorialsFilterModel.h"
 
 #include <Application.h>
 
@@ -89,11 +90,11 @@ HelpManager::HelpManager(QObject* parent) :
             for (const auto video : videos) {
                 auto videoMap = video.toVariant().toMap();
 
-                addVideo(new Video(Video::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
+                addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
             }
 
             for (const auto tutorial : tutorials)
-                addVideo(new Tutorial(tutorial.toVariant().toMap()));
+                addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
         }
         catch (std::exception& e)
         {
@@ -141,39 +142,66 @@ void HelpManager::reset()
     endReset();
 }
 
-void HelpManager::addVideo(const Video* video)
+void HelpManager::addVideo(const LearningCenterVideo* video)
 {
     _videosModel.addVideo(video);
 }
 
-Videos HelpManager::getVideos(const QStringList& tags) const
+LearningCenterVideos HelpManager::getVideos(const QStringList& tags) const
 {
-    VideosFilterModel videosFilterModel;
+    LearningCenterVideosFilterModel videosFilterModel;
 
     auto videosModel = &const_cast<HelpManager*>(this)->_videosModel;
 
     videosFilterModel.setSourceModel(videosModel);
     videosFilterModel.getTagsFilterAction().initialize(tags, tags);
 
-    Videos videos;
+    LearningCenterVideos videos;
 
     for (int rowIndex = 0; rowIndex < videosFilterModel.rowCount(); rowIndex++) {
-        const auto videoIndex = videosFilterModel.mapToSource(videosFilterModel.index(rowIndex, 0));
+        const auto videoIndex   = videosFilterModel.mapToSource(videosFilterModel.index(rowIndex, 0));
+        const auto videoItem    = dynamic_cast<LearningCenterVideosModel::Item*>(videosModel->itemFromIndex(videoIndex));
 
-        //const auto videoUrlString = videoIndex.siblingAtColumn(5).data().toString();
-
-        //if (!urlExists(videoUrlString))
-        //    continue;
-        
-        //videos.emplace_back(dynamic_cast<VideosModel::Item*>(videosModel->itemFromIndex(videoIndex))->getVideo());
+        videos.push_back(videoItem->getVideo());
     }
 
     return videos;
 }
 
-const VideosModel& HelpManager::getVideosModel() const
+const LearningCenterVideosModel& HelpManager::getVideosModel() const
 {
     return _videosModel;
+}
+
+void HelpManager::addTutorial(const util::LearningCenterTutorial* tutorial)
+{
+    _tutorialsModel.addTutorial(tutorial);
+}
+
+LearningCenterTutorials HelpManager::getTutorials(const QStringList& tags) const
+{
+    LearningCenterTutorialsFilterModel tutorialsFilterModel;
+
+    auto tutorialsModel = &const_cast<HelpManager*>(this)->_videosModel;
+
+    tutorialsFilterModel.setSourceModel(tutorialsModel);
+    tutorialsFilterModel.getTagsFilterAction().initialize(tags, tags);
+
+    LearningCenterTutorials tutorials;
+
+    for (int rowIndex = 0; rowIndex < tutorialsFilterModel.rowCount(); rowIndex++) {
+        const auto tutorialIndex    = tutorialsFilterModel.mapToSource(tutorialsFilterModel.index(rowIndex, 0));
+        const auto tutorialItem     = dynamic_cast<LearningCenterTutorialsModel::Item*>(tutorialsModel->itemFromIndex(tutorialIndex));
+
+        tutorials.push_back(tutorialItem->getTutorial());
+    }
+
+    return tutorials;
+}
+
+const LearningCenterTutorialsModel& HelpManager::getTutorialsModel() const
+{
+    return _tutorialsModel;
 }
 
 }

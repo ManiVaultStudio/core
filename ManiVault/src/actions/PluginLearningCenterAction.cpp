@@ -244,12 +244,12 @@ bool PluginLearningCenterAction::hasHelp() const
     return _plugin->getFactory()->hasHelp();
 }
 
-void PluginLearningCenterAction::addVideo(const util::Video* video)
+void PluginLearningCenterAction::addVideo(const util::LearningCenterVideo* video)
 {
     _videos.push_back(video);
 }
 
-void PluginLearningCenterAction::addVideos(const util::Videos& videos)
+void PluginLearningCenterAction::addVideos(const util::LearningCenterVideos& videos)
 {
     _videos.insert(_videos.end(), videos.begin(), videos.end());
 }
@@ -264,7 +264,7 @@ void PluginLearningCenterAction::addVideos(const QStringList& tags)
     addVideos(mv::help().getVideos(tags));
 }
 
-const Videos& PluginLearningCenterAction::getVideos() const
+const LearningCenterVideos& PluginLearningCenterAction::getVideos() const
 {
     return _videos;
 }
