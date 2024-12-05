@@ -391,6 +391,7 @@ set(PUBLIC_WIDGETS_HEADERS
     src/widgets/OpenGLWidget.h
     src/widgets/Divider.h
     src/widgets/ElidedLabel.h
+    src/widgets/FileDialog.h
 )
 
 set(PUBLIC_WIDGETS_SOURCES
@@ -399,6 +400,7 @@ set(PUBLIC_WIDGETS_SOURCES
     src/widgets/OpenGLWidget.cpp
     src/widgets/Divider.cpp
     src/widgets/ElidedLabel.cpp
+    src/widgets/FileDialog.cpp
 )
 
 set(PUBLIC_WIDGETS_FILES

@@ -7,12 +7,11 @@
 #include "CoreInterface.h"
 
 #include "actions/WidgetAction.h"
+
 #include "util/Serialization.h"
 #include "util/Exception.h"
 
 #include <QDebug>
-#include <QFileDialog>
-#include <QJsonArray>
 #include <QUuid>
 
 #ifdef _DEBUG
@@ -100,9 +99,7 @@ void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
 
         QByteArray data = jsonFile.readAll();
 
-        QJsonDocument jsonDocument;
-
-        jsonDocument = QJsonDocument::fromJson(data);
+        auto jsonDocument = QJsonDocument::fromJson(data);
 
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");

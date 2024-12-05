@@ -3,13 +3,13 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "FilePickerAction.h"
+#include "Application.h"
 
-#include <Application.h>
+#include "actions/HorizontalGroupAction.h"
 
-#include <actions/HorizontalGroupAction.h>
+#include "widgets/FileDialog.h"
 
 #include <QDir>
-#include <QFileDialog>
 #include <QStandardPaths>
 
 using namespace mv::util;
@@ -22,8 +22,6 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     _completer(nullptr),
     _filePathAction(this, "File path"),
     _pickAction(this, "Pick"),
-    _nameFilters(),
-    _defaultSuffix(),
     _fileType("File"),
     _useNativeDialog(true)
 {
@@ -65,17 +63,14 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     connect(&_filePathAction, &StringAction::stringChanged, this, updateStatusAction);
 
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
-        auto* fileDialog = new QFileDialog(nullptr, Qt::WindowStaysOnTopHint);
+        auto* fileDialog = new FileOpenDialog(nullptr);
 
-        fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
         fileDialog->setWindowTitle(QString("Open %1").arg(getFileType()));
-        fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
-        fileDialog->setFileMode(QFileDialog::ExistingFile);
         fileDialog->setNameFilters(getNameFilters());
         fileDialog->setDefaultSuffix(getDefaultSuffix());
         fileDialog->setDirectory(Application::current()->getSetting(getSettingsPrefix(), QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
         
-        if(!_useNativeDialog)
+        if (!_useNativeDialog)
             fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
 		connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
@@ -89,6 +84,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
             if (!getSettingsPrefix().isEmpty())
                 setFilePath(QFileInfo(filePath).absoluteFilePath());
 		});
+
         connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
         fileDialog->open();

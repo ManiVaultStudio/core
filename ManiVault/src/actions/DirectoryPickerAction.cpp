@@ -3,11 +3,11 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DirectoryPickerAction.h"
+#include "Application.h"
 
-#include <Application.h>
+#include "widgets/FileDialog.h"
 
 #include <QDir>
-#include <QFileDialog>
 #include <QHBoxLayout>
 
 using namespace mv::util;
@@ -16,10 +16,9 @@ namespace mv::gui {
 
 DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory /*= QString()*/) :
     WidgetAction(parent, title),
-    _dirModel(),
-    _completer(),
     _directoryAction(this, "Directory"),
-    _pickAction(this, "Pick")
+    _pickAction(this, "Pick"),
+    _useNativeDialog(true)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -53,7 +52,12 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
 
     // Open file dialog when pick action is triggered
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
-        const auto directory = QFileDialog::getExistingDirectory(nullptr, tr("Open directory"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        QFileDialog::Options options = QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks;
+
+        if (!_useNativeDialog)
+            options.setFlag(QFileDialog::DontUseNativeDialog);
+
+        const auto directory = FileDialog::getExistingDirectory(nullptr, tr("Open directory"), "", options);
 
         if (!directory.isEmpty())
             setDirectory(directory);
@@ -95,6 +99,16 @@ void DirectoryPickerAction::setPlaceHolderString(const QString& placeholderStrin
 QString DirectoryPickerAction::getDirectoryName() const
 {
     return QDir(getDirectory()).dirName();
+}
+
+void DirectoryPickerAction::setUseNativeFileDialog(bool useNativeDialog)
+{
+    _useNativeDialog = useNativeDialog;
+}
+
+bool DirectoryPickerAction::getUseNativeFileDialog() const
+{
+    return _useNativeDialog;
 }
 
 bool DirectoryPickerAction::isValid() const

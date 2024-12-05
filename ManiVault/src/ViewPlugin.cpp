@@ -8,9 +8,9 @@
 #include "AbstractWorkspaceManager.h"
 
 #include "widgets/ViewPluginEditorDialog.h"
+#include "widgets/FileDialog.h"
 
 #include <QWidget>
-#include <QFileDialog>
 
 #ifdef _DEBUG
     #define VIEW_PLUGIN_VERBOSE
@@ -201,33 +201,30 @@ bool ViewPlugin::isSystemViewPlugin() const
 
 void ViewPlugin::createScreenshot()
 {
-    auto* fileDialog = new QFileDialog();
+    auto fileSaveDialog = new FileSaveDialog();
 
-    fileDialog->setWindowTitle("Save Screenshot");
-    fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
-    fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
-    fileDialog->setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog->setNameFilters({ "Image files (*.png)" });
-    fileDialog->setDefaultSuffix(".png");
+    fileSaveDialog->setWindowTitle("Save Screenshot");
+    fileSaveDialog->setNameFilters({ "Image files (*.png)" });
+    fileSaveDialog->setDefaultSuffix(".png");
 
     const auto cachedDirectory = QFileInfo(Application::current()->getSetting("ScreenShot/ViewPlugin/Directory", ".").toString()).dir();
 
-    fileDialog->setDirectory(cachedDirectory);
+    fileSaveDialog->setDirectory(cachedDirectory);
 
-    connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
-        if (fileDialog->selectedFiles().count() != 1)
+    connect(fileSaveDialog, &QFileDialog::accepted, this, [this, fileSaveDialog]() -> void {
+        if (fileSaveDialog->selectedFiles().count() != 1)
             throw std::runtime_error("Only one file may be selected");
 
-        Application::current()->setSetting("ScreenShot/ViewPlugin/Directory", fileDialog->selectedFiles().first());
+        Application::current()->setSetting("ScreenShot/ViewPlugin/Directory", fileSaveDialog->selectedFiles().first());
 
         auto widgetPixmap = getWidget().grab();
 
-        widgetPixmap.toImage().save(fileDialog->selectedFiles().first());
+        widgetPixmap.toImage().save(fileSaveDialog->selectedFiles().first());
     });
 
-    connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
+    connect(fileSaveDialog, &QFileDialog::finished, fileSaveDialog, &QFileDialog::deleteLater);
 
-    fileDialog->open();
+    fileSaveDialog->open();
 }
 
 QKeySequence ViewPlugin::getTriggerShortcut() const

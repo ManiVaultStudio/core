@@ -17,7 +17,8 @@
 #include <util/Exception.h>
 #include <util/Serialization.h>
 
-#include <QFileDialog>
+#include <widgets/FileDialog.h>
+
 #include <QStandardPaths>
 #include <QGridLayout>
 #include <QEventLoop>
@@ -360,16 +361,12 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             ToggleAction disableReadOnlyAction(this, "Allow edit of published project");
 
             if (filePath.isEmpty()) {
-                QFileDialog fileDialog;
+                FileOpenDialog openFileDialog;
 
-                fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Open ManiVault Project");
-                fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-                fileDialog.setFileMode(QFileDialog::ExistingFile);
-                fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-                fileDialog.setDefaultSuffix(".mv");
-                fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+                openFileDialog.setWindowTitle("Open ManiVault Project");
+                openFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+                openFileDialog.setDefaultSuffix(".mv");
+                openFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
                 StringAction    titleAction(this, "Title");
                 StringAction    descriptionAction(this, "Description");
@@ -384,27 +381,27 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 contributorsAction.setEnabled(false);
                 disableReadOnlyAction.setEnabled(false);
 
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(openFileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
-                fileDialogLayout->addWidget(titleAction.createLabelWidget(&fileDialog), rowCount, 0);
-                fileDialogLayout->addWidget(titleAction.createWidget(&fileDialog), rowCount, 1, 1, 2);
+                fileDialogLayout->addWidget(titleAction.createLabelWidget(&openFileDialog), rowCount, 0);
+                fileDialogLayout->addWidget(titleAction.createWidget(&openFileDialog), rowCount, 1, 1, 2);
 
-                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileDialog), rowCount + 1, 0);
-                fileDialogLayout->addWidget(descriptionAction.createWidget(&fileDialog), rowCount + 1, 1, 1, 2);
+                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&openFileDialog), rowCount + 1, 0);
+                fileDialogLayout->addWidget(descriptionAction.createWidget(&openFileDialog), rowCount + 1, 1, 1, 2);
 
-                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileDialog), rowCount + 2, 0);
-                fileDialogLayout->addWidget(tagsAction.createWidget(&fileDialog), rowCount + 2, 1, 1, 2);
+                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&openFileDialog), rowCount + 2, 0);
+                fileDialogLayout->addWidget(tagsAction.createWidget(&openFileDialog), rowCount + 2, 1, 1, 2);
 
-                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 3, 0);
-                fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 3, 1, 1, 2);
+                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&openFileDialog), rowCount + 3, 0);
+                fileDialogLayout->addWidget(commentsAction.createWidget(&openFileDialog), rowCount + 3, 1, 1, 2);
 
-                fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&fileDialog), rowCount + 4, 0);
-                fileDialogLayout->addWidget(contributorsAction.createWidget(&fileDialog), rowCount + 4, 1, 1, 2);
+                fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&openFileDialog), rowCount + 4, 0);
+                fileDialogLayout->addWidget(contributorsAction.createWidget(&openFileDialog), rowCount + 4, 1, 1, 2);
        
-                fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileDialog), rowCount + 5, 1, 1, 2);
+                fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&openFileDialog), rowCount + 5, 1, 1, 2);
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
+                connect(&openFileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
 
@@ -421,21 +418,21 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     disableReadOnlyAction.setEnabled(projectMetaAction->getReadOnlyAction().isChecked());
                 });
 
-                fileDialog.open();
+                openFileDialog.open();
 
                 QEventLoop eventLoop;
                 
-                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                QObject::connect(&openFileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
                 
                 eventLoop.exec();
 
-                if (fileDialog.result() != QDialog::Accepted)
+                if (openFileDialog.result() != QDialog::Accepted)
                     return;
 
-                if (fileDialog.selectedFiles().count() != 1)
+                if (openFileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
 
-                filePath = fileDialog.selectedFiles().first();
+                filePath = openFileDialog.selectedFiles().first();
 
                 Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
@@ -579,17 +576,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             if (filePath.isEmpty()) {
 
-                QFileDialog fileDialog;
+                FileSaveDialog saveFileDialog;
 
-                fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Save ManiVault Project");
-                fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-                fileDialog.setDefaultSuffix(".mv");
-                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-                fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+                saveFileDialog.setWindowTitle("Save ManiVault Project");
+                saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+                saveFileDialog.setDefaultSuffix(".mv");
+                saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
                 QCheckBox   passwordProtectedCheckBox("Password protected");
@@ -600,8 +594,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 auto compressionLayout = new QHBoxLayout();
 
-                compressionLayout->addWidget(_project->getCompressionAction().getEnabledAction().createWidget(&fileDialog));
-                compressionLayout->addWidget(_project->getCompressionAction().getLevelAction().createWidget(&fileDialog), 1);
+                compressionLayout->addWidget(_project->getCompressionAction().getEnabledAction().createWidget(&saveFileDialog));
+                compressionLayout->addWidget(_project->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
                 
                 fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 
@@ -626,8 +620,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 auto titleLayout = new QHBoxLayout();
 
-                titleLayout->addWidget(titleAction.createWidget(&fileDialog));
-                titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&fileDialog));
+                titleLayout->addWidget(titleAction.createWidget(&saveFileDialog));
+                titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&saveFileDialog));
 
                 fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
 
@@ -639,7 +633,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 //updatePassword();
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
+                connect(&saveFileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
 
@@ -652,19 +646,19 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     _project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 
-                fileDialog.open();
+                saveFileDialog.open();
 
                 QEventLoop eventLoop;
-                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                QObject::connect(&saveFileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
                 eventLoop.exec();
 
-                if (fileDialog.result() != QDialog::Accepted)
+                if (saveFileDialog.result() != QDialog::Accepted)
                     return;
 
-                if (fileDialog.selectedFiles().count() != 1)
+                if (saveFileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
 
-                filePath = fileDialog.selectedFiles().first();
+                filePath = saveFileDialog.selectedFiles().first();
 
                 Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
@@ -799,17 +793,15 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
             if (filePath.isEmpty()) {
 
-                QFileDialog fileDialog;
+                FileSaveDialog saveFileDialog;
 
-                fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
-                fileDialog.setWindowTitle("Publish ManiVault Project");
-                fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-                fileDialog.setDefaultSuffix(".mv");
-                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-                fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+                saveFileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
+                saveFileDialog.setWindowTitle("Publish ManiVault Project");
+                saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+                saveFileDialog.setDefaultSuffix(".mv");
+                saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
                 QStringList options{ "Compression", "Title" };
@@ -823,8 +815,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
                     auto passwordLayout = new QHBoxLayout();
 
-                    passwordLayout->addWidget(passwordProtectedAction.createWidget(&fileDialog));
-                    passwordLayout->addWidget(passwordAction.createWidget(&fileDialog), 1);
+                    passwordLayout->addWidget(passwordProtectedAction.createWidget(&saveFileDialog));
+                    passwordLayout->addWidget(passwordAction.createWidget(&saveFileDialog), 1);
 
                     const auto updatePasswordActionReadOnly = [&]() -> void {
                         passwordAction.setEnabled(passwordProtectedAction.isChecked());
@@ -840,8 +832,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                 if (options.contains("Compression")) {
                     auto compressionLayout = new QHBoxLayout();
 
-                    compressionLayout->addWidget(currentProject->getCompressionAction().getEnabledAction().createWidget(&fileDialog));
-                    compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&fileDialog), 1);
+                    compressionLayout->addWidget(currentProject->getCompressionAction().getEnabledAction().createWidget(&saveFileDialog));
+                    compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
 
                     fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 }
@@ -869,13 +861,13 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
                     auto titleLayout = new QHBoxLayout();
 
-                    titleLayout->addWidget(titleAction.createWidget(&fileDialog));
-                    titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&fileDialog));
+                    titleLayout->addWidget(titleAction.createWidget(&saveFileDialog));
+                    titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&saveFileDialog));
 
                     fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
                 }
                     
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& filePath) -> void {
+                connect(&saveFileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
 
@@ -888,19 +880,19 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     currentProject->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 
-                fileDialog.open();
+                saveFileDialog.open();
 
                 QEventLoop eventLoop;
-                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                QObject::connect(&saveFileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
                 eventLoop.exec();
 
-                if (fileDialog.result() != QDialog::Accepted)
+                if (saveFileDialog.result() != QDialog::Accepted)
                     return;
 
-                if (fileDialog.selectedFiles().count() != 1)
+                if (saveFileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
 
-                filePath = fileDialog.selectedFiles().first();
+                filePath = saveFileDialog.selectedFiles().first();
 
                 Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }

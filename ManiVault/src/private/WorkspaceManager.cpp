@@ -18,9 +18,10 @@
 #include "util/Serialization.h"
 #include "util/Icon.h"
 
+#include "widgets/FileDialog.h"
+
 #include <QMainWindow>
 #include <QPainter>
-#include <QFileDialog>
 #include <QStandardPaths>
 #include <QBuffer>
 #include <QOpenGLWidget>
@@ -265,17 +266,13 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
         beginLoadWorkspace();
         {
             if (filePath.isEmpty()) {
-                QFileDialog fileDialog;
+                FileOpenDialog fileOpenDialog;
 
-                fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Load ManiVault Workspace");
-                fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-                fileDialog.setFileMode(QFileDialog::ExistingFile);
-                fileDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
-                fileDialog.setDefaultSuffix(".json");
-                fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-                fileDialog.setMinimumHeight(400);
+                fileOpenDialog.setWindowTitle("Load ManiVault Workspace");
+                fileOpenDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
+                fileOpenDialog.setDefaultSuffix(".json");
+                fileOpenDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+                fileOpenDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
                 StringAction descriptionAction(this, "Description");
                 StringAction tagsAction(this, "Tags");
@@ -285,19 +282,19 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 tagsAction.setEnabled(false);
                 commentsAction.setEnabled(false);
 
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileOpenDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
-                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileDialog), rowCount, 0);
-                fileDialogLayout->addWidget(descriptionAction.createWidget(&fileDialog), rowCount, 1, 1, 2);
+                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileOpenDialog), rowCount, 0);
+                fileDialogLayout->addWidget(descriptionAction.createWidget(&fileOpenDialog), rowCount, 1, 1, 2);
 
-                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileDialog), rowCount + 1, 0);
-                fileDialogLayout->addWidget(tagsAction.createWidget(&fileDialog), rowCount + 1, 1, 1, 2);
+                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileOpenDialog), rowCount + 1, 0);
+                fileDialogLayout->addWidget(tagsAction.createWidget(&fileOpenDialog), rowCount + 1, 1, 1, 2);
 
-                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 2, 0);
-                fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 2, 1, 1, 2);
+                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileOpenDialog), rowCount + 2, 0);
+                fileDialogLayout->addWidget(commentsAction.createWidget(&fileOpenDialog), rowCount + 2, 1, 1, 2);
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
+                connect(&fileOpenDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
 
@@ -308,19 +305,19 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                     commentsAction.setString(workspace.getDescriptionAction().getString());
                 });
 
-                fileDialog.open();
+                fileOpenDialog.open();
 
                 QEventLoop eventLoop;
-                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                QObject::connect(&fileOpenDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
                 eventLoop.exec();
 
-                if (fileDialog.result() != QDialog::Accepted)
+                if (fileOpenDialog.result() != QDialog::Accepted)
                     return;
 
-                if (fileDialog.selectedFiles().count() != 1)
+                if (fileOpenDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
 
-                filePath = fileDialog.selectedFiles().first();
+                filePath = fileOpenDialog.selectedFiles().first();
 
                 Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }           
@@ -351,32 +348,26 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
     Application::setSerializationAborted(false);
 
     if (projectFilePath.isEmpty()) {
-        QFileDialog fileDialog;
+        FileOpenDialog fileOpenDialog;
 
-        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-        fileDialog.setWindowTitle("Import ManiVault Workspace From Project");
-        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-        fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-        fileDialog.setDefaultSuffix(".mv");
-        fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-
-        fileDialog.open();
+        fileOpenDialog.setWindowTitle("Import ManiVault Workspace From Project");
+        fileOpenDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+        fileOpenDialog.setDefaultSuffix(".mv");
+        fileOpenDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+        fileOpenDialog.open();
 
         QEventLoop eventLoop;
-        QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+        QObject::connect(&fileOpenDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
         eventLoop.exec();
 
-        if (fileDialog.result() != QDialog::Accepted)
+        if (fileOpenDialog.result() != QDialog::Accepted)
             return;
 
-        if (fileDialog.selectedFiles().count() != 1)
+        if (fileOpenDialog.selectedFiles().count() != 1)
             throw std::runtime_error("Only one file may be selected");
 
-        projectFilePath = fileDialog.selectedFiles().first();
+        projectFilePath = fileOpenDialog.selectedFiles().first();
     }
-
-    Archiver archiver;
 
     const QString workspaceFile("workspace.json");
 
@@ -384,6 +375,8 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
 
     try
     {
+        Archiver archiver;
+
         archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
     }
     catch (const std::runtime_error& e)
@@ -411,18 +404,14 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
 
             if (filePath.isEmpty()) {
 
-                QFileDialog fileDialog;
+                FileSaveDialog fileSaveDialog;
 
-                fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Export ManiVault Workspace");
-                fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
-                fileDialog.setDefaultSuffix(".json");
-                fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-                fileDialog.setMinimumHeight(500);
+                fileSaveDialog.setWindowTitle("Export ManiVault Workspace");
+                fileSaveDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
+                fileSaveDialog.setDefaultSuffix(".json");
+                fileSaveDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileSaveDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
                 auto& titleAction = currentWorkspace->getTitleAction();
@@ -443,24 +432,24 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
 
                 auto titleLayout = new QHBoxLayout();
 
-                titleLayout->addWidget(titleAction.createWidget(&fileDialog));
-                titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&fileDialog));
+                titleLayout->addWidget(titleAction.createWidget(&fileSaveDialog));
+                titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&fileSaveDialog));
 
                 fileDialogLayout->addLayout(titleLayout, rowCount, 1, 1, 2);
 
-                fileDialog.open();
+                fileSaveDialog.open();
 
                 QEventLoop eventLoop;
-                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                QObject::connect(&fileSaveDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
                 eventLoop.exec();
 
-                if (fileDialog.result() != QDialog::Accepted)
+                if (fileSaveDialog.result() != QDialog::Accepted)
                     return;
 
-                if (fileDialog.selectedFiles().count() != 1)
+                if (fileSaveDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
 
-                filePath = fileDialog.selectedFiles().first();
+                filePath = fileSaveDialog.selectedFiles().first();
 
                 Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
