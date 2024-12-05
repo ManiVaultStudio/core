@@ -2,111 +2,67 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "Video.h"
-
-#include <QMovie>
+#include "LearningCenterTutorial.h"
 
 using namespace mv::gui;
 
 namespace mv::util {
 
-Video::Video(const Type& type, const QString& title, const QStringList& tags, const QString& date, const QString& summary, const QString& resource) :
-    _type(type),
+Tutorial::Tutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url) :
     _title(title),
     _tags(tags),
     _date(date),
+    _iconName(iconName),
     _summary(summary),
-    _resource(resource)
+    _content(content),
+    _url(url)
 {
-    switch (_type) {
-	    case Type::YouTube:
-	    {
-	        connect(&_thumbnailDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-                setThumbnailImage(QImage::fromData(_thumbnailDownloader.downloadedData()));
-
-	            //constexpr auto  marginToRemove = 9;
-	            //const auto      rectangleToCopy = QRect(0, marginToRemove, _thumbnailPixmap.width(), _thumbnailPixmap.height() - (2 * marginToRemove));
-
-	            //_thumbnailPixmap = _thumbnailPixmap.copy(rectangleToCopy).scaledToWidth(200, Qt::SmoothTransformation);
-
-	            //_thumbnailLabel.setFixedSize(_thumbnailPixmap.size());
-	            //_thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
-
-                
-			});
-
-	        const auto youTubeThumbnailUrl = getYouTubeThumbnailUrl(_resource);
-
-	        _thumbnailDownloader.download(QUrl(youTubeThumbnailUrl));
-
-	        break;
-	    }
-
-        case Type::GIF:
-        {
-            QMovie movie(_resource);
-
-            if (movie.isValid()) {
-                movie.jumpToFrame(0);
-
-                setThumbnailImage(movie.currentImage());
-            }
-
-            break;
-        }
-    }
 }
 
-const Video::Type& Video::getType() const
+Tutorial::Tutorial(const QVariantMap& variantMap) :
+    _title(variantMap["title"].toString()),
+    _tags(variantMap["tags"].toStringList()),
+    _date(variantMap["date"].toString()),
+    _iconName(variantMap["icon"].toString()),
+    _summary(variantMap["summary"].toString()),
+    _content(variantMap["fullpost"].toString()),
+    _url(QUrl(variantMap["url"].toString()))
 {
-    return _type;
 }
 
-const QString& Video::getTitle() const
+const QString& Tutorial::getTitle() const
 {
     return _title;
 }
 
-const QStringList& Video::getTags() const
+const QStringList& Tutorial::getTags() const
 {
     return _tags;
 }
 
-const QString& Video::getDate() const
+const QString& Tutorial::getDate() const
 {
     return _date;
 }
 
-const QString& Video::getSummary() const
+const QString& Tutorial::getIconName() const
+{
+    return _iconName;
+}
+
+const QString& Tutorial::getSummary() const
 {
     return _summary;
 }
 
-const QString& Video::getResource() const
+const QString& Tutorial::getContent() const
 {
-    return _resource;
+    return _content;
 }
 
-QImage Video::getThumbnailImage() const
+const QUrl& Tutorial::getUrl() const
 {
-    return _thumbnailImage;
-}
-
-void Video::setThumbnailImage(const QImage& thumbnailImage)
-{
-    _thumbnailImage = thumbnailImage;
-
-    emit thumbnailImageReady(_thumbnailImage);
-}
-
-bool Video::hasThumbnailImage() const
-{
-    return !_thumbnailImage.isNull();
-}
-
-QString Video::getYouTubeThumbnailUrl(const QString& videoId, const QString& quality /*= "mqdefault"*/)
-{
-    return QString("https://img.youtube.com/vi/%1/%2.jpg").arg(videoId, quality);
+    return _url;
 }
 
 }

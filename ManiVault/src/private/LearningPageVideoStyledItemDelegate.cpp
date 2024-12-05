@@ -7,10 +7,7 @@
 
 #include <widgets/YouTubeVideoDialog.h>
 
-#include <QDebug>
-#include <QImage>
 #include <QAbstractTextDocumentLayout>
-#include <QLocale>
 
 using namespace mv::util;
 using namespace mv::gui;

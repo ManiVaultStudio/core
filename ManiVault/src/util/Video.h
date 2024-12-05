@@ -38,7 +38,7 @@ public:
     using GifResource = QString;
     
     /**
-     * Base constructor for use by type-specific constructors
+     * Construct video from individual properties
      * @param type Type of video
      * @param title Video title
      * @param tags Video tags for filtering
@@ -110,9 +110,9 @@ public:
     static QString getYouTubeThumbnailUrl(const QString& videoId, const QString& quality = "mqdefault");
 
     /**
-     * Overload assignment operator to avoid the watch action being copied
+     * Overload assignment operator
      * @param rhs Right hand side video
-     * @return Assigned
+     * @return Assigned video
      */
     Video& operator=(const Video& rhs)
     {

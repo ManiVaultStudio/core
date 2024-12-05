@@ -9,142 +9,112 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QImage>
 
 #include <vector>
-
-#include "FileDownloader.h"
 
 namespace mv::util {
 
 /**
- * Video class
+ * Tutorial class
  *
- * Contains video meta data and offers ways to watch it
+ * Contains tutorial information
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT Video : public QObject
+class CORE_EXPORT Tutorial : public QObject
 {
     Q_OBJECT
 
 public:
-    /** Type of video */
-    enum class Type {
-	    YouTube,        /** Youtube video */
-        GIF             /** GIF animation*/
-    };
-
-    using GifResource = QString;
     
     /**
-     * Base constructor for use by type-specific constructors
-     * @param type Type of video
-     * @param title Video title
-     * @param tags Video tags for filtering
+     * Construct tutorial from individual properties
+     * @param title Tutorial title
+     * @param tags Tutorial tags for filtering
      * @param date Issue date
-     * @param summary Brief video description
-     * @param resource Identifier of the YouTube or GIF
+     * @param iconName Font Awesome icon name
+     * @param summary Tutorial summary (brief description)
+     * @param content Full tutorial content in HTML format
+     * @param url ManiVault website tutorial URL
      */
-    explicit Video(const Type& type, const QString& title, const QStringList& tags, const QString& date, const QString& summary, const QString& resource);
+    explicit Tutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url);
 
     /**
-     * Get video type
-     * @return Video type
+     * Construct tutorial from \p variantMap
+     * @param variantMap Variant map containing the tutorial properties
      */
-    const Type& getType() const;
+    explicit Tutorial(const QVariantMap& variantMap);
 
     /**
-     * Get video title
-     * @return Video title
+     * Get title
+     * @return Tutorial title
      */
     const QString& getTitle() const;
 
     /**
-     * Get video tags
-     * @return Video tags
+     * Get tags
+     * @return Tutorial tags
      */
     const QStringList& getTags() const;
 
     /**
-     * Get video date
-     * @return Video date
+     * Get date
+     * @return Issue date 
      */
     const QString& getDate() const;
 
     /**
-     * Get video summary (brief description)
-     * @return Video summary
+     * Get icon name
+     * @return Font Awesome icon name
+     */
+    const QString& getIconName() const;
+
+    /**
+     * Get summary
+     * @return Tutorial summary (brief description)
      */
     const QString& getSummary() const;
 
     /**
-     * Get video resource
-     * @return Video resource
+     * Get content
+     * @return Full tutorial content in HTML format
      */
-    const QString& getResource() const;
+    const QString& getContent() const;
 
     /**
-     * Get thumbnail image
-     * @return Thumbnail image
+     * Get URL
+     * @return ManiVault website tutorial URL
      */
-    QImage getThumbnailImage() const;
+    const QUrl& getUrl() const;
 
     /**
-     * Set thumbnail image to /p thumbnailImage
-     * @param thumbnailImage Thumbnail image
+     * Overload assignment operator
+     * @param rhs Right hand side tutorial
+     * @return Assigned tutorial
      */
-    void setThumbnailImage(const QImage& thumbnailImage);
-
-    /**
-     * Get whether there is a valid thumbnail image
-     * @return Boolean determining whether there is a valid thumbnail image
-     */
-    bool hasThumbnailImage() const;
-
-    /**
-     * Get youTube thumbnail for \p videoId with \p quality
-     * @param videoId Globally unique identifier of the video
-     * @param quality String determining the quality: "default", "hqdefault", "mqdefault", "sddefault", "maxresdefault"
-     */
-    static QString getYouTubeThumbnailUrl(const QString& videoId, const QString& quality = "mqdefault");
-
-    /**
-     * Overload assignment operator to avoid the watch action being copied
-     * @param rhs Right hand side video
-     * @return Assigned
-     */
-    Video& operator=(const Video& rhs)
+    Tutorial& operator=(const Tutorial& rhs)
     {
-        _type           = rhs.getType();
         _title          = rhs.getTitle();
         _tags           = rhs.getTags();
         _date           = rhs.getDate();
+        _iconName       = rhs.getIconName();
         _summary        = rhs.getSummary();
-        _resource       = rhs.getResource();
+        _content        = rhs.getContent();
+        _url            = rhs.getUrl();
 
         return *this;
     }
 
-signals:
-
-    /**
-     * Signals that /p thumbnailImage is ready for use
-     * @param thumbnailImage Thumbnail image
-     */
-    void thumbnailImageReady(const QImage& thumbnailImage);
-
 private:
-    Type            _type;                      /** Type */
-    QString         _title;                     /** Title */
-    QStringList     _tags;                      /** Tags */
-    QString         _date;                      /** Date and time */
-    QString         _summary;                   /** Summary */
-    QString         _resource;                  /** Video resource */
-    FileDownloader  _thumbnailDownloader;       /** File downloader for downloading the YouTube thumbnail image */
-    QImage          _thumbnailImage;            /** Cached thumbnail image */
+    QString         _title;         /** Title */
+    QStringList     _tags;          /** Tags */
+    QString         _date;          /** Issue date */
+    QString         _iconName;      /** Font Awesome icon name */
+    QString         _summary;       /** Tutorial summary (brief description) */
+    QString         _content;       /** Full tutorial content in HTML format */
+    QUrl            _url;           /** ManiVault website tutorial URL */
 };
 
-using Videos = std::vector<const Video*>;
+using Tutorials = std::vector<const Tutorial*>;
 
 }

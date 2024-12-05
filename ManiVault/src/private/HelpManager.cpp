@@ -80,13 +80,28 @@ HelpManager::HelpManager(QObject* parent) :
     });
 
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-        const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-        const auto videos = jsonDocument.object()["videos"].toArray();
+        try
+        {
+            const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
+            const auto videos = jsonDocument.object()["videos"].toArray();
+            const auto tutorials = jsonDocument.object()["tutorials"].toArray();
 
-        for (const auto& video : videos) {
-            auto videoMap = video.toVariant().toMap();
+            for (const auto video : videos) {
+                auto videoMap = video.toVariant().toMap();
 
-            addVideo(new Video(Video::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
+                addVideo(new Video(Video::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
+            }
+
+            for (const auto tutorial : tutorials)
+                addVideo(new Tutorial(tutorial.toVariant().toMap()));
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to process learning center JSON", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to process learning center JSON");
         }
 	});
 }
