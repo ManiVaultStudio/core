@@ -31,7 +31,7 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* target, const mv::plugin::ViewPlugin* viewPlugin) :
+ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin) :
     OverlayWidget(target),
     _viewPlugin(viewPlugin),
     _toolbarWidget(viewPlugin, this),
@@ -229,7 +229,7 @@ void ViewPluginLearningCenterOverlayWidget::alignmentChanged()
 
 PluginLearningCenterAction& ViewPluginLearningCenterOverlayWidget::getLearningCenterAction() const
 {
-    return const_cast<mv::plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction();
+    return const_cast<plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction();
 }
 
 void ViewPluginLearningCenterOverlayWidget::expand()
@@ -258,7 +258,7 @@ void ViewPluginLearningCenterOverlayWidget::collapse()
         _toolbarItemWidget->getWidgetFader().fadeOut(animationDuration, true);
 }
 
-ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(14, 14)*/) :
+ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(14, 14)*/) :
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
     _iconSize(iconSize),
@@ -313,14 +313,14 @@ WidgetFader& ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::g
     return _widgetFader;
 }
 
-const mv::plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin() const
+const plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin() const
 {
     return _viewPlugin;
 }
 
-mv::plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin()
+plugin::ViewPlugin* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getViewPlugin()
 {
-    return const_cast<mv::plugin::ViewPlugin*>(_viewPlugin);
+    return const_cast<plugin::ViewPlugin*>(_viewPlugin);
 }
 
 ViewPluginLearningCenterOverlayWidget* ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getOverlayWidget() const
@@ -328,7 +328,7 @@ ViewPluginLearningCenterOverlayWidget* ViewPluginLearningCenterOverlayWidget::Ab
     return _overlayWidget;
 }
 
-ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::LearningCenterToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::LearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     const auto updateTooltip = [this]() -> void {
@@ -356,7 +356,7 @@ bool ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::sho
     return getViewPlugin()->getLearningCenterAction().getOverlayVisibleAction().isChecked();
 }
 
-ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip("Watch related videos");
@@ -404,7 +404,7 @@ bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDispl
     return !getViewPlugin()->getLearningCenterAction().getVideos().empty();
 }
 
-ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::DescriptionToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(getViewPlugin()->getLearningCenterAction().getViewDescriptionAction().toolTip());
@@ -427,7 +427,7 @@ bool ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::should
     return getViewPlugin()->getLearningCenterAction().hasDescription();
 }
 
-ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowDocumentationToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getTriggerHelpAction().toolTip());
@@ -450,7 +450,7 @@ bool ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::
     return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->hasHelp();
 }
 
-ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip("View shortcuts");
@@ -477,7 +477,7 @@ bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDi
     return getViewPlugin()->getShortcuts().hasShortcuts();
 }
 
-ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGithubRepoToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getVisitRepositoryAction().toolTip());
@@ -500,7 +500,7 @@ bool ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::sh
     return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getRepositoryUrl().isValid();
 }
 
-ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::ToLearningCenterToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::ToLearningCenterToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(mv::help().getToLearningCenterAction().toolTip());
@@ -523,7 +523,7 @@ bool ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::s
     return true;
 }
 
-ViewPluginLearningCenterOverlayWidget::HideToolbarItemWidget::HideToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::HideToolbarItemWidget::HideToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip(getViewPlugin()->getLearningCenterAction().getHideToolbarAction().toolTip());
@@ -548,7 +548,7 @@ bool ViewPluginLearningCenterOverlayWidget::HideToolbarItemWidget::shouldDisplay
 
 std::vector<ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::Alignment> ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::alignments = {};
 
-ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::AlignmentToolbarItemWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::AlignmentToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
     setToolTip("Move the toolbar");
@@ -581,7 +581,7 @@ bool ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::shouldDi
     return true;
 }
 
-ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::BackgroundWidget(QWidget* target, const mv::plugin::ViewPlugin* viewPlugin) :
+ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::BackgroundWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin) :
     QWidget(target),
     _viewPlugin(viewPlugin),
     _geometryAnimation(this, "geometry")
@@ -638,7 +638,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
     std::int32_t radius = 0;
 
-    const auto alignment = const_cast<mv::plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction().getAlignment();
+    const auto alignment = const_cast<plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction().getAlignment();
 
     if (alignment & Qt::AlignLeft || alignment & Qt::AlignRight) {
         radius              = (width() - 2 * rectangleMargin) / 2;
@@ -678,7 +678,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
     QWidget::paintEvent(event);
 }
 
-ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const mv::plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, bool alwaysVisible /*= false*/) :
+ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, bool alwaysVisible /*= false*/) :
     QWidget(overlayWidget),
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
@@ -750,7 +750,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const mv::pl
 
 PluginLearningCenterAction& ViewPluginLearningCenterOverlayWidget::ToolbarWidget::getLearningCenterAction() const
 {
-    return const_cast<mv::plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction();
+    return const_cast<plugin::ViewPlugin*>(_viewPlugin)->getLearningCenterAction();
 }
 
 void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::addWidget(QWidget* widget)
