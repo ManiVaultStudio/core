@@ -65,9 +65,9 @@ private:
 public:
 
     /**
-     * Construct with model \p index and pointer to \p learningPageContentWidget
+     * Construct with model \p index and pointer to \p parent widget
      * @param index Model index for videos model
-     * @param learningPageContentWidget Pointer to owning learning page content widget
+     * @param parent Pointer to parent widget
      */
     LearningPageVideoWidget(const QModelIndex& index, QWidget* parent = nullptr);
 
@@ -85,6 +85,6 @@ private:
     QPixmap                     _thumbnailPixmap;           /** Thumbnail pixmap */
     QTextBrowser                _propertiesTextBrowser;     /** Text browser for showing the video title */
     OverlayWidget               _overlayWidget;             /** Overlay widget widget that shows video-related actions */
-
+    
     friend class LearningPageVideoStyledItemDelegate;
 };

@@ -57,6 +57,7 @@ public:
         /**
          * Construct with pointer \p video
          * @param video Const pointer to video object
+         * @param editable Boolean determining whether the item is editable or not
          */
         Item(const util::Video* video, bool editable = false);
 

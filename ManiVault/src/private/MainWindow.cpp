@@ -78,8 +78,6 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     QMainWindow::showEvent(showEvent);
 
     if (centralWidget() == nullptr) {
-        setFixedSize(1920, 1080);
-
         auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
 
         auto fileMenuAction = menuBar()->addMenu(new FileMenu());

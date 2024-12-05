@@ -69,16 +69,6 @@ ViewPluginDescriptionDialog::ViewPluginDescriptionDialog(plugin::ViewPlugin* vie
             _markdownPage.runJavaScript(setFontSizeJs);
             // _markdownPage.runJavaScript(QString("document.body.style.fontSize = '%1';").arg(QString::number(fontSize)));
             _markdownPage.runJavaScript(QString("document.body.style.color = '%1';").arg(colorHex));
-
-            const auto setFontSizeJs = R"(
-				var style = document.createElement('style');
-				style.innerHTML = `body, * {
-					font-size:)" + QString::number(fontSize) + R"(pt !important;
-				}`;
-				document.head.appendChild(style);
-			)";
-
-            _markdownPage.runJavaScript(setFontSizeJs);
 		});
 
         _webEngineView.setPage(&_markdownPage);

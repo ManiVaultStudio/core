@@ -75,9 +75,6 @@ DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
 void DataHierarchyPluginFactory::initialize()
 {
 	ViewPluginFactory::initialize();
-
-    mv::help().addVideo(new Video(Video::Type::GIF, "Import data", { "Shorts", "Data Hierarchy", "Import" }, "", "Shows how to import data with the data hierarchy plugin", ":/animation/ImportDataset.gif"));
-    mv::help().addVideo(new Video(Video::Type::GIF, "Export data", { "Shorts", "Data Hierarchy", "Export" }, "", "Shows how to export data with the data hierarchy plugin", ":/animation/ExportDataset.gif"));
 }
 
 QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

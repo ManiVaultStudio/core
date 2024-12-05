@@ -32,10 +32,14 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
 
     _videosListView.setObjectName("Videos");
     _videosListView.setViewMode(QListView::IconMode);
+    _videosListView.setFlow(QListView::LeftToRight);
+    _videosListView.setWrapping(true);
+    _videosListView.setIconSize(QSize(64, 64));
+    _videosListView.setResizeMode(QListView::Adjust);
     _videosListView.setModel(&_videosFilterModel);
     _videosListView.setModelColumn(static_cast<int>(VideosModel::Column::Delegate));
     _videosListView.setItemDelegateForColumn(static_cast<int>(VideosModel::Column::Delegate), new LearningPageVideoStyledItemDelegate(this));
-
+    
     setLayout(&_mainLayout);
 
     const auto openPersistentEditors = [this]() -> void {
@@ -60,6 +64,9 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
     });
 
     updateCustomStyle();
+
+    _videosFilterModel.invalidate();
+
 }
 
 bool LearningPageVideosWidget::event(QEvent* event)

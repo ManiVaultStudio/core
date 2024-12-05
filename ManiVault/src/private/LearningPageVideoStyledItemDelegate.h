@@ -40,13 +40,6 @@ public:
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
     /**
-     * Updates an editor widget with new data for \p index
-     * @param editor Pointer to editor widget
-     * @param index Model index
-     */
-    void setEditorData(QWidget* editor, const QModelIndex& index) const;
-
-    /**
      * Updates \p editor widget geometry
      * @param editor Pointer to editor widget
      * @param option Style options

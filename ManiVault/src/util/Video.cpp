@@ -99,6 +99,11 @@ void Video::setThumbnailImage(const QImage& thumbnailImage)
     emit thumbnailImageReady(_thumbnailImage);
 }
 
+bool Video::hasThumbnailImage() const
+{
+    return !_thumbnailImage.isNull();
+}
+
 QString Video::getYouTubeThumbnailUrl(const QString& videoId, const QString& quality /*= "mqdefault"*/)
 {
     return QString("https://img.youtube.com/vi/%1/%2.jpg").arg(videoId, quality);

@@ -31,10 +31,6 @@ using namespace mv::util;
 LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _index(index),
-    _mainLayout(),
-    _thumbnailLabel(),
-    _thumbnailPixmap(),
-    _propertiesTextBrowser(),
     _overlayWidget(index, &_thumbnailLabel)
 {
     const auto title = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Title)).data().toString();
@@ -55,7 +51,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     ");
 
     connect(_propertiesTextBrowser.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [this]() -> void {
-        _propertiesTextBrowser.setFixedHeight(_propertiesTextBrowser.document()->size().height());
+        _propertiesTextBrowser.setFixedHeight(static_cast<int>(_propertiesTextBrowser.document()->size().height()));
     });
 
     _overlayWidget.hide();
@@ -82,38 +78,27 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
         border: 1px solid rgb(150, 150, 150); \
     }");
 
-    const auto videoType = static_cast<util::Video::Type>(_index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Type)).data().toInt());
+    const auto sourceModelIndex = dynamic_cast<const QSortFilterProxyModel*>(_index.model())->mapToSource(_index);
+    const auto modelItem        = mv::help().getVideosModel().itemFromIndex(sourceModelIndex.siblingAtColumn(0));
+    const auto videoModelItem   = dynamic_cast<VideosModel::Item*>(modelItem);
+	const auto video            = videoModelItem->getVideo();
 
-    /*
-    switch (videoType) {
-		case Video::Type::YouTube:
-		{
-            connect(&_thumbnailDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-                _thumbnailPixmap = QPixmap::fromImage(QImage::fromData(_thumbnailDownloader.downloadedData()));
+	const auto updateThumbnailImage = [this, video]() -> void {
+        _thumbnailPixmap = QPixmap::fromImage(video->getThumbnailImage());
 
-                constexpr auto  marginToRemove  = 9;
-                const auto      rectangleToCopy = QRect(0, marginToRemove, _thumbnailPixmap.width(), _thumbnailPixmap.height() - (2 * marginToRemove));
+        constexpr auto  marginToRemove = 9;
+        const auto      rectangleToCopy = QRect(0, marginToRemove, _thumbnailPixmap.width(), _thumbnailPixmap.height() - (2 * marginToRemove));
 
-                _thumbnailPixmap = _thumbnailPixmap.copy(rectangleToCopy).scaledToWidth(200, Qt::SmoothTransformation);
+        _thumbnailPixmap = _thumbnailPixmap.copy(rectangleToCopy).scaledToWidth(200, Qt::SmoothTransformation);
 
-                _thumbnailLabel.setFixedSize(_thumbnailPixmap.size());
-                _thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
-			});
+        _thumbnailLabel.setFixedSize(_thumbnailPixmap.size());
+        _thumbnailLabel.setPixmap(_thumbnailPixmap.copy());
+    };
 
-            const auto youTubeId            = _index.sibling(_index.row(), static_cast<int>(VideosModel::Column::Resource)).data().toString();
-            const auto youtTubeThumbnailUrl = getYouTubeThumbnailUrl(youTubeId);
-
-            _thumbnailDownloader.download(QUrl(youtTubeThumbnailUrl));
-
-            break;
-    	}
-
-        case Video::Type::GIF:
-        {
-            break;
-        }
-    }
-    */
+    if (video->hasThumbnailImage())
+        updateThumbnailImage();
+    else
+        connect(video, &Video::thumbnailImageReady, this, updateThumbnailImage);
 
     _thumbnailLabel.installEventFilter(this);
 }
@@ -152,13 +137,6 @@ bool LearningPageVideoWidget::eventFilter(QObject* target, QEvent* event)
 LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, QWidget* parent) :
     QWidget(parent),
     _index(index),
-    _mainLayout(),
-    _centerLayout(),
-    _bottomLayout(),
-    _playIconLabel(),
-    _summaryIconLabel(),
-    _dateIconLabel(),
-    _tagsIconLabel(),
     _widgetOverlayer(this, this, parent)
 {
     setObjectName("OverlayWidget");

@@ -97,6 +97,12 @@ public:
     void setThumbnailImage(const QImage& thumbnailImage);
 
     /**
+     * Get whether there is a valid thumbnail image
+     * @return Boolean determining whether there is a valid thumbnail image
+     */
+    bool hasThumbnailImage() const;
+
+    /**
      * Get youTube thumbnail for \p videoId with \p quality
      * @param videoId Globally unique identifier of the video
      * @param quality String determining the quality: "default", "hqdefault", "mqdefault", "sddefault", "maxresdefault"
