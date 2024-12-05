@@ -6,14 +6,11 @@
 
 #include "Application.h"
 
-#include <QLabel>
-#include <QFileDialog>
 #include <QTableView>
 #include <QHeaderView>
 #include <QTime>
 #include <QAbstractEventDispatcher>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 
 #include <deque>
 #include <set>
@@ -34,14 +31,12 @@ using namespace mv::gui;
 DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _points(nullptr),
-    _holder(),
     _itemModel(new DimensionsPickerItemModel(_holder)),
     _proxyModel(new DimensionsPickerProxyModel(_holder)),
     _summaryAction(this, "Summary"),
     _filterAction(*this),
     _selectAction(*this),
-    _miscellaneousAction(*this),
-    _summaryUpdateAwakeConnection()
+    _miscellaneousAction(*this)
 {
     setText("Dimensions");
     setIconByName("columns");

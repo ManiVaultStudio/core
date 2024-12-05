@@ -4,22 +4,19 @@
 
 #pragma once
 
-#include "Application.h"
 #include "Plugin.h"
 
 #include <QString>
 
 #include <exception>
 
-namespace mv {
-
-namespace plugin {
+namespace mv::plugin {
 
 struct CORE_EXPORT DataLoadException : public std::exception
 {
 public:
-    DataLoadException(QString filePath, QString reason)
-        : _filePath(filePath),
+    DataLoadException(QString filePath, QString reason) :
+		_filePath(filePath),
         _reason(reason)
     {
         _what = ("Failed to load file at: " + _filePath + "\nReason: " + _reason).toStdString();
@@ -58,7 +55,7 @@ protected:
      * application settings (in the registry, on Windows).
      * `fileNameFilter` could be something like "Text Files (*.txt)".
      */
-    QString AskForFileName(const QString& fileNameFilter);
+    QString AskForFileName(const QString& fileNameFilter) const;
 };
 
 
@@ -70,9 +67,9 @@ public:
     LoaderPluginFactory() :
         PluginFactory(Type::LOADER)
     {
-
     }
-    ~LoaderPluginFactory() = default;
+
+    ~LoaderPluginFactory() override = default;
     
     /**
      * Set name of the object
@@ -116,8 +113,6 @@ public:
     gui::PluginTriggerActions getPluginTriggerActions(const mv::DataTypes& dataTypes) const override;
 };
 
-} // namespace plugin
-
-} // namespace mv
+}
 
 Q_DECLARE_INTERFACE(mv::plugin::LoaderPluginFactory, "ManiVault.LoaderPluginFactory")

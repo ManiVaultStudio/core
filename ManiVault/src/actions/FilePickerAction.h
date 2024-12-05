@@ -115,7 +115,7 @@ public:
 
     /**
      * Set placeholder text
-     * @param placeholderText Placeholder text
+     * @param placeholderString Placeholder text
      */
     void setPlaceHolderString(const QString& placeholderString);
 
@@ -147,7 +147,7 @@ public: // Serialization
 
     /**
      * Load file picker action from variant
-     * @param Variant representation of the file picker action
+     * @param variantMap Variant representation of the file picker action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 

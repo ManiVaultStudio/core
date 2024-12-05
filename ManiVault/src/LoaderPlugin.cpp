@@ -4,31 +4,30 @@
 
 #include "LoaderPlugin.h"
 
-#include <actions/PluginTriggerAction.h>
+#include "actions/PluginTriggerAction.h"
 
-#include <QFileDialog>
+#include "widgets/FileDialog.h"
+
 #include <QSettings>
 #include <QString>
 
 using namespace mv::gui;
 
-namespace mv {
+namespace mv::plugin {
 
-namespace plugin {
-
-QString LoaderPlugin::AskForFileName(const QString& fileNameFilter)
+QString LoaderPlugin::AskForFileName(const QString& fileNameFilter) const
 {
-    QSettings settings(QLatin1String{"ManiVault"}, QLatin1String{"Plugins/"} + getKind());
+    QSettings settings(QLatin1String{"ManiVault"}, QLatin1String{ "Plugins/" } + getKind());
+
     const QLatin1String directoryPathKey("directoryPath");
-    const auto directoryPath = settings.value(directoryPathKey).toString();
-    const auto fileName = QFileDialog::getOpenFileName(
-        nullptr, QObject::tr("Load File"), directoryPath, fileNameFilter + QObject::tr(";;All Files (*)"));
+
+    const auto directoryPath    = settings.value(directoryPathKey).toString();
+    const auto fileName         = FileDialog::getOpenFileName(nullptr, QObject::tr("Load File"), directoryPath, fileNameFilter + QObject::tr(";;All Files (*)"));
 
     // Only store the directory name when the dialog has not been not canceled and the file name is non-empty.
     if (!fileName.isEmpty())
-    {
         settings.setValue(directoryPathKey, QFileInfo(fileName).absolutePath());
-    }
+    
     return fileName;
 }
 
@@ -52,5 +51,4 @@ PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const DataType
     return getPluginTriggerActions(DataTypes({}));
 }
 
-}
 }

@@ -7,9 +7,10 @@
 
 #include <Application.h>
 
-#include <QFileDialog>
 #include <QLabel>
 #include <QVBoxLayout>
+
+#include "../../../widgets/FileDialog.h"
 
 namespace mv::gui {
 
@@ -82,35 +83,41 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
 
     // Load dimension selection from file when the corresponding action is triggered
     connect(&_loadSelectionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
-        // don't call fileDialog.exec() or use a static method like QFileDialog::getOpenFileName
-        // since they trigger some assertion failures due to threading issues when opening the dialog here
-        QFileDialog* fileDialog = new QFileDialog(nullptr, tr("Load dimension selection from file"), {}, selectionFileFilter);
-        fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
-        fileDialog->setFileMode(QFileDialog::ExistingFile);
+        // Don't call fileDialog.exec() or use a static method like QFileDialog::getOpenFileName since they trigger some assertion failures due to threading issues when opening the dialog here
+        auto fileOpenDialog = new FileOpenDialog(nullptr, tr("Load dimension selection from file"), {}, selectionFileFilter);
 
-        connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
-            QString fileName = fileDialog->selectedFiles().first();;
-            _dimensionsPickerAction.loadSelectionFromFile(fileName);
-            fileDialog->deleteLater();
-            });
+        fileOpenDialog->setFileMode(QFileDialog::ExistingFile);
 
-        fileDialog->open();
+        connect(fileOpenDialog, &QFileDialog::accepted, this, [this, fileOpenDialog]() -> void {
+            _dimensionsPickerAction.loadSelectionFromFile(fileOpenDialog->selectedFiles().first());
+            fileOpenDialog->deleteLater();
+		});
+
+        connect(fileOpenDialog, &QFileDialog::rejected, this, [this, fileOpenDialog]() -> void {
+            fileOpenDialog->deleteLater();
+		});
+
+        fileOpenDialog->open();
     });
 
     // Save dimension selection to file when the corresponding action is triggered
     connect(&_saveSelectionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
-        QFileDialog* fileDialog = new QFileDialog(nullptr, tr("Save dimension selection to file"), {}, selectionFileFilter);
-        fileDialog->setAcceptMode(QFileDialog::AcceptSave);
-        fileDialog->setFileMode(QFileDialog::AnyFile);
+        auto fileSaveDialog = new FileSaveDialog(nullptr, tr("Save dimension selection to file"), {}, selectionFileFilter);
 
-        connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
-            QString fileName = fileDialog->selectedFiles().first();;
+        fileSaveDialog->setFileMode(QFileDialog::AnyFile);
+
+        connect(fileSaveDialog, &QFileDialog::accepted, this, [this, fileSaveDialog]() -> void {
+            QString fileName = fileSaveDialog->selectedFiles().first();;
             _dimensionsPickerAction.saveSelectionToFile(fileName);
-            fileDialog->deleteLater();
-            });
 
-        fileDialog->open();
+        	fileSaveDialog->deleteLater();
+		});
 
+        connect(fileSaveDialog, &QFileDialog::rejected, this, [this, fileSaveDialog]() -> void {
+            fileSaveDialog->deleteLater();
+		});
+
+        fileSaveDialog->open();
     });
 
     // Load dimension exclusion from file when the corresponding action is triggered

@@ -88,6 +88,18 @@ public:
     QString getDirectoryName() const;
 
     /**
+     * Set whether to use native or Qt file dialog
+     * @param useNativeDialog Whether to use native or Qt file dialog
+     */
+    void setUseNativeFileDialog(bool useNativeDialog);
+
+    /**
+     * Get whether to use native or Qt file dialog
+     * @return Bool whether to use native or Qt file dialog
+     */
+    bool getUseNativeFileDialog() const;
+
+    /**
      * Get whether the directory is valid or not
      * @return Boolean indication whether the directory is valid or not
      */
@@ -126,6 +138,7 @@ protected:
     QCompleter          _completer;             /** Completer */
     StringAction        _directoryAction;       /** Directory action */
     TriggerAction       _pickAction;            /** Pick directory action */
+    bool                _useNativeDialog;       /** Whether to use native or Qt file dialog */
 };
 
 }
