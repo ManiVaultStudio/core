@@ -5,6 +5,7 @@
 #include "LoggingPlugin.h"
 
 #include <Application.h>
+#include <util/Miscellaneous.h>
 
 #include <QVBoxLayout>
 
@@ -18,10 +19,8 @@ LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     _loggingWidget(nullptr)
 {
     getLearningCenterAction().setPluginTitle("Logging");
-
     getLearningCenterAction().setShortDescription("Shows <b>ManiVault</b> logging");
-    getLearningCenterAction().setLongDescription("This plugin shows the <b>ManiVault</b> logging information. It contains all the logs produced by the core of <b>ManiVault</b> and its plugins.");
-
+    getLearningCenterAction().setLongDescription("");
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
 

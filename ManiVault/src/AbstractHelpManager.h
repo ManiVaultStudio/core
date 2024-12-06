@@ -8,7 +8,11 @@
 
 #include "actions/TriggerAction.h"
 
-#include "util/Video.h"
+#include "util/LearningCenterVideo.h"
+#include "util/LearningCenterTutorial.h"
+
+#include "models/LearningCenterVideosModel.h"
+#include "models/LearningCenterTutorialsModel.h"
 
 #include <QObject>
 
@@ -37,11 +41,42 @@ public:
     }
 
     /**
+     * Add \p video
+     * @param video Pointer to video to add
+     */
+    virtual void addVideo(const util::LearningCenterVideo* video) = 0;
+
+    /**
      * Get videos for \p tags
      * @param tags Filter tags (returns all videos if empty)
      * @return Vector of videos
      */
-    virtual util::Videos getVideos(const QStringList& tags) const = 0;
+    virtual util::LearningCenterVideos getVideos(const QStringList& tags) const = 0;
+
+    /**
+     * Get videos model
+     * @return Const reference to videos model
+     */
+    virtual const LearningCenterVideosModel& getVideosModel() const = 0;
+
+    /**
+     * Add \p tutorial
+     * @param tutorial Pointer to tutorial to add
+     */
+    virtual void addTutorial(const util::LearningCenterTutorial* tutorial) = 0;
+
+    /**
+     * Get tutorials for \p tags
+     * @param tags Filter tags (returns all tutorials if empty)
+     * @return Vector of tutorials
+     */
+    virtual util::LearningCenterTutorials getTutorials(const QStringList& tags) const = 0;
+
+    /**
+     * Get tutorials model
+     * @return Const reference to tutorials model
+     */
+    virtual const LearningCenterTutorialsModel& getTutorialsModel() const = 0;
 
 public: // Action getters
 

@@ -48,6 +48,9 @@ public:
     /** Constructor */
     DataHierarchyPluginFactory();
 
+    /** Post-add initialization */
+    void initialize() override;
+
     /**
      * Get plugin icon
      * @param color Icon color for flat (font) icons
