@@ -19,6 +19,7 @@ QMap<LearningCenterVideosModel::Column, LearningCenterVideosModel::ColumHeaderIn
     { Column::Type, { "Type" , "Type", "Video type" } },
     { Column::Summary, { "Summary" , "Summary", "Video description" } },
     { Column::Resource, { "Resource" , "Resource", "Video resource" } },
+    { Column::Thumbnail, { "Thumbnail" , "Thumbnail", "Thumbnail" } },
     { Column::Delegate, { "Delegate" , "Delegate", "Delegate" } }
 });
 
@@ -49,6 +50,9 @@ QVariant LearningCenterVideosModel::headerData(int section, Qt::Orientation orie
 
         case Column::Resource:
             return ResourceItem::headerData(orientation, role);
+
+        case Column::Thumbnail:
+            return ThumbnailItem::headerData(orientation, role);
 
         case Column::Delegate:
             return DelegateItem::headerData(orientation, role);

@@ -19,30 +19,8 @@ LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     _loggingWidget(nullptr)
 {
     getLearningCenterAction().setPluginTitle("Logging");
-
     getLearningCenterAction().setShortDescription("Shows <b>ManiVault</b> logging");
     getLearningCenterAction().setLongDescription("");
-
-    const std::string longDescriptionMarkdown = R"(
-# Introduction
-This plugin shows the **ManiVault** logging information. It contains all the logs produced by the core of **ManiVault** and its plugins.
-
-## Examples
-### View and edit dataset properties
-)"
-+ util::embedGifFromResource(":/animation/ViewEditPropertiesScaled.gif").toStdString() +
-R"(
-
-### Search properties
-)"
-+ util::embedGifFromResource(":/animation/SearchScaled.gif").toStdString() +
-R"()";
-
-    getLearningCenterAction().setLongDescriptionMarkdown(QString::fromStdString(longDescriptionMarkdown));
-
-
-
-
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
 }
 

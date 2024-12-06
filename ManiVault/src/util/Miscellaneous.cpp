@@ -16,7 +16,6 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QString>
-#include <QStringList>
 #include <QTimer>
 #include <QTcpSocket>
 #include <QUrl>
@@ -321,25 +320,26 @@ QString embedGifFromBase64(const QString& gifBase64)
 
 QString embedGifFromResource(const QString& resourcePath)
 {
-    try {
-        const auto gifResource = QResource(resourcePath);
+	try {
+		const auto gifResource = QResource(resourcePath);
 
-        if (!gifResource.isValid())
-            throw std::runtime_error(QString("GIF resource is not valid: %1").arg(resourcePath).toStdString());
+		if (!gifResource.isValid())
+			throw std::runtime_error(QString("GIF resource is not valid: %1").arg(resourcePath).toStdString());
 
-        const auto gifDataBase64 = gifToBase64(QByteArray(reinterpret_cast<const char*>(gifResource.data()), gifResource.size()));
+		const auto gifDataBase64 = gifToBase64(QByteArray(reinterpret_cast<const char*>(gifResource.data()), gifResource.size()));
 
-        return embedGifFromBase64(gifDataBase64);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to embed GIF image from resource", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to embed GIF image from resource");
-    }
+		return embedGifFromBase64(gifDataBase64);
+	}
+	catch (std::exception& e)
+	{
+		exceptionMessageBox("Unable to embed GIF image from resource", e);
+	}
+	catch (...) {
+		exceptionMessageBox("Unable to embed GIF image from resource");
+	}
 
-    return {};
+	return {};
+}
 
 void waitForDuration(int milliSeconds)
 {

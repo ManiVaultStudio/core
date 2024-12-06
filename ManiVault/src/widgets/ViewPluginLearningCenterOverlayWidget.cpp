@@ -16,13 +16,11 @@
 #include <actions/WatchVideoAction.h>
 
 #include <QDebug>
-#include <QMainWindow>
 #include <QMenu>
 #include <QDesktopServices>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QMainWindow>
-#include <QMenu>
 #include <QPainter>
 #include <QResizeEvent>
 
