@@ -6,13 +6,9 @@
 
 #include <DockWidget.h>
 
-#include "CentralDockWidget.h"
 #include "LogoWidget.h"
 #include "DockManager.h"
-#include "DockWidget.h"
 #include "ViewPluginDockWidget.h"
-
-#include <ViewPlugin.h>
 
 /**
  * View plugins dock widget class
@@ -33,7 +29,7 @@ public:
      * @param dockManager Pointer to docking manager owned by the workspace manager
      * @param parent Pointer to parent widget
      */
-    ViewPluginsDockWidget(QPointer<DockManager> dockManager, QWidget* parent = nullptr);
+    ViewPluginsDockWidget(const QPointer<DockManager>& dockManager, QWidget* parent = nullptr);
 
 private:
 
@@ -44,13 +40,13 @@ private:
      * Invoked when a dock widget is added
      * @param dockWidget Pointer to added dock widget
      */
-    void dockWidgetAdded(ads::CDockWidget* dockWidget);
+    void dockWidgetAdded(const ads::CDockWidget* dockWidget);
 
     /**
      * Invoked when a dock widget is about to be removed
      * @param dockWidget Pointer to about to be removed dock widget
      */
-    void dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget);
+    void dockWidgetAboutToBeRemoved(const ads::CDockWidget* dockWidget);
 
 public: // Cache and restore visibility for view plugin isolation
 
@@ -59,7 +55,7 @@ public: // Cache and restore visibility for view plugin isolation
      * @param viewPlugin View plugin to isolate
      * @param isolate Whether to isolate the view plugin or not
      */
-    static void isolate(mv::plugin::ViewPlugin* viewPlugin, bool isolate);
+    static void isolate(const mv::plugin::ViewPlugin* viewPlugin, bool isolate);
 
     /** Caches the visibility of each view plugin */
     static void cacheVisibility();
@@ -68,7 +64,8 @@ public: // Cache and restore visibility for view plugin isolation
     static void restoreVisibility();
 
 private:
-    QPointer<DockManager>           _dockManager;                   /** Dock manager for docking of view plugins */
-    ads::CDockWidget                _centralDockWidget;             /** Central dock widget (show when no view plugins are visible) */
-    LogoWidget                      _logoWidget;                    /** Logo widget for logo dock widget */
+    ads::CDockWidget                _centralDockWidget;     /** Central dock widget (show when no view plugins are visible) */
+    LogoWidget                      _logoWidget;            /** Logo widget for logo dock widget */
+
+    static QPointer<DockManager> dockManager;    /** Dock manager for docking of view plugins */
 };

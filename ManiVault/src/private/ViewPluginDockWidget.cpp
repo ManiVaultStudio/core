@@ -30,8 +30,6 @@ using namespace mv::plugin;
 using namespace mv::util;
 using namespace mv::gui;
 
-QList<ViewPluginDockWidget*> ViewPluginDockWidget::active = QList<ViewPluginDockWidget*>();
-
 QMap<QString, Task*> ViewPluginDockWidget::serializationTasks = QMap<QString, Task*>();
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidget* parent /*= nullptr*/) :
@@ -43,8 +41,6 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
 	_cachedVisibility(false),
 	_progressOverlayWidget(this)
 {
-	active << this;
-
 	setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 	initialize();
 }
@@ -67,8 +63,9 @@ ViewPluginDockWidget::~ViewPluginDockWidget()
     qDebug() << __FUNCTION__ << windowTitle();
 #endif
 
+    qDebug() << __FUNCTION__ << windowTitle();
+
 	serializationTasks.remove(getId());
-    active.removeOne(this);
 }
 
 QString ViewPluginDockWidget::getTypeString() const
@@ -173,8 +170,8 @@ void ViewPluginDockWidget::restoreViewPluginState() const
 
 void ViewPluginDockWidget::restoreViewPluginStates()
 {
-	for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
-		viewPluginDockWidget->restoreViewPluginState();
+	//for (auto viewPluginDockWidget : dynamic_cast<DockManager*>(dockManager())->getViewPluginDockWidgets())
+	//	viewPluginDockWidget->restoreViewPluginState();
 }
 
 QMenu* ViewPluginDockWidget::getSettingsMenu()

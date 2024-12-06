@@ -199,19 +199,18 @@ private:
     void setViewPlugin(mv::plugin::ViewPlugin* viewPlugin);
 
 private:
-    mv::plugin::ViewPlugin*         _viewPlugin;                /** Pointer to view plugin */
-    QString                         _viewPluginKind;            /** Kind of (view) plugin */
-    QVariantMap                     _viewPluginMap;             /** View plugin cached map for deferred loading */
-    QMenu                           _settingsMenu;              /** Menu for view plugin settings */
-    QMenu                           _toggleMenu;                /** Menu for toggling view plugin dock widgets */
-    mv::gui::TriggerAction          _helpAction;                /** Action for triggering help */
-    bool                            _cachedVisibility;          /** Cached visibility for view plugin isolation */
-    ads::CDockManager               _dockManager;               /** Dock manager for internal docking */
-    QMap<QString, CDockWidget*>     _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
-    ProgressOverlayWidget           _progressOverlayWidget;     /** Overlay widget which shows a very thin view progress bar */
+    QPointer<mv::plugin::ViewPlugin>    _viewPlugin;                /** Pointer to view plugin */
+    QString                             _viewPluginKind;            /** Kind of (view) plugin */
+    QVariantMap                         _viewPluginMap;             /** View plugin cached map for deferred loading */
+    QMenu                               _settingsMenu;              /** Menu for view plugin settings */
+    QMenu                               _toggleMenu;                /** Menu for toggling view plugin dock widgets */
+    mv::gui::TriggerAction              _helpAction;                /** Action for triggering help */
+    bool                                _cachedVisibility;          /** Cached visibility for view plugin isolation */
+    ads::CDockManager                   _dockManager;               /** Dock manager for internal docking */
+    QMap<QString, CDockWidget*>         _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
+    ProgressOverlayWidget               _progressOverlayWidget;     /** Overlay widget which shows a very thin view progress bar */
 
 protected:
-    static QList<ViewPluginDockWidget*> active;  /** Loaded view plugin dock widgets */
 
     /**
      * Map view plugin dock widget identifier to serialization task

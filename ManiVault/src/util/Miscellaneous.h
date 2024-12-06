@@ -118,4 +118,9 @@ CORE_EXPORT QVariant getValueByPath(const QVariant& root, const QString& path, c
  */
 CORE_EXPORT void waitForDuration(int milliSeconds);
 
+/**
+ * Remove all connections (to and from) from \p object and its descendants
+ * @param object Pointer to root object
+ */
+CORE_EXPORT void disconnectRecursively(const QObject* object);
 }

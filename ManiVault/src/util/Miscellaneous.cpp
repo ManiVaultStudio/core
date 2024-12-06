@@ -288,4 +288,17 @@ void waitForDuration(int milliSeconds)
 	localEventLoop.exec();
 }
 
+void disconnectRecursively(const QObject* object)
+{
+    Q_ASSERT(object);
+
+	if (!object)
+		return;
+
+    [[maybe_unused]] auto result = object->disconnect();
+
+	for (auto child : object->children())
+		disconnectRecursively(child);
+}
+
 }
