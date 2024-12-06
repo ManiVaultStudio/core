@@ -17,7 +17,6 @@
 
 #include <DockWidgetTab.h>
 #include <DockAreaWidget.h>
-#include <DockAreaTitleBar.h>
 #include <AutoHideDockContainer.h>
 
 #ifdef _DEBUG
@@ -31,8 +30,6 @@ using namespace mv::plugin;
 using namespace mv::util;
 using namespace mv::gui;
 
-QList<ViewPluginDockWidget*> ViewPluginDockWidget::active = QList<ViewPluginDockWidget*>();
-
 QMap<QString, Task*> ViewPluginDockWidget::serializationTasks = QMap<QString, Task*>();
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidget* parent /*= nullptr*/) :
@@ -42,11 +39,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
 	_toggleMenu("Toggle", this),
 	_helpAction(this, "Help"),
 	_cachedVisibility(false),
-	_dockManager(this),
 	_progressOverlayWidget(this)
 {
-	active << this;
-
 	setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 	initialize();
 }
@@ -88,19 +82,6 @@ void ViewPluginDockWidget::initialize()
 
 	connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
 		_viewPlugin->getLearningCenterAction().getViewHelpAction().trigger();
-	});
-
-	connect(&plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
-		if (plugin != _viewPlugin)
-			return;
-
-#ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
-        qDebug() << "Remove active view plugin dock widget" << plugin->getGuiName();
-#endif
-
-		active.removeOne(this);
-
-		takeWidget();
 	});
 
 	connect(&_settingsMenu, &QMenu::aboutToShow, this, [this]() -> void {
@@ -183,12 +164,6 @@ void ViewPluginDockWidget::restoreViewPluginState() const
 		return;
 
 	_viewPlugin->fromVariantMap(_viewPluginMap);
-}
-
-void ViewPluginDockWidget::restoreViewPluginStates()
-{
-	for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
-		viewPluginDockWidget->restoreViewPluginState();
 }
 
 QMenu* ViewPluginDockWidget::getSettingsMenu()
@@ -323,6 +298,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 	auto centralDockWidget = new CDockWidget("Central");
 
 	centralDockWidget->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
+    centralDockWidget->setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 
 	_dockManager.setCentralWidget(centralDockWidget);
 
@@ -470,7 +446,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 		toggleView(toggled);
 	});
 
-	connect(this, &CDockWidget::viewToggled, this, [this, viewPlugin](bool toggled) {
+	connect(this, &CDockWidget::viewToggled, viewPlugin, [this, viewPlugin](bool toggled) {
 		QSignalBlocker toggleActionBlocker(&viewPlugin->getVisibleAction());
 
 		viewPlugin->getVisibleAction().setChecked(toggled);

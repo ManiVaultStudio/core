@@ -4,14 +4,19 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QFileDialog>
+#include <QSize>
+#include <QString>
+#include <QUrl>
 
 namespace mv::gui {
 
 /**
  * File dialog class
  * 
- * GUI class for file open/save with non-native dialog
+ * GUI class for picking files and directories for open/save (defaults with non-native dialog)
  * 
  * @author Thomas Kroes
  */

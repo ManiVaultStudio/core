@@ -248,14 +248,11 @@ void ProjectManager::reset()
 
     beginReset();
     {
-        auto core = Application::core();
-
         if (!isCoreDestroyed()) {
-            core->getActionsManager().reset();
-            core->getPluginManager().reset();
-            core->getDataHierarchyManager().reset();
-            core->getDataManager().reset();
-            core->getWorkspaceManager().reset();
+            actions().reset();
+            dataHierarchy().reset();
+            data().reset();
+            plugins().reset();
         }
     }
     endReset();
@@ -324,6 +321,8 @@ void ProjectManager::newBlankProject()
 #endif
 
         createProject();
+
+        workspaces().reset();
     }
     catch (std::exception& e)
     {
@@ -342,106 +341,109 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
+        
+        const auto scopedState = ScopedState(this, State::OpeningProject);
 
-        emit projectAboutToBeOpened(*(_project.get()));
-        {
-            const auto scopedState = ScopedState(this, State::OpeningProject);
+        if (QFileInfo(filePath).isDir())
+            throw std::runtime_error("Project file path may not be a directory");
 
-            if (QFileInfo(filePath).isDir())
-                throw std::runtime_error("Project file path may not be a directory");
+        QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
 
-            QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
+        setTemporaryDirPath(TemporaryDirType::Open, temporaryDirectory.path());
 
-            setTemporaryDirPath(TemporaryDirType::Open, temporaryDirectory.path());
+        const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-            const auto temporaryDirectoryPath = temporaryDirectory.path();
+        Application::setSerializationAborted(false);
 
-            Application::setSerializationAborted(false);
+        ToggleAction disableReadOnlyAction(this, "Allow edit of published project");
 
-            ToggleAction disableReadOnlyAction(this, "Allow edit of published project");
+        if (filePath.isEmpty()) {
+            FileOpenDialog fileOpenDialog;
 
-            if (filePath.isEmpty()) {
-                FileOpenDialog openFileDialog;
+            fileOpenDialog.setWindowTitle("Open ManiVault Project");
+            fileOpenDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+            fileOpenDialog.setDefaultSuffix(".mv");
+            fileOpenDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+            fileOpenDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
-                openFileDialog.setWindowTitle("Open ManiVault Project");
-                openFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-                openFileDialog.setDefaultSuffix(".mv");
-                openFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+            StringAction    titleAction(this, "Title");
+            StringAction    descriptionAction(this, "Description");
+            StringAction    tagsAction(this, "Tags");
+            StringAction    commentsAction(this, "Comments");
+            StringAction    contributorsAction(this, "Contributors");
 
-                StringAction    titleAction(this, "Title");
-                StringAction    descriptionAction(this, "Description");
-                StringAction    tagsAction(this, "Tags");
-                StringAction    commentsAction(this, "Comments");
-                StringAction    contributorsAction(this, "Contributors");
+            titleAction.setEnabled(false);
+            descriptionAction.setEnabled(false);
+            tagsAction.setEnabled(false);
+            commentsAction.setEnabled(false);
+            contributorsAction.setEnabled(false);
+            disableReadOnlyAction.setEnabled(false);
 
-                titleAction.setEnabled(false);
-                descriptionAction.setEnabled(false);
-                tagsAction.setEnabled(false);
-                commentsAction.setEnabled(false);
-                contributorsAction.setEnabled(false);
-                disableReadOnlyAction.setEnabled(false);
+            auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileOpenDialog.layout());
+            auto rowCount           = fileDialogLayout->rowCount();
 
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(openFileDialog.layout());
-                auto rowCount           = fileDialogLayout->rowCount();
+            fileDialogLayout->addWidget(titleAction.createLabelWidget(&fileOpenDialog), rowCount, 0);
+            fileDialogLayout->addWidget(titleAction.createWidget(&fileOpenDialog), rowCount, 1, 1, 2);
 
-                fileDialogLayout->addWidget(titleAction.createLabelWidget(&openFileDialog), rowCount, 0);
-                fileDialogLayout->addWidget(titleAction.createWidget(&openFileDialog), rowCount, 1, 1, 2);
+            fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileOpenDialog), rowCount + 1, 0);
+            fileDialogLayout->addWidget(descriptionAction.createWidget(&fileOpenDialog), rowCount + 1, 1, 1, 2);
 
-                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&openFileDialog), rowCount + 1, 0);
-                fileDialogLayout->addWidget(descriptionAction.createWidget(&openFileDialog), rowCount + 1, 1, 1, 2);
+            fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileOpenDialog), rowCount + 2, 0);
+            fileDialogLayout->addWidget(tagsAction.createWidget(&fileOpenDialog), rowCount + 2, 1, 1, 2);
 
-                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&openFileDialog), rowCount + 2, 0);
-                fileDialogLayout->addWidget(tagsAction.createWidget(&openFileDialog), rowCount + 2, 1, 1, 2);
+            fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileOpenDialog), rowCount + 3, 0);
+            fileDialogLayout->addWidget(commentsAction.createWidget(&fileOpenDialog), rowCount + 3, 1, 1, 2);
 
-                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&openFileDialog), rowCount + 3, 0);
-                fileDialogLayout->addWidget(commentsAction.createWidget(&openFileDialog), rowCount + 3, 1, 1, 2);
+            fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&fileOpenDialog), rowCount + 4, 0);
+            fileDialogLayout->addWidget(contributorsAction.createWidget(&fileOpenDialog), rowCount + 4, 1, 1, 2);
+   
+            fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileOpenDialog), rowCount + 5, 1, 1, 2);
 
-                fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&openFileDialog), rowCount + 4, 0);
-                fileDialogLayout->addWidget(contributorsAction.createWidget(&openFileDialog), rowCount + 4, 1, 1, 2);
-       
-                fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&openFileDialog), rowCount + 5, 1, 1, 2);
-
-                connect(&openFileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
-                    if (!QFileInfo(filePath).isFile())
-                        return;
-
-                    const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
-
-                    if (projectMetaAction.isNull())
-                        return;
-
-                    titleAction.setString(projectMetaAction->getTitleAction().getString());
-                    descriptionAction.setString(projectMetaAction->getDescriptionAction().getString());
-                    tagsAction.setString(projectMetaAction->getTagsAction().getStrings().join(", "));
-                    commentsAction.setString(projectMetaAction->getCommentsAction().getString());
-                    contributorsAction.setString(projectMetaAction->getContributorsAction().getStrings().join(","));
-                    disableReadOnlyAction.setEnabled(projectMetaAction->getReadOnlyAction().isChecked());
-                });
-
-                openFileDialog.open();
-
-                QEventLoop eventLoop;
-                
-                QObject::connect(&openFileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
-                
-                eventLoop.exec();
-
-                if (openFileDialog.result() != QDialog::Accepted)
+            connect(&fileOpenDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
+                if (!QFileInfo(filePath).isFile())
                     return;
 
-                if (openFileDialog.selectedFiles().count() != 1)
-                    throw std::runtime_error("Only one file may be selected");
+                const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
 
-                filePath = openFileDialog.selectedFiles().first();
+                if (projectMetaAction.isNull())
+                    return;
 
-                Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
-            }
+                titleAction.setString(projectMetaAction->getTitleAction().getString());
+                descriptionAction.setString(projectMetaAction->getDescriptionAction().getString());
+                tagsAction.setString(projectMetaAction->getTagsAction().getStrings().join(", "));
+                commentsAction.setString(projectMetaAction->getCommentsAction().getString());
+                contributorsAction.setString(projectMetaAction->getContributorsAction().getStrings().join(","));
+                disableReadOnlyAction.setEnabled(projectMetaAction->getReadOnlyAction().isChecked());
+            });
 
-            qDebug().noquote() << "Open ManiVault project from" << filePath;
+            fileOpenDialog.open();
 
-            if (!importDataOnly)
-                newProject();
+            QEventLoop eventLoop;
+            
+            connect(&fileOpenDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+            
+            eventLoop.exec();
 
+            if (fileOpenDialog.result() != QDialog::Accepted)
+                return;
+
+            if (fileOpenDialog.selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
+
+            filePath = fileOpenDialog.selectedFiles().first();
+
+            Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
+        }
+
+        qDebug().noquote() << "Open ManiVault project from" << filePath;
+
+        workspaces().reset();
+
+        if (!importDataOnly)
+            newProject();
+
+		emit projectAboutToBeOpened(*_project);
+	    {
             _project->setFilePath(filePath);
 
             auto& projectSerializationTask      = projects().getProjectSerializationTask();
@@ -511,7 +513,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             qDebug().noquote() << filePath << "loaded successfully";
         }
-        emit projectOpened(*(_project.get()));
+        emit projectOpened(*_project);
     }
     catch (std::exception& e)
     {
@@ -563,7 +565,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
         const auto scopedState = ScopedState(this, State::SavingProject);
 
-        emit projectAboutToBeSaved(*(_project.get()));
+        emit projectAboutToBeSaved(*_project);
         {
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
@@ -722,7 +724,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             qDebug().noquote() << filePath << "saved successfully";
         }
-        emit projectSaved(*(_project.get()));
+        emit projectSaved(*_project);
     }
     catch (std::exception& e)
     {
@@ -970,12 +972,12 @@ QString ProjectManager::extractFileFromManiVaultProject(const QString& maniVault
 
     QFileInfo extractFileInfo(temporaryDirectoryPath, extractFilePath);
 
-    Archiver archiver;
-
     QString extractedFilePath = "";
 
     try
     {
+        Archiver archiver;
+
         archiver.extractSingleFile(maniVaultFilePath, extractFilePath, extractFileInfo.absoluteFilePath());
 
         extractedFilePath = extractFileInfo.absoluteFilePath();
@@ -1007,8 +1009,8 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
         
         if (!workspacePreviewImage.isNull())
             return workspacePreviewImage.scaled(targetSize, Qt::KeepAspectRatio);
-        else
-            return {};
+        
+		return {};
     }
     catch (std::exception& e)
     {
@@ -1036,17 +1038,15 @@ void ProjectManager::createProject()
 {
     emit projectAboutToBeCreated();
     {
-        mv::data().reset();
+        data().reset();
 
         reset();
 
         _project.reset(new Project());
     }
-    emit projectCreated(*(_project.get()));
+    emit projectCreated(*_project);
 
     _showStartPageAction.setChecked(false);
-
-    workspaces().reset();
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
@@ -1059,7 +1059,7 @@ QVariantMap ProjectManager::toVariantMap() const
     if (hasProject())
         return _project->toVariantMap();
 
-    return QVariantMap();
+    return {};
 }
 
 }

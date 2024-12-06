@@ -15,6 +15,10 @@ namespace mv::plugin {
     class ViewPlugin;
 }
 
+namespace mv::gui {
+    class PluginLearningCenterAction;
+}
+
 namespace mv::gui
 {
 
@@ -425,9 +429,9 @@ protected:
             void paintEvent(QPaintEvent* event) override;
 
         private:
-            const plugin::ViewPlugin*   _viewPlugin;            /** Pointer to view plugin */
-            QPropertyAnimation          _geometryAnimation;     /** Animates the position and size of the background widget */
-            QRect                       _previousGeometry;      /** Previous geometry, used as start value for geometry animation */
+            const plugin::ViewPlugin*       _viewPlugin;            /** Pointer to view plugin */
+            QPropertyAnimation              _geometryAnimation;     /** Animates the position and size of the background widget */
+            QRect                           _previousGeometry;      /** Previous geometry, used as start value for geometry animation */
         };
 
     public:

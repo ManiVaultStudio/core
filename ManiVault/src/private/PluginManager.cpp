@@ -83,6 +83,13 @@ void PluginManager::reset()
 
     beginReset();
     {
+        QStringList pluginIds;
+
+        for (const auto& plugin : _plugins)
+            pluginIds << plugin->getId();
+
+        for (const auto& pluginId : pluginIds)
+            destroyPluginById(pluginId);
     }
     endReset();
 }
@@ -533,6 +540,38 @@ void PluginManager::destroyPlugin(plugin::Plugin* plugin)
             if (it == _plugins.end())
                 throw std::runtime_error(QString("Plugin %1 (%2) not found").arg(plugin->getGuiName(), plugin->getId()).toStdString());
 
+            _plugins.erase(it);
+        }
+        emit pluginDestroyed(pluginId);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to destroy plugin", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to destroy plugin");
+    }
+}
+
+void PluginManager::destroyPluginById(const QString& pluginId)
+{
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << "Destroy plugin by identifier" << plugin->getGuiName();
+#endif
+
+    try
+    {
+        const auto it = std::find_if(_plugins.begin(), _plugins.end(), [pluginId](const auto& pluginPtr) -> bool {
+            return pluginId == pluginPtr->getId();
+		});
+
+        if (it == _plugins.end())
+            throw std::runtime_error(QString("Plugin (%1) not found").arg(pluginId).toStdString());
+
+        auto plugin = it->get();
+
+        emit pluginAboutToBeDestroyed(plugin);
+        {
             _plugins.erase(it);
         }
         emit pluginDestroyed(pluginId);

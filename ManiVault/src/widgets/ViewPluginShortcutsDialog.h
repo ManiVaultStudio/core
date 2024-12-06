@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QDialog>
 #include <QScrollArea>
 #include <QVBoxLayout>

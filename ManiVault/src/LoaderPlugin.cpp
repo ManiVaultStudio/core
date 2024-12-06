@@ -4,6 +4,8 @@
 
 #include "LoaderPlugin.h"
 
+#include "Application.h"
+
 #include "actions/PluginTriggerAction.h"
 
 #include "widgets/FileDialog.h"

@@ -18,7 +18,6 @@ WidgetActionToolButtonMenu::WidgetActionToolButtonMenu(WidgetActionToolButton& w
     QMenu(&widgetActionToolButton),
     _widgetActionToolButton(widgetActionToolButton),
     _deferredLoadWidgetAction(widgetActionToolButton),
-    _widgetConfigurationFunction(),
     _ignoreCloseEvent(false)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);

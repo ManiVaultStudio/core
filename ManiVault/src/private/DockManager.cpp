@@ -14,8 +14,6 @@
 
 #include <DockAreaWidget.h> 
 
-#include <QSplitter>
-
 #ifdef _DEBUG
     //#define DOCK_MANAGER_VERBOSE
 #endif
@@ -55,20 +53,27 @@ DockManager::~DockManager()
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
+
     reset();
 }
 
-ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
+DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
 {
-    return _orderedViewPluginDockWidgets;
+    ViewPluginDockWidgets viewPluginDockWidgets;
+
+    for (auto dockWidget : dockWidgets())
+        if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
+            viewPluginDockWidgets.push_back(viewPluginDockWidget);
+
+    return viewPluginDockWidgets;
 }
 
-const ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
+DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
 {
     return const_cast<DockManager*>(this)->getViewPluginDockWidgets();
 }
 
-ads::CDockAreaWidget* DockManager::findDockAreaWidget(mv::plugin::ViewPlugin* viewPlugin)
+CDockAreaWidget* DockManager::findDockAreaWidget(const ViewPlugin* viewPlugin) const
 {
     if (viewPlugin == nullptr)
         return nullptr;
@@ -106,35 +111,32 @@ void DockManager::reset()
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    CDockManager::removeAllDockAreas();
+    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
+        removeViewPluginDockWidget(viewPluginDockWidget);
 
-    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
-        removeViewPluginDockWidget(viewPluginDockWidget.get());
+    for (auto dockWidget : dockWidgets())
+        if (!dynamic_cast<ViewPluginDockWidget*>(dockWidget) && !dockWidget->isCentralWidget())
+            CDockManager::removeDockWidget(dockWidget);
 }
 
-void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* Dockwidget, ads::CDockAreaWidget* DockAreaWidget)
+void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* dockWidget, ads::CDockAreaWidget* dockAreaWidget)
 {
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
     
-    ViewPluginDockWidget* viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(Dockwidget);
-    
-    if (viewPluginDockWidget)
-        _orderedViewPluginDockWidgets << viewPluginDockWidget;
-
-    CDockManager::addDockWidget(area, Dockwidget, DockAreaWidget);
+    CDockManager::addDockWidget(area, dockWidget, dockAreaWidget);
 }
 
-void DockManager::removeViewPluginDockWidget(ads::CDockWidget* Dockwidget)
+void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDockWidget)
 {
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
-    
-    CDockManager::removeDockWidget(Dockwidget);
 
-    _orderedViewPluginDockWidgets.removeAll(Dockwidget);
+    CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
+
+    viewPluginDockWidget->deleteLater();
 }
 
 QWidget* DockManager::getWidget()
@@ -236,7 +238,7 @@ QVariantMap DockManager::toVariantMap() const
     return variantMap;
 }
 
-Task* DockManager::getSerializationTask()
+Task* DockManager::getSerializationTask() const
 {
     return _serializationTask;
 }
