@@ -4,12 +4,8 @@
 
 #include "ViewPluginsDockWidget.h"
 
-#include <util/Serialization.h>
-
-#include <Application.h>
 #include <CoreInterface.h>
 #include <AbstractPluginManager.h>
-#include <Plugin.h>
 
 #include "DockAreaWidget.h"
 

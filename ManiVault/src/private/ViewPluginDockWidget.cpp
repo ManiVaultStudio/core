@@ -172,12 +172,12 @@ void ViewPluginDockWidget::loadViewPlugin()
 		setViewPlugin(viewPlugin);
 }
 
-ViewPlugin* ViewPluginDockWidget::getViewPlugin()
+ViewPlugin* ViewPluginDockWidget::getViewPlugin() const
 {
 	return _viewPlugin;
 }
 
-void ViewPluginDockWidget::restoreViewPluginState()
+void ViewPluginDockWidget::restoreViewPluginState() const
 {
 	if (!_viewPlugin)
 		return;

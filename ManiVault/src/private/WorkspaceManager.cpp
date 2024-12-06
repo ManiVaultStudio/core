@@ -500,7 +500,7 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
     else
         _viewPluginsDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
 
-    if (projects().isOpeningProject() || projects().isOpeningProject())
+    if (projects().isOpeningProject() || projects().isImportingProject())
         return;
 
     viewPlugin->getPresetsAction().loadDefaultPreset();
