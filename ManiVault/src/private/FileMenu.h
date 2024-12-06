@@ -24,7 +24,13 @@ public:
      * @param parent Pointer to parent widget
      */
     FileMenu(QWidget *parent = nullptr);
-    
+
+    /**
+     * 
+     * @param event 
+     */
+    void showEvent(QShowEvent* event) override;
+
 private:
     
     /**

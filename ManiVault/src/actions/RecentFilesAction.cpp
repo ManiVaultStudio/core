@@ -18,9 +18,6 @@ namespace mv::gui {
 
 RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
     WidgetAction(parent, "Recent Files"),
-    _settingsKey(),
-    _fileType(),
-    _icon(),
     _model(this),
     _filterModel(this),
     _editAction(this, "Edit...")

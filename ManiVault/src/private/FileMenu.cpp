@@ -22,7 +22,7 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     setToolTip("File operations");
     
     //  Quit is by default in the app menu on macOS
-    if(QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
+    if (QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
         
         _exitApplictionAction.setShortcut(QKeySequence("Alt+F4"));
         _exitApplictionAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -36,6 +36,14 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     
     // macOS does not like populating the menu on show, so we rather do it explicitly here
     populate();
+}
+
+void FileMenu::showEvent(QShowEvent* event)
+{
+	QMenu::showEvent(event);
+
+    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows)
+        populate();
 }
 
 void FileMenu::populate()
