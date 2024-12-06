@@ -138,9 +138,6 @@ public:
     /** Restores the view plugin state */
     void restoreViewPluginState() const;
 
-    /** Restores the view plugin states of all active view plugins */
-    static void restoreViewPluginStates();
-
 public: // Title bar settings menu
 
     /**

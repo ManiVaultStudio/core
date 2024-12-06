@@ -168,12 +168,6 @@ void ViewPluginDockWidget::restoreViewPluginState() const
 	_viewPlugin->fromVariantMap(_viewPluginMap);
 }
 
-void ViewPluginDockWidget::restoreViewPluginStates()
-{
-	//for (auto viewPluginDockWidget : dynamic_cast<DockManager*>(dockManager())->getViewPluginDockWidgets())
-	//	viewPluginDockWidget->restoreViewPluginState();
-}
-
 QMenu* ViewPluginDockWidget::getSettingsMenu()
 {
 	return &_settingsMenu;
