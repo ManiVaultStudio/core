@@ -358,16 +358,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         ToggleAction disableReadOnlyAction(this, "Allow edit of published project");
 
         if (filePath.isEmpty()) {
-            QFileDialog fileDialog;
+            FileOpenDialog fileOpenDialog;
 
-            fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-            fileDialog.setWindowTitle("Open ManiVault Project");
-            fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-            fileDialog.setFileMode(QFileDialog::ExistingFile);
-            fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-            fileDialog.setDefaultSuffix(".mv");
-            fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-            fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+            fileOpenDialog.setWindowTitle("Open ManiVault Project");
+            fileOpenDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+            fileOpenDialog.setDefaultSuffix(".mv");
+            fileOpenDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+            fileOpenDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
             StringAction    titleAction(this, "Title");
             StringAction    descriptionAction(this, "Description");
@@ -382,27 +379,27 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             contributorsAction.setEnabled(false);
             disableReadOnlyAction.setEnabled(false);
 
-            auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+            auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileOpenDialog.layout());
             auto rowCount           = fileDialogLayout->rowCount();
 
-            fileDialogLayout->addWidget(titleAction.createLabelWidget(&fileDialog), rowCount, 0);
-            fileDialogLayout->addWidget(titleAction.createWidget(&fileDialog), rowCount, 1, 1, 2);
+            fileDialogLayout->addWidget(titleAction.createLabelWidget(&fileOpenDialog), rowCount, 0);
+            fileDialogLayout->addWidget(titleAction.createWidget(&fileOpenDialog), rowCount, 1, 1, 2);
 
-            fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileDialog), rowCount + 1, 0);
-            fileDialogLayout->addWidget(descriptionAction.createWidget(&fileDialog), rowCount + 1, 1, 1, 2);
+            fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileOpenDialog), rowCount + 1, 0);
+            fileDialogLayout->addWidget(descriptionAction.createWidget(&fileOpenDialog), rowCount + 1, 1, 1, 2);
 
-            fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileDialog), rowCount + 2, 0);
-            fileDialogLayout->addWidget(tagsAction.createWidget(&fileDialog), rowCount + 2, 1, 1, 2);
+            fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileOpenDialog), rowCount + 2, 0);
+            fileDialogLayout->addWidget(tagsAction.createWidget(&fileOpenDialog), rowCount + 2, 1, 1, 2);
 
-            fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 3, 0);
-            fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 3, 1, 1, 2);
+            fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileOpenDialog), rowCount + 3, 0);
+            fileDialogLayout->addWidget(commentsAction.createWidget(&fileOpenDialog), rowCount + 3, 1, 1, 2);
 
-            fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&fileDialog), rowCount + 4, 0);
-            fileDialogLayout->addWidget(contributorsAction.createWidget(&fileDialog), rowCount + 4, 1, 1, 2);
+            fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&fileOpenDialog), rowCount + 4, 0);
+            fileDialogLayout->addWidget(contributorsAction.createWidget(&fileOpenDialog), rowCount + 4, 1, 1, 2);
    
-            fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileDialog), rowCount + 5, 1, 1, 2);
+            fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileOpenDialog), rowCount + 5, 1, 1, 2);
 
-            connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
+            connect(&fileOpenDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                 if (!QFileInfo(filePath).isFile())
                     return;
 
@@ -419,21 +416,21 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 disableReadOnlyAction.setEnabled(projectMetaAction->getReadOnlyAction().isChecked());
             });
 
-            fileDialog.open();
+            fileOpenDialog.open();
 
             QEventLoop eventLoop;
             
-            connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+            connect(&fileOpenDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
             
             eventLoop.exec();
 
-            if (fileDialog.result() != QDialog::Accepted)
+            if (fileOpenDialog.result() != QDialog::Accepted)
                 return;
 
-            if (fileDialog.selectedFiles().count() != 1)
+            if (fileOpenDialog.selectedFiles().count() != 1)
                 throw std::runtime_error("Only one file may be selected");
 
-            filePath = fileDialog.selectedFiles().first();
+            filePath = fileOpenDialog.selectedFiles().first();
 
             Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
         }
