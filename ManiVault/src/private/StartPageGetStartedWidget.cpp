@@ -15,6 +15,7 @@
 #include <CoreInterface.h>
 
 #include <QDebug>
+#include <QDesktopServices>
 #include <QScrollBar>
 
 using namespace mv;
@@ -26,6 +27,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _startPageContentWidget(startPageContentWidget),
     _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
     _createProjectFromDatasetWidget(this, "Project From Data"),
+    _tutorialsWidget(this, "Tutorials"),
     _workspaceLocationTypeAction(this, "Workspace location type"),
     _workspaceLocationTypesModel(this),
     _recentWorkspacesAction(this, mv::workspaces().getSettingsPrefix() + "RecentWorkspaces"),
@@ -35,6 +37,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     layout->addWidget(&_createProjectFromWorkspaceWidget, 3);
     layout->addWidget(&_createProjectFromDatasetWidget, 3);
+    layout->addWidget(&_tutorialsWidget, 3);
 
     setLayout(layout);
 
@@ -44,6 +47,9 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Item");
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getTreeView().verticalScrollBar()->setDisabled(true);
+
+    _tutorialsWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    _tutorialsWidget.getHierarchyWidget().setItemTypeName("Tutorial");
 
     _createProjectFromDatasetWidget.getHierarchyWidget().setItemTypeName("Importer");
 
@@ -70,6 +76,8 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
+
+    updateTutorialActions();
 }
 
 void StartPageGetStartedWidget::updateActions()
@@ -161,9 +169,6 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
 
             break;
         }
-
-        default:
-            break;
     }
 }
 
@@ -183,5 +188,19 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
         fromDataStartPageAction.setComments(QString("Create a new project and import data into it with the %1").arg(viewPluginFactory->getKind()));
 
         _createProjectFromDatasetWidget.getModel().add(fromDataStartPageAction);
+    }
+}
+
+void StartPageGetStartedWidget::updateTutorialActions()
+{
+    for (auto tutorial : help().getTutorials({ "GettingStarted" })) {
+        StartPageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [tutorial]() -> void {
+            QDesktopServices::openUrl(tutorial->getUrl());
+		});
+
+        //tutorialAction.setSubtitle(subtitle);
+        //tutorialAction.setComments(QString("Create a new project and import data into it with the %1").arg(viewPluginFactory->getKind()));
+
+        _tutorialsWidget.getModel().add(tutorialAction);
     }
 }

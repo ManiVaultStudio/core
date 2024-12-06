@@ -182,7 +182,7 @@ LearningCenterTutorials HelpManager::getTutorials(const QStringList& tags) const
 {
     LearningCenterTutorialsFilterModel tutorialsFilterModel;
 
-    auto tutorialsModel = &const_cast<HelpManager*>(this)->_videosModel;
+    auto tutorialsModel = &const_cast<HelpManager*>(this)->_tutorialsModel;
 
     tutorialsFilterModel.setSourceModel(tutorialsModel);
     tutorialsFilterModel.getTagsFilterAction().initialize(tags, tags);
@@ -191,7 +191,8 @@ LearningCenterTutorials HelpManager::getTutorials(const QStringList& tags) const
 
     for (int rowIndex = 0; rowIndex < tutorialsFilterModel.rowCount(); rowIndex++) {
         const auto tutorialIndex    = tutorialsFilterModel.mapToSource(tutorialsFilterModel.index(rowIndex, 0));
-        const auto tutorialItem     = dynamic_cast<LearningCenterTutorialsModel::Item*>(tutorialsModel->itemFromIndex(tutorialIndex));
+        const auto itemIndex        = tutorialsModel->itemFromIndex(tutorialIndex);
+        const auto tutorialItem     = dynamic_cast<LearningCenterTutorialsModel::Item*>(itemIndex);
 
         tutorials.push_back(tutorialItem->getTutorial());
     }

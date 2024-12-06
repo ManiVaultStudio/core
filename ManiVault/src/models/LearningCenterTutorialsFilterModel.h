@@ -59,7 +59,7 @@ public: // Action getters
     gui::HorizontalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
-    LearningCenterVideosModel*      _learningCenterTutorialsModel;     /** Pointer to source model */
+    LearningCenterTutorialsModel*   _learningCenterTutorialsModel;  /** Pointer to source model */
     gui::OptionsAction              _tagsFilterAction;              /** Filter based on tag(s) */
     gui::HorizontalGroupAction      _filterGroupAction;             /** Groups the filter text and the filter settings */
 };

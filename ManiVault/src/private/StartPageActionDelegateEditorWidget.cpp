@@ -18,17 +18,6 @@ using namespace mv;
 
 StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _index(),
-    _mainLayout(),
-    _iconLayout(),
-    _textLayout(),
-    _primaryTextLayout(),
-    _titleLabel(),
-    _metaDataLabel(),
-    _secondaryTextLayout(),
-    _subtitleLabel(),
-    _infoWidget(),
-    _infoLayout(),
     _previewIconLabel(Application::getIconFont("FontAwesome").getIcon("image")),
     _metaDataIconLabel(Application::getIconFont("FontAwesome").getIcon("file-alt")),
     _tagsIconLabel(Application::getIconFont("FontAwesome").getIcon("tags")),
@@ -166,7 +155,7 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
 
     _tagsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
         if (!_index.isValid())
-            return QString();
+            return {};
 
         StartPageAction startPageAction(_index);
 
@@ -177,7 +166,7 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
 
     _contributorsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
         if (!_index.isValid())
-            return QString();
+            return {};
 
         StartPageAction startPageAction(_index);
 

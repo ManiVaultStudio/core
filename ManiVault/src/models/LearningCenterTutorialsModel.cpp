@@ -86,6 +86,8 @@ void LearningCenterTutorialsModel::updateTags()
 		for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getTutorial()->getTags())
 			_tags.insert(tag);
 
+    qDebug() << _tags;
+
     emit tagsChanged(_tags);
 }
 

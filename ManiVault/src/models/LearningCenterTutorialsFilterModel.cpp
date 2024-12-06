@@ -52,7 +52,7 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
             return false;
     }
 
-    const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningCenterVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::Tags)).data(Qt::EditRole).toStringList();
     const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
 
     if (_tagsFilterAction.hasOptions()) {
@@ -78,9 +78,9 @@ void LearningCenterTutorialsFilterModel::setSourceModel(QAbstractItemModel* sour
 {
     SortFilterProxyModel::setSourceModel(sourceModel);
 
-    _learningCenterTutorialsModel = dynamic_cast<LearningCenterVideosModel*>(sourceModel);
+    _learningCenterTutorialsModel = dynamic_cast<LearningCenterTutorialsModel*>(sourceModel);
 
-    connect(_learningCenterTutorialsModel, &LearningCenterVideosModel::tagsChanged, this, [this](const QSet<QString>& tags) -> void {
+    connect(_learningCenterTutorialsModel, &LearningCenterTutorialsModel::tagsChanged, this, [this](const QSet<QString>& tags) -> void {
         const auto options = QStringList(_learningCenterTutorialsModel->getTagsSet().begin(), _learningCenterTutorialsModel->getTagsSet().end());
 
         _tagsFilterAction.initialize(options, options);

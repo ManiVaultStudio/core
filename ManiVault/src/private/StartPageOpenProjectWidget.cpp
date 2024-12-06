@@ -25,11 +25,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
-    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
-    _leftAlignedIcon(),
-    _leftAlignedLoggingIcon(),
-    _rightAlignedIcon(),
-    _rightAlignedLoggingIcon()
+    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects")
 {
     auto layout = new QVBoxLayout();
 
@@ -64,7 +60,6 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     connect(&_startPageContentWidget->getToggleRecentProjectsAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
-    
 }
 
 bool StartPageOpenProjectWidget::event(QEvent* event)
