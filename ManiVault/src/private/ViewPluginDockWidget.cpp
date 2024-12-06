@@ -63,8 +63,6 @@ ViewPluginDockWidget::~ViewPluginDockWidget()
     qDebug() << __FUNCTION__ << windowTitle();
 #endif
 
-    qDebug() << __FUNCTION__ << windowTitle();
-
 	serializationTasks.remove(getId());
 }
 

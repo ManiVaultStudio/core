@@ -321,6 +321,8 @@ void ProjectManager::newBlankProject()
 #endif
 
         createProject();
+
+        workspaces().reset();
     }
     catch (std::exception& e)
     {

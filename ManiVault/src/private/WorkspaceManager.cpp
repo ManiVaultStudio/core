@@ -224,6 +224,9 @@ void WorkspaceManager::reset()
     {
 		for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
 			plugin->destroy();
+
+        _mainDockManager->reset();
+        _viewPluginsDockManager->reset();
     }
     endReset();
 }
