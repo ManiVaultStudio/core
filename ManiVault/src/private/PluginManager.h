@@ -33,7 +33,7 @@ public:
     void reset() override;
 
     /** Loads all plugin factories from the plugin directory */
-    void loadPluginFactories();
+    void loadPluginFactories() override;
 
     /**
      * Determine whether a plugin of \p kind is loaded
@@ -78,13 +78,19 @@ private:
      */
     void addPlugin(plugin::Plugin* plugin) override;
 
-public:
+public: // Destroy
 
     /**
      * Destroy \p plugin
      * @param plugin Pointer to the plugin that is to be destroyed
      */
     void destroyPlugin(plugin::Plugin* plugin) override;
+
+    /**
+     * Destroy plugin by \p pluginId
+     * @param pluginId Globally unique identifier of the plugin that is to be destroyed
+     */
+    void destroyPluginById(const QString& pluginId) override;
 
 public: // Plugin factory
 
@@ -231,7 +237,7 @@ protected:
      * @param pluginDir Plugin scan directory
      * @return List of resolved plugin filenames
      */
-    QStringList resolveDependencies(QDir pluginDir) const;
+    QStringList resolveDependencies(QDir pluginDir) const override;
 
 private:
     QHash<QString, PluginFactory*>                  _pluginFactories;   /** All loaded plugin factories */

@@ -6,13 +6,20 @@
 
 #include "Application.h"
 #include "CoreInterface.h"
+#include "ViewPlugin.h"
+
+#include "actions/PluginLearningCenterAction.h"
+
 #include "util/Icon.h"
+#include "util/Miscellaneous.h"
 
 #include <QDebug>
-#include <QMainWindow>
-#include <QMenu>
 #include <QDesktopServices>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsScene>
+#include <QMainWindow>
+#include <QMenu>
+#include <QPainter>
 #include <QResizeEvent>
 
 #ifdef _DEBUG
@@ -813,7 +820,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::showEvent(QShowEvent*
 
     _numberOfShowEvents++;
 
-    QTimer::singleShot(widgetAsyncUpdateTimerInterval, [this]() -> void {
+    QTimer::singleShot(widgetAsyncUpdateTimerInterval, this, [this]() -> void {
         _backgroundWidget.transitionGeometry(geometry());
 	});
 }

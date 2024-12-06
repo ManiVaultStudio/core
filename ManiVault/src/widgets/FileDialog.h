@@ -4,7 +4,12 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QFileDialog>
+#include <QSize>
+#include <QString>
+#include <QUrl>
 
 namespace mv::gui {
 

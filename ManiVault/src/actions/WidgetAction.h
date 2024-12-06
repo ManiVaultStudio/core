@@ -206,7 +206,7 @@ public: // Hierarchy queries
     /**
      * Get number of children of \p WidgetActionType, possibly \p recursively
      * @param recursively Count recursively
-     * @returm Number of children
+     * @return Number of children
      */
     template<typename WidgetActionType = WidgetAction>
     std::uint32_t getNumberOfChildren(bool recursively = false) const {

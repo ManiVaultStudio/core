@@ -41,7 +41,10 @@ public:
         QObject(parent),
         Serializable(name),
         _initialized(false),
-        _lockingAction(nullptr)
+        _lockingAction(nullptr),
+		_coreIsDestroyed(false),
+        _isInitializing(false),
+		_isResetting(false)
     {
     }
 
@@ -57,6 +60,8 @@ public:
 #endif
 
         emit managerAboutToBeReset();
+
+        _isResetting = true;
     }
 
     /** Resets the contents of the manager */
@@ -74,7 +79,9 @@ public:
 #ifdef ABSTRACT_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-        
+
+		_isResetting = false;
+
         emit managerReset();
     }
 
@@ -83,6 +90,8 @@ public:
 #ifdef ABSTRACT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
+
+        _isInitializing = true;
 
         if (isInitialized()) {
             qDebug() << getSerializationName() << "already initialized";
@@ -98,7 +107,8 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        _initialized = true;
+        _initialized    = true;
+        _isInitializing = false;
 
         emit managerInitialized();
     }
@@ -109,6 +119,22 @@ public:
      */
     bool isInitialized() const {
         return _initialized;
+    }
+
+    /**
+     * Get whether the manager is initializing or not
+     * @return Boolean determining whether the manager is initializing or not
+     */
+    bool isInitializing() const {
+	    return _isInitializing;
+    }
+
+    /**
+     * Get whether the manager is resetting or not
+     * @return Boolean determining whether the manager is resetting or not
+     */
+    bool isResetting() const {
+        return _isResetting;
     }
 
     /**
@@ -151,12 +177,14 @@ public: // Locking
         return true;
     };
 
-public: // Core destruction
+protected: // Core destruction
 
     /** Mark core as destroyed */
     void setCoreIsDestroyed() {
         _coreIsDestroyed = true;
     }
+
+public: // Core destruction
 
     /**
      * Establish whether the core is destroyed
@@ -184,6 +212,10 @@ private:
     bool                    _initialized;       /** Whether the manager is initialized or not */
     gui::LockingAction*     _lockingAction;     /** Manager locking action */
     bool                    _coreIsDestroyed;   /** Boolean determining whether the core is destroyed */
+    bool                    _isInitializing;    /** Boolean determining whether the manager is being initialized */
+    bool                    _isResetting;       /** Boolean determining whether the manager is resetting */
+
+    friend class Core;
 };
 
 }

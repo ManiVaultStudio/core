@@ -4,6 +4,8 @@
 
 #include "FileDialog.h"
 
+#include "Application.h"
+
 #ifdef _DEBUG
     #define FILE_DIALOG_VERBOSE
 #endif

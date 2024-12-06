@@ -197,10 +197,10 @@ void WorkspaceManager::initialize()
 
             if (!viewPlugin)
                 return;
-            
+
             if (_mainDockManager && viewPlugin->isSystemViewPlugin())
                 _mainDockManager->removeViewPluginDockWidget(viewPlugin);
-            else if(_viewPluginsDockManager)
+            else if (_viewPluginsDockManager)
                 _viewPluginsDockManager->removeViewPluginDockWidget(viewPlugin);
         });
 
@@ -217,11 +217,13 @@ void WorkspaceManager::reset()
     qDebug() << __FUNCTION__;
 #endif
 
+    if (isCoreDestroyed())
+        return;
+
     beginReset();
     {
-        if (!isCoreDestroyed())
-			for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
-				plugin->destroy();
+		for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
+			plugin->destroy();
     }
     endReset();
 }
@@ -500,7 +502,7 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
     else
         _viewPluginsDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
 
-    if (projects().isOpeningProject() || projects().isOpeningProject())
+    if (projects().isOpeningProject() || projects().isImportingProject())
         return;
 
     viewPlugin->getPresetsAction().loadDefaultPreset();
@@ -569,7 +571,11 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
     _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
     _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 
-    ViewPluginDockWidget::restoreViewPluginStates();
+    for (auto viewPluginDockWidget : _mainDockManager->getViewPluginDockWidgets())
+    	viewPluginDockWidget->restoreViewPluginState();
+
+    for (auto viewPluginDockWidget : _viewPluginsDockManager->getViewPluginDockWidgets())
+        viewPluginDockWidget->restoreViewPluginState();
 }
 
 QVariantMap WorkspaceManager::toVariantMap() const
@@ -624,17 +630,16 @@ void WorkspaceManager::createWorkspace()
 
         _workspace.reset(new Workspace());
     }
-    emit workspaceCreated(*(_workspace.get()));
+    emit workspaceCreated(*_workspace);
 }
 
 void WorkspaceManager::createIcon()
 {
-    const auto size             = 128;
-    const auto halfSize         = size / 2;
-    const auto margin           = 12;
-    const auto spacing          = 14;
-    const auto halfSpacing      = spacing / 2;
-    const auto lineThickness    = 7.0;
+    constexpr auto size             = 128;
+    constexpr auto halfSize         = size / 2;
+    constexpr auto margin           = 12;
+    constexpr auto spacing          = 14;
+    constexpr auto halfSpacing      = spacing / 2;
 
     QPixmap pixmap(size, size);
 
@@ -644,7 +649,7 @@ void WorkspaceManager::createIcon()
 
     painter.setWindow(0, 0, size, size);
 
-    const auto drawWindow = [&](QRectF rectangle) -> void {
+    const auto drawWindow = [&](const QRectF& rectangle) -> void {
         painter.setBrush(Qt::black);
         painter.setPen(Qt::NoPen);
         painter.drawRect(rectangle);
@@ -654,7 +659,7 @@ void WorkspaceManager::createIcon()
     drawWindow(QRectF(QPointF(halfSize + halfSpacing, margin), QPointF(size - margin, halfSize - halfSpacing)));
     drawWindow(QRectF(QPointF(halfSize + halfSpacing, halfSize + halfSpacing), QPointF(size - margin, size - margin)));
 
-    _icon = mv::gui::createIcon(pixmap);
+    _icon = gui::createIcon(pixmap);
 }
 
 WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocation::Types& types /*= WorkspaceLocation::Type::All*/)
@@ -666,7 +671,7 @@ WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocati
 
         QDir workspaceExamplesDirectory(QString("%1/examples/workspaces/").arg(qApp->applicationDirPath()));
 
-        for (const auto workspaceFileName : workspaceExamplesDirectory.entryList(workspaceFilter))
+        for (const auto& workspaceFileName : workspaceExamplesDirectory.entryList(workspaceFilter))
             workspaceLocations << WorkspaceLocation(workspaceFileName, QString("%1/%2").arg(workspaceExamplesDirectory.absolutePath(), workspaceFileName), WorkspaceLocation::Type::BuiltIn);
     }
 
@@ -677,12 +682,11 @@ WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocati
     if (types.testFlag(WorkspaceLocation::Type::Recent)) {
         _recentWorkspacesAction.updateRecentFilePaths();
 
-        for (const auto recentFilePath : _recentWorkspacesAction.getRecentFilePaths()) {
+        for (const auto& recentFilePath : _recentWorkspacesAction.getRecentFilePaths()) {
             Workspace workspace(recentFilePath);
 
             workspaceLocations << WorkspaceLocation(workspace.getTitleAction().getString(), recentFilePath, WorkspaceLocation::Type::Recent);
         }
-            
     }
     
     return workspaceLocations;
@@ -731,9 +735,7 @@ QStringList WorkspaceManager::getViewPluginNames(const QString& workspaceJsonFil
 
     QByteArray data = jsonFile.readAll();
 
-    QJsonDocument jsonDocument;
-
-    jsonDocument = QJsonDocument::fromJson(data);
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(data);
 
     if (jsonDocument.isNull() || jsonDocument.isEmpty())
         return {};
@@ -745,7 +747,7 @@ QStringList WorkspaceManager::getViewPluginNames(const QString& workspaceJsonFil
     const auto getViewPluginNamesFromDockManager = [](const QVariantMap& dockManagerMap) -> QStringList {
         QStringList viewPluginNames;
 
-        for (auto viewPluginDockWidgetVariant : dockManagerMap["ViewPluginDockWidgets"].toList()) {
+        for (const auto& viewPluginDockWidgetVariant : dockManagerMap["ViewPluginDockWidgets"].toList()) {
             const auto viewPluginMap = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
 
             viewPluginNames << viewPluginMap["GuiName"].toMap()["Value"].toString();

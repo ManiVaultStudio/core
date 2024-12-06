@@ -4,9 +4,6 @@
 
 #include "DockWidget.h"
 
-#include <ViewPlugin.h>
-
-#include <util/Serialization.h>
 #include <Application.h>
 
 #include <DockWidgetTab.h>
@@ -15,7 +12,7 @@
 #include <QToolButton>
 
 #ifdef _DEBUG
-    #define DOCK_WIDGET_VERBOSE
+    //#define DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;
@@ -53,8 +50,6 @@ DockWidget::~DockWidget()
 #ifdef DOCK_WIDGET_VERBOSE
     qDebug() << __FUNCTION__ << getSerializationName();
 #endif
-
-    takeWidget();
 }
 
 bool DockWidget::event(QEvent* event)
@@ -108,7 +103,7 @@ QVariantMap DockWidget::toVariantMap() const
     return variantMap;
 }
 
-void DockWidget::updateStyle()
+void DockWidget::updateStyle() const
 {
     _settingsToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
 }

@@ -133,13 +133,10 @@ public:
      * Get the view plugin
      * @return Pointer to view plugin (might be nullptr)
      */
-    mv::plugin::ViewPlugin* getViewPlugin();
+    mv::plugin::ViewPlugin* getViewPlugin() const;
 
     /** Restores the view plugin state */
-    void restoreViewPluginState();
-
-    /** Restores the view plugin states of all active view plugins */
-    static void restoreViewPluginStates();
+    void restoreViewPluginState() const;
 
 public: // Title bar settings menu
 
@@ -193,25 +190,24 @@ public: // View plugin isolation
 private:
 
     /**
-     * Assign \p viewPlugin to dock widget (configures the dock widget properties and sets the dock widget widget)
+     * Assign \p viewPlugin to dock widget (configures the dock widget properties and sets the dock widget)
      * @param viewPlugin Pointer to view plugin
      */
     void setViewPlugin(mv::plugin::ViewPlugin* viewPlugin);
 
 private:
-    mv::plugin::ViewPlugin*         _viewPlugin;                /** Pointer to view plugin */
-    QString                         _viewPluginKind;            /** Kind of (view) plugin */
-    QVariantMap                     _viewPluginMap;             /** View plugin cached map for deferred loading */
-    QMenu                           _settingsMenu;              /** Menu for view plugin settings */
-    QMenu                           _toggleMenu;                /** Menu for toggling view plugin dock widgets */
-    mv::gui::TriggerAction          _helpAction;                /** Action for triggering help */
-    bool                            _cachedVisibility;          /** Cached visibility for view plugin isolation */
-    ads::CDockManager               _dockManager;               /** Dock manager for internal docking */
-    QMap<QString, CDockWidget*>     _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
-    ProgressOverlayWidget           _progressOverlayWidget;     /** Overlay widget which shows a very thin view progress bar */
+    QPointer<mv::plugin::ViewPlugin>    _viewPlugin;                /** Pointer to view plugin */
+    QString                             _viewPluginKind;            /** Kind of (view) plugin */
+    QVariantMap                         _viewPluginMap;             /** View plugin cached map for deferred loading */
+    QMenu                               _settingsMenu;              /** Menu for view plugin settings */
+    QMenu                               _toggleMenu;                /** Menu for toggling view plugin dock widgets */
+    mv::gui::TriggerAction              _helpAction;                /** Action for triggering help */
+    bool                                _cachedVisibility;          /** Cached visibility for view plugin isolation */
+    ads::CDockManager                   _dockManager;               /** Dock manager for internal docking */
+    QMap<QString, CDockWidget*>         _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
+    ProgressOverlayWidget               _progressOverlayWidget;     /** Overlay widget which shows a very thin view progress bar */
 
 protected:
-    static QList<ViewPluginDockWidget*> active;  /** Loaded view plugin dock widgets */
 
     /**
      * Map view plugin dock widget identifier to serialization task
@@ -222,5 +218,3 @@ protected:
     friend class ViewPluginsDockWidget;
     friend class WorkspaceManager;
 };
-
-using ViewPluginDockWidgets = QVector<QPointer<ViewPluginDockWidget>>;

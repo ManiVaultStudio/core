@@ -3,14 +3,24 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Miscellaneous.h"
+
+#include "Exception.h"
 #include "Icon.h"
 
 #include <QAction>
+#include <QEventLoop>
+#include <QLayout>
+#include <QLayoutItem>
+#include <QPainter>
+#include <QPixmap>
+#include <QString>
 #include <QStringList>
+#include <QTimer>
 #include <QTcpSocket>
 #include <QUrl>
 #include <QVariant>
-#include <QString>
+
+#include <exception>
 
 namespace mv::util
 {
@@ -43,6 +53,20 @@ QString getNoBytesHumanReadable(float noBytes)
     }
 
     return QString::number(noBytes, 'f', 2) + " " + unit;
+}
+
+QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex)
+{
+	static constexpr std::uint32_t tabSize = 4;
+
+	QString indentation;
+
+	for (std::uint32_t i = 0; i < tabIndex * tabSize; i++)
+		indentation += " ";
+
+	message.insert(0, indentation);
+
+	return message;
 }
 
 CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha /*= true*/)
@@ -254,4 +278,27 @@ QVariant getValueByPath(const QVariant& root, const QString& path, const QVarian
 
 	return foundValue; // Return the found value
 }
+
+void waitForDuration(int milliSeconds)
+{
+	QEventLoop localEventLoop;
+
+	QTimer::singleShot(milliSeconds, &localEventLoop, &QEventLoop::quit);
+
+	localEventLoop.exec();
+}
+
+void disconnectRecursively(const QObject* object)
+{
+    Q_ASSERT(object);
+
+	if (!object)
+		return;
+
+    [[maybe_unused]] auto result = object->disconnect();
+
+	for (auto child : object->children())
+		disconnectRecursively(child);
+}
+
 }

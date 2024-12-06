@@ -6,12 +6,14 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QString>
-#include <QWidget>
+#include <QIcon>
 #include <QPointer>
+#include <QString>
+#include <QVariant>
+#include <QVector>
+#include <QWidget>
 
 #include <algorithm>
-#include <qtcpsocket.h>
 
 class QAction;
 
@@ -37,7 +39,7 @@ CORE_EXPORT QString getNoBytesHumanReadable(float noBytes);
  * @param actions Actions to sort
  */
 template<typename ActionType>
-inline void sortActions(QVector<QPointer<ActionType>>& actions)
+void sortActions(QVector<QPointer<ActionType>>& actions)
 {
     std::sort(actions.begin(), actions.end(), [](auto actionA, auto actionB) {
         return actionA->text() < actionB->text();
@@ -50,15 +52,12 @@ inline void sortActions(QVector<QPointer<ActionType>>& actions)
  * @return Pointer to parent widget of type \p WidgetClass, otherwise a nullptr
  */
 template <class WidgetClass>
-inline WidgetClass* findParent(const QWidget* widget)
+WidgetClass* findParent(const QWidget* widget)
 {
     auto parentWidget = widget->parentWidget();
 
-    while (parentWidget)
-    {
-        auto parentImpl = qobject_cast<WidgetClass*>(parentWidget);
-
-        if (parentImpl)
+    while (parentWidget) {
+        if (auto parentImpl = qobject_cast<WidgetClass*>(parentWidget))
             return parentImpl;
 
         parentWidget = parentWidget->parentWidget();
@@ -73,18 +72,7 @@ inline WidgetClass* findParent(const QWidget* widget)
  * @param tabIndex Number of tabs to prefix with
  * @return Message indented with tabs
  */
-CORE_EXPORT inline QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex) {
-    static const std::uint32_t tabSize = 4;
-
-    QString indentation;
-
-    for (std::uint32_t i = 0; i < tabIndex * tabSize; i++)
-        indentation += " ";
-
-    message.insert(0, indentation);
-
-    return message;
-}
+CORE_EXPORT inline QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex);
 
 /**
  * Get \p color as CSS string, either with or without \p alpha
@@ -122,4 +110,17 @@ CORE_EXPORT QVariant setValueByPath(QVariant root, const QString& path, const QV
  * @return Value, invalid when no value was found
  */
 CORE_EXPORT QVariant getValueByPath(const QVariant& root, const QString& path, const QVariant& valueIfNotFound = QVariant());
+
+
+/**
+ * This method keeps the application event loop responsive while halting the current execution for n \p milliseconds
+ * @param milliSeconds Milliseconds to wait
+ */
+CORE_EXPORT void waitForDuration(int milliSeconds);
+
+/**
+ * Remove all connections (to and from) from \p object and its descendants
+ * @param object Pointer to root object
+ */
+CORE_EXPORT void disconnectRecursively(const QObject* object);
 }

@@ -35,7 +35,7 @@ public:
     DockWidget(const QString& title, QWidget* parent = nullptr);
 
     /** Destructor */
-    ~DockWidget();
+    ~DockWidget() override;
 
     /**
      * Get string that describes the dock widget type
@@ -68,7 +68,7 @@ public:
 protected:
     /**
      * Override QObject's event handling
-     * @return Boolean Wheter the event was recognized and processed
+     * @return Boolean Whether the event was recognized and processed
      */
     bool event(QEvent* event) override;
 
@@ -89,7 +89,7 @@ public: // Serialization
 public: // Themes
     
     /** refresh the widget and its children according to new style */
-    void updateStyle();
+    void updateStyle() const;
 
 private:
     QToolButton*    _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */

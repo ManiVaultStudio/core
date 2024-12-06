@@ -4,12 +4,8 @@
 
 #include "ViewPluginsDockWidget.h"
 
-#include <util/Serialization.h>
-
-#include <Application.h>
 #include <CoreInterface.h>
 #include <AbstractPluginManager.h>
-#include <Plugin.h>
 
 #include "DockAreaWidget.h"
 
@@ -26,17 +22,19 @@ using namespace mv::plugin;
 using namespace mv::util;
 using namespace mv::gui;
 
-ViewPluginsDockWidget::ViewPluginsDockWidget(QPointer<DockManager> dockManager, QWidget* parent /*= nullptr*/) :
+QPointer<DockManager> ViewPluginsDockWidget::dockManager = QPointer<DockManager>();
+
+ViewPluginsDockWidget::ViewPluginsDockWidget(const QPointer<DockManager>& dockManager, QWidget* parent /*= nullptr*/) :
     CDockWidget("View plugins", parent),
-    _dockManager(dockManager),
-    _centralDockWidget("Central dock widget"),
-    _logoWidget()
+    _centralDockWidget("Central dock widget")
 {
+    ViewPluginsDockWidget::dockManager = dockManager;
+
     auto widget = new QWidget();
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(_dockManager);
+    layout->addWidget(dockManager);
 
     widget->setLayout(layout);
 
@@ -44,13 +42,13 @@ ViewPluginsDockWidget::ViewPluginsDockWidget(QPointer<DockManager> dockManager, 
 
     _centralDockWidget.setWidget(&_logoWidget);
 
-    _dockManager->setCentralWidget(&_centralDockWidget);
+    dockManager->setCentralWidget(&_centralDockWidget);
 
-    connect(_dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
-    connect(_dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);
-    connect(_dockManager, &CDockManager::dockWidgetAdded, this, &ViewPluginsDockWidget::dockWidgetAdded);
-    connect(_dockManager, &CDockManager::dockWidgetAboutToBeRemoved, this, &ViewPluginsDockWidget::dockWidgetAboutToBeRemoved);
-    connect(_dockManager, &CDockManager::focusedDockWidgetChanged, this, &ViewPluginsDockWidget::updateCentralWidget);
+    connect(dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
+    connect(dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);
+    connect(dockManager, &CDockManager::dockWidgetAdded, this, &ViewPluginsDockWidget::dockWidgetAdded);
+    connect(dockManager, &CDockManager::dockWidgetAboutToBeRemoved, this, &ViewPluginsDockWidget::dockWidgetAboutToBeRemoved);
+    connect(dockManager, &CDockManager::focusedDockWidgetChanged, this, &ViewPluginsDockWidget::updateCentralWidget);
 
     connect(&plugins(), &AbstractPluginManager::pluginDestroyed, this, &ViewPluginsDockWidget::updateCentralWidget);
 }
@@ -63,14 +61,14 @@ void ViewPluginsDockWidget::updateCentralWidget()
     
     std::int32_t numberOfVisibleNonCentralDockWidgets = 0;
 
-    for (auto dockWidget : _dockManager->dockWidgets())
+    for (auto dockWidget : dockManager->dockWidgets())
         if (!dockWidget->isCentralWidget() && !dockWidget->isClosed())
             numberOfVisibleNonCentralDockWidgets++;
 
     _centralDockWidget.toggleView(numberOfVisibleNonCentralDockWidgets == 0);
 }
 
-void ViewPluginsDockWidget::dockWidgetAdded(ads::CDockWidget* dockWidget)
+void ViewPluginsDockWidget::dockWidgetAdded(const ads::CDockWidget* dockWidget)
 {
     Q_ASSERT(dockWidget != nullptr);
 
@@ -90,7 +88,7 @@ void ViewPluginsDockWidget::dockWidgetAdded(ads::CDockWidget* dockWidget)
     });
 }
 
-void ViewPluginsDockWidget::dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget)
+void ViewPluginsDockWidget::dockWidgetAboutToBeRemoved(const ads::CDockWidget* dockWidget)
 {
     Q_ASSERT(dockWidget != nullptr);
 
@@ -102,7 +100,7 @@ void ViewPluginsDockWidget::dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWid
     disconnect(dockWidget, &CDockWidget::topLevelChanged, this, nullptr);
 }
 
-void ViewPluginsDockWidget::isolate(plugin::ViewPlugin* viewPlugin, bool isolate)
+void ViewPluginsDockWidget::isolate(const plugin::ViewPlugin* viewPlugin, bool isolate)
 {
     if (viewPlugin->isSystemViewPlugin())
         return;
@@ -110,7 +108,7 @@ void ViewPluginsDockWidget::isolate(plugin::ViewPlugin* viewPlugin, bool isolate
     if (isolate) {
         cacheVisibility();
 
-        for (auto viewPluginDockWidget : ViewPluginDockWidget::active) {
+        for (auto viewPluginDockWidget : ViewPluginsDockWidget::dockManager->getViewPluginDockWidgets()) {
             if (viewPlugin != viewPluginDockWidget->getViewPlugin())
                 viewPluginDockWidget->toggleView(false);
         }
@@ -122,12 +120,12 @@ void ViewPluginsDockWidget::isolate(plugin::ViewPlugin* viewPlugin, bool isolate
 
 void ViewPluginsDockWidget::cacheVisibility()
 {
-    for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
+    for (auto viewPluginDockWidget : ViewPluginsDockWidget::dockManager->getViewPluginDockWidgets())
         viewPluginDockWidget->cacheVisibility();
 }
 
 void ViewPluginsDockWidget::restoreVisibility()
 {
-    for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
+    for (auto viewPluginDockWidget : ViewPluginsDockWidget::dockManager->getViewPluginDockWidgets())
         viewPluginDockWidget->restoreVisibility();
 }

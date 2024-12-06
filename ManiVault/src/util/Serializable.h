@@ -39,6 +39,7 @@ public:
      */
     Serializable(const QString& serializationName = "");
 
+    /** Destructor */
     virtual ~Serializable() { }
 
     /**
@@ -46,25 +47,25 @@ public:
      * @param truncated Whether to only return the first six characters of the ID
      * @return Globally unique identifier of the serializable object
      */
-    virtual QString getId(bool truncated = false) const final;
+    QString getId(bool truncated = false) const;
 
     /**
      * Set globally unique identifier (only use this function when strictly necessary and when the ramifications are understood, undefined behaviour might happen otherwise)
      * @param id Globally unique identifier of the serializable object
      */
-    virtual void setId(const QString& id) final;
+    void setId(const QString& id);
 
     /**
      * Get serialization name
      * @return Serialization name
      */
-    virtual QString getSerializationName() const final;
+    QString getSerializationName() const;
 
     /**
      * Set serialization name to \p name
      * @param serializationName Serialization name
      */
-    virtual void setSerializationName(const QString& serializationName) final;
+    void setSerializationName(const QString& serializationName);
 
     /**
      * Load from variant map
@@ -88,34 +89,34 @@ public:
      * Save into \p variantMap
      * @param variantMap Variant map
      */
-    virtual void insertIntoVariantMap(QVariantMap& variantMap) const final;
+    void insertIntoVariantMap(QVariantMap& variantMap) const;
 
     /**
      * Load widget action from JSON document
-     * @param JSON document
+     * @param jsonDocument The JSON document
      */
-    virtual void fromJsonDocument(const QJsonDocument& jsonDocument) final;
+    void fromJsonDocument(const QJsonDocument& jsonDocument);
 
     /**
      * Save widget action to JSON document
      * @return JSON document
      */
-    virtual QJsonDocument toJsonDocument() const final;
+    QJsonDocument toJsonDocument() const;
 
     /**
      * Load from JSON file
      * @param filePath Path to the JSON file (if none/invalid a file open dialog is automatically opened)
      */
-    virtual void fromJsonFile(const QString& filePath = "") final;
+    void fromJsonFile(const QString& filePath = "");
 
     /**
      * Save to JSON file
      * @param filePath Path to the JSON file (if none/invalid a file save dialog is automatically opened)
      */
-    virtual void toJsonFile(const QString& filePath = "") final;
+    void toJsonFile(const QString& filePath = "");
 
     /** Assigns a fresh new identifier to the serializable object */
-    virtual void makeUnique() final;
+    void makeUnique();
 
     /**
      * Creates a new globally unique identifier for a serializable object
@@ -128,7 +129,7 @@ protected: // Serialization
     /**
      * Load serializable object from variant map
      * @param serializable Pointer to serializable object
-     * @param Variant map
+     * @param variantMap The Variant map
      */
     static void fromVariantMap(Serializable* serializable, const QVariantMap& variantMap);
 
@@ -168,7 +169,7 @@ public: // Operators
      * Equality operator
      * @param rhs Right-hand-side operator
      */
-    const bool operator == (const Serializable& rhs) const {
+    bool operator == (const Serializable& rhs) const {
         return rhs.getId() == getId();
     }
     
@@ -176,7 +177,7 @@ public: // Operators
      * Inequality operator
      * @param rhs Right-hand-side operator
      */
-    const bool operator != (const Serializable& rhs) const {
+    bool operator != (const Serializable& rhs) const {
         return rhs.getId() != getId();
     }
 
