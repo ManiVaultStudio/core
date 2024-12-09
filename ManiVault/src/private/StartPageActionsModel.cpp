@@ -13,18 +13,18 @@
     //#define START_PAGE_ACTIONS_MODEL_VERBOSE
 #endif
 
-QMap<StartPageActionsModel::Column, QPair<QString, QString>> StartPageActionsModel::columns = QMap<StartPageActionsModel::Column, QPair<QString, QString>>({
-    { StartPageActionsModel::Column::Icon, { "Icon", "Icon" }},
-    { StartPageActionsModel::Column::Title, { "Title", "Title" }},
-    { StartPageActionsModel::Column::Description, { "Description", "Description" }},
-    { StartPageActionsModel::Column::Comments, { "Comments", "Comments" }},
-    { StartPageActionsModel::Column::Tags, { "Tags", "Tags" }},
-    { StartPageActionsModel::Column::MetaData, { "Meta Data", "Meta Data" }},
-    { StartPageActionsModel::Column::PreviewImage, { "Preview", "Preview image" }},
-    { StartPageActionsModel::Column::Tooltip, { "Tooltip", "Tooltip" }},
-    { StartPageActionsModel::Column::Contributors, { "Contributors", "Contributors" }},
-    { StartPageActionsModel::Column::ClickedCallback, { "Clicked Callback", "Callback which is called when the action is clicked" }},
-    { StartPageActionsModel::Column::SummaryDelegate, { "Summary", "Delegate item with title and subtitle" }}
+QMap<StartPageActionsModel::Column, QPair<QString, QString>> StartPageActionsModel::columns = QMap<Column, QPair<QString, QString>>({
+    { Column::Icon, { "Icon", "Icon" }},
+    { Column::Title, { "Title", "Title" }},
+    { Column::Description, { "Description", "Description" }},
+    { Column::Comments, { "Comments", "Comments" }},
+    { Column::Tags, { "Tags", "Tags" }},
+    { Column::MetaData, { "Meta Data", "Meta Data" }},
+    { Column::PreviewImage, { "Preview", "Preview image" }},
+    { Column::Tooltip, { "Tooltip", "Tooltip" }},
+    { Column::Contributors, { "Contributors", "Contributors" }},
+    { Column::ClickedCallback, { "Clicked Callback", "Callback which is called when the action is clicked" }},
+    { Column::SummaryDelegate, { "Summary", "Delegate item with title and subtitle" }}
 });
 
 StartPageActionsModel::StartPageActionsModel(QObject* parent /*= nullptr*/) :

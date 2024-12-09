@@ -7,16 +7,11 @@
 #include "LearningPageContentWidget.h"
 #include "PageContentWidget.h"
 
-#include <QApplication>
-#include <QDebug>
-#include <QStyledItemDelegate>
-
 using namespace mv::gui;
 
 LearningPageTutorialsWidget::LearningPageTutorialsWidget(LearningPageContentWidget* learningPageContentWidget) :
     QWidget(learningPageContentWidget),
-    _learningPageContentWidget(learningPageContentWidget),
-    _mainLayout()
+    _learningPageContentWidget(learningPageContentWidget)
 {
     _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Tutorials", "Tutorials"));

@@ -13,12 +13,14 @@
 #include "util/Icon.h"
 #include "util/Miscellaneous.h"
 
+#include <actions/WatchVideoAction.h>
+
 #include <QDebug>
+#include <QMenu>
 #include <QDesktopServices>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QMainWindow>
-#include <QMenu>
 #include <QPainter>
 #include <QResizeEvent>
 
@@ -369,21 +371,7 @@ void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressE
     auto contextMenu = new QMenu(this);
 
     for (const auto& video : getViewPlugin()->getLearningCenterAction().getVideos())
-    {
-        auto watchVideoAction = new QAction(video._title);
-
-        watchVideoAction->setIcon(Application::getIconFont("FontAwesomeBrands").getIcon(video._youTubeId.isEmpty() ? "video" : "youtube"));
-
-        connect(watchVideoAction, &QAction::triggered, this, [video]() -> void {
-#ifdef USE_YOUTUBE_DIALOG
-            YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::YouTubeId)).data().toString());
-#else
-            QDesktopServices::openUrl(video._url);
-#endif
-        });
-
-        contextMenu->addAction(watchVideoAction);
-    }
+        contextMenu->addAction(new WatchVideoAction(contextMenu, video->getTitle(), const_cast<LearningCenterVideo*>(video)));
         
     contextMenu->exec(mapToGlobal(event->pos()));
 }

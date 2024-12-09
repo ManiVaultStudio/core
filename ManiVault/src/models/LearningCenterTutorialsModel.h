@@ -4,19 +4,23 @@
 
 #pragma once
 
-#include <util/FileDownloader.h>
+#include "ManiVaultGlobals.h"
+
+#include "util/LearningCenterTutorial.h"
 
 #include <QMap>
 #include <QStandardItemModel>
 
+namespace mv {
+
 /**
- * Help manager videos model class
+ * Learning center tutorial model class
  *
- * Model class which contains help manager video content
+ * Contains tutorial content for the learning center
  *
  * @author Thomas Kroes
  */
-class HelpManagerVideosModel final : public QStandardItemModel
+class CORE_EXPORT LearningCenterTutorialsModel final : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -24,13 +28,13 @@ public:
 
     /** Model columns */
     enum class Column {
-        Title,
+    	Title,
         Tags,
         Date,
+        IconName,
         Summary,
-        YouTubeId,
-        YouTubeUrl,
-        Delegate,
+        Content,
+        Url,
 
         Count
     };
@@ -45,29 +49,30 @@ public:
     /** Column name and tooltip */
     static QMap<Column, ColumHeaderInfo> columnInfo;
 
-protected:
-
-    /** Base standard model item class for video */
-    class Item : public QStandardItem {
+    /** Base standard model item class for tutorial */
+    class CORE_EXPORT Item : public QStandardItem {
     public:
 
         /**
-         * Construct with \p variantMap of video
-         * @param variantMap Variant map describing the video
+         * Construct with pointer \p tutorial
+         * @param tutorial Const pointer to tutorial
+         * @param editable Boolean determining whether the item is editable or not
          */
-        Item(QVariantMap variantMap, bool editable = false);
+        Item(const util::LearningCenterTutorial* tutorial, bool editable = false);
 
         /**
-         * Get variant map
-         * return Const reference to the JSON object
+         * Get tutorial
+         * return Pointer to the tutorial
          */
-        const QVariantMap& getVariantMap() const;
+        const util::LearningCenterTutorial* getTutorial() const;
 
     private:
-        QVariantMap _variantMap;      /** The video JSON object */
+        const util::LearningCenterTutorial*   _tutorial;      /** The tutorial data */
     };
 
-    /** Standard model item class for displaying the video title */
+protected:
+
+    /** Standard model item class for displaying the tutorial title */
     class TitleItem final : public Item {
     public:
 
@@ -94,13 +99,16 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Video title";
+
+                default:
+                    break;
             }
 
             return {};
         }
     };
 
-    /** Standard model item class for displaying the video tags */
+    /** Standard model item class for displaying the tutorial tags */
     class TagsItem final : public Item {
     public:
 
@@ -127,13 +135,16 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Video tags";
+
+                default:
+                    break;
             }
 
             return {};
         }
     };
 
-    /** Standard model item class for displaying the video date */
+    /** Standard model item class for displaying the tutorial date */
     class DateItem final : public Item {
     public:
 
@@ -159,14 +170,53 @@ protected:
                     return "Date";
 
                 case Qt::ToolTipRole:
-                    return "Date at which the video was published";
+                    return "Date at which the tutorial was published";
+
+                default:
+                    break;
             }
 
             return {};
         }
     };
 
-    /** Standard model item class for displaying the video summary */
+    /** Standard model item class for displaying the tutorial icon name */
+    class IconNameItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Icon name";
+
+	            case Qt::ToolTipRole:
+	                return "Tutorial Font Awesome icon name";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the tutorial summary */
     class SummaryItem final : public Item {
     public:
 
@@ -187,20 +237,23 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Summary";
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Summary";
 
-                case Qt::ToolTipRole:
-                    return "Video description";
+	            case Qt::ToolTipRole:
+	                return "Tutorial description";
+
+	            default:
+	                break;
             }
 
             return {};
         }
     };
 
-    /** Standard model item class for displaying the video YouTube identifier */
-    class YouTubeIdItem final : public Item {
+    /** Standard model item class for displaying the tutorial summary */
+    class ContentItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -220,20 +273,23 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "ID";
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Content";
 
-                case Qt::ToolTipRole:
-                    return "YouTube identifier";
+	            case Qt::ToolTipRole:
+	                return "Tutorial content";
+
+	            default:
+	                break;
             }
 
             return {};
         }
     };
 
-    /** Standard model item class for displaying the video YouTube URL */
-    class YouTubeUrlItem final : public Item {
+    /** Standard model item class for displaying the tutorial URL */
+    class UrlItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -258,34 +314,10 @@ protected:
                     return "URL";
 
                 case Qt::ToolTipRole:
-                    return "YouTube URL";
-            }
+                    return "Tutorial URL";
 
-            return {};
-        }
-    };
-
-    /** Standard model item class for displaying the video delegate */
-    class DelegateItem final : public Item {
-    public:
-
-        /** No need for custom constructor */
-        using Item::Item;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Delegate";
-
-                case Qt::ToolTipRole:
-                    return "Video delegate item";
+                default:
+                    break;
             }
 
             return {};
@@ -298,19 +330,19 @@ protected:
     public:
 
         /**
-         * Construct with \p variantMap of video
-         * @param variantMap Variant map describing the video
+         * Construct with pointer to \p tutorial object
+         * @param tutorial Pointer to tutorial object
          */
-        Row(QVariantMap variantMap) :
+        Row(const util::LearningCenterTutorial* tutorial) :
             QList<QStandardItem*>()
         {
-            append(new TitleItem(variantMap));
-            append(new TagsItem(variantMap));
-            append(new DateItem(variantMap));
-            append(new SummaryItem(variantMap));
-            append(new YouTubeIdItem(variantMap));
-            append(new YouTubeUrlItem(variantMap));
-            append(new DelegateItem(variantMap));
+        	append(new TitleItem(tutorial));
+            append(new TagsItem(tutorial));
+            append(new DateItem(tutorial));
+            append(new IconNameItem(tutorial));
+            append(new SummaryItem(tutorial));
+            append(new ContentItem(tutorial));
+            append(new UrlItem(tutorial));
         }
     };
 
@@ -320,7 +352,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    HelpManagerVideosModel(QObject* parent = nullptr);
+    LearningCenterTutorialsModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -337,8 +369,14 @@ public:
      */
     QSet<QString> getTagsSet() const;
 
-    /** Loads learning center JSON file and picks out the videos */
-    void populateFromServer();
+    /**
+     * Add \p tutorial
+     * @param tutorial Pointer to tutorial to add
+     */
+    void addTutorial(const util::LearningCenterTutorial* tutorial);
+
+    /** Builds a set of all video tags and emits LearningCenterTutorialsModel::tagsChanged(...) */
+    void updateTags();
 
 signals:
 
@@ -349,6 +387,8 @@ signals:
     void tagsChanged(const QSet<QString>& tags);
 
 private:
-    mv::util::FileDownloader    _fileDownloader;    /** For downloading the learning center JSON file */
-    QSet<QString>               _tags;              /** All tags */
+    util::LearningCenterTutorials   _tutorials;     /** Model tutorials */
+    QSet<QString>                   _tags;          /** All tags */
 };
+
+}

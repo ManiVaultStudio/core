@@ -4,14 +4,12 @@
 
 #pragma once
 
-#include <QWidget>
-#include <QScrollArea>
-#include <QListView>
-
-#include "HelpManagerVideosModel.h"
-#include "HelpManagerVideosFilterModel.h"
+#include <models/LearningCenterVideosFilterModel.h>
 
 #include <actions/HorizontalGroupAction.h>
+
+#include <QWidget>
+#include <QListView>
 
 class LearningPageContentWidget;
 
@@ -33,12 +31,6 @@ protected:
     LearningPageVideosWidget(QWidget* parent = nullptr);
 
     /**
-     * Invoked when the widget is shown
-     * @param showEvent Pointer to show event
-     */
-    void showEvent(QShowEvent* showEvent);
-
-    /**
      * Override QObject's event handling
      * @return Boolean Wheter the event was recognized and processed
      */
@@ -50,12 +42,11 @@ private:
     void updateCustomStyle();
 
 private:
-    QVBoxLayout                     _mainLayout;            /** Main vertical layout */
-    mv::gui::HorizontalGroupAction  _settingsAction;        /** For searching etc. */
-    QWidget                         _videosWidget;          /** Container for the videos list view */
-    QListView                       _videosListView;        /** List view which shows videos with styled item delegates */
-    HelpManagerVideosModel          _videosModel;           /** Videos model */
-    HelpManagerVideosFilterModel    _videosFilterModel;     /** Videos filter model */
+    QVBoxLayout                             _mainLayout;            /** Main vertical layout */
+    mv::gui::HorizontalGroupAction          _settingsAction;        /** For searching etc. */
+    QWidget                                 _videosWidget;          /** Container for the videos list view */
+    QListView                               _videosListView;        /** List view which shows videos with styled item delegates */
+    mv::LearningCenterVideosFilterModel     _videosFilterModel;     /** Videos filter model */
 
     friend class LearningPageContentWidget;
 };

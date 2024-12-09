@@ -2,20 +2,22 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "HelpManagerVideosFilterModel.h"
-#include "HelpManagerVideosModel.h"
+#include "LearningCenterTutorialsFilterModel.h"
+#include "LearningCenterTutorialsModel.h"
 
 #include <QDebug>
 
 #ifdef _DEBUG
-    #define HELP_MANAGER_VIDEOS_FILTER_MODEL_VERBOSE
+    #define LEARNING_CENTER_TUTORIALS_FILTER_MODEL_VERBOSE
 #endif
 
-using namespace mv;
 using namespace mv::gui;
 
-HelpManagerVideosFilterModel::HelpManagerVideosFilterModel(QObject* parent /*= nullptr*/) :
+namespace mv {
+
+LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* parent /*= nullptr*/) :
     SortFilterProxyModel(parent),
+    _learningCenterTutorialsModel(nullptr),
     _tagsFilterAction(this, "Tags filter"),
     _filterGroupAction(this, "Filter group")
 {
@@ -36,7 +38,7 @@ HelpManagerVideosFilterModel::HelpManagerVideosFilterModel(QObject* parent /*= n
     _filterGroupAction.addAction(&getTextFilterSettingsAction());
 }
 
-bool HelpManagerVideosFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
     const auto index = sourceModel()->index(row, 0, parent);
 
@@ -50,7 +52,7 @@ bool HelpManagerVideosFilterModel::filterAcceptsRow(int row, const QModelIndex& 
             return false;
     }
 
-    const auto tagsList         = index.siblingAtColumn(static_cast<int>(HelpManagerVideosModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::Tags)).data(Qt::EditRole).toStringList();
     const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
 
     if (_tagsFilterAction.hasOptions()) {
@@ -72,22 +74,27 @@ bool HelpManagerVideosFilterModel::filterAcceptsRow(int row, const QModelIndex& 
     return true;
 }
 
-void HelpManagerVideosFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
+void LearningCenterTutorialsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
 {
     SortFilterProxyModel::setSourceModel(sourceModel);
 
-    _videosModel = static_cast<HelpManagerVideosModel*>(sourceModel);
+    _learningCenterTutorialsModel = dynamic_cast<LearningCenterTutorialsModel*>(sourceModel);
 
-    connect(_videosModel, &HelpManagerVideosModel::tagsChanged, this, [this](const QSet<QString>& tags) -> void {
-        const auto options = QStringList(_videosModel->getTagsSet().begin(), _videosModel->getTagsSet().end());
+    const auto updateTags = [this]() -> void {
+        const auto uniqueTags = QStringList(_learningCenterTutorialsModel->getTagsSet().begin(), _learningCenterTutorialsModel->getTagsSet().end());
 
-        _tagsFilterAction.initialize(options, options);
+        _tagsFilterAction.initialize(uniqueTags, uniqueTags);
         _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
-    });
+    };
+
+    connect(_learningCenterTutorialsModel, &LearningCenterTutorialsModel::tagsChanged, this, updateTags);
+
+    updateTags();
 }
 
-bool HelpManagerVideosFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
+bool LearningCenterTutorialsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     return lhs.data().toString() < rhs.data().toString();
 }
 
+}
