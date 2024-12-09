@@ -302,8 +302,9 @@ add_subdirectory(src/plugins/SharedParametersPlugin)
 add_subdirectory(src/plugins/LoggingPlugin)
 add_subdirectory(src/plugins/TasksPlugin)
 add_subdirectory(src/plugins/SampleScopePlugin)
+add_subdirectory(src/plugins/TutorialPlugin)
 
-set_target_properties(DataHierarchyPlugin DataPropertiesPlugin SharedParametersPlugin LoggingPlugin TasksPlugin SampleScopePlugin
+set_target_properties(DataHierarchyPlugin DataPropertiesPlugin SharedParametersPlugin LoggingPlugin TasksPlugin SampleScopePlugin TutorialPlugin
     PROPERTIES
     FOLDER SystemPlugins
 )

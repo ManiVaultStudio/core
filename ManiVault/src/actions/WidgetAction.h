@@ -364,7 +364,6 @@ public: // Widgets
      * Create collapsed widget
      * @param parent Parent widget
      * @param widgetFlags Collapsed widget configuration flags
-     * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to collapsed widget
      */
     QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags = 0) const;

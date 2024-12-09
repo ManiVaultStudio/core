@@ -43,6 +43,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
     _createProjectFromDatasetWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _tutorialsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Item");

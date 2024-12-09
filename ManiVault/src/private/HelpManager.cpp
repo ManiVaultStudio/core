@@ -84,8 +84,8 @@ HelpManager::HelpManager(QObject* parent) :
         try
         {
             const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-            const auto videos = jsonDocument.object()["videos"].toArray();
-            const auto tutorials = jsonDocument.object()["tutorials"].toArray();
+            const auto videos       = jsonDocument.object()["videos"].toArray();
+            const auto tutorials    = jsonDocument.object()["tutorials"].toArray();
 
             for (const auto video : videos) {
                 auto videoMap = video.toVariant().toMap();

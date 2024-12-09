@@ -80,12 +80,16 @@ void LearningCenterTutorialsFilterModel::setSourceModel(QAbstractItemModel* sour
 
     _learningCenterTutorialsModel = dynamic_cast<LearningCenterTutorialsModel*>(sourceModel);
 
-    connect(_learningCenterTutorialsModel, &LearningCenterTutorialsModel::tagsChanged, this, [this](const QSet<QString>& tags) -> void {
-        const auto options = QStringList(_learningCenterTutorialsModel->getTagsSet().begin(), _learningCenterTutorialsModel->getTagsSet().end());
+    const auto updateTags = [this]() -> void {
+        const auto uniqueTags = QStringList(_learningCenterTutorialsModel->getTagsSet().begin(), _learningCenterTutorialsModel->getTagsSet().end());
 
-        _tagsFilterAction.initialize(options, options);
+        _tagsFilterAction.initialize(uniqueTags, uniqueTags);
         _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
-    });
+    };
+
+    connect(_learningCenterTutorialsModel, &LearningCenterTutorialsModel::tagsChanged, this, updateTags);
+
+    updateTags();
 }
 
 bool LearningCenterTutorialsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const

@@ -83,10 +83,8 @@ void LearningCenterTutorialsModel::addTutorial(const LearningCenterTutorial* tut
 void LearningCenterTutorialsModel::updateTags()
 {
     for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
-		for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getTutorial()->getTags())
-			_tags.insert(tag);
-
-    qDebug() << _tags;
+        for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getTutorial()->getTags())
+            _tags.insert(tag);
 
     emit tagsChanged(_tags);
 }
@@ -110,6 +108,9 @@ QVariant LearningCenterTutorialsModel::TitleItem::data(int role /*= Qt::UserRole
 
         case Qt::ToolTipRole:
             return "Title: " + data(Qt::DisplayRole).toString();
+
+    case Qt::DecorationRole:
+            return Application::getIconFont("FontAwesome").getIcon(getTutorial()->getIconName());
 
         default:
             break;

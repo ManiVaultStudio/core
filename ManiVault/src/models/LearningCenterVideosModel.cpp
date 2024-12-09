@@ -57,6 +57,7 @@ QVariant LearningCenterVideosModel::headerData(int section, Qt::Orientation orie
         case Column::Delegate:
             return DelegateItem::headerData(orientation, role);
 
+        case Column::Count:
         default:
             break;
     }
@@ -87,8 +88,8 @@ void LearningCenterVideosModel::addVideo(const LearningCenterVideo* video)
 void LearningCenterVideosModel::updateTags()
 {
     for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
-		for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getVideo()->getTags())
-			_tags.insert(tag);
+        for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getVideo()->getTags())
+            _tags.insert(tag);
 
     emit tagsChanged(_tags);
 }

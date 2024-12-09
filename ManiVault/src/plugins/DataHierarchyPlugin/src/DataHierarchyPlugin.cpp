@@ -7,7 +7,7 @@
 #include <Application.h>
 
 #include <util/Miscellaneous.h>
-#include <util/Video.h>
+#include <util/LearningCenterVideo.h>
 
 Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
 using namespace mv::gui;
