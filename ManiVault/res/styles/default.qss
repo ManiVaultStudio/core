@@ -9,6 +9,7 @@ QPushButton {
 .square-button {
     width: 16px;
     height: 16px;
+    background-color: rgb(230, 0, 0);
 }
 
 QComboBox {

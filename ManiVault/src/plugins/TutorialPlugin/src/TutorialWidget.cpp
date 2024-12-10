@@ -65,6 +65,13 @@ void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
     )").arg(htmlText);
 
     _webEngineView.setHtml(sanitizedHtmltext, baseUrl);
+
+    _baseUrl = baseUrl;
+}
+
+QUrl TutorialWidget::getBaseUrl() const
+{
+    return _baseUrl;
 }
 
 InfoOverlayWidget& TutorialWidget::getInfoOverlayWidget()

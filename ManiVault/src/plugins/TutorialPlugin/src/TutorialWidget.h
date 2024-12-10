@@ -37,6 +37,13 @@ public:
      */
     void setHtmlText(const QString& htmlText, const QUrl& baseUrl);
 
+
+    /**
+     * Get the base URL
+     * @return Origination URL 
+     */
+    QUrl getBaseUrl() const;
+
     /**
      * Get info overlay widget
      * @return Reference to info overlay widget
@@ -48,4 +55,5 @@ private:
     QVBoxLayout                             _layout;                /** Main layout */
     QWebEngineView                          _webEngineView;         /** Web engine view in which the tutorial HTML is displayed */
     mv::gui::InfoOverlayWidget              _infoOverlayWidget;     /** Overlay widget with an info message */
+    QUrl                                    _baseUrl;               /** Origination URL */
 };

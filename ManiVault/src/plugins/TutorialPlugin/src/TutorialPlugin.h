@@ -53,7 +53,7 @@ private:
     mv::gui::HorizontalGroupAction          _horizontalGroupAction;                 /** Horizontal group action for settings */
     mv::LearningCenterTutorialsFilterModel  _learningCenterTutorialsFilterModel;    /** For filtering the learning center tutorials model */
     mv::gui::OptionAction                   _tutorialPickerAction;                  /** Action for picking the tutorial */
-    //mv::gui::PluginPickerAction         _sourcePluginPickerAction;      /** Action for picking the source plugin */
+    mv::gui::TriggerAction                  _openInBrowserAction;                   /** Action for opening the tutorial on the ManiVault Studio website */
 };
 
 class TutorialPluginFactory : public mv::plugin::ViewPluginFactory
@@ -62,7 +62,7 @@ class TutorialPluginFactory : public mv::plugin::ViewPluginFactory
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "studio.manivault.TutorialPlugin"
                       FILE  "TutorialPlugin.json")
-    
+
 public:
 
     /**

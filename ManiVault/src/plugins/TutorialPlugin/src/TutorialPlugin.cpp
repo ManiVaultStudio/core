@@ -7,6 +7,8 @@
 #include <Application.h>
 #include <CoreInterface.h>
 
+#include <QDesktopServices>
+
 Q_PLUGIN_METADATA(IID "studio.manivault.TutorialPlugin")
 
 using namespace mv;
@@ -17,7 +19,8 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _tutorialWidget(this, nullptr),
     _horizontalGroupAction(this, "Settings"),
-    _tutorialPickerAction(this, "Pick tutorial")
+    _tutorialPickerAction(this, "Pick tutorial"),
+    _openInBrowserAction(this, "Open in browser")
 {
     auto tutorialsModel = const_cast<mv::LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel());
 
@@ -26,6 +29,9 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _tutorialPickerAction.setCustomModel(&_learningCenterTutorialsFilterModel);
     _tutorialPickerAction.setPlaceHolderString("Pick a tutorial...");
 
+    _openInBrowserAction.setIconByName("globe");
+    _openInBrowserAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
     auto& tagsFilterAction = _learningCenterTutorialsFilterModel.getTagsFilterAction();
 
     tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
@@ -33,10 +39,18 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     tagsFilterAction.setPopupSizeHint(QSize(640, 0));
 
-    _horizontalGroupAction.addAction(&_tutorialPickerAction);
-    _horizontalGroupAction.addAction(&tagsFilterAction, OptionsAction::Tags | OptionsAction::Selection);
+    _horizontalGroupAction.addAction(&_tutorialPickerAction, 1);
+    _horizontalGroupAction.addAction(&tagsFilterAction);
+    _horizontalGroupAction.addAction(&_openInBrowserAction);
 
-    connect(&_tutorialPickerAction, &OptionAction::currentIndexChanged, this, [this, tutorialsModel](const int& currentIndex) -> void {
+    const auto currentTutorialChanged = [this, tutorialsModel]() -> void {
+        const auto currentIndex = _tutorialPickerAction.getCurrentIndex();
+
+        _openInBrowserAction.setEnabled(currentIndex >= 0);
+
+        if (currentIndex < 0)
+            return;
+
         const auto contentIndex         = _learningCenterTutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Content));
         const auto urlIndex             = _learningCenterTutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Url));
         const auto sourceContentIndex   = _learningCenterTutorialsFilterModel.mapToSource(contentIndex);
@@ -45,6 +59,15 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
         const auto url                  = tutorialsModel->data(sourceUrlIndex, Qt::EditRole).toString();
 
         _tutorialWidget.setHtmlText(content, url);
+        _openInBrowserAction.setToolTip(QString("Go to: %1").arg(_tutorialWidget.getBaseUrl().toString()));
+    };
+
+    currentTutorialChanged();
+
+    connect(&_tutorialPickerAction, &OptionAction::currentIndexChanged, this, currentTutorialChanged);
+
+    connect(&_openInBrowserAction, &TriggerAction::triggered, this, [this]() -> void {
+        QDesktopServices::openUrl(_tutorialWidget.getBaseUrl());
     });
 }
 
