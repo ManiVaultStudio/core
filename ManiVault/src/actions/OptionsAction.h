@@ -12,6 +12,7 @@
 #include "models/CheckableStringListModel.h"
 
 #include "widgets/FlowLayout.h"
+#include "widgets/MultiSelectComboBox.h"
 
 #include <QComboBox>
 #include <QCompleter>
@@ -122,16 +123,17 @@ public: // Widgets
          * @param target Object of which an event occurred
          * @param event The event that took place
          */
-        bool eventFilter(QObject* target, QEvent* event);
+        bool eventFilter(QObject* target, QEvent* event) override;
 
         /** Updates the line edit text to the joined selected strings */
         void updateCurrentText();
 
     protected:
-        OptionsAction*          _optionsAction;     /** Pointer to owning options action */
-        QHBoxLayout             _layout;            /** Horizontal layout */
-        QComboBox               _comboBox;          /** Combobox for selecting options */
-        QCompleter              _completer;         /** For inline searching */
+        OptionsAction*          _optionsAction;         /** Pointer to owning options action */
+        QHBoxLayout             _layout;                /** Horizontal layout */
+        MultiSelectComboBox     _comboBox;              /** Combobox for selecting options */
+        QCompleter              _completer;             /** For inline searching */
+        bool                    _preventPopupClose;     /** Prevent the popup from closing when we do not want it */
 
         friend class OptionsAction;
     };

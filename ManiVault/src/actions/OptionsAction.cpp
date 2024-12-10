@@ -278,9 +278,7 @@ QVariantMap OptionsAction::toVariantMap() const
 OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags) :
     QWidget(parent),
     _optionsAction(optionsAction),
-    _layout(),
-    _comboBox(),
-    _completer()
+    _preventPopupClose(false)
 {
     auto comboBoxCheckableTableView = new CheckableTableView(this);
 
@@ -305,6 +303,8 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
 
     _comboBox.installEventFilter(this);
     _comboBox.lineEdit()->installEventFilter(this);
+
+	_comboBox.init();
 
     _layout.setContentsMargins(0, 0, 0, 0);
 
