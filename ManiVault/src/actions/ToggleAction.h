@@ -82,8 +82,15 @@ public:
          */
         PushButtonWidget(QWidget* parent, ToggleAction* toggleAction, const std::int32_t& widgetFlags);
 
+        /**
+         * Override this event to make the push button square (in case only an icon is used)
+         * @param event Pointer to resize event
+         */
+        void resizeEvent(QResizeEvent* event) override;
+
     protected:
         ToggleAction*   _toggleAction;      /** Pointer to toggle action */
+        std::int32_t    _widgetFlags;       /** Widget flags */
 
         friend class ToggleAction;
     };
