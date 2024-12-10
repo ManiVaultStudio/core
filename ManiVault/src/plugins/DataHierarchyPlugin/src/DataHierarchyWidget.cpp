@@ -432,7 +432,12 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         if (index.column() != static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId))
             return;
 
-        QGuiApplication::clipboard()->setText(_treeModel.getItem(_filterModel.mapToSource(index))->getDataset()->getId());
+        const auto datasetId    = _treeModel.getItem(_filterModel.mapToSource(index))->getDataset()->getId();
+        const auto datasetIdLog = _treeModel.getItem(_filterModel.mapToSource(index))->getDataset()->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked());
+
+        QGuiApplication::clipboard()->setText(datasetId);
+
+        qDebug() << "Dataset identifier" << datasetIdLog << "copied to clipboard";
 	});
 }
 

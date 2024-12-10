@@ -76,12 +76,19 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
         addSeparator();
 
         const auto copySelectedDatasetIdsToClipboard = [this]() -> void {
-            QStringList datasetIds;
+            QStringList datasetIds, datasetIdsLog;
 
-            for (const auto& selectedDataset : _selectedDatasets)
-                datasetIds << selectedDataset->getId();
+            for (const auto& selectedDataset : _selectedDatasets) {
+	            datasetIds << selectedDataset->getId();
+            	datasetIdsLog << selectedDataset->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked());
+            }
 
             QGuiApplication::clipboard()->setText(datasetIds.join("\n"));
+
+            if (datasetIdsLog.count() > 1)
+				qDebug() << "Dataset identifiers" << datasetIdsLog.join(", ") << "copied to clipboard";
+            else
+                qDebug() << "Dataset identifier" << datasetIdsLog.join(", ") << "copied to clipboard";
         };
 
         auto copyAction = new QAction(QString("Copy dataset ID%1").arg(_selectedDatasets.count() > 1 ? "'s" : ""));
