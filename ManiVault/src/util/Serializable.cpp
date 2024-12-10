@@ -32,7 +32,7 @@ Serializable::Serializable(const QString& name /*= ""*/) :
 QString Serializable::getId(bool truncated /*= false*/) const
 {
     if (truncated)
-        return _id.left(8);
+        return _id.right(8);
         
     return _id;
 }

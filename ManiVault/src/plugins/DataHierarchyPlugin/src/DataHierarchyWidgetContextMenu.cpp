@@ -15,8 +15,7 @@
 #include <QDebug>
 #include <QMenu>
 #include <QAction>
-
-#include <stdexcept>
+#include <QClipboard>
 
 using namespace mv;
 using namespace mv::util;
@@ -72,13 +71,41 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
 
         addAction(removeDatasetsAction);
     }
+
+    if (!_selectedDatasets.isEmpty()) {
+        addSeparator();
+
+        const auto copySelectedDatasetIdsToClipboard = [this]() -> void {
+            QStringList datasetIds, datasetIdsLog;
+
+            for (const auto& selectedDataset : _selectedDatasets) {
+	            datasetIds << selectedDataset->getId();
+            	datasetIdsLog << selectedDataset->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked());
+            }
+
+            QGuiApplication::clipboard()->setText(datasetIds.join("\n"));
+
+            if (datasetIdsLog.count() > 1)
+				qDebug() << "Dataset identifiers" << datasetIdsLog.join(", ") << "copied to clipboard";
+            else
+                qDebug() << "Dataset identifier" << datasetIdsLog.join(", ") << "copied to clipboard";
+        };
+
+        auto copyAction = new QAction(QString("Copy dataset ID%1").arg(_selectedDatasets.count() > 1 ? "'s" : ""));
+
+        copyAction->setIcon(Application::getIconFont("FontAwesome").getIcon("barcode"));
+
+        connect(copyAction, &QAction::triggered, copyAction, copySelectedDatasetIdsToClipboard);
+
+        addAction(copyAction);
+    }
 }
 
 void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginType)
 {
     QMap<QString, QMenu*> menus;
 
-    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _selectedDatasets)) {
+    for (const auto& pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _selectedDatasets)) {
         const auto titleSegments = pluginTriggerAction->getMenuLocation().split("/");
 
         QString menuPath, previousMenuPath = titleSegments.first();
@@ -311,3 +338,4 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
 
     return unhideMenu;
 }
+

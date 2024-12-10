@@ -16,6 +16,7 @@
 #include <QVBoxLayout>
 #include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
+#include <QClipboard>
 
 #include <stdexcept>
 
@@ -70,7 +71,7 @@ public:
 private:
 
     /** Updates the editor widget visibility based on the dataset task status */
-    void updateEditorWidgetVisibility() {
+    void updateEditorWidgetVisibility() const {
         const auto datasetTaskStatus = _progressItem->getDatasetTask().getStatus();
 
         if (datasetTaskStatus == Task::Status::Running || datasetTaskStatus == Task::Status::RunningIndeterminate || datasetTaskStatus == Task::Status::Finished)
@@ -80,7 +81,7 @@ private:
     }
 
     /** Updates the editor widget read-only state based on the dataset task status */
-    void updateEditorWidgetReadOnly() {
+    void updateEditorWidgetReadOnly() const {
         _progressEditorWidget->setEnabled(!_progressItem->getDataset()->isLocked());
     }
 
@@ -102,7 +103,7 @@ public:
 
     /**
      * Construct with owning parent \p dataHierarchyWidget
-     * @param parent Pointer to owning parent data hierarchy widget
+     * @param dataHierarchyWidget Pointer to owning parent data hierarchy widget
      */
     explicit ItemDelegate(DataHierarchyWidget* dataHierarchyWidget) :
         QStyledItemDelegate(dataHierarchyWidget),
@@ -121,12 +122,12 @@ public:
      * @param index Model index to create the editor for
      * @return Pointer to widget if progress column, nullptr otherwise
      */
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
         if (static_cast<AbstractDataHierarchyModel::Column>(index.column()) != AbstractDataHierarchyModel::Column::Progress)
             return QStyledItemDelegate::createEditor(parent, option, index);
 
         const auto sourceModelIndex = _dataHierarchyWidget->getFilterModel().mapToSource(index);
-        const auto progressItem     = static_cast<AbstractDataHierarchyModel::ProgressItem*>(_dataHierarchyWidget->getTreeModel().itemFromIndex(sourceModelIndex));
+        const auto progressItem     = dynamic_cast<AbstractDataHierarchyModel::ProgressItem*>(_dataHierarchyWidget->getTreeModel().itemFromIndex(sourceModelIndex));
         
         return new ProgressItemDelegateEditorWidget(progressItem, parent);
     }
@@ -136,7 +137,7 @@ public:
      * @param option Style option
      * @param index Model index of the cell for which the geometry changed
      */
-    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
         Q_UNUSED(index)
 
         if (editor == nullptr)
@@ -156,7 +157,7 @@ protected:
     {
         QStyledItemDelegate::initStyleOption(option, index);
 
-        auto item = static_cast<AbstractDataHierarchyModel::Item*>(_dataHierarchyWidget->getTreeModel().itemFromIndex(_dataHierarchyWidget->getFilterModel().mapToSource(index)));
+        auto item = dynamic_cast<AbstractDataHierarchyModel::Item*>(_dataHierarchyWidget->getTreeModel().itemFromIndex(_dataHierarchyWidget->getFilterModel().mapToSource(index)));
 
         if (item->getDataset()->isLocked())// || index.column() >= static_cast<int>(AbstractDataHierarchyModel::Column::IsGroup))
             option->state &= ~QStyle::State_Enabled;
@@ -230,7 +231,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     connect(expandAllAction, &TriggerAction::triggered, this, [this]() -> void {
         _hierarchyWidget.getExpandAllAction().trigger();
-        });
+	});
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -427,6 +428,17 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         });
     }
 
+    connect(&_hierarchyWidget.getTreeView(), &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
+        if (index.column() != static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId))
+            return;
+
+        const auto datasetId    = _treeModel.getItem(_filterModel.mapToSource(index))->getDataset()->getId();
+        const auto datasetIdLog = _treeModel.getItem(_filterModel.mapToSource(index))->getDataset()->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked());
+
+        QGuiApplication::clipboard()->setText(datasetId);
+
+        qDebug() << "Dataset identifier" << datasetIdLog << "copied to clipboard";
+	});
 }
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset) const
@@ -434,7 +446,7 @@ QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImp
     const auto modelIndices = _treeModel.match(_treeModel.index(0, static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId), QModelIndex()), Qt::EditRole, dataset->getId(), 1, Qt::MatchFlag::MatchRecursive);
 
     if (modelIndices.isEmpty())
-        throw new std::runtime_error(QString("'%1' not found in the data hierarchy model").arg(dataset->text()).toLatin1());
+        throw std::runtime_error(QString("'%1' not found in the data hierarchy model").arg(dataset->text()).toLatin1());
 
     return modelIndices.first();
 }
