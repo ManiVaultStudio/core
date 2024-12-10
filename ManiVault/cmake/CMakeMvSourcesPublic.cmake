@@ -425,6 +425,7 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/ViewPluginShortcutsDialog.h
 	src/widgets/ViewPluginLearningCenterOverlayWidget.h
 	src/widgets/IconLabel.h
+	src/widgets/MultiSelectComboBox.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
@@ -444,6 +445,7 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/ViewPluginShortcutsDialog.cpp
 	src/widgets/ViewPluginLearningCenterOverlayWidget.cpp
 	src/widgets/IconLabel.cpp
+	src/widgets/MultiSelectComboBox.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES
