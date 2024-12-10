@@ -13,7 +13,6 @@ MultiSelectComboBox::MultiSelectComboBox(QWidget* parent) :
 	QComboBox(parent),
     _preventHidePopup(true)
 {
-    setEditable(true);
 }
 
 void MultiSelectComboBox::init()
