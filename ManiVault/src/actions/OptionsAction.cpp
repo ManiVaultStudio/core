@@ -339,7 +339,7 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     setLayout(&_layout);
 }
 
-void OptionsAction::ComboBoxWidget::updateCurrentText()
+void OptionsAction::ComboBoxWidget::updateCurrentText() const
 {
     const auto selectedOptions = _optionsAction->getSelectedOptions();
 

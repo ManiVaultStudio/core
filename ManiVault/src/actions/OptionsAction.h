@@ -126,7 +126,7 @@ public: // Widgets
         bool eventFilter(QObject* target, QEvent* event) override;
 
         /** Updates the line edit text to the joined selected strings */
-        void updateCurrentText();
+        void updateCurrentText() const;
 
     protected:
         OptionsAction*          _optionsAction;         /** Pointer to owning options action */

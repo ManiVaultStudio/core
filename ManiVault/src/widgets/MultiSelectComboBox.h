@@ -6,34 +6,58 @@
 
 #include "ManiVaultGlobals.h"
 
-class QWidget;
+#include <QComboBox>
 
 namespace mv::gui {
 
+/**
+ * Multi-select combobox widget class
+ *
+ * Allows to select multiple items during a single popup sessions.
+ *
+ * @author Thomas Kroes
+ */
 class CORE_EXPORT MultiSelectComboBox : public QComboBox {
 
 	Q_OBJECT
 
 public:
+
+    
+	/**
+     * Construct with pointer to \p parent widget
+     * @param parent Pointer to parent widget
+     */
     explicit MultiSelectComboBox(QWidget* parent = nullptr);
 
+    /** Call this post QComboBox::setView() to setup connections */
     void init();
 
 protected:
-    void showPopup() override;
 
+    /** Override to customize popup hide behaviour */
     void hidePopup() override;
 
+    
+	/**
+     * Called when \p event happens for \p watched object
+     * @param watched Pointer to watched object
+     * @param event Pointer to event that occurred
+     * @return Whether the event was handled or not
+     */
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
+
+    
+	/**
+     * Toggle the check state of \p index
+     * @param index Index of which to toggle the check state
+     */
     void toggleItemCheckState(const QModelIndex& index) const;
 
-    void updateDisplayText();
-
 private:
-    bool _popupOpen = false;
-    bool _preventHidePopup = false;
+    bool _preventHidePopup = false; /** Whether to prevent the popup from closing or not */
 };
 
 }
