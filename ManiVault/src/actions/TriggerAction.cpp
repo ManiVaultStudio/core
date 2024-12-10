@@ -32,11 +32,12 @@ void TriggerAction::selfTriggered()
 
 TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags) :
     QPushButton(parent),
-    _triggerAction(triggerAction)
+    _triggerAction(triggerAction),
+    _widgetFlags(widgetFlags)
 {
     connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();
-    });
+	});
 
     const auto update = [this, triggerAction, widgetFlags]() -> void {
         QSignalBlocker blocker(this);
@@ -46,23 +47,26 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
         if (widgetFlags & WidgetFlag::Text)
             setText(triggerAction->text());
 
-        if (widgetFlags & WidgetFlag::Icon) {
+        if (widgetFlags & WidgetFlag::Icon)
             setIcon(triggerAction->icon());
-
-            if ((widgetFlags & WidgetFlag::Text) == 0) {
-                setProperty("class", "square-button");
-            }
-        }
 
         setToolTip(triggerAction->toolTip());
         setVisible(triggerAction->isVisible());
-    };
+	};
 
     connect(triggerAction, &QAction::changed, this, [this, update]() {
         update();
-    });
+	});
 
     update();
+}
+
+void TriggerAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
+{
+    if (_widgetFlags & WidgetFlag::Icon && (_widgetFlags & WidgetFlag::Text) == 0)
+        setFixedSize(event->size().height(), event->size().height());
+    else
+        QPushButton::resizeEvent(event);
 }
 
 QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -72,6 +76,8 @@ QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
+
+    widget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
     layout->setContentsMargins(0, 0, 0, 0);
 

@@ -27,8 +27,8 @@ public:
     enum WidgetFlag {
 
         /** Push button options */
-        Icon            = 0x00001,          /** Enable push button icon */
-        Text            = 0x00002,          /** Enable push button text */
+        Icon = 0x00001,          /** Enable push button icon */
+        Text = 0x00002,          /** Enable push button text */
 
         /** Push button configurations */
         IconText = Icon | Text              /** Push button with icon and text */
@@ -48,8 +48,15 @@ public:
          */
         PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags);
 
+        /**
+         * Override this event to make the push button square (in case only an icon is used)
+         * @param event Pointer to resize event
+         */
+        void resizeEvent(QResizeEvent* event) override;
+
     protected:
-        TriggerAction*   _triggerAction;      /** Pointer to trigger action */
+        TriggerAction* _triggerAction;     /** Pointer to trigger action */
+        std::int32_t    _widgetFlags;       /** Widget flags */
 
         friend class TriggerAction;
     };
