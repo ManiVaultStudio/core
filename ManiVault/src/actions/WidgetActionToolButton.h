@@ -55,7 +55,7 @@ public:
      * Get action
      * @return Pointer to action (maybe nullptr)
      */
-    WidgetAction* getAction();
+    WidgetAction* getAction() const;
 
     /**
      * Set the action to \p action (ownership is not transferred)

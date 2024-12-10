@@ -22,20 +22,20 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _tutorialPickerAction(this, "Pick tutorial"),
     _openInBrowserAction(this, "Open in browser")
 {
+    _horizontalGroupAction.setShowLabels(false);
+
     auto tutorialsModel = const_cast<mv::LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel());
 
-    _learningCenterTutorialsFilterModel.setSourceModel(tutorialsModel);
+    _tutorialsFilterModel.setSourceModel(tutorialsModel);
 
-    _tutorialPickerAction.setCustomModel(&_learningCenterTutorialsFilterModel);
+    _tutorialPickerAction.setCustomModel(&_tutorialsFilterModel);
     _tutorialPickerAction.setPlaceHolderString("Pick a tutorial...");
 
     _openInBrowserAction.setIconByName("globe");
     _openInBrowserAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
-    auto& tagsFilterAction = _learningCenterTutorialsFilterModel.getTagsFilterAction();
+    auto& tagsFilterAction = _tutorialsFilterModel.getTagsFilterAction();
 
-    tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    //tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup, true);
     tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     tagsFilterAction.setPopupSizeHint(QSize(640, 0));
 
@@ -51,10 +51,10 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
         if (currentIndex < 0)
             return;
 
-        const auto contentIndex         = _learningCenterTutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Content));
-        const auto urlIndex             = _learningCenterTutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Url));
-        const auto sourceContentIndex   = _learningCenterTutorialsFilterModel.mapToSource(contentIndex);
-        const auto sourceUrlIndex       = _learningCenterTutorialsFilterModel.mapToSource(urlIndex);
+        const auto contentIndex         = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Content));
+        const auto urlIndex             = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Url));
+        const auto sourceContentIndex   = _tutorialsFilterModel.mapToSource(contentIndex);
+        const auto sourceUrlIndex       = _tutorialsFilterModel.mapToSource(urlIndex);
         const auto content              = tutorialsModel->data(sourceContentIndex, Qt::EditRole).toString();
         const auto url                  = tutorialsModel->data(sourceUrlIndex, Qt::EditRole).toString();
 

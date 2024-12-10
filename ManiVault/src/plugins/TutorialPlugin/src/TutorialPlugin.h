@@ -49,11 +49,11 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    TutorialWidget                          _tutorialWidget;                        /** Tutorial widget */
-    mv::gui::HorizontalGroupAction          _horizontalGroupAction;                 /** Horizontal group action for settings */
-    mv::LearningCenterTutorialsFilterModel  _learningCenterTutorialsFilterModel;    /** For filtering the learning center tutorials model */
-    mv::gui::OptionAction                   _tutorialPickerAction;                  /** Action for picking the tutorial */
-    mv::gui::TriggerAction                  _openInBrowserAction;                   /** Action for opening the tutorial on the ManiVault Studio website */
+    TutorialWidget                          _tutorialWidget;            /** Tutorial widget */
+    mv::gui::HorizontalGroupAction          _horizontalGroupAction;     /** Horizontal group action for settings */
+    mv::LearningCenterTutorialsFilterModel  _tutorialsFilterModel;      /** For filtering the learning center tutorials model */
+    mv::gui::OptionAction                   _tutorialPickerAction;      /** Action for picking the tutorial */
+    mv::gui::TriggerAction                  _openInBrowserAction;       /** Action for opening the tutorial on the ManiVault Studio website */
 };
 
 class TutorialPluginFactory : public mv::plugin::ViewPluginFactory

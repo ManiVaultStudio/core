@@ -23,7 +23,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
 {
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
-    setRowTypeName("Video");
+    setRowTypeName("Tutorial");
 
     _tagsFilterAction.setIconByName("tag");
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);

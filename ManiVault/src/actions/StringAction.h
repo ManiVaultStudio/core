@@ -136,7 +136,7 @@ public:
 
     /**
      * Set placeholder text
-     * @param placeholderText Placeholder text
+     * @param placeholderString Placeholder text
      */
     void setPlaceHolderString(const QString& placeholderString);
 
