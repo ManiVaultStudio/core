@@ -29,7 +29,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
 
-    connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, [this]() -> void {
+    connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, [this](const QStringList& tags) -> void {
         invalidate();
     });
 

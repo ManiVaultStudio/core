@@ -117,7 +117,7 @@ bool OptionsAction::hasSelectedOptions() const
 
 void OptionsAction::selectOption(const QString& option, bool unselect /*= false*/)
 {
-    const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option);
+    const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option, 1, Qt::MatchExactly);
 
     if (!matches.isEmpty())
         _optionsModel.setData(matches.first(), unselect ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);

@@ -23,7 +23,7 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
 
     _learningCenterTutorialsFilterModel.setSourceModel(tutorialsModel);
 
-    _tutorialPickerAction.setCustomModel(tutorialsModel);
+    _tutorialPickerAction.setCustomModel(&_learningCenterTutorialsFilterModel);
     _tutorialPickerAction.setPlaceHolderString("Pick a tutorial...");
 
     auto& tagsFilterAction = _learningCenterTutorialsFilterModel.getTagsFilterAction();
@@ -35,10 +35,12 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _horizontalGroupAction.addAction(&tagsFilterAction, OptionsAction::Tags | OptionsAction::Selection);
 
     connect(&_tutorialPickerAction, &OptionAction::currentIndexChanged, this, [this, tutorialsModel](const int& currentIndex) -> void {
-        const auto contentIndex = tutorialsModel->index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Content));
-        const auto urlIndex     = tutorialsModel->index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Url));
-        const auto content      = tutorialsModel->data(contentIndex, Qt::EditRole).toString();
-        const auto url          = tutorialsModel->data(urlIndex, Qt::EditRole).toString();
+        const auto contentIndex         = _learningCenterTutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Content));
+        const auto urlIndex             = _learningCenterTutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Url));
+        const auto sourceContentIndex   = _learningCenterTutorialsFilterModel.mapToSource(contentIndex);
+        const auto sourceUrlIndex       = _learningCenterTutorialsFilterModel.mapToSource(urlIndex);
+        const auto content              = tutorialsModel->data(sourceContentIndex, Qt::EditRole).toString();
+        const auto url                  = tutorialsModel->data(sourceUrlIndex, Qt::EditRole).toString();
 
         _tutorialWidget.setHtmlText(content, url);
     });

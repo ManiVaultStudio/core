@@ -49,6 +49,9 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Item");
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getTreeView().verticalScrollBar()->setDisabled(true);
 
+    _learningCenterTutorialsFilterModel.setSourceModel(const_cast<LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel()));
+    _learningCenterTutorialsFilterModel.getTagsFilterAction().setSelectedOptions({ "GettingStarted" });
+
     _tutorialsWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _tutorialsWidget.getHierarchyWidget().setItemTypeName("Tutorial");
 
@@ -77,6 +80,10 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
+
+    connect(&_learningCenterTutorialsFilterModel, &LearningCenterTutorialsFilterModel::layoutChanged, this, &StartPageGetStartedWidget::updateTutorialActions);
+    connect(&_learningCenterTutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsInserted, this, &StartPageGetStartedWidget::updateTutorialActions);
+    connect(&_learningCenterTutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsRemoved, this, &StartPageGetStartedWidget::updateTutorialActions);
 
     updateTutorialActions();
 }
@@ -194,7 +201,15 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
 
 void StartPageGetStartedWidget::updateTutorialActions()
 {
-    for (auto tutorial : help().getTutorials({ "GettingStarted" })) {
+    _tutorialsWidget.getModel().reset();
+
+    qDebug() << _learningCenterTutorialsFilterModel.rowCount();
+
+    for (int rowIndex = 0; rowIndex < _learningCenterTutorialsFilterModel.rowCount(); ++rowIndex) {
+        const auto sourceRowIndex = _learningCenterTutorialsFilterModel.mapToSource(_learningCenterTutorialsFilterModel.index(rowIndex, 0));
+
+        auto tutorial = dynamic_cast<LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceRowIndex))->getTutorial();
+
         StartPageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [tutorial]() -> void {
             QDesktopServices::openUrl(tutorial->getUrl());
 		});
