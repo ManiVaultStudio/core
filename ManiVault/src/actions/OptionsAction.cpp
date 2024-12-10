@@ -277,10 +277,7 @@ QVariantMap OptionsAction::toVariantMap() const
 
 OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction, const std::int32_t& widgetFlags) :
     QWidget(parent),
-    _optionsAction(optionsAction),
-    _layout(),
-    _comboBox(),
-    _completer()
+    _optionsAction(optionsAction)
 {
     auto comboBoxCheckableTableView = new CheckableTableView(this);
 
@@ -339,7 +336,7 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     setLayout(&_layout);
 }
 
-void OptionsAction::ComboBoxWidget::updateCurrentText()
+void OptionsAction::ComboBoxWidget::updateCurrentText() const
 {
     const auto selectedOptions = _optionsAction->getSelectedOptions();
 
@@ -544,9 +541,6 @@ void OptionsAction::TagsViewWidget::TagLabel::mousePressEvent(QMouseEvent* event
         case Type::SelectInvert:
             _optionsAction->selectInvert();
             break;
-
-        default:
-            break;
     }
 }
 
@@ -588,9 +582,6 @@ void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
 
         case Type::SelectInvert:
             setToolTip("Click to invert the options selection");
-            break;
-
-        default:
             break;
     }
 

@@ -28,8 +28,10 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
 
     auto& tagsFilterAction = _learningCenterTutorialsFilterModel.getTagsFilterAction();
 
-    tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup, true);
-    tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup, true);
+    tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
+    //tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup, true);
+    tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
+    tagsFilterAction.setPopupSizeHint(QSize(640, 180));
 
     _horizontalGroupAction.addAction(&_tutorialPickerAction);
     _horizontalGroupAction.addAction(&tagsFilterAction, OptionsAction::Tags | OptionsAction::Selection);
