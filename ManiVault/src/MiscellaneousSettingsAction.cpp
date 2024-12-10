@@ -37,6 +37,7 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     addAction(&_keepDescendantsAfterRemovalAction);
     addAction(&_statusBarVisibleAction);
     addAction(&_statusBarOptionsAction);
+    addAction(&_showSimplifiedGuidsAction);
 }
 
 void MiscellaneousSettingsAction::updateStatusBarOptionsAction()
