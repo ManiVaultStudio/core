@@ -30,8 +30,8 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
 
     tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
     //tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup, true);
-    tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
-    tagsFilterAction.setPopupSizeHint(QSize(640, 180));
+    tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    tagsFilterAction.setPopupSizeHint(QSize(640, 0));
 
     _horizontalGroupAction.addAction(&_tutorialPickerAction);
     _horizontalGroupAction.addAction(&tagsFilterAction, OptionsAction::Tags | OptionsAction::Selection);
