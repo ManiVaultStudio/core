@@ -27,8 +27,8 @@ public:
     enum WidgetFlag {
 
         /** Push button options */
-        Icon            = 0x00001,          /** Enable push button icon */
-        Text            = 0x00002,          /** Enable push button text */
+        Icon = 0x00001,          /** Enable push button icon */
+        Text = 0x00002,          /** Enable push button text */
 
         /** Push button configurations */
         IconText = Icon | Text              /** Push button with icon and text */

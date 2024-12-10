@@ -190,7 +190,8 @@ bool ToggleAction::CheckBoxWidget::eventFilter(QObject* target, QEvent* event)
 
 ToggleAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ToggleAction* toggleAction, const std::int32_t& widgetFlags) :
     QPushButton(parent),
-    _toggleAction(toggleAction)
+    _toggleAction(toggleAction),
+    _widgetFlags(widgetFlags)
 {
     setCheckable(true);
 
@@ -216,15 +217,21 @@ ToggleAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ToggleAction* 
         if (widgetFlags & WidgetFlag::Text && text() != _toggleAction->text())
             setText(_toggleAction->text());
 
-        if (widgetFlags & WidgetFlag::Icon) {
+        if (widgetFlags & WidgetFlag::Icon)
             setIcon(_toggleAction->icon());
-            setProperty("class", "square-button");
-        }
     };
 
     connect(_toggleAction, &QAction::changed, this, update);
 
     update();
+}
+
+void ToggleAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
+{
+    if (_widgetFlags & WidgetFlag::Icon && (_widgetFlags & WidgetFlag::Text) == 0)
+        setFixedSize(event->size().height(), event->size().height());
+    else
+        QPushButton::resizeEvent(event);
 }
 
 QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -234,6 +241,8 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
 
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
+
+    widget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
     layout->setContentsMargins(0, 0, 0, 0);
 

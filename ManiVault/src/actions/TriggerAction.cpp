@@ -37,7 +37,7 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 {
     connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();
-    });
+	});
 
     const auto update = [this, triggerAction, widgetFlags]() -> void {
         QSignalBlocker blocker(this);
@@ -52,11 +52,11 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
         setToolTip(triggerAction->toolTip());
         setVisible(triggerAction->isVisible());
-    };
+	};
 
     connect(triggerAction, &QAction::changed, this, [this, update]() {
         update();
-    });
+	});
 
     update();
 }
