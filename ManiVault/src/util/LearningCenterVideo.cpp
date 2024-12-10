@@ -6,8 +6,6 @@
 
 #include <QMovie>
 
-using namespace mv::gui;
-
 namespace mv::util {
 
 LearningCenterVideo::LearningCenterVideo(const Type& type, const QString& title, const QStringList& tags, const QString& date, const QString& summary, const QString& resource) :

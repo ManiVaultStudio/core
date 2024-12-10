@@ -7,6 +7,8 @@
 #include "Application.h"
 #include "ViewPlugin.h"
 
+#include "util/Miscellaneous.h"
+
 #include <QDebug>
 #include <QScrollBar>
 

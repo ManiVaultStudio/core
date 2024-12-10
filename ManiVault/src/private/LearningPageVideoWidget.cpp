@@ -5,12 +5,11 @@
 #include "LearningPageVideoWidget.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <util/Miscellaneous.h>
 
 #include <models/LearningCenterVideosModel.h>
-
-#include <widgets/YouTubeVideoDialog.h>
 
 #include <QAbstractTextDocumentLayout>
 #include <QDateTime>

@@ -4,6 +4,8 @@
 
 #include "LearningCenterTutorialsModel.h"
 
+#include "Application.h"
+
 #ifdef _DEBUG
     //#define LEARNING_CENTER_TUTORIALS_MODEL_VERBOSE
 #endif

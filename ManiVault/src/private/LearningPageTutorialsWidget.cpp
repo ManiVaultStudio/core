@@ -7,6 +7,8 @@
 #include "LearningPageContentWidget.h"
 #include "PageContentWidget.h"
 
+#include <QEvent>
+
 using namespace mv::gui;
 
 LearningPageTutorialsWidget::LearningPageTutorialsWidget(LearningPageContentWidget* learningPageContentWidget) :

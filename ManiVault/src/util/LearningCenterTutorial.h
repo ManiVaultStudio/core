@@ -9,6 +9,8 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QUrl>
+#include <QVariantMap>
 
 #include <vector>
 

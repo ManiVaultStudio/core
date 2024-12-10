@@ -7,10 +7,11 @@
 #include "models/LearningCenterVideosFilterModel.h"
 #include "models/LearningCenterTutorialsFilterModel.h"
 
+#include "util/Exception.h"
+
 #include <Application.h>
 
 #include <QDesktopServices>
-#include <QMainWindow>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>

@@ -9,6 +9,8 @@
 
 #include <Application.h>
 
+#include <CoreInterface.h>
+
 #ifdef _DEBUG
     #define LEARNING_PAGE_VIDEOS_WIDGET_VERBOSE
 #endif
