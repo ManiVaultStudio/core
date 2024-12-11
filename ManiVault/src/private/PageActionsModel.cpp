@@ -2,18 +2,18 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "StartPageActionsModel.h"
+#include "PageActionsModel.h"
 
-#include "StartPageAction.h"
+#include "PageAction.h"
 
 #include <QList>
 #include <QStandardItem>
 
 #ifdef _DEBUG
-    //#define START_PAGE_ACTIONS_MODEL_VERBOSE
+    //#define PAGE_ACTIONS_MODEL_VERBOSE
 #endif
 
-QMap<StartPageActionsModel::Column, QPair<QString, QString>> StartPageActionsModel::columns = QMap<Column, QPair<QString, QString>>({
+QMap<PageActionsModel::Column, QPair<QString, QString>> PageActionsModel::columns = QMap<Column, QPair<QString, QString>>({
     { Column::Icon, { "Icon", "Icon" }},
     { Column::Title, { "Title", "Title" }},
     { Column::Description, { "Description", "Description" }},
@@ -27,7 +27,7 @@ QMap<StartPageActionsModel::Column, QPair<QString, QString>> StartPageActionsMod
     { Column::SummaryDelegate, { "Summary", "Delegate item with title and subtitle" }}
 });
 
-StartPageActionsModel::StartPageActionsModel(QObject* parent /*= nullptr*/) :
+PageActionsModel::PageActionsModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent)
 {
     for (const auto& column : columns.keys()) {
@@ -39,40 +39,40 @@ StartPageActionsModel::StartPageActionsModel(QObject* parent /*= nullptr*/) :
     }
 }
 
-void StartPageActionsModel::add(const StartPageAction& startPageAction)
+void PageActionsModel::add(const PageAction& pageAction)
 {
-#ifdef START_PAGE_ACTIONS_MODEL_VERBOSE
+#ifdef PAGE_ACTIONS_MODEL_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    QList<QStandardItem*> startPageActionRow = {
+    QList<QStandardItem*> pageActionRow = {
         new QStandardItem(),
-        new QStandardItem(startPageAction.getTitle()),
-        new QStandardItem(startPageAction.getDescription()),
-        new QStandardItem(startPageAction.getComments()),
+        new QStandardItem(pageAction.getTitle()),
+        new QStandardItem(pageAction.getDescription()),
+        new QStandardItem(pageAction.getComments()),
         new QStandardItem(),
-        new QStandardItem(startPageAction.getSubtitle()),
-        new QStandardItem(startPageAction.getMetaData()),
+        new QStandardItem(pageAction.getSubtitle()),
+        new QStandardItem(pageAction.getMetaData()),
         new QStandardItem(),
-        new QStandardItem(startPageAction.getTooltip()),
+        new QStandardItem(pageAction.getTooltip()),
         new QStandardItem(),
         new QStandardItem(),
         new QStandardItem()
     };
 
-    startPageActionRow[static_cast<int>(Column::Icon)]->setData(QVariant::fromValue(startPageAction.getIcon()));
-    startPageActionRow[static_cast<int>(Column::Tags)]->setData(QVariant::fromValue(startPageAction.getTags()), Qt::EditRole);
-    startPageActionRow[static_cast<int>(Column::PreviewImage)]->setData(QVariant::fromValue(startPageAction.getPreviewImage()));
-    startPageActionRow[static_cast<int>(Column::Contributors)]->setData(QVariant::fromValue(startPageAction.getContributors()));
-    startPageActionRow[static_cast<int>(Column::ClickedCallback)]->setData(QVariant::fromValue(startPageAction.getClickedCallback()));
+    pageActionRow[static_cast<int>(Column::Icon)]->setData(QVariant::fromValue(pageAction.getIcon()));
+    pageActionRow[static_cast<int>(Column::Tags)]->setData(QVariant::fromValue(pageAction.getTags()), Qt::EditRole);
+    pageActionRow[static_cast<int>(Column::PreviewImage)]->setData(QVariant::fromValue(pageAction.getPreviewImage()));
+    pageActionRow[static_cast<int>(Column::Contributors)]->setData(QVariant::fromValue(pageAction.getContributors()));
+    pageActionRow[static_cast<int>(Column::ClickedCallback)]->setData(QVariant::fromValue(pageAction.getClickedCallback()));
 
-    for (auto item : startPageActionRow)
+    for (auto item : pageActionRow)
         item->setEditable(false);
 
-    appendRow(startPageActionRow);
+    appendRow(pageActionRow);
 }
 
-void StartPageActionsModel::reset()
+void PageActionsModel::reset()
 {
     removeRows(0, rowCount());
 

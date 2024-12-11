@@ -5,7 +5,6 @@
 #include "PageHeaderWidget.h"
 #include "PageWidget.h"
 
-#include <QApplication>
 #include <QDebug>
 #include <QResizeEvent>
 
@@ -13,12 +12,10 @@
 
 PageHeaderWidget::PageHeaderWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _layout(),
-    _iconLabel(),
     _iconName(":/Images/AppBackground256"),
     _previousHeight(-1)
 {
-    setObjectName("StartPageHeaderWidget");
+    setObjectName("PageHeaderWidget");
     setLayout(&_layout);
     setAutoFillBackground(true);
     setMinimumHeight(150);

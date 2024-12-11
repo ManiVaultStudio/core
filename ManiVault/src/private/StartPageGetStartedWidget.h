@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "StartPageActionsWidget.h"
+#include "PageActionsWidget.h"
 
 #include <actions/OptionAction.h>
 #include <actions/RecentFilesAction.h>
@@ -58,10 +58,10 @@ private:
 
 private:
     StartPageContentWidget*                     _startPageContentWidget;                /** Non-owning pointer to start page content widget */
-    StartPageActionsWidget                      _createProjectFromWorkspaceWidget;      /** Actions widget for creating a project from workspace */
-    StartPageActionsWidget                      _createProjectFromDatasetWidget;        /** Actions widget for creating a project from a dataset */
+    PageActionsWidget                           _createProjectFromWorkspaceWidget;      /** Actions widget for creating a project from workspace */
+    PageActionsWidget                           _createProjectFromDatasetWidget;        /** Actions widget for creating a project from a dataset */
     mv::LearningCenterTutorialsFilterModel      _learningCenterTutorialsFilterModel;    /** For filtering learning center tutorials */
-    StartPageActionsWidget                      _tutorialsWidget;                       /** Actions widget for launching tutorials */
+    PageActionsWidget                           _tutorialsWidget;                       /** Actions widget for launching tutorials */
     mv::gui::OptionAction                       _workspaceLocationTypeAction;           /** Action for filtering workspace location types (create project from built-in workspace or import from project) */
     QStandardItemModel                          _workspaceLocationTypesModel;           /** Input model for the above workspace location type action */
     mv::gui::RecentFilesAction                  _recentWorkspacesAction;                /** Action for recent workspaces (create project from recent workspace) */

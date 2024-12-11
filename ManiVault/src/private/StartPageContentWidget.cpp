@@ -3,9 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StartPageContentWidget.h"
-
-#include "StartPageAction.h"
 #include "StartPageWidget.h"
+
+#include "PageAction.h"
 
 #include <CoreInterface.h>
 
@@ -74,7 +74,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
 void StartPageContentWidget::updateActions()
 {
-    StartPageAction::setCompactView(_compactViewAction.isChecked());
+    PageAction::setCompactView(_compactViewAction.isChecked());
 
     _openProjectWidget.updateActions();
     _getStartedWidget.updateActions();

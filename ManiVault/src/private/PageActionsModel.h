@@ -5,20 +5,19 @@
 #pragma once
 
 #include <QMap>
-#include <QPair>
 #include <QStandardItemModel>
 #include <QString>
 
-class StartPageAction;
+class PageAction;
 
 /**
- * Start page actions model class
+ * Page actions model class
  *
- * Model class which contains actions for the start page.
+ * Contains actions for a page.
  *
  * @author Thomas Kroes
  */
-class StartPageActionsModel final : public QStandardItemModel
+class PageActionsModel final : public QStandardItemModel
 {
 public:
 
@@ -44,16 +43,16 @@ public:
 public:
 
     /**
-     * Construct start page actions model with \p parent object
+     * Construct page actions model with \p parent object
      * @param parent Pointer to parent object
      */
-    StartPageActionsModel(QObject* parent = nullptr);
+    PageActionsModel(QObject* parent = nullptr);
 
     /**
      * Add start page action
-     * @param startPageAction Start page action
+     * @param pageAction Page action
      */
-    void add(const StartPageAction& startPageAction);
+    void add(const PageAction& pageAction);
 
     /** Resets the rows and notifies others */
     void reset();

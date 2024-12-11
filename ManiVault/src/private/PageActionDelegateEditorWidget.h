@@ -13,23 +13,23 @@
 #include <QWidget>
 
 /**
- * Start page action delegate editor widget class
+ * Page action delegate editor widget class
  *
- * Delegate editor widget class for custom start page action display in a view.
+ * For custom page action display in a view.
  *
  * @author Thomas Kroes
  */
-class StartPageActionDelegateEditorWidget : public QWidget
+class PageActionDelegateEditorWidget : public QWidget
 {
     Q_OBJECT
 
 public:
     
     /**
-     * Construct delegate editor widget with \p parent widget
+     * Construct delegate editor widget with pointer to \p parent widget
      * @param parent Pointer to parent widget
      */
-    StartPageActionDelegateEditorWidget(QWidget* parent = nullptr);
+    PageActionDelegateEditorWidget(QWidget* parent = nullptr);
 
     /**
      * Set editor data from model \p index

@@ -4,21 +4,21 @@
 
 #pragma once
 
-#include "StartPageActionsModel.h"
-#include "StartPageActionsFilterModel.h"
+#include "PageActionsModel.h"
+#include "PageActionsFilterModel.h"
 
 #include <widgets/HierarchyWidget.h>
 
 #include <QWidget>
 
 /**
- * Start page actions widget class
+ * Page actions widget class
  *
- * Widget class for listing start page actions.
+ * Widget class for listing page actions.
  *
  * @author Thomas Kroes
  */
-class StartPageActionsWidget : public QWidget
+class PageActionsWidget : public QWidget
 {
 public:
 
@@ -26,9 +26,9 @@ public:
      * Construct with \p parent widget
      * @param parent Pointer to parent widget
      * @param title Title shown in the header
-     * @param restyle Whether to change the style to seamlessly integrate with the start page (false for use outside of startpage widget)
+     * @param restyle Whether to change the style to seamlessly integrate with the page (false for use outside of page widget)
      */
-    StartPageActionsWidget(QWidget* parent, const QString& title, bool restyle = true);
+    PageActionsWidget(QWidget* parent, const QString& title, bool restyle = true);
 
     /**
      * Get layout
@@ -40,13 +40,13 @@ public:
      * Get model
      * @return Reference to model
      */
-    StartPageActionsModel& getModel();
+    PageActionsModel& getModel();
 
     /**
      * Get filter model
      * @return Reference to filter model
      */
-    StartPageActionsFilterModel& getFilterModel();
+    PageActionsFilterModel& getFilterModel();
 
     /**
      * Get hierarchy widget
@@ -79,9 +79,9 @@ private:
     void updateCustomStyle();
 
 private:
-    QVBoxLayout                     _layout;            /** Main layout */
-    StartPageActionsModel           _model;             /** Model which contains start page actions */
-    StartPageActionsFilterModel     _filterModel;       /** Model for filtering and sorting start page actions */
-    mv::gui::HierarchyWidget        _hierarchyWidget;   /** Widget for displaying the actions */
-    bool                            _restyle;           /** Remember whether the restyle flag was set upon creation */
+    QVBoxLayout                 _layout;            /** Main layout */
+    PageActionsModel            _model;             /** Model which contains start page actions */
+    PageActionsFilterModel      _filterModel;       /** Model for filtering and sorting start page actions */
+    mv::gui::HierarchyWidget    _hierarchyWidget;   /** Widget for displaying the actions */
+    bool                        _restyle;           /** Remember whether the restyle flag was set upon creation */
 };

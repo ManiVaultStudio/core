@@ -7,20 +7,18 @@
 #include <QIcon>
 #include <QImage>
 #include <QList>
-#include <QModelIndex>
 #include <QString>
-#include <QStringList>
 
 #include <functional>
 
 /**
- * Start page action
+ * Page action
  *
- * Container class for start page action.
+ * Container class for page action.
  *
  * @author Thomas Kroes
  */
-class StartPageAction final
+class PageAction final
 {
 public:
 
@@ -37,13 +35,13 @@ public:
      * @param tooltip Action tooltip
      * @param clickedCallback Callback function that is called when the action row is clicked
      */
-    StartPageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& description, const QString& tooltip, const ClickedCallback& clickedCallback);
+    PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& description, const QString& tooltip, const ClickedCallback& clickedCallback);
 
     /**
      * Construct from model \p index
      * @param index Model index to set editor data from
      */
-    StartPageAction(const QModelIndex& index);
+    PageAction(const QModelIndex& index);
 
 public: // Getters and setters
     
@@ -118,4 +116,4 @@ protected:
     static bool compactView;
 };
 
-using StartPageActions = QList<StartPageAction>;
+using PageActions = QList<PageAction>;

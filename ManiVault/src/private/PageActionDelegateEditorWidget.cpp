@@ -2,28 +2,27 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "StartPageActionDelegateEditorWidget.h"
+#include "PageActionDelegateEditorWidget.h"
 
-#include "StartPageAction.h"
+#include "PageAction.h"
 
 #include <Application.h>
 #include <QBuffer>
-#include <QPainter>
 
 #ifdef _DEBUG
-    #define START_PAGE_ACTION_DELEGATE_EDITOR_WIDGET_VERBOSE
+    #define PAGE_ACTION_DELEGATE_EDITOR_WIDGET_VERBOSE
 #endif
 
 using namespace mv;
 
-StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
+PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _previewIconLabel(Application::getIconFont("FontAwesome").getIcon("image")),
     _metaDataIconLabel(Application::getIconFont("FontAwesome").getIcon("file-alt")),
     _tagsIconLabel(Application::getIconFont("FontAwesome").getIcon("tags")),
     _contributorsIconLabel(Application::getIconFont("FontAwesome").getIcon("user"))
 {
-    setObjectName("StartPageActionDelegateEditorWidget");
+    setObjectName("PageActionDelegateEditorWidget");
     setMouseTracking(true);
 
     _mainLayout.setContentsMargins(1, 1, 1, 1);
@@ -46,7 +45,7 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _iconLabel.setStyleSheet("padding-top: 3px;");
     _titleLabel.setStyleSheet("font-weight: bold;");
 
-    if (StartPageAction::isCompactView()) {
+    if (PageAction::isCompactView()) {
         _textLayout.addLayout(&_primaryTextLayout);
         _textLayout.addLayout(&_secondaryTextLayout);
 
@@ -106,11 +105,11 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
         if (!_index.isValid())
             return QString();
 
-        StartPageAction startPageAction(_index);
+        PageAction pageAction(_index);
 
         QString tooltipTextHtml;
 
-        const auto previewImage = startPageAction.getPreviewImage();
+        const auto previewImage = pageAction.getPreviewImage();
 
         if (!previewImage.isNull()) {
             QBuffer buffer;
@@ -129,9 +128,9 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
 
     _metaDataIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
         if (!_index.isValid())
-            return QString();
+            return {};
 
-        StartPageAction startPageAction(_index);
+        PageAction pageAction(_index);
 
         auto metaDataHtml = QString(" \
             <table> \
@@ -148,7 +147,7 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
                     <td>%3</td> \
                 </tr> \
             </table> \
-        ").arg(startPageAction.getTitle(), startPageAction.getDescription(), startPageAction.getComments());
+        ").arg(pageAction.getTitle(), pageAction.getDescription(), pageAction.getComments());
 
         return getTooltipHtml(metaDataHtml);
     });
@@ -157,9 +156,9 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
         if (!_index.isValid())
             return {};
 
-        StartPageAction startPageAction(_index);
+        PageAction pageAction(_index);
 
-        auto tagsHtml = QString("<p><b>Tags:</b>&nbsp;%1</p>").arg(startPageAction.getTags().join(", "));
+        auto tagsHtml = QString("<p><b>Tags:</b>&nbsp;%1</p>").arg(pageAction.getTags().join(", "));
 
         return getTooltipHtml(tagsHtml);
     });
@@ -168,9 +167,9 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
         if (!_index.isValid())
             return {};
 
-        StartPageAction startPageAction(_index);
+        PageAction pageAction(_index);
 
-        auto tagsHtml = QString("<p><b>Contributors:</b>&nbsp;%1</p>").arg(startPageAction.getContributors().join(", "));
+        auto tagsHtml = QString("<p><b>Contributors:</b>&nbsp;%1</p>").arg(pageAction.getContributors().join(", "));
 
         return getTooltipHtml(tagsHtml);
     });
@@ -186,20 +185,20 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     updateInfoWidgetVisibility();
 }
 
-void StartPageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
+void PageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
 {
     _index = index;
 
-    StartPageAction startPageAction(_index);
+    PageAction pageAction(_index);
 
     updateTextLabels();
 
-    _previewIconLabel.setVisible(!startPageAction.getPreviewImage().isNull());
-    _tagsIconLabel.setVisible(!startPageAction.getTags().isEmpty());
-    _contributorsIconLabel.setVisible(!startPageAction.getContributors().isEmpty());
+    _previewIconLabel.setVisible(!pageAction.getPreviewImage().isNull());
+    _tagsIconLabel.setVisible(!pageAction.getTags().isEmpty());
+    _contributorsIconLabel.setVisible(!pageAction.getContributors().isEmpty());
 }
 
-bool StartPageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* event)
+bool PageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* event)
 {
     switch (event->type())
     {
@@ -218,47 +217,48 @@ bool StartPageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* e
     return QWidget::eventFilter(target, event);
 }
 
-void StartPageActionDelegateEditorWidget::enterEvent(QEnterEvent* enterEvent)
+void PageActionDelegateEditorWidget::enterEvent(QEnterEvent* enterEvent)
 {
     QWidget::enterEvent(enterEvent);
 
     updateInfoWidgetVisibility();
 }
 
-void StartPageActionDelegateEditorWidget::leaveEvent(QEvent* event)
+void PageActionDelegateEditorWidget::leaveEvent(QEvent* event)
 {
     QWidget::leaveEvent(event);
 
     updateInfoWidgetVisibility();
 }
 
-void StartPageActionDelegateEditorWidget::updateTextLabels()
+void PageActionDelegateEditorWidget::updateTextLabels()
 {
-    StartPageAction startPageAction(_index);
+    PageAction pageAction(_index);
 
-    _iconLabel.setPixmap(startPageAction.getIcon().pixmap(StartPageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
+    _iconLabel.setPixmap(pageAction.getIcon().pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
 
     QFontMetrics titleMetrics(_titleLabel.font()), descriptionMetrics(_subtitleLabel.font());
 
-    _titleLabel.setText(titleMetrics.elidedText(startPageAction.getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
-    _subtitleLabel.setText(descriptionMetrics.elidedText(startPageAction.getSubtitle(), Qt::ElideMiddle, _subtitleLabel.width() - 2));
-    _metaDataLabel.setText(startPageAction.getMetaData());
+    _titleLabel.setText(titleMetrics.elidedText(pageAction.getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
+    _subtitleLabel.setText(descriptionMetrics.elidedText(pageAction.getSubtitle(), Qt::ElideMiddle, _subtitleLabel.width() - 2));
+    _metaDataLabel.setText(pageAction.getMetaData());
 }
 
-void StartPageActionDelegateEditorWidget::updateInfoWidgetVisibility()
+void PageActionDelegateEditorWidget::updateInfoWidgetVisibility()
 {
-    if (StartPageAction::isCompactView())
+    if (PageAction::isCompactView())
         _metaDataLabel.setVisible(!QWidget::underMouse());
 
     _infoWidget.setVisible(QWidget::underMouse());
 }
 
-void StartPageActionDelegateEditorWidget::updateCustomStyle()
+void PageActionDelegateEditorWidget::updateCustomStyle()
 {
     QString stylesheet = "dark-grey";
-    if(qApp->palette().text().color().lightnessF() > 0.5)
-    {
+
+    if(qApp->palette().text().color().lightnessF() > 0.5) {
         stylesheet = "light-grey";
     }
+
     _metaDataLabel.setStyleSheet(stylesheet);
 }

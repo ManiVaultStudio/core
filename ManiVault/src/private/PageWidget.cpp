@@ -10,8 +10,6 @@
 
 PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _layout(),
-    _contentLayout(),
     _pageHeaderWidget(title),
     _titleLabel(title),
     _backgroundImage(":/Images/StartPageBackground")
@@ -74,7 +72,7 @@ void PageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::C
     // Therefore we translate the colorRole to a color using the global palette instead of the widget style option
     QString color = QApplication::palette().color(QPalette::Normal, colorRole).name();
     
-    widget->setStyleSheet("QWidget#PageWidget, QWidget#StartPageHeaderWidget, QWidget#PageContentWidget, QLabel#Title { background-color: " + color + "}");
+    widget->setStyleSheet("QWidget#PageWidget, QWidget#PageHeaderWidget, QWidget#PageContentWidget, QLabel#Title { background-color: " + color + "}");
 }
 
 QVBoxLayout& PageWidget::getContentLayout()

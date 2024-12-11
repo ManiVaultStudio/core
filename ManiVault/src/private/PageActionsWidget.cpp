@@ -2,11 +2,12 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "StartPageActionsWidget.h"
+#include "PageActionsWidget.h"
 
-#include "StartPageAction.h"
-#include "StartPageActionDelegate.h"
-#include "StartPageContentWidget.h"
+#include "PageAction.h"
+#include "PageContentWidget.h"
+#include "PageActionsModel.h"
+#include "PageActionDelegate.h"
 
 #include <Application.h>
 
@@ -14,28 +15,27 @@
 #include <QHeaderView>
 
 #ifdef _DEBUG
-    //#define START_PAGE_ACTIONS_WIDGET_VERBOSE
+    //#define PAGE_ACTIONS_WIDGET_VERBOSE
 #endif
 
 using namespace mv;
 using namespace mv::gui;
 
-StartPageActionsWidget::StartPageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
+PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
     QWidget(parent),
-    _layout(),
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Item", _model, &_filterModel, true, true),
     _restyle(restyle)
 {
     if (!title.isEmpty())
-        _layout.addWidget(StartPageContentWidget::createHeaderLabel(title, title));
+        _layout.addWidget(PageContentWidget::createHeaderLabel(title, title));
 
     _layout.addWidget(&_hierarchyWidget, 1);
 
     setLayout(&_layout);
 
-    _filterModel.setFilterKeyColumn(static_cast<int>(StartPageActionsModel::Column::Title));
+    _filterModel.setFilterKeyColumn(static_cast<int>(PageActionsModel::Column::Title));
 
     _hierarchyWidget.getFilterGroupAction().setVisible(false);
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
@@ -49,35 +49,35 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent, const QString& t
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setRootIsDecorated(false);
-    treeView.setItemDelegateForColumn(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), new StartPageActionDelegate());
+    treeView.setItemDelegateForColumn(static_cast<int>(PageActionsModel::Column::SummaryDelegate), new PageActionDelegate());
     treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
     treeView.setMouseTracking(true);
     treeView.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Icon), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Title), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Description), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Comments), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Tags), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Subtitle), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::MetaData), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::PreviewImage), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Tooltip), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Contributors), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::ClickedCallback), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Icon), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Title), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Description), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Comments), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Tags), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Subtitle), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::MetaData), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::PreviewImage), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Tooltip), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Contributors), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::ClickedCallback), true);
 
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(PageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
     
     updateCustomStyle();
 
     connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
-        auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<StartPageAction::ClickedCallback>();
+        auto callback = index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<PageAction::ClickedCallback>();
         callback();
 
         _hierarchyWidget.getSelectionModel().clear();
@@ -95,7 +95,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent, const QString& t
     
 }
 
-bool StartPageActionsWidget::event(QEvent* event)
+bool PageActionsWidget::event(QEvent* event)
 {
     if (event->type() == QEvent::ApplicationPaletteChange)
         updateCustomStyle();
@@ -103,59 +103,59 @@ bool StartPageActionsWidget::event(QEvent* event)
     return QWidget::event(event);
 }
 
-QVBoxLayout& StartPageActionsWidget::getLayout()
+QVBoxLayout& PageActionsWidget::getLayout()
 {
     return _layout;
 }
 
-StartPageActionsModel& StartPageActionsWidget::getModel()
+PageActionsModel& PageActionsWidget::getModel()
 {
     return _model;
 }
 
-StartPageActionsFilterModel& StartPageActionsWidget::getFilterModel()
+PageActionsFilterModel& PageActionsWidget::getFilterModel()
 {
     return _filterModel;
 }
 
-HierarchyWidget& StartPageActionsWidget::getHierarchyWidget()
+HierarchyWidget& PageActionsWidget::getHierarchyWidget()
 {
     return _hierarchyWidget;
 }
 
-void StartPageActionsWidget::openPersistentEditor(int rowIndex)
+void PageActionsWidget::openPersistentEditor(int rowIndex)
 {
-    const auto index = _filterModel.index(rowIndex, static_cast<int>(StartPageActionsModel::Column::SummaryDelegate));
+    const auto index = _filterModel.index(rowIndex, static_cast<int>(PageActionsModel::Column::SummaryDelegate));
 
     if (_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
         return;
 
     if (index.isValid()) {
-#ifdef START_PAGE_ACTIONS_WIDGET_VERBOSE
-        qDebug() << __FUNCTION__ << index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Title)).data().toString() << index << index.isValid();
+#ifdef PAGE_ACTIONS_WIDGET_VERBOSE
+        qDebug() << __FUNCTION__ << index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Title)).data().toString() << index << index.isValid();
 #endif
 
         _hierarchyWidget.getTreeView().openPersistentEditor(index);
     }
 }
 
-void StartPageActionsWidget::closePersistentEditor(int rowIndex)
+void PageActionsWidget::closePersistentEditor(int rowIndex)
 {
-    const auto index = _filterModel.index(rowIndex, static_cast<int>(StartPageActionsModel::Column::SummaryDelegate));
+    const auto index = _filterModel.index(rowIndex, static_cast<int>(PageActionsModel::Column::SummaryDelegate));
 
     if (!_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
         return;
 
     if (index.isValid()) {
-#ifdef START_PAGE_ACTIONS_WIDGET_VERBOSE
-        qDebug() << __FUNCTION__ << index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Title)).data().toString() << index;
+#ifdef PAGE_ACTIONS_WIDGET_VERBOSE
+        qDebug() << __FUNCTION__ << index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Title)).data().toString() << index;
 #endif
 
         _hierarchyWidget.getTreeView().closePersistentEditor(index);
     }
 }
 
-void StartPageActionsWidget::updateCustomStyle()
+void PageActionsWidget::updateCustomStyle()
 {
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("search"));
     
