@@ -28,6 +28,7 @@ LearningCenterVideosFilterModel::LearningCenterVideosFilterModel(QObject* parent
     _tagsFilterAction.setIconByName("tag");
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
+    _tagsFilterAction.setPopupSizeHint(QSize(500, 200));
 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, [this]() -> void {
         invalidate();
@@ -84,7 +85,6 @@ void LearningCenterVideosFilterModel::setSourceModel(QAbstractItemModel* sourceM
         const auto uniqueTags = QStringList(_learningCenterVideosModel->getTagsSet().begin(), _learningCenterVideosModel->getTagsSet().end());
 
         _tagsFilterAction.initialize(uniqueTags, uniqueTags);
-        _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox);
     };
 
     connect(_learningCenterVideosModel, &LearningCenterVideosModel::tagsChanged, this, updateTags);

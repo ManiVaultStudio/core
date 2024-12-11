@@ -46,10 +46,10 @@ public:
     WidgetActionToolButton(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction);
 
     /**
-     * Paint event
+     * Override paint event for custom painting
      * @param paintEvent Pointer to paint event
      */
-    void paintEvent(QPaintEvent* paintEvent);
+    void paintEvent(QPaintEvent* paintEvent) override;
 
     /**
      * Get action

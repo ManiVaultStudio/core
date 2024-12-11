@@ -27,7 +27,8 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
 
     _tagsFilterAction.setIconByName("tag");
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
+    _tagsFilterAction.setPopupSizeHint(QSize(500, 300));
 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, [this](const QStringList& tags) -> void {
         invalidate();

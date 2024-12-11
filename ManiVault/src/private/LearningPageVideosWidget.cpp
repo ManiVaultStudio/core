@@ -22,15 +22,18 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
     QWidget(parent),
     _settingsAction(this, "Settings")
 {
+
     _mainLayout.setContentsMargins(0, 0, 0, 0);
     _mainLayout.setSpacing(20);
     _mainLayout.addWidget(PageContentWidget::createHeaderLabel("Videos", "Videos"));
-    _mainLayout.addWidget(_videosFilterModel.getTagsFilterAction().createWidget(this));
-    _mainLayout.addWidget(_videosFilterModel.getFilterGroupAction().createWidget(this));
+    _mainLayout.addWidget(_settingsAction.createWidget(this));
     _mainLayout.addWidget(&_videosListView, 1);
 
+    _settingsAction.setShowLabels(false);
+    _settingsAction.addAction(&_videosFilterModel.getFilterGroupAction());
+    _settingsAction.addAction(&_videosFilterModel.getTagsFilterAction());
+
     _videosFilterModel.setSourceModel(&(const_cast<LearningCenterVideosModel&>(mv::help().getVideosModel())));
-    _videosFilterModel.getTagsFilterAction().setStretch(2);
 
     _videosListView.setObjectName("Videos");
     _videosListView.setViewMode(QListView::IconMode);
