@@ -4,6 +4,7 @@ QWidget#PopupWidget {
 
 QPushButton {
     qproperty-iconSize: 12px;
+    height: 18px;
 }
 
 QComboBox {

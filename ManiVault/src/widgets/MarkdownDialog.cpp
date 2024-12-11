@@ -21,11 +21,7 @@ namespace mv::util {
 
 MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _markdownUrl(markdownUrl),
-    _webEngineView(),
-    _markdownPage(),
-    _fileDownloader(),
-    _markdownDocument()
+    _markdownUrl(markdownUrl)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("book"));
     setModal(true);

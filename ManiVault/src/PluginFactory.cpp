@@ -182,16 +182,33 @@ QString PluginFactory::getLongDescription() const
     return _shortDescription;
 }
 
+QString PluginFactory::getLongDescriptionMarkdown() const
+{
+    return _longDescriptionMarkdown;
+}
+
 void PluginFactory::setLongDescription(const QString& longDescription)
 {
     if (longDescription == _longDescription)
         return;
 
-    const auto previouslongDescription = _longDescription;
+    const auto previousLongDescription = _longDescription;
 
     _longDescription = longDescription;
 
-    emit longDescriptionChanged(previouslongDescription, _longDescription);
+    emit longDescriptionChanged(previousLongDescription, _longDescription);
+}
+
+void PluginFactory::setLongDescriptionMarkdown(const QString& longDescriptionMarkdown)
+{
+    if (longDescriptionMarkdown == _longDescriptionMarkdown)
+        return;
+
+    const auto previousLongDescriptionMarkdown = _longDescriptionMarkdown;
+
+    _longDescriptionMarkdown = longDescriptionMarkdown;
+
+    emit longDescriptionMarkdownChanged(previousLongDescriptionMarkdown, _longDescriptionMarkdown);
 }
 
 std::uint32_t PluginFactory::getNumberOfInstances() const

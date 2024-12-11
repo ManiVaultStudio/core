@@ -388,8 +388,8 @@ void OptionAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 
     initStyleOption(&styleOptionComboBox);
 
-    if (_optionAction->getCurrentIndex() == -1)
-        styleOptionComboBox.currentIcon = Application::getIconFont("FontAwesome").getIcon("list");
+    //if (_optionAction->getCurrentIndex() == -1)
+    //    styleOptionComboBox.currentIcon = Application::getIconFont("FontAwesome").getIcon("list");
 
     painter->drawComplexControl(QStyle::CC_ComboBox, styleOptionComboBox);
 
