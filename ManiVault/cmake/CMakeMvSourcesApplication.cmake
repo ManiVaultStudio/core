@@ -290,6 +290,12 @@ set(PRIVATE_PAGES_COMMON_HEADERS
     src/private/PageHeaderWidget.h
     src/private/PageContentWidget.h
     src/private/LogoWidget.h
+	src/private/PageActionsWidget.h
+    src/private/PageActionsModel.h
+    src/private/PageActionsFilterModel.h
+    src/private/PageActionDelegate.h
+    src/private/PageActionDelegateEditorWidget.h
+    src/private/PageAction.h
 )
 
 set(PRIVATE_PAGES_COMMON_SOURCES
@@ -297,6 +303,12 @@ set(PRIVATE_PAGES_COMMON_SOURCES
     src/private/PageHeaderWidget.cpp
     src/private/PageContentWidget.cpp
     src/private/LogoWidget.cpp
+	src/private/PageActionsWidget.cpp
+    src/private/PageActionsModel.cpp
+    src/private/PageActionsFilterModel.cpp
+    src/private/PageActionDelegate.cpp
+    src/private/PageActionDelegateEditorWidget.cpp
+    src/private/PageAction.cpp
 )
 
 set(PRIVATE_PAGES_COMMON_FILES
@@ -309,12 +321,6 @@ set(PRIVATE_START_PAGE_HEADERS
     src/private/StartPageContentWidget.h
     src/private/StartPageOpenProjectWidget.h
     src/private/StartPageGetStartedWidget.h
-    src/private/StartPageActionsWidget.h
-    src/private/StartPageActionsModel.h
-    src/private/StartPageActionsFilterModel.h
-    src/private/StartPageActionDelegate.h
-    src/private/StartPageActionDelegateEditorWidget.h
-    src/private/StartPageAction.h
 )
 
 set(PRIVATE_START_PAGE_SOURCES
@@ -322,12 +328,6 @@ set(PRIVATE_START_PAGE_SOURCES
     src/private/StartPageContentWidget.cpp
     src/private/StartPageOpenProjectWidget.cpp
     src/private/StartPageGetStartedWidget.cpp
-    src/private/StartPageActionsWidget.cpp
-    src/private/StartPageActionsModel.cpp
-    src/private/StartPageActionsFilterModel.cpp
-    src/private/StartPageActionDelegate.cpp
-    src/private/StartPageActionDelegateEditorWidget.cpp
-    src/private/StartPageAction.cpp
 )
 
 set(PRIVATE_START_PAGE_FILES
