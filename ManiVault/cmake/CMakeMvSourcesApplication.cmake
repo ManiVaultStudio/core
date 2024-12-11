@@ -296,6 +296,7 @@ set(PRIVATE_PAGES_COMMON_HEADERS
     src/private/PageActionDelegate.h
     src/private/PageActionDelegateEditorWidget.h
     src/private/PageAction.h
+	src/private/PageTutorialsWidget.h
 )
 
 set(PRIVATE_PAGES_COMMON_SOURCES
@@ -309,6 +310,7 @@ set(PRIVATE_PAGES_COMMON_SOURCES
     src/private/PageActionDelegate.cpp
     src/private/PageActionDelegateEditorWidget.cpp
     src/private/PageAction.cpp
+	src/private/PageTutorialsWidget.cpp
 )
 
 set(PRIVATE_PAGES_COMMON_FILES
@@ -341,7 +343,6 @@ set(PRIVATE_LEARNING_PAGE_HEADERS
     src/private/LearningPageVideosWidget.h
     src/private/LearningPageVideoWidget.h
     src/private/LearningPageVideoStyledItemDelegate.h
-	src/private/LearningPageTutorialsWidget.h
 	src/private/LearningPageExamplesWidget.h
     src/private/LearningPagePluginResourcesWidget.h
     src/private/LearningPagePluginAction.h
@@ -353,7 +354,6 @@ set(PRIVATE_LEARNING_PAGE_SOURCES
     src/private/LearningPageVideosWidget.cpp
     src/private/LearningPageVideoWidget.cpp
     src/private/LearningPageVideoStyledItemDelegate.cpp
-	src/private/LearningPageTutorialsWidget.cpp
 	src/private/LearningPageExamplesWidget.cpp
     src/private/LearningPagePluginResourcesWidget.cpp
     src/private/LearningPagePluginAction.cpp

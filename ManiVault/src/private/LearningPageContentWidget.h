@@ -5,8 +5,9 @@
 #pragma once
 
 #include "PageContentWidget.h"
+#include "PageTutorialsWidget.h"
+
 #include "LearningPageVideosWidget.h"
-#include "LearningPageTutorialsWidget.h"
 #include "LearningPageExamplesWidget.h"
 #include "LearningPagePluginResourcesWidget.h"
 
@@ -36,7 +37,7 @@ private:
     mv::gui::TriggerAction              _toStartPageAction;             /** Trigger action for showing the start page */
     mv::gui::HorizontalGroupAction      _toolbarAction;                 /** Bottom toolbar action */
     LearningPageVideosWidget            _videosWidget;                  /** Learning page video section content widget */
-    LearningPageTutorialsWidget         _tutorialsWidget;               /** Learning page tutorials section content widget */
+    PageTutorialsWidget                 _tutorialsWidget;               /** Learning page tutorials section content widget */
     LearningPageExamplesWidget          _examplesWidget;                /** Learning page examples section content widget */
     LearningPagePluginResourcesWidget   _pluginResourcesWidget;         /** Learning page plugin section resources content widget */
 

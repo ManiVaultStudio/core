@@ -27,7 +27,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _startPageContentWidget(startPageContentWidget),
     _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
     _createProjectFromDatasetWidget(this, "Project From Data"),
-    _tutorialsWidget(this, "Tutorials"),
+    _tutorialsWidget(this),
     _workspaceLocationTypeAction(this, "Workspace location type"),
     _workspaceLocationTypesModel(this),
     _recentWorkspacesAction(this, mv::workspaces().getSettingsPrefix() + "RecentWorkspaces"),
@@ -43,17 +43,10 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
     _createProjectFromDatasetWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
-    _tutorialsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Item");
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getTreeView().verticalScrollBar()->setDisabled(true);
-
-    _learningCenterTutorialsFilterModel.setSourceModel(const_cast<LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel()));
-    _learningCenterTutorialsFilterModel.getTagsFilterAction().setSelectedOptions({ "GettingStarted" });
-
-    _tutorialsWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _tutorialsWidget.getHierarchyWidget().setItemTypeName("Tutorial");
 
     _createProjectFromDatasetWidget.getHierarchyWidget().setItemTypeName("Importer");
 
@@ -80,12 +73,6 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
-
-    connect(&_learningCenterTutorialsFilterModel, &LearningCenterTutorialsFilterModel::layoutChanged, this, &StartPageGetStartedWidget::updateTutorialActions);
-    connect(&_learningCenterTutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsInserted, this, &StartPageGetStartedWidget::updateTutorialActions);
-    connect(&_learningCenterTutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsRemoved, this, &StartPageGetStartedWidget::updateTutorialActions);
-
-    updateTutorialActions();
 }
 
 void StartPageGetStartedWidget::updateActions()
@@ -199,24 +186,4 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
     }
 }
 
-void StartPageGetStartedWidget::updateTutorialActions()
-{
-    _tutorialsWidget.getModel().reset();
 
-    qDebug() << _learningCenterTutorialsFilterModel.rowCount();
-
-    for (int rowIndex = 0; rowIndex < _learningCenterTutorialsFilterModel.rowCount(); ++rowIndex) {
-        const auto sourceRowIndex = _learningCenterTutorialsFilterModel.mapToSource(_learningCenterTutorialsFilterModel.index(rowIndex, 0));
-
-        auto tutorial = dynamic_cast<LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceRowIndex))->getTutorial();
-
-        PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [tutorial]() -> void {
-            QDesktopServices::openUrl(tutorial->getUrl());
-		});
-
-        //tutorialAction.setSubtitle(subtitle);
-        //tutorialAction.setComments(QString("Create a new project and import data into it with the %1").arg(viewPluginFactory->getKind()));
-
-        _tutorialsWidget.getModel().add(tutorialAction);
-    }
-}
