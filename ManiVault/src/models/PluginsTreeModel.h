@@ -40,7 +40,7 @@ public:
     plugin::Plugin* getPlugin(const QModelIndex& modelIndex) const override;
 
     /**
-     * Set the \p plugins from which can be picked (mode is set to Mode::Manual)
+     * Set the \p plugins from which can be picked (mode is set to StorageMode::Manual)
      * @param plugins Vector of plugins
      */
     void setPlugins(const plugin::Plugins& plugins) override;

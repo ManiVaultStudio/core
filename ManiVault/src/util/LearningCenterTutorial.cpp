@@ -6,25 +6,27 @@
 
 namespace mv::util {
 
-LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url) :
+LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QString& project) :
     _title(title),
     _tags(tags),
     _date(date),
     _iconName(iconName),
     _summary(summary),
     _content(content),
-    _url(url)
+    _url(url),
+    _project(project)
 {
 }
 
 LearningCenterTutorial::LearningCenterTutorial(const QVariantMap& variantMap) :
-    _title(variantMap["title"].toString()),
-    _tags(variantMap["tags"].toStringList()),
-    _date(variantMap["date"].toString()),
-    _iconName(variantMap["icon"].toString()),
-    _summary(variantMap["summary"].toString()),
-    _content(variantMap["fullpost"].toString()),
-    _url(QUrl(variantMap["url"].toString()))
+    _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
+    _tags(variantMap.contains("tags") ? variantMap["tags"].toStringList() : QStringList()),
+    _date(variantMap.contains("date") ? variantMap["date"].toString() : ""),
+    _iconName(variantMap.contains("icon") ? variantMap["icon"].toString() : ""),
+    _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
+    _content(variantMap.contains("fullpost") ? variantMap["fullpost"].toString() : ""),
+    _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
+    _project(variantMap.contains("project") ? variantMap["project"].toString() : "")
 {
 }
 
@@ -61,6 +63,16 @@ const QString& LearningCenterTutorial::getContent() const
 const QUrl& LearningCenterTutorial::getUrl() const
 {
     return _url;
+}
+
+const QString& LearningCenterTutorial::getProject() const
+{
+    return _project;
+}
+
+bool LearningCenterTutorial::hasProject() const
+{
+    return !_project.isEmpty();
 }
 
 }

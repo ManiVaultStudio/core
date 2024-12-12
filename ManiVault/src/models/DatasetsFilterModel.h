@@ -47,7 +47,7 @@ public:
     bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
 
     /**
-     * Set datasets filter function (mode is set to Mode::Automatic)
+     * Set datasets filter function (mode is set to StorageMode::Automatic)
      * @param datasetsFilterFunction Filter lambda (triggered when datasets are added and/or removed from the datasets model)
      */
     void setFilterFunction(const FilterFunction& filterFunction);
