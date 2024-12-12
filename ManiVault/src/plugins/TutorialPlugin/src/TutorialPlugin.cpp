@@ -85,16 +85,14 @@ void TutorialPlugin::fromVariantMap(const QVariantMap& variantMap)
 {
     ViewPlugin::fromVariantMap(variantMap);
 
-    //_sourcePluginPickerAction.fromParentVariantMap(variantMap);
-    //_freezeViewAction.fromParentVariantMap(variantMap);
+    _tutorialPickerAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap TutorialPlugin::toVariantMap() const
 {
     auto variantMap = ViewPlugin::toVariantMap();
 
-    //_sourcePluginPickerAction.insertIntoVariantMap(variantMap);
-    //_freezeViewAction.insertIntoVariantMap(variantMap);
+    _tutorialPickerAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
