@@ -18,7 +18,7 @@ using namespace mv::plugin;
 TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _tutorialWidget(this, nullptr),
-    _horizontalGroupAction(this, "Settings"),
+    _horizontalGroupAction(this, "Toolbar"),
     _tutorialPickerAction(this, "Pick tutorial"),
     _openInBrowserAction(this, "Open in browser")
 {

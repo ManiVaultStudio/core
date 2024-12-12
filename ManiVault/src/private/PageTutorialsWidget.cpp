@@ -9,7 +9,6 @@
 #include <util/FileDownloader.h>
 
 #include <QEvent>
-#include <QDesktopServices>
 
 using namespace mv;
 using namespace mv::gui;
@@ -72,7 +71,7 @@ void PageTutorialsWidget::updateActions()
 
         auto tutorial = dynamic_cast<LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceRowIndex))->getTutorial();
 
-        PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), tutorial->getProject(), "", [this, tutorial]() -> void {
+        PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", tutorial->getProject(), [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
                     auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
@@ -82,9 +81,21 @@ void PageTutorialsWidget::updateActions()
                         projectDownloader->deleteLater();
                     });
 
-                    qDebug() << tutorial->getProject();
+                    connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
+                        qDebug() << "Download aborted by user";
+					});
 
                     projectDownloader->download(tutorial->getProject());
+                } else {
+                    mv::projects().newBlankProject();
+
+                	if (auto tutorialPlugin = mv::plugins().requestViewPlugin("Tutorial")) {
+                        if (auto pickerAction = dynamic_cast<OptionAction*>(tutorialPlugin->findChildByPath("Pick tutorial")))
+                            pickerAction->setCurrentText(tutorial->getTitle());
+
+                        if (auto toolbarAction = dynamic_cast<HorizontalGroupAction*>(tutorialPlugin->findChildByPath("Toolbar")))
+                            toolbarAction->setVisible(false);
+                	}
                 }
             }
             catch (std::exception& e)
@@ -97,12 +108,10 @@ void PageTutorialsWidget::updateActions()
 	        {
 	            exceptionMessageBox("Unable to load tutorial");
 	        }
-
-            //QDesktopServices::openUrl(tutorial->getUrl());
 		});
 
         //tutorialAction.setSubtitle(subtitle);
-        //tutorialAction.setComments(QString("Create a new project and import data into it with the %1").arg(viewPluginFactory->getKind()));
+        tutorialAction.setComments(tutorial->getProject());
 
         getModel().add(tutorialAction);
     }

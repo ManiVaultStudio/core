@@ -27,7 +27,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _startPageContentWidget(startPageContentWidget),
     _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
     _createProjectFromDatasetWidget(this, "Project From Data"),
-    _tutorialsWidget(this),
+    _tutorialsWidget(this, { "GettingStarted" }),
     _workspaceLocationTypeAction(this, "Workspace location type"),
     _workspaceLocationTypesModel(this),
     _recentWorkspacesAction(this, mv::workspaces().getSettingsPrefix() + "RecentWorkspaces"),

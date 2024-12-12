@@ -81,6 +81,9 @@ signals:
     /** Signals that the file is correctly downloaded */
     void downloaded();
 
+    /** Signals that the file download process was aborted (by the user) */
+    void aborted();
+
     /**
      * Invoked when there is download progress update
      * @param progress Progress [0, 1]

@@ -5,6 +5,7 @@
 #include "FileDownloader.h"
 
 #include "Task.h"
+#include "Task.h"
 
 #ifdef _DEBUG
 	#define FILE_DOWNLOADER_VERBOSE
@@ -16,7 +17,7 @@ FileDownloader::FileDownloader(const StorageMode& mode, const Task::GuiScope& ta
     QObject(parent),
     _storageMode(mode),
     _isDownloading(false),
-    _task(this, "Downloading", { taskGuiScope })
+    _task(this, "Downloading", { taskGuiScope }, Task::Status::Undefined, true)
 {
     connect(&_networkAccessManager, &QNetworkAccessManager::finished, this, &FileDownloader::downloadFinished);
 
@@ -27,6 +28,10 @@ void FileDownloader::download(const QUrl& url)
 {
     if (_isDownloading)
         return;
+
+#ifdef FILE_DOWNLOADER_VERBOSE
+    qDebug() << __FUNCTION__ << _url.toString();
+#endif
 
     _url            = url;
     _isDownloading  = true;
@@ -41,7 +46,18 @@ void FileDownloader::download(const QUrl& url)
     _task.setIcon(Application::getIconFont("FontAwesome").getIcon("download"));
     _task.setRunning();
 
-    connect(networkReply, &QNetworkReply::downloadProgress, this, [this](qint64 downloaded, qint64 total) -> void {
+    connect(&_task, &Task::requestAbort, this, [this, networkReply]() -> void {
+        networkReply->abort();
+
+        _task.setAborted();
+
+        emit aborted();
+    });
+
+    connect(networkReply, &QNetworkReply::downloadProgress, this, [this, networkReply](qint64 downloaded, qint64 total) -> void {
+        if (_task.isAborting())
+            return;
+			
         const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
 
         _task.setProgress(progress);
@@ -95,9 +111,11 @@ void FileDownloader::downloadFinished(QNetworkReply* reply)
 
     _isDownloading = false;
 
-    _task.setFinished();
+    if (reply->error() == QNetworkReply::NoError) {
+        _task.setFinished();
 
-    emit downloaded();
+		emit downloaded();
+    }
 }
 
 QByteArray FileDownloader::downloadedData() const {

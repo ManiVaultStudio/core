@@ -10,12 +10,15 @@
 #include "util/Exception.h"
 
 #include <Application.h>
+#include <Task.h>
 
 #include <QDesktopServices>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUrl>
+
+#include "DatasetsToRemoveModel.h"
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -34,7 +37,8 @@ HelpManager::HelpManager(QObject* parent) :
     _toWebsiteAction(this, "Website"),
     _toWikiAction(this, "Wiki"),
     _toRepositoryAction(this, "Repository"),
-    _toLearningCenterAction(this, "Go to learning center")
+    _toLearningCenterAction(this, "Go to learning center"),
+    _fileDownloader(FileDownloader::StorageMode::File, Task::GuiScope::Background)
 {
     _showLearningCenterAction.setIconByName("chalkboard-teacher");
     _showLearningCenterAction.setToolTip("Go to the learning center");
