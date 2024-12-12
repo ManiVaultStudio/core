@@ -16,6 +16,8 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
     PageActionsWidget(parent, "Tutorials"),
     _toolbarAction(this, "Toolbar")
 {
+    layout()->setContentsMargins(0, 0, 0, 0);
+
     dynamic_cast<QVBoxLayout*>(layout())->insertWidget(1, _toolbarAction.createWidget(this));
 
     _toolbarAction.setShowLabels(false);
