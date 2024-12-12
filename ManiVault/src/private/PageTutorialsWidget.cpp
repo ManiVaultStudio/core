@@ -75,7 +75,7 @@ void PageTutorialsWidget::updateActions()
         PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), tutorial->getProject(), "", [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
-                    auto* projectDownloader = new FileDownloader();
+                    auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
 
                     connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
                         mv::projects().openProject(projectDownloader->getDownloadedFilePath());

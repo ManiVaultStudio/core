@@ -4,19 +4,23 @@
 
 #include "FileDownloader.h"
 
+#include "Task.h"
+
 #ifdef _DEBUG
 	#define FILE_DOWNLOADER_VERBOSE
 #endif
 
 namespace mv::util {
 
-FileDownloader::FileDownloader(const StorageMode& mode, QObject* parent) :
+FileDownloader::FileDownloader(const StorageMode& mode, const Task::GuiScope& taskGuiScope, QObject* parent) :
     QObject(parent),
     _storageMode(mode),
     _isDownloading(false),
-    _task(this, "Downloading")
+    _task(this, "Downloading", { taskGuiScope })
 {
     connect(&_networkAccessManager, &QNetworkAccessManager::finished, this, &FileDownloader::downloadFinished);
+
+    _task.setEnabled(taskGuiScope != Task::GuiScope::None);
 }
 
 void FileDownloader::download(const QUrl& url)
@@ -31,10 +35,18 @@ void FileDownloader::download(const QUrl& url)
 
     auto* networkReply = _networkAccessManager.get(request);
 
+    const auto fileName = QFileInfo(_url.toString()).fileName();
+
+    _task.setName(QString("Download %1").arg(fileName));
+    _task.setIcon(Application::getIconFont("FontAwesome").getIcon("download"));
     _task.setRunning();
 
     connect(networkReply, &QNetworkReply::downloadProgress, this, [this](qint64 downloaded, qint64 total) -> void {
-        _task.setProgress(static_cast<float>(downloaded) / static_cast<float>(total));
+        const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
+
+        _task.setProgress(progress);
+
+        emit downloadProgress(progress);
     });
 }
 

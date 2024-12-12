@@ -38,9 +38,10 @@ public:
     /**
      * Construct with \p mode and pointer to \p parent object
      * @param mode Download mode
+     * @param taskGuiScope Type of GUI task reporting
      * @param parent Pointer to parent object
      */
-    explicit FileDownloader(const StorageMode& mode = StorageMode::All, QObject* parent = nullptr);
+    explicit FileDownloader(const StorageMode& mode = StorageMode::All, const Task::GuiScope& taskGuiScope = Task::GuiScope::None, QObject* parent = nullptr);
 
     /** No need for custom destructor */
     virtual ~FileDownloader() = default;
@@ -82,9 +83,9 @@ signals:
 
     /**
      * Invoked when there is download progress update
-     * @param progress Progress [0, 100]
+     * @param progress Progress [0, 1]
      */
-    void downloadProgress(std::int32_t progress);
+    void downloadProgress(float progress);
 
 private:
     const StorageMode       _storageMode;               /** Download mode */
@@ -93,7 +94,7 @@ private:
     bool                    _isDownloading;             /** Boolean determining whether a download is taking place */
     QByteArray              _downloadedData;            /** Downloaded data as byte array */
     QString                 _downloadedFilePath;        /** Location where the downloaded file is stored */
-    ModalTask               _task;                      /** Task for reporting progress */
+    Task                    _task;                      /** Task for reporting progress */
 };
 
 }
