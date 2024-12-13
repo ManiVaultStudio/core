@@ -75,20 +75,10 @@ void PageTutorialsWidget::updateActions()
         PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
-                    auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
-
-                    connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
-                        mv::projects().openProject(projectDownloader->getDownloadedFilePath());
-                        projectDownloader->deleteLater();
-                    });
-
-                    connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
-                        qDebug() << "Download aborted by user";
-					});
-
-                    projectDownloader->download(tutorial->getProject());
+                    mv::projects().openProject(tutorial->getProject());
                 } else {
-                    mv::projects().newBlankProject();
+                    if (!mv::projects().hasProject())
+						mv::projects().newBlankProject();
 
                 	if (auto tutorialPlugin = mv::plugins().requestViewPlugin("Tutorial")) {
                         if (auto pickerAction = dynamic_cast<OptionAction*>(tutorialPlugin->findChildByPath("Pick tutorial")))

@@ -341,7 +341,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
-        
+
         const auto scopedState = ScopedState(this, State::OpeningProject);
 
         if (QFileInfo(filePath).isDir())
@@ -527,6 +527,35 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         projects().getProjectSerializationTask().setFinished();
     }
+}
+
+void ProjectManager::openProject(QUrl url, bool importDataOnly, bool loadWorkspace)
+{
+    try {
+        if (hasProject())
+			saveProjectAs();
+
+        auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
+
+        connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
+            mv::projects().openProject(projectDownloader->getDownloadedFilePath());
+            projectDownloader->deleteLater();
+		});
+
+        connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
+            qDebug() << "Download aborted by user";
+		});
+
+        projectDownloader->download(url);
+	}
+	catch (std::exception& e)
+	{
+	    exceptionMessageBox("Unable to load ManiVault project", e);
+	}
+	catch (...)
+	{
+	    exceptionMessageBox("Unable to load ManiVault project");
+	}
 }
 
 void ProjectManager::importProject(QString filePath /*= ""*/)
