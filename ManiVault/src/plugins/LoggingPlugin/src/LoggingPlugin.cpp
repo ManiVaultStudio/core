@@ -22,6 +22,7 @@ LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     getLearningCenterAction().setShortDescription("Shows <b>ManiVault</b> logging");
     getLearningCenterAction().setLongDescription("");
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+    getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "LoggingPlugin" }));
 }
 
 void LoggingPlugin::init()

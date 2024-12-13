@@ -44,8 +44,8 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     getLearningCenterAction().setPluginTitle("Data properties");
 
     getLearningCenterAction().setShortDescription("Data properties of the selected dataset(s)");
-    //getLearningCenterAction().setLongDescriptionMarkdown(QString::fromStdString(longDescriptionMarkdown));
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+    getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataPropertiesPlugin" }));
 }
 
 void DataPropertiesPlugin::updateWindowTitle(DataHierarchyItems selectedDataHierarchyItems)
