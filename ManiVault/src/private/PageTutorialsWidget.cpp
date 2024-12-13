@@ -33,15 +33,15 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
     
     _tutorialsFilterModel.setSourceModel(const_cast<LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel()));
     _tutorialsFilterModel.getTextFilterColumnAction().setCurrentText("Title");
-    
-    if (!tags.isEmpty())
-		_tutorialsFilterModel.getTagsFilterAction().setSelectedOptions(tags);
 
     connect(&_tutorialsFilterModel, &LearningCenterTutorialsFilterModel::layoutChanged, this, &PageTutorialsWidget::updateActions);
     connect(&_tutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsInserted, this, &PageTutorialsWidget::updateActions);
     connect(&_tutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsRemoved, this, &PageTutorialsWidget::updateActions);
 
     updateActions();
+
+    if (!tags.isEmpty())
+        _tutorialsFilterModel.getTagsFilterAction().setSelectedOptions(tags);
 }
 
 HorizontalGroupAction& PageTutorialsWidget::getToolbarAction()
