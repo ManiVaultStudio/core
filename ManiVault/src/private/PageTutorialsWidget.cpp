@@ -86,7 +86,7 @@ void PageTutorialsWidget::updateActions()
                             toolbarAction->setVisible(false);
                 	}
 
-                    mv::help().getShowLearningCenterAction().setChecked(false);
+                    mv::help().getShowLearningCenterPageAction().setChecked(false);
                     mv::projects().getShowStartPageAction().setChecked(false);
                 }
             }

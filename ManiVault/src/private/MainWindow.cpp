@@ -176,7 +176,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
 
-        connect(&help().getShowLearningCenterAction(), &ToggleAction::toggled, this, [stackedWidget, startPageWidget, projectWidget, learningPageWidget](bool toggled) -> void {
+        connect(&help().getShowLearningCenterPageAction(), &ToggleAction::toggled, this, [stackedWidget, startPageWidget, projectWidget, learningPageWidget](bool toggled) -> void {
             if (toggled)
                 stackedWidget->setCurrentWidget(learningPageWidget);
             else {

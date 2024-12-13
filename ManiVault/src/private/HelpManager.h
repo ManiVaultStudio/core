@@ -72,7 +72,7 @@ public:
 
 public: // Action getters
 
-    gui::ToggleAction& getShowLearningCenterAction() override { return _showLearningCenterAction; }
+    gui::ToggleAction& getShowLearningCenterPageAction() override { return _showLearningCenterPageAction; }
     gui::TriggerAction& getToDiscordAction() override { return _toDiscordAction; }
     gui::TriggerAction& getToWebsiteAction() override { return _toWebsiteAction; }
     gui::TriggerAction& getToWikiAction() override { return _toWikiAction; }
@@ -80,15 +80,15 @@ public: // Action getters
     gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; }
 
 private:
-    gui::ToggleAction               _showLearningCenterAction;  /** Toggle action for toggling the learning center */
-    gui::TriggerAction              _toDiscordAction;           /** External link to discord */
-    gui::TriggerAction              _toWebsiteAction;           /** External link to website */
-    gui::TriggerAction              _toWikiAction;              /** External link to wiki */
-    gui::TriggerAction              _toRepositoryAction;        /** External link to repository */
-    gui::TriggerAction              _toLearningCenterAction;    /** Trigger action to go the learning center */
-    LearningCenterVideosModel       _videosModel;               /** Videos model */
-    LearningCenterTutorialsModel    _tutorialsModel;            /** Tutorials model */
-    util::FileDownloader            _fileDownloader;            /** For downloading the learning center JSON file */
+    gui::ToggleAction               _showLearningCenterPageAction;  /** Toggle action for toggling the learning center page */
+    gui::TriggerAction              _toDiscordAction;               /** External link to discord */
+    gui::TriggerAction              _toWebsiteAction;               /** External link to website */
+    gui::TriggerAction              _toWikiAction;                  /** External link to wiki */
+    gui::TriggerAction              _toRepositoryAction;            /** External link to repository */
+    gui::TriggerAction              _toLearningCenterAction;        /** Trigger action to go the learning center */
+    LearningCenterVideosModel       _videosModel;                   /** Videos model */
+    LearningCenterTutorialsModel    _tutorialsModel;                /** Tutorials model */
+    util::FileDownloader            _fileDownloader;                /** For downloading the learning center JSON file */
 };
 
 }

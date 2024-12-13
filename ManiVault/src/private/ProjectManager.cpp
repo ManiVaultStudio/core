@@ -215,7 +215,7 @@ ProjectManager::ProjectManager(QObject* parent) :
     });
 
     connect(&_backToProjectAction, &TriggerAction::triggered, this, [this]() -> void {
-        mv::help().getShowLearningCenterAction().setChecked(false);
+        mv::help().getShowLearningCenterPageAction().setChecked(false);
         getShowStartPageAction().setChecked(false);
     });
 }
@@ -1075,7 +1075,7 @@ void ProjectManager::createProject()
     }
     emit projectCreated(*_project);
 
-    mv::help().getShowLearningCenterAction().setChecked(false);
+    mv::help().getShowLearningCenterPageAction().setChecked(false);
 
     _showStartPageAction.setChecked(false);
     

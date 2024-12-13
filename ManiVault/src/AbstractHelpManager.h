@@ -88,7 +88,7 @@ signals:
 
 public: // Action getters
 
-    virtual gui::ToggleAction& getShowLearningCenterAction() = 0;
+    virtual gui::ToggleAction& getShowLearningCenterPageAction() = 0;
     virtual gui::TriggerAction& getToDiscordAction() = 0;
     virtual gui::TriggerAction& getToWebsiteAction() = 0;
     virtual gui::TriggerAction& getToWikiAction() = 0;

@@ -85,7 +85,7 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     getMainLayout().addWidget(_toolbarAction.createWidget(this));
 
     connect(&_toStartPageAction, &TriggerAction::triggered, this, []() -> void {
-        mv::help().getShowLearningCenterAction().setChecked(false);
+        mv::help().getShowLearningCenterPageAction().setChecked(false);
         mv::projects().getShowStartPageAction().setChecked(true);
     });
 }

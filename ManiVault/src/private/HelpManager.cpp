@@ -32,7 +32,7 @@ namespace mv
 
 HelpManager::HelpManager(QObject* parent) :
     AbstractHelpManager(parent),
-    _showLearningCenterAction(this, "Learning center"),
+    _showLearningCenterPageAction(this, "Learning center"),
     _toDiscordAction(this, "Join us..."),
     _toWebsiteAction(this, "Website"),
     _toWikiAction(this, "Wiki"),
@@ -40,8 +40,8 @@ HelpManager::HelpManager(QObject* parent) :
     _toLearningCenterAction(this, "Go to learning center"),
     _fileDownloader(FileDownloader::StorageMode::File, Task::GuiScope::Background)
 {
-    _showLearningCenterAction.setIconByName("chalkboard-teacher");
-    _showLearningCenterAction.setToolTip("Go to the learning center");
+    _showLearningCenterPageAction.setIconByName("chalkboard-teacher");
+    _showLearningCenterPageAction.setToolTip("Go to the learning center");
 
     _toDiscordAction.setIcon(Application::getIconFont("FontAwesomeBrands", 5, 14).getIcon("discord"));
     _toDiscordAction.setToolTip("Get in touch on our Discord");
@@ -82,7 +82,7 @@ HelpManager::HelpManager(QObject* parent) :
     });
 
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, [this]() -> void {
-        _showLearningCenterAction.setChecked(true);
+        _showLearningCenterPageAction.setChecked(true);
     });
 
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {

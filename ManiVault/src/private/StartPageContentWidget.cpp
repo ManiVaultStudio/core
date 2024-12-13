@@ -66,7 +66,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, []() -> void {
         mv::projects().getShowStartPageAction().setChecked(false);
-        mv::help().getShowLearningCenterAction().setChecked(true);
+        mv::help().getShowLearningCenterPageAction().setChecked(true);
     });
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
