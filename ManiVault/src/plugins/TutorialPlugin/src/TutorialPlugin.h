@@ -48,6 +48,12 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Action getters
+
+    mv::gui::HorizontalGroupAction& getHorizontalGroupAction() { return _horizontalGroupAction; }
+    mv::gui::OptionAction& getTutorialPickerAction() { return _tutorialPickerAction; }
+    mv::gui::TriggerAction& getOpenInBrowserAction() { return _openInBrowserAction; }
+
 private:
     TutorialWidget                          _tutorialWidget;            /** Tutorial widget */
     mv::gui::HorizontalGroupAction          _horizontalGroupAction;     /** Horizontal group action for settings */

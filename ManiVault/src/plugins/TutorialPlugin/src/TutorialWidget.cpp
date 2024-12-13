@@ -59,10 +59,13 @@ void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
             </style>
         </head>
         <body>
-            <main class="container">%1</main>
+            <main class="container">
+				<h1 class="display-6 fw-bold">%1</h1>
+				%2
+			</main>
         </body>
     </html>
-    )").arg(htmlText);
+    )").arg(_tutorialPlugin->getTutorialPickerAction().getCurrentText(), htmlText);
 
     _webEngineView.setHtml(sanitizedHtmltext, baseUrl);
 
