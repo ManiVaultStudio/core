@@ -85,6 +85,9 @@ void PageTutorialsWidget::updateActions()
                         if (auto toolbarAction = dynamic_cast<HorizontalGroupAction*>(tutorialPlugin->findChildByPath("Toolbar")))
                             toolbarAction->setVisible(false);
                 	}
+
+                    mv::help().getShowLearningCenterAction().setChecked(false);
+                    mv::projects().getShowStartPageAction().setChecked(false);
                 }
             }
             catch (std::exception& e)
