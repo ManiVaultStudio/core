@@ -36,8 +36,8 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
 
     auto& tagsFilterAction = _tutorialsFilterModel.getTagsFilterAction();
 
-    tagsFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
-    tagsFilterAction.setPopupSizeHint(QSize(640, 0));
+    tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
+    tagsFilterAction.setPopupSizeHint(QSize(500, 300));
 
     _horizontalGroupAction.addAction(&_tutorialPickerAction, 1);
     _horizontalGroupAction.addAction(&tagsFilterAction);
