@@ -38,10 +38,10 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
     connect(&_tutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsInserted, this, &PageTutorialsWidget::updateActions);
     connect(&_tutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsRemoved, this, &PageTutorialsWidget::updateActions);
 
-    updateActions();
-
     if (!tags.isEmpty())
         _tutorialsFilterModel.getTagsFilterAction().setSelectedOptions(tags);
+
+    updateActions();
 }
 
 HorizontalGroupAction& PageTutorialsWidget::getToolbarAction()
