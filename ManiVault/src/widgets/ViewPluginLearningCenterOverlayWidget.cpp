@@ -395,7 +395,7 @@ bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDispl
 ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::TutorialsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip("Watch related tutorial(s)");
+    setToolTip("Explore related tutorial(s)");
 }
 
 void ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
