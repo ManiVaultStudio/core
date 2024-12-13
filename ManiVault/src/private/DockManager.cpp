@@ -61,7 +61,7 @@ DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
 {
     ViewPluginDockWidgets viewPluginDockWidgets;
 
-    for (auto dockWidget : dockWidgets())
+    for (auto dockWidget : dockWidgetsMap().values())
         if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
             viewPluginDockWidgets.push_back(viewPluginDockWidget);
 
