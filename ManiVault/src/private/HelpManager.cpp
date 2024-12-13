@@ -98,8 +98,12 @@ HelpManager::HelpManager(QObject* parent) :
                 addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
             }
 
+            emit videosModelPopulatedFromWebsite();
+
             for (const auto tutorial : tutorials)
                 addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+
+            emit tutorialsModelPopulatedFromWebsite();
         }
         catch (std::exception& e)
         {

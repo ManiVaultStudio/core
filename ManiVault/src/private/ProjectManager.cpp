@@ -1046,7 +1046,10 @@ void ProjectManager::createProject()
     }
     emit projectCreated(*_project);
 
+    mv::help().getShowLearningCenterAction().setChecked(false);
+
     _showStartPageAction.setChecked(false);
+    
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)

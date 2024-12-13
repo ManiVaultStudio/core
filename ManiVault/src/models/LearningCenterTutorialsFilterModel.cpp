@@ -84,6 +84,9 @@ void LearningCenterTutorialsFilterModel::setSourceModel(QAbstractItemModel* sour
     const auto updateTags = [this]() -> void {
         const auto uniqueTags = QStringList(_learningCenterTutorialsModel->getTagsSet().begin(), _learningCenterTutorialsModel->getTagsSet().end());
 
+        if (uniqueTags == _tagsFilterAction.getOptions())
+            return;
+
         _tagsFilterAction.setOptions(uniqueTags);
     	_tagsFilterAction.setSelectedOptions(_tagsFilterAction.hasSelectedOptions() ? _tagsFilterAction.getSelectedOptions() : uniqueTags);
     };

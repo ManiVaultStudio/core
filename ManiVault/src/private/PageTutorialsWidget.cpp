@@ -38,10 +38,11 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
     connect(&_tutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsInserted, this, &PageTutorialsWidget::updateActions);
     connect(&_tutorialsFilterModel, &LearningCenterTutorialsFilterModel::rowsRemoved, this, &PageTutorialsWidget::updateActions);
 
-    if (!tags.isEmpty())
-        _tutorialsFilterModel.getTagsFilterAction().setSelectedOptions(tags);
-
     updateActions();
+
+    connect(&mv::help(), &mv::AbstractHelpManager::tutorialsModelPopulatedFromWebsite, this, [this, tags]() -> void {
+        getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tags.isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tags);
+	});
 }
 
 HorizontalGroupAction& PageTutorialsWidget::getToolbarAction()

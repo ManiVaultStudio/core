@@ -34,6 +34,8 @@ OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStrin
 
     connect(&_optionsModel, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) -> void {
         //if (roles.contains(Qt::CheckStateRole)) {
+        qDebug() << __FUNCTION__;
+
             saveToSettings();
             emit selectedOptionsChanged(getSelectedOptions());
         //}
