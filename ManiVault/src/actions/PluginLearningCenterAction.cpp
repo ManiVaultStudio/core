@@ -271,6 +271,31 @@ const LearningCenterVideos& PluginLearningCenterAction::getVideos() const
     return _videos;
 }
 
+void PluginLearningCenterAction::addTutorial(const util::LearningCenterTutorial* tutorial)
+{
+    _tutorials.push_back(tutorial);
+}
+
+void PluginLearningCenterAction::addTutorials(const util::LearningCenterTutorials& tutorials)
+{
+    _tutorials.insert(_tutorials.end(), tutorials.begin(), tutorials.end());
+}
+
+void PluginLearningCenterAction::addTutorials(const QString& tag)
+{
+    addTutorials(mv::help().getTutorials({ tag }));
+}
+
+void PluginLearningCenterAction::addTutorials(const QStringList& tags)
+{
+    addTutorials(mv::help().getTutorials(tags));
+}
+
+const util::LearningCenterTutorials& PluginLearningCenterAction::getTutorials() const
+{
+    return _tutorials;
+}
+
 bool PluginLearningCenterAction::isViewPlugin() const
 {
     Q_ASSERT(_plugin);

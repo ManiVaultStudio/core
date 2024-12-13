@@ -169,8 +169,8 @@ protected:
         bool shouldDisplay() const override;
     };
 
-    /** Toolbar item widget for showing the view plugin description */
-    class DescriptionToolbarItemWidget final : public AbstractToolbarItemWidget
+    /** Toolbar item widget for showing the view plugin tutorials */
+    class TutorialsToolbarItemWidget final : public AbstractToolbarItemWidget
     {
     public:
 
@@ -179,7 +179,7 @@ protected:
          * @param viewPlugin Pointer to view plugin
          * @param overlayWidget Pointer to overlay widget
          */
-        DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+        TutorialsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
 
         /**
          * Invoked when the mouse button is pressed
@@ -589,7 +589,7 @@ private:
     ToolbarWidget                               _toolbarWidget;                         /** Toolbar widget which contains the various learning center actions */
     LearningCenterToolbarItemWidget             _learningCenterToolbarItemWidget;       /** Primary learning center toolbar item widget */
     VideosToolbarItemWidget                     _videosToolbarItemWidget;               /** Videos toolbar item widget */
-    DescriptionToolbarItemWidget                _descriptionToolbarItemWidget;          /** Plugin description toolbar item widget */
+    TutorialsToolbarItemWidget                  _tutorialsToolbarItemWidget;            /** Plugin tutorials toolbar item widget */
     ShortcutsToolbarItemWidget                  _shortcutsToolbarItemWidget;            /** Plugin shortcuts toolbar item widget */
     ShowDocumentationToolbarItemWidget          _showDocumentationToolbarItemWidget;    /** Documentation toolbar item widget */
     VisitGithubRepoToolbarItemWidget            _visitGithubRepoToolbarItemWidget;      /** Link to GitHub repository toolbar item widget */

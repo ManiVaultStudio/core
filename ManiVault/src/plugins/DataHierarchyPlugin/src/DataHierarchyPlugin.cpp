@@ -50,10 +50,8 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     getLearningCenterAction().setPluginTitle("Data hierarchy view");
 
     getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
-    //getLearningCenterAction().setLongDescriptionMarkdown(QString::fromStdString(longDescriptionMarkdown));
 	getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
-
-    
+	getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataHierarchyPlugin" }));
 }
 
 void DataHierarchyPlugin::init()

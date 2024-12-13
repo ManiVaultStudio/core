@@ -11,6 +11,7 @@
 #include "actions/OptionAction.h"
 
 #include "util/LearningCenterVideo.h"
+#include "util/LearningCenterTutorial.h"
 
 namespace mv::plugin {
     class Plugin;
@@ -182,6 +183,38 @@ public: // Videos
      */
     const util::LearningCenterVideos& getVideos() const;
 
+public: // Tutorials
+
+    /**
+     * Add \p tutorial
+     * @param tutorial Pointer to tutorial
+     */
+    void addTutorial(const util::LearningCenterTutorial* tutorial);
+
+    /**
+     * Add \p tutorials
+     * @param tutorials Tutorials
+     */
+    void addTutorials(const util::LearningCenterTutorials& tutorials);
+
+    /**
+     * Add tutorial by \p tag
+     * @param tag tutorial tag (from global learning center tutorial)
+     */
+    void addTutorials(const QString& tag);
+
+    /**
+     * Add tutorials by \p tags
+     * @param tags Tutorial tags (from global learning center tutorial)
+     */
+    void addTutorials(const QStringList& tags);
+
+    /**
+     * Get tutorials
+     * @return tutorials
+     */
+    const util::LearningCenterTutorials& getTutorials() const;
+
 private:
 
     /**
@@ -287,6 +320,7 @@ private:
     TriggerAction                               _moveToBottomRightAction;           /** Trigger action that moves the view plugin overlay to the bottom-right of the widget */
     QString                                     _pluginTitle;                       /** Human-readable plugin title in plain text format */
     util::LearningCenterVideos                  _videos;                            /** Plugin related videos */
+    util::LearningCenterTutorials               _tutorials;                         /** Plugin related tutorials */
     ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
     QPointer<QWidget>                           _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
 

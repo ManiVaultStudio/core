@@ -39,7 +39,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     _toolbarWidget(viewPlugin, this),
     _learningCenterToolbarItemWidget(_viewPlugin, this),
     _videosToolbarItemWidget(_viewPlugin, this),
-    _descriptionToolbarItemWidget(_viewPlugin, this),
+    _tutorialsToolbarItemWidget(_viewPlugin, this),
     _shortcutsToolbarItemWidget(_viewPlugin, this),
     _showDocumentationToolbarItemWidget(_viewPlugin, this),
     _visitGithubRepoToolbarItemWidget(_viewPlugin, this),
@@ -67,7 +67,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         _layout.addWidget(&_toolbarWidget);
 
         _videosToolbarItemWidget.hide();
-        _descriptionToolbarItemWidget.hide();
+        _tutorialsToolbarItemWidget.hide();
         _shortcutsToolbarItemWidget.hide();
         _showDocumentationToolbarItemWidget.hide();
         _visitGithubRepoToolbarItemWidget.hide();
@@ -77,7 +77,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 
         _toolbarWidget.addWidget(&_learningCenterToolbarItemWidget);
         _toolbarWidget.addWidget(&_videosToolbarItemWidget);
-        _toolbarWidget.addWidget(&_descriptionToolbarItemWidget);
+        _toolbarWidget.addWidget(&_tutorialsToolbarItemWidget);
         _toolbarWidget.addWidget(&_shortcutsToolbarItemWidget);
         _toolbarWidget.addWidget(&_showDocumentationToolbarItemWidget);
         _toolbarWidget.addWidget(&_visitGithubRepoToolbarItemWidget);
@@ -89,7 +89,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 
         _toolbarItemWidgets = {
 	        &_videosToolbarItemWidget,
-	        &_descriptionToolbarItemWidget,
+	        &_tutorialsToolbarItemWidget,
 	        &_shortcutsToolbarItemWidget,
 	        &_showDocumentationToolbarItemWidget,
 	        &_visitGithubRepoToolbarItemWidget,
@@ -361,7 +361,7 @@ bool ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::sho
 ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip("Watch related videos");
+    setToolTip("Watch related video(s)");
 }
 
 void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressEvent(QMouseEvent* event)
@@ -392,27 +392,51 @@ bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDispl
     return !getViewPlugin()->getLearningCenterAction().getVideos().empty();
 }
 
-ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::DescriptionToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::TutorialsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip(getViewPlugin()->getLearningCenterAction().getViewDescriptionAction().toolTip());
+    setToolTip("Watch related tutorial(s)");
 }
 
-void ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+void ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
 
-    getViewPlugin()->getLearningCenterAction().getViewDescriptionAction().trigger();
+    auto contextMenu = new QMenu(this);
+
+    for (const auto tutorial : getViewPlugin()->getLearningCenterAction().getTutorials()) {
+        auto watchTutorialAction = new QAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle());
+
+        connect(watchTutorialAction, &QAction::triggered, watchTutorialAction, [tutorial]() -> void {
+            if (auto tutorialPlugin = mv::plugins().requestViewPlugin("Tutorial")) {
+                if (auto pickerAction = dynamic_cast<OptionAction*>(tutorialPlugin->findChildByPath("Pick tutorial")))
+                    pickerAction->setCurrentText(tutorial->getTitle());
+
+                if (auto toolbarAction = dynamic_cast<HorizontalGroupAction*>(tutorialPlugin->findChildByPath("Toolbar")))
+                    toolbarAction->setVisible(false);
+            }
+        });
+
+        contextMenu->addAction(watchTutorialAction);
+    }
+        
+    contextMenu->exec(mapToGlobal(event->pos()));
 }
 
-QIcon ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::getIcon() const
+QIcon ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::getIcon() const
 {
-    return getViewPlugin()->getLearningCenterAction().getViewDescriptionAction().icon();
+    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getLearningCenterAction().getTutorials().size()));
+
+    badge.setScale(.6f);
+    badge.setEnabled(true);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
+
+    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("chalkboard"), badge);
 }
 
-bool ViewPluginLearningCenterOverlayWidget::DescriptionToolbarItemWidget::shouldDisplay() const
+bool ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::shouldDisplay() const
 {
-    return getViewPlugin()->getLearningCenterAction().hasDescription();
+    return !getViewPlugin()->getLearningCenterAction().getTutorials().empty();
 }
 
 ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
