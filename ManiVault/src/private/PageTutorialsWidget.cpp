@@ -6,8 +6,6 @@
 #include "PageContentWidget.h"
 #include "PageAction.h"
 
-#include <util/FileDownloader.h>
-
 #include <QEvent>
 
 using namespace mv;
@@ -75,7 +73,7 @@ void PageTutorialsWidget::updateActions()
         PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
-                    mv::projects().openProject(tutorial->getProject());
+                    mv::projects().openProject(QUrl(tutorial->getProject()));
                 } else {
                     if (!mv::projects().hasProject())
 						mv::projects().newBlankProject();
