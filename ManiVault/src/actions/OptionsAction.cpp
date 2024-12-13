@@ -5,8 +5,6 @@
 #include "OptionsAction.h"
 #include "ModelSelectionAction.h"
 
-#include "Application.h"
-
 #include "util/Miscellaneous.h"
 
 #include "widgets/FileDialog.h"
@@ -33,12 +31,8 @@ OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStrin
     initialize(options, selectedOptions);
 
     connect(&_optionsModel, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) -> void {
-        //if (roles.contains(Qt::CheckStateRole)) {
-        qDebug() << __FUNCTION__;
-
-            saveToSettings();
-            emit selectedOptionsChanged(getSelectedOptions());
-        //}
+        saveToSettings();
+        emit selectedOptionsChanged(getSelectedOptions());
     });
 }
 
