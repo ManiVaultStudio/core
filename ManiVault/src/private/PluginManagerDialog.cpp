@@ -9,8 +9,6 @@
 #include <Plugin.h>
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QPushButton>
 #include <QMenu>
 #include <QHeaderView>
 
@@ -30,7 +28,8 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
     const auto pluginIcon = Application::getIconFont("FontAwesome").getIcon("plug");
 
     setWindowIcon(pluginIcon);
-    setModal(true);
+    setWindowModality(Qt::ApplicationModal);
+    setWindowFlag(Qt::WindowStaysOnTopHint);
     setWindowTitle("Plugin Browser");
     
     auto layout = new QVBoxLayout();
@@ -119,7 +118,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
 void PluginManagerDialog::create()
 {
-    auto* loadedPluginsDialog = new PluginManagerDialog();
-    connect(loadedPluginsDialog, &PluginManagerDialog::finished, loadedPluginsDialog, &PluginManagerDialog::deleteLater);
-    loadedPluginsDialog->open();
+    PluginManagerDialog loadedPluginsDialog;
+
+    loadedPluginsDialog.exec();
 }
