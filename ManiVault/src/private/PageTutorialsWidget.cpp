@@ -71,7 +71,7 @@ void PageTutorialsWidget::updateActions()
 
         auto tutorial = dynamic_cast<LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceRowIndex))->getTutorial();
 
-        PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", tutorial->getProject(), [this, tutorial]() -> void {
+        PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
                     auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
@@ -110,8 +110,8 @@ void PageTutorialsWidget::updateActions()
 	        }
 		});
 
-        //tutorialAction.setSubtitle(subtitle);
-        tutorialAction.setComments(tutorial->getProject());
+        tutorialAction.setComments(tutorial->hasProject() ? QString("A tutorial project will be downloaded from: %1.").arg(tutorial->getProject()) : "Creates a project with a tutorial plugin.");
+        tutorialAction.setTags(tutorial->getTags());
 
         getModel().add(tutorialAction);
     }
