@@ -96,10 +96,6 @@ bool PluginsFilterModel::hasPluginInstances(const QModelIndex& index, int level 
 {
     const auto numberOfRows = sourceModel()->rowCount(index);
 
-#ifdef PLUGINS_FILTER_MODEL_VERBOSE
-    qDebug() << __FUNCTION__ << index.data().toString() << "level" << level << "number of children" << numberOfRows;
-#endif
-
     if (level == 2 && sourceModel()->rowCount(index.parent()) >= 1)
         return true;
 
