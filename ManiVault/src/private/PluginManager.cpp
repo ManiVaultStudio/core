@@ -436,6 +436,9 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
 
 plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
 {
+    if (kind == "Tutorial")
+        return requestViewPluginFloated(kind, datasets);
+
     const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
 
     if (viewPlugin != nullptr)
