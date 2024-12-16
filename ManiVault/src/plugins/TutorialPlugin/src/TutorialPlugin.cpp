@@ -22,6 +22,8 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _tutorialPickerAction(this, "Pick tutorial"),
     _openInBrowserAction(this, "Open in browser")
 {
+    getLearningCenterAction().getToolbarVisibleAction().setChecked(false);
+
     _horizontalGroupAction.setShowLabels(false);
 
     auto tutorialsModel = const_cast<mv::LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel());
