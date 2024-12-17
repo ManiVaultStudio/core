@@ -32,6 +32,7 @@ void PageAction::setEditorData(const QModelIndex& index)
     setSubtitle(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Subtitle)).data(Qt::EditRole).toString());
     setMetaData(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::MetaData)).data(Qt::EditRole).toString());
     setPreviewImage(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::PreviewImage)).data(Qt::UserRole + 1).value<QImage>());
+    setDownloadUrls(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::DownloadUrls)).data(Qt::EditRole).toStringList());
     setContributors(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Contributors)).data(Qt::UserRole + 1).toStringList());
 }
 

@@ -20,6 +20,7 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
     _previewIconLabel(Application::getIconFont("FontAwesome").getIcon("image")),
     _metaDataIconLabel(Application::getIconFont("FontAwesome").getIcon("file-alt")),
     _tagsIconLabel(Application::getIconFont("FontAwesome").getIcon("tags")),
+    _downloadUrls(Application::getIconFont("FontAwesome").getIcon("download")),
     _contributorsIconLabel(Application::getIconFont("FontAwesome").getIcon("user"))
 {
     setObjectName("PageActionDelegateEditorWidget");
@@ -60,6 +61,7 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
         _infoLayout.addWidget(&_previewIconLabel);
         _infoLayout.addWidget(&_metaDataIconLabel);
         _infoLayout.addWidget(&_tagsIconLabel);
+        _infoLayout.addWidget(&_downloadUrls);
         _infoLayout.addWidget(&_contributorsIconLabel);
         _infoLayout.addStretch(1);
 
@@ -79,6 +81,7 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
         _infoLayout.addWidget(&_previewIconLabel);
         _infoLayout.addWidget(&_metaDataIconLabel);
         _infoLayout.addWidget(&_tagsIconLabel);
+        _infoLayout.addWidget(&_downloadUrls);
         _infoLayout.addWidget(&_contributorsIconLabel);
         _infoLayout.addStretch(1);
 
@@ -103,7 +106,7 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
 
     _previewIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
         if (!_index.isValid())
-            return QString();
+            return {};
 
         PageAction pageAction(_index);
 
@@ -163,6 +166,28 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
         return getTooltipHtml(tagsHtml);
     });
 
+    _downloadUrls.setTooltipCallback([this, getTooltipHtml]() -> QString {
+        if (!_index.isValid())
+            return {};
+
+        PageAction pageAction(_index);
+
+        const auto downloadUrls = pageAction.getDownloadUrls();
+
+        QStringList downloads;
+
+        for (const auto& downloadUrl : downloadUrls)
+            downloads << QString("<p>%1</p>").arg(downloadUrl);
+
+        if (downloadUrls.size() == 1)
+            return getTooltipHtml(QString("<p><b>One download from: </b></p>%1").arg(downloads.first()));
+
+        if (downloadUrls.size() > 1)
+            return getTooltipHtml(QString("<p><b>%1 downloads from: </b></p>%2").arg(QString::number(downloadUrls.size()), downloadUrls.join("</br>")));
+            
+        return {};
+    });
+
     _contributorsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
         if (!_index.isValid())
             return {};
@@ -195,6 +220,7 @@ void PageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
 
     _previewIconLabel.setVisible(!pageAction.getPreviewImage().isNull());
     _tagsIconLabel.setVisible(!pageAction.getTags().isEmpty());
+    _downloadUrls.setVisible(!pageAction.getDownloadUrls().isEmpty());
     _contributorsIconLabel.setVisible(!pageAction.getContributors().isEmpty());
 }
 

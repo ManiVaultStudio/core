@@ -89,7 +89,7 @@ public: // Global settings
      * Set plugin global settings group action to \p pluginGlobalSettingsGroupAction
      * @param pluginGlobalSettingsGroupAction Pointer to plugin global settings group action (maybe a nullptr)
      */
-    virtual void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction) final;
+    void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction);
 
 public: // Status bar
 
@@ -97,13 +97,13 @@ public: // Status bar
      * Get plugin status bar action
      * @return Pointer to plugin status bar action (maybe nullptr)
      */
-    virtual gui::PluginStatusBarAction* getStatusBarAction() const final;
+    gui::PluginStatusBarAction* getStatusBarAction() const;
 
     /**
      * Set plugin status bar action to \p statusBarAction
      * @param statusBarAction Pointer to plugin status bar action (maybe a nullptr)
      */
-    virtual void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction) final;
+    void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction);
 
 public: // Help
 

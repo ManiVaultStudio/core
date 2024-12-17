@@ -22,6 +22,7 @@ QMap<PageActionsModel::Column, QPair<QString, QString>> PageActionsModel::column
     { Column::MetaData, { "Meta Data", "Meta Data" }},
     { Column::PreviewImage, { "Preview", "Preview image" }},
     { Column::Tooltip, { "Tooltip", "Tooltip" }},
+    { Column::DownloadUrls, { "Download URLs", "Download URLs" }},
     { Column::Contributors, { "Contributors", "Contributors" }},
     { Column::ClickedCallback, { "Clicked Callback", "Callback which is called when the action is clicked" }},
     { Column::SummaryDelegate, { "Summary", "Delegate item with title and subtitle" }}
@@ -55,6 +56,7 @@ void PageActionsModel::add(const PageAction& pageAction)
         new QStandardItem(pageAction.getMetaData()),
         new QStandardItem(),
         new QStandardItem(pageAction.getTooltip()),
+        new QStandardItem(pageAction.getDownloadUrls().join(", ")),
         new QStandardItem(),
         new QStandardItem(),
         new QStandardItem()
@@ -64,6 +66,7 @@ void PageActionsModel::add(const PageAction& pageAction)
     pageActionRow[static_cast<int>(Column::Tags)]->setData(QVariant::fromValue(pageAction.getTags()), Qt::EditRole);
     pageActionRow[static_cast<int>(Column::PreviewImage)]->setData(QVariant::fromValue(pageAction.getPreviewImage()));
     pageActionRow[static_cast<int>(Column::Contributors)]->setData(QVariant::fromValue(pageAction.getContributors()));
+    pageActionRow[static_cast<int>(Column::DownloadUrls)]->setData(QVariant::fromValue(pageAction.getDownloadUrls()), Qt::EditRole);
     pageActionRow[static_cast<int>(Column::ClickedCallback)]->setData(QVariant::fromValue(pageAction.getClickedCallback()));
 
     for (auto item : pageActionRow)

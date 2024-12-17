@@ -75,7 +75,7 @@ private:
     QVBoxLayout                 _textLayout;                /** Right text layout */
     QHBoxLayout                 _primaryTextLayout;         /** Primary layout with title and comments labels */
     QLabel                      _titleLabel;                /** Title label */
-    QLabel                      _metaDataLabel;             /** Label with meta data (may be empty) */
+    QLabel                      _metaDataLabel;             /** Label with metadata (maybe empty) */
     QHBoxLayout                 _secondaryTextLayout;       /** Secondary layout with subtitle and info labels */
     QLabel                      _subtitleLabel;             /** Subtitle label */
     QWidget                     _infoWidget;                /** Widget for info labels */
@@ -83,5 +83,6 @@ private:
     mv::gui::IconLabel          _previewIconLabel;          /** Icon label for preview image */
     mv::gui::IconLabel          _metaDataIconLabel;         /** Icon label for meta data */
     mv::gui::IconLabel          _tagsIconLabel;             /** Icon label for tags */
+    mv::gui::IconLabel          _downloadUrls;     /** Icon label for requires download */
     mv::gui::IconLabel          _contributorsIconLabel;     /** Icon label for contributors */
 };

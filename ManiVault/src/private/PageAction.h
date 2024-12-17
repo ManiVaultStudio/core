@@ -75,6 +75,9 @@ public: // Getters and setters
     QStringList getContributors() const { return _contributors; }
     void setContributors(const QStringList& contributors) { _contributors = contributors; }
 
+    QStringList getDownloadUrls() const { return _downloadUrls; }
+    void setDownloadUrls(const QStringList& downloadUrls) { _downloadUrls = downloadUrls; }
+
     ClickedCallback getClickedCallback() const { return _clickedCallback; }
     void setClickedCallback(const ClickedCallback& clickedCallback) { _clickedCallback = clickedCallback; }
 
@@ -107,10 +110,11 @@ protected:
     QString             _comments;          /** Comments are show on the top right */
     QStringList         _tags;              /** Tags (might be empty) */
     QString             _subtitle;          /** Subtitle */
-    QString             _metaData;          /** Meta data (might be empty) */
+    QString             _metaData;          /** Metadata (might be empty) */
     QImage              _previewImage;      /** Preview image (might be empty) */
     QString             _tooltip;           /** Tooltip (might be empty) */
     QStringList         _contributors;      /** List of contributors */
+    QStringList         _downloadUrls;      /** Action download URLs */
     ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
 
     static bool compactView;

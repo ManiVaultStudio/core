@@ -6,7 +6,6 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
-#include <AbstractWorkspaceManager.h>
 #include <QOperatingSystemVersion>
 
 #define TEST_STYLESHEET

@@ -65,6 +65,7 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
     treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::MetaData), true);
     treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::PreviewImage), true);
     treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Tooltip), true);
+    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::DownloadUrls), true);
     treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Contributors), true);
     treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::ClickedCallback), true);
 
