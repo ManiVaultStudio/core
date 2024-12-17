@@ -48,8 +48,6 @@ void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
     if (!tutorial)
         return;
 
-    qDebug() << tutorial->getTags();
-
     QStringList tags;
 
     for (const auto& tag : tutorial->getTags())
