@@ -8,6 +8,8 @@
 
 #include <ViewPlugin.h>
 
+#include <util/LearningCenterTutorial.h>
+
 #include <actions/HorizontalGroupAction.h>
 
 #include <models/LearningCenterTutorialsFilterModel.h>
@@ -33,6 +35,12 @@ public:
 
     /** Perform plugin initialization */
     void init() override;
+
+    /**
+     * Get currently selected tutorial
+     * @return Pointer to tutorial (if one is selected)
+     */
+    const mv::util::LearningCenterTutorial* getCurrentTutorial() const;
 
 public: // Serialization
 

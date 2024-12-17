@@ -22,7 +22,7 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _tutorialPickerAction(this, "Pick tutorial"),
     _openInBrowserAction(this, "Open in browser")
 {
-    getLearningCenterAction().getToolbarVisibleAction().setChecked(false);
+    //getLearningCenterAction().getToolbarVisibleAction().setChecked(false);
 
     _horizontalGroupAction.setShowLabels(false);
 
@@ -81,6 +81,21 @@ void TutorialPlugin::init()
     layout->addWidget(&_tutorialWidget, 1);
 
     getWidget().setLayout(layout);
+}
+
+const mv::util::LearningCenterTutorial* TutorialPlugin::getCurrentTutorial() const
+{
+    if (!_tutorialPickerAction.hasSelection())
+        return {};
+
+    const auto currentIndex = _tutorialPickerAction.getCurrentIndex();
+    const auto sourceIndex  = _tutorialsFilterModel.mapToSource(_tutorialsFilterModel.index(currentIndex, 0));
+    const auto tutorialItem = dynamic_cast<mv::LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceIndex));
+
+    if (!tutorialItem)
+        return {};
+
+    return tutorialItem->getTutorial();
 }
 
 void TutorialPlugin::fromVariantMap(const QVariantMap& variantMap)

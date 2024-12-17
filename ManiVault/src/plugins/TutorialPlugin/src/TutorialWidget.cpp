@@ -43,7 +43,19 @@ TutorialWidget::TutorialWidget(TutorialPlugin* tutorialPlugin, QWidget* parent /
 
 void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
 {
-    QString sanitizedHtmltext = QString(R"(
+    const auto tutorial = _tutorialPlugin->getCurrentTutorial();
+
+    if (!tutorial)
+        return;
+
+    qDebug() << tutorial->getTags();
+
+    QStringList tags;
+
+    for (const auto& tag : tutorial->getTags())
+        tags << QString("<div style='display: inline; background-color: lightgrey; padding-left: 5px; padding-right: 5px; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; font-size: 8pt; margin-right: 4px;'>%1</div>").arg(tag);
+
+	QString sanitizedHtmltext = QString(R"(
     <html>
         <head>
             <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">
@@ -61,11 +73,12 @@ void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
         <body>
             <main class="container">
 				<h1 class="display-6 fw-bold">%1</h1>
-				%2
+				<p>%2</p>
+				%3
 			</main>
         </body>
     </html>
-    )").arg(_tutorialPlugin->getTutorialPickerAction().getCurrentText(), htmlText);
+    )").arg(_tutorialPlugin->getTutorialPickerAction().getCurrentText(), tags.join(""), htmlText);
 
     _webEngineView.setHtml(sanitizedHtmltext, baseUrl);
 

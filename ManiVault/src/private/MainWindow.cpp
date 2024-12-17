@@ -42,6 +42,8 @@
     #define MAIN_WINDOW_VERBOSE
 #endif
 
+//#define MAIN_WINDOW_SCREEN_CAPTURE
+
 using namespace mv;
 using namespace mv::gui;
 
@@ -236,12 +238,14 @@ void MainWindow::restoreWindowGeometryFromSettings()
 {
     const auto storedMainWindowGeometry = Application::current()->getSetting("MainWindow/Geometry", QVariant());
 
-    QRect mainWindowRect;
-
     if (storedMainWindowGeometry.isValid())
         restoreGeometry(storedMainWindowGeometry.toByteArray());
     else
         setDefaultWindowGeometry();
+
+#ifdef MAIN_WINDOW_SCREEN_CAPTURE
+    setFixedSize(1280, 720);
+#endif
 }
 
 void MainWindow::saveWindowGeometryToSettings()
