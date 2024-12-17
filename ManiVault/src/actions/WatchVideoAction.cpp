@@ -12,7 +12,7 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-WatchVideoAction::WatchVideoAction(QObject* parent, const QString& title, util::LearningCenterVideo* video /*= nullptr*/) :
+WatchVideoAction::WatchVideoAction(QObject* parent, const QString& title, const util::LearningCenterVideo* video /*= nullptr*/) :
     TriggerAction(parent, title),
     _video(video)
 {
@@ -33,7 +33,7 @@ WatchVideoAction::WatchVideoAction(QObject* parent, const QString& title, util::
     }
 }
 
-void WatchVideoAction::watch()
+void WatchVideoAction::watch() const
 {
     Q_ASSERT(_video);
 

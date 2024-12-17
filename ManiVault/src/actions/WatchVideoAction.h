@@ -31,15 +31,15 @@ public:
      * @param title Title of the action
      * @param video Pointer to video
      */
-    Q_INVOKABLE WatchVideoAction(QObject* parent, const QString& title, util::LearningCenterVideo* video = nullptr);
+    Q_INVOKABLE WatchVideoAction(QObject* parent, const QString& title, const util::LearningCenterVideo* video = nullptr);
 
 private:
 
     /** Opens up a browser with YouTube or a dialog with a GIF animation */
-    void watch();
+    void watch() const;
 
 private:
-    util::LearningCenterVideo*    _video;    /** Pointer to video to watch */
+    const util::LearningCenterVideo*    _video;    /** Pointer to video to watch */
 
     friend class AbstractActionsManager;
 };

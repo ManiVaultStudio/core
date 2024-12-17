@@ -22,7 +22,7 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _tutorialPickerAction(this, "Pick tutorial"),
     _openInBrowserAction(this, "Open in browser")
 {
-    //getLearningCenterAction().getToolbarVisibleAction().setChecked(false);
+    getLearningCenterAction().getToolbarVisibleAction().setChecked(false);
 
     _horizontalGroupAction.setShowLabels(false);
 

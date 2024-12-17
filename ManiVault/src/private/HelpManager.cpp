@@ -4,10 +4,12 @@
 
 #include "HelpManager.h"
 
-#include "models/LearningCenterVideosFilterModel.h"
-#include "models/LearningCenterTutorialsFilterModel.h"
+#include <models/LearningCenterVideosFilterModel.h>
+#include <models/LearningCenterTutorialsFilterModel.h>
 
-#include "util/Exception.h"
+#include <util/Exception.h>
+
+#include <actions/WatchVideoAction.h>
 
 #include <Application.h>
 #include <Task.h>
@@ -184,13 +186,9 @@ QMenu* HelpManager::getVideosMenu() const
     videosMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("video"));
 
     for (const auto video : getVideos({})) {
-        auto videoAction = new TriggerAction(videosMenu, video->getTitle());
+        auto videoAction = new WatchVideoAction(videosMenu, video->getTitle(), video);
 
         videoAction->setIconByName("external-link-square-alt");
-
-        connect(videoAction, &TriggerAction::triggered, videoAction, [video]() -> void {
-            QDesktopServices::openUrl(video->getResource());
-		});
 
         videosMenu->addAction(videoAction);
     }

@@ -117,6 +117,7 @@ public: // Help
      * Get the read me markdown file URL
      * @return URL of the read me markdown file
      */
+    [[deprecated("This function is under development and has no effect (yet).")]]
     virtual QUrl getReadmeMarkdownUrl() const;
 
     /**
@@ -247,24 +248,28 @@ public: // Description
      * Get extended description in HTML format
      * @return Extended description in HTML format
      */
+    [[deprecated("This function is under development and has no effect (yet).")]]
     QString getLongDescription() const;
 
     /**
      * Get extended description in Markdown format
      * @return Extended description in Markdown format
      */
+    [[deprecated("This function is under development and has no effect (yet).")]]
     QString getLongDescriptionMarkdown() const;
 
     /**
      * Set long description to \p longDescription
      * @param longDescription Extended description in HTML format
      */
+    [[deprecated("This function is under development and has no effect (yet).")]]
     void setLongDescription(const QString& longDescription);
 
     /**
      * Set long description Markdown to \p longDescription
      * @param longDescriptionMarkdown Extended description in Markdown format
      */
+    [[deprecated("This function is under development and has no effect (yet).")]]
     void setLongDescriptionMarkdown(const QString& longDescriptionMarkdown);
 
 public: // Number of instances
