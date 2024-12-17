@@ -179,14 +179,14 @@ LearningCenterVideos HelpManager::getVideos(const QStringList& tags) const
 
 QMenu* HelpManager::getVideosMenu() const
 {
-    auto videosMenu = new QMenu();
+    auto videosMenu = new QMenu("Videos");
 
     videosMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("video"));
 
     for (const auto video : getVideos({})) {
         auto videoAction = new TriggerAction(videosMenu, video->getTitle());
 
-        videoAction->setIconByName("play");
+        videoAction->setIconByName("external-link-square-alt");
 
         connect(videoAction, &TriggerAction::triggered, videoAction, [video]() -> void {
             QDesktopServices::openUrl(video->getResource());
@@ -195,7 +195,7 @@ QMenu* HelpManager::getVideosMenu() const
         videosMenu->addAction(videoAction);
     }
 
-    return videosMenu();
+    return videosMenu;
 }
 
 const LearningCenterVideosModel& HelpManager::getVideosModel() const
@@ -237,21 +237,23 @@ const LearningCenterTutorialsModel& HelpManager::getTutorialsModel() const
 
 QMenu* HelpManager::getTutorialsMenu() const
 {
-    auto tutorialsMenu = new QMenu();
+    auto tutorialsMenu = new QMenu("Tutorials");
 
     tutorialsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("chalkboard"));
 
     for (const auto tutorial : getTutorials({})) {
-        auto videoAction = new QAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle());
+        auto tutorialAction = new TriggerAction(tutorialsMenu, tutorial->getTitle());
 
-        connect(videoAction, &TriggerAction::triggered, videoAction, [tutorial]() -> void {
+        tutorialAction->setIconByName("external-link-square-alt");
+
+        connect(tutorialAction, &TriggerAction::triggered, tutorialAction, [tutorial]() -> void {
             QDesktopServices::openUrl(tutorial->getUrl());
 		});
 
-        tutorialsMenu->addAction(videoAction);
+        tutorialsMenu->addAction(tutorialAction);
     }
 
-    return tutorialsMenu();
+    return tutorialsMenu;
 }
 
 }

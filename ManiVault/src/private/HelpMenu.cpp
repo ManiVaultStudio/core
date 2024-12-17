@@ -11,6 +11,7 @@
 
 #include <QMessageBox> 
 #include <QStringLiteral>
+#include <QOperatingSystemVersion>
 #include <QDesktopServices>
 
 using namespace mv;
@@ -20,23 +21,20 @@ using namespace mv::plugin;
 
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
-    _aboutProjectAction(nullptr),
-    _aboutAction(nullptr),
-    _aboutQtAction(nullptr),
-    _aboutThirdPartiesAction(nullptr)
+    _devDocAction(nullptr, "Developer Documentation"),
+    _aboutProjectAction(nullptr, "About project"),
+    _aboutAction(nullptr, "About"),
+    _aboutQtAction(nullptr, "About Qt"),
+    _aboutThirdPartiesAction(nullptr, "About third-parties")
 {
     setTitle("Help");
     setToolTip("ManiVault help");
-    
-    // initialize static actions
-    _devDocAction = new TriggerAction(this, "Developer Documentation");
-    connect(_devDocAction, &QAction::triggered, this, [this](bool) { QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode)); });
-    
-    _aboutProjectAction = new TriggerAction(this, "About project");
 
-    _aboutProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("info"));
+    _aboutThirdPartiesAction.setMenuRole(QAction::NoRole);
+    _aboutQtAction.setMenuRole(QAction::NoRole);
+    _aboutProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("info"));
 
-    connect(_aboutProjectAction, &TriggerAction::triggered, this, []() -> void {
+    connect(&_aboutProjectAction, &TriggerAction::triggered, this, []() -> void {
         if (!projects().hasProject())
             return;
 
@@ -44,7 +42,7 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     });
 
     const auto updateAboutProjectActionReadOnly = [this]() -> void {
-        _aboutProjectAction->setVisible(projects().hasProject());
+        _aboutProjectAction.setVisible(projects().hasProject());
     };
 
     updateAboutProjectActionReadOnly();
@@ -52,14 +50,23 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     connect(&projects(), &AbstractProjectManager::projectOpened, this, updateAboutProjectActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateAboutProjectActionReadOnly);
 
-    // macOS does not like populating the menu on show, so we rather do it explicitly here
     populate();
+}
+
+void HelpMenu::showEvent(QShowEvent* event)
+{
+    QMenu::showEvent(event);
+
+    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows)
+        populate();
 }
 
 void HelpMenu::populate()
 {
+    clear();
+    
     addAction(&mv::help().getShowLearningCenterPageAction());
-    addAction(_devDocAction);
+    addAction(&_devDocAction);
     addSeparator();
     
     QVector<QPointer<TriggerAction>> actions;
@@ -88,38 +95,33 @@ void HelpMenu::populate()
     addMenu(mv::help().getTutorialsMenu());
 
     addSeparator();
-    addAction(_aboutProjectAction);
-
-    // the above clear() deletes all actions whose parent is this
-    _aboutAction                = new TriggerAction(this, "About");
-    _aboutThirdPartiesAction    = new TriggerAction(this, "About Third Parties");
-    _aboutQtAction              = new TriggerAction(this, "About Qt");
-
-    _aboutThirdPartiesAction->setMenuRole(QAction::NoRole);
-    _aboutQtAction->setMenuRole(QAction::NoRole);
-
-    connect(_aboutAction, &mv::gui::TriggerAction::triggered, this, &HelpMenu::about);
-
-    connect(_aboutThirdPartiesAction, &mv::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
-
-    connect(_aboutQtAction, &mv::gui::TriggerAction::triggered, this, [this](bool) {
-        QMessageBox::aboutQt(this->parentWidget(), "About Qt");
-    });
+    addAction(&_aboutProjectAction);
 
     if(!isEmpty())
         addSeparator();
 
-    addAction(_aboutAction);
-    addAction(_aboutThirdPartiesAction);
-    addAction(_aboutQtAction);
+    addAction(&_aboutAction);
+    addAction(&_aboutThirdPartiesAction);
+    addAction(&_aboutQtAction);
+
+    connect(&_devDocAction, &QAction::triggered, this, [this](bool) {
+        QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode));
+    });
+
+    connect(&_aboutAction, &TriggerAction::triggered, this, &HelpMenu::about);
+    connect(&_aboutThirdPartiesAction, &TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
+
+    connect(&_aboutQtAction, &TriggerAction::triggered, this, [this](bool) {
+        QMessageBox::aboutQt(this->parentWidget(), "About Qt");
+	});
 }
 
-void HelpMenu::about()
+void HelpMenu::about() const
 {
     QMessageBox::about(this->parentWidget(), tr("About ManiVault"), Application::getAbout());
 }
 
-void HelpMenu::aboutThirdParties()
+void HelpMenu::aboutThirdParties() const
 {
     const QString message = QMessageBox::tr(
         "<p>ManiVault uses several third party libraries: </p>"
