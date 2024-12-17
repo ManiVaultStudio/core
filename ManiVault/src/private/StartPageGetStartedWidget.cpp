@@ -35,6 +35,8 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 {
     auto layout = new QVBoxLayout();
 
+    layout->setContentsMargins(0, 0, 0, 0);
+
     layout->addWidget(&_createProjectFromWorkspaceWidget, 3);
     layout->addWidget(&_createProjectFromDatasetWidget, 3);
     layout->addWidget(&_tutorialsWidget, 3);

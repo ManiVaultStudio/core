@@ -32,6 +32,7 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
         _layout.addWidget(PageContentWidget::createHeaderLabel(title, title));
 
     _layout.addWidget(&_hierarchyWidget, 1);
+    _layout.setContentsMargins(0, 0, 0, 0);
 
     setLayout(&_layout);
 
