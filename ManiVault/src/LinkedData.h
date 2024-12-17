@@ -56,7 +56,13 @@ public:
      * Get map for indexed pixels
      * @return Index map
      */
-    Map& getMap();
+    Map& getMap() { return _map; };
+
+    /**
+     * Get map for indexed pixels
+     * @return Index map
+     */
+    const Map& getMap() const { return _map; };
 
     /**
      * Establishes whether a mapping exists for \p pointIndex

@@ -76,11 +76,6 @@ void SelectionMap::populateMappingIndices(std::uint32_t pointIndex, Indices& ind
     }
 }
 
-SelectionMap::Map& SelectionMap::getMap()
-{
-    return _map;
-}
-
 bool SelectionMap::hasMappingForPointIndex(std::uint32_t pointIndex) const
 {
     switch (_type)
