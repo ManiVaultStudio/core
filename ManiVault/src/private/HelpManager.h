@@ -46,6 +46,12 @@ public:
     util::LearningCenterVideos getVideos(const QStringList& tags) const override;
 
     /**
+     * Get videos menu (e.g. for use in the main menu)
+     * @return Pointer to videos menu
+     */
+    QMenu* getVideosMenu() const override;
+
+    /**
      * Get videos model
      * @return Const reference to videos model
      */
@@ -69,6 +75,12 @@ public:
      * @return Const reference to tutorials model
      */
     const LearningCenterTutorialsModel& getTutorialsModel() const override;
+
+    /**
+     * Get tutorials menu (e.g. for use in the main menu)
+     * @return Pointer to tutorials menu
+     */
+    QMenu* getTutorialsMenu() const;
 
 public: // Action getters
 

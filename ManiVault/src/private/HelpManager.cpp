@@ -177,6 +177,27 @@ LearningCenterVideos HelpManager::getVideos(const QStringList& tags) const
     return videos;
 }
 
+QMenu* HelpManager::getVideosMenu() const
+{
+    auto videosMenu = new QMenu();
+
+    videosMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("video"));
+
+    for (const auto video : getVideos({})) {
+        auto videoAction = new TriggerAction(videosMenu, video->getTitle());
+
+        videoAction->setIconByName("play");
+
+        connect(videoAction, &TriggerAction::triggered, videoAction, [video]() -> void {
+            QDesktopServices::openUrl(video->getResource());
+		});
+
+        videosMenu->addAction(videoAction);
+    }
+
+    return videosMenu();
+}
+
 const LearningCenterVideosModel& HelpManager::getVideosModel() const
 {
     return _videosModel;
@@ -212,6 +233,25 @@ LearningCenterTutorials HelpManager::getTutorials(const QStringList& tags) const
 const LearningCenterTutorialsModel& HelpManager::getTutorialsModel() const
 {
     return _tutorialsModel;
+}
+
+QMenu* HelpManager::getTutorialsMenu() const
+{
+    auto tutorialsMenu = new QMenu();
+
+    tutorialsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("chalkboard"));
+
+    for (const auto tutorial : getTutorials({})) {
+        auto videoAction = new QAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle());
+
+        connect(videoAction, &TriggerAction::triggered, videoAction, [tutorial]() -> void {
+            QDesktopServices::openUrl(tutorial->getUrl());
+		});
+
+        tutorialsMenu->addAction(videoAction);
+    }
+
+    return tutorialsMenu();
 }
 
 }

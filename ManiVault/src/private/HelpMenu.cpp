@@ -83,6 +83,11 @@ void HelpMenu::populate()
     }
 
     addSeparator();
+
+    addMenu(mv::help().getVideosMenu());
+    addMenu(mv::help().getTutorialsMenu());
+
+    addSeparator();
     addAction(_aboutProjectAction);
 
     // the above clear() deletes all actions whose parent is this

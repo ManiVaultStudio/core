@@ -53,7 +53,7 @@ void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
     for (const auto& tag : tutorial->getTags())
         tags << QString("<div style='display: inline; background-color: lightgrey; padding-left: 5px; padding-right: 5px; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; font-size: 8pt; margin-right: 4px;'>%1</div>").arg(tag);
 
-	QString sanitizedHtmltext = QString(R"(
+	const auto sanitizedHtmltext = QString(R"(
     <html>
         <head>
             <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">

@@ -60,6 +60,12 @@ public:
     virtual const LearningCenterVideosModel& getVideosModel() const = 0;
 
     /**
+     * Get videos menu (e.g. for use in the main menu)
+     * @return Pointer to videos menu
+     */
+    virtual QMenu* getVideosMenu() const = 0;
+
+    /**
      * Add \p tutorial
      * @param tutorial Pointer to tutorial to add
      */
@@ -77,6 +83,12 @@ public:
      * @return Const reference to tutorials model
      */
     virtual const LearningCenterTutorialsModel& getTutorialsModel() const = 0;
+
+    /**
+     * Get tutorials menu (e.g. for use in the main menu)
+     * @return Pointer to tutorials menu
+     */
+    virtual QMenu* getTutorialsMenu() const = 0;
 
 signals:
 
