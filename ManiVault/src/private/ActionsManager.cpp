@@ -188,7 +188,7 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
                     const auto nameChanged = [&nameAction, &actionsFilterModel, widget]() -> void {
                         const auto isDuplicateName = !actionsFilterModel.match(actionsFilterModel.index(0, static_cast<int>(AbstractActionsModel::Column::Name)), Qt::DisplayRole, nameAction.getString(), -1, Qt::MatchFlag::MatchExactly).isEmpty();
                         
-                        if (nameAction.getString().isEmpty() ? true : isDuplicateName ? true : false)
+                        if (nameAction.getString().isEmpty() ? true : isDuplicateName)
                             widget->setStyleSheet("color: red;");
                         else
                             widget->setStyleSheet("");
