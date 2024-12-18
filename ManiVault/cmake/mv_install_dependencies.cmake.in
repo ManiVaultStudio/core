@@ -4,7 +4,7 @@ install(CODE [[
         set(PRE_EXCLUDE "Qt6.*" "api-ms.*" "ext-ms.*" "hvsi.*" "pdmutilities.*" "wpaxholder.*" "dxgi.*" "^uxtheme.*" "d3d11.*" "winmm.*" "wldp.*")
         set(POST_EXCLUDE ".*[\\/]system32[\\/].*\\.dll" ".*[\\/]Qt6.dll" ".*[\\/]MV_Public.dll" ".*[\\/]PointData.dll" ".*[\\/]ClusterData.dll" ".*[\\/]ColorData.dll" ".*[\\/]ImageData.dll" ".*[\\/]TextData.dll")
     elseif(APPLE)
-        set(PRE_EXCLUDE "libQt6.*" "libPointData.dylib" "libMV_Public.dylib" "libClusterData.dylib" "libColorData.dylib" "libImageData.dylib" "libTextData.dylib")
+        set(PRE_EXCLUDE "libQt6.*" "libomp.dylib" "libPointData.dylib" "libMV_Public.dylib" "libClusterData.dylib" "libColorData.dylib" "libImageData.dylib" "libTextData.dylib")
         set(POST_EXCLUDE "macos/lib")
     else()
         set(PRE_EXCLUDE "libQt6.*" "libMV_Public.so" "libPointData.so" "libClusterData.so" "libColorData.so" "libImageData.so" "libTextData.so")
