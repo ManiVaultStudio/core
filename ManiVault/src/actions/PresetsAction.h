@@ -204,7 +204,7 @@ public:
     void loadPresetsFromApplicationSettings();
 
     /** Save presets variant map to application settings */
-    void savePresetsToApplicationSettings();
+    void savePresetsToApplicationSettings() const;
 
     /**
      * Get recent file paths menu
