@@ -5,7 +5,7 @@
 #include "FileDownloader.h"
 
 #include "Task.h"
-#include "Task.h"
+#include "Application.h"
 
 #ifdef _DEBUG
 	#define FILE_DOWNLOADER_VERBOSE

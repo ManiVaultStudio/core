@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <actions/TriggerAction.h>
+
 #include <QMenu>
 
 namespace mv::gui {

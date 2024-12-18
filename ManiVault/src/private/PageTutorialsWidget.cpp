@@ -6,6 +6,8 @@
 #include "PageContentWidget.h"
 #include "PageAction.h"
 
+#include <CoreInterface.h>
+
 #include <QEvent>
 
 using namespace mv;
