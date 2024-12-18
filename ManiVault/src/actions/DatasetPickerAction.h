@@ -7,7 +7,6 @@
 #include "Dataset.h"
 #include "Set.h"
 
-#include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
 
 #include "event/EventListener.h"
@@ -22,14 +21,22 @@ namespace mv::gui {
 /**
  * Dataset picker action class
  *
- * Action class for picking a dataset from a list
+ * For picking a dataset from a list
  * Automatically removes items when datasets are removed and renamed
  *
  * @author Thomas Kroes
  */
 class CORE_EXPORT DatasetPickerAction : public OptionAction
 {
-Q_OBJECT
+	Q_OBJECT
+
+public:
+
+    /** Helper class for scoped value serialization disabling */
+    struct CORE_EXPORT ValueSerializationDisabler {
+        ValueSerializationDisabler() { disableValueSerialization(); }
+        virtual ~ValueSerializationDisabler() { enableValueSerialization(); }
+    };
 
 public:
 
@@ -56,16 +63,16 @@ public:
 
     /**
      * Set datasets filter function
-     * @param datasetsFilterFunction Filter lambda (triggered when datasets are added and/or removed from the global datasets model)
+     * @param filterFunction Filter lambda (triggered when datasets are added and/or removed from the global datasets model)
      */
     void setFilterFunction(const DatasetsFilterModel::FilterFunction& filterFunction);
 
     /** Get the current dataset */
-    mv::Dataset<mv::DatasetImpl> getCurrentDataset() const;
+    mv::Dataset<> getCurrentDataset() const;
 
     /** Get the current dataset */
     template<typename DatasetType>
-    inline mv::Dataset<DatasetType> getCurrentDataset() const
+    mv::Dataset<DatasetType> getCurrentDataset() const
     {
         return getCurrentDataset();
     }
@@ -148,13 +155,31 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+    /**
+     * Get whether value serialization is disabled
+     * @return Boolean determining whether value serialization is disabled
+     */
+    static bool isValueSerializationDisabled();
+
+    /**
+     * Set value serialization to \p valueSerializationDisabled
+     * @param valueSerializationDisabled Boolean determining whether value serialization is disabled
+     */
+    static void setValueSerializationDisabled(bool valueSerializationDisabled = true);
+
+    /** Disables serialization */
+    static void disableValueSerialization();
+
+    /** Disables serialization */
+    static void enableValueSerialization();
+
 signals:
 
     /**
      * Signals that a dataset has been picked
-     * @param Smart pointer to picked dataset
+     * @param pickedDataset Smart pointer to picked dataset
      */
-    void datasetPicked(mv::Dataset<mv::DatasetImpl> pickedDataset);
+    void datasetPicked(mv::Dataset<> pickedDataset);
 
     /**
      * Signals that selectable datasets changed
@@ -175,6 +200,8 @@ private:
     DatasetsFilterModel                     _datasetsFilterModel;           /** Filter model for the datasets model above */
     bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_filterModel */
     QStringList                             _currentDatasetsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
+
+    static bool noValueSerialization;   /** Prevent the value from being serialized (used by preset serialization) */
 
     friend class AbstractActionsManager;
 };
