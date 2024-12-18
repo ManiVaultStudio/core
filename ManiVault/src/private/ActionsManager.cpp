@@ -155,6 +155,13 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
             if (askForSharedParameterNameAction.isChecked()) {
                 auto& fontAwesome = Application::getIconFont("FontAwesome");
 
+                ActionsFilterModel actionsFilterModel;
+
+                actionsFilterModel.setSourceModel(&getActionsListModel());
+                actionsFilterModel.getTextFilterColumnAction().setCurrentText("Name");
+                actionsFilterModel.getTypeFilterAction().setString(privateAction->getTypeString());
+                actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
+
                 QDialog publishDialog;
 
                 publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
@@ -168,15 +175,33 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
                 StringAction nameAction(this, "Name", privateAction->text());
                 TriggerAction publishAction(this, "Publish");
                 TriggerAction cancelAction(this, "Cancel");
+                StringAction nameAvailabilityAction(this, "Name availability", "");
 
                 nameAction.setConnectionPermissionsToForceNone();
                 publishAction.setConnectionPermissionsToForceNone();
                 cancelAction.setConnectionPermissionsToForceNone();
+                nameAvailabilityAction.setConnectionPermissionsToForceNone();
+
+                nameAvailabilityAction.setDefaultWidgetFlags(StringAction::Label);
+
+                nameAvailabilityAction.setWidgetConfigurationFunction([&actionsFilterModel , &nameAction](WidgetAction* action, QWidget* widget) -> void {
+                    const auto nameChanged = [&nameAction, &actionsFilterModel, widget]() -> void {
+                        const auto isDuplicateName = !actionsFilterModel.match(actionsFilterModel.index(0, static_cast<int>(AbstractActionsModel::Column::Name)), Qt::DisplayRole, nameAction.getString(), -1, Qt::MatchFlag::MatchExactly).isEmpty();
+                        
+                        if (nameAction.getString().isEmpty() ? true : isDuplicateName)
+                            widget->setStyleSheet("color: red;");
+                        else
+                            widget->setStyleSheet("");
+					};
+
+                    connect(&nameAction, &StringAction::stringChanged, widget, nameChanged);
+				});
 
                 nameAction.setToolTip("Name of the shared parameter");
 
                 parameterLayout.addWidget(nameAction.createLabelWidget(&publishDialog), 0, 0);
                 parameterLayout.addWidget(nameAction.createWidget(&publishDialog), 0, 1);
+                parameterLayout.addWidget(nameAvailabilityAction.createWidget(&publishDialog), 1, 1);
 
                 buttonsLayout.addWidget(askForSharedParameterNameAction.createWidget(&publishDialog));
                 buttonsLayout.addSpacing(10);
@@ -189,15 +214,18 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
                 publishDialog.setLayout(&mainLayout);
 
-                const auto updateActionsReadOnly = [&publishAction, &nameAction]() -> void {
-                    publishAction.setEnabled(!nameAction.getString().isEmpty());
+                const auto nameChanged = [&publishAction, &nameAction, &nameAvailabilityAction, &actionsFilterModel]() -> void {
+                    const auto isDuplicateName = !actionsFilterModel.match(actionsFilterModel.index(0, static_cast<int>(AbstractActionsModel::Column::Name)), Qt::DisplayRole, nameAction.getString(), -1, Qt::MatchFlag::MatchExactly).isEmpty();
+
+                    publishAction.setEnabled(!nameAction.getString().isEmpty() && !isDuplicateName);
+                    nameAvailabilityAction.setString(nameAction.getString().isEmpty() ? "Name may not be empty" : isDuplicateName ? QString("<i>%1</i> is already taken").arg(nameAction.getString()) : QString("<i>%1</i> is available").arg(nameAction.getString()));
                 };
 
-                connect(&nameAction, &StringAction::stringChanged, this, updateActionsReadOnly);
+                connect(&nameAction, &StringAction::stringChanged, this, nameChanged);
                 connect(&publishAction, &TriggerAction::triggered, &publishDialog, &QDialog::accept);
                 connect(&cancelAction, &TriggerAction::triggered, &publishDialog, &QDialog::reject);
 
-                updateActionsReadOnly();
+                nameChanged();
 
                 publishDialog.open();
 
