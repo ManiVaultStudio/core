@@ -1,8 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>animation/Search.gif</file>
-        <file>animation/SearchScaled.gif</file>
-        <file>animation/ViewEditProperties.gif</file>
-        <file>animation/ViewEditPropertiesScaled.gif</file>
-    </qresource>
-</RCC>
