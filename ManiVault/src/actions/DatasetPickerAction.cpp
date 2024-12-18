@@ -3,12 +3,8 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DatasetPickerAction.h"
-#include "Application.h"
-#include "DataHierarchyItem.h"
 
 #include "event/Event.h"
-
-#include <QHBoxLayout>
 
 #ifdef _DEBUG
     //#define DATASET_PICKER_ACTION_VERBOSE
@@ -17,6 +13,8 @@
 using namespace mv::util;
 
 namespace mv::gui {
+
+bool DatasetPickerAction::noValueSerialization = false;
 
 DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) :
     OptionAction(parent, title),
@@ -306,7 +304,10 @@ void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Value");
+    if (isValueSerializationDisabled())
+        return;
+
+	variantMapMustContain(variantMap, "Value");
 
     setCurrentDataset(variantMap["Value"].toString());
 }
@@ -315,11 +316,33 @@ QVariantMap DatasetPickerAction::toVariantMap() const
 {
     QVariantMap variantMap = WidgetAction::toVariantMap();
 
-    variantMap.insert({
-        { "Value", getCurrentDatasetId() }
-    });
+    if (!isValueSerializationDisabled()) {
+        variantMap.insert({
+			{ "Value", getCurrentDatasetId() }
+        });
+    }
 
     return variantMap;
+}
+
+bool DatasetPickerAction::isValueSerializationDisabled()
+{
+    return noValueSerialization;
+}
+
+void DatasetPickerAction::setValueSerializationDisabled(bool valueSerializationDisabled)
+{
+    noValueSerialization = valueSerializationDisabled;
+}
+
+void DatasetPickerAction::disableValueSerialization()
+{
+    setValueSerializationDisabled(true);
+}
+
+void DatasetPickerAction::enableValueSerialization()
+{
+    setValueSerializationDisabled(false);
 }
 
 }
