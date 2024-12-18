@@ -196,6 +196,8 @@ void PresetsAction::loadPreset(const QString& name)
 
     emit presetAboutToBeLoaded(name);
     {
+        const DatasetPickerAction::ValueSerializationDisabler valueSerializationDisabler;
+
         _sourceAction->fromVariantMap(_presets[name].toMap());
     }
     emit presetLoaded(name);
@@ -209,6 +211,8 @@ void PresetsAction::savePreset(const QString& name)
 
     if (name.isEmpty())
         return;
+
+    const DatasetPickerAction::ValueSerializationDisabler valueSerializationDisabler;
 
     auto sourceActionVariantMap = _sourceAction->toVariantMap();
 
