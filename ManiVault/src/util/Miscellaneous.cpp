@@ -9,7 +9,7 @@
 
 #include <QAction>
 #include <QBuffer>
-#include <Qresource>
+#include <QResource>
 #include <QEventLoop>
 #include <QLayout>
 #include <QLayoutItem>
