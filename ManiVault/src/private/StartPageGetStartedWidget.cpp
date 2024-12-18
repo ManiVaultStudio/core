@@ -69,10 +69,12 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     const auto toggleViews = [this]() -> void {
         _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());
         _createProjectFromDatasetWidget.setVisible(_startPageContentWidget->getToggleProjectFromDataAction().isChecked());
+        _tutorialsWidget.setVisible(_startPageContentWidget->getToggleTutorialsAction().isChecked());
     };
 
     connect(&_startPageContentWidget->getToggleProjectFromWorkspaceAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&_startPageContentWidget->getToggleTutorialsAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
 }

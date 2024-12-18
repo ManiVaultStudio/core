@@ -200,7 +200,7 @@ public:
 
     /**
      * Get plugin trigger actions given \p dataTypes
-     * @param datasetTypes Vector of input data types
+     * @param dataTypes Vector of input data types
      * @return Vector of plugin trigger actions
      */
     virtual gui::PluginTriggerActions getPluginTriggerActions(const DataTypes& dataTypes) const {

@@ -233,9 +233,6 @@ private:
      */
     mv::plugin::ViewPlugin* getViewPlugin() const;
 
-    /** View plugin description (view depends on the type of plugin) */
-    void viewDescription() const;
-
     /** View shortcuts (view depends on the type of plugin) */
     void viewShortcuts() const;
 
@@ -269,7 +266,7 @@ public: // Action getters
     const TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; }
     const TriggerAction& getViewHelpAction() const { return _viewHelpAction; }
     const TriggerAction& getViewShortcutsAction() const { return _viewShortcutsAction; }
-    const ToggleAction& getOverlayVisibleAction() const { return _toolbarVisibleAction; }
+    const ToggleAction& getToolbarVisibleAction() const { return _toolbarVisibleAction; }
     const TriggerAction& getHideToolbarAction() const { return _hideToolbarAction; }
     const OptionAction& getAlignmentAction() const { return _alignmentAction; }
     const TriggerAction& getMoveToTopRightAction() const { return _moveToTopRightAction; }
@@ -326,7 +323,6 @@ private:
     util::LearningCenterVideos                  _videos;                            /** Plugin related videos */
     util::LearningCenterTutorials               _tutorials;                         /** Plugin related tutorials */
     ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
-    QPointer<QWidget>                           _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
 
     friend class plugin::ViewPlugin;
 };

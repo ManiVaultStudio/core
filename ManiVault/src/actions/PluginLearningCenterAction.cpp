@@ -50,8 +50,6 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _viewDescriptionAction.setConnectionPermissionsToForceNone();
 
-    connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewDescription);
-
     _viewHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _viewHelpAction.setConnectionPermissionsToForceNone();
 
@@ -309,23 +307,6 @@ bool PluginLearningCenterAction::isViewPlugin() const
 plugin::ViewPlugin* PluginLearningCenterAction::getViewPlugin() const
 {
     return dynamic_cast<ViewPlugin*>(_plugin);
-}
-
-void PluginLearningCenterAction::viewDescription() const
-{
-#ifdef VIEW_PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (isViewPlugin() && hasDescription())
-    {
-        if (!_descriptionOverlayWidget.isNull())
-            return;
-
-        ViewPluginDescriptionDialog viewPluginDescriptionDialog(dynamic_cast<ViewPlugin*>(_plugin));
-
-        viewPluginDescriptionDialog.exec();
-    }
 }
 
 void PluginLearningCenterAction::viewShortcuts() const

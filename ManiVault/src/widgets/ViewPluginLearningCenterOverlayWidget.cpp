@@ -111,6 +111,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         connect(&getLearningCenterAction().getHideToolbarAction(), &TriggerAction::triggered, this, [this]() -> void {
             collapse();
             _learningCenterToolbarItemWidget.getWidgetFader().setOpacity(0.f, animationDuration);
+            hide();
         });
 
         alignmentChanged();
@@ -339,7 +340,7 @@ ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::Learning
 
     updateTooltip();
 
-    connect(&getViewPlugin()->getLearningCenterAction().getOverlayVisibleAction(), &ToggleAction::toggled, this, [this, updateTooltip]() -> void
+    connect(&getViewPlugin()->getLearningCenterAction().getToolbarVisibleAction(), &ToggleAction::toggled, this, [this, updateTooltip]() -> void
     {
         updateTooltip();
         updateIcon();
@@ -355,7 +356,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::ge
 
 bool ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::shouldDisplay() const
 {
-    return getViewPlugin()->getLearningCenterAction().getOverlayVisibleAction().isChecked();
+    return getViewPlugin()->getLearningCenterAction().getToolbarVisibleAction().isChecked();
 }
 
 ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
@@ -745,7 +746,7 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
             QTimer::singleShot(widgetAsyncUpdateTimerInterval + animationDuration, _overlayWidget, &ViewPluginLearningCenterOverlayWidget::updateMask);
 		});
 
-        connect(&_viewPlugin->getLearningCenterAction().getOverlayVisibleAction(), &ToggleAction::toggled, this, &ToolbarWidget::visibilityChanged);
+        connect(&_viewPlugin->getLearningCenterAction().getToolbarVisibleAction(), &ToggleAction::toggled, this, &ToolbarWidget::visibilityChanged);
 
         connect(&_viewPlugin->getLearningCenterAction().getAlignmentAction(), &OptionAction::currentIndexChanged, this, &ToolbarWidget::alignmentChanged);
 
@@ -847,7 +848,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::visibilityChanged()
     if (_alwaysVisible)
         return;
 
-    if (_viewPlugin->getLearningCenterAction().getOverlayVisibleAction().isChecked()) {
+    if (_viewPlugin->getLearningCenterAction().getToolbarVisibleAction().isChecked()) {
         _backgroundWidgetFader.setOpacity(0.95f, animationDuration);
         _overlayWidget->addMouseEventReceiverWidget(this);
         update();
