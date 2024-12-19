@@ -89,7 +89,7 @@ public: // Global settings
      * Set plugin global settings group action to \p pluginGlobalSettingsGroupAction
      * @param pluginGlobalSettingsGroupAction Pointer to plugin global settings group action (maybe a nullptr)
      */
-    virtual void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction) final;
+    void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction);
 
 public: // Status bar
 
@@ -97,13 +97,13 @@ public: // Status bar
      * Get plugin status bar action
      * @return Pointer to plugin status bar action (maybe nullptr)
      */
-    virtual gui::PluginStatusBarAction* getStatusBarAction() const final;
+    gui::PluginStatusBarAction* getStatusBarAction() const;
 
     /**
      * Set plugin status bar action to \p statusBarAction
      * @param statusBarAction Pointer to plugin status bar action (maybe a nullptr)
      */
-    virtual void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction) final;
+    void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction);
 
 public: // Help
 
@@ -117,6 +117,7 @@ public: // Help
      * Get the read me markdown file URL
      * @return URL of the read me markdown file
      */
+    [[deprecated("This function is under development and has no effect (yet).")]]
     virtual QUrl getReadmeMarkdownUrl() const;
 
     /**
@@ -199,7 +200,7 @@ public:
 
     /**
      * Get plugin trigger actions given \p dataTypes
-     * @param datasetTypes Vector of input data types
+     * @param dataTypes Vector of input data types
      * @return Vector of plugin trigger actions
      */
     virtual gui::PluginTriggerActions getPluginTriggerActions(const DataTypes& dataTypes) const {
@@ -244,16 +245,32 @@ public: // Description
     void setShortDescription(const QString& shortDescription);
 
     /**
-     * Get extended description
+     * Get extended description in HTML format
      * @return Extended description in HTML format
      */
+    [[deprecated("This function is under development and has no effect (yet).")]]
     QString getLongDescription() const;
+
+    /**
+     * Get extended description in Markdown format
+     * @return Extended description in Markdown format
+     */
+    [[deprecated("This function is under development and has no effect (yet).")]]
+    QString getLongDescriptionMarkdown() const;
 
     /**
      * Set long description to \p longDescription
      * @param longDescription Extended description in HTML format
      */
+    [[deprecated("This function is under development and has no effect (yet).")]]
     void setLongDescription(const QString& longDescription);
+
+    /**
+     * Set long description Markdown to \p longDescription
+     * @param longDescriptionMarkdown Extended description in Markdown format
+     */
+    [[deprecated("This function is under development and has no effect (yet).")]]
+    void setLongDescriptionMarkdown(const QString& longDescriptionMarkdown);
 
 public: // Number of instances
 
@@ -338,11 +355,18 @@ signals:
     void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
     
     /**
-     * Signals that the long description changed from \p previousLongDescription to \p currentLongDescription
-     * @param previousLongDescription Previous long description
-     * @param currentLongDescription Current long description
+     * Signals that the HTML-formatted long description changed from \p previousLongDescription to \p currentLongDescription
+     * @param previousLongDescription Previous long description in HTML format
+     * @param currentLongDescription Current long description in HTML format
      */
     void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
+
+    /**
+     * Signals that the Markdown-formatted long description format changed from \p previousLongDescriptionMarkdown to \p currentLongDescriptionMarkdown
+     * @param previousLongDescriptionMarkdown Previous long description in Markdown format
+     * @param currentLongDescriptionMarkdown Current long description in Markdown format
+     */
+    void longDescriptionMarkdownChanged(const QString& previousLongDescriptionMarkdown, const QString& currentLongDescriptionMarkdown);
 
 private:
     QString                                 _kind;                                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
@@ -360,6 +384,7 @@ private:
     util::ShortcutMap                       _shortcutMap;                           /** Shortcut cheatsheet map */
     QString                                 _shortDescription;                      /** Shortly describes the plugin */
     QString                                 _longDescription;                       /** Extended description in HTML format */
+    QString                                 _longDescriptionMarkdown;               /** Extended description in Markdown format */
 };
 
 }

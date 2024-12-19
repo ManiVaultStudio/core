@@ -104,6 +104,8 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
 
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+
     _tasksAction.initialize(&modalTaskHandler->getModel(), &modalTaskHandler->getFilterModel(), "Modal Task");
 
     auto layout = new QVBoxLayout();
@@ -116,6 +118,10 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
 
     connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::updateWindowTitleAndIcon);
     connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::updateWindowTitleAndIcon);
+
+    connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::adjustSize);
+    connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::adjustSize);
+    connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::layoutChanged, this, &ModalTasksDialog::adjustSize);
 }
 
 void ModalTaskHandler::ModalTasksDialog::updateWindowTitleAndIcon()

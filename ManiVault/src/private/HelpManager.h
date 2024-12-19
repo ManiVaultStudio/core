@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include "AbstractHelpManager.h"
-#include "HelpManagerVideosModel.h"
+#include <AbstractHelpManager.h>
+
+#include <util/FileDownloader.h>
 
 namespace mv
 {
@@ -32,15 +33,58 @@ public:
     void reset() override;
 
     /**
+     * Add \p video
+     * @param video Pointer to video to add
+     */
+    void addVideo(const util::LearningCenterVideo* video) override;
+
+    /**
      * Get videos for \p tags
-     * @param tags Fitler tags (returns all videos if empty)
+     * @param tags Filter tags (returns all videos if empty)
      * @return Vector of videos
      */
-    util::Videos getVideos(const QStringList& tags) const override;
+    util::LearningCenterVideos getVideos(const QStringList& tags) const override;
+
+    /**
+     * Get videos menu (e.g. for use in the main menu)
+     * @return Pointer to videos menu
+     */
+    QMenu* getVideosMenu() const override;
+
+    /**
+     * Get videos model
+     * @return Const reference to videos model
+     */
+    const LearningCenterVideosModel& getVideosModel() const override;
+
+    /**
+     * Add \p tutorial
+     * @param tutorial Pointer to tutorial to add
+     */
+    void addTutorial(const util::LearningCenterTutorial* tutorial) override;
+
+    /**
+     * Get tutorials for \p tags
+     * @param tags Filter tags (returns all tutorials if empty)
+     * @return Vector of tutorials
+     */
+    util::LearningCenterTutorials getTutorials(const QStringList& tags) const override;
+
+    /**
+     * Get tutorials model
+     * @return Const reference to tutorials model
+     */
+    const LearningCenterTutorialsModel& getTutorialsModel() const override;
+
+    /**
+     * Get tutorials menu (e.g. for use in the main menu)
+     * @return Pointer to tutorials menu
+     */
+    QMenu* getTutorialsMenu() const;
 
 public: // Action getters
 
-    gui::ToggleAction& getShowLearningCenterAction() override { return _showLearningCenterAction; }
+    gui::ToggleAction& getShowLearningCenterPageAction() override { return _showLearningCenterPageAction; }
     gui::TriggerAction& getToDiscordAction() override { return _toDiscordAction; }
     gui::TriggerAction& getToWebsiteAction() override { return _toWebsiteAction; }
     gui::TriggerAction& getToWikiAction() override { return _toWikiAction; }
@@ -48,14 +92,15 @@ public: // Action getters
     gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; }
 
 private:
-    gui::ToggleAction       _showLearningCenterAction;      /** Toggle action for toggling the learning center */
-    gui::TriggerAction      _toDiscordAction;               /** External link to discord */
-    gui::TriggerAction      _toWebsiteAction;               /** External link to website */
-    gui::TriggerAction      _toWikiAction;                  /** External link to wiki */
-    gui::TriggerAction      _toRepositoryAction;            /** External link to repository */
-    gui::TriggerAction      _toLearningCenterAction;        /** Trigger action to go the learning center */
-    HelpManagerVideosModel  _videosModel;                   /** Videos model */
-    
+    gui::ToggleAction               _showLearningCenterPageAction;  /** Toggle action for toggling the learning center page */
+    gui::TriggerAction              _toDiscordAction;               /** External link to discord */
+    gui::TriggerAction              _toWebsiteAction;               /** External link to website */
+    gui::TriggerAction              _toWikiAction;                  /** External link to wiki */
+    gui::TriggerAction              _toRepositoryAction;            /** External link to repository */
+    gui::TriggerAction              _toLearningCenterAction;        /** Trigger action to go the learning center */
+    LearningCenterVideosModel       _videosModel;                   /** Videos model */
+    LearningCenterTutorialsModel    _tutorialsModel;                /** Tutorials model */
+    util::FileDownloader            _fileDownloader;                /** For downloading the learning center JSON file */
 };
 
 }

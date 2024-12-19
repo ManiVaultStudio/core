@@ -193,7 +193,7 @@ public:
     ViewPluginFactory(bool producesSystemViewPlugins = false);
 
     /** Destructor */
-    ~ViewPluginFactory() = default;
+    ~ViewPluginFactory() override = default;
 
     /**
      * Get plugin icon

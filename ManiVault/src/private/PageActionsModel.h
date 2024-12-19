@@ -5,20 +5,19 @@
 #pragma once
 
 #include <QMap>
-#include <QPair>
 #include <QStandardItemModel>
 #include <QString>
 
-class StartPageAction;
+class PageAction;
 
 /**
- * Start page actions model class
+ * Page actions model class
  *
- * Model class which contains actions for the start page.
+ * Contains actions for a page.
  *
  * @author Thomas Kroes
  */
-class StartPageActionsModel final : public QStandardItemModel
+class PageActionsModel final : public QStandardItemModel
 {
 public:
 
@@ -26,14 +25,15 @@ public:
     enum class Column {
         Icon,               /** Icon */
         Title,              /** Title */
-        Description,        /** Description (may be empty) */
-        Comments,           /** Comments (may be empty) */
-        Tags,               /** Tags (may be empty) */
-        Subtitle,           /** Sub title */
+        Description,        /** Description (maybe empty) */
+        Comments,           /** Comments (maybe empty) */
+        Tags,               /** Tags (maybe empty) */
+        Subtitle,           /** Subtitle */
         MetaData,           /** Meta information */
         PreviewImage,       /** Action preview image */
         Tooltip,            /** Action tooltip */
         Contributors,       /** Action contributors */
+        DownloadUrls,       /** Download URLs */
         ClickedCallback,    /** Callback which is called when the action is clicked */
         SummaryDelegate     /** Delegate item with title and subtitle */
     };
@@ -44,16 +44,16 @@ public:
 public:
 
     /**
-     * Construct start page actions model with \p parent object
+     * Construct page actions model with \p parent object
      * @param parent Pointer to parent object
      */
-    StartPageActionsModel(QObject* parent = nullptr);
+    PageActionsModel(QObject* parent = nullptr);
 
     /**
      * Add start page action
-     * @param startPageAction Start page action
+     * @param pageAction Page action
      */
-    void add(const StartPageAction& startPageAction);
+    void add(const PageAction& pageAction);
 
     /** Resets the rows and notifies others */
     void reset();

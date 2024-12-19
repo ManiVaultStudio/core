@@ -10,9 +10,7 @@
 #include <QLineEdit>
 #include <QCompleter>
 #include <QStringListModel>
-#include <QAbstractProxyModel>
 #include <QItemSelection>
-#include <QPushButton>
 
 class QWidget;
 class QAbstractListModel;
@@ -68,7 +66,7 @@ public: // Widgets
         friend class OptionAction;
     };
 
-    /** Line edit widget (with auto completion) class for option action */
+    /** Line edit widget (with auto-completion) class for option action */
     class CORE_EXPORT LineEditWidget : public QLineEdit {
     protected:
 
@@ -127,7 +125,6 @@ public:
      * Initialize the option action
      * @param options Options
      * @param currentOption Current option
-     * @param defaultOption Default option
      */
     void initialize(const QStringList& options = QStringList(), const QString& currentOption = "");
 
@@ -189,7 +186,7 @@ public:
 
     /**
      * Set placeholder text (shown when no option selected)
-     * @param placeholderText Placeholder text
+     * @param placeholderString Placeholder text
      */
     void setPlaceHolderString(const QString& placeholderString);
 

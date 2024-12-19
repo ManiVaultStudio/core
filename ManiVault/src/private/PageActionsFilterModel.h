@@ -7,21 +7,21 @@
 #include <QSortFilterProxyModel>
 
 /**
- * Start page actions filter model class
+ * Page actions filter model class
  *
- * Sorting and filtering model for the start page actions model.
+ * Sorting and filtering model for the page actions model.
  *
  * @author Thomas Kroes
  */
-class StartPageActionsFilterModel : public QSortFilterProxyModel
+class PageActionsFilterModel : public QSortFilterProxyModel
 {
 public:
 
     /** 
-     * Construct the filter model with \p parent object
+     * Construct the filter model with pointer to \p parent object
      * @param parent Pointer to parent object
     */
-    StartPageActionsFilterModel(QObject* parent = nullptr);
+    PageActionsFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether \p row with \p parent is filtered out (false) or in (true)

@@ -8,13 +8,14 @@
 #include "Icon.h"
 
 #include <QAction>
+#include <QBuffer>
+#include <QResource>
 #include <QEventLoop>
 #include <QLayout>
 #include <QLayoutItem>
 #include <QPainter>
 #include <QPixmap>
 #include <QString>
-#include <QStringList>
 #include <QTimer>
 #include <QTcpSocket>
 #include <QUrl>
@@ -277,6 +278,67 @@ QVariant getValueByPath(const QVariant& root, const QString& path, const QVarian
 	}
 
 	return foundValue; // Return the found value
+}
+
+QString gifToBase64(const QByteArray& gifByteArray)
+{
+    try {
+        if (gifByteArray.isNull())
+            throw std::runtime_error("Supplied GIF byte array is not valid");
+
+        return QString::fromLatin1(gifByteArray.toBase64());
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to convert GIF image to base64-encoded string", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to convert GIF image to base64-encoded string");
+    }
+
+    return {};
+}
+
+QString embedGifFromBase64(const QString& gifBase64)
+{
+    try {
+        if (gifBase64.isEmpty())
+            throw std::runtime_error("Supplied image is not valid");
+
+        return QString("<img src=\"data:image/gif;base64,%1\" alt=\"Base64 GIF\" />").arg(gifBase64);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to embed GIF image", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to embed GIF image");
+    }
+
+    return {};
+}
+
+QString embedGifFromResource(const QString& resourcePath)
+{
+	try {
+		const auto gifResource = QResource(resourcePath);
+
+		if (!gifResource.isValid())
+			throw std::runtime_error(QString("GIF resource is not valid: %1").arg(resourcePath).toStdString());
+
+		const auto gifDataBase64 = gifToBase64(QByteArray(reinterpret_cast<const char*>(gifResource.data()), gifResource.size()));
+
+		return embedGifFromBase64(gifDataBase64);
+	}
+	catch (std::exception& e)
+	{
+		exceptionMessageBox("Unable to embed GIF image from resource", e);
+	}
+	catch (...) {
+		exceptionMessageBox("Unable to embed GIF image from resource");
+	}
+
+	return {};
 }
 
 void waitForDuration(int milliSeconds)

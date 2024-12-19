@@ -5,8 +5,6 @@
 #include "OptionsAction.h"
 #include "ModelSelectionAction.h"
 
-#include "Application.h"
-
 #include "util/Miscellaneous.h"
 
 #include "widgets/FileDialog.h"
@@ -18,6 +16,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMouseEvent>
+#include <QTimer>
 
 using namespace mv::util;
 
@@ -33,10 +32,8 @@ OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStrin
     initialize(options, selectedOptions);
 
     connect(&_optionsModel, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) -> void {
-        //if (roles.contains(Qt::CheckStateRole)) {
-            saveToSettings();
-            emit selectedOptionsChanged(getSelectedOptions());
-        //}
+        saveToSettings();
+        emit selectedOptionsChanged(getSelectedOptions());
     });
 }
 
@@ -117,7 +114,7 @@ bool OptionsAction::hasSelectedOptions() const
 
 void OptionsAction::selectOption(const QString& option, bool unselect /*= false*/)
 {
-    const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option);
+    const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option, 1, Qt::MatchExactly);
 
     if (!matches.isEmpty())
         _optionsModel.setData(matches.first(), unselect ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
@@ -544,9 +541,6 @@ void OptionsAction::TagsViewWidget::TagLabel::mousePressEvent(QMouseEvent* event
         case Type::SelectInvert:
             _optionsAction->selectInvert();
             break;
-
-        default:
-            break;
     }
 }
 
@@ -588,9 +582,6 @@ void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
 
         case Type::SelectInvert:
             setToolTip("Click to invert the options selection");
-            break;
-
-        default:
             break;
     }
 

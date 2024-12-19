@@ -59,9 +59,17 @@ public:
      * Open project from \p filePath
      * @param filePath File path of the project (choose file path when empty)
      * @param importDataOnly Whether to only import the data from the project
-     * @param loadWorkspace Whether to load the workspace which is accompanied with the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied by the project
      */
     void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) override;
+
+    /**
+     * Open project from \p url
+     * @param url URL of the project
+     * @param importDataOnly Whether to only import the data from the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied by the project
+     */
+    void openProject(QUrl url, bool importDataOnly = false, bool loadWorkspace = true) override;
 
     /**
      * Import project from \p filePath (only import the data)

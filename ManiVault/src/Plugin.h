@@ -48,7 +48,7 @@ public:
      * Get the plugin factory for the plugin
      * @return Pointer to plugin factory
      */
-    virtual const PluginFactory* getFactory() const final;
+    const PluginFactory* getFactory() const;
 
     /** Returns the unique name of this plugin */
     QString getName() const;
@@ -57,7 +57,7 @@ public:
     QString getGuiName() const;
 
     /** Returns the icon of this plugin */
-    virtual QIcon getIcon() const final;
+    QIcon getIcon() const;
 
     /**
      * Returns the kind of plugin. The kind is specific to the
@@ -161,7 +161,7 @@ public: // Serialization
 public: // Miscellaneous
 
     /** Destroys the plugin and removes it from the plugin manager */
-    virtual void destroy() final;
+    void destroy();
 
 public: // Action getters
 
