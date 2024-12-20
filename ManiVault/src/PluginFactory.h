@@ -117,7 +117,6 @@ public: // Help
      * Get the read me markdown file URL
      * @return URL of the read me markdown file
      */
-    [[deprecated("This function is under development and has no effect (yet).")]]
     virtual QUrl getReadmeMarkdownUrl() const;
 
     /**
