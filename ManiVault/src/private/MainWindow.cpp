@@ -42,7 +42,7 @@
     #define MAIN_WINDOW_VERBOSE
 #endif
 
-#define MAIN_WINDOW_SCREEN_CAPTURE
+//#define MAIN_WINDOW_SCREEN_CAPTURE
 
 using namespace mv;
 using namespace mv::gui;
