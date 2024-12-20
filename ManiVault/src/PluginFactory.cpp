@@ -280,7 +280,7 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
     if (!githubRepositoryUrl.isValid())
         return {};
 
-    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com%1/master/README.md").arg(githubRepositoryUrl.path()));
+    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com%1/%2/README.md").arg(githubRepositoryUrl.path(), getDefaultBranch()));
 
     if (readmeMarkdownUrl.isValid())
         return readmeMarkdownUrl;
@@ -293,4 +293,8 @@ QUrl PluginFactory::getRepositoryUrl() const
     return {};
 }
 
+QString PluginFactory::getDefaultBranch() const
+{
+    return "master";
+}
 }

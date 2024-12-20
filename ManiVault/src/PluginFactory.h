@@ -126,6 +126,12 @@ public: // Help
      */
     virtual QUrl getRepositoryUrl() const;
 
+    /**
+     * Get the name of the default branch
+     * @return Name of the default branch
+     */
+    virtual QString getDefaultBranch() const;
+
 public: // GUI name
 
     /** Get the menu name of the plugin */
