@@ -160,7 +160,6 @@ private:
         return static_cast<ElementTypeSpecifier>(_variantOfVectors.index());
     }
 
-
     /// Resizes the currently held data vector to the specified
     /// number of elements, and converts the elements of the specified data
     /// to the internal data element type, by static_cast. 
@@ -324,6 +323,11 @@ public:
     static constexpr auto getNumberOfSupportedElementTypes()
     {
         return getElementTypeNames().size();
+    }
+
+    ElementTypeSpecifier getElementType() const
+    {
+        return getElementTypeSpecifier();
     }
 
     void setElementType(const ElementTypeSpecifier elementTypSpecifier)
@@ -560,7 +564,7 @@ public:
 
 
     /* Allows visiting the point data, which is either _all_ data (if this data
-     * set is full), or (otherwise) the subset specifified by its indices.
+     * set is full), or (otherwise) the subset specified by its indices.
     */
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType visitData(FunctionObject functionObject) const
@@ -671,10 +675,10 @@ public:
         if (isProxy()) {
             std::size_t offset = 0;
 
-            for (auto proxyMember : getProxyMembers()) {
+            for (auto& proxyMember : getProxyMembers()) {
                 auto points = mv::Dataset<Points>(proxyMember);
 
-                ResultContainer proxyPointsData;
+                ResultContainer proxyPointsData = {};
 
                 const auto numberOfElements = points->getNumPoints() * dimensionIndices.size();
 
@@ -730,7 +734,7 @@ public:
         if (isProxy()) {
             auto numberOfPoints = 0;
 
-            for (auto proxyMember : getProxyMembers())
+            for (auto& proxyMember : getProxyMembers())
                 numberOfPoints += mv::Dataset<Points>(proxyMember)->getNumPoints();
 
             return numberOfPoints;
