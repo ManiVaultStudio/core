@@ -231,7 +231,7 @@ QVariant LearningCenterTutorialsModel::ProjectUrlItem::data(int role /*= Qt::Use
 {
     switch (role) {
         case Qt::EditRole:
-            return QVariant::fromValue(getTutorial()->getProject());
+            return QVariant::fromValue(getTutorial()->getProjectUrl());
 
         case Qt::DisplayRole:
             return QVariant::fromValue(data(Qt::EditRole).toString());

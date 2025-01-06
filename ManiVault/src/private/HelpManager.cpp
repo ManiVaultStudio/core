@@ -245,7 +245,7 @@ QMenu* HelpManager::getTutorialsMenu() const
         tutorialAction->setIconByName("external-link-square-alt");
 
         connect(tutorialAction, &TriggerAction::triggered, tutorialAction, [tutorial]() -> void {
-            QDesktopServices::openUrl(tutorial->getUrl());
+            mv::projects().openProject(tutorial->getProjectUrl());
 		});
 
         tutorialsMenu->addAction(tutorialAction);

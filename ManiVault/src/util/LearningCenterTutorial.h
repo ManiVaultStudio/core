@@ -10,7 +10,6 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
-#include <QVariantMap>
 
 #include <vector>
 
@@ -38,9 +37,9 @@ public:
      * @param summary Tutorial summary (brief description)
      * @param content Full tutorial content in HTML format
      * @param url ManiVault website tutorial URL
-     * @param project Location of the ManiVault tutorial project (if any)
+     * @param projectUrl Location of the ManiVault tutorial project (if any)
      */
-    explicit LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QString& project);
+    explicit LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QUrl& projectUrl);
 
     /**
      * Construct tutorial from \p variantMap
@@ -91,10 +90,10 @@ public:
     const QUrl& getUrl() const;
 
     /**
-     * Get project
+     * Get project URL
      * @return Location of the ManiVault tutorial project (if any)
      */
-    const QString& getProject() const;
+    const QUrl& getProjectUrl() const;
 
     /**
      * Get whether the tutorial has a project
@@ -116,7 +115,7 @@ public:
         _summary        = rhs.getSummary();
         _content        = rhs.getContent();
         _url            = rhs.getUrl();
-        _project        = rhs.getProject();
+        _projectUrl     = rhs.getProjectUrl();
 
         return *this;
     }
@@ -129,7 +128,7 @@ private:
     QString         _summary;       /** Summary (brief description) */
     QString         _content;       /** Full tutorial content in HTML format */
     QUrl            _url;           /** ManiVault website tutorial URL */
-    QString         _project;       /** Location of the ManiVault tutorial project (if any) */
+    QUrl            _projectUrl;    /** Location of the ManiVault tutorial project (if any) */         
 };
 
 using LearningCenterTutorials = std::vector<const LearningCenterTutorial*>;

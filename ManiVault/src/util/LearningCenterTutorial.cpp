@@ -6,7 +6,7 @@
 
 namespace mv::util {
 
-LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QString& project) :
+LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QUrl& projectUrl) :
     _title(title),
     _tags(tags),
     _date(date),
@@ -14,7 +14,7 @@ LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStri
     _summary(summary),
     _content(content),
     _url(url),
-    _project(project)
+    _projectUrl(projectUrl)
 {
 }
 
@@ -26,7 +26,7 @@ LearningCenterTutorial::LearningCenterTutorial(const QVariantMap& variantMap) :
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _content(variantMap.contains("fullpost") ? variantMap["fullpost"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
-    _project(variantMap.contains("project") ? variantMap["project"].toString() : "")
+    _projectUrl(variantMap.contains("project") ? QUrl(variantMap["projectUrl"].toString()) : QUrl())
 {
 }
 
@@ -65,14 +65,14 @@ const QUrl& LearningCenterTutorial::getUrl() const
     return _url;
 }
 
-const QString& LearningCenterTutorial::getProject() const
+const QUrl& LearningCenterTutorial::getProjectUrl() const
 {
-    return _project;
+    return _projectUrl;
 }
 
 bool LearningCenterTutorial::hasProject() const
 {
-    return !_project.isEmpty();
+    return !_projectUrl.isEmpty();
 }
 
 }

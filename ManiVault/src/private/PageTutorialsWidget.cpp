@@ -73,7 +73,7 @@ void PageTutorialsWidget::updateActions()
         PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
-                    mv::projects().openProject(QUrl(tutorial->getProject()));
+                    mv::projects().openProject(tutorial->getProjectUrl());
                 } else {
                     if (!mv::projects().hasProject())
 						mv::projects().newBlankProject();
@@ -102,9 +102,9 @@ void PageTutorialsWidget::updateActions()
 	        }
 		});
 
-        tutorialAction.setComments(tutorial->hasProject() ? QString("A tutorial project will be downloaded from: %1.").arg(tutorial->getProject()) : "Creates a project with a tutorial plugin.");
+        tutorialAction.setComments(tutorial->hasProject() ? QString("A tutorial project will be downloaded from: %1.").arg(tutorial->getProjectUrl().toString()) : "Creates a project with a tutorial plugin.");
         tutorialAction.setTags(tutorial->getTags());
-        tutorialAction.setDownloadUrls({ tutorial->getProject() });
+        tutorialAction.setDownloadUrls({ tutorial->getProjectUrl().toString() });
 
         getModel().add(tutorialAction);
     }
