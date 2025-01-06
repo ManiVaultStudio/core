@@ -160,7 +160,6 @@ private:
         return static_cast<ElementTypeSpecifier>(_variantOfVectors.index());
     }
 
-
     /// Resizes the currently held data vector to the specified
     /// number of elements, and converts the elements of the specified data
     /// to the internal data element type, by static_cast. 
@@ -565,7 +564,7 @@ public:
 
 
     /* Allows visiting the point data, which is either _all_ data (if this data
-     * set is full), or (otherwise) the subset specifified by its indices.
+     * set is full), or (otherwise) the subset specified by its indices.
     */
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType visitData(FunctionObject functionObject) const
