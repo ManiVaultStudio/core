@@ -676,10 +676,10 @@ public:
         if (isProxy()) {
             std::size_t offset = 0;
 
-            for (auto proxyMember : getProxyMembers()) {
+            for (auto& proxyMember : getProxyMembers()) {
                 auto points = mv::Dataset<Points>(proxyMember);
 
-                ResultContainer proxyPointsData;
+                ResultContainer proxyPointsData = {};
 
                 const auto numberOfElements = points->getNumPoints() * dimensionIndices.size();
 
@@ -735,7 +735,7 @@ public:
         if (isProxy()) {
             auto numberOfPoints = 0;
 
-            for (auto proxyMember : getProxyMembers())
+            for (auto& proxyMember : getProxyMembers())
                 numberOfPoints += mv::Dataset<Points>(proxyMember)->getNumPoints();
 
             return numberOfPoints;
