@@ -326,6 +326,11 @@ public:
         return getElementTypeNames().size();
     }
 
+    ElementTypeSpecifier getElementType() const
+    {
+        return getElementTypeSpecifier();
+    }
+
     void setElementType(const ElementTypeSpecifier elementTypSpecifier)
     {
         setElementTypeSpecifier(elementTypSpecifier);
