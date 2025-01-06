@@ -26,7 +26,8 @@ PluginFactory::PluginFactory(Type type) :
     _triggerReadmeAction(nullptr, "Readme"),
     _visitRepositoryAction(nullptr, "Go to repository"),
     _pluginGlobalSettingsGroupAction(nullptr),
-    _statusBarAction(nullptr)
+    _statusBarAction(nullptr),
+    _allowPluginCreationFromStandardGui(true)
 {
     _triggerReadmeAction.setIconByName("book");
 
@@ -297,4 +298,15 @@ QString PluginFactory::getDefaultBranch() const
 {
     return "master";
 }
+
+void PluginFactory::setAllowPluginCreationFromStandardGui(bool allowPluginCreationFromStandardGui)
+{
+    _allowPluginCreationFromStandardGui = allowPluginCreationFromStandardGui;
+}
+
+bool PluginFactory::getAllowPluginCreationFromStandardGui() const
+{
+    return _allowPluginCreationFromStandardGui;
+}
+
 }

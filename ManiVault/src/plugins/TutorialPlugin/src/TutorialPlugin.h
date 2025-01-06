@@ -79,6 +79,8 @@ class TutorialPluginFactory : public mv::plugin::ViewPluginFactory
 
 public:
 
+    TutorialPluginFactory();
+
     /**
      * Get plugin icon
      * @param color Icon color for flat (font) icons

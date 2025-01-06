@@ -227,4 +227,23 @@ QVariant LearningCenterTutorialsModel::UrlItem::data(int role) const
     return Item::data(role);
 }
 
+QVariant LearningCenterTutorialsModel::ProjectUrlItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return QVariant::fromValue(getTutorial()->getProject());
+
+        case Qt::DisplayRole:
+            return QVariant::fromValue(data(Qt::EditRole).toString());
+
+        case Qt::ToolTipRole:
+            return "Project URL: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 }

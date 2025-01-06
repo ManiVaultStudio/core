@@ -48,7 +48,7 @@ public:
      */
     PluginFactory(Type type);
 
-    virtual ~PluginFactory() { }
+    ~PluginFactory() override = default;
 
     /**
      * Get plugin kind
@@ -178,7 +178,7 @@ public:
      * Get whether a plugin may be produced
      * @return Boolean determining whether a plugin may be produced
      */
-    virtual bool mayProduce() const final;
+    bool mayProduce() const;
 
     /**
      * Get the data types that the plugin supports
@@ -221,19 +221,31 @@ public:
             pluginTriggerAction->initialize();
     }
 
+    /**
+     * Set whether the plugin may be produced from the standard GUI to \p allowPluginCreationFromStandardGui
+     * @param allowPluginCreationFromStandardGui Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.)
+     */
+    void setAllowPluginCreationFromStandardGui(bool allowPluginCreationFromStandardGui);
+
+    /**
+     * Get whether the plugin may be produced from the standard GUI
+     * @return Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.)
+     */
+    bool getAllowPluginCreationFromStandardGui() const;
+
 public: // Shortcut map
 
     /**
      * Get shortcut map
      * @return Reference to the shortcut map
      */
-    virtual util::ShortcutMap& getShortcutMap() final;
+    util::ShortcutMap& getShortcutMap();
 
     /**
      * Get shortcut map
      * @return Const reference to the shortcut map
      */
-    virtual const util::ShortcutMap& getShortcutMap() const final;
+    const util::ShortcutMap& getShortcutMap() const;
 
 public: // Description
 
@@ -390,6 +402,7 @@ private:
     QString                                 _shortDescription;                      /** Shortly describes the plugin */
     QString                                 _longDescription;                       /** Extended description in HTML format */
     QString                                 _longDescriptionMarkdown;               /** Extended description in Markdown format */
+    bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
 };
 
 }

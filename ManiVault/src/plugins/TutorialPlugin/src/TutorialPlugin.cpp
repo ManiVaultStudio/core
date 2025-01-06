@@ -53,15 +53,23 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
         if (currentIndex < 0)
             return;
 
-        const auto contentIndex         = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Content));
-        const auto urlIndex             = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Url));
-        const auto sourceContentIndex   = _tutorialsFilterModel.mapToSource(contentIndex);
-        const auto sourceUrlIndex       = _tutorialsFilterModel.mapToSource(urlIndex);
-        const auto content              = tutorialsModel->data(sourceContentIndex, Qt::EditRole).toString();
-        const auto url                  = tutorialsModel->data(sourceUrlIndex, Qt::EditRole).toString();
+        const auto contentIndex             = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Content));
+        const auto urlIndex                 = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Url));
+        const auto projectUrlIndex          = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::ProjectUrl));
+        const auto sourceContentIndex       = _tutorialsFilterModel.mapToSource(contentIndex);
+        const auto sourceUrlIndex           = _tutorialsFilterModel.mapToSource(urlIndex);
+        const auto sourceProjectUrlIndex    = _tutorialsFilterModel.mapToSource(projectUrlIndex);
+        const auto content                  = tutorialsModel->data(sourceContentIndex, Qt::EditRole).toString();
+        const auto url                      = tutorialsModel->data(sourceUrlIndex, Qt::EditRole).toString();
+        const auto projectUrl               = tutorialsModel->data(sourceProjectUrlIndex, Qt::EditRole).toString();
 
         _tutorialWidget.setHtmlText(content, url);
         _openInBrowserAction.setToolTip(QString("Go to: %1").arg(_tutorialWidget.getBaseUrl().toString()));
+
+        qDebug() << projectUrl;
+        
+        if (!projectUrl.isEmpty())
+            mv::projects().openProject(QUrl(projectUrl));
     };
 
     currentTutorialChanged();
@@ -112,6 +120,12 @@ QVariantMap TutorialPlugin::toVariantMap() const
     _tutorialPickerAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
+}
+
+TutorialPluginFactory::TutorialPluginFactory() :
+    ViewPluginFactory()
+{
+    setAllowPluginCreationFromStandardGui(false);
 }
 
 QIcon TutorialPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

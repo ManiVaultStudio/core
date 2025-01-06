@@ -35,6 +35,7 @@ public:
         Summary,
         Content,
         Url,
+        ProjectUrl,
 
         Count
     };
@@ -324,6 +325,42 @@ protected:
         }
     };
 
+    /** Standard model item class for displaying the tutorial project URL */
+    class ProjectUrlItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Project URL";
+
+                case Qt::ToolTipRole:
+                    return "Project URL";
+
+                default:
+                    break;
+            }
+
+            return {};
+        }
+    };
+
     /** Convenience class for combining items in a row */
     class Row final : public QList<QStandardItem*>
     {
@@ -343,6 +380,7 @@ protected:
             append(new SummaryItem(tutorial));
             append(new ContentItem(tutorial));
             append(new UrlItem(tutorial));
+            append(new ProjectUrlItem(tutorial));
         }
     };
 
