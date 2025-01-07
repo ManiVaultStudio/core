@@ -117,28 +117,24 @@ public: // Plugin description
      * Get long description
      * @return Long description in plain text format
      */
-    [[deprecated("This function is under development and has no effect (yet).")]]
     QString getLongDescription() const;
 
     /**
      * Set long description to \p longDescription
      * @param longDescription Long plugin description in plain text format
      */
-    [[deprecated("This function is under development and has no effect (yet).")]]
     void setLongDescription(const QString& longDescription) const;
 
     /**
      * Get Markdown-formatted long description
      * @return Long description in Markdown format
      */
-    [[deprecated("This function is under development and has no effect (yet).")]]
     QString getLongDescriptionMarkdown() const;
 
     /**
      * Set Markdown-formatted long description to \p longDescriptionMarkdown
      * @param longDescriptionMarkdown Long plugin description in Markdown format
      */
-    [[deprecated("This function is under development and has no effect (yet).")]]
     void setLongDescriptionMarkdown(const QString& longDescriptionMarkdown) const;
 
     /**
