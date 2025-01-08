@@ -18,8 +18,8 @@ HorizontalToolbarAction::HorizontalToolbarAction(QObject* parent, const QString&
 HorizontalToolbarAction::Widget::Widget(QWidget* parent, HorizontalToolbarAction* horizontalToolbarAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, horizontalToolbarAction, widgetFlags),
     _horizontalToolbarAction(horizontalToolbarAction),
-    _layout(),
-    _toolbarLayout(),
+    _layout(new QHBoxLayout()),
+    _toolbarLayout(new QHBoxLayout()),
     _toolbarWidget(),
     _timer()
 {
@@ -28,16 +28,16 @@ HorizontalToolbarAction::Widget::Widget(QWidget* parent, HorizontalToolbarAction
     _timer.setInterval(300);
     _timer.setSingleShot(true);
 
-    _toolbarLayout.setContentsMargins(ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN);
-    _toolbarLayout.setSpacing(0);
+    _toolbarLayout->setContentsMargins(ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN);
+    _toolbarLayout->setSpacing(0);
 
-    _toolbarWidget.setLayout(&_toolbarLayout);
-    _toolbarLayout.setAlignment(horizontalToolbarAction->getGroupAction().getAlignment());
+    _toolbarWidget.setLayout(_toolbarLayout);
+    _toolbarLayout->setAlignment(horizontalToolbarAction->getGroupAction().getAlignment());
     
-    _layout.setContentsMargins(0, 0, 0, 0);
-    _layout.addWidget(&_toolbarWidget);
+    _layout->setContentsMargins(0, 0, 0, 0);
+    _layout->addWidget(&_toolbarWidget);
 
-    setLayout(&_layout);
+    setLayout(_layout);
 
     connect(_horizontalToolbarAction, &ToolbarAction::actionWidgetsChanged, this, &HorizontalToolbarAction::Widget::setActionWidgets);
     connect(_horizontalToolbarAction, &ToolbarAction::layoutInvalidated, this, &Widget::updateLayout);
@@ -78,7 +78,7 @@ void HorizontalToolbarAction::Widget::setActionWidgets()
 {
     QLayoutItem* layoutItem;
 
-    while ((layoutItem = _toolbarLayout.takeAt(0)) != nullptr) {
+    while ((layoutItem = _toolbarLayout->takeAt(0)) != nullptr) {
         delete layoutItem->widget();
         delete layoutItem;
     }
@@ -87,9 +87,9 @@ void HorizontalToolbarAction::Widget::setActionWidgets()
         auto stretchAction = dynamic_cast<const StretchAction*>(actionItem->getAction());
 
         if (stretchAction)
-            _toolbarLayout.addWidget(actionItem->createWidget(&_toolbarWidget), stretchAction->getStretch());
+            _toolbarLayout->addWidget(actionItem->createWidget(&_toolbarWidget), stretchAction->getStretch());
         else
-            _toolbarLayout.addWidget(actionItem->createWidget(&_toolbarWidget));
+            _toolbarLayout->addWidget(actionItem->createWidget(&_toolbarWidget));
     }
 
     updateLayout();
@@ -133,7 +133,7 @@ void HorizontalToolbarAction::Widget::updateLayout()
         for (auto actionItem : _horizontalToolbarAction->getActionItems())
             width += actionItem->getWidgetSize(states[actionItem]).width();
 
-        width += (std::max(1, static_cast<int>(_horizontalToolbarAction->getActionItems().count() - 1)) * _toolbarLayout.spacing());
+        width += (std::max(1, static_cast<int>(_horizontalToolbarAction->getActionItems().count() - 1)) * _toolbarLayout->spacing());
 
         return width;
     };
