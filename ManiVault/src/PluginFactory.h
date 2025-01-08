@@ -257,7 +257,11 @@ public: // Description
 
 public: // Number of instances
 
-    /** Get number of plugin instances currently loaded */
+    
+    /**
+     * Get number of plugin instances currently loaded
+     * @return Number of plugin instances currently loaded
+     */
     std::uint32_t getNumberOfInstances() const;
 
     /**
@@ -265,6 +269,18 @@ public: // Number of instances
      * @param numberOfInstances Number of plugin instances currently loaded
      */
     void setNumberOfInstances(std::uint32_t numberOfInstances);
+
+    /**
+     * Get number of plugin instances produced in total
+     * @return Number of plugin instances produced in total
+     */
+    std::uint32_t getNumberOfInstancesProduced() const;
+
+    /**
+     * Set number of plugin instances produced in total
+     * @param numberOfInstancesProduced Number of plugin instances produced in total
+     */
+    void setNumberOfInstancesProduced(std::uint32_t numberOfInstancesProduced);
 
     /** Get maximum number of allowed plugin instances */
     std::uint32_t getMaximumNumberOfInstances() const;
@@ -319,6 +335,12 @@ signals:
     void numberOfInstancesChanged(std::uint32_t numberOfInstances);
 
     /**
+     * Signals that the number of instances produced in total changed to \p numberOfInstancesProduced
+     * @param numberOfInstancesProduced Number of plugin instances produced in total
+     */
+    void numberOfInstancesProducedChanged(std::uint32_t numberOfInstancesProduced);
+
+    /**
      * Signals that the plugin global settings group action changed to \p pluginGlobalSettingsGroupAction
      * @param pluginGlobalSettingsGroupAction Pointer to plugin global settings group action (maybe a nullptr)
      */
@@ -351,6 +373,7 @@ private:
     QString                                 _version;                               /** Plugin version */
     gui::PluginTriggerAction                _pluginTriggerAction;                   /** Standard plugin trigger action that produces an instance of the plugin without any special behavior (respects the maximum number of allowed instances) */
     std::uint32_t                           _numberOfInstances;                     /** Number of plugin instances */
+    std::uint32_t                           _numberOfInstancesProduced;             /** Number of plugin instances produced since the beginning of the factory */
     std::uint32_t                           _maximumNumberOfInstances;              /** Maximum number of plugin instances (unlimited when -1) */
     gui::TriggerAction                      _triggerHelpAction;                     /** Trigger action that triggers help (icon and text are already set) */
     gui::TriggerAction                      _triggerReadmeAction;                   /** Trigger action that displays the read me markdown text in a modal dialog (if the read me markdown file URL is valid) */

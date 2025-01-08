@@ -375,6 +375,7 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
             throw std::runtime_error("Maximum number of plugin instances reached");
 
         pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() + 1);
+        pluginFactory->setNumberOfInstancesProduced(pluginFactory->getNumberOfInstancesProduced() + 1);
 
         switch (pluginFactory->getType()) {
             case plugin::Type::ANALYSIS: {
