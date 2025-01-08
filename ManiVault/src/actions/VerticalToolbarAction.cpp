@@ -15,22 +15,22 @@ VerticalToolbarAction::VerticalToolbarAction(QObject* parent, const QString& tit
 VerticalToolbarAction::Widget::Widget(QWidget* parent, VerticalToolbarAction* verticalToolbarAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, verticalToolbarAction, widgetFlags),
     _verticalToolbarAction(verticalToolbarAction),
-    _layout(),
-    _toolbarLayout(),
+    _layout(new QVBoxLayout()),
+    _toolbarLayout(new QVBoxLayout()),
     _toolbarWidget()
 {
-    _toolbarLayout.setContentsMargins(ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN);
-    _toolbarLayout.setAlignment(Qt::AlignLeft);
+    _toolbarLayout->setContentsMargins(ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN);
+    _toolbarLayout->setAlignment(Qt::AlignLeft);
 
-    _toolbarWidget.setLayout(&_toolbarLayout);
+    _toolbarWidget.setLayout(_toolbarLayout);
     
-    _layout.setSizeConstraint(QLayout::SetFixedSize);
-    _layout.setContentsMargins(0, 0, 0, 0);
-    _layout.setAlignment(Qt::AlignLeft);
-    _layout.addWidget(&_toolbarWidget);
-    _layout.addStretch(1);
+    _layout->setSizeConstraint(QLayout::SetFixedSize);
+    _layout->setContentsMargins(0, 0, 0, 0);
+    _layout->setAlignment(Qt::AlignLeft);
+    _layout->addWidget(&_toolbarWidget);
+    _layout->addStretch(1);
     
-    setLayout(&_layout);
+    setLayout(_layout);
 
     connect(_verticalToolbarAction, &ToolbarAction::actionWidgetsChanged, this, &VerticalToolbarAction::Widget::setActionWidgets);
 
@@ -41,13 +41,13 @@ void VerticalToolbarAction::Widget::setActionWidgets()
 {
     QLayoutItem* layoutItem;
 
-    while ((layoutItem = _toolbarLayout.takeAt(0)) != nullptr) {
+    while ((layoutItem = _toolbarLayout->takeAt(0)) != nullptr) {
         delete layoutItem->widget();
         delete layoutItem;
     }
 
     for (auto actionItem : _verticalToolbarAction->getActionItems())
-        _toolbarLayout.addWidget(actionItem->createWidget(&_toolbarWidget));
+        _toolbarLayout->addWidget(actionItem->createWidget(&_toolbarWidget));
 }
 
 }
