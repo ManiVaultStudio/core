@@ -43,8 +43,8 @@ public: // Widgets
 
     protected:
         VerticalToolbarAction* _verticalToolbarAction;      /** Pointer to vertical toolbar action that creates the widget */
-        QVBoxLayout             _layout;                    /** Main layout */
-        QVBoxLayout             _toolbarLayout;             /** Toolbar layout */
+        QVBoxLayout*            _layout;                    /** Main layout */
+        QVBoxLayout*            _toolbarLayout;             /** Toolbar layout */
         QWidget                 _toolbarWidget;             /** Toolbar widget */
 
         friend class VerticalToolbarAction;

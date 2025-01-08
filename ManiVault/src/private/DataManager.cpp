@@ -556,7 +556,7 @@ Dataset<DatasetImpl> DataManager::createSubsetFromSelection(const Dataset<Datase
     return {};
 }
 
-Dataset<DatasetImpl> DataManager::getDataset(const QString& datasetId)
+Dataset<> DataManager::getDataset(const QString& datasetId)
 {
     try
     {
@@ -574,10 +574,10 @@ Dataset<DatasetImpl> DataManager::getDataset(const QString& datasetId)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to get set from data manager", e);
+        qDebug() << QString("Unable to get set from data manager: %1").arg(e.what());
     }
     catch (...) {
-        exceptionMessageBox("Unable to get set from data manager");
+        qDebug() << "Unable to get set from data manager due to unhandled exception";
     }
 
     return {};
@@ -585,7 +585,7 @@ Dataset<DatasetImpl> DataManager::getDataset(const QString& datasetId)
 
 Datasets DataManager::getAllDatasets(const std::vector<DataType>& dataTypes /*= std::vector<DataType>()*/) const
 {
-    QVector<Dataset<DatasetImpl>> allDatasets;
+    QVector<Dataset<>> allDatasets;
 
     for (const auto& dataset : _datasets) {
         if (dataTypes.empty()) {

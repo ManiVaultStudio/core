@@ -8,7 +8,6 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMenu>
-#include <QLocale>
 #include <QFileDialog>
 #include <QStringListModel>
 
@@ -18,9 +17,9 @@
 
 namespace mv::gui {
 
-QMap<PresetsAction::Column, QPair<QString, QString>> PresetsAction::columnInfo = QMap<PresetsAction::Column, QPair<QString, QString>>({
-    { PresetsAction::Column::Name, { "Name", "Preset name" }},
-    { PresetsAction::Column::DateTime, { "Date and time", "Date and time when the preset was changed" }}
+QMap<PresetsAction::Column, QPair<QString, QString>> PresetsAction::columnInfo = QMap<Column, QPair<QString, QString>>({
+    { Column::Name, { "Name", "Preset name" }},
+    { Column::DateTime, { "Date and time", "Date and time when the preset was changed" }}
 });
 
 PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey /*= ""*/, const QString& presetType /*= ""*/, const QIcon& icon /*= QIcon()*/) :
@@ -31,8 +30,7 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
     _icon(icon),
     _model(this),
     _filterModel(this),
-    _editAction(this, "Edit..."),
-    _presets()
+    _editAction(this, "Edit...")
 {
     Q_ASSERT(_sourceAction != nullptr);
 
@@ -92,7 +90,7 @@ void PresetsAction::loadPresetsFromApplicationSettings()
     updateModel();
 }
 
-void PresetsAction::savePresetsToApplicationSettings()
+void PresetsAction::savePresetsToApplicationSettings() const
 {
 #ifdef PRESETS_ACTION_VERBOSE
     qDebug() << __FUNCTION__;
@@ -198,6 +196,8 @@ void PresetsAction::loadPreset(const QString& name)
 
     emit presetAboutToBeLoaded(name);
     {
+        const DatasetPickerAction::ValueSerializationDisabler valueSerializationDisabler;
+
         _sourceAction->fromVariantMap(_presets[name].toMap());
     }
     emit presetLoaded(name);
@@ -211,6 +211,8 @@ void PresetsAction::savePreset(const QString& name)
 
     if (name.isEmpty())
         return;
+
+    const DatasetPickerAction::ValueSerializationDisabler valueSerializationDisabler;
 
     auto sourceActionVariantMap = _sourceAction->toVariantMap();
 
@@ -351,7 +353,7 @@ void PresetsAction::updateModel()
 
         dateTimeItem->setData(dateTime, Qt::EditRole);
 
-        const auto itemEnabled = true;// presetName != "Default";
+        const auto itemEnabled = presetName != "Default";
 
         nameItem->setEnabled(itemEnabled);
         dateTimeItem->setEnabled(itemEnabled);
@@ -464,11 +466,10 @@ PresetsAction::ChoosePresetNameDialog::ChoosePresetNameDialog(PresetsAction* pre
 
 QSize PresetsAction::ChoosePresetNameDialog::sizeHint() const
 {
-    return QSize(300, 0);
+    return { 300, 0 };
 }
 
 PresetsAction::ManagePresetsDialog::ManagePresetsDialog(PresetsAction* presetsAction) :
-    QDialog(),
     _hierarchyWidget(this, QString("%1 Preset").arg(presetsAction->getPresetType()), presetsAction->getModel(), const_cast<PresetsAction::FilterModel*>(&presetsAction->getFilterModel())),
     _removeAction(this, "Remove"),
     _okAction(this, "Ok")
@@ -507,12 +508,12 @@ PresetsAction::ManagePresetsDialog::ManagePresetsDialog(PresetsAction* presetsAc
 
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->setSortIndicator(static_cast<int>(PresetsAction::Column::Name), Qt::DescendingOrder);
+    treeViewHeader->setSortIndicator(static_cast<int>(Column::Name), Qt::DescendingOrder);
 
-    treeViewHeader->resizeSection(static_cast<int>(PresetsAction::Column::DateTime), 100);
+    treeViewHeader->resizeSection(static_cast<int>(Column::DateTime), 100);
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(PresetsAction::Column::Name), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(PresetsAction::Column::DateTime), QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(Column::Name), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(Column::DateTime), QHeaderView::Fixed);
 
     _removeAction.setEnabled(false);
     
@@ -537,7 +538,7 @@ PresetsAction::ManagePresetsDialog::ManagePresetsDialog(PresetsAction* presetsAc
         QStringList presetsToRemove;
 
         for (const auto& selectedRow : selectedRows)
-            presetsToRemove << selectedRow.siblingAtColumn(static_cast<int>(PresetsAction::Column::Name)).data().toString();
+            presetsToRemove << selectedRow.siblingAtColumn(static_cast<int>(Column::Name)).data().toString();
 
         presetsAction->removePresets(presetsToRemove);
     });
@@ -547,7 +548,7 @@ PresetsAction::ManagePresetsDialog::ManagePresetsDialog(PresetsAction* presetsAc
 
 QSize PresetsAction::ManagePresetsDialog::sizeHint() const
 {
-    return QSize(480, 480);
+    return { 480, 480 };
 }
 
 }
