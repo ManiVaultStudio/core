@@ -53,8 +53,8 @@ public: // Widgets
 
     protected:
         HorizontalToolbarAction*    _horizontalToolbarAction;   /** Pointer to horizontal toolbar action that creates the widget */
-        QHBoxLayout                 _layout;                    /** Main layout */
-        QHBoxLayout                 _toolbarLayout;             /** Toolbar layout */
+        QHBoxLayout*                _layout;                    /** Main layout */
+        QHBoxLayout*                _toolbarLayout;             /** Toolbar layout */
         QWidget                     _toolbarWidget;             /** Toolbar widget */
         QTimer                      _timer;                     /** Timer to periodically update the layout */
 
