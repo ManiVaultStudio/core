@@ -20,7 +20,7 @@
 #include <AutoHideDockContainer.h>
 
 #ifdef _DEBUG
-//#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+	#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;
@@ -60,7 +60,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
 ViewPluginDockWidget::~ViewPluginDockWidget()
 {
 #ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__ << windowTitle();
+    qDebug() << __FUNCTION__ << objectName() << windowTitle();
 #endif
 
 	serializationTasks.remove(getId());
