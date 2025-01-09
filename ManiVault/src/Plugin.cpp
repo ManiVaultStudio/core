@@ -19,7 +19,7 @@ Plugin::Plugin(const PluginFactory* factory) :
     _core(Application::core()),
     _factory(factory),
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
-    _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "1" : QString::number(factory->getNumberOfInstances() + 1)))),
+    _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "1" : QString::number(factory->getNumberOfInstancesProduced() + 1)))),
     _destroyAction(this, "Remove"),
     _shortcuts(this),
     _learningCenterAction(this, "Plugin learning center")

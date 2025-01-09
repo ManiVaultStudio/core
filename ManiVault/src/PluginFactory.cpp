@@ -21,6 +21,7 @@ PluginFactory::PluginFactory(Type type) :
     _type(type),
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
     _numberOfInstances(0),
+    _numberOfInstancesProduced(0),
     _maximumNumberOfInstances(-1),
     _triggerHelpAction(nullptr, "Trigger plugin help"),
     _triggerReadmeAction(nullptr, "Readme"),
@@ -138,7 +139,7 @@ void PluginFactory::setVersion(const QString& version)
 
 QIcon PluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return QIcon();
+    return {};
 }
 
 bool PluginFactory::mayProduce() const
@@ -227,6 +228,21 @@ void PluginFactory::setNumberOfInstances(std::uint32_t numberOfInstances)
     _pluginTriggerAction.setEnabled(mayProduce());
 
     emit numberOfInstancesChanged(_numberOfInstances);
+}
+
+std::uint32_t PluginFactory::getNumberOfInstancesProduced() const
+{
+    return _numberOfInstancesProduced;
+}
+
+void PluginFactory::setNumberOfInstancesProduced(std::uint32_t numberOfInstancesProduced)
+{
+    if (numberOfInstancesProduced == _numberOfInstancesProduced)
+        return;
+
+    _numberOfInstancesProduced = numberOfInstancesProduced;
+
+    emit numberOfInstancesProducedChanged(_numberOfInstancesProduced);
 }
 
 std::uint32_t PluginFactory::getMaximumNumberOfInstances() const
