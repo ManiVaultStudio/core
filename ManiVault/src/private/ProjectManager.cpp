@@ -532,8 +532,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 void ProjectManager::openProject(QUrl url, bool importDataOnly, bool loadWorkspace)
 {
     try {
-        if (hasProject())
-			saveProjectAs();
+   //     if (hasProject())
+			//saveProjectAs();
 
         auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
 
