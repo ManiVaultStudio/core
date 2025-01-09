@@ -105,7 +105,7 @@ public: // Getters/setters
     void setChanged();
 
     /**
-     * Get whether the selection process is cBurrently active
+     * Get whether the selection process is currently active
      * @return Boolean indicating whether the selection process is currently active
      */
     bool isActive() const {
