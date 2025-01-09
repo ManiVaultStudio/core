@@ -19,6 +19,8 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     SortFilterProxyModel(parent),
     _learningCenterTutorialsModel(nullptr),
     _tagsFilterAction(this, "Tags filter"),
+    _minimumVersionMajorAction(this, "Minimum version major", 0, 100, 1),
+    _minimumVersionMinorAction(this, "Minimum version minor", 0, 100, 0),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
@@ -30,17 +32,26 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
     _tagsFilterAction.setPopupSizeHint(QSize(500, 200));
 
-    connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, [this](const QStringList& tags) -> void {
-        invalidate();
-    });
+    _minimumVersionMajorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _minimumVersionMinorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+
+    _filterGroupAction.setIconByName("filter");
+
+    connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
+    connect(&_minimumVersionMajorAction, &IntegralAction::valueChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
+    connect(&_minimumVersionMinorAction, &IntegralAction::valueChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
 
     _filterGroupAction.setShowLabels(false);
     _filterGroupAction.addAction(&getTextFilterAction());
     _filterGroupAction.addAction(&getTextFilterSettingsAction());
+    _filterGroupAction.addAction(&getMinimumVersionMajorAction());
+    _filterGroupAction.addAction(&getMinimumVersionMinorAction());
 }
 
 bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
+    qDebug() << __FUNCTION__;
+
     const auto index = sourceModel()->index(row, 0, parent);
 
     if (!index.isValid())
@@ -71,6 +82,16 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
         if (!matchTags)
             return false;
     }
+
+    const auto minimumVersionMajor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMajor)).data(Qt::EditRole).toInt();
+    const auto minimumVersionMinor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMinor)).data(Qt::EditRole).toInt();
+    const auto applicationVersion   = Application::current()->getVersion();
+
+    if (minimumVersionMajor == Application::current()->getVersion().getMajor() && minimumVersionMinor > applicationVersion.getMinor())
+        return false;
+
+    if (minimumVersionMajor < applicationVersion.getMajor())
+        return false;
 
     return true;
 }

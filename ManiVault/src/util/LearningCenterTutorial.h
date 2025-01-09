@@ -38,8 +38,10 @@ public:
      * @param content Full tutorial content in HTML format
      * @param url ManiVault website tutorial URL
      * @param projectUrl Location of the ManiVault tutorial project (if any)
+     * @param minimumVersionMajor Minimum supported ManiVault Studio major version
+     * @param minimumVersionMinor Minimum supported ManiVault Studio minor version
      */
-    explicit LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QUrl& projectUrl);
+    explicit LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QUrl& projectUrl, const std::int32_t minimumVersionMajor, const std::int32_t minimumVersionMinor);
 
     /**
      * Construct tutorial from \p variantMap
@@ -96,6 +98,18 @@ public:
     const QUrl& getProjectUrl() const;
 
     /**
+     * Get minimum supported ManiVault Studio major version
+     * @return Minimum supported ManiVault Studio major version
+     */
+    const std::int32_t& getMinimumVersionMajor() const;
+
+    /**
+     * Get minimum supported ManiVault Studio minor version
+     * @return Minimum supported ManiVault Studio minor version
+     */
+    const std::int32_t& getMinimumVersionMinor() const;
+
+    /**
      * Get whether the tutorial has a project
      * @return Boolean determining whether the tutorial has a project
      */
@@ -108,27 +122,31 @@ public:
      */
     LearningCenterTutorial& operator=(const LearningCenterTutorial& rhs)
     {
-        _title          = rhs.getTitle();
-        _tags           = rhs.getTags();
-        _date           = rhs.getDate();
-        _iconName       = rhs.getIconName();
-        _summary        = rhs.getSummary();
-        _content        = rhs.getContent();
-        _url            = rhs.getUrl();
-        _projectUrl     = rhs.getProjectUrl();
+        _title                  = rhs.getTitle();
+        _tags                   = rhs.getTags();
+        _date                   = rhs.getDate();
+        _iconName               = rhs.getIconName();
+        _summary                = rhs.getSummary();
+        _content                = rhs.getContent();
+        _url                    = rhs.getUrl();
+        _projectUrl             = rhs.getProjectUrl();
+        _minimumVersionMajor    = rhs.getMinimumVersionMajor();
+        _minimumVersionMinor    = rhs.getMinimumVersionMinor();
 
         return *this;
     }
 
 private:
-    QString         _title;         /** Title */
-    QStringList     _tags;          /** Tags */
-    QString         _date;          /** Issue date */
-    QString         _iconName;      /** Font Awesome icon name */
-    QString         _summary;       /** Summary (brief description) */
-    QString         _content;       /** Full tutorial content in HTML format */
-    QUrl            _url;           /** ManiVault website tutorial URL */
-    QUrl            _projectUrl;    /** Location of the ManiVault tutorial project (if any) */         
+    QString         _title;                 /** Title */
+    QStringList     _tags;                  /** Tags */
+    QString         _date;                  /** Issue date */
+    QString         _iconName;              /** Font Awesome icon name */
+    QString         _summary;               /** Summary (brief description) */
+    QString         _content;               /** Full tutorial content in HTML format */
+    QUrl            _url;                   /** ManiVault website tutorial URL */
+    QUrl            _projectUrl;            /** Location of the ManiVault tutorial project (if any) */
+    std::int32_t    _minimumVersionMajor;   /** Minimum supported ManiVault Studio major version */
+    std::int32_t    _minimumVersionMinor;   /** Minimum supported ManiVault Studio minor version */
 };
 
 using LearningCenterTutorials = std::vector<const LearningCenterTutorial*>;

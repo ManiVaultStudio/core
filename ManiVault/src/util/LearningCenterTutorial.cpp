@@ -6,7 +6,7 @@
 
 namespace mv::util {
 
-LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QUrl& projectUrl) :
+LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QUrl& projectUrl, const std::int32_t minimumVersionMajor, const std::int32_t minimumVersionMinor) :
     _title(title),
     _tags(tags),
     _date(date),
@@ -14,7 +14,9 @@ LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStri
     _summary(summary),
     _content(content),
     _url(url),
-    _projectUrl(projectUrl)
+    _projectUrl(projectUrl),
+    _minimumVersionMajor(minimumVersionMajor),
+    _minimumVersionMinor(minimumVersionMinor)
 {
 }
 
@@ -26,7 +28,9 @@ LearningCenterTutorial::LearningCenterTutorial(const QVariantMap& variantMap) :
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _content(variantMap.contains("fullpost") ? variantMap["fullpost"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
-    _projectUrl(variantMap.contains("project") ? QUrl(variantMap["project"].toString()) : QUrl())
+    _projectUrl(variantMap.contains("project") ? QUrl(variantMap["project"].toString()) : QUrl()),
+    _minimumVersionMajor(variantMap.contains("minimum-version-major") ? variantMap["minimum-version-major"].toInt() : -1),
+    _minimumVersionMinor(variantMap.contains("minimum-version-minor") ? variantMap["minimum-version-minor"].toInt() : -1)
 {
 }
 
@@ -68,6 +72,16 @@ const QUrl& LearningCenterTutorial::getUrl() const
 const QUrl& LearningCenterTutorial::getProjectUrl() const
 {
     return _projectUrl;
+}
+
+const std::int32_t& LearningCenterTutorial::getMinimumVersionMajor() const
+{
+    return _minimumVersionMajor;
+}
+
+const std::int32_t& LearningCenterTutorial::getMinimumVersionMinor() const
+{
+    return _minimumVersionMinor;
 }
 
 bool LearningCenterTutorial::hasProject() const

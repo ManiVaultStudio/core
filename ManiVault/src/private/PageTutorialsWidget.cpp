@@ -20,10 +20,13 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
 {
     dynamic_cast<QVBoxLayout*>(layout())->insertWidget(1, _toolbarAction.createWidget(this));
 
+    _tutorialsFilterModel.getFilterGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+
     _toolbarAction.setShowLabels(false);
 
     _toolbarAction.addAction(&_tutorialsFilterModel.getTextFilterAction());
     _toolbarAction.addAction(&_tutorialsFilterModel.getTagsFilterAction());
+    _toolbarAction.addAction(&_tutorialsFilterModel.getFilterGroupAction());
 
     getHierarchyWidget().getToolbarAction().setVisible(false);
     getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

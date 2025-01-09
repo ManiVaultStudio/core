@@ -21,7 +21,9 @@ QMap<LearningCenterTutorialsModel::Column, LearningCenterTutorialsModel::ColumHe
     { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
     { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
     { Column::Content, { "Content" , "Content", "Full tutorial content in HTML format" } },
-    { Column::Url, { "URL" , "URL", "ManiVault website tutorial URL" } }
+    { Column::Url, { "URL" , "URL", "ManiVault website tutorial URL" } },
+    { Column::MinimumVersionMajor, { "Min. app version (major)" , "Min. app version (major)", "Minimum ManiVault Studio application version (major)" } },
+    { Column::MinimumVersionMinor, { "Min. app version (minor)" , "Min. app version (minor)", "Minimum ManiVault Studio application version (minor)" } }
 });
 
 LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= nullptr*/) :
@@ -54,6 +56,15 @@ QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation o
 
         case Column::Url:
             return UrlItem::headerData(orientation, role);
+
+        case Column::ProjectUrl:
+            return ProjectUrlItem::headerData(orientation, role);
+
+        case Column::MinimumVersionMajor:
+            return MinimumVersionMajorItem::headerData(orientation, role);
+
+        case Column::MinimumVersionMinor:
+            return MinimumVersionMinorItem::headerData(orientation, role);
 
         default:
             break;
@@ -244,6 +255,44 @@ QVariant LearningCenterTutorialsModel::ProjectUrlItem::data(int role /*= Qt::Use
     }
 
     return Item::data(role);
+}
+
+QVariant LearningCenterTutorialsModel::MinimumVersionMajorItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+            return getTutorial()->getMinimumVersionMajor();
+
+		case Qt::DisplayRole:
+	        return QString::number(data(Qt::EditRole).toInt());
+
+	    case Qt::ToolTipRole:
+	        return "Minimum ManiVault Studio application version (major): " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+    
+	return Item::data(role);
+}
+
+QVariant LearningCenterTutorialsModel::MinimumVersionMinorItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getTutorial()->getMinimumVersionMinor();
+
+	    case Qt::DisplayRole:
+	        return QString::number(data(Qt::EditRole).toInt());
+
+	    case Qt::ToolTipRole:
+	        return "Minimum ManiVault Studio application version (minor): " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+	return Item::data(role);
 }
 
 }

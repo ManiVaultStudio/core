@@ -36,6 +36,8 @@ public:
         Content,
         Url,
         ProjectUrl,
+        MinimumVersionMajor,
+        MinimumVersionMinor,
 
         Count
     };
@@ -361,6 +363,78 @@ protected:
         }
     };
 
+    /** Standard model item class for displaying the tutorial minimum application version (major) */
+    class MinimumVersionMajorItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Min. app version (major)";
+
+	            case Qt::ToolTipRole:
+	                return "Minimum ManiVault Studio application version (major)";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the tutorial minimum application version (minor) */
+    class MinimumVersionMinorItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Min. app version (minor)";
+
+	            case Qt::ToolTipRole:
+	                return "Minimum ManiVault Studio application version (minor)";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
     /** Convenience class for combining items in a row */
     class Row final : public QList<QStandardItem*>
     {
@@ -381,6 +455,8 @@ protected:
             append(new ContentItem(tutorial));
             append(new UrlItem(tutorial));
             append(new ProjectUrlItem(tutorial));
+            append(new MinimumVersionMajorItem(tutorial));
+            append(new MinimumVersionMinorItem(tutorial));
         }
     };
 

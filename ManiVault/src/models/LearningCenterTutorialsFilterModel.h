@@ -9,7 +9,7 @@
 #include "models/SortFilterProxyModel.h"
 
 #include "actions/OptionsAction.h"
-#include "actions/HorizontalGroupAction.h"
+#include "actions/VerticalGroupAction.h"
 
 namespace mv {
 
@@ -56,12 +56,16 @@ public:
 public: // Action getters
 
     gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
-    gui::HorizontalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
+    gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
+    gui::IntegralAction& getMinimumVersionMajorAction() { return _minimumVersionMajorAction; }
+    gui::IntegralAction& getMinimumVersionMinorAction() { return _minimumVersionMinorAction; }
 
 private:
     LearningCenterTutorialsModel*   _learningCenterTutorialsModel;  /** Pointer to source model */
     gui::OptionsAction              _tagsFilterAction;              /** Filter based on tag(s) */
-    gui::HorizontalGroupAction      _filterGroupAction;             /** Groups the filter text and the filter settings */
+    gui::IntegralAction             _minimumVersionMajorAction;     /** Minimum supported ManiVault Studio major version filter action */
+    gui::IntegralAction             _minimumVersionMinorAction;     /** Minimum supported ManiVault Studio minor version filter action */
+    gui::VerticalGroupAction        _filterGroupAction;             /** Groups the filter text, filter settings and minimum version settings */
 };
 
 }
