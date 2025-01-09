@@ -53,6 +53,12 @@ public:
         Item(plugin::Plugin* plugin, const QString& title);
 
         /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
          * Get plugin
          * return Pointer to plugin (maybe nullptr)
          */
