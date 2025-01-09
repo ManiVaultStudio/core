@@ -20,7 +20,8 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _tutorialWidget(this, nullptr),
     _horizontalGroupAction(this, "Toolbar"),
     _tutorialPickerAction(this, "Pick tutorial"),
-    _openInBrowserAction(this, "Open in browser")
+    _openInBrowserAction(this, "Open in browser"),
+    _autoOpenProject(true)
 {
     getLearningCenterAction().getToolbarVisibleAction().setChecked(true);
 
@@ -63,13 +64,12 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
         const auto url                      = tutorialsModel->data(sourceUrlIndex, Qt::EditRole).toString();
         const auto projectUrl               = tutorialsModel->data(sourceProjectUrlIndex, Qt::EditRole).toString();
 
-        _tutorialWidget.setHtmlText(content, url);
-        _openInBrowserAction.setToolTip(QString("Go to: %1").arg(_tutorialWidget.getBaseUrl().toString()));
-
-        qDebug() << projectUrl;
-        
-        if (!projectUrl.isEmpty())
+        if (_autoOpenProject && !projectUrl.isEmpty()) {
             mv::projects().openProject(QUrl(projectUrl));
+        } else {
+            _tutorialWidget.setHtmlText(content, url);
+            _openInBrowserAction.setToolTip(QString("Go to: %1").arg(_tutorialWidget.getBaseUrl().toString()));
+        }
     };
 
     currentTutorialChanged();
@@ -86,7 +86,7 @@ void TutorialPlugin::init()
     auto layout = new QVBoxLayout();
 
     layout->addWidget(_horizontalGroupAction.createWidget(&getWidget()));
-    layout->addWidget(&_tutorialWidget, 1);
+    //layout->addWidget(&_tutorialWidget, 1);
 
     getWidget().setLayout(layout);
 }
@@ -110,7 +110,11 @@ void TutorialPlugin::fromVariantMap(const QVariantMap& variantMap)
 {
     ViewPlugin::fromVariantMap(variantMap);
 
-    _tutorialPickerAction.fromParentVariantMap(variantMap);
+    _autoOpenProject = false;
+    {
+	    _tutorialPickerAction.fromParentVariantMap(variantMap);
+    }
+    _autoOpenProject = true;
 }
 
 QVariantMap TutorialPlugin::toVariantMap() const

@@ -68,6 +68,7 @@ private:
     mv::LearningCenterTutorialsFilterModel  _tutorialsFilterModel;      /** For filtering the learning center tutorials model */
     mv::gui::OptionAction                   _tutorialPickerAction;      /** Action for picking the tutorial */
     mv::gui::TriggerAction                  _openInBrowserAction;       /** Action for opening the tutorial on the ManiVault Studio website */
+    bool                                    _autoOpenProject;           /** Boolean determining whether to auto-open the associated tutorial project */
 };
 
 class TutorialPluginFactory : public mv::plugin::ViewPluginFactory
