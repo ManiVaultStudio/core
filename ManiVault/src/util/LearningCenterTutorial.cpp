@@ -26,7 +26,7 @@ LearningCenterTutorial::LearningCenterTutorial(const QVariantMap& variantMap) :
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _content(variantMap.contains("fullpost") ? variantMap["fullpost"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
-    _projectUrl(variantMap.contains("project") ? QUrl(variantMap["projectUrl"].toString()) : QUrl())
+    _projectUrl(variantMap.contains("project") ? QUrl(variantMap["project"].toString()) : QUrl())
 {
 }
 

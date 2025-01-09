@@ -125,7 +125,6 @@ QVariantMap TutorialPlugin::toVariantMap() const
 TutorialPluginFactory::TutorialPluginFactory() :
     ViewPluginFactory()
 {
-    setAllowPluginCreationFromStandardGui(false);
 }
 
 QIcon TutorialPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
