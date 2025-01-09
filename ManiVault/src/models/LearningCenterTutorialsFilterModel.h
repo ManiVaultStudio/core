@@ -56,15 +56,17 @@ public:
 public: // Action getters
 
     gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
-    gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
     gui::IntegralAction& getMinimumVersionMajorAction() { return _minimumVersionMajorAction; }
     gui::IntegralAction& getMinimumVersionMinorAction() { return _minimumVersionMinorAction; }
+    gui::HorizontalGroupAction& getMinimumVersionGroupAction() { return _minimumVersionGroupAction; }
+	gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
     LearningCenterTutorialsModel*   _learningCenterTutorialsModel;  /** Pointer to source model */
     gui::OptionsAction              _tagsFilterAction;              /** Filter based on tag(s) */
     gui::IntegralAction             _minimumVersionMajorAction;     /** Minimum supported ManiVault Studio major version filter action */
     gui::IntegralAction             _minimumVersionMinorAction;     /** Minimum supported ManiVault Studio minor version filter action */
+    gui::HorizontalGroupAction      _minimumVersionGroupAction;     /** Groups the minimum version settings */
     gui::VerticalGroupAction        _filterGroupAction;             /** Groups the filter text, filter settings and minimum version settings */
 };
 

@@ -107,7 +107,9 @@ void PageTutorialsWidget::updateActions()
 
         tutorialAction.setComments(tutorial->hasProject() ? QString("A tutorial project will be downloaded from: %1.").arg(tutorial->getProjectUrl().toString()) : "Creates a project with a tutorial plugin.");
         tutorialAction.setTags(tutorial->getTags());
-        tutorialAction.setDownloadUrls({ tutorial->getProjectUrl().toString() });
+
+        if (tutorial->hasProject())
+			tutorialAction.setDownloadUrls({ tutorial->getProjectUrl().toString() });
 
         getModel().add(tutorialAction);
     }

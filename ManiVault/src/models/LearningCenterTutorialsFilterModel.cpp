@@ -21,6 +21,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     _tagsFilterAction(this, "Tags filter"),
     _minimumVersionMajorAction(this, "Minimum version major", 0, 100, 1),
     _minimumVersionMinorAction(this, "Minimum version minor", 0, 100, 0),
+    _minimumVersionGroupAction(this, "Minimum version"),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
@@ -32,26 +33,36 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
     _tagsFilterAction.setPopupSizeHint(QSize(500, 200));
 
+    _minimumVersionMajorAction.setPrefix("major: ");
+    _minimumVersionMinorAction.setPrefix("minor: ");
+
     _minimumVersionMajorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _minimumVersionMinorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
 
+    const auto applicationVersion = Application::current()->getVersion();
+
+    _minimumVersionMajorAction.setValue(applicationVersion.getMajor());
+    _minimumVersionMinorAction.setValue(applicationVersion.getMinor());
+
+    _minimumVersionGroupAction.setShowLabels(false);
+
+    _minimumVersionGroupAction.addAction(&getMinimumVersionMajorAction());
+    _minimumVersionGroupAction.addAction(&getMinimumVersionMinorAction());
+
     _filterGroupAction.setIconByName("filter");
+    _filterGroupAction.setPopupSizeHint({ 400, 0 });
 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
     connect(&_minimumVersionMajorAction, &IntegralAction::valueChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
     connect(&_minimumVersionMinorAction, &IntegralAction::valueChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
 
-    _filterGroupAction.setShowLabels(false);
-    _filterGroupAction.addAction(&getTextFilterAction());
-    _filterGroupAction.addAction(&getTextFilterSettingsAction());
-    _filterGroupAction.addAction(&getMinimumVersionMajorAction());
-    _filterGroupAction.addAction(&getMinimumVersionMinorAction());
+    _filterGroupAction.addAction(&getTextFilterCaseSensitiveAction());
+    _filterGroupAction.addAction(&getTextFilterRegularExpressionAction());
+    _filterGroupAction.addAction(&getMinimumVersionGroupAction());
 }
 
 bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
-    qDebug() << __FUNCTION__;
-
     const auto index = sourceModel()->index(row, 0, parent);
 
     if (!index.isValid())
@@ -85,12 +96,11 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
 
     const auto minimumVersionMajor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMajor)).data(Qt::EditRole).toInt();
     const auto minimumVersionMinor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMinor)).data(Qt::EditRole).toInt();
-    const auto applicationVersion   = Application::current()->getVersion();
 
-    if (minimumVersionMajor == Application::current()->getVersion().getMajor() && minimumVersionMinor > applicationVersion.getMinor())
+    if (minimumVersionMajor == _minimumVersionMajorAction.getValue() && minimumVersionMinor < _minimumVersionMinorAction.getValue())
         return false;
 
-    if (minimumVersionMajor < applicationVersion.getMajor())
+    if (minimumVersionMajor < _minimumVersionMajorAction.getValue())
         return false;
 
     return true;
