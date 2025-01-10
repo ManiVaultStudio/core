@@ -22,7 +22,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     SortFilterProxyModel(parent),
     _learningCenterTutorialsModel(nullptr),
     _tagsFilterAction(this, "Tags filter"),
-    _appVersionAction(this, "App version"),
+    _targetAppVersionAction(this, "App version"),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
@@ -40,12 +40,11 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     _filterGroupAction.setPopupSizeHint({ 400, 0 });
 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
-    connect(&_minimumVersionMajorAction, &IntegralAction::valueChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
-    connect(&_minimumVersionMinorAction, &IntegralAction::valueChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
+    connect(&_targetAppVersionAction, &VersionAction::versionChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
 
     _filterGroupAction.addAction(&getTextFilterCaseSensitiveAction());
     _filterGroupAction.addAction(&getTextFilterRegularExpressionAction());
-    _filterGroupAction.addAction(&getMinimumVersionGroupAction());
+    _filterGroupAction.addAction(&getTargetAppVersionAction());
 }
 
 bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -84,10 +83,10 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
     const auto minimumVersionMajor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMajor)).data(Qt::EditRole).toInt();
     const auto minimumVersionMinor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMinor)).data(Qt::EditRole).toInt();
 
-    const Version minimumAppVersion(minimumVersionMajor, minimumVersionMinor, 0) ;
-    const Version targetAppVersion(_minimumVersionAction.getMajorAction().getValue(), _minimumVersionAction.getMinorAction().getValue(), 0) ;
+    const Version tutorialMinimumAppVersion(minimumVersionMajor, minimumVersionMinor, 0) ;
+    const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0) ;
 
-    if (targetAppVersion > minimumAppVersion)
+    if (targetAppVersion > tutorialMinimumAppVersion)
         return false;
 
     return true;
