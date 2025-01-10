@@ -83,6 +83,14 @@ util::Version VersionAction::getVersion() const
     return { getMajor(), getMinor(), getPatch(), getSuffix().toStdString() };
 }
 
+void VersionAction::setVersion(const util::Version& version)
+{
+    getMajorAction().setValue(version.getMajor());
+    getMinorAction().setValue(version.getMinor());
+    getPatchAction().setValue(version.getPatch());
+    getSuffixAction().setString(QString::fromStdString(version.getSuffix()));
+}
+
 void VersionAction::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);

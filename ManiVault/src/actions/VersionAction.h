@@ -62,11 +62,17 @@ public:
      */
     util::Version getVersion() const;
 
+    /**
+     * Set version to \p version
+     * @param version Version
+     */
+    void setVersion(const util::Version& version) const;
+
 public: // Serialization
 
     /**
-     * Load project from variant
-     * @param Variant representation of the project
+     * Load version action from variant
+     * @param variantMap Variant representation of the project
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
