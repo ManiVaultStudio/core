@@ -5,6 +5,8 @@
 #include "LearningCenterTutorialsFilterModel.h"
 #include "LearningCenterTutorialsModel.h"
 
+#include "util/version.h"
+
 #include <QDebug>
 
 #ifdef _DEBUG
@@ -12,6 +14,7 @@
 #endif
 
 using namespace mv::gui;
+using namespace mv::util;
 
 namespace mv {
 
@@ -19,9 +22,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     SortFilterProxyModel(parent),
     _learningCenterTutorialsModel(nullptr),
     _tagsFilterAction(this, "Tags filter"),
-    _minimumVersionMajorAction(this, "Minimum version major", 0, 100, 1),
-    _minimumVersionMinorAction(this, "Minimum version minor", 0, 100, 0),
-    _minimumVersionGroupAction(this, "Minimum version"),
+    _appVersionAction(this, "App version"),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
@@ -33,21 +34,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
     _tagsFilterAction.setPopupSizeHint(QSize(500, 200));
 
-    _minimumVersionMajorAction.setPrefix("major: ");
-    _minimumVersionMinorAction.setPrefix("minor: ");
-
-    _minimumVersionMajorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
-    _minimumVersionMinorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
-
     const auto applicationVersion = Application::current()->getVersion();
-
-    _minimumVersionMajorAction.setValue(applicationVersion.getMajor());
-    _minimumVersionMinorAction.setValue(applicationVersion.getMinor());
-
-    _minimumVersionGroupAction.setShowLabels(false);
-
-    _minimumVersionGroupAction.addAction(&getMinimumVersionMajorAction());
-    _minimumVersionGroupAction.addAction(&getMinimumVersionMinorAction());
 
     _filterGroupAction.setIconByName("filter");
     _filterGroupAction.setPopupSizeHint({ 400, 0 });
@@ -97,10 +84,10 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
     const auto minimumVersionMajor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMajor)).data(Qt::EditRole).toInt();
     const auto minimumVersionMinor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMinor)).data(Qt::EditRole).toInt();
 
-    if (minimumVersionMajor == _minimumVersionMajorAction.getValue() && minimumVersionMinor < _minimumVersionMinorAction.getValue())
-        return false;
+    const Version minimumAppVersion(minimumVersionMajor, minimumVersionMinor, 0) ;
+    const Version targetAppVersion(_minimumVersionAction.getMajorAction().getValue(), _minimumVersionAction.getMinorAction().getValue(), 0) ;
 
-    if (minimumVersionMajor < _minimumVersionMajorAction.getValue())
+    if (targetAppVersion > minimumAppVersion)
         return false;
 
     return true;

@@ -12,14 +12,15 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _majorAction(this, "Major Version", 0, 100, 1),
     _minorAction(this, "Minor Version", 0, 100, 0),
+    _patchAction(this, "Patch Version", 0, 100, 0),
     _suffixAction(this, "Suffix"),
-    _versionStringAction(this, "Version String"),
-    _suffixCompleter()
+    _versionStringAction(this, "Version String")
 {
     setShowLabels(false);
 
     addAction(&_majorAction);
     addAction(&_minorAction);
+    addAction(&_patchAction);
     addAction(&_suffixAction);
 
     _majorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
@@ -32,6 +33,11 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
     _minorAction.setPrefix("minor: ");
     _minorAction.setToolTip("Minor version number");
     _minorAction.setStretch(1);
+
+    _patchAction.setPrefix("patch: ");
+    _patchAction.setToolTip("Patch version number");
+    _patchAction.setStretch(1);
+    _patchAction.setVisible(false);
 
     _suffixAction.setPlaceHolderString("Enter suffix here...");
     _suffixAction.setClearable(true);
@@ -48,7 +54,41 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
 
     connect(&_majorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
     connect(&_minorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
+    connect(&_patchAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
     connect(&_suffixAction, &StringAction::stringChanged, this, updateVersionStringAction);
+}
+
+std::int32_t VersionAction::getMajor() const
+{
+    return getMajorAction().getValue();
+}
+
+std::int32_t VersionAction::getMinor() const
+{
+    return getMinorAction().getValue();
+}
+
+std::int32_t VersionAction::getPatch() const
+{
+    return getPatchAction().getValue();
+}
+
+QString VersionAction::getSuffix() const
+{
+    return getSuffixAction().getString();
+}
+
+util::Version VersionAction::getVersion() const
+{
+    return { getMajor(), getMinor(), getPatch(), getSuffix().toStdString() };
+}
+
+void VersionAction::setVersion(const util::Version& version)
+{
+    getMajorAction().setValue(version.getMajor());
+    getMinorAction().setValue(version.getMinor());
+    getPatchAction().setValue(version.getPatch());
+    getSuffixAction().setString(QString::fromStdString(version.getSuffix()));
 }
 
 void VersionAction::fromVariantMap(const QVariantMap& variantMap)
@@ -66,6 +106,7 @@ QVariantMap VersionAction::toVariantMap() const
 
     _majorAction.insertIntoVariantMap(variantMap);
     _minorAction.insertIntoVariantMap(variantMap);
+    _patchAction.insertIntoVariantMap(variantMap);
     _suffixAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
