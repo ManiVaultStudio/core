@@ -32,11 +32,47 @@ public:
      */
     Q_INVOKABLE VersionAction(QObject* parent, const QString& title);
 
+    /**
+     * Get major version number
+     * @return Major version number
+     */
+    std::int32_t getMajor() const;
+
+    /**
+     * Get minor version number
+     * @return Minor version number
+     */
+    std::int32_t getMinor() const;
+
+    /**
+     * Get patch version number
+     * @return Patch version number
+     */
+    std::int32_t getPatch() const;
+
+    /**
+     * Get version suffix string
+     * @return Version suffix string
+     */
+    QString getSuffix() const;
+
+    /**
+     * Get version
+     * @return Version
+     */
+    util::Version getVersion() const;
+
+    /**
+     * Set version to \p version
+     * @param version Version
+     */
+    void setVersion(const util::Version& version);
+
 public: // Serialization
 
     /**
-     * Load project from variant
-     * @param Variant representation of the project
+     * Load version action from variant
+     * @param variantMap Variant representation of the project
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -45,6 +81,14 @@ public: // Serialization
      * @return Variant representation of the project
      */
     QVariantMap toVariantMap() const override;
+
+signals:
+
+    /**
+     * Signals that the version changed to \p version
+     * @param version Changed version
+     */
+    void versionChanged(const util::Version& version);
 
 public: // Action getters
 
