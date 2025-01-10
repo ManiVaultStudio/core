@@ -21,7 +21,7 @@ class CORE_EXPORT Version final : public Serializable {
 public:
 
     /**
-     * Construct version with \p major and \p minor version number
+     * Construct version with \p major, \p minor and \p patch version number and possibly \p suffix
      * @param major Major version number
      * @param minor Minor version number
      * @param patch Patch version number
