@@ -28,6 +28,7 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     auto tutorialsModel = const_cast<mv::LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel());
 
     _tutorialsFilterModel.setSourceModel(tutorialsModel);
+    _tutorialsFilterModel.getFilterGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _tutorialPickerAction.setCustomModel(&_tutorialsFilterModel);
     _tutorialPickerAction.setPlaceHolderString("Pick a tutorial...");
@@ -41,6 +42,7 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     tagsFilterAction.setPopupSizeHint(QSize(500, 300));
 
     _horizontalGroupAction.addAction(&_tutorialPickerAction, 1);
+    _horizontalGroupAction.addAction(&_tutorialsFilterModel.getFilterGroupAction());
     _horizontalGroupAction.addAction(&tagsFilterAction);
     _horizontalGroupAction.addAction(&_openInBrowserAction);
 
