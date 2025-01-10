@@ -8,6 +8,8 @@
 #include "IntegralAction.h"
 #include "StringAction.h"
 
+#include "util/Version.h"
+
 #include <QCompleter>
 
 namespace mv::gui {
