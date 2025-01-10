@@ -46,16 +46,18 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
 
     _suffixCompleter.setModel(new QStringListModel({ "Alpha", "Beta", "Release Candidate", "Pre-release", "alpha", "beta", "rc", "pre-release" }));
 
-    const auto updateVersionStringAction = [this]() -> void {
-        _versionStringAction.setString(QString("%1.%2 %3").arg(QString::number(_majorAction.getValue()), QString::number(_minorAction.getValue()), _suffixAction.getString()));
+    const auto versionElementChanged = [this]() -> void {
+    _versionStringAction.setString(QString("%1.%2 %3").arg(QString::number(_majorAction.getValue()), QString::number(_minorAction.getValue()), _suffixAction.getString()));
+
+        emit versionChanged(getVersion());
     };
 
-    updateVersionStringAction();
-
-    connect(&_majorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
-    connect(&_minorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
-    connect(&_patchAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
-    connect(&_suffixAction, &StringAction::stringChanged, this, updateVersionStringAction);
+    versionElementChanged();
+    
+    connect(&_majorAction, &IntegralAction::valueChanged, this, versionElementChanged);
+    connect(&_minorAction, &IntegralAction::valueChanged, this, versionElementChanged);
+    connect(&_patchAction, &IntegralAction::valueChanged, this, versionElementChanged);
+    connect(&_suffixAction, &StringAction::stringChanged, this, versionElementChanged);
 }
 
 std::int32_t VersionAction::getMajor() const
