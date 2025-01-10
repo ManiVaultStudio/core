@@ -84,7 +84,6 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
 
     const auto pluginOverlayVisibleChanged = [this]() -> void {
         _toolbarVisibleAction.setIconByName(_toolbarVisibleAction.isChecked() ? "eye" : "eye-slash");
-        _alignmentAction.setEnabled(_toolbarVisibleAction.isChecked());
     };
 
     pluginOverlayVisibleChanged();
@@ -139,6 +138,7 @@ QMenu* PluginLearningCenterAction::getAlignmentContextMenu(QWidget* parent)
 {
     auto contextMenu = new QMenu("Alignment", parent);
 
+    contextMenu->setEnabled(_toolbarVisibleAction.isChecked());
     contextMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("arrows-alt"));
 
     if (getAlignment() != (Qt::AlignTop | Qt::AlignLeft))
