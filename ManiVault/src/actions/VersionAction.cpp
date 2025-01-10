@@ -14,8 +14,7 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
     _minorAction(this, "Minor Version", 0, 100, 0),
     _patchAction(this, "Patch Version", 0, 100, 0),
     _suffixAction(this, "Suffix"),
-    _versionStringAction(this, "Version String"),
-    _suffixCompleter()
+    _versionStringAction(this, "Version String")
 {
     setShowLabels(false);
 
@@ -35,6 +34,11 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
     _minorAction.setToolTip("Minor version number");
     _minorAction.setStretch(1);
 
+    _patchAction.setPrefix("patch: ");
+    _patchAction.setToolTip("Patch version number");
+    _patchAction.setStretch(1);
+    _patchAction.setVisible(false);
+
     _suffixAction.setPlaceHolderString("Enter suffix here...");
     _suffixAction.setClearable(true);
     _suffixAction.setStretch(3);
@@ -50,6 +54,7 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
 
     connect(&_majorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
     connect(&_minorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
+    connect(&_patchAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
     connect(&_suffixAction, &StringAction::stringChanged, this, updateVersionStringAction);
 }
 
@@ -68,6 +73,7 @@ QVariantMap VersionAction::toVariantMap() const
 
     _majorAction.insertIntoVariantMap(variantMap);
     _minorAction.insertIntoVariantMap(variantMap);
+    _patchAction.insertIntoVariantMap(variantMap);
     _suffixAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
