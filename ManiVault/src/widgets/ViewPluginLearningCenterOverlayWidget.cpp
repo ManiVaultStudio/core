@@ -110,8 +110,8 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 
         connect(&getLearningCenterAction().getHideToolbarAction(), &TriggerAction::triggered, this, [this]() -> void {
             collapse();
-            _learningCenterToolbarItemWidget.getWidgetFader().setOpacity(0.f, animationDuration);
-            hide();
+            //_learningCenterToolbarItemWidget.getWidgetFader().setOpacity(0.f, animationDuration);
+            //hide();
         });
 
         alignmentChanged();
@@ -747,9 +747,9 @@ ViewPluginLearningCenterOverlayWidget::ToolbarWidget::ToolbarWidget(const plugin
 		});
 
         connect(&_viewPlugin->getLearningCenterAction().getToolbarVisibleAction(), &ToggleAction::toggled, this, &ToolbarWidget::visibilityChanged);
-
         connect(&_viewPlugin->getLearningCenterAction().getAlignmentAction(), &OptionAction::currentIndexChanged, this, &ToolbarWidget::alignmentChanged);
 
+        visibilityChanged();
         alignmentChanged();
     }
     catch (std::exception& e)
@@ -849,13 +849,17 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::visibilityChanged()
         return;
 
     if (_viewPlugin->getLearningCenterAction().getToolbarVisibleAction().isChecked()) {
+    	_overlayWidget->addMouseEventReceiverWidget(this);
+        _overlayWidget->show();
+
         _backgroundWidgetFader.setOpacity(0.95f, animationDuration);
-        _overlayWidget->addMouseEventReceiverWidget(this);
+
         update();
     }
     else {
-        _backgroundWidgetFader.setOpacity(0.f, animationDuration);
+        _backgroundWidgetFader.setOpacity(0.f, 0);
         _overlayWidget->removeMouseEventReceiverWidget(this);
+        _overlayWidget->hide();
     }
 }
 

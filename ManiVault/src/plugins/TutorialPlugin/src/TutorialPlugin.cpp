@@ -23,8 +23,6 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _openInBrowserAction(this, "Open in browser"),
     _autoOpenProject(true)
 {
-    getLearningCenterAction().getToolbarVisibleAction().setChecked(true);
-
     _horizontalGroupAction.setShowLabels(false);
 
     auto tutorialsModel = const_cast<mv::LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel());
@@ -86,9 +84,11 @@ void TutorialPlugin::init()
     auto layout = new QVBoxLayout();
 
     layout->addWidget(_horizontalGroupAction.createWidget(&getWidget()));
-    //layout->addWidget(&_tutorialWidget, 1);
+    layout->addWidget(&_tutorialWidget, 1);
 
     getWidget().setLayout(layout);
+
+    getLearningCenterAction().getToolbarVisibleAction().setChecked(false);
 }
 
 const mv::util::LearningCenterTutorial* TutorialPlugin::getCurrentTutorial() const
