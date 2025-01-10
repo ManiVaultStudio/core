@@ -76,6 +76,8 @@ void WidgetOverlayer::addMouseEventReceiverWidget(const QWidget* mouseEventRecei
     _mouseEventReceiverWidgets << mouseEventReceiverWidget;
 
     emit mouseEventReceiverWidgetAdded(mouseEventReceiverWidget);
+
+    _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents, false);
 }
 
 void WidgetOverlayer::removeMouseEventReceiverWidget(const QWidget* mouseEventReceiverWidget)
@@ -88,6 +90,8 @@ void WidgetOverlayer::removeMouseEventReceiverWidget(const QWidget* mouseEventRe
     _mouseEventReceiverWidgets.removeOne(mouseEventReceiverWidget);
 
     emit mouseEventReceiverWidgetRemoved(mouseEventReceiverWidget);
+
+    _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 }
 
 WidgetOverlayer::MouseEventReceiverWidgets WidgetOverlayer::getMouseEventReceiverWidgets()
