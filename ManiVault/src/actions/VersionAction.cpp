@@ -58,6 +58,31 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
     connect(&_suffixAction, &StringAction::stringChanged, this, updateVersionStringAction);
 }
 
+std::int32_t VersionAction::getMajor() const
+{
+    return getMajorAction().getValue();
+}
+
+std::int32_t VersionAction::getMinor() const
+{
+    return getMinorAction().getValue();
+}
+
+std::int32_t VersionAction::getPatch() const
+{
+    return getPatchAction().getValue();
+}
+
+QString VersionAction::getSuffix() const
+{
+    return getSuffixAction().getString();
+}
+
+util::Version VersionAction::getVersion() const
+{
+    return { getMajor(), getMinor(), getPatch(), getSuffix().toStdString() };
+}
+
 void VersionAction::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);

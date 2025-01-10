@@ -32,6 +32,36 @@ public:
      */
     Q_INVOKABLE VersionAction(QObject* parent, const QString& title);
 
+    /**
+     * Get major version number
+     * @return Major version number
+     */
+    std::int32_t getMajor() const;
+
+    /**
+     * Get minor version number
+     * @return Minor version number
+     */
+    std::int32_t getMinor() const;
+
+    /**
+     * Get patch version number
+     * @return Patch version number
+     */
+    std::int32_t getPatch() const;
+
+    /**
+     * Get version suffix string
+     * @return Version suffix string
+     */
+    QString getSuffix() const;
+
+    /**
+     * Get version
+     * @return Version
+     */
+    util::Version getVersion() const;
+
 public: // Serialization
 
     /**
