@@ -12,6 +12,7 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _majorAction(this, "Major Version", 0, 100, 1),
     _minorAction(this, "Minor Version", 0, 100, 0),
+    _patchAction(this, "Patch Version", 0, 100, 0),
     _suffixAction(this, "Suffix"),
     _versionStringAction(this, "Version String"),
     _suffixCompleter()
@@ -20,6 +21,7 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
 
     addAction(&_majorAction);
     addAction(&_minorAction);
+    addAction(&_patchAction);
     addAction(&_suffixAction);
 
     _majorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
