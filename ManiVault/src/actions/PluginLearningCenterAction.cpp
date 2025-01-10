@@ -82,13 +82,14 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _alignmentAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _alignmentAction.setConnectionPermissionsToForceNone();
 
-    const auto updateViewPluginOverlayVisibleActionIcon = [this]() -> void {
+    const auto pluginOverlayVisibleChanged = [this]() -> void {
         _toolbarVisibleAction.setIconByName(_toolbarVisibleAction.isChecked() ? "eye" : "eye-slash");
+        _alignmentAction.setEnabled(_toolbarVisibleAction.isChecked());
     };
 
-    updateViewPluginOverlayVisibleActionIcon();
+    pluginOverlayVisibleChanged();
 
-    connect(&_toolbarVisibleAction, &ToggleAction::toggled, this, updateViewPluginOverlayVisibleActionIcon);
+    connect(&_toolbarVisibleAction, &ToggleAction::toggled, this, pluginOverlayVisibleChanged);
 
     _moveToTopLeftAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignLeft));
     _moveToTopRightAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignRight));
