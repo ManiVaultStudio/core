@@ -10,14 +10,22 @@
 
 namespace mv::util {
 
-/** Class for representing version with major-, minor- and patch version number plus an optional suffic */
+/**
+ * Version class
+ *
+ * Based on semantic versioning (major, minor and patch version number)
+ *
+ * It alo has optional suffix
+ */
 class CORE_EXPORT Version final : public Serializable {
 public:
 
     /**
-     * Construct version with \p major and \p minor version number
+     * Construct version with \p major, \p minor and \p patch version number and possibly \p suffix
      * @param major Major version number
      * @param minor Minor version number
+     * @param patch Patch version number
+     * @param suffix Suffix e.g. alpha, beta
      */
     Version(std::int32_t major, std::int32_t minor, std::int32_t patch, const std::string& suffix = "");
 
@@ -87,11 +95,55 @@ public:
      */
     void setSuffix(const std::string& suffix);
 
+public: // Comparison operators
+
+    /**
+     * Determines whether this version is larger than \p rhs
+     * @param rhs Right-hand-side version to compare with
+     * @return Boolean determining whether this version is larger than \p rhs
+     */
+    bool operator > (const Version& rhs) const {
+        if (getMajor() > rhs.getMajor())
+            return true;
+
+        if (getMajor() < rhs.getMajor())
+            return false;
+
+        if (getMinor() > rhs.getMinor())
+            return true;
+
+        if (getMinor() < rhs.getMinor())
+            return false;
+
+        return getPatch() > rhs.getPatch();
+    }
+
+    /**
+     * Determines whether this version is smaller than \p rhs
+     * @param rhs Right-hand-side version to compare with
+     * @return Boolean determining whether this version is smaller than \p rhs
+     */
+    bool operator < (const Version& rhs) const {
+        if (getMajor() < rhs.getMajor())
+            return true;
+
+        if (getMajor() > rhs.getMajor())
+            return false;
+
+        if (getMinor() < rhs.getMinor())
+            return true;
+
+        if (getMinor() > rhs.getMinor())
+            return false;
+
+        return getPatch() < rhs.getPatch();
+    }
+
 public: // Serialization
 
     /**
      * Load version from variant map
-     * @param Variant map representation of the version
+     * @param variantMap Variant map representation of the version
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -102,10 +154,10 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    std::int32_t _major;
-    std::int32_t _minor;
-    std::int32_t _patch;
-    std::string  _suffix;
+    std::int32_t    _major;     /** SEM version major */
+    std::int32_t    _minor;     /** SEM version minor */
+    std::int32_t    _patch;     /** SEM version patch */
+    std::string     _suffix;    /** Version suffix */
 };
 
 }

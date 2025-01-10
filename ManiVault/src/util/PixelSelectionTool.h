@@ -86,6 +86,12 @@ public: // Getters/setters
      */
     void setBrushRadius(const float& brushRadius);
 
+    /** Get fixed brush radius modifier */
+    Qt::KeyboardModifier getFixedBrushRadiusModifier() const;
+
+    /** Set fixed brush radius modifier */
+    void setFixedBrushRadiusModifier(Qt::KeyboardModifier fixedBrushRadiusModifier);
+
     /** Get main drawing color */
     QColor getMainColor() const;
 
@@ -99,7 +105,7 @@ public: // Getters/setters
     void setChanged();
 
     /**
-     * Get whether the selection process is cBurrently active
+     * Get whether the selection process is currently active
      * @return Boolean indicating whether the selection process is currently active
      */
     bool isActive() const {
@@ -186,6 +192,7 @@ protected:
     bool                        _active;                    /** Whether the selection process is active */
     bool                        _notifyDuringSelection;     /** Whether the selection is published continuously or at the end */
     float                       _brushRadius;               /** Brush radius */
+    Qt::KeyboardModifier        _fixedBrushRadiusModifier;  /** Do not change brush radius when fixed by pressing a key (e.g. for navigation) */
     QPoint                      _mousePosition;             /** Current mouse position */
     QVector<QPoint>             _mousePositions;            /** Recorded mouse positions */
     int                         _mouseButtons;              /** State of the left, middle and right mouse buttons */

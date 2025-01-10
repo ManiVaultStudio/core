@@ -22,6 +22,7 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _active(false),
     _notifyDuringSelection(true),
     _brushRadius(BRUSH_RADIUS_DEFAULT),
+    _fixedBrushRadiusModifier(Qt::NoModifier),
     _mousePosition(),
     _mousePositions(),
     _mouseButtons(),
@@ -124,6 +125,16 @@ void PixelSelectionTool::setBrushRadius(const float& brushRadius)
     emit brushRadiusChanged(_brushRadius);
     
     paint();
+}
+
+Qt::KeyboardModifier PixelSelectionTool::getFixedBrushRadiusModifier() const
+{
+    return _fixedBrushRadiusModifier;
+}
+
+void PixelSelectionTool::setFixedBrushRadiusModifier(Qt::KeyboardModifier fixedBrushRadiusModifier)
+{
+    _fixedBrushRadiusModifier = fixedBrushRadiusModifier;
 }
 
 QColor PixelSelectionTool::getMainColor() const
@@ -495,6 +506,9 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                 case PixelSelectionType::Brush:
                 case PixelSelectionType::Sample:
                 {
+                    if (_fixedBrushRadiusModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedBrushRadiusModifier)
+                        break;
+
                     if (wheelEvent->angleDelta().y() < 0)
                         setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
                     else
