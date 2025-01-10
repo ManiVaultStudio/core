@@ -48,19 +48,22 @@ public: // Serialization
 
 public: // Action getters
 
-    const gui::IntegralAction& getMajorAction() const { return _majorAction; }
-    const gui::IntegralAction& getMinorAction() const { return _minorAction; }
-    const gui::StringAction& getSuffixAction() const { return _suffixAction; }
-    const gui::StringAction& getVersionStringAction() const { return _versionStringAction; }
+    const IntegralAction& getMajorAction() const { return _majorAction; }
+    const IntegralAction& getMinorAction() const { return _minorAction; }
+    const IntegralAction& getPatchAction() const { return _patchAction; }
+    const StringAction& getSuffixAction() const { return _suffixAction; }
+    const StringAction& getVersionStringAction() const { return _versionStringAction; }
 
-    gui::IntegralAction& getMajorAction() { return _majorAction; }
-    gui::IntegralAction& getMinorAction() { return _minorAction; }
-    gui::StringAction& getSuffixAction() { return _suffixAction; }
-    gui::StringAction& getVersionStringAction() { return _versionStringAction; }
+    IntegralAction& getMajorAction() { return _majorAction; }
+    IntegralAction& getMinorAction() { return _minorAction; }
+    IntegralAction& getPatchAction() { return _patchAction; }
+    StringAction& getSuffixAction() { return _suffixAction; }
+    StringAction& getVersionStringAction() { return _versionStringAction; }
 
 private:
     IntegralAction  _majorAction;           /** Action for storing the major version */
     IntegralAction  _minorAction;           /** Action for storing the minor version */
+    IntegralAction  _patchAction;           /** Action for storing the patch version */
     StringAction    _suffixAction;          /** Action which stores the version suffix (e.g. alpha or beta) */
     StringAction    _versionStringAction;   /** Action which stores the string representation of the version */
     QCompleter      _suffixCompleter;       /** Completer for version suffix */
