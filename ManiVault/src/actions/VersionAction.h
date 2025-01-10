@@ -46,6 +46,14 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+signals:
+
+    /**
+     * Signals that the version changed to \p version
+     * @param version Changed version
+     */
+    void versionChanged(const util::Version& version);
+
 public: // Action getters
 
     const IntegralAction& getMajorAction() const { return _majorAction; }
