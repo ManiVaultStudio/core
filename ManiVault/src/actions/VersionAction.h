@@ -66,7 +66,7 @@ public:
      * Set version to \p version
      * @param version Version
      */
-    void setVersion(const util::Version& version) const;
+    void setVersion(const util::Version& version);
 
 public: // Serialization
 
