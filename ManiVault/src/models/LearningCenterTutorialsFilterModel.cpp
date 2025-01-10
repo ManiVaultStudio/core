@@ -36,6 +36,9 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
 
     const auto applicationVersion = Application::current()->getVersion();
 
+    _targetAppVersionAction.setToolTip("Minimum ManiVault Studio version");
+    _targetAppVersionAction.getSuffixAction().setVisible(false);
+
     _filterGroupAction.setIconByName("filter");
     _filterGroupAction.setPopupSizeHint({ 400, 0 });
 
