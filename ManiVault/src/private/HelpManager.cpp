@@ -237,16 +237,32 @@ QMenu* HelpManager::getTutorialsMenu() const
 {
     auto tutorialsMenu = new QMenu("Tutorials");
 
-    tutorialsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("chalkboard"));
+    tutorialsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
 
     for (const auto tutorial : getTutorials({})) {
+        
         auto tutorialAction = new TriggerAction(tutorialsMenu, tutorial->getTitle());
 
-        tutorialAction->setIconByName("external-link-square-alt");
+        tutorialAction->setIconByName(tutorial->getIconName());
 
-        connect(tutorialAction, &TriggerAction::triggered, tutorialAction, [tutorial]() -> void {
-            mv::projects().openProject(tutorial->getProjectUrl());
-		});
+        if (tutorial->hasProject()) {
+            connect(tutorialAction, &TriggerAction::triggered, tutorialAction, [tutorial]() -> void {
+                mv::projects().openProject(tutorial->getProjectUrl());
+            });
+        } else {
+            connect(tutorialAction, &TriggerAction::triggered, tutorialAction, [tutorial]() -> void {
+                if (!mv::projects().hasProject())
+                    mv::projects().newBlankProject();
+
+                if (auto tutorialPlugin = mv::plugins().requestViewPlugin("Tutorial")) {
+                    if (auto pickerAction = dynamic_cast<OptionAction*>(tutorialPlugin->findChildByPath("Pick tutorial")))
+                        pickerAction->setCurrentText(tutorial->getTitle());
+
+                    if (auto toolbarAction = dynamic_cast<HorizontalGroupAction*>(tutorialPlugin->findChildByPath("Toolbar")))
+                        toolbarAction->setVisible(false);
+                }
+			});
+        }
 
         tutorialsMenu->addAction(tutorialAction);
     }
