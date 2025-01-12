@@ -63,7 +63,7 @@ DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
 {
     ViewPluginDockWidgets viewPluginDockWidgets;
 
-    for (auto dockWidget : dockWidgetsMap().values()) {
+    for (auto dockWidget : dockWidgets()/*dockWidgetsMap().values()*/) {
         if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget)) {
             viewPluginDockWidgets.push_back(viewPluginDockWidget);
 
@@ -157,12 +157,18 @@ void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDoc
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
+    //
 
     disconnect(viewPluginDockWidget);
 
-    viewPluginDockWidget->closeDockWidget();
+    viewPluginDockWidget->takeWidget();
     viewPluginDockWidget->setParent(nullptr);
+
+    CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
+    //viewPluginDockWidget->setWidget(nullptr);
+
+    /*viewPluginDockWidget->closeDockWidget();
+    */
     delete viewPluginDockWidget;
 
     //QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
