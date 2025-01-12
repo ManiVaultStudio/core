@@ -159,17 +159,17 @@ void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDoc
 
     //
 
-    disconnect(viewPluginDockWidget);
+    //disconnect(viewPluginDockWidget);
 
-    viewPluginDockWidget->takeWidget();
-    viewPluginDockWidget->setParent(nullptr);
+    //viewPluginDockWidget->takeWidget();
+    //viewPluginDockWidget->setParent(nullptr);
 
     CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
     //viewPluginDockWidget->setWidget(nullptr);
 
     /*viewPluginDockWidget->closeDockWidget();
     */
-    delete viewPluginDockWidget;
+    viewPluginDockWidget->deleteLater();
 
     //QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
 }
