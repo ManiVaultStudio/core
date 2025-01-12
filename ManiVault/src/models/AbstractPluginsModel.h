@@ -217,7 +217,7 @@ public:
     virtual plugin::Plugin* getPlugin(const QModelIndex& modelIndex) const = 0;
 
     /**
-     * Set the \p plugins from which can be picked (mode is set to Mode::Manual)
+     * Set the \p plugins from which can be picked (mode is set to StorageMode::Manual)
      * @param plugins Vector of plugins
      */
     virtual void setPlugins(const plugin::Plugins& plugins) = 0;

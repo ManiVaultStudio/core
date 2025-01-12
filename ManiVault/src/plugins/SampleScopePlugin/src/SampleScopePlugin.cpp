@@ -84,6 +84,10 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
             connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::canViewChanged, this, updateNoSamplesOverlayWidget);
         }
     });
+
+    getLearningCenterAction().setPluginTitle("Sample scope plugin");
+    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+    getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "SampleScopePlugin" }));
 }
 
 void SampleScopePlugin::init()

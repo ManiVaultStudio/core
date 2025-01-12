@@ -11,7 +11,7 @@
 #include "util/Miscellaneous.h"
 
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
-#include "widgets/ViewPluginDescriptionOverlayWidget.h"
+#include "widgets/ViewPluginDescriptionDialog.h"
 #include "widgets/ViewPluginShortcutsDialog.h"
 
 using namespace mv::util;
@@ -46,12 +46,9 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
 {
     setIconByName("question-circle");
 
-    _viewDescriptionAction.setToolTip(getShortDescription());
     _viewDescriptionAction.setIconByName("book-reader");
     _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _viewDescriptionAction.setConnectionPermissionsToForceNone();
-
-    connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewDescription);
 
     _viewHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _viewHelpAction.setConnectionPermissionsToForceNone();
@@ -93,7 +90,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _moveToTopLeftAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignLeft));
     _moveToTopRightAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignRight));
     _moveToBottomLeftAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignLeft));
-    _moveToBottomRightAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignLeft));
+    _moveToBottomRightAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignRight));
 
     connect(&_moveToTopLeftAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("TopLeft"); });
     connect(&_moveToTopRightAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("TopRight"); });
@@ -112,14 +109,22 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
 
     _viewHelpAction.setToolTip(QString("Shows %1 documentation").arg(_plugin->getKind()));
 
-    if (_shortDescription.isEmpty())
+    if (_plugin->getFactory()->getShortDescription().isEmpty())
         setShortDescription(QString("View %1 description").arg(_plugin->getKind()));
 
-    if (_longDescription.isEmpty())
+    if (_plugin->getFactory()->getLongDescription().isEmpty() && _plugin->getFactory()->getLongDescriptionMarkdown().isEmpty())
         setShortDescription("No description available yet, stay tuned");
 
     if (_learningCenterOverlayWidget)
         _learningCenterOverlayWidget->deleteLater();
+
+    connect(_plugin->getFactory(), &PluginFactory::shortDescriptionChanged, this, &PluginLearningCenterAction::shortDescriptionChanged);
+    connect(_plugin->getFactory(), &PluginFactory::longDescriptionChanged, this, &PluginLearningCenterAction::longDescriptionChanged);
+    connect(_plugin->getFactory(), &PluginFactory::longDescriptionMarkdownChanged, this, &PluginLearningCenterAction::longDescriptionMarkdownChanged);
+
+    connect(_plugin->getFactory(), &PluginFactory::shortDescriptionChanged, this, [this](const QString& previousShortDescription, const QString& currentShortDescription) -> void {
+        _viewDescriptionAction.setToolTip(currentShortDescription);
+	});
 }
 
 QMenu* PluginLearningCenterAction::getContextMenu(QWidget* parent)
@@ -176,7 +181,7 @@ void PluginLearningCenterAction::setAlignment(const Qt::Alignment& alignment)
 	const auto it = std::find(alignmentFlags.begin(), alignmentFlags.end(), alignment);
 
     if (it != alignmentFlags.end())
-        _alignmentAction.setCurrentIndex(std::distance(alignmentFlags.begin(), it));
+        _alignmentAction.setCurrentIndex(static_cast<std::int32_t>(std::distance(alignmentFlags.begin(), it)));
 }
 
 void PluginLearningCenterAction::createViewPluginOverlayWidget()
@@ -202,41 +207,37 @@ void PluginLearningCenterAction::setPluginTitle(const QString& pluginTitle)
 
 QString PluginLearningCenterAction::getShortDescription() const
 {
-    return _shortDescription;
+    return _plugin->getFactory()->getLongDescription();
 }
 
-void PluginLearningCenterAction::setShortDescription(const QString& shortDescription)
+void PluginLearningCenterAction::setShortDescription(const QString& shortDescription) const
 {
-    if (shortDescription == _shortDescription)
-        return;
-
-    const auto previousShortDescription = _shortDescription;
-
-    _shortDescription = shortDescription;
-
-    emit shortDescriptionChanged(previousShortDescription, _shortDescription);
+	const_cast<PluginFactory*>(_plugin->getFactory())->setShortDescription(shortDescription);
 }
 
 QString PluginLearningCenterAction::getLongDescription() const
 {
-    return _longDescription;
+    return _plugin->getFactory()->getLongDescription();
 }
 
-void PluginLearningCenterAction::setLongDescription(const QString& longDescription)
+void PluginLearningCenterAction::setLongDescription(const QString& longDescription) const
 {
-    if (longDescription == _longDescription)
-        return;
+    const_cast<PluginFactory*>(_plugin->getFactory())->setLongDescription(longDescription);
+}
 
-    const auto previousLongDescription = _longDescription;
+QString PluginLearningCenterAction::getLongDescriptionMarkdown() const
+{
+    return _plugin->getFactory()->getLongDescriptionMarkdown();
+}
 
-    _longDescription = longDescription;
-
-    emit longDescriptionChanged(previousLongDescription, _longDescription);
+void PluginLearningCenterAction::setLongDescriptionMarkdown(const QString& longDescriptionMarkdown) const
+{
+    const_cast<PluginFactory*>(_plugin->getFactory())->setLongDescriptionMarkdown(longDescriptionMarkdown);
 }
 
 bool PluginLearningCenterAction::hasDescription() const
 {
-    return !_longDescription.isEmpty();
+    return !(getLongDescription().isEmpty() && getLongDescriptionMarkdown().isEmpty());
 }
 
 bool PluginLearningCenterAction::hasHelp() const
@@ -244,12 +245,12 @@ bool PluginLearningCenterAction::hasHelp() const
     return _plugin->getFactory()->hasHelp();
 }
 
-void PluginLearningCenterAction::addVideo(const util::Video& video)
+void PluginLearningCenterAction::addVideo(const util::LearningCenterVideo* video)
 {
     _videos.push_back(video);
 }
 
-void PluginLearningCenterAction::addVideos(const util::Videos& videos)
+void PluginLearningCenterAction::addVideos(const util::LearningCenterVideos& videos)
 {
     _videos.insert(_videos.end(), videos.begin(), videos.end());
 }
@@ -264,9 +265,34 @@ void PluginLearningCenterAction::addVideos(const QStringList& tags)
     addVideos(mv::help().getVideos(tags));
 }
 
-const Videos& PluginLearningCenterAction::getVideos() const
+const LearningCenterVideos& PluginLearningCenterAction::getVideos() const
 {
     return _videos;
+}
+
+void PluginLearningCenterAction::addTutorial(const util::LearningCenterTutorial* tutorial)
+{
+    _tutorials.push_back(tutorial);
+}
+
+void PluginLearningCenterAction::addTutorials(const util::LearningCenterTutorials& tutorials)
+{
+    _tutorials.insert(_tutorials.end(), tutorials.begin(), tutorials.end());
+}
+
+void PluginLearningCenterAction::addTutorials(const QString& tag)
+{
+    addTutorials(mv::help().getTutorials({ tag }));
+}
+
+void PluginLearningCenterAction::addTutorials(const QStringList& tags)
+{
+    addTutorials(mv::help().getTutorials(tags));
+}
+
+const util::LearningCenterTutorials& PluginLearningCenterAction::getTutorials() const
+{
+    return _tutorials;
 }
 
 bool PluginLearningCenterAction::isViewPlugin() const
@@ -284,24 +310,7 @@ plugin::ViewPlugin* PluginLearningCenterAction::getViewPlugin() const
     return dynamic_cast<ViewPlugin*>(_plugin);
 }
 
-void PluginLearningCenterAction::viewDescription()
-{
-#ifdef VIEW_PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (isViewPlugin() && hasDescription())
-    {
-        if (!_descriptionOverlayWidget.isNull())
-            return;
-
-        _descriptionOverlayWidget = new gui::ViewPluginDescriptionOverlayWidget(dynamic_cast<ViewPlugin*>(_plugin));
-
-        _descriptionOverlayWidget->show();
-    }
-}
-
-void PluginLearningCenterAction::viewShortcuts()
+void PluginLearningCenterAction::viewShortcuts() const
 {
 #ifdef VIEW_PLUGIN_VERBOSE
     qDebug() << __FUNCTION__;

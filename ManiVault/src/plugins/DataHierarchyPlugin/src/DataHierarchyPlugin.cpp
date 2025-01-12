@@ -6,10 +6,37 @@
 
 #include <Application.h>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
+#include <util/Miscellaneous.h>
+#include <util/LearningCenterVideo.h>
 
-using namespace mv;
+Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
+
+void listResources(const QString& resourcePath) {
+    // Create a QDir object for the resource path
+    QDir resourceDir(resourcePath);
+
+    // Check if the directory exists
+    if (!resourceDir.exists()) {
+        qDebug() << "Resource directory does not exist:" << resourcePath;
+        return;
+    }
+
+    // Get the list of all files and directories in the resource path
+    QFileInfoList resourceList = resourceDir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+
+    // Print out each resource
+    for (const QFileInfo& fileInfo : resourceList) {
+        if (fileInfo.isDir()) {
+            // Recursively list resources in subdirectories
+            listResources(fileInfo.absoluteFilePath());
+        }
+        else {
+            qDebug() << "Resource found:" << fileInfo.absoluteFilePath();
+        }
+    }
+}
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
@@ -23,9 +50,8 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     getLearningCenterAction().setPluginTitle("Data hierarchy view");
 
     getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
-    getLearningCenterAction().setLongDescription("Hierarchical overview of all loaded data");
-
-    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+	getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+	getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataHierarchyPlugin" }));
 }
 
 void DataHierarchyPlugin::init()
@@ -42,6 +68,11 @@ void DataHierarchyPlugin::init()
 DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
     ViewPluginFactory(true)
 {
+}
+
+void DataHierarchyPluginFactory::initialize()
+{
+	ViewPluginFactory::initialize();
 }
 
 QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

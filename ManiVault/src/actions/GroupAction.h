@@ -63,7 +63,7 @@ public: // Widgets
         VerticalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
 
         /** Destructor */
-        ~VerticalWidget();
+        ~VerticalWidget() override;
 
     protected:
         GroupAction*    _groupAction;   /** Pointer to group action which created the widget */
@@ -86,7 +86,7 @@ public: // Widgets
         HorizontalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
 
         /** Destructor */
-        ~HorizontalWidget();
+        ~HorizontalWidget() override;
 
     protected:
         GroupAction* _groupAction;   /** Pointer to group action which created the widget */
@@ -118,7 +118,7 @@ public:
      * Get item alignment
      * @return Item alignment
      */
-    virtual Qt::AlignmentFlag getAlignment() const final;
+    Qt::AlignmentFlag getAlignment() const;
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);

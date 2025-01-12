@@ -67,6 +67,13 @@ public:
     ViewPluginDockWidgets getViewPluginDockWidgets() const;
 
     /**
+     * Find the view plugin dock widget where the widget of \p viewPlugin resides
+     * @param viewPlugin Pointer to view plugin that holds the widget
+     * @return Pointer to view plugin dock widget (if found, otherwise nullptr)
+     */
+    ViewPluginDockWidget* findViewPluginDockWidget(const mv::plugin::ViewPlugin* viewPlugin) const;
+
+    /**
      * Find the dock area widget where the widget of \p viewPlugin resides
      * @param viewPlugin Pointer to view plugin that holds the widget
      * @return Pointer to ADS dock widget area (if found, otherwise nullptr)

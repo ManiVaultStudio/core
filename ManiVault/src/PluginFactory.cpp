@@ -27,7 +27,8 @@ PluginFactory::PluginFactory(Type type) :
     _triggerReadmeAction(nullptr, "Readme"),
     _visitRepositoryAction(nullptr, "Go to repository"),
     _pluginGlobalSettingsGroupAction(nullptr),
-    _statusBarAction(nullptr)
+    _statusBarAction(nullptr),
+    _allowPluginCreationFromStandardGui(true)
 {
     _triggerReadmeAction.setIconByName("book");
 
@@ -183,16 +184,33 @@ QString PluginFactory::getLongDescription() const
     return _shortDescription;
 }
 
+QString PluginFactory::getLongDescriptionMarkdown() const
+{
+    return _longDescriptionMarkdown;
+}
+
 void PluginFactory::setLongDescription(const QString& longDescription)
 {
     if (longDescription == _longDescription)
         return;
 
-    const auto previouslongDescription = _longDescription;
+    const auto previousLongDescription = _longDescription;
 
     _longDescription = longDescription;
 
-    emit longDescriptionChanged(previouslongDescription, _longDescription);
+    emit longDescriptionChanged(previousLongDescription, _longDescription);
+}
+
+void PluginFactory::setLongDescriptionMarkdown(const QString& longDescriptionMarkdown)
+{
+    if (longDescriptionMarkdown == _longDescriptionMarkdown)
+        return;
+
+    const auto previousLongDescriptionMarkdown = _longDescriptionMarkdown;
+
+    _longDescriptionMarkdown = longDescriptionMarkdown;
+
+    emit longDescriptionMarkdownChanged(previousLongDescriptionMarkdown, _longDescriptionMarkdown);
 }
 
 std::uint32_t PluginFactory::getNumberOfInstances() const
@@ -279,7 +297,7 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
     if (!githubRepositoryUrl.isValid())
         return {};
 
-    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com%1/master/README.md").arg(githubRepositoryUrl.path()));
+    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com%1/%2/README.md").arg(githubRepositoryUrl.path(), getDefaultBranch()));
 
     if (readmeMarkdownUrl.isValid())
         return readmeMarkdownUrl;
@@ -290,6 +308,21 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
 QUrl PluginFactory::getRepositoryUrl() const
 {
     return {};
+}
+
+QString PluginFactory::getDefaultBranch() const
+{
+    return "master";
+}
+
+void PluginFactory::setAllowPluginCreationFromStandardGui(bool allowPluginCreationFromStandardGui)
+{
+    _allowPluginCreationFromStandardGui = allowPluginCreationFromStandardGui;
+}
+
+bool PluginFactory::getAllowPluginCreationFromStandardGui() const
+{
+    return _allowPluginCreationFromStandardGui;
 }
 
 }

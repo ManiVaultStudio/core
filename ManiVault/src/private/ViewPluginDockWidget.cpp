@@ -20,7 +20,7 @@
 #include <AutoHideDockContainer.h>
 
 #ifdef _DEBUG
-//#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+	#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;
@@ -60,7 +60,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
 ViewPluginDockWidget::~ViewPluginDockWidget()
 {
 #ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__ << windowTitle();
+    qDebug() << __FUNCTION__ << objectName() << windowTitle();
 #endif
 
 	serializationTasks.remove(getId());
@@ -295,14 +295,14 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 	setWindowIcon(_viewPlugin->getIcon());
 	setProperty("ViewPluginId", _viewPlugin->getId());
 
-	auto centralDockWidget = new CDockWidget("Central");
+	//auto centralDockWidget = new CDockWidget("Central");
 
-	centralDockWidget->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
-    centralDockWidget->setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
+	//centralDockWidget->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
+ //   centralDockWidget->setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 
-	_dockManager.setCentralWidget(centralDockWidget);
+	//_dockManager.setCentralWidget(centralDockWidget);
 
-	centralDockWidget->dockAreaWidget()->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+	//centralDockWidget->dockAreaWidget()->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
 	auto hideAllAction = new TriggerAction(this, "Hide All");
 	auto showAllAction = new TriggerAction(this, "Show All");
@@ -321,6 +321,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 		showAllAction->setEnabled(numberOfVisibleSettingsDockWidgets < numberOfSettingsDockWidgets);
 	};
 
+    /*
 	for (auto settingsAction : _viewPlugin->getDockingActions()) {
 		auto settingsDockWidget    = new CDockWidget(settingsAction->text(), this);
 		auto settingsWidget        = new SettingsActionWidget(this, settingsAction);
@@ -348,7 +349,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 		if (_settingsDockWidgetsMap.contains(dockToSettingsActionName))
 			dockAreaWidget = _settingsDockWidgetsMap[dockToSettingsActionName]->dockAreaWidget();
 
-		_dockManager.addDockWidget(static_cast<DockWidgetArea>(settingsAction->property("DockArea").toInt()), settingsDockWidget, dockAreaWidget);
+		//_dockManager.addDockWidget(static_cast<DockWidgetArea>(settingsAction->property("DockArea").toInt()), settingsDockWidget, dockAreaWidget);
 
 		const auto autoHide         = settingsAction->property("AutoHide").toBool();
 		const auto autoHideLocation = static_cast<SideBarLocation>(settingsAction->property("AutoHideLocation").toInt());
@@ -396,6 +397,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 			updateHideShowAllActionsReadOnly();
 		});
 	}
+    */
 
 	_toggleMenu.setEnabled(!_viewPlugin->getDockingActions().isEmpty());
 

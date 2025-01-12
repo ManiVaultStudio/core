@@ -39,6 +39,7 @@ public: // Action getters
     const mv::gui::ToggleAction& getToggleRecentProjectsAction() const { return _toggleRecentProjectsAction; }
     const mv::gui::ToggleAction& getToggleProjectFromWorkspaceAction() const { return _toggleProjectFromWorkspaceAction; }
     const mv::gui::ToggleAction& getToggleProjectFromDataAction() const { return _toggleProjectFromDataAction; }
+    const mv::gui::ToggleAction& getToggleTutorialsAction() const { return _toggleTutorialsAction; }
 
 private:
     mv::gui::ToggleAction           _compactViewAction;                 /** Toggle compact view on/off */
@@ -46,6 +47,7 @@ private:
     mv::gui::ToggleAction           _toggleRecentProjectsAction;        /** Toggle recent projects section */
     mv::gui::ToggleAction           _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
     mv::gui::ToggleAction           _toggleProjectFromDataAction;       /** Toggle project from data section */
+    mv::gui::ToggleAction           _toggleTutorialsAction;             /** Toggle tutorials section */
     mv::gui::GroupAction            _settingsAction;                    /** Settings action */
     mv::gui::TriggerAction          _toLearningCenterAction;            /** Trigger action for showing the learning center */
     mv::gui::HorizontalGroupAction  _toolbarAction;                     /** Bottom toolbar action */

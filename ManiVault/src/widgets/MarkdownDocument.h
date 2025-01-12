@@ -21,7 +21,7 @@ class MarkdownDocument : public QObject
 
     Q_PROPERTY(QString text MEMBER _text NOTIFY textChanged FINAL)
 
-protected:
+public:
 
     /**
      * Construct with pointer to \p parent object
@@ -45,8 +45,6 @@ signals:
 
 private:
     QString     _text;      /** Current text */
-
-    friend class MarkdownDialog;
 };
 
 }

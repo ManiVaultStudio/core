@@ -48,7 +48,7 @@ public:
      */
     PluginFactory(Type type);
 
-    virtual ~PluginFactory() { }
+    ~PluginFactory() override = default;
 
     /**
      * Get plugin kind
@@ -89,7 +89,7 @@ public: // Global settings
      * Set plugin global settings group action to \p pluginGlobalSettingsGroupAction
      * @param pluginGlobalSettingsGroupAction Pointer to plugin global settings group action (maybe a nullptr)
      */
-    virtual void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction) final;
+    void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction);
 
 public: // Status bar
 
@@ -97,13 +97,13 @@ public: // Status bar
      * Get plugin status bar action
      * @return Pointer to plugin status bar action (maybe nullptr)
      */
-    virtual gui::PluginStatusBarAction* getStatusBarAction() const final;
+    gui::PluginStatusBarAction* getStatusBarAction() const;
 
     /**
      * Set plugin status bar action to \p statusBarAction
      * @param statusBarAction Pointer to plugin status bar action (maybe a nullptr)
      */
-    virtual void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction) final;
+    void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction);
 
 public: // Help
 
@@ -124,6 +124,12 @@ public: // Help
      * @return URL of the GitHub repository (or readme markdown URL if set)
      */
     virtual QUrl getRepositoryUrl() const;
+
+    /**
+     * Get the name of the default branch
+     * @return Name of the default branch
+     */
+    virtual QString getDefaultBranch() const;
 
 public: // GUI name
 
@@ -172,7 +178,7 @@ public:
      * Get whether a plugin may be produced
      * @return Boolean determining whether a plugin may be produced
      */
-    virtual bool mayProduce() const final;
+    bool mayProduce() const;
 
     /**
      * Get the data types that the plugin supports
@@ -199,7 +205,7 @@ public:
 
     /**
      * Get plugin trigger actions given \p dataTypes
-     * @param datasetTypes Vector of input data types
+     * @param dataTypes Vector of input data types
      * @return Vector of plugin trigger actions
      */
     virtual gui::PluginTriggerActions getPluginTriggerActions(const DataTypes& dataTypes) const {
@@ -215,19 +221,31 @@ public:
             pluginTriggerAction->initialize();
     }
 
+    /**
+     * Set whether the plugin may be produced from the standard GUI to \p allowPluginCreationFromStandardGui
+     * @param allowPluginCreationFromStandardGui Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.)
+     */
+    void setAllowPluginCreationFromStandardGui(bool allowPluginCreationFromStandardGui);
+
+    /**
+     * Get whether the plugin may be produced from the standard GUI
+     * @return Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.)
+     */
+    bool getAllowPluginCreationFromStandardGui() const;
+
 public: // Shortcut map
 
     /**
      * Get shortcut map
      * @return Reference to the shortcut map
      */
-    virtual util::ShortcutMap& getShortcutMap() final;
+    util::ShortcutMap& getShortcutMap();
 
     /**
      * Get shortcut map
      * @return Const reference to the shortcut map
      */
-    virtual const util::ShortcutMap& getShortcutMap() const final;
+    const util::ShortcutMap& getShortcutMap() const;
 
 public: // Description
 
@@ -244,16 +262,28 @@ public: // Description
     void setShortDescription(const QString& shortDescription);
 
     /**
-     * Get extended description
+     * Get extended description in HTML format
      * @return Extended description in HTML format
      */
     QString getLongDescription() const;
+
+    /**
+     * Get extended description in Markdown format
+     * @return Extended description in Markdown format
+     */
+    QString getLongDescriptionMarkdown() const;
 
     /**
      * Set long description to \p longDescription
      * @param longDescription Extended description in HTML format
      */
     void setLongDescription(const QString& longDescription);
+
+    /**
+     * Set long description Markdown to \p longDescription
+     * @param longDescriptionMarkdown Extended description in Markdown format
+     */
+    void setLongDescriptionMarkdown(const QString& longDescriptionMarkdown);
 
 public: // Number of instances
 
@@ -360,11 +390,18 @@ signals:
     void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
     
     /**
-     * Signals that the long description changed from \p previousLongDescription to \p currentLongDescription
-     * @param previousLongDescription Previous long description
-     * @param currentLongDescription Current long description
+     * Signals that the HTML-formatted long description changed from \p previousLongDescription to \p currentLongDescription
+     * @param previousLongDescription Previous long description in HTML format
+     * @param currentLongDescription Current long description in HTML format
      */
     void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
+
+    /**
+     * Signals that the Markdown-formatted long description format changed from \p previousLongDescriptionMarkdown to \p currentLongDescriptionMarkdown
+     * @param previousLongDescriptionMarkdown Previous long description in Markdown format
+     * @param currentLongDescriptionMarkdown Current long description in Markdown format
+     */
+    void longDescriptionMarkdownChanged(const QString& previousLongDescriptionMarkdown, const QString& currentLongDescriptionMarkdown);
 
 private:
     QString                                 _kind;                                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
@@ -383,6 +420,8 @@ private:
     util::ShortcutMap                       _shortcutMap;                           /** Shortcut cheatsheet map */
     QString                                 _shortDescription;                      /** Shortly describes the plugin */
     QString                                 _longDescription;                       /** Extended description in HTML format */
+    QString                                 _longDescriptionMarkdown;               /** Extended description in Markdown format */
+    bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
 };
 
 }

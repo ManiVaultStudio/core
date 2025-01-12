@@ -4,7 +4,7 @@
 
 #include "NewProjectDialog.h"
 
-#include "StartPageAction.h"
+#include "PageAction.h"
 
 #include <AbstractWorkspaceManager.h>
 
@@ -55,7 +55,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     for (const auto workspaceLocation : workspaces().getWorkspaceLocations(WorkspaceLocation::Types(WorkspaceLocation::Type::BuiltIn))) {
         Workspace workspace(workspaceLocation.getFilePath());
 
-        StartPageAction fromWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), workspaceLocation.getFilePath(), [this, workspaceLocation]() -> void {
+        PageAction fromWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), workspaceLocation.getFilePath(), [this, workspaceLocation]() -> void {
             projects().newProject(workspaceLocation.getFilePath());
 
             QDialog::accept();
