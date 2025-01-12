@@ -30,7 +30,7 @@ void FileDownloader::download(const QUrl& url)
         return;
 
 #ifdef FILE_DOWNLOADER_VERBOSE
-    qDebug() << __FUNCTION__ << _url.toString();
+    qDebug() << __FUNCTION__ << url.toString();
 #endif
 
     _url            = url;

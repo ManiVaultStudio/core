@@ -39,6 +39,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
 	_toggleMenu("Toggle", this),
 	_helpAction(this, "Help"),
 	_cachedVisibility(false),
+    _centralDockWidget("Central"),
 	_progressOverlayWidget(this)
 {
 	setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
@@ -137,6 +138,11 @@ void ViewPluginDockWidget::initialize()
 			}
 				
 		}
+	});
+
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+        if (_dockManager.centralWidget() && plugin == _viewPlugin)
+            _dockManager.centralWidget()->takeWidget();
 	});
 }
 
@@ -295,14 +301,14 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 	setWindowIcon(_viewPlugin->getIcon());
 	setProperty("ViewPluginId", _viewPlugin->getId());
 
-	//auto centralDockWidget = new CDockWidget("Central");
+	auto centralDockWidget = new CDockWidget("Central");
 
-	//centralDockWidget->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
- //   centralDockWidget->setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
+	centralDockWidget->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
+    centralDockWidget->setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 
-	//_dockManager.setCentralWidget(centralDockWidget);
+	_dockManager.setCentralWidget(centralDockWidget);
 
-	//centralDockWidget->dockAreaWidget()->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+    centralDockWidget->dockAreaWidget()->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
 	auto hideAllAction = new TriggerAction(this, "Hide All");
 	auto showAllAction = new TriggerAction(this, "Show All");
