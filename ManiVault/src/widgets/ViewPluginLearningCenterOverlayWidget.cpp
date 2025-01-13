@@ -432,7 +432,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::getIcon
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("chalkboard"), badge);
+    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("user-graduate"), badge);
 }
 
 bool ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::shouldDisplay() const
