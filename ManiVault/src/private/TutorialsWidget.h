@@ -4,19 +4,23 @@
 
 #pragma once
 
+#include "PageActionsWidget.h"
+
+#include <models/LearningCenterTutorialsFilterModel.h>
+
 #include <QVBoxLayout>
 #include <QWidget>
 
 class LearningPageContentWidget;
 
 /**
- * Learning page tutorials widget class
+ * Page tutorials class
  *
- * Widget class which lists learning page tutorials content
+ * Page tutorials content
  *
  * @author Thomas Kroes
  */
-class LearningPageTutorialsWidget : public QWidget
+class LearningPageTutorialsWidget : public PageActionsWidget
 {
 protected:
 
@@ -39,8 +43,10 @@ private:
     void updateCustomStyle();
 
 private:
-    LearningPageContentWidget*      _learningPageContentWidget;     /** Pointer to owning learning page content widget */
-    QVBoxLayout                     _mainLayout;                    /** Main vertical layout */
+    LearningPageContentWidget*                  _learningPageContentWidget;             /** Pointer to owning learning page content widget */
+    QVBoxLayout                                 _mainLayout;                            /** Main vertical layout */
+    mv::LearningCenterTutorialsFilterModel      _learningCenterTutorialsFilterModel;    /** For filtering learning center tutorials */
+    PageActionsWidget                           _tutorialsWidget;                       /** Actions widget for launching tutorials */
 
     friend class LearningPageContentWidget;
 };

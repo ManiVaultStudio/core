@@ -49,6 +49,7 @@ set(DATAPROPERTIES_SOURCES
 source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
+source_group(Resources FILES ${QRESOURCES})
 
 add_library(${DATAPROPERTIESPLUGIN} SHARED ${DATAPROPERTIES_SOURCES})
 

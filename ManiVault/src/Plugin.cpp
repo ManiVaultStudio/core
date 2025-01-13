@@ -6,7 +6,7 @@
 #include "CoreInterface.h"
 
 #ifdef _DEBUG
-    //#define PLUGIN_VERBOSE
+    #define PLUGIN_VERBOSE
 #endif
 
 using namespace mv::gui;
@@ -166,6 +166,10 @@ QVariantMap Plugin::toVariantMap() const
 
 void Plugin::destroy()
 {
+#ifdef PLUGIN_VERBOSE
+    qDebug() << "Destroy plugin" << getGuiName();
+#endif
+
     plugins().destroyPlugin(this);
 }
 

@@ -26,8 +26,10 @@ PluginFactory::PluginFactory(Type type) :
     _triggerHelpAction(nullptr, "Trigger plugin help"),
     _triggerReadmeAction(nullptr, "Readme"),
     _visitRepositoryAction(nullptr, "Go to repository"),
+    _launchAboutAction(nullptr, "Read plugin about information"),
     _pluginGlobalSettingsGroupAction(nullptr),
-    _statusBarAction(nullptr)
+    _statusBarAction(nullptr),
+    _allowPluginCreationFromStandardGui(true)
 {
     _triggerReadmeAction.setIconByName("book");
 
@@ -47,6 +49,15 @@ PluginFactory::PluginFactory(Type type) :
     connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
         if (getRepositoryUrl().isValid())
             QDesktopServices::openUrl(getRepositoryUrl());
+    });
+
+    _launchAboutAction.setIconByName("info");
+
+    connect(&_launchAboutAction, &TriggerAction::triggered, this, [this]() -> void {
+        MarkdownDialog markdownDialog(getAboutMarkdown());
+
+        markdownDialog.setWindowTitle(QString("%1").arg(_kind));
+        markdownDialog.exec();
     });
 }
 
@@ -161,38 +172,38 @@ const util::ShortcutMap& PluginFactory::getShortcutMap() const
     return _shortcutMap;
 }
 
-QString PluginFactory::getShortDescription() const
+QString PluginFactory::getDescription() const
 {
-    return _shortDescription;
+    return _description;
 }
 
-void PluginFactory::setShortDescription(const QString& shortDescription)
+void PluginFactory::setDescription(const QString& description)
 {
-    if (shortDescription == _shortDescription)
+    if (description == _description)
         return;
 
-    const auto previousShortDescription = _shortDescription;
+    const auto previousDescription = _description;
 
-    _shortDescription = shortDescription;
+    _description = description;
 
-    emit shortDescriptionChanged(previousShortDescription, _shortDescription);
+    emit descriptionChanged(previousDescription, _description);
 }
 
-QString PluginFactory::getLongDescription() const
+QString PluginFactory::getAboutMarkdown() const
 {
-    return _shortDescription;
+    return _aboutMarkdown;
 }
 
-void PluginFactory::setLongDescription(const QString& longDescription)
+void PluginFactory::setAboutMarkdown(const QString& aboutMarkdown)
 {
-    if (longDescription == _longDescription)
+    if (aboutMarkdown == _aboutMarkdown)
         return;
 
-    const auto previouslongDescription = _longDescription;
+    const auto previousAboutMarkdown = _aboutMarkdown;
 
-    _longDescription = longDescription;
+    _aboutMarkdown = aboutMarkdown;
 
-    emit longDescriptionChanged(previouslongDescription, _longDescription);
+    emit aboutMarkdownChanged(previousAboutMarkdown, _aboutMarkdown);
 }
 
 std::uint32_t PluginFactory::getNumberOfInstances() const
@@ -279,7 +290,7 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
     if (!githubRepositoryUrl.isValid())
         return {};
 
-    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com%1/master/README.md").arg(githubRepositoryUrl.path()));
+    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com%1/%2/README.md").arg(githubRepositoryUrl.path(), getDefaultBranch()));
 
     if (readmeMarkdownUrl.isValid())
         return readmeMarkdownUrl;
@@ -290,6 +301,21 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
 QUrl PluginFactory::getRepositoryUrl() const
 {
     return {};
+}
+
+QString PluginFactory::getDefaultBranch() const
+{
+    return "master";
+}
+
+void PluginFactory::setAllowPluginCreationFromStandardGui(bool allowPluginCreationFromStandardGui)
+{
+    _allowPluginCreationFromStandardGui = allowPluginCreationFromStandardGui;
+}
+
+bool PluginFactory::getAllowPluginCreationFromStandardGui() const
+{
+    return _allowPluginCreationFromStandardGui;
 }
 
 }

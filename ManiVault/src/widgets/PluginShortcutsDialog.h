@@ -23,26 +23,26 @@ namespace mv::gui
 {
 
 /**
- * View plugin shortcuts dialog class
+ * Plugin shortcuts dialog class
  *
- * Dialog with a shortcuts cheat sheet widget
+ * Shortcuts cheat sheet dialog
  *  
  * @author Thomas Kroes
  */
-class CORE_EXPORT ViewPluginShortcutsDialog : public QDialog
+class CORE_EXPORT PluginShortcutsDialog : public QDialog
 {
 public:
 
     /**
-     * Construct with pointer to source \p view plugin
+     * Construct with pointer to source \p view plugin and pointer to \p parent widget
      * @param viewPlugin Pointer to source view plugin
      * @param parent Pointer to parent widget (maybe nullptr)
      */
-    ViewPluginShortcutsDialog(mv::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
+    PluginShortcutsDialog(mv::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(450, 600);
+        return { 450, 600 };
     }
 
     /** Get minimum size hint*/

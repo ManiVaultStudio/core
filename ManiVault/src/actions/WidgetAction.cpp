@@ -67,7 +67,6 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
         if (projects().hasProject())
             setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
     }
-
 }
 
 WidgetAction::~WidgetAction()
@@ -185,12 +184,12 @@ void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
     emit sortIndexChanged(_sortIndex);
 }
 
-QWidget* WidgetAction::createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags /*= 0*/) const
+QWidget* WidgetAction::createCollapsedWidget(QWidget* parent) const
 {
     return new WidgetActionCollapsedWidget(parent, const_cast<WidgetAction*>(this));
 }
 
-QWidget* WidgetAction::createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) const
+QWidget* WidgetAction::createCollapsedWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction) const
 {
     return new WidgetActionCollapsedWidget(parent, const_cast<WidgetAction*>(this), widgetConfigurationFunction);
 }
@@ -210,17 +209,17 @@ std::int32_t WidgetAction::getDefaultWidgetFlags() const
     return _defaultWidgetFlags;
 }
 
-void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
+void WidgetAction::setDefaultWidgetFlags(std::int32_t defaultWidgetFlags)
 {
-    _defaultWidgetFlags = widgetFlags;
+    _defaultWidgetFlags = defaultWidgetFlags;
 }
 
-void WidgetAction::setDefaultWidgetFlag(const std::int32_t& widgetFlag, bool unset /*= false*/)
+void WidgetAction::setDefaultWidgetFlag(std::int32_t defaultWidgetFlag, bool unset /*= false*/)
 {
     if (unset)
-        _defaultWidgetFlags = _defaultWidgetFlags & ~static_cast<std::int32_t>(widgetFlag);
+        _defaultWidgetFlags = _defaultWidgetFlags & ~static_cast<std::int32_t>(defaultWidgetFlag);
     else
-        _defaultWidgetFlags |= static_cast<std::int32_t>(widgetFlag);
+        _defaultWidgetFlags |= static_cast<std::int32_t>(defaultWidgetFlag);
 }
 
 WidgetAction::HighlightOption WidgetAction::getHighlighting() const

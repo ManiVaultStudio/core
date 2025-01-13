@@ -574,10 +574,10 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
     _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
     _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 
-    for (auto viewPluginDockWidget : _mainDockManager->getViewPluginDockWidgets())
+    for (auto viewPluginDockWidget : _mainDockManager->getViewPluginDockWidgets(true))
     	viewPluginDockWidget->restoreViewPluginState();
 
-    for (auto viewPluginDockWidget : _viewPluginsDockManager->getViewPluginDockWidgets())
+    for (auto viewPluginDockWidget : _viewPluginsDockManager->getViewPluginDockWidgets(true))
         viewPluginDockWidget->restoreViewPluginState();
 }
 

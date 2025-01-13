@@ -13,23 +13,23 @@
 #include <QWidget>
 
 /**
- * Start page action delegate editor widget class
+ * Page action delegate editor widget class
  *
- * Delegate editor widget class for custom start page action display in a view.
+ * For custom page action display in a view.
  *
  * @author Thomas Kroes
  */
-class StartPageActionDelegateEditorWidget : public QWidget
+class PageActionDelegateEditorWidget : public QWidget
 {
     Q_OBJECT
 
 public:
     
     /**
-     * Construct delegate editor widget with \p parent widget
+     * Construct delegate editor widget with pointer to \p parent widget
      * @param parent Pointer to parent widget
      */
-    StartPageActionDelegateEditorWidget(QWidget* parent = nullptr);
+    PageActionDelegateEditorWidget(QWidget* parent = nullptr);
 
     /**
      * Set editor data from model \p index
@@ -75,7 +75,7 @@ private:
     QVBoxLayout                 _textLayout;                /** Right text layout */
     QHBoxLayout                 _primaryTextLayout;         /** Primary layout with title and comments labels */
     QLabel                      _titleLabel;                /** Title label */
-    QLabel                      _metaDataLabel;             /** Label with meta data (may be empty) */
+    QLabel                      _metaDataLabel;             /** Label with metadata (maybe empty) */
     QHBoxLayout                 _secondaryTextLayout;       /** Secondary layout with subtitle and info labels */
     QLabel                      _subtitleLabel;             /** Subtitle label */
     QWidget                     _infoWidget;                /** Widget for info labels */
@@ -83,5 +83,6 @@ private:
     mv::gui::IconLabel          _previewIconLabel;          /** Icon label for preview image */
     mv::gui::IconLabel          _metaDataIconLabel;         /** Icon label for meta data */
     mv::gui::IconLabel          _tagsIconLabel;             /** Icon label for tags */
+    mv::gui::IconLabel          _downloadUrls;     /** Icon label for requires download */
     mv::gui::IconLabel          _contributorsIconLabel;     /** Icon label for contributors */
 };

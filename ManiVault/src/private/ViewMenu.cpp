@@ -64,8 +64,6 @@ void ViewMenu::populate()
         addMenu(_loadSystemViewMenu.get());
     }
 
-    auto separator = addSeparator();
-
     if (_dockAreaWidget) {
 
         for (auto& dockArea : { gui::DockAreaFlag::Left, gui::DockAreaFlag::Right, gui::DockAreaFlag::Top, gui::DockAreaFlag::Bottom, gui::DockAreaFlag::Center })
@@ -119,14 +117,14 @@ bool ViewMenu::mayProducePlugins() const
     return false;
 }
 
-QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
+QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea) const
 {
     PluginTriggerActions pluginTriggerActions;
 
     for (auto& pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::VIEW)) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
-        if (viewPluginFactory->producesSystemViewPlugins())
+        if (viewPluginFactory->producesSystemViewPlugins() || !viewPluginFactory->getAllowPluginCreationFromStandardGui())
             continue;
             
         pluginTriggerActions << new PluginTriggerAction(*pluginTriggerAction, QString("Create %1").arg(viewPluginFactory->getKind()));
@@ -136,9 +134,7 @@ QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAr
         if (_dockAreaWidget && _dockAreaWidget->dockWidgetsCount() >= 1) {
             auto dockWidgets = _dockAreaWidget->dockWidgets();
 
-            auto firstViewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(_dockAreaWidget->dockWidgets().first());
-
-            if (firstViewPluginDockWidget)
+            if (auto firstViewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(_dockAreaWidget->dockWidgets().first()))
                 dockToViewPlugin = firstViewPluginDockWidget->getViewPlugin();
         }
 

@@ -47,7 +47,7 @@ VersionAction::VersionAction(QObject* parent, const QString& title) :
     _suffixCompleter.setModel(new QStringListModel({ "Alpha", "Beta", "Release Candidate", "Pre-release", "alpha", "beta", "rc", "pre-release" }));
 
     const auto versionElementChanged = [this]() -> void {
-    _versionStringAction.setString(QString("%1.%2 %3").arg(QString::number(_majorAction.getValue()), QString::number(_minorAction.getValue()), _suffixAction.getString()));
+		_versionStringAction.setString(QString("%1.%2 %3").arg(QString::number(_majorAction.getValue()), QString::number(_minorAction.getValue()), _suffixAction.getString()));
 
         emit versionChanged(getVersion());
     };

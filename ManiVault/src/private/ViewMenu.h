@@ -66,7 +66,7 @@ private:
      * @param dockArea Dock area to dock to
      * @return Vector of actions
      */
-    QVector<QPointer<mv::gui::PluginTriggerAction>> getLoadViewsActions(mv::gui::DockAreaFlag dockArea);
+    QVector<QPointer<mv::gui::PluginTriggerAction>> getLoadViewsActions(mv::gui::DockAreaFlag dockArea) const;
 
 private:
     using MenuMap = QMap<mv::gui::DockAreaFlag, QSharedPointer<QMenu>>;   /** Short hand for map to shared pointers of menus */

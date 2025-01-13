@@ -203,6 +203,7 @@ private:
     QMenu                               _toggleMenu;                /** Menu for toggling view plugin dock widgets */
     mv::gui::TriggerAction              _helpAction;                /** Action for triggering help */
     bool                                _cachedVisibility;          /** Cached visibility for view plugin isolation */
+    CDockWidget                         _centralDockWidget;         /** Dock manager central widget */
     ads::CDockManager                   _dockManager;               /** Dock manager for internal docking */
     QMap<QString, CDockWidget*>         _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
     ProgressOverlayWidget               _progressOverlayWidget;     /** Overlay widget which shows a very thin view progress bar */

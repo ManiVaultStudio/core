@@ -278,7 +278,7 @@ public:
     Dataset<DatasetImpl> getDataset(std::int32_t rowIndex) const;
 
     /**
-     * Set the datasets from which can be picked (mode is set to Mode::Manual)
+     * Set the datasets from which can be picked (mode is set to StorageMode::Manual)
      * @param datasets Datasets
      */
     void setDatasets(mv::Datasets datasets);

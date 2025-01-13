@@ -363,20 +363,17 @@ public: // Widgets
     /**
      * Create collapsed widget
      * @param parent Parent widget
-     * @param widgetFlags Collapsed widget configuration flags
-     * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to collapsed widget
      */
-    QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags = 0) const;
+    QWidget* createCollapsedWidget(QWidget* parent) const;
 
     /**
      * Create collapsed widget
      * @param parent Parent widget
-     * @param widgetFlags Collapsed widget configuration flags
      * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to collapsed widget
      */
-    QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) const;
+    QWidget* createCollapsedWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction) const;
 
     /**
      * Create label widget
@@ -488,16 +485,16 @@ public: // Widget flags
 
     /**
      * Set the widget flags
-     * @param widgetFlags Widget flags
+     * @param defaultWidgetFlags Widget flags
      */
-    void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
+    void setDefaultWidgetFlags(std::int32_t defaultWidgetFlags);
 
     /**
      * Set a single widget flag on/off
-     * @param widgetFlag Widget flag to set on/off
+     * @param defaultWidgetFlag Widget flag to set on/off
      * @param unset Whether to unset the default widget flag
      */
-    void setDefaultWidgetFlag(const std::int32_t& widgetFlag, bool unset = false);
+    void setDefaultWidgetFlag(std::int32_t defaultWidgetFlag, bool unset = false);
 
 public: // Highlighting
 

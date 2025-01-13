@@ -5,22 +5,19 @@
 #include "PageContentWidget.h"
 #include "PageWidget.h"
 
-#include <QApplication>
-#include <QDebug>
 #include <QLabel>
 #include <QString>
 
 PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _mainLayout(),
-    _columnsLayout(),
-    _rowsLayout()
+    QWidget(parent)
 {
     setObjectName("PageContentWidget");
     setAutoFillBackground(true);
 
     _columnsLayout.setContentsMargins(35, 35, 35, 35);
     _rowsLayout.setContentsMargins(35, 35, 35, 35);
+
+    _columnsLayout.setSpacing(40);
 
     switch (orientation) {
         case Qt::Horizontal:
@@ -29,9 +26,6 @@ PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget
 
         case Qt::Vertical:
             _mainLayout.addLayout(&_rowsLayout);
-            break;
-
-        default:
             break;
     }
 
