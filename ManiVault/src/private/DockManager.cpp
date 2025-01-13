@@ -59,32 +59,28 @@ DockManager::~DockManager()
     reset();
 }
 
-DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
+DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets(bool floating)
 {
     ViewPluginDockWidgets viewPluginDockWidgets;
 
-    for (auto dockWidget : dockWidgets()/*dockWidgetsMap().values()*/) {
-        if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget)) {
+    for (auto dockWidget : dockWidgets()) {
+        if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
             viewPluginDockWidgets.push_back(viewPluginDockWidget);
-
-            //qDebug() << viewPluginDockWidget->getViewPlugin()->getGuiName();
-        }
     }
-
-    //for (auto dockWidget : floatingWidgets())
-    //    if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
-    //        viewPluginDockWidgets.push_back(viewPluginDockWidget);
-
-    //for (auto dockWidget : dockWidgets())
-    //    if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
-    //        viewPluginDockWidgets.push_back(viewPluginDockWidget);
+     
+    if (floating)  {
+        for (auto floatingDockContainer : floatingWidgets())
+            for (auto dockWidget : floatingDockContainer->dockWidgets())
+                if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
+                    viewPluginDockWidgets.push_back(viewPluginDockWidget);
+    }
 
     return viewPluginDockWidgets;
 }
 
-DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
+DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets(bool floating) const
 {
-    return const_cast<DockManager*>(this)->getViewPluginDockWidgets();
+    return const_cast<DockManager*>(this)->getViewPluginDockWidgets(floating);
 }
 
 ViewPluginDockWidget* DockManager::findViewPluginDockWidget(const mv::plugin::ViewPlugin* viewPlugin) const
