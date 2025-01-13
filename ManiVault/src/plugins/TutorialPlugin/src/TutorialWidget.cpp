@@ -53,7 +53,7 @@ void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
     for (const auto& tag : tutorial->getTags())
         tags << QString("<div style='display: inline; background-color: lightgrey; padding-left: 5px; padding-right: 5px; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; font-size: 8pt; margin-right: 4px;'>%1</div>").arg(tag);
 
-	const auto sanitizedHtmltext = QString(R"(
+	auto sanitizedHtmltext = QString(R"(
     <html>
         <head>
             <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">
@@ -77,6 +77,8 @@ void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
         </body>
     </html>
     )").arg(_tutorialPlugin->getTutorialPickerAction().getCurrentText(), tags.join(""), htmlText);
+
+    sanitizedHtmltext = sanitizedHtmltext.replace(QRegularExpression("This tutorial requires a starter project.*?if you need it"), "");
 
     _webEngineView.setHtml(sanitizedHtmltext, baseUrl);
 

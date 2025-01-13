@@ -231,6 +231,37 @@ protected:
         bool shouldDisplay() const override;
     };
 
+    /** Toolbar item widget for showing the about information */
+    class AboutToolbarItemWidget final : public AbstractToolbarItemWidget
+    {
+    public:
+
+        /**
+         * Construct with pointer to \p viewPlugin and \p overlayWidget
+         * @param viewPlugin Pointer to view plugin
+         * @param overlayWidget Pointer to overlay widget
+         */
+        AboutToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget);
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+        /**
+         * Get icon
+         * @return Icon
+         */
+        QIcon getIcon() const override;
+
+        /**
+         * Determine whether the item should be visible or not
+         * @return Boolean determining whether the item should be visible or not
+         */
+        bool shouldDisplay() const override;
+    };
+
     /** Toolbar item widget for showing the shortcut map */
     class ShortcutsToolbarItemWidget final : public AbstractToolbarItemWidget
     {
@@ -590,6 +621,7 @@ private:
     LearningCenterToolbarItemWidget             _learningCenterToolbarItemWidget;       /** Primary learning center toolbar item widget */
     VideosToolbarItemWidget                     _videosToolbarItemWidget;               /** Videos toolbar item widget */
     TutorialsToolbarItemWidget                  _tutorialsToolbarItemWidget;            /** Plugin tutorials toolbar item widget */
+    AboutToolbarItemWidget                      _aboutToolbarItemWidget;                /** Plugin about toolbar item widget */
     ShortcutsToolbarItemWidget                  _shortcutsToolbarItemWidget;            /** Plugin shortcuts toolbar item widget */
     ShowDocumentationToolbarItemWidget          _showDocumentationToolbarItemWidget;    /** Documentation toolbar item widget */
     VisitGithubRepoToolbarItemWidget            _visitGithubRepoToolbarItemWidget;      /** Link to GitHub repository toolbar item widget */

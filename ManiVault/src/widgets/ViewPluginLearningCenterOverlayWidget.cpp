@@ -40,6 +40,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
     _learningCenterToolbarItemWidget(_viewPlugin, this),
     _videosToolbarItemWidget(_viewPlugin, this),
     _tutorialsToolbarItemWidget(_viewPlugin, this),
+    _aboutToolbarItemWidget(_viewPlugin, this),
     _shortcutsToolbarItemWidget(_viewPlugin, this),
     _showDocumentationToolbarItemWidget(_viewPlugin, this),
     _visitGithubRepoToolbarItemWidget(_viewPlugin, this),
@@ -68,6 +69,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
 
         _videosToolbarItemWidget.hide();
         _tutorialsToolbarItemWidget.hide();
+        _aboutToolbarItemWidget.hide();
         _shortcutsToolbarItemWidget.hide();
         _showDocumentationToolbarItemWidget.hide();
         _visitGithubRepoToolbarItemWidget.hide();
@@ -78,6 +80,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         _toolbarWidget.addWidget(&_learningCenterToolbarItemWidget);
         _toolbarWidget.addWidget(&_videosToolbarItemWidget);
         _toolbarWidget.addWidget(&_tutorialsToolbarItemWidget);
+        _toolbarWidget.addWidget(&_aboutToolbarItemWidget);
         _toolbarWidget.addWidget(&_shortcutsToolbarItemWidget);
         _toolbarWidget.addWidget(&_showDocumentationToolbarItemWidget);
         _toolbarWidget.addWidget(&_visitGithubRepoToolbarItemWidget);
@@ -90,6 +93,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         _toolbarItemWidgets = {
 	        &_videosToolbarItemWidget,
 	        &_tutorialsToolbarItemWidget,
+	        & _aboutToolbarItemWidget,
 	        &_shortcutsToolbarItemWidget,
 	        &_showDocumentationToolbarItemWidget,
 	        &_visitGithubRepoToolbarItemWidget,
@@ -461,6 +465,27 @@ QIcon ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget:
 bool ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::shouldDisplay() const
 {
     return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->hasHelp();
+}
+
+ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::AboutToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
+    AbstractToolbarItemWidget(viewPlugin, overlayWidget)
+{
+    setToolTip("View about");
+}
+
+void ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    getViewPlugin()->getLearningCenterAction().getViewShortcutsAction().trigger();
+}
+
+QIcon ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("info");
+}
+
+bool ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::shouldDisplay() const
+{
+    return getViewPlugin()->getLearningCenterAction().hasAboutMarkdown();
 }
 
 ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
