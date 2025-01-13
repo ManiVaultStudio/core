@@ -19,29 +19,29 @@ namespace mv::util {
 }
 
 namespace mv::plugin {
-    class ViewPlugin;
+    class Plugin;
 }
 
 namespace mv::gui
 {
 
 /**
- * View plugin description dialog class
+ * Plugin about dialog class
  *
- * Dialog with a view plugin description
+ * Show plugin about Markdown text
  *
  * @author Thomas Kroes
  */
-class ViewPluginDescriptionDialog : public QDialog
+class PluginAboutDialog : public QDialog
 {
 public:
 
     /**
-     * Construct with pointer to source \p view plugin and pointer to \p parent widget
-     * @param viewPlugin Pointer to source view plugin
+     * Construct with pointer to source \p plugin and pointer to \p parent widget
+     * @param plugin Pointer to plugin
      * @param parent Pointer to parent widget (maybe nullptr)
      */
-    ViewPluginDescriptionDialog(mv::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
+    PluginAboutDialog(mv::plugin::Plugin* plugin, QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {

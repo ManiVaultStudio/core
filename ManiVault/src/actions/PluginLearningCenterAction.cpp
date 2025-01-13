@@ -11,8 +11,8 @@
 #include "util/Miscellaneous.h"
 
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
-#include "widgets/ViewPluginDescriptionDialog.h"
-#include "widgets/ViewPluginShortcutsDialog.h"
+#include "widgets/PluginAboutDialog.h"
+#include "widgets/PluginShortcutsDialog.h"
 
 using namespace mv::util;
 using namespace mv::plugin;
@@ -35,6 +35,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _viewDescriptionAction(this, "View description"),
     _viewHelpAction(this, "View help"),
     _viewShortcutsAction(this, "View shortcuts"),
+    _viewAboutAction(this, "View about"),
     _toolbarVisibleAction(this, "Visible", true),
     _hideToolbarAction(this, "Hide toolbar"),
     _alignmentAction(this, "View plugin overlay alignment", alignmentOptions, "BottomLeft"),
@@ -109,21 +110,20 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
 
     _viewHelpAction.setToolTip(QString("Shows %1 documentation").arg(_plugin->getKind()));
 
-    if (_plugin->getFactory()->getShortDescription().isEmpty())
-        setShortDescription(QString("View %1 description").arg(_plugin->getKind()));
+    if (_plugin->getFactory()->getDescription().isEmpty())
+        setDescription(QString("View %1 description").arg(_plugin->getKind()));
 
-    if (_plugin->getFactory()->getLongDescription().isEmpty() && _plugin->getFactory()->getLongDescriptionMarkdown().isEmpty())
-        setShortDescription("No description available yet, stay tuned");
+    if (_plugin->getFactory()->getDescription().isEmpty())
+        setDescription("No description available yet, stay tuned");
 
     if (_learningCenterOverlayWidget)
         _learningCenterOverlayWidget->deleteLater();
 
-    connect(_plugin->getFactory(), &PluginFactory::shortDescriptionChanged, this, &PluginLearningCenterAction::shortDescriptionChanged);
-    connect(_plugin->getFactory(), &PluginFactory::longDescriptionChanged, this, &PluginLearningCenterAction::longDescriptionChanged);
-    connect(_plugin->getFactory(), &PluginFactory::longDescriptionMarkdownChanged, this, &PluginLearningCenterAction::longDescriptionMarkdownChanged);
+    connect(_plugin->getFactory(), &PluginFactory::descriptionChanged, this, &PluginLearningCenterAction::descriptionChanged);
+    connect(_plugin->getFactory(), &PluginFactory::aboutMarkdownChanged, this, &PluginLearningCenterAction::aboutMarkdownChanged);
 
-    connect(_plugin->getFactory(), &PluginFactory::shortDescriptionChanged, this, [this](const QString& previousShortDescription, const QString& currentShortDescription) -> void {
-        _viewDescriptionAction.setToolTip(currentShortDescription);
+    connect(_plugin->getFactory(), &PluginFactory::descriptionChanged, this, [this](const QString& previousDescription, const QString& currentDescription) -> void {
+        _viewDescriptionAction.setToolTip(currentDescription);
 	});
 }
 
@@ -205,39 +205,34 @@ void PluginLearningCenterAction::setPluginTitle(const QString& pluginTitle)
     emit pluginTitleChanged(_pluginTitle);
 }
 
-QString PluginLearningCenterAction::getShortDescription() const
+QString PluginLearningCenterAction::getDescription() const
 {
-    return _plugin->getFactory()->getLongDescription();
+    return _plugin->getFactory()->getDescription();
 }
 
-void PluginLearningCenterAction::setShortDescription(const QString& shortDescription) const
+void PluginLearningCenterAction::setDescription(const QString& description) const
 {
-	const_cast<PluginFactory*>(_plugin->getFactory())->setShortDescription(shortDescription);
-}
-
-QString PluginLearningCenterAction::getLongDescription() const
-{
-    return _plugin->getFactory()->getLongDescription();
-}
-
-void PluginLearningCenterAction::setLongDescription(const QString& longDescription) const
-{
-    const_cast<PluginFactory*>(_plugin->getFactory())->setLongDescription(longDescription);
-}
-
-QString PluginLearningCenterAction::getLongDescriptionMarkdown() const
-{
-    return _plugin->getFactory()->getLongDescriptionMarkdown();
-}
-
-void PluginLearningCenterAction::setLongDescriptionMarkdown(const QString& longDescriptionMarkdown) const
-{
-    const_cast<PluginFactory*>(_plugin->getFactory())->setLongDescriptionMarkdown(longDescriptionMarkdown);
+    const_cast<PluginFactory*>(_plugin->getFactory())->setDescription(description);
 }
 
 bool PluginLearningCenterAction::hasDescription() const
 {
-    return !(getLongDescription().isEmpty() && getLongDescriptionMarkdown().isEmpty());
+    return !getDescription().isEmpty();
+}
+
+QString PluginLearningCenterAction::getAboutMarkdown() const
+{
+    return _plugin->getFactory()->getAboutMarkdown();
+}
+
+void PluginLearningCenterAction::setAboutMarkdown(const QString& aboutMarkdown) const
+{
+    const_cast<PluginFactory*>(_plugin->getFactory())->setAboutMarkdown(aboutMarkdown);
+}
+
+bool PluginLearningCenterAction::hasAboutMarkdown() const
+{
+    return !getAboutMarkdown().isEmpty();
 }
 
 bool PluginLearningCenterAction::hasHelp() const
@@ -316,12 +311,26 @@ void PluginLearningCenterAction::viewShortcuts() const
     qDebug() << __FUNCTION__;
 #endif
 
-    if (isViewPlugin() && _plugin->getShortcuts().hasShortcuts())
-    {
-        ViewPluginShortcutsDialog viewPluginShortcutsDialog(dynamic_cast<ViewPlugin*>(_plugin));
+    if (!_plugin->getShortcuts().hasShortcuts())
+        return;
 
-        viewPluginShortcutsDialog.exec();
-    }
+    PluginShortcutsDialog viewPluginShortcutsDialog(dynamic_cast<ViewPlugin*>(_plugin));
+
+    viewPluginShortcutsDialog.exec();
+}
+
+void PluginLearningCenterAction::viewAbout() const
+{
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (!hasAboutMarkdown())
+        return;
+
+    PluginShortcutsDialog viewPluginShortcutsDialog(dynamic_cast<ViewPlugin*>(_plugin));
+
+    viewPluginShortcutsDialog.exec();
 }
 
 void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)

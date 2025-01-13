@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ViewPluginDescriptionDialog.h"
+#include "PluginAboutDialog.h"
 
 #include "Application.h"
 #include "ViewPlugin.h"
@@ -13,7 +13,7 @@
 #include <QScrollBar>
 
 #ifdef _DEBUG
-    #define VIEW_PLUGIN_DESCRIPTION_DIALOG_VERBOSE
+    #define PLUGIN_ABOUT_DIALOG_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -21,12 +21,12 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-ViewPluginDescriptionDialog::ViewPluginDescriptionDialog(plugin::ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
+PluginAboutDialog::PluginAboutDialog(plugin::Plugin* plugin, QWidget* parent /*= nullptr*/) :
     QDialog(parent)
 {
     setAutoFillBackground(true);
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("book-reader"));
-    setWindowTitle(QString("%1 overview").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
+    setWindowTitle(QString("%1 overview").arg(plugin->getLearningCenterAction().getPluginTitle()));
 
     auto layout = new QVBoxLayout();
 
@@ -40,15 +40,15 @@ ViewPluginDescriptionDialog::ViewPluginDescriptionDialog(plugin::ViewPlugin* vie
     _textScrollArea.setObjectName("Shortcuts");
     _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
 
-    const auto longDescriptionMarkdown = viewPlugin->getLearningCenterAction().getLongDescriptionMarkdown();
+    const auto longDescriptionMarkdown = plugin->getLearningCenterAction().getAboutMarkdown();
 
     if (!longDescriptionMarkdown.isEmpty()) {
         _markdownChannel.registerObject(QStringLiteral("content"), &_markdownDocument);
 
         _markdownPage.setWebChannel(&_markdownChannel);
 
-        connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this, viewPlugin]() -> void {
-            _markdownDocument.setText(viewPlugin->getLearningCenterAction().getLongDescriptionMarkdown());
+        connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this, plugin]() -> void {
+            _markdownDocument.setText(plugin->getLearningCenterAction().getAboutMarkdown());
             _markdownPage.runJavaScript(QString("document.body.style.backgroundColor = '%1';").arg(getColorAsCssString(qApp->palette().window().color())));
 
             const auto appFont      = qApp->font();
@@ -79,7 +79,7 @@ ViewPluginDescriptionDialog::ViewPluginDescriptionDialog(plugin::ViewPlugin* vie
         _textScrollArea.setWidget(&_webEngineView);
 
     } else {
-        const auto longDescription = viewPlugin->getLearningCenterAction().getLongDescription();
+        const auto aboutMarkdown = plugin->getLearningCenterAction().getAboutMarkdown();
 
         _textScrollArea.setWidget(&_textWidget);
 
@@ -89,7 +89,7 @@ ViewPluginDescriptionDialog::ViewPluginDescriptionDialog(plugin::ViewPlugin* vie
 
         _textWidget.setLayout(&_textWidgetLayout);
 
-        _textBodyLabel.setText(longDescription);
+        _textBodyLabel.setText(aboutMarkdown);
         _textBodyLabel.setWordWrap(true);
     }
 }

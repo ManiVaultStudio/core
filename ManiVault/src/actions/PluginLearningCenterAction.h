@@ -102,46 +102,40 @@ public: // Plugin description
     void setPluginTitle(const QString& pluginTitle);
 
     /**
-     * Get short description
-     * @return Short description in plain text format
+     * Get description
+     * @return Description in plain text format
      */
-    QString getShortDescription() const;
+    QString getDescription() const;
 
     /**
-     * Set short description to \p shortDescription
-     * @param shortDescription Short plugin description in plain text format
+     * Set description to \p description
+     * @param description Plugin description in plain text format
      */
-    void setShortDescription(const QString& shortDescription) const;
-
-    /**
-     * Get long description
-     * @return Long description in plain text format
-     */
-    QString getLongDescription() const;
-
-    /**
-     * Set long description to \p longDescription
-     * @param longDescription Long plugin description in plain text format
-     */
-    void setLongDescription(const QString& longDescription) const;
-
-    /**
-     * Get Markdown-formatted long description
-     * @return Long description in Markdown format
-     */
-    QString getLongDescriptionMarkdown() const;
-
-    /**
-     * Set Markdown-formatted long description to \p longDescriptionMarkdown
-     * @param longDescriptionMarkdown Long plugin description in Markdown format
-     */
-    void setLongDescriptionMarkdown(const QString& longDescriptionMarkdown) const;
+    void setDescription(const QString& description) const;
 
     /**
      * Get whether the plugin has a description or not
      * @return Boolean determining whether the plugin has a description or not
      */
     bool hasDescription() const;
+
+    /**
+     * Get Markdown-formatted about text
+     * @return About text in Markdown format
+     */
+    QString getAboutMarkdown() const;
+
+    /**
+     * Set about markdown to \p aboutMarkdown
+     * @param aboutMarkdown Plugin about text in Markdown format
+     */
+    void setAboutMarkdown(const QString& aboutMarkdown) const;
+
+    /**
+     * Get whether the plugin has about Markdown or not
+     * @return Boolean determining whether the plugin has about Markdown or not
+     */
+    bool hasAboutMarkdown() const;
 
 public: // Help
 
@@ -232,11 +226,14 @@ private:
     /** View shortcuts (view depends on the type of plugin) */
     void viewShortcuts() const;
 
+    /** View plugin about */
+    void viewAbout() const;
+
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param variantMap Variant representation of the widget action
+     * Load action from variant
+     * @param variantMap variantMap Variant representation of the action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -251,6 +248,7 @@ public: // Action getters
     TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; }
     TriggerAction& getViewHelpAction() { return _viewHelpAction; }
     TriggerAction& getViewShortcutsAction() { return _viewShortcutsAction; }
+    TriggerAction& getViewAboutAction() { return _viewAboutAction; }
     ToggleAction& getToolbarVisibleAction() { return _toolbarVisibleAction; }
     TriggerAction& getHideToolbarAction() { return _hideToolbarAction; }
     OptionAction& getAlignmentAction() { return _alignmentAction; }
@@ -262,6 +260,7 @@ public: // Action getters
     const TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; }
     const TriggerAction& getViewHelpAction() const { return _viewHelpAction; }
     const TriggerAction& getViewShortcutsAction() const { return _viewShortcutsAction; }
+    const TriggerAction& getViewAboutAction() const { return _viewAboutAction; }
     const ToggleAction& getToolbarVisibleAction() const { return _toolbarVisibleAction; }
     const TriggerAction& getHideToolbarAction() const { return _hideToolbarAction; }
     const OptionAction& getAlignmentAction() const { return _alignmentAction; }
@@ -278,25 +277,18 @@ signals:
     void pluginTitleChanged(const QString& pluginTitle);
 
     /**
-     * Signals that the short description changed from \p previousShortDescription to \p currentShortDescription
-     * @param previousShortDescription Previous short description
-     * @param currentShortDescription Current short description
+     * Signals that the description changed from \p previousDescription to \p currentDescription
+     * @param previousDescription Previous short description
+     * @param currentDescription Current short description
      */
-    void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
+    void descriptionChanged(const QString& previousDescription, const QString& currentDescription);
 
     /**
-     * Signals that the HTML-formatted long description changed from \p previousLongDescription to \p currentLongDescription
-     * @param previousLongDescription Previous long description in HTML format
-     * @param currentLongDescription Current long description in HTML format
+     * Signals that the about Markdown text changed from \p previousAboutMarkdown to \p currentAboutMarkdown
+     * @param previousAboutMarkdown Previous long description in Markdown format
+     * @param currentAboutMarkdown Current long description in Markdown format
      */
-    void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
-
-    /**
-     * Signals that the Markdown-formatted long description format changed from \p previousLongDescriptionMarkdown to \p currentLongDescriptionMarkdown
-     * @param previousLongDescriptionMarkdown Previous long description in Markdown format
-     * @param currentLongDescriptionMarkdown Current long description in Markdown format
-     */
-    void longDescriptionMarkdownChanged(const QString& previousLongDescriptionMarkdown, const QString& currentLongDescriptionMarkdown);
+    void aboutMarkdownChanged(const QString& previousAboutMarkdown, const QString& currentAboutMarkdown);
 
 public:
     static const QStringList alignmentOptions;                                      /** Names of the supported alignments in the case of a view plugin */
@@ -308,6 +300,7 @@ private:
     TriggerAction                               _viewDescriptionAction;             /** Trigger action that displays the plugin help */
     TriggerAction                               _viewHelpAction;                    /** Trigger action that displays the plugin description */
     TriggerAction                               _viewShortcutsAction;               /** Trigger action that displays the plugin shortcut map */
+    TriggerAction                               _viewAboutAction;                   /** Trigger action that displays the plugin about Markdown text */
     ToggleAction                                _toolbarVisibleAction;              /** Toggles toolbar widget visibility */
     TriggerAction                               _hideToolbarAction;                 /** Hides the view plugin overlay toolbar widget */
     OptionAction                                _alignmentAction;                   /** Determines the view plugin overlay alignment */

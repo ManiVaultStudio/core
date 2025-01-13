@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ViewPluginShortcutsDialog.h"
+#include "PluginShortcutsDialog.h"
 
 #include "Application.h"
 #include "util/ShortcutMap.h"
@@ -11,7 +11,7 @@
 #include <QDebug>
 
 #ifdef _DEBUG
-    #define VIEW_PLUGIN_SHORTCUTS_DIALOG_VERBOSE
+    #define PLUGIN_SHORTCUTS_DIALOG_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -19,7 +19,7 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-ViewPluginShortcutsDialog::ViewPluginShortcutsDialog(plugin::ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
+PluginShortcutsDialog::PluginShortcutsDialog(plugin::ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _shortcutMap(viewPlugin->getShortcuts().getMap())
 {

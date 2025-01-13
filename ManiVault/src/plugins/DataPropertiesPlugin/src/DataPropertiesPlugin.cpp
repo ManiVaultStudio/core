@@ -43,7 +43,7 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
 
     getLearningCenterAction().setPluginTitle("Data properties");
 
-    getLearningCenterAction().setShortDescription("Data properties of the selected dataset(s)");
+    getLearningCenterAction().setDescription("Data properties of the selected dataset(s)");
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
     getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataPropertiesPlugin" }));
 }

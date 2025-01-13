@@ -26,6 +26,7 @@ PluginFactory::PluginFactory(Type type) :
     _triggerHelpAction(nullptr, "Trigger plugin help"),
     _triggerReadmeAction(nullptr, "Readme"),
     _visitRepositoryAction(nullptr, "Go to repository"),
+    _launchAboutAction(nullptr, "Read plugin about information"),
     _pluginGlobalSettingsGroupAction(nullptr),
     _statusBarAction(nullptr),
     _allowPluginCreationFromStandardGui(true)
@@ -48,6 +49,15 @@ PluginFactory::PluginFactory(Type type) :
     connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
         if (getRepositoryUrl().isValid())
             QDesktopServices::openUrl(getRepositoryUrl());
+    });
+
+    _launchAboutAction.setIconByName("info");
+
+    connect(&_launchAboutAction, &TriggerAction::triggered, this, [this]() -> void {
+        MarkdownDialog markdownDialog(getAboutMarkdown());
+
+        markdownDialog.setWindowTitle(QString("%1").arg(_kind));
+        markdownDialog.exec();
     });
 }
 
@@ -162,55 +172,38 @@ const util::ShortcutMap& PluginFactory::getShortcutMap() const
     return _shortcutMap;
 }
 
-QString PluginFactory::getShortDescription() const
+QString PluginFactory::getDescription() const
 {
-    return _shortDescription;
+    return _description;
 }
 
-void PluginFactory::setShortDescription(const QString& shortDescription)
+void PluginFactory::setDescription(const QString& description)
 {
-    if (shortDescription == _shortDescription)
+    if (description == _description)
         return;
 
-    const auto previousShortDescription = _shortDescription;
+    const auto previousDescription = _description;
 
-    _shortDescription = shortDescription;
+    _description = description;
 
-    emit shortDescriptionChanged(previousShortDescription, _shortDescription);
+    emit descriptionChanged(previousDescription, _description);
 }
 
-QString PluginFactory::getLongDescription() const
+QString PluginFactory::getAboutMarkdown() const
 {
-    return _shortDescription;
+    return _aboutMarkdown;
 }
 
-QString PluginFactory::getLongDescriptionMarkdown() const
+void PluginFactory::setAboutMarkdown(const QString& aboutMarkdown)
 {
-    return _longDescriptionMarkdown;
-}
-
-void PluginFactory::setLongDescription(const QString& longDescription)
-{
-    if (longDescription == _longDescription)
+    if (aboutMarkdown == _aboutMarkdown)
         return;
 
-    const auto previousLongDescription = _longDescription;
+    const auto previousAboutMarkdown = _aboutMarkdown;
 
-    _longDescription = longDescription;
+    _aboutMarkdown = aboutMarkdown;
 
-    emit longDescriptionChanged(previousLongDescription, _longDescription);
-}
-
-void PluginFactory::setLongDescriptionMarkdown(const QString& longDescriptionMarkdown)
-{
-    if (longDescriptionMarkdown == _longDescriptionMarkdown)
-        return;
-
-    const auto previousLongDescriptionMarkdown = _longDescriptionMarkdown;
-
-    _longDescriptionMarkdown = longDescriptionMarkdown;
-
-    emit longDescriptionMarkdownChanged(previousLongDescriptionMarkdown, _longDescriptionMarkdown);
+    emit aboutMarkdownChanged(previousAboutMarkdown, _aboutMarkdown);
 }
 
 std::uint32_t PluginFactory::getNumberOfInstances() const

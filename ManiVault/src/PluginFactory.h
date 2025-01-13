@@ -250,44 +250,31 @@ public: // Shortcut map
 public: // Description
 
     /**
-     * Get short description
+     * Get description
      * @return String that shortly describes the plugin
      */
-    QString getShortDescription() const;
+    QString getDescription() const;
 
     /**
-     * Set short description to \p shortDescription
-     * @param shortDescription String that shortly describes the plugin
+     * Set description to \p description
+     * @param description String that shortly describes the plugin
      */
-    void setShortDescription(const QString& shortDescription);
+    void setDescription(const QString& description);
 
     /**
-     * Get extended description in HTML format
-     * @return Extended description in HTML format
+     * Get about text in Markdown format
+     * @return About text in Markdown format
      */
-    QString getLongDescription() const;
+    QString getAboutMarkdown() const;
 
     /**
-     * Get extended description in Markdown format
-     * @return Extended description in Markdown format
+     * Set about text to \p aboutMarkdown
+     * @param aboutMarkdown About text in Markdown format
      */
-    QString getLongDescriptionMarkdown() const;
-
-    /**
-     * Set long description to \p longDescription
-     * @param longDescription Extended description in HTML format
-     */
-    void setLongDescription(const QString& longDescription);
-
-    /**
-     * Set long description Markdown to \p longDescription
-     * @param longDescriptionMarkdown Extended description in Markdown format
-     */
-    void setLongDescriptionMarkdown(const QString& longDescriptionMarkdown);
+    void setAboutMarkdown(const QString& aboutMarkdown);
 
 public: // Number of instances
 
-    
     /**
      * Get number of plugin instances currently loaded
      * @return Number of plugin instances currently loaded
@@ -355,6 +342,7 @@ public: // Action getters
     gui::TriggerAction& getTriggerHelpAction() { return _triggerHelpAction; };
     gui::TriggerAction& getTriggerReadmeAction() { return _triggerReadmeAction; };
     gui::TriggerAction& getVisitRepositoryAction() { return _visitRepositoryAction; };
+    gui::TriggerAction& getLaunchAboutAction() { return _launchAboutAction; };
 
 signals:
 
@@ -383,25 +371,18 @@ signals:
     void statusBarActionChanged(gui::PluginStatusBarAction* statusBarAction);
 
     /**
-     * Signals that the short description changed from \p previousShortDescription to \p currentShortDescription
-     * @param previousShortDescription Previous short description
-     * @param currentShortDescription Current short description
+     * Signals that the description changed from \p previousDescription to \p currentDescription
+     * @param previousDescription Previous description
+     * @param currentDescription Current description
      */
-    void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
-    
+    void descriptionChanged(const QString& previousDescription, const QString& currentDescription);
+   
     /**
-     * Signals that the HTML-formatted long description changed from \p previousLongDescription to \p currentLongDescription
-     * @param previousLongDescription Previous long description in HTML format
-     * @param currentLongDescription Current long description in HTML format
+     * Signals that the about text in Markdown format changed from \p previousAboutMarkdown to \p currentAboutMarkdown
+     * @param previousAboutMarkdown Previous about text in Markdown format
+     * @param currentAboutMarkdown Current about text in Markdown format
      */
-    void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
-
-    /**
-     * Signals that the Markdown-formatted long description format changed from \p previousLongDescriptionMarkdown to \p currentLongDescriptionMarkdown
-     * @param previousLongDescriptionMarkdown Previous long description in Markdown format
-     * @param currentLongDescriptionMarkdown Current long description in Markdown format
-     */
-    void longDescriptionMarkdownChanged(const QString& previousLongDescriptionMarkdown, const QString& currentLongDescriptionMarkdown);
+    void aboutMarkdownChanged(const QString& previousAboutMarkdown, const QString& currentAboutMarkdown);
 
 private:
     QString                                 _kind;                                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
@@ -415,12 +396,12 @@ private:
     gui::TriggerAction                      _triggerHelpAction;                     /** Trigger action that triggers help (icon and text are already set) */
     gui::TriggerAction                      _triggerReadmeAction;                   /** Trigger action that displays the read me markdown text in a modal dialog (if the read me markdown file URL is valid) */
     gui::TriggerAction                      _visitRepositoryAction;                 /** Trigger action that opens an external browser and visits the GitHub repository */
+    gui::TriggerAction                      _launchAboutAction;                     /** Trigger action that displays the about Markdown text in the markdown dialog */
     gui::PluginGlobalSettingsGroupAction*   _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
     util::ShortcutMap                       _shortcutMap;                           /** Shortcut cheatsheet map */
-    QString                                 _shortDescription;                      /** Shortly describes the plugin */
-    QString                                 _longDescription;                       /** Extended description in HTML format */
-    QString                                 _longDescriptionMarkdown;               /** Extended description in Markdown format */
+    QString                                 _description;                           /** Shortly describes the plugin */
+    QString                                 _aboutMarkdown;                         /** About text in Markdown format */
     bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
 };
 
