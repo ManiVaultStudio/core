@@ -119,6 +119,8 @@ void TutorialPlugin::fromVariantMap(const QVariantMap& variantMap)
         qDebug() << _tutorialPickerAction.getCurrentText();
     }
     _autoOpenProject = true;
+
+    getLearningCenterAction().getToolbarVisibleAction().setChecked(false);
 }
 
 QVariantMap TutorialPlugin::toVariantMap() const
