@@ -13,31 +13,6 @@ Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
-void listResources(const QString& resourcePath) {
-    // Create a QDir object for the resource path
-    QDir resourceDir(resourcePath);
-
-    // Check if the directory exists
-    if (!resourceDir.exists()) {
-        qDebug() << "Resource directory does not exist:" << resourcePath;
-        return;
-    }
-
-    // Get the list of all files and directories in the resource path
-    QFileInfoList resourceList = resourceDir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-
-    // Print out each resource
-    for (const QFileInfo& fileInfo : resourceList) {
-        if (fileInfo.isDir()) {
-            // Recursively list resources in subdirectories
-            listResources(fileInfo.absoluteFilePath());
-        }
-        else {
-            qDebug() << "Resource found:" << fileInfo.absoluteFilePath();
-        }
-    }
-}
-
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataHierarchyWidget(nullptr)
