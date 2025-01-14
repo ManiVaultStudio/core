@@ -25,7 +25,7 @@ PluginShortcutsDialog::PluginShortcutsDialog(plugin::ViewPlugin* viewPlugin, QWi
 {
     setAutoFillBackground(true);
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("keyboard"));
-    setWindowTitle(QString("%1 shortcuts").arg(viewPlugin->getLearningCenterAction().getPluginTitle()));
+    setWindowTitle(QString("%1 shortcuts").arg(viewPlugin->getFactory()->getPluginMetaData().getGuiName()));
 
     auto layout = new QVBoxLayout();
 

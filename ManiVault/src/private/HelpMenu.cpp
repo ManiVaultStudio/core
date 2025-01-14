@@ -73,7 +73,7 @@ void HelpMenu::populate()
 
     for (auto& pluginFactory : plugins().getPluginFactoriesByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW }))
         if (pluginFactory->hasHelp() && pluginFactory->getNumberOfInstances() >= 1)
-            actions << &pluginFactory->getTriggerHelpAction();
+            actions << &pluginFactory->getPluginMetaData().getTriggerHelpAction();
 
     sortActions(actions);
 

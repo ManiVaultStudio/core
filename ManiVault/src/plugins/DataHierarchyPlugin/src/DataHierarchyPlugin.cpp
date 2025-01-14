@@ -6,10 +6,9 @@
 
 #include <Application.h>
 
-#include <util/Miscellaneous.h>
-#include <util/LearningCenterVideo.h>
+Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
 
-Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
+using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -22,11 +21,12 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     shortcuts.add({ QKeySequence(Qt::CTRL | Qt::Key_Minus), "Expand/collapse", "Collapse all" });
     shortcuts.add({ QKeySequence(Qt::CTRL | Qt::Key_Plus), "Expand/collapse", "Expand all" });
 
-    getLearningCenterAction().setPluginTitle("Data hierarchy view");
+    getLearningCenterAction().getPluginMetaData().setDescription("Hierarchical overview of all loaded data");
+    getLearningCenterAction().getPluginMetaData().setSummary("This plugin is for interacting with the ManiVault Studio dataset hierarchy");
+    getLearningCenterAction().getPluginMetaData().setAuthors({ "T. Kroes", "A. Vieth", "J.Thijssen" });
 
-    getLearningCenterAction().setDescription("Hierarchical overview of all loaded data");
-	getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
-	getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataHierarchyPlugin" }));
+    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+    getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataHierarchyPlugin" }));
 }
 
 void DataHierarchyPlugin::init()
@@ -60,13 +60,13 @@ QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 #ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
     return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/DataHierarchyPlugin/README.md");
 #else
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md");
+    return { "https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md" };
 #endif
 }
 
 QUrl DataHierarchyPluginFactory::getRepositoryUrl() const
 {
-    return QUrl("https://github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin");
+    return { "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin" };
 }
 
 ViewPlugin* DataHierarchyPluginFactory::produce()

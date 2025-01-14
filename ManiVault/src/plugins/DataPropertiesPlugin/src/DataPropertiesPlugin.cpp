@@ -41,9 +41,7 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
         viewPluginEditorDialog->open();
     });
 
-    getLearningCenterAction().setPluginTitle("Data properties");
-
-    getLearningCenterAction().setDescription("Data properties of the selected dataset(s)");
+    getLearningCenterAction().getPluginMetaData().setDescription("Data properties of the selected dataset(s)");
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
     getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataPropertiesPlugin" }));
 }

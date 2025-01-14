@@ -13,6 +13,8 @@
 #include "util/LearningCenterVideo.h"
 #include "util/LearningCenterTutorial.h"
 
+#include "PluginMetaData.h"
+
 namespace mv::plugin {
     class Plugin;
     class ViewPlugin;
@@ -82,60 +84,22 @@ public:
      */
     void setAlignment(const Qt::Alignment& alignment);
 
+    /**
+     * Get plugin meta data
+     * @return Reference to plugin meta data
+     */
+    plugin::PluginMetaData& getPluginMetaData();
+
+    /**
+     * Get plugin meta data
+     * @return Reference to plugin meta data
+     */
+    const plugin::PluginMetaData& getPluginMetaData() const;
+
 protected:
 
     /** Create the view plugin overlay widget (should only be called by the view plugin) */
     void createViewPluginOverlayWidget();
-
-public: // Plugin description
-
-    /**
-     * Get plugin title
-     * @return Human-readable plugin title in plain text format
-     */
-    QString getPluginTitle() const;
-
-    /**
-     * Set plugin title to \p pluginTitle
-     * @param pluginTitle Human-readable plugin title in plain text format
-     */
-    void setPluginTitle(const QString& pluginTitle);
-
-    /**
-     * Get description
-     * @return Description in plain text format
-     */
-    QString getDescription() const;
-
-    /**
-     * Set description to \p description
-     * @param description Plugin description in plain text format
-     */
-    void setDescription(const QString& description) const;
-
-    /**
-     * Get whether the plugin has a description or not
-     * @return Boolean determining whether the plugin has a description or not
-     */
-    bool hasDescription() const;
-
-    /**
-     * Get Markdown-formatted about text
-     * @return About text in Markdown format
-     */
-    QString getAboutMarkdown() const;
-
-    /**
-     * Set about markdown to \p aboutMarkdown
-     * @param aboutMarkdown Plugin about text in Markdown format
-     */
-    void setAboutMarkdown(const QString& aboutMarkdown) const;
-
-    /**
-     * Get whether the plugin has about Markdown or not
-     * @return Boolean determining whether the plugin has about Markdown or not
-     */
-    bool hasAboutMarkdown() const;
 
 public: // Help
 
@@ -268,28 +232,6 @@ public: // Action getters
     const TriggerAction& getMoveToBottomLeftAction() const { return _moveToBottomLeftAction; }
     const TriggerAction& getMoveToBottomRightAction() const { return _moveToBottomRightAction; }
 
-signals:
-
-    /**
-     * Signals that the plugin title changed to \p pluginTitle
-     * @param pluginTitle Plugin title
-     */
-    void pluginTitleChanged(const QString& pluginTitle);
-
-    /**
-     * Signals that the description changed from \p previousDescription to \p currentDescription
-     * @param previousDescription Previous short description
-     * @param currentDescription Current short description
-     */
-    void descriptionChanged(const QString& previousDescription, const QString& currentDescription);
-
-    /**
-     * Signals that the about Markdown text changed from \p previousAboutMarkdown to \p currentAboutMarkdown
-     * @param previousAboutMarkdown Previous long description in Markdown format
-     * @param currentAboutMarkdown Current long description in Markdown format
-     */
-    void aboutMarkdownChanged(const QString& previousAboutMarkdown, const QString& currentAboutMarkdown);
-
 public:
     static const QStringList alignmentOptions;                                      /** Names of the supported alignments in the case of a view plugin */
     static const std::vector<Qt::Alignment> alignmentFlags;                         /** Supported Qt alignment flags in the case of a view plugin */
@@ -308,7 +250,6 @@ private:
     TriggerAction                               _moveToTopRightAction;              /** Trigger action that moves the view plugin overlay to the top-right of the widget */
     TriggerAction                               _moveToBottomLeftAction;            /** Trigger action that moves the view plugin overlay to the bottom-left of the widget */
     TriggerAction                               _moveToBottomRightAction;           /** Trigger action that moves the view plugin overlay to the bottom-right of the widget */
-    QString                                     _pluginTitle;                       /** Human-readable plugin title in plain text format */
     util::LearningCenterVideos                  _videos;                            /** Plugin related videos */
     util::LearningCenterTutorials               _tutorials;                         /** Plugin related tutorials */
     ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */

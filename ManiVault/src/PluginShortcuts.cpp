@@ -26,7 +26,7 @@ PluginShortcuts::PluginShortcuts(plugin::Plugin* plugin) :
 
 util::ShortcutMap& PluginShortcuts::getMap()
 {
-    return const_cast<PluginFactory*>(_plugin->getFactory())->getShortcutMap();
+    return const_cast<PluginFactory*>(_plugin->getFactory())->getPluginMetaData().getShortcutMap();
 }
 
 const util::ShortcutMap& PluginShortcuts::getMap() const

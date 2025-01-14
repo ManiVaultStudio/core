@@ -11,7 +11,6 @@
 #include "util/Miscellaneous.h"
 
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
-#include "widgets/PluginAboutDialog.h"
 #include "widgets/PluginShortcutsDialog.h"
 
 using namespace mv::util;
@@ -60,10 +59,11 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
         if (!_plugin)
             return;
 
-        const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getTriggerHelpAction().trigger();
+        const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getPluginMetaData().getTriggerHelpAction().trigger();
     });
 
     connect(&_viewShortcutsAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcuts);
+    connect(&_viewAboutAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewAbout);
 
     _toolbarVisibleAction.setToolTip("Toggle toolbar visibility");
     _toolbarVisibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
@@ -110,17 +110,8 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
 
     _viewHelpAction.setToolTip(QString("Shows %1 documentation").arg(_plugin->getKind()));
 
-    if (_plugin->getFactory()->getDescription().isEmpty())
-        setDescription(QString("View %1 description").arg(_plugin->getKind()));
-
-    if (_plugin->getFactory()->getDescription().isEmpty())
-        setDescription("No description available yet, stay tuned");
-
     if (_learningCenterOverlayWidget)
         _learningCenterOverlayWidget->deleteLater();
-
-    connect(_plugin->getFactory(), &PluginFactory::descriptionChanged, this, &PluginLearningCenterAction::descriptionChanged);
-    connect(_plugin->getFactory(), &PluginFactory::aboutMarkdownChanged, this, &PluginLearningCenterAction::aboutMarkdownChanged);
 
     connect(_plugin->getFactory(), &PluginFactory::descriptionChanged, this, [this](const QString& previousDescription, const QString& currentDescription) -> void {
         _viewDescriptionAction.setToolTip(currentDescription);
@@ -184,55 +175,20 @@ void PluginLearningCenterAction::setAlignment(const Qt::Alignment& alignment)
         _alignmentAction.setCurrentIndex(static_cast<std::int32_t>(std::distance(alignmentFlags.begin(), it)));
 }
 
+plugin::PluginMetaData& PluginLearningCenterAction::getPluginMetaData()
+{
+    return const_cast<PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetaData();
+}
+
+const plugin::PluginMetaData& PluginLearningCenterAction::getPluginMetaData() const
+{
+    return getViewPlugin()->getFactory()->getPluginMetaData();
+}
+
 void PluginLearningCenterAction::createViewPluginOverlayWidget()
 {
     _learningCenterOverlayWidget = new ViewPluginLearningCenterOverlayWidget(&getViewPlugin()->getWidget(), getViewPlugin());
     _learningCenterOverlayWidget->show();
-}
-
-QString PluginLearningCenterAction::getPluginTitle() const
-{
-    return _pluginTitle.isEmpty() ? _plugin->getKind() : _pluginTitle;
-}
-
-void PluginLearningCenterAction::setPluginTitle(const QString& pluginTitle)
-{
-    if (pluginTitle == _pluginTitle)
-        return;
-
-    _pluginTitle = pluginTitle;
-
-    emit pluginTitleChanged(_pluginTitle);
-}
-
-QString PluginLearningCenterAction::getDescription() const
-{
-    return _plugin->getFactory()->getDescription();
-}
-
-void PluginLearningCenterAction::setDescription(const QString& description) const
-{
-    const_cast<PluginFactory*>(_plugin->getFactory())->setDescription(description);
-}
-
-bool PluginLearningCenterAction::hasDescription() const
-{
-    return !getDescription().isEmpty();
-}
-
-QString PluginLearningCenterAction::getAboutMarkdown() const
-{
-    return _plugin->getFactory()->getAboutMarkdown();
-}
-
-void PluginLearningCenterAction::setAboutMarkdown(const QString& aboutMarkdown) const
-{
-    const_cast<PluginFactory*>(_plugin->getFactory())->setAboutMarkdown(aboutMarkdown);
-}
-
-bool PluginLearningCenterAction::hasAboutMarkdown() const
-{
-    return !getAboutMarkdown().isEmpty();
 }
 
 bool PluginLearningCenterAction::hasHelp() const
@@ -325,12 +281,10 @@ void PluginLearningCenterAction::viewAbout() const
     qDebug() << __FUNCTION__;
 #endif
 
-    if (!hasAboutMarkdown())
+    if (!getPluginMetaData().hasAboutMarkdown())
         return;
 
-    PluginShortcutsDialog viewPluginShortcutsDialog(dynamic_cast<ViewPlugin*>(_plugin));
-
-    viewPluginShortcutsDialog.exec();
+    
 }
 
 void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)

@@ -132,7 +132,7 @@ LearningPagePluginActionsWidget::ActionsOverlayWidget::ActionsOverlayWidget(Lear
 
     if (hasReadmeMarkdownUrl) {
         auto triggerReadmeActionWidget = new ActionWidget("book", [this]() -> void {
-            const_cast<PluginFactory*>(_learningPagePluginActionWidget->getPluginFactory())->getTriggerReadmeAction().trigger();
+            const_cast<PluginFactory*>(_learningPagePluginActionWidget->getPluginFactory())->getPluginMetaData().getTriggerReadmeAction().trigger();
         });
 
         triggerReadmeActionWidget->setToolTip("View the plugin readme content");
@@ -142,7 +142,7 @@ LearningPagePluginActionsWidget::ActionsOverlayWidget::ActionsOverlayWidget(Lear
 
     if (hasRespositoryUrl) {
         auto visitRepositoryActionWidget = new ActionWidget("globe", [this]() -> void {
-            const_cast<PluginFactory*>(_learningPagePluginActionWidget->getPluginFactory())->getVisitRepositoryAction().trigger();
+            const_cast<PluginFactory*>(_learningPagePluginActionWidget->getPluginFactory())->getPluginMetaData().getVisitRepositoryAction().trigger();
         });
 
         visitRepositoryActionWidget->setToolTip("Visit the plugin repository");
