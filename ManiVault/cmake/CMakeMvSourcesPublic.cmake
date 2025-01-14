@@ -673,7 +673,7 @@ set(PUBLIC_PLUGIN_HEADERS
     src/Plugin.h
     src/PluginType.h
     src/PluginFactory.h
-    src/PluginMetaData.h
+    src/PluginMetadata.h
     src/LoaderPlugin.h
     src/WriterPlugin.h
     src/AnalysisPlugin.h
@@ -686,7 +686,7 @@ set(PUBLIC_PLUGIN_SOURCES
     src/Plugin.cpp
     src/PluginType.cpp
     src/PluginFactory.cpp
-    src/PluginMetaData.cpp
+    src/PluginMetadata.cpp
     src/LoaderPlugin.cpp
     src/WriterPlugin.cpp
     src/AnalysisPlugin.cpp

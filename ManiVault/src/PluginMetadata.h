@@ -17,7 +17,14 @@ namespace mv::plugin
 
 class PluginFactory;
 
-class CORE_EXPORT PluginMetaData : public QObject
+/**
+ * Plugin metadata plugin class
+ *
+ * Contains plugin properties
+ *
+ * @author T. Kroes
+ */
+class CORE_EXPORT PluginMetadata : public QObject
 {
     Q_OBJECT
 
@@ -27,7 +34,7 @@ public:
      * Construct with reference to parent \p pluginFactory
      * @param pluginFactory Reference to parent plugin factory
      */
-    PluginMetaData(const PluginFactory& pluginFactory);
+    PluginMetadata(const PluginFactory& pluginFactory);
 
 public: // GUI name
 

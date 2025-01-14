@@ -5,7 +5,7 @@
 #pragma once
 
 #include "MarkdownDocument.h"
-#include "PluginMetaData.h"
+#include "PluginMetadata.h"
 
 #include <QDialog>
 #include <QHBoxLayout>
@@ -42,7 +42,7 @@ public:
      * @param pluginMetaData Plugin meta data
      * @param parent Pointer to parent widget (maybe nullptr)
      */
-    PluginAboutDialog(const plugin::PluginMetaData& pluginMetaData, QWidget* parent = nullptr);
+    PluginAboutDialog(const plugin::PluginMetadata& pluginMetaData, QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -55,7 +55,7 @@ public:
     }
 
 private:
-    const plugin::PluginMetaData&   _pluginMetaData;        /** Plugin meta data */
+    const plugin::PluginMetadata&   _pluginMetaData;        /** Plugin meta data */
     QScrollArea                     _textScrollArea;        /** Scroll area for the shortcut */
     QWidget                         _textWidget;            /** Widget with the shortcuts label */
     QVBoxLayout                     _textWidgetLayout;      /** Widget with the shortcuts label */

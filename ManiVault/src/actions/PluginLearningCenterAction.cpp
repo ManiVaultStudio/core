@@ -59,7 +59,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
         if (!_plugin)
             return;
 
-        const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getPluginMetaData().getTriggerHelpAction().trigger();
+        const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getPluginMetadata().getTriggerHelpAction().trigger();
     });
 
     connect(&_viewShortcutsAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcuts);
@@ -175,14 +175,14 @@ void PluginLearningCenterAction::setAlignment(const Qt::Alignment& alignment)
         _alignmentAction.setCurrentIndex(static_cast<std::int32_t>(std::distance(alignmentFlags.begin(), it)));
 }
 
-plugin::PluginMetaData& PluginLearningCenterAction::getPluginMetaData()
+plugin::PluginMetadata& PluginLearningCenterAction::getPluginMetaData()
 {
-    return const_cast<PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetaData();
+    return const_cast<PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata();
 }
 
-const plugin::PluginMetaData& PluginLearningCenterAction::getPluginMetaData() const
+const plugin::PluginMetadata& PluginLearningCenterAction::getPluginMetaData() const
 {
-    return getViewPlugin()->getFactory()->getPluginMetaData();
+    return getViewPlugin()->getFactory()->getPluginMetadata();
 }
 
 void PluginLearningCenterAction::createViewPluginOverlayWidget()

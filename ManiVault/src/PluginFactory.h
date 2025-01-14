@@ -6,7 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "PluginMetaData.h"
+#include "PluginMetadata.h"
 #include "Dataset.h"
 #include "DataType.h"
 #include "PluginType.h"
@@ -294,16 +294,16 @@ public: // Miscellaneous
     virtual void viewShortcutMap();
 
     /**
-     * Get plugin meta data
-     * @return Reference to plugin meta data
+     * Get plugin metadata
+     * @return Reference to plugin metadata
      */
-    PluginMetaData& getPluginMetaData();
+    PluginMetadata& getPluginMetadata();
 
     /**
-     * Get plugin meta data
-     * @return Reference to plugin meta data
+     * Get plugin metadata
+     * @return Reference to plugin metadata
      */
-    const PluginMetaData& getPluginMetaData() const;
+    const PluginMetadata& getPluginMetadata() const;
 
 signals:
 
@@ -383,7 +383,7 @@ private:
     gui::PluginGlobalSettingsGroupAction*   _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
     bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
-    PluginMetaData                          _pluginMetaData;                        /** Plugin meta data */
+    PluginMetadata                          _pluginMetadata;                        /** Plugin metadata */
 };
 
 }

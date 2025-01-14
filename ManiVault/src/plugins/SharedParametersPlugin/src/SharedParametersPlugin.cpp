@@ -43,7 +43,6 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
 
     hierarchyWidget.getToolbarAction().addAction(&mv::settings().getParametersSettings().getExpertModeAction(), ToggleAction::PushButtonIcon);
 
-    getLearningCenterAction().setPluginTitle("Shared parameters view");
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
     getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "SharedParametersPlugin" }));
 }

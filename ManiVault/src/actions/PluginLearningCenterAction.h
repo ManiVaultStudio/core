@@ -13,7 +13,7 @@
 #include "util/LearningCenterVideo.h"
 #include "util/LearningCenterTutorial.h"
 
-#include "PluginMetaData.h"
+#include "PluginMetadata.h"
 
 namespace mv::plugin {
     class Plugin;
@@ -88,13 +88,13 @@ public:
      * Get plugin meta data
      * @return Reference to plugin meta data
      */
-    plugin::PluginMetaData& getPluginMetaData();
+    plugin::PluginMetadata& getPluginMetaData();
 
     /**
      * Get plugin meta data
      * @return Reference to plugin meta data
      */
-    const plugin::PluginMetaData& getPluginMetaData() const;
+    const plugin::PluginMetadata& getPluginMetaData() const;
 
 protected:
 

@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "PluginMetaData.h"
+#include "PluginMetadata.h"
 #include "PluginFactory.h"
 
 #include "Application.h"
@@ -18,7 +18,7 @@ using namespace mv::util;
 namespace mv::plugin
 {
 
-PluginMetaData::PluginMetaData(const PluginFactory& pluginFactory) :
+PluginMetadata::PluginMetadata(const PluginFactory& pluginFactory) :
     _pluginFactory(pluginFactory),
     _triggerHelpAction(nullptr, "Trigger plugin help"),
     _triggerReadmeAction(nullptr, "Readme"),
@@ -48,18 +48,18 @@ PluginMetaData::PluginMetaData(const PluginFactory& pluginFactory) :
     _launchAboutAction.setIconByName("info");
 
     connect(&_launchAboutAction, &TriggerAction::triggered, this, [this]() -> void {
-        PluginAboutDialog pluginAboutDialog(_pluginFactory.getPluginMetaData());
+        PluginAboutDialog pluginAboutDialog(_pluginFactory.getPluginMetadata());
 
         pluginAboutDialog.exec();
     });
 }
 
-QString PluginMetaData::getGuiName() const
+QString PluginMetadata::getGuiName() const
 {
     return _guiName;
 }
 
-void PluginMetaData::setGuiName(const QString& guiName)
+void PluginMetadata::setGuiName(const QString& guiName)
 {
     if (guiName == _guiName)
         return;
@@ -71,12 +71,12 @@ void PluginMetaData::setGuiName(const QString& guiName)
     emit guiNameChanged(previousGuiName, _guiName);
 }
 
-QString PluginMetaData::getVersion() const
+QString PluginMetadata::getVersion() const
 {
     return _version;
 }
 
-void PluginMetaData::setVersion(const QString& version)
+void PluginMetadata::setVersion(const QString& version)
 {
     if (version == _version)
         return;
@@ -88,12 +88,12 @@ void PluginMetaData::setVersion(const QString& version)
     emit versionChanged(previousVersion, _version);
 }
 
-QString PluginMetaData::getDescription() const
+QString PluginMetadata::getDescription() const
 {
     return _description;
 }
 
-void PluginMetaData::setDescription(const QString& description)
+void PluginMetadata::setDescription(const QString& description)
 {
     if (description == _description)
         return;
@@ -105,17 +105,17 @@ void PluginMetaData::setDescription(const QString& description)
     emit descriptionChanged(previousDescription, _description);
 }
 
-bool PluginMetaData::hasDescription() const
+bool PluginMetadata::hasDescription() const
 {
     return !_description.isEmpty();
 }
 
-QString PluginMetaData::getSummary() const
+QString PluginMetadata::getSummary() const
 {
     return _summary;
 }
 
-void PluginMetaData::setSummary(const QString& summary)
+void PluginMetadata::setSummary(const QString& summary)
 {
     if (summary == _summary)
         return;
@@ -127,17 +127,17 @@ void PluginMetaData::setSummary(const QString& summary)
     emit summaryChanged(previousSummary, _summary);
 }
 
-bool PluginMetaData::hasSummary() const
+bool PluginMetadata::hasSummary() const
 {
     return !_summary.isEmpty();
 }
 
-QStringList PluginMetaData::getAuthors() const
+QStringList PluginMetadata::getAuthors() const
 {
     return _authors;
 }
 
-void PluginMetaData::setAuthors(const QStringList& authors)
+void PluginMetadata::setAuthors(const QStringList& authors)
 {
     if (authors == _authors)
         return;
@@ -149,17 +149,17 @@ void PluginMetaData::setAuthors(const QStringList& authors)
     emit authorsChanged(previousAuthors, _authors);
 }
 
-bool PluginMetaData::hasAuthors() const
+bool PluginMetadata::hasAuthors() const
 {
     return !_authors.isEmpty();
 }
 
-QString PluginMetaData::getCopyrightNotice() const
+QString PluginMetadata::getCopyrightNotice() const
 {
     return _copyrightNotice;
 }
 
-void PluginMetaData::setCopyrightNotice(const QString& copyrightNotice)
+void PluginMetadata::setCopyrightNotice(const QString& copyrightNotice)
 {
     if (copyrightNotice == _copyrightNotice)
         return;
@@ -171,12 +171,12 @@ void PluginMetaData::setCopyrightNotice(const QString& copyrightNotice)
     emit copyrightNoticeChanged(previousCopyrightNotice, _copyrightNotice);
 }
 
-bool PluginMetaData::hasCopyrightNotice() const
+bool PluginMetadata::hasCopyrightNotice() const
 {
     return !_copyrightNotice.isEmpty();
 }
 
-QString PluginMetaData::getAboutMarkdown() const
+QString PluginMetadata::getAboutMarkdown() const
 {
     if (!_aboutMarkdown.isEmpty())
         return _aboutMarkdown;
@@ -188,7 +188,7 @@ QString PluginMetaData::getAboutMarkdown() const
     ).arg(getSummary(), getAuthors().join(", "), getCopyrightNotice());
 }
 
-void PluginMetaData::setAboutMarkdown(const QString& aboutMarkdown)
+void PluginMetadata::setAboutMarkdown(const QString& aboutMarkdown)
 {
     if (aboutMarkdown == _aboutMarkdown)
         return;
@@ -200,17 +200,17 @@ void PluginMetaData::setAboutMarkdown(const QString& aboutMarkdown)
     emit aboutMarkdownChanged(previousAboutMarkdown, _aboutMarkdown);
 }
 
-bool PluginMetaData::hasAboutMarkdown() const
+bool PluginMetadata::hasAboutMarkdown() const
 {
     return !_aboutMarkdown.isEmpty();
 }
 
-util::ShortcutMap& PluginMetaData::getShortcutMap()
+util::ShortcutMap& PluginMetadata::getShortcutMap()
 {
     return _shortcutMap;
 }
 
-const util::ShortcutMap& PluginMetaData::getShortcutMap() const
+const util::ShortcutMap& PluginMetadata::getShortcutMap() const
 {
     return _shortcutMap;
 }

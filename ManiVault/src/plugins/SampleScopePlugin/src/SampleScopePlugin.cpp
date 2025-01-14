@@ -85,7 +85,6 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
         }
     });
 
-    getLearningCenterAction().setPluginTitle("Sample scope plugin");
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
     getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "SampleScopePlugin" }));
 }

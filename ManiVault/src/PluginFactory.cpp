@@ -25,7 +25,7 @@ PluginFactory::PluginFactory(Type type) :
     _pluginGlobalSettingsGroupAction(nullptr),
     _statusBarAction(nullptr),
     _allowPluginCreationFromStandardGui(true),
-    _pluginMetaData(*this)
+    _pluginMetadata(*this)
 {
 }
 
@@ -40,7 +40,7 @@ void PluginFactory::setKind(const QString& kind)
 
     _pluginTriggerAction.setText(_kind);
 
-    getPluginMetaData().getShortcutMap().setTitle(_kind);
+    getPluginMetadata().getShortcutMap().setTitle(_kind);
 }
 
 mv::plugin::Type PluginFactory::getType() const
@@ -52,8 +52,8 @@ void PluginFactory::initialize()
 {
     getPluginTriggerAction().initialize();
 
-    getPluginMetaData().getTriggerHelpAction().setText(_kind);
-    getPluginMetaData().getTriggerHelpAction().setIcon(getIcon());
+    getPluginMetadata().getTriggerHelpAction().setText(_kind);
+    getPluginMetadata().getTriggerHelpAction().setIcon(getIcon());
 }
 
 QString PluginFactory::getGlobalSettingsPrefix() const
@@ -98,22 +98,22 @@ bool PluginFactory::hasHelp() const
 
 QString PluginFactory::getGuiName() const
 {
-    return getPluginMetaData().getGuiName();
+    return getPluginMetadata().getGuiName();
 }
 
 void PluginFactory::setGuiName(const QString& guiName)
 {
-    getPluginMetaData().setGuiName(guiName);
+    getPluginMetadata().setGuiName(guiName);
 }
 
 QString PluginFactory::getVersion() const
 {
-    return getPluginMetaData().getVersion();
+    return getPluginMetadata().getVersion();
 }
 
 void PluginFactory::setVersion(const QString& version)
 {
-    getPluginMetaData().setVersion(version);
+    getPluginMetadata().setVersion(version);
 }
 
 QIcon PluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
@@ -208,14 +208,14 @@ void PluginFactory::viewShortcutMap()
     qDebug() << __FUNCTION__ << "not implemented yet...";
 }
 
-PluginMetaData& PluginFactory::getPluginMetaData()
+PluginMetadata& PluginFactory::getPluginMetadata()
 {
-    return _pluginMetaData;
+    return _pluginMetadata;
 }
 
-const PluginMetaData& PluginFactory::getPluginMetaData() const
+const PluginMetadata& PluginFactory::getPluginMetadata() const
 {
-    return const_cast<PluginFactory*>(this)->getPluginMetaData();
+    return const_cast<PluginFactory*>(this)->getPluginMetadata();
 }
 
 QUrl PluginFactory::getReadmeMarkdownUrl() const

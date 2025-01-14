@@ -20,7 +20,7 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetaData& pluginMetaData, QWidget* parent /*= nullptr*/) :
+PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaData, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _pluginMetaData(pluginMetaData)
 {

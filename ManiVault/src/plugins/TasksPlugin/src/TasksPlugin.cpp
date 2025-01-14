@@ -35,7 +35,6 @@ TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     AbstractTaskTester::registerTester("mv::BackgroundTaskTester");
     AbstractTaskTester::registerTester("mv::ForegroundTaskTester");
 
-    getLearningCenterAction().setPluginTitle("Tasks view");
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
     getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "TasksPlugin" }));
 }

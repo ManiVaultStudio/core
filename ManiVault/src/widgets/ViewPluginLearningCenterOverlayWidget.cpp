@@ -447,14 +447,14 @@ bool ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::shouldDi
 ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::ShowDocumentationToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetaData().getTriggerHelpAction().toolTip());
+    setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata().getTriggerHelpAction().toolTip());
 }
 
 void ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
 
-    const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetaData().getTriggerHelpAction().trigger();
+    const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata().getTriggerHelpAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::getIcon() const
@@ -518,19 +518,19 @@ bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDi
 ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::VisitGithubRepoToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
     AbstractToolbarItemWidget(viewPlugin, overlayWidget)
 {
-    setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetaData().getVisitRepositoryAction().toolTip());
+    setToolTip(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata().getVisitRepositoryAction().toolTip());
 }
 
 void ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
     AbstractToolbarItemWidget::mousePressEvent(event);
 
-    const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetaData().getVisitRepositoryAction().trigger();
+    const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata().getVisitRepositoryAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::getIcon() const
 {
-    return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetaData().getVisitRepositoryAction().icon();
+    return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata().getVisitRepositoryAction().icon();
 }
 
 bool ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::shouldDisplay() const
