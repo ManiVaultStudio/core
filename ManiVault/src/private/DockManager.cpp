@@ -178,8 +178,6 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        //qDebug() << _serializationTask->getChildTasks();
-
         const auto viewPluginDockWidgetsList = variantMap["ViewPluginDockWidgets"].toList();
 
         for (const auto& viewPluginDockWidgetVariant : viewPluginDockWidgetsList)
@@ -190,8 +188,6 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
             const auto pluginKind       = viewPluginMap["Kind"].toString();
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
             const auto guiName          = viewPluginMap["GuiName"].toMap()["Value"].toString();
-
-            qDebug() << pluginKind << guiName;
 
             if (plugins().isPluginLoaded(pluginKind)) {
                 addViewPluginDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));

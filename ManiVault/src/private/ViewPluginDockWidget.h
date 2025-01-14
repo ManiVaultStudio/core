@@ -136,7 +136,7 @@ public:
     mv::plugin::ViewPlugin* getViewPlugin() const;
 
     /** Restores the view plugin state */
-    void restoreViewPluginState() const;
+    void restoreViewPluginState();
 
 public: // Title bar settings menu
 
@@ -206,6 +206,7 @@ private:
     CDockWidget                         _centralDockWidget;         /** Dock manager central widget */
     ads::CDockManager                   _dockManager;               /** Dock manager for internal docking */
     QMap<QString, CDockWidget*>         _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
+    //mv::Task                            _progressTask;              /** Task for reporting dock widget progress */
     ProgressOverlayWidget               _progressOverlayWidget;     /** Overlay widget which shows a very thin view progress bar */
 
 protected:
