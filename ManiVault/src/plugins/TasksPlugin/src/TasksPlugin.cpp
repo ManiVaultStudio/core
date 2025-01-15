@@ -104,7 +104,7 @@ void TasksPlugin::addTestSuite()
 TasksPluginFactory::TasksPluginFactory() :
     ViewPluginFactory(true)
 {
-    getPluginMetadata().setDescription("For interacting tasks");
+    getPluginMetadata().setDescription("For interacting with tasks");
     getPluginMetadata().setSummary("This system view plugin is for interacting with tasks (for debugging purposes only).");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setAuthors({
