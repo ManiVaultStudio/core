@@ -5,7 +5,7 @@
 #include "LearningCenterTutorialsFilterModel.h"
 #include "LearningCenterTutorialsModel.h"
 
-#include "util/version.h"
+#include "util/Version.h"
 
 #include <QDebug>
 
