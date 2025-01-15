@@ -30,6 +30,41 @@ class CORE_EXPORT PluginMetadata : public QObject
 
 public:
 
+    struct FormattedItem
+    {
+        QString toString() const {
+            if (_externalLink.isEmpty())
+                return QString("%1 (%2)").arg(_name, _description);
+
+            return QString("[%1](%2) (%3)").arg(_name, _externalLink, _description);
+        }
+
+        bool operator==(const FormattedItem& rhs) const {
+            if (_name != rhs._name)
+                return false;
+
+            if (_description != rhs._description)
+                return false;
+
+            if (_externalLink != rhs._externalLink)
+                return false;
+
+            return true;
+        }
+
+        QString     _name;
+        QString     _description;
+        QString     _externalLink;
+    };
+
+    using Author = FormattedItem;
+    using Authors = std::vector<Author>;
+
+    using Organization = FormattedItem;
+    using Organizations = std::vector<Organization>;
+
+public:
+
     /**
      * Construct with reference to parent \p pluginFactory
      * @param pluginFactory Reference to parent plugin factory
@@ -104,13 +139,13 @@ public: // Authors
      * Get authors
      * @return Authors that created and maintain the plugin
      */
-    QStringList getAuthors() const;
+    Authors getAuthors() const;
 
     /**
      * Set authors to \p authors
      * @param authors Authors that created and maintain the plugin
      */
-    void setAuthors(const QStringList& authors);
+    void setAuthors(const Authors& authors);
 
     /**
      * Get whether the plugin has authors assigned or not
@@ -118,25 +153,65 @@ public: // Authors
      */
     bool hasAuthors() const;
 
-public: // Copyright notice
+public: // Organizations
 
     /**
-     * Get copyright notice
-     * @return Copyright notice
+     * Get organizations
+     * @return Organizations that created and maintain the plugin
      */
-    QString getCopyrightNotice() const;
+    Organizations getOrganizations() const;
 
     /**
-     * Set copyrightNotice to \p copyrightNotice
-     * @param copyrightNotice Copyright notice
+     * Set organizations to \p organizations
+     * @param organizations Organizations that created and maintain the plugin
      */
-    void setCopyrightNotice(const QString& copyrightNotice);
+    void setOrganizations(const Organizations& organizations);
 
     /**
-     * Get whether the plugin has a copyright notice or not
-     * @return Boolean determining whether the plugin has a copyright notice or not
+     * Get whether the plugin has organizations assigned or not
+     * @return Boolean determining whether the plugin has organizations assigned or not
      */
-    bool hasCopyrightNotice() const;
+    bool hasOrganizations() const;
+
+public: // Copyright holder
+
+    /**
+     * Get copyright holder
+     * @return Copyright holder
+     */
+    QString getCopyrightHolder() const;
+
+    /**
+     * Set copyright holder to \p copyrightHolder
+     * @param copyrightHolder Copyright holder
+     */
+    void setCopyrightHolder(const QString& copyrightHolder);
+
+    /**
+     * Get whether the plugin has a copyright holder or not
+     * @return Boolean determining whether the plugin has a copyright holder or not
+     */
+    bool hasCopyrightHolder() const;
+
+public: // License text
+
+    /**
+     * Get license text
+     * @return License text
+     */
+    QString getLicenseText() const;
+
+    /**
+     * Set license text to \p licenseText
+     * @param licenseText License text
+     */
+    void setLicenseText(const QString& licenseText);
+
+    /**
+     * Get whether the plugin has a license text or not
+     * @return Boolean determining whether the plugin has a license text or not
+     */
+    bool hasLicenseText() const;
 
 public: // About markdown
 
@@ -177,7 +252,8 @@ public: // Action getters
     gui::TriggerAction& getTriggerHelpAction() { return _triggerHelpAction; }
     gui::TriggerAction& getTriggerReadmeAction() { return _triggerReadmeAction; }
     gui::TriggerAction& getVisitRepositoryAction() { return _visitRepositoryAction; }
-    gui::TriggerAction& getLaunchAboutAction() { return _launchAboutAction; }
+    gui::TriggerAction& getViewAboutAction() { return _viewAboutAction; }
+    gui::TriggerAction& getViewShortcutsAction() { return _viewShortcutsAction; }
 
 signals:
 
@@ -214,14 +290,28 @@ signals:
      * @param previousAuthors Previous authors
      * @param currentAuthors Current authors
      */
-    void authorsChanged(const QStringList previousAuthors, const QStringList& currentAuthors);
+    void authorsChanged(const Authors& previousAuthors, const Authors& currentAuthors);
 
     /**
-     * Signals that the copyright notice changed from \p previousCopyrightNotice to \p currentCopyrightNotice
-     * @param previousCopyrightNotice Previous copyright notice
-     * @param currentCopyrightNotice Current copyright notice
+     * Signals that the organizations changed from \p previousOrganizations to \p currentOrganizations
+     * @param previousOrganizations Previous organizations
+     * @param currentOrganizations Current organizations
      */
-    void copyrightNoticeChanged(const QString& previousCopyrightNotice, const QString& currentCopyrightNotice);
+    void organizationsChanged(const Organizations& previousOrganizations, const Organizations& currentOrganizations);
+
+    /**
+     * Signals that the copyright holder changed from \p previousCopyrightHolder to \p currentCopyrightHolder
+     * @param previousCopyrightHolder Previous copyright holder
+     * @param currentCopyrightHolder Current copyright holder
+     */
+    void copyrightHolderChanged(const QString& previousCopyrightHolder, const QString& currentCopyrightHolder);
+
+    /**
+     * Signals that the license text changed from \p previousLicenseText to \p currentLicenseText
+     * @param previousLicenseText Previous license text
+     * @param currentLicenseText Current license text
+     */
+    void licenseTextChanged(const QString& previousLicenseText, const QString& currentLicenseText);
 
     /**
      * Signals that the about text in Markdown format changed from \p previousAboutMarkdown to \p currentAboutMarkdown
@@ -237,13 +327,15 @@ private:
     gui::TriggerAction      _triggerHelpAction;         /** Trigger action that triggers help (icon and text are already set) */
     gui::TriggerAction      _triggerReadmeAction;       /** Trigger action that displays the read me markdown text in a modal dialog (if the read me markdown file URL is valid) */
     gui::TriggerAction      _visitRepositoryAction;     /** Trigger action that opens an external browser and visits the GitHub repository */
-    gui::TriggerAction      _launchAboutAction;         /** Trigger action that displays the about Markdown text in the markdown dialog */
+    gui::TriggerAction      _viewAboutAction;           /** Trigger action that displays the plugin about dialog */
+    gui::TriggerAction      _viewShortcutsAction;       /** Trigger action that displays the plugin shortcuts dialog */
     util::ShortcutMap       _shortcutMap;               /** Shortcut cheatsheet map */
-    QString                 _pluginTitle;               /** Human-readable plugin title in plain text format */
     QString                 _description;               /** Shortly describes the plugin */
     QString                 _summary;                   /** Elaborate description of the plugin (used in auto-generated about Markdown) */
-    QStringList             _authors;                   /** Authors that created and maintain the plugin (used in auto-generated about Markdown) */
-    QString                 _copyrightNotice;           /** Copyright notice (used in auto-generated about Markdown) */
+    Organizations           _organizations;             /** Which organizations create and maintain the plugin */
+    Authors                 _authors;                   /** Authors that created and maintain the plugin (used in auto-generated about Markdown) */
+    QString                 _copyrightHolder;           /** Copyright holder (used in auto-generated about Markdown) */
+    QString                 _licenseText;               /** License text (used in auto-generated about Markdown) */
     QString                 _aboutMarkdown;             /** About text in Markdown format. When set, it overrides the standardized about Markdown generated from summary, authors and copyright notice. */
 };
 

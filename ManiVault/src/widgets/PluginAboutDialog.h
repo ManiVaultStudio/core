@@ -14,6 +14,7 @@
 #include <QWebEngineView>
 #include <QWebEnginePage>
 #include <QWebChannel>
+#include <QDesktopServices>
 
 namespace mv::util {
     class ShortcutMap;
@@ -37,6 +38,25 @@ class PluginAboutDialog : public QDialog
 {
 public:
 
+	/** Ensure links open an external browser */
+	class LinksExternalWebEnginePage : public QWebEnginePage
+	{
+    public:
+        using QWebEnginePage::QWebEnginePage;
+
+    protected:
+        bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override {
+            if (type == NavigationTypeLinkClicked) {
+                QDesktopServices::openUrl(url);
+                return false;
+            }
+
+            return QWebEnginePage::acceptNavigationRequest(url, type, isMainFrame);
+        }
+    };
+
+public:
+
     /**
      * Construct with pointer to source \p plugin and pointer to \p parent widget
      * @param pluginMetaData Plugin meta data
@@ -46,7 +66,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return { 600, 800 };
+        return { 500, 300 };
     }
 
     /** Get minimum size hint*/
@@ -63,7 +83,7 @@ private:
     QWebChannel                     _markdownChannel;       /** Markdown web channel */
     QUrl                            _markdownUrl;           /** Location of the Markdown file */
     QWebEngineView                  _webEngineView;         /** Browser to show the Markdown in */
-    QWebEnginePage                  _markdownPage;          /** Browser page to show the Markdown in */
+    LinksExternalWebEnginePage      _markdownPage;          /** Browser page to show the Markdown in */
     util::MarkdownDocument          _markdownDocument;      /** Document for synchronizing the Markdown text with the browser */
 };
 

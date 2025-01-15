@@ -93,7 +93,7 @@ ViewPluginLearningCenterOverlayWidget::ViewPluginLearningCenterOverlayWidget(QWi
         _toolbarItemWidgets = {
 	        &_videosToolbarItemWidget,
 	        &_tutorialsToolbarItemWidget,
-	        & _aboutToolbarItemWidget,
+	        &_aboutToolbarItemWidget,
 	        &_shortcutsToolbarItemWidget,
 	        &_showDocumentationToolbarItemWidget,
 	        &_visitGithubRepoToolbarItemWidget,
@@ -475,7 +475,7 @@ ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::AboutToolbarItemW
 
 void ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
-    getViewPlugin()->getLearningCenterAction().getViewAboutAction().trigger();
+    getViewPlugin()->getLearningCenterAction().getPluginMetadata().getViewAboutAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::getIcon() const
@@ -485,7 +485,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::getIcon() c
 
 bool ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::shouldDisplay() const
 {
-    return getViewPlugin()->getLearningCenterAction().getPluginMetaData().hasAboutMarkdown();
+    return true;
 }
 
 ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
@@ -496,7 +496,7 @@ ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::ShortcutsTool
 
 void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePressEvent(QMouseEvent* event)
 {
-    getViewPlugin()->getLearningCenterAction().getViewShortcutsAction().trigger();
+    getViewPlugin()->getLearningCenterAction().getPluginMetadata().getViewShortcutsAction().trigger();
 }
 
 QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon() const

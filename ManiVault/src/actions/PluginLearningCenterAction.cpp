@@ -31,10 +31,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     WidgetAction(parent, title),
     _plugin(nullptr),
     _actions(this, "Actions"),
-    _viewDescriptionAction(this, "View description"),
     _viewHelpAction(this, "View help"),
-    _viewShortcutsAction(this, "View shortcuts"),
-    _viewAboutAction(this, "View about"),
     _toolbarVisibleAction(this, "Visible", true),
     _hideToolbarAction(this, "Hide toolbar"),
     _alignmentAction(this, "View plugin overlay alignment", alignmentOptions, "BottomLeft"),
@@ -45,10 +42,6 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _learningCenterOverlayWidget(nullptr)
 {
     setIconByName("question-circle");
-
-    _viewDescriptionAction.setIconByName("book-reader");
-    _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
-    _viewDescriptionAction.setConnectionPermissionsToForceNone();
 
     _viewHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _viewHelpAction.setConnectionPermissionsToForceNone();
@@ -61,9 +54,6 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
 
         const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getPluginMetadata().getTriggerHelpAction().trigger();
     });
-
-    connect(&_viewShortcutsAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcuts);
-    connect(&_viewAboutAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewAbout);
 
     _toolbarVisibleAction.setToolTip("Toggle toolbar visibility");
     _toolbarVisibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
@@ -112,10 +102,6 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
 
     if (_learningCenterOverlayWidget)
         _learningCenterOverlayWidget->deleteLater();
-
-    connect(_plugin->getFactory(), &PluginFactory::descriptionChanged, this, [this](const QString& previousDescription, const QString& currentDescription) -> void {
-        _viewDescriptionAction.setToolTip(currentDescription);
-	});
 }
 
 QMenu* PluginLearningCenterAction::getContextMenu(QWidget* parent)
@@ -175,7 +161,7 @@ void PluginLearningCenterAction::setAlignment(const Qt::Alignment& alignment)
         _alignmentAction.setCurrentIndex(static_cast<std::int32_t>(std::distance(alignmentFlags.begin(), it)));
 }
 
-plugin::PluginMetadata& PluginLearningCenterAction::getPluginMetaData()
+plugin::PluginMetadata& PluginLearningCenterAction::getPluginMetadata()
 {
     return const_cast<PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata();
 }
@@ -259,32 +245,6 @@ bool PluginLearningCenterAction::isViewPlugin() const
 plugin::ViewPlugin* PluginLearningCenterAction::getViewPlugin() const
 {
     return dynamic_cast<ViewPlugin*>(_plugin);
-}
-
-void PluginLearningCenterAction::viewShortcuts() const
-{
-#ifdef VIEW_PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (!_plugin->getShortcuts().hasShortcuts())
-        return;
-
-    PluginShortcutsDialog viewPluginShortcutsDialog(dynamic_cast<ViewPlugin*>(_plugin));
-
-    viewPluginShortcutsDialog.exec();
-}
-
-void PluginLearningCenterAction::viewAbout() const
-{
-#ifdef VIEW_PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (!getPluginMetaData().hasAboutMarkdown())
-        return;
-
-    
 }
 
 void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)

@@ -40,13 +40,13 @@ PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaDat
     _textScrollArea.setObjectName("Shortcuts");
     _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
 
-    const auto longDescriptionMarkdown = _pluginMetaData.getAboutMarkdown();
+    const auto aboutMarkdown = _pluginMetaData.getAboutMarkdown();
 
-    if (!longDescriptionMarkdown.isEmpty()) {
+    if (!aboutMarkdown.isEmpty()) {
         _markdownChannel.registerObject(QStringLiteral("content"), &_markdownDocument);
 
         _markdownPage.setWebChannel(&_markdownChannel);
-
+        
         connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this]() -> void {
             _markdownDocument.setText(_pluginMetaData.getAboutMarkdown());
             _markdownPage.runJavaScript(QString("document.body.style.backgroundColor = '%1';").arg(getColorAsCssString(qApp->palette().window().color())));
@@ -64,6 +64,15 @@ PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaDat
 				var style = document.createElement('style');
 				style.innerHTML = `body {
 					font-size:)" + QString::number(fontSize) + R"(pt !important;
+				}
+				summary {
+                    font-weight: bold;
+                    margin-left: 0px;
+                    margin-bottom: 10px;
+				}
+				summary:hover {
+					text-decoration: underline;
+					cursor: pointer;
 				}`;
 				document.head.appendChild(style);
 			)";

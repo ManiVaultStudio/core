@@ -8,7 +8,9 @@
 #include "Application.h"
 
 #include "widgets/MarkdownDialog.h"
+
 #include "widgets/PluginAboutDialog.h"
+#include "widgets/PluginShortcutsDialog.h"
 
 #include <QDesktopServices>
 
@@ -23,7 +25,8 @@ PluginMetadata::PluginMetadata(const PluginFactory& pluginFactory) :
     _triggerHelpAction(nullptr, "Trigger plugin help"),
     _triggerReadmeAction(nullptr, "Readme"),
     _visitRepositoryAction(nullptr, "Go to repository"),
-    _launchAboutAction(nullptr, "Read plugin about information")
+    _viewAboutAction(nullptr, "View plugin about"),
+    _viewShortcutsAction(nullptr, "View plugin shortcuts")
 {
     _triggerReadmeAction.setIconByName("book");
 
@@ -45,18 +48,24 @@ PluginMetadata::PluginMetadata(const PluginFactory& pluginFactory) :
             QDesktopServices::openUrl(_pluginFactory.getRepositoryUrl());
     });
 
-    _launchAboutAction.setIconByName("info");
+    _viewAboutAction.setIconByName("info");
 
-    connect(&_launchAboutAction, &TriggerAction::triggered, this, [this]() -> void {
+    connect(&_viewAboutAction, &TriggerAction::triggered, this, [this]() -> void {
         PluginAboutDialog pluginAboutDialog(_pluginFactory.getPluginMetadata());
 
         pluginAboutDialog.exec();
     });
+
+    connect(&_viewAboutAction, &TriggerAction::triggered, this, [this]() -> void {
+        PluginShortcutsDialog pluginShortcutsDialog(_pluginFactory.getPluginMetadata());
+
+        pluginShortcutsDialog.exec();
+	});
 }
 
 QString PluginMetadata::getGuiName() const
 {
-    return _guiName;
+    return _guiName.isEmpty() ? _pluginFactory.getKind() : _guiName;
 }
 
 void PluginMetadata::setGuiName(const QString& guiName)
@@ -132,12 +141,12 @@ bool PluginMetadata::hasSummary() const
     return !_summary.isEmpty();
 }
 
-QStringList PluginMetadata::getAuthors() const
+PluginMetadata::Authors PluginMetadata::getAuthors() const
 {
     return _authors;
 }
 
-void PluginMetadata::setAuthors(const QStringList& authors)
+void PluginMetadata::setAuthors(const Authors& authors)
 {
     if (authors == _authors)
         return;
@@ -151,29 +160,79 @@ void PluginMetadata::setAuthors(const QStringList& authors)
 
 bool PluginMetadata::hasAuthors() const
 {
-    return !_authors.isEmpty();
+    return !_authors.empty();
 }
 
-QString PluginMetadata::getCopyrightNotice() const
+PluginMetadata::Organizations PluginMetadata::getOrganizations() const
 {
-    return _copyrightNotice;
+    return _organizations;
 }
 
-void PluginMetadata::setCopyrightNotice(const QString& copyrightNotice)
+void PluginMetadata::setOrganizations(const Organizations& organizations)
 {
-    if (copyrightNotice == _copyrightNotice)
+    if (organizations == _organizations)
         return;
 
-    const auto previousCopyrightNotice = _copyrightNotice;
+    const auto previousOrganizations = _organizations;
 
-    _copyrightNotice = copyrightNotice;
+    _organizations = organizations;
 
-    emit copyrightNoticeChanged(previousCopyrightNotice, _copyrightNotice);
+    emit organizationsChanged(previousOrganizations, _organizations);
 }
 
-bool PluginMetadata::hasCopyrightNotice() const
+bool PluginMetadata::hasOrganizations() const
 {
-    return !_copyrightNotice.isEmpty();
+    return !_organizations.empty();
+}
+
+QString PluginMetadata::getCopyrightHolder() const
+{
+    if (!_copyrightHolder.isEmpty())
+        return _copyrightHolder;
+
+    return QString("&copy;%1 %2").arg(QString::number(QDate::currentDate().year()), getCopyrightHolder());
+}
+
+void PluginMetadata::setCopyrightHolder(const QString& copyrightHolder)
+{
+    if (copyrightHolder == _copyrightHolder)
+        return;
+
+    const auto previousCopyrightHolder = _copyrightHolder;
+
+    _copyrightHolder = copyrightHolder;
+
+    emit copyrightHolderChanged(previousCopyrightHolder, _copyrightHolder);
+}
+
+bool PluginMetadata::hasCopyrightHolder() const
+{
+    return !_copyrightHolder.isEmpty();
+}
+
+QString PluginMetadata::getLicenseText() const
+{
+    if (!_licenseText.isEmpty())
+        return _licenseText;
+
+    return "No license text available...";
+}
+
+void PluginMetadata::setLicenseText(const QString& licenseText)
+{
+    if (licenseText == _licenseText)
+        return;
+
+    const auto previousLicenseText = _licenseText;
+
+    _licenseText = licenseText;
+
+    emit licenseTextChanged(previousLicenseText, _licenseText);
+}
+
+bool PluginMetadata::hasLicenseText() const
+{
+    return !_licenseText.isEmpty();
 }
 
 QString PluginMetadata::getAboutMarkdown() const
@@ -181,11 +240,29 @@ QString PluginMetadata::getAboutMarkdown() const
     if (!_aboutMarkdown.isEmpty())
         return _aboutMarkdown;
 
+    QStringList authors, organizations;
+    
+    for (const auto& author : getAuthors())
+        authors << author.toString() + "\n";
+
+    for (const auto& organization : getOrganizations())
+        organizations << organization.toString() + "\n";
+
     return QString(
-        "%1"
-        "%2"
-        "%3"
-    ).arg(getSummary(), getAuthors().join(", "), getCopyrightNotice());
+        "# %1 v**%2**\n"
+        "%3\n\n"
+        "<details>\n\n"
+        "<summary>View authors</summary>"
+        "%7"
+        "</details>\n"
+        "<details>\n\n"
+        "<summary>View organizations</summary>\n\n"
+        "%8\n\n"
+        "</details>\n\n"
+        "---\n\n"
+        "Copyright &copy; %4 %5\n\n"
+        "%6"
+    ).arg(getGuiName(), getVersion(), getSummary(), QString::number(QDate::currentDate().year()), getCopyrightHolder(), getLicenseText(), authors.join("\n"), organizations.join("\n"));
 }
 
 void PluginMetadata::setAboutMarkdown(const QString& aboutMarkdown)

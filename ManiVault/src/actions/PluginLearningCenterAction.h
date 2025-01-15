@@ -85,10 +85,10 @@ public:
     void setAlignment(const Qt::Alignment& alignment);
 
     /**
-     * Get plugin meta data
-     * @return Reference to plugin meta data
+     * Get plugin metadata
+     * @return Reference to plugin metadata
      */
-    plugin::PluginMetadata& getPluginMetaData();
+    plugin::PluginMetadata& getPluginMetadata();
 
     /**
      * Get plugin meta data
@@ -187,12 +187,6 @@ private:
      */
     mv::plugin::ViewPlugin* getViewPlugin() const;
 
-    /** View shortcuts (view depends on the type of plugin) */
-    void viewShortcuts() const;
-
-    /** View plugin about */
-    void viewAbout() const;
-
 public: // Serialization
 
     /**
@@ -209,10 +203,7 @@ public: // Serialization
 
 public: // Action getters
 
-    TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; }
     TriggerAction& getViewHelpAction() { return _viewHelpAction; }
-    TriggerAction& getViewShortcutsAction() { return _viewShortcutsAction; }
-    TriggerAction& getViewAboutAction() { return _viewAboutAction; }
     ToggleAction& getToolbarVisibleAction() { return _toolbarVisibleAction; }
     TriggerAction& getHideToolbarAction() { return _hideToolbarAction; }
     OptionAction& getAlignmentAction() { return _alignmentAction; }
@@ -221,10 +212,7 @@ public: // Action getters
     TriggerAction& getMoveToBottomLeftAction() { return _moveToBottomLeftAction; }
     TriggerAction& getMoveToBottomRightAction() { return _moveToBottomRightAction; }
 
-    const TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; }
     const TriggerAction& getViewHelpAction() const { return _viewHelpAction; }
-    const TriggerAction& getViewShortcutsAction() const { return _viewShortcutsAction; }
-    const TriggerAction& getViewAboutAction() const { return _viewAboutAction; }
     const ToggleAction& getToolbarVisibleAction() const { return _toolbarVisibleAction; }
     const TriggerAction& getHideToolbarAction() const { return _hideToolbarAction; }
     const OptionAction& getAlignmentAction() const { return _alignmentAction; }
@@ -239,10 +227,7 @@ public:
 private:
     plugin::Plugin*                             _plugin;                            /** Pointer to associated plugin */
     HorizontalGroupAction                       _actions;                           /** Learning center actions */
-    TriggerAction                               _viewDescriptionAction;             /** Trigger action that displays the plugin help */
     TriggerAction                               _viewHelpAction;                    /** Trigger action that displays the plugin description */
-    TriggerAction                               _viewShortcutsAction;               /** Trigger action that displays the plugin shortcut map */
-    TriggerAction                               _viewAboutAction;                   /** Trigger action that displays the plugin about Markdown text */
     ToggleAction                                _toolbarVisibleAction;              /** Toggles toolbar widget visibility */
     TriggerAction                               _hideToolbarAction;                 /** Hides the view plugin overlay toolbar widget */
     OptionAction                                _alignmentAction;                   /** Determines the view plugin overlay alignment */

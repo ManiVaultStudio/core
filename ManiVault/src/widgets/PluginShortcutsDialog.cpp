@@ -5,8 +5,8 @@
 #include "PluginShortcutsDialog.h"
 
 #include "Application.h"
+
 #include "util/ShortcutMap.h"
-#include "ViewPlugin.h"
 
 #include <QDebug>
 
@@ -19,13 +19,13 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-PluginShortcutsDialog::PluginShortcutsDialog(plugin::ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
+PluginShortcutsDialog::PluginShortcutsDialog(const plugin::PluginMetadata& pluginMetaData, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _shortcutMap(viewPlugin->getShortcuts().getMap())
+    _pluginMetaData(pluginMetaData)
 {
     setAutoFillBackground(true);
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("keyboard"));
-    setWindowTitle(QString("%1 shortcuts").arg(viewPlugin->getFactory()->getPluginMetadata().getGuiName()));
+    setWindowTitle(QString("%1 shortcuts").arg(_pluginMetaData.getGuiName()));
 
     auto layout = new QVBoxLayout();
 
@@ -40,7 +40,7 @@ PluginShortcutsDialog::PluginShortcutsDialog(plugin::ViewPlugin* viewPlugin, QWi
 
         QString rows;
 
-        for (const auto& shortcut : _shortcutMap.getShortcuts({ category }))
+        for (const auto& shortcut : _pluginMetaData.getShortcutMap().getShortcuts({ category }))
             rows += QString("<tr><td width='50'><b>%1</b></td><td>%2</td></tr>").arg(shortcut._keySequence.toString(), shortcut._title);
 
         const auto table = QString("<table>%1</table>").arg(rows);
@@ -48,7 +48,7 @@ PluginShortcutsDialog::PluginShortcutsDialog(plugin::ViewPlugin* viewPlugin, QWi
         return header + table;
     };
 
-    for (const auto& category : _shortcutMap.getCategories())
+    for (const auto& category : _pluginMetaData.getShortcutMap().getCategories())
         categories += createShortcutMapCategoryTable(category);
 
     _textScrollArea.setWidgetResizable(true);

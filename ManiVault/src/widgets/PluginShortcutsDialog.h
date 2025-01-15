@@ -34,15 +34,15 @@ class CORE_EXPORT PluginShortcutsDialog : public QDialog
 public:
 
     /**
-     * Construct with pointer to source \p view plugin and pointer to \p parent widget
-     * @param viewPlugin Pointer to source view plugin
+     * Construct with pointer to source \p plugin and pointer to \p parent widget
+     * @param pluginMetaData Plugin meta data
      * @param parent Pointer to parent widget (maybe nullptr)
      */
-    PluginShortcutsDialog(mv::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
+    PluginShortcutsDialog(const plugin::PluginMetadata& pluginMetaData, QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return { 450, 600 };
+        return { 450, 300 };
     }
 
     /** Get minimum size hint*/
@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    const mv::util::ShortcutMap&    _shortcutMap;           /** Const reference to the shortcut map for which to create the overlay */
+    const plugin::PluginMetadata&   _pluginMetaData;        /** Plugin meta data */
     QScrollArea                     _textScrollArea;        /** Scroll area for the shortcut */
     QWidget                         _textWidget;            /** Widget with the shortcuts label */
     QVBoxLayout                     _textWidgetLayout;      /** Widget with the shortcuts label */

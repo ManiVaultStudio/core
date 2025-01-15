@@ -21,10 +21,6 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     shortcuts.add({ QKeySequence(Qt::CTRL | Qt::Key_Minus), "Expand/collapse", "Collapse all" });
     shortcuts.add({ QKeySequence(Qt::CTRL | Qt::Key_Plus), "Expand/collapse", "Expand all" });
 
-    getLearningCenterAction().getPluginMetaData().setDescription("Hierarchical overview of all loaded data");
-    getLearningCenterAction().getPluginMetaData().setSummary("This plugin is for interacting with the ManiVault Studio dataset hierarchy");
-    getLearningCenterAction().getPluginMetaData().setAuthors({ "T. Kroes", "A. Vieth", "J.Thijssen" });
-
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
     getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataHierarchyPlugin" }));
 }
@@ -43,6 +39,19 @@ void DataHierarchyPlugin::init()
 DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
     ViewPluginFactory(true)
 {
+    getPluginMetadata().setDescription("Hierarchical overview of all loaded data");
+    getPluginMetadata().setSummary("This plugin is for interacting with the ManiVault Studio dataset hierarchy");
+    getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
+    getPluginMetadata().setAuthors({
+        { "T. Kroes", "Software architect", "" },
+        { "A. Vieth", "Plugin developer", "" },
+        { "J.Thijssen", "Software architect", "" }
+    });
+    getPluginMetadata().setOrganizations({
+        { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
+        { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
+    });
+    getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 }
 
 void DataHierarchyPluginFactory::initialize()
