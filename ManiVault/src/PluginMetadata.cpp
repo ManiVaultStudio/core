@@ -253,6 +253,8 @@ QString PluginMetadata::getAboutMarkdown() const
     for (const auto& organization : getOrganizations())
         organizations << organization.toString() + "\n";
 
+    const auto repositoryUrl = QString("Click [here](%1) for the GitHub repository.").arg(_pluginFactory.getRepositoryUrl().toString());
+
     return QString(
         "# %1 v**%2**\n"
         "%3\n\n"
@@ -266,8 +268,9 @@ QString PluginMetadata::getAboutMarkdown() const
         "</details>\n\n"
         "---\n\n"
         "Copyright &copy; %4 %5\n\n"
-        "%6"
-    ).arg(getGuiName(), QString::fromStdString(getVersion().getVersionString()), getSummary(), QString::number(QDate::currentDate().year()), getCopyrightHolder(), getLicenseText(), authors.join("\n"), organizations.join("\n"));
+        "%6\n\n"
+        "%9\n\n"
+    ).arg(getGuiName(), QString::fromStdString(getVersion().getVersionString()), getSummary(), QString::number(QDate::currentDate().year()), getCopyrightHolder(), getLicenseText(), authors.join("\n"), organizations.join("\n"), repositoryUrl);
 }
 
 void PluginMetadata::setAboutMarkdown(const QString& aboutMarkdown)
