@@ -43,8 +43,8 @@ DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
     getPluginMetadata().setSummary("This plugin is for interacting with the ManiVault Studio dataset hierarchy");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setAuthors({
-        { "T. Kroes", "Software architect", "" },
-        { "A. Vieth", "Plugin developer", "" },
+        { "T. Kroes", "Lead software architect", "" },
+        { "A. Vieth", "Plugin developer & maintainer", "" },
         { "J.Thijssen", "Software architect", "" }
     });
     getPluginMetadata().setOrganizations({
