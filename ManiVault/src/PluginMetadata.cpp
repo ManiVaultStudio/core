@@ -104,6 +104,9 @@ void PluginMetadata::setVersion(const util::Version& version)
 
 QString PluginMetadata::getDescription() const
 {
+    if (_summary.isEmpty())
+        return "No description available.";
+
     return _description;
 }
 
@@ -126,6 +129,9 @@ bool PluginMetadata::hasDescription() const
 
 QString PluginMetadata::getSummary() const
 {
+    if (_summary.isEmpty())
+        return "No summary available.";
+    
     return _summary;
 }
 
@@ -192,10 +198,10 @@ bool PluginMetadata::hasOrganizations() const
 
 QString PluginMetadata::getCopyrightHolder() const
 {
-    if (!_copyrightHolder.isEmpty())
-        return _copyrightHolder;
+    if (_copyrightHolder.isEmpty())
+        return "No copyright holder available.";
 
-    return QString("&copy;%1 %2").arg(QString::number(QDate::currentDate().year()), getCopyrightHolder());
+    return _copyrightHolder;
 }
 
 void PluginMetadata::setCopyrightHolder(const QString& copyrightHolder)
@@ -220,7 +226,7 @@ QString PluginMetadata::getLicenseText() const
     if (!_licenseText.isEmpty())
         return _licenseText;
 
-    return "No license text available...";
+    return "No license text available.";
 }
 
 void PluginMetadata::setLicenseText(const QString& licenseText)
@@ -250,27 +256,35 @@ QString PluginMetadata::getAboutMarkdown() const
     for (const auto& author : getAuthors())
         authors << author.toString() + "\n";
 
+    if (!hasAuthors())
+        authors << "No authors available.\n";
+
     for (const auto& organization : getOrganizations())
         organizations << organization.toString() + "\n";
 
-    const auto repositoryUrl = QString("Click [here](%1) for the GitHub repository.").arg(_pluginFactory.getRepositoryUrl().toString());
+    if (!hasOrganizations())
+        organizations << "No organizations available.\n";
+
+    const auto repositoryUrl = _pluginFactory.getRepositoryUrl().isValid() ? QString("Click [here](%1) for the GitHub repository.").arg(_pluginFactory.getRepositoryUrl().toString()) : "";
+
+    const auto copyright = hasCopyrightHolder() ? QString("Copyright &copy; %4 %5").arg(QString::number(QDate::currentDate().year()), getCopyrightHolder()) : getCopyrightHolder();
 
     return QString(
         "# %1 v**%2**\n"
         "%3\n\n"
         "<details>\n\n"
         "<summary>View authors</summary>"
-        "%7"
-        "</details>\n"
+        "%6\n\n"
+        "</details>\n\n"
         "<details>\n\n"
-        "<summary>View organizations</summary>\n\n"
-        "%8\n\n"
+        "<summary>View organizations</summary>"
+        "%7\n\n"
         "</details>\n\n"
         "---\n\n"
-        "Copyright &copy; %4 %5\n\n"
-        "%6\n\n"
-        "%9\n\n"
-    ).arg(getGuiName(), QString::fromStdString(getVersion().getVersionString()), getSummary(), QString::number(QDate::currentDate().year()), getCopyrightHolder(), getLicenseText(), authors.join("\n"), organizations.join("\n"), repositoryUrl);
+        "%4\n\n"
+        "%5\n\n"
+        "%8\n\n"
+    ).arg(getGuiName(), QString::fromStdString(getVersion().getVersionString()), getSummary(), copyright, getLicenseText(), authors.join("\n"), organizations.join("\n"), repositoryUrl);
 }
 
 void PluginMetadata::setAboutMarkdown(const QString& aboutMarkdown)
