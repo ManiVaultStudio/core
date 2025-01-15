@@ -39,6 +39,19 @@ LoggingPluginFactory::LoggingPluginFactory() :
     ViewPluginFactory(true)
 {
     setPreferredDockArea(DockAreaFlag::Bottom);
+
+    getPluginMetadata().setDescription("For interacting logs");
+    getPluginMetadata().setSummary("This view plugin is for interacting with ManiVault Studio logs.");
+    getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
+    getPluginMetadata().setAuthors({
+        { "T. Kroes", "Software architect", "" },
+        { "N. Dekker", "Plugin developer", "" },
+        });
+    getPluginMetadata().setOrganizations({
+        { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
+        { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
+	});
+    getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 }
 
 QIcon LoggingPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
