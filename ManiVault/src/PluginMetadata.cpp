@@ -56,7 +56,7 @@ PluginMetadata::PluginMetadata(const PluginFactory& pluginFactory) :
         pluginAboutDialog.exec();
     });
 
-    connect(&_viewAboutAction, &TriggerAction::triggered, this, [this]() -> void {
+    connect(&_viewShortcutsAction, &TriggerAction::triggered, this, [this]() -> void {
         PluginShortcutsDialog pluginShortcutsDialog(_pluginFactory.getPluginMetadata());
 
         pluginShortcutsDialog.exec();
