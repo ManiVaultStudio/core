@@ -7,6 +7,8 @@
 
 #include "util/Version.h"
 
+#include "Application.h"
+
 #include <QDebug>
 
 #ifdef _DEBUG

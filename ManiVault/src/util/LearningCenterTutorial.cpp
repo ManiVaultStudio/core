@@ -4,6 +4,8 @@
 
 #include "LearningCenterTutorial.h"
 
+#include <QVariantMap>
+
 namespace mv::util {
 
 LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QUrl& projectUrl, const std::int32_t minimumVersionMajor, const std::int32_t minimumVersionMinor) :

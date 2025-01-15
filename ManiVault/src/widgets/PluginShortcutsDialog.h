@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "PluginMetadata.h"
+
 #include <QDialog>
 #include <QScrollArea>
 #include <QVBoxLayout>

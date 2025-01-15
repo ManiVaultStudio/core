@@ -6,10 +6,10 @@
 
 #include "MarkdownDocument.h"
 #include "PluginMetadata.h"
+#include "InfoOverlayWidget.h"
 
 #include <QDialog>
 #include <QHBoxLayout>
-#include <QLabel>
 #include <QScrollArea>
 #include <QWebEngineView>
 #include <QWebEnginePage>

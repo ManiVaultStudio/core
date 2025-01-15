@@ -7,6 +7,7 @@
 
 #include <QLabel>
 #include <QString>
+#include <QEvent>
 
 PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget* parent /*= nullptr*/) :
     QWidget(parent)
