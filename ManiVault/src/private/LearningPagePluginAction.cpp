@@ -8,7 +8,6 @@
 #include <PluginFactory.h>
 
 #include <QDebug>
-#include <QEnterEvent>
 #include <QEvent>
 
 using namespace mv;
@@ -17,7 +16,6 @@ using namespace mv::plugin;
 LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugin::PluginFactory* pluginFactory, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _pluginFactory(pluginFactory),
-    _mainLayout(),
     _actionsOverlayWidget(this)
 {
     Q_ASSERT(_pluginFactory);
@@ -30,7 +28,7 @@ LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugi
 
     auto categoryIconLabel  = new QLabel();
     auto nameLabel          = new QLabel(_pluginFactory->getKind());
-    auto versionLabel       = new QLabel(QString("v%1").arg(_pluginFactory->getVersion()));
+    auto versionLabel       = new QLabel(QString("v%1").arg(QString::fromStdString(_pluginFactory->getVersion().getVersionString())));
 
     categoryIconLabel->setPixmap(_pluginFactory->getCategoryIcon().pixmap(QSize(12, 12)));
 

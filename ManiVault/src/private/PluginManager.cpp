@@ -212,8 +212,9 @@ void PluginManager::loadPluginFactories()
 
         // Loading of the plugin succeeded so cast it to its original class
         _pluginFactories[pluginKind] = pluginFactory;
-        _pluginFactories[pluginKind]->setKind(pluginKind);
-        _pluginFactories[pluginKind]->setVersion(version);
+    	_pluginFactories[pluginKind]->setKind(pluginKind);
+        _pluginFactories[pluginKind]->getPluginMetadata().getVersion().setContext(QString("%1 plugin").arg(pluginKind).toStdString());
+        _pluginFactories[pluginKind]->getPluginMetadata().getVersion().initialize(version);
         _pluginFactories[pluginKind]->initialize();
 
         if (qobject_cast<AnalysisPluginFactory*>(pluginFactory))

@@ -80,12 +80,17 @@ void PluginMetadata::setGuiName(const QString& guiName)
     emit guiNameChanged(previousGuiName, _guiName);
 }
 
-QString PluginMetadata::getVersion() const
+util::Version& PluginMetadata::getVersion()
 {
     return _version;
 }
 
-void PluginMetadata::setVersion(const QString& version)
+const util::Version& PluginMetadata::getVersion() const
+{
+    return const_cast<PluginMetadata*>(this)->getVersion();
+}
+
+void PluginMetadata::setVersion(const util::Version& version)
 {
     if (version == _version)
         return;
@@ -262,7 +267,7 @@ QString PluginMetadata::getAboutMarkdown() const
         "---\n\n"
         "Copyright &copy; %4 %5\n\n"
         "%6"
-    ).arg(getGuiName(), getVersion(), getSummary(), QString::number(QDate::currentDate().year()), getCopyrightHolder(), getLicenseText(), authors.join("\n"), organizations.join("\n"));
+    ).arg(getGuiName(), QString::fromStdString(getVersion().getVersionString()), getSummary(), QString::number(QDate::currentDate().year()), getCopyrightHolder(), getLicenseText(), authors.join("\n"), organizations.join("\n"));
 }
 
 void PluginMetadata::setAboutMarkdown(const QString& aboutMarkdown)

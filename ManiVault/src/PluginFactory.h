@@ -140,14 +140,23 @@ public: // Meta data
      */
     void setGuiName(const QString& guiName);
 
-    /** Get the plugin version */
-    QString getVersion() const;
+    /**
+     * Get plugin version
+     * @return Plugin semantic version
+     */
+    util::Version& getVersion();
 
     /**
-     * Set the plugin version
-     * @param version Plugin version
+     * Get plugin version
+     * @return Plugin semantic version
      */
-    void setVersion(const QString& version);
+    const util::Version& getVersion() const;
+
+    /**
+     * Set the plugin version to \p version
+     * @param version Plugin semantic version
+     */
+    void setVersion(const util::Version& version);
 
 public:
 

@@ -26,7 +26,7 @@ PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaDat
 {
     setAutoFillBackground(true);
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("book-reader"));
-    setWindowTitle(QString("About %1").arg(_pluginMetaData.getGuiName()));
+    setWindowTitle(QString("%1 plugin").arg(_pluginMetaData.getGuiName()));
 
     auto layout = new QVBoxLayout();
 

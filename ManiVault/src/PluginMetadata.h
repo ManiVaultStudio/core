@@ -7,6 +7,7 @@
 #include "ManiVaultGlobals.h"
 
 #include "util/ShortcutMap.h"
+#include "util/Version.h"
 
 #include "actions/TriggerAction.h"
 
@@ -83,15 +84,24 @@ public: // GUI name
     void setGuiName(const QString& guiName);
 
 public: // Version
-
-    /** Get the plugin version */
-    QString getVersion() const;
+    
+    /**
+     * Get plugin version
+     * @return Plugin semantic version
+     */
+    util::Version& getVersion();
 
     /**
-     * Set the plugin version
-     * @param version Plugin version
+     * Get plugin version
+     * @return Plugin semantic version
      */
-    void setVersion(const QString& version);
+    const util::Version& getVersion() const;
+
+    /**
+     * Set the plugin version to \p version
+     * @param version Plugin semantic version
+     */
+    void setVersion(const util::Version& version);
 
 public: // Description
 
@@ -269,7 +279,7 @@ signals:
      * @param previousVersion Previous version
      * @param currentVersion Current version
      */
-    void versionChanged(const QString& previousVersion, const QString& currentVersion);
+    void versionChanged(const util::Version& previousVersion, const util::Version& currentVersion);
 
     /**
      * Signals that the description changed from \p previousDescription to \p currentDescription
@@ -323,7 +333,7 @@ signals:
 private:
     const PluginFactory&    _pluginFactory;             /** Reference to parent plugin factory */
     QString                 _guiName;                   /** Name of the plugin in the GUI */
-    QString                 _version;                   /** Plugin version */
+    util::Version           _version;                   /** Plugin semantic version */
     gui::TriggerAction      _triggerHelpAction;         /** Trigger action that triggers help (icon and text are already set) */
     gui::TriggerAction      _triggerReadmeAction;       /** Trigger action that displays the read me markdown text in a modal dialog (if the read me markdown file URL is valid) */
     gui::TriggerAction      _visitRepositoryAction;     /** Trigger action that opens an external browser and visits the GitHub repository */

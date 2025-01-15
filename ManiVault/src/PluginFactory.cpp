@@ -106,12 +106,17 @@ void PluginFactory::setGuiName(const QString& guiName)
     getPluginMetadata().setGuiName(guiName);
 }
 
-QString PluginFactory::getVersion() const
+util::Version& PluginFactory::getVersion()
 {
     return getPluginMetadata().getVersion();
 }
 
-void PluginFactory::setVersion(const QString& version)
+const util::Version& PluginFactory::getVersion() const
+{
+    return getPluginMetadata().getVersion();
+}
+
+void PluginFactory::setVersion(const util::Version& version)
 {
     getPluginMetadata().setVersion(version);
 }

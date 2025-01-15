@@ -36,7 +36,7 @@ public:
      */
     Plugin(const PluginFactory* factory);
 
-    virtual ~Plugin();
+    ~Plugin() override;
 
     /**
      * Can be implemented to initialize the plugin to a certain state.
@@ -71,10 +71,10 @@ public:
     Type getType() const;
 
     /**
-     * Returns the version of the plugin. If no version string is implemented 
-     * by this particular plugin it will return the "No version" string.
+     * Returns the version of the plugin
+     * @return Plugin version
      */
-    virtual QString getVersion() const;
+    virtual util::Version getVersion() const;
 
     /**
      * Get shortcuts
