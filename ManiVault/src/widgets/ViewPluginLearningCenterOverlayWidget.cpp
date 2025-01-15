@@ -877,7 +877,8 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::visibilityChanged()
     	_overlayWidget->addMouseEventReceiverWidget(this);
         _overlayWidget->show();
 
-        _backgroundWidgetFader.setOpacity(0.95f, animationDuration);
+        //_backgroundWidgetFader.setOpacity(0.95f, animationDuration);
+        _backgroundWidgetFader.setOpacity(0.f, 0);
 
         update();
     }
