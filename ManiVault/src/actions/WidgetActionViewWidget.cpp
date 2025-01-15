@@ -96,8 +96,10 @@ bool WidgetActionViewWidget::isPopup() const
 
 void WidgetActionViewWidget::mousePressEvent(QMouseEvent* event)
 {
-	if (isPopup() && !rect().contains(event->pos()))
-		close();
+    if (isPopup() && !rect().contains(event->pos()))
+        close();
+    else
+        QWidget::mousePressEvent(event);
 }
 
 void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
