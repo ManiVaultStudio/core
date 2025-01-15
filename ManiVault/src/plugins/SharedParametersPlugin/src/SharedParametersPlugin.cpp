@@ -61,6 +61,17 @@ void SharedParametersPlugin::init()
 SharedParametersPluginFactory::SharedParametersPluginFactory() :
     ViewPluginFactory(true)
 {
+    getPluginMetadata().setDescription("For interacting with shared parameters");
+    getPluginMetadata().setSummary("This system view plugin is for interacting with shared parameters.");
+    getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
+    getPluginMetadata().setAuthors({
+        { "T. Kroes", "Lead software architect", "" }
+    });
+    getPluginMetadata().setOrganizations({
+        { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
+        { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
+	});
+    getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 }
 
 QIcon SharedParametersPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
