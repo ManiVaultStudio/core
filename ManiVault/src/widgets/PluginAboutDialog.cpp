@@ -22,8 +22,11 @@ namespace mv::gui
 
 PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaData, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _pluginMetaData(pluginMetaData)
+    _pluginMetaData(pluginMetaData),
+    _waitingOverlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-start"), "Loading", "Please wait while the content is generated...")
 {
+    _waitingOverlayWidget.getWidgetFader().setOpacity(0.5f);
+
     setAutoFillBackground(true);
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("book-reader"));
     setWindowTitle(QString("%1 plugin").arg(_pluginMetaData.getGuiName()));
@@ -37,8 +40,11 @@ PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaDat
     layout->addWidget(&_textScrollArea);
 
     _textScrollArea.setWidgetResizable(true);
-    _textScrollArea.setObjectName("Shortcuts");
-    _textScrollArea.setStyleSheet("QScrollArea#Shortcuts { border: none; }");
+    _textScrollArea.setObjectName("About");
+    _textScrollArea.setStyleSheet("QScrollArea#About { border: none; }");
+    _textScrollArea.hide();
+
+    _textScrollArea.setWidget(&_webEngineView);
 
     const auto aboutMarkdown = _pluginMetaData.getAboutMarkdown();
 
@@ -48,8 +54,9 @@ PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaDat
         _markdownPage.setWebChannel(&_markdownChannel);
         
         connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this]() -> void {
+            _textScrollArea.show();
+
             _markdownDocument.setText(_pluginMetaData.getAboutMarkdown());
-            _markdownPage.runJavaScript(QString("document.body.style.backgroundColor = '%1';").arg(getColorAsCssString(qApp->palette().window().color())));
 
             const auto appFont      = qApp->font();
             const auto fontFamily   = appFont.family();
@@ -59,6 +66,7 @@ PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaDat
 
             _markdownPage.runJavaScript(QString("document.body.style.fontFamily = '%1';").arg(fontFamily));
             _markdownPage.runJavaScript(QString("document.body.style.color = '%1';").arg(colorHex));
+            _markdownPage.runJavaScript(QString("document.body.style.backgroundColor = '%1';").arg(getColorAsCssString(qApp->palette().window().color())));
 
             const auto setFontSizeJs = R"(
 				var style = document.createElement('style');
@@ -78,18 +86,16 @@ PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaDat
 			)";
 
             _markdownPage.runJavaScript(setFontSizeJs);
-            // _markdownPage.runJavaScript(QString("document.body.style.fontSize = '%1';").arg(QString::number(fontSize)));
             _markdownPage.runJavaScript(QString("document.body.style.color = '%1';").arg(colorHex));
+
+            QTimer::singleShot(250, [this]() -> void {
+                _waitingOverlayWidget.getWidgetFader().fadeOut(350);
+			});
 		});
 
         _webEngineView.setPage(&_markdownPage);
-        _webEngineView.load(QUrl("qrc:/HTML/MarkdownReadme"));
-
-        _textScrollArea.setWidget(&_webEngineView);
-
+        _webEngineView.load(QUrl("qrc:/HTML/Markdown"));
     } else {
-        const auto aboutMarkdown = _pluginMetaData.getAboutMarkdown();
-
         _textScrollArea.setWidget(&_textWidget);
 
         _textWidgetLayout.setContentsMargins(5, 0, 5, 0);

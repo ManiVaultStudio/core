@@ -75,16 +75,17 @@ public:
     }
 
 private:
-    const plugin::PluginMetadata&   _pluginMetaData;        /** Plugin meta data */
-    QScrollArea                     _textScrollArea;        /** Scroll area for the shortcut */
-    QWidget                         _textWidget;            /** Widget with the shortcuts label */
-    QVBoxLayout                     _textWidgetLayout;      /** Widget with the shortcuts label */
-    QLabel                          _textBodyLabel;         /** Shortcut cheatsheet HTML */
-    QWebChannel                     _markdownChannel;       /** Markdown web channel */
-    QUrl                            _markdownUrl;           /** Location of the Markdown file */
-    QWebEngineView                  _webEngineView;         /** Browser to show the Markdown in */
-    LinksExternalWebEnginePage      _markdownPage;          /** Browser page to show the Markdown in */
-    util::MarkdownDocument          _markdownDocument;      /** Document for synchronizing the Markdown text with the browser */
+    const plugin::PluginMetadata&   _pluginMetaData;            /** Plugin meta data */
+    QScrollArea                     _textScrollArea;            /** Scroll area for the shortcut */
+    QWidget                         _textWidget;                /** Widget with the shortcuts label */
+    QVBoxLayout                     _textWidgetLayout;          /** Widget with the shortcuts label */
+    QLabel                          _textBodyLabel;             /** Shortcut cheatsheet HTML */
+    QWebChannel                     _markdownChannel;           /** Markdown web channel */
+    QUrl                            _markdownUrl;               /** Location of the Markdown file */
+    QWebEngineView                  _webEngineView;             /** Browser to show the Markdown in */
+    LinksExternalWebEnginePage      _markdownPage;              /** Browser page to show the Markdown in */
+    util::MarkdownDocument          _markdownDocument;          /** Document for synchronizing the Markdown text with the browser */
+    gui::InfoOverlayWidget          _waitingOverlayWidget;      /** Overlay widget which informs the user that content is being generated*/
 };
 
 }
