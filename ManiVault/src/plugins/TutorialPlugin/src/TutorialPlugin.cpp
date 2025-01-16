@@ -136,7 +136,7 @@ TutorialPluginFactory::TutorialPluginFactory()
     getPluginMetadata().setSummary("This view plugin shows tutorials and loads associated projects (if available).");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setAuthors({
-        { "T. Kroes", "Lead software architect", "", { "LUMC" } }
+        { "T. Kroes", { "Lead software architect" }, { "LUMC" } }
 	});
     getPluginMetadata().setOrganizations({
         { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },

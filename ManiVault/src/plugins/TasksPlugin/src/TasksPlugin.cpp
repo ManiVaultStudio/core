@@ -108,12 +108,12 @@ TasksPluginFactory::TasksPluginFactory() :
     getPluginMetadata().setSummary("This system view plugin is for interacting with tasks (for debugging purposes only).");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setAuthors({
-        { "T. Kroes", "Lead software architect", "", { "LUMC" } }
-        });
+        { "T. Kroes", { "Lead software architect" }, { "LUMC" } }
+    });
     getPluginMetadata().setOrganizations({
         { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
         { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
-        });
+    });
     getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 }
 
@@ -125,15 +125,15 @@ QIcon TasksPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 QUrl TasksPluginFactory::getReadmeMarkdownUrl() const
 {
 #ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/TasksPlugin/README.md");
+    return { "https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/TasksPlugin/README.md" };
 #else
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/TasksPlugin/README.md");
+    return { "https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/TasksPlugin/README.md" };
 #endif
 }
 
 QUrl TasksPluginFactory::getRepositoryUrl() const
 {
-    return QUrl("https://github.com/ManiVaultStudio/core");
+    return { "https://github.com/ManiVaultStudio/core" };
 }
 
 ViewPlugin* TasksPluginFactory::produce()

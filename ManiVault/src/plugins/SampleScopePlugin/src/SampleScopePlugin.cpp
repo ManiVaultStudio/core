@@ -123,12 +123,12 @@ SampleScopePluginFactory::SampleScopePluginFactory()
     getPluginMetadata().setSummary("This view plugin displays sample information obtained from another view plugin.");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setAuthors({
-        { "T. Kroes", "lead software architect", "", { "LUMC" } },
+        { "T. Kroes", { "Lead software architect" }, { "LUMC" } },
 	});
     getPluginMetadata().setOrganizations({
         { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
         { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
-        });
+	});
     getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 }
 

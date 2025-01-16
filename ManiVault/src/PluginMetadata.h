@@ -118,13 +118,14 @@ public:
         /**
          * Construct with \p name, \p description, \p externalLink and \p organizations
          * @param name Item name
-         * @param description Item description
-         * @param externalLink External link
+         * @param roles Assumed roles
          * @param organizationNames Names of the affiliated organizations
+         * @param externalLink External link (e.g. profile website or e-mail address)
          */
-        Author(const QString& name, const QString& description, const QString& externalLink, const QStringList& organizationNames = QStringList()) :
-            FormattedItem(name, description, externalLink),
-			_organizationNames(organizationNames)
+        Author(const QString& name, const QStringList& roles = QStringList(), const QStringList& organizationNames = QStringList(), const QString& externalLink = QString()) :
+            FormattedItem(name, "", externalLink),
+			_organizationNames(organizationNames),
+            _roles(roles)
         {
         }
         
@@ -146,12 +147,21 @@ public:
                 }
             }
 
-            QString affiliations = indices.isEmpty() ? "" : QString("<sup><b> [%1]</b></sup>").arg(indices.join(","));
+            const auto affiliations = indices.isEmpty() ? "" : QString("<sup><b> [%1]</b></sup>").arg(indices.join(","));
+
+        	auto rolesString = _roles.isEmpty() ? "" : QString("(%1)").arg(_roles.join(", "));
+
+            if (!_roles.isEmpty()) {
+                int lastCommaIndex = rolesString.lastIndexOf(',');
+
+                if (lastCommaIndex != -1)
+                    rolesString.replace(lastCommaIndex, 1, " & ");
+            }
 
             if (_externalLink.isEmpty())
-                return QString("**%1** (%2)%3").arg(_name, _description, affiliations);
+                return QString("**%1** %2%3").arg(_name, rolesString, affiliations);
 
-            return QString("[**%1**](%2) (%3)%4").arg(_name, _externalLink, _description, affiliations);
+            return QString("[**%1**](%2) %3%4").arg(_name, _externalLink, rolesString, affiliations);
         }
 
         /**
@@ -163,10 +173,10 @@ public:
             if (FormattedItem::operator != (rhs))
                 return false;
 
-            if (_description != rhs._description)
+            if (_organizationNames != rhs._organizationNames)
                 return false;
 
-            if (_organizationNames != rhs._organizationNames)
+            if (_roles != rhs._roles)
                 return false;
 
             return true;
@@ -181,7 +191,8 @@ public:
             return !(*this == rhs);
         }
 
-        QStringList     _organizationNames;     /** Affiliated organizations */
+        QStringList     _organizationNames;   /** Affiliated organizations */
+        QStringList     _roles;               /** Assumed roles */
     };
 
     using Authors = std::vector<Author>;
