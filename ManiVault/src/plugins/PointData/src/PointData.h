@@ -854,13 +854,13 @@ public:
         template <typename ColIndexType, typename ValueType>
         static void setSparseData(Points* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<ColIndexType>& colIndices, const std::vector<ValueType>& values)
         {
-            PointData::Experimental::setSparseData(points.getRawData<PointData>(), numRows, numCols, rowPointers, colIndices, values);
+            PointData::Experimental::setSparseData(points->getRawData<PointData>(), numRows, numCols, rowPointers, colIndices, values);
         }
 
         template <typename ColIndexType, typename ValueType>
         static void setSparseData(Points* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<ColIndexType>&& colIndices, std::vector<ValueType>&& values)
         {
-            PointData::Experimental::setSparseData(points.getRawData<PointData>(), numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
+            PointData::Experimental::setSparseData(points->getRawData<PointData>(), numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
         }
 
         static std::vector<float> row(const Points* points, size_t rowIndex)
