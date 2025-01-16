@@ -17,6 +17,7 @@
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
+#include <QDebug>
 #include <QMap>
 #include <QString>
 #include <QVariant>
@@ -217,14 +218,11 @@ public:
 
     std::uint64_t getNumberOfElements() const;
 
-    SparseMatrix<uint16_t, uint16_t>& getSparseData() { return _sparseData; }
-
     /**
      * Get amount of data occupied by the raw data
      * @return Size of the raw data in bytes
      */
     std::uint64_t getRawDataSize() const override;
-
 
     /**
      *Returns void pointer to the underlying array serving as element storage.
@@ -402,37 +400,7 @@ public:
         _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
-    template <typename ColIndexType, typename ValueType>
-    void setSparseData(size_t numRows, size_t numCols, std::vector<size_t> rowPointers, std::vector<ColIndexType> colIndices, std::vector<ValueType> values)
-    {
-        _numRows = numRows;
-        _numDimensions = numCols;
-        _sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
-
-        _isDense = false;
-    }
-
-    void setSparseData(size_t numRows, size_t numCols)
-    {
-        _numRows = numRows;
-        _numDimensions = numCols;
-
-        _isDense = false;
-    }
-
-    bool isDense() const
-    {
-        return _isDense;
-    }
-
-    size_t getNumNonZeroElements()
-    {
-        return _sparseData.getNumNonZeros();
-    }
-
     void setDimensionNames(const std::vector<QString>& dimNames);
-
-    std::vector<float> row(size_t rowIndex) const;
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
@@ -446,17 +414,60 @@ public:
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
 
+public: // Dense, test implementation
+    class Experimental {
+        friend class PointData;
+    public:
+        template <typename ColIndexType, typename ValueType>
+        static void setSparseData(PointData& points, size_t numRows, size_t numCols, std::vector<size_t> rowPointers, std::vector<ColIndexType> colIndices, std::vector<ValueType> values)
+        {
+            points._sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
+            points._numRows         = numRows;
+            points._numDimensions   = numCols;
+            points._isDense         = false;
+        }
+
+        static SparseMatrix<uint16_t, uint16_t>& getSparseData(PointData* points) 
+        { 
+            return points->_sparseData; 
+        }
+
+        static bool isDense(const PointData* points)
+        {
+            return points->_isDense;
+        }
+
+        static void setIsDense(PointData* points, bool isDense)
+        {
+            points->_isDense = isDense;
+        }
+
+        static size_t getNumNonZeroElements(const PointData* points)
+        {
+            return points->_sparseData.getNumNonZeros();
+        }
+
+        static std::vector<float> row(const PointData* points, size_t rowIndex)
+        {
+            if (!points->_isDense)
+                return points->_sparseData.getDenseRow(rowIndex);
+            else
+                qWarning() << ".row() not implemented for dense data";
+        }
+    };
+
+public: // Serialization
     /**
      * Load point data from variant map
      * @param Variant map representation of the point data
      */
-    virtual void fromVariantMap(const QVariantMap& variantMap) final;
+    Q_INVOKABLE void fromVariantMap(const QVariantMap& variantMap) final;
 
     /**
      * Save point data to variant map
      * @return Variant map representation of the point data
      */
-    virtual QVariantMap toVariantMap() const final;
+    QVariantMap toVariantMap() const final;
 
 private:
     VariantOfVectors _variantOfVectors;
@@ -466,7 +477,7 @@ private:
 
     std::vector<QString> _dimNames;
 
-    // Sparse data
+private: // Sparse data, experimental
     unsigned int _numRows = 0;
     SparseMatrix<uint16_t, uint16_t> _sparseData;
 
@@ -660,7 +671,6 @@ public:
         getRawData<PointData>()->setElementType<T>();
     }
 
-
     /// Just calls the corresponding member function of its PointData.
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
@@ -671,11 +681,6 @@ public:
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
-    }
-
-    SparseMatrix<uint16_t, uint16_t>& getSparseData()
-    {
-        return getRawData<PointData>()->getSparseData();
     }
 
     /// Just calls the corresponding member function of its PointData.
@@ -703,17 +708,6 @@ public:
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
-    }
-
-    template <typename ColIndexType, typename ValueType>
-    void setSparseData(size_t numRows, size_t numCols, std::vector<size_t> rowPointers, std::vector<ColIndexType> colIndices, std::vector<ValueType> values)
-    {
-        getRawData<PointData>()->setSparseData(numRows, numCols, rowPointers, colIndices, values);
-    }
-
-    void setSparseData(size_t numRows, size_t numCols)
-    {
-        getRawData<PointData>()->setSparseData(numRows, numCols);
     }
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
@@ -826,8 +820,6 @@ public:
         }
     }
 
-    std::vector<float> row(size_t rowIndex) const;
-
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
     // Will work fine, even when the internal data element type is not float.
@@ -839,6 +831,43 @@ public:
     // Will work fine, even when the internal data element type is not float.
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
+
+    public: // Dense, test implementation
+    class Experimental {
+        friend class Points;
+    public:
+
+        static SparseMatrix<uint16_t, uint16_t>& getSparseData(Points* points)
+        {
+            PointData::Experimental::getSparseData(points->getRawData<PointData>());
+        }
+
+        template <typename ColIndexType, typename ValueType>
+        static void setSparseData(Points* points, size_t numRows, size_t numCols, std::vector<size_t> rowPointers, std::vector<ColIndexType> colIndices, std::vector<ValueType> values)
+        {
+            PointData::Experimental::setSparseData(points.getRawData<PointData>(), numRows, numCols, rowPointers, colIndices, values);
+        }
+
+        static std::vector<float> row(const Points* points, size_t rowIndex)
+        {
+            return PointData::Experimental::row(points->getRawData<PointData>(), rowIndex);
+        }
+
+        static size_t getNumNonZeroElements(const Points* points)
+        {
+            return PointData::Experimental::getNumNonZeroElements(points->getRawData<PointData>());
+        }
+
+        static bool isDense(const Points* points)
+        {
+            return PointData::Experimental::isDense(points->getRawData<PointData>());
+        }
+
+        static void setIsDense(Points* points, bool isDense)
+        {
+            PointData::Experimental::setIsDense(points->getRawData<PointData>(), isDense);
+        }
+    };
 
     /**
      * Get a copy of the dataset
@@ -966,9 +995,9 @@ public:
     std::vector<unsigned int> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
-    mv::gui::GroupAction*     _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
+    mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
-    mv::EventListener         _eventListener;                 /** Listen to HDPS events */
+    mv::EventListener           _eventListener;                 /** Listen to HDPS events */
 };
 
 // =============================================================================

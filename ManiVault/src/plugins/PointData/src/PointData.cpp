@@ -16,9 +16,9 @@
 #include <util/Serialization.h>
 #include <util/Timer.h>
 
+#include <QDebug>
 #include <QPainter>
 #include <QtCore>
-#include <QtDebug>
 
 #include <cstring>
 #include <set>
@@ -111,18 +111,6 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
         qWarning() << "PointData: Number of dimension names does not equal the number of data dimensions";
 }
 
-std::vector<float> PointData::row(size_t rowIndex) const
-{
-    if (!_isDense)
-    {
-        return _sparseData.getDenseRow(rowIndex);
-    }
-    else
-    {
-        qWarning() << ".row() not implemented for dense data";
-    }
-}
-
 float PointData::getValueAt(const std::size_t index) const
 {
     return std::visit([index](const auto& vec)
@@ -147,7 +135,6 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
     variantMapMustContain(variantMap, "NumberOfDimensions");
-    variantMapMustContain(variantMap, "Dense");
 
     const auto data                 = variantMap["Data"].toMap();
     const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
@@ -155,7 +142,10 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     const auto numberOfElements     = numberOfPoints * numberOfDimensions;
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
-    const bool isDense              = variantMap["Dense"].toBool();
+
+    bool isDense = true;
+    if (variantMap.contains("Dense"))
+        isDense = variantMap["Dense"].toBool();;
 
     _isDense = isDense;
 
@@ -820,11 +810,6 @@ void Points::setDimensionNames(const std::vector<QString>& dimNames)
     mv::events().notifyDatasetDataDimensionsChanged(this);
 }
 
-std::vector<float> Points::row(size_t rowIndex) const
-{
-    return getRawData<PointData>()->row(rowIndex);
-}
-
 float Points::getValueAt(const std::size_t index) const
 {
     return getRawData<PointData>()->getValueAt(index);
@@ -1158,11 +1143,11 @@ QVariantMap Points::toVariantMap() const
     variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
-    variantMap["Dense"]                 = getRawData<PointData>()->isDense();
-    if (!getRawData<PointData>()->isDense())
-    {
-        variantMap["NumberOfNonZeroElements"] = QVariant::fromValue(getRawData<PointData>()->getNumNonZeroElements());
-    }
+
+    variantMap["Dense"]                 = Experimental::isDense(this);
+
+    if (!Experimental::isDense(this))
+        variantMap["NumberOfNonZeroElements"] = QVariant::fromValue(Experimental::getNumNonZeroElements(this));
     
     return variantMap;
 }
@@ -1178,11 +1163,7 @@ QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 
 QUrl PointDataFactory::getReadmeMarkdownUrl() const
 {
-#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/PointData/README.md");
-#else
     return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/PointData/README.md");
-#endif
 }
 
 QUrl PointDataFactory::getRepositoryUrl() const
