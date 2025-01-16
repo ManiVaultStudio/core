@@ -148,13 +148,13 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         isDense = variantMap["Dense"].toBool();;
 
     _isDense = isDense;
+    _numDimensions = numberOfDimensions;
 
     if (_isDense)
     {
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
         populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
-        _numDimensions = numberOfDimensions;
     }
     else
     {
@@ -166,7 +166,6 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
         populateDataBufferFromVariantMap(rawData, bytes.data());
         _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
-        _numDimensions = numberOfDimensions;
 
         size_t offset = 0;
         std::vector<size_t> rowPointers(numberOfPoints + 1);
@@ -188,12 +187,13 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap PointData::toVariantMap() const
 {
+    const auto numberOfElements = getNumberOfElements();
+
     if (_isDense)
     {
         const auto typeSpecifier = getElementTypeSpecifier();
         const auto typeSpecifierName = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
         const auto typeIndex = static_cast<std::int32_t>(typeSpecifier);
-        const auto numberOfElements = getNumberOfElements();
 
         QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize(), true);
 
@@ -206,8 +206,6 @@ QVariantMap PointData::toVariantMap() const
     }
     else
     {
-        const auto numberOfElements = getNumberOfElements();
-
         std::vector<char> bytes;
 
         const std::vector<size_t>& indexPointers = _sparseData.getIndexPointers();
@@ -242,9 +240,8 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
             const auto resultSize = result.size();
 
             for (std::size_t i{}; i < resultSize; ++i)
-            {
                 result[i] = vec[i * _numDimensions + dimensionIndex];
-            }
+
         },
         _variantOfVectors);
 }
@@ -280,9 +277,7 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
         std::vector<float> col2 = _sparseData.getDenseCol(dimensionIndex2);
 
         for (size_t i = 0; i < result.size(); i++)
-        {
             result[i].set(col1[i], col2[i]);
-        }
     }
 }
 

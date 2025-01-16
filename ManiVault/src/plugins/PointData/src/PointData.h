@@ -470,7 +470,7 @@ public: // Serialization
      * Load point data from variant map
      * @param Variant map representation of the point data
      */
-    Q_INVOKABLE void fromVariantMap(const QVariantMap& variantMap) final;
+    void fromVariantMap(const QVariantMap& variantMap) final;
 
     /**
      * Save point data to variant map
