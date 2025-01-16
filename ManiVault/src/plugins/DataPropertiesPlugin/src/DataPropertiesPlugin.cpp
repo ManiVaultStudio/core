@@ -77,8 +77,8 @@ DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
     getPluginMetadata().setSummary("This view plugin is for interacting with dataset properties.");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setAuthors({
-        { "T. Kroes", "Lead software architect", "" },
-        { "A. Vieth", "Plugin developer & maintainer", "" },
+        { "T. Kroes", "Lead software architect", "", { "LUMC" } },
+        { "A. Vieth", "Plugin developer & maintainer", "", { "LUMC", "TU Delft" } },
         });
     getPluginMetadata().setOrganizations({
         { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },

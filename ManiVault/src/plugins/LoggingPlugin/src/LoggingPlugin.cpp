@@ -44,8 +44,8 @@ LoggingPluginFactory::LoggingPluginFactory() :
     getPluginMetadata().setSummary("This view plugin is for interacting with ManiVault Studio logs.");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setAuthors({
-        { "T. Kroes", "Lead software architect", "" },
-        { "N. Dekker", "Plugin developer & maintainer", "" },
+        { "T. Kroes", "Lead software architect", "", { "LUMC" } },
+        { "N. Dekker", "Plugin developer & maintainer", "", { "LUMC" } },
         });
     getPluginMetadata().setOrganizations({
         { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },

@@ -31,8 +31,26 @@ class CORE_EXPORT PluginMetadata : public QObject
 
 public:
 
+    /** Formatted item for use in auto-generated about Markdown */
     struct FormattedItem
     {
+	    /**
+	     * Construct with \p name, \p description and \p externalLink
+	     * @param name Item name
+	     * @param description Item description
+	     * @param externalLink External link
+	     */
+	    FormattedItem(const QString& name, const QString& description, const QString& externalLink) :
+	        _name(name),
+	        _description(description),
+			_externalLink(externalLink)
+        {
+        }
+
+        /**
+         * Convert to string
+         * @return Markdown formatted string
+         */
         QString toString() const {
             if (_externalLink.isEmpty())
                 return QString("%1 (%2)").arg(_name, _description);
@@ -40,6 +58,11 @@ public:
             return QString("[%1](%2) (%3)").arg(_name, _externalLink, _description);
         }
 
+        /**
+         * Equality operator
+         * @param rhs Right-hand-side formatted item
+         * @return Whether this formatted item and \p rhs formatted item are the same
+         */
         bool operator==(const FormattedItem& rhs) const {
             if (_name != rhs._name)
                 return false;
@@ -53,16 +76,115 @@ public:
             return true;
         }
 
-        QString     _name;
-        QString     _description;
-        QString     _externalLink;
+	    /**
+         * Inequality operator
+         * @param rhs Right-hand-side formatted item
+         * @return Whether this formatted item and \p rhs formatted item are not the same
+         */
+        bool operator!=(const FormattedItem& rhs) const {
+            return !(*this == rhs);
+	    }
+
+        QString     _name;              /** Item name*/
+        QString     _description;       /** Item description */
+        QString     _externalLink;      /** Item external link (maybe empty) */
     };
 
-    using Author = FormattedItem;
-    using Authors = std::vector<Author>;
+    /** Organization formatted item for use in auto-generated about Markdown */
+    struct Organization : public FormattedItem
+    {
+        /** No need for custom constructor */
+        using FormattedItem::FormattedItem;
 
-    using Organization = FormattedItem;
+        /**
+         * Convert to string
+         * @return Markdown formatted string
+         */
+        QString toString(std::int32_t index) const {
+            const auto indexString = QString("<sup><b> *%1</b></sup>").arg(QString::number(index));
+
+            if (_externalLink.isEmpty())
+                return QString("%1 (%2)%3").arg(_name, _description, indexString);
+
+            return QString("[%1](%2) (%3)%4").arg(_name, _externalLink, _description, indexString);
+        }
+    };
+
     using Organizations = std::vector<Organization>;
+
+    /** Author formatted item for use in auto-generated about Markdown */
+    struct Author : protected FormattedItem
+    {
+        /**
+         * Construct with \p name, \p description, \p externalLink and \p organizations
+         * @param name Item name
+         * @param description Item description
+         * @param externalLink External link
+         * @param organizationNames Names of the affiliated organizations
+         */
+        Author(const QString& name, const QString& description, const QString& externalLink, const QStringList& organizationNames = QStringList()) :
+            FormattedItem(name, description, externalLink),
+			_organizationNames(organizationNames)
+        {
+        }
+        
+        /**
+         * Convert to string
+         * @param organizations Organizations list
+         * @return Markdown formatted string
+         */
+        QString toString(const Organizations& organizations) const {
+            QStringList indices;
+
+            for (const auto& organizationName : _organizationNames) {
+                const auto it = std::find_if(organizations.begin(), organizations.end(), [organizationName](const Organization& candidateOrganization) -> bool {
+                    return organizationName == candidateOrganization._name;
+                });
+
+                if (it != organizations.end()) {
+                    indices << QString::number(it - organizations.begin());
+                }
+            }
+
+            QString affiliations = indices.isEmpty() ? "" : QString("<sup><b> [%1]</b></sup>").arg(indices.join(","));
+
+            if (_externalLink.isEmpty())
+                return QString("**%1** (%2)%3").arg(_name, _description, affiliations);
+
+            return QString("[**%1**](%2) (%3)%4").arg(_name, _externalLink, _description, affiliations);
+        }
+
+        /**
+         * Equality operator
+         * @param rhs Right-hand-side author
+         * @return Whether this author and \p rhs author are the same
+         */
+        bool operator==(const Author& rhs) const {
+            if (FormattedItem::operator != (rhs))
+                return false;
+
+            if (_description != rhs._description)
+                return false;
+
+            if (_organizationNames != rhs._organizationNames)
+                return false;
+
+            return true;
+        }
+
+        /**
+         * Inequality operator
+         * @param rhs Right-hand-side author
+         * @return Whether this author and \p rhs author are not the same
+         */
+        bool operator!=(const Author& rhs) const {
+            return !(*this == rhs);
+        }
+
+        QStringList     _organizationNames;     /** Affiliated organizations */
+    };
+
+    using Authors = std::vector<Author>;
 
 public:
 

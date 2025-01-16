@@ -108,7 +108,7 @@ TasksPluginFactory::TasksPluginFactory() :
     getPluginMetadata().setSummary("This system view plugin is for interacting with tasks (for debugging purposes only).");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setAuthors({
-        { "T. Kroes", "Lead software architect", "" }
+        { "T. Kroes", "Lead software architect", "", { "LUMC" } }
         });
     getPluginMetadata().setOrganizations({
         { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },

@@ -254,13 +254,15 @@ QString PluginMetadata::getAboutMarkdown() const
     QStringList authors, organizations;
     
     for (const auto& author : getAuthors())
-        authors << author.toString() + "\n";
+        authors << author.toString(getOrganizations()) + "\n";
 
     if (!hasAuthors())
         authors << "No authors available.\n";
 
+    std::int32_t organizationIndex = 0;
+
     for (const auto& organization : getOrganizations())
-        organizations << organization.toString() + "\n";
+        organizations << organization.toString(organizationIndex++) + "\n";
 
     if (!hasOrganizations())
         organizations << "No organizations available.\n";
