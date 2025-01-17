@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <QObject>
 #include <QPointer>
 
 class QWidget;
