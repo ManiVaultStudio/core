@@ -6,14 +6,11 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QtNumeric>
 #include <QPointF>
 #include <QRectF>
 #include <QSize>
 
-namespace mv
-{
-namespace util
+namespace mv::util
 {
 
 CORE_EXPORT float lerp(float v0, float v1, float t);
@@ -30,6 +27,4 @@ inline bool areRectanglesEqual(const QRectF& rect1, const QRectF& rect2, qreal e
     return arePointsEqual(rect1.topLeft(), rect2.topLeft()) && areSizesEqual(rect1.size(), rect2.size());
 }
 
-} // namespace util
-
-} // namespace mv
+}

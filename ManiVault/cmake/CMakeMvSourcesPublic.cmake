@@ -534,6 +534,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/FileDownloader.h
     src/util/ShortcutMap.h
     src/util/Video.h
+	src/util/Notification.h
+    src/util/Notifications.h
 )
 
 if(APPLE)
@@ -581,6 +583,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/FileDownloader.cpp
     src/util/ShortcutMap.cpp
     src/util/Video.cpp
+	src/util/Notification.cpp
+    src/util/Notifications.cpp
 )
 
 if(APPLE)
@@ -958,21 +962,6 @@ set(PUBLIC_TASK_SOURCES
 set(PUBLIC_TASK_FILES
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_TASK_SOURCES}
-)
-
-set(PUBLIC_NOTIFICATIONS_HEADERS
-    src/Notification.h
-    src/Notifications.h
-)
-
-set(PUBLIC_NOTIFICATIONS_SOURCES
-    src/Notification.cpp
-    src/Notifications.cpp
-)
-
-set(PUBLIC_NOTIFICATIONS_FILES
-    ${PUBLIC_NOTIFICATIONS_HEADERS}
-    ${PUBLIC_NOTIFICATIONS_SOURCES}
 )
 
 # Automatically generated during cmake config
