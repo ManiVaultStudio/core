@@ -7,6 +7,7 @@
 #include "ManiVaultGlobals.h"
 
 #include <QObject>
+#include <QPointer>
 
 class QWidget;
 
@@ -40,13 +41,13 @@ public:
      * Get source widget
      * @return Pointer to source widget
      */
-    QWidget* getSourceWidget();
+    QWidget* getSourceWidget() const;
 
     /**
      * Get target widget
      * @return Pointer to target widget
      */
-    QWidget* getTargetWidget();
+    QWidget* getTargetWidget() const;
 
     /**
      * Set target widget to \p targetWidget
@@ -112,8 +113,8 @@ signals:
     void mouseEventReceiverWidgetRemoved(const QWidget* mouseEventReceiverWidget);
 
 private:
-    QWidget*                    _sourceWidget;                  /** Pointer to source widget (will be layered on top of the \p targetWidget) */
-    QWidget*                    _targetWidget;                  /** Pointer to target widget */
+    QPointer<QWidget>           _sourceWidget;                  /** Pointer to source widget (will be layered on top of the \p targetWidget) */
+    QPointer<QWidget>           _targetWidget;                  /** Pointer to target widget */
     MouseEventReceiverWidgets   _mouseEventReceiverWidgets;     /** Child widgets of the source widget that should receive mouse events, despite te \p Qt::WA_TransparentForMouseEvents attribute of the source widget */
 };
 

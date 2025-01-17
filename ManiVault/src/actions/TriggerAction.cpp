@@ -6,6 +6,7 @@
 
 #include <QHBoxLayout>
 #include <QMenu>
+#include <QResizeEvent>
 
 namespace mv::gui {
 
@@ -64,9 +65,9 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 void TriggerAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
 {
     if (_widgetFlags & WidgetFlag::Icon && (_widgetFlags & WidgetFlag::Text) == 0)
-        setFixedSize(event->size().height(), event->size().height());
+		setFixedSize(event->size().height(), event->size().height());
     else
-        QPushButton::resizeEvent(event);
+		QPushButton::resizeEvent(event);
 }
 
 QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

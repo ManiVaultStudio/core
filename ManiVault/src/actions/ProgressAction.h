@@ -263,7 +263,7 @@ signals:
 
     /**
      * Signals that the progress changed to \p percentage
-     * @param percentage Updated progress
+     * @param progress Updated progress
      */
     void progressChanged(float progress);
 

@@ -7,10 +7,7 @@
 
 #include <widgets/YouTubeVideoDialog.h>
 
-#include <QDebug>
-#include <QImage>
 #include <QAbstractTextDocumentLayout>
-#include <QLocale>
 
 using namespace mv::util;
 using namespace mv::gui;
@@ -31,8 +28,6 @@ LearningPageVideoStyledItemDelegate::LearningPageVideoStyledItemDelegate(QObject
 
 QSize LearningPageVideoStyledItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    auto rectangle = option.rect.size();
-
     auto editorWidget = std::make_unique<LearningPageVideoWidget>(index);
 
     editorWidget->adjustSize();
@@ -46,11 +41,6 @@ QWidget* LearningPageVideoStyledItemDelegate::createEditor(QWidget* parent, cons
     Q_UNUSED(index);
 
     return new LearningPageVideoWidget(index, parent);
-}
-
-void LearningPageVideoStyledItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
-{
-    //static_cast<LearningPageVideoWidget*>(editor)->setEditorData(index);
 }
 
 void LearningPageVideoStyledItemDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const

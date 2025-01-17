@@ -200,14 +200,10 @@ set(PRIVATE_TASK_MANAGER_FILES
 
 set(PRIVATE_HELP_MANAGER_HEADERS
     src/private/HelpManager.h
-	src/private/HelpManagerVideosModel.h
-	src/private/HelpManagerVideosFilterModel.h
 )
 
 set(PRIVATE_HELP_MANAGER_SOURCES
     src/private/HelpManager.cpp
-	src/private/HelpManagerVideosModel.cpp
-	src/private/HelpManagerVideosFilterModel.cpp
 )
 
 set(PRIVATE_HELP_MANAGER_FILES
@@ -294,6 +290,13 @@ set(PRIVATE_PAGES_COMMON_HEADERS
     src/private/PageHeaderWidget.h
     src/private/PageContentWidget.h
     src/private/LogoWidget.h
+	src/private/PageActionsWidget.h
+    src/private/PageActionsModel.h
+    src/private/PageActionsFilterModel.h
+    src/private/PageActionDelegate.h
+    src/private/PageActionDelegateEditorWidget.h
+    src/private/PageAction.h
+	src/private/PageTutorialsWidget.h
 )
 
 set(PRIVATE_PAGES_COMMON_SOURCES
@@ -301,6 +304,13 @@ set(PRIVATE_PAGES_COMMON_SOURCES
     src/private/PageHeaderWidget.cpp
     src/private/PageContentWidget.cpp
     src/private/LogoWidget.cpp
+	src/private/PageActionsWidget.cpp
+    src/private/PageActionsModel.cpp
+    src/private/PageActionsFilterModel.cpp
+    src/private/PageActionDelegate.cpp
+    src/private/PageActionDelegateEditorWidget.cpp
+    src/private/PageAction.cpp
+	src/private/PageTutorialsWidget.cpp
 )
 
 set(PRIVATE_PAGES_COMMON_FILES
@@ -313,12 +323,6 @@ set(PRIVATE_START_PAGE_HEADERS
     src/private/StartPageContentWidget.h
     src/private/StartPageOpenProjectWidget.h
     src/private/StartPageGetStartedWidget.h
-    src/private/StartPageActionsWidget.h
-    src/private/StartPageActionsModel.h
-    src/private/StartPageActionsFilterModel.h
-    src/private/StartPageActionDelegate.h
-    src/private/StartPageActionDelegateEditorWidget.h
-    src/private/StartPageAction.h
 )
 
 set(PRIVATE_START_PAGE_SOURCES
@@ -326,12 +330,6 @@ set(PRIVATE_START_PAGE_SOURCES
     src/private/StartPageContentWidget.cpp
     src/private/StartPageOpenProjectWidget.cpp
     src/private/StartPageGetStartedWidget.cpp
-    src/private/StartPageActionsWidget.cpp
-    src/private/StartPageActionsModel.cpp
-    src/private/StartPageActionsFilterModel.cpp
-    src/private/StartPageActionDelegate.cpp
-    src/private/StartPageActionDelegateEditorWidget.cpp
-    src/private/StartPageAction.cpp
 )
 
 set(PRIVATE_START_PAGE_FILES
@@ -345,7 +343,6 @@ set(PRIVATE_LEARNING_PAGE_HEADERS
     src/private/LearningPageVideosWidget.h
     src/private/LearningPageVideoWidget.h
     src/private/LearningPageVideoStyledItemDelegate.h
-	src/private/LearningPageTutorialsWidget.h
 	src/private/LearningPageExamplesWidget.h
     src/private/LearningPagePluginResourcesWidget.h
     src/private/LearningPagePluginAction.h
@@ -357,7 +354,6 @@ set(PRIVATE_LEARNING_PAGE_SOURCES
     src/private/LearningPageVideosWidget.cpp
     src/private/LearningPageVideoWidget.cpp
     src/private/LearningPageVideoStyledItemDelegate.cpp
-	src/private/LearningPageTutorialsWidget.cpp
 	src/private/LearningPageExamplesWidget.cpp
     src/private/LearningPagePluginResourcesWidget.cpp
     src/private/LearningPagePluginAction.cpp

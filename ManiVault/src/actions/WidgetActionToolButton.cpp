@@ -15,7 +15,6 @@ namespace mv::gui {
 WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* action) :
     QToolButton(parent),
     _action(nullptr),
-    _widgetConfigurationFunction(),
     _showIndicator(true),
     _indicatorAlignment(Qt::AlignBottom | Qt::AlignRight),
     _menu(*this)
@@ -39,7 +38,7 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     if (getShowIndicator()) {
-        const auto margin = 5.0f;
+	    constexpr auto margin = 5.0f;
 
         QPointF center;
 
@@ -67,7 +66,7 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
     }
 }
 
-WidgetAction* WidgetActionToolButton::getAction()
+WidgetAction* WidgetActionToolButton::getAction() const
 {
     return _action;
 }

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "StartPageActionsWidget.h"
+#include "PageActionsWidget.h"
 
 #include <actions/RecentFilesAction.h>
 
@@ -46,7 +46,7 @@ private:
      * @param icon Icon that is set by reference
      * @param logging Whether to show the logging view plugin at the bottom
      */
-    void createIconForDefaultProject(const Qt::Alignment& alignment, QIcon& icon, bool logging = false);
+    static void createIconForDefaultProject(const Qt::Alignment& alignment, QIcon& icon, bool logging = false);
 
     /** Update actions for opening and creating projects */
     void updateOpenCreateActions();
@@ -62,8 +62,8 @@ private:
 
 private:
     StartPageContentWidget*         _startPageContentWidget;    /** Non-owning pointer to start page content widget */
-    StartPageActionsWidget          _openCreateProjectWidget;   /** Actions widget for open and create project action */
-    StartPageActionsWidget          _recentProjectsWidget;      /** Actions widget for existing projects action */
+    PageActionsWidget               _openCreateProjectWidget;   /** Actions widget for open and create project action */
+    PageActionsWidget               _recentProjectsWidget;      /** Actions widget for existing projects action */
     mv::gui::RecentFilesAction      _recentProjectsAction;      /** Action for recent projects */
     QIcon                           _leftAlignedIcon;           /** Icon for left-aligned default project */
     QIcon                           _leftAlignedLoggingIcon;    /** Icon for left-aligned default project with logging */

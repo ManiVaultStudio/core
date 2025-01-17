@@ -5,7 +5,9 @@
 #include "LearningCenterTutorialsFilterModel.h"
 #include "LearningCenterTutorialsModel.h"
 
-#include "util/version.h"
+#include "util/Version.h"
+
+#include "Application.h"
 
 #include <QDebug>
 
@@ -22,7 +24,8 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     SortFilterProxyModel(parent),
     _learningCenterTutorialsModel(nullptr),
     _tagsFilterAction(this, "Tags filter"),
-    _appVersionAction(this, "App version"),
+    _excludeTagsFilterAction(this, "Exclude tags filter"),
+    _targetAppVersionAction(this, "App version"),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
@@ -36,16 +39,19 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
 
     const auto applicationVersion = Application::current()->getVersion();
 
+    _targetAppVersionAction.setToolTip("Minimum ManiVault Studio version");
+    _targetAppVersionAction.getSuffixAction().setVisible(false);
+
     _filterGroupAction.setIconByName("filter");
     _filterGroupAction.setPopupSizeHint({ 400, 0 });
 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
-    connect(&_minimumVersionMajorAction, &IntegralAction::valueChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
-    connect(&_minimumVersionMinorAction, &IntegralAction::valueChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
+    connect(&_excludeTagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
+    connect(&_targetAppVersionAction, &VersionAction::versionChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
 
     _filterGroupAction.addAction(&getTextFilterCaseSensitiveAction());
     _filterGroupAction.addAction(&getTextFilterRegularExpressionAction());
-    _filterGroupAction.addAction(&getMinimumVersionGroupAction());
+    _filterGroupAction.addAction(&getTargetAppVersionAction());
 }
 
 bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -62,8 +68,9 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
             return false;
     }
 
-    const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::Tags)).data(Qt::EditRole).toStringList();
-    const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
+    const auto tagsList                 = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    const auto filterTagsList           = _tagsFilterAction.getSelectedOptions();
+    const auto filterExcludeTagsList    = _excludeTagsFilterAction.getSelectedOptions();
 
     if (_tagsFilterAction.hasOptions()) {
         auto matchTags = false;
@@ -81,13 +88,20 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
             return false;
     }
 
+    if (_excludeTagsFilterAction.hasOptions()) {
+        for (const auto& tag : tagsList) {
+            if (filterExcludeTagsList.contains(tag))
+                return false;
+        }
+    }
+
     const auto minimumVersionMajor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMajor)).data(Qt::EditRole).toInt();
     const auto minimumVersionMinor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMinor)).data(Qt::EditRole).toInt();
 
-    const Version minimumAppVersion(minimumVersionMajor, minimumVersionMinor, 0) ;
-    const Version targetAppVersion(_minimumVersionAction.getMajorAction().getValue(), _minimumVersionAction.getMinorAction().getValue(), 0) ;
+    const Version tutorialMinimumAppVersion(minimumVersionMajor, minimumVersionMinor, 0) ;
+    const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0) ;
 
-    if (targetAppVersion > minimumAppVersion)
+    if (targetAppVersion > tutorialMinimumAppVersion)
         return false;
 
     return true;

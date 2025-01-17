@@ -27,7 +27,46 @@ public:
      * @param patch Patch version number
      * @param suffix Suffix e.g. alpha, beta
      */
-    Version(std::int32_t major, std::int32_t minor, std::int32_t patch, const std::string& suffix = "");
+    Version(std::int32_t major = -1, std::int32_t minor = -1, std::int32_t patch = -1, const std::string& suffix = "");
+
+    /**
+     * Construct version with \p version string
+     * @param version Version string
+     */
+    Version(const QString& version);
+
+    /**
+     * Initialize from \p major, \p minor and \p patch version number and possibly \p suffix
+     * @param major Major version number
+     * @param minor Minor version number
+     * @param patch Patch version number
+     * @param suffix Suffix e.g. alpha, beta
+     */
+    void initialize(std::int32_t major, std::int32_t minor, std::int32_t patch, const std::string& suffix = "");
+
+    /**
+     * Initialize from version string
+     * @param version Version string
+     */
+    void initialize(const QString& version);
+
+    /**
+     * Get whether the version is valid
+     * @return Boolean determining whether the version is valid
+     */
+    bool isValid() const;
+
+    /**
+     * Get context
+     * @return Version context
+     */
+    std::string getContext() const;
+
+    /**
+     * Set version context to \p context
+     * @param context Version context
+     */
+    void setContext(const std::string& context);
 
     /**
      * Get expanded version number, e.g. 40316 for 4.3.16
@@ -154,10 +193,13 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
+    std::string     _context;   /** Version context (to what the version applies) */
     std::int32_t    _major;     /** SEM version major */
     std::int32_t    _minor;     /** SEM version minor */
     std::int32_t    _patch;     /** SEM version patch */
     std::string     _suffix;    /** Version suffix */
+
+    static const QString semanticVersioningRegex;
 };
 
 }

@@ -8,8 +8,6 @@
 #include <CoreInterface.h>
 #include <ViewPlugin.h>
 
-#include <actions/PluginTriggerAction.h>
-
 #include <util/Miscellaneous.h>
 
 using namespace mv;
@@ -18,9 +16,7 @@ using namespace mv::util;
 using namespace mv::gui;
 
 LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
-    QMenu(parent),
-    _loadedSystemViewsMenu(),
-    _viewsToggleActions()
+    QMenu(parent)
 {
     setTitle("Toggle");
     setToolTip("Toggle loaded view plugin visibility");

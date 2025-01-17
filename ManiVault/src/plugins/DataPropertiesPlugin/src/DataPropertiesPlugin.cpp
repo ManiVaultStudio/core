@@ -41,12 +41,8 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
         viewPluginEditorDialog->open();
     });
 
-    getLearningCenterAction().setPluginTitle("Data properties view");
-
-    getLearningCenterAction().setShortDescription("Data properties of the selected dataset(s)");
-    getLearningCenterAction().setLongDescription("This plugin shows the properties of dataset(s) which are currently selected (for instance in the <b>data hierarchy plugin</b>). The properties are arranged in collapsible sections and changes are saved with the project.");
-
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+    getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataPropertiesPlugin" }));
 }
 
 void DataPropertiesPlugin::updateWindowTitle(DataHierarchyItems selectedDataHierarchyItems)
@@ -77,6 +73,18 @@ void DataPropertiesPlugin::init()
 DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
     ViewPluginFactory(true)
 {
+    getPluginMetadata().setDescription("For interacting with dataset properties");
+    getPluginMetadata().setSummary("This view plugin is for interacting with dataset properties.");
+    getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
+    getPluginMetadata().setAuthors({
+        { "T. Kroes", { "Lead software architect" }, { "LUMC" } },
+        { "A. Vieth", { "Plugin developer", "Maintainer" }, { "LUMC", "TU Delft" } }
+	});
+    getPluginMetadata().setOrganizations({
+        { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
+        { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
+    });
+    getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 }
 
 QIcon DataPropertiesPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

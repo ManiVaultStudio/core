@@ -70,6 +70,9 @@ class SampleScopePluginFactory : public mv::plugin::ViewPluginFactory
     
 public:
 
+    /** Override default constructor to set plugin metadata */
+    SampleScopePluginFactory();
+
     /**
      * Get plugin icon
      * @param color Icon color for flat (font) icons

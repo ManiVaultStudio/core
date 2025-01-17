@@ -55,9 +55,11 @@ QVariant AbstractPluginFactoriesModel::NameItem::data(int role /*= Qt::UserRole 
 QVariant AbstractPluginFactoriesModel::VersionItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
-        case Qt::EditRole:
-        case Qt::DisplayRole:
-            return getPluginFactory() ? QString("v%1").arg(getPluginFactory()->getVersion()) : "";
+    case Qt::EditRole:
+            return getPluginFactory() ? QVariant::fromValue(getPluginFactory()->getVersion()) : QVariant();
+
+    case Qt::DisplayRole:
+            return getPluginFactory() ? QString("v%1").arg(QString::fromStdString(getPluginFactory()->getVersion().getVersionString())) : "";
 
         default:
             break;
