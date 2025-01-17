@@ -48,7 +48,7 @@ public:
      * Get the source action
      * @return Pointer to source action
      */
-    virtual WidgetAction* getAction() final;
+    WidgetAction* getAction() const;
 
     /**
      * Set the source action
@@ -66,7 +66,13 @@ public:
      * Get whether the widget is in a popup state
      * @return Boolean determining whether the widget is in a popup state
      */
-    virtual bool isPopup() const final;
+    bool isPopup() const;
+
+    /**
+     * Override the mouse press event to avoid click-and-close behaviour for popups
+     * @param event Pointer to mouse event
+     */
+    void mousePressEvent(QMouseEvent* event) override;
 
 private: // Badge
 
@@ -97,11 +103,11 @@ protected: // Drag-and-drop events
     void dropEvent(QDropEvent* dropEvent) override;
 
 private:
-    WidgetAction*                                   _action;                /** Pointer to action that will be displayed */
-    std::int32_t                                    _widgetFlags;           /** Widget creation flags */
-    WidgetActionHighlightWidget*                    _highlightWidget;       /** Pointer to highlight widget */
-    std::unique_ptr<WidgetActionBadgeOverlayWidget> _badgeOverlayWidget;    /** Pointer to badge overlay widget */
-    std::int32_t                                    _cachedHighlighting;    /** Cached highlighting */
+    WidgetAction*                                       _action;                /** Pointer to action that will be displayed */
+    std::int32_t                                        _widgetFlags;           /** Widget creation flags */
+    WidgetActionHighlightWidget*                        _highlightWidget;       /** Pointer to highlight widget */
+    std::unique_ptr<WidgetActionBadgeOverlayWidget>     _badgeOverlayWidget;    /** Pointer to badge overlay widget */
+    std::int32_t                                        _cachedHighlighting;    /** Cached highlighting */
 };
 
 }

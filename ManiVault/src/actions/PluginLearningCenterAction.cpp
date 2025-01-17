@@ -11,8 +11,7 @@
 #include "util/Miscellaneous.h"
 
 #include "widgets/ViewPluginLearningCenterOverlayWidget.h"
-#include "widgets/ViewPluginDescriptionOverlayWidget.h"
-#include "widgets/ViewPluginShortcutsDialog.h"
+#include "widgets/PluginShortcutsDialog.h"
 
 using namespace mv::util;
 using namespace mv::plugin;
@@ -32,9 +31,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     WidgetAction(parent, title),
     _plugin(nullptr),
     _actions(this, "Actions"),
-    _viewDescriptionAction(this, "View description"),
     _viewHelpAction(this, "View help"),
-    _viewShortcutsAction(this, "View shortcuts"),
     _toolbarVisibleAction(this, "Visible", true),
     _hideToolbarAction(this, "Hide toolbar"),
     _alignmentAction(this, "View plugin overlay alignment", alignmentOptions, "BottomLeft"),
@@ -46,13 +43,6 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
 {
     setIconByName("question-circle");
 
-    _viewDescriptionAction.setToolTip(getShortDescription());
-    _viewDescriptionAction.setIconByName("book-reader");
-    _viewDescriptionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
-    _viewDescriptionAction.setConnectionPermissionsToForceNone();
-
-    connect(&_viewDescriptionAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewDescription);
-
     _viewHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _viewHelpAction.setConnectionPermissionsToForceNone();
 
@@ -62,10 +52,8 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
         if (!_plugin)
             return;
 
-        const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getTriggerHelpAction().trigger();
+        const_cast<plugin::PluginFactory*>(_plugin->getFactory())->getPluginMetadata().getTriggerHelpAction().trigger();
     });
-
-    connect(&_viewShortcutsAction, &TriggerAction::triggered, this, &PluginLearningCenterAction::viewShortcuts);
 
     _toolbarVisibleAction.setToolTip("Toggle toolbar visibility");
     _toolbarVisibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
@@ -93,7 +81,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _moveToTopLeftAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignLeft));
     _moveToTopRightAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignRight));
     _moveToBottomLeftAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignLeft));
-    _moveToBottomRightAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignLeft));
+    _moveToBottomRightAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignRight));
 
     connect(&_moveToTopLeftAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("TopLeft"); });
     connect(&_moveToTopRightAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("TopRight"); });
@@ -111,12 +99,6 @@ void PluginLearningCenterAction::initialize(plugin::Plugin* plugin)
     _plugin = plugin;
 
     _viewHelpAction.setToolTip(QString("Shows %1 documentation").arg(_plugin->getKind()));
-
-    if (_shortDescription.isEmpty())
-        setShortDescription(QString("View %1 description").arg(_plugin->getKind()));
-
-    if (_longDescription.isEmpty())
-        setShortDescription("No description available yet, stay tuned");
 
     if (_learningCenterOverlayWidget)
         _learningCenterOverlayWidget->deleteLater();
@@ -176,7 +158,17 @@ void PluginLearningCenterAction::setAlignment(const Qt::Alignment& alignment)
 	const auto it = std::find(alignmentFlags.begin(), alignmentFlags.end(), alignment);
 
     if (it != alignmentFlags.end())
-        _alignmentAction.setCurrentIndex(std::distance(alignmentFlags.begin(), it));
+        _alignmentAction.setCurrentIndex(static_cast<std::int32_t>(std::distance(alignmentFlags.begin(), it)));
+}
+
+plugin::PluginMetadata& PluginLearningCenterAction::getPluginMetadata()
+{
+    return const_cast<PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata();
+}
+
+const plugin::PluginMetadata& PluginLearningCenterAction::getPluginMetaData() const
+{
+    return getViewPlugin()->getFactory()->getPluginMetadata();
 }
 
 void PluginLearningCenterAction::createViewPluginOverlayWidget()
@@ -185,71 +177,17 @@ void PluginLearningCenterAction::createViewPluginOverlayWidget()
     _learningCenterOverlayWidget->show();
 }
 
-QString PluginLearningCenterAction::getPluginTitle() const
-{
-    return _pluginTitle.isEmpty() ? _plugin->getKind() : _pluginTitle;
-}
-
-void PluginLearningCenterAction::setPluginTitle(const QString& pluginTitle)
-{
-    if (pluginTitle == _pluginTitle)
-        return;
-
-    _pluginTitle = pluginTitle;
-
-    emit pluginTitleChanged(_pluginTitle);
-}
-
-QString PluginLearningCenterAction::getShortDescription() const
-{
-    return _shortDescription;
-}
-
-void PluginLearningCenterAction::setShortDescription(const QString& shortDescription)
-{
-    if (shortDescription == _shortDescription)
-        return;
-
-    const auto previousShortDescription = _shortDescription;
-
-    _shortDescription = shortDescription;
-
-    emit shortDescriptionChanged(previousShortDescription, _shortDescription);
-}
-
-QString PluginLearningCenterAction::getLongDescription() const
-{
-    return _longDescription;
-}
-
-void PluginLearningCenterAction::setLongDescription(const QString& longDescription)
-{
-    if (longDescription == _longDescription)
-        return;
-
-    const auto previousLongDescription = _longDescription;
-
-    _longDescription = longDescription;
-
-    emit longDescriptionChanged(previousLongDescription, _longDescription);
-}
-
-bool PluginLearningCenterAction::hasDescription() const
-{
-    return !_longDescription.isEmpty();
-}
-
 bool PluginLearningCenterAction::hasHelp() const
 {
     return _plugin->getFactory()->hasHelp();
 }
 
-void PluginLearningCenterAction::addVideo(const util::Video& video)
+void PluginLearningCenterAction::addVideo(const util::LearningCenterVideo* video)
 {
     _videos.push_back(video);
 }
 
-void PluginLearningCenterAction::addVideos(const util::Videos& videos)
+void PluginLearningCenterAction::addVideos(const util::LearningCenterVideos& videos)
 {
     _videos.insert(_videos.end(), videos.begin(), videos.end());
 }
@@ -264,9 +202,34 @@ void PluginLearningCenterAction::addVideos(const QStringList& tags)
     addVideos(mv::help().getVideos(tags));
 }
 
-const Videos& PluginLearningCenterAction::getVideos() const
+const LearningCenterVideos& PluginLearningCenterAction::getVideos() const
 {
     return _videos;
+}
+
+void PluginLearningCenterAction::addTutorial(const util::LearningCenterTutorial* tutorial)
+{
+    _tutorials.push_back(tutorial);
+}
+
+void PluginLearningCenterAction::addTutorials(const util::LearningCenterTutorials& tutorials)
+{
+    _tutorials.insert(_tutorials.end(), tutorials.begin(), tutorials.end());
+}
+
+void PluginLearningCenterAction::addTutorials(const QString& tag)
+{
+    addTutorials(mv::help().getTutorials({ tag }));
+}
+
+void PluginLearningCenterAction::addTutorials(const QStringList& tags)
+{
+    addTutorials(mv::help().getTutorials(tags));
+}
+
+const util::LearningCenterTutorials& PluginLearningCenterAction::getTutorials() const
+{
+    return _tutorials;
 }
 
 bool PluginLearningCenterAction::isViewPlugin() const
@@ -282,37 +245,6 @@ bool PluginLearningCenterAction::isViewPlugin() const
 plugin::ViewPlugin* PluginLearningCenterAction::getViewPlugin() const
 {
     return dynamic_cast<ViewPlugin*>(_plugin);
-}
-
-void PluginLearningCenterAction::viewDescription()
-{
-#ifdef VIEW_PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (isViewPlugin() && hasDescription())
-    {
-        if (!_descriptionOverlayWidget.isNull())
-            return;
-
-        _descriptionOverlayWidget = new gui::ViewPluginDescriptionOverlayWidget(dynamic_cast<ViewPlugin*>(_plugin));
-
-        _descriptionOverlayWidget->show();
-    }
-}
-
-void PluginLearningCenterAction::viewShortcuts()
-{
-#ifdef VIEW_PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (isViewPlugin() && _plugin->getShortcuts().hasShortcuts())
-    {
-        ViewPluginShortcutsDialog viewPluginShortcutsDialog(dynamic_cast<ViewPlugin*>(_plugin));
-
-        viewPluginShortcutsDialog.exec();
-    }
 }
 
 void PluginLearningCenterAction::fromVariantMap(const QVariantMap& variantMap)

@@ -36,7 +36,7 @@ public:
      */
     Plugin(const PluginFactory* factory);
 
-    virtual ~Plugin();
+    ~Plugin() override;
 
     /**
      * Can be implemented to initialize the plugin to a certain state.
@@ -48,7 +48,7 @@ public:
      * Get the plugin factory for the plugin
      * @return Pointer to plugin factory
      */
-    virtual const PluginFactory* getFactory() const final;
+    const PluginFactory* getFactory() const;
 
     /** Returns the unique name of this plugin */
     QString getName() const;
@@ -57,7 +57,7 @@ public:
     QString getGuiName() const;
 
     /** Returns the icon of this plugin */
-    virtual QIcon getIcon() const final;
+    QIcon getIcon() const;
 
     /**
      * Returns the kind of plugin. The kind is specific to the
@@ -71,10 +71,10 @@ public:
     Type getType() const;
 
     /**
-     * Returns the version of the plugin. If no version string is implemented 
-     * by this particular plugin it will return the "No version" string.
+     * Returns the version of the plugin
+     * @return Plugin version
      */
-    virtual QString getVersion() const;
+    virtual util::Version getVersion() const;
 
     /**
      * Get shortcuts
@@ -161,7 +161,7 @@ public: // Serialization
 public: // Miscellaneous
 
     /** Destroys the plugin and removes it from the plugin manager */
-    virtual void destroy() final;
+    void destroy();
 
 public: // Action getters
 

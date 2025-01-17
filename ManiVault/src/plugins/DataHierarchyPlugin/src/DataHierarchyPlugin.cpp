@@ -10,6 +10,7 @@ Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
@@ -20,12 +21,8 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     shortcuts.add({ QKeySequence(Qt::CTRL | Qt::Key_Minus), "Expand/collapse", "Collapse all" });
     shortcuts.add({ QKeySequence(Qt::CTRL | Qt::Key_Plus), "Expand/collapse", "Expand all" });
 
-    getLearningCenterAction().setPluginTitle("Data hierarchy view");
-
-    getLearningCenterAction().setShortDescription("Hierarchical overview of all loaded data");
-    getLearningCenterAction().setLongDescription("Hierarchical overview of all loaded data");
-
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+    getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "DataHierarchyPlugin" }));
 }
 
 void DataHierarchyPlugin::init()
@@ -42,6 +39,24 @@ void DataHierarchyPlugin::init()
 DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
     ViewPluginFactory(true)
 {
+    getPluginMetadata().setDescription("Hierarchical overview of all loaded data");
+    getPluginMetadata().setSummary("This plugin is for interacting with the ManiVault Studio dataset hierarchy");
+    getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
+    getPluginMetadata().setAuthors({
+        { "T. Kroes", { "Lead software architect" }, { "LUMC" } },
+        { "A. Vieth", { "Plugin developer", "Maintainer" }, { "LUMC", "TU Delft" } },
+        { "J. Thijssen", { "Software architect" }, { "LUMC", "TU Delft" } }
+    });
+    getPluginMetadata().setOrganizations({
+        { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
+        { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
+    });
+    getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
+}
+
+void DataHierarchyPluginFactory::initialize()
+{
+	ViewPluginFactory::initialize();
 }
 
 QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
@@ -54,13 +69,13 @@ QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 #ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
     return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/DataHierarchyPlugin/README.md");
 #else
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md");
+    return { "https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md" };
 #endif
 }
 
 QUrl DataHierarchyPluginFactory::getRepositoryUrl() const
 {
-    return QUrl("https://github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin");
+    return { "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin" };
 }
 
 ViewPlugin* DataHierarchyPluginFactory::produce()

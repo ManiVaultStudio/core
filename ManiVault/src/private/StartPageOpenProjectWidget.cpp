@@ -4,7 +4,7 @@
 
 #include "StartPageOpenProjectWidget.h"
 
-#include "StartPageAction.h"
+#include "PageAction.h"
 #include "StartPageContentWidget.h"
 
 #include <Application.h>
@@ -25,13 +25,11 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
-    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
-    _leftAlignedIcon(),
-    _leftAlignedLoggingIcon(),
-    _rightAlignedIcon(),
-    _rightAlignedLoggingIcon()
+    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects")
 {
     auto layout = new QVBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(&_openCreateProjectWidget);
     layout->addWidget(&_recentProjectsWidget);
@@ -64,7 +62,6 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     connect(&_startPageContentWidget->getToggleRecentProjectsAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
-    
 }
 
 bool StartPageOpenProjectWidget::event(QEvent* event)
@@ -128,45 +125,45 @@ void StartPageOpenProjectWidget::updateOpenCreateActions()
 
     _openCreateProjectWidget.getModel().reset();
 
-    StartPageAction openProjectStartPageAction(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
+    PageAction openProjectPageAction(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
 
-    openProjectStartPageAction.setComments("Use the file browser to navigate to the project and open it");
+    openProjectPageAction.setComments("Use the file browser to navigate to the project and open it");
 
-    _openCreateProjectWidget.getModel().add(openProjectStartPageAction);
+    _openCreateProjectWidget.getModel().add(openProjectPageAction);
 
-    StartPageAction blankProjectStartPageAction(fontAwesome.getIcon("file"), "Blank", "Create project without plugins", "Create project without any plugins", "", []() -> void {
+    PageAction blankProjectPageAction(fontAwesome.getIcon("file"), "Blank", "Create project without plugins", "Create project without any plugins", "", []() -> void {
         projects().newProject();
     });
 
-    StartPageAction rightAlignedProjectStartPageAction(_rightAlignedIcon, "Right-aligned", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", "", []() -> void {
+    PageAction rightAlignedProjectPageAction(_rightAlignedIcon, "Right-aligned", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", "", []() -> void {
         projects().newProject(Qt::AlignRight);
     });
 
-    StartPageAction rightAlignedLoggingProjectStartPageAction(_rightAlignedLoggingIcon, "Right-aligned with logging", "Create project with standard plugins on the right and logging at the bottom", "Create project with data hierarchy and data properties plugins on the right and a logging plugin at the bottom", "", []() -> void {
+    PageAction rightAlignedLoggingProjectPageAction(_rightAlignedLoggingIcon, "Right-aligned with logging", "Create project with standard plugins on the right and logging at the bottom", "Create project with data hierarchy and data properties plugins on the right and a logging plugin at the bottom", "", []() -> void {
         projects().newProject(Qt::AlignRight, true);
     });
 
-    StartPageAction leftAlignedProjectStartPageAction(_leftAlignedIcon, "Left-aligned", "Create project with standard plugins on the left", "Create project with data hierarchy and data properties plugins on the left", "", []() -> void {
+    PageAction leftAlignedProjectPageAction(_leftAlignedIcon, "Left-aligned", "Create project with standard plugins on the left", "Create project with data hierarchy and data properties plugins on the left", "", []() -> void {
         projects().newProject(Qt::AlignLeft);
     });
 
-    StartPageAction leftAlignedLoggingProjectStartPageAction(_leftAlignedLoggingIcon, "Left-aligned with logging", "Create project with standard plugins on the left and logging at the bottom", "Create project with data hierarchy and data properties plugins on the left and a logging plugin at the bottom", "", []() -> void {
+    PageAction leftAlignedLoggingProjectPageAction(_leftAlignedLoggingIcon, "Left-aligned with logging", "Create project with standard plugins on the left and logging at the bottom", "Create project with data hierarchy and data properties plugins on the left and a logging plugin at the bottom", "", []() -> void {
         projects().newProject(Qt::AlignLeft, true);
     });
 
-    //blankProjectStartPageAction.setComments(blankProjectStartPageAction.getDescription());
-    //rightAlignedProjectStartPageAction.setComments(rightAlignedProjectStartPageAction.getDescription());
-    //rightAlignedLoggingProjectStartPageAction.setComments(rightAlignedLoggingProjectStartPageAction.getDescription());
-    //leftAlignedProjectStartPageAction.setComments(leftAlignedProjectStartPageAction.getDescription());
-    //leftAlignedLoggingProjectStartPageAction.setComments(leftAlignedLoggingProjectStartPageAction.getDescription());
+    //blankProjectPageAction.setComments(blankProjectPageAction.getDescription());
+    //rightAlignedProjectPageAction.setComments(rightAlignedProjectPageAction.getDescription());
+    //rightAlignedLoggingProjectPageAction.setComments(rightAlignedLoggingProjectPageAction.getDescription());
+    //leftAlignedProjectPageAction.setComments(leftAlignedProjectPageAction.getDescription());
+    //leftAlignedLoggingProjectPageAction.setComments(leftAlignedLoggingProjectPageAction.getDescription());
 
-    _openCreateProjectWidget.getModel().add(blankProjectStartPageAction);
-    _openCreateProjectWidget.getModel().add(rightAlignedProjectStartPageAction);
-    _openCreateProjectWidget.getModel().add(rightAlignedLoggingProjectStartPageAction);
-    _openCreateProjectWidget.getModel().add(leftAlignedProjectStartPageAction);
-    _openCreateProjectWidget.getModel().add(leftAlignedLoggingProjectStartPageAction);
+    _openCreateProjectWidget.getModel().add(blankProjectPageAction);
+    _openCreateProjectWidget.getModel().add(rightAlignedProjectPageAction);
+    _openCreateProjectWidget.getModel().add(rightAlignedLoggingProjectPageAction);
+    _openCreateProjectWidget.getModel().add(leftAlignedProjectPageAction);
+    _openCreateProjectWidget.getModel().add(leftAlignedLoggingProjectPageAction);
 }
 
 void StartPageOpenProjectWidget::updateRecentActions()
@@ -186,26 +183,26 @@ void StartPageOpenProjectWidget::updateRecentActions()
         const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
 
         if (projectMetaAction.isNull()) {
-            StartPageAction recentProjectStartPageAction(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
+            PageAction recentProjectPageAction(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
                 projects().openProject(recentFilePath);
             });
 
-            _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
+            _recentProjectsWidget.getModel().add(recentProjectPageAction);
         }
         else {
             qDebug() << "Found project: " << QFileInfo(recentFilePath).baseName();
 
-            StartPageAction recentProjectStartPageAction(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, projectMetaAction->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+            PageAction recentProjectPageAction(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, projectMetaAction->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
                 projects().openProject(recentFilePath);
             });
 
-            recentProjectStartPageAction.setComments(projectMetaAction->getCommentsAction().getString());
-            recentProjectStartPageAction.setTags(projectMetaAction->getTagsAction().getStrings());
-            recentProjectStartPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
-            recentProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(recentFilePath));
-            recentProjectStartPageAction.setContributors(projectMetaAction->getContributorsAction().getStrings());
+            recentProjectPageAction.setComments(projectMetaAction->getCommentsAction().getString());
+            recentProjectPageAction.setTags(projectMetaAction->getTagsAction().getStrings());
+            recentProjectPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
+            recentProjectPageAction.setPreviewImage(projects().getWorkspacePreview(recentFilePath));
+            recentProjectPageAction.setContributors(projectMetaAction->getContributorsAction().getStrings());
 
-            _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
+            _recentProjectsWidget.getModel().add(recentProjectPageAction);
         }
     }
 

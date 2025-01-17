@@ -10,7 +10,10 @@
 #include "actions/TriggerAction.h"
 #include "actions/OptionAction.h"
 
-#include "util/Video.h"
+#include "util/LearningCenterVideo.h"
+#include "util/LearningCenterTutorial.h"
+
+#include "PluginMetadata.h"
 
 namespace mv::plugin {
     class Plugin;
@@ -81,54 +84,22 @@ public:
      */
     void setAlignment(const Qt::Alignment& alignment);
 
+    /**
+     * Get plugin metadata
+     * @return Reference to plugin metadata
+     */
+    plugin::PluginMetadata& getPluginMetadata();
+
+    /**
+     * Get plugin meta data
+     * @return Reference to plugin meta data
+     */
+    const plugin::PluginMetadata& getPluginMetaData() const;
+
 protected:
 
     /** Create the view plugin overlay widget (should only be called by the view plugin) */
     void createViewPluginOverlayWidget();
-
-public: // Plugin description
-
-    /**
-     * Get plugin title
-     * @return Human-readable plugin title in plain text format
-     */
-    QString getPluginTitle() const;
-
-    /**
-     * Set plugin title to \p pluginTitle
-     * @param pluginTitle Human-readable plugin title in plain text format
-     */
-    void setPluginTitle(const QString& pluginTitle);
-
-    /**
-     * Get short description
-     * @return Short description in plain text format
-     */
-    QString getShortDescription() const;
-
-    /**
-     * Set short description to \p shortDescription
-     * @param shortDescription Short plugin description in plain text format
-     */
-    void setShortDescription(const QString& shortDescription);
-
-    /**
-     * Get long description
-     * @return Long description in plain text format
-     */
-    QString getLongDescription() const;
-
-    /**
-     * Set long description to \p longDescription
-     * @param longDescription Long plugin description in plain text format
-     */
-    void setLongDescription(const QString& longDescription);
-
-    /**
-     * Get whether the plugin has a description or not
-     * @return Boolean determining whether the plugin has a description or not
-     */
-    bool hasDescription() const;
 
 public: // Help
 
@@ -142,15 +113,15 @@ public: // Videos
 
     /**
      * Add \p video
-     * @param video Video
+     * @param video Pointer to video
      */
-    void addVideo(const util::Video& video);
+    void addVideo(const util::LearningCenterVideo* video);
 
     /**
      * Add \p videos
      * @param videos Videos
      */
-    void addVideos(const util::Videos& videos);
+    void addVideos(const util::LearningCenterVideos& videos);
 
     /**
      * Add video by \p tag
@@ -168,7 +139,39 @@ public: // Videos
      * Get videos
      * @return Videos
      */
-    const util::Videos& getVideos() const;
+    const util::LearningCenterVideos& getVideos() const;
+
+public: // Tutorials
+
+    /**
+     * Add \p tutorial
+     * @param tutorial Pointer to tutorial
+     */
+    void addTutorial(const util::LearningCenterTutorial* tutorial);
+
+    /**
+     * Add \p tutorials
+     * @param tutorials Tutorials
+     */
+    void addTutorials(const util::LearningCenterTutorials& tutorials);
+
+    /**
+     * Add tutorial by \p tag
+     * @param tag tutorial tag (from global learning center tutorial)
+     */
+    void addTutorials(const QString& tag);
+
+    /**
+     * Add tutorials by \p tags
+     * @param tags Tutorial tags (from global learning center tutorial)
+     */
+    void addTutorials(const QStringList& tags);
+
+    /**
+     * Get tutorials
+     * @return tutorials
+     */
+    const util::LearningCenterTutorials& getTutorials() const;
 
 private:
 
@@ -184,17 +187,11 @@ private:
      */
     mv::plugin::ViewPlugin* getViewPlugin() const;
 
-    /** View plugin description (view depends on the type of plugin) */
-    void viewDescription();
-
-    /** View shortcuts (view depends on the type of plugin) */
-    void viewShortcuts();
-
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param variantMap Variant representation of the widget action
+     * Load action from variant
+     * @param variantMap variantMap Variant representation of the action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -206,9 +203,7 @@ public: // Serialization
 
 public: // Action getters
 
-    TriggerAction& getViewDescriptionAction() { return _viewDescriptionAction; }
     TriggerAction& getViewHelpAction() { return _viewHelpAction; }
-    TriggerAction& getViewShortcutsAction() { return _viewShortcutsAction; }
     ToggleAction& getToolbarVisibleAction() { return _toolbarVisibleAction; }
     TriggerAction& getHideToolbarAction() { return _hideToolbarAction; }
     OptionAction& getAlignmentAction() { return _alignmentAction; }
@@ -217,37 +212,13 @@ public: // Action getters
     TriggerAction& getMoveToBottomLeftAction() { return _moveToBottomLeftAction; }
     TriggerAction& getMoveToBottomRightAction() { return _moveToBottomRightAction; }
 
-    const TriggerAction& getViewDescriptionAction() const { return _viewDescriptionAction; }
     const TriggerAction& getViewHelpAction() const { return _viewHelpAction; }
-    const TriggerAction& getViewShortcutsAction() const { return _viewShortcutsAction; }
-    const ToggleAction& getOverlayVisibleAction() const { return _toolbarVisibleAction; }
+    const ToggleAction& getToolbarVisibleAction() const { return _toolbarVisibleAction; }
     const TriggerAction& getHideToolbarAction() const { return _hideToolbarAction; }
     const OptionAction& getAlignmentAction() const { return _alignmentAction; }
     const TriggerAction& getMoveToTopRightAction() const { return _moveToTopRightAction; }
     const TriggerAction& getMoveToBottomLeftAction() const { return _moveToBottomLeftAction; }
     const TriggerAction& getMoveToBottomRightAction() const { return _moveToBottomRightAction; }
-
-signals:
-
-    /**
-     * Signals that the plugin title changed to \p pluginTitle
-     * @param pluginTitle Plugin title
-     */
-    void pluginTitleChanged(const QString& pluginTitle);
-
-    /**
-     * Signals that the short description changed from \p previousShortDescription to \p currentShortDescription
-     * @param previousShortDescription Previous short description
-     * @param currentShortDescription Current short description
-     */
-    void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
-
-    /**
-     * Signals that the long description changed from \p previousShortDescription to \p currentShortDescription
-     * @param previousLongDescription Previous long description
-     * @param currentLongDescription Current long description
-     */
-    void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
 
 public:
     static const QStringList alignmentOptions;                                      /** Names of the supported alignments in the case of a view plugin */
@@ -256,9 +227,7 @@ public:
 private:
     plugin::Plugin*                             _plugin;                            /** Pointer to associated plugin */
     HorizontalGroupAction                       _actions;                           /** Learning center actions */
-    TriggerAction                               _viewDescriptionAction;             /** Trigger action that displays the plugin help */
     TriggerAction                               _viewHelpAction;                    /** Trigger action that displays the plugin description */
-    TriggerAction                               _viewShortcutsAction;               /** Trigger action that displays the plugin shortcut map */
     ToggleAction                                _toolbarVisibleAction;              /** Toggles toolbar widget visibility */
     TriggerAction                               _hideToolbarAction;                 /** Hides the view plugin overlay toolbar widget */
     OptionAction                                _alignmentAction;                   /** Determines the view plugin overlay alignment */
@@ -266,12 +235,9 @@ private:
     TriggerAction                               _moveToTopRightAction;              /** Trigger action that moves the view plugin overlay to the top-right of the widget */
     TriggerAction                               _moveToBottomLeftAction;            /** Trigger action that moves the view plugin overlay to the bottom-left of the widget */
     TriggerAction                               _moveToBottomRightAction;           /** Trigger action that moves the view plugin overlay to the bottom-right of the widget */
-    QString                                     _pluginTitle;                       /** Human-readable plugin title in plain text format */
-    QString                                     _shortDescription;                  /** Short plugin description in plain text format */
-    QString                                     _longDescription;                   /** Long plugin description in HTML-formatted text */
-    util::Videos                                _videos;                            /** Plugin related videos */
+    util::LearningCenterVideos                  _videos;                            /** Plugin related videos */
+    util::LearningCenterTutorials               _tutorials;                         /** Plugin related tutorials */
     ViewPluginLearningCenterOverlayWidget*      _learningCenterOverlayWidget;       /** Add learning center overlay widget */
-    QPointer<QWidget>                           _descriptionOverlayWidget;          /** Guarded pointer to description overlay widget */
 
     friend class plugin::ViewPlugin;
 };

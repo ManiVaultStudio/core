@@ -17,7 +17,7 @@ namespace mv::gui {
 /**
  * Version action class
  *
- * Action class for storing a major and minor version
+ * For interaction with a semantic version
  *
  * @author Thomas Kroes
  */

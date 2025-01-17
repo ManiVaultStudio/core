@@ -4,16 +4,12 @@
 
 #include "WidgetActionCollapsedWidget.h"
 
-#include "util/Icon.h"
-
 #include <QDebug>
-#include <QPainter>
 
 namespace mv::gui {
 
 WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action) :
     WidgetActionViewWidget(parent, action),
-    _layout(),
     _toolButton(this, action)
 {
     initialize(action);
@@ -21,7 +17,6 @@ WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, Widget
 
 WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction) :
     WidgetActionViewWidget(parent, action),
-    _layout(),
     _toolButton(this, action, widgetConfigurationFunction)
 {
     initialize(action);

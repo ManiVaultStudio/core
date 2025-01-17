@@ -55,7 +55,7 @@ public:
     mv::Datasets getDatasets() const;
 
     /**
-     * Set the datasets from which can be picked (mode is set to Mode::Manual)
+     * Set the datasets from which can be picked (mode is set to StorageMode::Manual)
      * @param datasets Datasets from which can be picked
      * @param silent Whether the signal datasetsChanged is emitted
      */

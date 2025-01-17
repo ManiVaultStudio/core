@@ -16,8 +16,7 @@ namespace mv::util {
 
 WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget* targetWidget, float initialOpacity /*= 1.0f*/) :
     QObject(parent),
-    _sourceWidget(sourceWidget),
-    _targetWidget()
+    _sourceWidget(sourceWidget)
 {
     setObjectName("WidgetOverlayer");
 
@@ -32,12 +31,12 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
     setTargetWidget(targetWidget);
 }
 
-QWidget* WidgetOverlayer::getSourceWidget()
+QWidget* WidgetOverlayer::getSourceWidget() const
 {
     return _sourceWidget;
 }
 
-QWidget* WidgetOverlayer::getTargetWidget()
+QWidget* WidgetOverlayer::getTargetWidget() const
 {
     return _targetWidget;
 }
@@ -74,7 +73,8 @@ void WidgetOverlayer::addMouseEventReceiverWidget(const QWidget* mouseEventRecei
     if (!mouseEventReceiverWidget)
         return;
 
-    _mouseEventReceiverWidgets << mouseEventReceiverWidget;
+    if (!_mouseEventReceiverWidgets.contains(mouseEventReceiverWidget))
+		_mouseEventReceiverWidgets << mouseEventReceiverWidget;
 
     emit mouseEventReceiverWidgetAdded(mouseEventReceiverWidget);
 

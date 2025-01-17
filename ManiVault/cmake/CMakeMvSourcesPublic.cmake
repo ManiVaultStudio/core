@@ -345,6 +345,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/ApplicationIconAction.h
     src/actions/ViewPluginSamplerAction.h
     src/actions/PluginLearningCenterAction.h
+    src/actions/WatchVideoAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -378,6 +379,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/ApplicationIconAction.cpp
     src/actions/ViewPluginSamplerAction.cpp
     src/actions/PluginLearningCenterAction.cpp
+    src/actions/WatchVideoAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -421,8 +423,8 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/MarkdownDialog.h
 	src/widgets/YouTubeVideoDialog.h
 	src/widgets/ViewPluginOverlayWidget.h
-	src/widgets/ViewPluginDescriptionOverlayWidget.h
-	src/widgets/ViewPluginShortcutsDialog.h
+	src/widgets/PluginAboutDialog.h
+	src/widgets/PluginShortcutsDialog.h
 	src/widgets/ViewPluginLearningCenterOverlayWidget.h
 	src/widgets/IconLabel.h
 	src/widgets/MultiSelectComboBox.h
@@ -441,8 +443,8 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/MarkdownDialog.cpp
 	src/widgets/YouTubeVideoDialog.cpp
 	src/widgets/ViewPluginOverlayWidget.cpp
-	src/widgets/ViewPluginDescriptionOverlayWidget.cpp
-	src/widgets/ViewPluginShortcutsDialog.cpp
+	src/widgets/PluginAboutDialog.cpp
+	src/widgets/PluginShortcutsDialog.cpp
 	src/widgets/ViewPluginLearningCenterOverlayWidget.cpp
 	src/widgets/IconLabel.cpp
 	src/widgets/MultiSelectComboBox.cpp
@@ -533,7 +535,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/NumericalRange.h
     src/util/FileDownloader.h
     src/util/ShortcutMap.h
-    src/util/Video.h
+    src/util/LearningCenterVideo.h
+    src/util/LearningCenterTutorial.h
 )
 
 if(APPLE)
@@ -580,7 +583,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/NumericalRange.cpp
     src/util/FileDownloader.cpp
     src/util/ShortcutMap.cpp
-    src/util/Video.cpp
+    src/util/LearningCenterVideo.cpp
+    src/util/LearningCenterTutorial.cpp
 )
 
 if(APPLE)
@@ -669,6 +673,7 @@ set(PUBLIC_PLUGIN_HEADERS
     src/Plugin.h
     src/PluginType.h
     src/PluginFactory.h
+    src/PluginMetadata.h
     src/LoaderPlugin.h
     src/WriterPlugin.h
     src/AnalysisPlugin.h
@@ -681,6 +686,7 @@ set(PUBLIC_PLUGIN_SOURCES
     src/Plugin.cpp
     src/PluginType.cpp
     src/PluginFactory.cpp
+    src/PluginMetadata.cpp
     src/LoaderPlugin.cpp
     src/WriterPlugin.cpp
     src/AnalysisPlugin.cpp
@@ -894,6 +900,36 @@ set(PUBLIC_DATASETS_MODEL_FILES
     ${PUBLIC_DATASETS_MODEL_SOURCES}
 )
 
+set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS
+    src/models/LearningCenterVideosModel.h
+	src/models/LearningCenterVideosFilterModel.h
+)
+
+set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES
+    src/models/LearningCenterVideosModel.cpp
+	src/models/LearningCenterVideosFilterModel.cpp
+)
+
+set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES
+    ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
+    ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
+)
+
+set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS
+    src/models/LearningCenterTutorialsModel.h
+	src/models/LearningCenterTutorialsFilterModel.h
+)
+
+set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES
+    src/models/LearningCenterTutorialsModel.cpp
+	src/models/LearningCenterTutorialsFilterModel.cpp
+)
+
+set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
+    ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
+    ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -1008,6 +1044,8 @@ set(PUBLIC_HEADERS
     ${PUBLIC_PLUGIN_FACTORIES_MODEL_HEADERS}
     ${PUBLIC_MISCELLANEOUS_MODEL_HEADERS}
 	${PUBLIC_DATASETS_MODEL_HEADERS}
+	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
+	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_VERSION_HEADERS}
@@ -1052,6 +1090,8 @@ set(PUBLIC_SOURCES
     ${PUBLIC_PLUGIN_FACTORIES_MODEL_SOURCES}
     ${PUBLIC_MISCELLANEOUS_MODEL_SOURCES}
 	${PUBLIC_DATASETS_MODEL_SOURCES}
+	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
+	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_HEADERS}
@@ -1109,5 +1149,7 @@ source_group(Models\\Plugins FILES ${PUBLIC_PLUGINS_MODEL_FILES})
 source_group(Models\\PluginFactories FILES ${PUBLIC_PLUGIN_FACTORIES_MODEL_FILES})
 source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
 source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
+source_group(Models\\LearningCenter\\Videos FILES ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES})
+source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})

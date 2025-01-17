@@ -21,11 +21,7 @@ namespace mv::util {
 
 MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _markdownUrl(markdownUrl),
-    _webEngineView(),
-    _markdownPage(),
-    _fileDownloader(),
-    _markdownDocument()
+    _markdownUrl(markdownUrl)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("book"));
     setModal(true);
@@ -41,7 +37,7 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
     });
 
     _webEngineView.setPage(&_markdownPage);
-    _webEngineView.load(QUrl("qrc:/HTML/MarkdownReadme"));
+    _webEngineView.load(QUrl("qrc:/HTML/Markdown"));
 
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         const auto markdown = QString(_fileDownloader.downloadedData());

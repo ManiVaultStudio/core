@@ -56,15 +56,24 @@ public:
 
     /**
      * Get view plugin dock widgets
+     * @param floating Whether to also include floating dock widgets
      * @return Vector of pointers to plugin dock widgets
      */
-    ViewPluginDockWidgets getViewPluginDockWidgets();
+    ViewPluginDockWidgets getViewPluginDockWidgets(bool floating = false);
 
     /**
      * Get view plugin dock widgets
+     * @param floating Whether to also include floating dock widgets
      * @return Vector of pointers to plugin dock widgets
      */
-    ViewPluginDockWidgets getViewPluginDockWidgets() const;
+    ViewPluginDockWidgets getViewPluginDockWidgets(bool floating = false) const;
+
+    /**
+     * Find the view plugin dock widget where the widget of \p viewPlugin resides
+     * @param viewPlugin Pointer to view plugin that holds the widget
+     * @return Pointer to view plugin dock widget (if found, otherwise nullptr)
+     */
+    ViewPluginDockWidget* findViewPluginDockWidget(const mv::plugin::ViewPlugin* viewPlugin) const;
 
     /**
      * Find the dock area widget where the widget of \p viewPlugin resides

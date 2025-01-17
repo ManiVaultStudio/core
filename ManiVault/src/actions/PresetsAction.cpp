@@ -5,6 +5,8 @@
 #include "PresetsAction.h"
 #include "Application.h"
 
+#include "actions/DatasetPickerAction.h"
+
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMenu>
