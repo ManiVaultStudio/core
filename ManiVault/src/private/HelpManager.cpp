@@ -141,4 +141,14 @@ Videos HelpManager::getVideos(const QStringList& tags) const
     return videos;
 }
 
+void HelpManager::addNotification(const QString& title, const QString& description)
+{
+    _notifications.showMessage(description);
+}
+
+void HelpManager::initializeNotifications(QWidget* parentWidget)
+{
+    _notifications.setParentWidget(parentWidget);
+}
+
 }

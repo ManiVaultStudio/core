@@ -16,85 +16,62 @@ Notifications::Notifications(QWidget* parent, Position position) :
 
 void Notifications::showMessage(const QString& message)
 {
-	Notification* toaster = new Notification(message, _parentWidget);
+    Q_ASSERT(_parentWidget);
 
-	// Calculate position for the new toaster
-	QPoint pos = calculateNotificationPosition(toaster);
-	toaster->showToaster(pos);
+    if (!_parentWidget)
+        return;
+
+	auto notification = new Notification(message, _parentWidget);
+
+    positionNotification(notification);
+
+	notification->show();
 
 	// Keep track of active toasters
-	_activeNotifications.append(toaster);
+	_notifications.append(notification);
 
 	// Remove toaster from active list when finished
-	connect(toaster, &Notification::finished, this, [this, toaster]() {
-		_activeNotifications.removeOne(toaster);
+	connect(notification, &Notification::finished, this, [this, notification]() {
+		_notifications.removeOne(notification);
 		adjustNotificationPositions();
 	});
 }
 
-QPoint Notifications::calculateNotificationPosition(Notification* notification)
+void Notifications::setParentWidget(QWidget* parentWidget)
 {
+    _parentWidget = parentWidget;
+}
+
+std::int32_t Notifications::getNumberOfActiveNotifications() const
+{
+    return static_cast<std::int32_t>(std::count_if(_notifications.begin(), _notifications.end(), [](auto notification) -> bool {
+        return !notification->isClosing();
+	}));
+}
+
+void Notifications::positionNotification(Notification* notification) const
+{
+    Q_ASSERT(_parentWidget);
+
+    if (!_parentWidget || notification->isClosing())
+        return;
+
 	constexpr int margin = 10; // Space between toasters
-	int           x, y;
 
-	switch (_position) {
-		case BottomCenter:
-		{
-			x = (_parentWidget->width() - notification->width()) / 2;
-			y = _parentWidget->height() - (_activeNotifications.size() + 1) * (notification->height() + margin);
-			break;
-		}
+    const QPoint position(0, _parentWidget->height() - (static_cast<int>(getNumberOfActiveNotifications()) + 1) * (notification->height() + margin) - 50);
 
-		case TopCenter:
-		{
-			x = (_parentWidget->width() - notification->width()) / 2;
-			y = (_activeNotifications.size()) * (notification->height() + margin);
-			break;
-		}
-
-		case BottomRight:
-		{
-			x = _parentWidget->width() - notification->width() - margin;
-			y = _parentWidget->height() - (_activeNotifications.size() + 1) * (notification->height() + margin);
-			break;
-		}
-	}
-
-	return { x, y };
+    notification->move(_parentWidget->mapToGlobal(position));
 }
 
 void Notifications::adjustNotificationPositions()
 {
-	for (int i = 0; i < _activeNotifications.size(); ++i) {
-		constexpr int margin = 10;
+    Q_ASSERT(_parentWidget);
 
-		int x, y;
+    if (!_parentWidget)
+        return;
 
-		switch (_position) {
-			case BottomCenter:
-			{
-				x = (_parentWidget->width() - _activeNotifications[i]->width()) / 2;
-				y = _parentWidget->height() - (i + 1) * (_activeNotifications[i]->height() + margin);
-				break;
-			}
-
-			case TopCenter:
-			{
-				x = (_parentWidget->width() - _activeNotifications[i]->width()) / 2;
-				y = i * (_activeNotifications[i]->height() + margin);
-				break;
-			}
-
-			case BottomRight:
-			{
-				x = _parentWidget->width() - _activeNotifications[i]->width() - margin;
-				y = _parentWidget->height() - (i + 1) * (_activeNotifications[i]->height() + margin);
-				break;
-			}
-		}
-
-		_activeNotifications[i]->move(QPoint(x, y));
-	}
+    for (auto notification : _notifications)
+        positionNotification(notification);
 }
 
 }

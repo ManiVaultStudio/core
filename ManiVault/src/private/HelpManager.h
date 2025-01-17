@@ -7,6 +7,8 @@
 #include "AbstractHelpManager.h"
 #include "HelpManagerVideosModel.h"
 
+#include <util/Notification.h>
+
 namespace mv
 {
 
@@ -33,10 +35,23 @@ public:
 
     /**
      * Get videos for \p tags
-     * @param tags Fitler tags (returns all videos if empty)
+     * @param tags Filter tags (returns all videos if empty)
      * @return Vector of videos
      */
     util::Videos getVideos(const QStringList& tags) const override;
+
+    /**
+     * Add toaster notification in the main window
+     * @param title Message title (maybe HTML)
+     * @param description Message description (maybe HTML)
+     */
+    void addNotification(const QString& title, const QString& description) override;
+
+    /**
+     * Initialize notifications manager with \p parentWidget widget
+     * @param parentWidget Pointer to parent widget
+     */
+    void initializeNotifications(QWidget* parentWidget) override;
 
 public: // Action getters
 
@@ -55,7 +70,7 @@ private:
     gui::TriggerAction      _toRepositoryAction;            /** External link to repository */
     gui::TriggerAction      _toLearningCenterAction;        /** Trigger action to go the learning center */
     HelpManagerVideosModel  _videosModel;                   /** Videos model */
-    
+    util::Notifications     _notifications;                 /** Notifications manager */
 };
 
 }

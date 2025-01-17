@@ -26,14 +26,18 @@ public:
 
     void showMessage(const QString& message);
 
+    void setParentWidget(QWidget* parentWidget);
+
+    std::int32_t getNumberOfActiveNotifications() const;
+
 private:
-    QPoint calculateNotificationPosition(Notification* notification);
+    void positionNotification(Notification* notification) const;
 
     void adjustNotificationPositions();
 
     QWidget*                _parentWidget;
     Position                _position;
-    QVector<Notification*>  _activeNotifications;
+    QVector<Notification*>  _notifications;
 };
 
 }

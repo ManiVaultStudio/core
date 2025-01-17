@@ -221,6 +221,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     connect(collapseAllAction, &TriggerAction::triggered, this, [this]() -> void {
         _hierarchyWidget.getCollapseAllAction().trigger();
+        mv::help().addNotification("Data hierarchy", "All items collapsed");
     });
 
     auto expandAllAction = new QAction(this);
@@ -231,6 +232,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     connect(expandAllAction, &TriggerAction::triggered, this, [this]() -> void {
         _hierarchyWidget.getExpandAllAction().trigger();
+        mv::help().addNotification("Data hierarchy", "All items expanded");
 	});
 
     auto& treeView = _hierarchyWidget.getTreeView();

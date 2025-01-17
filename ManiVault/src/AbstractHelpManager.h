@@ -43,6 +43,19 @@ public:
      */
     virtual util::Videos getVideos(const QStringList& tags) const = 0;
 
+    /**
+     * Add toaster notification in the main window
+     * @param title Message title (maybe HTML)
+     * @param description Message description (maybe HTML)
+     */
+    virtual void addNotification(const QString& title, const QString& description) = 0;
+
+    /**
+     * Initialize notifications manager with \p parentWidget widget
+     * @param parentWidget Pointer to parent widget
+     */
+    virtual void initializeNotifications(QWidget* parentWidget) = 0;
+
 public: // Action getters
 
     virtual gui::ToggleAction& getShowLearningCenterAction() = 0;
