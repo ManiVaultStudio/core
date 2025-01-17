@@ -101,7 +101,7 @@ public:
          * @return Markdown formatted string
          */
         QString toString(std::int32_t index) const {
-            const auto indexString = QString("<sup><b> *%1</b></sup>").arg(QString::number(index));
+            const auto indexString = QString("<sup>%1</sup>").arg(QString::number(index));
 
             if (_externalLink.isEmpty())
                 return QString("%1 (%2)%3").arg(_name, _description, indexString);
@@ -147,7 +147,7 @@ public:
                 }
             }
 
-            const auto affiliations = indices.isEmpty() ? "" : QString("<sup><b> [%1]</b></sup>").arg(indices.join(","));
+            const auto affiliations = indices.isEmpty() ? "" : QString("<sup>%1</sup>").arg(indices.join(","));
 
         	auto rolesString = _roles.isEmpty() ? "" : QString("(%1)").arg(_roles.join(", "));
 
