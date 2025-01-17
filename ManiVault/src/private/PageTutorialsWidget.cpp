@@ -21,6 +21,7 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
     dynamic_cast<QVBoxLayout*>(layout())->insertWidget(1, _toolbarAction.createWidget(this));
 
     _tutorialsFilterModel.getFilterGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _tutorialsFilterModel.getExcludeTagsFilterAction().setOptions({ "Installation" });
 
     _toolbarAction.setShowLabels(false);
 

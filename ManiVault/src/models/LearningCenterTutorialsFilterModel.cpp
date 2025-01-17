@@ -24,6 +24,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     SortFilterProxyModel(parent),
     _learningCenterTutorialsModel(nullptr),
     _tagsFilterAction(this, "Tags filter"),
+    _excludeTagsFilterAction(this, "Exclude tags filter"),
     _targetAppVersionAction(this, "App version"),
     _filterGroupAction(this, "Filter group")
 {
@@ -45,6 +46,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     _filterGroupAction.setPopupSizeHint({ 400, 0 });
 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
+    connect(&_excludeTagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
     connect(&_targetAppVersionAction, &VersionAction::versionChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
 
     _filterGroupAction.addAction(&getTextFilterCaseSensitiveAction());
@@ -66,8 +68,9 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
             return false;
     }
 
-    const auto tagsList         = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::Tags)).data(Qt::EditRole).toStringList();
-    const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
+    const auto tagsList                 = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    const auto filterTagsList           = _tagsFilterAction.getSelectedOptions();
+    const auto filterExcludeTagsList    = _excludeTagsFilterAction.getSelectedOptions();
 
     if (_tagsFilterAction.hasOptions()) {
         auto matchTags = false;
@@ -83,6 +86,13 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
 
         if (!matchTags)
             return false;
+    }
+
+    if (_excludeTagsFilterAction.hasOptions()) {
+        for (const auto& tag : tagsList) {
+            if (filterExcludeTagsList.contains(tag))
+                return false;
+        }
     }
 
     const auto minimumVersionMajor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMajor)).data(Qt::EditRole).toInt();

@@ -56,12 +56,14 @@ public:
 public: // Action getters
 
     gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
+    gui::OptionsAction& getExcludeTagsFilterAction() { return _excludeTagsFilterAction; }
     gui::VersionAction& getTargetAppVersionAction() { return _targetAppVersionAction; }
 	gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
     LearningCenterTutorialsModel*   _learningCenterTutorialsModel;  /** Pointer to source model */
     gui::OptionsAction              _tagsFilterAction;              /** Filter based on tag(s) */
+    gui::OptionsAction              _excludeTagsFilterAction;       /** Filter out based on tag(s) */
     gui::VersionAction              _targetAppVersionAction;        /** Target app minimum version filter action */
     gui::VerticalGroupAction        _filterGroupAction;             /** Groups the filter text, filter settings and minimum version settings */
 };
