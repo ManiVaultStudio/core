@@ -414,7 +414,7 @@ public:
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
 
-public: // Dense, test implementation
+public: // Sparse data, test implementation
     class Experimental {
         friend class PointData;
     public:
