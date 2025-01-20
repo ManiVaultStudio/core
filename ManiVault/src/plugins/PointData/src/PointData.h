@@ -458,10 +458,13 @@ public: // Dense, test implementation
 
         static std::vector<float> row(const PointData* points, size_t rowIndex)
         {
-            if (!points->_isDense)
-                return points->_sparseData.getDenseRow(rowIndex);
-            else
+            if (points->_isDense)
+            {
                 qWarning() << ".row() not implemented for dense data";
+                return {};
+            }
+
+            return points->_sparseData.getDenseRow(rowIndex);
         }
     };
 
