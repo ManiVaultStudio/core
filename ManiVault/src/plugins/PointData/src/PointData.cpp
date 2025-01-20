@@ -49,7 +49,10 @@ mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) 
 
 std::uint32_t PointData::getNumPoints() const
 {
-    return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
+    if (_isDense)
+        return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
+    else
+        return _numRows;
 }
 
 std::uint32_t PointData::getNumDimensions() const
@@ -65,8 +68,15 @@ std::uint64_t PointData::getNumberOfElements() const
 
 std::uint64_t  PointData::getRawDataSize() const
 {
-    std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
-    return elementSize * getNumberOfElements();
+    if (_isDense)
+    {
+        std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
+        return elementSize * getNumberOfElements();
+    }
+    else
+    {
+        return (_numRows + 4) * sizeof(size_t) + _sparseData.getNumNonZeros() * 2 * sizeof(uint16_t);
+    }
 }
 
 void* PointData::getDataVoidPtr()
@@ -101,6 +111,18 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
         qWarning() << "PointData: Number of dimension names does not equal the number of data dimensions";
 }
 
+std::vector<float> PointData::row(size_t rowIndex) const
+{
+    if (!_isDense)
+    {
+        return _sparseData.getDenseRow(rowIndex);
+    }
+    else
+    {
+        qWarning() << ".row() not implemented for dense data";
+    }
+}
+
 float PointData::getValueAt(const std::size_t index) const
 {
     return std::visit([index](const auto& vec)
@@ -125,37 +147,97 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
     variantMapMustContain(variantMap, "NumberOfDimensions");
+    variantMapMustContain(variantMap, "Dense");
 
     const auto data                 = variantMap["Data"].toMap();
     const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-    const auto numberOfDimensions   =variantMap["NumberOfDimensions"].toUInt();
+    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toUInt();
     const auto numberOfElements     = numberOfPoints * numberOfDimensions;
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
+    const bool isDense              = variantMap["Dense"].toBool();
 
+    _isDense = isDense;
 
-    setElementTypeSpecifier(elementTypeIndex);
-    resizeVector(numberOfElements);
-    populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
-    _numDimensions = numberOfDimensions;
-   
+    if (_isDense)
+    {
+        setElementTypeSpecifier(elementTypeIndex);
+        resizeVector(numberOfElements);
+        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
+        _numDimensions = numberOfDimensions;
+    }
+    else
+    {
+        variantMapMustContain(variantMap, "NumberOfNonZeroElements");
+
+        const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
+
+        std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * sizeof(uint16_t) * 2);
+
+        populateDataBufferFromVariantMap(rawData, bytes.data());
+        _numRows = numberOfPoints; // FIXME should be redundant
+        _numDimensions = numberOfDimensions;
+
+        size_t offset = 0;
+        std::vector<size_t> rowPointers(numberOfPoints + 1);
+        std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
+
+        offset += rowPointers.size() * sizeof(size_t);
+        std::vector<uint16_t> colIndices(numberOfNonZeroElements);
+        std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(uint16_t));
+
+        offset += colIndices.size() * sizeof(uint16_t);
+        std::vector<uint16_t> values(numberOfNonZeroElements);
+        std::memcpy(values.data(), bytes.data() + offset, values.size() * sizeof(uint16_t));
+
+        _sparseData.setData(numberOfPoints, numberOfDimensions, rowPointers, colIndices, values);
+
+        qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
+    }
 }
 
 QVariantMap PointData::toVariantMap() const
 {
-    const auto typeSpecifier        = getElementTypeSpecifier();
-    const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
-    const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
-    const auto numberOfElements     = getNumberOfElements();
+    if (_isDense)
+    {
+        const auto typeSpecifier = getElementTypeSpecifier();
+        const auto typeSpecifierName = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
+        const auto typeIndex = static_cast<std::int32_t>(typeSpecifier);
+        const auto numberOfElements = getNumberOfElements();
 
-    QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize(), true);
+        QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize(), true);
 
-    return {
-        { "TypeIndex", QVariant::fromValue(typeIndex) },
-        { "TypeName", QVariant(typeSpecifierName) },
-        { "Raw", QVariant::fromValue(rawData) },
-        { "NumberOfElements", QVariant::fromValue(numberOfElements) }
-    };
+        return {
+            { "TypeIndex", QVariant::fromValue(typeIndex) },
+            { "TypeName", QVariant(typeSpecifierName) },
+            { "Raw", QVariant::fromValue(rawData) },
+            { "NumberOfElements", QVariant::fromValue(numberOfElements) }
+        };
+    }
+    else
+    {
+        const auto numberOfElements = getNumberOfElements();
+
+        std::vector<char> bytes;
+
+        const std::vector<size_t>& indexPointers = _sparseData.getIndexPointers();
+        const std::vector<uint16_t>& colIndices = _sparseData.getColIndices();
+        const std::vector<uint16_t>& values = _sparseData.getValues();
+
+        const char* indexPointersBytes = (const char*) (indexPointers.data());
+        const char* colIndicesBytes = (const char*) (colIndices.data());
+        const char* valuesBytes = (const char*) (values.data());
+
+        bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
+        bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(uint16_t));
+        bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(uint16_t));
+
+        QVariantMap rawData = rawDataToVariantMap(bytes.data(), bytes.size(), true);
+
+        return {
+            { "Raw", QVariant::fromValue(rawData) }
+        };
+    }
 }
 
 void PointData::extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const
@@ -180,23 +262,38 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
 void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
-    CheckDimensionIndex(dimensionIndex1);
-    CheckDimensionIndex(dimensionIndex2);
+    if (_isDense)
+    {
+        CheckDimensionIndex(dimensionIndex1);
+        CheckDimensionIndex(dimensionIndex2);
 
-    result.resize(getNumPoints());
+        result.resize(getNumPoints());
 
-    std::visit(
-        [&result, this, dimensionIndex1, dimensionIndex2](const auto& vec)
-        {
-            const auto resultSize = result.size();
-
-            for (std::size_t i{}; i < resultSize; ++i)
+        std::visit(
+            [&result, this, dimensionIndex1, dimensionIndex2](const auto& vec)
             {
-                const auto n = i * _numDimensions;
-                result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
-            }
-        },
-        _variantOfVectors);
+                const auto resultSize = result.size();
+
+                for (std::size_t i{}; i < resultSize; ++i)
+                {
+                    const auto n = i * _numDimensions;
+                    result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
+                }
+            },
+            _variantOfVectors);
+    }
+    else
+    {
+        result.resize(getNumPoints());
+
+        std::vector<float> col1 = _sparseData.getDenseCol(dimensionIndex1);
+        std::vector<float> col2 = _sparseData.getDenseCol(dimensionIndex2);
+
+        for (size_t i = 0; i < result.size(); i++)
+        {
+            result[i].set(col1[i], col2[i]);
+        }
+    }
 }
 
 
@@ -723,6 +820,11 @@ void Points::setDimensionNames(const std::vector<QString>& dimNames)
     mv::events().notifyDatasetDataDimensionsChanged(this);
 }
 
+std::vector<float> Points::row(size_t rowIndex) const
+{
+    return getRawData<PointData>()->row(rowIndex);
+}
+
 float Points::getValueAt(const std::size_t index) const
 {
     return getRawData<PointData>()->getValueAt(index);
@@ -1056,6 +1158,11 @@ QVariantMap Points::toVariantMap() const
     variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
+    variantMap["Dense"]                 = getRawData<PointData>()->isDense();
+    if (!getRawData<PointData>()->isDense())
+    {
+        variantMap["NumberOfNonZeroElements"] = QVariant::fromValue(getRawData<PointData>()->getNumNonZeroElements());
+    }
     
     return variantMap;
 }

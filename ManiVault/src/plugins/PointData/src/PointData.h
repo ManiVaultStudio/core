@@ -11,6 +11,7 @@
 #include "LinkedData.h"
 #include "PointDataRange.h"
 #include "Set.h"
+#include "SparseMatrix.h"
 
 #include "event/EventListener.h"
 
@@ -216,6 +217,8 @@ public:
 
     std::uint64_t getNumberOfElements() const;
 
+    SparseMatrix<uint16_t, uint16_t>& getSparseData() { return _sparseData; }
+
     /**
      * Get amount of data occupied by the raw data
      * @return Size of the raw data in bytes
@@ -269,7 +272,7 @@ public:
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
     void extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
     void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
-
+    
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
@@ -399,7 +402,37 @@ public:
         _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
+    template <typename ColIndexType, typename ValueType>
+    void setSparseData(size_t numRows, size_t numCols, std::vector<size_t> rowPointers, std::vector<ColIndexType> colIndices, std::vector<ValueType> values)
+    {
+        _numRows = numRows;
+        _numDimensions = numCols;
+        _sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
+
+        _isDense = false;
+    }
+
+    void setSparseData(size_t numRows, size_t numCols)
+    {
+        _numRows = numRows;
+        _numDimensions = numCols;
+
+        _isDense = false;
+    }
+
+    bool isDense() const
+    {
+        return _isDense;
+    }
+
+    size_t getNumNonZeroElements()
+    {
+        return _sparseData.getNumNonZeros();
+    }
+
     void setDimensionNames(const std::vector<QString>& dimNames);
+
+    std::vector<float> row(size_t rowIndex) const;
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
@@ -432,6 +465,12 @@ private:
     unsigned int _numDimensions = 1;
 
     std::vector<QString> _dimNames;
+
+    // Sparse data
+    unsigned int _numRows = 0;
+    SparseMatrix<uint16_t, uint16_t> _sparseData;
+
+    bool _isDense = true;
 };
 
 // =============================================================================
@@ -634,6 +673,11 @@ public:
             mv::events().notifyDatasetDataDimensionsChanged(this);
     }
 
+    SparseMatrix<uint16_t, uint16_t>& getSparseData()
+    {
+        return getRawData<PointData>()->getSparseData();
+    }
+
     /// Just calls the corresponding member function of its PointData.
     void setData(std::nullptr_t data, std::size_t numPoints, std::size_t numDimensions);
 
@@ -659,6 +703,17 @@ public:
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
+    }
+
+    template <typename ColIndexType, typename ValueType>
+    void setSparseData(size_t numRows, size_t numCols, std::vector<size_t> rowPointers, std::vector<ColIndexType> colIndices, std::vector<ValueType> values)
+    {
+        getRawData<PointData>()->setSparseData(numRows, numCols, rowPointers, colIndices, values);
+    }
+
+    void setSparseData(size_t numRows, size_t numCols)
+    {
+        getRawData<PointData>()->setSparseData(numRows, numCols);
     }
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
@@ -766,9 +821,12 @@ public:
     std::uint64_t getRawDataSize() const override {
         if (isProxy())
             return 0;
-        else
+        else {
             return getRawData<PointData>()->getRawDataSize();
+        }
     }
+
+    std::vector<float> row(size_t rowIndex) const;
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
