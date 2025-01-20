@@ -422,8 +422,8 @@ public: // Dense, test implementation
         static void setSparseData(PointData* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<ColIndexType>& colIndices, const std::vector<ValueType>& values)
         {
             points->_sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
-            points->_numRows = numRows;
-            points->_numDimensions = numCols;
+            points->_numRows = static_cast<uint32_t>(numRows);
+            points->setData(std::vector<float> {}, numCols);
             points->_isDense = false;
         }
 
@@ -431,8 +431,8 @@ public: // Dense, test implementation
         static void setSparseData(PointData* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<ColIndexType>&& colIndices, std::vector<ValueType>&& values)
         {
             points->_sparseData.setData(numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
-            points->_numRows = numRows;
-            points->_numDimensions = numCols;
+            points->_numRows = static_cast<uint32_t>(numRows);
+            points->setData(std::vector<float> {}, numCols);
             points->_isDense = false;
         }
 
