@@ -22,6 +22,7 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
 
     _tutorialsFilterModel.getFilterGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _tutorialsFilterModel.getExcludeTagsFilterAction().setOptions({ "Installation" });
+    _tutorialsFilterModel.getExcludeTagsFilterAction().setSelectedOptions({ "Installation" });
 
     _toolbarAction.setShowLabels(false);
 
