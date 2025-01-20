@@ -105,7 +105,7 @@ SparseRow<ColIndexType, ValueType> SparseMatrix<RowIndexType, ColIndexType, Valu
     size_t nzStart = _rowPointers[rowIndex];
     size_t nzEnd = _rowPointers[rowIndex + 1];
 
-    SparseRow<RowIndexType, ColIndexType, ValueType> row;
+    SparseRow<ColIndexType, ValueType> row;
     row._colIndices = std::vector<ColIndexType>(_colIndices.begin() + nzStart, _colIndices.begin() + nzEnd);
     row._values = std::vector<ValueType>(_values.begin() + nzStart, _values.begin() + nzEnd);
 
