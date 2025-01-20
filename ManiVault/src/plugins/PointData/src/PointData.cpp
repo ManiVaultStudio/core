@@ -75,7 +75,7 @@ std::uint64_t  PointData::getRawDataSize() const
     }
     else
     {
-        return (_numRows + 4) * sizeof(size_t) + _sparseData.getNumNonZeros() * (sizeof(uint32_t) + sizeof(float));
+        return (_numRows + 4) * sizeof(size_t) + _sparseData.getNumNonZeros() * (sizeof(size_t) + sizeof(float));
     }
 }
 
@@ -162,7 +162,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
         const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
 
-        std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(uint32_t) + sizeof(float)));
+        std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
         populateDataBufferFromVariantMap(rawData, bytes.data());
         _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
@@ -172,8 +172,8 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
 
         offset += rowPointers.size() * sizeof(size_t);
-        std::vector<uint32_t> colIndices(numberOfNonZeroElements);
-        std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(uint32_t));
+        std::vector<size_t> colIndices(numberOfNonZeroElements);
+        std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(size_t));
 
         offset += colIndices.size() * sizeof(float);
         std::vector<float> values(numberOfNonZeroElements);
@@ -209,7 +209,7 @@ QVariantMap PointData::toVariantMap() const
         std::vector<char> bytes;
 
         const std::vector<size_t>& indexPointers = _sparseData.getIndexPointers();
-        const std::vector<uint32_t>& colIndices = _sparseData.getColIndices();
+        const std::vector<size_t>& colIndices = _sparseData.getColIndices();
         const std::vector<float>& values = _sparseData.getValues();
 
         const char* indexPointersBytes = (const char*) (indexPointers.data());
@@ -217,7 +217,7 @@ QVariantMap PointData::toVariantMap() const
         const char* valuesBytes = (const char*) (values.data());
 
         bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
-        bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(uint32_t));
+        bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
         bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
 
         QVariantMap rawData = rawDataToVariantMap(bytes.data(), bytes.size(), true);

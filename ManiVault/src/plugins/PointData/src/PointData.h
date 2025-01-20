@@ -418,8 +418,8 @@ public: // Dense, test implementation
     class Experimental {
         friend class PointData;
     public:
-        template <typename ColIndexType, typename ValueType>
-        static void setSparseData(PointData* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<ColIndexType>& colIndices, const std::vector<ValueType>& values)
+
+        static void setSparseData(PointData* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
         {
             points->_sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
             points->_numRows = static_cast<uint32_t>(numRows);
@@ -427,8 +427,7 @@ public: // Dense, test implementation
             points->_isDense = false;
         }
 
-        template <typename ColIndexType, typename ValueType>
-        static void setSparseData(PointData* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<ColIndexType>&& colIndices, std::vector<ValueType>&& values)
+        static void setSparseData(PointData* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<size_t>&& colIndices, std::vector<float>&& values)
         {
             points->_sparseData.setData(numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
             points->_numRows = static_cast<uint32_t>(numRows);
@@ -436,7 +435,7 @@ public: // Dense, test implementation
             points->_isDense = false;
         }
 
-        static SparseMatrix<uint32_t, float>& getSparseData(PointData* points)
+        static SparseMatrix<size_t, size_t, float>& getSparseData(PointData* points)
         { 
             return points->_sparseData; 
         }
@@ -491,7 +490,7 @@ private:
 
 private: // Sparse data, experimental
     unsigned int _numRows = 0;
-    SparseMatrix<uint32_t, float> _sparseData = {};
+    SparseMatrix<size_t, size_t, float> _sparseData = {};
 
     bool _isDense = true;
 };
@@ -849,19 +848,17 @@ public:
         friend class Points;
     public:
 
-        static SparseMatrix<uint32_t, float>& getSparseData(Points* points)
+        static SparseMatrix<size_t, size_t, float>& getSparseData(Points* points)
         {
             PointData::Experimental::getSparseData(points->getRawData<PointData>());
         }
 
-        template <typename ColIndexType, typename ValueType>
-        static void setSparseData(Points* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<ColIndexType>& colIndices, const std::vector<ValueType>& values)
+        static void setSparseData(Points* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
         {
             PointData::Experimental::setSparseData(points->getRawData<PointData>(), numRows, numCols, rowPointers, colIndices, values);
         }
 
-        template <typename ColIndexType, typename ValueType>
-        static void setSparseData(Points* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<ColIndexType>&& colIndices, std::vector<ValueType>&& values)
+        static void setSparseData(Points* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<size_t>&& colIndices, std::vector<float>&& values)
         {
             PointData::Experimental::setSparseData(points->getRawData<PointData>(), numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
         }

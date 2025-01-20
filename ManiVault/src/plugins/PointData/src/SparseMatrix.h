@@ -20,7 +20,7 @@ public:
 //    std::vector<ValueType> _values;
 //};
 
-template<typename ColIndexType, typename ValueType>
+template<typename RowIndexType, typename ColIndexType, typename ValueType>
 class SparseMatrix
 {
 public:
@@ -31,12 +31,12 @@ public:
     size_t getNumCols() const { return _numCols; }
     size_t getNumNonZeros() const { return _numNonZero; }
 
-    const std::vector<size_t>& getIndexPointers() const { return _rowPointers; }
+    const std::vector<RowIndexType>& getIndexPointers() const { return _rowPointers; }
     const std::vector<ColIndexType>& getColIndices() const { return _colIndices; }
     const std::vector<ValueType>& getValues() const { return _values; }
 
-    void setData(size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<ColIndexType>& colIndices, const std::vector<ValueType>& values);
-    void setData(size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<ColIndexType>&& colIndices, std::vector<ValueType>&& values);
+    void setData(size_t numRows, size_t numCols, const std::vector<RowIndexType>& rowPointers, const std::vector<ColIndexType>& colIndices, const std::vector<ValueType>& values);
+    void setData(size_t numRows, size_t numCols, std::vector<RowIndexType>&& rowPointers, std::vector<ColIndexType>&& colIndices, std::vector<ValueType>&& values);
 
     SparseRow<ColIndexType, ValueType> getSparseRow(size_t rowIndex);
     std::vector<ValueType> getDenseRow(size_t rowIndex) const;
@@ -49,19 +49,19 @@ private:
     size_t _numCols = 0;
     size_t _numNonZero = 0;
 
-    std::vector<size_t> _rowPointers = {};
+    std::vector<RowIndexType> _rowPointers = {};
     std::vector<ColIndexType> _colIndices = {};
     std::vector<ValueType> _values = {};
 };
 
-template<typename ColIndexType, typename ValueType>
-SparseMatrix<ColIndexType, ValueType>::SparseMatrix()
+template<typename RowIndexType, typename ColIndexType, typename ValueType>
+SparseMatrix<RowIndexType, ColIndexType, ValueType>::SparseMatrix()
 {
 
 }
 
-template<typename ColIndexType, typename ValueType>
-SparseMatrix<ColIndexType, ValueType>::SparseMatrix(size_t numRows, size_t numCols, size_t numNonZero) :
+template<typename RowIndexType, typename ColIndexType, typename ValueType>
+SparseMatrix<RowIndexType, ColIndexType, ValueType>::SparseMatrix(size_t numRows, size_t numCols, size_t numNonZero) :
     _numRows(numRows),
     _numCols(numCols),
     _numNonZero(numNonZero)
@@ -71,8 +71,8 @@ SparseMatrix<ColIndexType, ValueType>::SparseMatrix(size_t numRows, size_t numCo
     _values.resize(numNonZero);
 }
 
-template<typename ColIndexType, typename ValueType>
-void SparseMatrix<ColIndexType, ValueType>::setData(size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<ColIndexType>& colIndices, const std::vector<ValueType>& values)
+template<typename RowIndexType, typename ColIndexType, typename ValueType>
+void SparseMatrix<RowIndexType, ColIndexType, ValueType>::setData(size_t numRows, size_t numCols, const std::vector<RowIndexType>& rowPointers, const std::vector<ColIndexType>& colIndices, const std::vector<ValueType>& values)
 {
     _numRows = numRows;
     _numCols = numCols;
@@ -82,11 +82,11 @@ void SparseMatrix<ColIndexType, ValueType>::setData(size_t numRows, size_t numCo
     _values = values;
 
     qDebug() << "Num non zero: " << _numNonZero;
-    qDebug() << "CSR vector sizes: " << rowPointers.size() << ", " << colIndices.size() << ", " << values.size();
+    qDebug() << "CSR vector sizes: " << _rowPointers.size() << ", " << _colIndices.size() << ", " << _values.size();
 }
 
-template<typename ColIndexType, typename ValueType>
-void SparseMatrix<ColIndexType, ValueType>::setData(size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<ColIndexType>&& colIndices, std::vector<ValueType>&& values)
+template<typename RowIndexType, typename ColIndexType, typename ValueType>
+void SparseMatrix<RowIndexType, ColIndexType, ValueType>::setData(size_t numRows, size_t numCols, std::vector<RowIndexType>&& rowPointers, std::vector<ColIndexType>&& colIndices, std::vector<ValueType>&& values)
 {
     _numRows = numRows;
     _numCols = numCols;
@@ -96,24 +96,24 @@ void SparseMatrix<ColIndexType, ValueType>::setData(size_t numRows, size_t numCo
     _values = std::move(values);
 
     qDebug() << "Num non zero: " << _numNonZero;
-    qDebug() << "CSR vector sizes: " << rowPointers.size() << ", " << colIndices.size() << ", " << values.size();
+    qDebug() << "CSR vector sizes: " << _rowPointers.size() << ", " << _colIndices.size() << ", " << _values.size();
 }
 
-template<typename ColIndexType, typename ValueType>
-SparseRow<ColIndexType, ValueType> SparseMatrix<ColIndexType, ValueType>::getSparseRow(size_t rowIndex)
+template<typename RowIndexType, typename ColIndexType, typename ValueType>
+SparseRow<ColIndexType, ValueType> SparseMatrix<RowIndexType, ColIndexType, ValueType>::getSparseRow(size_t rowIndex)
 {
     size_t nzStart = _rowPointers[rowIndex];
     size_t nzEnd = _rowPointers[rowIndex + 1];
 
-    SparseRow<ColIndexType, ValueType> row;
+    SparseRow<RowIndexType, ColIndexType, ValueType> row;
     row._colIndices = std::vector<ColIndexType>(_colIndices.begin() + nzStart, _colIndices.begin() + nzEnd);
     row._values = std::vector<ValueType>(_values.begin() + nzStart, _values.begin() + nzEnd);
 
     return row;
 }
 
-template<typename ColIndexType, typename ValueType>
-std::vector<ValueType> SparseMatrix<ColIndexType, ValueType>::getDenseRow(size_t rowIndex) const
+template<typename RowIndexType, typename ColIndexType, typename ValueType>
+std::vector<ValueType> SparseMatrix<RowIndexType, ColIndexType, ValueType>::getDenseRow(size_t rowIndex) const
 {
     size_t nzStart = _rowPointers[rowIndex];
     size_t nzEnd = _rowPointers[rowIndex + 1];
@@ -130,13 +130,13 @@ std::vector<ValueType> SparseMatrix<ColIndexType, ValueType>::getDenseRow(size_t
     return row;
 }
 
-//SparseRow<ColIndexType, ValueType> SparseMatrix<ColIndexType, ValueType>::getSparseCol(ColIndexType colIndex)
+//SparseRow<RowIndexType, ColIndexType, ValueType> SparseMatrix<RowIndexType, ColIndexType, ValueType>::getSparseCol(ColIndexType colIndex)
 //{
 //
 //}
 
-template<typename ColIndexType, typename ValueType>
-std::vector<ValueType> SparseMatrix<ColIndexType, ValueType>::getDenseCol(ColIndexType colIndex) const
+template<typename RowIndexType, typename ColIndexType, typename ValueType>
+std::vector<ValueType> SparseMatrix<RowIndexType, ColIndexType, ValueType>::getDenseCol(ColIndexType colIndex) const
 {
     std::vector<ValueType> col(_numRows, 0);
 
