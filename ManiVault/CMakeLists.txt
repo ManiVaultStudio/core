@@ -264,6 +264,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
+target_link_libraries(${MV_EXE} PRIVATE sentry-native)
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
