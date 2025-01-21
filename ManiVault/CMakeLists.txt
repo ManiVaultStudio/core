@@ -172,7 +172,7 @@ CPMAddPackage(
   GIT_TAG 0.7.19 # Use the latest stable version
   OPTIONS
     "SENTRY_BACKEND crashpad" # Use Crashpad for crash reporting
-    "SENTRY_TRANSPORT none" # Use the default HTTP transport
+    "SENTRY_TRANSPORT winhttp" # Use the default HTTP transport
 )
 
 include_directories(${sentry-native_SOURCE_DIR}/include)
@@ -276,7 +276,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
-target_link_libraries(${MV_EXE} PRIVATE sentry-native)
+target_link_libraries(${MV_EXE} PRIVATE sentry)
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
@@ -536,6 +536,9 @@ if(NOT APPLE)
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:sentry> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_wer> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
 endif()

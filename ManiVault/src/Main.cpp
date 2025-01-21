@@ -75,10 +75,24 @@ QSharedPointer<ProjectMetaAction> getStartupProjectMetaAction(const QString& sta
 int main(int argc, char *argv[])
 {
     sentry_options_t* options = sentry_options_new();
-    sentry_options_set_dsn(options, "https://<your-public-key>@sentry.io/<your-project-id>");
-    sentry_options_set_release(options, "my-project@1.0.0");
-    sentry_options_set_environment(options, "production");
-    sentry_init(options);
+    sentry_options_set_dsn(options, "https://c10704e6c4e3929343b574c87ab2f721@o4508081578442752.ingest.de.sentry.io/4508081584799824");
+    sentry_options_set_handler_path(options, QString("%1/crashpad_handler.exe").arg(QDir::currentPath()).toLatin1());
+    //sentry_options_set_transport(options, sentry_transport_new());
+
+    // This is also the default-path. For further information and recommendations:
+    // https://docs.sentry.io/platforms/native/configuration/options/#database-path
+    sentry_options_set_database_path(options, ".sentry-native");
+
+    sentry_options_set_release(options, QString("manivault-studio@%1.%2.%3 %4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data())).toLatin1());
+    sentry_options_set_debug(options, 1);
+
+#ifdef _DEBUG
+    sentry_options_set_environment(options, "debug");
+#else
+    sentry_options_set_environment(options, "release");
+#endif
+
+	sentry_init(options);
 
     // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings
     auto coreApplication = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
@@ -124,6 +138,8 @@ int main(int argc, char *argv[])
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
     qDebug() << "Starting ManiVault" << QString("%1.%2").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR));
+
+    auto sentryClose = qScopeGuard([] { sentry_close(); });
 
     Application application(argc, argv);
 
