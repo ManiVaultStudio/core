@@ -2,6 +2,8 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
+#include <sentry.h>
+
 #include "private/MainWindow.h"
 #include "private/Archiver.h"
 #include "private/Core.h"
@@ -13,8 +15,6 @@
 
 #include <util/Icon.h>
 
-#include <QSurfaceFormat>
-#include <QStyleFactory>
 #include <QProxyStyle>
 #include <QQuickWindow>
 #include <QCommandLineParser>
@@ -74,6 +74,12 @@ QSharedPointer<ProjectMetaAction> getStartupProjectMetaAction(const QString& sta
 
 int main(int argc, char *argv[])
 {
+    sentry_options_t* options = sentry_options_new();
+    sentry_options_set_dsn(options, "https://<your-public-key>@sentry.io/<your-project-id>");
+    sentry_options_set_release(options, "my-project@1.0.0");
+    sentry_options_set_environment(options, "production");
+    sentry_init(options);
+
     // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings
     auto coreApplication = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
 

@@ -169,10 +169,22 @@ CPMAddPackage(
 CPMAddPackage(
   NAME sentry-native
   GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-  GIT_TAG v0.8.0 # Use the latest stable version
+  GIT_TAG 0.7.19 # Use the latest stable version
   OPTIONS
     "SENTRY_BACKEND crashpad" # Use Crashpad for crash reporting
-    "SENTRY_TRANSPORT default" # Use the default HTTP transport
+    "SENTRY_TRANSPORT none" # Use the default HTTP transport
+)
+
+include_directories(${sentry-native_SOURCE_DIR}/include)
+
+set_target_properties(sentry mini_chromium
+    PROPERTIES
+    FOLDER CoreDependencies
+)
+
+set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
+    PROPERTIES
+    FOLDER CoreDependencies/Crashpad
 )
 
 # -----------------------------------------------------------------------------
