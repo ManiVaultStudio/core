@@ -166,6 +166,15 @@ CPMAddPackage(
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
 
+CPMAddPackage(
+  NAME sentry-native
+  GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+  GIT_TAG v0.8.0 # Use the latest stable version
+  OPTIONS
+    "SENTRY_BACKEND crashpad" # Use Crashpad for crash reporting
+    "SENTRY_TRANSPORT default" # Use the default HTTP transport
+)
+
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
