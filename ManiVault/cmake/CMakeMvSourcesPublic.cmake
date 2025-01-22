@@ -428,6 +428,7 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/ViewPluginLearningCenterOverlayWidget.h
 	src/widgets/IconLabel.h
 	src/widgets/MultiSelectComboBox.h
+	src/widgets/CrashReportDialog.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
@@ -448,6 +449,7 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/ViewPluginLearningCenterOverlayWidget.cpp
 	src/widgets/IconLabel.cpp
 	src/widgets/MultiSelectComboBox.cpp
+	src/widgets/CrashReportDialog.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES

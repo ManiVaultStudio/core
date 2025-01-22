@@ -176,6 +176,7 @@ CPMAddPackage(
 )
 
 include_directories(${sentry-native_SOURCE_DIR}/include)
+include_directories(${sentry-native_SOURCE_DIR}/external/crashpad/client)
 
 set_target_properties(sentry mini_chromium
     PROPERTIES
@@ -277,6 +278,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 target_link_libraries(${MV_EXE} PRIVATE sentry)
+target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
@@ -540,6 +542,16 @@ if(NOT APPLE)
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_wer> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
+
+	# Find all .pdb files in the build directory
+	file(GLOB_RECURSE PDB_FILES "${CMAKE_BINARY_DIR}/*.pdb")
+
+	# Iterate over the found .pdb files and copy them individually
+	foreach(PDB_FILE ${PDB_FILES})
+		add_custom_command(TARGET ${MV_EXE} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PDB_FILE} ${MV_INSTALL_DIR}/$<CONFIGURATION>
+		)
+	endforeach()
 
 endif()
 

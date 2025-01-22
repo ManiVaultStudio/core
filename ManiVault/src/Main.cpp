@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include <sentry.h>
+#include <signal.h>
 
 #include "private/MainWindow.h"
 #include "private/Archiver.h"
@@ -14,6 +15,8 @@
 #include <ManiVaultVersion.h>
 
 #include <util/Icon.h>
+
+#include <widgets/CrashReportDialog.h>
 
 #include <QProxyStyle>
 #include <QQuickWindow>
@@ -74,16 +77,12 @@ QSharedPointer<ProjectMetaAction> getStartupProjectMetaAction(const QString& sta
 
 int main(int argc, char *argv[])
 {
+    
     sentry_options_t* options = sentry_options_new();
-    sentry_options_set_dsn(options, "https://c10704e6c4e3929343b574c87ab2f721@o4508081578442752.ingest.de.sentry.io/4508081584799824");
+    sentry_options_set_dsn(options, "https://a7cf606b5e26f698d8980a15d39262d6@o4508081578442752.ingest.de.sentry.io/4508681697099856");
     sentry_options_set_handler_path(options, QString("%1/crashpad_handler.exe").arg(QDir::currentPath()).toLatin1());
-    //sentry_options_set_transport(options, sentry_transport_new());
-
-    // This is also the default-path. For further information and recommendations:
-    // https://docs.sentry.io/platforms/native/configuration/options/#database-path
     sentry_options_set_database_path(options, ".sentry-native");
-
-    sentry_options_set_release(options, QString("manivault-studio@%1.%2.%3 %4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data())).toLatin1());
+    sentry_options_set_release(options, QString("manivault-studio@%1.%2.%3").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data())).toLatin1());
     sentry_options_set_debug(options, 1);
 
 #ifdef _DEBUG
@@ -92,7 +91,35 @@ int main(int argc, char *argv[])
     sentry_options_set_environment(options, "release");
 #endif
 
-	sentry_init(options);
+    sentry_options_set_before_send(
+        options,
+        [](sentry_value_t event, void* hint, void* userdata) -> sentry_value_t {
+            CrashReportDialog dialog;
+
+            if (dialog.exec() == QDialog::Accepted) {
+                const auto crashUserInfo = dialog.getCrashUserInfo();
+
+                if (crashUserInfo._sendReport) {
+                    sentry_value_t extra = sentry_value_new_object();
+
+                    sentry_value_set_by_key(extra, "feedback", sentry_value_new_string(crashUserInfo._feedback.toUtf8()));
+                    sentry_value_set_by_key(extra, "contactInfo", sentry_value_new_string(crashUserInfo._contactDetails.toUtf8()));
+
+                    sentry_value_set_by_key(event, "extra", extra);
+
+                	if (auto eventJson = sentry_value_to_json(event)) {
+                        std::cout << "Modified Event JSON: " << eventJson << std::endl;
+                        sentry_free(eventJson);
+                    }
+                }
+            }
+
+            return event;
+        },
+        nullptr
+    );
+
+    sentry_init(options);
 
     // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings
     auto coreApplication = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
@@ -139,9 +166,14 @@ int main(int argc, char *argv[])
 
     qDebug() << "Starting ManiVault" << QString("%1.%2").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR));
 
-    auto sentryClose = qScopeGuard([] { sentry_close(); });
+    auto sentryClose = qScopeGuard([] {
+        std::cout << "A crash occurred. Triggering the crash report form..." << std::endl;
+	    sentry_close();
+    });
 
     Application application(argc, argv);
+
+    CrashReportDialog::initialize();
 
     QString startupProjectFilePath;
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
