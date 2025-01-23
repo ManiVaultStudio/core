@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     sentry_options_set_release(options, releaseString + "-debug");
     sentry_set_tag("build_type", "debug");
 #else
-    sentry_options_set_debug(options, 1);
+    sentry_options_set_debug(options, 0);
     sentry_options_set_environment(options, "release");
     sentry_options_set_release(options, releaseString + "-release");
     sentry_set_tag("build_type", "release");
