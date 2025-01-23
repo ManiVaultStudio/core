@@ -55,9 +55,9 @@ private:
     void populate ();
 
 private:
-    mv::gui::TriggerAction  _devDocAction;                /** Menu entry for ManiVault About Messagebox */
-    mv::gui::TriggerAction  _aboutProjectAction;          /** Action for triggering the ManiVault about project splash screen */
-    mv::gui::TriggerAction  _aboutAction;                 /** Menu entry for ManiVault About Messagebox */
-    mv::gui::TriggerAction  _aboutQtAction;               /** Menu entry for Qt About Messagebox */
-    mv::gui::TriggerAction  _aboutThirdPartiesAction;     /** Menu entry for Third Party About Messagebox */
+    mv::gui::TriggerAction  _devDocAction;              /** Menu entry for ManiVault About Messagebox */
+    mv::gui::TriggerAction  _aboutAction;               /** Menu entry for ManiVault About Messagebox */
+    mv::gui::TriggerAction  _aboutQtAction;             /** Menu entry for Qt About Messagebox */
+    mv::gui::TriggerAction  _aboutThirdPartiesAction;   /** Menu entry for Third Party About Messagebox */
+    mv::gui::TriggerAction  _releaseNotesAction;        /** Menu entry for release notes */
 };
