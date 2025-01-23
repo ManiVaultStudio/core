@@ -4,11 +4,10 @@
 
 #include "ApplicationSettingsAction.h"
 #include "Application.h"
-#include "sentry.h"
 
 #ifdef Q_OS_MACX
-#include "util/MacThemeHelper.h"
-#endif // Q_OS_MACX
+	#include "util/MacThemeHelper.h"
+#endif
 
 namespace mv::gui
 {
@@ -17,7 +16,7 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Application"),
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
     _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System"),
-    _showCrashReportDialogAction(this, "Show again next time")
+    _showCrashReportDialogAction(this, "Show crash report dialog", true)
 {
     _applicationSessionIdAction.setEnabled(false);
 
