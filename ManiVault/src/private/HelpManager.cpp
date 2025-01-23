@@ -206,14 +206,15 @@ void HelpManager::addTutorial(const util::LearningCenterTutorial* tutorial)
     _tutorialsModel.addTutorial(tutorial);
 }
 
-LearningCenterTutorials HelpManager::getTutorials(const QStringList& tags) const
+LearningCenterTutorials HelpManager::getTutorials(const QStringList& includeTags, const QStringList& excludeTags /*= QStringList()*/) const
 {
     LearningCenterTutorialsFilterModel tutorialsFilterModel;
 
     auto tutorialsModel = &const_cast<HelpManager*>(this)->_tutorialsModel;
 
     tutorialsFilterModel.setSourceModel(tutorialsModel);
-    tutorialsFilterModel.getTagsFilterAction().initialize(tags, tags);
+    tutorialsFilterModel.getTagsFilterAction().initialize(includeTags, includeTags);
+    tutorialsFilterModel.getExcludeTagsFilterAction().initialize(excludeTags, excludeTags);
 
     LearningCenterTutorials tutorials;
 
@@ -239,7 +240,7 @@ QMenu* HelpManager::getTutorialsMenu() const
 
     tutorialsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
 
-    for (const auto tutorial : getTutorials({})) {
+    for (const auto tutorial : getTutorials({}, { "Installation" })) {
         
         auto tutorialAction = new TriggerAction(tutorialsMenu, tutorial->getTitle());
 
