@@ -17,7 +17,6 @@ namespace mv {
 Project::Project(QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
-    _filePath(),
     _startupProject(false),
     _applicationVersion(Application::current()->getVersion()),
     _projectMetaAction(this),
@@ -28,6 +27,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
 {
     initialize();
 
+    /*
     const auto initStatusBarOptionsAction = [this]() -> void {
         const auto& appStatusBarOptionsAction = mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction();
 
@@ -37,7 +37,9 @@ Project::Project(QObject* parent /*= nullptr*/) :
     initStatusBarOptionsAction();
 
     connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::optionsChanged, initStatusBarOptionsAction);
+	*/
 
+    /*
     const auto updateStatusBarActions = [this]() -> void {
         const auto overrideApplicationStatusBar = _overrideApplicationStatusBarAction.isChecked();
 
@@ -48,6 +50,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     updateStatusBarActions();
 
     connect(&_overrideApplicationStatusBarAction, &ToggleAction::toggled, updateStatusBarActions);
+    */
 }
 
 Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
