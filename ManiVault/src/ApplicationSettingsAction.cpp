@@ -4,6 +4,7 @@
 
 #include "ApplicationSettingsAction.h"
 #include "Application.h"
+#include "sentry.h"
 
 #ifdef Q_OS_MACX
 #include "util/MacThemeHelper.h"
@@ -15,7 +16,8 @@ namespace mv::gui
 ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Application"),
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
-    _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System")
+    _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System"),
+    _showCrashReportDialogAction(this, "Show again next time")
 {
     _applicationSessionIdAction.setEnabled(false);
 
@@ -59,6 +61,12 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
 
         connect(&_appearanceOptionAction, &gui::OptionAction::currentTextChanged, this, appearanceOptionCurrentIndexChanged);
     }
+
+#ifdef _DEBUG
+    _showCrashReportDialogAction.setChecked(false);
+#endif
+
+    addAction(&_showCrashReportDialogAction);
 }
 
 }

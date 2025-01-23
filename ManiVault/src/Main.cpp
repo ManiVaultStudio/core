@@ -100,6 +100,9 @@ int main(int argc, char *argv[])
     sentry_options_set_before_send(
         options,
         [](sentry_value_t event, void* hint, void* userdata) -> sentry_value_t {
+            if (!mv::settings().getApplicationSettings().getShowCrashReportDialogAction().isChecked())
+                return event;
+
             CrashReportDialog dialog;
 
             if (dialog.exec() == QDialog::Accepted) {
