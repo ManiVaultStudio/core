@@ -82,13 +82,19 @@ int main(int argc, char *argv[])
     sentry_options_set_dsn(options, "https://a7cf606b5e26f698d8980a15d39262d6@o4508081578442752.ingest.de.sentry.io/4508681697099856");
     sentry_options_set_handler_path(options, QString("%1/crashpad_handler.exe").arg(QDir::currentPath()).toLatin1());
     sentry_options_set_database_path(options, ".sentry-native");
-    sentry_options_set_release(options, QString("manivault-studio@%1.%2.%3").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data())).toLatin1());
-    sentry_options_set_debug(options, 1);
+
+    const auto releaseString = QString("manivault-studio@%1.%2.%3").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data())).toLatin1();
 
 #ifdef _DEBUG
+    sentry_options_set_debug(options, 1);
     sentry_options_set_environment(options, "debug");
+    sentry_options_set_release(options, releaseString + "-debug");
+    sentry_set_tag("build_type", "debug");
 #else
+    sentry_options_set_debug(options, 1);
     sentry_options_set_environment(options, "release");
+    sentry_options_set_release(options, releaseString + "-release");
+    sentry_set_tag("build_type", "release");
 #endif
 
     sentry_options_set_before_send(
