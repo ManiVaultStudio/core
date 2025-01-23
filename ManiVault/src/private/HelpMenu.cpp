@@ -24,13 +24,16 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     _devDocAction(nullptr, "Developer Documentation"),
     _aboutAction(nullptr, "About"),
     _aboutQtAction(nullptr, "About Qt"),
-    _aboutThirdPartiesAction(nullptr, "About third-parties")
+    _aboutThirdPartiesAction(nullptr, "About third-parties"),
+    _releaseNotesAction(nullptr, "Release notes")
 {
     setTitle("Help");
     setToolTip("ManiVault help");
 
     _aboutThirdPartiesAction.setMenuRole(QAction::NoRole);
     _aboutQtAction.setMenuRole(QAction::NoRole);
+
+    _releaseNotesAction.setIconByName("scroll");
 
     populate();
 }
@@ -83,16 +86,26 @@ void HelpMenu::populate()
     addAction(&_aboutThirdPartiesAction);
     addAction(&_aboutQtAction);
 
+    addSeparator();
+
+    addAction(&_releaseNotesAction);
+
     connect(&_devDocAction, &QAction::triggered, this, [this](bool) {
         QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode));
-    });
+	});
 
     connect(&_aboutAction, &TriggerAction::triggered, this, &HelpMenu::about);
     connect(&_aboutThirdPartiesAction, &TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
 
     connect(&_aboutQtAction, &TriggerAction::triggered, this, [this](bool) {
         QMessageBox::aboutQt(this->parentWidget(), "About Qt");
-	});
+    });
+
+    connect(&_releaseNotesAction, &QAction::triggered, this, [this](bool) {
+        const auto applicationVersion = Application::current()->getVersion();
+
+        QDesktopServices::openUrl(QUrl(QString("https://github.com/ManiVaultStudio/core/releases/tag/v%1.%2").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor())), QUrl::TolerantMode));
+    });
 }
 
 void HelpMenu::about() const
