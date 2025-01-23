@@ -506,7 +506,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 auto& miscellaneousSettings = mv::settings().getMiscellaneousSettings();
 
                 miscellaneousSettings.getStatusBarVisibleAction().setChecked(_project->getStatusBarVisibleAction().isChecked());
-                miscellaneousSettings.getStatusBarOptionsAction().setSelectedOptions(_project->getStatusBarOptionsAction().getSelectedOptions());
+
+                /* TODO: Fix plugin status bar action visibility
+            	miscellaneousSettings.getStatusBarOptionsAction().setSelectedOptions(_project->getStatusBarOptionsAction().getSelectedOptions());
+                */
             }
 
             unsetTemporaryDirPath(TemporaryDirType::Open);
@@ -812,12 +815,18 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             auto currentProject = getCurrentProject();
 
             currentProject->getOverrideApplicationStatusBarAction().cacheState();
+
+            /* TODO: Fix plugin status bar action visibility
             currentProject->getStatusBarVisibleAction().cacheState();
             currentProject->getStatusBarOptionsAction().cacheState();
+            */
 
             currentProject->getOverrideApplicationStatusBarAction().setChecked(true);
+
+            /* TODO: Fix plugin status bar action visibility
             currentProject->getStatusBarVisibleAction().setChecked(true);
             currentProject->getStatusBarOptionsAction().setSelectedOptions({ "Logging", "Background Tasks", "Foreground Tasks" });
+            */
 
             ToggleAction    passwordProtectedAction(this, "Password Protected");
             StringAction    passwordAction(this, "Password");
@@ -888,7 +897,10 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
                     settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
                     settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
+
+                    /* TODO: Fix plugin status bar action visibility
                     settingsGroupAction.addAction(&currentProject->getStatusBarOptionsAction());
+                    */
 
                     auto titleLayout = new QHBoxLayout();
 
@@ -957,9 +969,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
 
             currentProject->getOverrideApplicationStatusBarAction().restoreState();
+
+			/* TODO: Fix plugin status bar action visibility
             currentProject->getStatusBarVisibleAction().restoreState();
             currentProject->getStatusBarOptionsAction().restoreState();
-
+            */
             unsetTemporaryDirPath(TemporaryDirType::Publish);
         }
         emit projectPublished(*_project);
