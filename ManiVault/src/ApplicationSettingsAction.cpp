@@ -16,7 +16,8 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Application"),
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
     _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System"),
-    _showCrashReportDialogAction(this, "Show crash report dialog", true)
+    _allowErrorReportingAction(this, "Error reporting", false),
+    _showErrorReportDialogAction(this, "Show error report dialog", true)
 {
     _applicationSessionIdAction.setEnabled(false);
 
@@ -62,10 +63,11 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     }
 
 #ifdef _DEBUG
-    _showCrashReportDialogAction.setChecked(false);
+    _showErrorReportDialogAction.setChecked(false);
 #endif
 
-    addAction(&_showCrashReportDialogAction);
+    addAction(&_allowErrorReportingAction);
+    addAction(&_showErrorReportDialogAction);
 }
 
 }

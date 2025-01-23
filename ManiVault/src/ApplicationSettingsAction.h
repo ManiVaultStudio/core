@@ -34,12 +34,14 @@ public: // Action getters
 
     StringAction& getApplicationSessionIdAction() { return _applicationSessionIdAction; }
     OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
-    ToggleAction& getShowCrashReportDialogAction() { return _showCrashReportDialogAction; }
+    ToggleAction& getAllowErrorReportingAction() { return _allowErrorReportingAction; }
+    ToggleAction& getShowErrorReportDialogAction() { return _showErrorReportDialogAction; }
 
 private:
     StringAction    _applicationSessionIdAction;    /** String action for the application session identifier */
     OptionAction    _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
-    ToggleAction    _showCrashReportDialogAction;   /** Toggle crash report dialog on/off */         
+    ToggleAction    _allowErrorReportingAction;     /** Toggle error reporting on/off */         
+    ToggleAction    _showErrorReportDialogAction;   /** Toggle error report dialog on/off */
 };
 
 }

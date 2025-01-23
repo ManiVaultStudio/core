@@ -429,6 +429,7 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
 	src/widgets/IconLabel.h
 	src/widgets/MultiSelectComboBox.h
 	src/widgets/CrashReportDialog.h
+	src/widgets/ErrorLoggingConsentDialog.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
@@ -450,6 +451,7 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
 	src/widgets/IconLabel.cpp
 	src/widgets/MultiSelectComboBox.cpp
 	src/widgets/CrashReportDialog.cpp
+	src/widgets/ErrorLoggingConsentDialog.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES

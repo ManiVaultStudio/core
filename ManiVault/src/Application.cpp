@@ -181,6 +181,11 @@ bool Application::shouldOpenProjectAtStartup() const
     return !_startupProjectFilePath.isEmpty() && QFileInfo(_startupProjectFilePath).exists();
 }
 
+bool Application::hasSetting(const QString& path) const
+{
+    return _settings.contains(path);
+}
+
 QVariant Application::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
 {
     return _settings.value(path, defaultValue);

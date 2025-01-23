@@ -2,38 +2,33 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "CrashReportDialog.h"
+#include "ErrorLoggingConsentDialog.h"
 
 #include "Application.h"
 
 #ifdef _DEBUG
-    #define CRASH_REPORT_DIALOG_VERBOSE
+    #define ERROR_LOGGING_CONSENT_DIALOG_VERBOSE
 #endif
-
-using namespace mv::util;
 
 namespace mv::gui
 {
 
-QIcon CrashReportDialog::windowIcon         = QIcon();
-QIcon CrashReportDialog::frownIcon          = QIcon();
-QIcon CrashReportDialog::exclamationIcon    = QIcon();
-
-CrashReportDialog::CrashReportDialog(QWidget* parent):
-	QDialog(parent),
+ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
+	QDialog(parent)/*,
     _notificationLabel("ManiVault Studio has encountered an error and needs to close. Please help us improve by providing some information about what happened.\n"),
     _feedbackLabel("What were you doing when the crash occurred?"),
     _contactLabel("\nYour email (optional):"),
     _sendButton("Send report"),
-    _cancelButton("Cancel")
+    _cancelButton("Cancel")*/
 {
-	setWindowTitle("Crash report");
+	setWindowTitle("Error logging consent");
     setWindowModality(Qt::ApplicationModal);
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
-    setWindowIcon(windowIcon);
+    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
 
+    /*
     _notificationIcon.setPixmap(frownIcon.pixmap(QSize(32, 32)));
     _notificationIcon.setAlignment(Qt::AlignTop);
 
@@ -73,7 +68,7 @@ CrashReportDialog::CrashReportDialog(QWidget* parent):
 
     _layout.addWidget(&_contactLineEdit);
 
-    _buttonsLayout.addWidget(mv::settings().getApplicationSettings().getShowErrorReportDialogAction().createWidget(this));
+    _buttonsLayout.addWidget(mv::settings().getApplicationSettings().getShowCrashReportDialogAction().createWidget(this));
     _buttonsLayout.addStretch(1);
     _buttonsLayout.addWidget(&_sendButton);
     _buttonsLayout.addWidget(&_cancelButton);
@@ -84,22 +79,24 @@ CrashReportDialog::CrashReportDialog(QWidget* parent):
 
 	connect(&_sendButton, &QPushButton::clicked, this, &CrashReportDialog::accept);
 	connect(&_cancelButton, &QPushButton::clicked, this, &CrashReportDialog::reject);
+    */
 }
 
-CrashReportDialog::CrashUserInfo CrashReportDialog::getCrashUserInfo() const
+void showErrorLoggingConsentDialogOnFirstLaunch()
 {
-    return {
-        result() == DialogCode::Accepted,
-        _feedbackTextEdit.toPlainText(),
-        _contactLineEdit.text()
-    };
-}
+	if (!Application::current()->hasSetting("ErrorLogging/ConsentGiven")) {
 
-void CrashReportDialog::initialize()
-{
-    windowIcon      = Application::getIconFont("FontAwesome").getIcon("bug");
-    frownIcon       = Application::getIconFont("FontAwesome").getIcon("frown");
-    exclamationIcon = Application::getIconFont("FontAwesome").getIcon("exclamation");
+		ErrorLoggingConsentDialog dialog;
+
+		if (dialog.exec() == QDialog::Accepted) {
+            Application::current()->setSetting("ErrorLogging/ConsentGiven", true);
+            Application::current()->setSetting("ErrorLogging/Enabled", true);
+		}
+		else {
+            Application::current()->setSetting("ErrorLogging/ConsentGiven", false);
+            Application::current()->setSetting("ErrorLogging/Enabled", false);
+		}
+	}
 }
 
 }
