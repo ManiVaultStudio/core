@@ -22,7 +22,6 @@ using namespace mv::plugin;
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
     _devDocAction(nullptr, "Developer Documentation"),
-    _aboutProjectAction(nullptr, "About project"),
     _aboutAction(nullptr, "About"),
     _aboutQtAction(nullptr, "About Qt"),
     _aboutThirdPartiesAction(nullptr, "About third-parties")
@@ -32,23 +31,6 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
 
     _aboutThirdPartiesAction.setMenuRole(QAction::NoRole);
     _aboutQtAction.setMenuRole(QAction::NoRole);
-    _aboutProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("info"));
-
-    connect(&_aboutProjectAction, &TriggerAction::triggered, this, []() -> void {
-        if (!projects().hasProject())
-            return;
-
-        projects().getCurrentProject()->getSplashScreenAction().getOpenAction().trigger();
-    });
-
-    const auto updateAboutProjectActionReadOnly = [this]() -> void {
-        _aboutProjectAction.setVisible(projects().hasProject());
-    };
-
-    updateAboutProjectActionReadOnly();
-
-    connect(&projects(), &AbstractProjectManager::projectOpened, this, updateAboutProjectActionReadOnly);
-    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateAboutProjectActionReadOnly);
 
     populate();
 }
@@ -93,9 +75,6 @@ void HelpMenu::populate()
 
     addMenu(mv::help().getVideosMenu());
     addMenu(mv::help().getTutorialsMenu());
-
-    addSeparator();
-    addAction(&_aboutProjectAction);
 
     if(!isEmpty())
         addSeparator();
