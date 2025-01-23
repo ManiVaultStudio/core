@@ -73,10 +73,11 @@ public:
 
     /**
      * Get tutorials for \p tags
-     * @param tags Filter tags (returns all tutorials if empty)
+     * @param includeTags Filter tags (returns all tutorials if empty)
+     * @param excludeTags Filter exclude tags
      * @return Vector of tutorials
      */
-    virtual util::LearningCenterTutorials getTutorials(const QStringList& tags) const = 0;
+    virtual util::LearningCenterTutorials getTutorials(const QStringList& includeTags, const QStringList& excludeTags = QStringList()) const = 0;
 
     /**
      * Get tutorials model
