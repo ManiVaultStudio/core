@@ -16,8 +16,10 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Application"),
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
     _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System"),
+    _errorReportingConsentAction(this, "Consent..."),
     _allowErrorReportingAction(this, "Error reporting", false),
-    _showErrorReportDialogAction(this, "Show error report dialog", true)
+    _showErrorReportDialogAction(this, "Show error report dialog", true),
+    _errorReportingAction(this, "Error reporting")
 {
     _applicationSessionIdAction.setEnabled(false);
 
@@ -66,8 +68,13 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     _showErrorReportDialogAction.setChecked(false);
 #endif
 
-    addAction(&_allowErrorReportingAction);
-    addAction(&_showErrorReportDialogAction);
+    _allowErrorReportingAction.setEnabled(false);
+
+    addAction(&_errorReportingAction);
+
+    _errorReportingAction.addAction(&_errorReportingConsentAction);
+    _errorReportingAction.addAction(&_allowErrorReportingAction);
+    _errorReportingAction.addAction(&_showErrorReportDialogAction);
 
     const auto allowErrorReportingChanged = [this]() -> void {
         _showErrorReportDialogAction.setEnabled(_allowErrorReportingAction.isChecked());

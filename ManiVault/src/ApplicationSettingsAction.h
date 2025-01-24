@@ -8,6 +8,8 @@
 
 #include "actions/StringAction.h"
 #include "actions/OptionAction.h"
+#include "actions/TriggerAction.h"
+#include "actions/HorizontalGroupAction.h"
 
 namespace mv::gui
 {
@@ -15,7 +17,7 @@ namespace mv::gui
 /**
  * Application global settings action class
  *
- * Action class which groups all global settings for the application
+ * Groups all global settings for the application
  *
  * @author Thomas Kroes
  * @author Thomas Höllt
@@ -34,14 +36,18 @@ public: // Action getters
 
     StringAction& getApplicationSessionIdAction() { return _applicationSessionIdAction; }
     OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
+    TriggerAction& getErrorReportingConsentAction() { return _errorReportingConsentAction; }
     ToggleAction& getAllowErrorReportingAction() { return _allowErrorReportingAction; }
     ToggleAction& getShowErrorReportDialogAction() { return _showErrorReportDialogAction; }
-
+    HorizontalGroupAction& getErrorReportingAction() { return _errorReportingAction; }
+    
 private:
-    StringAction    _applicationSessionIdAction;    /** String action for the application session identifier */
-    OptionAction    _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
-    ToggleAction    _allowErrorReportingAction;     /** Toggle error reporting on/off */         
-    ToggleAction    _showErrorReportDialogAction;   /** Toggle error report dialog on/off */
+    StringAction            _applicationSessionIdAction;    /** String action for the application session identifier */
+    OptionAction            _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
+    TriggerAction           _errorReportingConsentAction;   /** Shows the error reporting consent dialog when triggered */
+	ToggleAction            _allowErrorReportingAction;     /** Toggle error reporting on/off */         
+    ToggleAction            _showErrorReportDialogAction;   /** Toggle error report dialog on/off */
+    HorizontalGroupAction   _errorReportingAction;          /** Groups error reporting actions together */
 };
 
 }

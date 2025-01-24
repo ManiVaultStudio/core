@@ -48,28 +48,31 @@ bool ErrorLogging::getErrorLoggingEnabled()
 
 void ErrorLogging::setErrorLoggingEnabled(bool errorLoggingEnabled)
 {
-    Application::current()->setSetting(enabledSettingsKey, errorLoggingEnabled);
+    setEnabled(errorLoggingEnabled);
 }
 
 void ErrorLogging::initialize()
 {
-    mv::settings().getApplicationSettings().getAllowErrorReportingAction().setChecked(getErrorLoggingEnabled());
+    auto& allowErrorReportingAction = mv::settings().getApplicationSettings().getAllowErrorReportingAction();
+    
+    allowErrorReportingAction.setChecked(getErrorLoggingEnabled());
 
-    connect(&mv::settings().getApplicationSettings().getAllowErrorReportingAction(), &ToggleAction::toggled, nullptr, [](bool toggled) -> void {
+    connect(&allowErrorReportingAction, &ToggleAction::toggled, [](bool toggled) -> void {
         ErrorLogging::setEnabled(toggled);
 	});
+
+    connect(&mv::settings().getApplicationSettings().getErrorReportingConsentAction(), &TriggerAction::triggered, []() -> void {
+        ErrorLoggingConsentDialog errorLoggingConsentDialog;
+
+        errorLoggingConsentDialog.exec();
+	});
+
+    if (getUserHasOpted())
+		setEnabled(getErrorLoggingEnabled());
 }
 
 void ErrorLogging::setEnabled(bool enabled)
 {
-    if (enabled)
-		qDebug() << "Enabling error logging with Sentry";
-    else
-        qDebug() << "Disabling error logging with Sentry";
-
-    if (enabled == getErrorLoggingEnabled())
-        return;
-
     Application::current()->setSetting(enabledSettingsKey, enabled);
 
 	if (enabled) {
@@ -126,8 +129,14 @@ void ErrorLogging::setEnabled(bool enabled)
 		sentry_init(options);
 	}
 	else {
+        sentry_flush(2000);
 		sentry_shutdown();
 	}
+
+    if (enabled)
+        qDebug() << "Sentry error logging is enabled";
+    else
+        qDebug() << "Sentry error logging is disabled";
 }
 
 QString ErrorLogging::getReleaseString()
@@ -135,5 +144,7 @@ QString ErrorLogging::getReleaseString()
     if (!getErrorLoggingEnabled())
         return {};
 
-    return QString("ManiVaultStudio@%1.%2.%3").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data()));
+    const auto suffix = QString(MV_VERSION_SUFFIX.data());
+
+    return QString("ManiVaultStudio@%1.%2.%3%4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), suffix.isEmpty() ? "" : QString("-%1").arg(suffix));
 }
