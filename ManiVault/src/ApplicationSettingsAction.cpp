@@ -68,6 +68,14 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
 
     addAction(&_allowErrorReportingAction);
     addAction(&_showErrorReportDialogAction);
+
+    const auto allowErrorReportingChanged = [this]() -> void {
+        _showErrorReportDialogAction.setEnabled(_allowErrorReportingAction.isChecked());
+	};
+
+    allowErrorReportingChanged();
+
+    connect(&_allowErrorReportingAction, &ToggleAction::toggled, this, allowErrorReportingChanged);
 }
 
 }
