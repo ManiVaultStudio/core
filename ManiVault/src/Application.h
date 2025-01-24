@@ -83,7 +83,7 @@ public: // Construction
      */
     Application(int& argc, char** argv);
 
-    ~Application();
+    ~Application() override;
 
 public: // Miscellaneous
 

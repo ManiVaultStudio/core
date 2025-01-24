@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "ManiVaultGlobals.h"
-
 #include <QDialog>
 #include <QLineEdit>
 #include <QPlainTextEdit>
@@ -14,9 +12,6 @@
 #include <QLabel>
 #include <QAction>
 
-namespace mv::gui
-{
-
 /**
  * Crash report dialog class
  *
@@ -24,7 +19,7 @@ namespace mv::gui
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT CrashReportDialog : public QDialog
+class CrashReportDialog : public QDialog
 {
     Q_OBJECT
 
@@ -83,6 +78,3 @@ private:
     static QIcon    frownIcon;          /** Frown icon */
     static QIcon    exclamationIcon;    /** Exclamation icon */
 };
-
-}
-

@@ -8,15 +8,13 @@
 #include "private/Archiver.h"
 #include "private/Core.h"
 #include "private/StartupProjectSelectorDialog.h"
+#include "private/ErrorLogging.h"
 
 #include <Application.h>
-#include <ProjectMetaAction.h>
 #include <ManiVaultVersion.h>
+#include <ProjectMetaAction.h>
 
 #include <util/Icon.h>
-
-#include <widgets/CrashReportDialog.h>
-#include <widgets/ErrorLoggingConsentDialog.h>
 
 #include <QProxyStyle>
 #include <QQuickWindow>
@@ -75,66 +73,6 @@ QSharedPointer<ProjectMetaAction> getStartupProjectMetaAction(const QString& sta
     return nullptr;
 }
 
-void toggleSentry(bool enable) {
-    if (enable) {
-        sentry_options_t* options = sentry_options_new();
-
-        sentry_options_set_dsn(options, "https://a7cf606b5e26f698d8980a15d39262d6@o4508081578442752.ingest.de.sentry.io/4508681697099856");
-        sentry_options_set_handler_path(options, QString("%1/crashpad_handler.exe").arg(QDir::currentPath()).toLatin1());
-        sentry_options_set_database_path(options, ".sentry-native");
-
-        const auto releaseString = QString("manivault-studio@%1.%2.%3").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data())).toLatin1();
-
-#ifdef _DEBUG
-        sentry_options_set_debug(options, 1);
-        sentry_options_set_environment(options, "debug");
-        sentry_options_set_release(options, releaseString + "-debug");
-        sentry_set_tag("build_type", "debug");
-#else
-        sentry_options_set_debug(options, 0);
-        sentry_options_set_environment(options, "release");
-        sentry_options_set_release(options, releaseString + "-release");
-        sentry_set_tag("build_type", "release");
-#endif
-
-        sentry_options_set_before_send(
-            options,
-            [](sentry_value_t event, void* hint, void* userdata) -> sentry_value_t {
-                if (!mv::settings().getApplicationSettings().getShowErrorReportDialogAction().isChecked())
-                    return event;
-
-                CrashReportDialog dialog;
-
-                if (dialog.exec() == QDialog::Accepted) {
-                    const auto crashUserInfo = dialog.getCrashUserInfo();
-
-                    if (crashUserInfo._sendReport) {
-                        sentry_value_t extra = sentry_value_new_object();
-
-                        sentry_value_set_by_key(extra, "feedback", sentry_value_new_string(crashUserInfo._feedback.toUtf8()));
-                        sentry_value_set_by_key(extra, "contactInfo", sentry_value_new_string(crashUserInfo._contactDetails.toUtf8()));
-
-                        sentry_value_set_by_key(event, "extra", extra);
-
-                        if (auto eventJson = sentry_value_to_json(event)) {
-                            std::cout << "Modified Event JSON: " << eventJson << std::endl;
-                            sentry_free(eventJson);
-                        }
-                    }
-                }
-
-                return event;
-            },
-            nullptr
-        );
-
-        sentry_init(options);
-    }
-    else {
-        sentry_shutdown();
-    }
-}
-
 int main(int argc, char *argv[])
 {
     // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings
@@ -189,7 +127,7 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
-    CrashReportDialog::initialize();
+    ErrorLogging errorLogging;
 
     QString startupProjectFilePath;
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;

@@ -251,6 +251,9 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadedViewsMenu.h
     src/private/HelpMenu.h
     src/private/StartupProjectSelectorDialog.h
+    src/private/ErrorLogging.h
+	src/private/CrashReportDialog.h
+	src/private/ErrorLoggingConsentDialog.h
 )
 
 set(PRIVATE_APPLICATION_SOURCES
@@ -261,6 +264,9 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadedViewsMenu.cpp
     src/private/HelpMenu.cpp
     src/private/StartupProjectSelectorDialog.cpp
+    src/private/ErrorLogging.cpp
+	src/private/CrashReportDialog.cpp
+	src/private/ErrorLoggingConsentDialog.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES
