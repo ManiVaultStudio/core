@@ -76,6 +76,8 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     _errorReportingAction.addAction(&_allowErrorReportingAction);
     _errorReportingAction.addAction(&_showErrorReportDialogAction);
 
+    _showErrorReportDialogAction.setSettingsPrefix(QString("%1/ShowErrorReportDialog").arg(getSettingsPrefix()));
+
     const auto allowErrorReportingChanged = [this]() -> void {
         _showErrorReportDialogAction.setEnabled(_allowErrorReportingAction.isChecked());
 	};
