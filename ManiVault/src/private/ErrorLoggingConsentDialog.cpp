@@ -20,13 +20,14 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
 	QDialog(parent),
     _acceptPushButton("Accept"),
     _optOutPushButton( "Opt Out"),
-    _decideLaterPushButton("Privacy Policy")
+    _decideLaterPushButton("Decide Later")
 {
 	setWindowTitle("Help us improve ManiVault Studio");
     setWindowModality(Qt::ApplicationModal);
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
+    setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check-square"));
     setFixedSize({ 500, 420 });
 

@@ -23,6 +23,9 @@ public:
      */
     ErrorLogging(QObject* parent = nullptr);
 
+    /** Connects to the application */
+    static void initialize();
+
 protected:
 
     /**
@@ -50,9 +53,6 @@ protected:
     static void setErrorLoggingEnabled(bool errorLoggingEnabled);
 
 private:
-
-    /** Spools up the error logging if enabled and shows report logging consent dialog at first launch */
-    static void initialize();
 
     /**
      * Set whether error logging is enabled or not

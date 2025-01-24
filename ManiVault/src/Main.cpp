@@ -120,16 +120,12 @@ int main(int argc, char *argv[])
 
     qDebug() << "Starting ManiVault" << QString("%1.%2").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR));
 
-    /*auto sentryClose = qScopeGuard([] {
-        std::cout << "A crash occurred. Triggering the crash report form..." << std::endl;
-	    sentry_close();
-    });*/
-
     Application application(argc, argv);
 
     ErrorLogging errorLogging;
 
     QString startupProjectFilePath;
+
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
 
     if (commandLineParser.isSet("project")) {
@@ -181,6 +177,8 @@ int main(int argc, char *argv[])
     application.setCore(&core);
 
     core.createManagers();
+
+    ErrorLogging::initialize();
 
     SplashScreenAction splashScreenAction(&application, false);
 
@@ -236,6 +234,8 @@ int main(int argc, char *argv[])
     core.initialize();
 
     application.initialize();
+
+    
 
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 

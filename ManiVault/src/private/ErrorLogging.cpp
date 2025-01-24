@@ -21,7 +21,14 @@ const QString ErrorLogging::enabledSettingsKey = QString("ErrorLogging/Enabled")
 ErrorLogging::ErrorLogging(QObject* parent /*= nullptr*/) :
     QObject(parent)
 {
-    initialize();
+    CrashReportDialog::initialize();
+
+    if (!getUserHasOpted()) {
+
+        ErrorLoggingConsentDialog errorLoggingConsentDialog;
+
+        errorLoggingConsentDialog.exec();
+    }
 }
 
 bool ErrorLogging::getUserHasOpted()
@@ -46,16 +53,11 @@ void ErrorLogging::setErrorLoggingEnabled(bool errorLoggingEnabled)
 
 void ErrorLogging::initialize()
 {
-    //connect(&mv::settings().getApplicationSettings().getAllowErrorReportingAction(), &ToggleAction::toggled, &ErrorLogging::setEnabled);
+    mv::settings().getApplicationSettings().getAllowErrorReportingAction().setChecked(getErrorLoggingEnabled());
 
-    CrashReportDialog::initialize();
-
-    if (!getUserHasOpted()) {
-
-        ErrorLoggingConsentDialog errorLoggingConsentDialog;
-
-        errorLoggingConsentDialog.exec();
-    }
+    connect(&mv::settings().getApplicationSettings().getAllowErrorReportingAction(), &ToggleAction::toggled, nullptr, [](bool toggled) -> void {
+        ErrorLogging::setEnabled(toggled);
+	});
 }
 
 void ErrorLogging::setEnabled(bool enabled)
@@ -64,6 +66,9 @@ void ErrorLogging::setEnabled(bool enabled)
 		qDebug() << "Enabling error logging with Sentry";
     else
         qDebug() << "Disabling error logging with Sentry";
+
+    if (enabled == getErrorLoggingEnabled())
+        return;
 
     Application::current()->setSetting(enabledSettingsKey, enabled);
 
