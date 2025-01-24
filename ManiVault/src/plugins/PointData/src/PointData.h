@@ -850,7 +850,7 @@ public:
 
         static SparseMatrix<size_t, size_t, float>& getSparseData(Points* points)
         {
-            PointData::Experimental::getSparseData(points->getRawData<PointData>());
+            return PointData::Experimental::getSparseData(points->getRawData<PointData>());
         }
 
         static void setSparseData(Points* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
