@@ -69,9 +69,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
         fileDialog->setNameFilters(getNameFilters());
         fileDialog->setDefaultSuffix(getDefaultSuffix());
         fileDialog->setDirectory(Application::current()->getSetting(getSettingsPrefix(), QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-        
-        if (!_useNativeDialog)
-            fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
+        fileDialog->setOption(QFileDialog::DontUseNativeDialog, !_useNativeDialog);
 
 		connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
             if (fileDialog->selectedFiles().count() != 1)
