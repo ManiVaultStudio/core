@@ -15,6 +15,7 @@
 using namespace mv;
 using namespace mv::gui;
 
+bool ErrorLogging::initialized = false;
 const QString ErrorLogging::userHasOptedSettingsKey = QString("ErrorLogging/UserHasOpted");
 const QString ErrorLogging::enabledSettingsKey = QString("ErrorLogging/Enabled");
 
@@ -53,12 +54,16 @@ void ErrorLogging::setErrorLoggingEnabled(bool errorLoggingEnabled)
 
 void ErrorLogging::initialize()
 {
-    auto& allowErrorReportingAction = mv::settings().getApplicationSettings().getAllowErrorReportingAction();
+    if (ErrorLogging::initialized)
+        return;
+
+    /*
+    auto& allowErrorReportingAction = ;
     
     allowErrorReportingAction.setChecked(getErrorLoggingEnabled());
-
-    connect(&allowErrorReportingAction, &ToggleAction::toggled, [](bool toggled) -> void {
-        ErrorLogging::setEnabled(toggled);
+*/
+    connect(&mv::settings().getApplicationSettings().getAllowErrorReportingAction(), &ToggleAction::toggled, [](bool toggled) -> void {
+        ErrorLogging::setErrorLoggingEnabled(toggled);
 	});
 
     connect(&mv::settings().getApplicationSettings().getErrorReportingConsentAction(), &TriggerAction::triggered, []() -> void {
@@ -68,17 +73,24 @@ void ErrorLogging::initialize()
 	});
 
     if (getUserHasOpted())
-		setEnabled(getErrorLoggingEnabled());
+		setEnabled(getErrorLoggingEnabled(), true);
+
+    ErrorLogging::initialized = true;
 }
 
-void ErrorLogging::setEnabled(bool enabled)
+void ErrorLogging::setEnabled(bool enabled, bool force /*= false*/)
 {
+    if (enabled == getErrorLoggingEnabled() && !force)
+        return;
+
     Application::current()->setSetting(enabledSettingsKey, enabled);
+
+    mv::settings().getApplicationSettings().getAllowErrorReportingAction().setChecked(getErrorLoggingEnabled());
 
 	if (enabled) {
 		sentry_options_t* options = sentry_options_new();
 
-		sentry_options_set_dsn(options, "https://a7cf606b5e26f698d8980a15d39262d6@o4508081578442752.ingest.de.sentry.io/4508681697099856");
+		sentry_options_set_dsn(options, "https://671da8db3450cacb6c868494e9c1f092@o98733.ingest.us.sentry.io/4508715562369024");
 		sentry_options_set_handler_path(options, QString("%1/crashpad_handler.exe").arg(QDir::currentPath()).toLatin1());
 		sentry_options_set_database_path(options, ".sentry-native");
 

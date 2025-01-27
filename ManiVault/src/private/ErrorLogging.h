@@ -57,8 +57,9 @@ private:
     /**
      * Set whether error logging is enabled or not
      * @param enabled Boolean determining whether error logging is enabled or not
+     * @param force Enabled/disable, regardless whether the state has changed or not
      */
-    static void setEnabled(bool enabled);
+    static void setEnabled(bool enabled, bool force = false);
 
     /**
      * Get release string for Sentry
@@ -66,6 +67,7 @@ private:
      */
     static QString getReleaseString();
 
+    static bool initialized;                        /** Boolean determinging whether the error logging has been initialized or not */
     static const QString userHasOptedSettingsKey;   /** Settings key for storing whether the user has made choice the choice to opt in or out of automated error logging */
     static const QString enabledSettingsKey;        /** Settings key for storing whether the user wants error logging or not */
 
