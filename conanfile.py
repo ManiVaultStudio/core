@@ -84,20 +84,23 @@ class HdpsCoreConan(ConanFile):
 
     def system_requirements(self):
         if tools.os_info.is_linux:
+            packages = [
+                "mesa-common-dev", 
+                "libgl1-mesa-dev",
+                "libxcomposite-dev",
+                "libxcursor-dev",
+                "libxi-dev",
+                "libnss3-dev",
+                "libnspr4-dev",
+                "libfreetype6-dev",
+                "libfontconfig1-dev",
+                "libxtst-dev",
+                "libasound2-dev",
+                "libdbus-1-dev"
+                ]
             if tools.os_info.with_apt:
                 installer = tools.SystemPackageTool()
-                installer.install("mesa-common-dev")
-                installer.install("libgl1-mesa-dev")
-                installer.install("libxcomposite-dev")
-                installer.install("libxcursor-dev")
-                installer.install("libxi-dev")
-                installer.install("libnss3-dev")
-                installer.install("libnspr4-dev")
-                installer.install("libfreetype6-dev")
-                installer.install("libfontconfig1-dev")
-                installer.install("libxtst-dev")
-                installer.install("libasound2-dev")
-                installer.install("libdbus-1-dev")
+                installer.install(packages)
                 min_cmake_version = os.environ.get("CONAN_MINIMUM_CMAKE_VERSION")
                 if min_cmake_version is not None:
                     subprocess.run(f"pip3 install cmake>={min_cmake_version}".split())
