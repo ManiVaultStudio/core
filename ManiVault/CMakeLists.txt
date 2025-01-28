@@ -110,9 +110,12 @@ if(MSVC)
 	
 	# No linking optimization for MSVC builds with error logging (linking optimization screws up the program database which prohibits symbolication)
 	if(${MV_USE_ERROR_LOGGING})
-		set(CMAKE_C_FLAGS_RELEASE "/Od /Zi")        	# Disable optimization and enable debug info
-		set(CMAKE_CXX_FLAGS_RELEASE "/Od /Zi")     		# Same for C++
-		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/DEBUG")  	# Keep debug symbols in the executable
+		# set(CMAKE_C_FLAGS_RELEASE "/Od /Zi")        	# Disable optimization and enable debug info
+		# set(CMAKE_CXX_FLAGS_RELEASE "/Od /Zi")     		# Same for C++
+		# set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/DEBUG")  	# Keep debug symbols in the executable
+		
+		# Remove /OPT:ICF flag from CMake's default flags
+		string(REPLACE "/OPT:ICF" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	endif()
 endif(MSVC)
 
