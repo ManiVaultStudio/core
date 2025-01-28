@@ -2,13 +2,14 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include <sentry.h>
-
 #include "private/MainWindow.h"
 #include "private/Archiver.h"
 #include "private/Core.h"
 #include "private/StartupProjectSelectorDialog.h"
-#include "private/ErrorLogging.h"
+
+#ifdef ERROR_LOGGING
+	#include "private/ErrorLogging.h"
+#endif
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
@@ -122,8 +123,10 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
+#ifdef ERROR_LOGGING
     ErrorLogging errorLogging;
-
+#endif
+    
     QString startupProjectFilePath;
 
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
@@ -178,7 +181,9 @@ int main(int argc, char *argv[])
 
     core.createManagers();
 
+#ifdef ERROR_LOGGING
     ErrorLogging::initialize();
+#endif
 
     SplashScreenAction splashScreenAction(&application, false);
 
