@@ -139,16 +139,6 @@ class HdpsCoreConan(ConanFile):
         qt_dir = qt_cfg.parents[0].as_posix()
         qt_root = qt_cfg.parents[3].as_posix()
 
-        qtpath_OLD = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
-        qt_root_OLD = str(list(qtpath_OLD.glob("**/Qt6Config.cmake"))[0].parents[3].as_posix())
-
-        print(f"qt_path: {qt_path}")
-        print(f"qt_dir: {qt_dir}")
-        print(f"qt_root: {qt_root}")
-
-        print(f"qtpath_OLD: {qtpath_OLD}")
-        print(f"qt_root_OLD: {qt_root_OLD}")
-
         # for Qt >= 6.4.2
         #tc.variables["Qt6_DIR"] = qt_dir
 
