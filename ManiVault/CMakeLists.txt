@@ -107,8 +107,20 @@ if(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+	
+	# No linking optimization for MSVC builds with error logging (linking optimization screws up the program database which prohibits symbolication)
+	if(${MV_USE_ERROR_LOGGING})
+		set(CMAKE_C_FLAGS_RELEASE "/Od /Zi")        	# Disable optimization and enable debug info
+		set(CMAKE_CXX_FLAGS_RELEASE "/Od /Zi")     		# Same for C++
+		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/DEBUG")  	# Keep debug symbols in the executable
+	endif()
 endif(MSVC)
 
+# Add preprocessor directive to notify sources of error logging
+if(${MV_USE_ERROR_LOGGING})
+	add_compile_definitions(ERROR_LOGGING)
+endif()
+	
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
@@ -166,27 +178,34 @@ CPMAddPackage(
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
 
-CPMAddPackage(
-  NAME sentry-native
-  GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-  GIT_TAG 0.7.19 # Use the latest stable version
-  OPTIONS
-    "SENTRY_BACKEND crashpad" # Use Crashpad for crash reporting
-    "SENTRY_TRANSPORT winhttp" # Use the default HTTP transport
-)
+if(${MV_USE_ERROR_LOGGING})
+	
+	# Add Sentry with CPM
+	CPMAddPackage(
+		NAME sentry-native
+		GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+		GIT_TAG 0.7.19 														# Use the latest stable version
+		OPTIONS
+			"SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
+			"SENTRY_TRANSPORT winhttp" 										# Use the default HTTP transport
+	)
 
-include_directories(${sentry-native_SOURCE_DIR}/include)
-include_directories(${sentry-native_SOURCE_DIR}/external/crashpad/client)
+	include_directories(${sentry-native_SOURCE_DIR}/include)
+	include_directories(${sentry-native_SOURCE_DIR}/external/crashpad/client)
 
-set_target_properties(sentry mini_chromium
-    PROPERTIES
-    FOLDER CoreDependencies
-)
-
-set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
-    PROPERTIES
-    FOLDER CoreDependencies/Crashpad
-)
+	# Put targets in the proper source folder
+	set_target_properties(sentry mini_chromium
+		PROPERTIES
+		FOLDER CoreDependencies
+	)
+	
+	# Put targets in the proper source folder
+	set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
+		PROPERTIES
+		FOLDER CoreDependencies/Crashpad
+	)
+	
+endif()
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -277,8 +296,11 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
-target_link_libraries(${MV_EXE} PRIVATE sentry)
-target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
+
+if(${MV_USE_ERROR_LOGGING})
+	target_link_libraries(${MV_EXE} PRIVATE sentry)
+	target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
+endif()
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
@@ -368,7 +390,13 @@ if(APPLE)
             if(NOT retval EQUAL 0)
         	    message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
+            set(ADDITIONAL_LIBS
+				\"$<TARGET_FILE:qt6advanceddocking>\"
+				\"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
+				\"$<TARGET_FILE:sentry>\"
+				\"$<TARGET_FILE:crashpad_wer>\"
+				\"$<TARGET_FILE:crashpad_handler}>\"
+			)
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
             
@@ -538,21 +566,59 @@ if(NOT APPLE)
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:sentry> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_wer> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
-
-	# Find all .pdb files in the build directory
-	file(GLOB_RECURSE PDB_FILES "${CMAKE_BINARY_DIR}/*.pdb")
-
-	# Iterate over the found .pdb files and copy them individually
-	foreach(PDB_FILE ${PDB_FILES})
-		add_custom_command(TARGET ${MV_EXE} POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PDB_FILE} ${MV_INSTALL_DIR}/$<CONFIGURATION>
+	
+	if(${MV_USE_ERROR_LOGGING})
+		
+		# Copy sentry-native runtime to install directory after successful compilation
+		add_custom_target(sentry_post_build ALL
+			COMMAND ${CMAKE_COMMAND} -E echo "Installing: sentry runtime library"
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:sentry> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
+			DEPENDS sentry  # Ensure sentry_native is built first
 		)
-	endforeach()
+		
+		# Copy crashpad_wer runtime to install directory after successful compilation
+		add_custom_target(crashpad_wer_post_build ALL
+			COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_wer runtime library"
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_wer> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
+			DEPENDS crashpad_wer  # Ensure crashpad_wer is built first
+		)
+		
+		# Copy crashpad_handler runtime to install directory after successful compilation
+		add_custom_target(crashpad_handler_post_build ALL
+			COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler runtime library"
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
+			DEPENDS crashpad_handler  # Ensure sentry_native is built first
+		)
+		
+		# Make ManiVault executable depend on the custom post-build targets
+		add_dependencies(${MV_EXE} sentry_post_build)
+		add_dependencies(${MV_EXE} crashpad_wer_post_build)
+		add_dependencies(${MV_EXE} crashpad_handler_post_build)
+		
+		# Put custom post-build targets in the proper source folder
+		set_target_properties(sentry_post_build crashpad_wer_post_build crashpad_handler_post_build
+			PROPERTIES
+			FOLDER CoreDependencies/Miscellaneous
+		)
+		
+		if(MSVC)
+			# Find all .pdb files in the build directory
+			file(GLOB_RECURSE PDB_FILES "${CMAKE_BINARY_DIR}/**/*.pdb")
+			
+			# Program database files target directory
+			set(PDB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/pdb/")
+			
+			# Copy all PDB files after the ManiVault executable has been built
+			add_custom_command(
+				TARGET ${MV_EXE} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E make_directory ${PDB_DIR}  					# Ensure the target PDB directory exists
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PDB_FILES} ${PDB_DIR}	# Copy all .pdb files
+				COMMENT "Copying .pdb files to ${PDB_DIR}"
+			)
 
+		endif()
+	endif()
 endif()
 
 # Install examples

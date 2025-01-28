@@ -251,10 +251,15 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadedViewsMenu.h
     src/private/HelpMenu.h
     src/private/StartupProjectSelectorDialog.h
-    src/private/ErrorLogging.h
-	src/private/CrashReportDialog.h
-	src/private/ErrorLoggingConsentDialog.h
 )
+
+if(MV_USE_ERROR_LOGGING)
+	list(APPEND PRIVATE_APPLICATION_HEADERS
+		src/private/ErrorLogging.h
+		src/private/CrashReportDialog.h
+		src/private/ErrorLoggingConsentDialog.h
+	)
+endif()
 
 set(PRIVATE_APPLICATION_SOURCES
     src/private/MainWindow.cpp
@@ -264,10 +269,15 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadedViewsMenu.cpp
     src/private/HelpMenu.cpp
     src/private/StartupProjectSelectorDialog.cpp
-    src/private/ErrorLogging.cpp
-	src/private/CrashReportDialog.cpp
-	src/private/ErrorLoggingConsentDialog.cpp
 )
+
+if(MV_USE_ERROR_LOGGING)
+	list(APPEND PRIVATE_APPLICATION_SOURCES
+		src/private/ErrorLogging.cpp
+		src/private/CrashReportDialog.cpp
+		src/private/ErrorLoggingConsentDialog.cpp
+	)
+endif()
 
 set(PRIVATE_APPLICATION_FILES
     ${PRIVATE_APPLICATION_HEADERS}
