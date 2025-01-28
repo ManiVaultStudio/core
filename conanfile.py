@@ -138,6 +138,9 @@ class HdpsCoreConan(ConanFile):
         # for Qt < 6.4.2
         tc.variables["Qt6_ROOT"] = qt_root
 
+        # for ads, may also be remove with Qt >= 6.4.2
+        tc.variables["CMAKE_PREFIX_PATH"] = f"{qt_root}"
+
         # Set the installation directory for ManiVault based on the MV_INSTALL_DIR environment variable
         # or if none is specified, set it to the build/install dir.
         if not os.environ.get("MV_INSTALL_DIR", None):
