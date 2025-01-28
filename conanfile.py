@@ -84,7 +84,11 @@ class HdpsCoreConan(ConanFile):
 
     def system_requirements(self):
         if tools.os_info.is_linux:
-            packages = [
+            if not tools.os_info.with_apt:
+                print("Cannot install linux dependencies - no apt available")
+                return
+
+            linux_requirements = [
                 "mesa-common-dev", 
                 "libgl1-mesa-dev",
                 "libxcomposite-dev",
@@ -98,22 +102,11 @@ class HdpsCoreConan(ConanFile):
                 "libasound2-dev",
                 "libdbus-1-dev"
                 ]
-            if tools.os_info.with_apt:
-                installer = tools.SystemPackageTool()
-                installer.install(packages)
-                min_cmake_version = os.environ.get("CONAN_MINIMUM_CMAKE_VERSION")
-                if min_cmake_version is not None:
-                    subprocess.run(f"pip3 install cmake>={min_cmake_version}".split())
-                    print("Path is: ", os.environ["PATH"])
-                    result = subprocess.run(
-                        "which cmake".split(),
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                    )
-                    os.environ["CONAN_CMAKE_PROGRAM"] = result.stdout.decode(
-                        "utf-8"
-                    ).rstrip()
-                    print(f'Cmake at {os.environ["CONAN_CMAKE_PROGRAM"]}')
+            
+            installer = tools.SystemPackageTool()
+            for package in linux_requirements:
+                installer.install(package)
+
         # if tools.os_info.is_macos:
         #    installer = tools.SystemPackageTool()
         #    installer.install("libomp", update=False)
