@@ -114,8 +114,10 @@ if(MSVC)
 		# set(CMAKE_CXX_FLAGS_RELEASE "/Od /Zi")     		# Same for C++
 		# set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/DEBUG")  	# Keep debug symbols in the executable
 		
-		# Remove /OPT:ICF flag from CMake's default flags
-		string(REPLACE "/OPT:ICF" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+		# Remove /OPT:ICF from the linker flags
+		string(REPLACE "/OPT:ICF" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+		string(REPLACE "/OPT:ICF" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+		string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
 	endif()
 endif(MSVC)
 

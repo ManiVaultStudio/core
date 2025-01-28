@@ -68,6 +68,7 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     _showErrorReportDialogAction.setChecked(false);
 #endif
 
+#ifdef ERROR_LOGGING
     _allowErrorReportingAction.setEnabled(false);
 
     addAction(&_errorReportingAction);
@@ -85,6 +86,7 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     allowErrorReportingChanged();
 
     connect(&_allowErrorReportingAction, &ToggleAction::toggled, this, allowErrorReportingChanged);
+#endif
 }
 
 }
