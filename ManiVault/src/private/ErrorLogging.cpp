@@ -90,7 +90,7 @@ void ErrorLogging::setEnabled(bool enabled, bool force /*= false*/)
 	if (enabled) {
 		sentry_options_t* options = sentry_options_new();
 
-		sentry_options_set_dsn(options, "https://671da8db3450cacb6c868494e9c1f092@o98733.ingest.us.sentry.io/4508715562369024");
+		sentry_options_set_dsn(options, "http://19e0e42364b066f58ca013d44c5ff72e@localhost:9000/2");
 		sentry_options_set_handler_path(options, QString("%1/crashpad_handler.exe").arg(QDir::currentPath()).toLatin1());
 		sentry_options_set_database_path(options, ".sentry-native");
 
