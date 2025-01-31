@@ -52,6 +52,12 @@ protected:
      */
     static void setErrorLoggingEnabled(bool errorLoggingEnabled);
 
+    /**
+     * Get Crashpad handler executable name
+     * @return Name of the Crashpad handler executable name
+     */
+    static QString getCrashpadHandlerExecutableName();
+
 private:
 
     /**

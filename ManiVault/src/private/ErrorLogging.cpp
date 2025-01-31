@@ -12,6 +12,8 @@
 
 #include "sentry.h"
 
+#include <QOperatingSystemVersion>
+
 using namespace mv;
 using namespace mv::gui;
 
@@ -50,6 +52,25 @@ bool ErrorLogging::getErrorLoggingEnabled()
 void ErrorLogging::setErrorLoggingEnabled(bool errorLoggingEnabled)
 {
     setEnabled(errorLoggingEnabled);
+}
+
+QString ErrorLogging::getCrashpadHandlerExecutableName()
+{
+#ifdef Q_OS_LINUX
+    qDebug() << "crashpad_handler";
+#endif
+
+    switch (QOperatingSystemVersion::current().type())
+    {
+	    case QOperatingSystemVersion::Windows:
+            return "crashpad_handler.exe";
+
+	    case QOperatingSystemVersion::MacOS:
+            return "crashpad_handler";
+	    
+	    default:
+            return "";
+    }
 }
 
 void ErrorLogging::initialize()
@@ -91,7 +112,7 @@ void ErrorLogging::setEnabled(bool enabled, bool force /*= false*/)
 		sentry_options_t* options = sentry_options_new();
 
 		sentry_options_set_dsn(options, "http://19e0e42364b066f58ca013d44c5ff72e@localhost:9000/2");
-		sentry_options_set_handler_path(options, QString("%1/crashpad_handler.exe").arg(QDir::currentPath()).toLatin1());
+		sentry_options_set_handler_path(options, QString("%1/%2").arg(QDir::currentPath(), getCrashpadHandlerExecutableName()).toLatin1());
 		sentry_options_set_database_path(options, ".sentry-native");
 
 		const auto releaseString = getReleaseString().toUtf8();
