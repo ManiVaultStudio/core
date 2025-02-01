@@ -87,6 +87,7 @@ std::vector<std::uint32_t>& Text::getSelectionIndices()
 
 void Text::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
+    getSelection<Text>()->indices = indices;
 }
 
 bool Text::canSelect() const
