@@ -49,6 +49,12 @@ mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) 
 
 std::uint32_t PointData::getNumPoints() const
 {
+    if (_numDimensions == 0)
+    {
+        qWarning() << "Number of dimensions is 0 in point data ";
+        return 0;
+    }
+
     if (_isDense)
         return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
     else
@@ -696,7 +702,6 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
         }
     }
     else {
-
         // In an array the size of the full raw data, mark selected points as true
         std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
 
