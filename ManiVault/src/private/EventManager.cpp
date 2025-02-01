@@ -20,10 +20,12 @@ using namespace mv::util;
 
 namespace mv
 {
+constexpr int EVENT_POLLING_INTERVAL_MS = 20;
 
 EventManager::EventManager(QObject* parent) :
     AbstractEventManager(parent)
 {
+
 }
 
 EventManager::~EventManager()
@@ -44,6 +46,57 @@ void EventManager::initialize()
 
     beginInitialization();
     endInitialization();
+
+    _selectionPollingTimer = new QTimer(this);
+    connect(_selectionPollingTimer, &QTimer::timeout, this, [this]() {
+        Datasets datasets = data().getAllDatasets();
+
+        // Make a temporary copy of the event listener list to avoid additions while processing
+        const auto eventListeners = _eventListeners;
+
+        // Propagate selection flags
+        for (auto dataset : datasets)
+        {
+            if (!dataset->needsSelectionUpdate())
+                continue;
+
+            // For all datasets, check if they relate to the current dataset and notify them as well
+            for (auto candidateDataset : mv::data().getAllDatasets()) {
+                // Ignore the current dataset
+                if (candidateDataset == dataset)
+                    continue;
+
+                // If the dataset derives from the current dataset, notify it
+                if (candidateDataset->isDerivedData() && candidateDataset->getSourceDataset<DatasetImpl>()->getRawDataName() == dataset->getSourceDataset<DatasetImpl>()->getRawDataName())
+                    candidateDataset->markSelectionDirty(true);
+
+                // If the dataset has the same raw data, notify it
+                if (candidateDataset->getRawDataName() == dataset->getRawDataName())
+                    candidateDataset->markSelectionDirty(true);
+
+                // If the dataset is a proxy and the current dataset is one of its members, notify the proxy
+                if (candidateDataset->isProxy() && candidateDataset->getProxyMembers().contains(dataset))
+                    candidateDataset->markSelectionDirty(true);
+            }
+        }
+
+        // For all dirty dataset selections, fire an event
+        for (auto dataset : datasets)
+        {
+            if (!dataset->needsSelectionUpdate())
+                continue;
+            
+            DatasetDataSelectionChangedEvent dataSelectionChangedEvent(dataset);
+            
+            // For every listener, find it in the original list and call its DataSelectionChangedEvent
+            for (auto listener : eventListeners)
+                if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                    callListenerDataEvent(listener, &dataSelectionChangedEvent);
+
+            dataset->markSelectionDirty(false);
+        }
+        });
+    _selectionPollingTimer->start(EVENT_POLLING_INTERVAL_MS);
 }
 
 void EventManager::reset()
@@ -172,15 +225,9 @@ void EventManager::notifyDatasetDataDimensionsChanged(const Dataset<DatasetImpl>
 void EventManager::notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets /*= nullptr*/)
 {
     try {
-        if (ignoreDatasets != nullptr && ignoreDatasets->contains(dataset))
-            return;
-
-        if (ignoreDatasets != nullptr)
-            *ignoreDatasets << dataset;
-
+#ifdef EVENT_MANAGER_VERBOSE
         QStringList datasetNotifiedString;
 
-#ifdef EVENT_MANAGER_VERBOSE
         if (ignoreDatasets != nullptr)
             for (auto datasetNotified : *ignoreDatasets)
                 datasetNotifiedString << datasetNotified->getGuiName();
@@ -188,53 +235,17 @@ void EventManager::notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>&
         qDebug() << __FUNCTION__ << dataset->getGuiName() << datasetNotifiedString;
 #endif
 
-        Datasets notified{ dataset };
+        dataset->markSelectionDirty(true);
 
-        if (ignoreDatasets == nullptr)
-            ignoreDatasets = &notified;
-
-        const auto callNotifyDatasetSelectionChanged = [this, dataset, ignoreDatasets](Dataset<DatasetImpl> notifyDataset) -> void {
-            if (ignoreDatasets != nullptr && ignoreDatasets->contains(notifyDataset))
-                return;
-
-            notifyDatasetDataSelectionChanged(notifyDataset, ignoreDatasets);
-        };
-
-        DatasetDataSelectionChangedEvent dataSelectionChangedEvent(dataset);
-
-        const auto eventListeners = _eventListeners;
-
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                callListenerDataEvent(listener, &dataSelectionChangedEvent);
-
-        if (!dataset->isFull())
-            callNotifyDatasetSelectionChanged(dataset->getFullDataset<DatasetImpl>());
-
-        if (dataset->isProxy())
-            for (auto proxyMember : dataset->getProxyMembers())
-                callNotifyDatasetSelectionChanged(proxyMember->getSourceDataset<DatasetImpl>());
-
-        for (auto candidateDataset : mv::data().getAllDatasets()) {
-
-            if (ignoreDatasets != nullptr && ignoreDatasets->contains(candidateDataset))
-                continue;
-
-            if (candidateDataset == dataset)
-                continue;
-
-            if (candidateDataset->isDerivedData() && candidateDataset->getSourceDataset<DatasetImpl>()->getRawDataName() == dataset->getSourceDataset<DatasetImpl>()->getRawDataName())
-                callNotifyDatasetSelectionChanged(candidateDataset);
-
-            if (candidateDataset->getRawDataName() == dataset->getRawDataName())
-                callNotifyDatasetSelectionChanged(candidateDataset);
-
-            if (candidateDataset->isProxy() && candidateDataset->getProxyMembers().contains(dataset))
-                callNotifyDatasetSelectionChanged(candidateDataset);
+        // For all selection groups, set the current dataset as having a changed selection
+        for (const KeyBasedSelectionGroup& selectionGroup : _selectionGroups)
+        {
+            selectionGroup.selectionChanged(dataset, dataset->getSelection()->getSelectionIndices());
         }
 
+        // If the dataset has any linked dataset, then dirty them as well
         for (const LinkedData& ld : dataset->getLinkedData())
-            callNotifyDatasetSelectionChanged(ld.getTargetDataset());
+            ld.getTargetDataset()->markSelectionDirty(true);
     }
     catch (std::exception& e)
     {

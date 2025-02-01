@@ -301,6 +301,8 @@ public: // Selection
      */
     virtual std::vector<std::uint32_t>& getSelectionIndices() = 0;
 
+    bool needsSelectionUpdate() const { return _dirtySelection; }
+
     /**
      * Select by indices
      * @param indices Selection indices
@@ -330,6 +332,9 @@ public: // Selection
 
     /** Invert item selection */
     virtual void selectInvert() = 0;
+
+private:
+    void markSelectionDirty(bool isDirty) const { _dirtySelection = isDirty; }
 
 public: // Lock
 
@@ -629,12 +634,14 @@ private:
     Dataset<DatasetImpl>        _smartPointer;          /** Smart pointer to own dataset */
     DatasetTask                 _task;                  /** Task for display in the data hierarchy and foreground */
     bool                        _aboutToBeRemoved;      /** Boolean determining whether the set is in the process of being removed */
+    mutable bool                _dirtySelection;        /** Whether the dataset should be notified about a changed selection */
 
     friend class CoreInterface;
     friend class Core;
     friend class DataManager;
     friend class EventListener;
+    friend class EventManager;
+    friend class KeyBasedSelectionGroup;
 };
 
 }
-

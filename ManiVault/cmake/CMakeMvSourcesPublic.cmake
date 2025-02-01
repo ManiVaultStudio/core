@@ -651,6 +651,7 @@ set(PUBLIC_DATASET_HEADERS
     src/RawData.h
     src/Set.h
     src/LinkedData.h
+    src/SelectionGroup.h
     src/Dataset.h
     src/DatasetPrivate.h
     src/DatasetsMimeData.h
@@ -659,6 +660,7 @@ set(PUBLIC_DATASET_HEADERS
 set(PUBLIC_DATASET_SOURCES
     src/Set.cpp
     src/LinkedData.cpp
+    src/SelectionGroup.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp
     src/DatasetsMimeData.cpp
