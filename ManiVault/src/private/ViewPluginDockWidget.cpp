@@ -313,7 +313,14 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
     //_progressTask.setProgressTextFormatter([](Task& task) -> QString { return ""; });
 
 	setWindowIcon(_viewPlugin->getIcon());
-	setProperty("ViewPluginId", _viewPlugin->getId());
+
+    const auto updateViewPluginIdProperty = [this](const QString& viewPluginId) -> void {
+        setProperty("ViewPluginId", viewPluginId);
+	};
+
+    updateViewPluginIdProperty(_viewPlugin->getId());
+
+    connect(_viewPlugin, &WidgetAction::idChanged, _viewPlugin, updateViewPluginIdProperty);
 
 	auto centralDockWidget = new CDockWidget("Central");
 
