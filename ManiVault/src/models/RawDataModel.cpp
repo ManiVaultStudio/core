@@ -93,8 +93,6 @@ RawDataModel::RawDataModel(QObject* parent) :
 
     connect(&mv::data(), &AbstractDataManager::rawDataAdded, this, &RawDataModel::populateFromDataManager);
     connect(&mv::data(), &AbstractDataManager::rawDataRemoved, this, &RawDataModel::populateFromDataManager);
-
-    populateFromDataManager();
 }
 
 QVariant RawDataModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -122,6 +120,9 @@ void RawDataModel::populateFromDataManager()
 #ifdef RAW_DATA_MODEL_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
+        return;
 
     setRowCount(0);
 

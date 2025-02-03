@@ -70,9 +70,7 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
 
         QByteArray projectByteArray = projectJsonFile.readAll();
 
-        QJsonDocument jsonDocument;
-
-        jsonDocument = QJsonDocument::fromJson(projectByteArray);
+        QJsonDocument jsonDocument = QJsonDocument::fromJson(projectByteArray);
 
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");
