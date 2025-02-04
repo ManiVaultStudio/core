@@ -80,6 +80,7 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
 
     _errorLoggingDsnAction.setSettingsPrefix(QString("%1/ErrorLogging/DSN").arg(getSettingsPrefix()));
     _errorLoggingDsnAction.setToolTip("The Sentry error logging data source name");
+    _errorLoggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
 
     _errorLoggingSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _errorLoggingSettingsAction.setIconByName("cog");

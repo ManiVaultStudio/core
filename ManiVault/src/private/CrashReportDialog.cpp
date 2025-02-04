@@ -61,10 +61,8 @@ CrashReportDialog::CrashReportDialog(QWidget* parent):
 
 	connect(&_contactLineEdit, &QLineEdit::textChanged, this, [this]() -> void {
         if (!_contactLineEdit.text().isEmpty() && !_contactLineEdit.hasAcceptableInput()) {
-            //_contactLineEdit.setStyleSheet("QLineEdit { color: red;}");
             _trailingAction.setVisible(true);
         } else {
-            //_contactLineEdit.setStyleSheet(QString("QLineEdit { color: %1;}").arg(qApp->palette().color(QPalette::Text).name()));
             _trailingAction.setVisible(false);
         }
 	});
