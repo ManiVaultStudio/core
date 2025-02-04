@@ -20,8 +20,6 @@
 #include <QJsonObject>
 #include <QUrl>
 
-#include "DatasetsToRemoveModel.h"
-
 using namespace mv::gui;
 using namespace mv::util;
 

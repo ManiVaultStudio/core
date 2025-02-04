@@ -535,7 +535,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/NumericalRange.h
     src/util/FileDownloader.h
     src/util/ShortcutMap.h
-    src/util/Video.h
 	src/util/Notification.h
     src/util/Notifications.h
     src/util/LearningCenterVideo.h
@@ -586,7 +585,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/NumericalRange.cpp
     src/util/FileDownloader.cpp
     src/util/ShortcutMap.cpp
-    src/util/Video.cpp
 	src/util/Notification.cpp
     src/util/Notifications.cpp
     src/util/LearningCenterVideo.cpp

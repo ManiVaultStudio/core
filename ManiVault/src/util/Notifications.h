@@ -28,13 +28,7 @@ public:
 
     void setParentWidget(QWidget* parentWidget);
 
-    std::int32_t getNumberOfActiveNotifications() const;
-
 private:
-    void positionNotification(Notification* notification) const;
-
-    void adjustNotificationPositions();
-
     QWidget*                _parentWidget;
     Position                _position;
     QVector<Notification*>  _notifications;

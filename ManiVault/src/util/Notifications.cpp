@@ -21,57 +21,22 @@ void Notifications::showMessage(const QString& message)
     if (!_parentWidget)
         return;
 
-	auto notification = new Notification(message, _parentWidget);
-
-    positionNotification(notification);
+	auto notification = new Notification(message + QString::number(_notifications.size()), _notifications.isEmpty() ? nullptr : _notifications.last(), _parentWidget);
 
 	notification->show();
 
-	// Keep track of active toasters
+	QTimer::singleShot(10, notification, &Notification::updatePosition);
+
 	_notifications.append(notification);
 
-	// Remove toaster from active list when finished
 	connect(notification, &Notification::finished, this, [this, notification]() {
 		_notifications.removeOne(notification);
-		adjustNotificationPositions();
 	});
 }
 
 void Notifications::setParentWidget(QWidget* parentWidget)
 {
     _parentWidget = parentWidget;
-}
-
-std::int32_t Notifications::getNumberOfActiveNotifications() const
-{
-    return static_cast<std::int32_t>(std::count_if(_notifications.begin(), _notifications.end(), [](auto notification) -> bool {
-        return !notification->isClosing();
-	}));
-}
-
-void Notifications::positionNotification(Notification* notification) const
-{
-    Q_ASSERT(_parentWidget);
-
-    if (!_parentWidget || notification->isClosing())
-        return;
-
-	constexpr int margin = 10; // Space between toasters
-
-    const QPoint position(0, _parentWidget->height() - (static_cast<int>(getNumberOfActiveNotifications()) + 1) * (notification->height() + margin) - 50);
-
-    notification->move(_parentWidget->mapToGlobal(position));
-}
-
-void Notifications::adjustNotificationPositions()
-{
-    Q_ASSERT(_parentWidget);
-
-    if (!_parentWidget)
-        return;
-
-    for (auto notification : _notifications)
-        positionNotification(notification);
 }
 
 }

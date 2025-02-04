@@ -13,7 +13,7 @@
 namespace mv
 {
 
-class HelpManager final : public mv::AbstractHelpManager
+class HelpManager : public mv::AbstractHelpManager
 {
     Q_OBJECT
 
@@ -108,13 +108,13 @@ public: // Action getters
     gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; }
 
 private:
-    gui::ToggleAction       		_showLearningCenterAction;      /** Toggle action for toggling the learning center */
+    gui::ToggleAction       		_showLearningCenterPageAction;  /** Toggle action for toggling the learning center */
     gui::TriggerAction      		_toDiscordAction;               /** External link to discord */
     gui::TriggerAction      		_toWebsiteAction;               /** External link to website */
     gui::TriggerAction      		_toWikiAction;                  /** External link to wiki */
     gui::TriggerAction      		_toRepositoryAction;            /** External link to repository */
     gui::TriggerAction      		_toLearningCenterAction;        /** Trigger action to go the learning center */
-    HelpManagerVideosModel  		_videosModel;                   /** Videos model */
+    LearningCenterVideosModel  		_videosModel;                   /** Videos model */
 	LearningCenterTutorialsModel    _tutorialsModel;                /** Tutorials model */
     util::Notifications     		_notifications;                 /** Notifications manager */
 	util::FileDownloader            _fileDownloader;                /** For downloading the learning center JSON file */
