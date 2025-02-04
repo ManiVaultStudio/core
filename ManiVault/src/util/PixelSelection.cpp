@@ -47,7 +47,8 @@ QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
         }
         case PixelSelectionType::Line:
         {
-            painter.drawRect(pixmapRectDeflated);
+            // Draw a line from the top-left to the bottom-right of the deflated rectangle
+            painter.drawLine(pixmapRectDeflated.topLeft(), pixmapRectDeflated.bottomRight());
             break;
         }
         case PixelSelectionType::Brush:

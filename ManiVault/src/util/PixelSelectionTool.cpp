@@ -624,27 +624,42 @@ void PixelSelectionTool::paint()
             if (noMousePositions != 2)
                 break;
 
-            const auto topLeft = QPointF(std::min(_mousePositions.first().x(), _mousePositions.last().x()), std::min(_mousePositions.first().y(), _mousePositions.last().y()));
-            const auto bottomRight = QPointF(std::max(_mousePositions.first().x(), _mousePositions.last().x()), std::max(_mousePositions.first().y(), _mousePositions.last().y()));
-            const auto rectangle = QRectF(topLeft, bottomRight);
+            const auto startPoint = _mousePositions.first();
+            const auto endPoint = _mousePositions.last();
 
-            controlPoints << _mousePositions.first();
-            controlPoints << _mousePositions.last();
+            controlPoints << startPoint;
+            controlPoints << endPoint;
 
-            areaPainter.setBrush(_areaBrush);
-            areaPainter.setPen(Qt::NoPen);
-            areaPainter.drawRect(rectangle);
+            const auto length = 5.0;
+            const auto direction = (endPoint - startPoint) / std::sqrt(std::pow(endPoint.x() - startPoint.x(), 2) + std::pow(endPoint.y() - startPoint.y(), 2));
+            const auto perpendicular = QPointF(-direction.y(), direction.x()) * length;
+
+            shapePainter.setPen(_penLineBackGround);
+            shapePainter.drawLine(startPoint + perpendicular, endPoint + perpendicular);
+            shapePainter.drawLine(startPoint - perpendicular, endPoint - perpendicular);
 
             shapePainter.setPen(_penLineForeGround);
-            shapePainter.drawRect(rectangle);
+            shapePainter.drawLine(startPoint, endPoint);
+
+            const auto arrowSize = 5.0;
+            const auto arrowAngle = M_PI / 6;
+            const auto arrowP1 = endPoint - direction * arrowSize + QPointF(-direction.y(), direction.x()) * arrowSize * std::tan(arrowAngle);
+            const auto arrowP2 = endPoint - direction * arrowSize - QPointF(-direction.y(), direction.x()) * arrowSize * std::tan(arrowAngle);
+
+            QPolygonF arrowHead;
+            arrowHead << endPoint << arrowP1 << arrowP2;
+
+            shapePainter.setBrush(_penLineForeGround.color());
+            shapePainter.drawPolygon(arrowHead);
 
             const auto size = 8.0f;
-            const auto textCenter = rectangle.topRight() + QPoint(size, -size);
+            const auto textCenter = endPoint + QPoint(size, -size);
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
             break;
         }
+
 
         case PixelSelectionType::Brush:
         {
