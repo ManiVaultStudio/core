@@ -227,6 +227,18 @@ QRegularExpressionValidator& StringAction::getValidator()
     return _validator;
 }
 
+QValidator::State StringAction::isValid() const
+{
+    if (_validator.regularExpression().pattern().isEmpty())
+        return QValidator::State::Acceptable;
+
+    int position{};
+
+    auto string = _string;
+
+    return _validator.validate(string, position);
+}
+
 StringAction::LabelWidget::LabelWidget(QWidget* parent, StringAction* stringAction) :
     QLabel(parent),
     _stringAction(stringAction)
@@ -286,8 +298,6 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
             _validatorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("exclamation"));
     };
 
-    updateValidatorAction();
-
     connect(_stringAction, &StringAction::stringChanged, this, updateValidatorAction);
     connect(&_stringAction->getValidator(), &QRegularExpressionValidator::regularExpressionChanged, this, updateValidatorAction);
 
@@ -344,6 +354,7 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     updateLeadingAction();
     updateTrailingAction();
     updateCompleter();
+    updateValidatorAction();
 }
 
 StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :

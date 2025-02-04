@@ -208,6 +208,12 @@ public:
      */
     QRegularExpressionValidator& getValidator();
 
+    /**
+     * Get whether the string is QValidator::State::Acceptable, QValidator::State::Intermediate or QValidator::State::Invalid.
+     * @return Validator state
+     */
+    QValidator::State isValid() const;
+
 protected: // Linking
 
     /**
