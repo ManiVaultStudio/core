@@ -168,17 +168,17 @@ void ErrorLogging::setEnabled(bool enabled, bool force /*= false*/)
 				nullptr
 			);
 
-			sentry_init(options);
+            if (sentry_init(options) == 0)
+                qDebug() << "Sentry error logging is running at DSN " + dsn;
+            else
+                qDebug() << "Sentry error logging is not running";
 		}
 		else {
 	        sentry_flush(2000);
 			sentry_shutdown();
-		}
 
-        if (enabled)
-            qDebug() << "Sentry error logging is running at DSN " + dsn;
-        else
             qDebug() << "Sentry error logging is not running";
+		}
     }
     else {
         qWarning() << "Cannot start Sentry: error logging is enabled, but the DSN is empty or invalid";
