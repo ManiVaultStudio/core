@@ -181,6 +181,7 @@ void PixelSelectionTool::setShapePixmap(const QPixmap& shapePixmap)
     emit shapeChanged();
 }
 
+
 bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 {
     auto shouldPaint = false;
@@ -542,7 +543,16 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
         case PixelSelectionType::Rectangle:
             break;
         case PixelSelectionType::Line:
+        {
+            if (wheelEvent->angleDelta().y() < 0)
+                _lineAreaWidth = std::max(1.0f, _lineAreaWidth - 1.0f);
+            else
+                _lineAreaWidth += 1.0f;
+
+            shouldPaint = true;
+
             break;
+        }
         case PixelSelectionType::Brush:
         case PixelSelectionType::Sample:
         {
@@ -677,8 +687,6 @@ void PixelSelectionTool::paint()
 
             break;
         }
-
-
 
         case PixelSelectionType::Brush:
         {
