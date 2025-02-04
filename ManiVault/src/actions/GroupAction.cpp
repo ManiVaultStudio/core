@@ -26,7 +26,6 @@ GroupAction::GroupAction(QObject* parent, const QString& title, const bool& expa
     _alignment(alignment),
     _expanded(expanded),
     _readOnly(false),
-    _actions(),
     _showLabels(true),
     _labelSizingType(LabelSizingType::Percentage),
     _labelWidthPercentage(GroupAction::globalLabelWidthPercentage),
@@ -348,12 +347,12 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
 
                 case LabelSizingType::Percentage:
                 {
-                    layout->setColumnStretch(0, groupAction->getLabelWidthPercentage());
-                    layout->setColumnStretch(1, 100 - groupAction->getLabelWidthPercentage());
+                    layout->setColumnStretch(0, static_cast<int>(groupAction->getLabelWidthPercentage()));
+                    layout->setColumnStretch(1, static_cast<int>(100 - groupAction->getLabelWidthPercentage()));
                     break;
                 }
 
-                default:
+				case LabelSizingType::Fixed:
                     break;
             }
         }
@@ -393,12 +392,9 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
                     case LabelSizingType::Fixed:
                     {
                         labelWidget->setElide(true);
-                        labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                        labelWidget->setFixedWidth(static_cast<int>(groupAction->getLabelWidthFixed()));
                         break;
                     }
-
-                    default:
-                        break;
                 }
 
                 layout->addWidget(labelWidget, numRows, 0);
@@ -468,9 +464,7 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
         }
 
         for (auto action : groupAction->getActions()) {
-            auto actionStretch = dynamic_cast<StretchAction*>(action);
-
-            if (actionStretch) {
+            if (auto actionStretch = dynamic_cast<StretchAction*>(action)) {
                 layout->addStretch(actionStretch->getStretch());
 
                 continue;
@@ -479,25 +473,17 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
             if (groupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
                 layout->addWidget(action->createLabelWidget(this));
 
-            const auto widgetFlags                  = groupAction->getWidgetFlagsMap()[action];
+            const auto overrideWidgetFlags          = groupAction->getWidgetFlagsMap()[action];
+            const auto widgetFlags                  = overrideWidgetFlags >= 0 ? overrideWidgetFlags : action->getDefaultWidgetFlags();
             const auto widgetConfigurationFunction  = groupAction->getWidgetConfigurationFunctionsMap()[action];
 
             if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup)) {
-                layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this, 0, widgetConfigurationFunction));
+                layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this, widgetConfigurationFunction));
             } else {
-                if (action->getStretch() >= 1) {
-                    if (widgetFlags >= 0)
-                        layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags), action->getStretch());
-                    else
-                        layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this), action->getStretch());
-                }
-                else {
-                    if (widgetFlags >= 0)
-                        layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags));
-                    else
-                        layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this));
-                }
-
+                if (action->getStretch() >= 1)
+					layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags), action->getStretch());
+                else
+					layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags));
             }
         }
 

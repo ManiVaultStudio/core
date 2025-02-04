@@ -26,8 +26,8 @@ public:
     FileMenu(QWidget *parent = nullptr);
 
     /**
-     * 
-     * @param event 
+     * Invoked when the menu is shown
+     * @param event Pointer to show event
      */
     void showEvent(QShowEvent* event) override;
 

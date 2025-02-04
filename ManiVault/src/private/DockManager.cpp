@@ -4,6 +4,7 @@
 
 #include "DockManager.h"
 #include "ViewPluginDockWidget.h"
+#include "ViewPluginsDockWidget.h"
 
 #include <AbstractPluginManager.h>
 #include <CoreInterface.h>
@@ -13,9 +14,10 @@
 #include <widgets/InfoWidget.h>
 
 #include <DockAreaWidget.h> 
+#include <QLoggingCategory> 
 
 #ifdef _DEBUG
-    //#define DOCK_MANAGER_VERBOSE
+    #define DOCK_MANAGER_VERBOSE
 #endif
 
 using namespace ads;
@@ -57,25 +59,50 @@ DockManager::~DockManager()
     reset();
 }
 
-DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
+DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets(bool floating)
 {
     ViewPluginDockWidgets viewPluginDockWidgets;
 
-    for (auto dockWidget : dockWidgetsMap().values())
+    for (auto dockWidget : dockWidgets()) {
         if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
             viewPluginDockWidgets.push_back(viewPluginDockWidget);
+    }
+     
+    if (floating)  {
+        for (auto floatingDockContainer : floatingWidgets())
+            for (auto dockWidget : floatingDockContainer->dockWidgets())
+                if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
+                    viewPluginDockWidgets.push_back(viewPluginDockWidget);
+    }
 
     return viewPluginDockWidgets;
 }
 
-DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
+DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets(bool floating) const
 {
-    return const_cast<DockManager*>(this)->getViewPluginDockWidgets();
+    return const_cast<DockManager*>(this)->getViewPluginDockWidgets(floating);
+}
+
+ViewPluginDockWidget* DockManager::findViewPluginDockWidget(const mv::plugin::ViewPlugin* viewPlugin) const
+{
+    Q_ASSERT(viewPlugin);
+
+    if (!viewPlugin)
+        return nullptr;
+
+    for (auto dockWidget : dockWidgets()) {
+        if (viewPlugin->getId() == dockWidget->property("ViewPluginId").toString())
+            return dynamic_cast<ViewPluginDockWidget*>(dockWidget);
+    }
+
+    return nullptr;
 }
 
 CDockAreaWidget* DockManager::findDockAreaWidget(const ViewPlugin* viewPlugin) const
 {
-    if (viewPlugin == nullptr)
+    Q_ASSERT(viewPlugin);
+
+    if (!viewPlugin)
         return nullptr;
 
     for (auto dockWidget : dockWidgets()) {
@@ -92,17 +119,13 @@ void DockManager::removeViewPluginDockWidget(ViewPlugin* viewPlugin)
     qDebug() << __FUNCTION__ << viewPlugin->getGuiName();
 #endif
 
-    Q_ASSERT(viewPlugin != nullptr);
+    Q_ASSERT(viewPlugin);
 
-    for (auto dockWidget : dockWidgets()) {
-        auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget);
+    if (!viewPlugin)
+        return;
 
-        if (viewPluginDockWidget == nullptr)
-            continue;
-
-        if (viewPlugin == viewPluginDockWidget->getViewPlugin())
-            removeViewPluginDockWidget(viewPluginDockWidget);
-    }
+    if (auto viewPluginDockWidget = findViewPluginDockWidget(viewPlugin))
+        removeViewPluginDockWidget(viewPluginDockWidget);
 }
 
 void DockManager::reset()
@@ -111,12 +134,8 @@ void DockManager::reset()
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
+    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
         removeViewPluginDockWidget(viewPluginDockWidget);
-
-    for (auto dockWidget : dockWidgets())
-        if (!dynamic_cast<ViewPluginDockWidget*>(dockWidget) && !dockWidget->isCentralWidget())
-            CDockManager::removeDockWidget(dockWidget);
 }
 
 void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* dockWidget, ads::CDockAreaWidget* dockAreaWidget)
@@ -136,7 +155,7 @@ void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDoc
 
     CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
 
-    viewPluginDockWidget->deleteLater();
+	viewPluginDockWidget->deleteLater();
 }
 
 QWidget* DockManager::getWidget()
@@ -159,8 +178,6 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        //qDebug() << _serializationTask->getChildTasks();
-
         const auto viewPluginDockWidgetsList = variantMap["ViewPluginDockWidgets"].toList();
 
         for (const auto& viewPluginDockWidgetVariant : viewPluginDockWidgetsList)

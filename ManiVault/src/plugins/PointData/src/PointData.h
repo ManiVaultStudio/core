@@ -11,11 +11,13 @@
 #include "LinkedData.h"
 #include "PointDataRange.h"
 #include "Set.h"
+#include "SparseMatrix.h"
 
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
+#include <QDebug>
 #include <QMap>
 #include <QString>
 #include <QVariant>
@@ -222,7 +224,6 @@ public:
      */
     std::uint64_t getRawDataSize() const override;
 
-
     /**
      *Returns void pointer to the underlying array serving as element storage.
      */
@@ -269,7 +270,7 @@ public:
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
     void extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
     void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
-
+    
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
@@ -413,17 +414,71 @@ public:
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
 
+public: // Sparse data, test implementation
+    class Experimental {
+        friend class PointData;
+    public:
+
+        static void setSparseData(PointData* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
+        {
+            points->_sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
+            points->_numRows = static_cast<uint32_t>(numRows);
+            points->setData(std::vector<float> {}, numCols);
+            points->_isDense = false;
+        }
+
+        static void setSparseData(PointData* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<size_t>&& colIndices, std::vector<float>&& values)
+        {
+            points->_sparseData.setData(numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
+            points->_numRows = static_cast<uint32_t>(numRows);
+            points->setData(std::vector<float> {}, numCols);
+            points->_isDense = false;
+        }
+
+        static SparseMatrix<size_t, size_t, float>& getSparseData(PointData* points)
+        { 
+            return points->_sparseData; 
+        }
+
+        static bool isDense(const PointData* points)
+        {
+            return points->_isDense;
+        }
+
+        static void setIsDense(PointData* points, bool isDense)
+        {
+            points->_isDense = isDense;
+        }
+
+        static size_t getNumNonZeroElements(const PointData* points)
+        {
+            return points->_sparseData.getNumNonZeros();
+        }
+
+        static std::vector<float> row(const PointData* points, size_t rowIndex)
+        {
+            if (points->_isDense)
+            {
+                qWarning() << ".row() not implemented for dense data";
+                return {};
+            }
+
+            return points->_sparseData.getDenseRow(rowIndex);
+        }
+    };
+
+public: // Serialization
     /**
      * Load point data from variant map
      * @param Variant map representation of the point data
      */
-    virtual void fromVariantMap(const QVariantMap& variantMap) final;
+    void fromVariantMap(const QVariantMap& variantMap) final;
 
     /**
      * Save point data to variant map
      * @return Variant map representation of the point data
      */
-    virtual QVariantMap toVariantMap() const final;
+    QVariantMap toVariantMap() const final;
 
 private:
     VariantOfVectors _variantOfVectors;
@@ -432,6 +487,12 @@ private:
     unsigned int _numDimensions = 1;
 
     std::vector<QString> _dimNames;
+
+private: // Sparse data, experimental
+    unsigned int _numRows = 0;
+    SparseMatrix<size_t, size_t, float> _sparseData = {};
+
+    bool _isDense = true;
 };
 
 // =============================================================================
@@ -621,7 +682,6 @@ public:
         getRawData<PointData>()->setElementType<T>();
     }
 
-
     /// Just calls the corresponding member function of its PointData.
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
@@ -766,8 +826,9 @@ public:
     std::uint64_t getRawDataSize() const override {
         if (isProxy())
             return 0;
-        else
+        else {
             return getRawData<PointData>()->getRawDataSize();
+        }
     }
 
     // Returns the value of the element at the specified position in the current
@@ -781,6 +842,47 @@ public:
     // Will work fine, even when the internal data element type is not float.
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
+
+    public: // Dense, test implementation
+    class Experimental {
+        friend class Points;
+    public:
+
+        static SparseMatrix<size_t, size_t, float>& getSparseData(Points* points)
+        {
+            return PointData::Experimental::getSparseData(points->getRawData<PointData>());
+        }
+
+        static void setSparseData(Points* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
+        {
+            PointData::Experimental::setSparseData(points->getRawData<PointData>(), numRows, numCols, rowPointers, colIndices, values);
+        }
+
+        static void setSparseData(Points* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<size_t>&& colIndices, std::vector<float>&& values)
+        {
+            PointData::Experimental::setSparseData(points->getRawData<PointData>(), numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
+        }
+
+        static std::vector<float> row(const Points* points, size_t rowIndex)
+        {
+            return PointData::Experimental::row(points->getRawData<PointData>(), rowIndex);
+        }
+
+        static size_t getNumNonZeroElements(const Points* points)
+        {
+            return PointData::Experimental::getNumNonZeroElements(points->getRawData<PointData>());
+        }
+
+        static bool isDense(const Points* points)
+        {
+            return PointData::Experimental::isDense(points->getRawData<PointData>());
+        }
+
+        static void setIsDense(Points* points, bool isDense)
+        {
+            PointData::Experimental::setIsDense(points->getRawData<PointData>(), isDense);
+        }
+    };
 
     /**
      * Get a copy of the dataset
@@ -908,9 +1010,9 @@ public:
     std::vector<unsigned int> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
-    mv::gui::GroupAction*     _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
+    mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
-    mv::EventListener         _eventListener;                 /** Listen to HDPS events */
+    mv::EventListener           _eventListener;                 /** Listen to HDPS events */
 };
 
 // =============================================================================

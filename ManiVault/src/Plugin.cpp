@@ -6,7 +6,7 @@
 #include "CoreInterface.h"
 
 #ifdef _DEBUG
-    //#define PLUGIN_VERBOSE
+    #define PLUGIN_VERBOSE
 #endif
 
 using namespace mv::gui;
@@ -79,7 +79,7 @@ mv::plugin::Type Plugin::getType() const
     return _factory->getType();
 }
 
-QString Plugin::getVersion() const
+util::Version Plugin::getVersion() const
 {
     return _factory->getVersion();
 }
@@ -156,7 +156,7 @@ QVariantMap Plugin::toVariantMap() const
         { "Name", _name },
         { "Kind", _factory->getKind() },
         { "Type", static_cast<std::uint32_t>(_factory->getType()) },
-        { "Version", _factory->getVersion() }
+        { "Version", QString::fromStdString(_factory->getVersion().getVersionString()) }
     });
 
     _learningCenterAction.insertIntoVariantMap(variantMap);
@@ -166,6 +166,10 @@ QVariantMap Plugin::toVariantMap() const
 
 void Plugin::destroy()
 {
+#ifdef PLUGIN_VERBOSE
+    qDebug() << "Destroy plugin" << getGuiName();
+#endif
+
     plugins().destroyPlugin(this);
 }
 

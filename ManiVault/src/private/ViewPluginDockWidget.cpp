@@ -20,7 +20,7 @@
 #include <AutoHideDockContainer.h>
 
 #ifdef _DEBUG
-//#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+	#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;
@@ -39,6 +39,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
 	_toggleMenu("Toggle", this),
 	_helpAction(this, "Help"),
 	_cachedVisibility(false),
+    _centralDockWidget("Central"),
+    //_progressTask(this, "Serialization"),
 	_progressOverlayWidget(this)
 {
 	setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
@@ -60,7 +62,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
 ViewPluginDockWidget::~ViewPluginDockWidget()
 {
 #ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__ << windowTitle();
+    qDebug() << __FUNCTION__ << objectName() << windowTitle();
 #endif
 
 	serializationTasks.remove(getId());
@@ -98,7 +100,7 @@ void ViewPluginDockWidget::initialize()
 			_settingsMenu.addAction(&_helpAction);
 
 		if (_viewPlugin->getFactory()->getReadmeMarkdownUrl().isValid())
-			_settingsMenu.addAction(&const_cast<PluginFactory*>(_viewPlugin->getFactory())->getTriggerReadmeAction());
+			_settingsMenu.addAction(&const_cast<PluginFactory*>(_viewPlugin->getFactory())->getPluginMetadata().getTriggerReadmeAction());
 
 		_settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
 
@@ -135,8 +137,12 @@ void ViewPluginDockWidget::initialize()
                 else
                     _settingsMenu.addAction(titleBarMenuAction);
 			}
-				
 		}
+	});
+
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+        if (_dockManager.centralWidget() && plugin == _viewPlugin)
+            _dockManager.centralWidget()->takeWidget();
 	});
 }
 
@@ -158,12 +164,17 @@ ViewPlugin* ViewPluginDockWidget::getViewPlugin() const
 	return _viewPlugin;
 }
 
-void ViewPluginDockWidget::restoreViewPluginState() const
+void ViewPluginDockWidget::restoreViewPluginState()
 {
 	if (!_viewPlugin)
 		return;
 
-	_viewPlugin->fromVariantMap(_viewPluginMap);
+    //_progressTask.setRunningIndeterminate();
+	{
+        _viewPlugin->fromVariantMap(_viewPluginMap);
+        //_dockManager.centralWidget()->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
+	}
+    //_progressTask.setFinished();
 }
 
 QMenu* ViewPluginDockWidget::getSettingsMenu()
@@ -285,15 +296,31 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
     qDebug() << __FUNCTION__;
 #endif
 
-	Q_ASSERT(viewPlugin != nullptr);
+	Q_ASSERT(viewPlugin);
 
 	if (!viewPlugin)
 		return;
 
 	_viewPlugin = viewPlugin;
 
+    connect(_viewPlugin, &ViewPlugin::progressTaskChanged, this, [this](Task* progressTask) {
+        _progressOverlayWidget.setTask(progressTask);
+	});
+
+    //_viewPlugin->setProgressTask(&_progressTask);
+
+    //_progressTask.setRunningIndeterminate();
+    //_progressTask.setProgressTextFormatter([](Task& task) -> QString { return ""; });
+
 	setWindowIcon(_viewPlugin->getIcon());
-	setProperty("ViewPluginId", _viewPlugin->getId());
+
+    const auto updateViewPluginIdProperty = [this](const QString& viewPluginId) -> void {
+        setProperty("ViewPluginId", viewPluginId);
+	};
+
+    updateViewPluginIdProperty(_viewPlugin->getId());
+
+    connect(_viewPlugin, &WidgetAction::idChanged, _viewPlugin, updateViewPluginIdProperty);
 
 	auto centralDockWidget = new CDockWidget("Central");
 
@@ -302,7 +329,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
 	_dockManager.setCentralWidget(centralDockWidget);
 
-	centralDockWidget->dockAreaWidget()->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+    centralDockWidget->dockAreaWidget()->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
 	auto hideAllAction = new TriggerAction(this, "Hide All");
 	auto showAllAction = new TriggerAction(this, "Show All");
@@ -451,12 +478,6 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
 		viewPlugin->getVisibleAction().setChecked(toggled);
 	});
-
-	_progressOverlayWidget.setTask(viewPlugin->getProgressTask());
-
-	connect(viewPlugin, &ViewPlugin::progressTaskChanged, this, [this](Task* progressTask) {
-		_progressOverlayWidget.setTask(progressTask);
-	});
 }
 
 ViewPluginDockWidget::SettingsActionWidget::SettingsActionWidget(QWidget* parent, mv::gui::WidgetAction* settingsAction) :
@@ -512,7 +533,6 @@ ViewPluginDockWidget::ProgressOverlayWidget::ProgressOverlayWidget(QWidget* pare
 	setLayout(layout);
 
 	updateVisibility();
-
 	updateCustomStyle();
 }
 
@@ -535,8 +555,8 @@ void ViewPluginDockWidget::ProgressOverlayWidget::setTask(Task* task)
 
 	if (_task) {
 		connect(_task, &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-			if (status == Task::Status::Running)
-				QTimer::singleShot(100, this, &ProgressOverlayWidget::updateVisibility);
+			if (status == Task::Status::Running || status == Task::Status::RunningIndeterminate)
+				QTimer::singleShot(20, this, &ProgressOverlayWidget::updateVisibility);
 			else
 				updateVisibility();
 		});
@@ -548,7 +568,7 @@ void ViewPluginDockWidget::ProgressOverlayWidget::setTask(Task* task)
 void ViewPluginDockWidget::ProgressOverlayWidget::updateVisibility()
 {
 	if (_task)
-		setVisible(_task->isRunning());
+		setVisible(_task->isRunning() || _task->isRunningIndeterminate());
 	else
 		setVisible(false);
 }

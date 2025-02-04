@@ -6,17 +6,15 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "PluginMetadata.h"
 #include "Dataset.h"
 #include "DataType.h"
 #include "PluginType.h"
 
 #include "actions/PluginTriggerAction.h"
 
-#include "util/ShortcutMap.h"
-
 #include <QObject>
 #include <QIcon>
-#include <QVariant>
 
 namespace mv {
     class DatasetImpl;
@@ -48,7 +46,7 @@ public:
      */
     PluginFactory(Type type);
 
-    virtual ~PluginFactory() { }
+    ~PluginFactory() override = default;
 
     /**
      * Get plugin kind
@@ -89,7 +87,7 @@ public: // Global settings
      * Set plugin global settings group action to \p pluginGlobalSettingsGroupAction
      * @param pluginGlobalSettingsGroupAction Pointer to plugin global settings group action (maybe a nullptr)
      */
-    virtual void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction) final;
+    void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction);
 
 public: // Status bar
 
@@ -97,13 +95,13 @@ public: // Status bar
      * Get plugin status bar action
      * @return Pointer to plugin status bar action (maybe nullptr)
      */
-    virtual gui::PluginStatusBarAction* getStatusBarAction() const final;
+    gui::PluginStatusBarAction* getStatusBarAction() const;
 
     /**
      * Set plugin status bar action to \p statusBarAction
      * @param statusBarAction Pointer to plugin status bar action (maybe a nullptr)
      */
-    virtual void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction) final;
+    void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction);
 
 public: // Help
 
@@ -125,7 +123,13 @@ public: // Help
      */
     virtual QUrl getRepositoryUrl() const;
 
-public: // GUI name
+    /**
+     * Get the name of the default branch
+     * @return Name of the default branch
+     */
+    virtual QString getDefaultBranch() const;
+
+public: // Meta data
 
     /** Get the menu name of the plugin */
     QString getGuiName() const;
@@ -136,16 +140,23 @@ public: // GUI name
      */
     void setGuiName(const QString& guiName);
 
-public: // Version
-
-    /** Get the plugin version */
-    QString getVersion() const;
+    /**
+     * Get plugin version
+     * @return Plugin semantic version
+     */
+    util::Version& getVersion();
 
     /**
-     * Set the plugin version
-     * @param version Plugin version
+     * Get plugin version
+     * @return Plugin semantic version
      */
-    void setVersion(const QString& version);
+    const util::Version& getVersion() const;
+
+    /**
+     * Set the plugin version to \p version
+     * @param version Plugin semantic version
+     */
+    void setVersion(const util::Version& version);
 
 public:
 
@@ -172,7 +183,7 @@ public:
      * Get whether a plugin may be produced
      * @return Boolean determining whether a plugin may be produced
      */
-    virtual bool mayProduce() const final;
+    bool mayProduce() const;
 
     /**
      * Get the data types that the plugin supports
@@ -199,7 +210,7 @@ public:
 
     /**
      * Get plugin trigger actions given \p dataTypes
-     * @param datasetTypes Vector of input data types
+     * @param dataTypes Vector of input data types
      * @return Vector of plugin trigger actions
      */
     virtual gui::PluginTriggerActions getPluginTriggerActions(const DataTypes& dataTypes) const {
@@ -215,49 +226,20 @@ public:
             pluginTriggerAction->initialize();
     }
 
-public: // Shortcut map
+    /**
+     * Set whether the plugin may be produced from the standard GUI to \p allowPluginCreationFromStandardGui
+     * @param allowPluginCreationFromStandardGui Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.)
+     */
+    void setAllowPluginCreationFromStandardGui(bool allowPluginCreationFromStandardGui);
 
     /**
-     * Get shortcut map
-     * @return Reference to the shortcut map
+     * Get whether the plugin may be produced from the standard GUI
+     * @return Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.)
      */
-    virtual util::ShortcutMap& getShortcutMap() final;
-
-    /**
-     * Get shortcut map
-     * @return Const reference to the shortcut map
-     */
-    virtual const util::ShortcutMap& getShortcutMap() const final;
-
-public: // Description
-
-    /**
-     * Get short description
-     * @return String that shortly describes the plugin
-     */
-    QString getShortDescription() const;
-
-    /**
-     * Set short description to \p shortDescription
-     * @param shortDescription String that shortly describes the plugin
-     */
-    void setShortDescription(const QString& shortDescription);
-
-    /**
-     * Get extended description
-     * @return Extended description in HTML format
-     */
-    QString getLongDescription() const;
-
-    /**
-     * Set long description to \p longDescription
-     * @param longDescription Extended description in HTML format
-     */
-    void setLongDescription(const QString& longDescription);
+    bool getAllowPluginCreationFromStandardGui() const;
 
 public: // Number of instances
 
-    
     /**
      * Get number of plugin instances currently loaded
      * @return Number of plugin instances currently loaded
@@ -315,16 +297,22 @@ protected:
      */
     static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const DataType& dataType);
 
-public: // Views
+public: // Miscellaneous
 
     /** View the shortcut map */
     virtual void viewShortcutMap();
 
-public: // Action getters
+    /**
+     * Get plugin metadata
+     * @return Reference to plugin metadata
+     */
+    PluginMetadata& getPluginMetadata();
 
-    gui::TriggerAction& getTriggerHelpAction() { return _triggerHelpAction; };
-    gui::TriggerAction& getTriggerReadmeAction() { return _triggerReadmeAction; };
-    gui::TriggerAction& getVisitRepositoryAction() { return _visitRepositoryAction; };
+    /**
+     * Get plugin metadata
+     * @return Reference to plugin metadata
+     */
+    const PluginMetadata& getPluginMetadata() const;
 
 signals:
 
@@ -353,36 +341,58 @@ signals:
     void statusBarActionChanged(gui::PluginStatusBarAction* statusBarAction);
 
     /**
-     * Signals that the short description changed from \p previousShortDescription to \p currentShortDescription
-     * @param previousShortDescription Previous short description
-     * @param currentShortDescription Current short description
+     * Signals that the plugin title changed from \p previousPluginTitle to \p currentPluginTitle
+     * @param previousPluginTitle Previous plugin title
+     * @param currentPluginTitle Current plugin title
      */
-    void shortDescriptionChanged(const QString& previousShortDescription, const QString& currentShortDescription);
-    
+    void pluginTitleChanged(const QString& previousPluginTitle, const QString& currentPluginTitle);
+
     /**
-     * Signals that the long description changed from \p previousLongDescription to \p currentLongDescription
-     * @param previousLongDescription Previous long description
-     * @param currentLongDescription Current long description
+     * Signals that the description changed from \p previousDescription to \p currentDescription
+     * @param previousDescription Previous description
+     * @param currentDescription Current description
      */
-    void longDescriptionChanged(const QString& previousLongDescription, const QString& currentLongDescription);
+    void descriptionChanged(const QString& previousDescription, const QString& currentDescription);
+
+    /**
+     * Signals that the summary changed from \p previousSummary to \p currentSummary
+     * @param previousSummary Previous summary
+     * @param currentSummary Current summary
+     */
+    void summaryChanged(const QString& previousSummary, const QString& currentSummary);
+
+    /**
+     * Signals that the authors changed from \p previousAuthors to \p currentAuthors
+     * @param previousAuthors Previous authors
+     * @param currentAuthors Current authors
+     */
+    void authorsChanged(const QStringList previousAuthors, const QStringList& currentAuthors);
+
+    /**
+     * Signals that the copyright notice changed from \p previousCopyrightNotice to \p currentCopyrightNotice
+     * @param previousCopyrightNotice Previous copyright notice
+     * @param currentCopyrightNotice Current copyright notice
+     */
+    void copyrightNoticeChanged(const QString& previousCopyrightNotice, const QString& currentCopyrightNotice);
+
+    /**
+     * Signals that the about text in Markdown format changed from \p previousAboutMarkdown to \p currentAboutMarkdown
+     * @param previousAboutMarkdown Previous about text in Markdown format
+     * @param currentAboutMarkdown Current about text in Markdown format
+     */
+    void aboutMarkdownChanged(const QString& previousAboutMarkdown, const QString& currentAboutMarkdown);
 
 private:
     QString                                 _kind;                                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
     Type                                    _type;                                  /** Type of plugin (e.g. analysis, data, loader, writer & view) */
-    QString                                 _guiName;                               /** Name of the plugin in the GUI */
-    QString                                 _version;                               /** Plugin version */
     gui::PluginTriggerAction                _pluginTriggerAction;                   /** Standard plugin trigger action that produces an instance of the plugin without any special behavior (respects the maximum number of allowed instances) */
     std::uint32_t                           _numberOfInstances;                     /** Number of plugin instances */
     std::uint32_t                           _numberOfInstancesProduced;             /** Number of plugin instances produced since the beginning of the factory */
     std::uint32_t                           _maximumNumberOfInstances;              /** Maximum number of plugin instances (unlimited when -1) */
-    gui::TriggerAction                      _triggerHelpAction;                     /** Trigger action that triggers help (icon and text are already set) */
-    gui::TriggerAction                      _triggerReadmeAction;                   /** Trigger action that displays the read me markdown text in a modal dialog (if the read me markdown file URL is valid) */
-    gui::TriggerAction                      _visitRepositoryAction;                 /** Trigger action that opens an external browser and visits the GitHub repository */
     gui::PluginGlobalSettingsGroupAction*   _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
-    util::ShortcutMap                       _shortcutMap;                           /** Shortcut cheatsheet map */
-    QString                                 _shortDescription;                      /** Shortly describes the plugin */
-    QString                                 _longDescription;                       /** Extended description in HTML format */
+    bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
+    PluginMetadata                          _pluginMetadata;                        /** Plugin metadata */
 };
 
 }

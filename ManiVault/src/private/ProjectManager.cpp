@@ -215,7 +215,7 @@ ProjectManager::ProjectManager(QObject* parent) :
     });
 
     connect(&_backToProjectAction, &TriggerAction::triggered, this, [this]() -> void {
-        mv::help().getShowLearningCenterAction().setChecked(false);
+        mv::help().getShowLearningCenterPageAction().setChecked(false);
         getShowStartPageAction().setChecked(false);
     });
 }
@@ -341,7 +341,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
-        
+
         const auto scopedState = ScopedState(this, State::OpeningProject);
 
         if (QFileInfo(filePath).isDir())
@@ -506,7 +506,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 auto& miscellaneousSettings = mv::settings().getMiscellaneousSettings();
 
                 miscellaneousSettings.getStatusBarVisibleAction().setChecked(_project->getStatusBarVisibleAction().isChecked());
-                miscellaneousSettings.getStatusBarOptionsAction().setSelectedOptions(_project->getStatusBarOptionsAction().getSelectedOptions());
+
+                /* TODO: Fix plugin status bar action visibility
+            	miscellaneousSettings.getStatusBarOptionsAction().setSelectedOptions(_project->getStatusBarOptionsAction().getSelectedOptions());
+                */
             }
 
             unsetTemporaryDirPath(TemporaryDirType::Open);
@@ -527,6 +530,35 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         projects().getProjectSerializationTask().setFinished();
     }
+}
+
+void ProjectManager::openProject(QUrl url, bool importDataOnly, bool loadWorkspace)
+{
+    try {
+   //     if (hasProject())
+			//saveProjectAs();
+
+        auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
+
+        connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
+            mv::projects().openProject(projectDownloader->getDownloadedFilePath());
+            projectDownloader->deleteLater();
+		});
+
+        connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
+            qDebug() << "Download aborted by user";
+		});
+
+        projectDownloader->download(url);
+	}
+	catch (std::exception& e)
+	{
+	    exceptionMessageBox("Unable to load ManiVault project", e);
+	}
+	catch (...)
+	{
+	    exceptionMessageBox("Unable to load ManiVault project");
+	}
 }
 
 void ProjectManager::importProject(QString filePath /*= ""*/)
@@ -783,12 +815,18 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             auto currentProject = getCurrentProject();
 
             currentProject->getOverrideApplicationStatusBarAction().cacheState();
+
+            /* TODO: Fix plugin status bar action visibility
             currentProject->getStatusBarVisibleAction().cacheState();
             currentProject->getStatusBarOptionsAction().cacheState();
+            */
 
             currentProject->getOverrideApplicationStatusBarAction().setChecked(true);
+
+            /* TODO: Fix plugin status bar action visibility
             currentProject->getStatusBarVisibleAction().setChecked(true);
             currentProject->getStatusBarOptionsAction().setSelectedOptions({ "Logging", "Background Tasks", "Foreground Tasks" });
+            */
 
             ToggleAction    passwordProtectedAction(this, "Password Protected");
             StringAction    passwordAction(this, "Password");
@@ -859,7 +897,10 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
                     settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
                     settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
+
+                    /* TODO: Fix plugin status bar action visibility
                     settingsGroupAction.addAction(&currentProject->getStatusBarOptionsAction());
+                    */
 
                     auto titleLayout = new QHBoxLayout();
 
@@ -928,9 +969,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
 
             currentProject->getOverrideApplicationStatusBarAction().restoreState();
+
+			/* TODO: Fix plugin status bar action visibility
             currentProject->getStatusBarVisibleAction().restoreState();
             currentProject->getStatusBarOptionsAction().restoreState();
-
+            */
             unsetTemporaryDirPath(TemporaryDirType::Publish);
         }
         emit projectPublished(*_project);
@@ -1046,7 +1089,10 @@ void ProjectManager::createProject()
     }
     emit projectCreated(*_project);
 
+    mv::help().getShowLearningCenterPageAction().setChecked(false);
+
     _showStartPageAction.setChecked(false);
+    
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)

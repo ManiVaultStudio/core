@@ -43,7 +43,7 @@ public:
     plugin::Plugins getPlugins() const;
 
     /**
-     * Set the \p plugins from which can be picked (mode is set to Mode::Manual)
+     * Set the \p plugins from which can be picked (mode is set to StorageMode::Manual)
      * @param plugins Plugins from which can be picked
      * @param silent Whether the signal pluginsChanged is emitted
      */

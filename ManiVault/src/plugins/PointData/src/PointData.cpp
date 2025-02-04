@@ -16,9 +16,9 @@
 #include <util/Serialization.h>
 #include <util/Timer.h>
 
+#include <QDebug>
 #include <QPainter>
 #include <QtCore>
-#include <QtDebug>
 
 #include <cstring>
 #include <set>
@@ -49,7 +49,16 @@ mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) 
 
 std::uint32_t PointData::getNumPoints() const
 {
-    return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
+    if (_numDimensions == 0)
+    {
+        qWarning() << "Number of dimensions is 0 in point data ";
+        return 0;
+    }
+
+    if (_isDense)
+        return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
+    else
+        return _numRows;
 }
 
 std::uint32_t PointData::getNumDimensions() const
@@ -65,8 +74,15 @@ std::uint64_t PointData::getNumberOfElements() const
 
 std::uint64_t  PointData::getRawDataSize() const
 {
-    std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
-    return elementSize * getNumberOfElements();
+    if (_isDense)
+    {
+        std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
+        return elementSize * getNumberOfElements();
+    }
+    else
+    {
+        return (_numRows + 4) * sizeof(size_t) + _sparseData.getNumNonZeros() * (sizeof(size_t) + sizeof(float));
+    }
 }
 
 void* PointData::getDataVoidPtr()
@@ -128,34 +144,94 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
     const auto data                 = variantMap["Data"].toMap();
     const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-    const auto numberOfDimensions   =variantMap["NumberOfDimensions"].toUInt();
+    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toUInt();
     const auto numberOfElements     = numberOfPoints * numberOfDimensions;
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
 
+    bool isDense = true;
+    if (variantMap.contains("Dense"))
+        isDense = variantMap["Dense"].toBool();;
 
-    setElementTypeSpecifier(elementTypeIndex);
-    resizeVector(numberOfElements);
-    populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
+    _isDense = isDense;
     _numDimensions = numberOfDimensions;
-   
+
+    if (_isDense)
+    {
+        setElementTypeSpecifier(elementTypeIndex);
+        resizeVector(numberOfElements);
+        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
+    }
+    else
+    {
+        variantMapMustContain(variantMap, "NumberOfNonZeroElements");
+
+        const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
+
+        std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
+
+        populateDataBufferFromVariantMap(rawData, bytes.data());
+        _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
+
+        size_t offset = 0;
+        std::vector<size_t> rowPointers(numberOfPoints + 1);
+        std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
+
+        offset += rowPointers.size() * sizeof(size_t);
+        std::vector<size_t> colIndices(numberOfNonZeroElements);
+        std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(size_t));
+
+        offset += colIndices.size() * sizeof(float);
+        std::vector<float> values(numberOfNonZeroElements);
+        std::memcpy(values.data(), bytes.data() + offset, values.size() * sizeof(float));
+
+        _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
+
+        qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
+    }
 }
 
 QVariantMap PointData::toVariantMap() const
 {
-    const auto typeSpecifier        = getElementTypeSpecifier();
-    const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
-    const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
-    const auto numberOfElements     = getNumberOfElements();
+    const auto numberOfElements = getNumberOfElements();
 
-    QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize(), true);
+    if (_isDense)
+    {
+        const auto typeSpecifier = getElementTypeSpecifier();
+        const auto typeSpecifierName = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
+        const auto typeIndex = static_cast<std::int32_t>(typeSpecifier);
 
-    return {
-        { "TypeIndex", QVariant::fromValue(typeIndex) },
-        { "TypeName", QVariant(typeSpecifierName) },
-        { "Raw", QVariant::fromValue(rawData) },
-        { "NumberOfElements", QVariant::fromValue(numberOfElements) }
-    };
+        QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize(), true);
+
+        return {
+            { "TypeIndex", QVariant::fromValue(typeIndex) },
+            { "TypeName", QVariant(typeSpecifierName) },
+            { "Raw", QVariant::fromValue(rawData) },
+            { "NumberOfElements", QVariant::fromValue(numberOfElements) }
+        };
+    }
+    else
+    {
+        std::vector<char> bytes;
+
+        const std::vector<size_t>& indexPointers = _sparseData.getIndexPointers();
+        const std::vector<size_t>& colIndices = _sparseData.getColIndices();
+        const std::vector<float>& values = _sparseData.getValues();
+
+        const char* indexPointersBytes = (const char*) (indexPointers.data());
+        const char* colIndicesBytes = (const char*) (colIndices.data());
+        const char* valuesBytes = (const char*) (values.data());
+
+        bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
+        bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
+        bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
+
+        QVariantMap rawData = rawDataToVariantMap(bytes.data(), bytes.size(), true);
+
+        return {
+            { "Raw", QVariant::fromValue(rawData) }
+        };
+    }
 }
 
 void PointData::extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const
@@ -170,9 +246,8 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
             const auto resultSize = result.size();
 
             for (std::size_t i{}; i < resultSize; ++i)
-            {
                 result[i] = vec[i * _numDimensions + dimensionIndex];
-            }
+
         },
         _variantOfVectors);
 }
@@ -180,23 +255,36 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
 void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
-    CheckDimensionIndex(dimensionIndex1);
-    CheckDimensionIndex(dimensionIndex2);
+    if (_isDense)
+    {
+        CheckDimensionIndex(dimensionIndex1);
+        CheckDimensionIndex(dimensionIndex2);
 
-    result.resize(getNumPoints());
+        result.resize(getNumPoints());
 
-    std::visit(
-        [&result, this, dimensionIndex1, dimensionIndex2](const auto& vec)
-        {
-            const auto resultSize = result.size();
-
-            for (std::size_t i{}; i < resultSize; ++i)
+        std::visit(
+            [&result, this, dimensionIndex1, dimensionIndex2](const auto& vec)
             {
-                const auto n = i * _numDimensions;
-                result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
-            }
-        },
-        _variantOfVectors);
+                const auto resultSize = result.size();
+
+                for (std::size_t i{}; i < resultSize; ++i)
+                {
+                    const auto n = i * _numDimensions;
+                    result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
+                }
+            },
+            _variantOfVectors);
+    }
+    else
+    {
+        result.resize(getNumPoints());
+
+        std::vector<float> col1 = _sparseData.getDenseCol(dimensionIndex1);
+        std::vector<float> col2 = _sparseData.getDenseCol(dimensionIndex2);
+
+        for (size_t i = 0; i < result.size(); i++)
+            result[i].set(col1[i], col2[i]);
+    }
 }
 
 
@@ -614,7 +702,6 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
         }
     }
     else {
-
         // In an array the size of the full raw data, mark selected points as true
         std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
 
@@ -1056,6 +1143,11 @@ QVariantMap Points::toVariantMap() const
     variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
+
+    variantMap["Dense"]                 = Experimental::isDense(this);
+
+    if (!Experimental::isDense(this))
+        variantMap["NumberOfNonZeroElements"] = QVariant::fromValue(Experimental::getNumNonZeroElements(this));
     
     return variantMap;
 }
@@ -1071,11 +1163,7 @@ QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 
 QUrl PointDataFactory::getReadmeMarkdownUrl() const
 {
-#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/PointData/README.md");
-#else
     return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/PointData/README.md");
-#endif
 }
 
 QUrl PointDataFactory::getRepositoryUrl() const

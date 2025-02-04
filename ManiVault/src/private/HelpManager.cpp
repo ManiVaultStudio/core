@@ -4,13 +4,23 @@
 
 #include "HelpManager.h"
 
-#include "HelpManagerVideosModel.h"
-#include "HelpManagerVideosFilterModel.h"
+#include <models/LearningCenterVideosFilterModel.h>
+#include <models/LearningCenterTutorialsFilterModel.h>
+
+#include <util/Exception.h>
+
+#include <actions/WatchVideoAction.h>
 
 #include <Application.h>
+#include <Task.h>
 
 #include <QDesktopServices>
-#include <QMainWindow>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QUrl>
+
+#include "DatasetsToRemoveModel.h"
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -24,15 +34,16 @@ namespace mv
 
 HelpManager::HelpManager(QObject* parent) :
     AbstractHelpManager(parent),
-    _showLearningCenterAction(this, "Learning center"),
+    _showLearningCenterPageAction(this, "Learning center"),
     _toDiscordAction(this, "Join us..."),
     _toWebsiteAction(this, "Website"),
     _toWikiAction(this, "Wiki"),
     _toRepositoryAction(this, "Repository"),
-    _toLearningCenterAction(this, "Go to learning center")
+    _toLearningCenterAction(this, "Go to learning center"),
+    _fileDownloader(FileDownloader::StorageMode::File, Task::GuiScope::Background)
 {
-    _showLearningCenterAction.setIconByName("chalkboard-teacher");
-    _showLearningCenterAction.setToolTip("Go to the learning center");
+    _showLearningCenterPageAction.setIconByName("chalkboard-teacher");
+    _showLearningCenterPageAction.setToolTip("Go to the learning center");
 
     _toDiscordAction.setIcon(Application::getIconFont("FontAwesomeBrands", 5, 14).getIcon("discord"));
     _toDiscordAction.setToolTip("Get in touch on our Discord");
@@ -73,10 +84,38 @@ HelpManager::HelpManager(QObject* parent) :
     });
 
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, [this]() -> void {
-        _showLearningCenterAction.setChecked(true);
+        _showLearningCenterPageAction.setChecked(true);
     });
 
-    _videosModel.populateFromServer();
+    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
+        try
+        {
+            const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
+            const auto videos       = jsonDocument.object()["videos"].toArray();
+            const auto tutorials    = jsonDocument.object()["tutorials"].toArray();
+
+            for (const auto video : videos) {
+                auto videoMap = video.toVariant().toMap();
+
+                addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
+            }
+
+            emit videosModelPopulatedFromWebsite();
+
+            for (const auto tutorial : tutorials)
+                addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+
+            emit tutorialsModelPopulatedFromWebsite();
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to process learning center JSON", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to process learning center JSON");
+        }
+	});
 }
 
 HelpManager::~HelpManager()
@@ -96,6 +135,9 @@ void HelpManager::initialize()
         return;
 
     beginInitialization();
+    {
+        _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
+    }
     endInitialization();
 }
 
@@ -111,31 +153,27 @@ void HelpManager::reset()
     endReset();
 }
 
-Videos HelpManager::getVideos(const QStringList& tags) const
+void HelpManager::addVideo(const LearningCenterVideo* video)
 {
-    HelpManagerVideosFilterModel videosFilterModel;
+    _videosModel.addVideo(video);
+}
 
-    videosFilterModel.setSourceModel(&const_cast<HelpManager*>(this)->_videosModel);
+LearningCenterVideos HelpManager::getVideos(const QStringList& tags) const
+{
+    LearningCenterVideosFilterModel videosFilterModel;
+
+    auto videosModel = &const_cast<HelpManager*>(this)->_videosModel;
+
+    videosFilterModel.setSourceModel(videosModel);
     videosFilterModel.getTagsFilterAction().initialize(tags, tags);
 
-    Videos videos;
+    LearningCenterVideos videos;
 
     for (int rowIndex = 0; rowIndex < videosFilterModel.rowCount(); rowIndex++) {
-        const auto videoIndex = videosFilterModel.mapToSource(videosFilterModel.index(rowIndex, 0));
+        const auto videoIndex   = videosFilterModel.mapToSource(videosFilterModel.index(rowIndex, 0));
+        const auto videoItem    = dynamic_cast<LearningCenterVideosModel::Item*>(videosModel->itemFromIndex(videoIndex));
 
-        //const auto videoUrlString = videoIndex.siblingAtColumn(5).data().toString();
-
-        //if (!urlExists(videoUrlString))
-        //    continue;
-
-        videos.emplace_back(Video({
-            videoIndex.siblingAtColumn(0).data().toString(),        // Title
-            videoIndex.siblingAtColumn(1).data().toStringList(),    // Tags
-            videoIndex.siblingAtColumn(2).data().toDateTime(),      // Date
-            videoIndex.siblingAtColumn(3).data().toString(),        // Summary
-            videoIndex.siblingAtColumn(4).data().toString(),        // YouTubeId
-            videoIndex.siblingAtColumn(5).data().toString()         // Url
-        }));
+        videos.push_back(videoItem->getVideo());
     }
 
     return videos;
@@ -149,6 +187,98 @@ void HelpManager::addNotification(const QString& title, const QString& descripti
 void HelpManager::initializeNotifications(QWidget* parentWidget)
 {
     _notifications.setParentWidget(parentWidget);
+}
+
+QMenu* HelpManager::getVideosMenu() const
+{
+    auto videosMenu = new QMenu("Videos");
+
+    videosMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("video"));
+
+    for (const auto video : getVideos({})) {
+        auto videoAction = new WatchVideoAction(videosMenu, video->getTitle(), video);
+
+        videoAction->setIconByName("external-link-square-alt");
+
+        videosMenu->addAction(videoAction);
+    }
+
+    return videosMenu;
+}
+
+const LearningCenterVideosModel& HelpManager::getVideosModel() const
+{
+    return _videosModel;
+}
+
+void HelpManager::addTutorial(const util::LearningCenterTutorial* tutorial)
+{
+    _tutorialsModel.addTutorial(tutorial);
+}
+
+LearningCenterTutorials HelpManager::getTutorials(const QStringList& includeTags, const QStringList& excludeTags /*= QStringList()*/) const
+{
+    LearningCenterTutorialsFilterModel tutorialsFilterModel;
+
+    auto tutorialsModel = &const_cast<HelpManager*>(this)->_tutorialsModel;
+
+    tutorialsFilterModel.setSourceModel(tutorialsModel);
+    tutorialsFilterModel.getTagsFilterAction().initialize(includeTags, includeTags);
+    tutorialsFilterModel.getExcludeTagsFilterAction().initialize(excludeTags, excludeTags);
+
+    LearningCenterTutorials tutorials;
+
+    for (int rowIndex = 0; rowIndex < tutorialsFilterModel.rowCount(); rowIndex++) {
+        const auto tutorialIndex    = tutorialsFilterModel.mapToSource(tutorialsFilterModel.index(rowIndex, 0));
+        const auto itemIndex        = tutorialsModel->itemFromIndex(tutorialIndex);
+        const auto tutorialItem     = dynamic_cast<LearningCenterTutorialsModel::Item*>(itemIndex);
+
+        tutorials.push_back(tutorialItem->getTutorial());
+    }
+
+    return tutorials;
+}
+
+const LearningCenterTutorialsModel& HelpManager::getTutorialsModel() const
+{
+    return _tutorialsModel;
+}
+
+QMenu* HelpManager::getTutorialsMenu() const
+{
+    auto tutorialsMenu = new QMenu("Tutorials");
+
+    tutorialsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
+
+    for (const auto tutorial : getTutorials({}, { "Installation" })) {
+        
+        auto tutorialAction = new TriggerAction(tutorialsMenu, tutorial->getTitle());
+
+        tutorialAction->setIconByName(tutorial->getIconName());
+
+        if (tutorial->hasProject()) {
+            connect(tutorialAction, &TriggerAction::triggered, tutorialAction, [tutorial]() -> void {
+                mv::projects().openProject(tutorial->getProjectUrl());
+            });
+        } else {
+            connect(tutorialAction, &TriggerAction::triggered, tutorialAction, [tutorial]() -> void {
+                if (!mv::projects().hasProject())
+                    mv::projects().newBlankProject();
+
+                if (auto tutorialPlugin = mv::plugins().requestViewPlugin("Tutorial")) {
+                    if (auto pickerAction = dynamic_cast<OptionAction*>(tutorialPlugin->findChildByPath("Pick tutorial")))
+                        pickerAction->setCurrentText(tutorial->getTitle());
+
+                    if (auto toolbarAction = dynamic_cast<HorizontalGroupAction*>(tutorialPlugin->findChildByPath("Toolbar")))
+                        toolbarAction->setVisible(false);
+                }
+			});
+        }
+
+        tutorialsMenu->addAction(tutorialAction);
+    }
+
+    return tutorialsMenu;
 }
 
 }

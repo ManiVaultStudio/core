@@ -84,33 +84,29 @@ class HdpsCoreConan(ConanFile):
 
     def system_requirements(self):
         if tools.os_info.is_linux:
-            if tools.os_info.with_apt:
-                installer = tools.SystemPackageTool()
-                installer.install("mesa-common-dev")
-                installer.install("libgl1-mesa-dev")
-                installer.install("libxcomposite-dev")
-                installer.install("libxcursor-dev")
-                installer.install("libxi-dev")
-                installer.install("libnss3-dev")
-                installer.install("libnspr4-dev")
-                installer.install("libfreetype6-dev")
-                installer.install("libfontconfig1-dev")
-                installer.install("libxtst-dev")
-                installer.install("libasound2-dev")
-                installer.install("libdbus-1-dev")
-                min_cmake_version = os.environ.get("CONAN_MINIMUM_CMAKE_VERSION")
-                if min_cmake_version is not None:
-                    subprocess.run(f"pip3 install cmake>={min_cmake_version}".split())
-                    print("Path is: ", os.environ["PATH"])
-                    result = subprocess.run(
-                        "which cmake".split(),
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                    )
-                    os.environ["CONAN_CMAKE_PROGRAM"] = result.stdout.decode(
-                        "utf-8"
-                    ).rstrip()
-                    print(f'Cmake at {os.environ["CONAN_CMAKE_PROGRAM"]}')
+            if not tools.os_info.with_apt:
+                print("Cannot install linux dependencies - no apt available")
+                return
+
+            linux_requirements = [
+                "mesa-common-dev", 
+                "libgl1-mesa-dev",
+                "libxcomposite-dev",
+                "libxcursor-dev",
+                "libxi-dev",
+                "libnss3-dev",
+                "libnspr4-dev",
+                "libfreetype6-dev",
+                "libfontconfig1-dev",
+                "libxtst-dev",
+                "libasound2-dev",
+                "libdbus-1-dev"
+                ]
+            
+            installer = tools.SystemPackageTool()
+            for package in linux_requirements:
+                installer.install(package)
+
         # if tools.os_info.is_macos:
         #    installer = tools.SystemPackageTool()
         #    installer.install("libomp", update=False)
@@ -120,37 +116,38 @@ class HdpsCoreConan(ConanFile):
             del self.options.fPIC
 
     def generate(self):
-        # This prevents overlap between the hdps/core (source folder)
-        # and the HDPS (build) folder. This happens in the Macos build
-        # Build folder can't be set here since conan 1.50
-        # possibly via CMakeDeps and CMakeToolchain
-        # self.build_folder = self.build_folder + '/hdps-common'
-        deps = CMakeDeps(self)
-        deps.generate()
-
         generator = None
-        # TODO Generators can be moved to profiles
         if self.settings.os == "Macos":
             generator = "Xcode"
         if self.settings.os == "Linux":
             generator = "Ninja Multi-Config"
+
         tc = CMakeToolchain(self, generator=generator)
-        if self.settings.os == "Windows" and self.options.shared:
-            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
-            tc.variables["CMAKE_CXX_STANDARD_REQUIRED"] = "ON"
+
+        tc.variables["CMAKE_CXX_STANDARD_REQUIRED"] = "ON"
+
         # Use the Qt provided .cmake files
-        qtpath = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
-        qt_root = str(list(qtpath.glob("**/Qt6Config.cmake"))[0].parents[3].as_posix())
+        qt_path = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
+        qt_cfg = list(qt_path.glob("**/Qt6Config.cmake"))[0]
+        qt_dir = qt_cfg.parents[0].as_posix()
+        qt_root = qt_cfg.parents[3].as_posix()
+
+        # for Qt >= 6.4.2, remember to also up the min cmake version to 3.22
+        #tc.variables["Qt6_DIR"] = qt_dir
+
+        # for Qt < 6.4.2
+        tc.variables["Qt6_ROOT"] = qt_root
+
+        # for ads, may also be remove with Qt >= 6.4.2 and Qt6_DIR usage
         tc.variables["CMAKE_PREFIX_PATH"] = f"{qt_root}"
-        #tc.variables["Qt6_ROOT"] = qt_root
-        
+
         # Set the installation directory for ManiVault based on the MV_INSTALL_DIR environment variable
         # or if none is specified, set it to the build/install dir.
         if not os.environ.get("MV_INSTALL_DIR", None):
             os.environ["MV_INSTALL_DIR"] = os.path.join(self.build_folder, "install")
         print("MV_INSTALL_DIR: ", os.environ["MV_INSTALL_DIR"])
         self.install_dir = pathlib.Path(os.environ["MV_INSTALL_DIR"]).as_posix()
+
         # Give the installation directory to CMake
         tc.variables["MV_INSTALL_DIR"] = self.install_dir
 
@@ -161,6 +158,7 @@ class HdpsCoreConan(ConanFile):
         # OS specific settings 
         if self.settings.os == "Linux":
             tc.variables["CMAKE_CONFIGURATION_TYPES"] = "Debug;Release"
+
         try:
             tc.generate()
         except KeyError as e:

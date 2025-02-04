@@ -12,7 +12,6 @@
 
 #include <QDebug>
 #include <QDragEnterEvent>
-#include <QDragLeaveEvent>
 #include <QWindow>
 
 #ifdef _DEBUG
@@ -32,7 +31,7 @@ WidgetActionViewWidget::WidgetActionViewWidget(QWidget* parent, WidgetAction* ac
     setAcceptDrops(true);
 }
 
-WidgetAction* WidgetActionViewWidget::getAction()
+WidgetAction* WidgetActionViewWidget::getAction() const
 {
     return _action;
 }
@@ -93,6 +92,14 @@ std::int32_t WidgetActionViewWidget::getWidgetFlags() const
 bool WidgetActionViewWidget::isPopup() const
 {
     return getWidgetFlags() & PopupLayout;
+}
+
+void WidgetActionViewWidget::mousePressEvent(QMouseEvent* event)
+{
+    if (isPopup() && !rect().contains(event->pos()))
+        close();
+    else
+        QWidget::mousePressEvent(event);
 }
 
 void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)

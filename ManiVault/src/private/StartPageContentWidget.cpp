@@ -3,9 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StartPageContentWidget.h"
-
-#include "StartPageAction.h"
 #include "StartPageWidget.h"
+
+#include "PageAction.h"
 
 #include <CoreInterface.h>
 
@@ -21,6 +21,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleRecentProjectsAction(this, "Recent Projects", true),
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleProjectFromDataAction(this, "Project From Data", true),
+    _toggleTutorialsAction(this, "Tutorials", true),
     _settingsAction(this, "Settings"),
     _toLearningCenterAction(this, "Learning center"),
     _toolbarAction(this, "Toolbar settings"),
@@ -32,6 +33,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
     _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
     _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
+    _toggleTutorialsAction.setSettingsPrefix("StartPage/ToggleTutorials");
+
+    _toggleProjectFromWorkspaceAction.setEnabled(false);
 
     _settingsAction.setText("Toggle Views");
     _settingsAction.setToolTip("Adjust page settings");
@@ -47,6 +51,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _settingsAction.addAction(&_toggleRecentProjectsAction);
     _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);
+    _settingsAction.addAction(&_toggleTutorialsAction);
     _settingsAction.addAction(&_compactViewAction);
 
     getColumnsLayout().addWidget(&_openProjectWidget);
@@ -66,7 +71,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, []() -> void {
         mv::projects().getShowStartPageAction().setChecked(false);
-        mv::help().getShowLearningCenterAction().setChecked(true);
+        mv::help().getShowLearningCenterPageAction().setChecked(true);
     });
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
@@ -74,7 +79,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
 void StartPageContentWidget::updateActions()
 {
-    StartPageAction::setCompactView(_compactViewAction.isChecked());
+    PageAction::setCompactView(_compactViewAction.isChecked());
 
     _openProjectWidget.updateActions();
     _getStartedWidget.updateActions();

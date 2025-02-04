@@ -19,18 +19,22 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     _statusBarOptionsAction(this, "Status bar options", {}, { "Example View OpenGL", "Start Page", "Version", "Plugins", "Logging", "Background Tasks", "Foreground Tasks", "Settings", "Workspace" })
 {
     _statusBarOptionsAction.setDefaultWidgetFlag(OptionsAction::WidgetFlag::Selection);
+    _statusBarOptionsAction.setEnabled(false);
 
     _askConfirmationBeforeRemovingDatasetsAction.setToolTip("Ask confirmation prior to removal of datasets");
     _keepDescendantsAfterRemovalAction.setToolTip("If checked, descendants will not be removed and become orphans (placed at the root of the hierarchy)");
     _showSimplifiedGuidsAction.setToolTip("If checked, views will show a truncated version of a globally unique identifier");
 
+    /* TODO: Fix plugin status bar action visibility
     const auto updateStatusBarOptionsActionReadOnly = [this]() -> void {
         _statusBarOptionsAction.setEnabled(_statusBarVisibleAction.isChecked());
     };
+    
 
     updateStatusBarOptionsActionReadOnly();
 
     connect(&_statusBarVisibleAction, &ToggleAction::toggled, updateStatusBarOptionsActionReadOnly);
+    */
 
     addAction(&_ignoreLoadingErrorsAction);
     addAction(&_askConfirmationBeforeRemovingDatasetsAction);
@@ -42,6 +46,7 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
 
 void MiscellaneousSettingsAction::updateStatusBarOptionsAction()
 {
+    /* TODO: Fix plugin status bar action visibility
     const auto previousStatusBarOptions = _statusBarOptionsAction.getOptions();
 
     QStringList statusBarOptions;
@@ -50,6 +55,7 @@ void MiscellaneousSettingsAction::updateStatusBarOptionsAction()
         statusBarOptions << statusBarAction->text();
 
     _statusBarOptionsAction.setOptions(statusBarOptions);
+    */
 }
 
 }

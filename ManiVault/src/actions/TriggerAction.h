@@ -55,7 +55,7 @@ public:
         void resizeEvent(QResizeEvent* event) override;
 
     protected:
-        TriggerAction* _triggerAction;     /** Pointer to trigger action */
+        TriggerAction*  _triggerAction;     /** Pointer to trigger action */
         std::int32_t    _widgetFlags;       /** Widget flags */
 
         friend class TriggerAction;

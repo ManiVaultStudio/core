@@ -8,6 +8,10 @@
 
 #include <event/EventListener.h>
 
+#include "SelectionGroup.h"
+
+#include <QTimer>
+
 namespace mv
 {
 
@@ -31,6 +35,8 @@ public:
 
     /** Resets the contents of the event manager */
     void reset() override;
+
+    void addSelectionGroup(KeyBasedSelectionGroup& selectionGroup) override { _selectionGroups.push_back(std::move(selectionGroup)); }
 
     /**
      * Notify listeners that a new dataset has been added to the core
@@ -95,7 +101,11 @@ public:
     void unregisterEventListener(EventListener* eventListener) override;
 
 private:
-    std::vector<EventListener*>     _eventListeners;        /** List of classes listening for core events */
+    std::vector<EventListener*>         _eventListeners;    /** List of classes listening for core events */
+
+    std::vector<KeyBasedSelectionGroup> _selectionGroups;   /** List of key-based selection groups used to synchronize selections between datasets */
+
+    QTimer* _selectionPollingTimer;
 };
 
 }

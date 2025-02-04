@@ -12,22 +12,24 @@ using namespace mv::gui;
 
 LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr*/) :
     PageContentWidget(Qt::Vertical, parent),
+    _showVideosAction(this, "Show videos", true),
+    _showTutorialsAction(this, "Show tutorials (coming soon)", true),
+    _showExamplesAction(this, "Show examples (coming soon)", false),
+    _showPluginResourcesAction(this, "Show plugin resources", false),
+    _settingsAction(this, "Page settings"),
+    _toStartPageAction(this, "To start page"),
+    _toolbarAction(this, "Toolbar settings"),
     _videosWidget(this),
     _tutorialsWidget(this),
     _examplesWidget(this),
-    _pluginResourcesWidget(this),
-    _showVideosAction(this, "Show videos", true),
-    _showTutorialsAction(this, "Show tutorials (coming soon)", false),
-    _showExamplesAction(this, "Show examples (coming soon)", false),
-    _showPluginResourcesAction(this, "Show plugin resources", true),
-    _settingsAction(this, "Page settings"),
-    _toStartPageAction(this, "To start page"),
-    _toolbarAction(this, "Toolbar settings")
+    _pluginResourcesWidget(this)
 {
+    _tutorialsWidget.getHierarchyWidget().getToolbarAction().addAction(&_tutorialsWidget.getTutorialsFilterModel().getTagsFilterAction());
+
     auto& rowsLayout = getRowsLayout();
 
     rowsLayout.addWidget(&_videosWidget, 2);
-    rowsLayout.addWidget(&_tutorialsWidget);
+    rowsLayout.addWidget(&_tutorialsWidget, 2);
     rowsLayout.addWidget(&_examplesWidget);
     rowsLayout.addWidget(&_pluginResourcesWidget);
 
@@ -36,7 +38,6 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     _showExamplesAction.setSettingsPrefix("LearningPage/ShowExamples");
     _showPluginResourcesAction.setSettingsPrefix("LearningPage/ShowPluginResources");
 
-    _showTutorialsAction.setEnabled(false);
     _showExamplesAction.setEnabled(false);
 
     const auto toggleSections = [this]() -> void {
@@ -84,7 +85,7 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     getMainLayout().addWidget(_toolbarAction.createWidget(this));
 
     connect(&_toStartPageAction, &TriggerAction::triggered, this, []() -> void {
-        mv::help().getShowLearningCenterAction().setChecked(false);
+        mv::help().getShowLearningCenterPageAction().setChecked(false);
         mv::projects().getShowStartPageAction().setChecked(true);
     });
 }

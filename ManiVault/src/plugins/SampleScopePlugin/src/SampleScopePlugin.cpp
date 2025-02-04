@@ -84,6 +84,9 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
             connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::canViewChanged, this, updateNoSamplesOverlayWidget);
         }
     });
+
+    getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
+    getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "SampleScopePlugin" }));
 }
 
 void SampleScopePlugin::init()
@@ -114,6 +117,21 @@ QVariantMap SampleScopePlugin::toVariantMap() const
     return variantMap;
 }
 
+SampleScopePluginFactory::SampleScopePluginFactory()
+{
+    getPluginMetadata().setDescription("For displaying sample information from another view plugin");
+    getPluginMetadata().setSummary("This view plugin displays sample information obtained from another view plugin.");
+    getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
+    getPluginMetadata().setAuthors({
+        { "T. Kroes", { "Lead software architect" }, { "LUMC" } },
+	});
+    getPluginMetadata().setOrganizations({
+        { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
+        { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
+	});
+    getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
+}
+
 QIcon SampleScopePluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return Application::getIconFont("FontAwesome").getIcon("microscope", color);
@@ -121,7 +139,7 @@ QIcon SampleScopePluginFactory::getIcon(const QColor& color /*= Qt::black*/) con
 
 QUrl SampleScopePluginFactory::getRepositoryUrl() const
 {
-    return QUrl("https://github.com/ManiVaultStudio/core");
+    return { "https://github.com/ManiVaultStudio/core" };
 }
 
 ViewPlugin* SampleScopePluginFactory::produce()

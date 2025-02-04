@@ -384,7 +384,8 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
     _smartPointer(this),
     _task(this, ""),
     _mayUnderive(mayUnderive),
-    _aboutToBeRemoved(false)
+    _aboutToBeRemoved(false),
+    _dirtySelection(false)
 {
     if (!id.isEmpty())
         Serializable::setId(id);

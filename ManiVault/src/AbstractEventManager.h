@@ -11,6 +11,7 @@ namespace mv
 {
 
 class DatasetImpl;
+class KeyBasedSelectionGroup;
 
 /**
  * Abstract event manager
@@ -33,6 +34,10 @@ public:
         AbstractManager(parent, "Events")
     {
     }
+
+    virtual ~AbstractEventManager() { }
+
+    virtual void addSelectionGroup(KeyBasedSelectionGroup& selectionGroup) = 0;
 
     /**
      * Notify listeners that a new dataset has been added to the core

@@ -6,6 +6,8 @@
 
 namespace mv::util {
 
+const QString Version::semanticVersioningRegex = QString(R"((0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-([\da-zA-Z-]+(?:\.[\da-zA-Z-]+)*))?(?:\+([\da-zA-Z-]+(?:\.[\da-zA-Z-]+)*))?)");
+
 Version::Version(std::int32_t major, std::int32_t minor, std::int32_t patch, const std::string& suffix) :
     _major(major),
     _minor(minor),
@@ -18,6 +20,61 @@ Version::Version(std::int32_t major, std::int32_t minor, std::int32_t patch, con
     assert(patch < 100);
 }
 
+Version::Version(const QString& version) :
+    Version()
+{
+    initialize(version);
+}
+
+void Version::initialize(std::int32_t major, std::int32_t minor, std::int32_t patch, const std::string& suffix)
+{
+    setMajor(major);
+    setMinor(minor);
+    setPatch(patch);
+    setSuffix(suffix);
+}
+
+void Version::initialize(const QString& version)
+{
+    QRegularExpression regex(Version::semanticVersioningRegex);
+
+    QRegularExpressionMatch match = regex.match(version);
+
+    if (match.hasMatch()) {
+        setMajor(match.captured(1).toInt());
+        setMinor(match.captured(2).toInt());
+        setPatch(match.captured(3).toInt());
+        setSuffix(match.captured(4).toStdString());
+    }
+    else {
+        qWarning() << version << "is not a valid semantic version for" << QString::fromStdString(_context);
+    }
+}
+
+bool Version::isValid() const
+{
+    if (getMajor() < 0)
+        return false;
+
+    if (getMinor() < 0)
+        return false;
+
+    if (getPatch() < 0)
+        return false;
+
+    return true;
+}
+
+std::string Version::getContext() const
+{
+    return _context;
+}
+
+void Version::setContext(const std::string& context)
+{
+    _context = context;
+}
+
 std::int32_t Version::getVersionNumber() const 
 {
     return _major * 10'000 + _minor * 100 + _patch;
@@ -25,6 +82,9 @@ std::int32_t Version::getVersionNumber() const
 
 std::string Version::getVersionString() const 
 {
+    if (!isValid())
+        return {};
+
     if(_suffix == " ")
         return std::to_string(_major) + "." + std::to_string(_minor) + "." + std::to_string(_patch);
     else

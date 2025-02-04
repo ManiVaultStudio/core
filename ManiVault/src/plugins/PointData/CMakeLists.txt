@@ -30,6 +30,7 @@ set(POINTS_SOURCES
     src/PointDataRange.h
     src/PointView.h
     src/RandomAccessRange.h
+    src/SparseMatrix.h
 )
 
 set(POINTS_HEADERS
@@ -53,6 +54,7 @@ set(POINTS_HEADERS
     src/DimensionsPickerProxyModel.h
     src/ModelResetter.h
     src/CreateSetFromSelectionAction.h
+    src/SparseMatrix.h
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects

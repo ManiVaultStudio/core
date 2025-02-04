@@ -123,7 +123,7 @@ public:
      * @param alignment Alignment of the default plugins
      * @param logging Whether to add a logging view at the bottom
      */
-    virtual void newProject(const Qt::AlignmentFlag& defaultPluginsAlignment, bool logging = false) = 0;
+    virtual void newProject(const Qt::AlignmentFlag& alignment, bool logging = false) = 0;
 
     /** Creates a new blank project (without any view plugins or data) */
     virtual void newBlankProject() = 0;
@@ -132,9 +132,17 @@ public:
      * Open project from \p filePath
      * @param filePath File path of the project (choose file path when empty)
      * @param importDataOnly Whether to only import the data from the project
-     * @param loadWorkspace Whether to load the workspace which is accompanied with the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied by the project
      */
     virtual void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
+
+    /**
+     * Open project from \p url
+     * @param url URL of the project
+     * @param importDataOnly Whether to only import the data from the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied by the project
+     */
+    virtual void openProject(QUrl url, bool importDataOnly = false, bool loadWorkspace = true) = 0;
 
     /**
      * Import project from \p filePath (only import the data)

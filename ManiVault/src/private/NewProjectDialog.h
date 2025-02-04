@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "StartPageActionsWidget.h"
+#include "PageActionsWidget.h"
 
 #include <QDialog>
 
@@ -36,6 +36,6 @@ public:
     }
 
 private:
-    StartPageActionsWidget      _workspacesWidget;          /** Actions widget for selecting a workspace and creating a project */
+    PageActionsWidget           _workspacesWidget;          /** Actions widget for selecting a workspace and creating a project */
     mv::gui::TriggerAction      _cancelAction;              /** Action for exiting the dialog without creating a new project */
 };

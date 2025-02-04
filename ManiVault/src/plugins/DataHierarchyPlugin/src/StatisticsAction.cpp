@@ -163,4 +163,6 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
         treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });
+
+    connect(&mv::projects(), &AbstractProjectManager::projectOpened, &_rawDataModel, &RawDataModel::populateFromDataManager);
 }

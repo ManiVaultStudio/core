@@ -22,13 +22,13 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QI
     _barGroupAction(this, "Bar Group"),
     _iconAction(this, "Icon"),
     _popupAction(nullptr),
-    _menuActions(),
     _index(-1)
 {
     initialize(icon);
 
     StatusBarAction::statusBarActions << this;
 
+    /* TODO: Fix plugin status bar action visibility
     const auto updateVisibility = [this]() -> void {
         setVisible(mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().isOptionSelected(text()));
     };
@@ -38,6 +38,7 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QI
     connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::selectedOptionsChanged, this, updateVisibility);
 
     mv::settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
+    */
 }
 
 StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QString& icon /*= ""*/) :
@@ -55,8 +56,10 @@ StatusBarAction::~StatusBarAction()
 
     StatusBarAction::statusBarActions.removeOne(this);
 
+    /* TODO: Fix plugin status bar action visibility
     if (!core()->isAboutToBeDestroyed())
 		settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
+	*/
 }
 
 WidgetActions StatusBarAction::getStatusBarActions()
@@ -203,6 +206,7 @@ void StatusBarAction::initialize(const QIcon& icon)
 
     connect(this, &WidgetAction::changed, this, tooltipChanged);
 
+    /* TODO: Fix plugin status bar action visibility
     const auto updateStatusBarActionsVisibility = [this]() -> void {
         const auto selectedOptions = mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction().getSelectedOptions();
 
@@ -213,6 +217,7 @@ void StatusBarAction::initialize(const QIcon& icon)
     updateStatusBarActionsVisibility();
 
     connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::selectedOptionsChanged, this, updateStatusBarActionsVisibility);
+    */
 }
 
 StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags) :

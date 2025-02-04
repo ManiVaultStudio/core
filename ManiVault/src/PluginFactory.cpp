@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PluginFactory.h"
-#include "widgets/MarkdownDialog.h"
 
 #include "Set.h"
 
@@ -23,31 +22,11 @@ PluginFactory::PluginFactory(Type type) :
     _numberOfInstances(0),
     _numberOfInstancesProduced(0),
     _maximumNumberOfInstances(-1),
-    _triggerHelpAction(nullptr, "Trigger plugin help"),
-    _triggerReadmeAction(nullptr, "Readme"),
-    _visitRepositoryAction(nullptr, "Go to repository"),
     _pluginGlobalSettingsGroupAction(nullptr),
-    _statusBarAction(nullptr)
+    _statusBarAction(nullptr),
+    _allowPluginCreationFromStandardGui(true),
+    _pluginMetadata(*this)
 {
-    _triggerReadmeAction.setIconByName("book");
-
-    connect(&_triggerReadmeAction, &TriggerAction::triggered, this, [this]() -> void {
-        if (!getReadmeMarkdownUrl().isValid())
-            return;
-
-        MarkdownDialog markdownDialog(getReadmeMarkdownUrl());
-
-        markdownDialog.setWindowTitle(QString("%1").arg(_kind));
-        markdownDialog.exec();
-    });
-
-    _visitRepositoryAction.setToolTip("Browse to the Github repository");
-    _visitRepositoryAction.setIcon(Application::getIconFont("FontAwesomeBrands").getIcon("code-branch"));
-
-    connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
-        if (getRepositoryUrl().isValid())
-            QDesktopServices::openUrl(getRepositoryUrl());
-    });
 }
 
 QString PluginFactory::getKind() const
@@ -60,7 +39,8 @@ void PluginFactory::setKind(const QString& kind)
     _kind = kind;
 
     _pluginTriggerAction.setText(_kind);
-    _shortcutMap.setTitle(_kind);
+
+    getPluginMetadata().getShortcutMap().setTitle(_kind);
 }
 
 mv::plugin::Type PluginFactory::getType() const
@@ -72,8 +52,8 @@ void PluginFactory::initialize()
 {
     getPluginTriggerAction().initialize();
 
-    _triggerHelpAction.setText(_kind);
-    _triggerHelpAction.setIcon(getIcon());
+    getPluginMetadata().getTriggerHelpAction().setText(_kind);
+    getPluginMetadata().getTriggerHelpAction().setIcon(getIcon());
 }
 
 QString PluginFactory::getGlobalSettingsPrefix() const
@@ -118,22 +98,27 @@ bool PluginFactory::hasHelp() const
 
 QString PluginFactory::getGuiName() const
 {
-    return _guiName;
+    return getPluginMetadata().getGuiName();
 }
 
 void PluginFactory::setGuiName(const QString& guiName)
 {
-    _guiName = guiName;
+    getPluginMetadata().setGuiName(guiName);
 }
 
-QString PluginFactory::getVersion() const
+util::Version& PluginFactory::getVersion()
 {
-    return _version;
+    return getPluginMetadata().getVersion();
 }
 
-void PluginFactory::setVersion(const QString& version)
+const util::Version& PluginFactory::getVersion() const
 {
-    _version = version;
+    return getPluginMetadata().getVersion();
+}
+
+void PluginFactory::setVersion(const util::Version& version)
+{
+    getPluginMetadata().setVersion(version);
 }
 
 QIcon PluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
@@ -149,50 +134,6 @@ bool PluginFactory::mayProduce() const
 mv::gui::PluginTriggerAction& PluginFactory::getPluginTriggerAction()
 {
     return _pluginTriggerAction;
-}
-
-util::ShortcutMap& PluginFactory::getShortcutMap()
-{
-    return _shortcutMap;
-}
-
-const util::ShortcutMap& PluginFactory::getShortcutMap() const
-{
-    return _shortcutMap;
-}
-
-QString PluginFactory::getShortDescription() const
-{
-    return _shortDescription;
-}
-
-void PluginFactory::setShortDescription(const QString& shortDescription)
-{
-    if (shortDescription == _shortDescription)
-        return;
-
-    const auto previousShortDescription = _shortDescription;
-
-    _shortDescription = shortDescription;
-
-    emit shortDescriptionChanged(previousShortDescription, _shortDescription);
-}
-
-QString PluginFactory::getLongDescription() const
-{
-    return _shortDescription;
-}
-
-void PluginFactory::setLongDescription(const QString& longDescription)
-{
-    if (longDescription == _longDescription)
-        return;
-
-    const auto previouslongDescription = _longDescription;
-
-    _longDescription = longDescription;
-
-    emit longDescriptionChanged(previouslongDescription, _longDescription);
 }
 
 std::uint32_t PluginFactory::getNumberOfInstances() const
@@ -272,6 +213,16 @@ void PluginFactory::viewShortcutMap()
     qDebug() << __FUNCTION__ << "not implemented yet...";
 }
 
+PluginMetadata& PluginFactory::getPluginMetadata()
+{
+    return _pluginMetadata;
+}
+
+const PluginMetadata& PluginFactory::getPluginMetadata() const
+{
+    return const_cast<PluginFactory*>(this)->getPluginMetadata();
+}
+
 QUrl PluginFactory::getReadmeMarkdownUrl() const
 {
     const auto githubRepositoryUrl = getRepositoryUrl();
@@ -279,7 +230,7 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
     if (!githubRepositoryUrl.isValid())
         return {};
 
-    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com%1/master/README.md").arg(githubRepositoryUrl.path()));
+    auto readmeMarkdownUrl = QUrl(QString("https://raw.githubusercontent.com%1/%2/README.md").arg(githubRepositoryUrl.path(), getDefaultBranch()));
 
     if (readmeMarkdownUrl.isValid())
         return readmeMarkdownUrl;
@@ -290,6 +241,21 @@ QUrl PluginFactory::getReadmeMarkdownUrl() const
 QUrl PluginFactory::getRepositoryUrl() const
 {
     return {};
+}
+
+QString PluginFactory::getDefaultBranch() const
+{
+    return "master";
+}
+
+void PluginFactory::setAllowPluginCreationFromStandardGui(bool allowPluginCreationFromStandardGui)
+{
+    _allowPluginCreationFromStandardGui = allowPluginCreationFromStandardGui;
+}
+
+bool PluginFactory::getAllowPluginCreationFromStandardGui() const
+{
+    return _allowPluginCreationFromStandardGui;
 }
 
 }
