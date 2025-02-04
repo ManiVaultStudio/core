@@ -47,7 +47,9 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     _buttonsLayout.addStretch(1);
     _buttonsLayout.addWidget(&_acceptPushButton);
     _buttonsLayout.addWidget(&_optOutPushButton);
-    _buttonsLayout.addWidget(&_decideLaterPushButton);
+
+    if (!ErrorLogging::getUserHasOpted())
+		_buttonsLayout.addWidget(&_decideLaterPushButton);
 
     _layout.addLayout(&_buttonsLayout);
 

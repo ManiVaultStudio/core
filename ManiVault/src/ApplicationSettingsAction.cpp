@@ -18,7 +18,7 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System"),
     _errorLoggingConsentAction(this, "Consent..."),
     _allowErrorLoggingAction(this, "Error reporting", false),
-    _showCrashReportDialogAction(this, "Show error report dialog", true),
+    _showCrashReportDialogAction(this, "Show crash report dialog", true),
     _errorLoggingSettingsAction(this, "Settings"),
     _errorLoggingDsnAction(this, "Sentry DSN"),
     _errorLoggingAction(this, "Error reporting")
@@ -83,11 +83,11 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     _errorLoggingSettingsAction.setSettingsPrefix(QString("%1/ErrorLogging/DSN").arg(getSettingsPrefix()));
     _errorLoggingSettingsAction.setLabelSizingType(LabelSizingType::Auto);
 
+    _errorLoggingSettingsAction.addAction(&_showCrashReportDialogAction);
     _errorLoggingSettingsAction.addAction(&_errorLoggingDsnAction);
 
     _errorLoggingAction.addAction(&_errorLoggingConsentAction);
     _errorLoggingAction.addAction(&_allowErrorLoggingAction);
-    _errorLoggingAction.addAction(&_showCrashReportDialogAction);
     _errorLoggingAction.addAction(&_errorLoggingSettingsAction);
 
     _showCrashReportDialogAction.setSettingsPrefix(QString("%1/ErrorLogging/ShowCrashReportDialog").arg(getSettingsPrefix()));
