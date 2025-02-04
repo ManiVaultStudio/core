@@ -24,6 +24,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _typeModel(this),
     _typeAction(this, "Type"),
     _rectangleAction(this, "Rectangle"),
+    _lineAction(this, "Line"),
     _brushAction(this, "Brush"),
     _lassoAction(this, "Lasso"),
     _polygonAction(this, "Polygon"),
@@ -64,6 +65,11 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _rectangleAction.setToolTip("Select pixels inside a rectangle (R)");
     _rectangleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _rectangleAction.setShortcut(QKeySequence("R"));
+
+    _lineAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Line));
+    _lineAction.setToolTip("Select pixels inside a line (D)");
+    _lineAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _lineAction.setShortcut(QKeySequence("D"));
 
     _brushAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Brush));
     _brushAction.setToolTip("Select pixels using a brush tool (B)");
@@ -155,6 +161,11 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
             _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Rectangle));
     });
 
+    connect(&_lineAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Line));
+        });
+
     connect(&_brushAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
             _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Brush));
@@ -230,6 +241,7 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
 
     if (shortcutsEnabled) {
         _targetWidget->addAction(&_rectangleAction);
+        _targetWidget->addAction(&_lineAction);
         _targetWidget->addAction(&_brushAction);
         _targetWidget->addAction(&_lassoAction);
         _targetWidget->addAction(&_polygonAction);
@@ -244,6 +256,7 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
     }
     else {
         _targetWidget->removeAction(&_rectangleAction);
+        _targetWidget->removeAction(&_lineAction);
         _targetWidget->removeAction(&_brushAction);
         _targetWidget->removeAction(&_lassoAction);
         _targetWidget->removeAction(&_polygonAction);
@@ -265,6 +278,9 @@ void PixelSelectionAction::initType()
 
     if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle))
         _typeActionGroup.addAction(&_rectangleAction);
+
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Line))
+        _typeActionGroup.addAction(&_lineAction);
 
     if (_pixelSelectionTypes.contains(PixelSelectionType::Brush))
         _typeActionGroup.addAction(&_brushAction);
@@ -291,6 +307,7 @@ void PixelSelectionAction::initType()
         _typeAction.setCurrentText(util::pixelSelectionTypes.value(type));
 
         _rectangleAction.setChecked(type == PixelSelectionType::Rectangle);
+        _lineAction.setChecked(type == PixelSelectionType::Line);
         _brushAction.setChecked(type == PixelSelectionType::Brush);
         _lassoAction.setChecked(type == PixelSelectionType::Lasso);
         _polygonAction.setChecked(type == PixelSelectionType::Polygon);
@@ -381,6 +398,9 @@ QMenu* PixelSelectionAction::getContextMenu()
     if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle))
         menu->addAction(&_rectangleAction);
 
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Line))
+        menu->addAction(&_lineAction);
+
     if (_pixelSelectionTypes.contains(PixelSelectionType::Brush))
         menu->addAction(&_brushAction);
 
@@ -390,7 +410,7 @@ QMenu* PixelSelectionAction::getContextMenu()
     if (_pixelSelectionTypes.contains(PixelSelectionType::Polygon))
         menu->addAction(&_polygonAction);
 
-    if (_pixelSelectionTypes.contains(PixelSelectionType::Sample))
+     if (_pixelSelectionTypes.contains(PixelSelectionType::Sample))
         menu->addAction(&_sampleAction);
 
     menu->addSeparator();

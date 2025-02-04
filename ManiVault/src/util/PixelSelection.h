@@ -15,6 +15,7 @@ namespace mv::util {
 enum class PixelSelectionType
 {
     Rectangle,      /** Select pixels within a rectangle */
+    Line,           /** Select pixels within a line */
     Brush,          /** A brush is used the paint the pixel selection */
     Lasso,          /** A lasso tool is used to select pixels */
     Polygon,        /** Select pixels in the interior of a polygon */
@@ -28,6 +29,7 @@ using PixelSelectionTypes = QVector<PixelSelectionType>;
 /** Default pixel selection types */
 static const PixelSelectionTypes defaultPixelSelectionTypes = {
     PixelSelectionType::Rectangle,
+    PixelSelectionType::Line,
     PixelSelectionType::Brush,
     PixelSelectionType::Polygon,
     PixelSelectionType::Lasso
@@ -36,6 +38,7 @@ static const PixelSelectionTypes defaultPixelSelectionTypes = {
 /** Maps pixel selection type enum to name */
 static const QMap<PixelSelectionType, QString> pixelSelectionTypes = {
     { PixelSelectionType::Rectangle, "Rectangle" },
+    { PixelSelectionType::Line, "Line" },
     { PixelSelectionType::Brush, "Brush" },
     { PixelSelectionType::Lasso, "Lasso" },
     { PixelSelectionType::Polygon, "Polygon" },

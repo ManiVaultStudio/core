@@ -128,6 +128,7 @@ public: // Action getters
     DecimalAction& getOverlayOpacityAction() { return _overlayOpacityAction; }
     OptionAction& getTypeAction() { return _typeAction; }
     ToggleAction& getRectangleAction() { return _rectangleAction; }
+    ToggleAction& getLineAction() { return _lineAction; }
     ToggleAction& getBrushAction() { return _brushAction; }
     ToggleAction& getLassoAction() { return _lassoAction; }
     ToggleAction& getPolygonAction() { return _polygonAction; }
@@ -154,6 +155,7 @@ private:
     util::PixelSelectionTypeModel   _typeModel;                         /** Selection type model */
     OptionAction                    _typeAction;                        /** Selection type action */
     ToggleAction                    _rectangleAction;                   /** Switch to rectangle selection action */
+    ToggleAction                    _lineAction;                        /** Switch to line selection action */
     ToggleAction                    _brushAction;                       /** Switch to brush selection action */
     ToggleAction                    _lassoAction;                       /** Switch to lasso selection action */
     ToggleAction                    _polygonAction;                     /** Switch to polygon selection action */
