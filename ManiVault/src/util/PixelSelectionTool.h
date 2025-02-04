@@ -158,6 +158,11 @@ private:
     /** Ends the selection process */
     void endSelection();
 
+
+    bool isShowAngleLines() const;
+
+    void setShowAngleLines(bool showAngleLines);
+
 signals:
 
     /** Signals that the type has changed */
@@ -201,6 +206,8 @@ protected:
     bool                        _preventContextMenu;        /** Whether to prevent a context menu */
     bool                        _aborted;                   /** Whether the selection process was aborted */
     float                       _lineAreaWidth;            /** Width of the line area */
+    float                       _lineAngle;                /** Angle of the line area */
+    bool                        _showAngleLines;          /** Whether to show angle lines */
     static const std::int32_t LAZY_UPDATE_INTERVAL = 10;
 
 protected:
