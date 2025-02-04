@@ -227,7 +227,7 @@ QRegularExpressionValidator& StringAction::getValidator()
     return _validator;
 }
 
-QValidator::State StringAction::isValid() const
+QValidator::State StringAction::getValidationState() const
 {
     if (_validator.regularExpression().pattern().isEmpty())
         return QValidator::State::Acceptable;
