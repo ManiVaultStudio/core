@@ -114,9 +114,11 @@ void ErrorLogging::setEnabled(bool enabled, bool force /*= false*/)
 
     mv::settings().getApplicationSettings().getAllowErrorLoggingAction().setChecked(getErrorLoggingEnabled());
 
+    auto& errorLoggingDsnAction = mv::settings().getApplicationSettings().getErrorLoggingDsnAction();
+
 	const auto dsn = mv::settings().getApplicationSettings().getErrorLoggingDsnAction().getString();
 
-    if (!dsn.isEmpty()) {
+    if (!errorLoggingDsnAction.getValidator().regularExpression().pattern().isEmpty() && errorLoggingDsnAction.isValid() == QValidator::State::Acceptable) {
 		if (enabled) {
 			sentry_options_t* options = sentry_options_new();
 	        
