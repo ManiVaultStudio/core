@@ -16,10 +16,12 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Application"),
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
     _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System"),
-    _errorReportingConsentAction(this, "Consent..."),
-    _allowErrorReportingAction(this, "Error reporting", false),
-    _showErrorReportDialogAction(this, "Show error report dialog", true),
-    _errorReportingAction(this, "Error reporting")
+    _errorLoggingConsentAction(this, "Consent..."),
+    _allowErrorLoggingAction(this, "Error reporting", false),
+    _showCrashReportDialogAction(this, "Show error report dialog", true),
+    _errorLoggingSettingsAction(this, "Settings"),
+    _errorLoggingDsnAction(this, "Sentry DSN"),
+    _errorLoggingAction(this, "Error reporting")
 {
     _applicationSessionIdAction.setEnabled(false);
 
@@ -65,27 +67,38 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     }
 
 #ifdef _DEBUG
-    _showErrorReportDialogAction.setChecked(false);
+    _showCrashReportDialogAction.setChecked(false);
 #endif
 
 #ifdef ERROR_LOGGING
-    _allowErrorReportingAction.setEnabled(false);
+    _errorLoggingAction.setShowLabels(false);
 
-    addAction(&_errorReportingAction);
+    _allowErrorLoggingAction.setEnabled(false);
 
-    _errorReportingAction.addAction(&_errorReportingConsentAction);
-    _errorReportingAction.addAction(&_allowErrorReportingAction);
-    _errorReportingAction.addAction(&_showErrorReportDialogAction);
+    addAction(&_errorLoggingAction);
 
-    _showErrorReportDialogAction.setSettingsPrefix(QString("%1/ShowErrorReportDialog").arg(getSettingsPrefix()));
+    _errorLoggingSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _errorLoggingSettingsAction.setIconByName("cog");
+    _errorLoggingSettingsAction.setPopupSizeHint({ 400, 0 });
+    _errorLoggingSettingsAction.setSettingsPrefix(QString("%1/ErrorLogging/DSN").arg(getSettingsPrefix()));
+    _errorLoggingSettingsAction.setLabelSizingType(LabelSizingType::Auto);
+
+    _errorLoggingSettingsAction.addAction(&_errorLoggingDsnAction);
+
+    _errorLoggingAction.addAction(&_errorLoggingConsentAction);
+    _errorLoggingAction.addAction(&_allowErrorLoggingAction);
+    _errorLoggingAction.addAction(&_showCrashReportDialogAction);
+    _errorLoggingAction.addAction(&_errorLoggingSettingsAction);
+
+    _showCrashReportDialogAction.setSettingsPrefix(QString("%1/ErrorLogging/ShowCrashReportDialog").arg(getSettingsPrefix()));
 
     const auto allowErrorReportingChanged = [this]() -> void {
-        _showErrorReportDialogAction.setEnabled(_allowErrorReportingAction.isChecked());
+        _showCrashReportDialogAction.setEnabled(_allowErrorLoggingAction.isChecked());
 	};
 
     allowErrorReportingChanged();
 
-    connect(&_allowErrorReportingAction, &ToggleAction::toggled, this, allowErrorReportingChanged);
+    connect(&_allowErrorLoggingAction, &ToggleAction::toggled, this, allowErrorReportingChanged);
 #endif
 }
 

@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
 
     //showErrorLoggingConsentDialogOnFirstLaunch();
 
-    //toggleSentry(mv::settings().getApplicationSettings().getAllowErrorReportingAction().isChecked());
+    //toggleSentry(mv::settings().getApplicationSettings().getAllowErrorLoggingAction().isChecked());
 
     return application.exec();
 }
