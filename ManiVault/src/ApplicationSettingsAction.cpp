@@ -74,14 +74,18 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     _errorLoggingAction.setShowLabels(false);
 
     _allowErrorLoggingAction.setEnabled(false);
+    _allowErrorLoggingAction.setToolTip("Toggle Sentry error logging");
 
     addAction(&_errorLoggingAction);
+
+    _errorLoggingDsnAction.setSettingsPrefix(QString("%1/ErrorLogging/DSN").arg(getSettingsPrefix()));
+    _errorLoggingDsnAction.setToolTip("The Sentry error logging data source name");
 
     _errorLoggingSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _errorLoggingSettingsAction.setIconByName("cog");
     _errorLoggingSettingsAction.setPopupSizeHint({ 400, 0 });
-    _errorLoggingSettingsAction.setSettingsPrefix(QString("%1/ErrorLogging/DSN").arg(getSettingsPrefix()));
     _errorLoggingSettingsAction.setLabelSizingType(LabelSizingType::Auto);
+    _errorLoggingSettingsAction.setToolTip("Error logging settings");
 
     _errorLoggingSettingsAction.addAction(&_showCrashReportDialogAction);
     _errorLoggingSettingsAction.addAction(&_errorLoggingDsnAction);
@@ -91,6 +95,7 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     _errorLoggingAction.addAction(&_errorLoggingSettingsAction);
 
     _showCrashReportDialogAction.setSettingsPrefix(QString("%1/ErrorLogging/ShowCrashReportDialog").arg(getSettingsPrefix()));
+    _showCrashReportDialogAction.setToolTip("Show report dialog when ManiVault Studio crashes");
 
     const auto allowErrorReportingChanged = [this]() -> void {
         _showCrashReportDialogAction.setEnabled(_allowErrorLoggingAction.isChecked());

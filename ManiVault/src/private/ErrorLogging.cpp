@@ -176,7 +176,7 @@ void ErrorLogging::setEnabled(bool enabled, bool force /*= false*/)
 		}
 
         if (enabled)
-            qDebug() << "Sentry error logging is running";
+            qDebug() << "Sentry error logging is running at DSN " + dsn;
         else
             qDebug() << "Sentry error logging is not running";
     }

@@ -27,7 +27,7 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
-    setWindowFlag(Qt::WindowCloseButtonHint, false);
+    //setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check-square"));
     setFixedSize({ 500, 420 });
 
