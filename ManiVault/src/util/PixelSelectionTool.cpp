@@ -36,7 +36,8 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _penLineForeGround(),
     _penLineBackGround(),
     _penControlPoint(),
-    _penClosingPoint()
+    _penClosingPoint(),
+    _lineAreaWidth(5.0f)
 {
     setMainColor(QColor(Qt::black));
 
@@ -187,370 +188,224 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
     switch (event->type())
     {
         // Prevent recursive paint events
-        case QEvent::Paint:
-            return false;
+    case QEvent::Paint:
+        return false;
 
-        case QEvent::ContextMenu:
-        {
-            // Prevent context menu when selection is ended in polygon mode (by right-clicking)
-            if (_preventContextMenu) {
-                _preventContextMenu = false;
-                return true;
-            }
-
-            break;
+    case QEvent::ContextMenu:
+    {
+        // Prevent context menu when selection is ended in polygon mode (by right-clicking)
+        if (_preventContextMenu) {
+            _preventContextMenu = false;
+            return true;
         }
 
-        case QEvent::KeyPress:
-        {
-            // Get key that was pressed
-            auto keyEvent = static_cast<QKeyEvent*>(event);
+        break;
+    }
 
-            // Do not handle repeating keys
-            if (!keyEvent->isAutoRepeat()) {
+    case QEvent::KeyPress:
+    {
+        // Get key that was pressed
+        auto keyEvent = static_cast<QKeyEvent*>(event);
 
-                // Abort selection when the escape key is pressed
-                if (keyEvent->key() == Qt::Key_Escape) {
+        // Do not handle repeating keys
+        if (!keyEvent->isAutoRepeat()) {
 
-                    // In polygon or lasso mode
-                    if (_type == PixelSelectionType::Polygon || _type == PixelSelectionType::Lasso) {
-                        _aborted = true;
+            // Abort selection when the escape key is pressed
+            if (keyEvent->key() == Qt::Key_Escape) {
 
-                        paint();
-                        endSelection();
-                        paint();
-                    }
+                // In polygon or lasso mode
+                if (_type == PixelSelectionType::Polygon || _type == PixelSelectionType::Lasso) {
+                    _aborted = true;
+
+                    paint();
+                    endSelection();
+                    paint();
                 }
             }
 
+            // Adjust line area width with up and down arrow keys
+            if (_type == PixelSelectionType::Line) {
+                if (keyEvent->key() == Qt::Key_Up) {
+                    _lineAreaWidth += 1.0f;
+                    shouldPaint = true;
+                }
+                else if (keyEvent->key() == Qt::Key_Down) {
+                    _lineAreaWidth = std::max(1.0f, _lineAreaWidth - 1.0f);
+                    shouldPaint = true;
+                }
+            }
+        }
+
+        break;
+    }
+
+    case QEvent::Resize:
+    {
+        const auto resizeEvent = static_cast<QResizeEvent*>(event);
+
+        _shapePixmap = QPixmap(resizeEvent->size());
+        _areaPixmap = QPixmap(resizeEvent->size());
+
+        _shapePixmap.fill(Qt::transparent);
+        _areaPixmap.fill(Qt::transparent);
+
+        shouldPaint = true;
+
+        break;
+    }
+
+    case QEvent::MouseButtonDblClick:
+    {
+        auto mouseEvent = static_cast<QMouseEvent*>(event);
+
+        switch (mouseEvent->button())
+        {
+        case Qt::LeftButton:
+        {
+            switch (_type)
+            {
+            case PixelSelectionType::Rectangle:
+            case PixelSelectionType::Line:
+            case PixelSelectionType::Brush:
+            case PixelSelectionType::Lasso:
+            case PixelSelectionType::Sample:
+                break;
+
+            case PixelSelectionType::Polygon:
+            {
+                endSelection();
+                break;
+            }
+
+            default:
+                break;
+            }
+
             break;
         }
 
-        case QEvent::Resize:
+        case Qt::RightButton:
+            break;
+
+        default:
+            break;
+        }
+
+        break;
+    }
+
+    case QEvent::MouseButtonPress:
+    {
+        auto mouseEvent = static_cast<QMouseEvent*>(event);
+
+        _mouseButtons = mouseEvent->buttons();
+
+        switch (_type)
         {
-            const auto resizeEvent = static_cast<QResizeEvent*>(event);
+        case PixelSelectionType::Rectangle:
+        case PixelSelectionType::Line:
+        case PixelSelectionType::Brush:
+        case PixelSelectionType::Lasso:
+        case PixelSelectionType::Sample:
+        {
+            switch (mouseEvent->button())
+            {
+            case Qt::LeftButton:
+                startSelection();
+                _mousePositions.clear();
+                _mousePositions << mouseEvent->pos();
+                break;
 
-            _shapePixmap    = QPixmap(resizeEvent->size());
-            _areaPixmap     = QPixmap(resizeEvent->size());
+            case Qt::RightButton:
+                break;
 
-            _shapePixmap.fill(Qt::transparent);
-            _areaPixmap.fill(Qt::transparent);
-
-            shouldPaint = true;
+            default:
+                break;
+            }
 
             break;
         }
 
-        case QEvent::MouseButtonDblClick:
+        case PixelSelectionType::Polygon:
         {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
+            if (_mousePositions.isEmpty() && mouseEvent->button() == Qt::LeftButton)
+                startSelection();
 
             switch (mouseEvent->button())
             {
-                case Qt::LeftButton:
-                {
-                    switch (_type)
-                    {
-                        case PixelSelectionType::Rectangle:
-                        case PixelSelectionType::Line:
-                        case PixelSelectionType::Brush:
-                        case PixelSelectionType::Lasso:
-                        case PixelSelectionType::Sample:
-                            break;
+            case Qt::LeftButton:
+                _mousePositions << mouseEvent->pos() << mouseEvent->pos();
+                break;
 
-                        case PixelSelectionType::Polygon:
-                        {
-                            endSelection();
-                            break;
-                        }
+            case Qt::RightButton:
+                _mousePositions << mouseEvent->pos();
+                break;
 
-                        default:
-                            break;
-                    }
+            default:
+                break;
+            }
 
-                    break;
-                }
+            if (_mousePositions.count() > 3 && (_mousePositions.last() - _mousePositions.first()).manhattanLength() < CP_RADIUS_CLOSING)
+                endSelection();
 
-                case Qt::RightButton:
-                    break;
+            break;
+        }
 
-                default:
-                    break;
+        default:
+            break;
+        }
+
+        shouldPaint = true;
+
+        break;
+    }
+
+    case QEvent::MouseButtonRelease:
+    {
+        auto mouseEvent = static_cast<QMouseEvent*>(event);
+
+        _mouseButtons = mouseEvent->buttons();
+
+        switch (_type)
+        {
+        case PixelSelectionType::Rectangle:
+        case PixelSelectionType::Line:
+        case PixelSelectionType::Brush:
+        case PixelSelectionType::Lasso:
+        case PixelSelectionType::Sample:
+        {
+            switch (mouseEvent->button())
+            {
+            case Qt::LeftButton:
+                endSelection();
+                break;
+
+            case Qt::RightButton:
+                break;
+
+            default:
+                break;
             }
 
             break;
         }
 
-        case QEvent::MouseButtonPress:
+        case PixelSelectionType::Polygon:
         {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
-
-            _mouseButtons = mouseEvent->buttons();
-
-            switch (_type)
+            switch (mouseEvent->button())
             {
-                case PixelSelectionType::Rectangle:
-                case PixelSelectionType::Line:
-                case PixelSelectionType::Brush:
-                case PixelSelectionType::Lasso:
-                case PixelSelectionType::Sample:
-                {
-                    switch (mouseEvent->button())
-                    {
-                        case Qt::LeftButton:
-                            startSelection();
-                            _mousePositions.clear();
-                            _mousePositions << mouseEvent->pos();
-                            break;
+            case Qt::LeftButton:
+                break;
 
-                        case Qt::RightButton:
-                            break;
-
-                        default:
-                            break;
-                    }
-                    
-                    break;
-                }
-
-                case PixelSelectionType::Polygon:
-                {
-                    if (_mousePositions.isEmpty() && mouseEvent->button() == Qt::LeftButton)
-                        startSelection();
-
-                    switch (mouseEvent->button())
-                    {
-                        case Qt::LeftButton:
-                            _mousePositions << mouseEvent->pos() << mouseEvent->pos();
-                            break;
-
-                        case Qt::RightButton:
-                            _mousePositions << mouseEvent->pos();
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                    if (_mousePositions.count() > 3 && (_mousePositions.last() - _mousePositions.first()).manhattanLength() < CP_RADIUS_CLOSING)
-                        endSelection();
-
-                    break;
-                }
-
-                default:
-                    break;
+            case Qt::RightButton:
+            {
+                _preventContextMenu = true;
+                endSelection();
+                break;
             }
 
-            shouldPaint = true;
-
-            break;
-        }
-
-        case QEvent::MouseButtonRelease:
-        {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
-
-            _mouseButtons = mouseEvent->buttons();
-
-            switch (_type)
-            {
-                case PixelSelectionType::Rectangle:
-                case PixelSelectionType::Line:
-                case PixelSelectionType::Brush:
-                case PixelSelectionType::Lasso:
-                case PixelSelectionType::Sample:
-                {
-                    switch (mouseEvent->button())
-                    {
-                        case Qt::LeftButton:
-                            endSelection();
-                            break;
-
-                        case Qt::RightButton:
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                    break;
-                }
-
-                case PixelSelectionType::Polygon:
-                {
-                    switch (mouseEvent->button())
-                    {
-                        case Qt::LeftButton:
-                            break;
-
-                        case Qt::RightButton:
-                        {
-                            _preventContextMenu = true;
-                            endSelection();
-                            break;
-                        }
- 
-                        default:
-                            break;
-                    }
-
-                    break;
-                }
-
-                default:
-                    break;
-            }
-
-            shouldPaint = true;
-
-            break;
-        }
-
-        case QEvent::MouseMove:
-        {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
-
-            _mousePosition = mouseEvent->pos();
-
-            switch (_type)
-            {
-                case PixelSelectionType::Rectangle:
-                {
-                    if (mouseEvent->buttons() & Qt::LeftButton) {
-                        if (_mousePositions.size() == 1) {
-                            _mousePositions << _mousePosition;
-                        } else {
-                            if (_mousePositions.isEmpty()) {
-                                _mousePositions << _mousePosition;
-                            }
-                            else {
-                                _mousePositions.last() = _mousePosition;
-                            }
-                        }
-                    }
-
-                    if (isActive())
-                        shouldPaint = true;
-
-                    break;
-                }
-
-                case PixelSelectionType::Line:
-                {
-                    if (mouseEvent->buttons() & Qt::LeftButton) {
-                        if (_mousePositions.size() == 1) {
-                            _mousePositions << _mousePosition;
-                        }
-                        else {
-                            if (_mousePositions.isEmpty()) {
-                                _mousePositions << _mousePosition;
-                            }
-                            else {
-                                _mousePositions.last() = _mousePosition;
-                            }
-                        }
-                    }
-
-                    if (isActive())
-                        shouldPaint = true;
-
-                    break;
-                }
-
-                case PixelSelectionType::Brush:
-                {
-                    if (mouseEvent->buttons() & Qt::LeftButton)
-                        _mousePositions << _mousePosition;
-
-                    shouldPaint = true;
-
-                    break;
-                }
-
-                case PixelSelectionType::Lasso:
-                {
-                    if (mouseEvent->buttons() & Qt::LeftButton && !_mousePositions.isEmpty())
-                        _mousePositions << mouseEvent->pos();
-
-                    if (isActive())
-                        shouldPaint = true;
-
-                    break;
-                }
-
-                case PixelSelectionType::Polygon:
-                {
-                    if (!_mousePositions.isEmpty())
-                        _mousePositions.last() = mouseEvent->pos();
-
-                    if (isActive())
-                        shouldPaint = true;
-
-                    break;
-                }
-
-                /*
-                case PixelSelectionType::ROI:
-                {
-                    if (!_mousePositions.isEmpty())
-                        _mousePositions.last() = mouseEvent->pos();
-
-                    if (isActive())
-                        shouldPaint = true;
-
-                    break;
-                }
-                */
-
-                case PixelSelectionType::Sample:
-                {
-                    _mousePositions = { _mousePosition };
-
-                    shouldPaint = true;
-
-                    break;
-                }
-
-                default:
-                    break;
-            }
-
-            break;
-        }
-
-        case QEvent::Wheel:
-        {
-            auto wheelEvent = static_cast<QWheelEvent*>(event);
-
-            switch (_type)
-            {
-                case PixelSelectionType::Rectangle:
-                    break;
-                case PixelSelectionType::Line:
-                    break;
-                case PixelSelectionType::Brush:
-                case PixelSelectionType::Sample:
-                {
-                    if (_fixedBrushRadiusModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedBrushRadiusModifier)
-                        break;
-
-                    if (wheelEvent->angleDelta().y() < 0)
-                        setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
-                    else
-                        setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
-
-                    shouldPaint = true;
-
-                    break;
-                }
-
-                case PixelSelectionType::Lasso:
-                case PixelSelectionType::Polygon:
-                    break;
-
-                default:
-                    break;
+            default:
+                break;
             }
 
             break;
@@ -558,6 +413,165 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
         default:
             break;
+        }
+
+        shouldPaint = true;
+
+        break;
+    }
+
+    case QEvent::MouseMove:
+    {
+        auto mouseEvent = static_cast<QMouseEvent*>(event);
+
+        _mousePosition = mouseEvent->pos();
+
+        switch (_type)
+        {
+        case PixelSelectionType::Rectangle:
+        {
+            if (mouseEvent->buttons() & Qt::LeftButton) {
+                if (_mousePositions.size() == 1) {
+                    _mousePositions << _mousePosition;
+                }
+                else {
+                    if (_mousePositions.isEmpty()) {
+                        _mousePositions << _mousePosition;
+                    }
+                    else {
+                        _mousePositions.last() = _mousePosition;
+                    }
+                }
+            }
+
+            if (isActive())
+                shouldPaint = true;
+
+            break;
+        }
+
+        case PixelSelectionType::Line:
+        {
+            if (mouseEvent->buttons() & Qt::LeftButton) {
+                if (_mousePositions.size() == 1) {
+                    _mousePositions << _mousePosition;
+                }
+                else {
+                    if (_mousePositions.isEmpty()) {
+                        _mousePositions << _mousePosition;
+                    }
+                    else {
+                        _mousePositions.last() = _mousePosition;
+                    }
+                }
+            }
+
+            if (isActive())
+                shouldPaint = true;
+
+            break;
+        }
+
+        case PixelSelectionType::Brush:
+        {
+            if (mouseEvent->buttons() & Qt::LeftButton)
+                _mousePositions << _mousePosition;
+
+            shouldPaint = true;
+
+            break;
+        }
+
+        case PixelSelectionType::Lasso:
+        {
+            if (mouseEvent->buttons() & Qt::LeftButton && !_mousePositions.isEmpty())
+                _mousePositions << mouseEvent->pos();
+
+            if (isActive())
+                shouldPaint = true;
+
+            break;
+        }
+
+        case PixelSelectionType::Polygon:
+        {
+            if (!_mousePositions.isEmpty())
+                _mousePositions.last() = mouseEvent->pos();
+
+            if (isActive())
+                shouldPaint = true;
+
+            break;
+        }
+
+        /*
+        case PixelSelectionType::ROI:
+        {
+            if (!_mousePositions.isEmpty())
+                _mousePositions.last() = mouseEvent->pos();
+
+            if (isActive())
+                shouldPaint = true;
+
+            break;
+        }
+        */
+
+        case PixelSelectionType::Sample:
+        {
+            _mousePositions = { _mousePosition };
+
+            shouldPaint = true;
+
+            break;
+        }
+
+        default:
+            break;
+        }
+
+        break;
+    }
+
+    case QEvent::Wheel:
+    {
+        auto wheelEvent = static_cast<QWheelEvent*>(event);
+
+        switch (_type)
+        {
+        case PixelSelectionType::Rectangle:
+            break;
+        case PixelSelectionType::Line:
+            break;
+        case PixelSelectionType::Brush:
+        case PixelSelectionType::Sample:
+        {
+            if (_fixedBrushRadiusModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedBrushRadiusModifier)
+                break;
+
+            if (wheelEvent->angleDelta().y() < 0)
+                setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
+            else
+                setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
+
+            shouldPaint = true;
+
+            break;
+        }
+
+        case PixelSelectionType::Lasso:
+        case PixelSelectionType::Polygon:
+            break;
+
+        default:
+            break;
+        }
+
+        break;
+    }
+
+    default:
+        break;
     }
 
     if (shouldPaint)
@@ -630,9 +644,13 @@ void PixelSelectionTool::paint()
             controlPoints << startPoint;
             controlPoints << endPoint;
 
-            const auto length = 5.0;
+            const auto length = _lineAreaWidth; // Use the new member variable
             const auto direction = (endPoint - startPoint) / std::sqrt(std::pow(endPoint.x() - startPoint.x(), 2) + std::pow(endPoint.y() - startPoint.y(), 2));
             const auto perpendicular = QPointF(-direction.y(), direction.x()) * length;
+
+            areaPainter.setBrush(_areaBrush);
+            areaPainter.setPen(Qt::NoPen);
+            areaPainter.drawPolygon(QPolygonF({ startPoint + perpendicular, endPoint + perpendicular, endPoint - perpendicular, startPoint - perpendicular }));
 
             shapePainter.setPen(_penLineBackGround);
             shapePainter.drawLine(startPoint + perpendicular, endPoint + perpendicular);
@@ -659,6 +677,7 @@ void PixelSelectionTool::paint()
 
             break;
         }
+
 
 
         case PixelSelectionType::Brush:

@@ -200,7 +200,7 @@ protected:
     QPixmap                     _areaPixmap;                /** Pixmap for the selection area */
     bool                        _preventContextMenu;        /** Whether to prevent a context menu */
     bool                        _aborted;                   /** Whether the selection process was aborted */
-
+    float                       _lineAreaWidth;            /** Width of the line area */
     static const std::int32_t LAZY_UPDATE_INTERVAL = 10;
 
 protected:
