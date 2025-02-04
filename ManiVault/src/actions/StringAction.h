@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QValidator>
 
 class QWidget;
 class QCompleter;
@@ -82,7 +83,8 @@ public:
         LineEditWidget(QWidget* parent, StringAction* stringAction);
 
     private:
-        StringAction* _stringAction;    /** Pointer to string action */
+        StringAction*   _stringAction;      /** Pointer to string action */
+        QAction         _validatorAction;   /** Trailing validator action */
 
         friend class StringAction;
     };
@@ -156,7 +158,7 @@ public:
      * Get completer
      * @return Pointer to completer
      */
-    QCompleter* getCompleter();
+    QCompleter* getCompleter() const;
 
     /**
      * Set completer
@@ -199,6 +201,12 @@ public:
      * @param textElideMode Text elide mode
      */
     void setTextElideMode(const Qt::TextElideMode& textElideMode);
+
+    /**
+     * Get validator
+     * @return Reference to regular expression validator
+     */
+    QRegularExpressionValidator& getValidator();
 
 protected: // Linking
 
@@ -254,16 +262,23 @@ signals:
      * @param textElideMode Text elide mode
      */
     void textElideModeChanged(const Qt::TextElideMode& textElideMode);
+
+    /**
+     * Signals that the text elide mode changed to \p textElideMode
+     * @param textElideMode Text elide mode
+     */
+    void validatorChanged(const Qt::TextElideMode& textElideMode);
     
 protected:
-    QString             _string;                /** Current string */
-    QString             _placeholderString;     /** Place holder string */
-    QAction             _leadingAction;         /** Action at the leading position */
-    QAction             _trailingAction;        /** Action at the trailing position */
-    QCompleter*         _completer;             /** Pointer to completer */
-    bool                _searchMode;            /** Whether the string action is in search mode */
-    bool                _clearable;             /** Whether the string can be cleared by clicking the trailing action */
-    Qt::TextElideMode   _textElideMode;         /** Text elide mode */
+    QString                         _string;                /** Current string */
+    QString                         _placeholderString;     /** Place holder string */
+    QAction                         _leadingAction;         /** Action at the leading position */
+    QAction                         _trailingAction;        /** Action at the trailing position */
+    QCompleter*                     _completer;             /** Pointer to completer */
+    bool                            _searchMode;            /** Whether the string action is in search mode */
+    bool                            _clearable;             /** Whether the string can be cleared by clicking the trailing action */
+    Qt::TextElideMode               _textElideMode;         /** Text elide mode */
+    QRegularExpressionValidator     _validator;             /** Regular expression validator */
 
     friend class AbstractActionsManager;
 };

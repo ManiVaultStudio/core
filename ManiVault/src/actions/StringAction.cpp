@@ -14,10 +14,6 @@ namespace mv::gui {
 
 StringAction::StringAction(QObject* parent, const QString& title, const QString& string /*= ""*/) :
     WidgetAction(parent, title),
-    _string(),
-    _placeholderString(),
-    _leadingAction(),
-    _trailingAction(),
     _completer(nullptr),
     _searchMode(false),
     _clearable(false),
@@ -73,7 +69,7 @@ QAction& StringAction::getTrailingAction()
     return _trailingAction;
 }
 
-QCompleter* StringAction::getCompleter()
+QCompleter* StringAction::getCompleter() const
 {
     return _completer;
 }
@@ -226,6 +222,11 @@ void StringAction::setTextElideMode(const Qt::TextElideMode& textElideMode)
     emit textElideModeChanged(_textElideMode);
 }
 
+QRegularExpressionValidator& StringAction::getValidator()
+{
+    return _validator;
+}
+
 StringAction::LabelWidget::LabelWidget(QWidget* parent, StringAction* stringAction) :
     QLabel(parent),
     _stringAction(stringAction)
@@ -272,6 +273,23 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
+    setValidator(&_stringAction->getValidator());
+
+    addAction(&_validatorAction, QLineEdit::TrailingPosition);
+
+    const auto updateValidatorAction = [this]() -> void {
+        _validatorAction.setVisible(!_stringAction->getString().isEmpty() && !_stringAction->getValidator().regularExpression().pattern().isEmpty());
+
+        if (hasAcceptableInput())
+            _validatorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("check"));
+        else
+            _validatorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("exclamation"));
+    };
+
+    updateValidatorAction();
+
+    connect(_stringAction, &StringAction::stringChanged, this, updateValidatorAction);
+    connect(&_stringAction->getValidator(), &QRegularExpressionValidator::regularExpressionChanged, this, updateValidatorAction);
 
     const auto updateToolTip = [this, stringAction]() -> void {
         setToolTip(stringAction->getString());
