@@ -598,13 +598,15 @@ void PixelSelectionTool::paint()
     if (!_enabled) // _type != PixelSelectionType::ROI && 
         return;
 
-    auto shapePixmap = _shapePixmap;
-    auto areaPixmap = _areaPixmap;
+    // Create temporary pixmaps for painting
+    QPixmap tempShapePixmap = _shapePixmap;
+    QPixmap tempAreaPixmap = _areaPixmap;
 
-    shapePixmap.fill(Qt::transparent);
-    areaPixmap.fill(Qt::transparent);
+    // Clear the temporary pixmaps before painting
+    tempShapePixmap.fill(Qt::transparent);
+    tempAreaPixmap.fill(Qt::transparent);
 
-    QPainter shapePainter(&shapePixmap), areaPainter(&areaPixmap);
+    QPainter shapePainter(&tempShapePixmap), areaPainter(&tempAreaPixmap);
 
     shapePainter.setRenderHint(QPainter::Antialiasing);
     areaPainter.setRenderHint(QPainter::Antialiasing);
@@ -694,7 +696,7 @@ void PixelSelectionTool::paint()
             shapePainter.setPen(grayPen);
 
             // Draw y-axis
-            shapePainter.drawLine(QPointF(startPoint.x(), 0), QPointF(startPoint.x(), shapePixmap.height()));
+            shapePainter.drawLine(QPointF(startPoint.x(), 0), QPointF(startPoint.x(), _shapePixmap.height()));
 
             // Draw small angular dashed line from a point closer to the start point in the y direction
             const auto angleLineLength = 25.0; // Local parameter for the length of the angle lines
@@ -835,7 +837,7 @@ void PixelSelectionTool::paint()
 
         shapePainter.drawPolyline(QVector<QPoint>({
             QPoint(mousePosition.x(), mousePosition.y() + radius + gap),
-            QPoint(mousePosition.x(), shapePixmap.size().height())
+            QPoint(mousePosition.x(), _shapePixmap.size().height())
             }));
 
         shapePainter.drawPolyline(QVector<QPoint>({
@@ -845,7 +847,7 @@ void PixelSelectionTool::paint()
 
         shapePainter.drawPolyline(QVector<QPoint>({
             QPoint(mousePosition.x() + radius + gap, mousePosition.y()),
-            QPoint(shapePixmap.size().width(), mousePosition.y())
+            QPoint(_shapePixmap.size().width(), mousePosition.y())
             }));
 
         break;
@@ -854,7 +856,7 @@ void PixelSelectionTool::paint()
     case PixelSelectionType::ROI:
     {
         const auto topLeft = QPointF(0.0f, 0.0f);
-        const auto bottomRight = QPointF(shapePixmap.size().width(), shapePixmap.size().height());
+        const auto bottomRight = QPointF(_shapePixmap.size().width(), _shapePixmap.size().height());
         const auto rectangle = QRectF(topLeft, bottomRight);
 
         auto boundsPen = _penLineBackGround;
@@ -928,10 +930,10 @@ void PixelSelectionTool::paint()
         break;
     }
 
-    setAreaPixmap(areaPixmap);
-    setShapePixmap(shapePixmap);
+    // Assign the temporary pixmaps to the member variables after painting
+    setAreaPixmap(tempAreaPixmap);
+    setShapePixmap(tempShapePixmap);
 }
-
 
 
 void PixelSelectionTool::startSelection()
