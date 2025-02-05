@@ -98,7 +98,7 @@ private:
 
     static const int        notificationWidth               = 400;      /** Width of the notification */
     static const int        notificationSpacing             = 5;        /** Spacing between notifications */
-    static const int        notificationDuration            = 5000;     /** Duration of notification display */
+    static const int        notificationDuration            = 7500;     /** Duration of notification display */
     static const int        notificationAnimationDuration   = 200;      /** Duration of notification animation */
 
     friend class Notifications;
