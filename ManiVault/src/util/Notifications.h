@@ -9,23 +9,40 @@
 #include "Notification.h"
 
 #include <QObject>
-#include <QPoint>
-#include <QVector>
 
 namespace mv::util
 {
-
+/**
+ * Notifications manager class
+ *
+ * Orchestrates the creation and display of notifications (used solely by the help manager)
+ *
+ * @author Thomas Kroes
+ */
 class CORE_EXPORT Notifications : public QObject
 {
     Q_OBJECT
 
 public:
-    enum Position { BottomCenter, TopCenter, BottomRight };
 
-    explicit Notifications(QWidget* parent = nullptr, Position position = BottomCenter);
+    /**
+     * Construct notifications manager with \p parent widget
+     * @param parent Pointer to parent widget
+     */
+    explicit Notifications(QWidget* parent = nullptr);
 
+    /**
+     * Show message with \p title, \p description and \p icon
+     * @param title Message title
+     * @param description Message description
+     * @param icon Message icon
+     */
     void showMessage(const QString& title, const QString& description, const QIcon& icon);
 
+    /**
+     * Set parent widget to \p parentWidget (notification widgets will anchor to this widget)
+     * @param parentWidget Pointer to parent widget
+     */
     void setParentWidget(QWidget* parentWidget);
 
 protected:
@@ -39,9 +56,8 @@ protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
-    QWidget*                _parentWidget;
-    Position                _position;
-    QVector<Notification*>  _notifications;
+    QWidget*                _parentWidget;      /** Pointer to parent widget */
+    QVector<Notification*>  _notifications;     /** Vector of notifications */
 };
 
 }

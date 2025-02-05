@@ -7,11 +7,13 @@
 #include <QLabel>
 #include <QTimer>
 #include <QPropertyAnimation>
+#include <QParallelAnimationGroup>
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QStatusBar>
 #include <QPushButton>
-#include <QUuid>
+
+#include "actions/ColorAction.h"
 
 namespace mv::util
 {
@@ -21,11 +23,11 @@ Notification::Notification(const QString& title, const QString& description, con
     _previousNotification(previousNotification),
     _closing(false)
 {
-    setProperty("id", QUuid::createUuid());
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setAttribute(Qt::WA_ShowWithoutActivating);
     setAutoFillBackground(true);
+    setMinimumHeight(10);
 
     if (_previousNotification)
         _previousNotification->_nextNotification = this;
@@ -39,34 +41,40 @@ Notification::Notification(const QString& title, const QString& description, con
     auto notificationWidgetLayout   = new QHBoxLayout(this);
     auto iconLabel                  = new QLabel(this);
     auto messageLabel               = new QLabel(this);
-    auto closePushButton            = new QPushButton(this);
+    auto closePushButton            = new QToolButton(this);
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
+    const auto borderColorName = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Mid).name();
+
     notificationWidget->setObjectName("Notification");
-    notificationWidget->setStyleSheet("QWidget#Notification { border: 1px solid rgb(220, 220, 220); border-radius: 2px; }");
-    notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    notificationWidget->setStyleSheet(QString("QWidget#Notification { border: 1px solid %1; border-radius: 2px; }").arg(borderColorName));
+    notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     notificationWidget->setFixedWidth(300);
+    notificationWidget->setMinimumHeight(10);
 
     iconLabel->setPixmap(icon.pixmap(24, 24));
 
     messageLabel->setWordWrap(true);
     messageLabel->setTextFormat(Qt::RichText);
     messageLabel->setText("<b>" + title + "</b>" + "<br>" + description);
-    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    //messageLabel->setStyleSheet("QLabel { background-color: rgb(50, 50, 50); }");
+    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    messageLabel->setMinimumHeight(10);
 
     closePushButton->setFixedSize(24, 24);
     closePushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
-    closePushButton->setFlat(true);
+    closePushButton->setAutoRaise(true);
 
-    //notificationWidgetLayout->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    notificationWidgetLayout->setContentsMargins(4, 4, 4, 4);
+    notificationWidgetLayout->setContentsMargins(5, 5, 5, 5);
     notificationWidgetLayout->setSpacing(10);
+    notificationWidgetLayout->setAlignment(Qt::AlignTop);
 
     notificationWidgetLayout->addWidget(iconLabel);
-	notificationWidgetLayout->addWidget(messageLabel, 1);
-	notificationWidgetLayout->addWidget(closePushButton);
+    notificationWidgetLayout->setAlignment(iconLabel, Qt::AlignCenter);
+    notificationWidgetLayout->addWidget(messageLabel, 1);
+    notificationWidgetLayout->setAlignment(messageLabel, Qt::AlignTop);
+    notificationWidgetLayout->addWidget(closePushButton);
+    notificationWidgetLayout->setAlignment(closePushButton, Qt::AlignTop);
 
     notificationWidget->setLayout(notificationWidgetLayout);
 
@@ -74,56 +82,60 @@ Notification::Notification(const QString& title, const QString& description, con
 
     setLayout(mainLayout);
 
-	auto fadeIn = new QPropertyAnimation(this, "windowOpacity");
+	auto fadeInAnimation = new QPropertyAnimation(this, "windowOpacity");
 
-	fadeIn->setDuration(300);
-	fadeIn->setStartValue(0.0);
-	fadeIn->setEndValue(1.0);
-	fadeIn->start();
+	fadeInAnimation->setDuration(notificationAnimationDuration / 2);
+	fadeInAnimation->setStartValue(0.0);
+	fadeInAnimation->setEndValue(1.0);
+	fadeInAnimation->start();
 
-	QTimer::singleShot(5000, this, &Notification::closeNotification);
+	QTimer::singleShot(notificationDuration, this, &Notification::requestFinish);
 
-    connect(closePushButton, &QPushButton::clicked, this, &Notification::closeNotification);
+    connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
 
 	connect(this, &Notification::finished, this, [this]() -> void {
         if (getNextNotification())
             getNextNotification()->setPreviousNotification(getPreviousNotification());
     });
-
-    qDebug() << "Notification" << property("id").toString() << getPreviousNotification();
 }
 
-void Notification::closeNotification()
+void Notification::requestFinish()
 {
     if (_closing)
         return;
 
-    qDebug() << "Close notification" << property("id").toString() << height();
-
     _closing = true;
 
-	auto fadeOut = new QPropertyAnimation(this, "windowOpacity");
+    auto animationGroup         = new QParallelAnimationGroup(this);
+	auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
+    auto positionAnimation      = new QPropertyAnimation(this, "pos");
 
-	fadeOut->setDuration(300);
-	fadeOut->setStartValue(1.0);
-	fadeOut->setEndValue(0.0);
+    animationGroup->addAnimation(windowOpacityAnimation);
+    animationGroup->addAnimation(positionAnimation);
 
-	connect(fadeOut, &QPropertyAnimation::finished, this, &Notification::onFadeOutFinished);
+	windowOpacityAnimation->setDuration(notificationAnimationDuration);
+	windowOpacityAnimation->setStartValue(1.0);
+	windowOpacityAnimation->setEndValue(0.0);
 
-	fadeOut->start();
+    positionAnimation->setEasingCurve(QEasingCurve::InQuad);
+    positionAnimation->setDuration(notificationAnimationDuration);
+    positionAnimation->setStartValue(pos());
+    positionAnimation->setEndValue(pos() - QPoint(50, 0));
+
+	connect(animationGroup, &QPropertyAnimation::finished, this, &Notification::finish);
+
+    animationGroup->start();
 }
 
-void Notification::onFadeOutFinished()
+void Notification::finish()
 {
-	emit finished();
-
     if (_previousNotification && _nextNotification)
         _previousNotification->setNextNotification(_nextNotification);
 
     if (_nextNotification && _previousNotification)
         _nextNotification->setPreviousNotification(_previousNotification);
 
-	deleteLater();
+    emit finished();
 }
 
 bool Notification::isClosing() const
@@ -159,8 +171,6 @@ void Notification::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
 
-    qDebug() << "Notification show event" << property("id").toString() << height();
-
     QTimer::singleShot(10, this, &Notification::updatePosition);
 }
 
@@ -170,7 +180,7 @@ void Notification::updatePosition()
         _previousNotification->updateGeometry();
         _previousNotification->adjustSize();
 
-        move(QPoint(_previousNotification->pos().x(), _previousNotification->pos().y() - height() - notificationSpacing)); // 
+        move(QPoint(_previousNotification->pos().x(), _previousNotification->pos().y() - height() - notificationSpacing));
     } else {
         move(parentWidget()->mapToGlobal(QPoint(notificationSpacing, Application::getMainWindow()->height() - Application::getMainWindow()->statusBar()->height() - height() - notificationSpacing)));
     }
