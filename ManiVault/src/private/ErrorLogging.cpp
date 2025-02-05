@@ -51,7 +51,9 @@ bool ErrorLogging::getErrorLoggingEnabled()
 
 void ErrorLogging::setErrorLoggingEnabled(bool errorLoggingEnabled)
 {
-    setEnabled(errorLoggingEnabled);
+    //setEnabled(errorLoggingEnabled);
+
+    mv::help().addNotification("Error logging", "Error logging changes will be applied after restarting the application.", Application::getIconFont("FontAwesome").getIcon("bug"));
 }
 
 QString ErrorLogging::getCrashpadHandlerExecutableName()
@@ -86,12 +88,14 @@ void ErrorLogging::initialize()
         ErrorLogging::setErrorLoggingEnabled(toggled);
 	});
 
+    /*
     connect(&mv::settings().getApplicationSettings().getErrorLoggingDsnAction(), &StringAction::stringChanged, [](const QString& errorLoggingDsn) -> void {
         if (getErrorLoggingEnabled()) {
 	        ErrorLogging::setErrorLoggingEnabled(false);
 			ErrorLogging::setErrorLoggingEnabled(true);
         }
 	});
+    */
 
     connect(&mv::settings().getApplicationSettings().getErrorLoggingConsentAction(), &TriggerAction::triggered, []() -> void {
         ErrorLoggingConsentDialog errorLoggingConsentDialog;

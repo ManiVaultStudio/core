@@ -45,10 +45,11 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
+    const auto windowColorName = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Window).name();
     const auto borderColorName = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Mid).name();
 
     notificationWidget->setObjectName("Notification");
-    notificationWidget->setStyleSheet(QString("QWidget#Notification { border: 1px solid %1; border-radius: 2px; }").arg(borderColorName));
+    notificationWidget->setStyleSheet(QString("QWidget#Notification { background-color: %1; border: 1px solid %2; border-radius: 5px; }").arg(windowColorName, borderColorName));
     notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     notificationWidget->setFixedWidth(notificationWidth);
     notificationWidget->setMinimumHeight(10);
@@ -179,7 +180,9 @@ void Notification::updatePosition()
 
         move(QPoint(_previousNotification->pos().x(), _previousNotification->pos().y() - height() - notificationSpacing));
     } else {
-        move(parentWidget()->mapToGlobal(QPoint(notificationSpacing, Application::getMainWindow()->height() - Application::getMainWindow()->statusBar()->height() - height() - notificationSpacing)));
+        const auto statusBarHeight = Application::getMainWindow()->statusBar()->isVisible() ? Application::getMainWindow()->statusBar()->height() : 0;
+
+        move(parentWidget()->mapToGlobal(QPoint(notificationSpacing, Application::getMainWindow()->height() - statusBarHeight - height() - notificationSpacing)));
     }
         
     if (_nextNotification)
