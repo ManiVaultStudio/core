@@ -173,4 +173,9 @@ void Plugin::destroy()
     plugins().destroyPlugin(this);
 }
 
+void Plugin::addNotification(const QString& description) const
+{
+    mv::help().addNotification(getGuiName(), description, getIcon());
+}
+
 }

@@ -91,6 +91,20 @@ public:
      */
     virtual QMenu* getTutorialsMenu() const = 0;
 
+    /**
+     * Add toaster notification in the main window
+     * @param title Message title (maybe HTML)
+     * @param description Message description (maybe HTML)
+     * @param icon Icon to display in the notification
+     */
+    virtual void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon()) = 0;
+
+    /**
+     * Initialize notifications manager with \p parentWidget widget
+     * @param parentWidget Pointer to parent widget
+     */
+    virtual void initializeNotifications(QWidget* parentWidget) = 0;
+
 signals:
 
     /** Invoked when the videos model has been successfully populated from the website */

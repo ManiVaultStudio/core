@@ -32,11 +32,7 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     _splashScreenAction(splashScreenAction),
     _logoImage(":/Icons/AppIcon256"),
     _backgroundImage(":/Images/SplashScreenBackground"),
-    _roundedFrame(),
-    _roundedFrameLayout(),
-    _closeToolButton(&_roundedFrame),
-    _dropShadowEffect(),
-    _processEventsTimer()
+    _closeToolButton(&_roundedFrame)
 {
     setObjectName("SplashScreenWidget");
     setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::WindowStaysOnTopHint);
