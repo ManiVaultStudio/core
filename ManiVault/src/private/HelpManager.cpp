@@ -177,9 +177,9 @@ LearningCenterVideos HelpManager::getVideos(const QStringList& tags) const
     return videos;
 }
 
-void HelpManager::addNotification(const QString& title, const QString& description)
+void HelpManager::addNotification(const QString& title, const QString& description, const QIcon& icon /*= QIcon()*/)
 {
-    _notifications.showMessage(description);
+    _notifications.showMessage(title, description, icon);
 }
 
 void HelpManager::initializeNotifications(QWidget* parentWidget)

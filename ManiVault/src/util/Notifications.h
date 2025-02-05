@@ -24,9 +24,19 @@ public:
 
     explicit Notifications(QWidget* parent = nullptr, Position position = BottomCenter);
 
-    void showMessage(const QString& message);
+    void showMessage(const QString& title, const QString& description, const QIcon& icon);
 
     void setParentWidget(QWidget* parentWidget);
+
+protected:
+
+    /**
+     * Watch \p watched for \p event
+     * @param watched Pointer to watched object
+     * @param event Event to watch
+     * @return Whether the event was handled
+     */
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
     QWidget*                _parentWidget;

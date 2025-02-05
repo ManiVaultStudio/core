@@ -103,8 +103,9 @@ signals:
      * Add toaster notification in the main window
      * @param title Message title (maybe HTML)
      * @param description Message description (maybe HTML)
+     * @param icon Icon to display in the notification
      */
-    virtual void addNotification(const QString& title, const QString& description) = 0;
+    virtual void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon()) = 0;
 
     /**
      * Initialize notifications manager with \p parentWidget widget

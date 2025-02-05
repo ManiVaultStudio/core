@@ -7,7 +7,6 @@
 #include "ManiVaultGlobals.h"
 
 #include <QWidget>
-#include <QPushButton>
 
 namespace mv::util
 {
@@ -18,9 +17,8 @@ class CORE_EXPORT Notification : public QWidget
     Q_OBJECT
 
 public:
-    explicit Notification(const QString& message, Notification* previousNotification, QWidget* parent = nullptr);
+    explicit Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, QWidget* parent = nullptr);
 
-    void showNotification(const QPoint& pos);
     void closeNotification();
 
     void onFadeOutFinished();
@@ -45,7 +43,15 @@ public:
      */
     Notification* getNextNotification() const;
 
+    /**
+     * Set next notification to \p nextNotification
+     * @param nextNotification Pointer to next notification (maybe nullptr)
+     */
+    void setNextNotification(Notification* nextNotification);
+
 protected:
+
+    void showEvent(QShowEvent* event) override;
 
     void updatePosition();
 
@@ -55,9 +61,9 @@ signals:
 private:
     QPointer<Notification>  _previousNotification;      /** Pointer to previous notification (maybe nullptr) */
     QPointer<Notification>  _nextNotification;          /** Pointer to next notification (maybe nullptr) */
-    QLabel* _label;                     /** Pointer to label */ 
-    QPushButton             _closePushButton;
-    bool                    _closing;           /** Whether this notification is being closed */
+    bool                    _closing;                   /** Whether this notification is being closed */
+
+    static const int        notificationSpacing = 5;    /** Spacing between notifications */
 
     friend class Notifications;
 };

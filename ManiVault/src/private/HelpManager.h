@@ -89,8 +89,9 @@ public:
      * Add toaster notification in the main window
      * @param title Message title (maybe HTML)
      * @param description Message description (maybe HTML)
+     * @param icon Icon to display in the notification
      */
-    void addNotification(const QString& title, const QString& description) override;
+    void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon()) override;
 
     /**
      * Initialize notifications manager with \p parentWidget widget
