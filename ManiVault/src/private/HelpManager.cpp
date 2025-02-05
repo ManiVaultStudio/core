@@ -20,8 +20,6 @@
 #include <QJsonObject>
 #include <QUrl>
 
-#include "DatasetsToRemoveModel.h"
-
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -177,6 +175,16 @@ LearningCenterVideos HelpManager::getVideos(const QStringList& tags) const
     }
 
     return videos;
+}
+
+void HelpManager::addNotification(const QString& title, const QString& description, const QIcon& icon /*= QIcon()*/)
+{
+    _notifications.showMessage(title, description, icon);
+}
+
+void HelpManager::initializeNotifications(QWidget* parentWidget)
+{
+    _notifications.setParentWidget(parentWidget);
 }
 
 QMenu* HelpManager::getVideosMenu() const

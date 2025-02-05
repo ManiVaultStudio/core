@@ -209,6 +209,8 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         updateStatusBarVisibility();
 
         connect(&mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction(), &ToggleAction::toggled, this, updateStatusBarVisibility);
+
+        mv::help().initializeNotifications(this);
     }
 }
 
