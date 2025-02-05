@@ -17,6 +17,8 @@ namespace mv::util
  *
  * Orchestrates the creation and display of notifications (used solely by the help manager)
  *
+ * Note: This class is developed for internal use only
+ *
  * @author Thomas Kroes
  */
 class CORE_EXPORT Notifications : public QObject

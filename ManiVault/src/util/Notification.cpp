@@ -50,7 +50,7 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidget->setObjectName("Notification");
     notificationWidget->setStyleSheet(QString("QWidget#Notification { border: 1px solid %1; border-radius: 2px; }").arg(borderColorName));
     notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-    notificationWidget->setFixedWidth(300);
+    notificationWidget->setFixedWidth(notificationWidth);
     notificationWidget->setMinimumHeight(10);
 
     iconLabel->setPixmap(icon.pixmap(24, 24));
@@ -92,11 +92,6 @@ Notification::Notification(const QString& title, const QString& description, con
 	QTimer::singleShot(notificationDuration, this, &Notification::requestFinish);
 
     connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
-
-	connect(this, &Notification::finished, this, [this]() -> void {
-        if (getNextNotification())
-            getNextNotification()->setPreviousNotification(getPreviousNotification());
-    });
 }
 
 void Notification::requestFinish()
@@ -129,11 +124,11 @@ void Notification::requestFinish()
 
 void Notification::finish()
 {
-    if (_previousNotification && _nextNotification)
-        _previousNotification->setNextNotification(_nextNotification);
+    if (getPreviousNotification() && getNextNotification())
+        getPreviousNotification()->setNextNotification(getNextNotification());
 
-    if (_nextNotification && _previousNotification)
-        _nextNotification->setPreviousNotification(_previousNotification);
+    if (getNextNotification())
+        getNextNotification()->setPreviousNotification(getPreviousNotification());
 
     emit finished();
 }

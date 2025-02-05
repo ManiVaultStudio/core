@@ -16,6 +16,8 @@ namespace mv::util
  *
  * For showing stacked notifications in a toaster-like way (see the notifications class).
  *
+ * Note: This class is developed for internal use only
+ *
  * @author Thomas Kroes
  */
 class CORE_EXPORT Notification : public QWidget
@@ -90,13 +92,14 @@ signals:
     void finished();
 
 private:
-    QPointer<Notification>  _previousNotification;                  /** Pointer to previous notification (maybe nullptr) */
-    QPointer<Notification>  _nextNotification;                      /** Pointer to next notification (maybe nullptr) */
-    bool                    _closing;                               /** Whether this notification is being closed */
+    QPointer<Notification>  _previousNotification;                      /** Pointer to previous notification (maybe nullptr) */
+    QPointer<Notification>  _nextNotification;                          /** Pointer to next notification (maybe nullptr) */
+    bool                    _closing;                                   /** Whether this notification is being closed */
 
-    static const int        notificationSpacing = 5;                /** Spacing between notifications */
-    static const int        notificationDuration = 5000;            /** Duration of notification display */
-    static const int        notificationAnimationDuration = 200;    /** Duration of notification animation */
+    static const int        notificationWidth               = 350;      /** Width of the notification */
+    static const int        notificationSpacing             = 5;        /** Spacing between notifications */
+    static const int        notificationDuration            = 5000;     /** Duration of notification display */
+    static const int        notificationAnimationDuration   = 200;      /** Duration of notification animation */
 
     friend class Notifications;
 };
