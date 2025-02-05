@@ -383,12 +383,10 @@ void PixelSelectionAction::initMiscellaneous()
     });
 
     connect(_pixelSelectionTool, &PixelSelectionTool::lineWidthChanged, this, [this](const float& lineWidth) {
-        qDebug() << "lineWidthChanged: " << lineWidth;
         _lineWidthAction.setValue(lineWidth);
         });
 
     connect(&_lineWidthAction, &DecimalAction::valueChanged, this, [this](const double& value) {
-        qDebug() << "lineWidthAction: " << value;
         _pixelSelectionTool->setLineWidth(value);
         });
 
