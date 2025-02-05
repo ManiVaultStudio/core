@@ -13,7 +13,6 @@ Notifications::Notifications(QWidget* parent) :
 	QObject(parent),
 	_parentWidget(parent)
 {
-    Q_ASSERT(_parentWidget);
 }
 
 void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon)
