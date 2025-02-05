@@ -86,6 +86,24 @@ public: // Getters/setters
      */
     void setBrushRadius(const float& brushRadius);
 
+    /** Get line width */
+    float getLineWidth() const;
+
+    /**
+     * Set line width
+     * @param lineWidth Line width
+     */
+    void setLineWidth(const float& lineWidth);
+
+    /** Get line angle */
+    float getLineAngle() const;
+
+    /**
+     * Set line angle
+     * @param lineAngle Line angle
+     */
+    void setLineAngle(const float& lineAngle);
+
     /** Get fixed brush radius modifier */
     Qt::KeyboardModifier getFixedBrushRadiusModifier() const;
 
@@ -176,6 +194,13 @@ signals:
 
     /** Signals that the brush radius has changed */
     void brushRadiusChanged(const float& brushRadius);
+
+    /** Signals that the line width has changed */
+    void lineWidthChanged(const float& lineWidth);
+
+    /** Signals that the line angle has changed */
+    void lineAngleChanged(const float& lineAngle);
+
 
     /** Signals that the selection shape changed */
     void shapeChanged();

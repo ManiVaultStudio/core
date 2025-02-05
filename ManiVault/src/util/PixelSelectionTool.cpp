@@ -137,6 +137,36 @@ void PixelSelectionTool::setBrushRadius(const float& brushRadius)
     paint();
 }
 
+float PixelSelectionTool::getLineWidth() const
+{
+    return _lineAreaWidth;
+}
+
+void PixelSelectionTool::setLineWidth(const float& lineWidth)
+{
+    if (lineWidth == _lineAreaWidth)
+        return;
+    _lineAreaWidth = std::max(1.0f, lineWidth);
+    emit lineWidthChanged(_lineAreaWidth);
+
+    paint();
+}
+
+float PixelSelectionTool::getLineAngle() const
+{
+    return _lineAngle;
+}
+
+void PixelSelectionTool::setLineAngle(const float& lineAngle)
+{
+    if (lineAngle == _lineAngle)
+        return;
+    _lineAngle = lineAngle;
+    emit lineAngleChanged(_lineAngle);
+    paint();
+}
+
+
 Qt::KeyboardModifier PixelSelectionTool::getFixedBrushRadiusModifier() const
 {
     return _fixedBrushRadiusModifier;
@@ -169,6 +199,8 @@ void PixelSelectionTool::setChanged()
     emit modifierChanged(_modifier);
     emit notifyDuringSelectionChanged(_notifyDuringSelection);
     emit brushRadiusChanged(_brushRadius);
+    emit lineAngleChanged(_lineAngle);
+    emit lineWidthChanged(_lineAreaWidth);
 }
 
 void PixelSelectionTool::update()
@@ -985,6 +1017,7 @@ void PixelSelectionTool::endSelection()
 
         // Round to two decimal places
         _lineAngle = std::round(_lineAngle * 100.0) / 100.0;
+        setLineAngle(_lineAngle);
         qDebug() << "Line angle: " << _lineAngle;
         // Call paint() to update the UI immediately
         paint();
