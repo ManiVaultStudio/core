@@ -965,8 +965,8 @@ void PixelSelectionTool::endSelection()
         const auto length = std::sqrt(dx * dx + dy * dy);
         const auto direction = QPointF(dx / length, dy / length);
 
-        // Calculate the angle in degrees with respect to the y-axis
-        _lineAngle = std::atan2(direction.x(), direction.y()) * 180.0 / M_PI;
+        // Calculate the angle in degrees with respect to the top of the y-axis
+        _lineAngle = std::atan2(dx, -dy) * 180.0 / M_PI;
         if (_lineAngle < 0) {
             _lineAngle += 360.0;
         }
