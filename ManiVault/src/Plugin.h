@@ -163,6 +163,12 @@ public: // Miscellaneous
     /** Destroys the plugin and removes it from the plugin manager */
     void destroy();
 
+    /**
+     * Add plugin notification in the main window
+     * @param description Message description (maybe HTML)
+     */
+    void addNotification(const QString& description) const;
+    
 public: // Action getters
 
     gui::StringAction& getGuiNameAction() { return _guiNameAction; };
