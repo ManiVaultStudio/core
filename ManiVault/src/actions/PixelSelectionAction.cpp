@@ -41,7 +41,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _invertSelectionAction(this, "Invert"),
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
     _notifyDuringSelectionAction(this, "Notify during selection", true),
-    _lineWidthAction(this, "Line width", 1.0f, 100.0f, 1.0f),
+    _lineWidthAction(this, "Line width", 1.0f, 50.0f, 5.0f),
     _lineAngleAction(this, "Line angle", 0.0f, 359.9f, 0.0f)
 
 {
@@ -143,7 +143,9 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _lineWidthAction.setSuffix("px");
 
     _lineAngleAction.setToolTip("Line angle");
-    _lineAngleAction.setSuffix("°");
+    _lineAngleAction.setSuffix("\u00B0");
+    _lineAngleAction.setDisabled(true);
+    _lineAngleAction.setDefaultWidgetFlags(DecimalAction::SpinBox);
 
     _notifyDuringSelectionAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
     _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -205,7 +207,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     const auto updateType = [this]() {
         _brushRadiusAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Brush) || _typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Sample));
         _lineWidthAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Line));
-        _lineAngleAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Line));
+        //_lineAngleAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Line));
     };
 
     updateType();
@@ -381,18 +383,22 @@ void PixelSelectionAction::initMiscellaneous()
     });
 
     connect(_pixelSelectionTool, &PixelSelectionTool::lineWidthChanged, this, [this](const float& lineWidth) {
+        qDebug() << "lineWidthChanged: " << lineWidth;
         _lineWidthAction.setValue(lineWidth);
         });
 
     connect(&_lineWidthAction, &DecimalAction::valueChanged, this, [this](const double& value) {
+        qDebug() << "lineWidthAction: " << value;
         _pixelSelectionTool->setLineWidth(value);
         });
 
     connect(_pixelSelectionTool, &PixelSelectionTool::lineAngleChanged, this, [this](const float& lineAngle) {
+ 
         _lineAngleAction.setValue(lineAngle);
         });
 
     connect(&_lineAngleAction, &DecimalAction::valueChanged, this, [this](const double& value) {
+
         _pixelSelectionTool->setLineAngle(value);
         });
 

@@ -264,18 +264,19 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     paint();
                 }
             }
-
+            float lineAreaWidth = getLineWidth();
             // Adjust line area width with up and down arrow keys
             if (_type == PixelSelectionType::Line) {
                 if (keyEvent->key() == Qt::Key_Up) {
-                    _lineAreaWidth += 1.0f;
+                    lineAreaWidth += 1.0f;
                     shouldPaint = true;
                 }
                 else if (keyEvent->key() == Qt::Key_Down) {
-                    _lineAreaWidth = std::max(1.0f, _lineAreaWidth - 1.0f);
+                    lineAreaWidth = std::max(1.0f, lineAreaWidth - 1.0f);
                     shouldPaint = true;
                 }
             }
+            setLineWidth(lineAreaWidth);
         }
 
         break;
@@ -586,11 +587,13 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             break;
         case PixelSelectionType::Line:
         {
+            float lineAreaWidth = getLineWidth();
             if (wheelEvent->angleDelta().y() < 0)
-                _lineAreaWidth = std::max(1.0f, _lineAreaWidth - 1.0f);
+                lineAreaWidth = std::max(1.0f, lineAreaWidth - 1.0f);
             else
-                _lineAreaWidth += 1.0f;
+                lineAreaWidth += 1.0f;
 
+            setLineWidth(lineAreaWidth);
             shouldPaint = true;
 
             break;
@@ -701,7 +704,8 @@ void PixelSelectionTool::paint()
         controlPoints << startPoint;
         controlPoints << endPoint;
 
-        const auto length = _lineAreaWidth; // Use the new member variable
+        const auto length = getLineWidth(); 
+        
         const auto direction = (endPoint - startPoint) / std::sqrt(std::pow(endPoint.x() - startPoint.x(), 2) + std::pow(endPoint.y() - startPoint.y(), 2));
         const auto perpendicular = QPointF(-direction.y(), direction.x()) * length;
 
@@ -1010,15 +1014,15 @@ void PixelSelectionTool::endSelection()
         const auto direction = QPointF(dx / length, dy / length);
 
         // Calculate the angle in degrees with respect to the top of the y-axis
-        _lineAngle = std::atan2(dx, -dy) * 180.0 / M_PI;
-        if (_lineAngle < 0) {
-            _lineAngle += 360.0;
+        float lineAngle = std::atan2(dx, -dy) * 180.0 / M_PI;
+        if (lineAngle < 0) {
+            lineAngle += 360.0;
         }
 
         // Round to two decimal places
-        _lineAngle = std::round(_lineAngle * 100.0) / 100.0;
-        setLineAngle(_lineAngle);
-        qDebug() << "Line angle: " << _lineAngle;
+        lineAngle = std::round(lineAngle * 100.0) / 100.0;
+        setLineAngle(lineAngle);
+        //qDebug() << "Line angle: " << _lineAngle;
         // Call paint() to update the UI immediately
         paint();
     }
