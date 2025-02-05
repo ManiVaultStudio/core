@@ -96,7 +96,7 @@ private:
     QPointer<Notification>  _nextNotification;                          /** Pointer to next notification (maybe nullptr) */
     bool                    _closing;                                   /** Whether this notification is being closed */
 
-    static const int        notificationWidth               = 350;      /** Width of the notification */
+    static const int        notificationWidth               = 400;      /** Width of the notification */
     static const int        notificationSpacing             = 5;        /** Spacing between notifications */
     static const int        notificationDuration            = 5000;     /** Duration of notification display */
     static const int        notificationAnimationDuration   = 200;      /** Duration of notification animation */

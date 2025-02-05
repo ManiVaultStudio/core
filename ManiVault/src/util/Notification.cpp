@@ -60,6 +60,7 @@ Notification::Notification(const QString& title, const QString& description, con
     messageLabel->setText("<b>" + title + "</b>" + "<br>" + description);
     messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
     messageLabel->setMinimumHeight(10);
+    messageLabel->setOpenExternalLinks(true);
 
     closePushButton->setFixedSize(24, 24);
     closePushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
