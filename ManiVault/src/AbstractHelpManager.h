@@ -91,14 +91,6 @@ public:
      */
     virtual QMenu* getTutorialsMenu() const = 0;
 
-signals:
-
-    /** Invoked when the videos model has been successfully populated from the website */
-    void videosModelPopulatedFromWebsite();
-
-    /** Invoked when the tutorials model has been successfully populated from the website */
-    void tutorialsModelPopulatedFromWebsite();
-
     /**
      * Add toaster notification in the main window
      * @param title Message title (maybe HTML)
@@ -112,6 +104,14 @@ signals:
      * @param parentWidget Pointer to parent widget
      */
     virtual void initializeNotifications(QWidget* parentWidget) = 0;
+
+signals:
+
+    /** Invoked when the videos model has been successfully populated from the website */
+    void videosModelPopulatedFromWebsite();
+
+    /** Invoked when the tutorials model has been successfully populated from the website */
+    void tutorialsModelPopulatedFromWebsite();
 
 public: // Action getters
 
