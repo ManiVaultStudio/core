@@ -218,7 +218,7 @@ protected:
     QPen        _penLineBackGround;         /** Background pen */
     QPen        _penControlPoint;           /** Control point pen */
     QPen        _penClosingPoint;           /** Closing point pen (e.g. for finishing polygon selection) */
-
+    QTimer* _paintTimer;                    /** Timer for lazy update */
 public:
     static constexpr float BRUSH_RADIUS_MIN     = 10.0f;                    /** Minimum radius */
     static constexpr float BRUSH_RADIUS_MAX     = 500.0f;                   /** Maximum radius */

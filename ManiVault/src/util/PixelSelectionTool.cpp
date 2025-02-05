@@ -39,11 +39,18 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _penClosingPoint(),
     _lineAreaWidth(5.0f),
     _lineAngle(0.0f),
-    _showAngleLines(false)
+    _showAngleLines(false),
+    _paintTimer()
 {
     setMainColor(QColor(Qt::black));
 
     targetWidget->installEventFilter(this);
+
+    _paintTimer = new QTimer(this);
+    _paintTimer->setSingleShot(true);
+    _paintTimer->setInterval(50); // 50 ms delay
+    connect(_paintTimer, &QTimer::timeout, this, &PixelSelectionTool::paint);
+
 }
 
 bool PixelSelectionTool::isEnabled() const
@@ -587,8 +594,11 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
         break;
     }
 
-    if (shouldPaint)
-        paint();
+    if (shouldPaint) {
+        if (!_paintTimer->isActive()) {
+            _paintTimer->start();
+        }
+    }
 
     return QObject::eventFilter(target, event);
 }
