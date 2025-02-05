@@ -53,7 +53,8 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidget->setFixedWidth(notificationWidth);
     notificationWidget->setMinimumHeight(10);
 
-    iconLabel->setPixmap(icon.pixmap(24, 24));
+    iconLabel->setStyleSheet("padding: 3px;");
+    iconLabel->setPixmap(icon.pixmap(32, 32));
 
     messageLabel->setWordWrap(true);
     messageLabel->setTextFormat(Qt::RichText);
@@ -66,12 +67,12 @@ Notification::Notification(const QString& title, const QString& description, con
     closePushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
     closePushButton->setAutoRaise(true);
 
-    notificationWidgetLayout->setContentsMargins(5, 5, 5, 5);
-    notificationWidgetLayout->setSpacing(10);
+    notificationWidgetLayout->setContentsMargins(10, 10, 10, 10);
+    notificationWidgetLayout->setSpacing(20);
     notificationWidgetLayout->setAlignment(Qt::AlignTop);
 
     notificationWidgetLayout->addWidget(iconLabel);
-    notificationWidgetLayout->setAlignment(iconLabel, Qt::AlignCenter);
+    notificationWidgetLayout->setAlignment(iconLabel, Qt::AlignTop);
     notificationWidgetLayout->addWidget(messageLabel, 1);
     notificationWidgetLayout->setAlignment(messageLabel, Qt::AlignTop);
     notificationWidgetLayout->addWidget(closePushButton);
