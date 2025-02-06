@@ -229,8 +229,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     connect(expandAllAction, &TriggerAction::triggered, this, [this]() -> void {
         _hierarchyWidget.getExpandAllAction().trigger();
-
-        mv::help().addNotification("Data hierarchy expanded", "All items in the data hierarchy have been expanded", Application::getIconFont("FontAwesome").getIcon("database"), util::Notification::DurationType::Calculated);
 	});
 
     auto& treeView = _hierarchyWidget.getTreeView();
