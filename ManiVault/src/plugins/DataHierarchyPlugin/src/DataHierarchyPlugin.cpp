@@ -34,8 +34,6 @@ void DataHierarchyPlugin::init()
     layout->addWidget(&_dataHierarchyWidget);
 
     getWidget().setLayout(layout);
-
-    addNotification("In the heart of a bustling city, there was a small, quaint bookstore that had stood the test of time. The store, known as The Book Nook, was a haven for book lovers of all ages. Its wooden shelves were lined with books of every genre, from classic literature to modern thrillers, and everything in between. The scent of aged paper and ink filled the air, creating an atmosphere that was both nostalgic and inviting.", Notification::DurationType::Calculated);
 }
 
 DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
