@@ -173,9 +173,9 @@ void Plugin::destroy()
     plugins().destroyPlugin(this);
 }
 
-void Plugin::addNotification(const QString& description) const
+void Plugin::addNotification(const QString& description, const util::Notification::DurationType& durationType /*= util::Notification::DurationType::Fixed*/, std::int32_t delayMs /*= 0*/) const
 {
-    mv::help().addNotification(getGuiName(), description, getIcon());
+    mv::help().addNotification(getGuiName(), description, getIcon(), durationType, delayMs);
 }
 
 }
