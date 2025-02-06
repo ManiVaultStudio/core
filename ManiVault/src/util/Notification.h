@@ -22,8 +22,15 @@ namespace mv::util
  */
 class CORE_EXPORT Notification : public QWidget
 {
-
     Q_OBJECT
+
+public:
+
+    /** Duration types */
+    enum class DurationType {
+        Fixed,          /** Standard 5000 ms */
+        Calculated      /** Calculated based on the number of characters */ 
+    };
 
 public:
 
@@ -33,9 +40,10 @@ public:
      * @param description Notification description
      * @param icon Notification icon
      * @param previousNotification Pointer to previous notification (maybe nullptr)
+     * @param durationType Duration type of the notification
      * @param parent Pointer to parent widget
      */
-    explicit Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, QWidget* parent = nullptr);
+    explicit Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent = nullptr);
 
     /**
      * Get whether the notification is closing
@@ -86,20 +94,34 @@ private:
     /** Perform final operations after fade-out animation and before being deleted */
 	void finish();
 
+    /** Slide the notification in */
+    void slideIn();
+
+    /** Slide the notification out */
+    void slideOut();
+
+    /**
+     * Estimate the reading time of \p text
+     * @param text Input text
+     * @return Estimated reading time in milliseconds
+     */
+    static double getEstimatedReadingTime(const QString& text);
+
 signals:
 
     /** Signal emitted when the toaster finishes displaying */
     void finished();
 
 private:
-    QPointer<Notification>  _previousNotification;                      /** Pointer to previous notification (maybe nullptr) */
-    QPointer<Notification>  _nextNotification;                          /** Pointer to next notification (maybe nullptr) */
-    bool                    _closing;                                   /** Whether this notification is being closed */
+    QPointer<Notification>  _previousNotification;          /** Pointer to previous notification (maybe nullptr) */
+    QPointer<Notification>  _nextNotification;              /** Pointer to next notification (maybe nullptr) */
+    bool                    _closing;                       /** Whether this notification is being closed */
 
-    static const int        notificationWidth               = 400;      /** Width of the notification */
-    static const int        notificationSpacing             = 5;        /** Spacing between notifications */
-    static const int        notificationDuration            = 7500;     /** Duration of notification display */
-    static const int        notificationAnimationDuration   = 200;      /** Duration of notification animation */
+    static const int    fixedWidth              = 400;      /** Width of the notification */
+    static const int    spacing                 = 5;        /** Spacing between notifications */
+    static const int    fixedDuration           = 5000;     /** Duration of notification display */
+    static const int    animationDuration       = 300;      /** Duration of notification animation */
+    static const int    averageReadingSpeedWPM  = 200;      /** Average reading speed in words per minute */
 
     friend class Notifications;
 };

@@ -18,7 +18,7 @@
 namespace mv::util
 {
 
-Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, QWidget* parent) :
+Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
 	QWidget(parent),
     _previousNotification(previousNotification),
     _closing(false)
@@ -50,7 +50,7 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidget->setObjectName("Notification");
     notificationWidget->setStyleSheet(QString("QWidget#Notification { border: 1px solid %1; border-radius: 2px; }").arg(borderColorName));
     notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-    notificationWidget->setFixedWidth(notificationWidth);
+    notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
 
     iconLabel->setStyleSheet("padding: 3px;");
@@ -63,7 +63,7 @@ Notification::Notification(const QString& title, const QString& description, con
     messageLabel->setMinimumHeight(10);
     messageLabel->setOpenExternalLinks(true);
 
-    closePushButton->setFixedSize(24, 24);
+    closePushButton->setFixedSize(18, 18);
     closePushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
     closePushButton->setAutoRaise(true);
 
@@ -84,14 +84,9 @@ Notification::Notification(const QString& title, const QString& description, con
 
     setLayout(mainLayout);
 
-	auto fadeInAnimation = new QPropertyAnimation(this, "windowOpacity");
+    const auto duration = durationType == DurationType::Fixed ? fixedDuration : getEstimatedReadingTime(title + description);
 
-	fadeInAnimation->setDuration(notificationAnimationDuration / 2);
-	fadeInAnimation->setStartValue(0.0);
-	fadeInAnimation->setEndValue(1.0);
-	fadeInAnimation->start();
-
-	QTimer::singleShot(notificationDuration, this, &Notification::requestFinish);
+	QTimer::singleShot(duration, this, &Notification::requestFinish);
 
     connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
 }
@@ -103,25 +98,7 @@ void Notification::requestFinish()
 
     _closing = true;
 
-    auto animationGroup         = new QParallelAnimationGroup(this);
-	auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
-    auto positionAnimation      = new QPropertyAnimation(this, "pos");
-
-    animationGroup->addAnimation(windowOpacityAnimation);
-    animationGroup->addAnimation(positionAnimation);
-
-	windowOpacityAnimation->setDuration(notificationAnimationDuration);
-	windowOpacityAnimation->setStartValue(1.0);
-	windowOpacityAnimation->setEndValue(0.0);
-
-    positionAnimation->setEasingCurve(QEasingCurve::InQuad);
-    positionAnimation->setDuration(notificationAnimationDuration);
-    positionAnimation->setStartValue(pos());
-    positionAnimation->setEndValue(pos() - QPoint(50, 0));
-
-	connect(animationGroup, &QPropertyAnimation::finished, this, &Notification::finish);
-
-    animationGroup->start();
+    slideOut();
 }
 
 void Notification::finish()
@@ -133,6 +110,71 @@ void Notification::finish()
         getNextNotification()->setPreviousNotification(getPreviousNotification());
 
     emit finished();
+}
+
+void Notification::slideIn()
+{
+    auto animationGroup         = new QParallelAnimationGroup(this);
+    auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
+    auto positionAnimation      = new QPropertyAnimation(this, "pos");
+
+    animationGroup->addAnimation(windowOpacityAnimation);
+    animationGroup->addAnimation(positionAnimation);
+
+    windowOpacityAnimation->setDuration(animationDuration);
+    windowOpacityAnimation->setEasingCurve(QEasingCurve::InOutQuad);
+    windowOpacityAnimation->setStartValue(0.0);
+    windowOpacityAnimation->setEndValue(1.0);
+
+    positionAnimation->setEasingCurve(QEasingCurve::InOutQuad);
+    positionAnimation->setDuration(animationDuration);
+    positionAnimation->setStartValue(pos() - QPoint(25, 0));
+    positionAnimation->setEndValue(pos());
+
+    animationGroup->start();
+}
+
+void Notification::slideOut()
+{
+    auto animationGroup = new QParallelAnimationGroup(this);
+    auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
+    auto positionAnimation = new QPropertyAnimation(this, "pos");
+
+    animationGroup->addAnimation(windowOpacityAnimation);
+    animationGroup->addAnimation(positionAnimation);
+
+    windowOpacityAnimation->setDuration(animationDuration);
+    windowOpacityAnimation->setEasingCurve(QEasingCurve::InOutQuad);
+    windowOpacityAnimation->setStartValue(1.0);
+    windowOpacityAnimation->setEndValue(0.0);
+
+    positionAnimation->setEasingCurve(QEasingCurve::InOutQuad);
+    positionAnimation->setDuration(animationDuration);
+    positionAnimation->setStartValue(pos());
+    positionAnimation->setEndValue(pos() - QPoint(25, 0));
+
+    connect(animationGroup, &QPropertyAnimation::finished, this, &Notification::finish);
+
+    animationGroup->start();
+}
+
+double Notification::getEstimatedReadingTime(const QString& text)
+{
+    QRegularExpression wordRegex("\\b\\w+\\b");
+
+	auto wordIterator = wordRegex.globalMatch(text);
+
+	size_t wordCount = 0;
+
+    while (wordIterator.hasNext()) {
+        wordIterator.next();
+        wordCount++;
+    }
+
+    const double readingTimeMinutes       = static_cast<float>(wordCount) / averageReadingSpeedWPM;
+    const double readingTimeMilliseconds  = readingTimeMinutes * 60 * 1000;
+
+    return readingTimeMilliseconds;
 }
 
 bool Notification::isClosing() const
@@ -168,7 +210,10 @@ void Notification::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
 
-    QTimer::singleShot(10, this, &Notification::updatePosition);
+    QTimer::singleShot(10, this, [this]() -> void {
+        updatePosition();
+        slideIn();
+    });
 }
 
 void Notification::updatePosition()
@@ -177,9 +222,9 @@ void Notification::updatePosition()
         _previousNotification->updateGeometry();
         _previousNotification->adjustSize();
 
-        move(QPoint(_previousNotification->pos().x(), _previousNotification->pos().y() - height() - notificationSpacing));
+        move(QPoint(_previousNotification->pos().x(), _previousNotification->pos().y() - height() - spacing));
     } else {
-        move(parentWidget()->mapToGlobal(QPoint(notificationSpacing, Application::getMainWindow()->height() - Application::getMainWindow()->statusBar()->height() - height() - notificationSpacing)));
+        move(parentWidget()->mapToGlobal(QPoint(spacing, Application::getMainWindow()->height() - Application::getMainWindow()->statusBar()->height() - height() - spacing)));
     }
         
     if (_nextNotification)

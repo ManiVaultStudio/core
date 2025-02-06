@@ -38,8 +38,10 @@ public:
      * @param title Message title
      * @param description Message description
      * @param icon Message icon
+     * @param durationType Duration type of the notification
+     * @param delayMs Delay in milliseconds before the notification is shown
      */
-    void showMessage(const QString& title, const QString& description, const QIcon& icon);
+    void showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs);
 
     /**
      * Set parent widget to \p parentWidget (notification widgets will anchor to this widget)
