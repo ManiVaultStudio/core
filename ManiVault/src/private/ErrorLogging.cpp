@@ -33,8 +33,8 @@ ErrorLogging::ErrorLogging(QObject* parent /*= nullptr*/) :
 
         errorLoggingConsentDialog.exec();
 
-        //if (getErrorLoggingEnabled())
-
+        if (getErrorLoggingEnabled())
+            start();
     }
 }
 
