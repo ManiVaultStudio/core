@@ -227,7 +227,7 @@ void Notification::updatePosition()
     } else {
         const auto statusBarHeight = Application::getMainWindow()->statusBar()->isVisible() ? Application::getMainWindow()->statusBar()->height() : 0;
 
-        move(parentWidget()->mapToGlobal(QPoint(notificationSpacing, Application::getMainWindow()->height() - statusBarHeight - height() - notificationSpacing)));
+        move(parentWidget()->mapToGlobal(QPoint(spacing, Application::getMainWindow()->height() - statusBarHeight - height() - spacing)));
     }
         
     if (_nextNotification)
