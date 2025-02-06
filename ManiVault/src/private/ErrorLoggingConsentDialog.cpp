@@ -4,8 +4,6 @@
 
 #include "ErrorLoggingConsentDialog.h"
 
-#include "ErrorLogging.h"
-
 #include <Application.h>
 
 #include <QDesktopServices>
@@ -15,6 +13,8 @@
 #endif
 
 using namespace mv;
+
+ErrorLogging* ErrorLoggingConsentDialog::errorLoggingInstance = nullptr;
 
 ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
 	QDialog(parent),
@@ -27,7 +27,6 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
-    //setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check-square"));
     setFixedSize({ 500, 420 });
 
@@ -48,7 +47,7 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     _buttonsLayout.addWidget(&_acceptPushButton);
     _buttonsLayout.addWidget(&_optOutPushButton);
 
-    if (!ErrorLogging::getUserHasOpted())
+    if (!errorLoggingInstance->getUserHasOpted())
 		_buttonsLayout.addWidget(&_decideLaterPushButton);
 
     _layout.addLayout(&_buttonsLayout);
@@ -56,15 +55,15 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     setLayout(&_layout);
 
 	connect(&_acceptPushButton, &QPushButton::clicked, this, [this]() -> void {
-        ErrorLogging::setUserHasOpted(true);
-        ErrorLogging::setErrorLoggingEnabled(true);
+        errorLoggingInstance->setUserHasOpted(true);
+        errorLoggingInstance->setErrorLoggingEnabled(true);
 
         accept();
 	});
     
 	connect(&_optOutPushButton, &QPushButton::clicked, this, [this]() -> void {
-        ErrorLogging::setUserHasOpted(true);
-        ErrorLogging::setErrorLoggingEnabled(false);
+        errorLoggingInstance->setUserHasOpted(true);
+        errorLoggingInstance->setErrorLoggingEnabled(false);
 
         accept();
 	});
@@ -72,4 +71,9 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     connect(&_decideLaterPushButton, &QPushButton::clicked, this, [this]() -> void {
         reject();
 	});
+}
+
+void ErrorLoggingConsentDialog::setErrorLoggingInstance(ErrorLogging* errorLoggingInstance)
+{
+    ErrorLoggingConsentDialog::errorLoggingInstance = errorLoggingInstance;
 }

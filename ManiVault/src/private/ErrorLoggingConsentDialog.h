@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ErrorLogging.h"
+
 #include <QDialog>
 #include <QPlainTextEdit>
 #include <QPushButton>
@@ -29,11 +31,19 @@ public:
      */
     explicit ErrorLoggingConsentDialog(QWidget* parent = nullptr);
 
+    /**
+     * Set error logging instance to \p errorLogging
+     * @param errorLoggingInstance Pointer to error logging instance
+     */
+    static void setErrorLoggingInstance(ErrorLogging* errorLoggingInstance);
+
 private:
-    QVBoxLayout         _layout;                    /** Main layout */
-    QLabel              _notificationLabel;         /** Notification label */
-    QHBoxLayout         _buttonsLayout;             /** Bottom buttons layout */
-    QPushButton         _acceptPushButton;          /** Opt in of automated error reporting when clicked */
-    QPushButton         _optOutPushButton;          /** Opt out of automated error reporting when clicked */
-    QPushButton         _decideLaterPushButton;     /** Exit the dialog and show it at next startup */
+    QVBoxLayout     _layout;                    /** Main layout */
+    QLabel          _notificationLabel;         /** Notification label */
+    QHBoxLayout     _buttonsLayout;             /** Bottom buttons layout */
+    QPushButton     _acceptPushButton;          /** Opt in of automated error reporting when clicked */
+    QPushButton     _optOutPushButton;          /** Opt out of automated error reporting when clicked */
+    QPushButton     _decideLaterPushButton;     /** Exit the dialog and show it at next startup */
+
+    static ErrorLogging* errorLoggingInstance;  /** Pointer to error logging instance */
 };

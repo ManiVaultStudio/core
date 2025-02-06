@@ -23,6 +23,8 @@
 #include <QTemporaryDir>
 #include <QFileInfo>
 
+#include "private/ErrorLoggingConsentDialog.h"
+
 using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;
@@ -125,6 +127,8 @@ int main(int argc, char *argv[])
 
 #ifdef ERROR_LOGGING
     ErrorLogging errorLogging;
+
+    ErrorLoggingConsentDialog::setErrorLoggingInstance(&errorLogging);
 #endif
     
     QString startupProjectFilePath;
