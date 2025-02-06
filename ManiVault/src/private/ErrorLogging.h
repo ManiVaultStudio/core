@@ -23,8 +23,8 @@ public:
      */
     ErrorLogging(QObject* parent = nullptr);
 
-    /** Connects to the application */
-    static void initialize();
+    /** Connects to the error logging global settings */
+    void initialize();
 
 protected:
 
@@ -32,50 +32,70 @@ protected:
      * Get whether the user has opted in or out
      * @return Boolean determining whether the user has opted in or out
      */
-    static bool getUserHasOpted();
+    bool getUserHasOpted() const;
 
     /**
      * Set whether the \p userHasOpted in or out
      * @param userHasOpted Boolean determining whether the user has opted in or out
      */
-    static void setUserHasOpted(bool userHasOpted);
+    void setUserHasOpted(bool userHasOpted);
 
     /**
      * Get whether error logging is enabled or not
      * @return Boolean determining whether error logging is enabled or not
      */
-    static bool getErrorLoggingEnabled();
+    bool getErrorLoggingEnabled() const;
 
     /**
      * Set error logging enabled to \p errorLoggingEnabled
      * @param errorLoggingEnabled Boolean determining whether error logging is enabled or not
      */
-    static void setErrorLoggingEnabled(bool errorLoggingEnabled);
+    void setErrorLoggingEnabled(bool errorLoggingEnabled);
+
+    /**
+     * Get error logging Data Source Name (DSN)
+     * @return Error logging DSN
+     */
+    QString getErrorLoggingDsn() const;
+
+    /**
+     * Set error logging Data Source Name (DSN) to \p errorLoggingDsn
+     * @param errorLoggingDsn Error logging DSN
+     */
+    void setErrorLoggingDsn(const QString& errorLoggingDsn);
 
     /**
      * Get Crashpad handler executable name
      * @return Name of the Crashpad handler executable name
      */
-    static QString getCrashpadHandlerExecutableName();
+    QString getCrashpadHandlerExecutableName() const;
 
 private:
 
-    /**
-     * Set whether error logging is enabled or not
-     * @param enabled Boolean determining whether error logging is enabled or not
-     * @param force Enabled/disable, regardless whether the state has changed or not
-     */
-    static void setEnabled(bool enabled, bool force = false);
+    /** Start error logging to */
+    void start();
 
     /**
      * Get release string for Sentry
      * @return Release string
      */
-    static QString getReleaseString();
+    QString getReleaseString();
 
-    static bool initialized;                        /** Boolean determinging whether the error logging has been initialized or not */
+    /** Set settings dirty (requires restart) */
+    void setSettingsDirty();
+
+    /**
+     * Get whether the Sentry data source name (DSN) is valid
+     * @return Boolean determining whether the DSN is valid
+     */
+    bool isDsnValid() const;
+
+private:
+    bool _initialized;       /** Boolean determining whether the error logging has been _initialized or not */
+
     static const QString userHasOptedSettingsKey;   /** Settings key for storing whether the user has made choice the choice to opt in or out of automated error logging */
     static const QString enabledSettingsKey;        /** Settings key for storing whether the user wants error logging or not */
+    static const QString dsnSettingsKey;            /** Settings key for storing the Data Source Name (DSN) for Sentry */
 
     friend class ErrorLoggingConsentDialog;
 };

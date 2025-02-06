@@ -64,7 +64,7 @@ Notification::Notification(const QString& title, const QString& description, con
     messageLabel->setMinimumHeight(10);
     messageLabel->setOpenExternalLinks(true);
 
-    closePushButton->setFixedSize(24, 24);
+    closePushButton->setFixedSize(16, 16);
     closePushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
     closePushButton->setAutoRaise(true);
 
