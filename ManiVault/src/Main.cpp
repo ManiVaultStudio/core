@@ -127,8 +127,6 @@ int main(int argc, char *argv[])
 
 #ifdef ERROR_LOGGING
     ErrorLogging errorLogging;
-
-    ErrorLoggingConsentDialog::setErrorLoggingInstance(&errorLogging);
 #endif
     
     QString startupProjectFilePath;
@@ -186,7 +184,7 @@ int main(int argc, char *argv[])
     core.createManagers();
 
 #ifdef ERROR_LOGGING
-    ErrorLogging::initialize();
+    errorLogging.initialize();
 #endif
 
     SplashScreenAction splashScreenAction(&application, false);
@@ -274,7 +272,7 @@ int main(int argc, char *argv[])
 
     //showErrorLoggingConsentDialogOnFirstLaunch();
 
-    //toggleSentry(mv::settings().getApplicationSettings().getAllowErrorLoggingAction().isChecked());
+    //toggleSentry(mv::settings().getApplicationSettings().getErrorLoggingEnabledAction().isChecked());
 
     return application.exec();
 }

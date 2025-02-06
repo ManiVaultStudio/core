@@ -17,69 +17,64 @@
 using namespace mv;
 using namespace mv::gui;
 
-const QString ErrorLogging::userHasOptedSettingsKey = QString("ErrorLogging/UserHasOpted");
-const QString ErrorLogging::enabledSettingsKey      = QString("ErrorLogging/Enabled");
-const QString ErrorLogging::dsnSettingsKey          = QString("ErrorLogging/DSN");
-
 ErrorLogging::ErrorLogging(QObject* parent /*= nullptr*/) :
     QObject(parent),
-    _initialized(false)
+    _initialized(false),
+    _userHasOptedAction(this, "User has opted", false),
+    _enabledAction(this, "Toggle error reporting", false),
+    _dsnAction(this, "Sentry DSN"),
+	_showCrashReportDialogAction(this, "Show crash report dialog", true)
 {
     CrashReportDialog::initialize();
+    ErrorLoggingConsentDialog::setErrorLoggingInstance(this);
 
-    if (!getUserHasOpted()) {
+    _userHasOptedAction.setSettingsPrefix("ErrorLogging/UserHasOpted");
+    _enabledAction.setSettingsPrefix("ErrorLogging/Enabled");
+    _dsnAction.setSettingsPrefix("ErrorLogging/DSN");
+    _showCrashReportDialogAction.setSettingsPrefix("ErrorLogging/DSN");
+
+    _dsnAction.setToolTip("The Sentry error logging data source name");
+    _dsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
+
+    _notificationTimer.setSingleShot(true);
+    _notificationTimer.setInterval(1000);
+
+    connect(&_notificationTimer, &QTimer::timeout, this, [this]() -> void {
+        mv::help().addNotification("Error logging", "The changes will be applied after restarting the application.", Application::getIconFont("FontAwesome").getIcon("bug"));
+    });
+
+    connect(&_enabledAction, &ToggleAction::toggled, this, [this](bool enabled) -> void {
+        ////const auto settingsDirty = !Application::current()->hasSetting(enabledSettingsKey) || enabled != getErrorLoggingEnabled();
+
+        //Application::current()->setSetting(enabledSettingsKey, enabled);
+
+        //if (mv::core()->isInitialized())
+        //    mv::settings().getApplicationSettings().getErrorLoggingEnabledAction().setChecked(enabled);
+
+        ////if (settingsDirty)
+        //    setSettingsDirty();
+    });
+
+    connect(&_dsnAction, &ToggleAction::toggled, this, [this]() -> void {
+        //const auto settingsDirty = !Application::current()->hasSetting(enabledSettingsKey) || errorLoggingDsn != getErrorLoggingDsn();
+
+        //Application::current()->setSetting(dsnSettingsKey, errorLoggingDsn);
+
+        //mv::settings().getApplicationSettings().getErrorLoggingDsnAction().setString(errorLoggingDsn);
+
+        //if (settingsDirty)
+        //    setSettingsDirty();
+    });
+
+    if (!_userHasOptedAction.isChecked()) {
 
         ErrorLoggingConsentDialog errorLoggingConsentDialog;
 
         errorLoggingConsentDialog.exec();
 
-        if (getErrorLoggingEnabled())
+        if (_enabledAction.isChecked())
             start();
     }
-}
-
-bool ErrorLogging::getUserHasOpted() const
-{
-    return Application::current()->getSetting(userHasOptedSettingsKey, false).toBool();
-}
-
-void ErrorLogging::setUserHasOpted(bool userHasOpted)
-{
-    Application::current()->setSetting(userHasOptedSettingsKey, userHasOpted);
-
-    setSettingsDirty();
-}
-
-bool ErrorLogging::getErrorLoggingEnabled() const
-{
-    return Application::current()->getSetting(enabledSettingsKey, false).toBool();
-}
-
-void ErrorLogging::setErrorLoggingEnabled(bool errorLoggingEnabled)
-{
-    if (errorLoggingEnabled == getErrorLoggingEnabled()) return;
-
-	Application::current()->setSetting(enabledSettingsKey, errorLoggingEnabled);
-
-	mv::settings().getApplicationSettings().getAllowErrorLoggingAction().setChecked(errorLoggingEnabled);
-
-    setSettingsDirty();
-}
-
-QString ErrorLogging::getErrorLoggingDsn() const
-{
-    return Application::current()->getSetting(dsnSettingsKey, false).toString();
-}
-
-void ErrorLogging::setErrorLoggingDsn(const QString& errorLoggingDsn)
-{
-    if (errorLoggingDsn == getErrorLoggingDsn()) return;
-
-    Application::current()->setSetting(dsnSettingsKey, errorLoggingDsn);
-
-    mv::settings().getApplicationSettings().getErrorLoggingDsnAction().setString(errorLoggingDsn);
-
-    setSettingsDirty();
 }
 
 QString ErrorLogging::getCrashpadHandlerExecutableName() const
@@ -112,19 +107,32 @@ void ErrorLogging::initialize()
     if (ErrorLogging::_initialized)
         return;
 
-    connect(&mv::settings().getApplicationSettings().getAllowErrorLoggingAction(), &ToggleAction::toggled, this, &ErrorLogging::setErrorLoggingEnabled);
-    connect(&mv::settings().getApplicationSettings().getErrorLoggingDsnAction(), &StringAction::stringChanged, this, &ErrorLogging::setErrorLoggingDsn);
+    auto& applicationSettingsAction = mv::settings().getApplicationSettings();
 
-    connect(&mv::settings().getApplicationSettings().getErrorLoggingConsentAction(), &TriggerAction::triggered, []() -> void {
+    applicationSettingsAction.getErrorLoggingEnabledAction().setChecked(getEnabledAction().isChecked());
+    //applicationSettingsAction.getErrorLoggingDsnAction().setString(getErrorLoggingDsn());
+
+    //
+    //connect(&applicationSettingsAction.getErrorLoggingDsnAction(), &StringAction::stringChanged, this, &ErrorLogging::setErrorLoggingDsn);
+
+    /*connect(&applicationSettingsAction.getErrorLoggingConsentAction(), &TriggerAction::triggered, []() -> void {
         ErrorLoggingConsentDialog errorLoggingConsentDialog;
 
         errorLoggingConsentDialog.exec();
+	});*/
+
+    connect(&getEnabledAction(), &ToggleAction::toggled, this, [this](bool enabled) -> void {
+		mv::settings().getApplicationSettings().getErrorLoggingEnabledAction().setChecked(enabled);
+
+        setSettingsDirty();
 	});
 
-    if (getUserHasOpted())
+    connect(&applicationSettingsAction.getErrorLoggingEnabledAction(), &ToggleAction::toggled, &getEnabledAction(), &ToggleAction::setChecked);
+
+    if (getUserHasOptedAction().isChecked() && getEnabledAction().isChecked())
 		start();
 
-    ErrorLogging::_initialized = true;
+    _initialized = true;
 }
 
 void ErrorLogging::start()
@@ -134,7 +142,7 @@ void ErrorLogging::start()
         return;
     }
         
-	const auto dsn = getErrorLoggingDsn();
+	const auto dsn = getDsnAction().getString();
 
 	sentry_options_t* options = sentry_options_new();
     
@@ -156,33 +164,34 @@ void ErrorLogging::start()
 	sentry_set_tag("build_type", "release");
 #endif
 
-	sentry_options_set_before_send(options, [](sentry_value_t event, void* hint, void* userdata) -> sentry_value_t {
-		if (!mv::settings().getApplicationSettings().getShowCrashReportDialogAction().isChecked())
-			return event;
+    auto showCrashReportDialog = getShowCrashReportDialogAction().isChecked();
 
-		CrashReportDialog dialog;
+    sentry_options_set_before_send(options, [](sentry_value_t event, void* hint, void* closure) -> sentry_value_t {
+        auto showCrashReportDialogAction = static_cast<bool*>(closure);
 
-		if (dialog.exec() == QDialog::Accepted) {
-			const auto crashUserInfo = dialog.getCrashUserInfo();
+    	if (!*showCrashReportDialogAction)
+            return event;
 
-			if (crashUserInfo._sendReport) {
-				sentry_value_t extra = sentry_value_new_object();
+        CrashReportDialog dialog;
 
-				sentry_value_set_by_key(extra, "feedback", sentry_value_new_string(crashUserInfo._feedback.toUtf8()));
-				sentry_value_set_by_key(extra, "contactInfo", sentry_value_new_string(crashUserInfo._contactDetails.toUtf8()));
+        if (dialog.exec() == QDialog::Accepted) {
+            const auto crashUserInfo = dialog.getCrashUserInfo();
 
-				sentry_value_set_by_key(event, "extra", extra);
+            if (crashUserInfo._sendReport) {
+                sentry_value_t extra = sentry_value_new_object();
 
-                if (mv::projects().hasProject() && mv::projects().getCurrentProject()->getReadOnlyAction().isChecked())
-					sentry_set_tag("application", mv::projects().getCurrentProject()->getTitleAction().getString().toUtf8());
+                sentry_value_set_by_key(extra, "feedback", sentry_value_new_string(crashUserInfo._feedback.toUtf8()));
+                sentry_value_set_by_key(extra, "contactInfo", sentry_value_new_string(crashUserInfo._contactDetails.toUtf8()));
 
-				if (auto eventJson = sentry_value_to_json(event))
-					sentry_free(eventJson);
-			}
-		}
+                sentry_value_set_by_key(event, "extra", extra);
 
-		return event;
-	}, nullptr);
+                if (auto eventJson = sentry_value_to_json(event))
+                    sentry_free(eventJson);
+            }
+        }
+
+        return event;
+    }, &showCrashReportDialog);
 
     if (sentry_init(options) == 0)
         qDebug() << "Sentry error logging is running, crash reports will send to: " + dsn;
@@ -195,7 +204,7 @@ void ErrorLogging::start()
 
 QString ErrorLogging::getReleaseString()
 {
-    if (!getErrorLoggingEnabled())
+    if (!getEnabledAction().isChecked())
         return {};
 
     const auto suffix = QString(MV_VERSION_SUFFIX.data());
@@ -205,14 +214,14 @@ QString ErrorLogging::getReleaseString()
 
 void ErrorLogging::setSettingsDirty()
 {
-    mv::help().addNotification("Error logging", "Error logging changes will be applied after restarting the application.", Application::getIconFont("FontAwesome").getIcon("bug"));
+	_notificationTimer.start();
 }
 
 bool ErrorLogging::isDsnValid() const
 {
-    QRegularExpressionValidator validator(mv::settings().getApplicationSettings().getErrorLoggingDsnAction().getValidator().regularExpression());
+    QRegularExpressionValidator validator(const_cast<mv::gui::StringAction&>(getDsnAction()).getValidator().regularExpression());
 
-    auto errorLoggingDsn = getErrorLoggingDsn();
+    auto errorLoggingDsn = getDsnAction().getString();
     int pos{};
 
     return validator.validate(errorLoggingDsn, pos) == QValidator::Acceptable;

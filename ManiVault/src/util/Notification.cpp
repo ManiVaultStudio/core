@@ -137,9 +137,9 @@ void Notification::slideIn()
 
 void Notification::slideOut()
 {
-    auto animationGroup = new QParallelAnimationGroup(this);
+    auto animationGroup         = new QParallelAnimationGroup(this);
     auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
-    auto positionAnimation = new QPropertyAnimation(this, "pos");
+    auto positionAnimation      = new QPropertyAnimation(this, "pos");
 
     animationGroup->addAnimation(windowOpacityAnimation);
     animationGroup->addAnimation(positionAnimation);
@@ -161,7 +161,7 @@ void Notification::slideOut()
 
 double Notification::getEstimatedReadingTime(const QString& text)
 {
-    QRegularExpression wordRegex("\\b\\w+\\b");
+    QRegularExpression wordRegex(R"(\b\w+\b)");
 
 	auto wordIterator = wordRegex.globalMatch(text);
 
@@ -223,7 +223,7 @@ void Notification::updatePosition()
         _previousNotification->updateGeometry();
         _previousNotification->adjustSize();
 
-        move(QPoint(_previousNotification->pos().x(), _previousNotification->pos().y() - height() - spacing));
+        move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
     } else {
         const auto statusBarHeight = Application::getMainWindow()->statusBar()->isVisible() ? Application::getMainWindow()->statusBar()->height() : 0;
 

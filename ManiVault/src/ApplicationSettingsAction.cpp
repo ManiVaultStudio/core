@@ -17,8 +17,8 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
     _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System"),
     _errorLoggingConsentAction(this, "Consent..."),
-    _allowErrorLoggingAction(this, "Error reporting", false),
-    _showCrashReportDialogAction(this, "Show crash report dialog", true),
+    _errorLoggingEnabledAction(this, "Error logging enabled", false),
+    _errorLoggingCrashReportDialogAction(this, "Show crash report dialog", true),
     _errorLoggingSettingsAction(this, "Settings"),
     _errorLoggingDsnAction(this, "Sentry DSN"),
     _errorLoggingAction(this, "Error reporting")
@@ -67,18 +67,17 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     }
 
 #ifdef _DEBUG
-    _showCrashReportDialogAction.setChecked(false);
+    _errorLoggingCrashReportDialogAction.setChecked(false);
 #endif
 
 #ifdef ERROR_LOGGING
     _errorLoggingAction.setShowLabels(false);
 
-    _allowErrorLoggingAction.setEnabled(false);
-    _allowErrorLoggingAction.setToolTip("Toggle Sentry error logging");
+    //_errorLoggingEnabledAction.setEnabled(false);
+    _errorLoggingEnabledAction.setToolTip("Toggle Sentry error logging");
 
     addAction(&_errorLoggingAction);
 
-    _errorLoggingDsnAction.setSettingsPrefix(QString("%1/ErrorLogging/DSN").arg(getSettingsPrefix()));
     _errorLoggingDsnAction.setToolTip("The Sentry error logging data source name");
     _errorLoggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
 
@@ -88,23 +87,24 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     _errorLoggingSettingsAction.setLabelSizingType(LabelSizingType::Auto);
     _errorLoggingSettingsAction.setToolTip("Error logging settings");
 
-    _errorLoggingSettingsAction.addAction(&_showCrashReportDialogAction);
+    _errorLoggingSettingsAction.addAction(&_errorLoggingCrashReportDialogAction);
     _errorLoggingSettingsAction.addAction(&_errorLoggingDsnAction);
 
     _errorLoggingAction.addAction(&_errorLoggingConsentAction);
-    _errorLoggingAction.addAction(&_allowErrorLoggingAction);
+    _errorLoggingAction.addAction(&_errorLoggingEnabledAction);
     _errorLoggingAction.addAction(&_errorLoggingSettingsAction);
 
-    _showCrashReportDialogAction.setSettingsPrefix(QString("%1/ErrorLogging/ShowCrashReportDialog").arg(getSettingsPrefix()));
-    _showCrashReportDialogAction.setToolTip("Show report dialog when ManiVault Studio crashes");
+    _errorLoggingCrashReportDialogAction.setSettingsPrefix(QString("%1/ErrorLogging/ShowCrashReportDialog").arg(getSettingsPrefix()));
+    _errorLoggingCrashReportDialogAction.setToolTip("Show report dialog when ManiVault Studio crashes");
 
     const auto allowErrorReportingChanged = [this]() -> void {
-        _showCrashReportDialogAction.setEnabled(_allowErrorLoggingAction.isChecked());
+        _errorLoggingCrashReportDialogAction.setEnabled(_errorLoggingEnabledAction.isChecked());
+        _errorLoggingSettingsAction.setEnabled(_errorLoggingEnabledAction.isChecked());
 	};
 
     allowErrorReportingChanged();
 
-    connect(&_allowErrorLoggingAction, &ToggleAction::toggled, this, allowErrorReportingChanged);
+    connect(&_errorLoggingEnabledAction, &ToggleAction::toggled, this, allowErrorReportingChanged);
 #endif
 }
 

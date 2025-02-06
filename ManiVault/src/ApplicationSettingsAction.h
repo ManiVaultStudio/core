@@ -37,21 +37,21 @@ public: // Action getters
     StringAction& getApplicationSessionIdAction() { return _applicationSessionIdAction; }
     OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
     TriggerAction& getErrorLoggingConsentAction() { return _errorLoggingConsentAction; }
-    ToggleAction& getAllowErrorLoggingAction() { return _allowErrorLoggingAction; }
-    ToggleAction& getShowCrashReportDialogAction() { return _showCrashReportDialogAction; }
+    ToggleAction& getErrorLoggingEnabledAction() { return _errorLoggingEnabledAction; }
+    ToggleAction& getErrorLoggingCrashReportDialogAction() { return _errorLoggingCrashReportDialogAction; }
     VerticalGroupAction& getErrorLoggingSettingsAction() { return _errorLoggingSettingsAction; }
     StringAction& getErrorLoggingDsnAction() { return _errorLoggingDsnAction; }
     HorizontalGroupAction& getErrorLoggingAction() { return _errorLoggingAction; }
     
 private:
-    StringAction            _applicationSessionIdAction;    /** String action for the application session identifier */
-    OptionAction            _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
-    TriggerAction           _errorLoggingConsentAction;     /** Shows the error logging consent dialog when triggered */
-	ToggleAction            _allowErrorLoggingAction;       /** Toggle error logging on/off */         
-    ToggleAction            _showCrashReportDialogAction;   /** Toggle crash dialog on/off */
-    VerticalGroupAction     _errorLoggingSettingsAction;    /** Advanced error logging settings action */
-    StringAction            _errorLoggingDsnAction;         /** Error logging data source name action */
-    HorizontalGroupAction   _errorLoggingAction;            /** Groups error logging actions together */
+    StringAction            _applicationSessionIdAction;            /** String action for the application session identifier */
+    OptionAction            _appearanceOptionAction;                /** Options action for dark, light, or system appearance */
+    TriggerAction           _errorLoggingConsentAction;             /** Shows the error logging consent dialog when triggered */
+	ToggleAction            _errorLoggingEnabledAction;             /** Toggle error logging on/off */         
+    ToggleAction            _errorLoggingCrashReportDialogAction;   /** Toggle crash dialog on/off */
+    VerticalGroupAction     _errorLoggingSettingsAction;            /** Advanced error logging settings action */
+    StringAction            _errorLoggingDsnAction;                 /** Error logging data source name action */
+    HorizontalGroupAction   _errorLoggingAction;                    /** Groups error logging actions together */
 };
 
 }

@@ -47,7 +47,7 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     _buttonsLayout.addWidget(&_acceptPushButton);
     _buttonsLayout.addWidget(&_optOutPushButton);
 
-    if (!errorLoggingInstance->getUserHasOpted())
+    if (!errorLoggingInstance->getUserHasOptedAction().isChecked())
 		_buttonsLayout.addWidget(&_decideLaterPushButton);
 
     _layout.addLayout(&_buttonsLayout);
@@ -55,15 +55,15 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     setLayout(&_layout);
 
 	connect(&_acceptPushButton, &QPushButton::clicked, this, [this]() -> void {
-        errorLoggingInstance->setUserHasOpted(true);
-        errorLoggingInstance->setErrorLoggingEnabled(true);
+        errorLoggingInstance->getUserHasOptedAction().setChecked(true);
+        errorLoggingInstance->getEnabledAction().setChecked(true);
 
         accept();
 	});
     
 	connect(&_optOutPushButton, &QPushButton::clicked, this, [this]() -> void {
-        errorLoggingInstance->setUserHasOpted(true);
-        errorLoggingInstance->setErrorLoggingEnabled(false);
+        errorLoggingInstance->getUserHasOptedAction().setChecked(true);
+        errorLoggingInstance->getEnabledAction().setChecked(false);
 
         accept();
 	});
