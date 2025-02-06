@@ -10,6 +10,8 @@
 
 #include "event/EventListener.h"
 
+#include "util/Notification.h"
+
 #include "actions/WidgetAction.h"
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
@@ -166,8 +168,10 @@ public: // Miscellaneous
     /**
      * Add plugin notification in the main window
      * @param description Message description (maybe HTML)
+     * @param durationType Duration type of the notification
+     * @param delayMs Delay in milliseconds before the notification is shown
      */
-    void addNotification(const QString& description) const;
+    void addNotification(const QString& description, const util::Notification::DurationType& durationType = util::Notification::DurationType::Fixed, std::int32_t delayMs = 0) const;
     
 public: // Action getters
 

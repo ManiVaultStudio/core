@@ -15,23 +15,30 @@ Notifications::Notifications(QWidget* parent) :
 {
 }
 
-void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon)
+void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs)
 {
     Q_ASSERT(_parentWidget);
 
     if (!_parentWidget)
         return;
 
-	auto notification = new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), _parentWidget);
+    const auto addNotification = [this, title, description, icon, durationType]() -> void {
+        auto notification = new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, _parentWidget);
 
-	notification->show();
+        notification->show();
 
-	_notifications.append(notification);
+        _notifications.append(notification);
 
-	connect(notification, &Notification::finished, this, [this, notification]() {
-		_notifications.removeOne(notification);
-        notification->deleteLater();
-	});
+        connect(notification, &Notification::finished, this, [this, notification]() {
+            _notifications.removeOne(notification);
+            notification->deleteLater();
+		});
+    };
+
+    if (delayMs > 0)
+        QTimer::singleShot(delayMs, addNotification);
+    else
+        addNotification();
 }
 
 void Notifications::setParentWidget(QWidget* parentWidget)
