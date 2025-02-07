@@ -16,8 +16,6 @@ namespace mv
 class CORE_EXPORT BiMap
 {
 public:
-    BiMap();
-
     void addKeyValuePairs(const std::vector<QString>& keys, const std::vector<uint32_t>& values);
 
     std::vector<QString> getKeysByValues(const std::vector<uint32_t>& values) const;

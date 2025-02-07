@@ -2,11 +2,6 @@
 
 namespace mv
 {
-    BiMap::BiMap()
-    {
-
-    }
-
     void BiMap::addKeyValuePairs(const std::vector<QString>& keys, const std::vector<uint32_t>& values)
     {
         if (keys.size() != values.size())
