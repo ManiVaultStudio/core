@@ -59,9 +59,7 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _groupTreeWidgetItem(nullptr),
     _parentTreeWidgetItem(treeWidgetItem),
     _groupWidget(nullptr),
-    _overlayWidget(this),
-    _overlayLayout(),
-    _iconLabel()
+    _overlayWidget(this)
 {
     auto isMacOS = QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS;
     

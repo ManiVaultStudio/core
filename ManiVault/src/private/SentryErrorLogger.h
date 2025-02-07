@@ -23,9 +23,6 @@ public:
      */
     SentryErrorLogger(QObject* parent = nullptr);
 
-    /** Begin the initialization of the error logger */
-    void beginInitialization() override;
-
     /** Connects to the error logging global settings */
     void initialize() override;
 

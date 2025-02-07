@@ -28,10 +28,12 @@ class AbstractErrorLogger : public QObject
 {
 protected:
 
+    /** Notification struct */
     struct Notification {
-        QString _title;
-        QString _message;
-        QIcon   _icon;
+        QString         _title;         /**< Title of the notification */
+        QString         _message;       /**< Message of the notification */
+        QIcon           _icon;          /**< Icon of the notification */
+        std::int32_t    _delay = 0;     /**< Delay of the notification */
     };
 
     using Notifications = std::map<QString, Notification>;
@@ -48,11 +50,14 @@ public:
         _loggerName(loggerName),
         _initialized(false)
     {
-        _notificationTimer.setInterval(1000);
+        _notificationTimer.setInterval(2500);
         
         connect(&_notificationTimer, &QTimer::timeout, this, [this]() -> void {
             for (auto& pair : _notifications) {
-                mv::help().addNotification(pair.second._title, pair.second._message, pair.second._icon);
+                const auto& notification = pair.second;
+
+                mv::help().addNotification(notification._title, notification._message, notification._icon, util::Notification::DurationType::Calculated, notification._delay);
+
 				_notifications.erase(pair.first);
             }
 		});
@@ -63,6 +68,15 @@ public:
     /** Connects to the error logging global settings */
     virtual void initialize() = 0;
 
+    /**
+     * Get the logger name
+     * @return Logger name
+     */
+    QString getLoggerName() const {
+	    return _loggerName;
+    }
+
+    /** Starts the error logger if the pre-flight conditions are met */
     void requestStart()
     {
         if (getUserHasOptedAction().isChecked() && getEnabledAction().isChecked()) {
@@ -78,40 +92,47 @@ public:
 	    return _initialized;
     }
 
+    /**
+     * Add /p notification
+     * @param name Name of the notification
+     * @param notification Notification
+     */
+    void addNotification(const QString& name, const Notification& notification) {
+        _notifications[name] = notification;
+    }
+
     /** Begin the initialization of the error logger */
     virtual void beginInitialization() {
         connect(&mv::errors().getLoggingEnabledAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
-            _notifications["Enabled"] = {
+            addNotification("Enabled", {
                 QString("%1 error logging").arg(_loggerName),
                 QString("Logging will be <b>%1</b> after restarting the application.").arg(toggled ? "enabled" : "disabled"),
                 Application::getIconFont("FontAwesome").getIcon("bug")
-            };
+            });
         });
 
         connect(&mv::errors().getLoggingDsnAction(), &gui::StringAction::stringChanged, this, [this](const QString& dsn) -> void {
-            if (mv::errors().getLoggingDsnAction().isValid() == QValidator::Acceptable) {
-                _notifications["DSN"] = {
-                    QString("%1 error logging").arg(_loggerName),
-                    QString("The logging Data Source Name (DSN) will be changed to <a href='%1'>%1</a> after restarting the application.").arg(dsn),
-                    Application::getIconFont("FontAwesome").getIcon("bug")
-                };
-            }
+            if (mv::errors().getLoggingDsnAction().isValid() == QValidator::Acceptable)
+                addNotification("DSN", {
+                	QString("%1 error logging").arg(_loggerName),
+                	QString("The logging Data Source Name (DSN) will be changed to <a href='%1'>%1</a> after restarting the application.").arg(dsn),
+                	Application::getIconFont("FontAwesome").getIcon("bug")
+                });
 		});
 
         connect(&mv::errors().getLoggingShowCrashReportDialogAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
-            if (toggled) {
-                _notifications["ShowCrashReportDialog"] = {
-					QString("%1 error logging").arg(_loggerName),
-					QString("A crash report dialog will popup when an fatal error occurs."),
-					Application::getIconFont("FontAwesome").getIcon("bug")
-                };
-            } else {
-                _notifications["ShowCrashReportDialog"] = {
-	                QString("%1 error logging").arg(_loggerName),
-	                QString("A crash report will be sent to the Sentry server unsupervised."),
-	                Application::getIconFont("FontAwesome").getIcon("bug")
-                };
-            }
+            if (toggled)
+                addNotification("ShowCrashReportDialog", {
+                        QString("%1 error logging").arg(_loggerName),
+                        QString("A crash report dialog will popup when an fatal error occurs."),
+                        Application::getIconFont("FontAwesome").getIcon("bug")
+				});
+            else
+                addNotification("ShowCrashReportDialog", {
+                    QString("%1 error logging").arg(_loggerName),
+                    QString("A crash report will be sent to the Sentry server unsupervised."),
+                    Application::getIconFont("FontAwesome").getIcon("bug")
+                });
 		});
     }
 

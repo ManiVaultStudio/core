@@ -21,13 +21,14 @@ namespace mv
 
 ErrorManager::ErrorManager(QObject* parent) :
     AbstractErrorManager(parent),
-    _loggingAskConsentDialogAction(this, "Show consent dialog"),
+    _loggingAskConsentDialogAction(this, "Consent..."),
     _loggingUserHasOptedAction(this, "User has opted", false),
     _loggingEnabledAction(this, "Toggle error reporting", false),
     _loggingDsnAction(this, "Sentry DSN"),
     _loggingShowCrashReportDialogAction(this, "Show crash report dialog")
 {
     _loggingAskConsentDialogAction.setToolTip("Show the error logging consent dialog");
+    _loggingAskConsentDialogAction.setDefaultWidgetFlags(TriggerAction::IconText);
 
     _loggingUserHasOptedAction.setSettingsPrefix(QString("%1Logging/UserHasOpted").arg(getSettingsPrefix()));
     _loggingUserHasOptedAction.setToolTip("Whether the user has opted in or out");

@@ -243,14 +243,11 @@ Task& GroupsAction::getUpdateTask()
 GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
-    _layout(),
     _filteredActionsAction(this, "Filtered Actions", true),
     _toolbarWidget(parent),
-    _toolbarLayout(),
     _filterAction(this, "Search"),
     _expandAllAction(this, "Expand all"),
-    _collapseAllAction(this, "Collapse all"),
-    _treeWidget()
+    _collapseAllAction(this, "Collapse all")
 {
     // Configure layout
     _layout.setContentsMargins(0, 0, 0, 0);

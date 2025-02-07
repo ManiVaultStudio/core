@@ -8,7 +8,7 @@ namespace mv::gui
 {
 
 ErrorLoggingSettingsAction::ErrorLoggingSettingsAction(QObject* parent) :
-    GlobalSettingsGroupAction(parent, "Error logging")
+    GlobalSettingsGroupAction(parent, "Error logging", false)
 {
 }
 

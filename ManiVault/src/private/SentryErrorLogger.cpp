@@ -21,18 +21,6 @@ SentryErrorLogger::SentryErrorLogger(QObject* parent /*= nullptr*/) :
     //ErrorLoggingConsentDialog::setErrorLoggingInstance(this);
 }
 
-void SentryErrorLogger::beginInitialization()
-{
-    AbstractErrorLogger::beginInitialization();
-
-    //if (!getUserHasOptedAction().isChecked()) {
-
-    //    ErrorLoggingConsentDialog errorLoggingConsentDialog;
-
-    //    errorLoggingConsentDialog.exec();
-    //}
-}
-
 QString SentryErrorLogger::getCrashpadHandlerExecutableName() const
 {
 #ifdef Q_OS_LINUX
@@ -137,6 +125,13 @@ void SentryErrorLogger::start()
         qDebug() << "Sentry error logging is running, crash reports will send to: " + dsn;
     else
         qDebug() << "Sentry error logging is not running";
+
+    addNotification("Started", {
+        QString("%1 error logging").arg(getLoggerName()),
+        "Error logging using <a href='https://sentry.io/'>Sentry</a> is active, crash reports will be logged to improve the application.",
+        Application::getIconFont("FontAwesome").getIcon("bug"),
+        2500
+	});
 
     //sentry_flush(2000);
     //sentry_shutdown();
