@@ -8,7 +8,6 @@
 
 #include <QMap>
 #include <QString>
-#include <QtLogging>
 
 #include <cstddef>
 #include <deque>
