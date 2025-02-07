@@ -1,5 +1,7 @@
 #include "SelectionGroup.h"
 
+#include <stdexcept>
+
 namespace mv
 {
     void BiMap::addKeyValuePairs(const std::vector<QString>& keys, const std::vector<uint32_t>& values)
@@ -32,7 +34,7 @@ namespace mv
             }
             catch (std::out_of_range& oor)
             {
-                qWarning() << "Trying to find value: " << values[i] << " in value-key map, but no such value exists.";
+                qWarning() << "Trying to find value: " << values[i] << " in value-key map, but no such value exists. Error: " << oor.what();
                 return std::vector<QString>();
             }
         }
