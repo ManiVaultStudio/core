@@ -58,7 +58,7 @@ void PluginFactory::initialize()
 
 QString PluginFactory::getGlobalSettingsPrefix() const
 {
-    return QString("%1/").arg(getKind());
+    return QString("Plugins/%1/").arg(getKind());
 }
 
 PluginGlobalSettingsGroupAction* PluginFactory::getGlobalSettingsGroupAction() const

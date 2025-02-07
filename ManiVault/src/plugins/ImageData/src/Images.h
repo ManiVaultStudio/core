@@ -290,5 +290,5 @@ private:
     QSharedPointer<InfoAction>      _infoAction;            /** Shared pointer to info action */
     QRect                           _visibleRectangle;      /** Rectangle which bounds the visible pixels */
     std::vector<std::uint8_t>       _maskData;              /** Mask data */
-    bool                            _maskDataGiven;         /** Wheter mask data was set externally */
+    bool                            _maskDataGiven;         /** Whether mask data was set externally */
 };

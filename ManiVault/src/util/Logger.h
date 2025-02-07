@@ -6,8 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QString>
 #include <QMap>
+#include <QString>
 
 #include <cstddef>
 #include <deque>
@@ -23,14 +23,14 @@ namespace mv::util
 
 struct CORE_EXPORT MessageRecord
 {
-    std::size_t number;
-    QtMsgType type;
-    int version;
-    int line;
-    const char* file;
-    const char* function;
-    const char* category;
-    QString message;
+    std::size_t number = 0;
+    QtMsgType type = {};
+    int version = 0;
+    int line = 0;
+    const char* file = nullptr;
+    const char* function = nullptr;
+    const char* category = nullptr;
+    QString message = {};
 
     QString toString() const;
 };
