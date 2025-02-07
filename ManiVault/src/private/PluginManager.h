@@ -160,7 +160,7 @@ public: // Plugin trigger actions
      * @param datasets Vector of input datasets
      * @return Vector of plugin trigger actions
      */
-    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const;
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const override;
 
     /**
      * Get plugin trigger actions by \p pluginType and \p dataTypes
@@ -168,7 +168,7 @@ public: // Plugin trigger actions
      * @param dataTypes Vector of input data types
      * @return Vector of plugin trigger actions
      */
-    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const;
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const override;
 
     /**
      * Get plugin trigger actions by \p pluginKind and \p datasets
@@ -176,7 +176,7 @@ public: // Plugin trigger actions
      * @param datasets Vector of input datasets
      * @return Vector of plugin trigger actions
      */
-    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const;
+    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const override;
 
     /**
      * Get plugin trigger actions by \p pluginKind and \p dataTypes
@@ -184,7 +184,7 @@ public: // Plugin trigger actions
      * @param dataTypes Vector of input data types
      * @return Vector of plugin trigger actions
      */
-    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const;
+    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const override;
 
 public: // Plugin query
 

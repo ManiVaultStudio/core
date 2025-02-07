@@ -44,7 +44,7 @@ private:
          * Invoked on mouse press
          * @param event Pointer to mouse event
          */
-        void mousePressEvent(QMouseEvent* event);
+        void mousePressEvent(QMouseEvent* event) override;
 
         /**
          * Invoked on mouse hover
