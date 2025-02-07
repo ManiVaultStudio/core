@@ -39,6 +39,8 @@ namespace mv
          */
         const std::vector<QString>& getColumnNames() const;
 
+        bool hasColumn(QString columnName) const;
+
         /**
          * Get a column by the name of its header
          * @return The column of text data associated with the given header name

@@ -119,6 +119,11 @@ namespace mv
         return _columnHeaders;
     }
 
+    bool OrderedMap::hasColumn(QString columnName) const
+    {
+        return _columns.find(columnName) != _columns.end();
+    }
+
     const std::vector<QString>& OrderedMap::getColumn(QString columnName) const
     {
         try
