@@ -8,6 +8,7 @@
 
 namespace mv {
 
+class AbstractErrorManager;
 class AbstractActionsManager;
 class AbstractPluginManager;
 class AbstractEventManager;
@@ -25,9 +26,6 @@ public:
 
     /** Default constructor */
     Core();
-
-    /** Reset plugin managers upon destruction */
-    ~Core() override;
 
 public:
 
@@ -67,6 +65,7 @@ public: // Managers
 
     AbstractManager* getManager(const ManagerType& managerType) override;
 
+    AbstractErrorManager& getErrorManager() override;
     AbstractActionsManager& getActionsManager() override;
     AbstractPluginManager& getPluginManager() override;
     AbstractEventManager& getEventManager() override;

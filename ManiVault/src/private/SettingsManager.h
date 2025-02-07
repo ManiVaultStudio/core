@@ -44,6 +44,7 @@ public: // Global settings actions
     gui::TasksSettingsAction& getTasksSettingsAction() override { return _tasksSettingsAction; };
     gui::ApplicationSettingsAction& getApplicationSettings() override { return _applicationSettingsAction; };
     gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() override { return _temporaryDirectoriesSettingsAction; };
+    gui::ErrorLoggingSettingsAction& getErrorLoggingSettingsAction() override { return _errorLoggingSettingsAction; };
 
     /**
      * Get plugin global settings for plugin \p kind
@@ -66,6 +67,7 @@ private:
     gui::TasksSettingsAction                    _tasksSettingsAction;                   /** Tasks global settings */
     gui::ApplicationSettingsAction              _applicationSettingsAction;             /** Application global settings */
     gui::TemporaryDirectoriesSettingsAction     _temporaryDirectoriesSettingsAction;    /** Temporary files global settings */
+    gui::ErrorLoggingSettingsAction             _errorLoggingSettingsAction;            /** Error logging settings */
 };
 
 }

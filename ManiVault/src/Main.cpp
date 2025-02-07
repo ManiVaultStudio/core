@@ -7,10 +7,6 @@
 #include "private/Core.h"
 #include "private/StartupProjectSelectorDialog.h"
 
-#ifdef ERROR_LOGGING
-	#include "private/ErrorLogging.h"
-#endif
-
 #include <Application.h>
 #include <ManiVaultVersion.h>
 #include <ProjectMetaAction.h>
@@ -125,10 +121,6 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
-#ifdef ERROR_LOGGING
-    ErrorLogging errorLogging;
-#endif
-    
     QString startupProjectFilePath;
 
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
@@ -182,10 +174,6 @@ int main(int argc, char *argv[])
     application.setCore(&core);
 
     core.createManagers();
-
-#ifdef ERROR_LOGGING
-    errorLogging.initialize();
-#endif
 
     SplashScreenAction splashScreenAction(&application, false);
 
@@ -242,8 +230,6 @@ int main(int argc, char *argv[])
 
     application.initialize();
 
-    
-
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 
     loadGuiTask.setSubtasks({ "Apply styles", "Create main window", "Initializing start page" });
@@ -269,10 +255,6 @@ int main(int argc, char *argv[])
     mainWindow.show();
 
     loadGuiTask.setSubtaskFinished("Create main window");
-
-    //showErrorLoggingConsentDialogOnFirstLaunch();
-
-    //toggleSentry(mv::settings().getApplicationSettings().getErrorLoggingEnabledAction().isChecked());
 
     return application.exec();
 }

@@ -69,7 +69,7 @@ Notification::Notification(const QString& title, const QString& description, con
     closePushButton->setAutoRaise(true);
 
     notificationWidgetLayout->setContentsMargins(10, 10, 10, 10);
-    notificationWidgetLayout->setSpacing(20);
+    notificationWidgetLayout->setSpacing(10);
     notificationWidgetLayout->setAlignment(Qt::AlignTop);
 
     notificationWidgetLayout->addWidget(iconLabel);

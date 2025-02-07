@@ -211,6 +211,19 @@ set(PRIVATE_HELP_MANAGER_FILES
     ${PRIVATE_HELP_MANAGER_SOURCES}
 )
 
+set(PRIVATE_ERROR_MANAGER_HEADERS
+    src/private/ErrorManager.h
+)
+
+set(PRIVATE_ERROR_MANAGER_SOURCES
+    src/private/ErrorManager.cpp
+)
+
+set(PRIVATE_ERROR_MANAGER_FILES
+    ${PRIVATE_ERROR_MANAGER_HEADERS}
+    ${PRIVATE_ERROR_MANAGER_SOURCES}
+)
+
 set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
     ${PRIVATE_PLUGIN_MANAGER_HEADERS}
@@ -222,6 +235,7 @@ set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_SETTINGS_MANAGER_HEADERS}
     ${PRIVATE_TASK_MANAGER_HEADERS}
     ${PRIVATE_HELP_MANAGER_HEADERS}
+    ${PRIVATE_ERROR_MANAGER_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -236,6 +250,7 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_SETTINGS_MANAGER_SOURCES}
     ${PRIVATE_TASK_MANAGER_SOURCES}
     ${PRIVATE_HELP_MANAGER_SOURCES}
+    ${PRIVATE_ERROR_MANAGER_SOURCES}
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -255,7 +270,7 @@ set(PRIVATE_APPLICATION_HEADERS
 
 if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_HEADERS
-		src/private/ErrorLogging.h
+		src/private/SentryErrorLogger.h
 		src/private/CrashReportDialog.h
 		src/private/ErrorLoggingConsentDialog.h
 	)
@@ -273,7 +288,7 @@ set(PRIVATE_APPLICATION_SOURCES
 
 if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_SOURCES
-		src/private/ErrorLogging.cpp
+		src/private/SentryErrorLogger.cpp
 		src/private/CrashReportDialog.cpp
 		src/private/ErrorLoggingConsentDialog.cpp
 	)
@@ -436,6 +451,7 @@ source_group(Managers\\Workspace FILES ${PRIVATE_WORKSPACE_MANAGER_FILES})
 source_group(Managers\\Settings FILES ${PRIVATE_SETTINGS_MANAGER_FILES})
 source_group(Managers\\Task FILES ${PRIVATE_TASK_MANAGER_FILES})
 source_group(Managers\\Help FILES ${PRIVATE_HELP_MANAGER_FILES})
+source_group(Managers\\Error FILES ${PRIVATE_ERROR_MANAGER_FILES})
 source_group(Pages\\Common FILES ${PRIVATE_PAGES_COMMON_FILES})
 source_group(Pages\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Pages\\Learning FILES ${PRIVATE_LEARNING_PAGE_FILES})

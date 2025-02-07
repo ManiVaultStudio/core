@@ -6,6 +6,7 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
+#include <QOperatingSystemVersion>
 #include <QVBoxLayout>
 
 using namespace mv;
@@ -32,7 +33,13 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
-    _groupsAction.addGroupAction(&mv::settings().getApplicationSettings());
+    if (QOperatingSystemVersion::current().type() == QOperatingSystemVersion::MacOS)
+		_groupsAction.addGroupAction(&mv::settings().getApplicationSettings());
+
+#ifdef ERROR_LOGGING
+    _groupsAction.addGroupAction(&mv::settings().getErrorLoggingSettingsAction());
+#endif
+
     _groupsAction.addGroupAction(&mv::settings().getParametersSettings());
     _groupsAction.addGroupAction(&mv::settings().getMiscellaneousSettings());
     _groupsAction.addGroupAction(&mv::settings().getTasksSettingsAction());
