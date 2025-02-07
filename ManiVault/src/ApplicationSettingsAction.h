@@ -8,6 +8,8 @@
 
 #include "actions/StringAction.h"
 #include "actions/OptionAction.h"
+#include "actions/TriggerAction.h"
+#include "actions/HorizontalGroupAction.h"
 
 namespace mv::gui
 {
@@ -15,7 +17,7 @@ namespace mv::gui
 /**
  * Application global settings action class
  *
- * Action class which groups all global settings for the application
+ * Groups all global settings for the application
  *
  * @author Thomas Kroes
  * @author Thomas Höllt
@@ -34,10 +36,10 @@ public: // Action getters
 
     StringAction& getApplicationSessionIdAction() { return _applicationSessionIdAction; }
     OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
-
+    
 private:
-    StringAction   _applicationSessionIdAction;    /** String action for the application session Id */
-    OptionAction   _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
+    StringAction    _applicationSessionIdAction;            /** String action for the application session identifier */
+    OptionAction    _appearanceOptionAction;                /** Options action for dark, light, or system appearance */
 };
 
 }

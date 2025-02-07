@@ -83,7 +83,7 @@ public: // Construction
      */
     Application(int& argc, char** argv);
 
-    ~Application();
+    ~Application() override;
 
 public: // Miscellaneous
 
@@ -170,6 +170,13 @@ public: // Static resource access functions
     static const IconFont& getIconFont(const QString& name, const std::int32_t& majorVersion = -1, const std::int32_t& minorVersion = -1);
 
 public: // Settings API
+
+    /**
+     * Get whether a setting exists
+     * @param path Path of the setting (e.g. General/Computation/NumberOfIterations)
+     * @return Boolean determining whether a setting exists
+     */
+    bool hasSetting(const QString& path) const;
 
     /**
      * Load setting

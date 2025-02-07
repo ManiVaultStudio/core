@@ -596,7 +596,7 @@ protected:
 
     /**
      * Connect this action to a public action
-     * @param publicAction Pointer to public action to connect to
+     * @param publicActionName Pointer to public action to connect to
      */
     void connectToPublicActionByName(const QString& publicActionName);
 
@@ -1032,6 +1032,7 @@ private:
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
     WidgetActionBadge               _badge;                         /** Badge configuration */
     WidgetActionDrag                _drag;                          /** Drag behaviour */
+    QString                         _description;                   /** Action description */
 
 protected:
     friend class mv::AbstractActionsManager;

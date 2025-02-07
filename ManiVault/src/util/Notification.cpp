@@ -45,10 +45,11 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
+    const auto windowColorName = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Window).name();
     const auto borderColorName = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Mid).name();
 
     notificationWidget->setObjectName("Notification");
-    notificationWidget->setStyleSheet(QString("QWidget#Notification { border: 1px solid %1; border-radius: 2px; }").arg(borderColorName));
+    notificationWidget->setStyleSheet(QString("QWidget#Notification { background-color: %1; border: 1px solid %2; border-radius: 5px; }").arg(windowColorName, borderColorName));
     notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
@@ -63,12 +64,12 @@ Notification::Notification(const QString& title, const QString& description, con
     messageLabel->setMinimumHeight(10);
     messageLabel->setOpenExternalLinks(true);
 
-    closePushButton->setFixedSize(18, 18);
+    closePushButton->setFixedSize(16, 16);
     closePushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
     closePushButton->setAutoRaise(true);
 
     notificationWidgetLayout->setContentsMargins(10, 10, 10, 10);
-    notificationWidgetLayout->setSpacing(20);
+    notificationWidgetLayout->setSpacing(10);
     notificationWidgetLayout->setAlignment(Qt::AlignTop);
 
     notificationWidgetLayout->addWidget(iconLabel);
@@ -136,9 +137,9 @@ void Notification::slideIn()
 
 void Notification::slideOut()
 {
-    auto animationGroup = new QParallelAnimationGroup(this);
+    auto animationGroup         = new QParallelAnimationGroup(this);
     auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
-    auto positionAnimation = new QPropertyAnimation(this, "pos");
+    auto positionAnimation      = new QPropertyAnimation(this, "pos");
 
     animationGroup->addAnimation(windowOpacityAnimation);
     animationGroup->addAnimation(positionAnimation);
@@ -160,7 +161,7 @@ void Notification::slideOut()
 
 double Notification::getEstimatedReadingTime(const QString& text)
 {
-    QRegularExpression wordRegex("\\b\\w+\\b");
+    QRegularExpression wordRegex(R"(\b\w+\b)");
 
 	auto wordIterator = wordRegex.globalMatch(text);
 
@@ -222,7 +223,7 @@ void Notification::updatePosition()
         _previousNotification->updateGeometry();
         _previousNotification->adjustSize();
 
-        move(QPoint(_previousNotification->pos().x(), _previousNotification->pos().y() - height() - spacing));
+        move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
     } else {
         const auto statusBarHeight = Application::getMainWindow()->statusBar()->isVisible() ? Application::getMainWindow()->statusBar()->height() : 0;
 
