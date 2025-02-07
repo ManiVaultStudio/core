@@ -27,7 +27,7 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-bool isInPopupMode(QWidget* parent) {
+static bool isInPopupMode(QWidget* parent) {
     return parent->property("Popup").isValid() ? parent->property("Popup").toBool() : false;
 }
 
