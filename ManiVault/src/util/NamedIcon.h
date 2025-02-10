@@ -41,6 +41,55 @@ public: // Construction/destruction
      */
     static NamedIcon fromFontAwesome(const QString& iconName, const Version& version = { 6, 5 });
 
+    /**
+     * Create icon with \p iconName from \p version of Font Awesome Brands
+     * @param iconName Name of the icon
+     * @param version Font Awesome version
+     * @return Named icon
+     */
+    static NamedIcon fromFontAwesomeBrands(const QString& iconName, const Version& version = { 6, 5 });
+
+    /**
+     * Initialize \p version of \p iconFontName
+     * @param iconFontName Name of the icon font
+     * @param iconFontVersion Font Awesome version
+     */
+    static void initializeIconFont(const QString& iconFontName, const Version& iconFontVersion);
+
+    /**
+     * Converts human readable \p icon name to icon character (unicode)
+     * @param iconName Name of the icon
+     * @param iconFontName Name of the icon font
+     * @param iconFontVersion Version of the icon font
+     * @return Unicode icon character (empty if not found) 
+     */
+    static QString getIconCharacter(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion);
+
+    /**
+     * Get icon font resource name for \p iconFontName at \p version
+     * @param iconFontName Name of the icon font
+     * @param version Font Awesome version
+     * @return Icon font resource name
+     */
+    static QString getIconFontResourceName(const QString& iconFontName, const Version& version);
+
+    /**
+     * Get icon with \p iconName, \p iconFontName and \p iconFontVersion
+     * @param iconName Icon name
+     * @param iconFontName Font name
+     * @param iconFontVersion Font version
+     * @param foregroundColor Foreground color
+     * @param backgroundColor Background color
+     * @return 
+     */
+    static QIcon getIcon(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion, const QColor& foregroundColor/*= QColor(0, 0, 0, 0)*/, const QColor& backgroundColor/*= Qt::transparent*/);
+
+    /**
+     * Get icon font version string for \p version
+     * @return Icon font version string (e.g. 2.4)
+     */
+    static QString getIconFontVersionString(const Version& version);
+
 protected:
 
     /** Only allow named icon construction */
@@ -50,10 +99,14 @@ protected:
     void updateIcon();
 
 private:
-    const QString   _iconName;          /** Name of the icon */
-    const QString   _iconFontName;      /** Name of the icon font */
-    const Version   _iconFontVersion;   /** Version of the icon font */
-    ThemeWatcher    _themeWatcher;      /** Use our own theme watcher (which does not emit paletteChanged(...) needlessly) */
+    const QString                   _iconName;          /** Name of the icon */
+    const QString                   _iconFontName;      /** Name of the icon font */
+    const Version                   _iconFontVersion;   /** Version of the icon font */
+    ThemeWatcher                    _themeWatcher;      /** Use our own theme watcher (which does not emit paletteChanged(...) needlessly) */
+
+protected:
+	static QMap<QString, QVariant>  fontMetadata;   /** Font-specific metadata */
+    static QMap<QString, QFont>     fonts;          /** Icon fonts */
 };
 
 

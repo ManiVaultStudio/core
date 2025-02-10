@@ -15,7 +15,7 @@
 
 #include "IconFont.h"
 
-namespace mv {
+namespace mv::util {
 
 /**
  * Icon fonts utility class
@@ -49,11 +49,6 @@ public: // Exceptions
         {
         }
     };
-
-public: // Construction
-
-    /** Default constructor */
-    IconFonts();
 
 public: // Getters
 

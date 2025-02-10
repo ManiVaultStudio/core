@@ -7,14 +7,9 @@
 #include <QDebug>
 #include <QMessageBox>
 
-namespace mv {
+namespace mv::util {
 
-IconFonts::IconFonts() :
-    _iconFonts()
-{
-}
-
-const mv::IconFont& IconFonts::getIconFont(const QString& name, const std::int32_t& majorVersion /*= -1*/, const std::int32_t& minorVersion /*= -1*/) const
+const IconFont& IconFonts::getIconFont(const QString& name, const std::int32_t& majorVersion /*= -1*/, const std::int32_t& minorVersion /*= -1*/) const
 {
     if (majorVersion < 0 && minorVersion < 0)
         for (auto iconFont : _iconFonts[name])
@@ -64,7 +59,7 @@ QStringList IconFonts::getFontNames() const
     return _iconFonts.keys();
 }
 
-mv::IconFonts::Fonts IconFonts::getIconFonts(const QString& fontName) const
+mv::util::IconFonts::Fonts IconFonts::getIconFonts(const QString& fontName) const
 {
     try
     {

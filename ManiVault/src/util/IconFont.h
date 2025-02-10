@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "NamedIcon.h"
 
 #include <QString>
 #include <QFont>
@@ -12,7 +13,7 @@
 #include <QMap>
 #include <QDebug>
 
-namespace mv {
+namespace mv::util {
 
 /**
  * Icon font utility class
