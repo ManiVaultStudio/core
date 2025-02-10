@@ -166,6 +166,10 @@ CPMAddPackage(
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
 
+if(APPLE)
+    set(CMAKE_XCODE_GENERATE_SCHEME ON)
+endif()
+
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
@@ -284,6 +288,11 @@ if(APPLE)
     # Find libraries relative to the executable in the macOS .app tree
     set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 
+    # Debug ManiVault Studio from the install directory
+    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:Debug>,${MV_INSTALL_DIR}/Debug,${MV_INSTALL_DIR}/Release>")   
+    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO)
+    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app")
+    
 endif()
 
 set_target_properties(qt6advanceddocking QuaZip zlib zlibstatic
@@ -340,7 +349,7 @@ if(APPLE)
             message(\"**** MacOS bundle install ****\")
             file(MAKE_DIRECTORY \"${BUNDLE_DIR}\")
             message(\"**** Run macdeployqt for \"${BUNDLE_DIR}\" ****\")
-            execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite RESULT_VARIABLE retval)
+            execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -no-strip RESULT_VARIABLE retval)
             if(NOT retval EQUAL 0)
         	    message(FATAL_ERROR \"macdeployqt failed\")
             endif()
