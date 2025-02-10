@@ -108,8 +108,10 @@ void ErrorManager::reset()
 
 void ErrorManager::showErrorLoggingConsentDialog()
 {
+#ifdef ERROR_LOGGING
     ErrorLoggingConsentDialog errorLoggingConsentDialog;
     errorLoggingConsentDialog.exec();
+#endif
 }
 
 }
