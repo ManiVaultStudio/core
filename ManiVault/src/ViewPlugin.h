@@ -165,7 +165,7 @@ private:
     QWidget                         _widget;                    /** Widget representation of the plugin */
     gui::TriggerAction              _editorAction;              /** Trigger action to start the view plugin editor */
     gui::TriggerAction              _screenshotAction;          /** Trigger action to create a screenshot */
-    gui::ToggleAction               _isolateAction;             /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */
+    gui::ToggleAction               _isolateAction;             /** Toggle action to setEnabled view isolation (when toggled, all other view plugins are temporarily closed) */
     gui::ToggleAction               _mayCloseAction;            /** Action for toggling whether the view plugin may be closed */
     gui::ToggleAction               _mayFloatAction;            /** Action for toggling whether the view plugin may float */
     gui::ToggleAction               _mayMoveAction;             /** Action for toggling whether the view plugin may be moved */

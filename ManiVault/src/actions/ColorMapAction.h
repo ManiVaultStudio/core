@@ -215,7 +215,7 @@ protected:
     ToggleAction                _lockToSharedDataRangeAction;                           /** Lock to shared data range action */
     ToggleAction                _mirrorAction[static_cast<int>(Axis::Count)];           /** Mirror along the horizontal/vertical axis action */
     HorizontalGroupAction       _mirrorGroupAction;                                     /** Group action for mirroring along horizontal/vertical axis */
-    ToggleAction                _discretizeAction;                                      /** Discretize toggle action */
+    ToggleAction                _discretizeAction;                                      /** Discretize setEnabled action */
     IntegralAction              _numberOfDiscreteStepsAction;                           /** Number of discrete steps action */
     ToggleAction                _discretizeAlphaAction;                                 /** Whether to also discretize the alpha channel of the color map */
     ColorMapSettings1DAction    _settings1DAction;                                      /** One-dimensional settings action */

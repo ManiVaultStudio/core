@@ -6,8 +6,8 @@
 #include "Application.h"
 
 #ifdef Q_OS_MACX
-#include "util/MacThemeHelper.h"
-#endif // Q_OS_MACX
+	#include "util/MacThemeHelper.h"
+#endif
 
 namespace mv::gui
 {

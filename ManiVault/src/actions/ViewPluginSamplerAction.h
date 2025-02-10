@@ -247,10 +247,10 @@ private:
     PixelSelectionAction*           _pixelSelectionAction;                      /** Pointer to pixel selection tool to use */
     PixelSelectionAction*           _samplerPixelSelectionAction;               /** Pointer to sampler pixel selection tool to use */
     ViewGeneratorFunction           _viewGeneratorFunction;                     /** View generator function which is called periodically when the mouse moves in the view (should return an HTML formatted string) */
-    ToggleAction                    _enabledAction;                             /** Action to toggle computation on/off */
-    ToggleAction                    _highlightFocusedElementsAction;            /** Action to toggle focus elements highlighting */
+    ToggleAction                    _enabledAction;                             /** Action to setEnabled computation on/off */
+    ToggleAction                    _highlightFocusedElementsAction;            /** Action to setEnabled focus elements highlighting */
     VerticalGroupAction             _settingsAction;                            /** Additional vertical group action for settings */
-    ToggleAction                    _restrictNumberOfElementsAction;            /** Action to toggle the restriction of the maximum number of elements in the focus region */
+    ToggleAction                    _restrictNumberOfElementsAction;            /** Action to setEnabled the restriction of the maximum number of elements in the focus region */
     IntegralAction                  _maximumNumberOfElementsAction;             /** Action to restrict the maximum number of elements in the focus region */
     IntegralAction                  _lazyUpdateIntervalAction;                  /** Action to control the view update timer interval */
     OptionAction                    _samplingModeAction;                        /** Action to control the sampling mode */
