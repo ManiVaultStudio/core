@@ -32,12 +32,7 @@ Application::Application(int& argc, char** argv) :
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _core(nullptr),
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
-    _iconFonts(),
-    _settings(),
-    _serializationTemporaryDirectory(),
     _serializationAborted(false),
-    _logger(),
-    _startupProjectFilePath(),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
     _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), _id.mid(0, 6)))),
@@ -85,11 +80,28 @@ Application::Application(int& argc, char** argv) :
         ForegroundTask::createHandler(Application::current());
         ModalTask::createHandler(Application::current());
     });
+
+    _currentPalette = palette();
 }
 
 Application::~Application()
 {
     _core = nullptr;
+}
+
+bool Application::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange) {
+        auto currentPalette = QGuiApplication::palette();
+
+        if (currentPalette != _currentPalette) {
+            emit paletteChanged(_currentPalette);
+
+            _currentPalette = currentPalette;
+        }
+    }
+
+    return QApplication::event(event);
 }
 
 Application* Application::current()

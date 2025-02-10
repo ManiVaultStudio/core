@@ -19,6 +19,7 @@
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QLockFile>
+#include <QPalette>
 
 class QMainWindow;
 
@@ -83,7 +84,16 @@ public: // Construction
      */
     Application(int& argc, char** argv);
 
-    ~Application();
+    ~Application() override;
+
+protected:
+
+    /**
+     * Invoked when \p event occurs
+     * @param event Pointer to event
+     * @return Whether the event was handled or not
+     */
+    bool event(QEvent* event) override;
 
 public: // Miscellaneous
 
@@ -244,6 +254,12 @@ signals:
      */
     void coreManagersCreated(CoreInterface* core);
 
+    /**
+     * Signals that the application palette change to \p palette
+     * @param palette Current application palette
+     */
+    void paletteChanged(const QPalette& palette);
+
 protected:
     QString                     _id;                                /** Globally unique identifier of the application instance */
     CoreInterface*              _core;                              /** Pointer to the ManiVault core */
@@ -260,6 +276,7 @@ protected:
     QTemporaryDir               _temporaryDir;                      /** Directory where application temporary files reside */
     TemporaryDirs               _temporaryDirs;                     /** ManiVault application temporary directories manager */
     QLockFile                   _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
+    QPalette                    _currentPalette;                    /** Prevent unnecessary emissions of Application::paletteChanged() by comparing with a cached palette */
 };
 
 }
