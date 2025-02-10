@@ -535,10 +535,11 @@ set(PUBLIC_UTIL_HEADERS
     src/util/NumericalRange.h
     src/util/FileDownloader.h
     src/util/ShortcutMap.h
-	src/util/Notification.h
+    src/util/Notification.h
     src/util/Notifications.h
     src/util/LearningCenterVideo.h
     src/util/LearningCenterTutorial.h
+    src/util/ThemeWatcher.h
 )
 
 if(APPLE)
@@ -585,10 +586,11 @@ set(PUBLIC_UTIL_SOURCES
     src/util/NumericalRange.cpp
     src/util/FileDownloader.cpp
     src/util/ShortcutMap.cpp
-	src/util/Notification.cpp
+    src/util/Notification.cpp
     src/util/Notifications.cpp
     src/util/LearningCenterVideo.cpp
     src/util/LearningCenterTutorial.cpp
+    src/util/ThemeWatcher.cpp
 )
 
 if(APPLE)
