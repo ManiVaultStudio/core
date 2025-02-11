@@ -24,6 +24,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _typeModel(this),
     _typeAction(this, "Type"),
     _rectangleAction(this, "Rectangle"),
+    _lineAction(this, "Line"),
     _brushAction(this, "Brush"),
     _lassoAction(this, "Lasso"),
     _polygonAction(this, "Polygon"),
@@ -39,7 +40,10 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _selectAllAction(this, "All"),
     _invertSelectionAction(this, "Invert"),
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
-    _notifyDuringSelectionAction(this, "Notify during selection", true)
+    _notifyDuringSelectionAction(this, "Notify during selection", true),
+    _lineWidthAction(this, "Line width", 1.0f, 50.0f, 5.0f),
+    _lineAngleAction(this, "Line angle", 0.0f, 359.9f, 0.0f)
+
 {
     setIconByName("mouse-pointer");
 
@@ -49,6 +53,8 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     addAction(&_modifierAction);
     addAction(&_selectAction);
     addAction(&_brushRadiusAction);
+    addAction(&_lineWidthAction);
+    addAction(&_lineAngleAction);
     addAction(&_notifyDuringSelectionAction);
 
     const auto& fontAwesome = mv::Application::getIconFont("FontAwesome");
@@ -64,6 +70,11 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _rectangleAction.setToolTip("Select pixels inside a rectangle (R)");
     _rectangleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _rectangleAction.setShortcut(QKeySequence("R"));
+
+    _lineAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Line));
+    _lineAction.setToolTip("Select pixels inside a line (D)");
+    _lineAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _lineAction.setShortcut(QKeySequence("D"));
 
     _brushAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Brush));
     _brushAction.setToolTip("Select pixels using a brush tool (B)");
@@ -128,6 +139,14 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _brushRadiusAction.setToolTip("Brush selection tool radius");
     _brushRadiusAction.setSuffix("px");
 
+    _lineWidthAction.setToolTip("Line width");
+    _lineWidthAction.setSuffix("px");
+
+    _lineAngleAction.setToolTip("Line angle");
+    _lineAngleAction.setSuffix("\u00B0");
+    _lineAngleAction.setDisabled(true);
+    _lineAngleAction.setDefaultWidgetFlags(DecimalAction::SpinBox);
+
     _notifyDuringSelectionAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
     _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
@@ -154,6 +173,11 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
         if (toggled)
             _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Rectangle));
     });
+
+    connect(&_lineAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Line));
+        });
 
     connect(&_brushAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
@@ -182,6 +206,8 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
 
     const auto updateType = [this]() {
         _brushRadiusAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Brush) || _typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Sample));
+        _lineWidthAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Line));
+        //_lineAngleAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Line));
     };
 
     updateType();
@@ -230,6 +256,7 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
 
     if (shortcutsEnabled) {
         _targetWidget->addAction(&_rectangleAction);
+        _targetWidget->addAction(&_lineAction);
         _targetWidget->addAction(&_brushAction);
         _targetWidget->addAction(&_lassoAction);
         _targetWidget->addAction(&_polygonAction);
@@ -240,10 +267,13 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
         _targetWidget->addAction(&_selectAllAction);
         _targetWidget->addAction(&_invertSelectionAction);
         _targetWidget->addAction(&_brushRadiusAction);
+        _targetWidget->addAction(&_lineWidthAction);
+        _targetWidget->addAction(&_lineAngleAction);
         _targetWidget->addAction(&_notifyDuringSelectionAction);
     }
     else {
         _targetWidget->removeAction(&_rectangleAction);
+        _targetWidget->removeAction(&_lineAction);
         _targetWidget->removeAction(&_brushAction);
         _targetWidget->removeAction(&_lassoAction);
         _targetWidget->removeAction(&_polygonAction);
@@ -254,6 +284,8 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
         _targetWidget->removeAction(&_selectAllAction);
         _targetWidget->removeAction(&_invertSelectionAction);
         _targetWidget->removeAction(&_brushRadiusAction);
+        _targetWidget->removeAction(&_lineWidthAction);
+        _targetWidget->removeAction(&_lineAngleAction);
         _targetWidget->removeAction(&_notifyDuringSelectionAction);
     }
 }
@@ -265,6 +297,9 @@ void PixelSelectionAction::initType()
 
     if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle))
         _typeActionGroup.addAction(&_rectangleAction);
+
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Line))
+        _typeActionGroup.addAction(&_lineAction);
 
     if (_pixelSelectionTypes.contains(PixelSelectionType::Brush))
         _typeActionGroup.addAction(&_brushAction);
@@ -291,6 +326,7 @@ void PixelSelectionAction::initType()
         _typeAction.setCurrentText(util::pixelSelectionTypes.value(type));
 
         _rectangleAction.setChecked(type == PixelSelectionType::Rectangle);
+        _lineAction.setChecked(type == PixelSelectionType::Line);
         _brushAction.setChecked(type == PixelSelectionType::Brush);
         _lassoAction.setChecked(type == PixelSelectionType::Lasso);
         _polygonAction.setChecked(type == PixelSelectionType::Polygon);
@@ -346,6 +382,24 @@ void PixelSelectionAction::initMiscellaneous()
         _pixelSelectionTool->setBrushRadius(value);
     });
 
+    connect(_pixelSelectionTool, &PixelSelectionTool::lineWidthChanged, this, [this](const float& lineWidth) {
+        _lineWidthAction.setValue(lineWidth);
+        });
+
+    connect(&_lineWidthAction, &DecimalAction::valueChanged, this, [this](const double& value) {
+        _pixelSelectionTool->setLineWidth(value);
+        });
+
+    connect(_pixelSelectionTool, &PixelSelectionTool::lineAngleChanged, this, [this](const float& lineAngle) {
+ 
+        _lineAngleAction.setValue(lineAngle);
+        });
+
+    connect(&_lineAngleAction, &DecimalAction::valueChanged, this, [this](const double& value) {
+
+        _pixelSelectionTool->setLineAngle(value);
+        });
+
     const auto updateNotifyDuringSelection = [this]() -> void {
         _notifyDuringSelectionAction.setChecked(_pixelSelectionTool->isNotifyDuringSelection());
     };
@@ -381,6 +435,9 @@ QMenu* PixelSelectionAction::getContextMenu()
     if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle))
         menu->addAction(&_rectangleAction);
 
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Line))
+        menu->addAction(&_lineAction);
+
     if (_pixelSelectionTypes.contains(PixelSelectionType::Brush))
         menu->addAction(&_brushAction);
 
@@ -390,13 +447,18 @@ QMenu* PixelSelectionAction::getContextMenu()
     if (_pixelSelectionTypes.contains(PixelSelectionType::Polygon))
         menu->addAction(&_polygonAction);
 
-    if (_pixelSelectionTypes.contains(PixelSelectionType::Sample))
+     if (_pixelSelectionTypes.contains(PixelSelectionType::Sample))
         menu->addAction(&_sampleAction);
 
     menu->addSeparator();
 
     if (_pixelSelectionTypes.contains(PixelSelectionType::Brush))
         addActionToMenu(&_brushRadiusAction);
+
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Line)) {
+        addActionToMenu(&_lineWidthAction);
+        addActionToMenu(&_lineAngleAction);
+    }
 
     menu->addSeparator();
 
@@ -494,6 +556,8 @@ void PixelSelectionAction::connectToPublicAction(WidgetAction* publicAction, boo
         actions().connectPrivateActionToPublicAction(&_selectAllAction, &publicPixelSelectionAction->getSelectAllAction(), recursive);
         actions().connectPrivateActionToPublicAction(&_invertSelectionAction, &publicPixelSelectionAction->getInvertSelectionAction(), recursive);
         actions().connectPrivateActionToPublicAction(&_brushRadiusAction, &publicPixelSelectionAction->getBrushRadiusAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_lineWidthAction, &publicPixelSelectionAction->getLineWidthAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_lineAngleAction, &publicPixelSelectionAction->getLineAngleAction(), recursive);
         actions().connectPrivateActionToPublicAction(&_notifyDuringSelectionAction, &publicPixelSelectionAction->getNotifyDuringSelectionAction(), recursive);
     }
 
@@ -514,6 +578,8 @@ void PixelSelectionAction::disconnectFromPublicAction(bool recursive)
         actions().disconnectPrivateActionFromPublicAction(&_selectAllAction, recursive);
         actions().disconnectPrivateActionFromPublicAction(&_invertSelectionAction, recursive);
         actions().disconnectPrivateActionFromPublicAction(&_brushRadiusAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_lineWidthAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_lineAngleAction, recursive);
         actions().disconnectPrivateActionFromPublicAction(&_notifyDuringSelectionAction, recursive);
     }
 
@@ -529,6 +595,8 @@ void PixelSelectionAction::fromVariantMap(const QVariantMap& variantMap)
     _typeAction.fromParentVariantMap(variantMap);
     _modifierAction.fromParentVariantMap(variantMap);
     _brushRadiusAction.fromParentVariantMap(variantMap);
+    _lineWidthAction.fromParentVariantMap(variantMap);
+    _lineAngleAction.fromParentVariantMap(variantMap);
     _notifyDuringSelectionAction.fromParentVariantMap(variantMap);
 }
 
@@ -541,6 +609,8 @@ QVariantMap PixelSelectionAction::toVariantMap() const
     _typeAction.insertIntoVariantMap(variantMap);
     _modifierAction.insertIntoVariantMap(variantMap);
     _brushRadiusAction.insertIntoVariantMap(variantMap);
+    _lineWidthAction.insertIntoVariantMap(variantMap);
+    _lineAngleAction.insertIntoVariantMap(variantMap);
     _notifyDuringSelectionAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

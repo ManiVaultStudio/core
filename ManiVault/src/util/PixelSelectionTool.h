@@ -86,6 +86,24 @@ public: // Getters/setters
      */
     void setBrushRadius(const float& brushRadius);
 
+    /** Get line width */
+    float getLineWidth() const;
+
+    /**
+     * Set line width
+     * @param lineWidth Line width
+     */
+    void setLineWidth(const float& lineWidth);
+
+    /** Get line angle */
+    float getLineAngle() const;
+
+    /**
+     * Set line angle
+     * @param lineAngle Line angle
+     */
+    void setLineAngle(const float& lineAngle);
+
     /** Get fixed brush radius modifier */
     Qt::KeyboardModifier getFixedBrushRadiusModifier() const;
 
@@ -158,6 +176,11 @@ private:
     /** Ends the selection process */
     void endSelection();
 
+
+    bool isShowAngleLines() const;
+
+    void setShowAngleLines(bool showAngleLines);
+
 signals:
 
     /** Signals that the type has changed */
@@ -171,6 +194,13 @@ signals:
 
     /** Signals that the brush radius has changed */
     void brushRadiusChanged(const float& brushRadius);
+
+    /** Signals that the line width has changed */
+    void lineWidthChanged(const float& lineWidth);
+
+    /** Signals that the line angle has changed */
+    void lineAngleChanged(const float& lineAngle);
+
 
     /** Signals that the selection shape changed */
     void shapeChanged();
@@ -200,7 +230,9 @@ protected:
     QPixmap                     _areaPixmap;                /** Pixmap for the selection area */
     bool                        _preventContextMenu;        /** Whether to prevent a context menu */
     bool                        _aborted;                   /** Whether the selection process was aborted */
-
+    float                       _lineAreaWidth;            /** Width of the line area */
+    float                       _lineAngle;                /** Angle of the line area */
+    bool                        _showAngleLines;          /** Whether to show angle lines */
     static const std::int32_t LAZY_UPDATE_INTERVAL = 10;
 
 protected:
@@ -211,7 +243,7 @@ protected:
     QPen        _penLineBackGround;         /** Background pen */
     QPen        _penControlPoint;           /** Control point pen */
     QPen        _penClosingPoint;           /** Closing point pen (e.g. for finishing polygon selection) */
-
+    QTimer* _paintTimer;                    /** Timer for lazy update */
 public:
     static constexpr float BRUSH_RADIUS_MIN     = 10.0f;                    /** Minimum radius */
     static constexpr float BRUSH_RADIUS_MAX     = 500.0f;                   /** Maximum radius */
