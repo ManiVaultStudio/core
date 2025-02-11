@@ -183,8 +183,8 @@ QPixmap NamedIcon::createIconPixmap(const QString& iconName, const QString& icon
 
         QColor fontColor = foregroundColor;
 
-        if (fontColor == QColor(0, 0, 0, 0))
-            fontColor = qApp->palette().text().color();
+        //if (fontColor == QColor(0, 0, 0, 0))
+        //    fontColor = qApp->palette().text().color();
 
         QPainter painter(&pixmap);
 
