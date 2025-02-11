@@ -238,6 +238,11 @@ int main(int argc, char *argv[])
 
     application.setStyle(new NoFocusProxyStyle);
 
+#ifdef __APPLE__
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+#endif
+    
+#ifdef _WIN32
     QFile styleSheetFile(":/styles/default.qss");
 
     styleSheetFile.open(QFile::ReadOnly);
@@ -245,6 +250,8 @@ int main(int argc, char *argv[])
     QString styleSheet = QLatin1String(styleSheetFile.readAll());
 
     application.setStyleSheet(styleSheet);
+#endif
+    
     loadGuiTask.setSubtaskFinished("Apply styles");
 
     MainWindow mainWindow;
