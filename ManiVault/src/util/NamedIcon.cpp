@@ -249,10 +249,8 @@ QString NamedIcon::getIconFontMetadataResourcePath(const QString& iconFontName, 
 void NamedIcon::updateIcon()
 {
     try {
-	    const auto textColor = qApp->palette().text().color();
-
         for (const auto& pixmapSize : defaultIconPixmapSizes) {
-            const auto iconPixmap = createIconPixmap(_iconName, _iconFontName, _iconFontVersion);
+            const auto iconPixmap = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, qApp->palette().text().color());
 
             addPixmap(iconPixmap.scaled(pixmapSize, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
         }
