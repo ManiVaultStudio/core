@@ -704,10 +704,16 @@ void PixelSelectionTool::paint()
         controlPoints << startPoint;
         controlPoints << endPoint;
 
-        const auto length = getLineWidth(); 
-        
-        const auto direction = (endPoint - startPoint) / std::sqrt(std::pow(endPoint.x() - startPoint.x(), 2) + std::pow(endPoint.y() - startPoint.y(), 2));
-        const auto perpendicular = QPointF(-direction.y(), direction.x()) * length;
+        const auto length = getLineWidth();
+        QPointF direction = (endPoint - startPoint);
+        double magnitude = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
+
+        if (magnitude != 0) {  // Prevent division by zero
+            direction /= magnitude;  // Normalize direction
+        }
+
+        QPointF perpendicular(-direction.y() * length, direction.x() * length);
+
 
         areaPainter.setBrush(_areaBrush);
         areaPainter.setPen(Qt::NoPen);
