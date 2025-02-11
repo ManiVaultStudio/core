@@ -169,6 +169,12 @@ QString NamedIcon::getIconCharacter(const QString& iconName, const QString& icon
 
 QPixmap NamedIcon::createIconPixmap(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion, const QColor& foregroundColor/*= QColor(0, 0, 0, 0)*/, const QColor& backgroundColor/*= Qt::transparent*/)
 {
+    if (iconName.isEmpty())
+        return;
+    
+    if (iconFontName.isEmpty())
+        return;
+    
     try
     {
         const auto iconFontResourceName = getIconFontResourceName(iconFontName, iconFontVersion);
@@ -256,7 +262,7 @@ void NamedIcon::updateIcon()
 
 
         for (const auto& pixmapSize : defaultIconPixmapSizes) {
-            const auto iconPixmap = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, process.readAllStandardOutput().trimmed() == "Dark" ? Qt::red : Qt::green); // qApp->palette().text().color()
+            const auto iconPixmap = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, QColor(255, 0, 0)); // qApp->palette().text().color()
 
             addPixmap(iconPixmap.scaled(pixmapSize, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
         }
