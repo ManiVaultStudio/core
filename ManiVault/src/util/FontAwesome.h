@@ -6,7 +6,7 @@
 
 #include "IconFont.h"
 
-namespace mv {
+namespace mv::util {
 
 /**
  * Font Awesome icon font class

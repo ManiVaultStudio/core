@@ -345,21 +345,25 @@ if(APPLE)
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
+    
     install(CODE "
-            message(\"**** MacOS bundle install ****\")
-            file(MAKE_DIRECTORY \"${BUNDLE_DIR}\")
-            message(\"**** Run macdeployqt for \"${BUNDLE_DIR}\" ****\")
+        message(\"**** MacOS bundle install ****\")
+
+        # Check if the Frameworks folder exists to determine if macdeployqt already ran
+        if(EXISTS \"${BUNDLE_DIR}/Contents/Frameworks/QtCore.framework\")
+            message(\"**** Skipping macdeployqt, bundle already deployed. ****\")
+        else()
+            message(\"**** Running macdeployqt for \"${BUNDLE_DIR}\" ****\")
             execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -no-strip RESULT_VARIABLE retval)
             if(NOT retval EQUAL 0)
-        	    message(FATAL_ERROR \"macdeployqt failed\")
+                message(FATAL_ERROR \"macdeployqt failed\")
             endif()
             set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
-            
-        "
-        COMPONENT MACOS_BUNDLE
-    )
+        endif()
+    " COMPONENT MACOS_BUNDLE)
+
       
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"

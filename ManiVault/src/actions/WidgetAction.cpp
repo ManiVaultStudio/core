@@ -49,7 +49,6 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _publicAction(nullptr),
     _highlighting(HighlightOption::None),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
-    _namedIcon(""),
     _badge(this),
     _drag(this)
 {
@@ -76,13 +75,6 @@ WidgetAction::~WidgetAction()
 
     if (!core()->isAboutToBeDestroyed())
 		actions().removeAction(this);
-}
-bool WidgetAction::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidgetAction::event(event);
 }
 
 QString WidgetAction::getLocation(bool recompute /*= false*/) const
@@ -917,24 +909,23 @@ void WidgetAction::setStudioMode(bool studioMode, bool recursive /*= true*/)
     }
 }
 
-void WidgetAction::setIconByName(QString namedIcon)
+void WidgetAction::setIconByName(const QString& iconName)
 {
-    _namedIcon = namedIcon;
+    _namedIcon.set(iconName);
 
-    refreshIcon();
+    setIcon(_namedIcon);
 }
 
-void WidgetAction::refreshIcon()
+void WidgetAction::setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)
 {
-    if (_namedIcon != "")
-    {
-        setIcon(Application::getIconFont("FontAwesome").getIcon(_namedIcon));
-    }
+    _namedIcon.set(iconName, iconFontName, iconFontVersion);
+
+    setIcon(_namedIcon);
 }
 
-void WidgetAction::updateCustomStyle()
+util::NamedIcon& WidgetAction::getIcon()
 {
-    refreshIcon();
+    return _namedIcon;
 }
 
 WidgetActionBadge& WidgetAction::getBadge()
