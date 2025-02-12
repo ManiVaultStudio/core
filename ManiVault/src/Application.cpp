@@ -101,9 +101,8 @@ bool Application::event(QEvent* event)
 
             _currentPalette = currentPalette;
             
-            for (QWidget* widget : QApplication::allWidgets()) {
-                        widget->repaint();
-                    }
+            for (auto widget : QApplication::allWidgets())
+				widget->repaint();
         }
     }
 
