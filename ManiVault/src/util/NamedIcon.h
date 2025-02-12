@@ -35,13 +35,24 @@ public:
      * @param parent Pointer to parent object (maybe nullptr)
      */
     explicit NamedIcon(const QString& iconName = "", const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion, QWidget* parent = nullptr);
-    
+
+    /**
+     * Copy construct from \p other named icon
+     * @param other Other named icon to copy from
+     */
     explicit NamedIcon(const NamedIcon& other);
-    
+
+    /**
+     * Overload assignment operator
+     * @param other Other named icon to assign from
+     * @return Copied result
+     */
     NamedIcon& operator=(const NamedIcon& other) {
-        _iconName = other._iconName;
-        _iconFontName = other._iconFontName;
-        _iconFontVersion = other._iconFontVersion;
+        _iconName           = other._iconName;
+        _iconFontName       = other._iconFontName;
+        _iconFontVersion    = other._iconFontVersion;
+
+        return *this;
     }
     
     /**
