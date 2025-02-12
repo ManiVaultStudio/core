@@ -66,7 +66,7 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     auto isMacOS = QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS;
     
     // on macOS the buttons look extremely squished and foreign with fixed height
-    if(!isMacOS) {
+    if (!isMacOS) {
         setFixedHeight(22);
     }
 
@@ -82,7 +82,7 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
 
     _iconLabel.setAlignment(Qt::AlignCenter);
 
-    if(isMacOS) {
+    if (isMacOS) {
         _iconLabel.setFont(fontAwesome.getFont());
     } else {
         _iconLabel.setFont(fontAwesome.getFont(7));
