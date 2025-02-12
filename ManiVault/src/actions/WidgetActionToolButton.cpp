@@ -20,6 +20,10 @@ WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* ac
     _menu(*this)
 {
     initialize(action);
+    
+#ifdef __APPLE__
+    setIconSize(QSize(8, 8));
+#endif
 }
 
 WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction) :
