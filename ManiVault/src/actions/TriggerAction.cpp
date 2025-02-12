@@ -36,6 +36,10 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     _triggerAction(triggerAction),
     _widgetFlags(widgetFlags)
 {
+#ifdef __APPLE__
+    setIconSize(QSize(12, 12));
+#endif
+    
     connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();
 	});
