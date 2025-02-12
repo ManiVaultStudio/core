@@ -22,7 +22,7 @@ WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* ac
     initialize(action);
     
 #ifdef __APPLE__
-    setIconSize(QSize(8, 8));
+    setIconSize(QSize(12, 12));
 #endif
 }
 
@@ -64,7 +64,7 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
         if (_indicatorAlignment & Qt::AlignRight)
             center.setX(width() - margin);
 
-        painter.setPen(QPen(QBrush(isEnabled() ? Qt::black : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
+        painter.setPen(QPen(QBrush(isEnabled() ? qApp->palette().text().color() : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
         painter.setBrush(Qt::NoBrush);
         painter.drawPoint(center);
     }
