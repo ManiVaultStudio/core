@@ -16,7 +16,7 @@
     #define FONT_AWESOME_VERBOSE
 #endif
 
-namespace mv {
+namespace mv::util {
 
 FontAwesome::FontAwesome(const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont /*= false*/, const QString& name /*= "FontAwesome"*/) :
     IconFont(name, majorVersion, minorVersion, fontResourceNames, defaultFont),

@@ -243,6 +243,10 @@ int main(int argc, char *argv[])
 #ifdef __APPLE__
     application.setStyle(QStyleFactory::create("Fusion"));
 #endif
+    
+#ifdef __APPLE__
+    application.setStyle(QStyleFactory::create("Fusion"));
+#endif
 
 #ifdef _WIN32
     QFile styleSheetFile(":/styles/default.qss");

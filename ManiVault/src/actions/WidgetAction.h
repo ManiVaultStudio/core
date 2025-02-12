@@ -9,6 +9,7 @@
 #include "WidgetActionDrag.h"
 
 #include "util/Serializable.h"
+#include "util/NamedIcon.h"
 
 #include <QWidgetAction>
 #include <QPointer>
@@ -422,13 +423,6 @@ public: // Widgets
      * @param widgetConfigurationFunction This function is called right after a widget action widget is created (useful for manual manipulation of the generated widget)
      */
     void setWidgetConfigurationFunction(const WidgetConfigurationFunction& widgetConfigurationFunction);
-
-protected:
-    /**
-     * Override QObject's event handling
-     * @return Boolean Whether the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
 
 public: // Visibility
 
@@ -873,22 +867,28 @@ public: // Studio mode
      */
     void setStudioMode(bool studioMode, bool recursive = true);
     
-public: // Font Icon
-    
-    /**
-     * Set the icon using a icon font name (i.e., fontawesome)
-     * @param setIcon the name of the icon in fontawesome v5
-     */
-    void setIconByName(QString namedIcon);
+public: // Icon
 
-private:
-    
-    /** refresh the icon when a icon font is used */
-    void refreshIcon();
-    
-    /** refresh the icon when a icon font is used */
-    void updateCustomStyle();
-    
+    /**
+     * Set the icon by \p iconName and use the default icon font and version
+     * @param iconName Name of the icon
+     */
+    void setIconByName(const QString& iconName);
+
+    /**
+     * Set the icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion
+     * @param iconName Name of the icon
+     * @param iconFontName Name of the icon font
+     * @param iconFontVersion Version of the icon font
+     */
+    void setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion);
+
+    /**
+     * Get the icon
+     * @return Reference to named icon
+     */
+    util::NamedIcon& getIcon();
+
 public: // Badge-related
 
     /**
@@ -1028,7 +1028,7 @@ private:
     std::int32_t                    _configuration;                 /** Configuration flags */
     QMap<QString, QVariant>         _cachedStates;                  /** Maps cache name to state */
     QString                         _location;                      /** The path relative to the root in string format */
-    QString                         _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
+    util::NamedIcon                 _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
     WidgetActionBadge               _badge;                         /** Badge configuration */
     WidgetActionDrag                _drag;                          /** Drag behaviour */

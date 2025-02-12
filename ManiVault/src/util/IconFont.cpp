@@ -19,14 +19,12 @@
 
 using namespace mv::gui;
 
-namespace mv {
+namespace mv::util {
 
 IconFont::IconFont(const QString& name, const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont /*= false*/) :
     _name(name),
     _majorVersion(majorVersion),
     _minorVersion(minorVersion),
-    _fontFamily(),
-    _characters(),
     _defaultFont(defaultFont)
 {
     try
