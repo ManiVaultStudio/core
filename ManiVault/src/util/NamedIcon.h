@@ -66,9 +66,9 @@ public:
     /**
      * Get icon pixmap
      * @param foregroundColor Foreground color
-     * @return Icon pixmap
+     * @return Pointer to pixmap (maybe nullptr)
      */
-    QPixmap getIconPixmap(const QColor& foregroundColor = QColor(0, 0, 0, 0)) const;
+    QPixmap* getIconPixmap(const QColor& foregroundColor = QColor(0, 0, 0, 0)) const;
 
     /**
      * Create icon with \p iconName from \p version of Font Awesome regular
@@ -149,7 +149,16 @@ private:
     using QIcon::QIcon;
 
     /** Trigger repaint of owning widget */
-    void updateIcon();
+    void updateIcon() const;
+
+    /**
+     * Create cryptographic key 
+     * @param iconName Icon name
+     * @param iconFontName Font name
+     * @param iconFontVersion Font version
+     * @return SHA
+     */
+    static QString generateSha(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion);
 
 signals:
 
@@ -181,6 +190,7 @@ private:
     QString         _iconName;          /** Name of the icon */
     QString         _iconFontName;      /** Name of the icon font */
     Version         _iconFontVersion;   /** Version of the icon font */
+    QString         _sha;               /** NamedIcons::icons key */
     ThemeWatcher    _themeWatcher;      /** Use our own theme watcher (which does not emit paletteChanged(...) needlessly) */
 
 protected:
@@ -188,6 +198,7 @@ protected:
     static QMap<QString, QFont>         fonts;                      /** Icon fonts */
     static QString                      defaultIconFontName;        /** Default icon font name */
     static Version                      defaultIconFontVersion;     /** Default icon font version */
+    static QMap<QString, QPixmap>       pixmaps;                    /** All pixmaps for icons */
 };
 
 

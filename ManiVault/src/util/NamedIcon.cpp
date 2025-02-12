@@ -11,7 +11,8 @@
 #include <QDebug>
 #include <QFontDatabase>
 #include <QJsonObject>
-#include <QProcess>
+#include <QCryptographicHash>
+#include <QByteArray>
 
 using namespace mv::gui;
 
@@ -20,9 +21,9 @@ namespace mv::util
 
 QMap<QString, QVariantMap> NamedIcon::fontMetadata = {};
 QMap<QString, QFont> NamedIcon::fonts = {};
-
 QString NamedIcon::defaultIconFontName = "FontAwesomeSolid";
 Version NamedIcon::defaultIconFontVersion = { 5, 14 };
+QMap<QString, QPixmap> NamedIcon::pixmaps = {};
 
 NamedIcon::NamedIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/, QWidget* parent /*= nullptr*/) :
     QObject(parent),
@@ -62,6 +63,8 @@ void NamedIcon::set(const QString& iconName, const QString& iconFontName, const 
 	    _iconFontName       = iconFontName;
 	    _iconFontVersion    = iconFontVersion;
 
+        _sha = generateSha(_iconName, _iconFontName, _iconFontVersion);
+
         const auto iconFontResourcePath = getIconFontResourcePath(_iconFontName, _iconFontVersion);
 
 	    if (!QFile::exists(iconFontResourcePath))
@@ -87,9 +90,12 @@ void NamedIcon::set(const QString& iconName, const QString& iconFontName, const 
 	}
 }
 
-QPixmap NamedIcon::getIconPixmap(const QColor& foregroundColor) const
+QPixmap* NamedIcon::getIconPixmap(const QColor& foregroundColor) const
 {
-    return createIconPixmap(_iconName, _iconFontName, _iconFontVersion, foregroundColor);
+    if (!pixmaps.contains(_sha))
+        return nullptr;
+
+    return &pixmaps[_sha];
 }
 
 NamedIcon NamedIcon::fromFontAwesomeRegular(const QString& iconName, const Version& version /*= { 6, 5 }*/)
@@ -258,26 +264,26 @@ QString NamedIcon::getIconFontMetadataResourcePath(const QString& iconFontName, 
     return iconFontMetadataResourcePath;
 }
 
-void NamedIcon::updateIcon()
+void NamedIcon::updateIcon() const
 {
     try {
-        if (_iconName.isEmpty() || _iconFontName.isEmpty())
+        if (pixmaps.contains(_sha))
             return;
-        
-        const auto iconPixmap = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, qApp->palette().text().color());
-        
-        if (iconPixmap.isNull())
-            return;
-        
-        for (const auto& pixmapSize : defaultIconPixmapSizes)
-            addPixmap(iconPixmap.scaled(pixmapSize, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
-        
-        
+
+        pixmaps[_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, qApp->palette().text().color());
 	}
 	catch (std::exception& e)
 	{
         qWarning() << "Unable to update named icon" << e.what();
 	}
+}
+
+QString NamedIcon::generateSha(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion)
+{
+    const auto input    = iconName + iconFontName + QString::fromStdString(iconFontVersion.getVersionString());
+	const auto hash     = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha256);
+
+	return hash.toHex();
 }
 
 }
