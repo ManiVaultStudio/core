@@ -35,7 +35,15 @@ public:
      * @param parent Pointer to parent object (maybe nullptr)
      */
     explicit NamedIcon(const QString& iconName = "", const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion, QWidget* parent = nullptr);
-
+    
+    explicit NamedIcon(const NamedIcon& other);
+    
+    NamedIcon& operator=(const NamedIcon& other) {
+        _iconName = other._iconName;
+        _iconFontName = other._iconFontName;
+        _iconFontVersion = other._iconFontVersion;
+    }
+    
     /**
      * Configure the named icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion
      * @param iconName Name of the icon

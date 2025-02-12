@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "ThemeWatcher.h"
+
 #include <QIconEngine>
 #include <QObject>
 
@@ -35,7 +37,7 @@ public:
     QIconEngine* clone() const override;
 
 private:
-    NamedIcon&   _namedIcon;
+    NamedIcon&   _namedIcon;    /** Reference to named icon */
 };
 
 

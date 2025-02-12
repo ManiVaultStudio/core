@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
+// SPDX-License-Identifier: LGPL-3.0-or-later
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
@@ -29,9 +29,15 @@ NamedIcon::NamedIcon(const QString& iconName /*= ""*/, const QString& iconFontNa
     QIcon(new ThemeIconEngine(*this))
 {
     connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, &NamedIcon::updateIcon);
-    //connect(this, &NamedIcon::changed, this, &NamedIcon::updateIcon);
+    //connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, &NamedIcon::updateIcon);
 
-    set(iconName, iconFontName, iconFontVersion);
+    if (!iconName.isEmpty() && !iconFontName.isEmpty())
+        set(iconName, iconFontName, iconFontVersion);
+}
+
+NamedIcon::NamedIcon(const NamedIcon& other) :
+    NamedIcon(other._iconName, other._iconFontName, other._iconFontVersion)
+{
 }
 
 void NamedIcon::set(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)
@@ -169,11 +175,10 @@ QString NamedIcon::getIconCharacter(const QString& iconName, const QString& icon
 
 QPixmap NamedIcon::createIconPixmap(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion, const QColor& foregroundColor/*= QColor(0, 0, 0, 0)*/, const QColor& backgroundColor/*= Qt::transparent*/)
 {
-    if (iconName.isEmpty())
-        return;
-    
-    if (iconFontName.isEmpty())
-        return;
+    if (iconName.isEmpty() || iconFontName.isEmpty()) {
+        qDebug() << "NamedIcon::createIconPixmap()" << iconName << iconFontName;
+        return {};
+    }
     
     try
     {
@@ -197,7 +202,7 @@ QPixmap NamedIcon::createIconPixmap(const QString& iconName, const QString& icon
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
         painter.setRenderHint(QPainter::LosslessImageRendering, true);
-        painter.setPen(fontColor);
+        painter.setPen(foregroundColor);
         painter.setFont(fonts[iconFontResourceName]);
 
         QFontMetrics fontMetrics(painter.font());
@@ -256,16 +261,18 @@ QString NamedIcon::getIconFontMetadataResourcePath(const QString& iconFontName, 
 void NamedIcon::updateIcon()
 {
     try {
-        QProcess process;
-        process.start("defaults read -g AppleInterfaceStyle");
-        process.waitForFinished();
-
-
-        for (const auto& pixmapSize : defaultIconPixmapSizes) {
-            const auto iconPixmap = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, QColor(255, 0, 0)); // qApp->palette().text().color()
-
+        if (_iconName.isEmpty() || _iconFontName.isEmpty())
+            return;
+        
+        const auto iconPixmap = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, qApp->palette().text().color());
+        
+        if (iconPixmap.isNull())
+            return;
+        
+        for (const auto& pixmapSize : defaultIconPixmapSizes)
             addPixmap(iconPixmap.scaled(pixmapSize, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
-        }
+        
+        
 	}
 	catch (std::exception& e)
 	{

@@ -82,6 +82,8 @@ Application::Application(int& argc, char** argv) :
     });
 
     _currentPalette = palette();
+    
+    
 }
 
 Application::~Application()
@@ -98,6 +100,10 @@ bool Application::event(QEvent* event)
             emit paletteChanged(_currentPalette);
 
             _currentPalette = currentPalette;
+            
+            for (QWidget* widget : QApplication::allWidgets()) {
+                        widget->repaint();
+                    }
         }
     }
 

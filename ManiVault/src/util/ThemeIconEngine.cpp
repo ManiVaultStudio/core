@@ -17,25 +17,24 @@ ThemeIconEngine::ThemeIconEngine(NamedIcon& namedIcon) :
 }
 
 ThemeIconEngine::ThemeIconEngine(const ThemeIconEngine& other) :
-	QIconEngine(other),
-    _namedIcon(other._namedIcon)
+    ThemeIconEngine(other._namedIcon)
 {
 }
 
 void ThemeIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state)
 {
     painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->drawPixmap(rect, _namedIcon.getIconPixmap());
+    painter->drawPixmap(rect, _namedIcon.getIconPixmap(qApp->palette().text().color()));
 }
 
 QPixmap ThemeIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
-    const auto pixmap = _namedIcon.getIconPixmap();
+    const auto pixmap = _namedIcon.getIconPixmap(qApp->palette().text().color());
 
     if (pixmap.isNull())
         return {};
-
-    return _namedIcon.getIconPixmap().scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    
+    return pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 }
 
 QIconEngine* ThemeIconEngine::clone() const
