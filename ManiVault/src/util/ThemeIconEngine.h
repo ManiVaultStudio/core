@@ -23,8 +23,6 @@ class NamedIcon;
  */
 class CORE_EXPORT ThemeIconEngine : public QObject, public QIconEngine
 {
-    Q_OBJECT
-
 public:
 
     /**
@@ -32,6 +30,14 @@ public:
      * @param namedIcon Reference to named icon
      */
     ThemeIconEngine(NamedIcon& namedIcon);
+
+    /**
+     * Construct from \p sha
+     * @param sha SHA of the icon
+     * @param _colorRoleLightTheme Color role for light theme
+     * @param _colorRoleDarkTheme Color role for dark theme
+     */
+    ThemeIconEngine(const QString& sha, const QPalette::ColorRole& _colorRoleLightTheme, const QPalette::ColorRole& _colorRoleDarkTheme);
 
     /**
      * Copy construct from \p other
@@ -76,8 +82,24 @@ private:
      */
     static QPixmap recolorPixmap(const QPixmap& pixmap, const QColor& color);
 
+    /**
+     * Get whether the current theme is dark
+     * @return Boolean determining whether the current theme is dark
+     */
+    static bool isDarkTheme();
+
+    /**
+     * Get color role for current theme
+     * @return Color role for current theme
+     */
+    QPalette::ColorRole getColorRoleForCurrentTheme() const;
+
 private:
-    NamedIcon&   _namedIcon;    /** Reference to named icon */
+    QString                 _sha;                       /** NamedIcons::icons key */
+    QPalette::ColorRole     _colorRoleLightTheme;       /** Color role for light theme */
+    QPalette::ColorRole     _colorRoleDarkTheme;        /** Color role for dark theme */
+
+    friend class NamedIcon;
 };
 
 

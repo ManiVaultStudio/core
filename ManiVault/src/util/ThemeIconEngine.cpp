@@ -12,12 +12,21 @@ namespace mv::util
 {
 
 ThemeIconEngine::ThemeIconEngine(NamedIcon& namedIcon) :
-    _namedIcon(namedIcon)
+	_colorRoleLightTheme(QPalette::Text),
+	_colorRoleDarkTheme(QPalette::Text)
+{
+    namedIcon._iconEngine = this;
+}
+
+ThemeIconEngine::ThemeIconEngine(const QString& sha, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme) :
+    _sha(sha),
+    _colorRoleLightTheme(colorRoleLightTheme),
+    _colorRoleDarkTheme(colorRoleDarkTheme)
 {
 }
 
 ThemeIconEngine::ThemeIconEngine(const ThemeIconEngine& other) :
-    ThemeIconEngine(other._namedIcon)
+    ThemeIconEngine(other._sha, other._colorRoleLightTheme, other._colorRoleDarkTheme)
 {
 }
 
@@ -27,13 +36,15 @@ void ThemeIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mo
 
 QPixmap ThemeIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
-    const auto pixmap = _namedIcon.getPixmap();
+    if (NamedIcon::pixmaps.contains(_sha)) {
+        const auto pixmap = NamedIcon::pixmaps[_sha];
 
-    if (!pixmap.isNull()) {
-        const auto recoloredPixmap  = recolorPixmap(pixmap, qApp->palette().color(QPalette::ColorGroup::Normal, _namedIcon.getColorRoleForCurrentTheme()));
-        const auto recoloredIcon    = QIcon(recoloredPixmap);
+        if (!pixmap.isNull()) {
+            const auto recoloredPixmap = recolorPixmap(pixmap, qApp->palette().color(QPalette::ColorGroup::Normal, getColorRoleForCurrentTheme()));
+            const auto recoloredIcon = QIcon(recoloredPixmap);
 
-        return recoloredIcon.pixmap(size, mode, state);
+            return recoloredIcon.pixmap(size, mode, state);
+        }
     }
 
 	return {};
@@ -55,6 +66,20 @@ QPixmap ThemeIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& colo
     painter.end();
 
     return { QPixmap::fromImage(image) };
+}
+
+bool ThemeIconEngine::isDarkTheme()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    return QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+    return QApplication::palette().color(QPalette::Window).lightness() < 128;
+#endif
+}
+
+QPalette::ColorRole ThemeIconEngine::getColorRoleForCurrentTheme() const
+{
+    return isDarkTheme() ? _colorRoleDarkTheme : _colorRoleLightTheme;
 }
 
 }
