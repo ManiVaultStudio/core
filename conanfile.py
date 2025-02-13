@@ -139,7 +139,7 @@ class HdpsCoreConan(ConanFile):
         tc.variables["QT_DIR"] = qt_dir     # for ads
 
         # for Qt < 6.4.2
-        #tc.variables["Qt6_ROOT"] = qt_root
+        tc.variables["Qt6_ROOT"] = qt_root
 
         # for ads, may also be remove with Qt >= 6.4.2 and Qt6_DIR usage
         tc.variables["CMAKE_PREFIX_PATH"] = f"{qt_root}"
