@@ -23,19 +23,17 @@ ThemeIconEngine::ThemeIconEngine(const ThemeIconEngine& other) :
 
 void ThemeIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state)
 {
-    //painter->setRenderHint(QPainter::Antialiasing, true);
-    //painter->drawPixmap(rect, _namedIcon.getIconPixmap(qApp->palette().text().color()));
 }
 
 QPixmap ThemeIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
-    if (const auto pixmap = _namedIcon.getIconPixmap()) {
-        const auto recoloredPixmap = recolorPixmap(*pixmap, qApp->palette().text().color());
+    const auto pixmap = _namedIcon.getPixmap();
 
-        if (recoloredPixmap.isNull())
-            return {};
+    if (!pixmap.isNull()) {
+        const auto recoloredPixmap  = recolorPixmap(pixmap, qApp->palette().color(QPalette::ColorGroup::Normal, _namedIcon.getColorRoleForCurrentTheme()));
+        const auto recoloredIcon    = QIcon(recoloredPixmap);
 
-        return recoloredPixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        return recoloredIcon.pixmap(size, mode, state);
     }
 
 	return {};

@@ -20,18 +20,19 @@ using namespace mv::gui;
 namespace mv::util
 {
 
-QMap<QString, QVariantMap> NamedIcon::fontMetadata = {};
-QMap<QString, QFont> NamedIcon::fonts = {};
-QString NamedIcon::defaultIconFontName = "FontAwesomeSolid";
-Version NamedIcon::defaultIconFontVersion = { 5, 14 };
-QMap<QString, QPixmap> NamedIcon::pixmaps = {};
+QMap<QString, QVariantMap>  NamedIcon::fontMetadata             = {};
+QMap<QString, QFont>        NamedIcon::fonts                    = {};
+QString                     NamedIcon::defaultIconFontName      = "FontAwesomeSolid";
+Version                     NamedIcon::defaultIconFontVersion   = { 5, 14 };
+QMap<QString, QPixmap>      NamedIcon::pixmaps                  = {};
 
 NamedIcon::NamedIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/, QWidget* parent /*= nullptr*/) :
     QObject(parent),
-    QIcon(new ThemeIconEngine(*this))
+    QIcon(new ThemeIconEngine(*this)),
+    _colorRoleLightTheme(QPalette::Text),
+    _colorRoleDarkTheme(QPalette::Window)
 {
     connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, &NamedIcon::updateIcon);
-    //connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, &NamedIcon::updateIcon);
 
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
         set(iconName, iconFontName, iconFontVersion);
@@ -101,12 +102,12 @@ void NamedIcon::set(const QString& iconName, const QString& iconFontName, const 
 	}
 }
 
-QPixmap* NamedIcon::getIconPixmap(const QColor& foregroundColor) const
+QPixmap NamedIcon::getPixmap() const
 {
     if (!pixmaps.contains(_sha))
-        return nullptr;
+        return {};
 
-    return &pixmaps[_sha];
+    return pixmaps[_sha];
 }
 
 NamedIcon NamedIcon::fromFontAwesomeRegular(const QString& iconName, const Version& version /*= { 6, 5 }*/)
@@ -250,6 +251,31 @@ QString NamedIcon::getIconFontVersionString(const Version& iconFontVersion)
     return QString("%1.%2").arg(QString::number(iconFontVersion.getMajor()), QString::number(iconFontVersion.getMinor()));
 }
 
+QPalette::ColorRole NamedIcon::getColorRoleLightTheme() const
+{
+    return _colorRoleLightTheme;
+}
+
+void NamedIcon::setColorRoleLightTheme(const QPalette::ColorRole& colorRoleLightTheme)
+{
+    _colorRoleLightTheme = colorRoleLightTheme;
+}
+
+QPalette::ColorRole NamedIcon::getColorRoleDarkTheme() const
+{
+    return _colorRoleDarkTheme;
+}
+
+void NamedIcon::setColorRoleDarkTheme(const QPalette::ColorRole& colorRoleDarkTheme)
+{
+    _colorRoleDarkTheme = colorRoleDarkTheme;
+}
+
+QPalette::ColorRole NamedIcon::getColorRoleForCurrentTheme() const
+{
+    return isDarkTheme() ? _colorRoleDarkTheme : _colorRoleLightTheme;
+}
+
 QString NamedIcon::getIconFontResourceName(const QString& iconFontName, const Version& iconFontVersion)
 {
     return QString("%1-%2").arg(iconFontName, getIconFontVersionString(iconFontVersion));
@@ -290,6 +316,15 @@ QString NamedIcon::generateSha(const QString& iconName, const QString& iconFontN
 	const auto hash     = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha256);
 
 	return hash.toHex();
+}
+
+bool NamedIcon::isDarkTheme()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        return QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+	return QApplication::palette().color(QPalette::Window).lightness() < 128;
+#endif
 }
 
 }

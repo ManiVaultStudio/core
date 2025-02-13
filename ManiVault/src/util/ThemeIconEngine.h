@@ -6,8 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "ThemeWatcher.h"
-
 #include <QIconEngine>
 #include <QObject>
 
@@ -28,12 +26,44 @@ class CORE_EXPORT ThemeIconEngine : public QObject, public QIconEngine
     Q_OBJECT
 
 public:
+
+    /**
+     * Construct from \p namedIcon
+     * @param namedIcon Reference to named icon
+     */
     ThemeIconEngine(NamedIcon& namedIcon);
+
+    /**
+     * Copy construct from \p other
+     * @param other Other theme icon engine to copy from
+     */
     ThemeIconEngine(const ThemeIconEngine& other);
+
+    /** No need for custom destructor */
     ~ThemeIconEngine() override = default;
 
+    /**
+     * Paint the icon
+     * @param painter Pointer to painter
+     * @param rect Rectangle to paint
+     * @param mode Mode of the icon
+     * @param state State of the icon
+     */
     void paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state) override;
+
+    /**
+     * Get pixmap
+     * @param size Size of the pixmap
+     * @param mode Mode of the icon
+     * @param state State of the icon
+     * @return Pixmap
+     */
     QPixmap pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state) override;
+
+    /**
+     * Clone the theme icon engine
+     * @return Pointer to cloned theme icon engine
+     */
     QIconEngine* clone() const override;
 
 private:

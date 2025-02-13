@@ -258,8 +258,8 @@ signals:
 protected:
     QString             _string;                /** Current string */
     QString             _placeholderString;     /** Place holder string */
-    QAction             _leadingAction;         /** Action at the leading position */
-    QAction             _trailingAction;        /** Action at the trailing position */
+    QWidgetAction       _leadingAction;         /** Action at the leading position */
+    QWidgetAction       _trailingAction;        /** Action at the trailing position */
     QCompleter*         _completer;             /** Pointer to completer */
     bool                _searchMode;            /** Whether the string action is in search mode */
     bool                _clearable;             /** Whether the string can be cleared by clicking the trailing action */
