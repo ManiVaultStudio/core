@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 set(SAMPLE_CONTEXT_PLUGIN "SampleScopePlugin")
 PROJECT(${SAMPLE_CONTEXT_PLUGIN})

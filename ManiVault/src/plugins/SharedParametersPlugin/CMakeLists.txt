@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 set(SHARED_PARAMETERS_PLUGIN "SharedParametersPlugin")
 PROJECT(${SHARED_PARAMETERS_PLUGIN})

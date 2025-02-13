@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 set(TUTORIAL_PLUGIN "TutorialPlugin")
 PROJECT(${TUTORIAL_PLUGIN})
