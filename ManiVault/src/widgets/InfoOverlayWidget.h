@@ -38,10 +38,8 @@ public:
      * @param icon Icon
      * @param title Title of the overlay
      * @param description Overlay description
-     * @param foregroundColor Foreground color
-     * @param backgroundColor Background color
      */
-    InfoOverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description = "", const QColor foregroundColor = Qt::black, const QColor backgroundColor = Qt::lightGray);
+    InfoOverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description = "");
 
     /**
      * Get widget fader
