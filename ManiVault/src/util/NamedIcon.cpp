@@ -34,8 +34,6 @@ NamedIcon::NamedIcon(const QString& iconName /*= ""*/, const QString& iconFontNa
 
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
         set(iconName, iconFontName, iconFontVersion);
-
-    emit requestIconEngineInitialize();
 }
 
 NamedIcon::NamedIcon(const NamedIcon& other) :
