@@ -49,7 +49,7 @@ public:
     explicit NamedIcon(const QIcon& icon);
 
     /**
-     * Overload assignment operator
+     * Assign \p other named icon
      * @param other Other named icon to assign from
      * @return Copied result
      */
@@ -63,7 +63,7 @@ public:
     }
 
     /**
-     * Overload assignment operator
+     * Assign \p other QIcon
      * @param other Other named icon to assign from
      * @return Copied result
      */
