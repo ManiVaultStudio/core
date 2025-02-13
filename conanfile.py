@@ -102,7 +102,8 @@ class HdpsCoreConan(ConanFile):
                 "libfontconfig1-dev",
                 "libxtst-dev",
                 "libasound2-dev",
-                "libdbus-1-dev"
+                "libdbus-1-dev",
+                "libcups2-dev "
                 ]
             
             installer = tools.SystemPackageTool()
