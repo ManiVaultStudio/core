@@ -47,7 +47,7 @@ target_sources(${COLORDATA} PRIVATE ${COLORDATA_MOC})
 
 target_include_directories(${COLORDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${COLORDATA} PRIVATE cxx_std_17)
+target_compile_features(${COLORDATA} PRIVATE cxx_std_20)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)

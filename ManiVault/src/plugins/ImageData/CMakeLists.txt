@@ -62,7 +62,7 @@ target_sources(${IMAGEDATA} PRIVATE ${IMAGEDATA_MOC})
 
 target_include_directories(${IMAGEDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${IMAGEDATA} PRIVATE cxx_std_17)
+target_compile_features(${IMAGEDATA} PRIVATE cxx_std_20)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)

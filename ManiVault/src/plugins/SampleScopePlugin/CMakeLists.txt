@@ -57,7 +57,7 @@ target_sources(${SAMPLE_CONTEXT_PLUGIN} PRIVATE ${DATAPROPERTIES_MOC})
 
 target_include_directories(${SAMPLE_CONTEXT_PLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${SAMPLE_CONTEXT_PLUGIN} PRIVATE cxx_std_17)
+target_compile_features(${SAMPLE_CONTEXT_PLUGIN} PRIVATE cxx_std_20)
 
 target_link_libraries(${SAMPLE_CONTEXT_PLUGIN} PRIVATE Qt6::Core)
 target_link_libraries(${SAMPLE_CONTEXT_PLUGIN} PRIVATE Qt6::Widgets)

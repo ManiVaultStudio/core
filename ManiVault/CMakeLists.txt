@@ -20,7 +20,7 @@ message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
 # -----------------------------------------------------------------------------
 # CMake Settings
 # -----------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -200,7 +200,7 @@ target_sources(${MV_PUBLIC_LIB}
 
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
+target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_20)
 
 target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
 
@@ -249,7 +249,7 @@ target_include_directories(${MV_EXE} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
 )
 
-target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
+target_compile_features(${MV_EXE} PRIVATE cxx_std_20)
 
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)

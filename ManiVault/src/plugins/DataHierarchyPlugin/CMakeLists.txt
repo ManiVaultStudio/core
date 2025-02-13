@@ -70,7 +70,7 @@ target_sources(${DATAHIERARCHYPLUGIN} PRIVATE ${DATAHIERARCHY_MOC})
 
 target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_17)
+target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_20)
 
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)

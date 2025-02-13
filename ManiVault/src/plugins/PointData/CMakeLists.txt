@@ -117,7 +117,7 @@ target_sources(${POINTDATA} PRIVATE ${POINTDATA_MOC})
 target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
 
-target_compile_features(${POINTDATA} PRIVATE cxx_std_17)
+target_compile_features(${POINTDATA} PRIVATE cxx_std_20)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)

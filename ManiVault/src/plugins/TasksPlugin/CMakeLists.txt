@@ -52,7 +52,7 @@ target_sources(${TASKS_PLUGIN} PRIVATE ${TASKS_MOC})
 
 target_include_directories(${TASKS_PLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include")
 
-target_compile_features(${TASKS_PLUGIN} PRIVATE cxx_std_17)
+target_compile_features(${TASKS_PLUGIN} PRIVATE cxx_std_20)
 
 target_link_libraries(${TASKS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${TASKS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
