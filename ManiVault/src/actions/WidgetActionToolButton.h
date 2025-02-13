@@ -10,6 +10,7 @@
 #include "WidgetActionToolButtonMenu.h"
 
 #include <QToolButton>
+#include <QPushButton>
 
 namespace mv::gui {
 
@@ -132,6 +133,9 @@ private:
     bool                            _showIndicator;                 /** Whether to show the indicator or not */
     Qt::Alignment                   _indicatorAlignment;            /** Alignment of the indicator */
     WidgetActionToolButtonMenu      _menu;                          /** Menu with custom action content */
+       
+    /** Work around improper QToolButton sizing issue */
+    static QPushButton* sizeHintPushButton;
 };
 
 }
