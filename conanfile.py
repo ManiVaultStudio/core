@@ -92,6 +92,8 @@ class HdpsCoreConan(ConanFile):
                 "mesa-common-dev", 
                 "libgl1-mesa-dev",
                 "libxcomposite-dev",
+                "libxkbcommon-dev",
+                "libxkbcommon-x11-dev",
                 "libxcursor-dev",
                 "libxi-dev",
                 "libnss3-dev",
