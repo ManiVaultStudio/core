@@ -60,6 +60,17 @@ public:
 
         return *this;
     }
+
+    /**
+     * Overload assignment operator
+     * @param other Other named icon to assign from
+     * @return Copied result
+     */
+    NamedIcon& operator=(const QIcon& other) {
+        *this = NamedIcon(other);
+
+        return *this;
+    }
     
     /**
      * Configure the named icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion

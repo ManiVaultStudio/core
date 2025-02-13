@@ -171,8 +171,6 @@ void InfoWidget::updateStyling()
         "{"
 			"color: %2;"
         "}").arg(backgroundColor.name(), foregroundColor.name()));
-
-    //_iconLabel.setPixmap(QPixmap::fromImage(tmp));
 }
 
 }
