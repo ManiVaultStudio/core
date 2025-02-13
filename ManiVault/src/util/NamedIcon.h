@@ -236,8 +236,6 @@ signals:
     /** Signals that the NamedIcon::_iconName and/or NamedIcon::_iconFontName and/or NamedIcon::_iconFontVersion changed */
     void changed();
 
-    void requestIconEngineInitialize();
-
 private:
     ThemeIconEngine*    _iconEngine;                /** Icon engine */
 	QString             _iconName;                  /** Name of the icon */
