@@ -30,7 +30,7 @@ NamedIcon::NamedIcon(const QString& iconName /*= ""*/, const QString& iconFontNa
     QObject(parent),
     QIcon(new ThemeIconEngine(*this)),
     _colorRoleLightTheme(QPalette::Text),
-    _colorRoleDarkTheme(QPalette::Window)
+    _colorRoleDarkTheme(QPalette::Text)
 {
     connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, &NamedIcon::updateIcon);
 
