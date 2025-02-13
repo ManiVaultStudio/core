@@ -24,7 +24,7 @@ jobs:
     steps:
     - name: Get matrix from file
       id: matrix_setup
-      uses: ManiVaultStudio/github-actions/matrix_setup@CIUpdate022025
+      uses: ManiVaultStudio/github-actions/matrix_setup@feature/CIUpdate022025
       with:
         matrix_ids : 'windows_2022 linux_gcc13 macos_code14 macos_code15'
 
