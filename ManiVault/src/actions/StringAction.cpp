@@ -5,8 +5,11 @@
 #include "StringAction.h"
 #include "Application.h"
 
+#include "util/NamedIcon.h"
+
 #include <QHBoxLayout>
 #include <QCompleter>
+#include <QToolButton>
 
 using namespace mv::util;
 
@@ -14,10 +17,8 @@ namespace mv::gui {
 
 StringAction::StringAction(QObject* parent, const QString& title, const QString& string /*= ""*/) :
     WidgetAction(parent, title),
-    _string(),
-    _placeholderString(),
-    _leadingAction(),
-    _trailingAction(),
+    _leadingAction(this),
+    _trailingAction(this),
     _completer(nullptr),
     _searchMode(false),
     _clearable(false),
@@ -29,6 +30,14 @@ StringAction::StringAction(QObject* parent, const QString& title, const QString&
 
     _leadingAction.setVisible(false);
     _trailingAction.setVisible(false);
+
+    auto button = new QToolButton();
+
+    button->setIcon(NamedIcon("search"));
+    button->setIconSize(QSize(12, 12));
+    button->setStyleSheet("border: none;");
+
+    //_leadingAction.setDefaultWidget(button);
 }
 
 QString StringAction::getString() const
@@ -95,7 +104,6 @@ void StringAction::setSearchMode(bool searchMode)
     _searchMode = searchMode;
 
     _leadingAction.setVisible(_searchMode);
-    _leadingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
     
     setClearable(searchMode);
 }

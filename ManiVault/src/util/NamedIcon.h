@@ -82,11 +82,10 @@ public:
     void set(const QString& iconName, const QString& iconFontName = defaultIconFontName, const util::Version& iconFontVersion = defaultIconFontVersion);
 
     /**
-     * Get icon pixmap
-     * @param foregroundColor Foreground color
-     * @return Pointer to pixmap (maybe nullptr)
+     * Get pixmap
+     * @return Pixmap
      */
-    QPixmap* getIconPixmap(const QColor& foregroundColor = QColor(0, 0, 0, 0)) const;
+    QPixmap getPixmap() const;
 
     /**
      * Create icon with \p iconName from \p version of Font Awesome regular
@@ -161,6 +160,38 @@ public:
      */
     static QString getIconFontVersionString(const Version& version);
 
+public: // Color roles
+
+    /**
+     * Get color role for light theme
+     * @return Color role for light theme
+     */
+    QPalette::ColorRole getColorRoleLightTheme() const;
+
+    /**
+     * Set color role for light theme to \p colorRoleLightTheme
+     * @param colorRoleLightTheme Color role for light theme
+     */
+    void setColorRoleLightTheme(const QPalette::ColorRole& colorRoleLightTheme);
+
+    /**
+     * Get color role for dark theme
+     * @return Color role for dark theme
+     */
+    QPalette::ColorRole getColorRoleDarkTheme() const;
+
+    /**
+     * Set color role for dark theme to \p colorRoleDarkTheme
+     * @param colorRoleDarkTheme Color role for dark theme
+     */
+    void setColorRoleDarkTheme(const QPalette::ColorRole& colorRoleDarkTheme);
+
+    /**
+     * Get color role for current theme
+     * @return Color role for current theme
+     */
+    QPalette::ColorRole getColorRoleForCurrentTheme() const;
+
 private:
 
     /** Only allow named icon construction */
@@ -177,6 +208,12 @@ private:
      * @return SHA
      */
     static QString generateSha(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion);
+
+    /**
+     * Get whether the current theme is dark
+     * @return Boolean determining whether the current theme is dark
+     */
+    static bool isDarkTheme();
 
 signals:
 
@@ -205,11 +242,13 @@ signals:
     void changed();
 
 private:
-    QString         _iconName;          /** Name of the icon */
-    QString         _iconFontName;      /** Name of the icon font */
-    Version         _iconFontVersion;   /** Version of the icon font */
-    QString         _sha;               /** NamedIcons::icons key */
-    ThemeWatcher    _themeWatcher;      /** Use our own theme watcher (which does not emit paletteChanged(...) needlessly) */
+    QString                 _iconName;                  /** Name of the icon */
+    QString                 _iconFontName;              /** Name of the icon font */
+    Version                 _iconFontVersion;           /** Version of the icon font */
+    QString                 _sha;                       /** NamedIcons::icons key */
+    ThemeWatcher            _themeWatcher;              /** Use our own theme watcher (which does not emit paletteChanged(...) needlessly) */
+    QPalette::ColorRole     _colorRoleLightTheme;       /** Color role for light theme */
+    QPalette::ColorRole     _colorRoleDarkTheme;        /** Color role for dark theme */
 
 protected:
 	static QMap<QString, QVariantMap>   fontMetadata;               /** Font-specific metadata */
