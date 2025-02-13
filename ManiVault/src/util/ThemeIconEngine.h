@@ -37,6 +37,16 @@ public:
     QIconEngine* clone() const override;
 
 private:
+
+    /**
+     * Re-color \p pixmap with \p color
+     * @param pixmap Pixmap to re-color
+     * @param color New color
+     * @return Re-colored pixmap
+     */
+    static QPixmap recolorPixmap(const QPixmap& pixmap, const QColor& color);
+
+private:
     NamedIcon&   _namedIcon;    /** Reference to named icon */
 };
 

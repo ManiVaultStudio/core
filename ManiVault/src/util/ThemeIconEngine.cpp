@@ -6,12 +6,12 @@
 #include "NamedIcon.h"
 
 #include <QDebug>
+#include <QPainter>
 
 namespace mv::util
 {
 
 ThemeIconEngine::ThemeIconEngine(NamedIcon& namedIcon) :
-    QIconEngine(),
     _namedIcon(namedIcon)
 {
 }
@@ -23,23 +23,40 @@ ThemeIconEngine::ThemeIconEngine(const ThemeIconEngine& other) :
 
 void ThemeIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state)
 {
-    painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->drawPixmap(rect, _namedIcon.getIconPixmap(qApp->palette().text().color()));
+    //painter->setRenderHint(QPainter::Antialiasing, true);
+    //painter->drawPixmap(rect, _namedIcon.getIconPixmap(qApp->palette().text().color()));
 }
 
 QPixmap ThemeIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
-    const auto pixmap = _namedIcon.getIconPixmap(qApp->palette().text().color());
+    if (const auto pixmap = _namedIcon.getIconPixmap()) {
+        const auto recoloredPixmap = recolorPixmap(*pixmap, qApp->palette().text().color());
 
-    if (pixmap.isNull())
-        return {};
-    
-    return pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        if (recoloredPixmap.isNull())
+            return {};
+
+        return recoloredPixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+
+	return {};
 }
 
 QIconEngine* ThemeIconEngine::clone() const
 {
     return new ThemeIconEngine(*this);
+}
+
+QPixmap ThemeIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& color)
+{
+    auto image = pixmap.toImage();
+
+    QPainter painter(&image);
+
+    painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
+    painter.fillRect(image.rect(), color);
+    painter.end();
+
+    return { QPixmap::fromImage(image) };
 }
 
 }
