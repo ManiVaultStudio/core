@@ -11,6 +11,8 @@
     #define INFO_WIDGET_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv::gui
 {
 
@@ -155,6 +157,8 @@ void InfoWidget::initialize()
     layout->addStretch(1);
 
     setLayout(layout);
+
+    connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, &InfoWidget::updateStyling);
 }
 
 void InfoWidget::updateStyling()

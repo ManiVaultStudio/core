@@ -57,6 +57,7 @@ public:
         _iconName           = other._iconName;
         _iconFontName       = other._iconFontName;
         _iconFontVersion    = other._iconFontVersion;
+        _sha                = other._sha;
 
         return *this;
     }
