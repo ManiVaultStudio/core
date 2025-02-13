@@ -5,6 +5,7 @@
 #pragma once
 
 #include <util/Serializable.h>
+#include <util/ThemeWatcher.h>
 
 #include <DockWidget.h>
 
@@ -65,13 +66,6 @@ public:
      */
     void setWidget(QWidget* widget, eInsertMode insertMode = AutoScrollArea);
 
-protected:
-    /**
-     * Override QObject's event handling
-     * @return Boolean Whether the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
-
 public: // Serialization
 
     /**
@@ -85,15 +79,11 @@ public: // Serialization
      * @return Variant representation of the widget action
      */
     QVariantMap toVariantMap() const override;
-    
-public: // Themes
-    
-    /** refresh the widget and its children according to new style */
-    void updateStyle() const;
 
 private:
-    QToolButton*    _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
-    QMenu           _settingsMenu;          /** Settings menu for settings tool button */
+    QToolButton*            _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
+    QMenu                   _settingsMenu;          /** Settings menu for settings tool button */
+    mv::util::ThemeWatcher  _themeWatcher;          /** Theme watcher */
 };
 
 using DockWidgets = QVector<DockWidget*>;
