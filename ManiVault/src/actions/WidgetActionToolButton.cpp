@@ -12,6 +12,8 @@
 
 namespace mv::gui {
 
+QPushButton* WidgetActionToolButton::sizeHintPushButton = nullptr;
+
 WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* action) :
     QToolButton(parent),
     _action(nullptr),
@@ -21,8 +23,21 @@ WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* ac
 {
     initialize(action);
     
+    if (!WidgetActionToolButton::sizeHintPushButton) {
+        WidgetActionToolButton::sizeHintPushButton = new QPushButton(" ");
+        sizeHintPushButton->ensurePolished();
+    }
+    
+    const auto heightHint = WidgetActionToolButton::sizeHintPushButton->sizeHint().height();
+    
+    setMinimumSize(QSize(heightHint, heightHint));
+    
 #ifdef __APPLE__
     setIconSize(QSize(12, 12));
+           
+    // This is a work-around to prevent sizing issues with tool buttons that have only an icon
+    //setText(" ");
+    
 #endif
 }
 
