@@ -49,11 +49,27 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
         setEnabled(triggerAction->isEnabled());
 
-        if (widgetFlags & WidgetFlag::Text)
+        if (widgetFlags & WidgetFlag::Text) {
             setText(triggerAction->text());
-
-        if (widgetFlags & WidgetFlag::Icon)
+            
+#ifdef __APPLE__
+            
+            // This is a work-around to prevent sizing issues with pushbuttons that have only an icon
+            if (triggerAction->text().isEmpty())
+                setText(" ");
+#endif
+        }
+        
+        if (widgetFlags & WidgetFlag::Icon) {
             setIcon(triggerAction->icon());
+            
+#ifdef __APPLE__
+            
+            // This is a work-around to prevent sizing issues with pushbuttons that have only an icon
+            if ((widgetFlags & WidgetFlag::Text) == 0)
+                setText(" ");
+#endif
+        }
 
         setToolTip(triggerAction->toolTip());
         setVisible(triggerAction->isVisible());
