@@ -7,6 +7,7 @@
 
 #include "Application.h"
 #include "Icon.h"
+#include "Serializable.h"
 
 #include <QDebug>
 #include <QFontDatabase>
@@ -39,6 +40,16 @@ NamedIcon::NamedIcon(const QString& iconName /*= ""*/, const QString& iconFontNa
 NamedIcon::NamedIcon(const NamedIcon& other) :
     NamedIcon(other._iconName, other._iconFontName, other._iconFontVersion)
 {
+}
+
+NamedIcon::NamedIcon(const QIcon& icon) :
+    NamedIcon()
+{
+    if (!icon.isNull()) {
+        _sha = Serializable::createId();
+
+        pixmaps[_sha] = icon.pixmap(64, 64);
+    }
 }
 
 void NamedIcon::set(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)
@@ -197,11 +208,6 @@ QPixmap NamedIcon::createIconPixmap(const QString& iconName, const QString& icon
         pixmap.fill(backgroundColor);
 
         const auto iconText = getIconCharacter(iconName, iconFontName, iconFontVersion);
-
-        QColor fontColor = foregroundColor;
-
-        //if (fontColor == QColor(0, 0, 0, 0))
-        //    fontColor = qApp->palette().text().color();
 
         QPainter painter(&pixmap);
 

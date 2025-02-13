@@ -43,6 +43,12 @@ public:
     explicit NamedIcon(const NamedIcon& other);
 
     /**
+     * Construct from \p icon
+     * @param icon Icon to initialize from
+     */
+    explicit NamedIcon(const QIcon& icon);
+
+    /**
      * Overload assignment operator
      * @param other Other named icon to assign from
      * @return Copied result
