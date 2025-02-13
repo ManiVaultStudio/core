@@ -6,6 +6,8 @@
 
 #include <Application.h>
 
+#include <util/NamedIcon.h>
+
 #include <DockWidgetTab.h>
 
 #include <QBoxLayout>
@@ -39,7 +41,13 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     _settingsToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
     _settingsToolButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
+    const auto updateStyle = [this]() -> void {
+        _settingsToolButton->setIcon(NamedIcon("bars"));
+    };
+    
     updateStyle();
+    
+    connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, updateStyle);
 
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertSpacing(1, 5);
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertWidget(2, _settingsToolButton, Qt::AlignCenter);
@@ -50,14 +58,6 @@ DockWidget::~DockWidget()
 #ifdef DOCK_WIDGET_VERBOSE
     qDebug() << __FUNCTION__ << getSerializationName();
 #endif
-}
-
-bool DockWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateStyle();
-
-    return ads::CDockWidget::event(event);
 }
 
 QString DockWidget::getTypeString() const
@@ -101,9 +101,4 @@ QVariantMap DockWidget::toVariantMap() const
     });
 
     return variantMap;
-}
-
-void DockWidget::updateStyle() const
-{
-    _settingsToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
 }
