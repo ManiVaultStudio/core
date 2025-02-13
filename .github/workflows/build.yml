@@ -79,7 +79,7 @@ jobs:
 
       - name: Windows build
         if: startsWith(runner.os, 'Windows')
-        uses: ManiVaultStudio/github-actions/conan_windows_build@main
+        uses: ManiVaultStudio/github-actions/conan_windows_build@feature/PrepareCIUpdate022025
         with:
           conan-visual-version: ${{matrix.build-cversion}}
           conan-visual-runtime: ${{matrix.build-runtime}}
@@ -91,7 +91,7 @@ jobs:
 
       - name: Linux build
         if: startsWith(matrix.os, 'ubuntu')
-        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@main
+        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@feature/PrepareCIUpdate022025
         with:
           conan-compiler: ${{matrix.build-compiler}}
           conan-cc: ${{matrix.build-cc}}
@@ -100,13 +100,14 @@ jobs:
           conan-libcxx-version: ${{matrix.build-libcxx}}
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
+          build-arch: ${{matrix.build-arch}}
           conan-user: ${{secrets.LKEB_UPLOAD_USER}}
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
           
       - name: Mac build
         if: startsWith(matrix.os, 'macos')
-        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@main
+        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@feature/PrepareCIUpdate022025
         with:
           conan-compiler: ${{matrix.build-compiler}}
           conan-cc: ${{matrix.build-cc}}
@@ -115,6 +116,7 @@ jobs:
           conan-libcxx-version: ${{matrix.build-libcxx}}
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
+          build-arch: ${{matrix.build-arch}}
           conan-user: ${{secrets.LKEB_UPLOAD_USER}}
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
