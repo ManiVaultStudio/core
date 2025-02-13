@@ -10,6 +10,8 @@
 #include <Application.h>
 #include <CoreInterface.h>
 
+#include <util/NamedIcon.h>
+
 #include <QToolButton>
 
 using namespace ads;
@@ -90,18 +92,11 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
 
     updateReadOnly();
 
+    const auto updateStyle = [this]() -> void {
+        _addViewPluginToolButton->setIcon(NamedIcon("plus"));
+	};
+
     updateStyle();
-}
 
-void DockAreaTitleBar::updateStyle()
-{
-    _addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
-}
-
-bool DockAreaTitleBar::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateStyle();
-
-    return ads::CDockAreaTitleBar::event(event);
+    connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, updateStyle);
 }
