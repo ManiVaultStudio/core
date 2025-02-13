@@ -7,6 +7,7 @@
 #include "ManiVaultGlobals.h"
 #include "Version.h"
 #include "ThemeWatcher.h"
+#include "ThemeIconEngine.h"
 
 #include <QIcon>
 #include <QObject>
@@ -57,7 +58,6 @@ public:
         _iconName           = other._iconName;
         _iconFontName       = other._iconFontName;
         _iconFontVersion    = other._iconFontVersion;
-        _sha                = other._sha;
 
         return *this;
     }
@@ -172,7 +172,7 @@ public: // Color roles
      * Set color role for light theme to \p colorRoleLightTheme
      * @param colorRoleLightTheme Color role for light theme
      */
-    void setColorRoleLightTheme(const QPalette::ColorRole& colorRoleLightTheme);
+    void setColorRoleLightTheme(const QPalette::ColorRole& colorRoleLightTheme) const;
 
     /**
      * Get color role for dark theme
@@ -184,13 +184,7 @@ public: // Color roles
      * Set color role for dark theme to \p colorRoleDarkTheme
      * @param colorRoleDarkTheme Color role for dark theme
      */
-    void setColorRoleDarkTheme(const QPalette::ColorRole& colorRoleDarkTheme);
-
-    /**
-     * Get color role for current theme
-     * @return Color role for current theme
-     */
-    QPalette::ColorRole getColorRoleForCurrentTheme() const;
+    void setColorRoleDarkTheme(const QPalette::ColorRole& colorRoleDarkTheme) const;
 
 private:
 
@@ -208,12 +202,6 @@ private:
      * @return SHA
      */
     static QString generateSha(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion);
-
-    /**
-     * Get whether the current theme is dark
-     * @return Boolean determining whether the current theme is dark
-     */
-    static bool isDarkTheme();
 
 signals:
 
@@ -238,17 +226,24 @@ signals:
      */
     void iconFontVersionChanged(const Version& previousIconFontVersion, const Version& currentIconFontVersion);
 
+    /**
+     * Signals that the sha changed from \p previousSha to \p currentSha
+     * @param previousSha Previous sha
+     * @param currentSha Current sha
+     */
+    void shaChanged(const QString& previousSha, const QString& currentSha);
+
     /** Signals that the NamedIcon::_iconName and/or NamedIcon::_iconFontName and/or NamedIcon::_iconFontVersion changed */
     void changed();
 
+    void requestIconEngineInitialize();
+
 private:
-    QString                 _iconName;                  /** Name of the icon */
-    QString                 _iconFontName;              /** Name of the icon font */
-    Version                 _iconFontVersion;           /** Version of the icon font */
-    QString                 _sha;                       /** NamedIcons::icons key */
-    ThemeWatcher            _themeWatcher;              /** Use our own theme watcher (which does not emit paletteChanged(...) needlessly) */
-    QPalette::ColorRole     _colorRoleLightTheme;       /** Color role for light theme */
-    QPalette::ColorRole     _colorRoleDarkTheme;        /** Color role for dark theme */
+    ThemeIconEngine*    _iconEngine;                /** Icon engine */
+	QString             _iconName;                  /** Name of the icon */
+    QString             _iconFontName;              /** Name of the icon font */
+    Version             _iconFontVersion;           /** Version of the icon font */
+    ThemeWatcher        _themeWatcher;              /** Use our own theme watcher (which does not emit paletteChanged(...) needlessly) */
 
 protected:
 	static QMap<QString, QVariantMap>   fontMetadata;               /** Font-specific metadata */
@@ -256,6 +251,8 @@ protected:
     static QString                      defaultIconFontName;        /** Default icon font name */
     static Version                      defaultIconFontVersion;     /** Default icon font version */
     static QMap<QString, QPixmap>       pixmaps;                    /** All pixmaps for icons */
+
+    friend class ThemeIconEngine;
 };
 
 

@@ -141,7 +141,7 @@ QIcon IconFont::getIcon(const QString& name, const QColor& foregroundColor/*= QC
     catch (std::exception& e)
     {
         QMessageBox::critical(nullptr, "Unable to retrieve icon", e.what());
-        return QIcon();
+        return {};
     }
 }
 
