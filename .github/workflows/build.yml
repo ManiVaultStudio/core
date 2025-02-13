@@ -66,13 +66,6 @@ jobs:
         with:
           python-version: "3.11"
 
-      # windows-2016 need the SSHAgentFeature added
-      #- name: Start ssh key agent
-      #  if: matrix.os == 'windows-2019'
-      #  run: |
-      #    choco install --no-progress -my openssh --params '"/SSHAgentFeature"'
-      #    refreshenv
-
       - name: Start ssh key agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
