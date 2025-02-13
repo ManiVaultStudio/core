@@ -146,15 +146,15 @@ CPMAddPackage(
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
-  GIT_TAG           4.3.1
+  GIT_TAG           4.4.0
   OPTIONS "BUILD_EXAMPLES OFF"
 )
 
 if(MV_UNITY_BUILD)
-    set_target_properties(qt6advanceddocking PROPERTIES UNITY_BUILD ON)
+    set_target_properties(qtadvanceddocking-qt6 PROPERTIES UNITY_BUILD ON)
 endif()
 
-set_target_properties(qt6advanceddocking PROPERTIES PROJECT_LABEL "qtadvanceddocking" OUTPUT_NAME "qtadvanceddocking")
+set_target_properties(qtadvanceddocking-qt6 PROPERTIES PROJECT_LABEL "qtadvanceddocking" OUTPUT_NAME "qtadvanceddocking")
 
 # bfloat16 implementation for pre c++23
 CPMAddPackage(
@@ -257,7 +257,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
+target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
@@ -295,7 +295,7 @@ if(APPLE)
     
 endif()
 
-set_target_properties(qt6advanceddocking QuaZip zlib zlibstatic
+set_target_properties(qtadvanceddocking-qt6 QuaZip zlib zlibstatic
     PROPERTIES
     FOLDER CoreDependencies
 )
@@ -358,7 +358,7 @@ if(APPLE)
             if(NOT retval EQUAL 0)
                 message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qt6advanceddocking>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
+            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qtadvanceddocking-qt6>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
         endif()
@@ -526,7 +526,7 @@ if(NOT APPLE)
     # on windows, the DLLs should be placed in the same directory as the executable
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
 endif()
