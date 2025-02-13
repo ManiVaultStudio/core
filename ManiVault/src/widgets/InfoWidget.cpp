@@ -175,6 +175,8 @@ void InfoWidget::updateStyling()
         "{"
 			"color: %2;"
         "}").arg(backgroundColor.name(), foregroundColor.name()));
+
+    _iconLabel.setPixmap(_icon.pixmap(QSize(24, 24)));
 }
 
 }
