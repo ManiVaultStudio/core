@@ -9,7 +9,6 @@
 #include "util/IconFonts.h"
 #include "util/Logger.h"
 #include "util/Version.h"
-#include "util/ThemeWatcher.h"
 
 #include "actions/TriggerAction.h"
 #include "actions/OptionsAction.h"
@@ -263,7 +262,6 @@ protected:
     QTemporaryDir           _temporaryDir;                    /** Directory where application temporary files reside */
     TemporaryDirs           _temporaryDirs;                   /** ManiVault application temporary directories manager */
     QLockFile               _lockFile;                        /** Lock file is used for fail-safe purging of the temporary directory */
-    util::ThemeWatcher      _themeWatcher;                    /** Theme watcher for monitoring theme changes */
 };
 
 }

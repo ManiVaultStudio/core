@@ -3,11 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PageContentWidget.h"
-#include "PageWidget.h"
 
 #include <QLabel>
 #include <QString>
-#include <QEvent>
 
 PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget* parent /*= nullptr*/) :
     QWidget(parent)
@@ -32,15 +30,8 @@ PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget
 
     setLayout(&_mainLayout);
 
-    updateCustomStyle();
-}
-
-bool PageContentWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
+    setBackgroundRole(QPalette::Window);
+    setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
 QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString& tooltip)
@@ -54,7 +45,3 @@ QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString
     return label;
 }
 
-void PageContentWidget::updateCustomStyle()
-{
-    PageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
-}

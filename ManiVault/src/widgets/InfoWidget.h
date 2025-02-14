@@ -6,7 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "util/ThemeWatcher.h"
 #include "util/StyledIcon.h"
 
 #include <QWidget>
@@ -162,7 +161,6 @@ private:
     QColor              _backgroundColor;       /** Background color of the widget */
     std::int32_t        _foregroundColorRole;   /** Color role for foreground elements (InfoWidget::_foregroundColor will be used if zero) */
     std::int32_t        _backgroundColorRole;   /** Color role for background elements (InfoWidget::_backgroundColor will be used if zero) */
-    util::ThemeWatcher  _themeWatcher;          /** Update the styling when the theme changes */
 
     static QColor defaultForegroundColor;
     static QColor defaultBackgroundColor;

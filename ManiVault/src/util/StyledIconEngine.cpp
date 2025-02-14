@@ -69,18 +69,9 @@ QPixmap StyledIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& col
     return { QPixmap::fromImage(image) };
 }
 
-bool StyledIconEngine::isDarkTheme()
-{
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
-#else
-    return QApplication::palette().color(QPalette::Window).lightness() < 128;
-#endif
-}
-
 QPalette::ColorRole StyledIconEngine::getColorRoleForCurrentTheme() const
 {
-    return isDarkTheme() ? _colorRoleDarkTheme : _colorRoleLightTheme;
+    return mv::theme().isDark() ? _colorRoleDarkTheme : _colorRoleLightTheme;
 }
 
 }

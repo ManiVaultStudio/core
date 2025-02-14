@@ -8,6 +8,7 @@
 
 #include "actions/StringAction.h"
 #include "actions/OptionAction.h"
+#include "actions/HorizontalGroupAction.h"
 
 namespace mv::gui
 {
@@ -36,8 +37,9 @@ public: // Action getters
     OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
 
 private:
-    StringAction   _applicationSessionIdAction;    /** String action for the application session Id */
-    OptionAction   _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
+    StringAction            _applicationSessionIdAction;    /** String action for the application session Id */
+    HorizontalGroupAction   _themeGroupAction;              /** Horizontal group action for theme settings */
+    OptionAction            _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
 };
 
 }

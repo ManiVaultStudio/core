@@ -8,6 +8,7 @@
 
 #include <QIconEngine>
 #include <QObject>
+#include <QPalette>
 
 namespace mv::util
 {
@@ -81,12 +82,6 @@ private:
      * @return Re-colored pixmap
      */
     static QPixmap recolorPixmap(const QPixmap& pixmap, const QColor& color);
-
-    /**
-     * Get whether the current theme is dark
-     * @return Boolean determining whether the current theme is dark
-     */
-    static bool isDarkTheme();
 
     /**
      * Get color role for current theme

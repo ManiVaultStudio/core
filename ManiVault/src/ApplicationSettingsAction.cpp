@@ -15,11 +15,14 @@ namespace mv::gui
 ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Application"),
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
+    _themeGroupAction(this, "Theme"),
     _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System")
 {
     _applicationSessionIdAction.setEnabled(false);
 
     addAction(&_applicationSessionIdAction);
+
+    _themeGroupAction.setShowLabels(false);
 
     _appearanceOptionAction.setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
 
@@ -53,16 +56,16 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
 
 #ifdef WIN32
 	#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-	    //connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
-	    //    _dark = scheme == Qt::ColorScheme::Dark;
 
-	    //    emit themeChanged(_dark);
+	    connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) -> void {
+	        addAction(&_themeGroupAction);
 
-	    //    if (_dark)
-	    //        emit themeChangedToDark();
-	    //    else
-	    //        emit themeChangedToLight();
-	    //    });
+	        _themeGroupAction.addAction(&mv::theme().getUseSystemThemeAction());
+	        _themeGroupAction.addAction(&mv::theme().getLightThemeAction());
+	        _themeGroupAction.addAction(&mv::theme().getDarkThemeAction());
+	        _themeGroupAction.addAction(&mv::theme().getCustomThemeAction());
+        });
+
 	#else
 		hide();
 	#endif

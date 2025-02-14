@@ -16,6 +16,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractSettingsManager.h
     src/AbstractTaskManager.h
     src/AbstractHelpManager.h
+    src/AbstractThemeManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_SOURCES
@@ -539,7 +540,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Notifications.h
     src/util/LearningCenterVideo.h
     src/util/LearningCenterTutorial.h
-    src/util/ThemeWatcher.h
     src/util/StyledIcon.h
     src/util/StyledIconEngine.h
 )
@@ -592,7 +592,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Notifications.cpp
     src/util/LearningCenterVideo.cpp
     src/util/LearningCenterTutorial.cpp
-    src/util/ThemeWatcher.cpp
     src/util/StyledIcon.cpp
     src/util/StyledIconEngine.cpp
 )

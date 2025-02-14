@@ -94,15 +94,9 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
             closePersistentEditor(rowIndex);
     });
-    
-}
 
-bool PageActionsWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
+    _hierarchyWidget.getTreeView().setBackgroundRole(QPalette::Window);
+    _hierarchyWidget.getTreeView().setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
 QVBoxLayout& PageActionsWidget::getLayout()
@@ -174,6 +168,7 @@ void PageActionsWidget::updateCustomStyle()
     ");
     
     auto& treeView = _hierarchyWidget.getTreeView();
+
     if (_restyle) {
         styleSheet += QString(" \
             QTreeView { \
@@ -182,7 +177,9 @@ void PageActionsWidget::updateCustomStyle()
         ");
     }
     
-    auto color = QApplication::palette().color(QPalette::Normal, QPalette::Midlight).name();
-    styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
-    treeView.setStyleSheet(styleSheet);
+    auto color = QApplication::palette().color(QPalette::Normal, QPalette::Window).name();
+
+	styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
+
+	treeView.setStyleSheet(styleSheet);
 }

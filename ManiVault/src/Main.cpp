@@ -243,19 +243,15 @@ int main(int argc, char *argv[])
 #ifdef __APPLE__
     application.setStyle(QStyleFactory::create("Fusion"));
 #endif
-    
-#ifdef __APPLE__
-    application.setStyle(QStyleFactory::create("Fusion"));
-#endif
 
 #ifdef _WIN32
-    QFile styleSheetFile(":/styles/default.qss");
+    //QFile styleSheetFile(":/styles/default.qss");
 
-    styleSheetFile.open(QFile::ReadOnly);
+    //styleSheetFile.open(QFile::ReadOnly);
 
-    QString styleSheet = QLatin1String(styleSheetFile.readAll());
+    //QString styleSheet = QLatin1String(styleSheetFile.readAll());
 
-    application.setStyleSheet(styleSheet);
+    //application.setStyleSheet(styleSheet);
 #endif
     
     loadGuiTask.setSubtaskFinished("Apply styles");
