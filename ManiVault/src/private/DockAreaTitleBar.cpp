@@ -91,11 +91,5 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
 
     updateReadOnly();
 
-    const auto updateStyle = [this]() -> void {
-        _addViewPluginToolButton->setIcon(StyledIcon("plus"));
-	};
-
-    updateStyle();
-
-    connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, updateStyle);
+    _addViewPluginToolButton->setIcon(StyledIcon("plus"));
 }

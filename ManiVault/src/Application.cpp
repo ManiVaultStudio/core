@@ -81,32 +81,19 @@ Application::Application(int& argc, char** argv) :
         ModalTask::createHandler(Application::current());
     });
 
-    _currentPalette = palette();
-    
-    
+    connect(&_themeWatcher, &ThemeWatcher::themeChanged, this, [this](bool dark) -> void {
+        for (auto widget : QApplication::allWidgets()) {
+            widget->style()->unpolish(this);
+            widget->style()->polish(this);
+
+            widget->repaint();
+        }
+    });
 }
 
 Application::~Application()
 {
     _core = nullptr;
-}
-
-bool Application::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange) {
-        auto currentPalette = QGuiApplication::palette();
-
-        if (currentPalette != _currentPalette) {
-            emit paletteChanged(_currentPalette);
-
-            _currentPalette = currentPalette;
-            
-            for (auto widget : QApplication::allWidgets())
-				widget->repaint();
-        }
-    }
-
-    return QApplication::event(event);
 }
 
 Application* Application::current()

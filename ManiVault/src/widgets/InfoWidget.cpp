@@ -158,7 +158,7 @@ void InfoWidget::initialize()
 
     setLayout(layout);
 
-    connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, &InfoWidget::updateStyling);
+    connect(&_themeWatcher, &ThemeWatcher::themeChanged, this, &InfoWidget::updateStyling);
 }
 
 void InfoWidget::updateStyling()

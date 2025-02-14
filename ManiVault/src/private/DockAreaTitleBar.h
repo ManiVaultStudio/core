@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <util/ThemeWatcher.h>
-
 #include <DockAreaTitleBar.h>
 
 class ViewMenu;
@@ -32,5 +30,4 @@ private:
     QToolButton*            _addViewPluginToolButton;   /** Tool button which is added to the dock area title bar to add new (system) views */
     ViewMenu*               _viewMenu;                  /** Menu for loading view plugins, which is added as soon as the first dock widget is added (will only be initialized for the view plugins dock manager) */
     LoadSystemViewMenu*     _loadSystemViewMenu;        /** Menu for loading system view plugins, which is added as soon as the first dock widget is added (will only be initialized for the system plugins dock manager) */
-    mv::util::ThemeWatcher  _themeWatcher;              /** Theme watcher */
 };
