@@ -22,38 +22,37 @@ ThemeWatcher::ThemeWatcher(QObject* parent /*= nullptr*/) :
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
-        _dark = scheme == Qt::ColorScheme::Dark;
+        const auto isDark = scheme == Qt::ColorScheme::Dark;
 
-        emit themeChanged(_dark);
+        emit themeChanged(isDark);
 
-    	if (_dark)
+    	if (isDark)
             emit themeChangedToDark();
         else
             emit themeChangedToLight();
 	});
 #else
     connect(Application::current(), &Application::paletteChanged, this, [this](const QPalette& palette) -> void {
-        _dark = QApplication::palette().color(QPalette::Window).lightness() < 128;
+        const auto isDark = ;
 
-        emit themeChanged(_dark);
+        emit themeChanged(isDark);
 
-        if (_dark)
+        if (isDark)
             emit themeChangedToDark();
         else
             emit themeChangedToLight();
     });
 #endif
-    
 }
 
 bool ThemeWatcher::isDark() const
 {
-	return _dark;
+	return QApplication::palette().color(QPalette::Window).lightness() < 128;
 }
 
 bool ThemeWatcher::isLight() const
 {
-	return !_dark;
+	return !isDark();
 }
 
 }
