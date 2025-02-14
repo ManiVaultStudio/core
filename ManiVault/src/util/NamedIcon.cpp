@@ -6,7 +6,6 @@
 #include "ThemeIconEngine.h"
 
 #include "Application.h"
-#include "Icon.h"
 #include "Serializable.h"
 
 #include <QDebug>
@@ -30,7 +29,7 @@ NamedIcon::NamedIcon(const QString& iconName /*= ""*/, const QString& iconFontNa
     QObject(parent),
     QIcon(new ThemeIconEngine(*this))
 {
-    connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, &NamedIcon::updateIcon);
+    connect(&_themeWatcher, &ThemeWatcher::paletteChanged, this, &NamedIcon::updateIconPixmap);
 
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
         set(iconName, iconFontName, iconFontVersion);
@@ -92,20 +91,12 @@ void NamedIcon::set(const QString& iconName, const QString& iconFontName, const 
 	    if (iconNameHasChanged || iconFontNameHasChanged || iconFontVersionHasChanged)
 			emit changed();
 
-	    updateIcon();
+	    updateIconPixmap();
 	}
 	catch (std::exception& e)
 	{
         qWarning() << "Unable to set named icon" << e.what();
 	}
-}
-
-QPixmap NamedIcon::getPixmap() const
-{
-    if (!pixmaps.contains(_iconEngine->_sha))
-        return {};
-
-    return pixmaps[_iconEngine->_sha];
 }
 
 NamedIcon NamedIcon::fromFontAwesomeRegular(const QString& iconName, const Version& version /*= { 6, 5 }*/)
@@ -116,6 +107,15 @@ NamedIcon NamedIcon::fromFontAwesomeRegular(const QString& iconName, const Versi
 NamedIcon NamedIcon::fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version)
 {
     return NamedIcon(iconName, "FontAwesomeBrandsRegular", version);
+}
+
+QPixmap NamedIcon::requestPixmap() const
+{
+    if (!pixmaps.contains(_iconEngine->_sha)) {
+        pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, qApp->palette().text().color());
+    }
+
+    return pixmaps[_iconEngine->_sha];
 }
 
 void NamedIcon::initializeIconFont(const QString& iconFontName, const Version& iconFontVersion)
@@ -289,7 +289,7 @@ QString NamedIcon::getIconFontMetadataResourcePath(const QString& iconFontName, 
     return iconFontMetadataResourcePath;
 }
 
-void NamedIcon::updateIcon() const
+void NamedIcon::updateIconPixmap() const
 {
     try {
         if (pixmaps.contains(_iconEngine->_sha))

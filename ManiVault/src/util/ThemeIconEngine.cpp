@@ -37,14 +37,14 @@ void ThemeIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mo
 QPixmap ThemeIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
     if (NamedIcon::pixmaps.contains(_sha)) {
-        const auto pixmap = NamedIcon::pixmaps[_sha];
+	    const auto pixmap = NamedIcon::pixmaps[_sha];
 
-        if (!pixmap.isNull()) {
-            const auto recoloredPixmap = recolorPixmap(pixmap, qApp->palette().color(QPalette::ColorGroup::Normal, getColorRoleForCurrentTheme()));
-            const auto recoloredIcon = QIcon(recoloredPixmap);
+    	if (!pixmap.isNull()) {
+    		const auto recoloredPixmap  = recolorPixmap(pixmap, qApp->palette().color(QPalette::ColorGroup::Normal, getColorRoleForCurrentTheme()));
+    		const auto recoloredIcon    = QIcon(recoloredPixmap);
 
-            return recoloredIcon.pixmap(size, mode, state);
-        }
+    		return recoloredIcon.pixmap(size, mode, state);
+    	}
     }
 
 	return {};
