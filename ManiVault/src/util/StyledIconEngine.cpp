@@ -9,25 +9,31 @@
 #include <QPainter>
 #include <QStyleHints>
 
+#include "actions/ColorAction.h"
+
 namespace mv::util
 {
 
 StyledIconEngine::StyledIconEngine(StyledIcon& styledIcon) :
-	_colorRoleLightTheme(QPalette::Text),
-	_colorRoleDarkTheme(QPalette::Text)
+    _colorGroupLightTheme(QPalette::ColorGroup::Normal),
+    _colorGroupDarkTheme(QPalette::ColorGroup::Normal),
+	_colorRoleLightTheme(QPalette::ColorRole::Text),
+	_colorRoleDarkTheme(QPalette::ColorRole::Text)
 {
     styledIcon._iconEngine = this;
 }
 
-StyledIconEngine::StyledIconEngine(const QString& sha, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme) :
+StyledIconEngine::StyledIconEngine(const QString& sha, const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme) :
     _sha(sha),
+    _colorGroupLightTheme(colorGroupLightTheme),
+    _colorGroupDarkTheme(colorGroupDarkTheme),
     _colorRoleLightTheme(colorRoleLightTheme),
     _colorRoleDarkTheme(colorRoleDarkTheme)
 {
 }
 
 StyledIconEngine::StyledIconEngine(const StyledIconEngine& other) :
-    StyledIconEngine(other._sha, other._colorRoleLightTheme, other._colorRoleDarkTheme)
+    StyledIconEngine(other._sha, other._colorGroupLightTheme, other._colorGroupDarkTheme, other._colorRoleLightTheme, other._colorRoleDarkTheme)
 {
 }
 
@@ -41,7 +47,7 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 	    const auto pixmap = StyledIcon::pixmaps[_sha];
 
     	if (!pixmap.isNull()) {
-    		const auto recoloredPixmap  = recolorPixmap(pixmap, qApp->palette().color(QPalette::ColorGroup::Normal, getColorRoleForCurrentTheme()));
+    		const auto recoloredPixmap  = recolorPixmap(pixmap, qApp->palette().color(getColorGroupForCurrentTheme(), getColorRoleForCurrentTheme()));
     		const auto recoloredIcon    = QIcon(recoloredPixmap);
 
     		return recoloredIcon.pixmap(size, mode, state);
@@ -67,6 +73,11 @@ QPixmap StyledIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& col
     painter.end();
 
     return { QPixmap::fromImage(image) };
+}
+
+QPalette::ColorGroup StyledIconEngine::getColorGroupForCurrentTheme() const
+{
+    return mv::theme().isDark() ? _colorGroupDarkTheme : _colorGroupLightTheme;
 }
 
 QPalette::ColorRole StyledIconEngine::getColorRoleForCurrentTheme() const

@@ -13,12 +13,11 @@
 namespace mv::gui
 {
 
-IconLabel::IconLabel(const QIcon& icon, QWidget* parent /*= nullptr*/) :
+IconLabel::IconLabel(const util::StyledIcon& icon, QWidget* parent /*= nullptr*/) :
     QLabel(parent),
-    _opacityEffect(this),
-    _tooltipCallback()
+    _opacityEffect(this)
 {
-    setPixmap(icon.pixmap(QSize(14, 14)));
+    setPixmap(icon.pixmap(QSize(12, 12)));
     setGraphicsEffect(&_opacityEffect);
 
     updateOpacityEffect();

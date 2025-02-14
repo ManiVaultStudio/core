@@ -9,6 +9,8 @@
 #include <Application.h>
 #include <QBuffer>
 
+#include "GroupDataDialog.h"
+
 #ifdef _DEBUG
     #define PAGE_ACTION_DELEGATE_EDITOR_WIDGET_VERBOSE
 #endif
@@ -17,11 +19,11 @@ using namespace mv;
 
 PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _previewIconLabel(Application::getIconFont("FontAwesome").getIcon("image")),
-    _metaDataIconLabel(Application::getIconFont("FontAwesome").getIcon("file-alt")),
-    _tagsIconLabel(Application::getIconFont("FontAwesome").getIcon("tags")),
-    _downloadUrls(Application::getIconFont("FontAwesome").getIcon("download")),
-    _contributorsIconLabel(Application::getIconFont("FontAwesome").getIcon("user"))
+    _previewIconLabel(util::StyledIcon("image")),
+    _metaDataIconLabel(util::StyledIcon("file-alt")),
+    _tagsIconLabel(util::StyledIcon("tags")),
+    _downloadUrls(util::StyledIcon("download")),
+    _contributorsIconLabel(util::StyledIcon("user"))
 {
     setObjectName("PageActionDelegateEditorWidget");
     setMouseTracking(true);

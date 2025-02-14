@@ -35,10 +35,12 @@ public:
     /**
      * Construct from \p sha
      * @param sha SHA of the icon
-     * @param _colorRoleLightTheme Color role for light theme
-     * @param _colorRoleDarkTheme Color role for dark theme
+     * @param colorGroupLightTheme Color group for light theme
+     * @param colorGroupDarkTheme Color group for dark theme
+     * @param colorRoleLightTheme Color role for light theme
+     * @param colorRoleDarkTheme Color role for dark theme
      */
-    StyledIconEngine(const QString& sha, const QPalette::ColorRole& _colorRoleLightTheme, const QPalette::ColorRole& _colorRoleDarkTheme);
+    StyledIconEngine(const QString& sha, const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
 
     /**
      * Copy construct from \p other
@@ -84,6 +86,12 @@ private:
     static QPixmap recolorPixmap(const QPixmap& pixmap, const QColor& color);
 
     /**
+     * Get color group for current theme
+     * @return Color group for current theme
+     */
+    QPalette::ColorGroup getColorGroupForCurrentTheme() const;
+
+    /**
      * Get color role for current theme
      * @return Color role for current theme
      */
@@ -91,6 +99,8 @@ private:
 
 private:
     QString                 _sha;                       /** NamedIcons::icons key */
+    QPalette::ColorGroup    _colorGroupLightTheme;      /** Color group for light theme */
+    QPalette::ColorGroup    _colorGroupDarkTheme;       /** Color group for dark theme */
     QPalette::ColorRole     _colorRoleLightTheme;       /** Color role for light theme */
     QPalette::ColorRole     _colorRoleDarkTheme;        /** Color role for dark theme */
 

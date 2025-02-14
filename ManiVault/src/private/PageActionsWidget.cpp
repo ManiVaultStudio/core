@@ -154,18 +154,25 @@ void PageActionsWidget::closePersistentEditor(int rowIndex)
 void PageActionsWidget::updateCustomStyle()
 {
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("search"));
-    
-    auto styleSheet = QString(" \
-        QLabel { \
-            background-color: rgba(0, 0, 0, 0); \
-        } \
-        QTreeView::item:hover:!selected { \
-            background-color: rgba(0, 0, 0, 50); \
-        } \
-        QTreeView::item:selected { \
-            background-color: rgba(0, 0, 0, 100); \
-        } \
-    ");
+
+    auto rowHoverColor = qApp->palette().color(QPalette::Normal, QPalette::Text);
+
+    rowHoverColor.setAlpha(50);
+
+    auto styleSheet = QString(
+        "QLabel {"
+            "background-color: rgba(0, 0, 0, 0);"
+        "}"
+        "QTreeView::item {"
+			"border-radius: 5px;"
+        "}"
+        "QTreeView::item:hover:!selected {"
+            "background-color: %1;"
+        "}"
+        "QTreeView::item:selected {"
+			"background-color: rgba(0, 0, 0, 100);"
+        "}"
+    ).arg(rowHoverColor.name(QColor::HexArgb));
     
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -177,7 +184,7 @@ void PageActionsWidget::updateCustomStyle()
         ");
     }
     
-    auto color = QApplication::palette().color(QPalette::Normal, QPalette::Window).name();
+    auto color = qApp->palette().color(QPalette::Normal, QPalette::Window).name();
 
 	styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
 

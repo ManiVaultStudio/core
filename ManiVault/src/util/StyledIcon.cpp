@@ -52,8 +52,6 @@ StyledIcon::StyledIcon(const QIcon& icon) :
 
 StyledIcon::~StyledIcon()
 {
-    qDebug() << __FUNCTION__;
-
     disconnect(&mv::theme(), &AbstractThemeManager::themeChanged, this, nullptr);
 }
 
@@ -256,6 +254,22 @@ QString StyledIcon::getIconFontVersionString(const Version& iconFontVersion)
     return QString("%1.%2").arg(QString::number(iconFontVersion.getMajor()), QString::number(iconFontVersion.getMinor()));
 }
 
+StyledIcon& StyledIcon::changedColorGroups(const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme)
+{
+    setColorGroupLightTheme(colorGroupLightTheme);
+    setColorGroupDarkTheme(colorGroupDarkTheme);
+
+    return *this;
+}
+
+StyledIcon& StyledIcon::changedColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme)
+{
+    setColorRoleLightTheme(colorRoleLightTheme);
+    setColorRoleDarkTheme(colorRoleDarkTheme);
+
+    return *this;
+}
+
 QPalette::ColorRole StyledIcon::getColorRoleLightTheme() const
 {
     return _iconEngine->_colorRoleLightTheme;
@@ -274,6 +288,26 @@ QPalette::ColorRole StyledIcon::getColorRoleDarkTheme() const
 void StyledIcon::setColorRoleDarkTheme(const QPalette::ColorRole& colorRoleDarkTheme) const
 {
     _iconEngine->_colorRoleDarkTheme = colorRoleDarkTheme;
+}
+
+QPalette::ColorGroup StyledIcon::getColorGroupLightTheme() const
+{
+    return _iconEngine->_colorGroupLightTheme;
+}
+
+void StyledIcon::setColorGroupLightTheme(const QPalette::ColorGroup& colorGroupLightTheme) const
+{
+    _iconEngine->_colorGroupLightTheme = colorGroupLightTheme;
+}
+
+QPalette::ColorGroup StyledIcon::getColorGroupDarkTheme() const
+{
+    return _iconEngine->_colorGroupDarkTheme;
+}
+
+void StyledIcon::setColorGroupDarkTheme(const QPalette::ColorGroup& colorGroupDarkTheme) const
+{
+    _iconEngine->_colorGroupDarkTheme = colorGroupDarkTheme;
 }
 
 QString StyledIcon::getIconFontResourceName(const QString& iconFontName, const Version& iconFontVersion)
@@ -299,7 +333,7 @@ QString StyledIcon::getIconFontMetadataResourcePath(const QString& iconFontName,
 void StyledIcon::updateIconPixmap() const
 {
     try {
-        if (!_iconEngine->_sha.isEmpty() && !pixmaps.contains(_iconEngine->_sha))
+        if (_iconEngine && !_iconEngine->_sha.isEmpty() && !pixmaps.contains(_iconEngine->_sha))
 			pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, qApp->palette().text().color());
 	}
 	catch (std::exception& e)

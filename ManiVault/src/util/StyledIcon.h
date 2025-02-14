@@ -106,6 +106,22 @@ public:
      */
     static StyledIcon fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version = { 6, 5 });
 
+    /**
+     * Return styled icon with changed color groups \p colorGroupLightTheme and \p colorGroupDarkTheme
+     * @param colorGroupLightTheme Color group for light theme
+     * @param colorGroupDarkTheme Color group for dark theme
+     * @return Reference to changed styled icon
+     */
+    StyledIcon& changedColorGroups(const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme);
+
+    /**
+     * Return styled icon with changed color roles \p colorRoleLightTheme and \p colorRoleDarkTheme
+     * @param colorRoleLightTheme Color role for light theme
+     * @param colorRoleDarkTheme Color role for dark theme
+     * @return Reference to changed styled icon
+     */
+    StyledIcon& changedColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
+
 protected:
 
     /**
@@ -196,6 +212,30 @@ public: // Color roles
      * @param colorRoleDarkTheme Color role for dark theme
      */
     void setColorRoleDarkTheme(const QPalette::ColorRole& colorRoleDarkTheme) const;
+
+    /**
+     * Get color group for light theme
+     * @return Color group for light theme
+     */
+    QPalette::ColorGroup getColorGroupLightTheme() const;
+
+    /**
+     * Set color group for light theme to \p colorGroupLightTheme
+     * @param colorGroupLightTheme Color group for light theme
+     */
+    void setColorGroupLightTheme(const QPalette::ColorGroup& colorGroupLightTheme) const;
+
+    /**
+     * Get color group for dark theme
+     * @return Color group for dark theme
+     */
+    QPalette::ColorGroup getColorGroupDarkTheme() const;
+
+    /**
+     * Set color group for dark theme to \p colorGroupDarkTheme
+     * @param colorGroupDarkTheme Color group for dark theme
+     */
+    void setColorGroupDarkTheme(const QPalette::ColorGroup& colorGroupDarkTheme) const;
 
 private:
 
