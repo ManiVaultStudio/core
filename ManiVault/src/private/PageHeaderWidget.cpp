@@ -35,6 +35,7 @@ PageHeaderWidget::PageHeaderWidget(const QString& title, QWidget* parent /*= nul
     _layout.addWidget(&_iconLabel);
 
     setBackgroundRole(QPalette::Window);
+    setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
 void PageHeaderWidget::resizeEvent(QResizeEvent* event)

@@ -50,6 +50,10 @@ void ThemeManager::initialize()
     if (isInitialized())
         return;
 
+    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
+        qDebug() << "Color scheme changed";
+        });
+
     beginInitialization();
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
@@ -62,7 +66,7 @@ void ThemeManager::initialize()
                 emit themeChangedToDark();
             else
                 emit themeChangedToLight();
-            });
+        });
 #endif
 
         connect(this, &AbstractThemeManager::themeChanged, this, [this](bool dark) -> void {
@@ -90,6 +94,8 @@ void ThemeManager::initialize()
             _darkThemeAction.setChecked(false);
 
             _customThemeAction.setCurrentText("Light");
+
+            //QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
         });
 
         connect(&_darkThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
@@ -107,8 +113,17 @@ void ThemeManager::initialize()
             _lightThemeAction.setChecked(false);
             _darkThemeAction.setChecked(false);
 
-            if (_customThemes.contains(currentTheme))
-				qApp->setPalette(_customThemes[currentTheme]);
+            if (_customThemes.contains(currentTheme)) {
+	            qApp->setPalette(_customThemes[currentTheme]);
+
+				for (auto widget : QApplication::allWidgets()) {
+					widget->style()->unpolish(widget);
+					widget->style()->polish(widget);
+
+					widget->update();
+					widget->repaint();
+				}
+            }
         });
 
         addDefaultCustomThemes();
