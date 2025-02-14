@@ -110,10 +110,6 @@ class HdpsCoreConan(ConanFile):
             for package in linux_requirements:
                 installer.install(package)
 
-        # if tools.os_info.is_macos:
-        #    installer = tools.SystemPackageTool()
-        #    installer.install("libomp", update=False)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
