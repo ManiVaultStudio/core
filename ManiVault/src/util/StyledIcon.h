@@ -6,7 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 #include "Version.h"
-#include "ThemeWatcher.h"
 #include "StyledIconEngine.h"
 
 #include <QIcon>
@@ -246,11 +245,10 @@ signals:
     void changed();
 
 private:
-    StyledIconEngine*    _iconEngine;                /** Icon engine */
-	QString             _iconName;                  /** Name of the icon */
-    QString             _iconFontName;              /** Name of the icon font */
-    Version             _iconFontVersion;           /** Version of the icon font */
-    ThemeWatcher        _themeWatcher;              /** Use our own theme watcher (which does not emit paletteChanged(...) needlessly) */
+    StyledIconEngine*   _iconEngine;        /** Icon engine */
+	QString             _iconName;          /** Name of the icon */
+    QString             _iconFontName;      /** Name of the icon font */
+    Version             _iconFontVersion;   /** Version of the icon font */
 
 protected:
 	static QMap<QString, QVariantMap>   fontMetadata;               /** Font-specific metadata */

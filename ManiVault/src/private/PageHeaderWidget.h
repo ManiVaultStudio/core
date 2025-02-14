@@ -38,23 +38,12 @@ protected:
      */
     void showEvent(QShowEvent* event) override;
 
-    /**
-     * Override QObject's event handling
-     * @return Boolean Whether the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
-
 private:
     /**
      * Resize the main icon shown in the header to newSize x newSize pixels
      * @param newSize new icon width and height
      */
     void resizeIcon(const QSize& newSize);
-    
-private slots:
-    
-    /** Update custom theme parts not caught by the system itself */
-    void updateCustomStyle() ;
     
 protected:
     QVBoxLayout     _layout;            /** Main layout */

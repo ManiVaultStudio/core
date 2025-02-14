@@ -5,7 +5,6 @@
 #pragma once
 
 #include <util/Serializable.h>
-#include <util/ThemeWatcher.h>
 
 #include <DockWidget.h>
 
@@ -81,9 +80,8 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    QToolButton*            _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
-    QMenu                   _settingsMenu;          /** Settings menu for settings tool button */
-    mv::util::ThemeWatcher  _themeWatcher;          /** Theme watcher */
+    QToolButton*    _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
+    QMenu           _settingsMenu;          /** Settings menu for settings tool button */
 };
 
 using DockWidgets = QVector<DockWidget*>;

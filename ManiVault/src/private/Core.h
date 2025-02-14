@@ -8,17 +8,16 @@
 
 namespace mv {
 
-class AbstractActionsManager;
-class AbstractPluginManager;
-class AbstractEventManager;
-class AbstractDataManager;
-class AbstractDataHierarchyManager;
-class AbstractTaskManager;
-class AbstractWorkspaceManager;
-class AbstractProjectManager;
-class AbstractSettingsManager;
-class AbstractHelpManager;
-
+/**
+ * Core class
+ *
+ * This class provides the core implementation of the application
+ * It is responsible for creating and managing all managers
+ * It is also responsible for initializing and resetting the application
+ * It is a singleton class
+ *
+ * @author Thomas Kroes
+ */
 class Core final : public CoreInterface
 {
 public:
@@ -77,6 +76,7 @@ public: // Managers
     AbstractProjectManager& getProjectManager() override;
     AbstractSettingsManager& getSettingsManager() override;
     AbstractHelpManager& getHelpManager() override;
+    AbstractThemeManager& getThemeManager() override;
 
 private:
     std::vector<std::unique_ptr<AbstractManager>>   _managers;              /** All managers in the core */

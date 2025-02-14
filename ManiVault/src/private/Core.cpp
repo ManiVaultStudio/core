@@ -14,6 +14,7 @@
 #include "ProjectManager.h"
 #include "SettingsManager.h"
 #include "HelpManager.h"
+#include "ThemeManager.h"
 
 #include "Application.h"
 
@@ -61,6 +62,7 @@ void Core::createManagers()
     _managers[static_cast<int>(ManagerType::Projects)]      = std::make_unique<ProjectManager>(this);
     _managers[static_cast<int>(ManagerType::Settings)]      = std::make_unique<SettingsManager>(this);
     _managers[static_cast<int>(ManagerType::Help)]          = std::make_unique<HelpManager>(this);
+    _managers[static_cast<int>(ManagerType::Theme)]         = std::make_unique<ThemeManager>(this);
 
     setManagersCreated();
 }
@@ -187,6 +189,11 @@ AbstractSettingsManager& Core::getSettingsManager()
 mv::AbstractHelpManager& Core::getHelpManager()
 {
     return *dynamic_cast<AbstractHelpManager*>(getManager(ManagerType::Help));
+}
+
+AbstractThemeManager& Core::getThemeManager()
+{
+    return *dynamic_cast<AbstractThemeManager*>(getManager(ManagerType::Theme));
 }
 
 }

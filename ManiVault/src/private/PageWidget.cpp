@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <QPainter>
 
+using namespace mv;
+
 PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _pageHeaderWidget(title),
@@ -40,15 +42,8 @@ PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     _layout.addLayout(&_contentLayout, 2);
     _layout.addStretch(1);
 
-    updateCustomStyle();
-}
-
-bool PageWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
+    setBackgroundRole(QPalette::Window);
+    setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
 void PageWidget::paintEvent(QPaintEvent* paintEvent)
@@ -64,23 +59,8 @@ void PageWidget::paintEvent(QPaintEvent* paintEvent)
     painter.drawPixmap(pixmapRectangle.topLeft(), QPixmap(backgroundImage));
 }
 
-void PageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole)
-{
-    Q_ASSERT(widget != nullptr);
-    
-    // When the palette is changed during runtime, the system is updated before the widget
-    // Therefore we translate the colorRole to a color using the global palette instead of the widget style option
-    QString color = QApplication::palette().color(QPalette::Normal, colorRole).name();
-    
-    widget->setStyleSheet("QWidget#PageWidget, QWidget#PageHeaderWidget, QWidget#PageContentWidget, QLabel#Title { background-color: " + color + "}");
-}
-
 QVBoxLayout& PageWidget::getContentLayout()
 {
     return _contentLayout;
 }
 
-void PageWidget::updateCustomStyle()
-{
-    PageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
-}

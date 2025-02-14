@@ -20,6 +20,7 @@
 #include "AbstractProjectManager.h"
 #include "AbstractSettingsManager.h"
 #include "AbstractHelpManager.h"
+#include "AbstractThemeManager.h"
 
 #include <QString>
 #include <QObject>
@@ -67,6 +68,7 @@ public:
         Projects,           /** Manager for loading/saving projects */
         Settings,           /** Manager for managing global settings */
         Help,               /** Manager for getting help */
+        Theme,              /** Manager for controlling the application theme */
 
         Count
     };
@@ -122,6 +124,7 @@ public: // Managers
     virtual AbstractProjectManager& getProjectManager() = 0;
     virtual AbstractSettingsManager& getSettingsManager() = 0;
     virtual AbstractHelpManager& getHelpManager() = 0;
+    virtual AbstractThemeManager& getThemeManager() = 0;
 
 signals:
 
@@ -225,6 +228,14 @@ CORE_EXPORT inline AbstractSettingsManager& settings() {
  */
 CORE_EXPORT inline AbstractHelpManager& help() {
     return core()->getHelpManager();
+}
+
+/**
+* Convenience function to obtain access to the theme manager in the core
+* @return Reference to abstract theme manager
+*/
+CORE_EXPORT inline AbstractThemeManager& theme() {
+    return core()->getThemeManager();
 }
 
 }

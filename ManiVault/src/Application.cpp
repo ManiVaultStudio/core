@@ -80,15 +80,6 @@ Application::Application(int& argc, char** argv) :
         ForegroundTask::createHandler(Application::current());
         ModalTask::createHandler(Application::current());
     });
-
-    connect(&_themeWatcher, &ThemeWatcher::themeChanged, this, [this](bool dark) -> void {
-        for (auto widget : QApplication::allWidgets()) {
-            widget->style()->unpolish(this);
-            widget->style()->polish(this);
-
-            widget->repaint();
-        }
-    });
 }
 
 Application::~Application()
