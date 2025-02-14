@@ -7,10 +7,9 @@
 #include "ViewMenu.h"
 #include "LoadSystemViewMenu.h"
 
-#include <Application.h>
 #include <CoreInterface.h>
 
-#include <util/NamedIcon.h>
+#include <util/StyledIcon.h>
 
 #include <QToolButton>
 
@@ -93,7 +92,7 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     updateReadOnly();
 
     const auto updateStyle = [this]() -> void {
-        _addViewPluginToolButton->setIcon(NamedIcon("plus"));
+        _addViewPluginToolButton->setIcon(StyledIcon("plus"));
 	};
 
     updateStyle();

@@ -7,7 +7,7 @@
 #include "ManiVaultGlobals.h"
 #include "Version.h"
 #include "ThemeWatcher.h"
-#include "ThemeIconEngine.h"
+#include "StyledIconEngine.h"
 
 #include <QIcon>
 #include <QObject>
@@ -16,13 +16,16 @@ namespace mv::util
 {
 
 /**
- * Named icon class
+ * Styled icon class
  *
- * Icon which responds to theme changes (from mv::util::ThemeWatcher).
+ * StyledIcon class is a wrapper around QIcon that allows for easy creation of icons from icon fonts.
+ * - Support icon fonts (FontAwesome, Material Design Icons, etc.)
+ * - Supports custom icons
+ * - Theme-aware (due to StyledIconEngine)
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT NamedIcon : public QObject, public QIcon
+class CORE_EXPORT StyledIcon : public QObject, public QIcon
 {
     Q_OBJECT
 
@@ -35,26 +38,26 @@ public:
      * @param iconFontVersion Version of the icon font
      * @param parent Pointer to parent object (maybe nullptr)
      */
-    explicit NamedIcon(const QString& iconName = "", const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion, QWidget* parent = nullptr);
+    explicit StyledIcon(const QString& iconName = "", const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion, QWidget* parent = nullptr);
 
     /**
-     * Copy construct from \p other named icon
-     * @param other Other named icon to copy from
+     * Copy construct from \p other styled icon
+     * @param other Other styled icon to copy from
      */
-    explicit NamedIcon(const NamedIcon& other);
+    explicit StyledIcon(const StyledIcon& other);
 
     /**
      * Construct from \p icon
      * @param icon Icon to initialize from
      */
-    explicit NamedIcon(const QIcon& icon);
+    explicit StyledIcon(const QIcon& icon);
 
     /**
-     * Assign \p other named icon
-     * @param other Other named icon to assign from
+     * Assign \p other styled icon
+     * @param other Other styled icon to assign from
      * @return Copied result
      */
-    NamedIcon& operator=(const NamedIcon& other) {
+    StyledIcon& operator=(const StyledIcon& other) {
         QIcon::operator=(other);
 
         _iconName           = other._iconName;
@@ -66,19 +69,19 @@ public:
 
     /**
      * Assign \p other QIcon
-     * @param other Other named icon to assign from
+     * @param other Other styled icon to assign from
      * @return Copied result
      */
-    NamedIcon& operator=(const QIcon& other) {
+    StyledIcon& operator=(const QIcon& other) {
         QIcon::operator=(other);
 
-        *this = NamedIcon(other);
+        *this = StyledIcon(other);
 
         return *this;
     }
     
     /**
-     * Configure the named icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion
+     * Configure the styled icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion
      * @param iconName Name of the icon
      * @param iconFontName Name of the icon font
      * @param iconFontVersion Version of the icon font
@@ -91,7 +94,7 @@ public:
      * @param version Font Awesome version
      * @return Named icon
      */
-    static NamedIcon fromFontAwesomeRegular(const QString& iconName, const Version& version = { 6, 5 });
+    static StyledIcon fromFontAwesomeRegular(const QString& iconName, const Version& version = { 6, 5 });
 
     /**
      * Create icon with \p iconName from \p version of Font Awesome Brands
@@ -99,7 +102,7 @@ public:
      * @param version Font Awesome version
      * @return Named icon
      */
-    static NamedIcon fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version = { 6, 5 });
+    static StyledIcon fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version = { 6, 5 });
 
 protected:
 
@@ -194,7 +197,7 @@ public: // Color roles
 
 private:
 
-    /** Only allow named icon construction */
+    /** Only allow styled icon constructors, not the base */
     using QIcon::QIcon;
 
     /** Update the pixmap representation of the icon */
@@ -239,11 +242,11 @@ signals:
      */
     void shaChanged(const QString& previousSha, const QString& currentSha);
 
-    /** Signals that the NamedIcon::_iconName and/or NamedIcon::_iconFontName and/or NamedIcon::_iconFontVersion changed */
+    /** Signals that the StyledIcon::_iconName and/or StyledIcon::_iconFontName and/or StyledIcon::_iconFontVersion changed */
     void changed();
 
 private:
-    ThemeIconEngine*    _iconEngine;                /** Icon engine */
+    StyledIconEngine*    _iconEngine;                /** Icon engine */
 	QString             _iconName;                  /** Name of the icon */
     QString             _iconFontName;              /** Name of the icon font */
     Version             _iconFontVersion;           /** Version of the icon font */
@@ -256,7 +259,7 @@ protected:
     static Version                      defaultIconFontVersion;     /** Default icon font version */
     static QMap<QString, QPixmap>       pixmaps;                    /** All pixmaps for icons */
 
-    friend class ThemeIconEngine;
+    friend class StyledIconEngine;
 };
 
 

@@ -12,24 +12,24 @@
 namespace mv::util
 {
 
-class NamedIcon;
+class StyledIcon;
 
 /**
- * Theme icon engine class
+ * Styled icon engine class
  *
- * Icon engine for creating theme-specific icons.
+ * Icon engine for creating theme-specific icons of the StyledIcon.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ThemeIconEngine : public QObject, public QIconEngine
+class CORE_EXPORT StyledIconEngine : public QObject, public QIconEngine
 {
 public:
 
     /**
      * Construct from \p namedIcon
-     * @param namedIcon Reference to named icon
+     * @param styledIcon Reference to styled icon
      */
-    ThemeIconEngine(NamedIcon& namedIcon);
+    StyledIconEngine(StyledIcon& styledIcon);
 
     /**
      * Construct from \p sha
@@ -37,16 +37,16 @@ public:
      * @param _colorRoleLightTheme Color role for light theme
      * @param _colorRoleDarkTheme Color role for dark theme
      */
-    ThemeIconEngine(const QString& sha, const QPalette::ColorRole& _colorRoleLightTheme, const QPalette::ColorRole& _colorRoleDarkTheme);
+    StyledIconEngine(const QString& sha, const QPalette::ColorRole& _colorRoleLightTheme, const QPalette::ColorRole& _colorRoleDarkTheme);
 
     /**
      * Copy construct from \p other
      * @param other Other theme icon engine to copy from
      */
-    ThemeIconEngine(const ThemeIconEngine& other);
+    StyledIconEngine(const StyledIconEngine& other);
 
     /** No need for custom destructor */
-    ~ThemeIconEngine() override = default;
+    ~StyledIconEngine() override = default;
 
     /**
      * Paint the icon
@@ -99,7 +99,7 @@ private:
     QPalette::ColorRole     _colorRoleLightTheme;       /** Color role for light theme */
     QPalette::ColorRole     _colorRoleDarkTheme;        /** Color role for dark theme */
 
-    friend class NamedIcon;
+    friend class StyledIcon;
 };
 
 

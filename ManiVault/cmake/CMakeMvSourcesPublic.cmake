@@ -542,8 +542,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/LearningCenterVideo.h
     src/util/LearningCenterTutorial.h
     src/util/ThemeWatcher.h
-    src/util/NamedIcon.h
-    src/util/ThemeIconEngine.h
+    src/util/StyledIcon.h
+    src/util/StyledIconEngine.h
 )
 
 if(APPLE)
@@ -595,8 +595,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/LearningCenterVideo.cpp
     src/util/LearningCenterTutorial.cpp
     src/util/ThemeWatcher.cpp
-    src/util/NamedIcon.cpp
-    src/util/ThemeIconEngine.cpp
+    src/util/StyledIcon.cpp
+    src/util/StyledIconEngine.cpp
 )
 
 if(APPLE)

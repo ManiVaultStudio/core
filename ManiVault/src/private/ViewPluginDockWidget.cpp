@@ -360,7 +360,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
 	_dockManager.setStyleSheet("");
 
-	setIcon(NamedIcon(viewPlugin->getIcon()));
+	setIcon(StyledIcon(viewPlugin->getIcon()));
 	setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
 	setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
 
