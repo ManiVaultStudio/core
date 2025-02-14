@@ -56,9 +56,6 @@ signals:
 
     /** Signal emitted when the application theme changed to dark */
     void themeChangedToDark();
-
-private:
-    bool    _dark = false;  /** Boolean indicating whether the theme is dark */
 };
 
 }

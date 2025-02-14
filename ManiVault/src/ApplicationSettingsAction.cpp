@@ -21,6 +21,8 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
 
     addAction(&_applicationSessionIdAction);
 
+    _appearanceOptionAction.setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
+
     bool themesAvailable = false;
 
 #ifdef Q_OS_MACX
@@ -29,36 +31,43 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     // While changing the theme works, there is still a number of icons that do not work on dark theme.
     //macSetToLightTheme();
 #endif // Q_OS_MACX
-    
+
+#ifdef Q_OS_MACX
     if (themesAvailable)
     {
-        _appearanceOptionAction.setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
-            
         addAction(&_appearanceOptionAction);
         
         const auto appearanceOptionCurrentIndexChanged = [this](const QString& currentText) -> void {
-            if(currentText == "System")
-            {
-#ifdef Q_OS_MACX
+            if (currentText == "System") {
                 macSetToAutoTheme();
-#endif // Q_OS_MACX
-            }
-            else if(currentText == "Dark")
-            {
-#ifdef Q_OS_MACX
+            } else if(currentText == "Dark") {
                 macSetToDarkTheme();
-#endif // Q_OS_MACX
-            }
-            else if(currentText == "Light")
-            {
-#ifdef Q_OS_MACX
+            } else if(currentText == "Light") {
                 macSetToLightTheme();
-#endif // Q_OS_MACX
             }
         };
 
         connect(&_appearanceOptionAction, &gui::OptionAction::currentTextChanged, this, appearanceOptionCurrentIndexChanged);
     }
+#endif
+
+#ifdef WIN32
+	#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+	    //connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
+	    //    _dark = scheme == Qt::ColorScheme::Dark;
+
+	    //    emit themeChanged(_dark);
+
+	    //    if (_dark)
+	    //        emit themeChangedToDark();
+	    //    else
+	    //        emit themeChangedToLight();
+	    //    });
+	#else
+		hide();
+	#endif
+#endif
+	
 }
 
 }
