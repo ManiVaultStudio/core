@@ -32,20 +32,14 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
+    _groupsAction.addGroupAction(&mv::settings().getApplicationSettings());
     _groupsAction.addGroupAction(&mv::settings().getParametersSettings());
     _groupsAction.addGroupAction(&mv::settings().getMiscellaneousSettings());
     _groupsAction.addGroupAction(&mv::settings().getTasksSettingsAction());
-
-#ifdef Q_OS_MACX
-    _groupsAction.addGroupAction(&mv::settings().getApplicationSettings());
-#endif
-
     _groupsAction.addGroupAction(&mv::settings().getTemporaryDirectoriesSettingsAction());
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        auto pluginGlobalSettingsGroupAction = pluginFactory->getGlobalSettingsGroupAction();
-
-        if (pluginGlobalSettingsGroupAction)
+        if (auto pluginGlobalSettingsGroupAction = pluginFactory->getGlobalSettingsGroupAction())
             _groupsAction.addGroupAction(pluginGlobalSettingsGroupAction);
     }
 }
