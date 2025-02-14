@@ -55,6 +55,8 @@ public:
      * @return Copied result
      */
     NamedIcon& operator=(const NamedIcon& other) {
+        QIcon::operator=(other);
+
         _iconName           = other._iconName;
         _iconFontName       = other._iconFontName;
         _iconFontVersion    = other._iconFontVersion;
@@ -68,6 +70,8 @@ public:
      * @return Copied result
      */
     NamedIcon& operator=(const QIcon& other) {
+        QIcon::operator=(other);
+
         *this = NamedIcon(other);
 
         return *this;
@@ -80,12 +84,6 @@ public:
      * @param iconFontVersion Version of the icon font
      */
     void set(const QString& iconName, const QString& iconFontName = defaultIconFontName, const util::Version& iconFontVersion = defaultIconFontVersion);
-
-    /**
-     * Get pixmap
-     * @return Pixmap
-     */
-    QPixmap getPixmap() const;
 
     /**
      * Create icon with \p iconName from \p version of Font Awesome regular
@@ -102,6 +100,14 @@ public:
      * @return Named icon
      */
     static NamedIcon fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version = { 6, 5 });
+
+protected:
+
+    /**
+     * Requests a pixmap
+     * @return Pixmap
+     */
+    QPixmap requestPixmap() const;
 
     /**
      * Initialize \p version of \p iconFontName
@@ -191,8 +197,8 @@ private:
     /** Only allow named icon construction */
     using QIcon::QIcon;
 
-    /** Trigger repaint of owning widget */
-    void updateIcon() const;
+    /** Update the pixmap representation of the icon */
+    void updateIconPixmap() const;
 
     /**
      * Create cryptographic key 
