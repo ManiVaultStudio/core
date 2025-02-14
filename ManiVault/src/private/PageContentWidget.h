@@ -65,4 +65,5 @@ private:
     QVBoxLayout     _mainLayout;        /** Main layout */
     QHBoxLayout     _columnsLayout;     /** Columns layout */
     QVBoxLayout     _rowsLayout;        /** Rows layout */
+    QLabel          _headerLabel;       /** Header label */ 
 };

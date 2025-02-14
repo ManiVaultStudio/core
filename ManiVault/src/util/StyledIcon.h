@@ -51,6 +51,9 @@ public:
      */
     explicit StyledIcon(const QIcon& icon);
 
+    /** Override destructor to do some cleanup */
+    ~StyledIcon() override;
+
     /**
      * Assign \p other styled icon
      * @param other Other styled icon to assign from

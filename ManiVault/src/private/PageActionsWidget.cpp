@@ -95,8 +95,8 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
             closePersistentEditor(rowIndex);
     });
 
-    _hierarchyWidget.getTreeView().setBackgroundRole(QPalette::Window);
-    _hierarchyWidget.getTreeView().setAttribute(Qt::WA_NoSystemBackground, false);
+    treeView.setBackgroundRole(QPalette::Window);
+    treeView.setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
 QVBoxLayout& PageActionsWidget::getLayout()

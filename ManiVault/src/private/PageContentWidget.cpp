@@ -36,12 +36,24 @@ PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget
 
 QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString& tooltip)
 {
-    auto label = new QLabel(title);
+    auto headerLabel = new QLabel(title);
 
-    label->setAlignment(Qt::AlignLeft);
-    label->setStyleSheet("QLabel { font-weight: 200; font-size: 13pt; }");
-    label->setToolTip(tooltip);
+    headerLabel->setAlignment(Qt::AlignLeft);
+    headerLabel->setToolTip(tooltip);
 
-    return label;
+    const auto updateHeaderLabelStyle = [headerLabel]() -> void {
+        headerLabel->setStyleSheet(QString(
+            "QLabel {"
+				"color: %1;"
+				"font-weight: 200;"
+				"font-size: 13pt;"
+			"}").arg(qApp->palette().text().color().name()));
+    };
+
+    updateHeaderLabelStyle();
+
+    connect(&mv::theme(), &mv::AbstractThemeManager::themeChanged, headerLabel, updateHeaderLabelStyle);
+
+    return headerLabel;
 }
 
