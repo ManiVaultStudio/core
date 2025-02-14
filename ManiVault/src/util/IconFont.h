@@ -5,7 +5,6 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-#include "NamedIcon.h"
 
 #include <QString>
 #include <QFont>

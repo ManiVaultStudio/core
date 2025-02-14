@@ -4,9 +4,7 @@
 
 #include "DockWidget.h"
 
-#include <Application.h>
-
-#include <util/NamedIcon.h>
+#include <util/StyledIcon.h>
 
 #include <DockWidgetTab.h>
 
@@ -42,7 +40,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     _settingsToolButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     const auto updateStyle = [this]() -> void {
-        _settingsToolButton->setIcon(NamedIcon("bars"));
+        _settingsToolButton->setIcon(StyledIcon("bars"));
     };
     
     updateStyle();

@@ -2,8 +2,8 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ThemeIconEngine.h"
-#include "NamedIcon.h"
+#include "StyledIconEngine.h"
+#include "StyledIcon.h"
 
 #include <QDebug>
 #include <QPainter>
@@ -11,33 +11,33 @@
 namespace mv::util
 {
 
-ThemeIconEngine::ThemeIconEngine(NamedIcon& namedIcon) :
+StyledIconEngine::StyledIconEngine(StyledIcon& styledIcon) :
 	_colorRoleLightTheme(QPalette::Text),
 	_colorRoleDarkTheme(QPalette::Text)
 {
-    namedIcon._iconEngine = this;
+    styledIcon._iconEngine = this;
 }
 
-ThemeIconEngine::ThemeIconEngine(const QString& sha, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme) :
+StyledIconEngine::StyledIconEngine(const QString& sha, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme) :
     _sha(sha),
     _colorRoleLightTheme(colorRoleLightTheme),
     _colorRoleDarkTheme(colorRoleDarkTheme)
 {
 }
 
-ThemeIconEngine::ThemeIconEngine(const ThemeIconEngine& other) :
-    ThemeIconEngine(other._sha, other._colorRoleLightTheme, other._colorRoleDarkTheme)
+StyledIconEngine::StyledIconEngine(const StyledIconEngine& other) :
+    StyledIconEngine(other._sha, other._colorRoleLightTheme, other._colorRoleDarkTheme)
 {
 }
 
-void ThemeIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state)
+void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state)
 {
 }
 
-QPixmap ThemeIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
+QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
-    if (NamedIcon::pixmaps.contains(_sha)) {
-	    const auto pixmap = NamedIcon::pixmaps[_sha];
+    if (StyledIcon::pixmaps.contains(_sha)) {
+	    const auto pixmap = StyledIcon::pixmaps[_sha];
 
     	if (!pixmap.isNull()) {
     		const auto recoloredPixmap  = recolorPixmap(pixmap, qApp->palette().color(QPalette::ColorGroup::Normal, getColorRoleForCurrentTheme()));
@@ -50,12 +50,12 @@ QPixmap ThemeIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Stat
 	return {};
 }
 
-QIconEngine* ThemeIconEngine::clone() const
+QIconEngine* StyledIconEngine::clone() const
 {
-    return new ThemeIconEngine(*this);
+    return new StyledIconEngine(*this);
 }
 
-QPixmap ThemeIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& color)
+QPixmap StyledIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& color)
 {
     auto image = pixmap.toImage();
 
@@ -68,7 +68,7 @@ QPixmap ThemeIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& colo
     return { QPixmap::fromImage(image) };
 }
 
-bool ThemeIconEngine::isDarkTheme()
+bool StyledIconEngine::isDarkTheme()
 {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     return QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
@@ -77,7 +77,7 @@ bool ThemeIconEngine::isDarkTheme()
 #endif
 }
 
-QPalette::ColorRole ThemeIconEngine::getColorRoleForCurrentTheme() const
+QPalette::ColorRole StyledIconEngine::getColorRoleForCurrentTheme() const
 {
     return isDarkTheme() ? _colorRoleDarkTheme : _colorRoleLightTheme;
 }

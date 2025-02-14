@@ -9,7 +9,7 @@
 #include "WidgetActionDrag.h"
 
 #include "util/Serializable.h"
-#include "util/NamedIcon.h"
+#include "util/styledIcon.h"
 
 #include <QWidgetAction>
 #include <QPointer>
@@ -867,7 +867,7 @@ public: // Studio mode
      */
     void setStudioMode(bool studioMode, bool recursive = true);
     
-public: // Icon
+public: // Styled icon
 
     /**
      * Set the icon by \p iconName and use the default icon font and version
@@ -887,7 +887,7 @@ public: // Icon
      * Get the icon
      * @return Reference to named icon
      */
-    util::NamedIcon& getIcon();
+    util::StyledIcon& getIcon();
 
 public: // Badge-related
 
@@ -1028,7 +1028,7 @@ private:
     std::int32_t                    _configuration;                 /** Configuration flags */
     QMap<QString, QVariant>         _cachedStates;                  /** Maps cache name to state */
     QString                         _location;                      /** The path relative to the root in string format */
-    util::NamedIcon                 _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
+    util::StyledIcon                _styledIcon;                    /** Theme aware icon */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
     WidgetActionBadge               _badge;                         /** Badge configuration */
     WidgetActionDrag                _drag;                          /** Drag behaviour */

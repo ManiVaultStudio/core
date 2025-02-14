@@ -5,7 +5,7 @@
 #include "StringAction.h"
 #include "Application.h"
 
-#include "util/NamedIcon.h"
+#include "util/StyledIcon.h"
 
 #include <QHBoxLayout>
 #include <QCompleter>
@@ -33,7 +33,7 @@ StringAction::StringAction(QObject* parent, const QString& title, const QString&
 
     auto button = new QToolButton();
 
-    button->setIcon(NamedIcon("search"));
+    button->setIcon(StyledIcon("search"));
     button->setIconSize(QSize(12, 12));
     button->setStyleSheet("border: none;");
 

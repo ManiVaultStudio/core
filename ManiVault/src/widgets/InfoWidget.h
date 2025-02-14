@@ -7,7 +7,7 @@
 #include "ManiVaultGlobals.h"
 
 #include "util/ThemeWatcher.h"
-#include "util/NamedIcon.h"
+#include "util/StyledIcon.h"
 
 #include <QWidget>
 #include <QLabel>
@@ -154,7 +154,7 @@ signals:
     void backgroundColorRoleChanged(const QPalette::ColorRole& previousBackgroundColorRole, const QPalette::ColorRole& currentBackgroundColorRole);
 
 private:
-    util::NamedIcon     _icon;                  /** Theme icon for switching between themes */
+    util::StyledIcon    _icon;                  /** Theme-aware icon */
     QLabel              _iconLabel;             /** Label for displaying the icon */
     QLabel              _titleLabel;            /** Label for displaying the title */
     QLabel              _descriptionLabel;      /** Label for displaying the description */

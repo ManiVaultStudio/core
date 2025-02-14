@@ -911,21 +911,21 @@ void WidgetAction::setStudioMode(bool studioMode, bool recursive /*= true*/)
 
 void WidgetAction::setIconByName(const QString& iconName)
 {
-    _namedIcon.set(iconName);
+    _styledIcon.set(iconName);
 
-    setIcon(_namedIcon);
+    setIcon(_styledIcon);
 }
 
 void WidgetAction::setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)
 {
-    _namedIcon.set(iconName, iconFontName, iconFontVersion);
+    _styledIcon.set(iconName, iconFontName, iconFontVersion);
 
-    setIcon(_namedIcon);
+    setIcon(_styledIcon);
 }
 
-util::NamedIcon& WidgetAction::getIcon()
+util::StyledIcon& WidgetAction::getIcon()
 {
-    return _namedIcon;
+    return _styledIcon;
 }
 
 WidgetActionBadge& WidgetAction::getBadge()
