@@ -50,9 +50,9 @@ void ThemeManager::initialize()
     if (isInitialized())
         return;
 
-    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
-        qDebug() << "Color scheme changed";
-        });
+    //connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
+    //    qDebug() << "Color scheme changed";
+    //    });
 
     beginInitialization();
     {
@@ -79,11 +79,8 @@ void ThemeManager::initialize()
 		});
 
         connect(&_useSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-            if (!toggled)
-                return;
-
-            _lightThemeAction.setChecked(false);
-            _darkThemeAction.setChecked(false);
+            _lightThemeAction.setChecked(!toggled);
+            _darkThemeAction.setChecked(!toggled);
 		});
 
         connect(&_lightThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
@@ -95,7 +92,7 @@ void ThemeManager::initialize()
 
             _customThemeAction.setCurrentText("Light");
 
-            //QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
+            QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
         });
 
         connect(&_darkThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
@@ -106,6 +103,8 @@ void ThemeManager::initialize()
             _lightThemeAction.setChecked(false);
 
             _customThemeAction.setCurrentText("Dark");
+
+            QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Dark);
         });
 
         connect(&_customThemeAction, &OptionAction::currentTextChanged, this, [this](const QString& currentTheme) -> void {
