@@ -6,12 +6,16 @@
 
 #include "WidgetAction.h"
 
+#include "util/StyledIcon.h"
+
 #include <QLabel>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QToolButton>
 
 class QWidget;
 class QCompleter;
+class QEvent;
 
 namespace mv::gui {
 
@@ -35,6 +39,76 @@ public:
         TextEdit    = 0x00004,      /** Widget includes a text edit */
 
         Default = LineEdit,
+    };
+
+    /** Actions shown at leading and/or trailing position */
+    class InlineAction : public QWidgetAction
+    {
+    private:
+
+        /** Create hover effect for tool button */
+        class StyledToolButton : public QToolButton
+        {
+        public:
+
+            /**
+             * Construct with \p styledIcon and \p parent
+             * @param inlineAction Reference to inline action
+             * @param parent Pointer to parent widget
+             */
+            StyledToolButton(InlineAction& inlineAction, QWidget* parent = nullptr);
+
+            /**
+             * Respond to \p watched events
+             * @param watched Object of which an event occurred
+             * @param event The event that took place
+             * @return Whether the event was handled
+             */
+            bool eventFilter(QObject* watched, QEvent* event) override;
+
+        private:
+
+            /** Add glow effect to tool button */
+            void addGlowEffect();
+
+            /** Remove glow effect from tool button */
+            void removeGlowEffect();
+
+            /** Synchronize with inline action */
+            void synchronizeWithInlineAction();
+
+        private:
+            InlineAction& _inlineAction; /** Reference to inline action */
+        };
+
+    public:
+
+        /**
+         * Construct with pointer to \p parent object
+         * @param parent Pointer to parent object
+         */
+        InlineAction(QObject* parent = nullptr);
+
+        /**
+         * Create widget with \p parent widget
+         * @param parent Pointer to parent widget
+         * @return Pointer to created widget
+         */
+        QWidget* createWidget(QWidget* parent) override;
+
+	    /**
+         * Set icon to \p styledIcon
+         * @param styledIcon Styled icon
+	     */
+	    void setStyledIcon(const util::StyledIcon& styledIcon);
+
+    protected:
+
+        /** Only allow use of our own set icon function */
+        using QWidgetAction::setIcon;
+
+    private:
+        util::StyledIcon _styledIcon;   /** Styled icon */
     };
 
 public:
@@ -156,7 +230,7 @@ public:
      * Get completer
      * @return Pointer to completer
      */
-    QCompleter* getCompleter();
+    QCompleter* getCompleter() const;
 
     /**
      * Set completer
@@ -258,8 +332,8 @@ signals:
 protected:
     QString             _string;                /** Current string */
     QString             _placeholderString;     /** Place holder string */
-    QWidgetAction       _leadingAction;         /** Action at the leading position */
-    QWidgetAction       _trailingAction;        /** Action at the trailing position */
+    InlineAction        _leadingAction;         /** Inline action at the leading position */
+    InlineAction        _trailingAction;        /** Inline action at the trailing position */
     QCompleter*         _completer;             /** Pointer to completer */
     bool                _searchMode;            /** Whether the string action is in search mode */
     bool                _clearable;             /** Whether the string can be cleared by clicking the trailing action */

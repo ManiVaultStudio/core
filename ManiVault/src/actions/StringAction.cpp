@@ -3,13 +3,11 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StringAction.h"
-#include "Application.h"
-
-#include "util/StyledIcon.h"
 
 #include <QHBoxLayout>
 #include <QCompleter>
 #include <QToolButton>
+#include <QGraphicsDropShadowEffect>
 
 using namespace mv::util;
 
@@ -33,11 +31,13 @@ StringAction::StringAction(QObject* parent, const QString& title, const QString&
 
     auto button = new QToolButton();
 
-    button->setIcon(StyledIcon("search"));
-    button->setIconSize(QSize(12, 12));
-    button->setStyleSheet("border: none;");
+    _leadingAction.setEnabled(false);
 
-    //_leadingAction.setDefaultWidget(button);
+    _leadingAction.setStyledIcon(StyledIcon("search"));
+    _trailingAction.setStyledIcon(StyledIcon("times-circle"));
+
+    _leadingAction.setToolTip("Search");
+    _trailingAction.setToolTip("Clear");
 }
 
 QString StringAction::getString() const
@@ -82,7 +82,7 @@ QAction& StringAction::getTrailingAction()
     return _trailingAction;
 }
 
-QCompleter* StringAction::getCompleter()
+QCompleter* StringAction::getCompleter() const
 {
     return _completer;
 }
@@ -123,8 +123,6 @@ void StringAction::setClearable(bool clearable)
     _trailingAction.setVisible(false);
 
     if (_clearable) {
-        _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
-
         connect(&_trailingAction, &QAction::triggered, this, [this]() -> void {
             setString("");
         });
@@ -232,6 +230,90 @@ void StringAction::setTextElideMode(const Qt::TextElideMode& textElideMode)
     _textElideMode = textElideMode;
 
     emit textElideModeChanged(_textElideMode);
+}
+
+StringAction::InlineAction::StyledToolButton::StyledToolButton(InlineAction& inlineAction, QWidget* parent):
+	QToolButton(parent),
+	_inlineAction(inlineAction)
+{
+	installEventFilter(this);
+    
+    inlineAction.installEventFilter(this);
+
+    synchronizeWithInlineAction();
+}
+
+bool StringAction::InlineAction::StyledToolButton::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == this && _inlineAction.isEnabled()) {
+        if (event->type() == QEvent::Enter) {
+            addGlowEffect();
+        }
+        else if (event->type() == QEvent::Leave) {
+            removeGlowEffect();
+        }
+    }
+
+    if (watched == &_inlineAction) {
+    	if (event->type() == QEvent::EnabledChange)
+            synchronizeWithInlineAction();
+
+    	if (event->type() == QEvent::ToolTipChange)
+            synchronizeWithInlineAction();
+    }
+
+	return QToolButton::eventFilter(watched, event);
+}
+
+void StringAction::InlineAction::StyledToolButton::addGlowEffect()
+{
+	auto* effect = new QGraphicsDropShadowEffect(this);
+
+    auto color = palette().color(QPalette::ColorRole::HighlightedText);
+
+	effect->setBlurRadius(12);
+	effect->setColor(color);
+	effect->setOffset(0, 0);
+
+	setGraphicsEffect(effect);
+}
+
+void StringAction::InlineAction::StyledToolButton::removeGlowEffect()
+{
+	setGraphicsEffect(nullptr);
+}
+
+void StringAction::InlineAction::StyledToolButton::synchronizeWithInlineAction()
+{
+    setEnabled(_inlineAction.isEnabled());
+    setToolTip(_inlineAction.toolTip());
+}
+
+StringAction::InlineAction::InlineAction(QObject* parent) :
+    QWidgetAction(parent)
+{
+}
+
+QWidget* StringAction::InlineAction::createWidget(QWidget* parent)
+{
+    auto toolButton = new StyledToolButton(*this, parent);
+
+    toolButton->setIcon(_styledIcon);
+    toolButton->setIconSize(QSize(12, 12));
+    toolButton->setStyleSheet("border: none;");
+    toolButton->setAutoRaise(false);
+    toolButton->setCursor(Qt::PointingHandCursor);
+
+    connect(toolButton, &QToolButton::clicked, this, [this]() -> void {
+        emit triggered();
+	});
+
+	return toolButton;
+}
+
+void StringAction::InlineAction::setStyledIcon(const util::StyledIcon& styledIcon)
+{
+    _styledIcon = styledIcon;
 }
 
 StringAction::LabelWidget::LabelWidget(QWidget* parent, StringAction* stringAction) :
