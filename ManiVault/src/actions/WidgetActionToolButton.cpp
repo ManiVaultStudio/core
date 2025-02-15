@@ -31,14 +31,8 @@ WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* ac
     const auto heightHint = WidgetActionToolButton::sizeHintPushButton->sizeHint().height();
     
     setMinimumSize(QSize(heightHint, heightHint));
-    
-#ifdef __APPLE__
+
     setIconSize(QSize(12, 12));
-           
-    // This is a work-around to prevent sizing issues with tool buttons that have only an icon
-    //setText(" ");
-    
-#endif
 }
 
 WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction) :
@@ -83,6 +77,12 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
         painter.setBrush(Qt::NoBrush);
         painter.drawPoint(center);
     }
+
+    auto rect = QRect({}, iconSize());
+
+    rect.moveCenter(geometry().center());
+
+    painter.drawPixmap(rect, _action->icon().pixmap(iconSize()));
 }
 
 WidgetAction* WidgetActionToolButton::getAction() const
@@ -104,7 +104,6 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
 
     if (_action) {
         const auto actionChanged = [this]() {
-            setIcon(_action->icon());
             setToolTip(_action->toolTip());
         };
 

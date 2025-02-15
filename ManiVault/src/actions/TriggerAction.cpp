@@ -36,10 +36,12 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     _triggerAction(triggerAction),
     _widgetFlags(widgetFlags)
 {
-#ifdef __APPLE__
+//#ifdef __APPLE__
+//    setIconSize(QSize(12, 12));
+//#endif
+
     setIconSize(QSize(12, 12));
-#endif
-    
+
     connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();
 	});
@@ -52,23 +54,13 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
         if (widgetFlags & WidgetFlag::Text) {
             setText(triggerAction->text());
             
-#ifdef __APPLE__
-            
-            // This is a work-around to prevent sizing issues with pushbuttons that have only an icon
             if (triggerAction->text().isEmpty())
                 setText(" ");
-#endif
         }
         
         if (widgetFlags & WidgetFlag::Icon) {
-#ifdef __APPLE__
-            
-            // This is a work-around to prevent sizing issues with pushbuttons that have only an icon
             if ((widgetFlags & WidgetFlag::Text) == 0)
                 setText(" ");
-#else
-            setIcon(triggerAction->icon());
-#endif
         }
 
         setToolTip(triggerAction->toolTip());
@@ -96,11 +88,11 @@ void TriggerAction::PushButtonWidget::paintEvent(QPaintEvent* event) {
     if (_widgetFlags & WidgetFlag::Icon && (_widgetFlags & WidgetFlag::Text) == 0) {
         QPainter painter(this);
         
-        const auto iconSize = this->iconSize();
-        const auto rect     = this->rect();
-        const auto center   = rect.center() - QPoint(iconSize.width() / 2, iconSize.height() / 2) + QPoint(1, 1);
-        
-        _triggerAction->icon().paint(&painter, QRect(center, iconSize));
+        auto rect = QRect({}, iconSize());
+
+        rect.moveCenter(geometry().center());
+
+        painter.drawPixmap(rect, _triggerAction->icon().pixmap(iconSize()));
     }
 }
 
