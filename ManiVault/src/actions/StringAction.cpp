@@ -269,7 +269,7 @@ void StringAction::InlineAction::StyledToolButton::addGlowEffect()
 {
 	auto* effect = new QGraphicsDropShadowEffect(this);
 
-    auto color = palette().color(QPalette::ColorRole::HighlightedText);
+    auto color = palette().color(QPalette::ColorRole::Accent);
 
 	effect->setBlurRadius(12);
 	effect->setColor(color);
