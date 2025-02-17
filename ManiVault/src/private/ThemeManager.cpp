@@ -50,9 +50,31 @@ void ThemeManager::initialize()
     if (isInitialized())
         return;
 
-    //connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
-    //    qDebug() << "Color scheme changed";
-    //    });
+    connect(qApp, &QApplication::paletteChanged, this, [this]() -> void {
+        //qDebug() << "Color scheme changed";
+        //qDebug() << "connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged";
+
+        QTimer::singleShot(1500, [this]() -> void
+        {
+            QList<QWidget*> Children = this->findChildren<QWidget*>(QString(), Qt::FindChildrenRecursively);
+            for (auto Widget : Children)
+            {
+                Widget->style()->unpolish(Widget);
+                Widget->style()->polish(Widget);
+            }
+        });
+
+        
+        /*
+        for (auto widget : QApplication::allWidgets()) {
+            widget->style()->unpolish(widget);
+            widget->style()->polish(widget);
+
+            widget->update();
+            widget->repaint();
+        }
+        */
+    });
 
     beginInitialization();
     {
@@ -115,13 +137,7 @@ void ThemeManager::initialize()
             if (_customThemes.contains(currentTheme)) {
 	            qApp->setPalette(_customThemes[currentTheme]);
 
-				for (auto widget : QApplication::allWidgets()) {
-					widget->style()->unpolish(widget);
-					widget->style()->polish(widget);
-
-					widget->update();
-					widget->repaint();
-				}
+				
             }
         });
 

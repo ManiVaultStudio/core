@@ -29,7 +29,7 @@ StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFont
     QObject(parent),
     QIcon(new StyledIconEngine(*this))
 {
-    connect(&mv::theme(), &AbstractThemeManager::themeChanged, this, &StyledIcon::updateIconPixmap);
+    //connect(&mv::theme(), &AbstractThemeManager::themeChanged, this, &StyledIcon::updateIconPixmap);
 
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
         set(iconName, iconFontName, iconFontVersion);
