@@ -4,7 +4,6 @@
 
 #include "PageWidget.h"
 
-#include <QApplication>
 #include <QDebug>
 #include <QPainter>
 
@@ -13,30 +12,38 @@ using namespace mv;
 PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _pageHeaderWidget(title),
-    _titleLabel(title),
     _backgroundImage(":/Images/StartPageBackground")
 {
     setObjectName("PageWidget");
     setLayout(&_layout);
     setMinimumWidth(500);
+    setAutoFillBackground(true);
 
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setSpacing(0);
 
     _contentLayout.addWidget(&_pageHeaderWidget,  1);
 
-    _titleLabel.setObjectName("Title");
-    _titleLabel.setAutoFillBackground(true);
-    _titleLabel.setStyleSheet(" \
-        font-size: 18pt; \
-        color: rgb(80, 80, 80); \
-        padding-top: 10px; \
-        padding-bottom: 0px; \
-    ");
+    auto titleWidget    = new QWidget();
+    auto titleLayout    = new QVBoxLayout();
+    auto titleLabel     = new QLabel(title);
 
-    _titleLabel.setAlignment(Qt::AlignCenter);
+    titleWidget->setAutoFillBackground(true);
+    titleWidget->setAttribute(Qt::WidgetAttribute::WA_StyledBackground);
+    titleWidget->setLayout(titleLayout);
+    titleWidget->setBackgroundRole(QPalette::Window);
 
-    _contentLayout.addWidget(&_titleLabel);
+    titleLabel->setAlignment(Qt::AlignCenter);
+    titleLabel->setStyleSheet(
+        "font-size: 18pt;"
+        "color: rgb(80, 80, 80);"
+        "padding-top: 10px;"
+        "padding-bottom: 0px;"
+    );
+
+    titleLayout->addWidget(titleLabel);
+
+    _contentLayout.addWidget(titleWidget);
 
     _layout.addStretch(1);
     _layout.addLayout(&_contentLayout, 2);

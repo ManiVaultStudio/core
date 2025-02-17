@@ -96,7 +96,7 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
     });
 
     treeView.setBackgroundRole(QPalette::Window);
-    treeView.setAttribute(Qt::WA_NoSystemBackground, false);
+    //treeView.setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
 QVBoxLayout& PageActionsWidget::getLayout()

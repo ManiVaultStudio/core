@@ -44,6 +44,5 @@ private:
     QHBoxLayout         _layout;                /** Main layout */
     QVBoxLayout         _contentLayout;         /** Layout for the main content */
     PageHeaderWidget    _pageHeaderWidget;      /** Widget which contains the header */
-    QLabel              _titleLabel;            /** Title label */
     QPixmap             _backgroundImage;       /** Background image */
 };
