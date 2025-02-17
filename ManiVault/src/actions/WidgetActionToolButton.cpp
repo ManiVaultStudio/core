@@ -78,11 +78,13 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
         painter.drawPoint(center);
     }
 
-    auto rect = QRect({}, iconSize());
+    if (_action) {
+        auto rect = QRect({}, iconSize());
 
-    rect.moveCenter(geometry().center());
+        rect.moveCenter(geometry().center());
 
-    painter.drawPixmap(rect, _action->icon().pixmap(iconSize()));
+        painter.drawPixmap(rect, _action->icon().pixmap(iconSize()));
+    }
 }
 
 WidgetAction* WidgetActionToolButton::getAction() const
