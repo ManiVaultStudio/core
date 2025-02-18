@@ -59,6 +59,8 @@ public:
      */
     void addCustomTheme(const QString& themeName, const QPalette& themePalette) override;
 
+private:
+
     /**
      * Handle \p event
      * @param event Pointer to event
@@ -66,10 +68,11 @@ public:
      */
     bool event(QEvent* event) override;
 
-private:
-
     /** Add default custom themes */
     void addDefaultCustomThemes();
+
+    /** Restyles all widgets in the application */
+    void restyleAllWidgets();
 
 public: // Action getters
 
@@ -84,6 +87,7 @@ private:
     gui::ToggleAction           _darkThemeAction;           /** Set to dark theme when triggered */
     gui::OptionAction           _customThemeAction;         /** Set to dark theme when triggered */
     QMap<QString, QPalette>     _customThemes;              /** Custom themes */
+    QPalette                    _currentPalette;            /** Current application palette */
 };
 
 }
