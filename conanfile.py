@@ -51,7 +51,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/6.7.3@lkeb/stable")
+    requires = ("qt/6.8.2@lkeb/stable")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
@@ -129,7 +129,7 @@ class HdpsCoreConan(ConanFile):
         qt_path = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
         qt_cfg = list(qt_path.glob("**/Qt6Config.cmake"))[0]
         qt_dir = qt_cfg.parents[0].as_posix()
-        qt_root = qt_cfg.parents[3].as_posix()
+        qt_root = qt_cfg.parents[2].as_posix()
 
         # for qt & ads
         tc.variables["Qt6_ROOT"] = qt_root
