@@ -120,14 +120,15 @@ public: // Action getters
     gui::OptionAction& getCustomThemeAction() override { return _customThemeAction; }
 
 private:
-    gui::ToggleAction           _useSystemThemeAction;      /** Toggle action for toggling the learning center */
-    gui::ToggleAction           _lightSystemThemeAction;    /** Set to light system theme when triggered */
-    gui::ToggleAction           _darkSystemThemeAction;     /** Set to dark theme when triggered */
-    gui::OptionAction           _customThemeAction;         /** Set to dark theme when triggered */
-    QMap<QString, QPalette>     _customThemes;              /** Custom themes */
-    QPalette                    _currentPalette;            /** Current application palette */
-    QTimer                      _requestChangesTimer;       /** Timer for processing requested changes */
-    std::int32_t                _numberOfCommits;           /** Number of commits */
+    gui::ToggleAction           _useSystemThemeAction;              /** Toggle action for toggling the learning center */
+    gui::ToggleAction           _lightSystemThemeAction;            /** Set to light system theme when triggered */
+    gui::ToggleAction           _darkSystemThemeAction;             /** Set to dark theme when triggered */
+    gui::OptionAction           _customThemeAction;                 /** Set to dark theme when triggered */
+    QMap<QString, QPalette>     _customThemes;                      /** Custom themes */
+    QPalette                    _currentPalette;                    /** Current application palette */
+    QTimer                      _requestChangesTimer;               /** Timer for processing requested changes */
+    QTimer                      _detectColorSchemeChangeTimer;      /** QStyleHints::colorSchemeChanged is sometimes unreliable: check periodically for changes */
+    std::int32_t                _numberOfCommits;                   /** Number of commits */
 };
 
 }

@@ -4,8 +4,6 @@
 
 #include "ThemeManager.h"
 
-#include <Task.h>
-
 #include <QStyleFactory>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
@@ -44,6 +42,13 @@ ThemeManager::ThemeManager(QObject* parent) :
     connect(&_requestChangesTimer, &QTimer::timeout, this, [this]() -> void {
         commitChanges();
 	});
+
+    _detectColorSchemeChangeTimer.setSingleShot(true);
+    _detectColorSchemeChangeTimer.setInterval(1000);
+
+    connect(&_detectColorSchemeChangeTimer, &QTimer::timeout, this, [this]() -> void {
+        requestChanges();
+	});
 }
 
 ThemeManager::~ThemeManager()
@@ -72,14 +77,7 @@ void ThemeManager::initialize()
 
             emit applicationPaletteChanged(qApp->palette());
 
-            const auto isDark = scheme == Qt::ColorScheme::Dark;
-
-            emit themeChanged(isDark);
-
-            if (isDark)
-                emit themeChangedToDark();
-            else
-                emit themeChangedToLight();
+            requestChanges();
         });
 #endif
 
@@ -99,13 +97,11 @@ void ThemeManager::initialize()
             qDebug() << "mv::ThemeManager::_lightSystemThemeAction::toggled()" << toggled;
 #endif
 
-            if (isSystemThemingActive() && !toggled) {
-                activateDarkSystemTheme();
-            }  else {
-                QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
+            //if (toggled) {
+            //    QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
 
-                requestChanges();
-            }
+            //    requestChanges();
+            //}
         });
 
         connect(&_darkSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
@@ -113,14 +109,11 @@ void ThemeManager::initialize()
             qDebug() << "mv::ThemeManager::_darkSystemThemeAction::toggled()" << toggled;
 #endif
 
-            if (isSystemThemingActive() && !toggled) {
-                activateLightSystemTheme();
-            }
-            else {
-	            QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Dark);
+            //if (toggled) {
+            //    QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Dark);
 
-				requestChanges();
-            }
+            //    requestChanges();
+            //}
         });
 
         connect(&_customThemeAction, &OptionAction::currentTextChanged, this, [this](const QString& currentTheme) -> void {
@@ -128,17 +121,20 @@ void ThemeManager::initialize()
             qDebug() << "mv::ThemeManager::_customThemeAction::currentTextChanged()" << currentTheme;
 #endif
 
-            requestChanges();
+            
 
             if (_customThemes.contains(currentTheme)) {
-                qApp->setStyle(QStyleFactory::create("Fusion"));
 	            qApp->setPalette(_customThemes[currentTheme]);
+                qApp->setStyle(QStyleFactory::create("Fusion"));
 
                 emit applicationPaletteChanged(qApp->palette());
+
+                requestChanges();
             }
         });
 
         addDefaultCustomThemes();
+        requestChanges();
     }
     endInitialization();
 }
@@ -202,11 +198,15 @@ void ThemeManager::deactivateSystemTheme()
 
 bool ThemeManager::isDarkColorSchemeActive() const
 {
+    if (isSystemThemingActive()) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
 #else
     return QApplication::palette().color(QPalette::Window).lightness() < 128;
 #endif
+    }
+
+	return _darkSystemThemeAction.isChecked();
 }
 
 void ThemeManager::activateLightSystemTheme()
@@ -243,7 +243,15 @@ QStringList ThemeManager::getCustomThemeNames() const
 
 bool ThemeManager::isLightColorSchemeActive() const
 {
-    return !isDarkColorSchemeActive();
+    if (isSystemThemingActive()) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Light;
+#else
+        return QApplication::palette().color(QPalette::Window).lightness() >= 128;
+#endif
+    }
+    
+    return _lightSystemThemeAction.isChecked();
 }
 
 void ThemeManager::addCustomTheme(const QString& themeName, const QPalette& themePalette)
@@ -260,6 +268,10 @@ void ThemeManager::addCustomTheme(const QString& themeName, const QPalette& them
 bool ThemeManager::event(QEvent* event)
 {
     if (event->type() == QEvent::PaletteChange) {
+#ifdef THEME_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__ << "QEvent::PaletteChange";
+#endif
+
         auto currentPalette = QGuiApplication::palette();
 
         if (currentPalette != _currentPalette) {
@@ -273,6 +285,10 @@ bool ThemeManager::event(QEvent* event)
     }
 
     if (event->type() == QEvent::ThemeChange) {
+#ifdef THEME_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__ << "QEvent::ThemeChange";
+#endif
+
         emit applicationPaletteChanged(_currentPalette);
 
         restyleAllWidgets();
@@ -287,132 +303,37 @@ void ThemeManager::addDefaultCustomThemes()
     qDebug() << __FUNCTION__;
 #endif
 
-    auto& palette = _customThemes["Dark"];
+    const auto addTheme = [this](QString name, QColor window, QColor windowText, QColor base, QColor alternateBase, QColor tooltipBase, QColor tooltipText, QColor text, QColor button, QColor buttonText, QColor brightText) -> void {
+        auto palette = QPalette();
 
-    palette.setColor(QPalette::Window, QColor(45, 45, 45));
-    palette.setColor(QPalette::WindowText, Qt::white);
-    palette.setColor(QPalette::Base, QColor(30, 30, 30));
-    palette.setColor(QPalette::AlternateBase, QColor(45, 45, 45));
-    palette.setColor(QPalette::ToolTipBase, Qt::white);
-    palette.setColor(QPalette::ToolTipText, Qt::white);
-    palette.setColor(QPalette::Text, Qt::white);
-    palette.setColor(QPalette::Button, QColor(60, 60, 60));
-    palette.setColor(QPalette::ButtonText, Qt::white);
-    palette.setColor(QPalette::BrightText, Qt::red);
+        palette.setColor(QPalette::Window, window);
+        palette.setColor(QPalette::WindowText, windowText);
+        palette.setColor(QPalette::Base, base);
+        palette.setColor(QPalette::AlternateBase, alternateBase);
+        palette.setColor(QPalette::ToolTipBase, tooltipBase);
+        palette.setColor(QPalette::ToolTipText, tooltipText);
+        palette.setColor(QPalette::Text, tooltipText);
+        palette.setColor(QPalette::Button, button);
+        palette.setColor(QPalette::ButtonText, buttonText);
+        palette.setColor(QPalette::BrightText, brightText);
 
-    palette = _customThemes["Light"];
+        addCustomTheme(name, palette);
+    };
 
-    palette.setColor(QPalette::Window, Qt::white);
-    palette.setColor(QPalette::WindowText, Qt::black);
-    palette.setColor(QPalette::Base, Qt::white);
-    palette.setColor(QPalette::AlternateBase, QColor(240, 240, 240));
-    palette.setColor(QPalette::ToolTipBase, Qt::white);
-    palette.setColor(QPalette::ToolTipText, Qt::black);
-    palette.setColor(QPalette::Text, Qt::black);
-    palette.setColor(QPalette::Button, QColor(220, 220, 220));
-    palette.setColor(QPalette::ButtonText, Qt::black);
-    palette.setColor(QPalette::BrightText, Qt::red);
+    addTheme("Dark", QColor(45, 45, 45), Qt::white, QColor(30, 30, 30), QColor(45, 45, 45), Qt::white, Qt::white, Qt::white, QColor(60, 60, 60), Qt::white, Qt::red);
+    addTheme("Light", Qt::white, Qt::black, Qt::white, QColor(240, 240, 240), Qt::white, Qt::black, Qt::black, QColor(220, 220, 220), Qt::black, Qt::red);
+    addTheme("Fusion (dark)", QColor(45, 45, 45), Qt::white, QColor(30, 30, 30), QColor(45, 45, 45), Qt::white, Qt::white, Qt::white, QColor(60, 60, 60), Qt::white, Qt::red);
+    addTheme("Fusion (light)", Qt::white, Qt::black, Qt::white, QColor(240, 240, 240), Qt::white, Qt::black, Qt::black, QColor(220, 220, 220), Qt::black, Qt::red);
+    addTheme("Google Material Design (dark)", QColor(33, 33, 33), QColor(220, 220, 220), QColor(50, 50, 50), QColor(40, 40, 40), QColor(50, 50, 50), QColor(220, 220, 220), QColor(220, 220, 220), QColor(50, 50, 50), QColor(220, 220, 220), QColor(220, 220, 220));
+    addTheme("Google Material Design (light)", QColor(245, 245, 245), QColor(0, 0, 0), QColor(255, 255, 255), QColor(240, 240, 240), QColor(255, 255, 255), QColor(0, 0, 0), QColor(0, 0, 0), QColor(230, 230, 230), QColor(0, 0, 0), QColor(0, 0, 0));
+    addTheme("Dracula", QColor(40, 42, 54), QColor(248, 248, 242), QColor(68, 71, 90), QColor(50, 50, 70), QColor(68, 71, 90), QColor(248, 248, 242), QColor(248, 248, 242), QColor(68, 71, 90), QColor(248, 248, 242), QColor(248, 248, 242));
+    addTheme("Nord (Cold Minimalistic)", QColor(46, 52, 64), QColor(216, 222, 233), QColor(59, 66, 82), QColor(76, 86, 106), QColor(59, 66, 82), QColor(216, 222, 233), QColor(216, 222, 233), QColor(59, 66, 82), QColor(216, 222, 233), QColor(216, 222, 233));
+    addTheme("Solarized (dark)", QColor(0, 43, 54), QColor(131, 148, 150), QColor(7, 54, 66), QColor(0, 43, 54), QColor(7, 54, 66), QColor(131, 148, 150), QColor(147, 161, 161), QColor(88, 110, 117), QColor(147, 161, 161), QColor(147, 161, 161));
+    addTheme("Solarized (light)", QColor(253, 246, 227), QColor(101, 123, 131), QColor(238, 232, 213), QColor(253, 246, 227), QColor(238, 232, 213), QColor(101, 123, 131), QColor(88, 110, 117), QColor(147, 161, 161), QColor(88, 110, 117), QColor(88, 110, 117));
+    addTheme("Monokai", QColor(39, 40, 34), QColor(248, 248, 242), QColor(50, 50, 50), QColor(60, 60, 60), QColor(50, 50, 50), QColor(248, 248, 242), QColor(248, 248, 242), QColor(70, 70, 70), QColor(248, 248, 242), QColor(248, 248, 242));
+    addTheme("High contrast", Qt::black, Qt::white, Qt::black, Qt::white, Qt::black, Qt::white, Qt::white, Qt::black, Qt::white, Qt::red);
 
-    palette = _customThemes["Fusion light"];
-
-    palette.setColor(QPalette::Window, Qt::white);
-    palette.setColor(QPalette::WindowText, Qt::black);
-    palette.setColor(QPalette::Base, Qt::white);
-    palette.setColor(QPalette::AlternateBase, QColor(240, 240, 240));
-    palette.setColor(QPalette::Text, Qt::black);
-    palette.setColor(QPalette::Button, QColor(220, 220, 220));
-    palette.setColor(QPalette::ButtonText, Qt::black);
-
-    palette = _customThemes["Fusion (dark)"];
-
-    palette.setColor(QPalette::Window, QColor(45, 45, 45));
-    palette.setColor(QPalette::WindowText, Qt::white);
-    palette.setColor(QPalette::Base, QColor(30, 30, 30));
-    palette.setColor(QPalette::AlternateBase, QColor(45, 45, 45));
-    palette.setColor(QPalette::Text, Qt::white);
-    palette.setColor(QPalette::Button, QColor(60, 60, 60));
-    palette.setColor(QPalette::ButtonText, Qt::white);
-
-    palette = _customThemes["Google Material Design (dark)"];
-
-    palette.setColor(QPalette::Window, QColor(33, 33, 33));
-    palette.setColor(QPalette::WindowText, QColor(220, 220, 220));
-    palette.setColor(QPalette::Base, QColor(50, 50, 50));
-    palette.setColor(QPalette::AlternateBase, QColor(40, 40, 40));
-    palette.setColor(QPalette::Text, QColor(220, 220, 220));
-    palette.setColor(QPalette::Button, QColor(50, 50, 50));
-    palette.setColor(QPalette::ButtonText, QColor(220, 220, 220));
-
-    palette = _customThemes["Google Material Design (light)"];
-
-    palette.setColor(QPalette::Window, QColor(245, 245, 245));
-    palette.setColor(QPalette::WindowText, QColor(0, 0, 0));
-    palette.setColor(QPalette::Base, QColor(255, 255, 255));
-    palette.setColor(QPalette::AlternateBase, QColor(240, 240, 240));
-    palette.setColor(QPalette::Text, QColor(0, 0, 0));
-    palette.setColor(QPalette::Button, QColor(230, 230, 230));
-    palette.setColor(QPalette::ButtonText, QColor(0, 0, 0));
-
-    palette = _customThemes["Dracula"];
-
-    palette.setColor(QPalette::Window, QColor(40, 42, 54));
-    palette.setColor(QPalette::WindowText, QColor(248, 248, 242));
-    palette.setColor(QPalette::Base, QColor(68, 71, 90));
-    palette.setColor(QPalette::AlternateBase, QColor(50, 50, 70));
-    palette.setColor(QPalette::Text, QColor(248, 248, 242));
-    palette.setColor(QPalette::Button, QColor(68, 71, 90));
-    palette.setColor(QPalette::ButtonText, QColor(248, 248, 242));
-
-    palette = _customThemes["Nord (Cold Minimalistic)"];
-
-    palette.setColor(QPalette::Window, QColor(46, 52, 64));
-    palette.setColor(QPalette::WindowText, QColor(216, 222, 233));
-    palette.setColor(QPalette::Base, QColor(59, 66, 82));
-    palette.setColor(QPalette::AlternateBase, QColor(76, 86, 106));
-    palette.setColor(QPalette::Text, QColor(216, 222, 233));
-    palette.setColor(QPalette::Button, QColor(76, 86, 106));
-    palette.setColor(QPalette::ButtonText, QColor(216, 222, 233));
-
-    palette = _customThemes["Solarized (dark)"];
-
-    palette.setColor(QPalette::Window, QColor(0, 43, 54));
-    palette.setColor(QPalette::WindowText, QColor(131, 148, 150));
-    palette.setColor(QPalette::Base, QColor(7, 54, 66));
-    palette.setColor(QPalette::AlternateBase, QColor(0, 43, 54));
-    palette.setColor(QPalette::Text, QColor(147, 161, 161));
-    palette.setColor(QPalette::Button, QColor(88, 110, 117));
-    palette.setColor(QPalette::ButtonText, QColor(147, 161, 161));
-
-    palette = _customThemes["Solarized (light)"];
-
-    palette.setColor(QPalette::Window, QColor(253, 246, 227));
-    palette.setColor(QPalette::WindowText, QColor(101, 123, 131));
-    palette.setColor(QPalette::Base, QColor(238, 232, 213));
-    palette.setColor(QPalette::AlternateBase, QColor(253, 246, 227));
-    palette.setColor(QPalette::Text, QColor(88, 110, 117));
-    palette.setColor(QPalette::Button, QColor(147, 161, 161));
-    palette.setColor(QPalette::ButtonText, QColor(88, 110, 117));
-
-    palette = _customThemes["Monokai"];
-
-    palette.setColor(QPalette::Window, QColor(39, 40, 34));
-    palette.setColor(QPalette::WindowText, QColor(248, 248, 242));
-    palette.setColor(QPalette::Base, QColor(50, 50, 50));
-    palette.setColor(QPalette::AlternateBase, QColor(60, 60, 60));
-    palette.setColor(QPalette::Text, QColor(248, 248, 242));
-    palette.setColor(QPalette::Button, QColor(70, 70, 70));
-    palette.setColor(QPalette::ButtonText, QColor(248, 248, 242));
-
-    palette = _customThemes["High contrast"];
-
-    palette.setColor(QPalette::Window, Qt::black);
-    palette.setColor(QPalette::WindowText, Qt::white);
-    palette.setColor(QPalette::Base, Qt::black);
-    palette.setColor(QPalette::Text, Qt::white);
-    palette.setColor(QPalette::Button, Qt::black);
-    palette.setColor(QPalette::ButtonText, Qt::white);
-
-    _customThemeAction.setOptions(_customThemes.keys());
+	_customThemeAction.setOptions(_customThemes.keys());
 }
 
 void ThemeManager::restyleAllWidgets() const
@@ -423,11 +344,10 @@ void ThemeManager::restyleAllWidgets() const
 
     QTimer::singleShot(25, [this]() -> void
     {
-        const auto children = this->findChildren<QWidget*>(QString(), Qt::FindChildrenRecursively);
-
-        for (auto widget : children) {
+        for (auto widget : QApplication::topLevelWidgets()) {
             widget->style()->unpolish(widget);
             widget->style()->polish(widget);
+            widget->update();
             widget->repaint();
         }
     });
@@ -439,14 +359,14 @@ void ThemeManager::requestChanges()
     qDebug() << __FUNCTION__;
 #endif
 
-    _lightSystemThemeAction.setEnabled(isSystemThemingActive());
-    _darkSystemThemeAction.setEnabled(isSystemThemingActive());
+    _lightSystemThemeAction.setEnabled(!isSystemThemingActive());
+    _darkSystemThemeAction.setEnabled(!isSystemThemingActive());
     _customThemeAction.setEnabled(!isSystemThemingActive());
 
-    const auto isSystemThemeActive = _useSystemThemeAction.isChecked();
-
-    _lightSystemThemeAction.setChecked(isSystemThemeActive && isLightColorSchemeActive());
-    _darkSystemThemeAction.setChecked(isSystemThemeActive && isDarkColorSchemeActive());
+    if (isSystemThemingActive()) {
+        _lightSystemThemeAction.setChecked(isLightColorSchemeActive());
+        _darkSystemThemeAction.setChecked(isDarkColorSchemeActive());
+    }
 
     _requestChangesTimer.start();
 }

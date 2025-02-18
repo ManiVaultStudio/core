@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 
     loadGuiTask.setSubtaskStarted("Apply styles");
 
-    application.setStyle(QStyleFactory::create("Fusion"));
+    //application.setStyle(QStyleFactory::create("Fusion"));
 
 #ifdef _WIN32
     //application.setStyle(new NoFocusProxyStyle);
