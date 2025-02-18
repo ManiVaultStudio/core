@@ -14,7 +14,6 @@
 #include <QPushButton>
 
 #include "actions/ColorAction.h"
-#include "actions/ColorAction.h"
 
 namespace mv::util
 {
