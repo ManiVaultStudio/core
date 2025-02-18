@@ -50,36 +50,12 @@ void ThemeManager::initialize()
     if (isInitialized())
         return;
 
-    connect(qApp, &QApplication::paletteChanged, this, [this]() -> void {
-        //qDebug() << "Color scheme changed";
-        //qDebug() << "connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged";
-
-        QTimer::singleShot(1500, [this]() -> void
-        {
-            QList<QWidget*> Children = this->findChildren<QWidget*>(QString(), Qt::FindChildrenRecursively);
-            for (auto Widget : Children)
-            {
-                Widget->style()->unpolish(Widget);
-                Widget->style()->polish(Widget);
-            }
-        });
-
-        
-        /*
-        for (auto widget : QApplication::allWidgets()) {
-            widget->style()->unpolish(widget);
-            widget->style()->polish(widget);
-
-            widget->update();
-            widget->repaint();
-        }
-        */
-    });
-
     beginInitialization();
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
+            emit applicationPaletteChanged(qApp->palette());
+
             const auto isDark = scheme == Qt::ColorScheme::Dark;
 
             emit themeChanged(isDark);
@@ -196,12 +172,30 @@ void ThemeManager::addCustomTheme(const QString& themeName, const QPalette& them
 bool ThemeManager::event(QEvent* event)
 {
     if (event->type() == QEvent::PaletteChange) {
+        auto currentPalette = QGuiApplication::palette();
+
+        if (currentPalette != _currentPalette) {
+
+            _currentPalette = currentPalette;
+
+            emit applicationPaletteChanged(_currentPalette);
+
+            restyleAllWidgets();
+        }
+    }
+
+    if (event->type() == QEvent::ThemeChange) {
+        emit applicationPaletteChanged(_currentPalette);
+
         emit themeChanged(isDark());
         if (isDark())
             emit themeChangedToDark();
         else
             emit themeChangedToLight();
+
+        restyleAllWidgets();
     }
+
 	return AbstractThemeManager::event(event);
 }
 
@@ -333,6 +327,20 @@ void ThemeManager::addDefaultCustomThemes()
     palette.setColor(QPalette::ButtonText, Qt::white);
 
     _customThemeAction.setOptions(_customThemes.keys());
+}
+
+void ThemeManager::restyleAllWidgets()
+{
+    QTimer::singleShot(250, [this]() -> void
+    {
+        const auto children = this->findChildren<QWidget*>(QString(), Qt::FindChildrenRecursively);
+
+        for (auto widget : children) {
+            widget->style()->unpolish(widget);
+            widget->style()->polish(widget);
+            widget->repaint();
+        }
+    });
 }
 
 }

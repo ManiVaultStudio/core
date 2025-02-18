@@ -31,7 +31,7 @@ PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget
     setLayout(&_mainLayout);
 
     setBackgroundRole(QPalette::Window);
-    setAttribute(Qt::WA_NoSystemBackground, false);
+    //setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
 QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString& tooltip)
@@ -44,15 +44,17 @@ QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString
     const auto updateHeaderLabelStyle = [headerLabel]() -> void {
         headerLabel->setStyleSheet(QString(
             "QLabel {"
-				"color: %1;"
-				"font-weight: 200;"
-				"font-size: 13pt;"
-			"}").arg(qApp->palette().text().color().name()));
+                "color: %1;"
+                "font-weight: 200;"
+                "font-size: 13pt;"
+            "}").arg(qApp->palette().text().color().name()));
+
+        qDebug() << "updateHeaderLabelStyle";
     };
 
     updateHeaderLabelStyle();
 
-    connect(&mv::theme(), &mv::AbstractThemeManager::themeChanged, headerLabel, updateHeaderLabelStyle);
+    connect(&mv::theme(), &mv::AbstractThemeManager::applicationPaletteChanged, headerLabel, updateHeaderLabelStyle);
 
     return headerLabel;
 }

@@ -7,6 +7,7 @@
 #include "AbstractManager.h"
 
 #include <QObject>
+#include <QPalette>
 
 namespace mv::gui
 {
@@ -65,6 +66,12 @@ public:
     virtual void addCustomTheme(const QString& themeName, const QPalette& themePalette) = 0;
 
 signals:
+
+    /**
+     * Signals that the application palette change to \p palette
+     * @param palette Current palette
+     */
+    void applicationPaletteChanged(const QPalette& palette);
 
     /**
      * Signal emitted when the application theme changed
