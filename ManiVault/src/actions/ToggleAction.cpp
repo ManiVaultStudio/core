@@ -8,7 +8,6 @@
 #include <QPushButton>
 #include <QMenu>
 #include <QHBoxLayout>
-#include <QLabel>
 #include <QEvent>
 #include <QMouseEvent>
 

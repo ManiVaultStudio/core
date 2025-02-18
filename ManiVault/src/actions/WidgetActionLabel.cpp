@@ -217,7 +217,6 @@ void WidgetActionLabel::updateCustomStyle()
             _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().link().color().name()));
         else
             _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().text().color().name()));
-            ;
     } else {
         _nameLabel.setStyleSheet("color: gray;");
     }
