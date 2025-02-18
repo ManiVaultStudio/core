@@ -114,7 +114,7 @@ endif(MSVC)
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.7 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
+find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
