@@ -26,7 +26,8 @@ ThemeManager::ThemeManager(QObject* parent) :
     _systemLightColorSchemeAction(this, "Light"),
     _systemDarkColorSchemeAction(this, "Dark"),
     _customColorSchemeAction(this, "Custom theme"),
-    _numberOfCommits(0)
+    _numberOfCommits(0),
+    _currentColorScheme(Qt::ColorScheme::Unknown)
 {
     _colorSchemeModeAction.setSettingsPrefix(getSettingsPrefix() + "ColorSchemeMode");
     _systemLightColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Light");
@@ -47,12 +48,25 @@ ThemeManager::ThemeManager(QObject* parent) :
         commitChanges();
 	});
 
-    /*_detectColorSchemeChangeTimer.setSingleShot(true);
-    _detectColorSchemeChangeTimer.setInterval(1000);
+    _systemColorSchemeChangesTimer.setInterval(1000);
 
-    connect(&_detectColorSchemeChangeTimer, &QTimer::timeout, this, [this]() -> void {
+    connect(&_systemColorSchemeChangesTimer, &QTimer::timeout, this, [this]() -> void {
+        if (isSystemColorSchemeModeActive()) {
+            if (isSystemLightColorSchemeActive() && _currentColorScheme != Qt::ColorScheme::Light) {
+                setPalette(QApplication::style()->standardPalette());
+                _currentColorScheme = Qt::ColorScheme::Light;
+            }
+                
+            if (isSystemDarkColorSchemeActive() && _currentColorScheme != Qt::ColorScheme::Dark) {
+                setPalette(QApplication::style()->standardPalette());
+                _currentColorScheme = Qt::ColorScheme::Dark;
+            }
+        }
+
         requestChanges();
-	});*/
+	});
+
+    _systemColorSchemeChangesTimer.start();
 }
 
 ThemeManager::~ThemeManager()
@@ -73,39 +87,35 @@ void ThemeManager::initialize()
 
     beginInitialization();
     {
-//#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-//        connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
-//#ifdef THEME_MANAGER_VERBOSE
-//            qDebug() << "QStyleHints::colorSchemeChanged()" << scheme;
-//#endif
-//
-//            emit applicationPaletteChanged(qApp->palette());
-//
-//            requestChanges();
-//        });
-//#endif
-
-        connect(&_colorSchemeModeAction, &OptionAction::currentIndexChanged, this, [this](std::int32_t currentIndex) -> void {
-#ifdef THEME_MANAGER_VERBOSE
-            qDebug() << "mv::ThemeManager::_colorSchemeModeAction::currentIndexChanged()" << currentIndex;
-#endif
+        const auto colorSchemeModeChanged = [this]() -> void {
+            if (isSystemColorSchemeModeActive())
+                setPalette(QApplication::style()->standardPalette());
 
             if (!isSystemLightColorSchemeActive() && !isSystemDarkColorSchemeActive())
                 activateLightSystemColorScheme();
 
+            if (isCustomColorSchemeModeActive()) {
+                const auto customColorSchemeName = _customColorSchemeAction.getCurrentText();
+
+            	if (_customThemes.contains(customColorSchemeName))
+					setPalette(_customThemes[customColorSchemeName]);
+            }
+
             requestChanges();
-		});
+        };
+
+        colorSchemeModeChanged();
+
+        connect(&_colorSchemeModeAction, &OptionAction::currentIndexChanged, this, colorSchemeModeChanged);
 
         connect(&_systemLightColorSchemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
 #ifdef THEME_MANAGER_VERBOSE
             qDebug() << "mv::ThemeManager::_systemLightColorSchemeAction::toggled()" << toggled;
 #endif
+            _systemDarkColorSchemeAction.setChecked(false);
 
-            //if (toggled) {
-            //    QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
-
-            //    requestChanges();
-            //}
+    //        if (isSystemLightDarkColorSchemeModeActive() && toggled)
+				//QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
         });
 
         connect(&_systemDarkColorSchemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
@@ -113,11 +123,10 @@ void ThemeManager::initialize()
             qDebug() << "mv::ThemeManager::_systemDarkColorSchemeAction::toggled()" << toggled;
 #endif
 
-            //if (toggled) {
-            //    QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Dark);
+            _systemLightColorSchemeAction.setChecked(false);
 
-            //    requestChanges();
-            //}
+            //if (isSystemLightDarkColorSchemeModeActive() && toggled)
+            //    QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Dark);
         });
 
         connect(&_customColorSchemeAction, &OptionAction::currentTextChanged, this, [this](const QString& currentTheme) -> void {
@@ -125,14 +134,8 @@ void ThemeManager::initialize()
             qDebug() << "mv::ThemeManager::_customColorSchemeAction::currentTextChanged()" << currentTheme;
 #endif
 
-            if (_customThemes.contains(currentTheme)) {
-	            qApp->setPalette(_customThemes[currentTheme]);
-                qApp->setStyle(QStyleFactory::create("Fusion"));
-
-                emit applicationPaletteChanged(qApp->palette());
-
-                requestChanges();
-            }
+            if (_customThemes.contains(currentTheme))
+                setPalette(_customThemes[currentTheme]);
         });
 
         addDefaultCustomThemes();
@@ -234,7 +237,7 @@ QStringList ThemeManager::getCustomThemeNames() const
 void ThemeManager::addCustomTheme(const QString& themeName, const QPalette& themePalette)
 {
 #ifdef THEME_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << themeName << themePalette;
+    qDebug() << __FUNCTION__ << themeName;
 #endif
 
     _customThemes[themeName] = themePalette;
@@ -340,10 +343,10 @@ void ThemeManager::requestChanges()
     _systemDarkColorSchemeAction.setEnabled(isSystemLightDarkColorSchemeModeActive());
     _customColorSchemeAction.setEnabled(isCustomColorSchemeModeActive());
 
-    if (isSystemLightDarkColorSchemeModeActive()) {
-        _systemLightColorSchemeAction.setChecked(isSystemLightColorSchemeActive());
-        _systemDarkColorSchemeAction.setChecked(isSystemDarkColorSchemeActive());
-    }
+    //if (isSystemColorSchemeModeActive()) {
+    //    _systemLightColorSchemeAction.setChecked(isSystemLightColorSchemeActive());
+    //    _systemDarkColorSchemeAction.setChecked(isSystemDarkColorSchemeActive());
+    //}
 
     _requestChangesTimer.start();
 }
@@ -363,6 +366,16 @@ void ThemeManager::commitChanges()
     //    mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(isSystemLightColorSchemeActive() ? "Light" : "Dark"), StyledIcon("palette"));
     //else
     //    mv::help().addNotification("Theme update", QString("<b>%1</b> custom application theme has been activated.").arg(_customColorSchemeAction.getCurrentText()), StyledIcon("palette"));
+}
+
+void ThemeManager::setPalette(const QPalette& palette)
+{
+    qApp->setPalette(palette);
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+
+    emit applicationPaletteChanged(palette);
+
+    requestChanges();
 }
 
 }
