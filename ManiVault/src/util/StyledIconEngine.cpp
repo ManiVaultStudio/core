@@ -77,12 +77,12 @@ QPixmap StyledIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& col
 
 QPalette::ColorGroup StyledIconEngine::getColorGroupForCurrentTheme() const
 {
-    return mv::theme().isDarkColorSchemeActive() ? _colorGroupDarkTheme : _colorGroupLightTheme;
+    return mv::theme().isSystemDarkColorSchemeActive() ? _colorGroupDarkTheme : _colorGroupLightTheme;
 }
 
 QPalette::ColorRole StyledIconEngine::getColorRoleForCurrentTheme() const
 {
-    return mv::theme().isDarkColorSchemeActive() ? _colorRoleDarkTheme : _colorRoleLightTheme;
+    return mv::theme().isSystemDarkColorSchemeActive() ? _colorRoleDarkTheme : _colorRoleLightTheme;
 }
 
 }

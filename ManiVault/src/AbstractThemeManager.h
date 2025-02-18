@@ -31,6 +31,15 @@ class CORE_EXPORT AbstractThemeManager : public AbstractManager
 
 public:
 
+    /** Color scheme modes */
+    enum class ColorSchemeMode {
+        System,             /** Color scheme is determined by the system color scheme */
+        SystemLightDark,    /** Color scheme is determined by the light/dark system color scheme */
+        Custom              /** Color scheme is determined by a custom color scheme */
+    };
+
+public:
+
     /**
      * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
@@ -41,46 +50,73 @@ public:
     }
 
     /**
-     * Get whether system theming is active
-     * @return Boolean determining whether system theming is active
+     * Get the current color scheme
+     * @return Color scheme mode
      */
-    virtual bool isSystemThemingActive() const = 0;
-
-    /** Activates system theming */
-    virtual void activateSystemTheming() = 0;
+    ColorSchemeMode getColorSchemeMode() const { return static_cast<ColorSchemeMode>(getColorSchemeModeAction().getCurrentIndex()); }
 
     /**
-     * Activates system theming with \p colorScheme
-     * @param colorScheme Color scheme
+     * Set the color scheme mode to \p colorSchemeMode
+     * @param colorSchemeMode Color scheme mode
      */
-    virtual void activateSystemTheming(const Qt::ColorScheme& colorScheme) = 0;
+    void setColorSchemeMode(const ColorSchemeMode& colorSchemeMode)
+    {
+        if (colorSchemeMode == getColorSchemeMode())
+            return;
 
-    /** De-activates the system theme (switches the application palette) */
-    virtual void deactivateSystemTheme() = 0;
+	    getColorSchemeModeAction().setCurrentIndex(static_cast<int>(colorSchemeMode));
+    }
+
+    /**
+     * Get whether the system color scheme mode is active
+     * @return Boolean indicating whether the system color scheme mode is active
+     */
+    virtual bool isSystemColorSchemeModeActive() const = 0;
+
+    /**
+     * Get whether the system light/dark color scheme mode is active
+     * @return Boolean indicating whether the system light/dark color scheme mode is active
+     */
+    virtual bool isSystemLightDarkColorSchemeModeActive() const = 0;
 
     /**
      * Get whether the light system color scheme is active
      * @return Boolean indicating whether the light system color scheme is active (also false when the system theme is not active)
      */
-    virtual bool isLightColorSchemeActive() const = 0;
+    virtual bool isSystemLightColorSchemeActive() const = 0;
 
     /**
      * Get whether the dark system color scheme is active
      * @return Boolean indicating whether the dark system color scheme is active (also false when the system theme is not active)
      */
-    virtual bool isDarkColorSchemeActive() const = 0;
-
-    /** Set theme to system light */
-    virtual void activateLightSystemTheme() = 0;
-
-    /** Set theme to system dark */
-    virtual void activateDarkSystemTheme() = 0;
+    virtual bool isSystemDarkColorSchemeActive() const = 0;
 
     /**
-     * Set custom theme to theme with \p customThemeName (this will override the system theme)
-     * @param customThemeName Custom theme name
+     * Get whether a custom color scheme mode is active
+     * @return Boolean indicating whether a custom color scheme mode is active
      */
-    virtual void activateCustomTheme(const QString& customThemeName) = 0;
+    virtual bool isCustomColorSchemeModeActive() const = 0;
+
+    /** Set color scheme mode to system */
+    virtual void activateSystemColorScheme() = 0;
+
+    /** Set color scheme mode to system light/dark */
+    virtual void activateSystemColorSchemeLightDark() = 0;
+
+    /** Set color scheme to system light */
+    virtual void activateLightSystemColorScheme() = 0;
+
+    /** Set theme to system dark */
+    virtual void activateDarkSystemColorScheme() = 0;
+
+    /** Activates the currently selected custom color scheme */
+    virtual void activateCustomColorScheme() = 0;
+
+    /**
+     * Activate custom color scheme with \p customThemeName (this will override the system color scheme)
+     * @param customColorSchemeName Custom color scheme name
+     */
+    virtual void activateCustomColorScheme(const QString& customColorSchemeName) = 0;
 
     /**
      * Get custom theme names
@@ -115,12 +151,27 @@ signals:
     /** Signal emitted when the application theme changed to dark */
     void themeChangedToDark();
 
+    /**
+     * Signals that the color scheme mode changed to \p colorSchemeMode
+     * @param colorSchemeMode Color scheme mode
+     */
+    void colorSchemeModeChanged(const ColorSchemeMode& colorSchemeMode);
+
+protected: // Action getters
+
+	virtual gui::OptionAction& getColorSchemeModeAction() = 0;
+    virtual gui::ToggleAction& getSystemLightColorSchemeAction() = 0;
+    virtual gui::ToggleAction& getSystemDarkColorSchemeAction() = 0;
+    virtual gui::OptionAction& getCustomColorSchemeAction() = 0;
+
 public: // Action getters
 
-    virtual gui::ToggleAction& getUseSystemThemeAction() = 0;
-    virtual gui::ToggleAction& getLightThemeAction() = 0;
-    virtual gui::ToggleAction& getDarkThemeAction() = 0;
-    virtual gui::OptionAction& getCustomThemeAction() = 0;
+    virtual const gui::OptionAction& getColorSchemeModeAction() const = 0;
+    virtual const gui::ToggleAction& getSystemLightColorSchemeAction() const = 0;
+    virtual const gui::ToggleAction& getSystemDarkColorSchemeAction() const = 0;
+    virtual const gui::OptionAction& getCustomColorSchemeAction() const = 0;
+
+    friend class mv::gui::ApplicationSettingsAction;
 };
 
 }
