@@ -122,12 +122,12 @@ class HdpsCoreConan(ConanFile):
                 "rm -rf ./icu/",
                 "rm -rf icu4c-73_2-Ubuntu22.04-x64.tgz"
             ]
-
-            try:
-                print(f"Executing: {cmd}")
-                subprocess.run(cmd, shell=True, check=True)
-            except subprocess.CalledProcessError as e:
-                print(f"Error: {e}")
+            for cmd in commands:
+                try:
+                    print(f"Executing: {cmd}")
+                    subprocess.run(cmd, shell=True, check=True)
+                except subprocess.CalledProcessError as e:
+                    print(f"Error: {e}")
             
     def config_options(self):
         if self.settings.os == "Windows":
