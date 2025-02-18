@@ -16,7 +16,7 @@ using namespace mv::gui;
 using namespace mv::util;
 
 #ifdef _DEBUG
-    //#define THEME_MANAGER_VERBOSE
+    #define THEME_MANAGER_VERBOSE
 #endif
 
 namespace mv
@@ -80,27 +80,34 @@ void ThemeManager::initialize()
 #endif
 
         connect(&_useSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-            qApp->setPalette(QPalette());
+            if (!isLightColorSchemeActive() && !isDarkColorSchemeActive())
+                activateLightSystemTheme();
 
             requestChanges();
 		});
 
         connect(&_lightSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-            if (!toggled)
-                return;
+            if (isSystemThemingActive() && !toggled) {
+                activateDarkSystemTheme();
+            }  else {
+                QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
 
-            QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
-
-            requestChanges();
+                requestChanges();
+            }
         });
 
         connect(&_darkSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
             if (!toggled)
                 return;
 
-            QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Dark);
+            if (isSystemThemingActive() && !toggled) {
+                activateLightSystemTheme();
+            }
+            else {
+	            QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Dark);
 
-            requestChanges();
+				requestChanges();
+            }
         });
 
         connect(&_customThemeAction, &OptionAction::currentTextChanged, this, [this](const QString& currentTheme) -> void {
@@ -138,11 +145,19 @@ bool ThemeManager::isSystemThemingActive() const
 
 void ThemeManager::activateSystemTheming()
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _useSystemThemeAction.setChecked(true);
 }
 
 void ThemeManager::activateSystemTheming(const Qt::ColorScheme& colorScheme)
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << colorScheme;
+#endif
+
     activateSystemTheming();
 
     switch (colorScheme) {
@@ -161,6 +176,10 @@ void ThemeManager::activateSystemTheming(const Qt::ColorScheme& colorScheme)
 
 void ThemeManager::deactivateSystemTheme()
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _useSystemThemeAction.setChecked(false);
 }
 
@@ -175,16 +194,28 @@ bool ThemeManager::isDarkColorSchemeActive() const
 
 void ThemeManager::activateLightSystemTheme()
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _lightSystemThemeAction.setChecked(true);
 }
 
 void ThemeManager::activateDarkSystemTheme()
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _darkSystemThemeAction.setChecked(true);
 }
 
 void ThemeManager::activateCustomTheme(const QString& customThemeName)
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << customThemeName;
+#endif
+
     _customThemeAction.setCurrentText(customThemeName);
 }
 
@@ -200,6 +231,10 @@ bool ThemeManager::isLightColorSchemeActive() const
 
 void ThemeManager::addCustomTheme(const QString& themeName, const QPalette& themePalette)
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << themeName << themePalette;
+#endif
+
     _customThemes[themeName] = themePalette;
 
     _customThemeAction.setOptions(_customThemes.keys());
@@ -231,6 +266,10 @@ bool ThemeManager::event(QEvent* event)
 
 void ThemeManager::addDefaultCustomThemes()
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     auto& palette = _customThemes["Dark"];
 
     palette.setColor(QPalette::Window, QColor(45, 45, 45));
@@ -361,6 +400,10 @@ void ThemeManager::addDefaultCustomThemes()
 
 void ThemeManager::restyleAllWidgets() const
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     QTimer::singleShot(25, [this]() -> void
     {
         const auto children = this->findChildren<QWidget*>(QString(), Qt::FindChildrenRecursively);
@@ -375,6 +418,10 @@ void ThemeManager::restyleAllWidgets() const
 
 void ThemeManager::requestChanges()
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _lightSystemThemeAction.setEnabled(isSystemThemingActive());
     _darkSystemThemeAction.setEnabled(isSystemThemingActive());
     _customThemeAction.setEnabled(!isSystemThemingActive());
@@ -389,6 +436,10 @@ void ThemeManager::requestChanges()
 
 void ThemeManager::commitChanges()
 {
+#ifdef THEME_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     restyleAllWidgets();
 
     if (_numberOfCommits++ == 0)
