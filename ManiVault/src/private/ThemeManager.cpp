@@ -336,11 +336,11 @@ void ThemeManager::requestChanges()
     qDebug() << __FUNCTION__;
 #endif
 
-    _systemLightColorSchemeAction.setEnabled(!isSystemColorSchemeModeActive());
-    _systemDarkColorSchemeAction.setEnabled(!isSystemColorSchemeModeActive());
-    _customColorSchemeAction.setEnabled(!isSystemColorSchemeModeActive());
+    _systemLightColorSchemeAction.setEnabled(isSystemLightDarkColorSchemeModeActive());
+    _systemDarkColorSchemeAction.setEnabled(isSystemLightDarkColorSchemeModeActive());
+    _customColorSchemeAction.setEnabled(isCustomColorSchemeModeActive());
 
-    if (isSystemColorSchemeModeActive()) {
+    if (isSystemLightDarkColorSchemeModeActive()) {
         _systemLightColorSchemeAction.setChecked(isSystemLightColorSchemeActive());
         _systemDarkColorSchemeAction.setChecked(isSystemDarkColorSchemeActive());
     }
