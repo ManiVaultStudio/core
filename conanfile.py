@@ -111,22 +111,6 @@ class HdpsCoreConan(ConanFile):
 
             for package in linux_requirements:
                 installer.install(package)
-
-            # Ubuntu 24.04 ships with libicu 74 see https://launchpad.net/ubuntu/+source/icu
-            # but either qt or cmake seems to require 73
-            commands = [
-                "sudo -A wget -q https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-Ubuntu22.04-x64.tgz",
-                "sudo -A tar -xf icu4c-73_2-Ubuntu22.04-x64.tgz",
-                "sudo -A find ./icu/usr/local/lib/ -name \"*.73*\" -print0 | xargs -0 cp -r -t /usr/lib/x86_64-linux-gnu/",
-                "sudo -A rm -rf ./icu/",
-                "sudo -A rm -rf icu4c-73_2-Ubuntu22.04-x64.tgz"
-            ]
-            for cmd in commands:
-                try:
-                    print(f"Executing: {cmd}")
-                    subprocess.run(cmd, shell=True, check=True)
-                except subprocess.CalledProcessError as e:
-                    print(f"Error: {e}")
             
     def config_options(self):
         if self.settings.os == "Windows":
