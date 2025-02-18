@@ -117,6 +117,12 @@ private:
     /** Updates the styling of all widgets and notifies the user of the change */
     void commitChanges();
 
+    /**
+     * Set the application palette to \p palette
+     * @param palette Application palette
+     */
+    void setPalette(const QPalette& palette);
+
 protected: // Action getters
 
     gui::OptionAction& getColorSchemeModeAction() override { return _colorSchemeModeAction; }
@@ -132,15 +138,16 @@ public: // Action getters
     const gui::OptionAction& getCustomColorSchemeAction() const override { return _customColorSchemeAction; }
 
 private:
-    gui::OptionAction           _colorSchemeModeAction;             /** For selecting the color scheme mode */
-    gui::ToggleAction           _systemLightColorSchemeAction;      /** Set to light system color scheme when triggered */
-    gui::ToggleAction           _systemDarkColorSchemeAction;       /** Set to dark system color scheme when triggered */
-    gui::OptionAction           _customColorSchemeAction;           /** Custom color scheme action  */
-    QMap<QString, QPalette>     _customThemes;                      /** Custom themes */
-    QPalette                    _currentPalette;                    /** Current application palette */
-    QTimer                      _requestChangesTimer;               /** Timer for processing requested changes */
-    QTimer                      _detectColorSchemeChangeTimer;      /** QStyleHints::colorSchemeChanged is sometimes unreliable: check periodically for changes */
-    std::int32_t                _numberOfCommits;                   /** Number of commits */
+    gui::OptionAction           _colorSchemeModeAction;                 /** For selecting the color scheme mode */
+    gui::ToggleAction           _systemLightColorSchemeAction;          /** Set to light system color scheme when triggered */
+    gui::ToggleAction           _systemDarkColorSchemeAction;           /** Set to dark system color scheme when triggered */
+    gui::OptionAction           _customColorSchemeAction;               /** Custom color scheme action  */
+    QMap<QString, QPalette>     _customThemes;                          /** Custom themes */
+    QPalette                    _currentPalette;                        /** Current application palette */
+    QTimer                      _requestChangesTimer;                   /** Timer for processing requested changes */
+    QTimer                      _systemColorSchemeChangesTimer;         /** QStyleHints::colorSchemeChanged is sometimes unreliable: check periodically for system color scheme changes */
+    std::int32_t                _numberOfCommits;                       /** Number of commits */
+    Qt::ColorScheme             _currentColorScheme;                    /** Current color scheme (valid in system color scheme mode) */
 };
 
 }
