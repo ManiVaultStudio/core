@@ -103,7 +103,8 @@ class HdpsCoreConan(ConanFile):
                 "libxtst-dev",
                 "libasound2-dev",
                 "libdbus-1-dev",
-                "libcups2-dev "
+                "libcups2-dev"
+                "libicu-dev",
                 ]
             
             installer = tools.SystemPackageTool()
