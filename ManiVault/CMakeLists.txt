@@ -160,7 +160,7 @@ set_target_properties(qtadvanceddocking-qt6 PROPERTIES PROJECT_LABEL "qtadvanced
 CPMAddPackage(
   NAME              biovault_bfloat16
   GITHUB_REPOSITORY biovault/biovault_bfloat16
-  GIT_TAG           v1.0.1
+  GIT_TAG           v1.0.2
   DOWNLOAD_ONLY     YES
   EXCLUDE_FROM_ALL  YES
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
