@@ -109,6 +109,9 @@ private:
     /** Synchronizes the states of all actions */
     void requestChanges();
 
+    /** Updates the styling of all widgets and notifies the user of the change */
+    void commitChanges();
+
 public: // Action getters
 
     gui::ToggleAction& getUseSystemThemeAction() override { return _useSystemThemeAction; }
@@ -124,6 +127,7 @@ private:
     QMap<QString, QPalette>     _customThemes;              /** Custom themes */
     QPalette                    _currentPalette;            /** Current application palette */
     QTimer                      _requestChangesTimer;       /** Timer for processing requested changes */
+    std::int32_t                _numberOfCommits;           /** Number of commits */
 };
 
 }

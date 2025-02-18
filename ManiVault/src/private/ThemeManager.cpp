@@ -27,7 +27,8 @@ ThemeManager::ThemeManager(QObject* parent) :
     _useSystemThemeAction(this, "System"),
     _lightSystemThemeAction(this, "Light"),
     _darkSystemThemeAction(this, "Dark"),
-    _customThemeAction(this, "Custom theme")
+    _customThemeAction(this, "Custom theme"),
+    _numberOfCommits(0)
 {
     _useSystemThemeAction.setSettingsPrefix(getSettingsPrefix() + "System");
     _lightSystemThemeAction.setSettingsPrefix(getSettingsPrefix() + "Light");
@@ -41,12 +42,7 @@ ThemeManager::ThemeManager(QObject* parent) :
     _requestChangesTimer.setInterval(1000);
 
     connect(&_requestChangesTimer, &QTimer::timeout, this, [this]() -> void {
-        restyleAllWidgets();
-
-        if (_useSystemThemeAction.isChecked())
-            mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(isLightColorSchemeActive() ? "Light" : "Dark"), StyledIcon("palette"));
-        else
-            mv::help().addNotification("Theme update", QString("<b>%1</b> custom application theme has been activated.").arg(_customThemeAction.getCurrentText()), StyledIcon("palette"));
+        commitChanges();
 	});
 }
 
@@ -68,29 +64,20 @@ void ThemeManager::initialize()
 
     beginInitialization();
     {
-//#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-//        connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
-//            emit applicationPaletteChanged(qApp->palette());
-//
-//            const auto isDark = scheme == Qt::ColorScheme::Dark;
-//
-//            emit themeChanged(isDark);
-//
-//            if (isDark)
-//                emit themeChangedToDark();
-//            else
-//                emit themeChangedToLight();
-//        });
-//#endif
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
+            emit applicationPaletteChanged(qApp->palette());
 
-  //      connect(this, &AbstractThemeManager::themeChanged, this, [this](bool dark) -> void {
-  //          for (auto widget : QApplication::allWidgets()) {
-  //              widget->style()->unpolish(widget);
-  //              widget->style()->polish(widget);
+            const auto isDark = scheme == Qt::ColorScheme::Dark;
 
-  //              widget->repaint();
-  //          }
-		//});
+            emit themeChanged(isDark);
+
+            if (isDark)
+                emit themeChangedToDark();
+            else
+                emit themeChangedToLight();
+        });
+#endif
 
         connect(&_useSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
             qApp->setPalette(QPalette());
@@ -235,12 +222,6 @@ bool ThemeManager::event(QEvent* event)
 
     if (event->type() == QEvent::ThemeChange) {
         emit applicationPaletteChanged(_currentPalette);
-
-        //emit themeChanged(isDarkColorSchemeActive());
-        //if (isDarkColorSchemeActive())
-        //    emit themeChangedToDark();
-        //else
-        //    emit themeChangedToLight();
 
         restyleAllWidgets();
     }
@@ -404,6 +385,19 @@ void ThemeManager::requestChanges()
     _darkSystemThemeAction.setChecked(isSystemThemeActive && isDarkColorSchemeActive());
 
     _requestChangesTimer.start();
+}
+
+void ThemeManager::commitChanges()
+{
+    restyleAllWidgets();
+
+    if (_numberOfCommits++ == 0)
+        return;
+    
+    if (_useSystemThemeAction.isChecked())
+        mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(isLightColorSchemeActive() ? "Light" : "Dark"), StyledIcon("palette"));
+    else
+        mv::help().addNotification("Theme update", QString("<b>%1</b> custom application theme has been activated.").arg(_customThemeAction.getCurrentText()), StyledIcon("palette"));
 }
 
 }
