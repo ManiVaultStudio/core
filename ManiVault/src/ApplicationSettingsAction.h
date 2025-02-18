@@ -37,9 +37,9 @@ public: // Action getters
     OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
 
 private:
-    StringAction            _applicationSessionIdAction;    /** String action for the application session Id */
-    HorizontalGroupAction   _themeGroupAction;              /** Horizontal group action for theme settings */
-    OptionAction            _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
+    StringAction            _applicationSessionIdAction;            /** String action for the application session identifier */
+    HorizontalGroupAction   _lightDarkSystemColorSchemeAction;      /** Groups the light and dark system color scheme actions together */
+    OptionAction            _appearanceOptionAction;                /** Options action for dark, light, or system appearance */
 };
 
 }

@@ -22,33 +22,37 @@ namespace mv
 
 ThemeManager::ThemeManager(QObject* parent) :
     AbstractThemeManager(parent),
-    _useSystemThemeAction(this, "System"),
-    _lightSystemThemeAction(this, "Light"),
-    _darkSystemThemeAction(this, "Dark"),
-    _customThemeAction(this, "Custom theme"),
+    _colorSchemeModeAction(this, "Color scheme", { "System", "System light/dark", "Custom" }),
+    _systemLightColorSchemeAction(this, "Light"),
+    _systemDarkColorSchemeAction(this, "Dark"),
+    _customColorSchemeAction(this, "Custom theme"),
     _numberOfCommits(0)
 {
-    _useSystemThemeAction.setSettingsPrefix(getSettingsPrefix() + "System");
-    _lightSystemThemeAction.setSettingsPrefix(getSettingsPrefix() + "Light");
-    _darkSystemThemeAction.setSettingsPrefix(getSettingsPrefix() + "Dark");
-    _customThemeAction.setSettingsPrefix(getSettingsPrefix() + "Custom");
+    _colorSchemeModeAction.setSettingsPrefix(getSettingsPrefix() + "ColorSchemeMode");
+    _systemLightColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Light");
+    _systemDarkColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Dark");
+    _customColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Custom");
 
-    _customThemeAction.setStretch(1);
-    _customThemeAction.setPlaceHolderString("Pick custom theme...");
+    _customColorSchemeAction.setStretch(1);
+    _customColorSchemeAction.setPlaceHolderString("Pick custom theme...");
 
     _requestChangesTimer.setSingleShot(true);
     _requestChangesTimer.setInterval(1000);
+
+    connect(&_colorSchemeModeAction, &OptionAction::currentIndexChanged, this, [this](std::int32_t currentIndex) -> void {
+        emit colorSchemeModeChanged(static_cast<ColorSchemeMode>(currentIndex));
+    });
 
     connect(&_requestChangesTimer, &QTimer::timeout, this, [this]() -> void {
         commitChanges();
 	});
 
-    _detectColorSchemeChangeTimer.setSingleShot(true);
+    /*_detectColorSchemeChangeTimer.setSingleShot(true);
     _detectColorSchemeChangeTimer.setInterval(1000);
 
     connect(&_detectColorSchemeChangeTimer, &QTimer::timeout, this, [this]() -> void {
         requestChanges();
-	});
+	});*/
 }
 
 ThemeManager::~ThemeManager()
@@ -69,32 +73,32 @@ void ThemeManager::initialize()
 
     beginInitialization();
     {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-        connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
+//#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+//        connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
+//#ifdef THEME_MANAGER_VERBOSE
+//            qDebug() << "QStyleHints::colorSchemeChanged()" << scheme;
+//#endif
+//
+//            emit applicationPaletteChanged(qApp->palette());
+//
+//            requestChanges();
+//        });
+//#endif
+
+        connect(&_colorSchemeModeAction, &OptionAction::currentIndexChanged, this, [this](std::int32_t currentIndex) -> void {
 #ifdef THEME_MANAGER_VERBOSE
-            qDebug() << "QStyleHints::colorSchemeChanged()" << scheme;
+            qDebug() << "mv::ThemeManager::_colorSchemeModeAction::currentIndexChanged()" << currentIndex;
 #endif
 
-            emit applicationPaletteChanged(qApp->palette());
-
-            requestChanges();
-        });
-#endif
-
-        connect(&_useSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-#ifdef THEME_MANAGER_VERBOSE
-            qDebug() << "mv::ThemeManager::_useSystemThemeAction::toggled()" << toggled;
-#endif
-
-            if (!isLightColorSchemeActive() && !isDarkColorSchemeActive())
-                activateLightSystemTheme();
+            if (!isSystemLightColorSchemeActive() && !isSystemDarkColorSchemeActive())
+                activateLightSystemColorScheme();
 
             requestChanges();
 		});
 
-        connect(&_lightSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        connect(&_systemLightColorSchemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
 #ifdef THEME_MANAGER_VERBOSE
-            qDebug() << "mv::ThemeManager::_lightSystemThemeAction::toggled()" << toggled;
+            qDebug() << "mv::ThemeManager::_systemLightColorSchemeAction::toggled()" << toggled;
 #endif
 
             //if (toggled) {
@@ -104,9 +108,9 @@ void ThemeManager::initialize()
             //}
         });
 
-        connect(&_darkSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        connect(&_systemDarkColorSchemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
 #ifdef THEME_MANAGER_VERBOSE
-            qDebug() << "mv::ThemeManager::_darkSystemThemeAction::toggled()" << toggled;
+            qDebug() << "mv::ThemeManager::_systemDarkColorSchemeAction::toggled()" << toggled;
 #endif
 
             //if (toggled) {
@@ -116,12 +120,10 @@ void ThemeManager::initialize()
             //}
         });
 
-        connect(&_customThemeAction, &OptionAction::currentTextChanged, this, [this](const QString& currentTheme) -> void {
+        connect(&_customColorSchemeAction, &OptionAction::currentTextChanged, this, [this](const QString& currentTheme) -> void {
 #ifdef THEME_MANAGER_VERBOSE
-            qDebug() << "mv::ThemeManager::_customThemeAction::currentTextChanged()" << currentTheme;
+            qDebug() << "mv::ThemeManager::_customColorSchemeAction::currentTextChanged()" << currentTheme;
 #endif
-
-            
 
             if (_customThemes.contains(currentTheme)) {
 	            qApp->setPalette(_customThemes[currentTheme]);
@@ -151,107 +153,82 @@ void ThemeManager::reset()
     endReset();
 }
 
-bool ThemeManager::isSystemThemingActive() const
+bool ThemeManager::isSystemColorSchemeModeActive() const
 {
-	return _useSystemThemeAction.isChecked();
+    return _colorSchemeModeAction.getCurrentText() == "System";
 }
 
-void ThemeManager::activateSystemTheming()
+bool ThemeManager::isSystemLightDarkColorSchemeModeActive() const
 {
-#ifdef THEME_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    _useSystemThemeAction.setChecked(true);
+    return _colorSchemeModeAction.getCurrentText() == "System light/dark";
 }
 
-void ThemeManager::activateSystemTheming(const Qt::ColorScheme& colorScheme)
+bool ThemeManager::isSystemLightColorSchemeActive() const
 {
-#ifdef THEME_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << colorScheme;
-#endif
-
-    activateSystemTheming();
-
-    switch (colorScheme) {
-	    case Qt::ColorScheme::Unknown:
-	        break;
-
-	    case Qt::ColorScheme::Light:
-	        _lightSystemThemeAction.setChecked(true);
-	        break;
-
-		case Qt::ColorScheme::Dark:
-		    _darkSystemThemeAction.setChecked(true);
-		    break;
-    }
-}
-
-void ThemeManager::deactivateSystemTheme()
-{
-#ifdef THEME_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    _useSystemThemeAction.setChecked(false);
-}
-
-bool ThemeManager::isDarkColorSchemeActive() const
-{
-    if (isSystemThemingActive()) {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
-#else
-    return QApplication::palette().color(QPalette::Window).lightness() < 128;
-#endif
-    }
-
-	return _darkSystemThemeAction.isChecked();
-}
-
-void ThemeManager::activateLightSystemTheme()
-{
-#ifdef THEME_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    _lightSystemThemeAction.setChecked(true);
-}
-
-void ThemeManager::activateDarkSystemTheme()
-{
-#ifdef THEME_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    _darkSystemThemeAction.setChecked(true);
-}
-
-void ThemeManager::activateCustomTheme(const QString& customThemeName)
-{
-#ifdef THEME_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << customThemeName;
-#endif
-
-    _customThemeAction.setCurrentText(customThemeName);
-}
-
-QStringList ThemeManager::getCustomThemeNames() const
-{
-    return _customThemes.keys();
-}
-
-bool ThemeManager::isLightColorSchemeActive() const
-{
-    if (isSystemThemingActive()) {
+    if (isSystemColorSchemeModeActive()) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Light;
 #else
         return QApplication::palette().color(QPalette::Window).lightness() >= 128;
 #endif
     }
-    
-    return _lightSystemThemeAction.isChecked();
+
+    return _systemLightColorSchemeAction.isChecked();
+}
+
+bool ThemeManager::isSystemDarkColorSchemeActive() const
+{
+    if (isSystemColorSchemeModeActive()) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+        return QApplication::palette().color(QPalette::Window).lightness() < 128;
+#endif
+    }
+
+    return _systemDarkColorSchemeAction.isChecked();
+}
+
+bool ThemeManager::isCustomColorSchemeModeActive() const
+{
+    return _colorSchemeModeAction.getCurrentText() == "Custom";
+}
+
+void ThemeManager::activateSystemColorScheme()
+{
+    _colorSchemeModeAction.setCurrentText("System");
+}
+
+void ThemeManager::activateSystemColorSchemeLightDark()
+{
+    _colorSchemeModeAction.setCurrentText("System light/dark");
+}
+
+void ThemeManager::activateLightSystemColorScheme()
+{
+    _systemLightColorSchemeAction.setChecked(true);
+}
+
+void ThemeManager::activateDarkSystemColorScheme()
+{
+    _systemDarkColorSchemeAction.setChecked(true);
+}
+
+void ThemeManager::activateCustomColorScheme()
+{
+    _colorSchemeModeAction.setCurrentText("Custom");
+}
+
+void ThemeManager::activateCustomColorScheme(const QString& customColorSchemeName)
+{
+    activateCustomColorScheme();
+
+    _customColorSchemeAction.setCurrentText(customColorSchemeName);
+}
+
+QStringList ThemeManager::getCustomThemeNames() const
+{
+    return _customThemes.keys();
 }
 
 void ThemeManager::addCustomTheme(const QString& themeName, const QPalette& themePalette)
@@ -262,7 +239,7 @@ void ThemeManager::addCustomTheme(const QString& themeName, const QPalette& them
 
     _customThemes[themeName] = themePalette;
 
-    _customThemeAction.setOptions(_customThemes.keys());
+    _customColorSchemeAction.setOptions(_customThemes.keys());
 }
 
 bool ThemeManager::event(QEvent* event)
@@ -333,7 +310,7 @@ void ThemeManager::addDefaultCustomThemes()
     addTheme("Monokai", QColor(39, 40, 34), QColor(248, 248, 242), QColor(50, 50, 50), QColor(60, 60, 60), QColor(50, 50, 50), QColor(248, 248, 242), QColor(248, 248, 242), QColor(70, 70, 70), QColor(248, 248, 242), QColor(248, 248, 242));
     addTheme("High contrast", Qt::black, Qt::white, Qt::black, Qt::white, Qt::black, Qt::white, Qt::white, Qt::black, Qt::white, Qt::red);
 
-	_customThemeAction.setOptions(_customThemes.keys());
+	_customColorSchemeAction.setOptions(_customThemes.keys());
 }
 
 void ThemeManager::restyleAllWidgets() const
@@ -359,13 +336,13 @@ void ThemeManager::requestChanges()
     qDebug() << __FUNCTION__;
 #endif
 
-    _lightSystemThemeAction.setEnabled(!isSystemThemingActive());
-    _darkSystemThemeAction.setEnabled(!isSystemThemingActive());
-    _customThemeAction.setEnabled(!isSystemThemingActive());
+    _systemLightColorSchemeAction.setEnabled(!isSystemColorSchemeModeActive());
+    _systemDarkColorSchemeAction.setEnabled(!isSystemColorSchemeModeActive());
+    _customColorSchemeAction.setEnabled(!isSystemColorSchemeModeActive());
 
-    if (isSystemThemingActive()) {
-        _lightSystemThemeAction.setChecked(isLightColorSchemeActive());
-        _darkSystemThemeAction.setChecked(isDarkColorSchemeActive());
+    if (isSystemColorSchemeModeActive()) {
+        _systemLightColorSchemeAction.setChecked(isSystemLightColorSchemeActive());
+        _systemDarkColorSchemeAction.setChecked(isSystemDarkColorSchemeActive());
     }
 
     _requestChangesTimer.start();
@@ -382,10 +359,10 @@ void ThemeManager::commitChanges()
     if (_numberOfCommits++ == 0)
         return;
     
-    if (_useSystemThemeAction.isChecked())
-        mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(isLightColorSchemeActive() ? "Light" : "Dark"), StyledIcon("palette"));
-    else
-        mv::help().addNotification("Theme update", QString("<b>%1</b> custom application theme has been activated.").arg(_customThemeAction.getCurrentText()), StyledIcon("palette"));
+    //if (_useSystemColorSchemeAction.isChecked())
+    //    mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(isSystemLightColorSchemeActive() ? "Light" : "Dark"), StyledIcon("palette"));
+    //else
+    //    mv::help().addNotification("Theme update", QString("<b>%1</b> custom application theme has been activated.").arg(_customColorSchemeAction.getCurrentText()), StyledIcon("palette"));
 }
 
 }

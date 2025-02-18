@@ -15,10 +15,6 @@ class ThemeManager : public mv::AbstractThemeManager
 {
     Q_OBJECT
 
-protected:
-
-	using PaletteGetter = std::function<QPalette()>;
-
 public:
 
     /**
@@ -37,46 +33,55 @@ public:
     void reset() override;
 
     /**
-     * Get whether system theming is active
-     * @return Boolean determining whether system theming is active
+     * Get whether the system color scheme mode is active
+     * @return Boolean indicating whether the system color scheme mode is active
      */
-    bool isSystemThemingActive() const override;
-
-    /** Activates system theming */
-    void activateSystemTheming() override;
+    bool isSystemColorSchemeModeActive() const override;
 
     /**
-     * Activates system theming with \p colorScheme
-     * @param colorScheme Color scheme
+     * Get whether the system light/dark color scheme mode is active
+     * @return Boolean indicating whether the system light/dark color scheme mode is active
      */
-    void activateSystemTheming(const Qt::ColorScheme& colorScheme) override;
-
-    /** De-activates the system theme (switches the application palette) */
-    void deactivateSystemTheme() override;
+    bool isSystemLightDarkColorSchemeModeActive() const override;
 
     /**
-     * Get whether the light system color scheme is active
-     * @return Boolean indicating whether the light system color scheme is active (also false when the system theme is not active)
-     */
-    bool isLightColorSchemeActive() const override;
+    * Get whether the light system color scheme is active
+    * @return Boolean indicating whether the light system color scheme is active (also false when the system theme is not active)
+    */
+    bool isSystemLightColorSchemeActive() const override;
 
     /**
      * Get whether the dark system color scheme is active
      * @return Boolean indicating whether the dark system color scheme is active (also false when the system theme is not active)
      */
-    bool isDarkColorSchemeActive() const override;
-
-    /** Set theme to system light */
-    void activateLightSystemTheme() override;
-
-    /** Set theme to system dark */
-    void activateDarkSystemTheme() override;
+    bool isSystemDarkColorSchemeActive() const override;
 
     /**
-     * Set custom theme to theme with \p customThemeName (this will override the system theme)
-     * @param customThemeName Custom theme name
+     * Get whether a custom color scheme mode is active
+     * @return Boolean indicating whether a custom color scheme mode is active
      */
-    void activateCustomTheme(const QString& customThemeName) override;
+    bool isCustomColorSchemeModeActive() const override;
+
+    /** Set color scheme mode to system */
+    void activateSystemColorScheme() override;
+
+    /** Set color scheme mode to system light/dark */
+    void activateSystemColorSchemeLightDark() override;
+
+    /** Set color scheme to system light */
+    void activateLightSystemColorScheme() override;
+
+    /** Set theme to system dark */
+    void activateDarkSystemColorScheme() override;
+
+    /** Activates the currently selected custom color scheme */
+    void activateCustomColorScheme() override;
+
+    /**
+     * Activate custom color scheme with \p customThemeName (this will override the system color scheme)
+     * @param customColorSchemeName Custom color scheme name
+     */
+    void activateCustomColorScheme(const QString& customColorSchemeName) override;
 
     /**
      * Get custom theme names
@@ -94,7 +99,7 @@ public:
 private:
 
     /**
-     * Handle \p event
+     * Override to handle palette and theme changes
      * @param event Pointer to event
      * @return Boolean indicating whether the event was handled
      */
@@ -112,18 +117,25 @@ private:
     /** Updates the styling of all widgets and notifies the user of the change */
     void commitChanges();
 
+protected: // Action getters
+
+    gui::OptionAction& getColorSchemeModeAction() override { return _colorSchemeModeAction; }
+    gui::ToggleAction& getSystemLightColorSchemeAction() override { return _systemLightColorSchemeAction; }
+    gui::ToggleAction& getSystemDarkColorSchemeAction() override { return _systemDarkColorSchemeAction; }
+    gui::OptionAction& getCustomColorSchemeAction() override { return _customColorSchemeAction; }
+
 public: // Action getters
 
-    gui::ToggleAction& getUseSystemThemeAction() override { return _useSystemThemeAction; }
-    gui::ToggleAction& getLightThemeAction() override { return _lightSystemThemeAction; }
-    gui::ToggleAction& getDarkThemeAction() override { return _darkSystemThemeAction; }
-    gui::OptionAction& getCustomThemeAction() override { return _customThemeAction; }
+    const gui::OptionAction& getColorSchemeModeAction() const override { return _colorSchemeModeAction; }
+    const gui::ToggleAction& getSystemLightColorSchemeAction() const override { return _systemLightColorSchemeAction; }
+    const gui::ToggleAction& getSystemDarkColorSchemeAction() const override { return _systemDarkColorSchemeAction; }
+    const gui::OptionAction& getCustomColorSchemeAction() const override { return _customColorSchemeAction; }
 
 private:
-    gui::ToggleAction           _useSystemThemeAction;              /** Toggle action for toggling the learning center */
-    gui::ToggleAction           _lightSystemThemeAction;            /** Set to light system theme when triggered */
-    gui::ToggleAction           _darkSystemThemeAction;             /** Set to dark theme when triggered */
-    gui::OptionAction           _customThemeAction;                 /** Set to dark theme when triggered */
+    gui::OptionAction           _colorSchemeModeAction;             /** For selecting the color scheme mode */
+    gui::ToggleAction           _systemLightColorSchemeAction;      /** Set to light system color scheme when triggered */
+    gui::ToggleAction           _systemDarkColorSchemeAction;       /** Set to dark system color scheme when triggered */
+    gui::OptionAction           _customColorSchemeAction;           /** Custom color scheme action  */
     QMap<QString, QPalette>     _customThemes;                      /** Custom themes */
     QPalette                    _currentPalette;                    /** Current application palette */
     QTimer                      _requestChangesTimer;               /** Timer for processing requested changes */
