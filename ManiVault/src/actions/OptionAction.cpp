@@ -88,8 +88,10 @@ void OptionAction::setOptions(const QStringList& options)
 
     emit modelChanged();
 
-    emit currentIndexChanged(_currentIndex);
-    emit currentTextChanged(getCurrentText());
+    if (_currentIndex != oldCurrentIndex) {
+        emit currentIndexChanged(_currentIndex);
+        emit currentTextChanged(getCurrentText());
+    }
 }
 
 const QAbstractItemModel* OptionAction::getModel() const
@@ -405,8 +407,7 @@ void OptionAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 
 OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* optionAction) :
     QLineEdit(parent),
-    _optionAction(optionAction),
-    _completer()
+    _optionAction(optionAction)
 {
     setObjectName("LineEdit");
     setCompleter(&_completer);

@@ -6,6 +6,8 @@
 
 #include <AbstractThemeManager.h>
 
+#include <QTimer>
+
 namespace mv
 {
 
@@ -35,22 +37,52 @@ public:
     void reset() override;
 
     /**
-     * Get whether the current theme is light
-     * @return Boolean indicating whether the current theme is light
+     * Get whether system theming is active
+     * @return Boolean determining whether system theming is active
      */
-    bool isLight() const override;
+    bool isSystemThemingActive() const override;
+
+    /** Activates system theming */
+    void activateSystemTheming() override;
 
     /**
-     * Get whether the current theme is dark
-     * @return Boolean indicating whether the current theme is dark
+     * Activates system theming with \p colorScheme
+     * @param colorScheme Color scheme
      */
-    bool isDark() const override;
+    void activateSystemTheming(const Qt::ColorScheme& colorScheme) override;
 
-    /** Set theme to light */
-    void setLight() override;
+    /** De-activates the system theme (switches the application palette) */
+    void deactivateSystemTheme() override;
 
-    /** Set theme to dark */
-    void setDark() override;
+    /**
+     * Get whether the light system color scheme is active
+     * @return Boolean indicating whether the light system color scheme is active (also false when the system theme is not active)
+     */
+    bool isLightColorSchemeActive() const override;
+
+    /**
+     * Get whether the dark system color scheme is active
+     * @return Boolean indicating whether the dark system color scheme is active (also false when the system theme is not active)
+     */
+    bool isDarkColorSchemeActive() const override;
+
+    /** Set theme to system light */
+    void activateLightSystemTheme() override;
+
+    /** Set theme to system dark */
+    void activateDarkSystemTheme() override;
+
+    /**
+     * Set custom theme to theme with \p customThemeName (this will override the system theme)
+     * @param customThemeName Custom theme name
+     */
+    void activateCustomTheme(const QString& customThemeName) override;
+
+    /**
+     * Get custom theme names
+     * @return List of non-system theme names (built-in and added)
+     */
+    QStringList getCustomThemeNames() const override;
 
     /**
      * Add theme with \p themeName and \p themePalette
@@ -72,22 +104,26 @@ private:
     void addDefaultCustomThemes();
 
     /** Restyles all widgets in the application */
-    void restyleAllWidgets();
+    void restyleAllWidgets() const;
+
+    /** Synchronizes the states of all actions */
+    void requestChanges();
 
 public: // Action getters
 
     gui::ToggleAction& getUseSystemThemeAction() override { return _useSystemThemeAction; }
-    gui::ToggleAction& getLightThemeAction() override { return _lightThemeAction; }
-    gui::ToggleAction& getDarkThemeAction() override { return _darkThemeAction; }
+    gui::ToggleAction& getLightThemeAction() override { return _lightSystemThemeAction; }
+    gui::ToggleAction& getDarkThemeAction() override { return _darkSystemThemeAction; }
     gui::OptionAction& getCustomThemeAction() override { return _customThemeAction; }
 
 private:
     gui::ToggleAction           _useSystemThemeAction;      /** Toggle action for toggling the learning center */
-    gui::ToggleAction           _lightThemeAction;          /** Set to light theme when triggered */
-    gui::ToggleAction           _darkThemeAction;           /** Set to dark theme when triggered */
+    gui::ToggleAction           _lightSystemThemeAction;    /** Set to light system theme when triggered */
+    gui::ToggleAction           _darkSystemThemeAction;     /** Set to dark theme when triggered */
     gui::OptionAction           _customThemeAction;         /** Set to dark theme when triggered */
     QMap<QString, QPalette>     _customThemes;              /** Custom themes */
     QPalette                    _currentPalette;            /** Current application palette */
+    QTimer                      _requestChangesTimer;       /** Timer for processing requested changes */
 };
 
 }

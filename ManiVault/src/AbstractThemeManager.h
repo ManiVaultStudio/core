@@ -41,22 +41,52 @@ public:
     }
 
     /**
-     * Get whether the current theme is light
-     * @return Boolean indicating whether the current theme is light
+     * Get whether system theming is active
+     * @return Boolean determining whether system theming is active
      */
-    virtual bool isLight() const = 0;
+    virtual bool isSystemThemingActive() const = 0;
+
+    /** Activates system theming */
+    virtual void activateSystemTheming() = 0;
 
     /**
-     * Get whether the current theme is dark
-     * @return Boolean indicating whether the current theme is dark
+     * Activates system theming with \p colorScheme
+     * @param colorScheme Color scheme
      */
-    virtual bool isDark() const = 0;
+    virtual void activateSystemTheming(const Qt::ColorScheme& colorScheme) = 0;
 
-    /** Set theme to light */
-    virtual void setLight() = 0;
+    /** De-activates the system theme (switches the application palette) */
+    virtual void deactivateSystemTheme() = 0;
 
-    /** Set theme to dark */
-    virtual void setDark() = 0;
+    /**
+     * Get whether the light system color scheme is active
+     * @return Boolean indicating whether the light system color scheme is active (also false when the system theme is not active)
+     */
+    virtual bool isLightColorSchemeActive() const = 0;
+
+    /**
+     * Get whether the dark system color scheme is active
+     * @return Boolean indicating whether the dark system color scheme is active (also false when the system theme is not active)
+     */
+    virtual bool isDarkColorSchemeActive() const = 0;
+
+    /** Set theme to system light */
+    virtual void activateLightSystemTheme() = 0;
+
+    /** Set theme to system dark */
+    virtual void activateDarkSystemTheme() = 0;
+
+    /**
+     * Set custom theme to theme with \p customThemeName (this will override the system theme)
+     * @param customThemeName Custom theme name
+     */
+    virtual void activateCustomTheme(const QString& customThemeName) = 0;
+
+    /**
+     * Get custom theme names
+     * @return List of non-system theme names (built-in and added)
+     */
+    virtual QStringList getCustomThemeNames() const = 0;
 
     /**
      * Add theme with \p themeName and \p themePalette

@@ -243,14 +243,11 @@ Task& GroupsAction::getUpdateTask()
 GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
-    _layout(),
     _filteredActionsAction(this, "Filtered Actions", true),
     _toolbarWidget(parent),
-    _toolbarLayout(),
     _filterAction(this, "Search"),
     _expandAllAction(this, "Expand all"),
-    _collapseAllAction(this, "Collapse all"),
-    _treeWidget()
+    _collapseAllAction(this, "Collapse all")
 {
     // Configure layout
     _layout.setContentsMargins(0, 0, 0, 0);
@@ -332,7 +329,9 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     _treeWidget.setSelectionMode(QAbstractItemView::NoSelection);
     _treeWidget.setUniformRowHeights(false);
     _treeWidget.setEditTriggers(QTreeWidget::NoEditTriggers);
-    
+    _treeWidget.setForegroundRole(QPalette::ColorRole::Text);
+    _treeWidget.setBackgroundRole(QPalette::ColorRole::Window);
+
     // Add tree widget to the layout
     _layout.addWidget(&_treeWidget);
 
@@ -346,14 +345,6 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     
     // We do all styling here
     updateCustomStyle();
-}
-
-bool GroupsAction::Widget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
 }
 
 void GroupsAction::Widget::updateToolbar()
@@ -466,12 +457,12 @@ void GroupsAction::Widget::hideGroupAction(GroupAction* groupAction)
 
 void GroupsAction::Widget::updateCustomStyle()
 {
-    // update custome style settings
-    auto color = QApplication::palette().color(QPalette::Normal, QPalette::Button).name();
-    QString styleSheet = QString("QTreeWidget { border: none; background-color: %1;}").arg(color);
-    
-    //_treeWidget.setPalette(palette);
-    _treeWidget.setStyleSheet(styleSheet);
+    //// update custome style settings
+    //auto color = QApplication::palette().color(QPalette::Normal, QPalette::Button).name();
+    //QString styleSheet = QString("QTreeWidget { border: none; background-color: %1;}").arg(color);
+    //
+    ////_treeWidget.setPalette(palette);
+    //_treeWidget.setStyleSheet(styleSheet);
 
 }
 
