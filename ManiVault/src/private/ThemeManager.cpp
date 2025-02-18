@@ -66,6 +66,10 @@ void ThemeManager::initialize()
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme scheme) -> void {
+#ifdef THEME_MANAGER_VERBOSE
+            qDebug() << "QStyleHints::colorSchemeChanged()" << scheme;
+#endif
+
             emit applicationPaletteChanged(qApp->palette());
 
             const auto isDark = scheme == Qt::ColorScheme::Dark;
@@ -80,6 +84,10 @@ void ThemeManager::initialize()
 #endif
 
         connect(&_useSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+#ifdef THEME_MANAGER_VERBOSE
+            qDebug() << "mv::ThemeManager::_useSystemThemeAction::toggled()" << toggled;
+#endif
+
             if (!isLightColorSchemeActive() && !isDarkColorSchemeActive())
                 activateLightSystemTheme();
 
@@ -87,6 +95,10 @@ void ThemeManager::initialize()
 		});
 
         connect(&_lightSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+#ifdef THEME_MANAGER_VERBOSE
+            qDebug() << "mv::ThemeManager::_lightSystemThemeAction::toggled()" << toggled;
+#endif
+
             if (isSystemThemingActive() && !toggled) {
                 activateDarkSystemTheme();
             }  else {
@@ -97,8 +109,9 @@ void ThemeManager::initialize()
         });
 
         connect(&_darkSystemThemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-            if (!toggled)
-                return;
+#ifdef THEME_MANAGER_VERBOSE
+            qDebug() << "mv::ThemeManager::_darkSystemThemeAction::toggled()" << toggled;
+#endif
 
             if (isSystemThemingActive() && !toggled) {
                 activateLightSystemTheme();
@@ -111,6 +124,10 @@ void ThemeManager::initialize()
         });
 
         connect(&_customThemeAction, &OptionAction::currentTextChanged, this, [this](const QString& currentTheme) -> void {
+#ifdef THEME_MANAGER_VERBOSE
+            qDebug() << "mv::ThemeManager::_customThemeAction::currentTextChanged()" << currentTheme;
+#endif
+
             requestChanges();
 
             if (_customThemes.contains(currentTheme)) {
