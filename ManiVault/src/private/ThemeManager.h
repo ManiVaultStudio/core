@@ -6,6 +6,8 @@
 
 #include <AbstractThemeManager.h>
 
+#include <QStyleFactory>
+#include <QStyleHints>
 #include <QTimer>
 
 namespace mv
@@ -14,6 +16,144 @@ namespace mv
 class ThemeManager : public mv::AbstractThemeManager
 {
     Q_OBJECT
+
+public:
+
+    class ThemeSettings : public QObject
+    {
+    public:
+
+        /**
+         * Construct theme settings with pointer to \p themeManager object
+         * @param themeManager Pointer to parent theme manager
+         */
+        ThemeSettings(ThemeManager* themeManager = nullptr) :
+            QObject(themeManager),
+            _themeManager(themeManager),
+            _colorSchemeMode(ColorSchemeMode::System),
+            _colorScheme(Qt::ColorScheme::Unknown)
+        {
+            _updateThemeTimer.setSingleShot(true);
+            _updateThemeTimer.setInterval(1000);
+            _updateThemeTimer.start();
+
+            connect(&_updateThemeTimer, &QTimer::timeout, this, &ThemeSettings::updateTheme);
+
+            //_systemLightColorSchemeAction.setEnabled(isSystemLightDarkColorSchemeModeActive());
+            //_systemDarkColorSchemeAction.setEnabled(isSystemLightDarkColorSchemeModeActive());
+            //_customColorSchemeAction.setEnabled(isCustomColorSchemeModeActive());
+        }
+
+        /**
+         * Set color scheme mode to \p colorSchemeMode
+         * @param colorSchemeMode Color scheme mode
+         */
+        void setColorSchemeMode(const ColorSchemeMode& colorSchemeMode)
+        {
+            if (colorSchemeMode == _colorSchemeMode)
+                return;
+
+            _colorSchemeMode = colorSchemeMode;
+
+            _updateThemeTimer.start();
+        }
+
+        /**
+         * Set color scheme to \p colorScheme
+         * @param colorScheme Color scheme
+         */
+        void setColorScheme(const Qt::ColorScheme& colorScheme)
+        {
+            if (colorScheme == _colorScheme)
+                return;
+
+            _colorScheme = colorScheme;
+
+            _updateThemeTimer.start();
+        }
+
+        /**
+         * Set palette to \p palette
+         * @param palette Palette
+         */
+        void setPalette(const QPalette& palette)
+        {
+            if (palette == _palette)
+                return;
+
+            _palette = palette;
+
+            _updateThemeTimer.start();
+        }
+
+        /** Update theme, restyle all widgets and self-destruct */
+        void updateTheme()
+        {
+            switch (_colorSchemeMode) {
+	            case ColorSchemeMode::System:
+	            {
+                    qDebug() << __FUNCTION__ << "case ColorSchemeMode::System";
+
+                    QApplication::setPalette(QApplication::style()->standardPalette());
+
+                    //QGuiApplication::styleHints()->setColorScheme(_colorScheme);
+
+                    //qApp->setPalette(QPalette());
+                    //qApp->setStyle(QStyleFactory::create("Fusion"));
+
+	                break;
+	            }
+
+	            case ColorSchemeMode::SystemLightDark:
+	            {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+                    
+                    qDebug() << __FUNCTION__ << "case ColorSchemeMode::SystemLightDark" << _colorScheme;
+
+                    QGuiApplication::styleHints()->setColorScheme(_colorScheme);
+
+                    qApp->setPalette(QApplication::style()->standardPalette());
+                    //qApp->setStyle(QStyleFactory::create("Fusion"));
+#else
+#endif
+	                break;
+	            }
+
+	            case ColorSchemeMode::Custom:
+	            {
+                    qDebug() << __FUNCTION__ << "case ColorSchemeMode::Custom";
+                    qApp->setPalette(_palette);
+	                break;
+	            }
+            }
+
+            //qApp->setStyle(QStyleFactory::create("Fusion"));
+
+            restyleAllWidgets();
+            deleteLater();
+
+            if (_colorSchemeMode == ColorSchemeMode::SystemLightDark || _colorSchemeMode == ColorSchemeMode::SystemLightDark)
+				mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(_colorScheme == Qt::ColorScheme::Light ? "Light" : "Dark"), util::StyledIcon("palette"));
+        	//mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(isSystemLightColorSchemeActive() ? "Light" : "Dark"), StyledIcon("palette"));
+        }
+
+        static void restyleAllWidgets()
+        {
+            for (auto widget : QApplication::allWidgets()) {
+                widget->style()->unpolish(widget);
+                widget->style()->polish(widget);
+                widget->update();
+                widget->repaint();
+            }
+        }
+
+    private:
+        ThemeManager*       _themeManager;          /** Pointer to parent theme manager */
+        ColorSchemeMode     _colorSchemeMode;       /** Type of color scheme mode*/
+        Qt::ColorScheme     _colorScheme;           /** Color scheme */
+        QPalette            _palette;               /** Custom application palette */
+        QTimer              _updateThemeTimer;      /** Apply theme on timeout and re-start when settings change */
+    };
 
 public:
 
@@ -101,20 +241,53 @@ private:
     /** Add default custom themes */
     void addDefaultCustomThemes();
 
-    /** Restyles all widgets in the application */
-    void restyleAllWidgets() const;
-
-    /** Requests an update of the color scheme once an appearance property has changed */
-    void requestUpdateColorScheme();
-
-    /** Update color scheme to reflect the appearance properties */
-    void updateColorScheme();
+    /**
+     * Set color scheme mode to system and \p forceRedraw
+     * @param forceRedraw Force a re-draw of the current color scheme 
+     */
+    void privateActivateSystemColorScheme(bool forceRedraw = false);
 
     /**
-    * Set the application palette to \p palette
-    * @param palette Application palette
-    */
-    void setPalette(const QPalette& palette);
+     * Set color scheme mode to system light/dark and \p forceRedraw
+     * @param forceRedraw Force a re-draw of the current color scheme
+     */
+    void privateActivateSystemColorSchemeLightDark(bool forceRedraw = false);
+
+    /**
+     * Set color scheme to system light and \p forceRedraw
+     * @param forceRedraw Force a re-draw of the current color scheme
+     */
+    void privateActivateLightSystemColorScheme(bool forceRedraw = false);
+
+    /**
+     * Set color scheme to system dark and \p forceRedraw
+     * @param forceRedraw Force a re-draw of the current color scheme
+     */
+    void privateActivateDarkSystemColorScheme(bool forceRedraw = false);
+
+    /**
+     * Set color scheme to custom and \p forceRedraw
+     * @param forceRedraw Force a re-draw of the current color scheme
+     */
+    void privateActivateCustomColorScheme(bool forceRedraw = false) ;
+
+    /**
+     * Set the system light color scheme action to \p checked without emitting signals
+     * @param checked Checked state
+     */
+    void setSystemLightColorSchemeActionCheckedSilent(bool checked);
+
+    /**
+     * Set the system dark color scheme action to \p checked without emitting signals
+     * @param checked Checked state
+     */
+    void setSystemDarkColorSchemeActionCheckedSilent(bool checked);
+
+    /**
+     * Get the requested theme settings for the next timeout of the ThemeManager::_updateThemeTimer
+     * @return Requested theme settings
+     */
+    ThemeSettings* getRequestThemeSettings();
 
 protected: // Action getters
 
@@ -135,14 +308,21 @@ private:
     gui::ToggleAction           _systemLightColorSchemeAction;          /** Set to light system color scheme when triggered */
     gui::ToggleAction           _systemDarkColorSchemeAction;           /** Set to dark system color scheme when triggered */
     gui::OptionAction           _customColorSchemeAction;               /** Custom color scheme action  */
-    QMap<QString, QPalette>     _customThemes;                          /** Custom themes */
-    QPalette                    _currentPalette;                        /** Current application palette */
-    QTimer                      _requestUpdateColorSchemeTimer;                   /** Timer for processing requested changes */
-    QTimer                      _systemColorSchemeChangesTimer;         /** QStyleHints::colorSchemeChanged is sometimes unreliable: check periodically for system color scheme changes */
+    QMap<QString, QPalette>     _customPalettes;                    /** Custom color schemes */
+    
+    QTimer                      _detectSystemColorSchemeChangesTimer;   /** QStyleHints::colorSchemeChanged is sometimes unreliable: check periodically for system color scheme changes */
     std::int32_t                _numberOfCommits;                       /** Number of commits */
-    Qt::ColorScheme             _currentColorScheme;                    /** Current color scheme (valid in system color scheme mode) */
-    bool                        _disableSystemLightSlot;                /** Disable system light slot */
-    bool                        _disableSystemDarkSlot;                 /** Disable system dark slot */
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 2)
+    Qt::ColorScheme             _systemColorScheme;                     /** System color scheme */
+    Qt::ColorScheme             _applicationColorScheme;                /** Application color scheme */
+#endif
+
+    ColorSchemeMode             _currentColorSchemeMode;                /** Current color scheme mode */
+    bool                        _disableSystemLightColorSchemeSlot;                /** Disable system light slot */
+    bool                        _disableSystemDarkColorSchemeSlot;                 /** Disable system dark slot */
+
+    QPointer<ThemeSettings>     _requestThemeSettings;                  /** Requested theme settings for the next timeout of the ThemeManager::_updateThemeTimer */
 };
 
 }
