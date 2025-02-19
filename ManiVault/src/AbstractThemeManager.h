@@ -103,10 +103,10 @@ public:
     /** Set color scheme mode to system light/dark */
     virtual void activateSystemColorSchemeLightDark() = 0;
 
-    /** Set color scheme to system light */
+    /** Set color scheme to system light (this will activate the system light/dark color scheme mode) */
     virtual void activateLightSystemColorScheme() = 0;
 
-    /** Set theme to system dark */
+    /** Set theme to system dark (this will activate the system light/dark color scheme mode) */
     virtual void activateDarkSystemColorScheme() = 0;
 
     /** Activates the currently selected custom color scheme */
