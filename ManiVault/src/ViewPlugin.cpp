@@ -302,6 +302,8 @@ void ViewPlugin::addDockingAction(WidgetAction* dockingAction, WidgetAction* doc
     dockingAction->setProperty("MinimumDockWidgetSize", minimumDockWidgetSize);
 
     _settingsActions << dockingAction;
+
+    emit dockingActionAdded(dockingAction);
 }
 
 mv::gui::WidgetActions ViewPlugin::getDockingActions() const

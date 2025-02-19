@@ -161,6 +161,8 @@ signals:
      */
     void progressTaskChanged(Task* progressTask);
 
+    void dockingActionAdded(gui::WidgetAction* action);
+
 private:
     QWidget                         _widget;                    /** Widget representation of the plugin */
     gui::TriggerAction              _editorAction;              /** Trigger action to start the view plugin editor */

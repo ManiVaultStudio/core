@@ -195,6 +195,9 @@ private:
      */
     void setViewPlugin(mv::plugin::ViewPlugin* viewPlugin);
 
+    
+    void addDockingAction(mv::gui::WidgetAction* dockingAction);
+
 private:
     QPointer<mv::plugin::ViewPlugin>    _viewPlugin;                /** Pointer to view plugin */
     QString                             _viewPluginKind;            /** Kind of (view) plugin */
