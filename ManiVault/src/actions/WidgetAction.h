@@ -77,7 +77,6 @@ public:
         ForceExpandedInGroup        = 0x00010,      /** Action will be expanded in a horizontal group (or toolbar), no matter the circumstances */
         ToolButtonAutoRaise         = 0x00020,      /** Sets auto-raise to true when a widget action is collapsed and a tool button is used for the popup functionality */
         NoGroupBoxInPopupLayout     = 0x00040,      /** Prevent group box in popup layout */
-        ExcludeFromSettings         = 0x00080,      /** Exclude action from settings */
 
         User                        = 0x00100,      /** And beyond for custom configuration flags */
 
@@ -253,9 +252,9 @@ public: // Hierarchy queries
     }
 
     /**
-     * Determine whether this action is a child of \p action of \p WidgetActionType
+     * Determine whether this action is a descendant of \p action of \p WidgetActionType
      * @param action Action to check for
-     * @return Boolean determining whether \p action is an ancestor or not
+     * @return Boolean determining whether \p action is a descendant or not
      */
     template<typename WidgetActionType = WidgetAction>
     bool isChildOf(WidgetAction* action) const {
@@ -263,9 +262,9 @@ public: // Hierarchy queries
     }
 
     /**
-     * Determine whether this action is a child of \p actions of \p WidgetActionType
+     * Determine whether this action is a descendant of \p actions of \p WidgetActionType
      * @param actions Actions to check for
-     * @return Boolean determining whether this action is child of one of \p actions or not
+     * @return Boolean determining whether this action is descendant of one of \p actions or not
      */
     template<typename WidgetActionType = WidgetAction>
     bool isChildOf(WidgetActions actions) const {
