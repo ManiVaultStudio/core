@@ -56,7 +56,7 @@ StyledIcon::StyledIcon(const QIcon& icon) :
 
 StyledIcon::~StyledIcon()
 {
-    disconnect(&mv::theme(), &AbstractThemeManager::themeChanged, this, nullptr);
+    disconnect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, nullptr);
 }
 
 void StyledIcon::set(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)

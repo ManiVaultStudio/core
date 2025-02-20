@@ -45,7 +45,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     
     updateStyle();
     
-    connect(&mv::theme(), &AbstractThemeManager::themeChanged, this, updateStyle);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, updateStyle);
 
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertSpacing(1, 5);
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertWidget(2, _settingsToolButton, Qt::AlignCenter);
