@@ -24,12 +24,11 @@ public:
     public:
 
         /**
-         * Construct theme settings with pointer to \p themeManager object
-         * @param themeManager Pointer to parent theme manager
+         * Construct theme settings with pointer to \p parent object
+         * @param parent Pointer to parent theme manager
          */
-        ThemeSettings(ThemeManager* themeManager = nullptr) :
-            QObject(themeManager),
-            _themeManager(themeManager),
+        ThemeSettings(QObject* parent = nullptr) :
+            QObject(parent),
             _colorSchemeMode(ColorSchemeMode::System),
             _colorScheme(Qt::ColorScheme::Unknown)
         {
@@ -91,6 +90,7 @@ public:
         /** Update theme, restyle all widgets and self-destruct */
         void updateTheme()
         {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
             switch (_colorSchemeMode) {
 	            case ColorSchemeMode::System:
 	            {
@@ -101,13 +101,11 @@ public:
 
 	            case ColorSchemeMode::SystemLightDark:
 	            {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+
                     qApp->styleHints()->setColorScheme(_colorScheme);
                     qApp->setPalette(QApplication::style()->standardPalette());
 
                     mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(_colorScheme == Qt::ColorScheme::Light ? "Light" : "Dark"), util::StyledIcon("palette"));
-#else
-#endif
 	                break;
 	            }
 
@@ -121,6 +119,7 @@ public:
 
             restyleAllWidgets();
             deleteLater();
+#endif
         }
 
         static void restyleAllWidgets()
@@ -134,7 +133,6 @@ public:
         }
 
     private:
-        ThemeManager*       _themeManager;          /** Pointer to parent theme manager */
         ColorSchemeMode     _colorSchemeMode;       /** Type of color scheme mode*/
         Qt::ColorScheme     _colorScheme;           /** Color scheme */
         QPalette            _palette;               /** Custom application palette */
