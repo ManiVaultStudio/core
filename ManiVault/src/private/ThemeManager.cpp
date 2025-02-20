@@ -5,7 +5,7 @@
 #include "ThemeManager.h"
 
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
 	#include <QStyleHints>
 #endif
 
@@ -21,7 +21,7 @@ namespace mv
 
 ThemeManager::ThemeManager(QObject* parent) :
     AbstractThemeManager(parent),
-    _colorSchemeModeAction(this, "Theme", { "System", "System light/dark", "Custom" }),
+    _colorSchemeModeAction(this, "Theme", { "System", "Light/dark", "Custom" }),
     _systemLightColorSchemeAction(this, "Light", false),
     _systemDarkColorSchemeAction(this, "Dark", true),
     _customColorSchemeAction(this, "Custom"),
@@ -134,7 +134,7 @@ bool ThemeManager::isSystemColorSchemeModeActive() const
 
 bool ThemeManager::isSystemLightDarkColorSchemeModeActive() const
 {
-    return _colorSchemeModeAction.getCurrentText() == "System light/dark";
+    return _colorSchemeModeAction.getCurrentText() == "Light/dark";
 }
 
 bool ThemeManager::isSystemLightColorSchemeActive() const
@@ -175,18 +175,18 @@ void ThemeManager::activateSystemColorScheme()
 
 void ThemeManager::activateSystemColorSchemeLightDark()
 {
-    _colorSchemeModeAction.setCurrentText("System light/dark");
+    _colorSchemeModeAction.setCurrentText("Light/dark");
 }
 
 void ThemeManager::activateLightSystemColorScheme()
 {
-    _colorSchemeModeAction.setCurrentText("System light/dark");
+    _colorSchemeModeAction.setCurrentText("Light/dark");
     _systemLightColorSchemeAction.setChecked(true);
 }
 
 void ThemeManager::activateDarkSystemColorScheme()
 {
-    _colorSchemeModeAction.setCurrentText("System light/dark");
+    _colorSchemeModeAction.setCurrentText("Light/dark");
     _systemDarkColorSchemeAction.setChecked(true);
 }
 
@@ -306,7 +306,9 @@ Qt::ColorScheme ThemeManager::getCurrentSystemColorScheme()
 
 void ThemeManager::privateActivateSystemColorScheme()
 {
+#ifdef THEME_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
+#endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     getRequestThemeSettings()->setColorSchemeMode(ColorSchemeMode::System);
@@ -316,7 +318,9 @@ void ThemeManager::privateActivateSystemColorScheme()
 
 void ThemeManager::privateActivateSystemColorSchemeLightDark()
 {
+#ifdef THEME_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
+#endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     if (_systemDarkColorSchemeAction.isChecked())
@@ -329,7 +333,9 @@ void ThemeManager::privateActivateSystemColorSchemeLightDark()
 
 void ThemeManager::privateActivateLightSystemColorScheme()
 {
+#ifdef THEME_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
+#endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     if (isSystemColorSchemeModeActive() || isSystemLightDarkColorSchemeModeActive()) {
@@ -341,7 +347,9 @@ void ThemeManager::privateActivateLightSystemColorScheme()
 
 void ThemeManager::privateActivateDarkSystemColorScheme()
 {
+#ifdef THEME_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
+#endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     if (isSystemColorSchemeModeActive() || isSystemLightDarkColorSchemeModeActive()) {
@@ -353,7 +361,9 @@ void ThemeManager::privateActivateDarkSystemColorScheme()
 
 void ThemeManager::privateActivateCustomColorScheme()
 {
+#ifdef THEME_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
+#endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     const auto currentCustomPaletteName = _customColorSchemeAction.getCurrentText();

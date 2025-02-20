@@ -118,6 +118,7 @@ public:
 #endif
         }
 
+        /** Re-styles all widgets so they are properly styled */
         static void restyleAllWidgets()
         {
             for (auto widget : QApplication::allWidgets()) {
