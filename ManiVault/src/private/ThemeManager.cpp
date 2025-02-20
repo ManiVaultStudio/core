@@ -55,32 +55,23 @@ void ThemeManager::initialize()
 
         connect(&_colorSchemeModeAction, &OptionAction::currentIndexChanged, this, [](const std::int32_t& currentIndex) -> void {
             if (currentIndex == static_cast<std::int32_t>(ColorSchemeMode::System))
-				mv::help().addNotification("Theme update", "ManiVault Studio them will synchronize with the current system theme.", util::StyledIcon("palette"));
+				mv::help().addNotification("Theme update", "ManiVault Studio theme will synchronize with the current system theme.", util::StyledIcon("palette"));
         });
 
         connect(&_systemLightColorSchemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
             if (!toggled || _disableSystemLightColorSchemeSlot)
                 return;
 
-            _disableSystemDarkColorSchemeSlot = true;
-            {
-                privateActivateLightSystemColorScheme();
-                //setSystemDarkColorSchemeActionCheckedSilent(false);
-                _systemDarkColorSchemeAction.setChecked(false);
-            }
-            _disableSystemDarkColorSchemeSlot = false;
+            privateActivateLightSystemColorScheme();
+            setSystemDarkColorSchemeActionCheckedSilent(false);
         });
 
         connect(&_systemDarkColorSchemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
             if (!toggled || _disableSystemDarkColorSchemeSlot)
                 return;
 
-            _disableSystemLightColorSchemeSlot = true;
-            {
-                privateActivateDarkSystemColorScheme();
-                _systemLightColorSchemeAction.setChecked(false);
-            }
-            _disableSystemLightColorSchemeSlot = false;
+            privateActivateDarkSystemColorScheme();
+            setSystemLightColorSchemeActionCheckedSilent(false);
         });
 
     	connect(&_customColorSchemeAction, &OptionAction::currentTextChanged, this, [this]() -> void {
@@ -98,8 +89,6 @@ void ThemeManager::initialize()
                 return;
 
             const auto currentSystemColorScheme = getCurrentSystemColorScheme();
-
-        	qDebug() << "System color scheme changed" << _systemColorScheme << currentSystemColorScheme;
 
             if (currentSystemColorScheme != _systemColorScheme) {
                 privateActivateSystemColorScheme();
