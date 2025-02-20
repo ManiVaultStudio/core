@@ -67,6 +67,7 @@ public: // Managers
     AbstractManager* getManager(const ManagerType& managerType) override;
 
     AbstractActionsManager& getActionsManager() override;
+    AbstractThemeManager& getThemeManager() override;
     AbstractPluginManager& getPluginManager() override;
     AbstractEventManager& getEventManager() override;
     AbstractDataManager& getDataManager() override;
@@ -76,7 +77,6 @@ public: // Managers
     AbstractProjectManager& getProjectManager() override;
     AbstractSettingsManager& getSettingsManager() override;
     AbstractHelpManager& getHelpManager() override;
-    AbstractThemeManager& getThemeManager() override;
 
 private:
     std::vector<std::unique_ptr<AbstractManager>>   _managers;              /** All managers in the core */

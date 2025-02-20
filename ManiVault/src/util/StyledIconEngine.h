@@ -33,14 +33,15 @@ public:
     StyledIconEngine(StyledIcon& styledIcon);
 
     /**
-     * Construct from \p sha
+     * Construct from parameters
+     * @param styledIcon Reference to styled icon
      * @param sha SHA of the icon
      * @param colorGroupLightTheme Color group for light theme
      * @param colorGroupDarkTheme Color group for dark theme
      * @param colorRoleLightTheme Color role for light theme
      * @param colorRoleDarkTheme Color role for dark theme
      */
-    StyledIconEngine(const QString& sha, const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
+    StyledIconEngine(StyledIcon& styledIcon, const QString& sha, const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
 
     /**
      * Copy construct from \p other
@@ -49,7 +50,7 @@ public:
     StyledIconEngine(const StyledIconEngine& other);
 
     /** No need for custom destructor */
-    ~StyledIconEngine() override = default;
+    ~StyledIconEngine() override;
 
     /**
      * Paint the icon
@@ -98,6 +99,7 @@ private:
     QPalette::ColorRole getColorRoleForCurrentTheme() const;
 
 private:
+    StyledIcon&             _styledIcon;                /** Reference to styled icon */
     QString                 _sha;                       /** NamedIcons::icons key */
     QPalette::ColorGroup    _colorGroupLightTheme;      /** Color group for light theme */
     QPalette::ColorGroup    _colorGroupDarkTheme;       /** Color group for dark theme */

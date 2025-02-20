@@ -6,8 +6,9 @@
 
 #include "AbstractManager.h"
 
+#include "ApplicationSettingsAction.h"
+
 #include <QObject>
-#include <QPalette>
 
 namespace mv::gui
 {
