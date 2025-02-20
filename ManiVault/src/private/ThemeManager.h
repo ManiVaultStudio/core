@@ -92,28 +92,15 @@ public:
             switch (_colorSchemeMode) {
 	            case ColorSchemeMode::System:
 	            {
-                    qDebug() << __FUNCTION__ << "case ColorSchemeMode::System";
-
-                    QApplication::setPalette(QApplication::style()->standardPalette());
-
-                    //QGuiApplication::styleHints()->setColorScheme(_colorScheme);
-
-                    //qApp->setPalette(QPalette());
-                    //qApp->setStyle(QStyleFactory::create("Fusion"));
-
+                    qApp->setPalette(QPalette());
 	                break;
 	            }
 
 	            case ColorSchemeMode::SystemLightDark:
 	            {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-                    
-                    qDebug() << __FUNCTION__ << "case ColorSchemeMode::SystemLightDark" << _colorScheme;
-
-                    QGuiApplication::styleHints()->setColorScheme(_colorScheme);
-
+                    qApp->styleHints()->setColorScheme(_colorScheme);
                     qApp->setPalette(QApplication::style()->standardPalette());
-                    //qApp->setStyle(QStyleFactory::create("Fusion"));
 #else
 #endif
 	                break;
@@ -121,7 +108,6 @@ public:
 
 	            case ColorSchemeMode::Custom:
 	            {
-                    qDebug() << __FUNCTION__ << "case ColorSchemeMode::Custom";
                     qApp->setPalette(_palette);
 	                break;
 	            }

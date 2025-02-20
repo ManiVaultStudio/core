@@ -115,7 +115,8 @@ void GroupAction::setShowLabels(bool showLabels)
     emit showLabelsChanged(_showLabels);
 }
 
-void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/)
+void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/
+                            , bool        load)
 {
     Q_ASSERT(action != nullptr);
 
