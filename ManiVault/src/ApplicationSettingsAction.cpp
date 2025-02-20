@@ -25,6 +25,7 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
 #endif
 
     _lightDarkSystemColorSchemeAction.setShowLabels(false);
+    _lightDarkSystemColorSchemeAction.setConfigurationFlag(ConfigurationFlag::ExcludeFromSettings);
 
     _appearanceOptionAction.setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
 
@@ -65,7 +66,7 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
             _lightDarkSystemColorSchemeAction.addAction(&mv::theme().getSystemLightColorSchemeAction());
             _lightDarkSystemColorSchemeAction.addAction(&mv::theme().getSystemDarkColorSchemeAction());
 
-	    	addAction(&_lightDarkSystemColorSchemeAction, -1, WidgetConfigurationFunction(), false);
+	    	addAction(&_lightDarkSystemColorSchemeAction, -1, WidgetConfigurationFunction());
 
 	    	addAction(&mv::theme().getCustomColorSchemeAction());
         });
