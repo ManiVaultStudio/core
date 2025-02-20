@@ -15,15 +15,17 @@ namespace mv::util
 {
 
 StyledIconEngine::StyledIconEngine(StyledIcon& styledIcon) :
+    _styledIcon(styledIcon),
     _colorGroupLightTheme(QPalette::ColorGroup::Normal),
     _colorGroupDarkTheme(QPalette::ColorGroup::Normal),
 	_colorRoleLightTheme(QPalette::ColorRole::Text),
 	_colorRoleDarkTheme(QPalette::ColorRole::Text)
 {
-    styledIcon._iconEngine = this;
+    _styledIcon._iconEngine = this;
 }
 
-StyledIconEngine::StyledIconEngine(const QString& sha, const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme) :
+StyledIconEngine::StyledIconEngine(StyledIcon& styledIcon, const QString& sha, const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme) :
+    _styledIcon(styledIcon),
     _sha(sha),
     _colorGroupLightTheme(colorGroupLightTheme),
     _colorGroupDarkTheme(colorGroupDarkTheme),
@@ -33,8 +35,13 @@ StyledIconEngine::StyledIconEngine(const QString& sha, const QPalette::ColorGrou
 }
 
 StyledIconEngine::StyledIconEngine(const StyledIconEngine& other) :
-    StyledIconEngine(other._sha, other._colorGroupLightTheme, other._colorGroupDarkTheme, other._colorRoleLightTheme, other._colorRoleDarkTheme)
+    StyledIconEngine(other._styledIcon, other._sha, other._colorGroupLightTheme, other._colorGroupDarkTheme, other._colorRoleLightTheme, other._colorRoleDarkTheme)
 {
+}
+
+StyledIconEngine::~StyledIconEngine()
+{
+    _styledIcon._iconEngine = nullptr;
 }
 
 void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state)

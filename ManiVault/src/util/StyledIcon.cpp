@@ -25,15 +25,15 @@ namespace mv::util
 
 QMap<QString, QVariantMap>  StyledIcon::fontMetadata             = {};
 QMap<QString, QFont>        StyledIcon::fonts                    = {};
-QString                     StyledIcon::defaultIconFontName      = "FontAwesomeSolid";
-Version                     StyledIcon::defaultIconFontVersion   = { 5, 14 };
+QString                     StyledIcon::defaultIconFontName      = "FontAwesomeRegular";
+Version                     StyledIcon::defaultIconFontVersion   = { 6, 7, 2 };
 QMap<QString, QPixmap>      StyledIcon::pixmaps                  = {};
 
 StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/, QWidget* parent /*= nullptr*/) :
     QObject(parent),
     QIcon(new StyledIconEngine(*this))
 {
-    //connect(&mv::theme(), &AbstractThemeManager::themeChanged, this, &StyledIcon::updateIconPixmap);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StyledIcon::updateIconPixmap);
 
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
         set(iconName, iconFontName, iconFontVersion);
@@ -255,7 +255,7 @@ QPixmap StyledIcon::createIconPixmap(const QString& iconName, const QString& ico
 
 QString StyledIcon::getIconFontVersionString(const Version& iconFontVersion)
 {
-    return QString("%1.%2").arg(QString::number(iconFontVersion.getMajor()), QString::number(iconFontVersion.getMinor()));
+    return QString("%1.%2.%3").arg(QString::number(iconFontVersion.getMajor()), QString::number(iconFontVersion.getMinor()), QString::number(iconFontVersion.getPatch()));
 }
 
 StyledIcon& StyledIcon::changedColorGroups(const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme)
