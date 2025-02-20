@@ -92,7 +92,8 @@ public:
             switch (_colorSchemeMode) {
 	            case ColorSchemeMode::System:
 	            {
-                    qApp->setPalette(QPalette());
+                    //qApp->setPalette(QPalette());
+                    //qApp->setPalette(QApplication::style()->standardPalette());
 	                break;
 	            }
 
@@ -101,6 +102,8 @@ public:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
                     qApp->styleHints()->setColorScheme(_colorScheme);
                     qApp->setPalette(QApplication::style()->standardPalette());
+
+                    mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(_colorScheme == Qt::ColorScheme::Light ? "Light" : "Dark"), util::StyledIcon("palette"));
 #else
 #endif
 	                break;
@@ -113,14 +116,8 @@ public:
 	            }
             }
 
-            //qApp->setStyle(QStyleFactory::create("Fusion"));
-
             restyleAllWidgets();
             deleteLater();
-
-            if (_colorSchemeMode == ColorSchemeMode::SystemLightDark)
-				mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(_colorScheme == Qt::ColorScheme::Light ? "Light" : "Dark"), util::StyledIcon("palette"));
-        	//mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(isSystemLightColorSchemeActive() ? "Light" : "Dark"), StyledIcon("palette"));
         }
 
         static void restyleAllWidgets()
@@ -274,7 +271,7 @@ private:
     void updateColorSchemeMode();
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
-    static Qt::ColorScheme getColorCurrentScheme();
+    static Qt::ColorScheme getCurrentSystemColorScheme();
 #endif
 
 protected: // Action getters
