@@ -43,7 +43,7 @@ void FileDownloader::download(const QUrl& url)
     const auto fileName = QFileInfo(_url.toString()).fileName();
 
     _task.setName(QString("Download %1").arg(fileName));
-    _task.setIcon(Application::getIconFont("FontAwesome").getIcon("download"));
+    _task.setIcon(StyledIcon("download"));
     _task.setRunning();
 
     connect(&_task, &Task::requestAbort, this, [this, networkReply]() -> void {

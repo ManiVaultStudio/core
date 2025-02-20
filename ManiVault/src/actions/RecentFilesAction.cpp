@@ -8,11 +8,12 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMenu>
-#include <QLocale>
 
 #ifdef _DEBUG
-    #define RECENT_FILE_PATHS_ACTION_VERBOSE
+    #define RECENT_FILES_ACTION_VERBOSE
 #endif
+
+using namespace mv::util;
 
 namespace mv::gui {
 
@@ -39,7 +40,7 @@ QMenu* RecentFilesAction::getMenu()
 
     menu->setTitle("Recent...");
     menu->setToolTip(QString("Recently opened %1s").arg(_fileType.toLower()));
-    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
+    menu->setIcon(StyledIcon("clock"));
     menu->setEnabled(_model.rowCount() >= 1);
 
     for (auto action : _model.getActions())
