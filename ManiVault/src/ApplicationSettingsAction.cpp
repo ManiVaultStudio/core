@@ -25,7 +25,6 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
 #endif
 
     _lightDarkSystemColorSchemeAction.setShowLabels(false);
-    _lightDarkSystemColorSchemeAction.setConfigurationFlag(ConfigurationFlag::ExcludeFromSettings);
 
     _appearanceOptionAction.setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
 

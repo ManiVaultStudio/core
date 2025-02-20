@@ -27,7 +27,7 @@ void GlobalSettingsGroupAction::addAction(WidgetAction* action, std::int32_t wid
     if (!action)
         return;
 
-    if (!action->isConfigurationFlagSet(ConfigurationFlag::ExcludeFromSettings)) {
+    if (action->isChildOf(this)) {
         const auto actionName = getSettingsPrefix() + action->getSerializationName();
 
         auto parts = actionName.split(" ");
