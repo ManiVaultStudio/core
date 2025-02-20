@@ -364,7 +364,7 @@ void ThemeManager::privateActivateCustomColorScheme()
 
     if (isCustomColorSchemeModeActive() && _customPalettes.contains(currentCustomPaletteName)) {
         getRequestThemeSettings()->setColorSchemeMode(ColorSchemeMode::Custom);
-        getRequestThemeSettings()->setPalette(_customPalettes[currentCustomPaletteName]);
+        getRequestThemeSettings()->setPalette(_customPalettes[currentCustomPaletteName], currentCustomPaletteName);
     }
 #endif
 }
