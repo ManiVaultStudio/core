@@ -42,19 +42,19 @@ IconPickerAction::IconPickerAction(QObject* parent, const QString& title) :
     _inputFilePathPickerAction.setDefaultWidgetFlags(FilePickerAction::WidgetFlag::PushButton);
 }
 
-QIcon IconPickerAction::getIcon() const
+const util::StyledIcon& IconPickerAction::getIcon() const
 {
-    return _iconAction.icon();
+    return _iconAction.getIcon();
 }
 
-void IconPickerAction::setIcon(const QIcon& icon)
+void IconPickerAction::setIcon(const util::StyledIcon& icon)
 {
     _iconAction.setIcon(icon);
 }
 
 void IconPickerAction::setIconFromImage(const QImage& image)
 {
-    setIcon(createIcon(QPixmap::fromImage(image)));
+    setIcon(util::StyledIcon(createIcon(QPixmap::fromImage(image))));
 }
 
 void IconPickerAction::fromVariantMap(const QVariantMap& variantMap)

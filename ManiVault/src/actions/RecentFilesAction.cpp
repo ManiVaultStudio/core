@@ -25,7 +25,7 @@ RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey
 {
     Q_ASSERT(!settingsKey.isEmpty());
 
-    initialize(settingsKey, fileType, shortcutPrefix, icon);
+    initialize(settingsKey, fileType, shortcutPrefix);
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* dialog = new Dialog(this);
@@ -69,11 +69,6 @@ QString RecentFilesAction::getShortcutPrefix() const
     return _shortcutPrefix;
 }
 
-QIcon RecentFilesAction::getIcon() const
-{
-    return _icon;
-}
-
 void RecentFilesAction::addRecentFilePath(const QString& filePath)
 {
 #ifdef RECENT_FILE_PATHS_ACTION_VERBOSE
@@ -83,12 +78,11 @@ void RecentFilesAction::addRecentFilePath(const QString& filePath)
     _model.addRecentFilePath(filePath);
 }
 
-void RecentFilesAction::initialize(const QString& settingsKey, const QString& fileType, const QString& shortcutPrefix, const QIcon& icon)
+void RecentFilesAction::initialize(const QString& settingsKey, const QString& fileType, const QString& shortcutPrefix)
 {
     _settingsKey    = settingsKey;
     _fileType       = fileType;
     _shortcutPrefix = shortcutPrefix;
-    _icon           = icon;
 
     _editAction.setIconByName("cog");
     _editAction.setToolTip(QString("Edit recently opened %1s").arg(_fileType.toLower()));

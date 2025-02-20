@@ -4,11 +4,11 @@
 
 #include "SettingsManagerDialog.h"
 
-#include <Application.h>
 #include <CoreInterface.h>
 #include <QVBoxLayout>
 
 using namespace mv;
+using namespace mv::util;
 
 #ifdef _DEBUG
     #define SETTINGS_MANAGER_DIALOG_VERBOSE

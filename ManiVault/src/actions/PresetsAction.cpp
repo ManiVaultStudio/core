@@ -26,7 +26,7 @@ QMap<PresetsAction::Column, QPair<QString, QString>> PresetsAction::columnInfo =
     { Column::DateTime, { "Date and time", "Date and time when the preset was changed" }}
 });
 
-PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey /*= ""*/, const QString& presetType /*= ""*/, const QIcon& icon /*= QIcon()*/) :
+PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey /*= ""*/, const QString& presetType /*= ""*/, const util::StyledIcon& icon /*= util::StyledIcon()*/) :
     WidgetAction(parent, "Presets"),
     _sourceAction(sourceAction),
     _settingsKey(settingsKey),
@@ -63,7 +63,7 @@ QString PresetsAction::getPresetType() const
     return _presetType;
 }
 
-QIcon PresetsAction::getIcon() const
+const util::StyledIcon& PresetsAction::getIcon() const
 {
     return _icon;
 }

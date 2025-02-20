@@ -89,18 +89,6 @@ public:
     /** Destructor */
     ~TransformationPluginFactory() override = default;
     
-    /**
-     * Get plugin icon
-     * @return Icon
-     */
-    util::StyledIcon getIcon() const override;
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    util::StyledIcon getCategoryIcon() const override;
-
     /** Produces an instance of a transformation plugin */
     TransformationPlugin* produce() override = 0;
 };

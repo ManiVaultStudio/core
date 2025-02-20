@@ -192,13 +192,6 @@ public:
         return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-
 public: // Serialization
 
     /**
@@ -268,15 +261,9 @@ class TextDataFactory : public RawDataFactory
                       FILE  "TextData.json")
     
 public:
-    TextDataFactory(void) {}
-    ~TextDataFactory(void) override {}
+    TextDataFactory();
 
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    ~TextDataFactory() override {}
 
     /**
      * Get the read me markdown file URL

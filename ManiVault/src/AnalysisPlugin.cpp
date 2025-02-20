@@ -70,16 +70,6 @@ QVariantMap AnalysisPlugin::toVariantMap() const
     return variantMap;
 }
 
-util::StyledIcon AnalysisPluginFactory::getIcon() const
-{
-    return util::StyledIcon("square-root-alt");
-}
-
-util::StyledIcon AnalysisPluginFactory::getCategoryIcon() const
-{
-    return util::StyledIcon("square-root-alt");
-}
-
 }
 
 }

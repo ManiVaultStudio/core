@@ -923,7 +923,7 @@ void WidgetAction::setIconByName(const QString& iconName, const QString& iconFon
     setIcon(_styledIcon);
 }
 
-util::StyledIcon& WidgetAction::getIcon()
+const util::StyledIcon& WidgetAction::getIcon() const
 {
     return _styledIcon;
 }

@@ -10,6 +10,7 @@
 #include <QEventLoop>
 
 using namespace mv;
+using namespace mv::util;
 
 ClustersModel::ClustersModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),

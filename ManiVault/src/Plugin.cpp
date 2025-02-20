@@ -65,7 +65,7 @@ QString Plugin::getGuiName() const
     return _guiNameAction.getString();
 }
 
-StyledIcon Plugin::getIcon() const
+const StyledIcon& Plugin::getIcon() const
 {
     return _factory->getIcon();
 }

@@ -894,7 +894,7 @@ public: // Styled icon
      * Get the icon
      * @return Reference to named icon
      */
-    util::StyledIcon& getIcon();
+    virtual const util::StyledIcon& getIcon() const;
 
 public: // Badge-related
 

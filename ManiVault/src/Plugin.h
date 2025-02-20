@@ -60,7 +60,7 @@ public:
     QString getGuiName() const;
 
     /** Returns the icon of this plugin */
-    util::StyledIcon getIcon() const;
+    const util::StyledIcon& getIcon() const override;
 
     /**
      * Returns the kind of plugin. The kind is specific to the

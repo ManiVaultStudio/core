@@ -12,6 +12,8 @@ using namespace mv::plugin;
     #define PLUGIN_FACTORIES_MODEL_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv {
 
 AbstractPluginFactoriesModel::Item::Item(const QString& type, plugin::PluginFactory* pluginFactory) :
@@ -43,7 +45,7 @@ QVariant AbstractPluginFactoriesModel::NameItem::data(int role /*= Qt::UserRole 
             return QString("%1").arg(data(Qt::DisplayRole).toString());
 
         case Qt::DecorationRole:
-            return getPluginFactory() ? getPluginFactory()->getIcon() : QIcon();
+            return getPluginFactory() ? StyledIcon(getPluginFactory()->getIcon()) : StyledIcon();
 
         default:
             break;

@@ -43,7 +43,7 @@ HelpManager::HelpManager(QObject* parent) :
     _showLearningCenterPageAction.setIconByName("chalkboard-teacher");
     _showLearningCenterPageAction.setToolTip("Go to the learning center");
 
-    _toDiscordAction.setIcon(Application::getIconFont("FontAwesomeBrands", 5, 14).getIcon("discord"));
+    _toDiscordAction.setIcon(StyledIcon("discord", "FontAwesomeBrands"));
     _toDiscordAction.setToolTip("Get in touch on our Discord");
     _toDiscordAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
@@ -55,7 +55,7 @@ HelpManager::HelpManager(QObject* parent) :
     _toWikiAction.setToolTip("Visit our wiki");
     _toWikiAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
-    _toRepositoryAction.setIcon(Application::getIconFont("FontAwesomeBrands", 6, 5).getIcon("github"));
+    _toRepositoryAction.setIcon(StyledIcon("github", "FontAwesomeBrands"));
     _toRepositoryAction.setToolTip("Contribute to ManiVault on Github");
     _toRepositoryAction.setDefaultWidgetFlags(TriggerAction::Icon);
     //_toRepositoryAction.setShortcut(QKeySequence("Ctrl+F4"));

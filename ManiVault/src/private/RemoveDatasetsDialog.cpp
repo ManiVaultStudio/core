@@ -5,7 +5,7 @@
 #include "RemoveDatasetsDialog.h"
 
 #include <CoreInterface.h>
-#include <Application.h>
+
 #include <Set.h>
 
 #include <widgets/HierarchyWidget.h>
@@ -14,6 +14,7 @@
 #include <QHeaderView>
 
 using namespace mv;
+using namespace mv::util;
 
 RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidget* parent /*= nullptr*/) :
     QDialog(parent),

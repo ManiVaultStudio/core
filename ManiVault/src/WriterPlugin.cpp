@@ -6,16 +6,12 @@
 
 using namespace mv::util;
 
-namespace mv
-{
-namespace plugin
+namespace mv::plugin
 {
 
 WriterPlugin::WriterPlugin(const PluginFactory* factory) :
-    Plugin(factory),
-    _input()
+    Plugin(factory)
 {
-
 }
 
 void WriterPlugin::setInputDataset(const Dataset<DatasetImpl>& inputDataset)
@@ -26,18 +22,6 @@ void WriterPlugin::setInputDataset(const Dataset<DatasetImpl>& inputDataset)
 void WriterPlugin::setInputDatasets(const Datasets& inputDatasets)
 {
     _input = inputDatasets;
-}
-
-StyledIcon WriterPluginFactory::getIcon() const
-{
-	return util::StyledIcon("file-export");
-}
-
-StyledIcon WriterPluginFactory::getCategoryIcon() const
-{
-    return StyledIcon("file-export");
-}
-
 }
 
 }

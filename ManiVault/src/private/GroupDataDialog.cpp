@@ -12,6 +12,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 GroupDataDialog::GroupDataDialog(QWidget* parent, const mv::Datasets& datasets) :
     QDialog(parent),

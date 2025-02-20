@@ -295,11 +295,6 @@ void Clusters::removeClustersById(const QStringList& ids)
     getRawData<ClusterData>()->removeClustersById(ids);
 }
 
-QIcon Clusters::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return StyledIcon("th-large", color);
-}
-
 std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 {
     // Indices that are selected
@@ -471,9 +466,9 @@ void Clusters::selectInvert()
     events().notifyDatasetDataSelectionChanged(this);
 }
 
-QIcon ClusterDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
+ClusterDataFactory::ClusterDataFactory()
 {
-    return StyledIcon("th-large", color);
+    setIconByName("th-large");
 }
 
 QUrl ClusterDataFactory::getReadmeMarkdownUrl() const
