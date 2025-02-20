@@ -6,7 +6,7 @@
 
 #include <Application.h>
 
-#include <util/Icon.h>
+#include <util/StyledIcon.h>
 
 #include <widgets/HierarchyWidget.h>
 
@@ -14,6 +14,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 UnhideAction::UnhideAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),

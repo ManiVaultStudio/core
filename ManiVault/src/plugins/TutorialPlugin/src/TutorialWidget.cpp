@@ -4,8 +4,6 @@
 
 #include "TutorialWidget.h"
 
-#include <Application.h>
-
 #include "TutorialPlugin.h"
 
 #include <QDebug>
@@ -19,6 +17,7 @@ namespace mv::gui
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::plugin;
+using namespace mv::util;
 
 TutorialWidget::TutorialWidget(TutorialPlugin* tutorialPlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),

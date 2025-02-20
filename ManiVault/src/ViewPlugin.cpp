@@ -329,13 +329,11 @@ ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/)
     _producesSystemViewPlugins(producesSystemViewPlugins),
     _preferredDockArea(DockAreaFlag::Right)
 {
+    setIconByName("eye");
+    setCategoryIconByName("eye");
+
     if (_producesSystemViewPlugins)
         setMaximumNumberOfInstances(1);
-}
-
-StyledIcon ViewPluginFactory::getIcon() const
-{
-    return StyledIcon("eye");
 }
 
 bool ViewPluginFactory::producesSystemViewPlugins() const
@@ -351,11 +349,6 @@ DockAreaFlag ViewPluginFactory::getPreferredDockArea() const
 void ViewPluginFactory::setPreferredDockArea(const gui::DockAreaFlag& preferredDockArea)
 {
     _preferredDockArea = preferredDockArea;
-}
-
-StyledIcon ViewPluginFactory::getCategoryIcon() const
-{
-    return StyledIcon("eye");
 }
 
 }

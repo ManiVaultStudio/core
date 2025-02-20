@@ -36,16 +36,8 @@ gui::OptionAction& TransformationPlugin::getTypeAction()
 TransformationPluginFactory::TransformationPluginFactory() :
     PluginFactory(Type::TRANSFORMATION)
 {
-}
-
-util::StyledIcon TransformationPluginFactory::getIcon() const
-{
-    return util::StyledIcon("random");
-}
-
-util::StyledIcon TransformationPluginFactory::getCategoryIcon() const
-{
-    return util::StyledIcon("random");
+    setIconByName("random");
+    setCategoryIconByName("random");
 }
 
 }

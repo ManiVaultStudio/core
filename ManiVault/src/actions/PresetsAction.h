@@ -150,7 +150,7 @@ public:
      * @param presetType Type of preset
      * @param icon Icon in menu
      */
-    Q_INVOKABLE PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey = "", const QString& presetType = "", const QIcon& icon = QIcon());
+    Q_INVOKABLE PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey = "", const QString& presetType = "", const util::StyledIcon& icon = util::StyledIcon());
 
     /**
      * Get settings key
@@ -168,7 +168,7 @@ public:
      * Get icon
      * @return Icon for the preset type
      */
-    QIcon getIcon() const;
+    const util::StyledIcon& getIcon() const override;
 
     /**
      * Set icon to \p icon
@@ -300,14 +300,14 @@ signals:
     void presetExported(const QString& filePath);
 
 private:
-    WidgetAction*       _sourceAction;      /** Non-owning pointer to widget action of which to save presets */
-    QString             _settingsKey;       /** Settings key where the preset will be stored */
-    QString             _presetType;        /** Preset type */
-    QIcon               _icon;              /** Icon for the preset type */
-    QStandardItemModel  _model;             /** Model for storing preset names and icons */
-    FilterModel         _filterModel;       /** Sort/filter model */
-    TriggerAction       _editAction;        /** Action which triggers a dialog in which the presets can be managed */
-    QVariantMap         _presets;           /** Cached presets */
+    WidgetAction*       _sourceAction;  /** Non-owning pointer to widget action of which to save presets */
+    QString             _settingsKey;   /** Settings key where the preset will be stored */
+    QString             _presetType;    /** Preset type */
+    util::StyledIcon    _icon;          /** Icon for the preset type */
+    QStandardItemModel  _model;         /** Model for storing preset names and icons */
+    FilterModel         _filterModel;   /** Sort/filter model */
+    TriggerAction       _editAction;    /** Action which triggers a dialog in which the presets can be managed */
+    QVariantMap         _presets;       /** Cached presets */
 };
 
 }

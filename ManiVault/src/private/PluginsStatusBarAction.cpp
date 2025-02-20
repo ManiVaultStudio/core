@@ -6,6 +6,7 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
+
 #include <widgets/HierarchyWidget.h>
 
 #ifdef _DEBUG
@@ -16,6 +17,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title, "plug"),

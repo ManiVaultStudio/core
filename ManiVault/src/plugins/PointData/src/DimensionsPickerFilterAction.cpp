@@ -9,6 +9,8 @@
 
 #include <QHBoxLayout>
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 DimensionsPickerFilterAction::DimensionsPickerFilterAction(DimensionsPickerAction& dimensionsPickerAction) :

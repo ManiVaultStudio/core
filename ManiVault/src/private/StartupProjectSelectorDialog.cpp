@@ -4,13 +4,12 @@
 
 #include "StartupProjectSelectorDialog.h"
 
-#include <Application.h>
-
 #include <QVBoxLayout>
 #include <QHeaderView>
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 #ifdef _DEBUG
     #define STARTUP_PROJECT_SELECTOR_DIALOG_VERBOSE

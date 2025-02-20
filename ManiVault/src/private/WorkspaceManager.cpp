@@ -128,7 +128,7 @@ WorkspaceManager::WorkspaceManager(QObject* parent) :
 
     createIcon();
 
-    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt", _icon);
+    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt");
 
     connect(&_recentWorkspacesAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         loadWorkspace(filePath);

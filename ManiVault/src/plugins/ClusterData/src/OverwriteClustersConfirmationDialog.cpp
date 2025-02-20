@@ -10,6 +10,7 @@
 #include <QLabel>
 
 using namespace mv;
+using namespace mv::util;
 
 OverwriteClustersConfirmationDialog::OverwriteClustersConfirmationDialog(QWidget* parent, std::uint32_t numberOfUserClusters, std::uint32_t numberOfUserModifiedClusters) :
     QDialog(parent),

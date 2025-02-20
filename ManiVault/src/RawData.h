@@ -71,17 +71,10 @@ public:
     RawDataFactory() :
         PluginFactory(Type::DATA)
     {
-
+        setIconByName("table");
+        setCategoryIconByName("table");
     }
     ~RawDataFactory() override {};
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    util::StyledIcon getCategoryIcon() const override {
-        return util::StyledIcon("table");
-    }
 
     /**
      * Produces the plugin

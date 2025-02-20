@@ -204,7 +204,7 @@ ProjectManager::ProjectManager(QObject* parent) :
 
     updateActionsReadOnly();
 
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", StyledIcon("file"));
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
     connect(&_recentProjectsAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         openProject(filePath);

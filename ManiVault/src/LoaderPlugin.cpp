@@ -31,16 +31,6 @@ QString LoaderPlugin::AskForFileName(const QString& fileNameFilter) const
     return fileName;
 }
 
-util::StyledIcon LoaderPluginFactory::getIcon() const
-{
-    return util::StyledIcon("file-import");
-}
-
-util::StyledIcon LoaderPluginFactory::getCategoryIcon() const
-{
-    return util::StyledIcon("file-import");
-}
-
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const Datasets& datasets) const
 {
     return { new PluginTriggerAction(const_cast<LoaderPluginFactory*>(this), this, QString("%1").arg(getKind()), QString("Load %1").arg(getKind()), getIcon()) };

@@ -4,7 +4,6 @@
 
 #include "StatusBarAction.h"
 
-#include "Application.h"
 #include "CoreInterface.h"
 
 #ifdef _DEBUG
@@ -19,7 +18,7 @@ namespace mv::gui {
 
 WidgetActions StatusBarAction::statusBarActions;
 
-StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QIcon& icon /*= QIcon()*/) :
+StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const StyledIcon& icon /*= StyledIcon()*/) :
     WidgetAction(parent, title),
     _barGroupAction(this, "Bar Group"),
     _iconAction(this, "Icon"),
@@ -44,7 +43,7 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QI
 }
 
 StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QString& icon /*= ""*/) :
-    StatusBarAction(parent, title, icon.isEmpty() ? QIcon() : StyledIcon(icon))
+    StatusBarAction(parent, title, icon.isEmpty() ? StyledIcon() : StyledIcon(icon))
 {
 }
 

@@ -8,16 +8,20 @@
 
 #include <QString>
 
-namespace mv
-{
-namespace plugin
+namespace mv::plugin
 {
 
 class CORE_EXPORT WriterPlugin : public Plugin
 {
 public:
+
+    /**
+     * Construct with pointer to plugin factory
+     * @param factory Pointer to plugin factory
+     */
     WriterPlugin(const PluginFactory* factory);
 
+    /** No need for custom destructor */
     ~WriterPlugin() override = default;
 
     virtual void writeData() = 0;
@@ -63,9 +67,12 @@ public:
     WriterPluginFactory() :
         PluginFactory(Type::WRITER)
     {
+        setIconByName("file-export");
+        setCategoryIconByName("file-export");
     }
 
-    ~WriterPluginFactory() = default;
+    /** No need for custom destructor */
+    ~WriterPluginFactory() override = default;
 
     /**
      * Set name of the object
@@ -76,26 +83,9 @@ public:
         QObject::setObjectName("Plugins/Writer/" + name);
     }
 
-    /**
-     * Get plugin icon
-     * @return Icon
-     */
-    util::StyledIcon getIcon() const override;
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    util::StyledIcon getCategoryIcon() const override;
-
-    /**
-    * Produces an instance of a writer plugin. This function gets called by the plugin manager.
-    */
     WriterPlugin* produce() override = 0;
 };
 
-} // namespace plugin
-
-} // namespace mv
+}
 
 Q_DECLARE_INTERFACE(mv::plugin::WriterPluginFactory, "ManiVault.WriterPluginFactory")

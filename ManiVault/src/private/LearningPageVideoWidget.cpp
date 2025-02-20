@@ -11,9 +11,10 @@
 
 #include <models/LearningCenterVideosModel.h>
 
+#include <QDebug>
+
 #include <QAbstractTextDocumentLayout>
 #include <QDateTime>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QEvent>
 #include <QLocale>
@@ -63,11 +64,9 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
 
     setLayout(&_mainLayout);
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     _thumbnailLabel.setObjectName("ThumbnailLabel");
-    _thumbnailLabel.setFont(fontAwesome.getFont(20));
-    _thumbnailLabel.setText(fontAwesome.getIconCharacter("spinner"));
+    _thumbnailLabel.setFont(StyledIcon::getIconFont(20));
+    _thumbnailLabel.setText(StyledIcon::getIconCharacter("spinner"));
     _thumbnailLabel.setAlignment(Qt::AlignCenter);
     _thumbnailLabel.setFixedSize(QSize(200, 102));
     _thumbnailLabel.setStyleSheet("QLabel#ThumbnailLabel { \
@@ -145,17 +144,15 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     _mainLayout.addLayout(&_centerLayout, 1);
     _mainLayout.addLayout(&_bottomLayout, 1);
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
+    _playIconLabel.setFont(StyledIcon::getIconFont(32));
+    _summaryIconLabel.setFont(StyledIcon::getIconFont(8));
+    _dateIconLabel.setFont(StyledIcon::getIconFont(8));
+    _tagsIconLabel.setFont(StyledIcon::getIconFont(8));
 
-    _playIconLabel.setFont(fontAwesome.getFont(32));
-    _summaryIconLabel.setFont(fontAwesome.getFont(8));
-    _dateIconLabel.setFont(fontAwesome.getFont(8));
-    _tagsIconLabel.setFont(fontAwesome.getFont(8));
-
-    _playIconLabel.setText(fontAwesome.getIconCharacter("play-circle"));
-    _summaryIconLabel.setText(fontAwesome.getIconCharacter("scroll"));
-    _dateIconLabel.setText(fontAwesome.getIconCharacter("calendar-alt"));
-    _tagsIconLabel.setText(fontAwesome.getIconCharacter("tags"));
+    _playIconLabel.setText(StyledIcon::getIconCharacter("play-circle"));
+    _summaryIconLabel.setText(StyledIcon::getIconCharacter("scroll"));
+    _dateIconLabel.setText(StyledIcon::getIconCharacter("calendar-alt"));
+    _tagsIconLabel.setText(StyledIcon::getIconCharacter("tags"));
     
     QLocale locale;
 

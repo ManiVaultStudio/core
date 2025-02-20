@@ -5,7 +5,8 @@
 #include "StartupProjectsModel.h"
 
 #include <ProjectMetaAction.h>
-#include <util/Icon.h>
+
+#include <util/StyledIcon.h>
 
 #include <QString>
 
@@ -15,6 +16,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 StartupProjectsModel::StartupProjectsModel(QObject* parent /*= nullptr*/) :
     StandardItemModel(parent)
@@ -46,10 +48,10 @@ void StartupProjectsModel::initialize(const QVector<QPair<QSharedPointer<mv::Pro
 {
     for (const auto& startupProjectMetaAction : startupProjectsMetaActions)
     {
-        auto icon             = startupProjectMetaAction.first->getApplicationIconAction().getIconPickerAction().getIcon();
-        auto fileName  = QFileInfo(startupProjectMetaAction.second).baseName();
-        auto title     = startupProjectMetaAction.first->getTitleAction().getString();
-        auto description= startupProjectMetaAction.first->getDescriptionAction().getString();
+        auto icon           = StyledIcon(startupProjectMetaAction.first->getApplicationIconAction().getIconPickerAction().getIcon());
+        auto fileName       = QFileInfo(startupProjectMetaAction.second).baseName();
+        auto title          = startupProjectMetaAction.first->getTitleAction().getString();
+        auto description    = startupProjectMetaAction.first->getDescriptionAction().getString();
 
         if (title.isEmpty())
             title = "NA";

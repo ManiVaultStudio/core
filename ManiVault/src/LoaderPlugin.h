@@ -67,6 +67,8 @@ public:
     LoaderPluginFactory() :
         PluginFactory(Type::LOADER)
     {
+        setIconByName("file-import");
+        setCategoryIconByName("file-import");
     }
 
     ~LoaderPluginFactory() override = default;
@@ -79,18 +81,6 @@ public:
     {
         QObject::setObjectName("Plugins/Loader/" + name);
     }
-
-    /**
-     * Get plugin icon
-     * @return Icon
-     */
-    util::StyledIcon getIcon() const override;
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    util::StyledIcon getCategoryIcon() const override;
 
     /**
     * Produces an instance of a loader plugin. This function gets called by the plugin manager.

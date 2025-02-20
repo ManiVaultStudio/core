@@ -20,7 +20,7 @@ class CORE_EXPORT AnalysisPlugin : public Plugin
 public:
     AnalysisPlugin(const PluginFactory* factory);
 
-    ~AnalysisPlugin() override {};
+    ~AnalysisPlugin() override = default;
 
     /**
      * Set name of the object
@@ -112,30 +112,17 @@ public:
     AnalysisPluginFactory() :
         PluginFactory(Type::ANALYSIS)
     {
-
+        setIconByName("square-root-alt");
+        setCategoryIconByName("square-root-alt");
     }
-    ~AnalysisPluginFactory() = default;
-    
-    /**
-     * Get plugin icon
-     * @return Icon
-     */
-    util::StyledIcon getIcon() const override;
 
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    util::StyledIcon getCategoryIcon() const override;
+	~AnalysisPluginFactory() override = default;
 
-    /**
-    * Produces an instance of an analysis plugin. This function gets called by the plugin manager.
-    */
     AnalysisPlugin* produce() override = 0;
 };
 
-} // namespace plugin
+}
 
-} // namespace mv
+}
 
 Q_DECLARE_INTERFACE(mv::plugin::AnalysisPluginFactory, "ManiVault.AnalysisPluginFactory")

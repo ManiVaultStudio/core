@@ -8,12 +8,15 @@
 #include <CoreInterface.h>
 #include <Plugin.h>
 
+#include <util/StyledIcon.h>
+
 #include <QVBoxLayout>
 #include <QMenu>
 #include <QHeaderView>
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 #ifdef _DEBUG
     #define PLUGIN_MANAGER_DIALOG_VERBOSE

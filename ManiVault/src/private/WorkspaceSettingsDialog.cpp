@@ -17,6 +17,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),

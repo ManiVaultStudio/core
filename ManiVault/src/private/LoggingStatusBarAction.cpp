@@ -16,6 +16,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title, "scroll"),

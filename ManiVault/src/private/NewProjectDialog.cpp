@@ -8,7 +8,6 @@
 
 #include <AbstractWorkspaceManager.h>
 
-#include <Application.h>
 #include <CoreInterface.h>
 
 #include <QVBoxLayout>
@@ -19,6 +18,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),

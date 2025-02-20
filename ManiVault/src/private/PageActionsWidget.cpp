@@ -20,6 +20,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
     QWidget(parent),

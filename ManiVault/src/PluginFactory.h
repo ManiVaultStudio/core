@@ -33,7 +33,7 @@ namespace mv::plugin
 
 class Plugin;
 
-class CORE_EXPORT PluginFactory : public QObject
+class CORE_EXPORT PluginFactory : public gui::WidgetAction
 {
     Q_OBJECT
 
@@ -45,6 +45,7 @@ public:
      */
     PluginFactory(Type type);
 
+    /** No need for custom destructor */
     ~PluginFactory() override = default;
 
     /**
@@ -67,6 +68,20 @@ public:
 
     /** Perform post-construction initialization */
     virtual void initialize();
+
+    /**
+     * Get plugin category icon
+     * @return Category icon
+     */
+    const util::StyledIcon& getCategoryIcon() const;
+
+protected:
+
+    /**
+     * Set category icon by name
+     * @param category Category name
+     */
+    void setCategoryIconByName(const QString& category);
 
 public: // Global settings
 
@@ -156,20 +171,6 @@ public: // Meta data
      * @param version Plugin semantic version
      */
     void setVersion(const util::Version& version);
-
-public:
-
-    /**
-     * Get plugin icon
-     * @return Styled icon
-     */
-    virtual util::StyledIcon getIcon() const;
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    virtual util::StyledIcon getCategoryIcon() const = 0;
 
     /**
      * Produces the plugin
@@ -391,6 +392,7 @@ private:
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
     bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
     PluginMetadata                          _pluginMetadata;                        /** Plugin metadata */
+	util::StyledIcon                        _categoryIcon;                          /** Category icon */
 };
 
 }

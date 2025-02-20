@@ -4,7 +4,6 @@
 
 #include "LearningPagePluginAction.h"
 
-#include <Application.h>
 #include <PluginFactory.h>
 
 #include <QDebug>
@@ -12,6 +11,7 @@
 
 using namespace mv;
 using namespace mv::plugin;
+using namespace mv::util;
 
 LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugin::PluginFactory* pluginFactory, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
@@ -200,5 +200,5 @@ void LearningPagePluginActionsWidget::ActionWidget::leaveEvent(QEvent* leaveEven
 
 void LearningPagePluginActionsWidget::ActionWidget::updateStyle()
 {
-    setPixmap(mv::StyledIcon(_iconName, underMouse() ? QColor(40, 40, 40) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
+    setPixmap(StyledIcon(_iconName).changedColor(underMouse() ? QColor(40, 40, 40) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
 }

@@ -11,11 +11,11 @@
 #include <ProjectMetaAction.h>
 
 #include <util/Serialization.h>
+#include <util/StyledIcon.h>
 
 #include <CoreInterface.h>
 
 #include <QDebug>
-#include <QDesktopServices>
 #include <QScrollBar>
 
 using namespace mv;
@@ -52,9 +52,9 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     _createProjectFromDatasetWidget.getHierarchyWidget().setItemTypeName("Importer");
 
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::StyledIcon("industry"), "Built-in Workspace"));
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::StyledIcon("clock"), "Recent Workspace"));
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::StyledIcon("clock"), "Recent Project"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(StyledIcon("industry"), "Built-in Workspace"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(StyledIcon("clock"), "Recent Workspace"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(StyledIcon("clock"), "Recent Project"));
     
     _workspaceLocationTypeAction.setCustomModel(&_workspaceLocationTypesModel);
     _workspaceLocationTypeAction.setCurrentIndex(static_cast<std::int32_t>(FromWorkspaceType::BuiltIn));
@@ -63,8 +63,8 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getToolbarAction().addAction(&_workspaceLocationTypeAction);
 
-    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt", StyledIcon("clock"));
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", StyledIcon("clock"));
+    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt");
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
     const auto toggleViews = [this]() -> void {
         _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());
@@ -89,8 +89,6 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
 {
     _createProjectFromWorkspaceWidget.getModel().reset();
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName(_workspaceLocationTypeAction.getCurrentText());
-
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     switch (static_cast<FromWorkspaceType>(_workspaceLocationTypeAction.getCurrentIndex()))
     {
@@ -144,14 +142,14 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                 const auto projectMeta = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
                 
                 if (projectMeta.isNull()) {
-                    PageAction recentProjectPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, "", [recentFilePath]() -> void {
+                    PageAction recentProjectPageAction(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, "", [recentFilePath]() -> void {
                         projects().newBlankProject();
                         workspaces().importWorkspaceFromProjectFile(recentFilePath);
                     });
                 
                     _createProjectFromWorkspaceWidget.getModel().add(recentProjectPageAction);
                 } else {
-                    PageAction recentProjectPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), projectMeta->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                    PageAction recentProjectPageAction(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), projectMeta->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
                         projects().newBlankProject();
                         workspaces().importWorkspaceFromProjectFile(recentFilePath);
                     });

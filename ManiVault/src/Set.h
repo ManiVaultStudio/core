@@ -67,7 +67,7 @@ public:
     explicit DatasetImpl(const QString& rawDataName, bool mayUnderive = true, const QString& id = "");
 
     /** Destructor */
-    virtual ~DatasetImpl();
+    ~DatasetImpl() override;
 
     /** Performs startup initialization */
     virtual void init();
@@ -213,21 +213,6 @@ public:
         auto nonConstThis = const_cast<DatasetImpl*>(this);
         return Dataset<DatasetType>(dynamic_cast<DatasetType*>(nonConstThis));
     }
-
-    /**
-     * Get set icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    virtual QIcon getIcon(const QColor& color = Qt::black) const = 0;
-
-    /**
-     * Get icon for \p storageType
-     * @param storageType Data storage type
-     * @param color Icon color for flat (font) icons
-     * @return Icon for \p storageType
-     */
-    virtual QIcon getIcon(StorageType storageType, const QColor& color = Qt::black) const final;
 
     /**
      * Makes this set a subset of a full dataset
