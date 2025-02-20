@@ -31,15 +31,6 @@ ThemeManager::ThemeManager(QObject* parent) :
     _disableSystemLightColorSchemeSlot(false),
     _disableSystemDarkColorSchemeSlot(false)
 {
-    _colorSchemeModeAction.setSettingsPrefix(getSettingsPrefix() + "ColorSchemeMode");
-    _systemLightColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Light");
-    _systemDarkColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Dark");
-    _customColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Custom");
-
-    _customColorSchemeAction.setStretch(1);
-    _customColorSchemeAction.setPlaceHolderString("Pick custom theme...");
-
-    updateColorSchemeMode();
 }
 
 ThemeManager::~ThemeManager()
@@ -49,7 +40,7 @@ ThemeManager::~ThemeManager()
 
 void ThemeManager::initialize()
 {
-#ifdef HELP_MANAGER_VERBOSE
+#ifdef THEME_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -62,6 +53,11 @@ void ThemeManager::initialize()
     {
         connect(&_colorSchemeModeAction, &OptionAction::currentIndexChanged, this, &ThemeManager::updateColorSchemeMode);
 
+        connect(&_colorSchemeModeAction, &OptionAction::currentIndexChanged, this, [](const std::int32_t& currentIndex) -> void {
+            if (currentIndex == static_cast<std::int32_t>(ColorSchemeMode::System))
+				mv::help().addNotification("Theme update", "ManiVault Studio them will synchronize with the current system theme.", util::StyledIcon("palette"));
+        });
+
         connect(&_systemLightColorSchemeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
             if (!toggled || _disableSystemLightColorSchemeSlot)
                 return;
@@ -69,6 +65,7 @@ void ThemeManager::initialize()
             _disableSystemDarkColorSchemeSlot = true;
             {
                 privateActivateLightSystemColorScheme();
+                //setSystemDarkColorSchemeActionCheckedSilent(false);
                 _systemDarkColorSchemeAction.setChecked(false);
             }
             _disableSystemDarkColorSchemeSlot = false;
@@ -93,40 +90,45 @@ void ThemeManager::initialize()
             privateActivateCustomColorScheme();
 		});
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         _detectSystemColorSchemeChangesTimer.setInterval(1000);
 
         connect(&_detectSystemColorSchemeChangesTimer, &QTimer::timeout, this, [this]() -> void {
             if (!isSystemColorSchemeModeActive())
                 return;
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 2)
+            const auto currentSystemColorScheme = getCurrentSystemColorScheme();
 
-#ifdef Q_OS_WIN
-            const auto settings                 = QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
-            const auto currentSystemColorScheme = settings.value("AppsUseLightTheme", 1).toInt() == 0 ? Qt::ColorScheme::Dark : Qt::ColorScheme::Light;
-#else
-            const auto currentSystemColorScheme = QGuiApplication::styleHints()->colorScheme();
-#endif
-            qDebug() << "System color scheme changed" << _systemColorScheme << currentSystemColorScheme;
+        	qDebug() << "System color scheme changed" << _systemColorScheme << currentSystemColorScheme;
 
             if (currentSystemColorScheme != _systemColorScheme) {
                 privateActivateSystemColorScheme();
 
             	_systemColorScheme = currentSystemColorScheme;
             }
-#endif
         });
 
         _detectSystemColorSchemeChangesTimer.start();
+#endif
 
         addDefaultCustomThemes();
+
+        _colorSchemeModeAction.setSettingsPrefix(getSettingsPrefix() + "ColorSchemeMode");
+        _systemLightColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Light");
+        _systemDarkColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Dark");
+        _customColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Custom");
+
+        _customColorSchemeAction.setStretch(1);
+        _customColorSchemeAction.setPlaceHolderString("Pick custom theme...");
+
+        updateColorSchemeMode();
     }
     endInitialization();
 }
 
 void ThemeManager::reset()
 {
-#ifdef HELP_MANAGER_VERBOSE
+#ifdef THEME_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -285,12 +287,7 @@ void ThemeManager::updateColorSchemeMode()
     switch (currentColorSchemeMode) {
 	    case ColorSchemeMode::System:
 	    {
-	        if (getColorCurrentScheme() == Qt::ColorScheme::Light)
-	            privateActivateLightSystemColorScheme();
-
-	        if (getColorCurrentScheme() == Qt::ColorScheme::Dark)
-	            privateActivateDarkSystemColorScheme();
-
+            privateActivateSystemColorScheme();
 	        break;
 	    }
 
@@ -308,7 +305,7 @@ void ThemeManager::updateColorSchemeMode()
     }
 }
 
-Qt::ColorScheme ThemeManager::getColorCurrentScheme()
+Qt::ColorScheme ThemeManager::getCurrentSystemColorScheme()
 {
 #ifdef Q_OS_WIN
     const auto settings = QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
@@ -324,9 +321,11 @@ void ThemeManager::privateActivateSystemColorScheme()
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     getRequestThemeSettings()->setColorSchemeMode(ColorSchemeMode::System);
-    getRequestThemeSettings()->setColorScheme(getColorCurrentScheme());
+    getRequestThemeSettings()->setColorScheme(getCurrentSystemColorScheme());
 
-    //qApp->setPalette(QApplication::style()->standardPalette());
+    qApp->styleHints()->setColorScheme(Qt::ColorScheme::Unknown);
+    //qApp->setPalette(QPalette());
+    qApp->setPalette(QApplication::style()->standardPalette());
 #endif
 }
 
