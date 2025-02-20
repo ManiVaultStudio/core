@@ -5,7 +5,6 @@
 #include "TasksTreeAction.h"
 
 #include "CoreInterface.h"
-#include "AbstractTaskManager.h"
 
 #include "actions/TaskAction.h"
 #include "actions/ProgressAction.h"
@@ -13,12 +12,12 @@
 
 #include "models/TasksTreeModel.h"
 
-#include "util/Icon.h"
-
 #include <QStyledItemDelegate>
 #include <QStyleOptionButton>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
+
+using namespace mv::util;
 
 namespace mv::gui {
 
@@ -121,7 +120,6 @@ TasksTreeAction::TasksTreeAction(QObject* parent, const QString& title) :
     _model(nullptr),
     _filterModel(nullptr),
     _treeAction(this, "Tasks"),
-    _widgetConfigurationFunction(),
     _mayLoadTasksPlugin(true),
     _loadTasksPluginAction(this, "Plugin")
 {
@@ -146,7 +144,7 @@ TasksTreeAction::TasksTreeAction(QObject* parent, const QString& title) :
         if (hierarchyWidget == nullptr)
             return;
 
-        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
+        hierarchyWidget->setWindowIcon(StyledIcon("tasks"));
 
         hierarchyWidget->getFilterGroupAction().addAction(&_filterModel->getTaskTypeFilterAction());
         hierarchyWidget->getFilterGroupAction().addAction(&_filterModel->getTaskScopeFilterAction());

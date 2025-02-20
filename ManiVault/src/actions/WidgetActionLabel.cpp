@@ -25,8 +25,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
     setAction(action);
     setAcceptDrops(true);
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     connect(getAction(), &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateNameLabel);
     connect(getAction(), &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
 

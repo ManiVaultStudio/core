@@ -27,8 +27,6 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 {
     Q_ASSERT(actions.count() != 0);
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     _publishAction.setIconByName("cloud-upload-alt");
     _connectAction.setIconByName("crosshairs");
     _disconnectAction.setIconByName("unlink");
