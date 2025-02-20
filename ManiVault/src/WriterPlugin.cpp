@@ -4,6 +4,8 @@
 
 #include "WriterPlugin.h"
 
+using namespace mv::util;
+
 namespace mv
 {
 namespace plugin
@@ -26,9 +28,14 @@ void WriterPlugin::setInputDatasets(const Datasets& inputDatasets)
     _input = inputDatasets;
 }
 
-QIcon WriterPluginFactory::getCategoryIcon() const
+StyledIcon WriterPluginFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("file-export");
+	return util::StyledIcon("file-export");
+}
+
+StyledIcon WriterPluginFactory::getCategoryIcon() const
+{
+    return StyledIcon("file-export");
 }
 
 }

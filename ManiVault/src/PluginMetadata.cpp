@@ -41,7 +41,7 @@ PluginMetadata::PluginMetadata(const PluginFactory& pluginFactory) :
     });
 
     _visitRepositoryAction.setToolTip("Browse to the Github repository");
-    _visitRepositoryAction.setIcon(Application::getIconFont("FontAwesomeBrands").getIcon("code-branch"));
+    _visitRepositoryAction.setIconByName("code-branch");
 
     connect(&_visitRepositoryAction, &TriggerAction::triggered, this, [this]() -> void {
         if (_pluginFactory.getRepositoryUrl().isValid())

@@ -513,10 +513,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Math.h
     src/util/Timer.h
     src/util/Icon.h
-    src/util/IconFont.h
-    src/util/IconFonts.h
     src/util/Interpolation.h
-    src/util/FontAwesome.h
     src/util/ColorMap.h
     src/util/ColorMapFilterModel.h
     src/util/ColorMapModel.h
@@ -565,10 +562,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Math.cpp
     src/util/Timer.cpp
     src/util/Icon.cpp
-    src/util/IconFont.cpp
-    src/util/IconFonts.cpp
     src/util/Interpolation.cpp
-    src/util/FontAwesome.cpp
     src/util/ColorMap.cpp
     src/util/ColorMapFilterModel.cpp
     src/util/ColorMapModel.cpp

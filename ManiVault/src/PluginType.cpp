@@ -5,6 +5,8 @@
 #include "PluginType.h"
 #include "Application.h"
 
+using namespace mv::util;
+
 namespace mv::plugin
 {
 
@@ -24,15 +26,13 @@ QString getPluginTypeName(const Type& type)
 
 QIcon getPluginTypeIcon(const Type& type)
 {
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     static const QMap<Type, QIcon> typeNames{
-        { Type::ANALYSIS, fontAwesome.getIcon("square-root-alt") },
-        { Type::DATA, fontAwesome.getIcon("database") },
-        { Type::LOADER, fontAwesome.getIcon("file-import") },
-        { Type::WRITER, fontAwesome.getIcon("file-export") },
-        { Type::TRANSFORMATION, fontAwesome.getIcon("random") },
-        { Type::VIEW, fontAwesome.getIcon("eye") }
+        { Type::ANALYSIS, StyledIcon("square-root-alt") },
+        { Type::DATA, StyledIcon("database") },
+        { Type::LOADER, StyledIcon("file-import") },
+        { Type::WRITER, StyledIcon("file-export") },
+        { Type::TRANSFORMATION, StyledIcon("random") },
+        { Type::VIEW, StyledIcon("eye") }
     };
 
     return typeNames[type];

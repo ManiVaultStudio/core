@@ -122,6 +122,24 @@ public:
      */
     StyledIcon& changedColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
 
+    /**
+     * Get icon font for \p iconFontName at \p iconFontVersion
+     * @param fontPointSize Point size of the font
+     * @param iconFontName Name of the icon font
+     * @param iconFontVersion Version of the icon font
+     * @return Icon font
+     */
+    static QFont getIconFont(std::int32_t fontPointSize = -1, const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion);
+
+    /**
+     * Converts human readable \p icon name to icon character (unicode)
+     * @param iconName Name of the icon
+     * @param iconFontName Name of the icon font
+     * @param iconFontVersion Version of the icon font
+     * @return Unicode icon character (empty if not found)
+     */
+    static QString getIconCharacter(const QString& iconName, const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion);
+
 protected:
 
     /**
@@ -136,15 +154,6 @@ protected:
      * @param iconFontVersion Font Awesome version
      */
     static void initializeIconFont(const QString& iconFontName, const Version& iconFontVersion);
-
-    /**
-     * Converts human readable \p icon name to icon character (unicode)
-     * @param iconName Name of the icon
-     * @param iconFontName Name of the icon font
-     * @param iconFontVersion Version of the icon font
-     * @return Unicode icon character (empty if not found) 
-     */
-    static QString getIconCharacter(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion);
 
     /**
      * Get icon font resource name for \p iconFontName at \p version

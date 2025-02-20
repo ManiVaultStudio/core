@@ -51,8 +51,6 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     addAction(&_brushRadiusAction);
     addAction(&_notifyDuringSelectionAction);
 
-    const auto& fontAwesome = mv::Application::getIconFont("FontAwesome");
-
     _overlayColorAction.setToolTip("Selection color");
 
     _overlayOpacityAction.setSuffix("%");

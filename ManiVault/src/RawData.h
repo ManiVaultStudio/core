@@ -79,8 +79,8 @@ public:
      * Get plugin category (loader/writer/transformation etc.) icon
      * @return Icon which belongs to the plugin factory category
      */
-    QIcon getCategoryIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("table");
+    util::StyledIcon getCategoryIcon() const override {
+        return util::StyledIcon("table");
     }
 
     /**

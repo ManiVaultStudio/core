@@ -10,6 +10,7 @@
 #endif
 
 using namespace mv::gui;
+using namespace mv::util;
 
 namespace mv::plugin
 {
@@ -64,7 +65,7 @@ QString Plugin::getGuiName() const
     return _guiNameAction.getString();
 }
 
-QIcon Plugin::getIcon() const
+StyledIcon Plugin::getIcon() const
 {
     return _factory->getIcon();
 }

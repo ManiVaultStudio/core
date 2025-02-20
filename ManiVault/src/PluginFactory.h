@@ -14,7 +14,6 @@
 #include "actions/PluginTriggerAction.h"
 
 #include <QObject>
-#include <QIcon>
 
 namespace mv {
     class DatasetImpl;
@@ -162,16 +161,15 @@ public:
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Styled icon
      */
-    virtual QIcon getIcon(const QColor& color = Qt::black) const;
+    virtual util::StyledIcon getIcon() const;
 
     /**
      * Get plugin category (loader/writer/transformation etc.) icon
      * @return Icon which belongs to the plugin factory category
      */
-    virtual QIcon getCategoryIcon() const = 0;
+    virtual util::StyledIcon getCategoryIcon() const = 0;
 
     /**
      * Produces the plugin

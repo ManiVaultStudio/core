@@ -11,6 +11,7 @@
 #include "event/EventListener.h"
 
 #include "util/Notification.h"
+#include "util/StyledIcon.h"
 
 #include "actions/WidgetAction.h"
 #include "actions/StringAction.h"
@@ -59,7 +60,7 @@ public:
     QString getGuiName() const;
 
     /** Returns the icon of this plugin */
-    QIcon getIcon() const;
+    util::StyledIcon getIcon() const;
 
     /**
      * Returns the kind of plugin. The kind is specific to the

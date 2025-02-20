@@ -7,7 +7,6 @@
 #include "Application.h"
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QLinearGradient>
 
 #ifdef _DEBUG
@@ -241,8 +240,6 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
     _goToNextNodeAction.setToolTip("Go to the next node");
     _goToLastNodeAction.setToolTip("Go to the last node");
     _removeNodeAction.setToolTip("Remove the selected node");
-
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _goToFirstNodeAction.setIconByName("angle-double-left");
     _goToPreviousNodeAction.setIconByName("angle-left");

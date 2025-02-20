@@ -170,34 +170,6 @@ void StyledIcon::initializeIconFont(const QString& iconFontName, const Version& 
     }
 }
 
-QString StyledIcon::getIconCharacter(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion)
-{
-    if (iconName.isEmpty())
-        throw std::runtime_error("Icon name is empty");
-
-    if (iconFontName.isEmpty())
-        throw std::runtime_error("Icon font name is empty");
-
-    const auto iconFontResourceName = getIconFontResourceName(iconFontName, iconFontVersion);
-
-    if (!fontMetadata.keys().contains(iconFontResourceName)) {
-        initializeIconFont(iconFontName, iconFontVersion);
-    }
-
-    if (!fontMetadata[iconFontResourceName].keys().contains(iconName))
-        throw std::runtime_error(QString("'%1' not found in %2").arg(iconName, iconFontResourceName).toStdString());
-
-    auto status = false;
-
-    const auto iconMap      = fontMetadata[iconFontResourceName][iconName].toMap();
-    const auto codePoint    = iconMap["unicode"].toString().toUInt(&status, 16);
-
-    if (!status)
-        throw std::runtime_error("Cannot establish unicode code point");
-
-    return QChar(codePoint);
-}
-
 QPixmap StyledIcon::createIconPixmap(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion, const QColor& foregroundColor/*= QColor(0, 0, 0, 0)*/, const QColor& backgroundColor/*= Qt::transparent*/)
 {
     if (iconName.isEmpty() || iconFontName.isEmpty()) {
@@ -272,6 +244,47 @@ StyledIcon& StyledIcon::changedColorRoles(const QPalette::ColorRole& colorRoleLi
     setColorRoleDarkTheme(colorRoleDarkTheme);
 
     return *this;
+}
+
+QFont StyledIcon::getIconFont(std::int32_t fontPointSize /*= -1*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/)
+{
+    const auto iconFontResourceName = getIconFontResourceName(iconFontName, iconFontVersion);
+
+    if (!fonts.contains(iconFontResourceName))
+        initializeIconFont(iconFontName, iconFontVersion);
+
+    if (!fonts.contains(iconFontResourceName))
+        throw std::runtime_error(QString("Unable to retrieve icon font: %1").arg(iconFontResourceName).toStdString());
+
+    return { fonts[iconFontResourceName].family(), fontPointSize };
+}
+
+QString StyledIcon::getIconCharacter(const QString& iconName, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/)
+{
+    if (iconName.isEmpty())
+        throw std::runtime_error("Icon name is empty");
+
+    if (iconFontName.isEmpty())
+        throw std::runtime_error("Icon font name is empty");
+
+    const auto iconFontResourceName = getIconFontResourceName(iconFontName, iconFontVersion);
+
+    if (!fontMetadata.keys().contains(iconFontResourceName)) {
+        initializeIconFont(iconFontName, iconFontVersion);
+    }
+
+    if (!fontMetadata[iconFontResourceName].keys().contains(iconName))
+        throw std::runtime_error(QString("'%1' not found in %2").arg(iconName, iconFontResourceName).toStdString());
+
+    auto status = false;
+
+    const auto iconMap = fontMetadata[iconFontResourceName][iconName].toMap();
+    const auto codePoint = iconMap["unicode"].toString().toUInt(&status, 16);
+
+    if (!status)
+        throw std::runtime_error("Cannot establish unicode code point");
+
+    return QChar(codePoint);
 }
 
 QPalette::ColorRole StyledIcon::getColorRoleLightTheme() const

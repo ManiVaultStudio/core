@@ -335,9 +335,9 @@ ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/)
         setMaximumNumberOfInstances(1);
 }
 
-QIcon ViewPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+StyledIcon ViewPluginFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("eye", color);
+    return StyledIcon("eye");
 }
 
 bool ViewPluginFactory::producesSystemViewPlugins() const
@@ -355,9 +355,9 @@ void ViewPluginFactory::setPreferredDockArea(const gui::DockAreaFlag& preferredD
     _preferredDockArea = preferredDockArea;
 }
 
-QIcon ViewPluginFactory::getCategoryIcon() const
+StyledIcon ViewPluginFactory::getCategoryIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("eye");
+    return StyledIcon("eye");
 }
 
 }
