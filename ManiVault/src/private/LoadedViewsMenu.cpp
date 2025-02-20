@@ -63,7 +63,7 @@ void LoadedViewsMenu::populate()
         for (auto& viewToggleAction : loadedSystemViewActions)
             _loadedSystemViewsMenu->addAction(viewToggleAction.get());
 
-        _loadedSystemViewsMenu->setIcon(StyledIcon("cogs"));
+        _loadedSystemViewsMenu->setIcon(StyledIcon("gears"));
 
         addMenu(_loadedSystemViewsMenu.get());
     }

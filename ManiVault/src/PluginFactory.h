@@ -42,8 +42,9 @@ public:
     /**
      * Constructor
      * @param type The plugin type
+     * @param title The plugin factory title
      */
-    PluginFactory(Type type);
+    PluginFactory(Type type, const QString& title);
 
     /** No need for custom destructor */
     ~PluginFactory() override = default;

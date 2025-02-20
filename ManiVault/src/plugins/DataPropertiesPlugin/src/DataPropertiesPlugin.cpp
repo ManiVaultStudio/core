@@ -19,7 +19,7 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     _additionalEditorAction(this, "Edit dataset parameters..."),
     _dataPropertiesWidget(this, nullptr)
 {
-    _additionalEditorAction.setIcon(StyledIcon("cogs"));
+    _additionalEditorAction.setIcon(StyledIcon("gears"));
     _additionalEditorAction.setShortcut(tr("F11"));
     _additionalEditorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _additionalEditorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
@@ -73,7 +73,7 @@ void DataPropertiesPlugin::init()
 DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
     ViewPluginFactory(true)
 {
-    setIconByName("sliders-h");
+    setIconByName("sliders");
 
     getPluginMetadata().setDescription("For interacting with dataset properties");
     getPluginMetadata().setSummary("This view plugin is for interacting with dataset properties.");

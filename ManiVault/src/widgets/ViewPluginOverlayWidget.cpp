@@ -63,7 +63,7 @@ ViewPluginOverlayWidget::ViewPluginOverlayWidget(plugin::ViewPlugin* viewPlugin)
     _toolbarLayout.addWidget(&_closeIconLabel);
 
     _closeIconLabel.setStyleSheet("opacity: 0.5");
-    _closeIconLabel.setPixmap(StyledIcon("times").changedColor(QColor(0, 0, 0, 150)).pixmap(QSize(14, 14)));
+    _closeIconLabel.setPixmap(StyledIcon("xmark").changedColor(QColor(0, 0, 0, 150)).pixmap(QSize(14, 14)));
 }
 
 QVBoxLayout& ViewPluginOverlayWidget::getMainLayout()

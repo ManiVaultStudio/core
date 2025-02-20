@@ -66,7 +66,7 @@ WorkspaceManager::WorkspaceManager(QObject* parent) :
 
     _resetWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+R"));
     _resetWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
-    _resetWorkspaceAction.setIconByName("undo");
+    _resetWorkspaceAction.setIconByName("rotate-left");
     _resetWorkspaceAction.setToolTip("Reset the current workspace");
 
     _importWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+I"));
@@ -86,9 +86,9 @@ WorkspaceManager::WorkspaceManager(QObject* parent) :
 
     _editWorkspaceSettingsAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
     _editWorkspaceSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
-    _editWorkspaceSettingsAction.setIconByName("cog");
+    _editWorkspaceSettingsAction.setIconByName("gear");
 
-    _importWorkspaceFromProjectAction.setIconByName("file-archive");
+    _importWorkspaceFromProjectAction.setIconByName("file-zipper");
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
 
     auto mainWindow = Application::topLevelWidgets().first();
@@ -425,7 +425,7 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
 
                 GroupAction settingsGroupAction(this, "Group");
 
-                settingsGroupAction.setIconByName("cog");
+                settingsGroupAction.setIconByName("gear");
                 settingsGroupAction.setToolTip("Edit workspace settings");
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);

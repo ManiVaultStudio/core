@@ -65,7 +65,7 @@ class CORE_EXPORT WriterPluginFactory : public PluginFactory
     
 public:
     WriterPluginFactory() :
-        PluginFactory(Type::WRITER)
+        PluginFactory(Type::WRITER, "Writer")
     {
         setIconByName("file-export");
         setCategoryIconByName("file-export");

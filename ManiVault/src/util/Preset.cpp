@@ -29,7 +29,7 @@ StyledIcon Preset::getIcon() const
     switch (_presetType)
     {
         case PresetType::Normal:
-            return StyledIcon("sliders-h");
+            return StyledIcon("sliders");
 
         case PresetType::Global:
             return StyledIcon("globe-europe");

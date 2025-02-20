@@ -34,7 +34,7 @@ gui::OptionAction& TransformationPlugin::getTypeAction()
 }
 
 TransformationPluginFactory::TransformationPluginFactory() :
-    PluginFactory(Type::TRANSFORMATION)
+    PluginFactory(Type::TRANSFORMATION, "Transformation")
 {
     setIconByName("random");
     setCategoryIconByName("random");

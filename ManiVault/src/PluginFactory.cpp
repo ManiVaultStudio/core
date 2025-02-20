@@ -16,8 +16,8 @@ using namespace mv::util;
 namespace mv::plugin
 {
 
-PluginFactory::PluginFactory(Type type) :
-    WidgetAction(nullptr, ""),
+PluginFactory::PluginFactory(Type type, const QString& title) :
+    WidgetAction(nullptr, title),
     _type(type),
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
     _numberOfInstances(0),

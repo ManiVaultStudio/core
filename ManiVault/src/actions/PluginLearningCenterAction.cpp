@@ -108,7 +108,7 @@ QMenu* PluginLearningCenterAction::getContextMenu(QWidget* parent)
 {
     auto contextMenu = new QMenu("Learning center", parent);
 
-    contextMenu->setIcon(StyledIcon("chalkboard-teacher"));
+    contextMenu->setIcon(StyledIcon("chalkboard-user"));
 
     contextMenu->addAction(&_toolbarVisibleAction);
     contextMenu->addMenu(getAlignmentContextMenu());

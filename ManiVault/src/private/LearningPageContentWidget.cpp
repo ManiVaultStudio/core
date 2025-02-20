@@ -55,7 +55,7 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     connect(&_showPluginResourcesAction, &ToggleAction::toggled, this, toggleSections);
 
     _settingsAction.setToolTip("Adjust page settings");
-    _settingsAction.setIconByName("cog");
+    _settingsAction.setIconByName("gear");
 
     _toStartPageAction.setIconByName("door-open");
     _toStartPageAction.setToolTip("Go to the start page");

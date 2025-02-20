@@ -130,7 +130,7 @@ FileSaveDialog::FileSaveDialog(QWidget* parent, const QString& caption, const QS
     qDebug() << __FUNCTION__;
 #endif
 
-    setWindowIcon(StyledIcon("save"));
+    setWindowIcon(StyledIcon("floppy-disk"));
     setAcceptMode(AcceptSave);
     setFileMode(AnyFile);
 }

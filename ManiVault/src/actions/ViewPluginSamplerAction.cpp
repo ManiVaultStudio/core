@@ -51,7 +51,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
 
     _enabledAction.setStretch(1);
 
-    _settingsAction.setIconByName("cog");
+    _settingsAction.setIconByName("gear");
     _settingsAction.setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
     _settingsAction.setPopupSizeHint(QSize(500, 0));
 

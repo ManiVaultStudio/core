@@ -155,7 +155,7 @@ void PageActionsWidget::closePersistentEditor(int rowIndex)
 
 void PageActionsWidget::updateCustomStyle()
 {
-    _hierarchyWidget.setWindowIcon(StyledIcon("search"));
+    _hierarchyWidget.setWindowIcon(StyledIcon("magnifying-glass"));
 
     auto rowHoverColor = qApp->palette().color(QPalette::Normal, QPalette::Text);
 

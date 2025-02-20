@@ -28,7 +28,7 @@ DimensionsPickerFilterAction::DimensionsPickerFilterAction(DimensionsPickerActio
 
     // Show and configure trailing action for the name filter
     _nameFilterAction.getTrailingAction().setVisible(true);
-    _nameFilterAction.getTrailingAction().setIcon(StyledIcon("times-circle"));
+    _nameFilterAction.getTrailingAction().setIcon(StyledIcon("circle-xmark"));
 
     // Reset the name filter when the trailing action is triggered
     connect(&_nameFilterAction.getTrailingAction(), &QAction::triggered, this, [this]() -> void {

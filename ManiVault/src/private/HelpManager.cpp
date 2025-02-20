@@ -40,10 +40,10 @@ HelpManager::HelpManager(QObject* parent) :
     _toLearningCenterAction(this, "Go to learning center"),
     _fileDownloader(FileDownloader::StorageMode::File, Task::GuiScope::Background)
 {
-    _showLearningCenterPageAction.setIconByName("chalkboard-teacher");
+    _showLearningCenterPageAction.setIconByName("chalkboard-user");
     _showLearningCenterPageAction.setToolTip("Go to the learning center");
 
-    _toDiscordAction.setIcon(StyledIcon("discord", "FontAwesomeBrands"));
+    _toDiscordAction.setIcon(StyledIcon("discord", "FontAwesomeBrandsRegular"));
     _toDiscordAction.setToolTip("Get in touch on our Discord");
     _toDiscordAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
@@ -55,13 +55,13 @@ HelpManager::HelpManager(QObject* parent) :
     _toWikiAction.setToolTip("Visit our wiki");
     _toWikiAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
-    _toRepositoryAction.setIcon(StyledIcon("github", "FontAwesomeBrands"));
+    _toRepositoryAction.setIcon(StyledIcon("github", "FontAwesomeBrandsRegular"));
     _toRepositoryAction.setToolTip("Contribute to ManiVault on Github");
     _toRepositoryAction.setDefaultWidgetFlags(TriggerAction::Icon);
     //_toRepositoryAction.setShortcut(QKeySequence("Ctrl+F4"));
     //_toRepositoryAction.setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
 
-    _toLearningCenterAction.setIconByName("chalkboard-teacher");
+    _toLearningCenterAction.setIconByName("chalkboard-user");
     //_toLearningCenterAction.setShortcut(QKeySequence(tr("Ctrl+F5")));
     //_toLearningCenterAction.setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
 

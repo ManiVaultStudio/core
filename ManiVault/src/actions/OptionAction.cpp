@@ -541,7 +541,7 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     if (widgetFlags & WidgetFlag::Clearable) {
         auto clearSelectionAction = new TriggerAction(parent, "Clear");
 
-        clearSelectionAction->setIconByName("times");
+        clearSelectionAction->setIconByName("xmark");
         clearSelectionAction->setToolTip("Clear the current selection");
 
         connect(clearSelectionAction, &TriggerAction::triggered, this, [this]() -> void {

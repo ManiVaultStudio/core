@@ -110,7 +110,7 @@ class CORE_EXPORT AnalysisPluginFactory : public PluginFactory
     
 public:
     AnalysisPluginFactory() :
-        PluginFactory(Type::ANALYSIS)
+        PluginFactory(Type::ANALYSIS, "Analysis")
     {
         setIconByName("square-root-alt");
         setCategoryIconByName("square-root-alt");

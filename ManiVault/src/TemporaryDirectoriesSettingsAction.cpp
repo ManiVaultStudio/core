@@ -27,7 +27,7 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
 
     _scanForStaleTemporaryDirectoriesAction.setToolTip("Rescan for stale temporary directories");
     _scanForStaleTemporaryDirectoriesAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _scanForStaleTemporaryDirectoriesAction.setIconByName("redo");
+    _scanForStaleTemporaryDirectoriesAction.setIconByName("rotate-right");
 
     _selectStaleTemporaryDirectoriesAction.setToolTip("Summary of stale temporary directories");
     _selectStaleTemporaryDirectoriesAction.setIconByName("list");

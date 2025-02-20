@@ -65,7 +65,7 @@ class CORE_EXPORT LoaderPluginFactory : public PluginFactory
     
 public:
     LoaderPluginFactory() :
-        PluginFactory(Type::LOADER)
+        PluginFactory(Type::LOADER, "Loader")
     {
         setIconByName("file-import");
         setCategoryIconByName("file-import");
