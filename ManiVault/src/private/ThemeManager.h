@@ -118,7 +118,7 @@ public:
             restyleAllWidgets();
             deleteLater();
 
-            if (_colorSchemeMode == ColorSchemeMode::SystemLightDark || _colorSchemeMode == ColorSchemeMode::SystemLightDark)
+            if (_colorSchemeMode == ColorSchemeMode::SystemLightDark)
 				mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(_colorScheme == Qt::ColorScheme::Light ? "Light" : "Dark"), util::StyledIcon("palette"));
         	//mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(isSystemLightColorSchemeActive() ? "Light" : "Dark"), StyledIcon("palette"));
         }
@@ -228,34 +228,29 @@ private:
     void addDefaultCustomThemes();
 
     /**
-     * Set color scheme mode to system and \p forceRedraw
-     * @param forceRedraw Force a re-draw of the current color scheme 
+     * Set color scheme mode to system and \p forceRedraw 
      */
-    void privateActivateSystemColorScheme(bool forceRedraw = false);
+    void privateActivateSystemColorScheme();
 
     /**
      * Set color scheme mode to system light/dark and \p forceRedraw
-     * @param forceRedraw Force a re-draw of the current color scheme
      */
-    void privateActivateSystemColorSchemeLightDark(bool forceRedraw = false);
+    void privateActivateSystemColorSchemeLightDark();
 
     /**
      * Set color scheme to system light and \p forceRedraw
-     * @param forceRedraw Force a re-draw of the current color scheme
      */
-    void privateActivateLightSystemColorScheme(bool forceRedraw = false);
+    void privateActivateLightSystemColorScheme();
 
     /**
      * Set color scheme to system dark and \p forceRedraw
-     * @param forceRedraw Force a re-draw of the current color scheme
      */
-    void privateActivateDarkSystemColorScheme(bool forceRedraw = false);
+    void privateActivateDarkSystemColorScheme();
 
     /**
      * Set color scheme to custom and \p forceRedraw
-     * @param forceRedraw Force a re-draw of the current color scheme
      */
-    void privateActivateCustomColorScheme(bool forceRedraw = false) ;
+    void privateActivateCustomColorScheme() ;
 
     /**
      * Set the system light color scheme action to \p checked without emitting signals
@@ -274,6 +269,13 @@ private:
      * @return Requested theme settings
      */
     ThemeSettings* getRequestThemeSettings();
+
+    /** Processes the current color scheme */
+    void updateColorSchemeMode();
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    static Qt::ColorScheme getColorCurrentScheme();
+#endif
 
 protected: // Action getters
 
@@ -294,19 +296,19 @@ private:
     gui::ToggleAction           _systemLightColorSchemeAction;          /** Set to light system color scheme when triggered */
     gui::ToggleAction           _systemDarkColorSchemeAction;           /** Set to dark system color scheme when triggered */
     gui::OptionAction           _customColorSchemeAction;               /** Custom color scheme action  */
-    QMap<QString, QPalette>     _customPalettes;                    /** Custom color schemes */
+    QMap<QString, QPalette>     _customPalettes;                        /** Custom color schemes */
     
     QTimer                      _detectSystemColorSchemeChangesTimer;   /** QStyleHints::colorSchemeChanged is sometimes unreliable: check periodically for system color scheme changes */
     std::int32_t                _numberOfCommits;                       /** Number of commits */
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 2)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     Qt::ColorScheme             _systemColorScheme;                     /** System color scheme */
     Qt::ColorScheme             _applicationColorScheme;                /** Application color scheme */
 #endif
 
     ColorSchemeMode             _currentColorSchemeMode;                /** Current color scheme mode */
-    bool                        _disableSystemLightColorSchemeSlot;                /** Disable system light slot */
-    bool                        _disableSystemDarkColorSchemeSlot;                 /** Disable system dark slot */
+    bool                        _disableSystemLightColorSchemeSlot;     /** Disable system light slot */
+    bool                        _disableSystemDarkColorSchemeSlot;      /** Disable system dark slot */
 
     QPointer<ThemeSettings>     _requestThemeSettings;                  /** Requested theme settings for the next timeout of the ThemeManager::_updateThemeTimer */
 };
