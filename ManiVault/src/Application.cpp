@@ -8,8 +8,6 @@
 #include "ForegroundTask.h"
 #include "ManiVaultVersion.h"
 
-#include "util/IconFonts.h"
-#include "util/FontAwesome.h"
 #include "util/Exception.h"
 
 #include "actions/WidgetAction.h"
@@ -41,32 +39,6 @@ Application::Application(int& argc, char** argv) :
 {
     _lockFile.lock();
 
-    qDebug() << "Initializing icon fonts";
-
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, { ":/IconFonts/FontAwesomeBrandsRegular-5.14.otf" }, false, "FontAwesomeBrands")));
-
-#if defined(_WIN32) || defined(_WIN64)
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, { ":/IconFonts/FontAwesomeRegular-5.14.otf" }, false, "FontAwesomeRegular")));
-#endif
-
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, { ":/IconFonts/FontAwesomeSolid-5.14.otf" }, true, "FontAwesome")));
-
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, { ":/IconFonts/FontAwesomeBrandsRegular-6.4.otf" }, false, "FontAwesomeBrands")));
-
-#if defined(_WIN32) || defined(_WIN64)
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, { ":/IconFonts/FontAwesomeRegular-6.4.otf" }, false, "FontAwesomeRegular")));
-#endif
-
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, { ":/IconFonts/FontAwesomeSolid-6.4.otf" }, false, "FontAwesome")));
-
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 5, { ":/IconFonts/FontAwesomeBrandsRegular-6.5.otf" }, false, "FontAwesomeBrands")));
-
-#if defined(_WIN32) || defined(_WIN64)
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 5, { ":/IconFonts/FontAwesomeRegular-6.5.otf" }, false, "FontAwesomeRegular")));
-#endif
-
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 5, { ":/IconFonts/FontAwesomeSolid-6.5.otf" }, false, "FontAwesome")));
-
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
         _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
 
@@ -93,11 +65,6 @@ Application* Application::current()
     auto maniVaultApplication = dynamic_cast<Application*>(applicationInstance);
 
     return maniVaultApplication;
-}
-
-const IconFont& Application::getIconFont(const QString& name, const std::int32_t& majorVersion /*= -1*/, const std::int32_t& minorVersion /*= -1*/)
-{
-    return current()->_iconFonts.getIconFont(name, majorVersion, minorVersion);
 }
 
 mv::CoreInterface* Application::getCore()

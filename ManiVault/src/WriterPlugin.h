@@ -4,18 +4,9 @@
 
 #pragma once
 
-/**
-* Writer.h
-*
-* Base plugin class for plugins that write data to a file.
-*/
-
-#include "Application.h"
 #include "Plugin.h"
 
 #include <QString>
-
-using namespace mv::util;
 
 namespace mv
 {
@@ -27,7 +18,7 @@ class CORE_EXPORT WriterPlugin : public Plugin
 public:
     WriterPlugin(const PluginFactory* factory);
 
-    ~WriterPlugin() override {};
+    ~WriterPlugin() override = default;
 
     virtual void writeData() = 0;
 
@@ -87,18 +78,15 @@ public:
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-export", color);
-    }
+    util::StyledIcon getIcon() const override;
 
     /**
      * Get plugin category (loader/writer/transformation etc.) icon
      * @return Icon which belongs to the plugin factory category
      */
-    QIcon getCategoryIcon() const override;
+    util::StyledIcon getCategoryIcon() const override;
 
     /**
     * Produces an instance of a writer plugin. This function gets called by the plugin manager.

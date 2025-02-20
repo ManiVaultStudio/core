@@ -6,10 +6,7 @@
 
 #include "Plugin.h"
 
-#include "DataHierarchyItem.h"
 #include "Set.h"
-
-#include <memory>
 
 namespace mv
 {
@@ -121,16 +118,15 @@ public:
     
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    util::StyledIcon getIcon() const override;
 
     /**
      * Get plugin category (loader/writer/transformation etc.) icon
      * @return Icon which belongs to the plugin factory category
      */
-    QIcon getCategoryIcon() const override;
+    util::StyledIcon getCategoryIcon() const override;
 
     /**
     * Produces an instance of an analysis plugin. This function gets called by the plugin manager.

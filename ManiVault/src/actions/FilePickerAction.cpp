@@ -54,7 +54,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     _filePathAction.getTrailingAction().setEnabled(false);
 
     const auto updateStatusAction = [this]() -> void {
-        _filePathAction.getTrailingAction().setIcon(isValid() ? Application::getIconFont("FontAwesome").getIcon("check") : Application::getIconFont("FontAwesome").getIcon("exclamation"));
+        _filePathAction.getTrailingAction().setIcon(isValid() ? StyledIcon("check") : StyledIcon("exclamation"));
         _filePathAction.getTrailingAction().setToolTip(isValid() ? "File exists" : "File does not exist");
     };
 

@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "TransformationPlugin.h"
-#include "Application.h"
 
 namespace mv::plugin
 {
@@ -39,14 +38,14 @@ TransformationPluginFactory::TransformationPluginFactory() :
 {
 }
 
-QIcon TransformationPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+util::StyledIcon TransformationPluginFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("random", color);
+    return util::StyledIcon("random");
 }
 
-QIcon TransformationPluginFactory::getCategoryIcon() const
+util::StyledIcon TransformationPluginFactory::getCategoryIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("random");
+    return util::StyledIcon("random");
 }
 
 }

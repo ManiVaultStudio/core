@@ -6,13 +6,12 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "util/StyledIcon.h"
+
 #include <QString>
-#include <QIcon>
 #include <QMap>
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 /** Preset types enum */
 enum class PresetType
@@ -66,7 +65,7 @@ public:
      * Get icon
      * @return Icon
      */
-    QIcon getIcon() const;
+    StyledIcon getIcon() const;
 
     /**
      * Get is divergent
@@ -90,5 +89,4 @@ private:
     friend class PresetsModel;
 };
 
-}
 }

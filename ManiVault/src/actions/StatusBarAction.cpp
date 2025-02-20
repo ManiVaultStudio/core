@@ -13,6 +13,8 @@
 
 #include <QDebug>
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 WidgetActions StatusBarAction::statusBarActions;
@@ -42,7 +44,7 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QI
 }
 
 StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QString& icon /*= ""*/) :
-    StatusBarAction(parent, title, icon.isEmpty() ? QIcon() : Application::getIconFont("FontAwesome").getIcon(icon))
+    StatusBarAction(parent, title, icon.isEmpty() ? QIcon() : StyledIcon(icon))
 {
 }
 

@@ -121,9 +121,9 @@ void PluginFactory::setVersion(const util::Version& version)
     getPluginMetadata().setVersion(version);
 }
 
-QIcon PluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+StyledIcon PluginFactory::getIcon() const
 {
-    return {};
+    return StyledIcon();
 }
 
 bool PluginFactory::mayProduce() const
