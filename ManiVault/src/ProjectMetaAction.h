@@ -48,7 +48,7 @@ public:
      * Get owning project
      * @return Pointer to owning project (might be nullptr if project meta action is used in isolation)
      */
-    Project* getProject();
+    Project* getProject() const;
 
 public: // Serialization
 
