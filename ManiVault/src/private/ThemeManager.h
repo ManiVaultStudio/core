@@ -75,13 +75,15 @@ public:
         /**
          * Set palette to \p palette
          * @param palette Palette
+         * @param paletteName Palette name
          */
-        void setPalette(const QPalette& palette)
+        void setPalette(const QPalette& palette, const QString& paletteName)
         {
             if (palette == _palette)
                 return;
 
-            _palette = palette;
+            _palette        = palette;
+            _paletteName    = paletteName;
 
             _updateThemeTimer.start();
         }
@@ -112,6 +114,7 @@ public:
 	            case ColorSchemeMode::Custom:
 	            {
                     qApp->setPalette(_palette);
+                    mv::help().addNotification("Theme update", QString("Custom <b>%1</b> theme has been activated.").arg(_paletteName), util::StyledIcon("palette"));
 	                break;
 	            }
             }
@@ -135,6 +138,7 @@ public:
         ColorSchemeMode     _colorSchemeMode;       /** Type of color scheme mode*/
         Qt::ColorScheme     _colorScheme;           /** Color scheme */
         QPalette            _palette;               /** Custom application palette */
+        QString             _paletteName;           /** Custom palette name */
         QTimer              _updateThemeTimer;      /** Apply theme on timeout and re-start when settings change */
     };
 
