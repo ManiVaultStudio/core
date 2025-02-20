@@ -211,7 +211,7 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
 
     updateInfoWidgetVisibility();
 
-    connect(&mv::theme(), &AbstractThemeManager::themeChanged, this, &PageActionDelegateEditorWidget::updateCustomStyle);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &PageActionDelegateEditorWidget::updateCustomStyle);
 }
 
 void PageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)

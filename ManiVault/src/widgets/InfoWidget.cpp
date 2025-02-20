@@ -158,7 +158,7 @@ void InfoWidget::initialize()
 
     setLayout(layout);
 
-    connect(&mv::theme(), &AbstractThemeManager::themeChanged, this, &InfoWidget::updateStyling);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &InfoWidget::updateStyling);
 }
 
 void InfoWidget::updateStyling()

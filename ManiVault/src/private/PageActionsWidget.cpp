@@ -75,8 +75,10 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
     treeViewHeader->setStretchLastSection(false);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(PageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
-    
+
     updateCustomStyle();
+
+    connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, this, &PageActionsWidget::updateCustomStyle);
 
     connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         auto callback = index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<PageAction::ClickedCallback>();
@@ -96,7 +98,6 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
     });
 
     treeView.setBackgroundRole(QPalette::Window);
-    //treeView.setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
 QVBoxLayout& PageActionsWidget::getLayout()

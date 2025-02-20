@@ -133,23 +133,8 @@ public:
 
 signals:
 
-    /**
-     * Signals that the application palette change to \p palette
-     * @param palette Current palette
-     */
-    void applicationPaletteChanged(const QPalette& palette);
-
-    /**
-     * Signal emitted when the application theme changed
-     * @param dark Boolean indicating whether the theme is dark
-     */
-    void themeChanged(bool dark);
-
-    /** Signal emitted when the application theme changed to light */
-    void themeChangedToLight();
-
-    /** Signal emitted when the application theme changed to dark */
-    void themeChangedToDark();
+    /** Signals that the color scheme changed */
+    void colorSchemeChanged();
 
     /**
      * Signals that the color scheme mode changed to \p colorSchemeMode
