@@ -134,7 +134,7 @@ SampleScopePluginFactory::SampleScopePluginFactory()
 
 QIcon SampleScopePluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("microscope", color);
+    return StyledIcon("microscope", color);
 }
 
 QUrl SampleScopePluginFactory::getRepositoryUrl() const

@@ -189,7 +189,7 @@ DimensionPickerAction::Widget::Widget(QWidget* parent, DimensionPickerAction* di
     auto lineEditWidget = dimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::LineEdit);
 
     // Gets search icon to decorate the line edit
-    const auto searchIcon = Application::getIconFont("FontAwesome").getIcon("search");
+    const auto searchIcon = StyledIcon("search");
 
     // Add the icon to the line edit
     lineEditWidget->findChild<QLineEdit*>("LineEdit")->addAction(searchIcon, QLineEdit::TrailingPosition);

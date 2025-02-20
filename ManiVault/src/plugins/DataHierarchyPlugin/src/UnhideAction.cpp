@@ -23,7 +23,7 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
     _triggersGroupAction(this, "Triggers"),
     _selectedAction(this, "Unhide Selected"),
     _allAction(this, "Unhide All"),
-    _icon(Application::getIconFont("FontAwesome").getIcon("eye-slash"))
+    _icon(StyledIcon("eye-slash"))
 {
     setIcon(_icon);
     setShowLabels(false);
@@ -46,7 +46,7 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
             return;
 
         hierarchyWidget->getToolbarAction().setVisible(false);
-        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+        hierarchyWidget->setWindowIcon(StyledIcon("database"));
 
         auto treeView = widget->findChild<QTreeView*>("TreeView");
 

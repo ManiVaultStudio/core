@@ -56,7 +56,7 @@ LoggingPluginFactory::LoggingPluginFactory() :
 
 QIcon LoggingPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("scroll", color);
+    return StyledIcon("scroll", color);
 }
 
 QUrl LoggingPluginFactory::getReadmeMarkdownUrl() const

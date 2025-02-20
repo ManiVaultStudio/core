@@ -191,7 +191,7 @@ QMenu* HelpManager::getVideosMenu() const
 {
     auto videosMenu = new QMenu("Videos");
 
-    videosMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("video"));
+    videosMenu->setIcon(StyledIcon("video"));
 
     for (const auto video : getVideos({})) {
         auto videoAction = new WatchVideoAction(videosMenu, video->getTitle(), video);
@@ -246,7 +246,7 @@ QMenu* HelpManager::getTutorialsMenu() const
 {
     auto tutorialsMenu = new QMenu("Tutorials");
 
-    tutorialsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
+    tutorialsMenu->setIcon(StyledIcon("user-graduate"));
 
     for (const auto tutorial : getTutorials({}, { "Installation" })) {
         

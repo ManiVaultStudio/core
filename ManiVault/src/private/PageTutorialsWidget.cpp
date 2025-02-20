@@ -75,7 +75,7 @@ void PageTutorialsWidget::updateActions()
 
         auto tutorial = dynamic_cast<LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceRowIndex))->getTutorial();
 
-        PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
+        PageAction tutorialAction(StyledIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
                     mv::projects().openProject(tutorial->getProjectUrl());

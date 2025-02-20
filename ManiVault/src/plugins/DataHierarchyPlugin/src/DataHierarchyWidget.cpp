@@ -184,7 +184,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     setLayout(layout);
 
-    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+    _hierarchyWidget.setWindowIcon(StyledIcon("database"));
     _hierarchyWidget.setNoItemsDescription(mv::plugins().getPluginFactoriesByType(plugin::Type::LOADER).empty() ? "No loader plugins available"  : "Right-click > Import to load data");
 
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();

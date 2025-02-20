@@ -66,7 +66,7 @@ void HelpMenu::populate()
         auto pluginHelpMenu = new QMenu("Plugin");
 
         pluginHelpMenu->setToolTip("ManiVault plugin documentation");
-        pluginHelpMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+        pluginHelpMenu->setIcon(StyledIcon("plug"));
 
         for (auto action : actions)
             pluginHelpMenu->addAction(action);

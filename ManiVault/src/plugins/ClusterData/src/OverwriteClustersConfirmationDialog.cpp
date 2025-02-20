@@ -17,7 +17,7 @@ OverwriteClustersConfirmationDialog::OverwriteClustersConfirmationDialog(QWidget
     _discardAction(this, "Discard"),
     _cancelAction(this, "Cancel")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("random"));
+    setWindowIcon(StyledIcon("random"));
     setWindowTitle("About to overwrite all cluster(s)");
     setModal(true);
 

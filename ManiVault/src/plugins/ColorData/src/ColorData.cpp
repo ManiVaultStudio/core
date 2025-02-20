@@ -85,7 +85,7 @@ void Colors::selectInvert()
 
 QIcon ColorDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return mv::Application::getIconFont("FontAwesome").getIcon("palette", color);
+    return mv::StyledIcon("palette", color);
 }
 
 QUrl ColorDataFactory::getReadmeMarkdownUrl() const 

@@ -17,6 +17,8 @@
     //#define PRESETS_ACTION_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 QMap<PresetsAction::Column, QPair<QString, QString>> PresetsAction::columnInfo = QMap<Column, QPair<QString, QString>>({
@@ -107,17 +109,15 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 
     auto menu = new QMenu("Presets", parent);
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    const auto presetIcon = fontAwesome.getIcon("prescription");
+    const auto presetIcon = StyledIcon("prescription");
 
     menu->setIcon(presetIcon);
 
     auto savePresetAction = new QAction("Save");
 
-    savePresetAction->setIcon(fontAwesome.getIcon("save"));
+    savePresetAction->setIcon(StyledIcon("save"));
 
-    connect(savePresetAction, &TriggerAction::triggered, this, [this, &fontAwesome, presetIcon]() -> void {
+    connect(savePresetAction, &TriggerAction::triggered, this, [this, presetIcon]() -> void {
         auto* choosePresetNameDialog = new ChoosePresetNameDialog(this);
 
         connect(choosePresetNameDialog, &ChoosePresetNameDialog::accepted, this, [this, choosePresetNameDialog]() -> void {
@@ -133,7 +133,7 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 
     auto saveDefaultPresetAction = new QAction("Save As Default");
 
-    saveDefaultPresetAction->setIcon(fontAwesome.getIcon("save"));
+    saveDefaultPresetAction->setIcon(StyledIcon("save"));
 
     connect(saveDefaultPresetAction, &TriggerAction::triggered, this, &PresetsAction::saveDefaultPreset);
 
@@ -169,8 +169,8 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
     auto importPresetAction = new QAction("Import...");
     auto exportPresetAction = new QAction("Export...");
 
-    importPresetAction->setIcon(fontAwesome.getIcon("file-import"));
-    exportPresetAction->setIcon(fontAwesome.getIcon("file-export"));
+    importPresetAction->setIcon(StyledIcon("file-import"));
+    exportPresetAction->setIcon(StyledIcon("file-export"));
 
     menu->addAction(importPresetAction);
     menu->addAction(exportPresetAction);
@@ -286,7 +286,7 @@ void PresetsAction::importPreset()
 
     auto* fileDialog = new QFileDialog();
 
-    fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    fileDialog->setWindowIcon(StyledIcon("file-import"));
     fileDialog->setWindowTitle("Import Preset");
     fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog->setFileMode(QFileDialog::ExistingFile);
@@ -319,7 +319,7 @@ void PresetsAction::exportPreset()
 
     auto* fileDialog = new QFileDialog();
 
-    fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+    fileDialog->setWindowIcon(StyledIcon("file-export"));
     fileDialog->setWindowTitle("Export Preset");
     fileDialog->setAcceptMode(QFileDialog::AcceptSave);
     fileDialog->setNameFilters({ "ManiVault View Preset (*.mvp)" });
@@ -429,7 +429,7 @@ PresetsAction::ChoosePresetNameDialog::ChoosePresetNameDialog(PresetsAction* pre
     _cancelAction(this, "Cancel")
 {
     setWindowTitle(QString("Choose %1 preset name").arg(presetsAction->getPresetType().toLower()));
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("prescription"));
+    setWindowIcon(StyledIcon("prescription"));
 
     _completer.setCompletionMode(QCompleter::PopupCompletion);
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
@@ -477,7 +477,7 @@ PresetsAction::ManagePresetsDialog::ManagePresetsDialog(PresetsAction* presetsAc
     _okAction(this, "Ok")
 {
     setModal(true);
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("prescription"));
+    setWindowIcon(StyledIcon("prescription"));
     setWindowTitle(QString("Edit %1 presets").arg(presetsAction->getPresetType().toLower()));
 
     auto layout = new QVBoxLayout();

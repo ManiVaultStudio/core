@@ -61,7 +61,7 @@ void DataHierarchyPluginFactory::initialize()
 
 QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("sitemap", color);
+    return StyledIcon("sitemap", color);
 }
 
 QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const

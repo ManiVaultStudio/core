@@ -47,7 +47,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
 
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", StyledIcon("file"));
 
     connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
 
@@ -170,7 +170,7 @@ void StartPageOpenProjectWidget::updateRecentActions()
 {
     _recentProjectsWidget.getModel().reset();
 
-    auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
+    auto clockIcon = StyledIcon("clock");
 
     const auto recentFiles = _recentProjectsAction.getRecentFiles();
 

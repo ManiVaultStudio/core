@@ -163,7 +163,7 @@ QRect Images::getVisibleRectangle() const
 
 QIcon Images::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return mv::Application::getIconFont("FontAwesome").getIcon("images", color);
+    return mv::StyledIcon("images", color);
 }
 
 std::vector<std::uint32_t>& Images::getSelectionIndices()

@@ -4,7 +4,6 @@
 
 #include "HorizontalHeaderAction.h"
 
-#include "Application.h"
 #include "OptionsAction.h"
 
 #include <QEvent>
@@ -39,8 +38,6 @@ void HorizontalHeaderAction::initialize(QHeaderView* horizontalHeaderView)
         return;
 
     _horizontalHeaderView = horizontalHeaderView;
-
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     connect(_horizontalHeaderView, &QHeaderView::sectionResized, this, &HorizontalHeaderAction::updateColumnsOptionsAction);
 

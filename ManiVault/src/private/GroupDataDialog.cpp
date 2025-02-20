@@ -19,7 +19,7 @@ GroupDataDialog::GroupDataDialog(QWidget* parent, const mv::Datasets& datasets) 
     _groupNameAction(this, "Group name"),
     _showDialogAction(this, "Show dialog next time", true)
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setWindowIcon(StyledIcon("cog"));
     setModal(true);
     setWindowTitle(QString("Group %1 datasets").arg(QString::number(_datasets.count())));
     

@@ -35,7 +35,7 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
 
     setLayout(layout);
 
-    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("scroll"));
+    _hierarchyWidget.setWindowIcon(StyledIcon("scroll"));
 
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
     _hierarchyWidget.getExpandAllAction().setVisible(false);
@@ -94,7 +94,7 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
             QGuiApplication::clipboard()->setText(messageRecordsString.join("\n"));
         });
 
-        copyAction->setIcon(Application::getIconFont("FontAwesome").getIcon("copy"));
+        copyAction->setIcon(StyledIcon("copy"));
         
         contextMenu.exec(QCursor::pos());
     });

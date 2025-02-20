@@ -93,7 +93,7 @@ Dataset<DatasetImpl> ImageData::createDataSet(const QString& guid /*= ""*/) cons
 
 QIcon ImageDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return mv::Application::getIconFont("FontAwesome").getIcon("images", color);
+    return mv::StyledIcon("images", color);
 }
 
 QUrl ImageDataFactory::getReadmeMarkdownUrl() const

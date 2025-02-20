@@ -76,7 +76,7 @@ SharedParametersPluginFactory::SharedParametersPluginFactory() :
 
 QIcon SharedParametersPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("cloud", color);
+    return StyledIcon("cloud", color);
 }
 
 QUrl SharedParametersPluginFactory::getReadmeMarkdownUrl() const

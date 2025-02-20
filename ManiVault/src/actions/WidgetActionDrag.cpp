@@ -5,8 +5,6 @@
 #include "WidgetActionDrag.h"
 #include "WidgetActionMimeData.h"
 
-#include "Application.h"
-
 #include <QDebug>
 #include <QDrag>
 
@@ -40,7 +38,7 @@ void WidgetActionDrag::start()
         auto mimeData   = new WidgetActionMimeData(_dragAction);
 
         drag->setMimeData(mimeData);
-        drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
+        drag->setPixmap(StyledIcon("link").pixmap(QSize(12, 12)));
 
         drag->exec();
     }

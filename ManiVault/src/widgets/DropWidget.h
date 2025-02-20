@@ -9,16 +9,12 @@
 #include "util/WidgetFader.h"
 
 #include <QWidget>
-#include <QLabel>
 
 class QMimeData;
 class QGraphicsOpacityEffect;
 class QPropertyAnimation;
 
-namespace mv
-{
-
-namespace gui
+namespace mv::gui
 {
 
 /**
@@ -208,5 +204,4 @@ protected:
     QWidget*                _dropIndicatorWidget;           /** Widget that makes users aware that items can be dropped */
 };
 
-}
 }

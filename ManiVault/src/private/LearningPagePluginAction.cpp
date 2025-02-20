@@ -49,7 +49,7 @@ LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugi
     if (hasOverlay()) {
         auto elipsisLabel = new QLabel();
 
-        elipsisLabel->setPixmap(Application::getIconFont("FontAwesome").getIcon("ellipsis-h").pixmap(QSize(12, 12)));
+        elipsisLabel->setPixmap(StyledIcon("ellipsis-h").pixmap(QSize(12, 12)));
         elipsisLabel->setToolTip("Plugin has additional resources");
 
         _mainLayout.addWidget(elipsisLabel);
@@ -200,5 +200,5 @@ void LearningPagePluginActionsWidget::ActionWidget::leaveEvent(QEvent* leaveEven
 
 void LearningPagePluginActionsWidget::ActionWidget::updateStyle()
 {
-    setPixmap(mv::Application::getIconFont("FontAwesome").getIcon(_iconName, underMouse() ? QColor(40, 40, 40) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
+    setPixmap(mv::StyledIcon(_iconName, underMouse() ? QColor(40, 40, 40) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
 }

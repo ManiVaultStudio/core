@@ -242,6 +242,13 @@ StyledIcon& StyledIcon::changedColorRoles(const QPalette::ColorRole& colorRoleLi
     return *this;
 }
 
+StyledIcon& StyledIcon::changedColor(const QColor& color)
+{
+    qWarning() << "StyledIcon::changedColor() is not implemented";
+
+    return *this;
+}
+
 QFont StyledIcon::getIconFont(std::int32_t fontPointSize /*= -1*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/)
 {
     const auto iconFontResourceName = getIconFontResourceName(iconFontName, iconFontVersion);

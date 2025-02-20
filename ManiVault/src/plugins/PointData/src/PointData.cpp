@@ -541,7 +541,7 @@ Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& gui
 
 QIcon Points::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return mv::Application::getIconFont("FontAwesome").getIcon("database", color);
+    return mv::StyledIcon("database", color);
 
     /*
     const auto size = QSize(100, 100);
@@ -1158,7 +1158,7 @@ QVariantMap Points::toVariantMap() const
 
 QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("circle", color);
+    return StyledIcon("circle", color);
 }
 
 QUrl PointDataFactory::getReadmeMarkdownUrl() const

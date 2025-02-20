@@ -147,7 +147,7 @@ TutorialPluginFactory::TutorialPluginFactory()
 
 QIcon TutorialPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("chalkboard", color);
+    return StyledIcon("chalkboard", color);
 }
 
 QUrl TutorialPluginFactory::getRepositoryUrl() const

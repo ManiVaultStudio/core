@@ -84,13 +84,13 @@ ProjectManager::ProjectManager(QObject* parent) :
     //_editProjectSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
     _editProjectSettingsAction.setIconByName("cog");
 
-    _newProjectMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    _newProjectMenu.setIcon(StyledIcon("file"));
     _newProjectMenu.setTitle("New Project");
     _newProjectMenu.setToolTip("Create new project");
     _newProjectMenu.addAction(&_newBlankProjectAction);
     //_newProjectMenu.addAction(&_newProjectFromWorkspaceAction);
 
-    _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _importDataMenu.setIcon(StyledIcon("file-import"));
     _importDataMenu.setTitle("Import data...");
     _importDataMenu.setToolTip("Import data into ManiVault");
 
@@ -204,7 +204,7 @@ ProjectManager::ProjectManager(QObject* parent) :
 
     updateActionsReadOnly();
 
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", StyledIcon("file"));
 
     connect(&_recentProjectsAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         openProject(filePath);
@@ -835,7 +835,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
                 FileSaveDialog saveFileDialog;
 
-                saveFileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
+                saveFileDialog.setWindowIcon(StyledIcon("cloud-upload-alt"));
                 saveFileDialog.setWindowTitle("Publish ManiVault Project");
                 saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
                 saveFileDialog.setDefaultSuffix(".mv");
