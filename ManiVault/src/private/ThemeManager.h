@@ -37,10 +37,6 @@ public:
             _updateThemeTimer.start();
 
             connect(&_updateThemeTimer, &QTimer::timeout, this, &ThemeSettings::updateTheme);
-
-            //_systemLightColorSchemeAction.setEnabled(isSystemLightDarkColorSchemeModeActive());
-            //_systemDarkColorSchemeAction.setEnabled(isSystemLightDarkColorSchemeModeActive());
-            //_customColorSchemeAction.setEnabled(isCustomColorSchemeModeActive());
         }
 
         /**
