@@ -265,24 +265,22 @@ QVariant AbstractTasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) c
 
         case Qt::DecorationRole:
         {
-            auto& fontAwesome = Application::getIconFont("FontAwesome");
-
             switch (getTask()->getStatus())
             {
                 case Task::Status::Idle:
-                    return fontAwesome.getIcon("clock");
+                    return StyledIcon("clock");
 
                 case Task::Status::Running:
-                    return fontAwesome.getIcon("play");
+                    return StyledIcon("play");
 
                 case Task::Status::RunningIndeterminate:
-                    return fontAwesome.getIcon("play-circle");
+                    return StyledIcon("play-circle");
 
                 case Task::Status::Finished:
-                    return fontAwesome.getIcon("check-circle");
+                    return StyledIcon("check-circle");
 
                 case Task::Status::Aborted:
-                    return fontAwesome.getIcon("bomb");
+                    return StyledIcon("bomb");
 
                 default:
                     break;

@@ -9,11 +9,12 @@
 
 #include <QHBoxLayout>
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 PluginTriggerPickerAction::PluginTriggerPickerAction(QObject* parent, const QString& title) :
     TriggerAction(parent, title),
-    _pluginTriggerActions(),
     _selectTriggerAction(this, "Pick plugin")
 {
     setText(title);
@@ -129,7 +130,7 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
         pluginTriggerPickerAction->getSelectTriggerAction().setOptions(options);
         pluginTriggerPickerAction->getSelectTriggerAction().setCurrentIndex(-1);
 
-        _configurationToolButton.getToolButton().setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+        _configurationToolButton.getToolButton().setIcon(StyledIcon("cog"));
     };
 
     const auto updateConfigurationToolButton = [this, pluginTriggerPickerAction]() -> void {
@@ -141,7 +142,7 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
             _configurationToolButton.setAction(nullptr);
 
         _configurationToolButton.setEnabled(_configurationToolButton.getAction());
-        _configurationToolButton.getToolButton().setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+        _configurationToolButton.getToolButton().setIcon(StyledIcon("cog"));
     };
 
     connect(pluginTriggerPickerAction, &PluginTriggerPickerAction::pluginTriggerActionsChanged, this, updateSelectTriggerAction);

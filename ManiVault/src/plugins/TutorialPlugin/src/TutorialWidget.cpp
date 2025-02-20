@@ -23,7 +23,7 @@ using namespace mv::plugin;
 TutorialWidget::TutorialWidget(TutorialPlugin* tutorialPlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _tutorialPlugin(tutorialPlugin),
-    _infoOverlayWidget(&_webEngineView, Application::getIconFont("FontAwesome").getIcon("eye-dropper"), "No samples view", "There is currently no samples view available...")
+    _infoOverlayWidget(&_webEngineView, StyledIcon("eye-dropper"), "No samples view", "There is currently no samples view available...")
 {
     setAutoFillBackground(true);
     setLayout(&_layout);

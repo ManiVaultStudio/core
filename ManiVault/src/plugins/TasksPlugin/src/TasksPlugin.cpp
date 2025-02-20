@@ -119,7 +119,7 @@ TasksPluginFactory::TasksPluginFactory() :
 
 QIcon TasksPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("tasks", color);
+    return StyledIcon("tasks", color);
 }
 
 QUrl TasksPluginFactory::getReadmeMarkdownUrl() const

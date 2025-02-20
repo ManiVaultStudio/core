@@ -46,7 +46,7 @@ QVariantMap TextData::toVariantMap() const
 
 QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("font", color);
+    return StyledIcon("font", color);
 }
 
 QUrl TextDataFactory::getReadmeMarkdownUrl() const
@@ -77,7 +77,7 @@ void Text::init()
 
 QIcon Text::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("font", color);
+    return StyledIcon("font", color);
 }
 
 std::vector<std::uint32_t>& Text::getSelectionIndices()

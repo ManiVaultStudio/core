@@ -63,7 +63,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
         if (hierarchyWidget == nullptr)
             return;
 
-        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("scroll"));
+        hierarchyWidget->setWindowIcon(StyledIcon("scroll"));
 
         auto& toolbarAction = hierarchyWidget->getToolbarAction();
 
@@ -108,7 +108,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
                 QGuiApplication::clipboard()->setText(messageRecordsString.join("\n"));
             });
 
-            copyAction->setIcon(Application::getIconFont("FontAwesome").getIcon("copy"));
+            copyAction->setIcon(StyledIcon("copy"));
 
             contextMenu.exec(QCursor::pos());
         });

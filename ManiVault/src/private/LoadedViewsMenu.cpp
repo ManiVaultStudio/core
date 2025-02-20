@@ -21,7 +21,7 @@ LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
     setTitle("Toggle");
     setToolTip("Toggle loaded view plugin visibility");
     setEnabled(!plugins().getPluginsByType(plugin::Type::VIEW).empty());
-    setIcon(Application::getIconFont("FontAwesome").getIcon("low-vision"));
+    setIcon(StyledIcon("low-vision"));
 
     _loadedSystemViewsMenu = QSharedPointer<QMenu>(new QMenu("System", this));
 
@@ -63,7 +63,7 @@ void LoadedViewsMenu::populate()
         for (auto& viewToggleAction : loadedSystemViewActions)
             _loadedSystemViewsMenu->addAction(viewToggleAction.get());
 
-        _loadedSystemViewsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+        _loadedSystemViewsMenu->setIcon(StyledIcon("cogs"));
 
         addMenu(_loadedSystemViewsMenu.get());
     }

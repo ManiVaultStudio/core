@@ -4,13 +4,13 @@
 
 #include "FileDialog.h"
 
-#include "Application.h"
-
 #ifdef _DEBUG
     #define FILE_DIALOG_VERBOSE
 #endif
 
 #define FILE_DIALOG_VERBOSE
+
+using namespace mv::util;
 
 namespace mv::gui {
 
@@ -106,7 +106,7 @@ FileOpenDialog::FileOpenDialog(QWidget* parent, const QString& caption, const QS
     qDebug() << __FUNCTION__;
 #endif
 
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+    setWindowIcon(StyledIcon("folder-open"));
     setFileMode(ExistingFile);
     setAcceptMode(AcceptOpen);
 }
@@ -118,7 +118,7 @@ DirectoryOpenDialog::DirectoryOpenDialog(QWidget* parent, const QString& caption
     qDebug() << __FUNCTION__;
 #endif
 
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+    setWindowIcon(StyledIcon("folder-open"));
     setFileMode(Directory);
     setAcceptMode(AcceptOpen);
 }
@@ -130,7 +130,7 @@ FileSaveDialog::FileSaveDialog(QWidget* parent, const QString& caption, const QS
     qDebug() << __FUNCTION__;
 #endif
 
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    setWindowIcon(StyledIcon("save"));
     setAcceptMode(AcceptSave);
     setFileMode(AnyFile);
 }

@@ -52,9 +52,9 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     _createProjectFromDatasetWidget.getHierarchyWidget().setItemTypeName("Importer");
 
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::Application::getIconFont("FontAwesome").getIcon("industry"), "Built-in Workspace"));
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::Application::getIconFont("FontAwesome").getIcon("clock"), "Recent Workspace"));
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::Application::getIconFont("FontAwesome").getIcon("clock"), "Recent Project"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::StyledIcon("industry"), "Built-in Workspace"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::StyledIcon("clock"), "Recent Workspace"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::StyledIcon("clock"), "Recent Project"));
     
     _workspaceLocationTypeAction.setCustomModel(&_workspaceLocationTypesModel);
     _workspaceLocationTypeAction.setCurrentIndex(static_cast<std::int32_t>(FromWorkspaceType::BuiltIn));
@@ -63,8 +63,8 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getToolbarAction().addAction(&_workspaceLocationTypeAction);
 
-    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt", Application::getIconFont("FontAwesome").getIcon("clock"));
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("clock"));
+    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt", StyledIcon("clock"));
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", StyledIcon("clock"));
 
     const auto toggleViews = [this]() -> void {
         _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());

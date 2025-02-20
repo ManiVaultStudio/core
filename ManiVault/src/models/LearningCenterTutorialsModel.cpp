@@ -123,7 +123,7 @@ QVariant LearningCenterTutorialsModel::TitleItem::data(int role /*= Qt::UserRole
             return "Title: " + data(Qt::DisplayRole).toString();
 
     case Qt::DecorationRole:
-            return Application::getIconFont("FontAwesome").getIcon(getTutorial()->getIconName());
+            return StyledIcon(getTutorial()->getIconName());
 
         default:
             break;

@@ -154,7 +154,7 @@ void PageActionsWidget::closePersistentEditor(int rowIndex)
 
 void PageActionsWidget::updateCustomStyle()
 {
-    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("search"));
+    _hierarchyWidget.setWindowIcon(StyledIcon("search"));
 
     auto rowHoverColor = qApp->palette().color(QPalette::Normal, QPalette::Text);
 

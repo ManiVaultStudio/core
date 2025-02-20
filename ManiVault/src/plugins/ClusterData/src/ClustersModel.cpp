@@ -209,7 +209,7 @@ QVariant ClustersModel::headerData(int section, Qt::Orientation orientation, int
                 switch (static_cast<Column>(section))
                 {
                     case Column::Color:
-                        return Application::getIconFont("FontAwesome").getIcon("palette");
+                        return StyledIcon("palette");
 
                     case Column::Name:
                     case Column::ID:

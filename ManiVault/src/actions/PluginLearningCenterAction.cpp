@@ -108,7 +108,7 @@ QMenu* PluginLearningCenterAction::getContextMenu(QWidget* parent)
 {
     auto contextMenu = new QMenu("Learning center", parent);
 
-    contextMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher"));
+    contextMenu->setIcon(StyledIcon("chalkboard-teacher"));
 
     contextMenu->addAction(&_toolbarVisibleAction);
     contextMenu->addMenu(getAlignmentContextMenu());
@@ -121,7 +121,7 @@ QMenu* PluginLearningCenterAction::getAlignmentContextMenu(QWidget* parent)
     auto contextMenu = new QMenu("Alignment", parent);
 
     contextMenu->setEnabled(_toolbarVisibleAction.isChecked());
-    contextMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("arrows-alt"));
+    contextMenu->setIcon(StyledIcon("arrows-alt"));
 
     if (getAlignment() != (Qt::AlignTop | Qt::AlignLeft))
         contextMenu->addAction(&_moveToTopLeftAction);

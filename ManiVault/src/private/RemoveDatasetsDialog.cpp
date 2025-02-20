@@ -34,7 +34,7 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
     _removeAction(this, "Remove"),
     _cancelAction(this, "Cancel")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    setWindowIcon(StyledIcon("trash"));
     setWindowTitle("About to remove dataset(s)");
     setModal(true);
 
@@ -92,7 +92,7 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
         if (hierarchyWidget == nullptr)
             return;
 
-        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+        hierarchyWidget->setWindowIcon(StyledIcon("database"));
 
         auto treeView = widget->findChild<QTreeView*>("TreeView");
 

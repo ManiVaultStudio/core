@@ -17,7 +17,7 @@ using namespace mv::plugin;
 SampleScopeWidget::SampleScopeWidget(SampleScopePlugin* sampleScopePlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _sampleScopePlugin(sampleScopePlugin),
-    _noSamplesOverlayWidget(&_textHtmlView, Application::getIconFont("FontAwesome").getIcon("eye-dropper"), "No samples view", "There is currently no samples view available...")
+    _noSamplesOverlayWidget(&_textHtmlView, StyledIcon("eye-dropper"), "No samples view", "There is currently no samples view available...")
 {
     setAutoFillBackground(true);
     setLayout(&_layout);

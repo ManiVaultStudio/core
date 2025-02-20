@@ -440,21 +440,21 @@ public:
      * @param index Model index to retrieve the action for
      * @return Pointer to action (nullptr if not found)
      */
-    gui::WidgetAction* getAction(const QModelIndex& index);
+    gui::WidgetAction* getAction(const QModelIndex& index) const;
 
     /**
      * Get action for model \p rowIndex
      * @param rowIndex Row index to retrieve the action for
      * @return Pointer to action (nullptr if not found)
      */
-    gui::WidgetAction* getAction(std::int32_t rowIndex);
+    gui::WidgetAction* getAction(std::int32_t rowIndex) const;
 
     /**
      * Get action by \p name
      * @param name Name of the action
      * @return Pointer to action (nullptr if not found)
      */
-    gui::WidgetAction* getAction(const QString& name);
+    gui::WidgetAction* getAction(const QString& name) const;
 
     /**
      * Get model index for \p action and column

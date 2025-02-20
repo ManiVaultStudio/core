@@ -123,6 +123,13 @@ public:
     StyledIcon& changedColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
 
     /**
+     * Return styled icon with changed \p color
+     * @param color Color
+     * @return Reference to changed styled icon
+     */
+    StyledIcon& changedColor(const QColor& color);
+
+    /**
      * Get icon font for \p iconFontName at \p iconFontVersion
      * @param fontPointSize Point size of the font
      * @param iconFontName Name of the icon font

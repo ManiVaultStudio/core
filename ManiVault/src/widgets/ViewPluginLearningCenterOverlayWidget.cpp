@@ -389,7 +389,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::getIcon() 
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("video"), badge);
+    return createIconWithNumberBadgeOverlay(StyledIcon("video"), badge);
 }
 
 bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDisplay() const
@@ -410,7 +410,7 @@ void ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::mousePre
     auto contextMenu = new QMenu(this);
 
     for (const auto tutorial : getViewPlugin()->getLearningCenterAction().getTutorials()) {
-        auto watchTutorialAction = new QAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle());
+        auto watchTutorialAction = new QAction(StyledIcon(tutorial->getIconName()), tutorial->getTitle());
 
         connect(watchTutorialAction, &QAction::triggered, watchTutorialAction, [tutorial]() -> void {
             if (auto tutorialPlugin = mv::plugins().requestViewPlugin("Tutorial")) {
@@ -436,7 +436,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::getIcon
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("user-graduate"), badge);
+    return createIconWithNumberBadgeOverlay(StyledIcon("user-graduate"), badge);
 }
 
 bool ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::shouldDisplay() const
@@ -459,7 +459,7 @@ void ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::
 
 QIcon ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("file-prescription");
+    return StyledIcon("file-prescription");
 }
 
 bool ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::shouldDisplay() const
@@ -480,7 +480,7 @@ void ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::mousePressEv
 
 QIcon ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("info");
+    return StyledIcon("info");
 }
 
 bool ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::shouldDisplay() const
@@ -507,7 +507,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("keyboard"), badge);
+    return createIconWithNumberBadgeOverlay(StyledIcon("keyboard"), badge);
 }
 
 bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDisplay() const
@@ -611,7 +611,7 @@ void ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::mousePre
 
 QIcon ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("arrows-alt");
+    return StyledIcon("arrows-alt");
 }
 
 bool ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::shouldDisplay() const

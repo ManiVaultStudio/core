@@ -25,7 +25,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     _workspacesWidget(this, "", false),
     _cancelAction(this, "Cancel")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    setWindowIcon(StyledIcon("file"));
     setModal(true);
     setWindowTitle("New Project From Workspace");
 

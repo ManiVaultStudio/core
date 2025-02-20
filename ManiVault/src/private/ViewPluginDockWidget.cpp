@@ -75,7 +75,7 @@ QString ViewPluginDockWidget::getTypeString() const
 
 void ViewPluginDockWidget::initialize()
 {
-	_toggleMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("low-vision"));
+	_toggleMenu.setIcon(StyledIcon("low-vision"));
 
 	_helpAction.setIconByName("question");
 	_helpAction.setShortcut(tr("F1"));

@@ -41,7 +41,7 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
             return;
 
         hierarchyWidget->setHeaderHidden(true);
-        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+        hierarchyWidget->setWindowIcon(StyledIcon("plug"));
         
         hierarchyWidget->getFilterGroupAction().setVisible(false);
         hierarchyWidget->getColumnsGroupAction().setVisible(false);

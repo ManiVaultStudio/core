@@ -24,7 +24,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
     _groupAction(this, "Group"),
     _okAction(this, "Ok")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setWindowIcon(StyledIcon("cog"));
     setModal(true);
     setWindowTitle("Project Settings");
 

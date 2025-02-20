@@ -351,7 +351,7 @@ QVariant AbstractDataHierarchyModel::IsVisibleItem::data(int role /*= Qt::UserRo
             break;
 
         case Qt::DecorationRole:
-            return Application::getIconFont("FontAwesome").getIcon(data(Qt::EditRole).toBool() ? "eye" : "eye-slash");
+            return StyledIcon(data(Qt::EditRole).toBool() ? "eye" : "eye-slash");
 
         case Qt::ToolTipRole:
             return QString("Dataset is visible: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
@@ -407,7 +407,7 @@ QVariant AbstractDataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole
                 break;
 
             if (getDataset()->isProxy())
-                return Application::getIconFont("FontAwesome").getIcon("object-group");
+                return StyledIcon("object-group");
 
             break;
         }
@@ -437,7 +437,7 @@ QVariant AbstractDataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRo
             return QString("Dataset %1 derived").arg(data(Qt::EditRole).toBool() ? "is" : "is not");
 
         case Qt::DecorationRole:
-            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("square-root-alt") : QIcon();
+            return data(Qt::EditRole).toBool() ? StyledIcon("square-root-alt") : QIcon();
 
         default:
             break;
@@ -557,7 +557,7 @@ QVariant AbstractDataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRol
             return QString("Dataset is %1").arg(data(Qt::EditRole).toBool() ? "locked" : "not locked");
 
         case Qt::DecorationRole:
-            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("lock") : Application::getIconFont("FontAwesome").getIcon("lock-open");
+            return data(Qt::EditRole).toBool() ? StyledIcon("lock") : StyledIcon("lock-open");
 
         default:
             break;
