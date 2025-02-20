@@ -94,8 +94,8 @@ public:
             switch (_colorSchemeMode) {
 	            case ColorSchemeMode::System:
 	            {
-                    //qApp->setPalette(QPalette());
-                    //qApp->setPalette(QApplication::style()->standardPalette());
+                    qApp->styleHints()->setColorScheme(Qt::ColorScheme::Unknown);
+                    qApp->setPalette(QApplication::style()->standardPalette());
 	                break;
 	            }
 

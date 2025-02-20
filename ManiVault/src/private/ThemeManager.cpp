@@ -311,10 +311,6 @@ void ThemeManager::privateActivateSystemColorScheme()
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     getRequestThemeSettings()->setColorSchemeMode(ColorSchemeMode::System);
     getRequestThemeSettings()->setColorScheme(getCurrentSystemColorScheme());
-
-    qApp->styleHints()->setColorScheme(Qt::ColorScheme::Unknown);
-    //qApp->setPalette(QPalette());
-    qApp->setPalette(QApplication::style()->standardPalette());
 #endif
 }
 
