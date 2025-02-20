@@ -15,7 +15,7 @@ namespace mv::gui
 ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Application"),
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
-    _lightDarkSystemColorSchemeAction(this, "Theme"),
+    _lightDarkSystemColorSchemeAction(this, "Color scheme"),
     _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System")
 {
     _applicationSessionIdAction.setEnabled(false);
@@ -65,7 +65,7 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
             _lightDarkSystemColorSchemeAction.addAction(&mv::theme().getSystemLightColorSchemeAction());
             _lightDarkSystemColorSchemeAction.addAction(&mv::theme().getSystemDarkColorSchemeAction());
 
-	    	addAction(&_lightDarkSystemColorSchemeAction);
+	    	addAction(&_lightDarkSystemColorSchemeAction, -1, WidgetConfigurationFunction(), false);
 
 	    	addAction(&mv::theme().getCustomColorSchemeAction());
         });
