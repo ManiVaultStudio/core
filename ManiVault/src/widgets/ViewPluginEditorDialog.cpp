@@ -48,7 +48,7 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, WidgetAction* ro
 
 void ViewPluginEditorDialog::init()
 {
-    setWindowIcon(StyledIcon("cog"));
+    setWindowIcon(StyledIcon("gear"));
     setMinimumSize(QSize(640, 480));
 
     auto layout = new QVBoxLayout();

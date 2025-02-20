@@ -24,7 +24,7 @@ WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) 
     _groupAction(this, "Group"),
     _okAction(this, "Ok")
 {
-    setWindowIcon(StyledIcon("cog"));
+    setWindowIcon(StyledIcon("gear"));
     setModal(true);
     setWindowTitle("Workspace Settings");
 

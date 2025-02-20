@@ -130,7 +130,7 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
         pluginTriggerPickerAction->getSelectTriggerAction().setOptions(options);
         pluginTriggerPickerAction->getSelectTriggerAction().setCurrentIndex(-1);
 
-        _configurationToolButton.getToolButton().setIcon(StyledIcon("cog"));
+        _configurationToolButton.getToolButton().setIcon(StyledIcon("gear"));
     };
 
     const auto updateConfigurationToolButton = [this, pluginTriggerPickerAction]() -> void {
@@ -142,7 +142,7 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
             _configurationToolButton.setAction(nullptr);
 
         _configurationToolButton.setEnabled(_configurationToolButton.getAction());
-        _configurationToolButton.getToolButton().setIcon(StyledIcon("cog"));
+        _configurationToolButton.getToolButton().setIcon(StyledIcon("gear"));
     };
 
     connect(pluginTriggerPickerAction, &PluginTriggerPickerAction::pluginTriggerActionsChanged, this, updateSelectTriggerAction);

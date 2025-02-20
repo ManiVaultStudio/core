@@ -235,7 +235,7 @@ void SplashScreenWidget::createToolbar()
 
     _closeToolButton.setFixedSize(fixedSize, fixedSize);
     _closeToolButton.setVisible(_splashScreenAction.getMayCloseSplashScreenWidget());
-    _closeToolButton.setIcon(StyledIcon("times"));
+    _closeToolButton.setIcon(StyledIcon("xmark"));
     _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
     _closeToolButton.setAutoRaise(true);
     _closeToolButton.setToolTip("Close the splash screen");

@@ -162,7 +162,7 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
                 QDialog publishDialog;
 
-                publishDialog.setWindowIcon(StyledIcon("cloud-upload-alt"));
+                publishDialog.setWindowIcon(StyledIcon("cloud-arrow-up"));
                 publishDialog.setWindowTitle("Publish " + privateAction->getLocation());
                 publishDialog.setMinimumWidth(400);
 

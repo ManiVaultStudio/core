@@ -23,7 +23,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
     _groupAction(this, "Group"),
     _okAction(this, "Ok")
 {
-    setWindowIcon(util::StyledIcon("cog"));
+    setWindowIcon(util::StyledIcon("gear"));
     setModal(true);
     setWindowTitle("Project Settings");
 

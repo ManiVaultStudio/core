@@ -20,7 +20,7 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _groupsAction(this, "Groups")
 {
-    setWindowIcon(StyledIcon("cogs"));
+    setWindowIcon(StyledIcon("gears"));
     setWindowModality(Qt::ApplicationModal);
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setWindowTitle("Settings");

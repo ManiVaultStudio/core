@@ -69,7 +69,7 @@ class CORE_EXPORT RawDataFactory : public PluginFactory
     
 public:
     RawDataFactory() :
-        PluginFactory(Type::DATA)
+        PluginFactory(Type::DATA, "Raw data")
     {
         setIconByName("table");
         setCategoryIconByName("table");

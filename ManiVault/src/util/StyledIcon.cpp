@@ -108,12 +108,12 @@ void StyledIcon::set(const QString& iconName, const QString& iconFontName, const
 	}
 }
 
-StyledIcon StyledIcon::fromFontAwesomeRegular(const QString& iconName, const Version& version /*= { 6, 5 }*/)
+StyledIcon StyledIcon::fromFontAwesomeRegular(const QString& iconName, const Version& version /*= defaultIconFontVersion*/)
 {
     return StyledIcon(iconName, "FontAwesomeRegular", version);
 }
 
-StyledIcon StyledIcon::fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version)
+StyledIcon StyledIcon::fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version /*= defaultIconFontVersion*/)
 {
     return StyledIcon(iconName, "FontAwesomeBrandsRegular", version);
 }

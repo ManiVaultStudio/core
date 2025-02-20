@@ -116,7 +116,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 
     _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    _editAction.setIconByName("cog");
+    _editAction.setIconByName("gear");
     _editAction.setToolTip("Edit the splash screen settings");
     _editAction.setPopupSizeHint(QSize(350, 0));
 

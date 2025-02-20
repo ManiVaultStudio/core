@@ -41,7 +41,7 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
     setText("Presets");
     setConnectionPermissionsToForceNone(true);
 
-    _editAction.setIconByName("cog");
+    _editAction.setIconByName("gear");
     _editAction.setToolTip(QString("Manage %1 presets").arg(_presetType.toLower()));
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -115,7 +115,7 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 
     auto savePresetAction = new QAction("Save");
 
-    savePresetAction->setIcon(StyledIcon("save"));
+    savePresetAction->setIcon(StyledIcon("floppy-disk"));
 
     connect(savePresetAction, &TriggerAction::triggered, this, [this, presetIcon]() -> void {
         auto* choosePresetNameDialog = new ChoosePresetNameDialog(this);
@@ -133,7 +133,7 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 
     auto saveDefaultPresetAction = new QAction("Save As Default");
 
-    saveDefaultPresetAction->setIcon(StyledIcon("save"));
+    saveDefaultPresetAction->setIcon(StyledIcon("floppy-disk"));
 
     connect(saveDefaultPresetAction, &TriggerAction::triggered, this, &PresetsAction::saveDefaultPreset);
 

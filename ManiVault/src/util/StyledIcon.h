@@ -96,7 +96,7 @@ public:
      * @param version Font Awesome version
      * @return Named icon
      */
-    static StyledIcon fromFontAwesomeRegular(const QString& iconName, const Version& version = { 6, 5 });
+    static StyledIcon fromFontAwesomeRegular(const QString& iconName, const Version& version = defaultIconFontVersion);
 
     /**
      * Create icon with \p iconName from \p version of Font Awesome Brands
@@ -104,7 +104,7 @@ public:
      * @param version Font Awesome version
      * @return Named icon
      */
-    static StyledIcon fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version = { 6, 5 });
+    static StyledIcon fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version = defaultIconFontVersion);
 
     /**
      * Return styled icon with changed color groups \p colorGroupLightTheme and \p colorGroupDarkTheme

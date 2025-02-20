@@ -72,7 +72,7 @@ void ProjectSerializationTask::setMode(const Mode& mode, const QString& projectF
         {
             setName("Save " + projectFileName);
             setDescription("Saving ManiVault project to " + projectFilePath);
-            setIcon(StyledIcon("file-archive"));
+            setIcon(StyledIcon("file-zipper"));
 
             _dataTask.setEnabled(false);
 

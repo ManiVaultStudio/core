@@ -29,7 +29,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 {
     Q_ASSERT(actions.count() != 0);
 
-    _publishAction.setIconByName("cloud-upload-alt");
+    _publishAction.setIconByName("cloud-arrow-up");
     _connectAction.setIconByName("crosshairs");
     _disconnectAction.setIconByName("unlink");
     _disconnectAllAction.setIconByName("unlink");

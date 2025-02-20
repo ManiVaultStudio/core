@@ -45,7 +45,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget.addAction(&_screenshotAction);
     _widget.addAction(&_isolateAction);
 
-    _editorAction.setIconByName("cog");
+    _editorAction.setIconByName("gear");
     _editorAction.setShortcut(tr("F12"));
     _editorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
@@ -327,7 +327,7 @@ void ViewPlugin::setProgressTask(Task* progressTask)
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
-    PluginFactory(Type::VIEW),
+    PluginFactory(Type::VIEW, "View"),
     _producesSystemViewPlugins(producesSystemViewPlugins),
     _preferredDockArea(DockAreaFlag::Right)
 {

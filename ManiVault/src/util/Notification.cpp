@@ -64,7 +64,7 @@ Notification::Notification(const QString& title, const QString& description, con
     messageLabel->setOpenExternalLinks(true);
 
     closePushButton->setFixedSize(18, 18);
-    closePushButton->setIcon(StyledIcon("times"));
+    closePushButton->setIcon(StyledIcon("xmark"));
     closePushButton->setAutoRaise(true);
 
     notificationWidgetLayout->setContentsMargins(10, 10, 10, 10);

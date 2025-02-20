@@ -323,7 +323,7 @@ QVariant AbstractActionsModel::ConnectionPermissionItem::data(int role /*= Qt::U
                 break;
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui)
-                return StyledIcon("cloud-upload-alt");
+                return StyledIcon("cloud-arrow-up");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui)
                 return StyledIcon("link");

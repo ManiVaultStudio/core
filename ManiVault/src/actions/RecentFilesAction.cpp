@@ -84,7 +84,7 @@ void RecentFilesAction::initialize(const QString& settingsKey, const QString& fi
     _fileType       = fileType;
     _shortcutPrefix = shortcutPrefix;
 
-    _editAction.setIconByName("cog");
+    _editAction.setIconByName("gear");
     _editAction.setToolTip(QString("Edit recently opened %1s").arg(_fileType.toLower()));
 
     _model.loadFromSettings();

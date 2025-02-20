@@ -40,7 +40,7 @@ SettingsManager::SettingsManager(QObject* parent) :
         _editSettingsAction.setMenuRole(QAction::PreferencesRole);
     } else {
         //_editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
-        _editSettingsAction.setIconByName("cogs");
+        _editSettingsAction.setIconByName("gears");
     }
         
     connect(&_editSettingsAction, &TriggerAction::triggered, this, &SettingsManager::edit);

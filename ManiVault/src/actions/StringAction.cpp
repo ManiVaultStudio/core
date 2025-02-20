@@ -33,8 +33,8 @@ StringAction::StringAction(QObject* parent, const QString& title, const QString&
 
     _leadingAction.setEnabled(false);
 
-    _leadingAction.setStyledIcon(StyledIcon("search"));
-    _trailingAction.setStyledIcon(StyledIcon("times-circle"));
+    _leadingAction.setStyledIcon(StyledIcon("magnifying-glass"));
+    _trailingAction.setStyledIcon(StyledIcon("circle-xmark"));
 
     _leadingAction.setToolTip("Search");
     _trailingAction.setToolTip("Clear");

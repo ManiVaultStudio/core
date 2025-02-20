@@ -171,7 +171,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     _settingsGroupAction.setText("Settings");
     _settingsGroupAction.setToolTip(QString("Edit %1s hierarchy settings").arg(_itemTypeName.toLower()));
-    _settingsGroupAction.setIconByName("cog");
+    _settingsGroupAction.setIconByName("gear");
     _settingsGroupAction.setVisible(false);
 
     auto layout = new QVBoxLayout();
