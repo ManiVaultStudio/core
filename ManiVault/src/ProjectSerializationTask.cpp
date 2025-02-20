@@ -7,6 +7,8 @@
 
 #include <QFileInfo>
 
+using namespace mv::util;
+
 namespace mv {
 
 ProjectSerializationTask::ProjectSerializationTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
@@ -53,7 +55,7 @@ void ProjectSerializationTask::setMode(const Mode& mode, const QString& projectF
         {
             setName("Load " + projectFileName);
             setDescription("Loading ManiVault project from " + projectFilePath);
-            setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            setIcon(StyledIcon("folder-open"));
 
             _dataTask.setEnabled(true);
 
@@ -70,7 +72,7 @@ void ProjectSerializationTask::setMode(const Mode& mode, const QString& projectF
         {
             setName("Save " + projectFileName);
             setDescription("Saving ManiVault project to " + projectFilePath);
-            setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
+            setIcon(StyledIcon("file-archive"));
 
             _dataTask.setEnabled(false);
 
@@ -82,9 +84,6 @@ void ProjectSerializationTask::setMode(const Mode& mode, const QString& projectF
 
             break;
         }
-
-        default:
-            break;
     }   
 }
 
