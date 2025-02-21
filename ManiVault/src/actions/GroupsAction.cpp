@@ -342,9 +342,6 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     // Show/hide group section tree items when requested
     connect(_groupsAction, &GroupsAction::groupActionShown, this, &Widget::showGroupAction);
     connect(_groupsAction, &GroupsAction::groupActionHidden, this, &Widget::hideGroupAction);
-    
-    // We do all styling here
-    updateCustomStyle();
 }
 
 void GroupsAction::Widget::updateToolbar()
