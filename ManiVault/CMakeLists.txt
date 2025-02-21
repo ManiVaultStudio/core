@@ -102,13 +102,13 @@ endif()
 # -----------------------------------------------------------------------------
 # Windows compiler and linker flags
 # -----------------------------------------------------------------------------
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELWITHDEBUG "${CMAKE_CXX_FLAGS_RELEASE} /MD")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-endif(MSVC)
+endif()
 
 # -----------------------------------------------------------------------------
 # Dependencies
@@ -276,13 +276,13 @@ if(MV_UNITY_BUILD)
     set_target_properties(${MV_EXE} PROPERTIES UNITY_BUILD ON)
 endif()
 
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_target_properties(${MV_EXE} PROPERTIES
         WIN32_EXECUTABLE YES
         LINK_FLAGS "/ENTRY:mainCRTStartup"
         LINK_FLAGS "/SUBSYSTEM:CONSOLE"
     )
-endif(MSVC)
+endif()
 
 if(APPLE)
     
@@ -421,7 +421,7 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
         COMPONENT MVPUBLIC_CMAKE_HELPER
 )
 
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Install program database (.pdb) files
     install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
     install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
@@ -567,7 +567,7 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 # -----------------------------------------------------------------------------
 
 # Automatically set the debug environment (command + working directory) for MSVC
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_ENVIRONMENT "PATH=${QT_DIR}/../../../bin")
     set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>)
     set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${MV_INSTALL_DIR}/Debug/ManiVault Studio.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${MV_INSTALL_DIR}/RelWithDebInfo/ManiVault Studio.exe","${MV_INSTALL_DIR}/Release/ManiVault Studio.exe">>)
