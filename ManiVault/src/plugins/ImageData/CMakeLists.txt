@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(IMAGEDATA "ImageData")
 PROJECT(${IMAGEDATA})
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 file(GLOB JSON src/*.json)
 set(AUX ${JSON})
 
