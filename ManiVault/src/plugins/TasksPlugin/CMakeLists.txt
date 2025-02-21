@@ -8,10 +8,6 @@ set(PLUGIN
     src/TasksPlugin.cpp
 )
 
-set(PLUGIN_MOC_HEADERS
-	src/TasksPlugin.h
-)
-
 set(AUX
     src/TasksPlugin.json
 )
@@ -28,9 +24,6 @@ add_library(${TASKS_PLUGIN} SHARED ${TASKS_SOURCES})
 
 add_dependencies(${TASKS_PLUGIN} ${MV_PUBLIC_LIB})
 
-qt_wrap_cpp(TASKS_MOC ${PLUGIN_MOC_HEADERS} TARGET ${TASKS_PLUGIN})
-target_sources(${TASKS_PLUGIN} PRIVATE ${TASKS_MOC})
-
 target_include_directories(${TASKS_PLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include")
 
 target_compile_features(${TASKS_PLUGIN} PRIVATE cxx_std_20)
@@ -41,6 +34,8 @@ target_link_libraries(${TASKS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${TASKS_PLUGIN} ${MV_USE_AVX})
+
+set_target_properties(${TASKS_PLUGIN} PROPERTIES AUTOMOC ON)
 
 install(TARGETS ${TASKS_PLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
@@ -56,6 +51,6 @@ add_custom_command(TARGET ${TASKS_PLUGIN} POST_BUILD
 
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
-    set_property(TARGET ${TASKS_PLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug,${MV_INSTALL_DIR}/release>)
-    set_property(TARGET ${TASKS_PLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug/${MV_APPLICATION_NAME}.exe,${MV_INSTALL_DIR}/release/${MV_APPLICATION_NAME}.exe>)
+    set_property(TARGET ${TASKS_PLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>)
+    set_property(TARGET ${TASKS_PLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${MV_INSTALL_DIR}/Debug/${MV_APPLICATION_NAME}.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${MV_INSTALL_DIR}/RelWithDebInfo/${MV_APPLICATION_NAME}.exe","${MV_INSTALL_DIR}/Release/${MV_APPLICATION_NAME}.exe">>)
 endif()
