@@ -9,14 +9,14 @@
 #include <QToolButton>
 #include <QGraphicsDropShadowEffect>
 
+#include "ColorAction.h"
+
 using namespace mv::util;
 
 namespace mv::gui {
 
 StringAction::StringAction(QObject* parent, const QString& title, const QString& string /*= ""*/) :
     WidgetAction(parent, title),
-    _leadingAction(this),
-    _trailingAction(this),
     _completer(nullptr),
     _searchMode(false),
     _clearable(false),
@@ -29,12 +29,10 @@ StringAction::StringAction(QObject* parent, const QString& title, const QString&
     _leadingAction.setVisible(false);
     _trailingAction.setVisible(false);
 
-    auto button = new QToolButton();
-
     _leadingAction.setEnabled(false);
 
-    _leadingAction.setStyledIcon(StyledIcon("magnifying-glass"));
-    _trailingAction.setStyledIcon(StyledIcon("circle-xmark"));
+    _leadingAction.setIconByName("magnifying-glass");
+    _trailingAction.setIconByName("xmark");
 
     _leadingAction.setToolTip("Search");
     _trailingAction.setToolTip("Clear");
@@ -289,7 +287,7 @@ void StringAction::InlineAction::StyledToolButton::synchronizeWithInlineAction()
     setToolTip(_inlineAction.toolTip());
 }
 
-StringAction::InlineAction::InlineAction(QObject* parent) :
+StringAction::InlineAction::InlineAction(QWidget* parent /*= nullptr*/) :
     QWidgetAction(parent)
 {
 }
@@ -298,7 +296,7 @@ QWidget* StringAction::InlineAction::createWidget(QWidget* parent)
 {
     auto toolButton = new StyledToolButton(*this, parent);
 
-    toolButton->setIcon(_styledIcon);
+    toolButton->setIcon(icon());
     toolButton->setIconSize(QSize(12, 12));
     toolButton->setStyleSheet("border: none;");
     toolButton->setAutoRaise(false);
@@ -306,14 +304,14 @@ QWidget* StringAction::InlineAction::createWidget(QWidget* parent)
 
     connect(toolButton, &QToolButton::clicked, this, [this]() -> void {
         emit triggered();
-	});
+    });
 
-	return toolButton;
+    return toolButton;
 }
 
-void StringAction::InlineAction::setStyledIcon(const util::StyledIcon& styledIcon)
+void StringAction::InlineAction::setIconByName(const QString& iconName)
 {
-    _styledIcon = styledIcon;
+	setIcon(util::StyledIcon(iconName));
 }
 
 StringAction::LabelWidget::LabelWidget(QWidget* parent, StringAction* stringAction) :
@@ -362,6 +360,9 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
+
+    addAction(&_stringAction->getLeadingAction(), QLineEdit::LeadingPosition);
+    addAction(&_stringAction->getTrailingAction(), QLineEdit::TrailingPosition);
 
     const auto updateToolTip = [this, stringAction]() -> void {
         setToolTip(stringAction->getString());
