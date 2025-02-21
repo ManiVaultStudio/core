@@ -661,7 +661,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
     painter.setRenderHint(QPainter::RenderHint::Antialiasing);
 
     constexpr auto  rectangleMargin = 3;
-    const auto      backgroundColor = qApp->palette().highlightedText().color();
+    const auto      backgroundColor = qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Window);
 
     QPixmap backgroundPixmap(size());
 

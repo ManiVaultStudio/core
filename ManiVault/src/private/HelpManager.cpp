@@ -11,7 +11,6 @@
 
 #include <actions/WatchVideoAction.h>
 
-#include <Application.h>
 #include <Task.h>
 
 #include <QDesktopServices>
@@ -134,7 +133,7 @@ void HelpManager::initialize()
 
     beginInitialization();
     {
-        _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
+        //_fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
     }
     endInitialization();
 }

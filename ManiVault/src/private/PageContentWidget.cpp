@@ -51,7 +51,7 @@ QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString
 
     updateHeaderLabelStyle();
 
-    //connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, headerLabel, updateHeaderLabelStyle);
+    connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, headerLabel, updateHeaderLabelStyle);
 
     return headerLabel;
 }
