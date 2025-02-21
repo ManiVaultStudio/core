@@ -24,8 +24,10 @@ jobs:
     steps:
     - name: Get matrix from file
       id: matrix_setup
-      uses: ManiVaultStudio/github-actions/matrix_setup@main
-      
+      uses: ManiVaultStudio/github-actions/matrix_setup@feature/PrepareCIUpdate022025
+      with:
+        matrix_ids : 'windows_2022 linux_gcc13 macos_code14 macos_code16'
+
   cross-platform-build:
     name: Cross platform build
     needs: prepare_matrix
@@ -64,13 +66,6 @@ jobs:
         with:
           python-version: "3.11"
 
-      # windows-2016 need the SSHAgentFeature added
-      #- name: Start ssh key agent
-      #  if: matrix.os == 'windows-2019'
-      #  run: |
-      #    choco install --no-progress -my openssh --params '"/SSHAgentFeature"'
-      #    refreshenv
-
       - name: Start ssh key agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -84,7 +79,7 @@ jobs:
 
       - name: Windows build
         if: startsWith(runner.os, 'Windows')
-        uses: ManiVaultStudio/github-actions/conan_windows_build@main
+        uses: ManiVaultStudio/github-actions/conan_windows_build@feature/PrepareCIUpdate022025
         with:
           conan-visual-version: ${{matrix.build-cversion}}
           conan-visual-runtime: ${{matrix.build-runtime}}
@@ -96,7 +91,7 @@ jobs:
 
       - name: Linux build
         if: startsWith(matrix.os, 'ubuntu')
-        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@main
+        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@feature/PrepareCIUpdate022025
         with:
           conan-compiler: ${{matrix.build-compiler}}
           conan-cc: ${{matrix.build-cc}}
@@ -105,13 +100,14 @@ jobs:
           conan-libcxx-version: ${{matrix.build-libcxx}}
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
+          build-arch: ${{matrix.build-arch}}
           conan-user: ${{secrets.LKEB_UPLOAD_USER}}
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
           
       - name: Mac build
         if: startsWith(matrix.os, 'macos')
-        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@main
+        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@feature/PrepareCIUpdate022025
         with:
           conan-compiler: ${{matrix.build-compiler}}
           conan-cc: ${{matrix.build-cc}}
@@ -120,6 +116,7 @@ jobs:
           conan-libcxx-version: ${{matrix.build-libcxx}}
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
+          build-arch: ${{matrix.build-arch}}
           conan-user: ${{secrets.LKEB_UPLOAD_USER}}
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}

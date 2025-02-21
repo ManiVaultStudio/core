@@ -1,27 +1,9 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 set(IMAGEDATA "ImageData")
 PROJECT(${IMAGEDATA})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-endif(MSVC)
-
-# Check if the directory to the ManiVault installation has been provided
-if(NOT DEFINED MV_INSTALL_DIR)
-    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is installed")
-    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is installed")
-endif()
-file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
-
-find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 file(GLOB JSON src/*.json)
 set(AUX ${JSON})
@@ -32,10 +14,6 @@ set(IMAGE_DATA_HEADERS
     src/Images.h
     src/Common.h
     ${CMAKE_CURRENT_BINARY_DIR}/imagedata_export.h
-)
-
-set(PLUGIN_MOC_HEADERS
-    src/ImageData.h
 )
 
 set(IMAGE_DATA_SOURCES 
@@ -57,12 +35,9 @@ add_library(${IMAGEDATA} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${AC
 
 add_library(ManiVault::${IMAGEDATA} ALIAS ${IMAGEDATA})
 
-qt_wrap_cpp(IMAGEDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${IMAGEDATA})
-target_sources(${IMAGEDATA} PRIVATE ${IMAGEDATA_MOC})
-
 target_include_directories(${IMAGEDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${IMAGEDATA} PRIVATE cxx_std_17)
+target_compile_features(${IMAGEDATA} PRIVATE cxx_std_20)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
@@ -83,10 +58,10 @@ target_link_libraries(${IMAGEDATA} PRIVATE ClusterData)
 mv_check_and_set_AVX(${IMAGEDATA} ${MV_USE_AVX})
 
 set_target_properties(${IMAGEDATA} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
+set_target_properties(${IMAGEDATA} PROPERTIES AUTOMOC ON)
 
 if(MV_UNITY_BUILD)
     set_target_properties(${IMAGEDATA} PROPERTIES UNITY_BUILD ON)
-    set_source_files_properties(${IMAGEDATA_MOC} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 install(TARGETS ${IMAGEDATA}

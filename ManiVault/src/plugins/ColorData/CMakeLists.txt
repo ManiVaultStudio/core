@@ -1,26 +1,9 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 set(COLORDATA "ColorData")
 PROJECT(${COLORDATA})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-endif(MSVC)
-
-# Check if the directory to the ManiVault installation has been provided
-if(NOT DEFINED MV_INSTALL_DIR)
-    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is installed")
-    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is installed")
-endif()
-file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
-
-find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(COLORDATA_SOURCES
     src/ColorData.h
@@ -32,22 +15,15 @@ set(COLORDATA_HEADERS
     src/ColorData.h
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/ColorData.h
-)
-
 source_group( Plugin FILES ${COLORDATA_SOURCES})
 
 add_library(${COLORDATA} SHARED ${COLORDATA_SOURCES})
 
 add_library(ManiVault::${COLORDATA} ALIAS ${COLORDATA})
 
-qt_wrap_cpp(COLORDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${COLORDATA})
-target_sources(${COLORDATA} PRIVATE ${COLORDATA_MOC})
-
 target_include_directories(${COLORDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${COLORDATA} PRIVATE cxx_std_17)
+target_compile_features(${COLORDATA} PRIVATE cxx_std_20)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
@@ -63,6 +39,7 @@ target_link_libraries(${COLORDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${COLORDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 set_target_properties(${COLORDATA} PROPERTIES PUBLIC_HEADER "${COLORDATA_HEADERS}")
+set_target_properties(${COLORDATA} PROPERTIES AUTOMOC ON)
 
 install(TARGETS ${COLORDATA}
     EXPORT "ManiVaultPublicExport"
