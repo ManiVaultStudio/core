@@ -45,11 +45,14 @@ include(mv_install_dependencies_utils)
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
 
-# Cmake package manager, downloads dependencies during configuration
+# CMake package manager, downloads dependencies during configuration
 include(CPM)
 
 # create a file that defines MV_VERSION_MAJOR, etc
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
+
+# set globally for data plugins
+set(CMAKE_AUTOMOC ON)
 
 # -----------------------------------------------------------------------------
 # Apple settings

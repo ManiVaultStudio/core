@@ -63,7 +63,6 @@ target_link_libraries(${IMAGEDATA} PRIVATE ClusterData)
 mv_check_and_set_AVX(${IMAGEDATA} ${MV_USE_AVX})
 
 set_target_properties(${IMAGEDATA} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
-set_target_properties(${IMAGEDATA} PROPERTIES AUTOMOC ON)
 
 if(MV_UNITY_BUILD)
     set_target_properties(${IMAGEDATA} PROPERTIES UNITY_BUILD ON)
