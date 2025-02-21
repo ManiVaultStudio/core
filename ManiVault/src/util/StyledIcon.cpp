@@ -32,7 +32,8 @@ QVector<QStringList>        StyledIcon::iconFontPreferenceGroups = { { "FontAwes
 
 StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/, QWidget* parent /*= nullptr*/) :
     QObject(parent),
-    QIcon(new StyledIconEngine(*this))
+    QIcon(new StyledIconEngine(*this)),
+    _fixColor(false)
 {
     connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StyledIcon::updateIconPixmap);
 
@@ -249,7 +250,10 @@ StyledIcon& StyledIcon::changedColorRoles(const QPalette::ColorRole& colorRoleLi
 
 StyledIcon& StyledIcon::changedColor(const QColor& color)
 {
-    qWarning() << "StyledIcon::changedColor() is not implemented";
+    _fixColor   = true;
+    _color      = color;
+
+    updateIconPixmap();
 
     return *this;
 }
@@ -403,7 +407,7 @@ void StyledIcon::updateIconPixmap() const
 {
     try {
         if (_iconEngine && !_iconEngine->_sha.isEmpty() && !pixmaps.contains(_iconEngine->_sha))
-			pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, qApp->palette().text().color());
+			pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _fixColor ? _color : qApp->palette().text().color());
 	}
 	catch (std::exception& e)
 	{

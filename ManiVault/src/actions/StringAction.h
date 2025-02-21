@@ -84,23 +84,22 @@ public:
     public:
 
         /**
-         * Construct with pointer to \p parent object
-         * @param parent Pointer to parent object
+         * Construct with pointer to parent widget
+         * @param parent Pointer to parent widget
          */
-        InlineAction(QObject* parent = nullptr);
+        InlineAction(QWidget* parent = nullptr);
 
         /**
-         * Create widget with \p parent widget
-         * @param parent Pointer to parent widget
+         * Create widget
          * @return Pointer to created widget
          */
         QWidget* createWidget(QWidget* parent) override;
 
-	    /**
-         * Set icon to \p styledIcon
-         * @param styledIcon Styled icon
-	     */
-	    void setStyledIcon(const util::StyledIcon& styledIcon);
+        /**
+         * Set icon by name
+         * @param iconName Name of the icon
+         */
+        void setIconByName(const QString& iconName);
 
     protected:
 

@@ -62,9 +62,12 @@ public:
     StyledIcon& operator=(const StyledIcon& other) {
         //QIcon::operator=(other);
 
+        //_iconEngine         = other._iconEngine;
         _iconName           = other._iconName;
         _iconFontName       = other._iconFontName;
         _iconFontVersion    = other._iconFontVersion;
+        _fixColor           = other._fixColor;
+        _color              = other._color;
 
         return *this;
     }
@@ -308,6 +311,8 @@ private:
 	QString             _iconName;          /** Name of the icon */
     QString             _iconFontName;      /** Name of the icon font */
     Version             _iconFontVersion;   /** Version of the icon font */
+    bool                _fixColor;          /** Whether to fix the color */
+    QColor              _color;             /** Color of the icon */
 
 protected:
 	static QMap<QString, QVariantMap>   fontMetadata;               /** Font-specific metadata */

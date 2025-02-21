@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QStyleHints>
+#include <windows.h>
 
 #include "actions/ColorAction.h"
 
@@ -54,7 +55,8 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 	    const auto pixmap = StyledIcon::pixmaps[_sha];
 
     	if (!pixmap.isNull()) {
-    		const auto recoloredPixmap  = recolorPixmap(pixmap, qApp->palette().color(getColorGroupForCurrentTheme(), getColorRoleForCurrentTheme()));
+            const auto recolorColor     = qApp->palette().color(getColorGroupForCurrentTheme(), getColorRoleForCurrentTheme());
+    		const auto recoloredPixmap  = recolorPixmap(pixmap, recolorColor);
     		const auto recoloredIcon    = QIcon(recoloredPixmap);
 
     		return recoloredIcon.pixmap(size, mode, state);
