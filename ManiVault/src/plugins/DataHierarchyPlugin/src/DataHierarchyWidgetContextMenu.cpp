@@ -185,7 +185,7 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
 
     auto lockSelectedAction = new QAction("Selected");
 
-    lockSelectedAction->setIcon(StyledIcon("mouse-pointer"));
+    lockSelectedAction->setIcon(StyledIcon("arrow-pointer"));
     lockSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(lockSelectedAction, &QAction::triggered, this, [this]() -> void {
@@ -221,7 +221,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
 
     auto unlockSelectedAction = new QAction("Selected");
 
-    unlockSelectedAction->setIcon(StyledIcon("mouse-pointer"));
+    unlockSelectedAction->setIcon(StyledIcon("arrow-pointer"));
     unlockSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(unlockSelectedAction, &QAction::triggered, this, [this]() -> void {
@@ -263,7 +263,7 @@ QMenu* DataHierarchyWidgetContextMenu::getHideMenu()
 
     auto hideSelectedAction = new QAction("Selected");
 
-    hideSelectedAction->setIcon(StyledIcon("mouse-pointer"));
+    hideSelectedAction->setIcon(StyledIcon("arrow-pointer"));
     hideSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(hideSelectedAction, &QAction::triggered, this, [this]() -> void {

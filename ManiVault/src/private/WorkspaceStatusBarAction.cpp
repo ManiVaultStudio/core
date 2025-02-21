@@ -34,7 +34,7 @@ WorkspaceStatusBarAction::WorkspaceStatusBarAction(QObject* parent, const QStrin
     _layoutLockedAction.setToolTip("Toggle workspace layout locking");
     _layoutLockedAction.setStretch(1);
 
-    _moreSettingsAction.setIconByName("ellipsis-h");
+    _moreSettingsAction.setIconByName("ellipsis");
     _moreSettingsAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
     _moreSettingsAction.setToolTip("More settings...");
 

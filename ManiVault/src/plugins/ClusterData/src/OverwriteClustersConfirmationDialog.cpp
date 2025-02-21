@@ -18,7 +18,7 @@ OverwriteClustersConfirmationDialog::OverwriteClustersConfirmationDialog(QWidget
     _discardAction(this, "Discard"),
     _cancelAction(this, "Cancel")
 {
-    setWindowIcon(StyledIcon("random"));
+    setWindowIcon(StyledIcon("shuffle"));
     setWindowTitle("About to overwrite all cluster(s)");
     setModal(true);
 

@@ -41,7 +41,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _moveToBottomRightAction(this, "Move to bottom-right"),
     _learningCenterOverlayWidget(nullptr)
 {
-    setIconByName("question-circle");
+    setIconByName("circle-question");
 
     _viewHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _viewHelpAction.setConnectionPermissionsToForceNone();

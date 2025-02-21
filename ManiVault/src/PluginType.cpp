@@ -27,11 +27,11 @@ QString getPluginTypeName(const Type& type)
 QIcon getPluginTypeIcon(const Type& type)
 {
     static const QMap<Type, QIcon> typeNames{
-        { Type::ANALYSIS, StyledIcon("square-root-alt") },
+        { Type::ANALYSIS, StyledIcon("square-root-variable") },
         { Type::DATA, StyledIcon("database") },
         { Type::LOADER, StyledIcon("file-import") },
         { Type::WRITER, StyledIcon("file-export") },
-        { Type::TRANSFORMATION, StyledIcon("random") },
+        { Type::TRANSFORMATION, StyledIcon("shuffle") },
         { Type::VIEW, StyledIcon("eye") }
     };
 

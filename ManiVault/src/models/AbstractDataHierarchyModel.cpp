@@ -437,7 +437,7 @@ QVariant AbstractDataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRo
             return QString("Dataset %1 derived").arg(data(Qt::EditRole).toBool() ? "is" : "is not");
 
         case Qt::DecorationRole:
-            return data(Qt::EditRole).toBool() ? StyledIcon("square-root-alt") : QIcon();
+            return data(Qt::EditRole).toBool() ? StyledIcon("square-root-variable") : QIcon();
 
         default:
             break;

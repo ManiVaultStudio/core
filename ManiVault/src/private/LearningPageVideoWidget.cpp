@@ -149,9 +149,9 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     _dateIconLabel.setFont(StyledIcon::getIconFont(8));
     _tagsIconLabel.setFont(StyledIcon::getIconFont(8));
 
-    _playIconLabel.setText(StyledIcon::getIconCharacter("play-circle"));
+    _playIconLabel.setText(StyledIcon::getIconCharacter("circle-play"));
     _summaryIconLabel.setText(StyledIcon::getIconCharacter("scroll"));
-    _dateIconLabel.setText(StyledIcon::getIconCharacter("calendar-alt"));
+    _dateIconLabel.setText(StyledIcon::getIconCharacter("calendar-days"));
     _tagsIconLabel.setText(StyledIcon::getIconCharacter("tags"));
     
     QLocale locale;

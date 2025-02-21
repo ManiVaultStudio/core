@@ -79,7 +79,7 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
 
     connect(&_selectAllDatasetsAction, &TriggerAction::triggered, &_model, &DatasetsToRemoveModel::checkAll);
 
-    _selectDatasetsGroupAction.setIconByName("mouse-pointer");
+    _selectDatasetsGroupAction.setIconByName("arrow-pointer");
     _selectDatasetsGroupAction.setShowLabels(false);
     _selectDatasetsGroupAction.setPopupSizeHint(QSize(400, 400));
     _selectDatasetsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);

@@ -196,7 +196,7 @@ QMenu* HelpManager::getVideosMenu() const
     for (const auto video : getVideos({})) {
         auto videoAction = new WatchVideoAction(videosMenu, video->getTitle(), video);
 
-        videoAction->setIconByName("external-link-square-alt");
+        videoAction->setIconByName("square-up-right");
 
         videosMenu->addAction(videoAction);
     }

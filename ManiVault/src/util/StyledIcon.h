@@ -60,7 +60,7 @@ public:
      * @return Copied result
      */
     StyledIcon& operator=(const StyledIcon& other) {
-        QIcon::operator=(other);
+        //QIcon::operator=(other);
 
         _iconName           = other._iconName;
         _iconFontName       = other._iconFontName;
@@ -315,6 +315,7 @@ protected:
     static QString                      defaultIconFontName;        /** Default icon font name */
     static Version                      defaultIconFontVersion;     /** Default icon font version */
     static QMap<QString, QPixmap>       pixmaps;                    /** All pixmaps for icons */
+    static QVector<QStringList>         iconFontPreferenceGroups;   /** The order in each usb-vector determines fetching precedence */
 
     friend class StyledIconEngine;
 };

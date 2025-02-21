@@ -38,7 +38,7 @@ public:
      * @param parent Pointer to parent object
      */
     AbstractTaskManager(QObject* parent) :
-        AbstractManager(parent, "Tasks")
+        AbstractManager(parent, "list-check")
     {
     }
 

@@ -15,10 +15,10 @@ using namespace mv;
 using namespace mv::gui;
 
 ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title, "tasks"),
+    StatusBarAction(parent, title, "list-check"),
     _model(),
     _filterModel(),
-    _tasksAction(this, "Tasks"),
+    _tasksAction(this, "list-check"),
     _numberOfTasks(0)
 {
     setToolTip("Foreground tasks");

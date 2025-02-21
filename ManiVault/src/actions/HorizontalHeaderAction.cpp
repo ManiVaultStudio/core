@@ -14,7 +14,7 @@ namespace mv::gui {
 HorizontalHeaderAction::HorizontalHeaderAction(QObject* parent, const QString& title, QHeaderView* horizontalHeaderView /*= nullptr*/) :
     VerticalGroupAction(parent, title),
     _horizontalHeaderView(nullptr),
-    _columnsAction(new OptionsAction(this, "Columns")),
+    _columnsAction(new OptionsAction(this, "table-columns")),
     _showHeaderAction(this, "Visible")
 {
     setText(title);

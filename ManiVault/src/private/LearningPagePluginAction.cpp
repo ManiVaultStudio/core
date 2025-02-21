@@ -49,7 +49,7 @@ LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugi
     if (hasOverlay()) {
         auto elipsisLabel = new QLabel();
 
-        elipsisLabel->setPixmap(StyledIcon("ellipsis-h").pixmap(QSize(12, 12)));
+        elipsisLabel->setPixmap(StyledIcon("ellipsis").pixmap(QSize(12, 12)));
         elipsisLabel->setToolTip("Plugin has additional resources");
 
         _mainLayout.addWidget(elipsisLabel);

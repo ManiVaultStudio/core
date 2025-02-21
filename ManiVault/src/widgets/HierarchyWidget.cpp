@@ -41,7 +41,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
     _selectionGroupAction(this, "Selection"),
-    _columnsGroupAction(this, "Columns"),
+    _columnsGroupAction(this, "table-columns"),
     _settingsGroupAction(this, "Settings"),
     _toolbarAction(this, "Toolbar")
 {
@@ -86,12 +86,12 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _filterGroupAction.addAction(&_filterCaseSensitiveAction);
     _filterGroupAction.addAction(&_filterRegularExpressionAction);
 
-    _expandAllAction.setIconByName("angle-double-down");
+    _expandAllAction.setIconByName("angles-down");
     _expandAllAction.setToolTip(QString("Expand all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _expandAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _expandAllAction.setConnectionPermissionsToForceNone();
 
-    _collapseAllAction.setIconByName("angle-double-up");
+    _collapseAllAction.setIconByName("angles-up");
     _collapseAllAction.setToolTip(QString("Collapse all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _collapseAllAction.setConnectionPermissionsToForceNone();
@@ -103,15 +103,15 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectNoneAction.setConnectionPermissionsToForceNone();
 
     _selectionGroupAction.setText("Selection");
-    _selectionGroupAction.setIconByName("mouse-pointer");
+    _selectionGroupAction.setIconByName("arrow-pointer");
     _selectionGroupAction.setConnectionPermissionsToForceNone();
 
     _selectionGroupAction.addAction(&_selectAllAction);
     _selectionGroupAction.addAction(&_selectNoneAction);
 
-    _columnsGroupAction.setText("Columns");
+    _columnsGroupAction.setText("table-columns");
     _columnsGroupAction.setToolTip(QString("Edit which %1 columns should be visible").arg(_itemTypeName.toLower()));
-    _columnsGroupAction.setIconByName("columns");
+    _columnsGroupAction.setIconByName("table-columns");
     _columnsGroupAction.setShowLabels(false);
     _columnsGroupAction.setConnectionPermissionsToForceNone();
 
