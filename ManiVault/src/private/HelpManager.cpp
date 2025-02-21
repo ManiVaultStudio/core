@@ -99,8 +99,8 @@ HelpManager::HelpManager(QObject* parent) :
 
             emit videosModelPopulatedFromWebsite();
 
-            for (const auto tutorial : tutorials)
-                addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+            //for (const auto tutorial : tutorials)
+            //    addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
 
             emit tutorialsModelPopulatedFromWebsite();
         }
@@ -133,7 +133,7 @@ void HelpManager::initialize()
 
     beginInitialization();
     {
-        //_fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
+        _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
     }
     endInitialization();
 }
