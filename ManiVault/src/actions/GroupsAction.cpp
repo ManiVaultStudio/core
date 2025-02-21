@@ -455,15 +455,4 @@ void GroupsAction::Widget::hideGroupAction(GroupAction* groupAction)
     _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
 }
 
-void GroupsAction::Widget::updateCustomStyle()
-{
-    //// update custome style settings
-    //auto color = QApplication::palette().color(QPalette::Normal, QPalette::Button).name();
-    //QString styleSheet = QString("QTreeWidget { border: none; background-color: %1;}").arg(color);
-    //
-    ////_treeWidget.setPalette(palette);
-    //_treeWidget.setStyleSheet(styleSheet);
-
-}
-
 }
