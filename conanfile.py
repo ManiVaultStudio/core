@@ -126,6 +126,7 @@ class HdpsCoreConan(ConanFile):
         tc = CMakeToolchain(self, generator=generator)
 
         tc.variables["CMAKE_CXX_STANDARD_REQUIRED"] = "ON"
+        tc.variables["CMAKE_CONFIGURATION_TYPES"] = "RelWithDebInfo;Release"
 
         # Use the Qt provided .cmake files
         qt_path = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
@@ -152,10 +153,6 @@ class HdpsCoreConan(ConanFile):
         # Set some build options
         tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
         tc.variables["MV_UNITY_BUILD"] = "ON"
-
-        # OS specific settings 
-        if self.settings.os == "Linux":
-            tc.variables["CMAKE_CONFIGURATION_TYPES"] = "RelWithDebInfo;Release"
 
         try:
             tc.generate()
