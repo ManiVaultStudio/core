@@ -119,12 +119,12 @@ TasksTreeAction::TasksTreeAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
     _model(nullptr),
     _filterModel(nullptr),
-    _treeAction(this, "Tasks"),
+    _treeAction(this, "list-check"),
     _mayLoadTasksPlugin(true),
     _loadTasksPluginAction(this, "Plugin")
 {
     setShowLabels(false);
-    setIconByName("tasks");
+    setIconByName("list-check");
     setDefaultWidgetFlag(NoMargins);
 
     addAction(&_treeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
@@ -135,7 +135,7 @@ TasksTreeAction::TasksTreeAction(QObject* parent, const QString& title) :
 
         widget->layout()->setContentsMargins(0, 0, 0, 0);
 
-        _loadTasksPluginAction.setEnabled(mv::plugins().getPluginFactory("Tasks")->getNumberOfInstances() == 0);
+        _loadTasksPluginAction.setEnabled(mv::plugins().getPluginFactory("list-check")->getNumberOfInstances() == 0);
 
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
@@ -144,7 +144,7 @@ TasksTreeAction::TasksTreeAction(QObject* parent, const QString& title) :
         if (hierarchyWidget == nullptr)
             return;
 
-        hierarchyWidget->setWindowIcon(StyledIcon("tasks"));
+        hierarchyWidget->setWindowIcon(StyledIcon("list-check"));
 
         hierarchyWidget->getFilterGroupAction().addAction(&_filterModel->getTaskTypeFilterAction());
         hierarchyWidget->getFilterGroupAction().addAction(&_filterModel->getTaskScopeFilterAction());
@@ -238,7 +238,7 @@ TasksTreeAction::TasksTreeAction(QObject* parent, const QString& title) :
     _loadTasksPluginAction.setToolTip("Load tasks plugin");
 
     connect(&_loadTasksPluginAction, &TriggerAction::triggered, this, [this]() -> void {
-        mv::plugins().requestViewPlugin("Tasks", nullptr, DockAreaFlag::Bottom);
+        mv::plugins().requestViewPlugin("list-check", nullptr, DockAreaFlag::Bottom);
 
         _loadTasksPluginAction.setEnabled(false);
     });

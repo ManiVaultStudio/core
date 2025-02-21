@@ -468,7 +468,7 @@ void Clusters::selectInvert()
 
 ClusterDataFactory::ClusterDataFactory()
 {
-    setIconByName("th-large");
+    setIconByName("table-cells-large");
 }
 
 QUrl ClusterDataFactory::getReadmeMarkdownUrl() const

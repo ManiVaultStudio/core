@@ -274,7 +274,7 @@ QVariant AbstractTasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) c
                     return StyledIcon("play");
 
                 case Task::Status::RunningIndeterminate:
-                    return StyledIcon("play-circle");
+                    return StyledIcon("circle-play");
 
                 case Task::Status::Finished:
                     return StyledIcon("check-circle");

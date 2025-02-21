@@ -15,7 +15,7 @@ using namespace mv;
 using namespace mv::gui;
 
 ManiVaultVersionStatusBarAction::ManiVaultVersionStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title, "home"),
+    StatusBarAction(parent, title, "house"),
     _versionAction(this, "Version"),
     _popupGroupAction(this, "Popup Group"),
     _popupAction(this, "Info")

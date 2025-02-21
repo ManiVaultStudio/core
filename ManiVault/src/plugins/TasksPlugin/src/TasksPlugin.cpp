@@ -18,7 +18,7 @@ using namespace mv::util;
 
 TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
-    _tasksAction(this, "Tasks")
+    _tasksAction(this, "list-check")
 {
     _filterModel.setSourceModel(&_model);
 
@@ -98,7 +98,7 @@ void TasksPlugin::addTestSuite()
 TasksPluginFactory::TasksPluginFactory() :
     ViewPluginFactory(true)
 {
-    setIconByName("tasks");
+    setIconByName("list-check");
 
     getPluginMetadata().setDescription("For interacting with tasks");
     getPluginMetadata().setSummary("This system view plugin is for interacting with tasks (for debugging purposes only).");

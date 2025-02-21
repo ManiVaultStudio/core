@@ -36,8 +36,8 @@ gui::OptionAction& TransformationPlugin::getTypeAction()
 TransformationPluginFactory::TransformationPluginFactory() :
     PluginFactory(Type::TRANSFORMATION, "Transformation")
 {
-    setIconByName("random");
-    setCategoryIconByName("random");
+    setIconByName("shuffle");
+    setCategoryIconByName("shuffle");
 }
 
 }

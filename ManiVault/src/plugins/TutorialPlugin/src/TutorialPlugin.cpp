@@ -33,7 +33,7 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _tutorialPickerAction.setCustomModel(&_tutorialsFilterModel);
     _tutorialPickerAction.setPlaceHolderString("Pick a tutorial...");
 
-    _openInBrowserAction.setIconByName("external-link-square-alt");
+    _openInBrowserAction.setIconByName("square-up-right");
     _openInBrowserAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     auto& tagsFilterAction = _tutorialsFilterModel.getTagsFilterAction();

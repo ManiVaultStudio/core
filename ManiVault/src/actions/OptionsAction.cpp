@@ -397,7 +397,7 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
     _tableAction(this, "Options")
 {
     _tableAction.initialize(&optionsAction->getOptionsModel(), &_filterModel, "Option");
-    _tableAction.setIconByName("tasks");
+    _tableAction.setIconByName("list-check");
     _tableAction.getShowHeaderSettingsAction().setChecked(false);
     _tableAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
         auto tableView = widget->findChild<QTableView*>("TableView");

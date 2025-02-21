@@ -20,7 +20,7 @@ using namespace mv;
 PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _previewIconLabel(util::StyledIcon("image")),
-    _metaDataIconLabel(util::StyledIcon("file-alt")),
+    _metaDataIconLabel(util::StyledIcon("file")),
     _tagsIconLabel(util::StyledIcon("tags")),
     _downloadUrls(util::StyledIcon("download")),
     _contributorsIconLabel(util::StyledIcon("user"))

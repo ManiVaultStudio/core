@@ -21,7 +21,7 @@ LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
     setTitle("Toggle");
     setToolTip("Toggle loaded view plugin visibility");
     setEnabled(!plugins().getPluginsByType(plugin::Type::VIEW).empty());
-    setIcon(StyledIcon("low-vision"));
+    setIcon(StyledIcon("eye-low-vision"));
 
     _loadedSystemViewsMenu = QSharedPointer<QMenu>(new QMenu("System", this));
 

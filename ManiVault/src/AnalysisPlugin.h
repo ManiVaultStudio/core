@@ -112,8 +112,8 @@ public:
     AnalysisPluginFactory() :
         PluginFactory(Type::ANALYSIS, "Analysis")
     {
-        setIconByName("square-root-alt");
-        setCategoryIconByName("square-root-alt");
+        setIconByName("square-root-variable");
+        setCategoryIconByName("square-root-variable");
     }
 
 	~AnalysisPluginFactory() override = default;

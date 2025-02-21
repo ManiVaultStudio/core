@@ -14,7 +14,7 @@ using namespace mv;
 using namespace mv::gui;
 
 FrontPagesStatusBarAction::FrontPagesStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title, "map-signs")
+    StatusBarAction(parent, title, "signs-post")
 {
     setToolTip("Front pages");
 
