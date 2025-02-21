@@ -51,7 +51,6 @@ void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode m
 
 QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
-    return {};
     if (StyledIcon::pixmaps.contains(_sha)) {
 	    const auto pixmap = StyledIcon::pixmaps[_sha];
 

@@ -126,7 +126,6 @@ QIcon combineIconsHorizontally(const QVector<QIcon>& icons)
 
 QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/)
 {
-    return {};
     const auto badgeSize        = QSize(100, 100);
     const auto badgeRectangle   = QRectF(QPoint(0, 0), badgeSize);
 
@@ -165,6 +164,9 @@ QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadg
 
 QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const WidgetActionBadge& widgetActionBadge, std::uint32_t iconMargin /*= 0*/)
 {
+    if (icon.availableSizes().isEmpty())
+        return {};
+
     const auto iconPixmapSize       = icon.availableSizes().first() + QSize(2 * iconMargin, 2 * iconMargin);
     const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), iconPixmapSize);
     const auto badgePixmap          = widgetActionBadge.getPixmap();
