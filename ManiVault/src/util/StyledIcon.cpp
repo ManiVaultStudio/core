@@ -36,7 +36,7 @@ StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFont
     QIcon(new StyledIconEngine(*this)),
     _fixColor(false)
 {
-    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StyledIcon::updateIconPixmap);
+    //connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StyledIcon::updateIconPixmap);
 
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
         set(iconName, iconFontName, iconFontVersion);
@@ -50,16 +50,16 @@ StyledIcon::StyledIcon(const StyledIcon& other) :
 StyledIcon::StyledIcon(const QIcon& icon) :
     StyledIcon()
 {
-    if (!icon.isNull()) {
-        _iconEngine->_sha = Serializable::createId();
+    //if (!icon.isNull()) {
+    //    _iconEngine->_sha = Serializable::createId();
 
-        pixmaps[_iconEngine->_sha] = icon.pixmap(64, 64);
-    }
+    //    pixmaps[_iconEngine->_sha] = icon.pixmap(64, 64);
+    //}
 }
 
 StyledIcon::~StyledIcon()
 {
-    disconnect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, nullptr);
+    //disconnect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, nullptr);
 }
 
 void StyledIcon::set(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)
@@ -407,8 +407,8 @@ QString StyledIcon::getIconFontMetadataResourcePath(const QString& iconFontName,
 void StyledIcon::updateIconPixmap() const
 {
     try {
-        if (_iconEngine && !_iconEngine->_sha.isEmpty() && !pixmaps.contains(_iconEngine->_sha))
-			pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _fixColor ? _color : qApp->palette().text().color());
+   //     if (_iconEngine && !_iconEngine->_sha.isEmpty() && !pixmaps.contains(_iconEngine->_sha))
+			//pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _fixColor ? _color : qApp->palette().text().color());
 	}
 	catch (std::exception& e)
 	{

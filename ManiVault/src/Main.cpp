@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 
 #ifdef _WIN32
     //application.setStyle(new NoFocusProxyStyle);
-    qApp->setStyle(QStyleFactory::create("Fusion"));
+    //qApp->setStyle(QStyleFactory::create("Fusion"));
 #endif
     
 #ifdef __APPLE__
