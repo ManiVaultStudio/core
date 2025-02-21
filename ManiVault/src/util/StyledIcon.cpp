@@ -35,7 +35,7 @@ StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFont
     QIcon(new StyledIconEngine(*this)),
     _fixColor(false)
 {
-    //connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StyledIcon::updateIconPixmap);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StyledIcon::updateIconPixmap);
 
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
         set(iconName, iconFontName, iconFontVersion);

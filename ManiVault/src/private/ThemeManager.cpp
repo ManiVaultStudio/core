@@ -262,7 +262,7 @@ ThemeManager::ThemeSettings* ThemeManager::getRequestThemeSettings()
 	if (_requestThemeSettings.isNull())
         _requestThemeSettings = new ThemeSettings();
 
-    connect(_requestThemeSettings, &QObject::destroyed, this, &AbstractThemeManager::colorSchemeChanged);
+    //connect(_requestThemeSettings, &QObject::destroyed, this, &AbstractThemeManager::colorSchemeChanged);
 
 	return _requestThemeSettings;
 }
