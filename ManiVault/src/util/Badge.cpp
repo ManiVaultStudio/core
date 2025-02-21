@@ -2,40 +2,39 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "WidgetActionBadge.h"
+#include "Badge.h"
 
-#include "util/Icon.h"
+#include "Icon.h"
 
 #include <QDebug>
 
-namespace mv::gui {
+namespace mv::util {
 
-WidgetActionBadge::WidgetActionBadge(QObject* parent, std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/, Qt::Alignment alignment /*= Qt::AlignTop | Qt::AlignRight*/, float scale /*= 0.5f*/) :
+Badge::Badge(QObject* parent, std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/, Qt::Alignment alignment /*= Qt::AlignTop | Qt::AlignRight*/, float scale /*= 0.5f*/) :
     QObject(parent),
     _enabled(false),
     _number(number),
     _backgroundColor(backgroundColor),
     _foregroundColor(foregroundColor),
     _alignment(alignment),
-    _scale(scale),
-    _customPixmap()
+    _scale(scale)
 {
 }
 
-QPixmap WidgetActionBadge::getPixmap() const
+QPixmap Badge::getPixmap() const
 {
     if (!_customPixmap.isNull())
         return _customPixmap;
 
-    return createNumberBadgeOverlayPixmap(_number, _backgroundColor, _foregroundColor);
+    return gui::createNumberBadgeOverlayPixmap(_number, _backgroundColor, _foregroundColor);
 }
 
-bool WidgetActionBadge::getEnabled() const
+bool Badge::getEnabled() const
 {
     return _enabled;
 }
 
-void WidgetActionBadge::setEnabled(bool enabled)
+void Badge::setEnabled(bool enabled)
 {
     if (enabled == _enabled)
         return;
@@ -46,12 +45,12 @@ void WidgetActionBadge::setEnabled(bool enabled)
     emit changed();
 }
 
-std::uint32_t WidgetActionBadge::getNumber() const
+std::uint32_t Badge::getNumber() const
 {
     return _number;
 }
 
-void WidgetActionBadge::setNumber(std::uint32_t number)
+void Badge::setNumber(std::uint32_t number)
 {
     if (number == _number)
         return;
@@ -62,12 +61,12 @@ void WidgetActionBadge::setNumber(std::uint32_t number)
     emit changed();
 }
 
-QColor WidgetActionBadge::getBackgroundColor() const
+QColor Badge::getBackgroundColor() const
 {
     return _backgroundColor;
 }
 
-void WidgetActionBadge::setBackgroundColor(const QColor& backgroundColor)
+void Badge::setBackgroundColor(const QColor& backgroundColor)
 {
     if (backgroundColor == _backgroundColor)
         return;
@@ -78,12 +77,12 @@ void WidgetActionBadge::setBackgroundColor(const QColor& backgroundColor)
     emit changed();
 }
 
-QColor WidgetActionBadge::getForegroundColor() const
+QColor Badge::getForegroundColor() const
 {
     return _foregroundColor;
 }
 
-void WidgetActionBadge::setForegroundColor(const QColor& foregroundColor)
+void Badge::setForegroundColor(const QColor& foregroundColor)
 {
     if (foregroundColor == _foregroundColor)
         return;
@@ -94,12 +93,12 @@ void WidgetActionBadge::setForegroundColor(const QColor& foregroundColor)
     emit changed();
 }
 
-Qt::Alignment WidgetActionBadge::getAlignment() const
+Qt::Alignment Badge::getAlignment() const
 {
     return _alignment;
 }
 
-void WidgetActionBadge::setAlignment(Qt::Alignment alignment)
+void Badge::setAlignment(Qt::Alignment alignment)
 {
     if (alignment == _alignment)
         return;
@@ -110,12 +109,12 @@ void WidgetActionBadge::setAlignment(Qt::Alignment alignment)
     emit changed();
 }
 
-float WidgetActionBadge::getScale() const
+float Badge::getScale() const
 {
     return _scale;
 }
 
-void WidgetActionBadge::setScale(float scale)
+void Badge::setScale(float scale)
 {
     if (scale == _scale)
         return;
@@ -126,12 +125,12 @@ void WidgetActionBadge::setScale(float scale)
     emit changed();
 }
 
-QPixmap WidgetActionBadge::getCustomPixmap() const
+QPixmap Badge::getCustomPixmap() const
 {
     return _customPixmap;
 }
 
-void WidgetActionBadge::setCustomPixmap(const QPixmap& customPixmap)
+void Badge::setCustomPixmap(const QPixmap& customPixmap)
 {
     _customPixmap = customPixmap;
 

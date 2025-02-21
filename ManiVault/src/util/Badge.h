@@ -10,21 +10,19 @@
 #include <QColor>
 #include <QPixmap>
 
-namespace mv::gui {
+namespace mv::util {
 
 /**
- * Widget action badge class
- * 
- * Configuration class for widget action badge
+ * Badge class
  * 
  * Draws a circle with a number with any Qt::Alignment flag and foreground (text)
  * and background color. Currently used by the collapsed widget only.
  * 
- * Note: By default the badge is disabled, use WidgetActionBadge::setEnabled(...) to enable it
+ * Note: By default the badge is disabled, use Badge::setEnabled(...) to enable it
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT WidgetActionBadge : public QObject
+class CORE_EXPORT Badge : public QObject
 {
     Q_OBJECT
 
@@ -32,13 +30,14 @@ public:
 
     /**
      * Construct with pointer to \p parent object, badge \p number, \p backgroundColor, \p foregroundColor, \p alignment and \p badge scale
+     * @param parent Pointer to parent object
      * @param number Number displayed in the badge
      * @param backgroundColor Background color the badge
      * @param foregroundColor Foreground color the badge
      * @param alignment Alignment of the badge
      * @param scale Scale of the badge w.r.t. of its container
      */
-    WidgetActionBadge(QObject* parent, std::uint32_t number = 0, const QColor& backgroundColor = Qt::red, const QColor& foregroundColor = Qt::white, Qt::Alignment alignment = Qt::AlignTop | Qt::AlignRight, float scale = 0.5f);
+    Badge(QObject* parent, std::uint32_t number = 0, const QColor& backgroundColor = Qt::red, const QColor& foregroundColor = Qt::white, Qt::Alignment alignment = Qt::AlignTop | Qt::AlignRight, float scale = 0.5f);
 
     /**
      * Get pixmap

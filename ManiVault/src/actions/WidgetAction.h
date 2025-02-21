@@ -5,11 +5,11 @@
 #pragma once
 
 #include "WidgetActionWidget.h"
-#include "WidgetActionBadge.h"
 #include "WidgetActionDrag.h"
 
 #include "util/Serializable.h"
-#include "util/styledIcon.h"
+#include "util/StyledIcon.h"
+#include "util/Badge.h"
 
 #include <QWidgetAction>
 #include <QPointer>
@@ -895,7 +895,7 @@ public: // Badge-related
      * Get badge
      * @return Reference to the widget action badge
      */
-    WidgetActionBadge& getBadge();
+    util::Badge& getBadge();
 
 public: // Drag-related
 
@@ -1030,7 +1030,7 @@ private:
     QString                         _location;                      /** The path relative to the root in string format */
     util::StyledIcon                _styledIcon;                    /** Theme aware icon */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
-    WidgetActionBadge               _badge;                         /** Badge configuration */
+    util::Badge                     _badge;                         /** Badge configuration */
     WidgetActionDrag                _drag;                          /** Drag behaviour */
 
 protected:
