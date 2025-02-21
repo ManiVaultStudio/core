@@ -7,6 +7,7 @@
 #include "ManiVaultGlobals.h"
 #include "Version.h"
 #include "StyledIconEngine.h"
+#include "Badge.h"
 
 #include <QIcon>
 #include <QObject>
@@ -43,7 +44,7 @@ public:
      * Copy construct from \p other styled icon
      * @param other Other styled icon to copy from
      */
-    explicit StyledIcon(const StyledIcon& other);
+    StyledIcon(const StyledIcon& other);
 
     /**
      * Construct from \p icon
@@ -68,6 +69,7 @@ public:
         _iconFontVersion    = other._iconFontVersion;
         _fixColor           = other._fixColor;
         _color              = other._color;
+        _badge              = other._badge;
 
         return *this;
     }
@@ -115,7 +117,7 @@ public:
      * @param colorGroupDarkTheme Color group for dark theme
      * @return Reference to changed styled icon
      */
-    StyledIcon& changedColorGroups(const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme);
+    StyledIcon& withColorGroups(const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme);
 
     /**
      * Return styled icon with changed color roles \p colorRoleLightTheme and \p colorRoleDarkTheme
@@ -123,14 +125,21 @@ public:
      * @param colorRoleDarkTheme Color role for dark theme
      * @return Reference to changed styled icon
      */
-    StyledIcon& changedColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
+    StyledIcon& withColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
+
+    /**
+     * Return styled icon with \p badge
+     * @param badge Badge
+     * @return Reference to changed styled icon
+     */
+    StyledIcon& withBadge(const util::Badge& badge);
 
     /**
      * Return styled icon with changed \p color
      * @param color Color
      * @return Reference to changed styled icon
      */
-    StyledIcon& changedColor(const QColor& color);
+    StyledIcon& withColor(const QColor& color);
 
     /**
      * Get icon font for \p iconFontName at \p iconFontVersion
@@ -256,6 +265,26 @@ public: // Color roles
      */
     void setColorGroupDarkTheme(const QPalette::ColorGroup& colorGroupDarkTheme) const;
 
+public: // Badge
+
+    /**
+     * Get badge
+     * @return Badge
+     */
+    Badge& getBadge();
+
+    /**
+     * Set badge enabled to \p badgeEnabled
+     * @param badgeEnabled Badge enabled
+     */
+    void setBadgeEnabled(bool badgeEnabled);
+
+    /**
+     * Get badge enabled
+     * @return Badge enabled
+     */
+    bool isBadgeEnabled() const;
+
 private:
 
     /** Only allow styled icon constructors, not the base */
@@ -313,6 +342,7 @@ private:
     Version             _iconFontVersion;   /** Version of the icon font */
     bool                _fixColor;          /** Whether to fix the color */
     QColor              _color;             /** Color of the icon */
+    Badge               _badge;             /** Badge */
 
 protected:
 	static QMap<QString, QVariantMap>   fontMetadata;               /** Font-specific metadata */

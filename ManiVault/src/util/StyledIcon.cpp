@@ -33,7 +33,8 @@ QVector<QStringList>        StyledIcon::iconFontPreferenceGroups = { { "FontAwes
 StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/, QWidget* parent /*= nullptr*/) :
     QObject(parent),
     QIcon(new StyledIconEngine(*this)),
-    _fixColor(false)
+    _fixColor(false),
+    _badge(this)
 {
     connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StyledIcon::updateIconPixmap);
 
@@ -49,16 +50,16 @@ StyledIcon::StyledIcon(const StyledIcon& other) :
 StyledIcon::StyledIcon(const QIcon& icon) :
     StyledIcon()
 {
-    //if (!icon.isNull()) {
-    //    _iconEngine->_sha = Serializable::createId();
+    /*if (!icon.isNull()) {
+        _iconEngine->_sha = Serializable::createId();
 
-    //    pixmaps[_iconEngine->_sha] = icon.pixmap(64, 64);
-    //}
+        pixmaps[_iconEngine->_sha] = icon.pixmap(64, 64);
+    }*/
 }
 
 StyledIcon::~StyledIcon()
 {
-    //disconnect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, nullptr);
+    disconnect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, nullptr);
 }
 
 void StyledIcon::set(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)
@@ -232,7 +233,7 @@ QString StyledIcon::getIconFontVersionString(const Version& iconFontVersion)
     return QString("%1.%2.%3").arg(QString::number(iconFontVersion.getMajor()), QString::number(iconFontVersion.getMinor()), QString::number(iconFontVersion.getPatch()));
 }
 
-StyledIcon& StyledIcon::changedColorGroups(const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme)
+StyledIcon& StyledIcon::withColorGroups(const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme)
 {
     setColorGroupLightTheme(colorGroupLightTheme);
     setColorGroupDarkTheme(colorGroupDarkTheme);
@@ -240,7 +241,7 @@ StyledIcon& StyledIcon::changedColorGroups(const QPalette::ColorGroup& colorGrou
     return *this;
 }
 
-StyledIcon& StyledIcon::changedColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme)
+StyledIcon& StyledIcon::withColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme)
 {
     setColorRoleLightTheme(colorRoleLightTheme);
     setColorRoleDarkTheme(colorRoleDarkTheme);
@@ -248,7 +249,14 @@ StyledIcon& StyledIcon::changedColorRoles(const QPalette::ColorRole& colorRoleLi
     return *this;
 }
 
-StyledIcon& StyledIcon::changedColor(const QColor& color)
+StyledIcon& StyledIcon::withBadge(const Badge& badge)
+{
+    _badge = badge;
+
+    return *this;
+}
+
+StyledIcon& StyledIcon::withColor(const QColor& color)
 {
     _fixColor   = true;
     _color      = color;
@@ -381,6 +389,21 @@ QPalette::ColorGroup StyledIcon::getColorGroupDarkTheme() const
 void StyledIcon::setColorGroupDarkTheme(const QPalette::ColorGroup& colorGroupDarkTheme) const
 {
     _iconEngine->_colorGroupDarkTheme = colorGroupDarkTheme;
+}
+
+Badge& StyledIcon::getBadge()
+{
+    return _badge;
+}
+
+void StyledIcon::setBadgeEnabled(bool badgeEnabled)
+{
+    _badge.setEnabled(badgeEnabled);
+}
+
+bool StyledIcon::isBadgeEnabled() const
+{
+    return _badge.getEnabled();
 }
 
 QString StyledIcon::getIconFontResourceName(const QString& iconFontName, const Version& iconFontVersion)

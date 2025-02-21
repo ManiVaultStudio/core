@@ -10,7 +10,7 @@
 
 namespace mv::util {
 
-Badge::Badge(QObject* parent, std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/, Qt::Alignment alignment /*= Qt::AlignTop | Qt::AlignRight*/, float scale /*= 0.5f*/) :
+Badge::Badge(QObject* parent /*= nullptr*/, std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/, Qt::Alignment alignment /*= Qt::AlignTop | Qt::AlignRight*/, float scale /*= 0.5f*/) :
     QObject(parent),
     _enabled(false),
     _number(number),
