@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(CLUSTERDATA "ClusterData")
 PROJECT(${CLUSTERDATA})
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(CLUSTERD_SOURCES
     src/ClusterData.h
     src/ClusterData.cpp
@@ -66,11 +68,6 @@ set(DIALOG_SOURCES
     src/OverwriteClustersConfirmationDialog.cpp
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/ClusterData.h
-    src/ClustersAction.h
-)
-
 source_group(Plugin FILES ${CLUSTERD_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
@@ -79,9 +76,6 @@ source_group(Dialog FILES ${DIALOG_SOURCES})
 add_library(${CLUSTERDATA} SHARED ${CLUSTERD_SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES})
 
 add_library(ManiVault::${CLUSTERDATA} ALIAS ${CLUSTERDATA})
-
-qt_wrap_cpp(CLUSTERDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${CLUSTERDATA})
-target_sources(${CLUSTERDATA} PRIVATE ${CLUSTERDATA_MOC})
 
 target_include_directories(${CLUSTERDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
@@ -105,10 +99,10 @@ target_link_libraries(${CLUSTERDATA} PRIVATE PointData)
 mv_check_and_set_AVX(${CLUSTERDATA} ${MV_USE_AVX})
 
 set_target_properties(${CLUSTERDATA} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
+set_target_properties(${CLUSTERDATA} PROPERTIES AUTOMOC ON)
 
 if(MV_UNITY_BUILD)
     set_target_properties(${CLUSTERDATA} PROPERTIES UNITY_BUILD ON)
-    set_source_files_properties(${CLUSTERDATA_MOC} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 install(TARGETS ${CLUSTERDATA}

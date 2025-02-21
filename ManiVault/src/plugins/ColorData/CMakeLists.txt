@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(COLORDATA "ColorData")
 PROJECT(${COLORDATA})
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(COLORDATA_SOURCES
     src/ColorData.h
     src/ColorData.cpp
@@ -13,18 +15,11 @@ set(COLORDATA_HEADERS
     src/ColorData.h
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/ColorData.h
-)
-
 source_group( Plugin FILES ${COLORDATA_SOURCES})
 
 add_library(${COLORDATA} SHARED ${COLORDATA_SOURCES})
 
 add_library(ManiVault::${COLORDATA} ALIAS ${COLORDATA})
-
-qt_wrap_cpp(COLORDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${COLORDATA})
-target_sources(${COLORDATA} PRIVATE ${COLORDATA_MOC})
 
 target_include_directories(${COLORDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
@@ -44,6 +39,7 @@ target_link_libraries(${COLORDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${COLORDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 set_target_properties(${COLORDATA} PROPERTIES PUBLIC_HEADER "${COLORDATA_HEADERS}")
+set_target_properties(${COLORDATA} PROPERTIES AUTOMOC ON)
 
 install(TARGETS ${COLORDATA}
     EXPORT "ManiVaultPublicExport"

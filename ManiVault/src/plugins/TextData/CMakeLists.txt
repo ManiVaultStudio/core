@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(TEXTDATA "TextData")
 PROJECT(${TEXTDATA})
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(TEXTDATA_SOURCES
     src/TextData.h
     src/TextData.cpp
@@ -19,18 +21,11 @@ set(TEXTDATA_HEADERS
     src/OrderedMap.h
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/TextData.h
-)
-
 source_group( Plugin FILES ${TEXTDATA_SOURCES})
 
 add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES})
 
 add_library(ManiVault::${TEXTDATA} ALIAS ${TEXTDATA})
-
-qt_wrap_cpp(TEXTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${TEXTDATA})
-target_sources(${TEXTDATA} PRIVATE ${TEXTDATA_MOC})
 
 target_include_directories(${TEXTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
@@ -50,6 +45,7 @@ target_link_libraries(${TEXTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${TEXTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 set_target_properties(${TEXTDATA} PROPERTIES PUBLIC_HEADER "${TEXTDATA_HEADERS}")
+set_target_properties(${TEXTDATA} PROPERTIES AUTOMOC ON)
 
 install(TARGETS ${TEXTDATA}
     EXPORT "ManiVaultPublicExport"

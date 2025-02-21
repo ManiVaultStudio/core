@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(POINTDATA "PointData")
 PROJECT(${POINTDATA})
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(POINTS_SOURCES
     src/PointData.h
     src/PointData.cpp
@@ -76,24 +78,12 @@ set(ACTIONS_SOURCES
     src/ModelResetter.cpp
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/PointData.h
-    src/ProxyDatasetsAction.h
-    src/EditProxyDatasetsAction.h
-    src/CreateSetFromSelectionAction.h
-    src/DimensionPickerAction.h
-    src/DimensionsPickerAction.h
-)
-
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 
 add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
-
-qt_wrap_cpp(POINTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${POINTDATA})
-target_sources(${POINTDATA} PRIVATE ${POINTDATA_MOC})
 
 target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
@@ -123,10 +113,10 @@ endif()
 
 if(MV_UNITY_BUILD)
     set_target_properties(${POINTDATA} PROPERTIES UNITY_BUILD ON)
-    set_source_files_properties(${POINTDATA_MOC} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
+set_target_properties(${POINTDATA} PROPERTIES AUTOMOC ON)
 
 install(TARGETS ${POINTDATA}
     EXPORT "ManiVaultPublicExport"

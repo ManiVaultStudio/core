@@ -14,10 +14,6 @@ set(IMAGE_DATA_HEADERS
     ${CMAKE_CURRENT_BINARY_DIR}/imagedata_export.h
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/ImageData.h
-)
-
 set(IMAGE_DATA_SOURCES 
     src/Image.cpp
     src/ImageData.cpp
@@ -36,9 +32,6 @@ source_group(Aux FILES ${AUX})
 add_library(${IMAGEDATA} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${ACTIONS_SOURCES} ${AUX})
 
 add_library(ManiVault::${IMAGEDATA} ALIAS ${IMAGEDATA})
-
-qt_wrap_cpp(IMAGEDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${IMAGEDATA})
-target_sources(${IMAGEDATA} PRIVATE ${IMAGEDATA_MOC})
 
 target_include_directories(${IMAGEDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
@@ -63,10 +56,10 @@ target_link_libraries(${IMAGEDATA} PRIVATE ClusterData)
 mv_check_and_set_AVX(${IMAGEDATA} ${MV_USE_AVX})
 
 set_target_properties(${IMAGEDATA} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
+set_target_properties(${IMAGEDATA} PROPERTIES AUTOMOC ON)
 
 if(MV_UNITY_BUILD)
     set_target_properties(${IMAGEDATA} PROPERTIES UNITY_BUILD ON)
-    set_source_files_properties(${IMAGEDATA_MOC} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 install(TARGETS ${IMAGEDATA}
