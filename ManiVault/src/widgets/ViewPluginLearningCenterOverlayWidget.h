@@ -76,7 +76,7 @@ protected:
         virtual bool shouldDisplay() const = 0;
 
         /** Updates the item icon (for badge update) */
-        void updateIcon();
+        virtual void updateIcon();
 
         /**
          * Get widget fader
@@ -104,7 +104,7 @@ protected:
          */
         ViewPluginLearningCenterOverlayWidget* getOverlayWidget() const;
 
-    private:
+    protected:
         const plugin::ViewPlugin*                   _viewPlugin;            /** Const pointer to source view plugin */
         ViewPluginLearningCenterOverlayWidget*      _overlayWidget;         /** Pointer to overlay widget */
         const QSize                                 _iconSize;              /** Size of the item icon */
@@ -136,6 +136,9 @@ protected:
          * @return Boolean determining whether the item should be visible or not
          */
         bool shouldDisplay() const override;
+
+        /** Updates the item icon (for badge update) */
+        void updateIcon() override;
     };
 
     /** Toolbar item widget for showing the view plugin related videos */

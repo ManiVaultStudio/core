@@ -37,13 +37,31 @@ public:
      * @param alignment Alignment of the badge
      * @param scale Scale of the badge w.r.t. of its container
      */
-    Badge(QObject* parent, std::uint32_t number = 0, const QColor& backgroundColor = Qt::red, const QColor& foregroundColor = Qt::white, Qt::Alignment alignment = Qt::AlignTop | Qt::AlignRight, float scale = 0.5f);
+    Badge(QObject* parent = nullptr, std::uint32_t number = 0, const QColor& backgroundColor = Qt::red, const QColor& foregroundColor = Qt::white, Qt::Alignment alignment = Qt::AlignTop | Qt::AlignRight, float scale = 0.5f);
 
     /**
      * Get pixmap
      * @return Pixmap representation of the badge (100 x 100)
      */
     QPixmap getPixmap() const;
+
+    /**
+     * Assign \p other badge
+     * @param other Other badge
+     * @return Copied result
+     */
+    Badge& operator=(const Badge& other) {
+        
+        _enabled            = other._enabled;
+        _number             = other._number;
+        _backgroundColor    = other._backgroundColor;
+        _foregroundColor    = other._foregroundColor;
+        _alignment          = other._alignment;
+        _scale              = other._scale;
+        _customPixmap       = other._customPixmap;
+
+        return *this;
+    }
 
 public: // Getters and setters
 

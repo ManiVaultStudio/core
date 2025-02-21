@@ -200,5 +200,5 @@ void LearningPagePluginActionsWidget::ActionWidget::leaveEvent(QEvent* leaveEven
 
 void LearningPagePluginActionsWidget::ActionWidget::updateStyle()
 {
-    setPixmap(StyledIcon(_iconName).changedColor(underMouse() ? QColor(40, 40, 40) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
+    setPixmap(StyledIcon(_iconName).withColor(underMouse() ? QColor(40, 40, 40) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
 }
