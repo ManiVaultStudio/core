@@ -127,6 +127,7 @@ if(MV_UNITY_BUILD)
 endif()
 
 set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
+set_target_properties(${POINTDATA} PROPERTIES AUTOMOC ON)
 
 install(TARGETS ${POINTDATA}
     EXPORT "ManiVaultPublicExport"
