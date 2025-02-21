@@ -928,7 +928,7 @@ const util::StyledIcon& WidgetAction::getIcon() const
     return _styledIcon;
 }
 
-WidgetActionBadge& WidgetAction::getBadge()
+Badge& WidgetAction::getBadge()
 {
     return _badge;
 }

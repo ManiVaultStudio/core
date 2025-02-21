@@ -326,7 +326,6 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionViewWidget.h
     src/actions/WidgetActionMimeData.h
     src/actions/WidgetActionHighlightWidget.h
-    src/actions/WidgetActionBadge.h
     src/actions/WidgetActionDrag.h
     src/actions/TasksTreeAction.h
     src/actions/TasksListAction.h
@@ -360,7 +359,6 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionViewWidget.cpp
     src/actions/WidgetActionMimeData.cpp
     src/actions/WidgetActionHighlightWidget.cpp
-    src/actions/WidgetActionBadge.cpp
     src/actions/WidgetActionDrag.cpp
     src/actions/TasksTreeAction.cpp
     src/actions/TasksListAction.cpp
@@ -541,6 +539,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/LearningCenterTutorial.h
     src/util/StyledIcon.h
     src/util/StyledIconEngine.h
+    src/util/Badge.h
 )
 
 if(APPLE)
@@ -590,6 +589,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/LearningCenterTutorial.cpp
     src/util/StyledIcon.cpp
     src/util/StyledIconEngine.cpp
+    src/util/Badge.cpp
 )
 
 if(APPLE)

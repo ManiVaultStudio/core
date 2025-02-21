@@ -18,6 +18,8 @@
     //#define WIDGET_ACTION_VIEW_WIDGET_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 WidgetActionViewWidget::WidgetActionViewWidget(QWidget* parent, WidgetAction* action, std::int32_t widgetFlags /*= 0*/) :
@@ -81,7 +83,7 @@ void WidgetActionViewWidget::setAction(WidgetAction* action)
 
     badgeEnabledChanged();
 
-    connect(&_action->getBadge(), &WidgetActionBadge::enabledChanged, this, badgeEnabledChanged);
+    connect(&_action->getBadge(), &Badge::enabledChanged, this, badgeEnabledChanged);
 }
 
 std::int32_t WidgetActionViewWidget::getWidgetFlags() const

@@ -5,8 +5,9 @@
 #include "Icon.h"
 
 #include <QPainter>
-#include <QApplication>
 #include <QPalette>
+
+using namespace mv::util;
 
 namespace mv::gui {
 
@@ -157,12 +158,12 @@ QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColo
     return badgePixmap;
 }
 
-QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadge)
+QPixmap createNumberBadgeOverlayPixmap(const Badge& widgetActionBadge)
 {
     return createNumberBadgeOverlayPixmap(widgetActionBadge.getNumber(), widgetActionBadge.getBackgroundColor(), widgetActionBadge.getForegroundColor());
 }
 
-QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const WidgetActionBadge& widgetActionBadge, std::uint32_t iconMargin /*= 0*/)
+QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const Badge& widgetActionBadge, std::uint32_t iconMargin /*= 0*/)
 {
     if (icon.availableSizes().isEmpty())
         return {};
