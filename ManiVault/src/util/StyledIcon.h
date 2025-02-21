@@ -60,7 +60,7 @@ public:
      * @return Copied result
      */
     StyledIcon& operator=(const StyledIcon& other) {
-        //QIcon::operator=(other);
+        QIcon::operator=(other);
 
         //_iconEngine         = other._iconEngine;
         _iconName           = other._iconName;
