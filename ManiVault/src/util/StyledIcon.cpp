@@ -406,8 +406,8 @@ QString StyledIcon::getIconFontMetadataResourcePath(const QString& iconFontName,
 void StyledIcon::updateIconPixmap() const
 {
     try {
-   //     if (_iconEngine && !_iconEngine->_sha.isEmpty() && !pixmaps.contains(_iconEngine->_sha))
-			//pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _fixColor ? _color : qApp->palette().text().color());
+        if (_iconEngine && !_iconEngine->_sha.isEmpty() && !pixmaps.contains(_iconEngine->_sha))
+			pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _fixColor ? _color : qApp->palette().text().color());
 	}
 	catch (std::exception& e)
 	{
