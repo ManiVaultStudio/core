@@ -54,7 +54,7 @@ void IconPickerAction::setIcon(const util::StyledIcon& icon)
 
 void IconPickerAction::setIconFromImage(const QImage& image)
 {
-    setIcon(util::StyledIcon(createIcon(QPixmap::fromImage(image))));
+    setIcon(util::StyledIcon::fromQIcon(createIcon(QPixmap::fromImage(image))));
 }
 
 void IconPickerAction::fromVariantMap(const QVariantMap& variantMap)

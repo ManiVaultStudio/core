@@ -284,7 +284,7 @@ void PageActionDelegateEditorWidget::updateCustomStyle()
 
     PageAction pageAction(_index);
 
-    _iconLabel.setPixmap(util::StyledIcon(pageAction.getIcon()).pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
+    _iconLabel.setPixmap(util::StyledIcon::fromQIcon(pageAction.getIcon()).pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
     _titleLabel.setStyleSheet(QString("color: %1; font-weight: bold;").arg(qApp->palette().text().color().name()));
     _subtitleLabel.setStyleSheet(QString("color: %1; font-size: 7pt;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
 }

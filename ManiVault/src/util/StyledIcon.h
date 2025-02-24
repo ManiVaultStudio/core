@@ -6,14 +6,19 @@
 
 #include "ManiVaultGlobals.h"
 #include "Version.h"
-#include "StyledIconEngine.h"
+#include "StyledIconCommon.h"
 #include "Badge.h"
 
 #include <QIcon>
 #include <QObject>
+#include <QPalette>
+
+#include "StyledIconEngine.h"
 
 namespace mv::util
 {
+
+class StyledIconEngine;
 
 /**
  * Styled icon class
@@ -25,10 +30,8 @@ namespace mv::util
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT StyledIcon : public QObject, public QIcon
+class CORE_EXPORT StyledIcon : public QIcon
 {
-    Q_OBJECT
-
 public:
 
     /**
@@ -46,14 +49,15 @@ public:
      */
     StyledIcon(const StyledIcon& other);
 
+protected:
+
     /**
      * Construct from \p icon
      * @param icon Icon to initialize from
      */
     explicit StyledIcon(const QIcon& icon);
 
-    /** Override destructor to do some cleanup */
-    ~StyledIcon() override;
+public:
 
     /**
      * Assign \p other styled icon
@@ -63,13 +67,13 @@ public:
     StyledIcon& operator=(const StyledIcon& other) {
         QIcon::operator=(other);
 
-        //_iconEngine         = other._iconEngine;
-        _iconName           = other._iconName;
-        _iconFontName       = other._iconFontName;
-        _iconFontVersion    = other._iconFontVersion;
-        _fixColor           = other._fixColor;
-        _color              = other._color;
-        _badge              = other._badge;
+        _iconEngine      = dynamic_cast<StyledIconEngine*>(other._iconEngine->clone());
+        _iconName        = other._iconName;
+        _iconFontName    = other._iconFontName;
+        _iconFontVersion = other._iconFontVersion;
+        _fixColor        = other._fixColor;
+        _color           = other._color;
+        //_badge              = other._badge;
 
         return *this;
     }
@@ -79,13 +83,13 @@ public:
      * @param other Other styled icon to assign from
      * @return Copied result
      */
-    StyledIcon& operator=(const QIcon& other) {
-        QIcon::operator=(other);
+    //StyledIcon& operator=(const QIcon& other) {
+    //    QIcon::operator=(other);
 
-        *this = StyledIcon(other);
+    //    *this = StyledIcon(other);
 
-        return *this;
-    }
+    //    return *this;
+    //}
     
     /**
      * Configure the styled icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion
@@ -110,6 +114,14 @@ public:
      * @return Named icon
      */
     static StyledIcon fromFontAwesomeBrandsRegular(const QString& iconName, const Version& version = defaultIconFontVersion);
+
+    /**
+     * Create a styled icon from a Qt \p icon with \p mode
+     * @param icon Icon to create the styled icon from
+     * @param mode The mode of the styled icon
+     * @return Styled icon
+     */
+    static StyledIcon fromQIcon(const QIcon& icon, const StyledIconMode& mode = StyledIconMode::ThemeAware);
 
     /**
      * Return styled icon with changed color groups \p colorGroupLightTheme and \p colorGroupDarkTheme
@@ -142,6 +154,13 @@ public:
     StyledIcon& withColor(const QColor& color);
 
     /**
+     * Return styled icon with \p mode
+     * @param mode The mode of the styled icon
+     * @return Reference to changed styled icon
+     */
+    StyledIcon& withMode(const StyledIconMode& mode);
+
+    /**
      * Get icon font for \p iconFontName at \p iconFontVersion
      * @param fontPointSize Point size of the font
      * @param iconFontName Name of the icon font
@@ -160,12 +179,6 @@ public:
     static QString getIconCharacter(const QString& iconName, const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion);
 
 protected:
-
-    /**
-     * Requests a pixmap
-     * @return Pixmap
-     */
-    QPixmap requestPixmap() const;
 
     /**
      * Initialize \p version of \p iconFontName
@@ -271,19 +284,19 @@ public: // Badge
      * Get badge
      * @return Badge
      */
-    Badge& getBadge();
+    //Badge& getBadge();
 
     /**
      * Set badge enabled to \p badgeEnabled
      * @param badgeEnabled Badge enabled
      */
-    void setBadgeEnabled(bool badgeEnabled);
+    //void setBadgeEnabled(bool badgeEnabled);
 
     /**
      * Get badge enabled
      * @return Badge enabled
      */
-    bool isBadgeEnabled() const;
+    //bool isBadgeEnabled() const;
 
 private:
 
@@ -302,39 +315,6 @@ private:
      */
     static QString generateSha(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion);
 
-signals:
-
-    /**
-     * Signals that the icon name changed from \p previousIconName to \p currentIconName
-     * @param previousIconName Previous icon name
-     * @param currentIconName Current icon name
-     */
-    void iconNameChanged(const QString& previousIconName, const QString& currentIconName);
-
-    /**
-     * Signals that the icon font name changed from \p previousFontName to \p currentFontName
-     * @param previousIconFontName Previous icon font name
-     * @param currentIconFontName Current icon font name
-     */
-    void iconFontNameChanged(const QString& previousIconFontName, const QString& currentIconFontName);
-
-    /**
-     * Signals that the icon font version changed from \p previousFontVersion to \p currentFontVersion
-     * @param previousIconFontVersion Previous icon font version
-     * @param currentIconFontVersion Current icon font version
-     */
-    void iconFontVersionChanged(const Version& previousIconFontVersion, const Version& currentIconFontVersion);
-
-    /**
-     * Signals that the sha changed from \p previousSha to \p currentSha
-     * @param previousSha Previous sha
-     * @param currentSha Current sha
-     */
-    void shaChanged(const QString& previousSha, const QString& currentSha);
-
-    /** Signals that the StyledIcon::_iconName and/or StyledIcon::_iconFontName and/or StyledIcon::_iconFontVersion changed */
-    void changed();
-
 private:
     StyledIconEngine*   _iconEngine;        /** Icon engine */
 	QString             _iconName;          /** Name of the icon */
@@ -342,7 +322,7 @@ private:
     Version             _iconFontVersion;   /** Version of the icon font */
     bool                _fixColor;          /** Whether to fix the color */
     QColor              _color;             /** Color of the icon */
-    Badge               _badge;             /** Badge */
+    //Badge               _badge;             /** Badge */
 
 protected:
 	static QMap<QString, QVariantMap>   fontMetadata;               /** Font-specific metadata */

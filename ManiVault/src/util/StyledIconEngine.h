@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "StyledIconCommon.h"
 
 #include <QIconEngine>
 #include <QObject>
@@ -22,7 +23,7 @@ class StyledIcon;
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT StyledIconEngine : public QObject, public QIconEngine
+class CORE_EXPORT StyledIconEngine : public QIconEngine
 {
 public:
 
@@ -101,10 +102,12 @@ private:
 private:
     StyledIcon&             _styledIcon;                /** Reference to styled icon */
     QString                 _sha;                       /** NamedIcons::icons key */
+    StyledIconMode          _mode;                      /** Styled icon coloring mode */
     QPalette::ColorGroup    _colorGroupLightTheme;      /** Color group for light theme */
     QPalette::ColorGroup    _colorGroupDarkTheme;       /** Color group for dark theme */
     QPalette::ColorRole     _colorRoleLightTheme;       /** Color role for light theme */
     QPalette::ColorRole     _colorRoleDarkTheme;        /** Color role for dark theme */
+    QColor                  _fixedColor;                /** Fixed color */
 
     friend class StyledIcon;
 };
