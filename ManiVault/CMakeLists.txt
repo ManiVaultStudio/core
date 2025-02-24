@@ -106,7 +106,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBUG "${CMAKE_CXX_FLAGS_RELEASE} /MD")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif()
 
@@ -292,7 +291,7 @@ if(APPLE)
     # Debug ManiVault Studio from the install directory
     set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>")   
     set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO)
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug/ManiVault Studio.app,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo/ManiVault Studio.app,${MV_INSTALL_DIR}/Release/ManiVault Studio.app>>")   
+    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app")
     
 endif()
 
