@@ -105,8 +105,7 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif()
 
 # -----------------------------------------------------------------------------
@@ -277,9 +276,7 @@ endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_target_properties(${MV_EXE} PROPERTIES
-        WIN32_EXECUTABLE YES
-        LINK_FLAGS "/ENTRY:mainCRTStartup"
-        LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+        LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:CONSOLE"
     )
 endif()
 
