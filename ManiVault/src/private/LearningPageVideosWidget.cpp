@@ -70,8 +70,9 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
 
     updateCustomStyle();
 
-    _videosFilterModel.invalidate();
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &LearningPageVideosWidget::updateCustomStyle);
 
+    _videosFilterModel.invalidate();
 }
 
 void LearningPageVideosWidget::updateCustomStyle()
