@@ -58,13 +58,6 @@ LearningCenterTutorialsFilterModel& PageTutorialsWidget::getTutorialsFilterModel
     return _tutorialsFilterModel;
 }
 
-bool PageTutorialsWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return PageActionsWidget::event(event);
-}
 
 void PageTutorialsWidget::updateActions()
 {

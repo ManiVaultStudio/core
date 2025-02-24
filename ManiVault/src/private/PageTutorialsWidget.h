@@ -42,13 +42,6 @@ public:
      */
     mv::LearningCenterTutorialsFilterModel& getTutorialsFilterModel();
 
-protected:
-    /**
-     * Override QObject's event handling
-     * @return Boolean Whether the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
-
 private:
 
     /** Update actions for launching tutorials */
