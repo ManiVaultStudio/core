@@ -183,7 +183,7 @@ class HdpsCoreConan(ConanFile):
         #print("**** Install RELWITHDEBINFO *****")
         #cmake.install(build_type="RelWithDebInfo")
 
-        # cmake_release = self._configure_cmake()
+        cmake = self._configure_cmake()
         print("**** Build RELEASE *****")
         cmake.build(build_type="Release")
         print("**** Install RELEASE *****")
