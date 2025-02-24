@@ -12,7 +12,6 @@ namespace mv::util
 /** Styled icon modes */
 enum class StyledIconMode
 {
-    Unmodified,     /** Icon is not modified */
     ThemeAware,     /** Icon is colored by current theme with QPalette::ColorGroup and QPalette::ColorRole the (default) */
     FixedColor      /** Icon is colored by a fixed color */
 };

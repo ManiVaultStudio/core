@@ -57,8 +57,9 @@ void StyledIcon::set(const QString& iconName, const QString& iconFontName, const
 {
     try
     {
-        if (iconName.isEmpty() || iconFontName.isEmpty())
+        if (iconName.isEmpty() || iconFontName.isEmpty()) {
             return;
+        }
 
 	    _iconName           = iconName;
 	    _iconFontName       = iconFontName;
@@ -89,7 +90,7 @@ StyledIcon StyledIcon::fromFontAwesomeBrandsRegular(const QString& iconName, con
     return StyledIcon(iconName, "FontAwesomeBrandsRegular", version);
 }
 
-StyledIcon StyledIcon::fromQIcon(const QIcon& icon, const StyledIconMode& mode)
+StyledIcon StyledIcon::fromQIcon(const QIcon& icon, const StyledIconMode& mode /*= StyledIconMode::ThemeAware*/)
 {
     return StyledIcon(icon).withMode(mode);
 }
