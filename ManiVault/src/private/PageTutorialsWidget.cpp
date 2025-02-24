@@ -117,6 +117,3 @@ void PageTutorialsWidget::updateActions()
     }
 }
 
-void PageTutorialsWidget::updateCustomStyle()
-{
-}

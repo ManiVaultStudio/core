@@ -54,9 +54,6 @@ private:
     /** Update actions for launching tutorials */
     void updateActions();
 
-    /** Update all custom style elements */
-    void updateCustomStyle();
-
 private:
     mv::gui::HorizontalGroupAction              _toolbarAction;             /** Horizontal toolbar (group) action */
     mv::LearningCenterTutorialsFilterModel      _tutorialsFilterModel;      /** For filtering learning center tutorials */
