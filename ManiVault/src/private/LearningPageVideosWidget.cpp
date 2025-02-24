@@ -74,14 +74,6 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
 
 }
 
-bool LearningPageVideosWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
-}
-
 void LearningPageVideosWidget::updateCustomStyle()
 {
     _videosListView.setStyleSheet(QString(" \
@@ -91,5 +83,5 @@ void LearningPageVideosWidget::updateCustomStyle()
         } \
         QListView#Videos::item:hover { \
             background-color: transparent; \
-        }").arg(QApplication::palette().color(QPalette::Normal, QPalette::Midlight).name()));
+        }").arg(QApplication::palette().color(QPalette::Normal, QPalette::Window).name()));
 }
