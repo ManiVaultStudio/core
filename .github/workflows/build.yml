@@ -25,8 +25,6 @@ jobs:
     - name: Get matrix from file
       id: matrix_setup
       uses: ManiVaultStudio/github-actions/matrix_setup@feature/PrepareCIUpdate022025
-      with:
-        matrix_ids : 'windows_2022 linux_gcc13 macos_code14 macos_code16'
 
   cross-platform-build:
     name: Cross platform build
@@ -55,11 +53,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           submodules: recursive
           fetch-depth: 0
-
-      - name: Select Xcode for Mac only
-        if: startsWith(runner.os, 'macOS')
-        run: |
-          sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app
 
       - name: Setup python version
         uses: actions/setup-python@v5
@@ -117,6 +110,7 @@ jobs:
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
           build-arch: ${{matrix.build-arch}}
+          build-xcode-version: ${{matrix.build-xcode-version}}
           conan-user: ${{secrets.LKEB_UPLOAD_USER}}
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
