@@ -377,7 +377,7 @@ void PresetsAction::updateModel()
 
 void PresetsAction::setIcon(const QIcon& icon)
 {
-    _icon = icon;
+    _icon.fromQIcon(icon);
 
     updateModel();
 }

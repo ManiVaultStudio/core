@@ -4,8 +4,6 @@
 
 #include "StyledIcon.h"
 #include "StyledIconEngine.h"
-
-#include "Application.h"
 #include "Serializable.h"
 
 #include <QDebug>
@@ -16,7 +14,7 @@
 #include <QStyleHints>
 
 #ifdef _DEBUG
-	#define NAMED_ICON_VERBOSE
+	#define STYLED_ICON_VERBOSE
 #endif
 
 using namespace mv::gui;
@@ -32,35 +30,28 @@ QMap<QString, QPixmap>      StyledIcon::pixmaps                  = {};
 QVector<QStringList>        StyledIcon::iconFontPreferenceGroups = { { "FontAwesomeSolid", "FontAwesomeRegular", "FontAwesomeBrandsRegular" } };
 
 StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/, QWidget* parent /*= nullptr*/) :
-    QObject(parent),
     QIcon(new StyledIconEngine(*this)),
-    _fixColor(false),
-    _badge(this)
+    _fixColor(false)//,
+    //_badge(this)
 {
-    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StyledIcon::updateIconPixmap);
-
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
         set(iconName, iconFontName, iconFontVersion);
 }
 
 StyledIcon::StyledIcon(const StyledIcon& other) :
-    StyledIcon(other._iconName, other._iconFontName, other._iconFontVersion)
+    QIcon(other)
 {
+    *this = other;
 }
 
 StyledIcon::StyledIcon(const QIcon& icon) :
-    StyledIcon()
+    QIcon(new StyledIconEngine(*this))
 {
-    /*if (!icon.isNull()) {
+    if (!icon.isNull()) {
         _iconEngine->_sha = Serializable::createId();
 
-        pixmaps[_iconEngine->_sha] = icon.pixmap(64, 64);
-    }*/
-}
-
-StyledIcon::~StyledIcon()
-{
-    disconnect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, nullptr);
+        pixmaps[_iconEngine->_sha] = icon.pixmap(32, 32);
+    }
 }
 
 void StyledIcon::set(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)
@@ -69,17 +60,6 @@ void StyledIcon::set(const QString& iconName, const QString& iconFontName, const
     {
         if (iconName.isEmpty() || iconFontName.isEmpty())
             return;
-
-	    const auto iconNameHasChanged          = iconName != _iconName;
-	    const auto iconFontNameHasChanged      = iconFontName != _iconFontName;
-	    const auto iconFontVersionHasChanged   = iconFontVersion != _iconFontVersion;
-
-	    if (!iconNameHasChanged && !iconFontNameHasChanged && !iconFontVersionHasChanged)
-	        return;
-
-	    const auto previousIconName         = _iconName;
-	    const auto previousIconFontName     = _iconFontName;
-	    const auto previousIconFontVersion  = _iconFontVersion;
 
 	    _iconName           = iconName;
 	    _iconFontName       = iconFontName;
@@ -91,18 +71,6 @@ void StyledIcon::set(const QString& iconName, const QString& iconFontName, const
 
 	    if (!QFile::exists(iconFontResourcePath))
             throw std::runtime_error(QString("Font resource not found: %1").arg(iconFontResourcePath).toStdString());
-
-	    if (iconNameHasChanged)
-			emit iconNameChanged(previousIconName, _iconName);
-
-	    if (iconFontNameHasChanged)
-	        emit iconFontNameChanged(previousIconFontName, _iconFontName);
-
-	    if (iconFontVersionHasChanged)
-	        emit iconFontVersionChanged(previousIconFontVersion, _iconFontVersion);
-
-	    if (iconNameHasChanged || iconFontNameHasChanged || iconFontVersionHasChanged)
-			emit changed();
 
 	    updateIconPixmap();
 	}
@@ -122,13 +90,9 @@ StyledIcon StyledIcon::fromFontAwesomeBrandsRegular(const QString& iconName, con
     return StyledIcon(iconName, "FontAwesomeBrandsRegular", version);
 }
 
-QPixmap StyledIcon::requestPixmap() const
+StyledIcon StyledIcon::fromQIcon(const QIcon& icon, const StyledIconMode& mode)
 {
-    if (!pixmaps.contains(_iconEngine->_sha)) {
-        pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, qApp->palette().text().color());
-    }
-
-    return pixmaps[_iconEngine->_sha];
+    return StyledIcon(icon).withMode(mode);
 }
 
 void StyledIcon::initializeIconFont(const QString& iconFontName, const Version& iconFontVersion)
@@ -252,7 +216,7 @@ StyledIcon& StyledIcon::withColorRoles(const QPalette::ColorRole& colorRoleLight
 
 StyledIcon& StyledIcon::withBadge(const Badge& badge)
 {
-    _badge = badge;
+    //_badge = badge;
 
     return *this;
 }
@@ -263,6 +227,13 @@ StyledIcon& StyledIcon::withColor(const QColor& color)
     _color      = color;
 
     updateIconPixmap();
+
+    return *this;
+}
+
+StyledIcon& StyledIcon::withMode(const StyledIconMode& mode)
+{
+    _iconEngine->_mode = mode;
 
     return *this;
 }
@@ -392,20 +363,20 @@ void StyledIcon::setColorGroupDarkTheme(const QPalette::ColorGroup& colorGroupDa
     _iconEngine->_colorGroupDarkTheme = colorGroupDarkTheme;
 }
 
-Badge& StyledIcon::getBadge()
-{
-    return _badge;
-}
-
-void StyledIcon::setBadgeEnabled(bool badgeEnabled)
-{
-    _badge.setEnabled(badgeEnabled);
-}
-
-bool StyledIcon::isBadgeEnabled() const
-{
-    return _badge.getEnabled();
-}
+//Badge& StyledIcon::getBadge()
+//{
+//    return _badge;
+//}
+//
+//void StyledIcon::setBadgeEnabled(bool badgeEnabled)
+//{
+//    _badge.setEnabled(badgeEnabled);
+//}
+//
+//bool StyledIcon::isBadgeEnabled() const
+//{
+//    return _badge.getEnabled();
+//}
 
 QString StyledIcon::getIconFontResourceName(const QString& iconFontName, const Version& iconFontVersion)
 {
@@ -431,7 +402,7 @@ void StyledIcon::updateIconPixmap() const
 {
     try {
         if (_iconEngine && !_iconEngine->_sha.isEmpty() && !pixmaps.contains(_iconEngine->_sha))
-			pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _fixColor ? _color : qApp->palette().text().color());
+			pixmaps[_iconEngine->_sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _fixColor ? _color : _iconEngine->_fixedColor);
 	}
 	catch (std::exception& e)
 	{

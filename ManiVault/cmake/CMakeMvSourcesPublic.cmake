@@ -537,6 +537,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Notifications.h
     src/util/LearningCenterVideo.h
     src/util/LearningCenterTutorial.h
+    src/util/StyledIconCommon.h
     src/util/StyledIcon.h
     src/util/StyledIconEngine.h
     src/util/Badge.h

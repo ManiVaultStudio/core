@@ -17,6 +17,7 @@ namespace mv::util
 
 StyledIconEngine::StyledIconEngine(StyledIcon& styledIcon) :
     _styledIcon(styledIcon),
+    _mode(StyledIconMode::ThemeAware),
     _colorGroupLightTheme(QPalette::ColorGroup::Normal),
     _colorGroupDarkTheme(QPalette::ColorGroup::Normal),
 	_colorRoleLightTheme(QPalette::ColorRole::Text),
@@ -28,6 +29,7 @@ StyledIconEngine::StyledIconEngine(StyledIcon& styledIcon) :
 StyledIconEngine::StyledIconEngine(StyledIcon& styledIcon, const QString& sha, const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme) :
     _styledIcon(styledIcon),
     _sha(sha),
+    _mode(StyledIconMode::ThemeAware),
     _colorGroupLightTheme(colorGroupLightTheme),
     _colorGroupDarkTheme(colorGroupDarkTheme),
     _colorRoleLightTheme(colorRoleLightTheme),
@@ -52,12 +54,33 @@ void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode m
 QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
     if (StyledIcon::pixmaps.contains(_sha)) {
-	    const auto pixmap = StyledIcon::pixmaps[_sha];
+	    auto pixmap = StyledIcon::pixmaps[_sha];
 
     	if (!pixmap.isNull()) {
-            const auto recolorColor     = qApp->palette().color(getColorGroupForCurrentTheme(), getColorRoleForCurrentTheme());
-    		const auto recoloredPixmap  = recolorPixmap(pixmap, recolorColor);
-    		const auto recoloredIcon    = QIcon(recoloredPixmap);
+		    switch (_mode) {
+	            case StyledIconMode::Unmodified:
+				{
+                    return pixmap;
+		        }
+
+                case StyledIconMode::ThemeAware:
+                {
+                    const auto recolorColor     = qApp->palette().color(getColorGroupForCurrentTheme(), getColorRoleForCurrentTheme());
+                    const auto recoloredPixmap  = recolorPixmap(pixmap, recolorColor);
+                    const auto recoloredIcon    = QIcon(recoloredPixmap);
+
+                    return recoloredIcon.pixmap(size, mode, state);
+                }
+
+                case StyledIconMode::FixedColor:
+                {
+                    const auto recoloredPixmap  = recolorPixmap(pixmap, _fixedColor);
+                    const auto recoloredIcon    = QIcon(recoloredPixmap);
+
+                    return recoloredIcon.pixmap(size, mode, state);
+                }
+		    }
+            
 
             //if (_styledIcon.getBadge().getEnabled()) {
             //    std::int32_t iconMargin = 0;
@@ -104,8 +127,6 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
             //        iconPixmapPainter.drawPixmap(QRectF(origin, scaledIconPixmapSize), badgePixmap, badgeRectangle);
             //    }
             //}
-
-    		return recoloredIcon.pixmap(size, mode, state);
     	}
     }
 
