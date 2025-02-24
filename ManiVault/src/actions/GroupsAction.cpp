@@ -4,8 +4,6 @@
 
 #include "GroupsAction.h"
 #include "GroupSectionTreeItem.h"
-#include "Application.h"
-#include "widgets/Divider.h"
 
 #include <QDebug>
 
@@ -15,8 +13,6 @@ namespace mv::gui {
 
 GroupsAction::GroupsAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
-    _groupActions(),
-    _visibility(),
     _updateTask(this, "Update " + title)
 {
     setDefaultWidgetFlags(Default);
@@ -244,7 +240,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
     _filteredActionsAction(this, "Filtered Actions", true),
-    _toolbarWidget(parent),
+    _toolbarAction(this, "Group"),
     _filterAction(this, "Search"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all")
@@ -278,31 +274,28 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
     _filterAction.setPlaceHolderString("Filter by name...");
 
     // Set action icon
-    _expandAllAction.setIconByName("angles-down");
+    //_expandAllAction.setIconByName("angles-down");
     _collapseAllAction.setIconByName("angles-up");
+
+    _expandAllAction.setText(" ");
+    _expandAllAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
+    _collapseAllAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
 
     // Set action tooltips
     _filterAction.setToolTip("Filter properties by name");
     _expandAllAction.setToolTip("Expand all property sections");
     _collapseAllAction.setToolTip("Collapse all property sections");
 
-    // Configure toolbar layout
-    _toolbarLayout.setContentsMargins(0, 2, 0, 2);
-
     // Add toolbar items
     if (widgetFlags & Filtering)
-        _toolbarLayout.addWidget(_filterAction.createWidget(this), 2);
+        _toolbarAction.addAction(&_filterAction);
 
     if (widgetFlags & Expansion) {
-        _toolbarLayout.addWidget(_expandAllAction.createWidget(this, TriggerAction::Icon));
-        _toolbarLayout.addWidget(_collapseAllAction.createWidget(this, TriggerAction::Icon));
+        _toolbarAction.addAction(&_expandAllAction);
+        _toolbarAction.addAction(&_collapseAllAction);
     }
 
-    // Set toolbar widget layout
-    _toolbarWidget.setLayout(&_toolbarLayout);
-
-    // And add to the main layout
-    _layout.addWidget(&_toolbarWidget);
+    _layout.addWidget(_toolbarAction.createWidget(this));
 
     // Update toolbar when a group action is expanded/collapsed/added/removed/shown/hidden
     connect(_groupsAction, &GroupsAction::groupActionExpanded, this, &Widget::updateToolbar);
@@ -347,7 +340,7 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
 void GroupsAction::Widget::updateToolbar()
 {
     // Set toolbar read-only status based on whether a dataset is loaded
-    _toolbarWidget.setEnabled(_groupsAction->getGroupActions().count() > 1);
+    _toolbarAction.setEnabled(_groupsAction->getGroupActions().count() > 1);
 
     // Set read-only states of actions
     _expandAllAction.setEnabled(_groupsAction->canExpandAll());

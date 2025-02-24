@@ -7,10 +7,10 @@
 #include "GroupAction.h"
 #include "StringAction.h"
 #include "TriggerAction.h"
+#include "HorizontalGroupAction.h"
 
 #include "Task.h"
 
-#include <QStyledItemDelegate>
 #include <QTreeWidget>
 
 class QWidget;
@@ -133,8 +133,7 @@ public:
         GroupsAction*                                   _groupsAction;                  /** Pointer to groups action */
         QVBoxLayout                                     _layout;                        /** Main layout */
         GroupAction                                     _filteredActionsAction;         /** Group action for filtered actions */
-        QWidget                                         _toolbarWidget;                 /** Toolbar widget */
-        QHBoxLayout                                     _toolbarLayout;                 /** Toolbar layout */
+        HorizontalGroupAction                           _toolbarAction;                 /** Toolbar action */
         StringAction                                    _filterAction;                  /** Filter action */
         TriggerAction                                   _expandAllAction;               /** Expand all datasets action */
         TriggerAction                                   _collapseAllAction;             /** Collapse all datasets action */
