@@ -54,10 +54,10 @@ void PluginFactory::initialize()
     getPluginTriggerAction().initialize();
 
     getPluginMetadata().getTriggerHelpAction().setText(_kind);
-    getPluginMetadata().getTriggerHelpAction().setIcon(getIcon());
+    getPluginMetadata().getTriggerHelpAction().setIcon(icon());
 }
 
-const StyledIcon& PluginFactory::getCategoryIcon() const
+const QIcon& PluginFactory::getCategoryIcon() const
 {
     return _categoryIcon;
 }

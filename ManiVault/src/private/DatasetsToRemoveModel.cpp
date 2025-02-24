@@ -128,7 +128,7 @@ QVariant DatasetsToRemoveModel::NameItem::data(int role /*= Qt::UserRole + 1*/) 
             if (!getDataset().isValid())
                 break;
 
-            return getDataset()->getIcon();
+            return StyledIcon(getDataset()->icon());
         }
 
         case Qt::CheckStateRole:

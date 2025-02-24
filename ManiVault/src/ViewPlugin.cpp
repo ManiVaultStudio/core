@@ -33,7 +33,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _dockingOptionsAction(this, "Docking options", { "May Close", "May Float", "May Move" }),
     _lockingAction(this),
     _visibleAction(this, "Visible", true),
-    _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
+    _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), StyledIcon(factory->icon())),
     _samplerAction(this, "Sampler"),
     _progressTask(nullptr)
 {
@@ -81,7 +81,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _lockingAction.setWhat("Layout");
 
     _visibleAction.setToolTip("Determines whether the view plugin is visible or not");
-    _visibleAction.setIcon(getIcon());
+    _visibleAction.setIcon(StyledIcon(icon()));
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
 
     _samplerAction.setToolTip(QStringLiteral("Element sampler"));

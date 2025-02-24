@@ -38,14 +38,14 @@ public:
      * Facade for IconAction::getIcon()
      * @return Icon
      */
-    const util::StyledIcon& getIcon() const override;
+    const QIcon& getIcon() const;
 
     /**
      * Set the current icon to \p icon
      * Facade for IconAction::setIcon(...)
      * @param icon Current icon
      */
-    void setIcon(const util::StyledIcon& icon);
+    void setIcon(const QIcon& icon);
 
     /**
      * Set the current icon from \p image

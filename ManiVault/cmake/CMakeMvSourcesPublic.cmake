@@ -588,6 +588,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Notifications.cpp
     src/util/LearningCenterVideo.cpp
     src/util/LearningCenterTutorial.cpp
+    src/util/StyledIconCommon.cpp
     src/util/StyledIcon.cpp
     src/util/StyledIconEngine.cpp
     src/util/Badge.cpp

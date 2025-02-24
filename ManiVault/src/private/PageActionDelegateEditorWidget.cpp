@@ -9,13 +9,12 @@
 #include <Application.h>
 #include <QBuffer>
 
-#include "GroupDataDialog.h"
-
 #ifdef _DEBUG
     #define PAGE_ACTION_DELEGATE_EDITOR_WIDGET_VERBOSE
 #endif
 
 using namespace mv;
+using namespace mv::util;
 
 PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
@@ -284,7 +283,9 @@ void PageActionDelegateEditorWidget::updateCustomStyle()
 
     PageAction pageAction(_index);
 
-    _iconLabel.setPixmap(util::StyledIcon::fromQIcon(pageAction.getIcon()).pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
+    const auto styledIcon = StyledIcon(pageAction.getIcon());
+
+    _iconLabel.setPixmap(QIcon(styledIcon).pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
     _titleLabel.setStyleSheet(QString("color: %1; font-weight: bold;").arg(qApp->palette().text().color().name()));
     _subtitleLabel.setStyleSheet(QString("color: %1; font-size: 7pt;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
 }

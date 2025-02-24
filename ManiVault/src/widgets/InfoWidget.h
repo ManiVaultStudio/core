@@ -153,14 +153,14 @@ signals:
     void backgroundColorRoleChanged(const QPalette::ColorRole& previousBackgroundColorRole, const QPalette::ColorRole& currentBackgroundColorRole);
 
 private:
-    util::StyledIcon    _icon;                  /** Theme-aware icon */
-    QLabel              _iconLabel;             /** Label for displaying the icon */
-    QLabel              _titleLabel;            /** Label for displaying the title */
-    QLabel              _descriptionLabel;      /** Label for displaying the description */
-    QColor              _foregroundColor;       /** Foreground color of the widget */
-    QColor              _backgroundColor;       /** Background color of the widget */
-    std::int32_t        _foregroundColorRole;   /** Color role for foreground elements (InfoWidget::_foregroundColor will be used if zero) */
-    std::int32_t        _backgroundColorRole;   /** Color role for background elements (InfoWidget::_backgroundColor will be used if zero) */
+    QIcon           _icon;                  /** Icon */
+    QLabel          _iconLabel;             /** Label for displaying the icon */
+    QLabel          _titleLabel;            /** Label for displaying the title */
+    QLabel          _descriptionLabel;      /** Label for displaying the description */
+    QColor          _foregroundColor;       /** Foreground color of the widget */
+    QColor          _backgroundColor;       /** Background color of the widget */
+    std::int32_t    _foregroundColorRole;   /** Color role for foreground elements (InfoWidget::_foregroundColor will be used if zero) */
+    std::int32_t    _backgroundColorRole;   /** Color role for background elements (InfoWidget::_backgroundColor will be used if zero) */
 
     static QColor defaultForegroundColor;
     static QColor defaultBackgroundColor;

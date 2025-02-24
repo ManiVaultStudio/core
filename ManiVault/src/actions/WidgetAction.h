@@ -8,7 +8,7 @@
 #include "WidgetActionDrag.h"
 
 #include "util/Serializable.h"
-#include "util/StyledIcon.h"
+#include "util/Version.h"
 #include "util/Badge.h"
 
 #include <QWidgetAction>
@@ -890,12 +890,6 @@ public: // Styled icon
      */
     void setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion);
 
-    /**
-     * Get the icon
-     * @return Reference to named icon
-     */
-    virtual const util::StyledIcon& getIcon() const;
-
 public: // Badge-related
 
     /**
@@ -1035,7 +1029,6 @@ private:
     std::int32_t                    _configuration;                 /** Configuration flags */
     QMap<QString, QVariant>         _cachedStates;                  /** Maps cache name to state */
     QString                         _location;                      /** The path relative to the root in string format */
-    util::StyledIcon                _styledIcon;                    /** Theme aware icon */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
     util::Badge                     _badge;                         /** Badge configuration */
     WidgetActionDrag                _drag;                          /** Drag behaviour */

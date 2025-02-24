@@ -38,7 +38,7 @@ void WidgetActionDrag::start()
         auto mimeData   = new WidgetActionMimeData(_dragAction);
 
         drag->setMimeData(mimeData);
-        drag->setPixmap(StyledIcon("link").pixmap(QSize(12, 12)));
+        drag->setPixmap(QIcon(StyledIcon("link")).pixmap(QSize(12, 12)));
 
         drag->exec();
     }

@@ -48,7 +48,7 @@ void StartupProjectsModel::initialize(const QVector<QPair<QSharedPointer<mv::Pro
 {
     for (const auto& startupProjectMetaAction : startupProjectsMetaActions)
     {
-        auto icon           = StyledIcon(startupProjectMetaAction.first->getApplicationIconAction().getIconPickerAction().getIcon());
+        auto icon           = startupProjectMetaAction.first->getApplicationIconAction().getIconPickerAction().getIcon();
         auto fileName       = QFileInfo(startupProjectMetaAction.second).baseName();
         auto title          = startupProjectMetaAction.first->getTitleAction().getString();
         auto description    = startupProjectMetaAction.first->getDescriptionAction().getString();

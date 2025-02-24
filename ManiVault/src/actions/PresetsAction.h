@@ -165,18 +165,6 @@ public:
     QString getPresetType() const;
 
     /**
-     * Get icon
-     * @return Icon for the preset type
-     */
-    const util::StyledIcon& getIcon() const override;
-
-    /**
-     * Set icon to \p icon
-     * @param icon Icon for the preset type
-     */
-    void setIcon(const QIcon& icon);
-
-    /**
      * Get model
      * @return Reference to model
      */

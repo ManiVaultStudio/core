@@ -87,7 +87,7 @@ QVariant AbstractDataHierarchyModel::NameItem::data(int role /*= Qt::UserRole + 
             if (!getDataset().isValid())
                 break;
 
-            return getDataset()->getIcon();
+            return QIcon(StyledIcon(getDataset()->icon()));
         }
 
         default:
@@ -136,7 +136,7 @@ QVariant AbstractDataHierarchyModel::LocationItem::data(int role /*= Qt::UserRol
             if (!getDataset().isValid())
                 break;
 
-            return getDataset()->getIcon();
+            return QVariant::fromValue(getDataset()->icon());
         }
 
         default:
@@ -351,7 +351,7 @@ QVariant AbstractDataHierarchyModel::IsVisibleItem::data(int role /*= Qt::UserRo
             break;
 
         case Qt::DecorationRole:
-            return StyledIcon(data(Qt::EditRole).toBool() ? "eye" : "eye-slash");
+            return QIcon(StyledIcon(data(Qt::EditRole).toBool() ? "eye" : "eye-slash"));
 
         case Qt::ToolTipRole:
             return QString("Dataset is visible: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
@@ -407,7 +407,7 @@ QVariant AbstractDataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole
                 break;
 
             if (getDataset()->isProxy())
-                return StyledIcon("object-group");
+                return QIcon(StyledIcon("object-group"));
 
             break;
         }

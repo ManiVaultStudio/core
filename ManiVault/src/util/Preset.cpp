@@ -24,7 +24,7 @@ QString Preset::getDescription() const
     return _description;
 }
 
-StyledIcon Preset::getIcon() const
+QIcon Preset::getIcon() const
 {
     switch (_presetType)
     {

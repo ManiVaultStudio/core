@@ -39,7 +39,7 @@ InfoWidget::InfoWidget(QWidget* parent, const QIcon& icon, const QString& title,
 
 void InfoWidget::set(const QIcon& icon, const QString& title, const QString& description /*= ""*/)
 {
-    _icon.fromQIcon(icon);
+    _icon = icon;
 
     _iconLabel.setPixmap(icon.pixmap(QSize(24, 24)));
     _titleLabel.setText(title);
