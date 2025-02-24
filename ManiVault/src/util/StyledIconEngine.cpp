@@ -58,11 +58,6 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 
     	if (!pixmap.isNull()) {
 		    switch (_mode) {
-	            case StyledIconMode::Unmodified:
-				{
-                    return pixmap;
-		        }
-
                 case StyledIconMode::ThemeAware:
                 {
                     const auto recolorColor     = qApp->palette().color(getColorGroupForCurrentTheme(), getColorRoleForCurrentTheme());
