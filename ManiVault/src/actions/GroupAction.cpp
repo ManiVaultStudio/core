@@ -452,6 +452,7 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
     auto layout = new QHBoxLayout();
 
     layout->setObjectName("HorizontalLayout");
+    layout->setSpacing(4);
 
     if (!(widgetFlags & WithMargins))
         layout->setContentsMargins(0, 0, 0, 0);
