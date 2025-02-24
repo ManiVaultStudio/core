@@ -24,7 +24,7 @@ jobs:
     steps:
     - name: Get matrix from file
       id: matrix_setup
-      uses: ManiVaultStudio/github-actions/matrix_setup@feature/PrepareCIUpdate022025
+      uses: ManiVaultStudio/github-actions/matrix_setup@main
 
   cross-platform-build:
     name: Cross platform build
