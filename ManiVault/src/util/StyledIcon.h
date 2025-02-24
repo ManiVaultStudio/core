@@ -30,7 +30,7 @@ class StyledIconEngine;
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT StyledIcon : public QIcon
+class CORE_EXPORT StyledIcon
 {
 public:
 
@@ -45,17 +45,25 @@ public:
 
     /**
      * Copy construct from \p other styled icon
-     * @param other Other styled icon to copy from
+     * @param icon 
      */
-    StyledIcon(const StyledIcon& other);
-
-protected:
+    explicit StyledIcon(const QIcon& other);
 
     /**
-     * Construct from \p icon
-     * @param icon Icon to initialize from
+     * Implicit conversion to QIcon
+     * @return Icon
      */
-    explicit StyledIcon(const QIcon& icon);
+    operator QIcon() const {
+        return QIcon(new StyledIconEngine(_iconSettings));
+    }
+
+    /**
+     * Implicit conversion to QVariant
+     * @return Variant
+     */
+    operator QVariant() const {
+        return QVariant::fromValue<QIcon>(*this);
+    }
 
 public:
 
@@ -65,32 +73,15 @@ public:
      * @return Copied result
      */
     StyledIcon& operator=(const StyledIcon& other) {
-        QIcon::operator=(other);
-
-        _iconEngine      = dynamic_cast<StyledIconEngine*>(other._iconEngine->clone());
-        _iconName        = other._iconName;
-        _iconFontName    = other._iconFontName;
-        _iconFontVersion = other._iconFontVersion;
-        _fixColor        = other._fixColor;
-        _color           = other._color;
+        _iconName           = other._iconName;
+        _iconFontName       = other._iconFontName;
+        _iconFontVersion    = other._iconFontVersion;
+        _iconSettings       = other._iconSettings;
         //_badge              = other._badge;
 
         return *this;
     }
 
-    /**
-     * Assign \p other QIcon
-     * @param other Other styled icon to assign from
-     * @return Copied result
-     */
-    //StyledIcon& operator=(const QIcon& other) {
-    //    QIcon::operator=(other);
-
-    //    *this = StyledIcon(other);
-
-    //    return *this;
-    //}
-    
     /**
      * Configure the styled icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion
      * @param iconName Name of the icon
@@ -158,7 +149,7 @@ public:
      * @param mode The mode of the styled icon
      * @return Reference to changed styled icon
      */
-    StyledIcon& withMode(const StyledIconMode& mode);
+    StyledIcon withMode(const StyledIconMode& mode);
 
     /**
      * Get icon font for \p iconFontName at \p iconFontVersion
@@ -228,56 +219,6 @@ protected:
      */
     static QString getIconFontVersionString(const Version& version);
 
-public: // Color roles
-
-    /**
-     * Get color role for light theme
-     * @return Color role for light theme
-     */
-    QPalette::ColorRole getColorRoleLightTheme() const;
-
-    /**
-     * Set color role for light theme to \p colorRoleLightTheme
-     * @param colorRoleLightTheme Color role for light theme
-     */
-    void setColorRoleLightTheme(const QPalette::ColorRole& colorRoleLightTheme) const;
-
-    /**
-     * Get color role for dark theme
-     * @return Color role for dark theme
-     */
-    QPalette::ColorRole getColorRoleDarkTheme() const;
-
-    /**
-     * Set color role for dark theme to \p colorRoleDarkTheme
-     * @param colorRoleDarkTheme Color role for dark theme
-     */
-    void setColorRoleDarkTheme(const QPalette::ColorRole& colorRoleDarkTheme) const;
-
-    /**
-     * Get color group for light theme
-     * @return Color group for light theme
-     */
-    QPalette::ColorGroup getColorGroupLightTheme() const;
-
-    /**
-     * Set color group for light theme to \p colorGroupLightTheme
-     * @param colorGroupLightTheme Color group for light theme
-     */
-    void setColorGroupLightTheme(const QPalette::ColorGroup& colorGroupLightTheme) const;
-
-    /**
-     * Get color group for dark theme
-     * @return Color group for dark theme
-     */
-    QPalette::ColorGroup getColorGroupDarkTheme() const;
-
-    /**
-     * Set color group for dark theme to \p colorGroupDarkTheme
-     * @param colorGroupDarkTheme Color group for dark theme
-     */
-    void setColorGroupDarkTheme(const QPalette::ColorGroup& colorGroupDarkTheme) const;
-
 public: // Badge
 
     /**
@@ -300,9 +241,6 @@ public: // Badge
 
 private:
 
-    /** Only allow styled icon constructors, not the base */
-    using QIcon::QIcon;
-
     /** Update the pixmap representation of the icon */
     void updateIconPixmap() const;
 
@@ -316,12 +254,10 @@ private:
     static QString generateSha(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion);
 
 private:
-    StyledIconEngine*   _iconEngine;        /** Icon engine */
-	QString             _iconName;          /** Name of the icon */
-    QString             _iconFontName;      /** Name of the icon font */
-    Version             _iconFontVersion;   /** Version of the icon font */
-    bool                _fixColor;          /** Whether to fix the color */
-    QColor              _color;             /** Color of the icon */
+	QString                 _iconName;          /** Name of the icon */
+    QString                 _iconFontName;      /** Name of the icon font */
+    Version                 _iconFontVersion;   /** Version of the icon font */
+    StyledIconSettings      _iconSettings;      /** Icon settings */
     //Badge               _badge;             /** Badge */
 
 protected:

@@ -13,7 +13,7 @@
 namespace mv::gui
 {
 
-IconLabel::IconLabel(const util::StyledIcon& icon, QWidget* parent /*= nullptr*/) :
+IconLabel::IconLabel(const QIcon& icon, QWidget* parent /*= nullptr*/) :
     QLabel(parent),
     _opacityEffect(this)
 {

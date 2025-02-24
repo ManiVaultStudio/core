@@ -18,7 +18,7 @@ using namespace mv::util;
 
 TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
-    _tasksAction(this, "list-check")
+    _tasksAction(this, "Tasks")
 {
     _filterModel.setSourceModel(&_model);
 

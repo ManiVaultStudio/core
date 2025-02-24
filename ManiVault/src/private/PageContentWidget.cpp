@@ -40,7 +40,7 @@ QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString
     headerLabel->setAlignment(Qt::AlignLeft);
     headerLabel->setToolTip(tooltip);
 
-    const auto updateHeaderLabelStyle = [headerLabel]() -> void {
+    const auto updateCustomStyle = [headerLabel]() -> void {
         headerLabel->setStyleSheet(QString(
             "QLabel {"
                 "color: %1;"
@@ -49,9 +49,9 @@ QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString
             "}").arg(qApp->palette().text().color().name()));
     };
 
-    updateHeaderLabelStyle();
+    updateCustomStyle();
 
-    connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, headerLabel, updateHeaderLabelStyle);
+    connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, headerLabel, updateCustomStyle);
 
     return headerLabel;
 }

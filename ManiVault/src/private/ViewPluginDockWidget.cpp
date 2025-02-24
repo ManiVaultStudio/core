@@ -312,7 +312,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
     //_progressTask.setRunningIndeterminate();
     //_progressTask.setProgressTextFormatter([](Task& task) -> QString { return ""; });
 
-	setWindowIcon(_viewPlugin->getIcon());
+	setWindowIcon(_viewPlugin->icon());
 
     const auto updateViewPluginIdProperty = [this](const QString& viewPluginId) -> void {
         setProperty("ViewPluginId", viewPluginId);
@@ -445,7 +445,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
 	_dockManager.setStyleSheet("");
 
-	setIcon(StyledIcon(viewPlugin->getIcon()));
+	setIcon(StyledIcon(viewPlugin->icon()));
 	setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
 	setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
 

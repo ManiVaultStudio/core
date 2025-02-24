@@ -326,7 +326,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
 
             auto unhideDatasetAction = new QAction(dataHierarchyItem->getLocation(true));
 
-            unhideDatasetAction->setIcon(datasetToUnhide->getIcon());
+            unhideDatasetAction->setIcon(StyledIcon(datasetToUnhide->icon()));
 
             connect(unhideDatasetAction, &QAction::triggered, this, [dataHierarchyItem]() -> void {
                 dataHierarchyItem->setVisible(true);

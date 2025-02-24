@@ -3,48 +3,17 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StyledIconEngine.h"
-#include "StyledIcon.h"
 
 #include <QDebug>
 #include <QPainter>
 #include <QStyleHints>
-#include <windows.h>
-
-#include "actions/ColorAction.h"
 
 namespace mv::util
 {
 
-StyledIconEngine::StyledIconEngine(StyledIcon& styledIcon) :
-    _styledIcon(styledIcon),
-    _mode(StyledIconMode::ThemeAware),
-    _colorGroupLightTheme(QPalette::ColorGroup::Normal),
-    _colorGroupDarkTheme(QPalette::ColorGroup::Normal),
-	_colorRoleLightTheme(QPalette::ColorRole::Text),
-	_colorRoleDarkTheme(QPalette::ColorRole::Text)
+StyledIconEngine::StyledIconEngine(const StyledIconSettings& styledIconSettings) :
+    _iconSettings(styledIconSettings)
 {
-    _styledIcon._iconEngine = this;
-}
-
-StyledIconEngine::StyledIconEngine(StyledIcon& styledIcon, const QString& sha, const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme) :
-    _styledIcon(styledIcon),
-    _sha(sha),
-    _mode(StyledIconMode::ThemeAware),
-    _colorGroupLightTheme(colorGroupLightTheme),
-    _colorGroupDarkTheme(colorGroupDarkTheme),
-    _colorRoleLightTheme(colorRoleLightTheme),
-    _colorRoleDarkTheme(colorRoleDarkTheme)
-{
-}
-
-StyledIconEngine::StyledIconEngine(const StyledIconEngine& other) :
-    StyledIconEngine(other._styledIcon, other._sha, other._colorGroupLightTheme, other._colorGroupDarkTheme, other._colorRoleLightTheme, other._colorRoleDarkTheme)
-{
-}
-
-StyledIconEngine::~StyledIconEngine()
-{
-    _styledIcon._iconEngine = nullptr;
 }
 
 void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state)
@@ -53,14 +22,14 @@ void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode m
 
 QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
-    if (StyledIcon::pixmaps.contains(_sha)) {
-	    auto pixmap = StyledIcon::pixmaps[_sha];
+    if (StyledIcon::pixmaps.contains(_iconSettings._sha)) {
+	    auto pixmap = StyledIcon::pixmaps[_iconSettings._sha];
 
     	if (!pixmap.isNull()) {
-		    switch (_mode) {
+		    switch (_iconSettings._mode) {
                 case StyledIconMode::ThemeAware:
                 {
-                    const auto recolorColor     = qApp->palette().color(getColorGroupForCurrentTheme(), getColorRoleForCurrentTheme());
+                    const auto recolorColor     = qApp->palette().color(_iconSettings.getColorGroupForCurrentTheme(), _iconSettings.getColorRoleForCurrentTheme());
                     const auto recoloredPixmap  = recolorPixmap(pixmap, recolorColor);
                     const auto recoloredIcon    = QIcon(recoloredPixmap);
 
@@ -69,7 +38,7 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 
                 case StyledIconMode::FixedColor:
                 {
-                    const auto recoloredPixmap  = recolorPixmap(pixmap, _fixedColor);
+                    const auto recoloredPixmap  = recolorPixmap(pixmap, _iconSettings._fixedColor);
                     const auto recoloredIcon    = QIcon(recoloredPixmap);
 
                     return recoloredIcon.pixmap(size, mode, state);
@@ -123,6 +92,9 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
             //    }
             //}
     	}
+        else {
+            qWarning() << "StyledIconEngine::pixmap() - pixmap is null" << _iconSettings._sha;
+        }
     }
 
 	return {};
@@ -144,16 +116,6 @@ QPixmap StyledIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& col
     painter.end();
 
     return { QPixmap::fromImage(image) };
-}
-
-QPalette::ColorGroup StyledIconEngine::getColorGroupForCurrentTheme() const
-{
-    return mv::theme().isSystemDarkColorSchemeActive() ? _colorGroupDarkTheme : _colorGroupLightTheme;
-}
-
-QPalette::ColorRole StyledIconEngine::getColorRoleForCurrentTheme() const
-{
-    return mv::theme().isSystemDarkColorSchemeActive() ? _colorRoleDarkTheme : _colorRoleLightTheme;
 }
 
 }

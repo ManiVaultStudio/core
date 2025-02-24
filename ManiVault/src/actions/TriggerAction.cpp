@@ -40,7 +40,7 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 //    setIconSize(QSize(12, 12));
 //#endif
 
-    //setIconSize(QSize(12, 12));
+    setIconSize(QSize(12, 12));
 
     //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 

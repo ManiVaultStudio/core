@@ -63,11 +63,6 @@ QString PresetsAction::getPresetType() const
     return _presetType;
 }
 
-const util::StyledIcon& PresetsAction::getIcon() const
-{
-    return _icon;
-}
-
 QStandardItemModel& PresetsAction::getModel()
 {
     return _model;
@@ -373,13 +368,6 @@ void PresetsAction::updateModel()
 
     setHeader(Column::Name);
     setHeader(Column::DateTime);
-}
-
-void PresetsAction::setIcon(const QIcon& icon)
-{
-    _icon.fromQIcon(icon);
-
-    updateModel();
 }
 
 const QVariantMap& PresetsAction::getPresets() const

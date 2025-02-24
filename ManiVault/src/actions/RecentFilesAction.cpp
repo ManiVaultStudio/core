@@ -157,7 +157,7 @@ void RecentFilesAction::Model::loadFromSettings()
         if (!QFileInfo(filePath).exists())
             continue;
 
-        auto filePathItem = new QStandardItem(_recentFilesAction->getIcon(), filePath);
+        auto filePathItem = new QStandardItem(_recentFilesAction->icon(), filePath);
         auto dateTimeItem = new QStandardItem(dateTime.toString("ddd MMMM d yy"));
 
         dateTimeItem->setData(dateTime, Qt::EditRole);
@@ -166,7 +166,7 @@ void RecentFilesAction::Model::loadFromSettings()
 
         auto recentFilePathAction = new TriggerAction(this, filePath);
 
-        recentFilePathAction->setIcon(_recentFilesAction->getIcon());
+        recentFilePathAction->setIcon(_recentFilesAction->icon());
 
         connect(recentFilePathAction, &TriggerAction::triggered, this, [this, filePath]() -> void {
             emit _recentFilesAction->triggered(filePath);
@@ -252,7 +252,7 @@ RecentFilesAction::Dialog::Dialog(RecentFilesAction* recentFilePathsAction) :
     _okAction(this, "Ok")
 {
     setModal(true);
-    setWindowIcon(recentFilePathsAction->getIcon());
+    setWindowIcon(recentFilePathsAction->icon());
     setWindowTitle(QString("Edit recent %1s").arg(recentFilePathsAction->getFileType().toLower()));
 
     auto layout = new QVBoxLayout();

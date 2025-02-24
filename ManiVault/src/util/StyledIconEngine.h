@@ -28,30 +28,10 @@ class CORE_EXPORT StyledIconEngine : public QIconEngine
 public:
 
     /**
-     * Construct from \p namedIcon
-     * @param styledIcon Reference to styled icon
+     * Construct from \p styledIconSettings
+     * @param styledIconSettings Reference to styled icon settings
      */
-    StyledIconEngine(StyledIcon& styledIcon);
-
-    /**
-     * Construct from parameters
-     * @param styledIcon Reference to styled icon
-     * @param sha SHA of the icon
-     * @param colorGroupLightTheme Color group for light theme
-     * @param colorGroupDarkTheme Color group for dark theme
-     * @param colorRoleLightTheme Color role for light theme
-     * @param colorRoleDarkTheme Color role for dark theme
-     */
-    StyledIconEngine(StyledIcon& styledIcon, const QString& sha, const QPalette::ColorGroup& colorGroupLightTheme, const QPalette::ColorGroup& colorGroupDarkTheme, const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
-
-    /**
-     * Copy construct from \p other
-     * @param other Other theme icon engine to copy from
-     */
-    StyledIconEngine(const StyledIconEngine& other);
-
-    /** No need for custom destructor */
-    ~StyledIconEngine() override;
+    StyledIconEngine(const StyledIconSettings& styledIconSettings);
 
     /**
      * Paint the icon
@@ -87,27 +67,8 @@ private:
      */
     static QPixmap recolorPixmap(const QPixmap& pixmap, const QColor& color);
 
-    /**
-     * Get color group for current theme
-     * @return Color group for current theme
-     */
-    QPalette::ColorGroup getColorGroupForCurrentTheme() const;
-
-    /**
-     * Get color role for current theme
-     * @return Color role for current theme
-     */
-    QPalette::ColorRole getColorRoleForCurrentTheme() const;
-
 private:
-    StyledIcon&             _styledIcon;                /** Reference to styled icon */
-    QString                 _sha;                       /** NamedIcons::icons key */
-    StyledIconMode          _mode;                      /** Styled icon coloring mode */
-    QPalette::ColorGroup    _colorGroupLightTheme;      /** Color group for light theme */
-    QPalette::ColorGroup    _colorGroupDarkTheme;       /** Color group for dark theme */
-    QPalette::ColorRole     _colorRoleLightTheme;       /** Color role for light theme */
-    QPalette::ColorRole     _colorRoleDarkTheme;        /** Color role for dark theme */
-    QColor                  _fixedColor;                /** Fixed color */
+    StyledIconSettings      _iconSettings;      /** Icon settings */
 
     friend class StyledIcon;
 };

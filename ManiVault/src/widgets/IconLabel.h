@@ -34,10 +34,10 @@ public:
 
     /**
      * Construct from \p icon and \p parent widget
-     * @param icon Styled icon
+     * @param icon Icon
      * @param parent Pointer to parent widget
      */
-    IconLabel(const util::StyledIcon& icon, QWidget* parent = nullptr);
+    IconLabel(const QIcon& icon, QWidget* parent = nullptr);
 
     /**
      * Set the tooltip callback

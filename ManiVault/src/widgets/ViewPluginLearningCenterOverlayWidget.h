@@ -67,7 +67,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        virtual util::StyledIcon getIcon() const = 0;
+        virtual QIcon getIcon() const = 0;
 
         /**
          * Determine whether the item should be visible or not
@@ -129,7 +129,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not
@@ -163,7 +163,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not
@@ -194,7 +194,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not
@@ -225,7 +225,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not
@@ -256,7 +256,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not
@@ -287,7 +287,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not
@@ -318,7 +318,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not
@@ -349,7 +349,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not
@@ -380,7 +380,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not
@@ -418,7 +418,7 @@ protected:
          * Get icon
          * @return Icon
          */
-        util::StyledIcon getIcon() const override;
+        QIcon getIcon() const override;
 
         /**
          * Determine whether the item should be visible or not

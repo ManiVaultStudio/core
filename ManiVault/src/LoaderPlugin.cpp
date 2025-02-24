@@ -12,6 +12,7 @@
 #include <QString>
 
 using namespace mv::gui;
+using namespace mv::util;
 
 namespace mv::plugin {
 
@@ -33,7 +34,7 @@ QString LoaderPlugin::AskForFileName(const QString& fileNameFilter) const
 
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const Datasets& datasets) const
 {
-    return { new PluginTriggerAction(const_cast<LoaderPluginFactory*>(this), this, QString("%1").arg(getKind()), QString("Load %1").arg(getKind()), getIcon()) };
+    return { new PluginTriggerAction(const_cast<LoaderPluginFactory*>(this), this, QString("%1").arg(getKind()), QString("Load %1").arg(getKind()), StyledIcon(icon())) };
 }
 
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const DataTypes& dataTypes) const

@@ -42,12 +42,12 @@ IconPickerAction::IconPickerAction(QObject* parent, const QString& title) :
     _inputFilePathPickerAction.setDefaultWidgetFlags(FilePickerAction::WidgetFlag::PushButton);
 }
 
-const util::StyledIcon& IconPickerAction::getIcon() const
+const QIcon& IconPickerAction::getIcon() const
 {
-    return _iconAction.getIcon();
+    return _iconAction.icon();
 }
 
-void IconPickerAction::setIcon(const util::StyledIcon& icon)
+void IconPickerAction::setIcon(const QIcon& icon)
 {
     _iconAction.setIcon(icon);
 }

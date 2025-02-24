@@ -9,7 +9,7 @@ namespace mv::gui
 {
 
 TasksSettingsAction::TasksSettingsAction(QObject* parent) :
-    GlobalSettingsGroupAction(parent, "list-check"),
+    GlobalSettingsGroupAction(parent, "Tasks"),
     _hideForegroundTasksPopupAction(this, "Hide foreground tasks popup")
 {
     setShowLabels(false);

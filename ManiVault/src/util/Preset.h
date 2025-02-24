@@ -6,8 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "util/StyledIcon.h"
-
 #include <QString>
 #include <QMap>
 
@@ -65,7 +63,7 @@ public:
      * Get icon
      * @return Icon
      */
-    StyledIcon getIcon() const;
+    QIcon getIcon() const;
 
     /**
      * Get is divergent

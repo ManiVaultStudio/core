@@ -121,7 +121,14 @@ public:
         /** Re-styles all widgets so they are properly styled */
         static void restyleAllWidgets()
         {
-            for (auto widget : QApplication::allWidgets()) {
+            QList<QWidget*> allWidgets;
+
+            for (QWidget* window : QApplication::topLevelWidgets()) {
+                allWidgets.append(window);
+                allWidgets.append(window->findChildren<QWidget*>());
+            }
+
+            for (auto widget : allWidgets) {
                 widget->style()->unpolish(widget);
                 widget->style()->polish(widget);
                 widget->update();

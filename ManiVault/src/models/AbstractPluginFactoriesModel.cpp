@@ -45,7 +45,7 @@ QVariant AbstractPluginFactoriesModel::NameItem::data(int role /*= Qt::UserRole 
             return QString("%1").arg(data(Qt::DisplayRole).toString());
 
         case Qt::DecorationRole:
-            return getPluginFactory() ? StyledIcon(getPluginFactory()->getIcon()) : StyledIcon();
+            return getPluginFactory() ? StyledIcon(getPluginFactory()->icon()) : QIcon();
 
         default:
             break;

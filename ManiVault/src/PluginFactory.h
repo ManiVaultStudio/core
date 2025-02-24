@@ -74,7 +74,7 @@ public:
      * Get plugin category icon
      * @return Category icon
      */
-    const util::StyledIcon& getCategoryIcon() const;
+    const QIcon& getCategoryIcon() const;
 
 protected:
 
@@ -393,7 +393,7 @@ private:
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
     bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
     PluginMetadata                          _pluginMetadata;                        /** Plugin metadata */
-	util::StyledIcon                        _categoryIcon;                          /** Category icon */
+	QIcon                                   _categoryIcon;                          /** Category icon */
 };
 
 }

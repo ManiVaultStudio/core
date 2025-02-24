@@ -176,7 +176,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
     for (auto viewPluginFactory : plugins().getPluginFactoriesByType(plugin::Type::LOADER)) {
         const auto subtitle = QString("Import data into new project with %1").arg(viewPluginFactory->getKind());
 
-        PageAction fromDataPageAction(viewPluginFactory->getIcon(), viewPluginFactory->getKind(), subtitle, subtitle, "", [viewPluginFactory]() -> void {
+        PageAction fromDataPageAction(StyledIcon(viewPluginFactory->icon()), viewPluginFactory->getKind(), subtitle, subtitle, "", [viewPluginFactory]() -> void {
             projects().newProject(Qt::AlignRight);
             plugins().requestPlugin(viewPluginFactory->getKind());
         });

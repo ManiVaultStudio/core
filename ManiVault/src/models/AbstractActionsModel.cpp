@@ -220,8 +220,8 @@ QVariant AbstractActionsModel::ForceDisabledItem::data(int role /*= Qt::UserRole
         case Qt::EditRole:
             return getAction()->getForceDisabled();
 
-        case Qt::DecorationRole:
-            return StyledIcon("lock");
+    case Qt::DecorationRole:
+            return QIcon(StyledIcon("lock"));
 
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
@@ -270,7 +270,7 @@ QVariant AbstractActionsModel::ForceHiddenItem::data(int role /*= Qt::UserRole +
             return getAction()->getForceHidden();
 
         case Qt::DecorationRole:
-            return StyledIcon("eye-slash");
+            return QIcon(StyledIcon("eye-slash"));
 
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;

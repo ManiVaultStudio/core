@@ -17,7 +17,7 @@ using namespace mv::util;
 namespace mv::gui {
 
 PluginStatusBarAction::PluginStatusBarAction(QObject* parent, const QString& title, const QString& pluginKind /*= ""*/) :
-    StatusBarAction(parent, title, mv::plugins().isPluginLoaded(pluginKind) ? StyledIcon(mv::plugins().getPluginFactory(pluginKind)->getIcon()) : StyledIcon()),
+    StatusBarAction(parent, title, mv::plugins().isPluginLoaded(pluginKind) ? StyledIcon(mv::plugins().getPluginFactory(pluginKind)->icon()) : StyledIcon()),
     _pluginKind(pluginKind),
     _conditionallyVisibleAction(this, "Only visible when instantiated", true)
 {

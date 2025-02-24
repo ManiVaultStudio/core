@@ -42,6 +42,12 @@ public:
     ~Plugin() override;
 
     /**
+     * Get icon
+     * @return Icon
+     */
+    QIcon icon() const;
+
+    /**
      * Can be implemented to initialize the plugin to a certain state.
      * This function gets called when the plugin is first instantiated.
      */
@@ -58,9 +64,6 @@ public:
 
     /** Returns the GUI name of this plugin */
     QString getGuiName() const;
-
-    /** Returns the icon of this plugin */
-    const util::StyledIcon& getIcon() const override;
 
     /**
      * Returns the kind of plugin. The kind is specific to the
