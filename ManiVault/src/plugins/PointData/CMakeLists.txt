@@ -1,26 +1,9 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 set(POINTDATA "PointData")
 PROJECT(${POINTDATA})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-endif(MSVC)
-
-# Check if the directory to the ManiVault installation has been provided
-if(NOT DEFINED MV_INSTALL_DIR)
-    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is installed")
-    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is installed")
-endif()
-file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
-
-find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
 set(POINTS_SOURCES
     src/PointData.h
@@ -95,15 +78,6 @@ set(ACTIONS_SOURCES
     src/ModelResetter.cpp
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/PointData.h
-    src/ProxyDatasetsAction.h
-    src/EditProxyDatasetsAction.h
-    src/CreateSetFromSelectionAction.h
-    src/DimensionPickerAction.h
-    src/DimensionsPickerAction.h
-)
-
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 
@@ -111,13 +85,10 @@ add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
-qt_wrap_cpp(POINTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${POINTDATA})
-target_sources(${POINTDATA} PRIVATE ${POINTDATA_MOC})
-
 target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
 
-target_compile_features(${POINTDATA} PRIVATE cxx_std_17)
+target_compile_features(${POINTDATA} PRIVATE cxx_std_20)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
@@ -142,10 +113,10 @@ endif()
 
 if(MV_UNITY_BUILD)
     set_target_properties(${POINTDATA} PROPERTIES UNITY_BUILD ON)
-    set_source_files_properties(${POINTDATA_MOC} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
+set_target_properties(${POINTDATA} PROPERTIES AUTOMOC ON)
 
 install(TARGETS ${POINTDATA}
     EXPORT "ManiVaultPublicExport"

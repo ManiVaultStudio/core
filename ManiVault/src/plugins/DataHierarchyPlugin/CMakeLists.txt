@@ -1,36 +1,11 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 set(DATAHIERARCHYPLUGIN "DataHierarchyPlugin")
 PROJECT(${DATAHIERARCHYPLUGIN})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-endif(MSVC)
-
-# Check if the directory to the ManiVault installation has been provided
-if(NOT DEFINED MV_INSTALL_DIR)
-    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is installed")
-    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is installed")
-endif()
-file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
-
-find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
-
 set(PLUGIN
     src/DataHierarchyPlugin.h
     src/DataHierarchyPlugin.cpp
-)
-
-set(PLUGIN_MOC_HEADERS
-    src/DataHierarchyPlugin.h
-    src/UnhideAction.h
-    src/StatisticsAction.h
 )
 
 set(ACTIONS
@@ -65,12 +40,9 @@ source_group(Aux FILES ${AUX})
 
 add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
 
-qt_wrap_cpp(DATAHIERARCHY_MOC ${PLUGIN_MOC_HEADERS} TARGET ${DATAHIERARCHYPLUGIN})
-target_sources(${DATAHIERARCHYPLUGIN} PRIVATE ${DATAHIERARCHY_MOC})
-
 target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_17)
+target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_20)
 
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
@@ -79,10 +51,10 @@ target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${DATAHIERARCHYPLUGIN} ${MV_USE_AVX})
 
+set_target_properties(${DATAHIERARCHYPLUGIN} PROPERTIES AUTOMOC ON)
+
 if(MV_UNITY_BUILD)
     set_target_properties(${DATAHIERARCHYPLUGIN} PROPERTIES UNITY_BUILD ON)
-    set_source_files_properties(${DATAHIERARCHY_MOC} PROPERTIES
-    SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
 
 install(TARGETS ${DATAHIERARCHYPLUGIN}
@@ -99,6 +71,6 @@ add_custom_command(TARGET ${DATAHIERARCHYPLUGIN} POST_BUILD
 
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
-    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug,${MV_INSTALL_DIR}/release>)
-    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug/${MV_APPLICATION_NAME}.exe,${MV_INSTALL_DIR}/release/${MV_APPLICATION_NAME}.exe>)
+    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>)
+    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${MV_INSTALL_DIR}/Debug/${MV_APPLICATION_NAME}.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${MV_INSTALL_DIR}/RelWithDebInfo/${MV_APPLICATION_NAME}.exe","${MV_INSTALL_DIR}/Release/${MV_APPLICATION_NAME}.exe">>)
 endif()
