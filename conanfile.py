@@ -177,11 +177,11 @@ class HdpsCoreConan(ConanFile):
             self.build_folder,
         )
 
-        cmake = self._configure_cmake()
-        print("**** Build RELWITHDEBINFO *****")
-        cmake.build(build_type="RelWithDebInfo")
-        print("**** Install RELWITHDEBINFO *****")
-        cmake.install(build_type="RelWithDebInfo")
+        #cmake = self._configure_cmake()
+        #print("**** Build RELWITHDEBINFO *****")
+        #cmake.build(build_type="RelWithDebInfo")
+        #print("**** Install RELWITHDEBINFO *****")
+        #cmake.install(build_type="RelWithDebInfo")
 
         # cmake_release = self._configure_cmake()
         print("**** Build RELEASE *****")
@@ -214,26 +214,26 @@ class HdpsCoreConan(ConanFile):
         if False == self.options.macos_bundle and self.settings.os == "Macos":
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
-            shutil.rmtree(str(pathlib.Path(self.install_dir, "RelWithDebInfo/ManiVault Studio.app")))
+            #shutil.rmtree(str(pathlib.Path(self.install_dir, "RelWithDebInfo/ManiVault Studio.app")))
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/ManiVault Studio.app")))
         elif self.settings.os == "Macos":
             # also remove Release even in bundle build to keep package size down
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/ManiVault Studio.app")))
 
         # Add the pdb files next to the libs for RelWithDebInfo linking
-        if tools.os_info.is_windows:
-            pdb_dest = pathlib.Path(self.install_dir, "RelWithDebInfo/lib")
-            # pdb_dest.mkdir()
-            pdb_files = pathlib.Path(self.build_folder).glob("hdps/RelWithDebInfo/*.pdb")
-            for pfile in pdb_files:
-                shutil.copy(pfile, pdb_dest)
+        #if tools.os_info.is_windows:
+        #    pdb_dest = pathlib.Path(self.install_dir, "RelWithDebInfo/lib")
+        #    # pdb_dest.mkdir()
+        #    pdb_files = pathlib.Path(self.build_folder).glob("hdps/RelWithDebInfo/*.pdb")
+        #    for pfile in pdb_files:
+        #        shutil.copy(pfile, pdb_dest)
 
         self.copy(pattern="*", src=self.install_dir, symlinks=True)
 
     def package_info(self):
-        self.cpp_info.relwithdebinfo.libdirs = ["RelWithDebInfo/lib"]
-        self.cpp_info.relwithdebinfo.bindirs = ["RelWithDebInfo/Plugins", "RelWithDebInfo"]
-        self.cpp_info.relwithdebinfo.includedirs = ["RelWithDebInfo/include", "RelWithDebInfo"]
+        #self.cpp_info.relwithdebinfo.libdirs = ["RelWithDebInfo/lib"]
+        #self.cpp_info.relwithdebinfo.bindirs = ["RelWithDebInfo/Plugins", "RelWithDebInfo"]
+        #self.cpp_info.relwithdebinfo.includedirs = ["RelWithDebInfo/include", "RelWithDebInfo"]
         self.cpp_info.release.libdirs = ["Release/lib"]
         self.cpp_info.release.bindirs = ["Release/Plugins", "Release"]
         self.cpp_info.release.includedirs = ["Release/include", "Release"]
