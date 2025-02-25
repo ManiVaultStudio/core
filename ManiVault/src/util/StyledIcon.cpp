@@ -224,15 +224,15 @@ StyledIcon& StyledIcon::withColorGroups(const QPalette::ColorGroup& colorGroupLi
 
 StyledIcon& StyledIcon::withColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme)
 {
-    _iconSettings._colorRoleLightTheme = colorRoleLightTheme;
+    _iconSettings._colorRoleLightTheme  = colorRoleLightTheme;
     _iconSettings._colorRoleDarkTheme   = colorRoleDarkTheme;
 
     return *this;
 }
 
-StyledIcon& StyledIcon::withBadge(const Badge& badge)
+StyledIcon& StyledIcon::withBadge(const Badge::Parameters& badgeParameters)
 {
-    //_badge = badge;
+    _iconSettings._badgeParameters = badgeParameters;
 
     return *this;
 }
@@ -340,20 +340,20 @@ QString StyledIcon::getIconCharacter(const QString& iconName, const QString& ico
     return "";
 }
 
-//Badge& StyledIcon::getBadge()
-//{
-//    return _badge;
-//}
-//
-//void StyledIcon::setBadgeEnabled(bool badgeEnabled)
-//{
-//    _badge.setEnabled(badgeEnabled);
-//}
-//
-//bool StyledIcon::isBadgeEnabled() const
-//{
-//    return _badge.getEnabled();
-//}
+Badge::Parameters StyledIcon::getBadge() const
+{
+    return _iconSettings._badgeParameters;
+}
+
+void StyledIcon::setBadgeEnabled(bool badgeEnabled)
+{
+	_iconSettings._badgeParameters._enabled = badgeEnabled;
+}
+
+bool StyledIcon::isBadgeEnabled() const
+{
+    return _iconSettings._badgeParameters._enabled;
+}
 
 QString StyledIcon::getIconFontResourceName(const QString& iconFontName, const Version& iconFontVersion)
 {

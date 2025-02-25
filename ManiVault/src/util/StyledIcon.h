@@ -77,7 +77,6 @@ public:
         _iconFontName       = other._iconFontName;
         _iconFontVersion    = other._iconFontVersion;
         _iconSettings       = other._iconSettings;
-        //_badge              = other._badge;
 
         return *this;
     }
@@ -131,11 +130,11 @@ public:
     StyledIcon& withColorRoles(const QPalette::ColorRole& colorRoleLightTheme, const QPalette::ColorRole& colorRoleDarkTheme);
 
     /**
-     * Return styled icon with \p badge
-     * @param badge Badge
+     * Return styled icon with \p badge parameters
+     * @param badgeParameters Badge parameters
      * @return Reference to changed styled icon
      */
-    StyledIcon& withBadge(const util::Badge& badge);
+    StyledIcon& withBadge(const Badge::Parameters& badgeParameters);
 
     /**
      * Return styled icon with changed \p color
@@ -225,19 +224,19 @@ public: // Badge
      * Get badge
      * @return Badge
      */
-    //Badge& getBadge();
+    Badge::Parameters getBadge() const;
 
     /**
      * Set badge enabled to \p badgeEnabled
      * @param badgeEnabled Badge enabled
      */
-    //void setBadgeEnabled(bool badgeEnabled);
+    void setBadgeEnabled(bool badgeEnabled);
 
     /**
      * Get badge enabled
      * @return Badge enabled
      */
-    //bool isBadgeEnabled() const;
+    bool isBadgeEnabled() const;
 
 private:
 
@@ -265,7 +264,6 @@ private:
     QString                 _iconFontName;      /** Name of the icon font */
     Version                 _iconFontVersion;   /** Version of the icon font */
     StyledIconSettings      _iconSettings;      /** Icon settings */
-    //Badge               _badge;             /** Badge */
 
 protected:
 	static QMap<QString, QVariantMap>       fontMetadata;               /** Font-specific metadata */

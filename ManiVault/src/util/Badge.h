@@ -28,6 +28,38 @@ class CORE_EXPORT Badge : public QObject
 
 public:
 
+    /** Badge parameters container struct */
+    struct Parameters
+    {
+        /**
+         * Construct with \p number, \p backgroundColor, \p foregroundColor, \p alignment and \p scale
+         * @param number Number displayed in the badge
+         * @param backgroundColor Background color the badge
+         * @param foregroundColor Foreground color the badge
+         * @param alignment Alignment of the badge
+         * @param scale Scale of the badge w.r.t. of its container
+         */
+        Parameters(std::uint32_t number = 0, const QColor& backgroundColor = Qt::red, const QColor& foregroundColor = Qt::white, Qt::Alignment alignment = Qt::AlignTop | Qt::AlignRight, float scale = 0.5f) :
+            _enabled(false),
+            _number(number),
+            _backgroundColor(backgroundColor),
+            _foregroundColor(foregroundColor),
+            _alignment(alignment),
+            _scale(scale)
+        {
+        }
+
+        bool            _enabled;               /** Whether the badge is enabled or not */
+        std::uint32_t   _number;                /** Badge number */
+        QColor          _backgroundColor;       /** Background color */
+        QColor          _foregroundColor;       /** Foreground (text) color */
+        Qt::Alignment   _alignment;             /** Badge alignment */
+        float           _scale;                 /** Badge scale w.r.t. its container */
+        QPixmap         _customPixmap;          /** Overrides the default pixmap */
+    };
+
+public:
+
     /**
      * Construct with pointer to \p parent object, badge \p number, \p backgroundColor, \p foregroundColor, \p alignment and \p badge scale
      * @param parent Pointer to parent object
@@ -46,22 +78,10 @@ public:
     QPixmap getPixmap() const;
 
     /**
-     * Assign \p other badge
-     * @param other Other badge
-     * @return Copied result
+     * Get parameters
+     * @return Badge parameters
      */
-    Badge& operator=(const Badge& other) {
-        
-        _enabled            = other._enabled;
-        _number             = other._number;
-        _backgroundColor    = other._backgroundColor;
-        _foregroundColor    = other._foregroundColor;
-        _alignment          = other._alignment;
-        _scale              = other._scale;
-        _customPixmap       = other._customPixmap;
-
-        return *this;
-    }
+    Parameters getParameters() const;
 
 public: // Getters and setters
 
@@ -197,13 +217,7 @@ signals:
     void changed();
 
 private:
-    bool            _enabled;               /** Whether the badge is enabled or not */
-    std::uint32_t   _number;                /** Badge number */
-    QColor          _backgroundColor;       /** Background color */
-    QColor          _foregroundColor;       /** Foreground (text) color */
-    Qt::Alignment   _alignment;             /** Badge alignment */
-    float           _scale;                 /** Badge scale w.r.t. its container */
-    QPixmap         _customPixmap;          /** Overrides the default pixmap */
+    Parameters _parameters; /** Badge parameters */
 };
 
 }

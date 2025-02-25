@@ -23,74 +23,85 @@ void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode m
 QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
     if (StyledIcon::pixmaps.contains(_iconSettings._sha)) {
-	    auto pixmap = StyledIcon::pixmaps[_iconSettings._sha];
+	    auto iconPixmap = StyledIcon::pixmaps[_iconSettings._sha].copy();
 
-    	if (!pixmap.isNull()) {
+        QPixmap result;
+
+    	if (!iconPixmap.isNull()) {
 		    switch (_iconSettings._mode) {
                 case StyledIconMode::ThemeAware:
                 {
                     const auto recolorColor     = qApp->palette().color(_iconSettings.getColorGroupForCurrentTheme(), _iconSettings.getColorRoleForCurrentTheme());
-                    const auto recoloredPixmap  = recolorPixmap(pixmap, recolorColor);
+                    const auto recoloredPixmap  = recolorPixmap(iconPixmap, recolorColor);
                     const auto recoloredIcon    = QIcon(recoloredPixmap);
 
-                    return recoloredIcon.pixmap(size, mode, state);
+                    result = recoloredIcon.pixmap(size, mode, state);
+
+                    break;
                 }
 
                 case StyledIconMode::FixedColor:
                 {
-                    const auto recoloredPixmap  = recolorPixmap(pixmap, _iconSettings._fixedColor);
+                    const auto recoloredPixmap  = recolorPixmap(iconPixmap, _iconSettings._fixedColor);
                     const auto recoloredIcon    = QIcon(recoloredPixmap);
 
-                    return recoloredIcon.pixmap(size, mode, state);
+                    result = recoloredIcon.pixmap(size, mode, state);
+
+                    break;
                 }
 		    }
             
+            auto& badgeParameters = _iconSettings._badgeParameters;
 
-            //if (_styledIcon.getBadge().getEnabled()) {
-            //    std::int32_t iconMargin = 0;
+            if (badgeParameters._enabled) {
+                std::int32_t iconMargin = 0;
 
-            //    const auto iconPixmapSize       = size + QSize(2 * iconMargin, 2 * iconMargin);
-            //    const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), iconPixmapSize);
-            //    const auto badgePixmap          = _styledIcon.getBadge().getPixmap();
-            //    const auto badgeRectangle       = QRectF(QPoint(0, 0), badgePixmap.size());
+                const auto iconPixmapSize       = size + QSize(2 * iconMargin, 2 * iconMargin);
+                const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), iconPixmapSize);
+                const auto badgePixmap          = badgeParameters._customPixmap.isNull() ? gui::createNumberBadgeOverlayPixmap(badgeParameters._number, Qt::red, badgeParameters._foregroundColor) : badgeParameters._customPixmap;
+                const auto badgeRectangle       = QRectF(QPoint(0, 0), badgePixmap.size());
 
-            //    QPixmap iconPixmap(iconPixmapSize);
+                QPixmap badgeIconPixmap(iconPixmapSize);
 
-            //    iconPixmap.fill(Qt::transparent);
+                badgeIconPixmap.fill(Qt::transparent);
 
-            //    QPainter iconPixmapPainter(&iconPixmap);
+                QPainter badgeIconPixmapPainter(&badgeIconPixmap);
 
-            //    iconPixmapPainter.setRenderHint(QPainter::Antialiasing);
-            //    iconPixmapPainter.drawPixmap(QRectF(QPoint(iconMargin, iconMargin), iconPixmapSize), pixmap, iconPixmapRectangle);
+                badgeIconPixmapPainter.setRenderHint(QPainter::Antialiasing);
+                badgeIconPixmapPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+            	badgeIconPixmapPainter.drawPixmap(QRectF(QPoint(iconMargin, iconMargin), iconPixmapSize), result, iconPixmapRectangle);
+                
 
-            //    if (_styledIcon.getBadge().getEnabled()) {
-            //        const auto badgeScale           = _styledIcon.getBadge().getScale();
-            //        const auto scaledIconPixmapSize = badgeScale * iconPixmapSize;
-            //        const auto badgeAlignment       = _styledIcon.getBadge().getAlignment();
+                const auto badgeScale           = badgeParameters._scale;
+                const auto scaledIconPixmapSize = badgeScale * iconPixmapSize;
+                const auto badgeAlignment       = badgeParameters._alignment;
 
-            //        QPoint origin;
+                QPoint origin;
 
-            //        if (badgeAlignment & Qt::AlignTop)
-            //            origin.setY(0);
+                if (badgeAlignment & Qt::AlignTop)
+                    origin.setY(0);
 
-            //        if (badgeAlignment & Qt::AlignVCenter)
-            //            origin.setY((0.5 * iconPixmapSize.height()) - ((0.5 * badgeScale) * iconPixmapSize.height()));
+                if (badgeAlignment & Qt::AlignVCenter)
+                    origin.setY((0.5 * iconPixmapSize.height()) - ((0.5 * badgeScale) * iconPixmapSize.height()));
 
-            //        if (badgeAlignment & Qt::AlignBottom)
-            //            origin.setY((1.0f - badgeScale) * iconPixmapSize.height());
+                if (badgeAlignment & Qt::AlignBottom)
+                    origin.setY((1.0f - badgeScale) * iconPixmapSize.height());
 
-            //        if (badgeAlignment & Qt::AlignLeft)
-            //            origin.setX(0);
+                if (badgeAlignment & Qt::AlignLeft)
+                    origin.setX(0);
 
-            //        if (badgeAlignment & Qt::AlignHCenter)
-            //            origin.setX((0.5 * iconPixmapSize.width()) - ((0.5 * badgeScale) * iconPixmapSize.width()));
+                if (badgeAlignment & Qt::AlignHCenter)
+                    origin.setX((0.5 * iconPixmapSize.width()) - ((0.5 * badgeScale) * iconPixmapSize.width()));
 
-            //        if (badgeAlignment & Qt::AlignRight)
-            //            origin.setX((1.0f - badgeScale) * iconPixmapSize.width());
+                if (badgeAlignment & Qt::AlignRight)
+                    origin.setX((1.0f - badgeScale) * iconPixmapSize.width());
 
-            //        iconPixmapPainter.drawPixmap(QRectF(origin, scaledIconPixmapSize), badgePixmap, badgeRectangle);
-            //    }
-            //}
+                badgeIconPixmapPainter.drawPixmap(QRectF(origin, scaledIconPixmapSize), badgePixmap, badgeRectangle);
+
+                return badgeIconPixmap;
+            }
+
+            return result;
     	}
         else {
             qWarning() << "StyledIconEngine::pixmap() - pixmap is null" << _iconSettings._sha;
