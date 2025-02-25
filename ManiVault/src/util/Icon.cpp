@@ -137,6 +137,9 @@ QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColo
     QPainter badgePixmapPainter(&badgePixmap);
 
     badgePixmapPainter.setRenderHint(QPainter::Antialiasing);
+    badgePixmapPainter.setRenderHint(QPainter::Antialiasing);
+    badgePixmapPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    badgePixmapPainter.setRenderHint(QPainter::LosslessImageRendering, true);
 
     badgePixmapPainter.setPen(QPen(backgroundColor, 100, Qt::SolidLine, Qt::RoundCap));
     badgePixmapPainter.drawPoint(QPoint(50, 50));

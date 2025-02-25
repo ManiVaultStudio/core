@@ -265,7 +265,7 @@ void ViewPluginLearningCenterOverlayWidget::collapse()
         _toolbarItemWidget->getWidgetFader().fadeOut(animationDuration, true);
 }
 
-ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(14, 14)*/) :
+ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(16, 16)*/) :
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
     _iconSize(iconSize),
@@ -274,6 +274,7 @@ ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolba
     setObjectName("ToolbarItemWidget");
 
     _iconLabel.setAlignment(Qt::AlignCenter);
+    _iconLabel.setFixedSize(QSize(20, 20));
 
     constexpr auto margin = 3;
 
@@ -311,11 +312,9 @@ void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::hideEvent
 
 void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateIcon()
 {
-    _iconLabel.setFixedSize(QSize(16, 16));
-
     const auto icon = StyledIcon(getIcon()).withColorGroups(QPalette::ColorGroup::Normal, QPalette::ColorGroup::Normal).withColorRoles(QPalette::ColorRole::Text, QPalette::ColorRole::Text);
 
-    _iconLabel.setPixmap(QIcon(icon).pixmap(_iconSize));
+    _iconLabel.setPixmap(getIcon().pixmap(_iconSize));
 }
 
 WidgetFader& ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::getWidgetFader()
@@ -364,15 +363,6 @@ QIcon ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::ge
 bool ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::shouldDisplay() const
 {
     return getViewPlugin()->getLearningCenterAction().getToolbarVisibleAction().isChecked();
-}
-
-void ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::updateIcon()
-{
-    _iconLabel.setFixedSize(QSize(16, 16));
-
-    const auto icon = StyledIcon(getIcon());//.withColorGroups(QPalette::ColorGroup::Normal, QPalette::ColorGroup::Normal).withColorRoles(QPalette::ColorRole::Text, QPalette::ColorRole::Text);
-
-    _iconLabel.setPixmap(QIcon(icon).pixmap(_iconSize));
 }
 
 ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::VideosToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget) :
@@ -448,7 +438,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::getIcon
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return StyledIcon("user-graduate");//.withBadge(badge);
+    return StyledIcon("user-graduate").withBadge(badge.getParameters());
 }
 
 bool ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::shouldDisplay() const

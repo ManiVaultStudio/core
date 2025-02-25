@@ -58,7 +58,7 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 
                 const auto iconPixmapSize       = size + QSize(2 * iconMargin, 2 * iconMargin);
                 const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), iconPixmapSize);
-                const auto badgePixmap          = badgeParameters._customPixmap.isNull() ? gui::createNumberBadgeOverlayPixmap(badgeParameters._number, Qt::red, badgeParameters._foregroundColor) : badgeParameters._customPixmap;
+                const auto badgePixmap          = badgeParameters._customPixmap.isNull() ? gui::createNumberBadgeOverlayPixmap(badgeParameters._number, badgeParameters._backgroundColor, badgeParameters._foregroundColor) : badgeParameters._customPixmap;
                 const auto badgeRectangle       = QRectF(QPoint(0, 0), badgePixmap.size());
 
                 QPixmap badgeIconPixmap(iconPixmapSize);
@@ -68,9 +68,10 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
                 QPainter badgeIconPixmapPainter(&badgeIconPixmap);
 
                 badgeIconPixmapPainter.setRenderHint(QPainter::Antialiasing);
-                badgeIconPixmapPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+                badgeIconPixmapPainter.setRenderHint(QPainter::Antialiasing);
+                badgeIconPixmapPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+                badgeIconPixmapPainter.setRenderHint(QPainter::LosslessImageRendering, true);
             	badgeIconPixmapPainter.drawPixmap(QRectF(QPoint(iconMargin, iconMargin), iconPixmapSize), result, iconPixmapRectangle);
-                
 
                 const auto badgeScale           = badgeParameters._scale;
                 const auto scaledIconPixmapSize = badgeScale * iconPixmapSize;
