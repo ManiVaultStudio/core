@@ -46,7 +46,7 @@ protected:
          * @param overlayWidget Pointer to overlay widget
          * @param iconSize Size of the item icon
          */
-        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize = QSize(14, 14));
+        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize = QSize(16, 16));
 
         /** Show only when required (when AbstractToolbarItemWidget::shouldDisplay() returns true) */
         void showConditionally();
@@ -136,9 +136,6 @@ protected:
          * @return Boolean determining whether the item should be visible or not
          */
         bool shouldDisplay() const override;
-
-        /** Updates the item icon (for badge update) */
-        void updateIcon() override;
     };
 
     /** Toolbar item widget for showing the view plugin related videos */
