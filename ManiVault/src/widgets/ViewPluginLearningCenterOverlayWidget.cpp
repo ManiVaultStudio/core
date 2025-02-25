@@ -677,7 +677,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
 	auto borderColor = qApp->palette().color(QPalette::ColorGroup::Inactive, QPalette::ColorRole::Text);
 
-    borderColor.setAlpha(30);
+    borderColor.setAlpha(15);
 
     QPixmap backgroundPixmap(size());
 
