@@ -105,7 +105,9 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif()
 
 # -----------------------------------------------------------------------------
@@ -167,6 +169,12 @@ CPMAddPackage(
 
 if(APPLE)
     set(CMAKE_XCODE_GENERATE_SCHEME ON)
+endif()
+
+if (MSVC)
+    target_compile_options(zlibstatic PRIVATE "$<IF:$<CONFIG:DEBUG>,/MDd,/MD>")
+    target_compile_options(QuaZip PRIVATE "$<IF:$<CONFIG:DEBUG>,/MDd,/MD>")
+    target_compile_options(qtadvanceddocking-qt6 PRIVATE "$<IF:$<CONFIG:DEBUG>,/MDd,/MD>")
 endif()
 
 # -----------------------------------------------------------------------------
