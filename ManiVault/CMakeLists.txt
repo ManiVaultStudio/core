@@ -171,12 +171,6 @@ if(APPLE)
     set(CMAKE_XCODE_GENERATE_SCHEME ON)
 endif()
 
-if (MSVC)
-    target_compile_options(zlibstatic PRIVATE "$<IF:$<CONFIG:DEBUG>,/MDd,/MD>")
-    target_compile_options(QuaZip PRIVATE "$<IF:$<CONFIG:DEBUG>,/MDd,/MD>")
-    target_compile_options(qtadvanceddocking-qt6 PRIVATE "$<IF:$<CONFIG:DEBUG>,/MDd,/MD>")
-endif()
-
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
