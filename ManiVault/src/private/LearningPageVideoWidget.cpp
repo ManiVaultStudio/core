@@ -136,15 +136,22 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     _index(index),
     _widgetOverlayer(this, this, parent),
     _opacityEffect(this),
-	_opacityAnimation(&_playIconLabel, "windowOpacity")
+	_opacityAnimation(&_opacityEffect, "opacity")
 {
     setObjectName("OverlayWidget");
-    //setGraphicsEffect(&_opacityEffect);
-    setAttribute(Qt::WA_TranslucentBackground);
+    setAutoFillBackground(true);
+    setBackgroundRole(QPalette::Window);
 
+    setGraphicsEffect(&_opacityEffect);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Widget);
+    setAttribute(Qt::WA_NoSystemBackground);
+
+
+    _opacityAnimation.setStartValue(0);
+    _opacityAnimation.setEndValue(1);
     _opacityAnimation.setDuration(200);
 
-    _opacityEffect.setOpacity(0);
+    //_opacityEffect.setOpacity(0);
 
     _mainLayout.setContentsMargins(4, 2, 4, 2);
 
@@ -187,6 +194,8 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
 
     setLayout(&_mainLayout);
 
+    this->installEventFilter(this);
+
     _playIconLabel.installEventFilter(this);
     _summaryIconLabel.installEventFilter(this);
     _dateIconLabel.installEventFilter(this);
@@ -216,9 +225,11 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
 
         case QEvent::Enter:
 	    {
+            if (target != this)
+                break;
+
             _opacityAnimation.stop();
-            _opacityAnimation.setStartValue(0);
-            _opacityAnimation.setEndValue(0.1);
+            _opacityAnimation.setDirection(QAbstractAnimation::Direction::Forward);
             _opacityAnimation.start();
 
             //updateStyle();
@@ -228,9 +239,11 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
 
         case QEvent::Leave:
         {
+            if (target != this)
+                break;
+
             _opacityAnimation.stop();
-            _opacityAnimation.setStartValue(0.1);
-            _opacityAnimation.setEndValue(0);
+            _opacityAnimation.setDirection(QAbstractAnimation::Direction::Backward);
             _opacityAnimation.start();
 
             //updateStyle();
@@ -247,15 +260,15 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
 
 void LearningPageVideoWidget::OverlayWidget::updateStyle()
 {
-    auto backgroundColor    = qApp->palette().color(QPalette::Normal, QPalette::Window);
-    auto borderColor        = qApp->palette().color(QPalette::Disabled, QPalette::Window);
+    //auto backgroundColor    = qApp->palette().color(QPalette::Normal, QPalette::Window);
+    //auto borderColor        = qApp->palette().color(QPalette::Disabled, QPalette::Window);
 
-    backgroundColor.setAlpha(200);
+    //backgroundColor.setAlpha(200);
 
-    setStyleSheet(QString("QWidget#OverlayWidget { \
-        background-color: %1; \
-        border: 1px solid %2; \
-    }").arg(backgroundColor.name(), borderColor.name())); // 
+    //setStyleSheet(QString("QWidget#OverlayWidget { \
+    //    background-color: %1; \
+    //    border: 1px solid %2; \
+    //}").arg(backgroundColor.name(), borderColor.name())); // 
 
     //auto colorEnter = getColorAsCssString(QColor(0, 0, 0, 150));
     //auto colorLeave = getColorAsCssString(QColor(0, 0, 0, 70));
