@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Badge.h"
+
 #include <QPalette>
 
 namespace mv::util
@@ -46,6 +48,7 @@ struct StyledIconSettings
     QPalette::ColorRole     _colorRoleLightTheme;       /** Color role for light theme */
     QPalette::ColorRole     _colorRoleDarkTheme;        /** Color role for dark theme */
     QColor                  _fixedColor;                /** Fixed color */
+    Badge::Parameters       _badgeParameters;           /** Badge parameters */
 };
 
 }

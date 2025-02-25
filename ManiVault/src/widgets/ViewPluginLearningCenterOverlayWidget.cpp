@@ -370,7 +370,7 @@ void ViewPluginLearningCenterOverlayWidget::LearningCenterToolbarItemWidget::upd
 {
     _iconLabel.setFixedSize(QSize(16, 16));
 
-    const auto icon = StyledIcon(getIcon()).withColorGroups(QPalette::ColorGroup::Normal, QPalette::ColorGroup::Normal).withColorRoles(QPalette::ColorRole::Text, QPalette::ColorRole::Text);
+    const auto icon = StyledIcon(getIcon());//.withColorGroups(QPalette::ColorGroup::Normal, QPalette::ColorGroup::Normal).withColorRoles(QPalette::ColorRole::Text, QPalette::ColorRole::Text);
 
     _iconLabel.setPixmap(QIcon(icon).pixmap(_iconSize));
 }
@@ -401,7 +401,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::getIcon() 
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return StyledIcon("video").withBadge(badge);
+    return StyledIcon("video").withBadge(badge.getParameters());
 }
 
 bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDisplay() const
@@ -519,7 +519,7 @@ QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return StyledIcon("keyboard").withBadge(badge);
+    return StyledIcon("keyboard").withBadge(badge.getParameters());
 }
 
 bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDisplay() const
