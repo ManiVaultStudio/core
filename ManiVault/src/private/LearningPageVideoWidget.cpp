@@ -134,9 +134,17 @@ bool LearningPageVideoWidget::eventFilter(QObject* target, QEvent* event)
 LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, QWidget* parent) :
     QWidget(parent),
     _index(index),
-    _widgetOverlayer(this, this, parent)
+    _widgetOverlayer(this, this, parent),
+    _opacityEffect(this),
+	_opacityAnimation(&_playIconLabel, "windowOpacity")
 {
     setObjectName("OverlayWidget");
+    //setGraphicsEffect(&_opacityEffect);
+    setAttribute(Qt::WA_TranslucentBackground);
+
+    _opacityAnimation.setDuration(200);
+
+    _opacityEffect.setOpacity(0);
 
     _mainLayout.setContentsMargins(4, 2, 4, 2);
 
@@ -177,15 +185,6 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     _bottomLayout.addWidget(&_dateIconLabel);
     _bottomLayout.addWidget(&_tagsIconLabel);
 
-    auto backgroundColor = QApplication::palette().color(QPalette::Normal, QPalette::Midlight);
-
-    backgroundColor.setAlpha(200);
-
-    setStyleSheet("QWidget#OverlayWidget { \
-        background-color: rgba(230, 230, 230, 230); \
-        border: 1px solid rgb(150, 150, 150); \
-    }");
-
     setLayout(&_mainLayout);
 
     _playIconLabel.installEventFilter(this);
@@ -194,6 +193,8 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     _tagsIconLabel.installEventFilter(this);
 
     updateStyle();
+
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &OverlayWidget::updateStyle);
 }
 
 bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent* event)
@@ -214,9 +215,28 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
         }
 
         case QEvent::Enter:
-        case QEvent::Leave:
-            updateStyle();
+	    {
+            _opacityAnimation.stop();
+            _opacityAnimation.setStartValue(0);
+            _opacityAnimation.setEndValue(0.1);
+            _opacityAnimation.start();
+
+            //updateStyle();
+
             break;
+		}
+
+        case QEvent::Leave:
+        {
+            _opacityAnimation.stop();
+            _opacityAnimation.setStartValue(0.1);
+            _opacityAnimation.setEndValue(0);
+            _opacityAnimation.start();
+
+            //updateStyle();
+
+            break;
+        }
 
         default:
             break;
@@ -227,11 +247,21 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
 
 void LearningPageVideoWidget::OverlayWidget::updateStyle()
 {
-    auto colorEnter = getColorAsCssString(QColor(0, 0, 0, 150));
-    auto colorLeave = getColorAsCssString(QColor(0, 0, 0, 70));
+    auto backgroundColor    = qApp->palette().color(QPalette::Normal, QPalette::Window);
+    auto borderColor        = qApp->palette().color(QPalette::Disabled, QPalette::Window);
 
-    _playIconLabel.setStyleSheet(QString("color: %1").arg(_playIconLabel.underMouse() ? colorEnter : colorLeave));
-    _summaryIconLabel.setStyleSheet(QString("color: %1").arg(_summaryIconLabel.underMouse() ? colorEnter : colorLeave));
-    _dateIconLabel.setStyleSheet(QString("color: %1").arg(_dateIconLabel.underMouse() ? colorEnter : colorLeave));
-    _tagsIconLabel.setStyleSheet(QString("color: %1").arg(_tagsIconLabel.underMouse() ? colorEnter : colorLeave));
+    backgroundColor.setAlpha(200);
+
+    setStyleSheet(QString("QWidget#OverlayWidget { \
+        background-color: %1; \
+        border: 1px solid %2; \
+    }").arg(backgroundColor.name(), borderColor.name())); // 
+
+    //auto colorEnter = getColorAsCssString(QColor(0, 0, 0, 150));
+    //auto colorLeave = getColorAsCssString(QColor(0, 0, 0, 70));
+
+    //_playIconLabel.setStyleSheet(QString("color: %1").arg(_playIconLabel.underMouse() ? colorEnter : colorLeave));
+    //_summaryIconLabel.setStyleSheet(QString("color: %1").arg(_summaryIconLabel.underMouse() ? colorEnter : colorLeave));
+    //_dateIconLabel.setStyleSheet(QString("color: %1").arg(_dateIconLabel.underMouse() ? colorEnter : colorLeave));
+    //_tagsIconLabel.setStyleSheet(QString("color: %1").arg(_tagsIconLabel.underMouse() ? colorEnter : colorLeave));
 }

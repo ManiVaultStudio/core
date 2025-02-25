@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <util/FileDownloader.h>
 #include <util/WidgetOverlayer.h>
 
 #include <QLabel>
@@ -14,7 +13,68 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "GroupDataDialog.h"
+
 class LearningPageVideosWidget;
+
+class GlowLabel : public QLabel {
+    Q_OBJECT
+public:
+    explicit GlowLabel(QWidget* parent = nullptr) :
+        QLabel(parent),
+        shadowEffect(new QGraphicsDropShadowEffect(this)),
+        animation(new QPropertyAnimation(this, "glowStrength"))
+    {
+        // Set up the glow effect
+        shadowEffect->setBlurRadius(20);
+        shadowEffect->setColor(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::BrightText));
+        shadowEffect->setOffset(0, 0);
+
+        setGraphicsEffect(shadowEffect);
+
+        // Animation setup
+        animation->setDuration(300);
+        animation->setEasingCurve(QEasingCurve::InOutQuad);
+        setGlowStrength(0); // Start with no glow
+
+        setAttribute(Qt::WA_Hover); // Enable hover events
+    }
+
+    void setGlowStrength(qreal strength) {
+        QColor color = shadowEffect->color();
+        color.setAlphaF(strength);  // Adjust transparency
+        shadowEffect->setColor(color);
+    }
+
+    qreal glowStrength() const {
+        return shadowEffect->color().alphaF();
+    }
+
+protected:
+    void enterEvent(QEnterEvent* event) override {
+        animation->stop();
+        animation->setStartValue(glowStrength());
+        animation->setEndValue(1.0); // Full glow
+        animation->start();
+
+        QLabel::enterEvent(event);
+    }
+
+    void leaveEvent(QEvent* event) override {
+        animation->stop();
+        animation->setStartValue(glowStrength());
+        animation->setEndValue(0.0); // Fade out glow
+        animation->start();
+
+        QLabel::leaveEvent(event);
+    }
+
+private:
+    QGraphicsDropShadowEffect* shadowEffect;
+    QPropertyAnimation* animation;
+
+    Q_PROPERTY(qreal glowStrength READ glowStrength WRITE setGlowStrength)
+};
 
 /**
  * Learning page video widget class
@@ -27,7 +87,7 @@ class LearningPageVideoWidget : public QWidget
 {
 private:
 
-    /** Overlay widget widget that shows video-related actions */
+    /** Overlay widget that shows video-related actions */
     class OverlayWidget : public QWidget {
     public:
 
@@ -50,16 +110,32 @@ private:
         /** Updates custom styling */
         void updateStyle();
 
+        void enterEvent(QEnterEvent* event) override {
+            
+        }
+
+        void leaveEvent(QEvent* event) override {
+            _opacityAnimation.stop();
+            _opacityAnimation.setStartValue(1);
+            _opacityAnimation.setEndValue(0);
+            _opacityAnimation.start();
+
+            QWidget::leaveEvent(event);
+        }
+
     private:
         QPersistentModelIndex       _index;                     /** Pointer to owning learning page content widget */
         QVBoxLayout                 _mainLayout;                /** Main vertical layout */
         QHBoxLayout                 _centerLayout;              /** Center horizontal layout for the play button */
         QHBoxLayout                 _bottomLayout;              /** Bottom horizontal layout for the meta labels */
-        QLabel                      _playIconLabel;             /** Play icon label */
-        QLabel                      _summaryIconLabel;          /** Summary icon label */
+        GlowLabel                      _playIconLabel;             /** Play icon label */
+        GlowLabel                      _summaryIconLabel;          /** Summary icon label */
         QLabel                      _dateIconLabel;             /** Date icon label */
         QLabel                      _tagsIconLabel;             /** Tags icon label */
         mv::util::WidgetOverlayer   _widgetOverlayer;           /** Synchronizes the size with the source widget */
+        QGraphicsOpacityEffect      _opacityEffect;             /** Opacity effect */
+        QPropertyAnimation          _opacityAnimation;          /** Opacity animation */
+        
     };
 
 public:
