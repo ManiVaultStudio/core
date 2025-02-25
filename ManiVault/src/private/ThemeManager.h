@@ -27,114 +27,32 @@ public:
          * Construct theme settings with pointer to \p parent object
          * @param parent Pointer to parent theme manager
          */
-        ThemeSettings(QObject* parent = nullptr) :
-            QObject(parent),
-            _colorSchemeMode(ColorSchemeMode::System),
-            _colorScheme(Qt::ColorScheme::Unknown)
-        {
-            _updateThemeTimer.setSingleShot(true);
-            _updateThemeTimer.setInterval(1000);
-            _updateThemeTimer.start();
-
-            connect(&_updateThemeTimer, &QTimer::timeout, this, &ThemeSettings::updateTheme);
-        }
+        ThemeSettings(QObject* parent = nullptr);
 
         /**
          * Set color scheme mode to \p colorSchemeMode
          * @param colorSchemeMode Color scheme mode
          */
-        void setColorSchemeMode(const ColorSchemeMode& colorSchemeMode)
-        {
-            if (colorSchemeMode == _colorSchemeMode)
-                return;
-
-            _colorSchemeMode = colorSchemeMode;
-
-            _updateThemeTimer.start();
-        }
+        void setColorSchemeMode(const ColorSchemeMode& colorSchemeMode);
 
         /**
          * Set color scheme to \p colorScheme
          * @param colorScheme Color scheme
          */
-        void setColorScheme(const Qt::ColorScheme& colorScheme)
-        {
-            if (colorScheme == _colorScheme)
-                return;
-
-            _colorScheme = colorScheme;
-
-            _updateThemeTimer.start();
-        }
+        void setColorScheme(const Qt::ColorScheme& colorScheme);
 
         /**
          * Set palette to \p palette
          * @param palette Palette
          * @param paletteName Palette name
          */
-        void setPalette(const QPalette& palette, const QString& paletteName)
-        {
-            if (palette == _palette)
-                return;
-
-            _palette        = palette;
-            _paletteName    = paletteName;
-
-            _updateThemeTimer.start();
-        }
+        void setPalette(const QPalette& palette, const QString& paletteName);
 
         /** Update theme, restyle all widgets and self-destruct */
-        void updateTheme()
-        {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-            switch (_colorSchemeMode) {
-	            case ColorSchemeMode::System:
-	            {
-                    qApp->styleHints()->setColorScheme(Qt::ColorScheme::Unknown);
-                    qApp->setPalette(QApplication::style()->standardPalette());
-	                break;
-	            }
-
-	            case ColorSchemeMode::SystemLightDark:
-	            {
-
-                    qApp->styleHints()->setColorScheme(_colorScheme);
-                    qApp->setPalette(QApplication::style()->standardPalette());
-
-                    mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(_colorScheme == Qt::ColorScheme::Light ? "Light" : "Dark"), util::StyledIcon("palette"));
-	                break;
-	            }
-
-	            case ColorSchemeMode::Custom:
-	            {
-                    qApp->setPalette(_palette);
-                    mv::help().addNotification("Theme update", QString("Custom <b>%1</b> theme has been activated.").arg(_paletteName), util::StyledIcon("palette"));
-	                break;
-	            }
-            }
-
-            restyleAllWidgets();
-            deleteLater();
-#endif
-        }
+        void updateTheme();
 
         /** Re-styles all widgets so they are properly styled */
-        static void restyleAllWidgets()
-        {
-            QList<QWidget*> allWidgets;
-
-            for (QWidget* window : QApplication::topLevelWidgets()) {
-                allWidgets.append(window);
-                allWidgets.append(window->findChildren<QWidget*>());
-            }
-
-            for (auto widget : allWidgets) {
-                widget->style()->unpolish(widget);
-                widget->style()->polish(widget);
-                widget->update();
-                widget->repaint();
-            }
-        }
+        static void restyleAllWidgets();
 
     private:
         ColorSchemeMode     _colorSchemeMode;       /** Type of color scheme mode*/
