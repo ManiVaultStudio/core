@@ -11,6 +11,8 @@
 #include <QCryptographicHash>
 #include <QByteArray>
 #include <QStyleHints>
+#include <QDirIterator>
+#include <QStringList>
 
 #ifdef _DEBUG
 	#define STYLED_ICON_VERBOSE
@@ -21,12 +23,28 @@ using namespace mv::gui;
 namespace mv::util
 {
 
-QMap<QString, QVariantMap>  StyledIcon::fontMetadata             = {};
-QMap<QString, QFont>        StyledIcon::fonts                    = {};
-QString                     StyledIcon::defaultIconFontName      = "FontAwesomeSolid";
-Version                     StyledIcon::defaultIconFontVersion   = { 6, 7, 2 };
-QMap<QString, QPixmap>      StyledIcon::pixmaps                  = {};
-QVector<QStringList>        StyledIcon::iconFontPreferenceGroups = { { "FontAwesomeSolid", "FontAwesomeRegular", "FontAwesomeBrandsRegular" } };
+QStringList findResourcesWithPrefix(const QString& prefix) {
+    QStringList matchedResources;
+
+    QDirIterator it(":", QDir::Files, QDirIterator::Subdirectories);
+
+    while (it.hasNext()) {
+        QString resourcePath = it.next();
+        if (resourcePath.startsWith(prefix)) {
+            matchedResources.append(resourcePath);
+        }
+    }
+
+    return matchedResources;
+}
+
+QMap<QString, QVariantMap>          StyledIcon::fontMetadata                = {};
+QMap<QString, QFont>                StyledIcon::fonts                       = {};
+QString                             StyledIcon::defaultIconFontName         = "FontAwesomeSolid";
+Version                             StyledIcon::defaultIconFontVersion      = { 6, 7, 2 };
+QMap<QString, QPixmap>              StyledIcon::pixmaps                     = {};
+QVector<QStringList>                StyledIcon::iconFontPreferenceGroups    = { { "FontAwesomeSolid", "FontAwesomeRegular", "FontAwesomeBrandsRegular" } };
+QMap<QString, QVector<Version>>     StyledIcon::iconFontVersions            = {};
 
 StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/, QWidget* parent /*= nullptr*/)
 {
@@ -89,6 +107,11 @@ void StyledIcon::initializeIconFont(const QString& iconFontName, const Version& 
 {
     try
     {
+        updateIconFontVersions(iconFontName);
+
+        if (fontMetadata.contains(iconFontName))
+            return;
+
 	    const auto iconFontResourceName         = getIconFontResourceName(iconFontName, iconFontVersion);
 	    const auto iconFontResourcePath         = getIconFontResourcePath(iconFontName, iconFontVersion);
 	    const auto iconFontMetadataResourcePath = getIconFontMetadataResourcePath(iconFontName, iconFontVersion);
@@ -98,7 +121,7 @@ void StyledIcon::initializeIconFont(const QString& iconFontName, const Version& 
 	        throw std::runtime_error(QString("Unable to load %1").arg(iconFontResourceName).toStdString());
 	    }
 
-#ifdef NAMED_ICON_VERBOSE
+#ifdef STYLED_ICON_VERBOSE
 	    qDebug() << "Loaded" << iconFontResourceName << QFontDatabase::applicationFontFamilies(addApplicationFontResult);
 #endif
 
@@ -118,7 +141,10 @@ void StyledIcon::initializeIconFont(const QString& iconFontName, const Version& 
 
 	    fontMetadata[iconFontResourceName] = metadataObject.toVariantMap();
 
-#ifdef NAMED_ICON_VERBOSE
+        if (!iconFontVersions.contains(iconFontName))
+            iconFontVersions[iconFontName] = {};
+
+#ifdef STYLED_ICON_VERBOSE
 	    qDebug() << QString("Found %1 %2 icons").arg(QString::number(fontMetadata[iconFontResourceName].count()), iconFontName);
 #endif
     }
@@ -265,30 +291,33 @@ QString StyledIcon::getIconCharacter(const QString& iconName, const QString& ico
 
         QStringList iconFontResourceNames;
 
-        // Go over the icon font variants in the order of preference
-        for (const auto& iconFontVariant : iconFontVariants) {
-            const auto iconFontResourceName = getIconFontResourceName(iconFontVariant, iconFontVersion);
+        QVector<QPair<QString, QString>> iconFontCandidates;
+
+        // Build up a list of icon font candidates
+        for (const auto& candidateIconFontName : iconFontVariants) {
+            updateIconFontVersions(candidateIconFontName);
+
+            for (const auto& candidateIconFontVersion : iconFontVersions[candidateIconFontName])
+				iconFontCandidates.append({ candidateIconFontName, QString::fromStdString(candidateIconFontVersion.getVersionString()) });
+        }
+
+        // Try all candidates
+        for (const auto& iconFontCandidate : iconFontCandidates) {
+            const auto candidateIconFontName    = iconFontCandidate.first;
+            const auto candidateIconFontVersion = iconFontCandidate.second;
+            const auto iconFontResourceName     = getIconFontResourceName(candidateIconFontName, candidateIconFontVersion);
+
+#ifdef STYLED_ICON_VERBOSE
+            qDebug() << "Trying" << candidateIconFontName << candidateIconFontVersion;
+#endif
 
             iconFontResourceNames << iconFontResourceName;
 
-#ifdef NAMED_ICON_VERBOSE
-            if (iconFontVariants.indexOf(iconFontVariant) >= 1)
-                qWarning() << "Trying" << iconFontResourceName;
-#endif
-
             if (!fontMetadata.keys().contains(iconFontResourceName)) {
-                initializeIconFont(iconFontVariant, iconFontVersion);
+                initializeIconFont(candidateIconFontName, candidateIconFontVersion);
             }
 
             if (!fontMetadata[iconFontResourceName].keys().contains(iconName)) {
-
-#ifdef NAMED_ICON_VERBOSE
-                qWarning() << iconName << "not found in preferred icon font" << iconFontResourceName;
-
-                if (iconFontVariant != iconFontVariants.last())
-                    qWarning() << "Attempting remaining variants...";
-#endif
-
                 continue;
             }
 
@@ -297,10 +326,8 @@ QString StyledIcon::getIconCharacter(const QString& iconName, const QString& ico
             const auto iconMap      = fontMetadata[iconFontResourceName][iconName].toMap();
             const auto codePoint    = iconMap["unicode"].toString().toUInt(&status, 16);
 
-            if (!status)
-                throw std::runtime_error("Cannot establish unicode code point");
-
-            return QChar(codePoint);
+            if (status)
+                return QChar(codePoint);
         }
 
         throw std::runtime_error(QString("%1 not found in any of these: %2").arg(iconName, iconFontVariants.join(", ")).toStdString());
@@ -351,8 +378,9 @@ QString StyledIcon::getIconFontMetadataResourcePath(const QString& iconFontName,
 void StyledIcon::updateIconPixmap() const
 {
     try {
-        if (!_iconSettings._sha.isEmpty() && !pixmaps.contains(_iconSettings._sha))
-			pixmaps[_iconSettings._sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _iconSettings._mode == StyledIconMode::FixedColor ? Qt::black : _iconSettings._fixedColor);
+        if (!_iconSettings._sha.isEmpty() && !pixmaps.contains(_iconSettings._sha)) {
+	        pixmaps[_iconSettings._sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _iconSettings._mode == StyledIconMode::FixedColor ? Qt::black : _iconSettings._fixedColor);
+        }
 	}
 	catch (std::exception& e)
 	{
@@ -366,6 +394,56 @@ QString StyledIcon::generateSha(const QString& iconName, const QString& iconFont
 	const auto hash     = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha256);
 
 	return hash.toHex();
+}
+
+void StyledIcon::updateIconFontVersions(const QString& iconFontName)
+{
+#ifdef STYLED_ICON_VERBOSE
+    qDebug() << "Updating" << iconFontName << "versions";
+#endif
+
+    if (iconFontVersions.contains(iconFontName))
+        return;
+
+    // Get icon fonts with matching icon font name
+    const auto matchingResources = findResourcesWithPrefix(QString(":/IconFonts/%1").arg(iconFontName));
+
+    // Extract version string from a matching resource name
+    const auto extractVersionString = [](const QString& text) -> QString {
+        QRegularExpression versionRegex(R"(\b\d+\.\d+\.\d+\b)");
+        QRegularExpressionMatch match = versionRegex.match(text);
+
+        if (match.hasMatch()) {
+            return match.captured(0);
+        }
+
+        return {};
+    };
+
+    iconFontVersions[iconFontName].clear();
+
+    // Build up a list of versions from the matching resources
+    for (const auto& matchingResourceName : matchingResources) {
+        const auto versionString = extractVersionString(matchingResourceName);
+
+        if (versionString.isEmpty())
+            continue;
+
+        iconFontVersions[iconFontName] << versionString;
+    }
+
+    // Sort based on extracted version
+    std::sort(iconFontVersions[iconFontName].begin(), iconFontVersions[iconFontName].end());
+    std::reverse(iconFontVersions[iconFontName].begin(), iconFontVersions[iconFontName].end());
+
+#ifdef STYLED_ICON_VERBOSE
+    QStringList versionStrings;
+
+    for (const auto& version : iconFontVersions[iconFontName])
+        versionStrings << QString::fromStdString(version.getVersionString());
+
+    qDebug() << iconFontName << "versions: " << versionStrings.join(", ");
+#endif
 }
 
 }
