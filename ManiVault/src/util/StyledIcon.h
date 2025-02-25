@@ -253,6 +253,13 @@ private:
      */
     static QString generateSha(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion);
 
+    /**
+     * Update icon font versions (order them from high to low)
+     * @param iconFontName Name of the icon font
+     * @return 
+     */
+    static void updateIconFontVersions(const QString& iconFontName);
+
 private:
 	QString                 _iconName;          /** Name of the icon */
     QString                 _iconFontName;      /** Name of the icon font */
@@ -261,12 +268,13 @@ private:
     //Badge               _badge;             /** Badge */
 
 protected:
-	static QMap<QString, QVariantMap>   fontMetadata;               /** Font-specific metadata */
-    static QMap<QString, QFont>         fonts;                      /** Icon fonts */
-    static QString                      defaultIconFontName;        /** Default icon font name */
-    static Version                      defaultIconFontVersion;     /** Default icon font version */
-    static QMap<QString, QPixmap>       pixmaps;                    /** All pixmaps for icons */
-    static QVector<QStringList>         iconFontPreferenceGroups;   /** The order in each usb-vector determines fetching precedence */
+	static QMap<QString, QVariantMap>       fontMetadata;               /** Font-specific metadata */
+    static QMap<QString, QFont>             fonts;                      /** Icon fonts */
+    static QString                          defaultIconFontName;        /** Default icon font name */
+    static Version                          defaultIconFontVersion;     /** Default icon font version */
+    static QMap<QString, QPixmap>           pixmaps;                    /** All pixmaps for icons */
+    static QVector<QStringList>             iconFontPreferenceGroups;   /** The order in each usb-vector determines fetching precedence */
+    static QMap<QString, QVector<Version>>  iconFontVersions;           /** Ordered (high to low) icon font versions for fallback purposes */
 
     friend class StyledIconEngine;
 };
