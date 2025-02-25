@@ -4,6 +4,9 @@
 
 #include "ThemeManager.h"
 
+#ifdef Q_OS_MACX
+	#include "util/MacThemeHelper.h"
+#endif
 
 #include <QStyleHints>
 
@@ -64,16 +67,38 @@ void ThemeManager::ThemeSettings::updateTheme()
 	switch (_colorSchemeMode) {
 		case ColorSchemeMode::System:
 		{
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
 			qApp->styleHints()->setColorScheme(Qt::ColorScheme::Unknown);
 			qApp->setPalette(QApplication::style()->standardPalette());
+#endif
+
+#ifdef Q_OS_MACOS
+            macSetToAutoTheme();
+#endif
 			break;
 		}
 
 		case ColorSchemeMode::SystemLightDark:
 		{
-
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
 			qApp->styleHints()->setColorScheme(_colorScheme);
 			qApp->setPalette(QApplication::style()->standardPalette());
+#endif
+
+#ifdef Q_OS_MACOS
+            switch (_colorScheme) {
+	            case Qt::ColorScheme::Light:
+	                macSetToLightTheme();
+	                break;
+
+	            case Qt::ColorScheme::Dark:
+	                macSetToDarkTheme();
+	                break;
+
+                case Qt::ColorScheme::Unknown:
+                    break;
+            }
+#endif
 
 			mv::help().addNotification("Theme update", QString("<b>%1</b> system theme has been activated.").arg(_colorScheme == Qt::ColorScheme::Light ? "Light" : "Dark"), util::StyledIcon("palette"));
 			break;
@@ -81,8 +106,10 @@ void ThemeManager::ThemeSettings::updateTheme()
 
 		case ColorSchemeMode::Custom:
 		{
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
 			qApp->setPalette(_palette);
 			mv::help().addNotification("Theme update", QString("Custom <b>%1</b> theme has been activated.").arg(_paletteName), util::StyledIcon("palette"));
+#endif
 			break;
 		}
 	}
@@ -110,16 +137,22 @@ void ThemeManager::ThemeSettings::restyleAllWidgets()
 
 ThemeManager::ThemeManager(QObject* parent) :
     AbstractThemeManager(parent),
-    _colorSchemeModeAction(this, "Theme", { "System", "Light/dark", "Custom" }),
+    _colorSchemeModeAction(this, "Theme"),
     _systemLightColorSchemeAction(this, "Light", false),
     _systemDarkColorSchemeAction(this, "Dark", true),
     _customColorSchemeAction(this, "Custom"),
-    _numberOfCommits(0),
     _systemColorScheme(Qt::ColorScheme::Unknown),
     _applicationColorScheme(Qt::ColorScheme::Unknown),
     _disableSystemLightColorSchemeSlot(false),
     _disableSystemDarkColorSchemeSlot(false)
 {
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+    _colorSchemeModeAction.setOptions({ "System", "Light/dark", "Custom" });
+#endif
+
+#ifdef Q_OS_MACOS
+    _colorSchemeModeAction.setOptions({ "System", "Light/dark" });
+#endif
 }
 
 ThemeManager::~ThemeManager()

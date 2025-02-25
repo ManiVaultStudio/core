@@ -218,19 +218,11 @@ private:
     gui::ToggleAction           _systemDarkColorSchemeAction;           /** Set to dark system color scheme when triggered */
     gui::OptionAction           _customColorSchemeAction;               /** Custom color scheme action  */
     QMap<QString, QPalette>     _customPalettes;                        /** Custom color schemes */
-    
     QTimer                      _detectSystemColorSchemeChangesTimer;   /** QStyleHints::colorSchemeChanged is sometimes unreliable: check periodically for system color scheme changes */
-    std::int32_t                _numberOfCommits;                       /** Number of commits */
-
-#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     Qt::ColorScheme             _systemColorScheme;                     /** System color scheme */
     Qt::ColorScheme             _applicationColorScheme;                /** Application color scheme */
-#endif
-
-    ColorSchemeMode             _currentColorSchemeMode;                /** Current color scheme mode */
     bool                        _disableSystemLightColorSchemeSlot;     /** Disable system light slot */
     bool                        _disableSystemDarkColorSchemeSlot;      /** Disable system dark slot */
-
     QPointer<ThemeSettings>     _requestThemeSettings;                  /** Requested theme settings for the next timeout of the ThemeManager::_updateThemeTimer */
 };
 
