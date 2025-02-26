@@ -20,7 +20,9 @@
 #include <QLocale>
 #include <QModelIndex>
 #include <QString>
+#include <QToolTip>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsSceneHelpEvent>
 
 //#define USE_YOUTUBE_DIALOG
 
@@ -132,9 +134,10 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _overlayGraphicsScene.addItem(&_dateItem);
     _overlayGraphicsScene.addItem(&_tagsItem);
 
+    _overlayGraphicsView.setObjectName("OverlayGraphicsView");
     _overlayGraphicsView.setRenderHint(QPainter::Antialiasing);
     _overlayGraphicsView.setRenderHint(QPainter::SmoothPixmapTransform);
-    _overlayGraphicsView.setStyleSheet("background: transparent; border: none;");
+    //_overlayGraphicsView.setStyleSheet("background: transparent; border: none;");
     _overlayGraphicsView.setAttribute(Qt::WA_TranslucentBackground);
     _overlayGraphicsView.setAttribute(Qt::WA_TransparentForMouseEvents);
     _overlayGraphicsView.show();
@@ -157,10 +160,26 @@ bool LearningPageVideoWidget::eventFilter(QObject* target, QEvent* event)
     {
 		case QEvent::MouseMove:
 	    {
-            _playItemFader.setOpacity(_playItem.isUnderMouse() ? 1.0 : 0.25);
-            _summaryItemFader.setOpacity(_summaryItem.isUnderMouse() ? 1.0 : 0.15);
-            _dateItemFader.setOpacity(_dateItem.isUnderMouse() ? 1.0 : 0.15);
-            _tagsItemFader.setOpacity(_tagsItem.isUnderMouse() ? 1.0 : 0.15);
+            const auto mouseEvent       = dynamic_cast<QMouseEvent*>(event);
+            const auto screenPosition   = mouseEvent->globalPos();
+
+            QToolTip::hideText();
+
+            if (_playItemFader.setOpacity(_playItem.isUnderMouse() ? 1.0 : 0.25)) {
+                QToolTip::showText(screenPosition, _summaryItem.toolTip());
+            }
+
+            if (_summaryItemFader.setOpacity(_summaryItem.isUnderMouse() ? 1.0 : 0.15)) {
+                QToolTip::showText(screenPosition, _playItem.toolTip());
+            }
+
+            if (_dateItemFader.setOpacity(_dateItem.isUnderMouse() ? 1.0 : 0.15)) {
+                QToolTip::showText(screenPosition, _dateItem.toolTip());
+            }
+
+            if (_tagsItemFader.setOpacity(_tagsItem.isUnderMouse() ? 1.0 : 0.15)) {
+                QToolTip::showText(screenPosition, _tagsItem.toolTip());
+            }
 
             break;
 	    }

@@ -32,32 +32,34 @@ public:
         fadeIn(opacity);
     }
 
-    void fadeIn(qreal opacity = 1.f, int duration = 300) {
-        setOpacity(opacity, duration);
+    bool fadeIn(qreal opacity = 1.f, int duration = 300) {
+        return setOpacity(opacity, duration);
     }
 
-    void fadeIn(int duration = 300) {
-        setOpacity(1.0, duration);
+    bool fadeIn(int duration = 300) {
+        return setOpacity(1.0, duration);
     }
 
-    void fadeOut(qreal opacity = 0.f, int duration = 300) {
-        setOpacity(opacity, duration);
+    bool fadeOut(qreal opacity = 0.f, int duration = 300) {
+        return setOpacity(opacity, duration);
     }
 
-    void fadeOut(int duration = 300) {
-        setOpacity(0.0, duration);
+    bool fadeOut(int duration = 300) {
+        return setOpacity(0.0, duration);
     }
 
-    void setOpacity(qreal opacity, int duration = 300) {
+    bool setOpacity(qreal opacity, int duration = 300) {
         if (_opacityEffect.opacity() == opacity)
-            return;
+            return false;
 
-        _opacityAnimation.setDuration(duration);
         _opacityAnimation.stop();
+        _opacityAnimation.setDuration(duration);
         _opacityAnimation.setStartValue(_opacityAnimation.currentValue());
         _opacityAnimation.setEndValue(opacity);
 
         _opacityAnimation.start();
+
+        return true;
     }
 
 private:
