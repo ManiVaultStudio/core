@@ -12,68 +12,58 @@
 #include <QTextBrowser>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QGraphicsView>
+#include <QGraphicsWidget>
+#include <QGraphicsRectItem>
+#include <QGraphicsLinearLayout>
 
-#include "GroupDataDialog.h"
-
-class LearningPageVideosWidget;
-
-class GlowLabel : public QLabel {
-    Q_OBJECT
+class GraphicsItemFader : public QObject
+{
 public:
-    explicit GlowLabel(QWidget* parent = nullptr) :
-        QLabel(parent),
-        shadowEffect(new QGraphicsDropShadowEffect(this)),
-        animation(new QPropertyAnimation(this, "glowStrength"))
+
+    GraphicsItemFader(QGraphicsItem* item, qreal opacity = 0.f, QObject* parent = nullptr) :
+        QObject(parent),
+        _item(item),
+        _opacityEffect(this),
+        _opacityAnimation(&_opacityEffect, "opacity")
     {
-        // Set up the glow effect
-        shadowEffect->setBlurRadius(20);
-        shadowEffect->setColor(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::BrightText));
-        shadowEffect->setOffset(0, 0);
+        _item->setGraphicsEffect(&_opacityEffect);
 
-        setGraphicsEffect(shadowEffect);
-
-        // Animation setup
-        animation->setDuration(300);
-        animation->setEasingCurve(QEasingCurve::InOutQuad);
-        setGlowStrength(0); // Start with no glow
-
-        setAttribute(Qt::WA_Hover); // Enable hover events
+        fadeIn(opacity);
     }
 
-    void setGlowStrength(qreal strength) {
-        QColor color = shadowEffect->color();
-        color.setAlphaF(strength);  // Adjust transparency
-        shadowEffect->setColor(color);
+    void fadeIn(qreal opacity = 1.f, int duration = 300) {
+        setOpacity(opacity, duration);
     }
 
-    qreal glowStrength() const {
-        return shadowEffect->color().alphaF();
+    void fadeIn(int duration = 300) {
+        setOpacity(1.0, duration);
     }
 
-protected:
-    void enterEvent(QEnterEvent* event) override {
-        animation->stop();
-        animation->setStartValue(glowStrength());
-        animation->setEndValue(1.0); // Full glow
-        animation->start();
-
-        QLabel::enterEvent(event);
+    void fadeOut(qreal opacity = 0.f, int duration = 300) {
+        setOpacity(opacity, duration);
     }
 
-    void leaveEvent(QEvent* event) override {
-        animation->stop();
-        animation->setStartValue(glowStrength());
-        animation->setEndValue(0.0); // Fade out glow
-        animation->start();
+    void fadeOut(int duration = 300) {
+        setOpacity(0.0, duration);
+    }
 
-        QLabel::leaveEvent(event);
+    void setOpacity(qreal opacity, int duration = 300) {
+        if (_opacityEffect.opacity() == opacity)
+            return;
+
+        _opacityAnimation.setDuration(duration);
+        _opacityAnimation.stop();
+        _opacityAnimation.setStartValue(_opacityAnimation.currentValue());
+        _opacityAnimation.setEndValue(opacity);
+
+        _opacityAnimation.start();
     }
 
 private:
-    QGraphicsDropShadowEffect* shadowEffect;
-    QPropertyAnimation* animation;
-
-    Q_PROPERTY(qreal glowStrength READ glowStrength WRITE setGlowStrength)
+    QGraphicsItem*          _item;              /** Pointer to the graphics item */
+    QGraphicsOpacityEffect  _opacityEffect;     /** Opacity effect */
+    QPropertyAnimation      _opacityAnimation;  /** Overlay animation */
 };
 
 /**
@@ -85,59 +75,6 @@ private:
  */
 class LearningPageVideoWidget : public QWidget
 {
-private:
-
-    /** Overlay widget that shows video-related actions */
-    class OverlayWidget : public QWidget {
-    public:
-
-        /**
-         * Construct with model \p index and pointer to \p parent widget
-         * @param index Model index
-         * @param parent Pointer to parent widget
-         */
-        explicit OverlayWidget(const QModelIndex& index, QWidget* parent);
-
-        /**
-         * Respond to target object events
-         * @param target Object of which an event occurred
-         * @param event The event that took place
-         */
-        bool eventFilter(QObject* target, QEvent* event) override;
-
-    private:
-
-        /** Updates custom styling */
-        void updateStyle();
-
-        void enterEvent(QEnterEvent* event) override {
-            
-        }
-
-        void leaveEvent(QEvent* event) override {
-            _opacityAnimation.stop();
-            _opacityAnimation.setStartValue(1);
-            _opacityAnimation.setEndValue(0);
-            _opacityAnimation.start();
-
-            QWidget::leaveEvent(event);
-        }
-
-    private:
-        QPersistentModelIndex       _index;                     /** Pointer to owning learning page content widget */
-        QVBoxLayout                 _mainLayout;                /** Main vertical layout */
-        QHBoxLayout                 _centerLayout;              /** Center horizontal layout for the play button */
-        QHBoxLayout                 _bottomLayout;              /** Bottom horizontal layout for the meta labels */
-        GlowLabel                      _playIconLabel;             /** Play icon label */
-        GlowLabel                      _summaryIconLabel;          /** Summary icon label */
-        QLabel                      _dateIconLabel;             /** Date icon label */
-        QLabel                      _tagsIconLabel;             /** Tags icon label */
-        mv::util::WidgetOverlayer   _widgetOverlayer;           /** Synchronizes the size with the source widget */
-        QGraphicsOpacityEffect      _opacityEffect;             /** Opacity effect */
-        QPropertyAnimation          _opacityAnimation;          /** Opacity animation */
-        
-    };
-
 public:
 
     /**
@@ -155,12 +92,34 @@ public:
     bool eventFilter(QObject* target, QEvent* event) override;
 
 private:
+
+    /** Updates custom styling */
+    void updateCustomStyle();
+
+private:
     QPersistentModelIndex       _index;                     /** Pointer to owning learning page content widget */
     QVBoxLayout                 _mainLayout;                /** Main vertical layout */
     QLabel                      _thumbnailLabel;            /** Label that shows the thumbnail pixmap */
     QPixmap                     _thumbnailPixmap;           /** Thumbnail pixmap */
     QTextBrowser                _propertiesTextBrowser;     /** Text browser for showing the video title */
-    OverlayWidget               _overlayWidget;             /** Overlay widget widget that shows video-related actions */
-    
+    QGraphicsScene              _overlayGraphicsScene;      /** Overlay graphics scene */
+    QGraphicsView               _overlayGraphicsView;       /** Overlay widget */
+    QGraphicsRectItem           _backgroundItem;            /** Overlay background item */
+    QGraphicsRectItem           _backgroundBorderItem;      /** Overlay background border item */
+    QGraphicsLinearLayout       _verticalLayout;            /** Overlay vertical layout */
+    QGraphicsLinearLayout       _metadataLayout;            /** Metadata layout */
+    QGraphicsPixmapItem         _playItem;                  /** Play video item */
+    QGraphicsPixmapItem         _summaryItem;               /** Video summary item */
+    QGraphicsPixmapItem         _dateItem;                  /** Video date item */
+    QGraphicsPixmapItem         _tagsItem;                  /** Video tags item */
+    QGraphicsWidget             _overlay;                   /** Overlay graphics widget */    
+    GraphicsItemFader           _backgroundFader;           /** Background fader */
+    GraphicsItemFader           _backgroundBorderFader;     /** Background border fader */
+    GraphicsItemFader           _playItemFader;             /** Play item fader */
+    GraphicsItemFader           _summaryItemFader;          /** Summary metadata item fader */
+    GraphicsItemFader           _dateItemFader;             /** Date metadata item fader */
+    GraphicsItemFader           _tagsItemFader;             /** Tags metadata item fader */
+
+
     friend class LearningPageVideoStyledItemDelegate;
 };
