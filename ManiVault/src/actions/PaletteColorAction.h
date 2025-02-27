@@ -4,39 +4,49 @@
 
 #pragma once
 
-#include "VerticalGroupAction.h"
+#include "HorizontalGroupAction.h"
 
 namespace mv::gui {
 
 /**
- * Palette class
+ * Palette color class
  *
- * For editing the palette of the application
+ * For editing a palette color of the application
  *
  * Note: This action is developed for internal use only
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT PaletteAction : public WidgetAction
+class CORE_EXPORT PaletteColorAction : public HorizontalGroupAction
 {
     Q_OBJECT
 
 public:
 
     /**
-     * Construct a palette action with a \p parent object
+     * Construct a palette action with a \p parent object and \p title
      * @param parent Pointer to parent object
      * @param title Title of the action
+     * @param colorGroup Color group of the palette color
+     * @param colorRole Color role of the palette color
      */
-    Q_INVOKABLE PaletteAction(QObject* parent, const QString& title);
+    Q_INVOKABLE PaletteColorAction(QObject* parent, const QString& title, const QPalette::ColorGroup& colorGroup = QPalette::ColorGroup::Normal, const QPalette::ColorRole& colorRole = QPalette::ColorRole::Window);
+
+    /**
+     * Initialize the palette color action with a \p colorGroup and \p colorRole
+     * @param colorGroup Color group of the palette color
+     * @param colorRole Color role of the palette color
+     */
+    void initialize(const QPalette::ColorGroup& colorGroup, const QPalette::ColorRole& colorRole);
 
 private:
-    StringAction        _nameAction;    /** Name of the palette */
-
+    QPalette::ColorGroup    _colorGroup;    /** Color group of the palette color */
+    QPalette::ColorRole     _colorRole;     /** Color role of the palette color */
+    ColorAction             _colorAction;   /** Palette color picker */
 };
 
 }
 
-Q_DECLARE_METATYPE(mv::gui::PaletteAction)
+Q_DECLARE_METATYPE(mv::gui::PaletteColorAction)
 
-inline const auto paletteActionMetaTypeId = qRegisterMetaType<mv::gui::PaletteAction*>("mv::gui::PaletteAction");
+inline const auto paletteColorActionMetaTypeId = qRegisterMetaType<mv::gui::PaletteColorAction*>("mv::gui::PaletteColorAction");

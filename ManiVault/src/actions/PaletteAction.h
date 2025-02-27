@@ -5,6 +5,7 @@
 #pragma once
 
 #include "VerticalGroupAction.h"
+#include "PaletteColorRoleAction.h"
 
 namespace mv::gui {
 
@@ -17,11 +18,14 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT PaletteAction : public WidgetAction
+class CORE_EXPORT PaletteAction : public VerticalGroupAction
 {
     Q_OBJECT
 
 public:
+
+    /** Palette color role actions */
+    using PaletteColorRoleActions = std::array<std::unique_ptr<PaletteColorRoleAction>, QPalette::ColorRole::NColorRoles>;
 
     /**
      * Construct a palette action with a \p parent object
@@ -30,9 +34,15 @@ public:
      */
     Q_INVOKABLE PaletteAction(QObject* parent, const QString& title);
 
-private:
-    StringAction        _nameAction;    /** Name of the palette */
+    /** Initialize the palette */
+    void initialize();
 
+private:
+    StringAction                _nameAction;                /** Name of the palette */
+    PaletteColorRoleActions     _paletteColorRoleActions;   /** Palette color role actions for each palette color role */
+
+protected:
+    static QStringList  colorRoleNames;    /** Names of the color roles */
 };
 
 }
