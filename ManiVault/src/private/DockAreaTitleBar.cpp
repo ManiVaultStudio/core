@@ -92,4 +92,15 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     updateReadOnly();
 
     _addViewPluginToolButton->setIcon(StyledIcon("plus"));
+
+    const auto patchTabStyling = [this]() -> void {
+        setStyleSheet(QString(" \
+			ads--CDockWidgetTab { \
+				background-color: %1; \
+			}").arg(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Window).name()));
+	};
+
+    patchTabStyling();
+
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, patchTabStyling);
 }
