@@ -259,11 +259,7 @@ bool ThemeManager::isSystemLightDarkColorSchemeModeActive() const
 bool ThemeManager::isSystemLightColorSchemeActive() const
 {
     if (isSystemColorSchemeModeActive() || isSystemLightDarkColorSchemeModeActive()) {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Light;
-#else
-        return QApplication::palette().color(QPalette::Window).lightness() >= 128;
-#endif
     }
 
     return false;
@@ -272,11 +268,7 @@ bool ThemeManager::isSystemLightColorSchemeActive() const
 bool ThemeManager::isSystemDarkColorSchemeActive() const
 {
     if (isSystemColorSchemeModeActive() || isSystemLightDarkColorSchemeModeActive()) {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
-#else
-        return QApplication::palette().color(QPalette::Window).lightness() < 128;
-#endif
     }
 
     return false;
