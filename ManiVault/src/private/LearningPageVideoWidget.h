@@ -21,52 +21,120 @@ class GraphicsItemFader : public QObject
 {
 public:
 
-    GraphicsItemFader(QGraphicsItem* item, qreal opacity = 0.f, QObject* parent = nullptr) :
-        QObject(parent),
-        _item(item),
-        _opacityEffect(this),
-        _opacityAnimation(&_opacityEffect, "opacity")
-    {
-        _item->setGraphicsEffect(&_opacityEffect);
+    GraphicsItemFader(QGraphicsItem* item, qreal opacity = 0.f, QObject* parent = nullptr);
 
-        fadeIn(opacity);
-    }
+    void fadeIn(qreal opacity = 1.f, int duration = 300, int delay = 0);
 
-    bool fadeIn(qreal opacity = 1.f, int duration = 300) {
-        return setOpacity(opacity, duration);
-    }
+    void fadeIn(int duration = 300, int delay = 0);
 
-    bool fadeIn(int duration = 300) {
-        return setOpacity(1.0, duration);
-    }
+    void fadeOut(qreal opacity = 0.f, int duration = 600, int delay = 0);
 
-    bool fadeOut(qreal opacity = 0.f, int duration = 300) {
-        return setOpacity(opacity, duration);
-    }
+    void fadeOut(int duration = 600, int delay = 0);
 
-    bool fadeOut(int duration = 300) {
-        return setOpacity(0.0, duration);
-    }
-
-    bool setOpacity(qreal opacity, int duration = 300) {
-        if (_opacityEffect.opacity() == opacity)
-            return false;
-
-        _opacityAnimation.stop();
-        _opacityAnimation.setDuration(duration);
-        _opacityAnimation.setStartValue(_opacityAnimation.currentValue());
-        _opacityAnimation.setEndValue(opacity);
-
-        _opacityAnimation.start();
-
-        return true;
-    }
+    void setOpacity(qreal opacity, int duration = 300, int delay = 0);
 
 private:
     QGraphicsItem*          _item;              /** Pointer to the graphics item */
     QGraphicsOpacityEffect  _opacityEffect;     /** Opacity effect */
     QPropertyAnimation      _opacityAnimation;  /** Overlay animation */
 };
+
+class GraphicsIconItem : public QObject, public QGraphicsPixmapItem
+{
+    Q_OBJECT
+
+public:
+
+    /**
+     * Construct with icon name \p iconName, icon size \p iconSize and pointer to \p parent item
+     * @param iconName Icon name
+     * @param iconSize Icon size
+     * @param intermediateOpacity Intermediate opacity
+     * @param parent Parent graphics item
+     */
+    GraphicsIconItem(const QString& iconName, const QSize& iconSize, qreal intermediateOpacity = 0.5, QGraphicsItem* parent = nullptr);
+
+    /**
+     * Respond to hover enter events
+     * @param event Hover event
+     */
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
+
+    /**
+     * Respond to hover move events
+     * @param event Hover event
+     */
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
+
+    /**
+     * Respond to mouse press events
+     * @param event Mouse event
+     */
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+
+    /**
+     * Returns the fader
+     * @return Fader
+     */
+    GraphicsItemFader& getFader() { return _fader; }
+
+signals:
+
+    /** Signal emitted when the item is clicked */
+	void clicked();
+
+private:
+    GraphicsItemFader   _fader;                 /** Fader for the item */
+    qreal               _intermediateOpacity;   /** Intermediate opacity */
+};
+
+class OverlayGraphicsView : public QGraphicsView
+{
+public:
+    explicit OverlayGraphicsView(QWidget* parent = nullptr)
+        : QGraphicsView(parent), targetWidget(parent) {
+        setAttribute(Qt::WA_TransparentForMouseEvents, false);
+        setStyleSheet("background: transparent;");
+        setFrameStyle(QFrame::NoFrame);
+    }
+
+protected:
+    void mousePressEvent(QMouseEvent* event) override {
+        QGraphicsItem* item = itemAt(event->pos());
+        if (item) {
+            // If an item is clicked, let QGraphicsView handle it
+            QGraphicsView::mousePressEvent(event);
+        }
+        else {
+            // Otherwise, forward the event to the underlying widget
+            QApplication::sendEvent(targetWidget, event);
+        }
+    }
+
+    void mouseMoveEvent(QMouseEvent* event) override {
+        QGraphicsItem* item = itemAt(event->pos());
+        if (item) {
+            QGraphicsView::mouseMoveEvent(event);
+        }
+        else {
+            QApplication::sendEvent(targetWidget, event);
+        }
+    }
+
+    void mouseReleaseEvent(QMouseEvent* event) override {
+        QGraphicsItem* item = itemAt(event->pos());
+        if (item) {
+            QGraphicsView::mouseReleaseEvent(event);
+        }
+        else {
+            QApplication::sendEvent(targetWidget, event);
+        }
+    }
+
+private:
+    QWidget* targetWidget;
+};
+
 
 /**
  * Learning page video widget class
@@ -105,23 +173,18 @@ private:
     QPixmap                     _thumbnailPixmap;           /** Thumbnail pixmap */
     QTextBrowser                _propertiesTextBrowser;     /** Text browser for showing the video title */
     QGraphicsScene              _overlayGraphicsScene;      /** Overlay graphics scene */
-    QGraphicsView               _overlayGraphicsView;       /** Overlay widget */
+    OverlayGraphicsView         _overlayGraphicsView;       /** Overlay widget */
     QGraphicsRectItem           _backgroundItem;            /** Overlay background item */
     QGraphicsRectItem           _backgroundBorderItem;      /** Overlay background border item */
     QGraphicsLinearLayout       _verticalLayout;            /** Overlay vertical layout */
     QGraphicsLinearLayout       _metadataLayout;            /** Metadata layout */
-    QGraphicsPixmapItem         _playItem;                  /** Play video item */
-    QGraphicsPixmapItem         _summaryItem;               /** Video summary item */
-    QGraphicsPixmapItem         _dateItem;                  /** Video date item */
-    QGraphicsPixmapItem         _tagsItem;                  /** Video tags item */
+    GraphicsIconItem            _playIconItem;              /** Play video item */
+    GraphicsIconItem            _summaryIconItem;           /** Video summary item */
+    GraphicsIconItem            _dateIconItem;              /** Video date item */
+    GraphicsIconItem            _tagsIconItem;              /** Video tags item */
     QGraphicsWidget             _overlay;                   /** Overlay graphics widget */    
     GraphicsItemFader           _backgroundFader;           /** Background fader */
     GraphicsItemFader           _backgroundBorderFader;     /** Background border fader */
-    GraphicsItemFader           _playItemFader;             /** Play item fader */
-    GraphicsItemFader           _summaryItemFader;          /** Summary metadata item fader */
-    GraphicsItemFader           _dateItemFader;             /** Date metadata item fader */
-    GraphicsItemFader           _tagsItemFader;             /** Tags metadata item fader */
-
 
     friend class LearningPageVideoStyledItemDelegate;
 };
