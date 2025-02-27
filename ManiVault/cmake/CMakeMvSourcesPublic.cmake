@@ -350,6 +350,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WatchVideoAction.h
     src/actions/PaletteAction.h
     src/actions/PaletteColorAction.h
+    src/actions/PaletteColorRoleAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -385,6 +386,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WatchVideoAction.cpp
     src/actions/PaletteAction.cpp
     src/actions/PaletteColorAction.cpp
+    src/actions/PaletteColorRoleAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
