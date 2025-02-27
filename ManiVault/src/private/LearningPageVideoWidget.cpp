@@ -7,8 +7,6 @@
 #include <Application.h>
 #include <CoreInterface.h>
 
-#include <util/Miscellaneous.h>
-
 #include <models/LearningCenterVideosModel.h>
 
 #include <QDebug>
@@ -88,15 +86,21 @@ GraphicsIconItem::GraphicsIconItem(const QString& iconName, const QSize& iconSiz
     _intermediateOpacity(intermediateOpacity)
 {
 	setAcceptHoverEvents(true);
+
+    //
 }
 
 void GraphicsIconItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
+    QGraphicsPixmapItem::hoverEnterEvent(event);
+
 	_fader.fadeIn(1.0, 150);
 }
 
 void GraphicsIconItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
+    QGraphicsPixmapItem::hoverLeaveEvent(event);
+
 	_fader.setOpacity(_intermediateOpacity);
 }
 
@@ -107,19 +111,40 @@ void GraphicsIconItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
     emit clicked();
 }
 
+OverlayRectangleItem::OverlayRectangleItem(QGraphicsItem* parent) :
+	QGraphicsRectItem(parent),
+    _fader(this)
+{
+}
+
+void OverlayRectangleItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+	QGraphicsRectItem::hoverEnterEvent(event);
+
+    _fader.fadeIn(1.0, 150);
+}
+
+void OverlayRectangleItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+	QGraphicsRectItem::hoverLeaveEvent(event);
+
+    _fader.setOpacity(0);
+}
+
+GraphicsItemFader& OverlayRectangleItem::getFader()
+{
+	return _fader;
+}
+
 LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _index(index),
     _overlayGraphicsScene(this),
     _overlayGraphicsView(this),
-    _verticalLayout(Qt::Vertical),
-	_metadataLayout(Qt::Horizontal),
-	_playIconItem("play", { 32, 32 }, 0.25),
-	_summaryIconItem("scroll", { 12, 12 }, 0.15),
-	_dateIconItem("calendar", { 12, 12 }, 0.15),
-	_tagsIconItem("tags", { 12, 12 }, 0.15),
-    _backgroundFader(&_backgroundItem, 0.2),
-    _backgroundBorderFader(&_backgroundBorderItem)
+	_playIconItem("play", { 32, 32 }, 0.5),
+	_summaryIconItem("scroll", { 12, 12 }, 0.3),
+	_dateIconItem("calendar", { 12, 12 }, 0.3),
+	_tagsIconItem("tags", { 12, 12 }, 0.3)
 {
     const auto title = _index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Title)).data().toString();
 
@@ -129,14 +154,13 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _propertiesTextBrowser.document()->setDocumentMargin(0);
     _propertiesTextBrowser.setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     _propertiesTextBrowser.setFixedWidth(200);
-    _propertiesTextBrowser.setHtml(QString("<p style='margin-top: 0px;'><b>%1</b></p>").arg(title));
+    _propertiesTextBrowser.setHtml(QString("<p style='margin-top: 0px;'>%1</p>").arg(title));
 
     connect(_propertiesTextBrowser.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [this]() -> void {
         _propertiesTextBrowser.setFixedHeight(static_cast<int>(_propertiesTextBrowser.document()->size().height()));
     });
 
     _mainLayout.setContentsMargins(0, 0, 0, 0);
-    //_mainLayout.setSpacing(1);
     _mainLayout.setAlignment(Qt::AlignTop);
 
     _mainLayout.addWidget(&_thumbnailLabel);
@@ -177,8 +201,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _overlayGraphicsView.setScene(&_overlayGraphicsScene);
     _overlayGraphicsView.setGeometry(0, 0, width(), height());
 
-    _backgroundItem.setRect(QRect(QPoint(0, 0), QSize(200, 102)));
-    _backgroundBorderItem.setRect(QRect(QPoint(0, 1), QSize(200, 102) - QSize(1, 2)));
+    _overlayRectangleItem.setRect(QRect(QPoint(0, 1), QSize(200, 101)));
 
     _playIconItem.setPos(100 - 16, 50 - 16);
     _summaryIconItem.setPos(140, 80);
@@ -206,8 +229,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _dateIconItem.setToolTip(dateString);
     _tagsIconItem.setToolTip(tags.join(", "));
 
-    _overlayGraphicsScene.addItem(&_backgroundItem);
-    _overlayGraphicsScene.addItem(&_backgroundBorderItem);
+    _overlayGraphicsScene.addItem(&_overlayRectangleItem);
     _overlayGraphicsScene.addItem(&_playIconItem);
     _overlayGraphicsScene.addItem(&_summaryIconItem);
     _overlayGraphicsScene.addItem(&_dateIconItem);
@@ -216,9 +238,8 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _overlayGraphicsView.setObjectName("OverlayGraphicsView");
     _overlayGraphicsView.setRenderHint(QPainter::Antialiasing);
     _overlayGraphicsView.setRenderHint(QPainter::SmoothPixmapTransform);
-    _overlayGraphicsView.setStyleSheet("background: transparent; border: none;");
+    _overlayGraphicsView.setStyleSheet("QGraphicsView#OverlayGraphicsView { background: transparent; border: none; }");
     _overlayGraphicsView.setAttribute(Qt::WA_TranslucentBackground);
-    //_overlayGraphicsView.setAttribute(Qt::WA_TransparentForMouseEvents);
     _overlayGraphicsView.show();
     _overlayGraphicsView.raise();
     _overlayGraphicsView.setGeometry(0, 0, 200, 101);
@@ -238,26 +259,26 @@ bool LearningPageVideoWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::Enter:
         {
-            _backgroundFader.fadeIn(250);
-            _backgroundBorderFader.fadeIn(250);
-
-            _playIconItem.getFader().fadeIn(0.25, 250, 200);
-            _summaryIconItem.getFader().fadeIn(0.15, 250, 300);
-            _dateIconItem.getFader().fadeIn(0.15, 250, 350);
-            _tagsIconItem.getFader().fadeIn(0.15, 250, 400);
+            _overlayRectangleItem.getFader().fadeIn(250);
+            _playIconItem.getFader().fadeIn(0.5, 250, 50);
+            _summaryIconItem.getFader().fadeIn(0.3, 250, 75);
+            _dateIconItem.getFader().fadeIn(0.3, 250, 100);
+            _tagsIconItem.getFader().fadeIn(0.3, 250, 125);
 
             break;
         }
 
         case QEvent::Leave:
         {
-            _backgroundFader.fadeOut(250, 450);
-            _backgroundBorderFader.fadeOut(250, 450);
+            if (rect().contains(mapFromGlobal(QCursor::pos()))) {
+                return true;
+            }
 
-            _playIconItem.getFader().fadeOut(250, 400);
-            _summaryIconItem.getFader().fadeOut(200, 300);
-            _dateIconItem.getFader().fadeOut(200, 250);
-            _tagsIconItem.getFader().fadeOut(200, 200);
+            _overlayRectangleItem.getFader().fadeOut(200, 25);
+            _playIconItem.getFader().fadeOut(150, 50);
+            _summaryIconItem.getFader().fadeOut(100, 75);
+            _dateIconItem.getFader().fadeOut(100, 100);
+            _tagsIconItem.getFader().fadeOut(100, 125);
 
             break;
         }
@@ -275,14 +296,12 @@ void LearningPageVideoWidget::updateCustomStyle()
         border: 1px solid %1; \
     }").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Window).name()));
 
-    _propertiesTextBrowser.setStyleSheet(QString("background-color: transparent; color: %1; border: none; margin: 0px; padding: 0px;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
+    _propertiesTextBrowser.setStyleSheet(QString("background-color: transparent; color: %1; border: none; margin: 0px; padding: 0px;").arg(qApp->palette().color(QPalette::ColorGroup::Inactive, QPalette::ColorRole::Text).name()));
 
     auto windowBackgroundColor = qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Window);
 
-    windowBackgroundColor.setAlphaF(1.f);
+    windowBackgroundColor.setAlphaF(0.9f);
 
-    _backgroundItem.setBrush(windowBackgroundColor);
-
-    _backgroundBorderItem.setBrush(Qt::NoBrush);
-    _backgroundBorderItem.setPen(QPen(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Accent), 1));
+    _overlayRectangleItem.setBrush(windowBackgroundColor);
+    _overlayRectangleItem.setPen(QPen(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Accent), 1));
 }
