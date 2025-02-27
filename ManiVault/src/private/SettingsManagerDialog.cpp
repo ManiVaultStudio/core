@@ -32,7 +32,7 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
-    _groupsAction.addGroupAction(&mv::settings().getApplicationSettings());
+    _groupsAction.addGroupAction(&mv::settings().getAppearanceSettingsAction());
     _groupsAction.addGroupAction(&mv::settings().getParametersSettings());
     _groupsAction.addGroupAction(&mv::settings().getMiscellaneousSettings());
     _groupsAction.addGroupAction(&mv::settings().getTasksSettingsAction());
@@ -46,7 +46,7 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
 QSize SettingsManagerDialog::sizeHint() const
 {
-    return QSize(400, 500);
+    return { 400, 500 };
 }
 
 }

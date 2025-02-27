@@ -42,7 +42,7 @@ public: // Global settings actions
     gui::ParametersSettingsAction& getParametersSettings() override { return _parametersSettingsAction; };
     gui::MiscellaneousSettingsAction& getMiscellaneousSettings() override { return _miscellaneousSettingsAction; };
     gui::TasksSettingsAction& getTasksSettingsAction() override { return _tasksSettingsAction; };
-    gui::ApplicationSettingsAction& getApplicationSettings() override { return _applicationSettingsAction; };
+    gui::AppearanceSettingsAction& getAppearanceSettingsAction() override { return _appearanceSettingsAction; };
     gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() override { return _temporaryDirectoriesSettingsAction; };
 
     /**
@@ -64,7 +64,7 @@ private:
     gui::ParametersSettingsAction               _parametersSettingsAction;              /** Parameters global settings */
     gui::MiscellaneousSettingsAction            _miscellaneousSettingsAction;           /** Miscellaneous global settings */
     gui::TasksSettingsAction                    _tasksSettingsAction;                   /** Tasks global settings */
-    gui::ApplicationSettingsAction              _applicationSettingsAction;             /** Application global settings */
+    gui::AppearanceSettingsAction               _appearanceSettingsAction;              /** Appearance global settings */
     gui::TemporaryDirectoriesSettingsAction     _temporaryDirectoriesSettingsAction;    /** Temporary files global settings */
 };
 

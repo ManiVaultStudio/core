@@ -944,7 +944,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/ParametersSettingsAction.h
     src/MiscellaneousSettingsAction.h
     src/TasksSettingsAction.h
-    src/ApplicationSettingsAction.h
+    src/AppearanceSettingsAction.h
     src/TemporaryDirectoriesSettingsAction.h
     src/PluginGlobalSettingsGroupAction.h
 )
@@ -954,7 +954,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/ParametersSettingsAction.cpp
     src/MiscellaneousSettingsAction.cpp
     src/TasksSettingsAction.cpp
-    src/ApplicationSettingsAction.cpp
+    src/AppearanceSettingsAction.cpp
     src/TemporaryDirectoriesSettingsAction.cpp
     src/PluginGlobalSettingsGroupAction.cpp
 )

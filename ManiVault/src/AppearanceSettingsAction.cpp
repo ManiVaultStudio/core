@@ -2,14 +2,14 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ApplicationSettingsAction.h"
+#include "AppearanceSettingsAction.h"
 #include "Application.h"
 
 namespace mv::gui
 {
 
-ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
-    GlobalSettingsGroupAction(parent, "Application"),
+AppearanceSettingsAction::AppearanceSettingsAction(QObject* parent) :
+    GlobalSettingsGroupAction(parent, "Appearance"),
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
     _lightDarkSystemColorSchemeAction(this, "Color scheme")
 {
