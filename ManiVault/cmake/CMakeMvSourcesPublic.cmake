@@ -346,6 +346,8 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/ViewPluginSamplerAction.h
     src/actions/PluginLearningCenterAction.h
     src/actions/WatchVideoAction.h
+    src/actions/PaletteAction.h
+    src/actions/PaletteColorAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -379,6 +381,8 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/ViewPluginSamplerAction.cpp
     src/actions/PluginLearningCenterAction.cpp
     src/actions/WatchVideoAction.cpp
+    src/actions/PaletteAction.cpp
+    src/actions/PaletteColorAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
