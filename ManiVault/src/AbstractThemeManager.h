@@ -8,6 +8,8 @@
 
 #include "AppearanceSettingsAction.h"
 
+#include "actions/CustomColorSchemeAction.h"
+
 #include <QObject>
 
 namespace mv::gui
@@ -38,6 +40,18 @@ public:
         SystemLightDark,    /** Color scheme is determined by the light/dark system color scheme */
         Custom              /** Color scheme is determined by a custom color scheme */
     };
+
+    /** Custom color scheme modes */
+    enum class CustomColorSchemeMode {
+        BuiltIn,    /** Built-in color scheme */
+        Added       /** Added color scheme */
+    };
+
+    /** Custom color scheme modes */
+    using CustomColorSchemeModes = std::vector<CustomColorSchemeMode>;
+
+    /** Maps custom color scheme name to palette */
+	using CustomColorSchemesMap = QMap<QString, QPalette>;
 
 public:
 
@@ -120,17 +134,25 @@ public:
     virtual void activateCustomColorScheme(const QString& customColorSchemeName) = 0;
 
     /**
-     * Get custom theme names
-     * @return List of non-system theme names (built-in and added)
+     * Get custom color scheme mode names for \p customColorSchemeModes
+     * @return List of color scheme mode names for the custom color scheme modes
      */
-    virtual QStringList getCustomThemeNames() const = 0;
+    virtual QStringList getCustomColorSchemeNames(const CustomColorSchemeModes& customColorSchemeModes = { CustomColorSchemeMode::BuiltIn, CustomColorSchemeMode::Added }) const = 0;
 
     /**
-     * Add theme with \p themeName and \p themePalette
-     * @param themeName Theme name
-     * @param themePalette Theme palette
+     * Get custom color schemes for \p customColorSchemeModes
+     * @param customColorSchemeModes Custom color scheme modes
+     * @return Custom color schemes
      */
-    virtual void addCustomTheme(const QString& themeName, const QPalette& themePalette) = 0;
+    virtual CustomColorSchemesMap getCustomColorSchemes(const CustomColorSchemeModes& customColorSchemeModes = { CustomColorSchemeMode::BuiltIn, CustomColorSchemeMode::Added }) const = 0;
+
+    /**
+     * Add custom color scheme with custom color scheme \p mode \p name and \p palette
+     * @param mode Color scheme mode
+     * @param name Color scheme name
+     * @param palette Color scheme palette
+     */
+    virtual void addCustomColorScheme(const CustomColorSchemeMode& mode, const QString& name, const QPalette& palette) = 0;
 
 signals:
 
@@ -148,14 +170,14 @@ protected: // Action getters
 	virtual gui::OptionAction& getColorSchemeModeAction() = 0;
     virtual gui::ToggleAction& getSystemLightColorSchemeAction() = 0;
     virtual gui::ToggleAction& getSystemDarkColorSchemeAction() = 0;
-    virtual gui::OptionAction& getCustomColorSchemeAction() = 0;
+    virtual gui::CustomColorSchemeAction& getCustomColorSchemeAction() = 0;
 
 public: // Action getters
 
     virtual const gui::OptionAction& getColorSchemeModeAction() const = 0;
     virtual const gui::ToggleAction& getSystemLightColorSchemeAction() const = 0;
     virtual const gui::ToggleAction& getSystemDarkColorSchemeAction() const = 0;
-    virtual const gui::OptionAction& getCustomColorSchemeAction() const = 0;
+    virtual const gui::CustomColorSchemeAction& getCustomColorSchemeAction() const = 0;
 
     friend class mv::gui::AppearanceSettingsAction;
 };

@@ -62,6 +62,8 @@ public:
         QTimer              _updateThemeTimer;      /** Apply theme on timeout and re-start when settings change */
     };
 
+    using CustomColorSchemes = QMap<CustomColorSchemeMode, CustomColorSchemesMap>;
+
 public:
 
     /**
@@ -131,17 +133,25 @@ public:
     void activateCustomColorScheme(const QString& customColorSchemeName) override;
 
     /**
-     * Get custom theme names
-     * @return List of non-system theme names (built-in and added)
+     * Get custom color scheme mode names for \p customColorSchemeModes
+     * @return List of color scheme mode names for the custom color scheme modes
      */
-    QStringList getCustomThemeNames() const override;
+    QStringList getCustomColorSchemeNames(const CustomColorSchemeModes& customColorSchemeModes = { CustomColorSchemeMode::BuiltIn, CustomColorSchemeMode::Added }) const override;
 
     /**
-     * Add theme with \p themeName and \p themePalette
-     * @param themeName Theme name
-     * @param themePalette Theme palette
+     * Get custom color schemes for \p customColorSchemeModes
+     * @param customColorSchemeModes Custom color scheme modes
+     * @return Custom color schemes
      */
-    void addCustomTheme(const QString& themeName, const QPalette& themePalette) override;
+    CustomColorSchemesMap getCustomColorSchemes(const CustomColorSchemeModes& customColorSchemeModes = { CustomColorSchemeMode::BuiltIn, CustomColorSchemeMode::Added }) const override;
+
+    /**
+     * Add custom color scheme with custom color scheme \p mode \p name and \p palette
+     * @param mode Color scheme mode
+     * @param name Color scheme name
+     * @param palette Color scheme palette
+     */
+    void addCustomColorScheme(const CustomColorSchemeMode& mode, const QString& name, const QPalette& palette) override;
 
 private:
 
@@ -203,27 +213,27 @@ protected: // Action getters
     gui::OptionAction& getColorSchemeModeAction() override { return _colorSchemeModeAction; }
     gui::ToggleAction& getSystemLightColorSchemeAction() override { return _systemLightColorSchemeAction; }
     gui::ToggleAction& getSystemDarkColorSchemeAction() override { return _systemDarkColorSchemeAction; }
-    gui::OptionAction& getCustomColorSchemeAction() override { return _customColorSchemeAction; }
+    gui::CustomColorSchemeAction& getCustomColorSchemeAction() override { return _customColorSchemeAction; }
 
 public: // Action getters
 
     const gui::OptionAction& getColorSchemeModeAction() const override { return _colorSchemeModeAction; }
     const gui::ToggleAction& getSystemLightColorSchemeAction() const override { return _systemLightColorSchemeAction; }
     const gui::ToggleAction& getSystemDarkColorSchemeAction() const override { return _systemDarkColorSchemeAction; }
-    const gui::OptionAction& getCustomColorSchemeAction() const override { return _customColorSchemeAction; }
+    const gui::CustomColorSchemeAction& getCustomColorSchemeAction() const override { return _customColorSchemeAction; }
 
 private:
-    gui::OptionAction           _colorSchemeModeAction;                 /** For selecting the color scheme mode */
-    gui::ToggleAction           _systemLightColorSchemeAction;          /** Set to light system color scheme when triggered */
-    gui::ToggleAction           _systemDarkColorSchemeAction;           /** Set to dark system color scheme when triggered */
-    gui::OptionAction           _customColorSchemeAction;               /** Custom color scheme action  */
-    QMap<QString, QPalette>     _customPalettes;                        /** Custom color schemes */
-    QTimer                      _detectSystemColorSchemeChangesTimer;   /** QStyleHints::colorSchemeChanged is sometimes unreliable: check periodically for system color scheme changes */
-    Qt::ColorScheme             _systemColorScheme;                     /** System color scheme */
-    Qt::ColorScheme             _applicationColorScheme;                /** Application color scheme */
-    bool                        _disableSystemLightColorSchemeSlot;     /** Disable system light slot */
-    bool                        _disableSystemDarkColorSchemeSlot;      /** Disable system dark slot */
-    QPointer<ThemeSettings>     _requestThemeSettings;                  /** Requested theme settings for the next timeout of the ThemeManager::_updateThemeTimer */
+    gui::OptionAction               _colorSchemeModeAction;                 /** For selecting the color scheme mode */
+    gui::ToggleAction               _systemLightColorSchemeAction;          /** Set to light system color scheme when triggered */
+    gui::ToggleAction               _systemDarkColorSchemeAction;           /** Set to dark system color scheme when triggered */
+    gui::CustomColorSchemeAction    _customColorSchemeAction;               /** Custom color scheme action  */
+    CustomColorSchemes              _customColorSchemes;                    /** Custom color schemes */
+    QTimer                          _detectSystemColorSchemeChangesTimer;   /** QStyleHints::colorSchemeChanged is sometimes unreliable: check periodically for system color scheme changes */
+    Qt::ColorScheme                 _systemColorScheme;                     /** System color scheme */
+    Qt::ColorScheme                 _applicationColorScheme;                /** Application color scheme */
+    bool                            _disableSystemLightColorSchemeSlot;     /** Disable system light slot */
+    bool                            _disableSystemDarkColorSchemeSlot;      /** Disable system dark slot */
+    QPointer<ThemeSettings>         _requestThemeSettings;                  /** Requested theme settings for the next timeout of the ThemeManager::_updateThemeTimer */
 };
 
 }
