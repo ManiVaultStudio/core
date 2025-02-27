@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <util/WidgetOverlayer.h>
-
 #include <QLabel>
 #include <QPersistentModelIndex>
 #include <QPixmap>
@@ -17,20 +15,55 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsLinearLayout>
 
+/** Applies fading capabilities to a graphics item*/
 class GraphicsItemFader : public QObject
 {
 public:
 
+    /**
+     * Construct with pointer to \p item, initial \p opacity and pointer to \p parent object
+     * @param item Pointer to the graphics item
+     * @param opacity Initial opacity
+     * @param parent Pointer to parent object
+     */
     GraphicsItemFader(QGraphicsItem* item, qreal opacity = 0.f, QObject* parent = nullptr);
 
+    /**
+     * Fade in the item with \p opacity, \p duration and \p delay
+     * @param opacity Opacity
+     * @param duration Duration
+     * @param delay Delay
+     */
     void fadeIn(qreal opacity = 1.f, int duration = 300, int delay = 0);
 
+    /**
+     * Fade in the item with \p duration and \p delay
+     * @param duration Duration
+     * @param delay Delay
+     */
     void fadeIn(int duration = 300, int delay = 0);
 
+    /**
+     * Fade out the item with \p opacity, \p duration and \p delay
+     * @param opacity Opacity
+     * @param duration Duration
+     * @param delay Delay
+     */
     void fadeOut(qreal opacity = 0.f, int duration = 600, int delay = 0);
 
+    /**
+     * Fade out the item with \p duration and \p delay
+     * @param duration Duration
+     * @param delay Delay
+     */
     void fadeOut(int duration = 600, int delay = 0);
 
+    /**
+     * Set the opacity of the item to \p opacity with \p duration and \p delay
+     * @param opacity Opacity
+     * @param duration Duration
+     * @param delay Delay
+     */
     void setOpacity(qreal opacity, int duration = 300, int delay = 0);
 
 private:
@@ -39,6 +72,7 @@ private:
     QPropertyAnimation      _opacityAnimation;  /** Overlay animation */
 };
 
+/** Overlay the thumbnail with an icon */
 class GraphicsIconItem : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
@@ -88,58 +122,99 @@ private:
     qreal               _intermediateOpacity;   /** Intermediate opacity */
 };
 
+/** Overlay the thumbnail with a rectangle */
+class OverlayRectangleItem : public QGraphicsRectItem
+{
+public:
+
+    /**
+     * Construct with icon name \p iconName, icon size \p iconSize and pointer to \p parent item
+     * @param parent Parent graphics item
+     */
+    OverlayRectangleItem(QGraphicsItem* parent = nullptr);
+
+    /**
+     * Respond to hover enter events
+     * @param event Hover event
+     */
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
+
+    /**
+     * Respond to hover move events
+     * @param event Hover event
+     */
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
+
+    /**
+     * Returns the fader
+     * @return Fader
+     */
+    GraphicsItemFader& getFader();
+
+private:
+    GraphicsItemFader   _fader;     /** Fader for the item */
+};
+
+/** Override to solve mouse event propagation issues */
 class OverlayGraphicsView : public QGraphicsView
 {
 public:
-    explicit OverlayGraphicsView(QWidget* parent = nullptr)
-        : QGraphicsView(parent), targetWidget(parent) {
-        setAttribute(Qt::WA_TransparentForMouseEvents, false);
-        setStyleSheet("background: transparent;");
+
+	/**
+	 * Create with pointer to \p parent widget
+     * @param parent Pointer to parent widget
+	 */
+	explicit OverlayGraphicsView(QWidget* parent = nullptr)
+        : QGraphicsView(parent), _targetWidget(parent)
+	{
         setFrameStyle(QFrame::NoFrame);
     }
 
 protected:
+
+    /**
+     * Respond to mouse press events
+     * @param event Mouse event
+     */
     void mousePressEvent(QMouseEvent* event) override {
-        QGraphicsItem* item = itemAt(event->pos());
-        if (item) {
-            // If an item is clicked, let QGraphicsView handle it
+        if (auto item = itemAt(event->pos()))
             QGraphicsView::mousePressEvent(event);
-        }
-        else {
-            // Otherwise, forward the event to the underlying widget
-            QApplication::sendEvent(targetWidget, event);
-        }
+        else
+            QApplication::sendEvent(_targetWidget, event);
     }
 
+    /**
+     * Respond to mouse move events
+     * @param event Mouse event
+     */
     void mouseMoveEvent(QMouseEvent* event) override {
-        QGraphicsItem* item = itemAt(event->pos());
-        if (item) {
+        if (auto item = itemAt(event->pos()))
             QGraphicsView::mouseMoveEvent(event);
-        }
-        else {
-            QApplication::sendEvent(targetWidget, event);
-        }
+        else
+            QApplication::sendEvent(_targetWidget, event);
     }
 
+    /**
+     * Respond to mouse release events
+     * @param event Mouse event
+     */
     void mouseReleaseEvent(QMouseEvent* event) override {
-        QGraphicsItem* item = itemAt(event->pos());
-        if (item) {
+        
+        if (auto item = itemAt(event->pos()))
             QGraphicsView::mouseReleaseEvent(event);
-        }
-        else {
-            QApplication::sendEvent(targetWidget, event);
-        }
+        else
+            QApplication::sendEvent(_targetWidget, event);
     }
 
 private:
-    QWidget* targetWidget;
+    QWidget* _targetWidget;  /** Pointer to the target widget */
 };
 
 
 /**
  * Learning page video widget class
  *
- * Widget class which show a learning page video
+ * Show a learning page video
  *
  * @author Thomas Kroes
  */
@@ -174,17 +249,12 @@ private:
     QTextBrowser                _propertiesTextBrowser;     /** Text browser for showing the video title */
     QGraphicsScene              _overlayGraphicsScene;      /** Overlay graphics scene */
     OverlayGraphicsView         _overlayGraphicsView;       /** Overlay widget */
-    QGraphicsRectItem           _backgroundItem;            /** Overlay background item */
-    QGraphicsRectItem           _backgroundBorderItem;      /** Overlay background border item */
-    QGraphicsLinearLayout       _verticalLayout;            /** Overlay vertical layout */
-    QGraphicsLinearLayout       _metadataLayout;            /** Metadata layout */
+    OverlayRectangleItem        _overlayRectangleItem;      /** Overlay rectangle item */
     GraphicsIconItem            _playIconItem;              /** Play video item */
     GraphicsIconItem            _summaryIconItem;           /** Video summary item */
     GraphicsIconItem            _dateIconItem;              /** Video date item */
     GraphicsIconItem            _tagsIconItem;              /** Video tags item */
     QGraphicsWidget             _overlay;                   /** Overlay graphics widget */    
-    GraphicsItemFader           _backgroundFader;           /** Background fader */
-    GraphicsItemFader           _backgroundBorderFader;     /** Background border fader */
 
     friend class LearningPageVideoStyledItemDelegate;
 };

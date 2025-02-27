@@ -44,7 +44,8 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
     _videosListView.setModel(&_videosFilterModel);
     _videosListView.setModelColumn(static_cast<int>(LearningCenterVideosModel::Column::Delegate));
     _videosListView.setItemDelegateForColumn(static_cast<int>(LearningCenterVideosModel::Column::Delegate), new LearningPageVideoStyledItemDelegate(this));
-    
+    _videosListView.setSpacing(10);
+
     setLayout(&_mainLayout);
 
     const auto openPersistentEditors = [this]() -> void {
