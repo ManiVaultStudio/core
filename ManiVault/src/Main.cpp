@@ -6,6 +6,7 @@
 #include "private/Archiver.h"
 #include "private/Core.h"
 #include "private/StartupProjectSelectorDialog.h"
+#include "private/NoProxyRectanglesFusionStyle.h"
 
 #include <Application.h>
 #include <ProjectMetaAction.h>
@@ -13,9 +14,8 @@
 
 #include <util/Icon.h>
 
-#include <QSurfaceFormat>
 #include <QStyleFactory>
-#include <QProxyStyle>
+#include <QSurfaceFormat>
 #include <QQuickWindow>
 #include <QCommandLineParser>
 #include <QTemporaryDir>
@@ -24,21 +24,6 @@
 using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;
-
-class NoFocusProxyStyle : public QProxyStyle {
-public:
-    NoFocusProxyStyle(QStyle *baseStyle = 0) :
-        QProxyStyle(baseStyle)
-    {
-    }
-
-    void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const {
-        if (element == QStyle::PE_FrameFocusRect)
-            return;
-
-        QProxyStyle::drawPrimitive(element, option, painter, widget);
-    }
-};
 
 QSharedPointer<ProjectMetaAction> getStartupProjectMetaAction(const QString& startupProjectFilePath)
 {
@@ -236,14 +221,7 @@ int main(int argc, char *argv[])
 
     loadGuiTask.setSubtaskStarted("Apply styles");
 
-#ifdef _WIN32
-    //application.setStyle(new NoFocusProxyStyle);
-    qApp->setStyle(QStyleFactory::create("Fusion"));
-#endif
-    
-#ifdef __APPLE__
-    application.setStyle(QStyleFactory::create("Fusion"));
-#endif
+    application.setStyle(new NoProxyRectanglesFusionStyle);
 
 #ifdef _WIN32
     //QFile styleSheetFile(":/styles/default.qss");
