@@ -4,8 +4,11 @@
 
 #include "DockArea.h"
 #include "Icon.h"
+#include "StyledIcon.h"
 
 #include <QPainter>
+
+using namespace mv::util;
 
 namespace mv::gui
 {
@@ -73,7 +76,7 @@ QIcon getDockAreaIcon(DockAreaFlag dockArea)
             break;
     }
 
-    return createIcon(pixmap);
+    return QIcon(util::StyledIcon(createIcon(pixmap)));
 }
 
 }

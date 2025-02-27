@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 
     //application.setStyleSheet(styleSheet);
 #endif
-    
+
     loadGuiTask.setSubtaskFinished("Apply styles");
 
     MainWindow mainWindow;
