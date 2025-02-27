@@ -41,10 +41,9 @@ CORE_EXPORT QIcon combineIcons(const QIcon& iconA, const QIcon& iconB);
 /**
  * Convenience function to create a plugin icon, which consists of maximum of four characters laid out in a grid
  * @param characters Characters
- * @param color Icon color
  * @return Plugin icon
  */
-CORE_EXPORT QIcon createPluginIcon(const QString& characters, const QColor& color);
+CORE_EXPORT QIcon createPluginIcon(const QString& characters);
 
 /**
  * Combines two (or more) icons into a horizontal icon
