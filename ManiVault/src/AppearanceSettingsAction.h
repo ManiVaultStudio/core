@@ -7,21 +7,20 @@
 #include "GlobalSettingsGroupAction.h"
 
 #include "actions/StringAction.h"
-#include "actions/OptionAction.h"
 #include "actions/HorizontalGroupAction.h"
 
 namespace mv::gui
 {
 
 /**
- * Application global settings action class
+ * Appearance global settings action class
  *
- * Action class which groups all global settings for the application
+ * Groups all global settings for the appearance of the application
  *
  * @author Thomas Kroes
  * @author Thomas Höllt
  */
-class CORE_EXPORT ApplicationSettingsAction final : public GlobalSettingsGroupAction
+class CORE_EXPORT AppearanceSettingsAction final : public GlobalSettingsGroupAction
 {
 public:
 
@@ -29,7 +28,7 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      */
-    ApplicationSettingsAction(QObject* parent);
+    AppearanceSettingsAction(QObject* parent);
 
 private:
     StringAction            _applicationSessionIdAction;            /** String action for the application session identifier */

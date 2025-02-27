@@ -6,7 +6,7 @@
 
 #include "AbstractManager.h"
 
-#include "ApplicationSettingsAction.h"
+#include "AppearanceSettingsAction.h"
 
 #include <QObject>
 
@@ -157,7 +157,7 @@ public: // Action getters
     virtual const gui::ToggleAction& getSystemDarkColorSchemeAction() const = 0;
     virtual const gui::OptionAction& getCustomColorSchemeAction() const = 0;
 
-    friend class mv::gui::ApplicationSettingsAction;
+    friend class mv::gui::AppearanceSettingsAction;
 };
 
 }
