@@ -48,7 +48,7 @@ QIcon combineIcons(const QIcon& iconA, const QIcon& iconB)
     return createIcon(pixmapA);
 }
 
-QIcon createPluginIcon(const QString& characters, const QColor& color)
+QIcon createPluginIcon(const QString& characters)
 {
     const auto margin       = 8;
     const auto pixmapSize   = QSize(256, 256);
@@ -63,7 +63,7 @@ QIcon createPluginIcon(const QString& characters, const QColor& color)
 
     painter.setRenderHint(QPainter::Antialiasing);
 
-    painter.setPen(QPen(color, 1, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painter.setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
 
     auto font = QFont("Arial", 100);
 
