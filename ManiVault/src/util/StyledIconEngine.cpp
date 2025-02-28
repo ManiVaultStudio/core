@@ -7,7 +7,6 @@
 #include <QDebug>
 #include <QPainter>
 #include <QStyleHints>
-#include <windows.h>
 
 namespace mv::util
 {
