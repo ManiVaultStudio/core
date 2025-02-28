@@ -37,12 +37,35 @@ public:
     /** Initialize the palette */
     void initialize();
 
+    /** Get the palette */
+    QPalette& getPalette();
+
+    /**
+     * Set the palette to \p palette
+     * @param palette Current palette
+     */
+    void setPalette(const QPalette& palette);
+
+signals:
+
+    /**
+     * Signals that the palette changed to \p palette
+     * @param palette 
+     */
+    void paletteChanged(const QPalette& palette);
+
 private:
     StringAction                _nameAction;                /** Name of the palette */
+    TriggerAction               _fromThemeAction;           /** Set palette from theme */
     PaletteColorRoleActions     _paletteColorRoleActions;   /** Palette color role actions for each palette color role */
+    TriggerAction               _previewAction;             /** Preview action */   
+    QPalette                    _palette;                   /** Current palette */
+    QPalette                    _cachedPalette;             /** Cached palette */
 
 protected:
     static QStringList  colorRoleNames;    /** Names of the color roles */
+
+    friend class PaletteColorAction;
 };
 
 }

@@ -40,6 +40,11 @@ public:
     void initialize(const QPalette::ColorGroup& colorGroup, const QPalette::ColorRole& colorRole);
 
 private:
+
+    /** Update the color from the palette */
+    void updateColorFromPalette();
+
+private:
     QPalette::ColorGroup    _colorGroup;    /** Color group of the palette color */
     QPalette::ColorRole     _colorRole;     /** Color role of the palette color */
     ColorAction             _colorAction;   /** Palette color picker */

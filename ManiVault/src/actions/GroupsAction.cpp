@@ -274,7 +274,7 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
     _filterAction.setPlaceHolderString("Filter by name...");
 
     // Set action icon
-    //_expandAllAction.setIconByName("angles-down");
+    _expandAllAction.setIconByName("angles-down");
     _collapseAllAction.setIconByName("angles-up");
 
     _expandAllAction.setText(" ");

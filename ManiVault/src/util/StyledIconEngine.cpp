@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QStyleHints>
+#include <windows.h>
 
 namespace mv::util
 {
@@ -22,30 +23,28 @@ void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode m
 
 QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
+    
+
     if (StyledIcon::pixmaps.contains(_iconSettings._sha)) {
 	    auto iconPixmap = StyledIcon::pixmaps[_iconSettings._sha].copy();
 
-        QPixmap result;
-
     	if (!iconPixmap.isNull()) {
+            QPixmap result;
+
 		    switch (_iconSettings._mode) {
                 case StyledIconMode::ThemeAware:
                 {
-                    const auto recolorColor     = qApp->palette().color(_iconSettings.getColorGroupForCurrentTheme(), _iconSettings.getColorRoleForCurrentTheme());
-                    const auto recoloredPixmap  = recolorPixmap(iconPixmap, recolorColor);
-                    const auto recoloredIcon    = QIcon(recoloredPixmap);
+                    const auto recolorColor    = qApp->palette().color(static_cast<QPalette::ColorGroup>(mode), _iconSettings.getColorRoleForCurrentTheme());
+                    const auto recoloredPixmap = recolorPixmap(iconPixmap, recolorColor).scaled(size, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation);
 
-                    result = recoloredIcon.pixmap(size, mode, state);
+					result = recoloredPixmap;
 
                     break;
                 }
 
                 case StyledIconMode::FixedColor:
                 {
-                    const auto recoloredPixmap  = recolorPixmap(iconPixmap, _iconSettings._fixedColor);
-                    const auto recoloredIcon    = QIcon(recoloredPixmap);
-
-                    result = recoloredIcon.pixmap(size, mode, state);
+                    result = recolorPixmap(iconPixmap, _iconSettings._fixedColor).scaled(size, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation);
 
                     break;
                 }
@@ -67,7 +66,6 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 
                 QPainter badgeIconPixmapPainter(&badgeIconPixmap);
 
-                badgeIconPixmapPainter.setRenderHint(QPainter::Antialiasing);
                 badgeIconPixmapPainter.setRenderHint(QPainter::Antialiasing);
                 badgeIconPixmapPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
                 badgeIconPixmapPainter.setRenderHint(QPainter::LosslessImageRendering, true);
@@ -119,15 +117,18 @@ QIconEngine* StyledIconEngine::clone() const
 
 QPixmap StyledIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& color)
 {
-    auto image = pixmap.toImage();
+    QPixmap coloredPixmap(pixmap.size());
+    coloredPixmap.fill(Qt::transparent);
 
-    QPainter painter(&image);
+    QPainter painter(&coloredPixmap);
+    painter.drawPixmap(0, 0, pixmap);
 
-    painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-    painter.fillRect(image.rect(), color);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(coloredPixmap.rect(), color);
+
     painter.end();
 
-    return { QPixmap::fromImage(image) };
+    return coloredPixmap;
 }
 
 }

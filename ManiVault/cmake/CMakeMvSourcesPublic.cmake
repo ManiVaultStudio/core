@@ -351,7 +351,8 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/PaletteAction.h
     src/actions/PaletteColorAction.h
     src/actions/PaletteColorRoleAction.h
-    src/actions/CustomColorSchemeAction.h
+    src/actions/ColorSchemeAction.h
+    src/actions/EditColorSchemeAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -388,7 +389,8 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/PaletteAction.cpp
     src/actions/PaletteColorAction.cpp
     src/actions/PaletteColorRoleAction.cpp
-    src/actions/CustomColorSchemeAction.cpp
+    src/actions/ColorSchemeAction.cpp
+    src/actions/EditColorSchemeAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -549,6 +551,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/StyledIcon.h
     src/util/StyledIconEngine.h
     src/util/Badge.h
+    src/util/ColorScheme.h
 )
 
 if(APPLE)
@@ -600,6 +603,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/StyledIcon.cpp
     src/util/StyledIconEngine.cpp
     src/util/Badge.cpp
+    src/util/ColorScheme.cpp
 )
 
 if(APPLE)
@@ -947,6 +951,23 @@ set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
     ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
 )
 
+set(PUBLIC_COLOR_SCHEMES_MODEL_HEADERS
+    src/models/AbstractColorSchemesModel.h
+	src/models/ColorSchemesListModel.h
+    src/models/ColorSchemesFilterModel.h
+)
+
+set(PUBLIC_COLOR_SCHEMES_MODEL_SOURCES
+    src/models/AbstractColorSchemesModel.cpp
+	src/models/ColorSchemesListModel.cpp
+    src/models/ColorSchemesFilterModel.cpp
+)
+
+set(PUBLIC_COLOR_SCHEMES_MODEL_FILES
+    ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
+    ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -1063,6 +1084,7 @@ set(PUBLIC_HEADERS
 	${PUBLIC_DATASETS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
+    ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_NOTIFICATIONS_HEADERS}
@@ -1110,6 +1132,7 @@ set(PUBLIC_SOURCES
 	${PUBLIC_DATASETS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
+    ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_NOTIFICATIONS_SOURCES}
@@ -1170,6 +1193,7 @@ source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
 source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Videos FILES ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES})
+source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})

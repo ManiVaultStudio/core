@@ -12,7 +12,19 @@ PaletteColorAction::PaletteColorAction(QObject* parent, const QString& title, co
     _colorRole(QPalette::ColorRole::Window),
     _colorAction(this, "Color")
 {
+    setShowLabels(false);
+
     initialize(colorGroup, colorRole);
+
+    auto paletteAction = dynamic_cast<PaletteAction*>(parent->parent());
+
+    connect(paletteAction, &PaletteAction::paletteChanged, this, &PaletteColorAction::updateColorFromPalette);
+
+    connect(&_colorAction, &ColorAction::colorChanged, this, [this, parent](const QColor& color) -> void {
+        auto paletteAction = dynamic_cast<PaletteAction*>(parent->parent());
+
+        paletteAction->getPalette().setColor(_colorGroup, _colorRole, color);
+    });
 }
 
 void PaletteColorAction::initialize(const QPalette::ColorGroup& colorGroup, const QPalette::ColorRole& colorRole)
@@ -21,6 +33,17 @@ void PaletteColorAction::initialize(const QPalette::ColorGroup& colorGroup, cons
     _colorRole  = colorRole;
 
     addAction(&_colorAction);
+   
+    _colorAction.setToolTip(QString("%1 %2 color").arg(PaletteColorRoleAction::colorGroupNames[_colorGroup], PaletteAction::colorRoleNames[_colorRole].toLower()));
+
+    updateColorFromPalette();
+}
+
+void PaletteColorAction::updateColorFromPalette()
+{
+    auto paletteAction = dynamic_cast<PaletteAction*>(parent()->parent());
+
+    _colorAction.setColor(paletteAction->getPalette().color(_colorGroup, _colorRole));
 }
 
 }

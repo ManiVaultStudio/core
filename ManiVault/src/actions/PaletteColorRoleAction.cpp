@@ -7,16 +7,16 @@
 namespace mv::gui {
 
 QStringList PaletteColorRoleAction::colorGroupNames = {
-    "Active",
+    "Normal",
     "Disabled",
-    "Inactive",
-    "Normal"
+    "Inactive"
 };
 
 PaletteColorRoleAction::PaletteColorRoleAction(QObject* parent, const QString& title, const QPalette::ColorRole& colorRole /*= QPalette::ColorRole::Window*/) :
     HorizontalGroupAction(parent, title),
     _nameAction(this, "Name")
 {
+    setShowLabels(false);
     initialize(colorRole);
 }
 
@@ -29,7 +29,7 @@ void PaletteColorRoleAction::initialize(const QPalette::ColorRole& colorRole)
     int currentColorGroupIndex = 0;
 
     for (auto& paletteColorAction : _paletteColorActions) {
-        paletteColorAction = std::make_unique<PaletteColorAction>(this, colorGroupNames[currentColorGroupIndex]);
+        paletteColorAction = std::make_unique<PaletteColorAction>(this, colorGroupNames[currentColorGroupIndex], static_cast<QPalette::ColorGroup>(currentColorGroupIndex), colorRole);
 
         addAction(paletteColorAction.get());
 
