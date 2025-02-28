@@ -235,6 +235,16 @@ void EventManager::notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>&
         qDebug() << __FUNCTION__ << dataset->getGuiName() << datasetNotifiedString;
 #endif
 
+        if (ignoreDatasets != nullptr && ignoreDatasets->contains(dataset))
+            return;
+
+        Datasets notified{ dataset };
+
+        if (ignoreDatasets == nullptr)
+            ignoreDatasets = &notified;
+        else
+            *ignoreDatasets << dataset;
+
         dataset->markSelectionDirty(true);
 
         // For all selection groups, set the current dataset as having a changed selection
@@ -244,8 +254,10 @@ void EventManager::notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>&
         }
 
         // If the dataset has any linked dataset, then dirty them as well
-        for (const LinkedData& ld : dataset->getLinkedData())
+        for (const LinkedData& ld : dataset->getLinkedData()) {
             ld.getTargetDataset()->markSelectionDirty(true);
+            notifyDatasetDataSelectionChanged(ld.getTargetDataset(), ignoreDatasets);
+        }
     }
     catch (std::exception& e)
     {
