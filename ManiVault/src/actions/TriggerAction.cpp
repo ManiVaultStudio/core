@@ -36,13 +36,7 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     _triggerAction(triggerAction),
     _widgetFlags(widgetFlags)
 {
-//#ifdef __APPLE__
-//    setIconSize(QSize(12, 12));
-//#endif
-
     setIconSize(QSize(12, 12));
-
-    //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 
     connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();
@@ -94,7 +88,7 @@ void TriggerAction::PushButtonWidget::paintEvent(QPaintEvent* event) {
 
         rect.moveCenter(geometry().center());
 
-        painter.drawPixmap(rect, _triggerAction->icon().pixmap(iconSize()));
+        painter.drawPixmap(rect, _triggerAction->icon().pixmap(iconSize(), isEnabled() ? QIcon::Mode::Normal : QIcon::Mode::Disabled));
     }
 }
 

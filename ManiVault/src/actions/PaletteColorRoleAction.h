@@ -55,6 +55,8 @@ private:
 
 protected:
     static QStringList  colorGroupNames;    /** Names of the color groups */
+
+    friend class PaletteColorAction;
 };
 
 }

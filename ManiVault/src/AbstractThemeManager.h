@@ -8,7 +8,11 @@
 
 #include "AppearanceSettingsAction.h"
 
-#include "actions/CustomColorSchemeAction.h"
+#include "actions/ColorSchemeAction.h"
+
+#include "util/ColorScheme.h"
+
+#include "models/ColorSchemesListModel.h"
 
 #include <QObject>
 
@@ -41,14 +45,7 @@ public:
         Custom              /** Color scheme is determined by a custom color scheme */
     };
 
-    /** Custom color scheme modes */
-    enum class CustomColorSchemeMode {
-        BuiltIn,    /** Built-in color scheme */
-        Added       /** Added color scheme */
-    };
-
-    /** Custom color scheme modes */
-    using CustomColorSchemeModes = std::vector<CustomColorSchemeMode>;
+    
 
     /** Maps custom color scheme name to palette */
 	using CustomColorSchemesMap = QMap<QString, QPalette>;
@@ -62,6 +59,14 @@ public:
     AbstractThemeManager(QObject* parent) :
         AbstractManager(parent, "Theme")
     {
+    }
+
+    /** Perform event manager startup initialization */
+    void initialize() override
+    {
+        AbstractManager::initialize();
+
+        getCustomColorSchemeListModel().addBuiltInColorSchemes();
     }
 
     /**
@@ -137,22 +142,52 @@ public:
      * Get custom color scheme mode names for \p customColorSchemeModes
      * @return List of color scheme mode names for the custom color scheme modes
      */
-    virtual QStringList getCustomColorSchemeNames(const CustomColorSchemeModes& customColorSchemeModes = { CustomColorSchemeMode::BuiltIn, CustomColorSchemeMode::Added }) const = 0;
+    virtual QStringList getCustomColorSchemeNames(const util::ColorScheme::Modes& customColorSchemeModes = { util::ColorScheme::Mode::BuiltIn, util::ColorScheme::Mode::UserAdded }) const = 0;
 
     /**
      * Get custom color schemes for \p customColorSchemeModes
      * @param customColorSchemeModes Custom color scheme modes
-     * @return Custom color schemes
+     * @return Color schemes map
      */
-    virtual CustomColorSchemesMap getCustomColorSchemes(const CustomColorSchemeModes& customColorSchemeModes = { CustomColorSchemeMode::BuiltIn, CustomColorSchemeMode::Added }) const = 0;
+    virtual util::ColorSchemesMap getCustomColorSchemes(const util::ColorScheme::Modes& customColorSchemeModes = { util::ColorScheme::Mode::BuiltIn, util::ColorScheme::Mode::UserAdded }) const = 0;
 
     /**
-     * Add custom color scheme with custom color scheme \p mode \p name and \p palette
-     * @param mode Color scheme mode
-     * @param name Color scheme name
-     * @param palette Color scheme palette
+     * Add custom \p colorScheme
+     * @param colorScheme Color scheme
      */
-    virtual void addCustomColorScheme(const CustomColorSchemeMode& mode, const QString& name, const QPalette& palette) = 0;
+    virtual void addCustomColorScheme(const util::ColorScheme& colorScheme) = 0;
+
+    /**
+     * Get custom color schemes list model
+     * @return Reference to custom color schemes list model
+     */
+    virtual const ColorSchemesListModel& getCustomColorSchemeListModel() const = 0;
+
+    /** Restyles all widgets to implement a color scheme change */
+    static void restyleAllWidgets()
+    {
+        QList<QWidget*> allWidgets;
+
+        for (QWidget* window : QApplication::topLevelWidgets()) {
+            allWidgets.append(window);
+            allWidgets.append(window->findChildren<QWidget*>());
+        }
+
+        for (auto widget : allWidgets) {
+            widget->style()->unpolish(widget);
+            widget->style()->polish(widget);
+            widget->update();
+            widget->repaint();
+        }
+    }
+
+protected:
+
+    /**
+     * Get custom color schemes list model
+     * @return Reference to custom color schemes list model
+     */
+    virtual ColorSchemesListModel& getCustomColorSchemeListModel() = 0;
 
 signals:
 
@@ -170,16 +205,16 @@ protected: // Action getters
 	virtual gui::OptionAction& getColorSchemeModeAction() = 0;
     virtual gui::ToggleAction& getSystemLightColorSchemeAction() = 0;
     virtual gui::ToggleAction& getSystemDarkColorSchemeAction() = 0;
-    virtual gui::CustomColorSchemeAction& getCustomColorSchemeAction() = 0;
+    virtual gui::ColorSchemeAction& getCustomColorSchemeAction() = 0;
 
 public: // Action getters
 
     virtual const gui::OptionAction& getColorSchemeModeAction() const = 0;
     virtual const gui::ToggleAction& getSystemLightColorSchemeAction() const = 0;
     virtual const gui::ToggleAction& getSystemDarkColorSchemeAction() const = 0;
-    virtual const gui::CustomColorSchemeAction& getCustomColorSchemeAction() const = 0;
+    virtual const gui::ColorSchemeAction& getCustomColorSchemeAction() const = 0;
 
-    friend class mv::gui::AppearanceSettingsAction;
+    friend class gui::AppearanceSettingsAction;
 };
 
 }

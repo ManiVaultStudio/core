@@ -8,6 +8,8 @@
 	#include "util/MacThemeHelper.h"
 #endif
 
+#include <models/ColorSchemesFilterModel.h>
+
 #include <QStyleHints>
 
 using namespace mv::gui;
@@ -114,25 +116,8 @@ void ThemeManager::ThemeSettings::updateTheme()
 		}
 	}
 
-	restyleAllWidgets();
+	AbstractThemeManager::restyleAllWidgets();
 	deleteLater();
-}
-
-void ThemeManager::ThemeSettings::restyleAllWidgets()
-{
-	QList<QWidget*> allWidgets;
-
-	for (QWidget* window : QApplication::topLevelWidgets()) {
-		allWidgets.append(window);
-		allWidgets.append(window->findChildren<QWidget*>());
-	}
-
-	for (auto widget : allWidgets) {
-		widget->style()->unpolish(widget);
-		widget->style()->polish(widget);
-		widget->update();
-		widget->repaint();
-	}
 }
 
 ThemeManager::ThemeManager(QObject* parent) :
@@ -140,7 +125,7 @@ ThemeManager::ThemeManager(QObject* parent) :
     _colorSchemeModeAction(this, "Theme"),
     _systemLightColorSchemeAction(this, "Light", false),
     _systemDarkColorSchemeAction(this, "Dark", true),
-    _customColorSchemeAction(this, "Custom"),
+    _colorSchemeAction(this, "Custom"),
     _systemColorScheme(Qt::ColorScheme::Unknown),
     _applicationColorScheme(Qt::ColorScheme::Unknown),
     _disableSystemLightColorSchemeSlot(false),
@@ -196,7 +181,7 @@ void ThemeManager::initialize()
             setSystemLightColorSchemeActionCheckedSilent(false);
         });
 
-    	connect(&_customColorSchemeAction.getCurrentColorSchemeAction(), &OptionAction::currentTextChanged, this, [this]() -> void {
+    	connect(&_colorSchemeAction.getCurrentColorSchemeAction(), &OptionAction::currentTextChanged, this, [this]() -> void {
             if (!isCustomColorSchemeModeActive())
                 return;
 
@@ -220,16 +205,14 @@ void ThemeManager::initialize()
 
         _detectSystemColorSchemeChangesTimer.start();
 
-        addDefaultCustomThemes();
-
         _colorSchemeModeAction.setSettingsPrefix(getSettingsPrefix() + "ColorSchemeMode");
         _systemLightColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Light");
         _systemDarkColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Dark");
-        _customColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Custom");
+        _colorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Custom");
 
         updateColorSchemeMode();
 
-        _customColorSchemeAction.initialize();
+        _colorSchemeAction.initialize();
     }
     endInitialization();
 }
@@ -310,10 +293,77 @@ void ThemeManager::activateCustomColorScheme(const QString& customColorSchemeNam
 {
     activateCustomColorScheme();
 
-    _customColorSchemeAction.getCurrentColorSchemeAction().setCurrentText(customColorSchemeName);
+    _colorSchemeAction.getCurrentColorSchemeAction().setCurrentText(customColorSchemeName);
 }
 
-QStringList ThemeManager::getCustomColorSchemeNames(const CustomColorSchemeModes& customColorSchemeModes /*= { CustomColorSchemeMode::BuiltIn, CustomColorSchemeMode::Added }*/) const
+QStringList ThemeManager::getCustomColorSchemeNames(const util::ColorScheme::Modes& customColorSchemeModes) const
+{
+    ColorSchemesFilterModel colorSchemesFilterModel;
+
+    colorSchemesFilterModel.setSourceModel(const_cast<ColorSchemesListModel*>(&_customColorSchemeListModel));
+
+    QStringList customColorSchemeModeNames;
+
+    for (const auto& customColorSchemeMode : customColorSchemeModes) {
+        customColorSchemeModeNames << ColorScheme::modeNames[customColorSchemeMode];
+    }
+
+	colorSchemesFilterModel.getModeFilterAction().setSelectedOptions(customColorSchemeModeNames);
+
+    QStringList customColorSchemeNames;
+
+    for (int rowIndex = 0; rowIndex < colorSchemesFilterModel.rowCount(); ++rowIndex) {
+        const auto sourceNameIndex  = colorSchemesFilterModel.mapToSource(colorSchemesFilterModel.index(rowIndex, static_cast<int>(ColorSchemesListModel::Column::Name)));
+        const auto colorSchemeName  = getCustomColorSchemeListModel().data(sourceNameIndex).toString();
+
+        customColorSchemeNames << colorSchemeName;
+    }
+
+    return customColorSchemeNames;
+}
+
+ColorSchemesMap ThemeManager::getCustomColorSchemes(const util::ColorScheme::Modes& customColorSchemeModes) const
+{
+    ColorSchemesFilterModel colorSchemesFilterModel;
+
+    colorSchemesFilterModel.setSourceModel(const_cast<ColorSchemesListModel*>(&_customColorSchemeListModel));
+
+    QStringList customColorSchemeModeNames;
+
+    for (const auto& customColorSchemeMode : customColorSchemeModes) {
+        customColorSchemeModeNames << ColorScheme::modeNames[customColorSchemeMode];
+    }
+
+    colorSchemesFilterModel.getModeFilterAction().setSelectedOptions(customColorSchemeModeNames);
+
+    ColorSchemesMap colorSchemes;
+
+    for (int rowIndex = 0; rowIndex < colorSchemesFilterModel.rowCount(); ++rowIndex) {
+        const auto sourceNameIndex  = colorSchemesFilterModel.mapToSource(colorSchemesFilterModel.index(rowIndex, static_cast<int>(ColorSchemesListModel::Column::Name)));
+
+        if (const auto colorSchemeItem = dynamic_cast<AbstractColorSchemesModel::Item*>(getCustomColorSchemeListModel().itemFromIndex(sourceNameIndex)))
+			colorSchemes[colorSchemeItem->getColorScheme().getName()] = colorSchemeItem->getColorScheme();
+    }
+
+    return colorSchemes;
+}
+
+void ThemeManager::addCustomColorScheme(const util::ColorScheme& colorScheme)
+{
+}
+
+const ColorSchemesListModel& ThemeManager::getCustomColorSchemeListModel() const
+{
+    return _customColorSchemeListModel;
+}
+
+ColorSchemesListModel& ThemeManager::getCustomColorSchemeListModel()
+{
+    return _customColorSchemeListModel;
+}
+
+/*
+QStringList ThemeManager::getCustomColorSchemeNames(const CustomColorSchemeModes& customColorSchemeModes ) const
 {
     QStringList customColorSchemeNames;
 
@@ -343,45 +393,11 @@ void ThemeManager::addCustomColorScheme(const CustomColorSchemeMode& mode, const
 
     _customColorSchemes[mode][name] = palette;
 
-    _customColorSchemeAction.getCurrentColorSchemeAction().setOptions(getCustomColorSchemeNames());
+    _colorSchemeAction.getCurrentColorSchemeAction().setOptions(getCustomColorSchemeNames());
 }
+*/
 
-void ThemeManager::addDefaultCustomThemes()
-{
-#ifdef THEME_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
 
-    const auto addBuiltInCustomColorScheme = [this](QString name, QColor window, QColor windowText, QColor base, QColor alternateBase, QColor tooltipBase, QColor tooltipText, QColor text, QColor button, QColor buttonText, QColor brightText) -> void {
-        auto palette = QPalette();
-
-        palette.setColor(QPalette::Window, window);
-        palette.setColor(QPalette::WindowText, windowText);
-        palette.setColor(QPalette::Base, base);
-        palette.setColor(QPalette::AlternateBase, alternateBase);
-        palette.setColor(QPalette::ToolTipBase, tooltipBase);
-        palette.setColor(QPalette::ToolTipText, tooltipText);
-        palette.setColor(QPalette::Text, tooltipText);
-        palette.setColor(QPalette::Button, button);
-        palette.setColor(QPalette::ButtonText, buttonText);
-        palette.setColor(QPalette::BrightText, brightText);
-
-        addCustomColorScheme(CustomColorSchemeMode::BuiltIn, name, palette);
-    };
-
-    addBuiltInCustomColorScheme("Dark", QColor(45, 45, 45), Qt::white, QColor(30, 30, 30), QColor(45, 45, 45), Qt::white, Qt::white, Qt::white, QColor(60, 60, 60), Qt::white, Qt::red);
-    addBuiltInCustomColorScheme("Light", Qt::white, Qt::black, Qt::white, QColor(240, 240, 240), Qt::white, Qt::black, Qt::black, QColor(220, 220, 220), Qt::black, Qt::red);
-    addBuiltInCustomColorScheme("Fusion (dark)", QColor(45, 45, 45), Qt::white, QColor(30, 30, 30), QColor(45, 45, 45), Qt::white, Qt::white, Qt::white, QColor(60, 60, 60), Qt::white, Qt::red);
-    addBuiltInCustomColorScheme("Fusion (light)", Qt::white, Qt::black, Qt::white, QColor(240, 240, 240), Qt::white, Qt::black, Qt::black, QColor(220, 220, 220), Qt::black, Qt::red);
-    addBuiltInCustomColorScheme("Google Material Design (dark)", QColor(33, 33, 33), QColor(220, 220, 220), QColor(50, 50, 50), QColor(40, 40, 40), QColor(50, 50, 50), QColor(220, 220, 220), QColor(220, 220, 220), QColor(50, 50, 50), QColor(220, 220, 220), QColor(220, 220, 220));
-    addBuiltInCustomColorScheme("Google Material Design (light)", QColor(245, 245, 245), QColor(0, 0, 0), QColor(255, 255, 255), QColor(240, 240, 240), QColor(255, 255, 255), QColor(0, 0, 0), QColor(0, 0, 0), QColor(230, 230, 230), QColor(0, 0, 0), QColor(0, 0, 0));
-    addBuiltInCustomColorScheme("Dracula", QColor(40, 42, 54), QColor(248, 248, 242), QColor(68, 71, 90), QColor(50, 50, 70), QColor(68, 71, 90), QColor(248, 248, 242), QColor(248, 248, 242), QColor(68, 71, 90), QColor(248, 248, 242), QColor(248, 248, 242));
-    addBuiltInCustomColorScheme("Nord (Cold Minimalistic)", QColor(46, 52, 64), QColor(216, 222, 233), QColor(59, 66, 82), QColor(76, 86, 106), QColor(59, 66, 82), QColor(216, 222, 233), QColor(216, 222, 233), QColor(59, 66, 82), QColor(216, 222, 233), QColor(216, 222, 233));
-    addBuiltInCustomColorScheme("Solarized (dark)", QColor(0, 43, 54), QColor(131, 148, 150), QColor(7, 54, 66), QColor(0, 43, 54), QColor(7, 54, 66), QColor(131, 148, 150), QColor(147, 161, 161), QColor(88, 110, 117), QColor(147, 161, 161), QColor(147, 161, 161));
-    addBuiltInCustomColorScheme("Solarized (light)", QColor(253, 246, 227), QColor(101, 123, 131), QColor(238, 232, 213), QColor(253, 246, 227), QColor(238, 232, 213), QColor(101, 123, 131), QColor(88, 110, 117), QColor(147, 161, 161), QColor(88, 110, 117), QColor(88, 110, 117));
-    addBuiltInCustomColorScheme("Monokai", QColor(39, 40, 34), QColor(248, 248, 242), QColor(50, 50, 50), QColor(60, 60, 60), QColor(50, 50, 50), QColor(248, 248, 242), QColor(248, 248, 242), QColor(70, 70, 70), QColor(248, 248, 242), QColor(248, 248, 242));
-    addBuiltInCustomColorScheme("High contrast", Qt::black, Qt::white, Qt::black, Qt::white, Qt::black, Qt::white, Qt::white, Qt::black, Qt::white, Qt::red);
-}
 
 ThemeManager::ThemeSettings* ThemeManager::getRequestThemeSettings()
 {
@@ -399,7 +415,7 @@ void ThemeManager::updateColorSchemeMode()
 
     _systemLightColorSchemeAction.setEnabled(currentColorSchemeMode == ColorSchemeMode::SystemLightDark);
     _systemDarkColorSchemeAction.setEnabled(currentColorSchemeMode == ColorSchemeMode::SystemLightDark);
-    _customColorSchemeAction.setEnabled(currentColorSchemeMode == ColorSchemeMode::Custom);
+    _colorSchemeAction.setEnabled(currentColorSchemeMode == ColorSchemeMode::Custom);
 
     switch (currentColorSchemeMode) {
 	    case ColorSchemeMode::System:
@@ -485,11 +501,12 @@ void ThemeManager::privateActivateCustomColorScheme()
     qDebug() << __FUNCTION__;
 #endif
 
-    const auto currentCustomColorSchemeName = _customColorSchemeAction.getCurrentColorSchemeAction().getCurrentText();
+    const auto currentCustomColorSchemeName = _colorSchemeAction.getCurrentColorSchemeAction().getCurrentText();
+    const auto customColorSchemes           = getCustomColorSchemes();
 
-    if (isCustomColorSchemeModeActive() && getCustomColorSchemeNames().contains(currentCustomColorSchemeName)) {
+    if (isCustomColorSchemeModeActive() && customColorSchemes.keys().contains(currentCustomColorSchemeName)) {
         getRequestThemeSettings()->setColorSchemeMode(ColorSchemeMode::Custom);
-        getRequestThemeSettings()->setPalette(getCustomColorSchemes()[currentCustomColorSchemeName], currentCustomColorSchemeName);
+        getRequestThemeSettings()->setPalette(customColorSchemes[currentCustomColorSchemeName].getPalette(), currentCustomColorSchemeName);
     }
 }
 

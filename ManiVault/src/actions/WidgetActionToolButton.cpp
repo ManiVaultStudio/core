@@ -78,13 +78,18 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
         painter.drawPoint(center);
     }
 
-    if (_action) {
-        auto rect = QRect({}, iconSize());
+    //if (_action) {
+    //    auto rect = QRect({}, iconSize());
 
-        rect.moveCenter(geometry().center());
+    //    rect.moveCenter(geometry().center());
 
-        painter.drawPixmap(rect, _action->icon().pixmap(iconSize()));
-    }
+    //    QIcon::Mode iconMode = isEnabled() ? QIcon::Mode::Normal : QIcon::Mode::Disabled;
+
+    //    if (isActiveWindow())
+    //        iconMode = QIcon::Mode::Active;
+
+    //    painter.drawPixmap(rect, _action->icon().pixmap(iconSize(), iconMode, isEnabled() ? QIcon::State::On : QIcon::State::Off));
+    //}
 }
 
 WidgetAction* WidgetActionToolButton::getAction() const
@@ -124,6 +129,8 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
         connect(_action, &WidgetAction::changed, this, actionChanged);
         connect(_action, &WidgetAction::enabledChanged, this, actionEnabledChanged);
         connect(_action, &WidgetAction::visibleChanged, this, actionVisibilityChanged);
+
+        setIcon(_action->icon());
     }
     
     setAutoRaise(_action ? _action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise) : false);
