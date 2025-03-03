@@ -92,6 +92,7 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     updateReadOnly();
 
     _addViewPluginToolButton->setIcon(StyledIcon("plus"));
+    _addViewPluginToolButton->setIconSize(QSize(12, 12));
 
     const auto patchTabStyling = [this]() -> void {
         setStyleSheet(QString(" \
