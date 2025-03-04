@@ -23,20 +23,9 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _notifyDuringSelection(true),
     _brushRadius(BRUSH_RADIUS_DEFAULT),
     _fixedBrushRadiusModifier(Qt::NoModifier),
-    _mousePosition(),
-    _mousePositions(),
     _mouseButtons(),
-    _shapePixmap(),
-    _areaPixmap(),
     _preventContextMenu(false),
     _aborted(false),
-    _mainColor(),
-    _fillColor(),
-    _areaBrush(),
-    _penLineForeGround(),
-    _penLineBackGround(),
-    _penControlPoint(),
-    _penClosingPoint(),
     _lineAreaWidth(5.0f),
     _lineAngle(0.0f),
     _showAngleLines(false),
@@ -264,7 +253,9 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     paint();
                 }
             }
+
             float lineAreaWidth = getLineWidth();
+
             // Adjust line area width with up and down arrow keys
             if (_type == PixelSelectionType::Line) {
                 if (keyEvent->key() == Qt::Key_Up) {
@@ -286,8 +277,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
     {
         const auto resizeEvent = static_cast<QResizeEvent*>(event);
 
-        _shapePixmap = QPixmap(resizeEvent->size());
-        _areaPixmap = QPixmap(resizeEvent->size());
+        _shapePixmap    = QPixmap(resizeEvent->size());
+        _areaPixmap     = QPixmap(resizeEvent->size());
 
         _shapePixmap.fill(Qt::transparent);
         _areaPixmap.fill(Qt::transparent);
@@ -303,35 +294,35 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
         switch (mouseEvent->button())
         {
-        case Qt::LeftButton:
-        {
-            switch (_type)
-            {
-            case PixelSelectionType::Rectangle:
-            case PixelSelectionType::Line:
-            case PixelSelectionType::Brush:
-            case PixelSelectionType::Lasso:
-            case PixelSelectionType::Sample:
-                break;
+	        case Qt::LeftButton:
+	        {
+	            switch (_type)
+	            {
+	            case PixelSelectionType::Rectangle:
+	            case PixelSelectionType::Line:
+	            case PixelSelectionType::Brush:
+	            case PixelSelectionType::Lasso:
+	            case PixelSelectionType::Sample:
+	                break;
 
-            case PixelSelectionType::Polygon:
-            {
-                endSelection();
-                break;
-            }
+	            case PixelSelectionType::Polygon:
+	            {
+	                endSelection();
+	                break;
+	            }
 
-            default:
-                break;
-            }
+	            default:
+	                break;
+	            }
 
-            break;
-        }
+	            break;
+	        }
 
-        case Qt::RightButton:
-            break;
+	        case Qt::RightButton:
+	            break;
 
-        default:
-            break;
+	        default:
+	            break;
         }
 
         break;
@@ -353,17 +344,17 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
         {
             switch (mouseEvent->button())
             {
-            case Qt::LeftButton:
-                startSelection();
-                _mousePositions.clear();
-                _mousePositions << mouseEvent->pos();
-                break;
+	            case Qt::LeftButton:
+	                startSelection();
+	                _mousePositions.clear();
+	                _mousePositions << mouseEvent->pos();
+	                break;
 
-            case Qt::RightButton:
-                break;
+	            case Qt::RightButton:
+	                break;
 
-            default:
-                break;
+	            default:
+	                break;
             }
 
             break;
@@ -579,47 +570,49 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
     case QEvent::Wheel:
     {
-        auto wheelEvent = static_cast<QWheelEvent*>(event);
+        auto wheelEvent = dynamic_cast<QWheelEvent*>(event);
 
         switch (_type)
         {
-        case PixelSelectionType::Rectangle:
-            break;
-        case PixelSelectionType::Line:
-        {
-            float lineAreaWidth = getLineWidth();
-            if (wheelEvent->angleDelta().y() < 0)
-                lineAreaWidth = std::max(1.0f, lineAreaWidth - 1.0f);
-            else
-                lineAreaWidth += 1.0f;
+	        case PixelSelectionType::Rectangle:
+	            break;
 
-            setLineWidth(lineAreaWidth);
-            shouldPaint = true;
+	        case PixelSelectionType::Line:
+	        {
+	            float lineAreaWidth = getLineWidth();
+	            if (wheelEvent->angleDelta().y() < 0)
+	                lineAreaWidth = std::max(1.0f, lineAreaWidth - 1.0f);
+	            else
+	                lineAreaWidth += 1.0f;
 
-            break;
-        }
-        case PixelSelectionType::Brush:
-        case PixelSelectionType::Sample:
-        {
-            if (_fixedBrushRadiusModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedBrushRadiusModifier)
-                break;
+	            setLineWidth(lineAreaWidth);
+	            shouldPaint = true;
 
-            if (wheelEvent->angleDelta().y() < 0)
-                setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
-            else
-                setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
+	            break;
+	        }
 
-            shouldPaint = true;
+	        case PixelSelectionType::Brush:
+	        case PixelSelectionType::Sample:
+	        {
+	            if (_fixedBrushRadiusModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedBrushRadiusModifier)
+	                break;
 
-            break;
-        }
+	            if (wheelEvent->angleDelta().y() < 0)
+	                setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
+	            else
+	                setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
 
-        case PixelSelectionType::Lasso:
-        case PixelSelectionType::Polygon:
-            break;
+	            shouldPaint = true;
 
-        default:
-            break;
+	            break;
+	        }
+
+	        case PixelSelectionType::Lasso:
+	        case PixelSelectionType::Polygon:
+	            break;
+
+	        default:
+	            break;
         }
 
         break;
@@ -666,277 +659,277 @@ void PixelSelectionTool::paint()
 
     switch (_type)
     {
-    case PixelSelectionType::Rectangle:
-    {
-        if (noMousePositions != 2)
-            break;
+	    case PixelSelectionType::Rectangle:
+	    {
+	        if (noMousePositions != 2)
+	            break;
 
-        const auto topLeft = QPointF(std::min(_mousePositions.first().x(), _mousePositions.last().x()), std::min(_mousePositions.first().y(), _mousePositions.last().y()));
-        const auto bottomRight = QPointF(std::max(_mousePositions.first().x(), _mousePositions.last().x()), std::max(_mousePositions.first().y(), _mousePositions.last().y()));
-        const auto rectangle = QRectF(topLeft, bottomRight);
+	        const auto topLeft = QPointF(std::min(_mousePositions.first().x(), _mousePositions.last().x()), std::min(_mousePositions.first().y(), _mousePositions.last().y()));
+	        const auto bottomRight = QPointF(std::max(_mousePositions.first().x(), _mousePositions.last().x()), std::max(_mousePositions.first().y(), _mousePositions.last().y()));
+	        const auto rectangle = QRectF(topLeft, bottomRight);
 
-        controlPoints << _mousePositions.first();
-        controlPoints << _mousePositions.last();
+	        controlPoints << _mousePositions.first();
+	        controlPoints << _mousePositions.last();
 
-        areaPainter.setBrush(_areaBrush);
-        areaPainter.setPen(Qt::NoPen);
-        areaPainter.drawRect(rectangle);
+	        areaPainter.setBrush(_areaBrush);
+	        areaPainter.setPen(Qt::NoPen);
+	        areaPainter.drawRect(rectangle);
 
-        shapePainter.setPen(_penLineForeGround);
-        shapePainter.drawRect(rectangle);
+	        shapePainter.setPen(_penLineForeGround);
+	        shapePainter.drawRect(rectangle);
 
-        const auto size = 8.0f;
-        const auto textCenter = rectangle.topRight() + QPoint(size, -size);
+	        const auto size = 8.0f;
+	        const auto textCenter = rectangle.topRight() + QPoint(size, -size);
 
-        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+	        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
-        break;
-    }
+	        break;
+	    }
 
-    case PixelSelectionType::Line:
-    {
-        if (noMousePositions != 2)
-            break;
+	    case PixelSelectionType::Line:
+	    {
+	        if (noMousePositions != 2)
+	            break;
 
-        const auto startPoint = _mousePositions.first();
-        const auto endPoint = _mousePositions.last();
+	        const auto startPoint = _mousePositions.first();
+	        const auto endPoint = _mousePositions.last();
 
-        controlPoints << startPoint;
-        controlPoints << endPoint;
+	        controlPoints << startPoint;
+	        controlPoints << endPoint;
 
-        const auto length = getLineWidth();
-        QPointF direction = (endPoint - startPoint);
-        double magnitude = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
+	        const auto length = getLineWidth();
+	        QPointF direction = (endPoint - startPoint);
+	        double magnitude = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
 
-        if (magnitude != 0) {  // Prevent division by zero
-            direction /= magnitude;  // Normalize direction
-        }
+	        if (magnitude != 0) {  // Prevent division by zero
+	            direction /= magnitude;  // Normalize direction
+	        }
 
-        QPointF perpendicular(-direction.y() * length, direction.x() * length);
+	        QPointF perpendicular(-direction.y() * length, direction.x() * length);
 
 
-        areaPainter.setBrush(_areaBrush);
-        areaPainter.setPen(Qt::NoPen);
-        areaPainter.drawPolygon(QPolygonF({ startPoint + perpendicular, endPoint + perpendicular, endPoint - perpendicular, startPoint - perpendicular }));
+	        areaPainter.setBrush(_areaBrush);
+	        areaPainter.setPen(Qt::NoPen);
+	        areaPainter.drawPolygon(QPolygonF({ startPoint + perpendicular, endPoint + perpendicular, endPoint - perpendicular, startPoint - perpendicular }));
 
-        shapePainter.setPen(_penLineBackGround);
-        shapePainter.drawLine(startPoint + perpendicular, endPoint + perpendicular);
-        shapePainter.drawLine(startPoint - perpendicular, endPoint - perpendicular);
+	        shapePainter.setPen(_penLineBackGround);
+	        shapePainter.drawLine(startPoint + perpendicular, endPoint + perpendicular);
+	        shapePainter.drawLine(startPoint - perpendicular, endPoint - perpendicular);
 
-        shapePainter.setPen(_penLineForeGround);
-        shapePainter.drawLine(startPoint, endPoint);
+	        shapePainter.setPen(_penLineForeGround);
+	        shapePainter.drawLine(startPoint, endPoint);
 
-        const auto arrowSize = 5.0;
-        const auto arrowAngle = M_PI / 6;
-        const auto arrowP1 = endPoint - direction * arrowSize + QPointF(-direction.y(), direction.x()) * arrowSize * std::tan(arrowAngle);
-        const auto arrowP2 = endPoint - direction * arrowSize - QPointF(-direction.y(), direction.x()) * arrowSize * std::tan(arrowAngle);
+	        const auto arrowSize = 5.0;
+	        const auto arrowAngle = M_PI / 6;
+	        const auto arrowP1 = endPoint - direction * arrowSize + QPointF(-direction.y(), direction.x()) * arrowSize * std::tan(arrowAngle);
+	        const auto arrowP2 = endPoint - direction * arrowSize - QPointF(-direction.y(), direction.x()) * arrowSize * std::tan(arrowAngle);
 
-        QPolygonF arrowHead;
-        arrowHead << endPoint << arrowP1 << arrowP2;
+	        QPolygonF arrowHead;
+	        arrowHead << endPoint << arrowP1 << arrowP2;
 
-        shapePainter.setBrush(_penLineForeGround.color());
-        shapePainter.drawPolygon(arrowHead);
+	        shapePainter.setBrush(_penLineForeGround.color());
+	        shapePainter.drawPolygon(arrowHead);
 
-        const auto size = 8.0f;
-        const auto textCenter = endPoint + QPoint(size, -size);
+	        const auto size = 8.0f;
+	        const auto textCenter = endPoint + QPoint(size, -size);
 
-        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+	        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
-        // Draw the y-axis and angle lines if _showAngleLines is true
-        if (_showAngleLines) {
-            QPen grayPen(Qt::gray, 1, Qt::DashLine);
-            shapePainter.setPen(grayPen);
+	        // Draw the y-axis and angle lines if _showAngleLines is true
+	        if (_showAngleLines) {
+	            QPen grayPen(Qt::gray, 1, Qt::DashLine);
+	            shapePainter.setPen(grayPen);
 
-            // Draw y-axis
-            shapePainter.drawLine(QPointF(startPoint.x(), 0), QPointF(startPoint.x(), _shapePixmap.height()));
+	            // Draw y-axis
+	            shapePainter.drawLine(QPointF(startPoint.x(), 0), QPointF(startPoint.x(), _shapePixmap.height()));
 
-            // Draw small angular dashed line from a point closer to the start point in the y direction
-            const auto angleLineLength = 25.0; // Local parameter for the length of the angle lines
-            QPainterPath angularPath;
-            angularPath.moveTo(QPointF(startPoint.x(), startPoint.y() - angleLineLength));
-            angularPath.lineTo(startPoint + direction * angleLineLength);
-            shapePainter.drawPath(angularPath);
-        }
+	            // Draw small angular dashed line from a point closer to the start point in the y direction
+	            const auto angleLineLength = 25.0; // Local parameter for the length of the angle lines
+	            QPainterPath angularPath;
+	            angularPath.moveTo(QPointF(startPoint.x(), startPoint.y() - angleLineLength));
+	            angularPath.lineTo(startPoint + direction * angleLineLength);
+	            shapePainter.drawPath(angularPath);
+	        }
 
-        break;
-    }
+	        break;
+	    }
 
-    case PixelSelectionType::Brush:
-    {
-        const auto brushCenter = _mousePosition;
+	    case PixelSelectionType::Brush:
+	    {
+	        const auto brushCenter = _mousePosition;
 
-        if (noMousePositions >= 1) {
-            if (noMousePositions == 1) {
-                areaPainter.setBrush(_areaBrush);
-                areaPainter.drawEllipse(QPointF(brushCenter), _brushRadius, _brushRadius);
-            }
-            else {
-                areaPainter.setBrush(Qt::NoBrush);
-                areaPainter.setPen(QPen(_areaBrush, 2.0 * _brushRadius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-                areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
-            }
-        }
+	        if (noMousePositions >= 1) {
+	            if (noMousePositions == 1) {
+	                areaPainter.setBrush(_areaBrush);
+	                areaPainter.drawEllipse(QPointF(brushCenter), _brushRadius, _brushRadius);
+	            }
+	            else {
+	                areaPainter.setBrush(Qt::NoBrush);
+	                areaPainter.setPen(QPen(_areaBrush, 2.0 * _brushRadius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+	                areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+	            }
+	        }
 
-        shapePainter.setPen(Qt::NoPen);
-        shapePainter.setBrush(_areaBrush);
+	        shapePainter.setPen(Qt::NoPen);
+	        shapePainter.setBrush(_areaBrush);
 
-        shapePainter.drawPoint(brushCenter);
+	        shapePainter.drawPoint(brushCenter);
 
-        shapePainter.setPen(_mouseButtons & Qt::LeftButton ? _penLineForeGround : _penLineBackGround);
-        shapePainter.setBrush(Qt::NoBrush);
-        shapePainter.drawEllipse(QPointF(brushCenter), _brushRadius, _brushRadius);
+	        shapePainter.setPen(_mouseButtons & Qt::LeftButton ? _penLineForeGround : _penLineBackGround);
+	        shapePainter.setBrush(Qt::NoBrush);
+	        shapePainter.drawEllipse(QPointF(brushCenter), _brushRadius, _brushRadius);
 
-        controlPoints << brushCenter;
+	        controlPoints << brushCenter;
 
-        const auto textAngle = 0.75f * M_PI;
-        const auto size = 12.0f;
-        const auto textCenter = brushCenter + (_brushRadius + size) * QPointF(sin(textAngle), cos(textAngle));
+	        const auto textAngle = 0.75f * M_PI;
+	        const auto size = 12.0f;
+	        const auto textCenter = brushCenter + (_brushRadius + size) * QPointF(sin(textAngle), cos(textAngle));
 
-        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+	        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
-        break;
-    }
+	        break;
+	    }
 
-    case PixelSelectionType::Lasso:
-    {
-        if (noMousePositions < 2)
-            break;
+	    case PixelSelectionType::Lasso:
+	    {
+	        if (noMousePositions < 2)
+	            break;
 
-        areaPainter.setBrush(_areaBrush);
-        areaPainter.setPen(Qt::NoPen);
-        areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
+	        areaPainter.setBrush(_areaBrush);
+	        areaPainter.setPen(Qt::NoPen);
+	        areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
-        shapePainter.setBrush(Qt::NoBrush);
+	        shapePainter.setBrush(Qt::NoBrush);
 
-        shapePainter.setPen(_penLineForeGround);
-        shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+	        shapePainter.setPen(_penLineForeGround);
+	        shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
 
-        controlPoints << _mousePositions.first();
-        controlPoints << _mousePositions.last();
+	        controlPoints << _mousePositions.first();
+	        controlPoints << _mousePositions.last();
 
-        shapePainter.setBrush(_areaBrush);
-        shapePainter.setPen(_penLineBackGround);
-        shapePainter.drawPolyline(controlPoints.constData(), controlPoints.count());
+	        shapePainter.setBrush(_areaBrush);
+	        shapePainter.setPen(_penLineBackGround);
+	        shapePainter.drawPolyline(controlPoints.constData(), controlPoints.count());
 
-        const auto size = 8.0f;
-        const auto textCenter = _mousePositions.first() - QPoint(size, size);
+	        const auto size = 8.0f;
+	        const auto textCenter = _mousePositions.first() - QPoint(size, size);
 
-        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+	        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
-        break;
-    }
+	        break;
+	    }
 
-    case PixelSelectionType::Polygon:
-    {
-        if (noMousePositions < 2)
-            break;
+	    case PixelSelectionType::Polygon:
+	    {
+	        if (noMousePositions < 2)
+	            break;
 
-        areaPainter.setBrush(_areaBrush);
-        areaPainter.setPen(Qt::NoPen);
-        areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
+	        areaPainter.setBrush(_areaBrush);
+	        areaPainter.setPen(Qt::NoPen);
+	        areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
-        shapePainter.setBrush(Qt::NoBrush);
+	        shapePainter.setBrush(Qt::NoBrush);
 
-        shapePainter.setPen(_penLineForeGround);
-        shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+	        shapePainter.setPen(_penLineForeGround);
+	        shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
 
-        QVector<QPoint> connectingPoints;
+	        QVector<QPoint> connectingPoints;
 
-        connectingPoints << _mousePositions.first();
-        connectingPoints << _mousePositions.last();
+	        connectingPoints << _mousePositions.first();
+	        connectingPoints << _mousePositions.last();
 
-        shapePainter.setPen(_penLineBackGround);
-        shapePainter.drawPolyline(connectingPoints.constData(), connectingPoints.count());
+	        shapePainter.setPen(_penLineBackGround);
+	        shapePainter.drawPolyline(connectingPoints.constData(), connectingPoints.count());
 
-        controlPoints << _mousePositions;
+	        controlPoints << _mousePositions;
 
-        const auto size = 8.0f;
-        const auto textCenter = _mousePositions.first() - QPoint(size, size);
+	        const auto size = 8.0f;
+	        const auto textCenter = _mousePositions.first() - QPoint(size, size);
 
-        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+	        textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
-        if (_mousePositions.count() > 3 && (_mousePositions.last() - _mousePositions.first()).manhattanLength() < CP_RADIUS_CLOSING) {
-            shapePainter.setPen(_penClosingPoint);
-            shapePainter.drawPoints(QVector<QPoint>({ _mousePositions.first() }));
-        }
+	        if (_mousePositions.count() > 3 && (_mousePositions.last() - _mousePositions.first()).manhattanLength() < CP_RADIUS_CLOSING) {
+	            shapePainter.setPen(_penClosingPoint);
+	            shapePainter.drawPoints(QVector<QPoint>({ _mousePositions.first() }));
+	        }
 
-        break;
-    }
+	        break;
+	    }
 
-    case PixelSelectionType::Sample:
-    {
-        if (noMousePositions < 1)
-            break;
+	    case PixelSelectionType::Sample:
+	    {
+	        if (noMousePositions < 1)
+	            break;
 
-        const auto mousePosition = _mousePositions.last();
+	        const auto mousePosition = _mousePositions.last();
 
-        areaPainter.setBrush(_areaBrush);
-        areaPainter.setPen(QPen(_areaBrush, _brushRadius, Qt::SolidLine, Qt::RoundCap));
-        areaPainter.drawPoint(mousePosition);
+	        areaPainter.setBrush(_areaBrush);
+	        areaPainter.setPen(QPen(_areaBrush, _brushRadius, Qt::SolidLine, Qt::RoundCap));
+	        areaPainter.drawPoint(mousePosition);
 
-        shapePainter.setOpacity(0.2);
+	        shapePainter.setOpacity(0.2);
 
-        shapePainter.setBrush(Qt::NoBrush);
-        shapePainter.setPen(_penLineBackGround);
+	        shapePainter.setBrush(Qt::NoBrush);
+	        shapePainter.setPen(_penLineBackGround);
 
-        constexpr auto gap = 5.0;
-        const auto radius = 0.5f * _brushRadius;
+	        constexpr auto gap = 5.0;
+	        const auto radius = 0.5f * _brushRadius;
 
-        shapePainter.drawPolyline(QVector<QPoint>({
-            QPoint(mousePosition.x(), mousePosition.y() - radius - gap),
-            QPoint(mousePosition.x(), 0.0)
-            }));
+	        shapePainter.drawPolyline(QVector<QPoint>({
+	            QPoint(mousePosition.x(), mousePosition.y() - radius - gap),
+	            QPoint(mousePosition.x(), 0.0)
+	            }));
 
-        shapePainter.drawPolyline(QVector<QPoint>({
-            QPoint(mousePosition.x(), mousePosition.y() + radius + gap),
-            QPoint(mousePosition.x(), _shapePixmap.size().height())
-            }));
+	        shapePainter.drawPolyline(QVector<QPoint>({
+	            QPoint(mousePosition.x(), mousePosition.y() + radius + gap),
+	            QPoint(mousePosition.x(), _shapePixmap.size().height())
+	            }));
 
-        shapePainter.drawPolyline(QVector<QPoint>({
-            QPoint(mousePosition.x() - radius - gap, mousePosition.y()),
-            QPoint(0.0, mousePosition.y())
-            }));
+	        shapePainter.drawPolyline(QVector<QPoint>({
+	            QPoint(mousePosition.x() - radius - gap, mousePosition.y()),
+	            QPoint(0.0, mousePosition.y())
+	            }));
 
-        shapePainter.drawPolyline(QVector<QPoint>({
-            QPoint(mousePosition.x() + radius + gap, mousePosition.y()),
-            QPoint(_shapePixmap.size().width(), mousePosition.y())
-            }));
+	        shapePainter.drawPolyline(QVector<QPoint>({
+	            QPoint(mousePosition.x() + radius + gap, mousePosition.y()),
+	            QPoint(_shapePixmap.size().width(), mousePosition.y())
+	            }));
 
-        break;
-    }
+	        break;
+	    }
 
-    case PixelSelectionType::ROI:
-    {
-        const auto topLeft = QPointF(0.0f, 0.0f);
-        const auto bottomRight = QPointF(_shapePixmap.size().width(), _shapePixmap.size().height());
-        const auto rectangle = QRectF(topLeft, bottomRight);
+	    case PixelSelectionType::ROI:
+	    {
+	        const auto topLeft = QPointF(0.0f, 0.0f);
+	        const auto bottomRight = QPointF(_shapePixmap.size().width(), _shapePixmap.size().height());
+	        const auto rectangle = QRectF(topLeft, bottomRight);
 
-        auto boundsPen = _penLineBackGround;
+	        auto boundsPen = _penLineBackGround;
 
-        boundsPen.setWidth(2 * boundsPen.width());
+	        boundsPen.setWidth(2 * boundsPen.width());
 
-        shapePainter.setPen(boundsPen);
-        shapePainter.drawRect(rectangle);
+	        shapePainter.setPen(boundsPen);
+	        shapePainter.drawRect(rectangle);
 
-        const auto crossHairSize = 15;
+	        constexpr auto crossHairSize = 15;
 
-        shapePainter.setPen(_penLineForeGround);
+	        shapePainter.setPen(_penLineForeGround);
 
-        shapePainter.drawPolyline(QVector<QPointF>({
-            rectangle.center() - QPointF(crossHairSize, 0.0f),
-            rectangle.center() + QPointF(crossHairSize, 0.0f)
-            }));
+	        shapePainter.drawPolyline(QVector<QPointF>({
+	            rectangle.center() - QPointF(crossHairSize, 0.0f),
+	            rectangle.center() + QPointF(crossHairSize, 0.0f)
+	            }));
 
-        shapePainter.drawPolyline(QVector<QPointF>({
-            rectangle.center() - QPointF(0.0f, crossHairSize),
-            rectangle.center() + QPointF(0.0f, crossHairSize)
-            }));
+	        shapePainter.drawPolyline(QVector<QPointF>({
+	            rectangle.center() - QPointF(0.0f, crossHairSize),
+	            rectangle.center() + QPointF(0.0f, crossHairSize)
+	            }));
 
-        break;
-    }
+	        break;
+	    }
 
-    default:
-        break;
+	    default:
+	        break;
     }
 
     shapePainter.setPen(_penControlPoint);
@@ -944,42 +937,42 @@ void PixelSelectionTool::paint()
 
     switch (_type)
     {
-    case PixelSelectionType::Rectangle:
-    case PixelSelectionType::Line:
-    case PixelSelectionType::Brush:
-    case PixelSelectionType::Lasso:
-    case PixelSelectionType::Polygon:
-    {
-        switch (_modifier)
-        {
-        case PixelSelectionModifierType::Replace:
-            break;
+	    case PixelSelectionType::Rectangle:
+	    case PixelSelectionType::Line:
+	    case PixelSelectionType::Brush:
+	    case PixelSelectionType::Lasso:
+	    case PixelSelectionType::Polygon:
+	    {
+	        switch (_modifier)
+	        {
+		        case PixelSelectionModifierType::Replace:
+		            break;
 
-        case PixelSelectionModifierType::Add:
-            shapePainter.setPen(_penLineForeGround);
-            shapePainter.drawText(textRectangle, mv::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
-            break;
+		        case PixelSelectionModifierType::Add:
+		            shapePainter.setPen(_penLineForeGround);
+		            shapePainter.drawText(textRectangle, mv::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
+		            break;
 
-        case PixelSelectionModifierType::Subtract:
-            shapePainter.setPen(_penLineForeGround);
-            shapePainter.drawText(textRectangle, mv::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
-            break;
+		        case PixelSelectionModifierType::Subtract:
+		            shapePainter.setPen(_penLineForeGround);
+		            shapePainter.drawText(textRectangle, mv::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
+		            break;
 
-        default:
-            break;
-        }
+		        default:
+		            break;
+	        }
 
-        break;
-    }
+	        break;
+	    }
 
-    case PixelSelectionType::Sample:
-    {
-        //shapePainter.drawText(_mousePosition, QString("%1, %2").arg(QString::number(_mousePosition.x()), QString::number(_mousePosition.y())));
-        break;
-    }
+	    case PixelSelectionType::Sample:
+	    {
+	        //shapePainter.drawText(_mousePosition, QString("%1, %2").arg(QString::number(_mousePosition.x()), QString::number(_mousePosition.y())));
+	        break;
+	    }
 
-    default:
-        break;
+	    default:
+	        break;
     }
 
     // Assign the temporary pixmaps to the member variables after painting

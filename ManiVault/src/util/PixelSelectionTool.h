@@ -9,7 +9,6 @@
 #include "PixelSelection.h"
 
 #include <QWidget>
-#include <QMap>
 #include <QPen>
 #include <QBrush>
 
@@ -115,7 +114,7 @@ public: // Getters/setters
 
     /**
      * Set main drawing color
-     * @param color Drawing color
+     * @param mainColor Drawing color
      */
     void setMainColor(const QColor& mainColor);
 
@@ -230,9 +229,10 @@ protected:
     QPixmap                     _areaPixmap;                /** Pixmap for the selection area */
     bool                        _preventContextMenu;        /** Whether to prevent a context menu */
     bool                        _aborted;                   /** Whether the selection process was aborted */
-    float                       _lineAreaWidth;            /** Width of the line area */
-    float                       _lineAngle;                /** Angle of the line area */
-    bool                        _showAngleLines;          /** Whether to show angle lines */
+    float                       _lineAreaWidth;             /** Width of the line area */
+    float                       _lineAngle;                 /** Angle of the line area */
+    bool                        _showAngleLines;            /** Whether to show angle lines */
+
     static const std::int32_t LAZY_UPDATE_INTERVAL = 10;
 
 protected:
@@ -243,7 +243,8 @@ protected:
     QPen        _penLineBackGround;         /** Background pen */
     QPen        _penControlPoint;           /** Control point pen */
     QPen        _penClosingPoint;           /** Closing point pen (e.g. for finishing polygon selection) */
-    QTimer* _paintTimer;                    /** Timer for lazy update */
+    QTimer*     _paintTimer;                /** Timer for lazy update */
+
 public:
     static constexpr float BRUSH_RADIUS_MIN     = 10.0f;                    /** Minimum radius */
     static constexpr float BRUSH_RADIUS_MAX     = 500.0f;                   /** Maximum radius */

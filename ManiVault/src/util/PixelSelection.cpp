@@ -45,12 +45,14 @@ QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
             painter.drawRect(pixmapRectDeflated);
             break;
         }
+
         case PixelSelectionType::Line:
         {
             // Draw a line from the top-left to the bottom-right of the deflated rectangle
             painter.drawLine(pixmapRectDeflated.topLeft(), pixmapRectDeflated.bottomRight());
             break;
         }
+
         case PixelSelectionType::Brush:
         {
             painter.drawEllipse(pixmapRectDeflated.center(), 45, 45);
@@ -147,7 +149,7 @@ QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
             painter.setPen(Qt::NoPen);
             painter.setBrush(textColor);
 
-            const auto roiMargin = 5 * margin;
+            constexpr auto roiMargin = 5 * margin;
 
             painter.drawRect(pixmapRectDeflated.marginsRemoved(QMargins(roiMargin, roiMargin, roiMargin, roiMargin)));
 
@@ -158,12 +160,11 @@ QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
             break;
     }
 
-    return QIcon(pixmap);
+    return { pixmap };
 }
 
 PixelSelectionTypeModel::PixelSelectionTypeModel(QObject* parent /*= nullptr*/) :
-    QAbstractListModel(parent),
-    _pixelSelectionTypes()
+    QAbstractListModel(parent)
 {
 }
 
@@ -205,7 +206,7 @@ QVariant PixelSelectionTypeModel::data(const QModelIndex& index, int role) const
             break;
     }
 
-    return QVariant();
+    return {};
 }
 
 }
