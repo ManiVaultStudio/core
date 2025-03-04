@@ -277,6 +277,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/TableAction.h
     src/actions/StatusBarAction.h
     src/actions/PluginStatusBarAction.h
+    src/actions/EventAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -292,6 +293,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/TableAction.cpp
     src/actions/StatusBarAction.cpp
     src/actions/PluginStatusBarAction.cpp
+    src/actions/EventAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
