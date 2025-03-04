@@ -93,7 +93,7 @@ public:
     /** View generator function which is called periodically when the mouse moves in the view (should return an HTML formatted string) */
     using HtmlViewGeneratorFunction = std::function<QString(const SampleContext&)>;
 
-    /** Widget view generator function (the sampler action does not take ownership of the widget) */
+    /** Widget view generator function () */
     using WidgetViewGeneratorFunction = std::function<QWidget*(const SampleContext&)>;
 
     /**
@@ -182,10 +182,16 @@ public:
     void setSampleContext(const SampleContext& sampleContext);
 
     /**
-     * Get view widget
+     * Get view string
      * @return HTML formatted string
      */
     QString getViewString() const;
+
+    /**
+     * Get view widget
+     * @return Pointer to view widget (maybe nullptr)
+     */
+    const QWidget* getViewWidget() const;
 
 private:
 

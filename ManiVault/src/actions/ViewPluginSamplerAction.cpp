@@ -336,6 +336,11 @@ QString ViewPluginSamplerAction::getViewString() const
     return _viewString;
 }
 
+const QWidget* ViewPluginSamplerAction::getViewWidget() const
+{
+    return _viewWidget;
+}
+
 void ViewPluginSamplerAction::setViewString(const QString& viewString)
 {
     if (viewString == _viewString)
