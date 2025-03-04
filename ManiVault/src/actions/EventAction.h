@@ -5,7 +5,6 @@
 #pragma once
 
 #include "VerticalGroupAction.h"
-#include "TriggerAction.h"
 
 namespace mv::gui {
 
@@ -68,10 +67,6 @@ signals:
      * @param eventData Event data
      */
     void eventTriggered(const QString& eventType, const QVariant& eventData);
-
-private:
-
-    TriggerAction   _testAction;
 
     friend class AbstractActionsManager;
 };

@@ -8,32 +8,13 @@
 namespace mv::gui {
 
 EventAction::EventAction(QObject* parent, const QString& title) :
-    VerticalGroupAction(parent, title),
-    _testAction(this, "Test...")
+    VerticalGroupAction(parent, title)
 {
     setConnectionPermissionsToAll(true);
-
-    addAction(&_testAction);
-
-    connect(&_testAction, &TriggerAction::triggered, this, [this]() -> void
-    {
-        triggerEvent("TEST_EVENT", QVariant(13.6f));
-    });
-
-    connect(this, &EventAction::eventTriggered, this, [this](const QString& eventType, const QVariant& eventData) -> void
-    {
-        auto plugin = dynamic_cast<plugin::Plugin*>(this->parent());
-
-        qDebug() << "Event received in:" << plugin->getGuiName() << eventType << eventData;
-    });
 }
 
 void EventAction::triggerEvent(const QString& eventType, const QVariant& eventData)
 {
-    auto plugin = dynamic_cast<plugin::Plugin*>(parent());
-
-    qDebug() << "Event triggered in:" << plugin->getGuiName() << eventType << eventData;
-
     emit eventTriggered(eventType, eventData);
 }
 
