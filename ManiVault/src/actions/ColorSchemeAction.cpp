@@ -48,9 +48,9 @@ void ColorSchemeAction::initialize()
     clear();
 
     addAction(&_currentColorSchemeAction);
-    addAction(&_addColorSchemeAction, GroupAction::WidgetFlag::Vertical);
-    addAction(&_removeColorSchemeAction);
-    addAction(&_editColorSchemeAction);
+    //addAction(&_addColorSchemeAction, GroupAction::WidgetFlag::Vertical);
+    //addAction(&_removeColorSchemeAction);
+    //addAction(&_editColorSchemeAction);
 
     _currentColorSchemeAction.setCustomModel(const_cast<ColorSchemesListModel*>(&static_cast<const AbstractThemeManager&>(mv::theme()).getCustomColorSchemeListModel()));
 
