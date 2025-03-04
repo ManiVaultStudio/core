@@ -19,15 +19,13 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
     _horizontalGroupAction(this, "Settings"),
     _sourcePluginPickerAction(this, "Source plugin"),
     _freezeViewAction(this, "Freeze view"),
-    _viewPluginSamplerAction(nullptr),
-    _eventAction(this, "Events")
+    _viewPluginSamplerAction(nullptr)
 {
     _sourcePluginPickerAction.setToolTip("The view plugin to display the samples for");
     _freezeViewAction.setToolTip("Freeze the current view");
 
     _horizontalGroupAction.addAction(&_sourcePluginPickerAction);
     _horizontalGroupAction.addAction(&_freezeViewAction);
-    _horizontalGroupAction.addAction(&_eventAction);
 
     _sourcePluginPickerAction.setStretch(1);
     _sourcePluginPickerAction.setFilterPluginTypes({ Type::VIEW });

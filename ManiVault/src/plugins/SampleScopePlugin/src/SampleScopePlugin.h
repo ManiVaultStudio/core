@@ -60,7 +60,6 @@ private:
     mv::gui::PluginPickerAction         _sourcePluginPickerAction;      /** Action for picking the source plugin */
     mv::gui::ToggleAction               _freezeViewAction;              /** Action for freezing the current view */
     mv::gui::ViewPluginSamplerAction*   _viewPluginSamplerAction;       /** Pointer to current view plugin sampler action */
-    mv::gui::EventAction                _eventAction;                   /** For emitting custom events */
 };
 
 class SampleScopePluginFactory : public mv::plugin::ViewPluginFactory
