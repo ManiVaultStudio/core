@@ -80,11 +80,21 @@ public:
         Tooltip     /** Force tooltip view (regardless of the size of the tooltip) */
     };
 
+    /** Type of generated view */
+    enum class GeneratedViewType
+    {
+        HTML,       /** HTML formatted string */
+        Widget      /** Widget */
+    };
+
     /** Context with which the tooltip is created */
     using SampleContext = QVariantMap;
 
     /** View generator function which is called periodically when the mouse moves in the view (should return an HTML formatted string) */
-    using ViewGeneratorFunction = std::function<QString(const SampleContext&)>;
+    using HtmlViewGeneratorFunction = std::function<QString(const SampleContext&)>;
+
+    /** Widget view generator function (the sampler action does not take ownership of the widget) */
+    using WidgetViewGeneratorFunction = std::function<QWidget*(const SampleContext&)>;
 
     /**
      * Construct with pointer to \p parent object and title
@@ -136,10 +146,28 @@ public:
     bool canView() const;
 
     /**
-     * Sets the view generator function to \p viewGeneratorFunction
-     * @param viewGeneratorFunction View generator function
+     * Get the generated view type
+     * @return Generated view type
      */
-    void setViewGeneratorFunction(const ViewGeneratorFunction& viewGeneratorFunction);
+    GeneratedViewType getGeneratedViewType() const;
+
+    /**
+     * Set the generated view type to \p generatedViewType
+     * @param generatedViewType Generated view type
+     */
+    void setGeneratedViewType(const GeneratedViewType& generatedViewType);
+
+    /**
+     * Sets the HTML view generator function to \p htmlViewGeneratorFunction (automatically sets the viewing type to GeneratedViewType::HTML)
+     * @param htmlViewGeneratorFunction HTML view generator function
+     */
+    void setHtmlViewGeneratorFunction(const HtmlViewGeneratorFunction& htmlViewGeneratorFunction);
+
+    /**
+     * Sets the widget view generator function to \p widgetViewGeneratorFunction (automatically sets the viewing type to GeneratedViewType::Widget)
+     * @param widgetViewGeneratorFunction Widget view generator function
+     */
+    void setWidgetViewGeneratorFunction(const WidgetViewGeneratorFunction& widgetViewGeneratorFunction);
 
     /**
      * Get sample context
@@ -154,7 +182,7 @@ public:
     void setSampleContext(const SampleContext& sampleContext);
 
     /**
-     * Get view string
+     * Get view widget
      * @return HTML formatted string
      */
     QString getViewString() const;
@@ -166,6 +194,12 @@ private:
      * @param viewString HTML formatted string
      */
     void setViewString(const QString& viewString);
+
+    /**
+     * Set generated widget to \p widget
+     * @param widget Pointer to generated widget
+     */
+    void setViewWidget(QWidget* widget);
 
     /** Draws the tooltip near the cursor */
     void drawToolTip();
@@ -226,11 +260,25 @@ signals:
     void viewingModeChanged(const ViewingMode& previousViewingMode, const ViewingMode& currentViewingMode);
 
     /**
+     * Signals that the generated view type changed from \p previousGeneratedViewType to \p currentGeneratedViewType
+     * @param previousGeneratedViewType Previous generated view type
+     * @param currentGeneratedViewType Current generated view type
+     */
+    void generatedViewTypeChanged(const GeneratedViewType& previousGeneratedViewType, const GeneratedViewType& currentGeneratedViewType);
+
+    /**
      * Signals that the view HTML string changed from \p previousViewString to \p currentViewString
      * @param previousViewString Previous view HTML string
      * @param currentViewString Current view HTML string
      */
     void viewStringChanged(const QString& previousViewString, const QString& currentViewString);
+
+    /**
+     * Signals that the view widget changed from \p previousViewWidget to \p currentViewWidget
+     * @param previousViewWidget Previous view widget
+     * @param currentViewWidget Current view widget
+     */
+    void viewWidgetChanged(const QWidget* previousViewWidget, const QWidget* currentViewWidget);
 
     /** Signals that a new sample context is required */
     void sampleContextRequested();
@@ -246,7 +294,9 @@ private:
     bool                            _isInitialized;                             /** Boolean determining whether the sampler is initialized or not */
     PixelSelectionAction*           _pixelSelectionAction;                      /** Pointer to pixel selection tool to use */
     PixelSelectionAction*           _samplerPixelSelectionAction;               /** Pointer to sampler pixel selection tool to use */
-    ViewGeneratorFunction           _viewGeneratorFunction;                     /** View generator function which is called periodically when the mouse moves in the view (should return an HTML formatted string) */
+    GeneratedViewType               _generatedViewType;                         /** Type of generated view */
+    HtmlViewGeneratorFunction       _htmlViewGeneratorFunction;                 /** HTML view generator function which is called periodically when the mouse moves in the view (should return an HTML formatted string) */
+    WidgetViewGeneratorFunction     _widgetViewGeneratorFunction;               /** Widget view generator function (the sampler action does not take ownership of the widget) */
     ToggleAction                    _enabledAction;                             /** Action to toggle computation on/off */
     ToggleAction                    _highlightFocusedElementsAction;            /** Action to toggle focus elements highlighting */
     VerticalGroupAction             _settingsAction;                            /** Additional vertical group action for settings */
@@ -258,7 +308,8 @@ private:
     SampleContext                   _sampleContext;                             /** Context for the tooltip */
     QTimer                          _sampleContextLazyUpdateTimer;              /** Lazily (periodically) updates the sample context tooltip string */
     bool                            _sampleContextDirty;                        /** Indicates that the sample context is dirty */
-    QString                         _viewString;                                /** HTML-formatted view string */
+    QString                         _viewString;                                /** Generated HTML-formatted view string */
+    QPointer<QWidget>               _viewWidget;                                /** Pointer to the generated view widget */
     std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                      /** Overlay widget for the tooltip */
     QLabel                          _toolTipLabel;                              /** The text label which contains the actual tooltip text */
     TriggerAction                   _openSampleScopeWindow;                     /** Opens a sample scope window */
