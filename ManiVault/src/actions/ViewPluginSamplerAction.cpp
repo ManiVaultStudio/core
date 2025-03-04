@@ -95,7 +95,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     connect(&_lazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateSampleContextLazyUpdateTimerInterval);
 
     connect(&_sampleContextLazyUpdateTimer, &QTimer::timeout, this, [this]() -> void {
-        if (!_sampleContextDirty || !_htmlViewGeneratorFunction || getViewingMode() == ViewingMode::None)
+        if (!_sampleContextDirty || (!_htmlViewGeneratorFunction && !_widgetViewGeneratorFunction) || getViewingMode() == ViewingMode::None)
             return;
 
         if (getSamplingMode() == SamplingMode::FocusRegion)
@@ -317,6 +317,7 @@ void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContex
 	        {
 	            if (_htmlViewGeneratorFunction)
 	                setViewString(_htmlViewGeneratorFunction(_sampleContext));
+
 	            break;
 	        }
 
@@ -462,7 +463,19 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 
 void ViewPluginSamplerAction::updateReadOnly()
 {
-    setEnabled(_htmlViewGeneratorFunction ? true : false);
+	switch (_generatedViewType) {
+	    case GeneratedViewType::HTML:
+	    {
+	        setEnabled(_htmlViewGeneratorFunction ? true : false);
+	        break;
+	    }
+
+        case GeneratedViewType::Widget:
+        {
+            setEnabled(_widgetViewGeneratorFunction ? true : false);
+            break;
+        }
+	}
 }
 
 QWidget* ViewPluginSamplerAction::getTargetWidget() const

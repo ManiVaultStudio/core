@@ -35,6 +35,14 @@ public:
     /** Perform plugin initialization */
     void init() override;
 
+protected:
+
+    /**
+     * Get the view plugin sampler action
+     * @return Pointer to view plugin sampler action
+     */
+    mv::gui::ViewPluginSamplerAction* getViewPluginSamplerAction() const;
+
 public: // Serialization
 
     /**
@@ -60,6 +68,8 @@ private:
     mv::gui::PluginPickerAction         _sourcePluginPickerAction;      /** Action for picking the source plugin */
     mv::gui::ToggleAction               _freezeViewAction;              /** Action for freezing the current view */
     mv::gui::ViewPluginSamplerAction*   _viewPluginSamplerAction;       /** Pointer to current view plugin sampler action */
+
+    friend class SampleScopeWidget;
 };
 
 class SampleScopePluginFactory : public mv::plugin::ViewPluginFactory
