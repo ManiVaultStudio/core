@@ -205,14 +205,14 @@ void ThemeManager::initialize()
 
         _detectSystemColorSchemeChangesTimer.start();
 
-        _colorSchemeModeAction.setSettingsPrefix(getSettingsPrefix() + "ColorSchemeMode");
-        _systemLightColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Light");
-        _systemDarkColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Dark");
-        _colorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "Custom");
+        _colorSchemeAction.initialize();
+
+        _systemLightColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "ColorScheme/LightDark/Light");
+        _systemDarkColorSchemeAction.setSettingsPrefix(getSettingsPrefix() + "ColorScheme/LightDark/Dark");
+        _colorSchemeAction.getCurrentColorSchemeAction().setSettingsPrefix(getSettingsPrefix() + "ColorScheme/Custom/Current");
+        _colorSchemeModeAction.setSettingsPrefix(getSettingsPrefix() + "ColorScheme/Mode");
 
         updateColorSchemeMode();
-
-        _colorSchemeAction.initialize();
     }
     endInitialization();
 }
