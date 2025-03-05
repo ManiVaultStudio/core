@@ -10,6 +10,7 @@
 #include <QJsonObject>
 #include <QCryptographicHash>
 #include <QByteArray>
+#include <QStyleHints>
 #include <QDirIterator>
 #include <QStringList>
 

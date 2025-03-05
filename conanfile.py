@@ -51,7 +51,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/6.3.2@lkeb/stable")
+    requires = ("qt/6.8.2@lkeb/stable")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
@@ -92,6 +92,8 @@ class HdpsCoreConan(ConanFile):
                 "mesa-common-dev", 
                 "libgl1-mesa-dev",
                 "libxcomposite-dev",
+                "libxkbcommon-dev",
+                "libxkbcommon-x11-dev",
                 "libxcursor-dev",
                 "libxi-dev",
                 "libnss3-dev",
@@ -100,17 +102,16 @@ class HdpsCoreConan(ConanFile):
                 "libfontconfig1-dev",
                 "libxtst-dev",
                 "libasound2-dev",
-                "libdbus-1-dev"
+                "libdbus-1-dev",
+                "libcups2-dev",
+                "libicu-dev"
                 ]
             
             installer = tools.SystemPackageTool()
+
             for package in linux_requirements:
                 installer.install(package)
-
-        # if tools.os_info.is_macos:
-        #    installer = tools.SystemPackageTool()
-        #    installer.install("libomp", update=False)
-
+            
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -130,15 +131,12 @@ class HdpsCoreConan(ConanFile):
         qt_path = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
         qt_cfg = list(qt_path.glob("**/Qt6Config.cmake"))[0]
         qt_dir = qt_cfg.parents[0].as_posix()
-        qt_root = qt_cfg.parents[3].as_posix()
+        qt_root = qt_cfg.parents[2].as_posix()
 
-        # for Qt >= 6.4.2, remember to also up the min cmake version to 3.22
-        #tc.variables["Qt6_DIR"] = qt_dir
-
-        # for Qt < 6.4.2
+        # for qt & ads
         tc.variables["Qt6_ROOT"] = qt_root
-
-        # for ads, may also be remove with Qt >= 6.4.2 and Qt6_DIR usage
+        tc.variables["Qt6_DIR"] = qt_dir
+        tc.variables["QT_DIR"] = qt_dir
         tc.variables["CMAKE_PREFIX_PATH"] = f"{qt_root}"
 
         # Set the installation directory for ManiVault based on the MV_INSTALL_DIR environment variable
@@ -154,10 +152,6 @@ class HdpsCoreConan(ConanFile):
         # Set some build options
         tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
         tc.variables["MV_UNITY_BUILD"] = "ON"
-
-        # OS specific settings 
-        if self.settings.os == "Linux":
-            tc.variables["CMAKE_CONFIGURATION_TYPES"] = "Debug;Release"
 
         try:
             tc.generate()
@@ -183,12 +177,11 @@ class HdpsCoreConan(ConanFile):
         )
 
         cmake = self._configure_cmake()
-        print("**** Build DEBUG *****")
-        cmake.build(build_type="Debug")
-        print("**** Install DEBUG *****")
-        cmake.install(build_type="Debug")
+        print("**** Build RELWITHDEBINFO *****")
+        cmake.build(build_type="RelWithDebInfo")
+        print("**** Install RELWITHDEBINFO *****")
+        cmake.install(build_type="RelWithDebInfo")
 
-        # cmake_release = self._configure_cmake()
         print("**** Build RELEASE *****")
         cmake.build(build_type="Release")
         print("**** Install RELEASE *****")
@@ -219,26 +212,26 @@ class HdpsCoreConan(ConanFile):
         if False == self.options.macos_bundle and self.settings.os == "Macos":
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
-            shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/ManiVault Studio.app")))
+            shutil.rmtree(str(pathlib.Path(self.install_dir, "RelWithDebInfo/ManiVault Studio.app")))
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/ManiVault Studio.app")))
         elif self.settings.os == "Macos":
-            # also remove debug even in bundle build to keep package size down
-            shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/ManiVault Studio.app")))
+            # also remove Release even in bundle build to keep package size down
+            shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/ManiVault Studio.app")))
 
-        # Add the pdb files next to the libs for debug linking
+        # Add the pdb files next to the libs for RelWithDebInfo linking
         if tools.os_info.is_windows:
-            pdb_dest = pathlib.Path(self.install_dir, "Debug/lib")
+            pdb_dest = pathlib.Path(self.install_dir, "RelWithDebInfo/lib")
             # pdb_dest.mkdir()
-            pdb_files = pathlib.Path(self.build_folder).glob("hdps/Debug/*.pdb")
+            pdb_files = pathlib.Path(self.build_folder).glob("hdps/RelWithDebInfo/*.pdb")
             for pfile in pdb_files:
                 shutil.copy(pfile, pdb_dest)
 
         self.copy(pattern="*", src=self.install_dir, symlinks=True)
 
     def package_info(self):
-        self.cpp_info.debug.libdirs = ["Debug/lib"]
-        self.cpp_info.debug.bindirs = ["Debug/Plugins", "Debug"]
-        self.cpp_info.debug.includedirs = ["Debug/include", "Debug"]
+        self.cpp_info.relwithdebinfo.libdirs = ["RelWithDebInfo/lib"]
+        self.cpp_info.relwithdebinfo.bindirs = ["RelWithDebInfo/Plugins", "RelWithDebInfo"]
+        self.cpp_info.relwithdebinfo.includedirs = ["RelWithDebInfo/include", "RelWithDebInfo"]
         self.cpp_info.release.libdirs = ["Release/lib"]
         self.cpp_info.release.bindirs = ["Release/Plugins", "Release"]
         self.cpp_info.release.includedirs = ["Release/include", "Release"]

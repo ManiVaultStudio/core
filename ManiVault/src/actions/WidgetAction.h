@@ -125,6 +125,13 @@ public:
     /** Destructor */
     ~WidgetAction() override;
 
+private:
+
+    using QWidgetAction::setDefaultWidget;
+    using QWidgetAction::defaultWidget;
+    using QWidgetAction::releaseWidget;
+    using QWidgetAction::deleteWidget;
+    
 public: // Hierarchy queries
 
     /**

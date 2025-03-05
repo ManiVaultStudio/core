@@ -509,6 +509,8 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
         return;
 
     viewPlugin->getPresetsAction().loadDefaultPreset();
+
+    viewPluginDockWidget->toggleView(viewPlugin->getVisibleAction().isChecked());
 }
 
 void WorkspaceManager::addViewPluginFloated(plugin::ViewPlugin* viewPlugin)

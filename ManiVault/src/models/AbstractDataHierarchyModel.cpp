@@ -87,7 +87,7 @@ QVariant AbstractDataHierarchyModel::NameItem::data(int role /*= Qt::UserRole + 
             if (!getDataset().isValid())
                 break;
 
-            return getDataset()->icon();
+            return QIcon(StyledIcon(getDataset()->icon()));
         }
 
         default:

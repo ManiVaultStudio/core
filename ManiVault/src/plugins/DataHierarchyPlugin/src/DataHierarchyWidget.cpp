@@ -250,7 +250,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setMinimumSectionSize(18);
 
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::Name, 150);
-    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::SelectionGroupIndex, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::SelectionGroupIndex, 30);
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsVisible, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsDerived, treeViewHeader->minimumSectionSize());

@@ -11,6 +11,7 @@
 #include <actions/HorizontalGroupAction.h>
 #include <actions/PluginPickerAction.h>
 #include <actions/ViewPluginSamplerAction.h>
+#include <actions/EventAction.h>
 
 /**
  * Sample scope plugin
