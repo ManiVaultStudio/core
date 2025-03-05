@@ -20,6 +20,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
     QWidget(parent),
@@ -75,8 +76,10 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
     treeViewHeader->setStretchLastSection(false);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(PageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
-    
+
     updateCustomStyle();
+
+    connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, this, &PageActionsWidget::updateCustomStyle);
 
     connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         auto callback = index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<PageAction::ClickedCallback>();
@@ -94,15 +97,8 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
             closePersistentEditor(rowIndex);
     });
-    
-}
 
-bool PageActionsWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
+    treeView.setBackgroundRole(QPalette::Window);
 }
 
 QVBoxLayout& PageActionsWidget::getLayout()
@@ -159,21 +155,29 @@ void PageActionsWidget::closePersistentEditor(int rowIndex)
 
 void PageActionsWidget::updateCustomStyle()
 {
-    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("search"));
-    
-    auto styleSheet = QString(" \
-        QLabel { \
-            background-color: rgba(0, 0, 0, 0); \
-        } \
-        QTreeView::item:hover:!selected { \
-            background-color: rgba(0, 0, 0, 50); \
-        } \
-        QTreeView::item:selected { \
-            background-color: rgba(0, 0, 0, 100); \
-        } \
-    ");
+    _hierarchyWidget.setWindowIcon(StyledIcon("magnifying-glass"));
+
+    auto rowHoverColor = qApp->palette().color(QPalette::Normal, QPalette::Text);
+
+    rowHoverColor.setAlpha(50);
+
+    auto styleSheet = QString(
+        "QLabel {"
+            "background-color: rgba(0, 0, 0, 0);"
+        "}"
+        "QTreeView::item {"
+			"border-radius: 5px;"
+        "}"
+        "QTreeView::item:hover:!selected {"
+            "background-color: %1;"
+        "}"
+        "QTreeView::item:selected {"
+			"background-color: rgba(0, 0, 0, 100);"
+        "}"
+    ).arg(rowHoverColor.name(QColor::HexArgb));
     
     auto& treeView = _hierarchyWidget.getTreeView();
+
     if (_restyle) {
         styleSheet += QString(" \
             QTreeView { \
@@ -182,7 +186,9 @@ void PageActionsWidget::updateCustomStyle()
         ");
     }
     
-    auto color = QApplication::palette().color(QPalette::Normal, QPalette::Midlight).name();
-    styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
-    treeView.setStyleSheet(styleSheet);
+    auto color = qApp->palette().color(QPalette::Normal, QPalette::Window).name();
+
+	styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
+
+	treeView.setStyleSheet(styleSheet);
 }

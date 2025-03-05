@@ -6,10 +6,7 @@
 
 #include "Plugin.h"
 
-#include "DataHierarchyItem.h"
 #include "Set.h"
-
-#include <memory>
 
 namespace mv
 {
@@ -23,7 +20,7 @@ class CORE_EXPORT AnalysisPlugin : public Plugin
 public:
     AnalysisPlugin(const PluginFactory* factory);
 
-    ~AnalysisPlugin() override {};
+    ~AnalysisPlugin() override = default;
 
     /**
      * Set name of the object
@@ -113,33 +110,19 @@ class CORE_EXPORT AnalysisPluginFactory : public PluginFactory
     
 public:
     AnalysisPluginFactory() :
-        PluginFactory(Type::ANALYSIS)
+        PluginFactory(Type::ANALYSIS, "Analysis")
     {
-
+        setIconByName("square-root-variable");
+        setCategoryIconByName("square-root-variable");
     }
-    ~AnalysisPluginFactory() = default;
-    
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
 
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    QIcon getCategoryIcon() const override;
+	~AnalysisPluginFactory() override = default;
 
-    /**
-    * Produces an instance of an analysis plugin. This function gets called by the plugin manager.
-    */
     AnalysisPlugin* produce() override = 0;
 };
 
-} // namespace plugin
+}
 
-} // namespace mv
+}
 
 Q_DECLARE_INTERFACE(mv::plugin::AnalysisPluginFactory, "ManiVault.AnalysisPluginFactory")

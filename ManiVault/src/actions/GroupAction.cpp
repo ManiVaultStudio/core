@@ -115,7 +115,8 @@ void GroupAction::setShowLabels(bool showLabels)
     emit showLabelsChanged(_showLabels);
 }
 
-void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/)
+void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/
+                            , bool        load)
 {
     Q_ASSERT(action != nullptr);
 
@@ -451,6 +452,7 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
     auto layout = new QHBoxLayout();
 
     layout->setObjectName("HorizontalLayout");
+    layout->setSpacing(4);
 
     if (!(widgetFlags & WithMargins))
         layout->setContentsMargins(0, 0, 0, 0);

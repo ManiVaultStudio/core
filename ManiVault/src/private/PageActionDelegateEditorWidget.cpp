@@ -14,14 +14,15 @@
 #endif
 
 using namespace mv;
+using namespace mv::util;
 
 PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _previewIconLabel(Application::getIconFont("FontAwesome").getIcon("image")),
-    _metaDataIconLabel(Application::getIconFont("FontAwesome").getIcon("file-alt")),
-    _tagsIconLabel(Application::getIconFont("FontAwesome").getIcon("tags")),
-    _downloadUrls(Application::getIconFont("FontAwesome").getIcon("download")),
-    _contributorsIconLabel(Application::getIconFont("FontAwesome").getIcon("user"))
+    _previewIconLabel(util::StyledIcon("image")),
+    _metaDataIconLabel(util::StyledIcon("file")),
+    _tagsIconLabel(util::StyledIcon("tags")),
+    _downloadUrls(util::StyledIcon("download")),
+    _contributorsIconLabel(util::StyledIcon("user"))
 {
     setObjectName("PageActionDelegateEditorWidget");
     setMouseTracking(true);
@@ -208,6 +209,8 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
     updateCustomStyle();
 
     updateInfoWidgetVisibility();
+
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &PageActionDelegateEditorWidget::updateCustomStyle);
 }
 
 void PageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
@@ -230,10 +233,6 @@ bool PageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::Resize:
             updateTextLabels();
-            break;
-
-        case QEvent::ApplicationPaletteChange:
-            updateCustomStyle();
             break;
 
         default:
@@ -261,13 +260,13 @@ void PageActionDelegateEditorWidget::updateTextLabels()
 {
     PageAction pageAction(_index);
 
-    _iconLabel.setPixmap(pageAction.getIcon().pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
-
     QFontMetrics titleMetrics(_titleLabel.font()), descriptionMetrics(_subtitleLabel.font());
 
     _titleLabel.setText(titleMetrics.elidedText(pageAction.getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
     _subtitleLabel.setText(descriptionMetrics.elidedText(pageAction.getSubtitle(), Qt::ElideMiddle, _subtitleLabel.width() - 2));
     _metaDataLabel.setText(pageAction.getMetaData());
+
+    updateCustomStyle();
 }
 
 void PageActionDelegateEditorWidget::updateInfoWidgetVisibility()
@@ -280,11 +279,13 @@ void PageActionDelegateEditorWidget::updateInfoWidgetVisibility()
 
 void PageActionDelegateEditorWidget::updateCustomStyle()
 {
-    QString stylesheet = "dark-grey";
+    //_metaDataLabel.setStyleSheet(stylesheet);
 
-    if(qApp->palette().text().color().lightnessF() > 0.5) {
-        stylesheet = "light-grey";
-    }
+    PageAction pageAction(_index);
 
-    _metaDataLabel.setStyleSheet(stylesheet);
+    const auto styledIcon = StyledIcon(pageAction.getIcon());
+
+    _iconLabel.setPixmap(QIcon(styledIcon).pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
+    _titleLabel.setStyleSheet(QString("color: %1; font-weight: bold;").arg(qApp->palette().text().color().name()));
+    _subtitleLabel.setStyleSheet(QString("color: %1; font-size: 7pt;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
 }

@@ -5,8 +5,9 @@
 #include "Icon.h"
 
 #include <QPainter>
-#include <QApplication>
 #include <QPalette>
+
+using namespace mv::util;
 
 namespace mv::gui {
 
@@ -47,7 +48,7 @@ QIcon combineIcons(const QIcon& iconA, const QIcon& iconB)
     return createIcon(pixmapA);
 }
 
-QIcon createPluginIcon(const QString& characters, const QColor& color)
+QIcon createPluginIcon(const QString& characters)
 {
     const auto margin       = 8;
     const auto pixmapSize   = QSize(256, 256);
@@ -62,7 +63,7 @@ QIcon createPluginIcon(const QString& characters, const QColor& color)
 
     painter.setRenderHint(QPainter::Antialiasing);
 
-    painter.setPen(QPen(color, 1, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painter.setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
 
     auto font = QFont("Arial", 100);
 
@@ -136,6 +137,9 @@ QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColo
     QPainter badgePixmapPainter(&badgePixmap);
 
     badgePixmapPainter.setRenderHint(QPainter::Antialiasing);
+    badgePixmapPainter.setRenderHint(QPainter::Antialiasing);
+    badgePixmapPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    badgePixmapPainter.setRenderHint(QPainter::LosslessImageRendering, true);
 
     badgePixmapPainter.setPen(QPen(backgroundColor, 100, Qt::SolidLine, Qt::RoundCap));
     badgePixmapPainter.drawPoint(QPoint(50, 50));
@@ -157,13 +161,16 @@ QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColo
     return badgePixmap;
 }
 
-QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadge)
+QPixmap createNumberBadgeOverlayPixmap(const Badge& widgetActionBadge)
 {
     return createNumberBadgeOverlayPixmap(widgetActionBadge.getNumber(), widgetActionBadge.getBackgroundColor(), widgetActionBadge.getForegroundColor());
 }
 
-QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const WidgetActionBadge& widgetActionBadge, std::uint32_t iconMargin /*= 0*/)
+QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const Badge& widgetActionBadge, std::uint32_t iconMargin /*= 0*/)
 {
+    if (icon.availableSizes().isEmpty())
+        return {};
+
     const auto iconPixmapSize       = icon.availableSizes().first() + QSize(2 * iconMargin, 2 * iconMargin);
     const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), iconPixmapSize);
     const auto badgePixmap          = widgetActionBadge.getPixmap();

@@ -6,8 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "util/ThemeWatcher.h"
-#include "util/NamedIcon.h"
+#include "util/StyledIcon.h"
 
 #include <QWidget>
 #include <QLabel>
@@ -154,15 +153,14 @@ signals:
     void backgroundColorRoleChanged(const QPalette::ColorRole& previousBackgroundColorRole, const QPalette::ColorRole& currentBackgroundColorRole);
 
 private:
-    util::NamedIcon     _icon;                  /** Theme icon for switching between themes */
-    QLabel              _iconLabel;             /** Label for displaying the icon */
-    QLabel              _titleLabel;            /** Label for displaying the title */
-    QLabel              _descriptionLabel;      /** Label for displaying the description */
-    QColor              _foregroundColor;       /** Foreground color of the widget */
-    QColor              _backgroundColor;       /** Background color of the widget */
-    std::int32_t        _foregroundColorRole;   /** Color role for foreground elements (InfoWidget::_foregroundColor will be used if zero) */
-    std::int32_t        _backgroundColorRole;   /** Color role for background elements (InfoWidget::_backgroundColor will be used if zero) */
-    util::ThemeWatcher  _themeWatcher;          /** Update the styling when the theme changes */
+    QIcon           _icon;                  /** Icon */
+    QLabel          _iconLabel;             /** Label for displaying the icon */
+    QLabel          _titleLabel;            /** Label for displaying the title */
+    QLabel          _descriptionLabel;      /** Label for displaying the description */
+    QColor          _foregroundColor;       /** Foreground color of the widget */
+    QColor          _backgroundColor;       /** Background color of the widget */
+    std::int32_t    _foregroundColorRole;   /** Color role for foreground elements (InfoWidget::_foregroundColor will be used if zero) */
+    std::int32_t    _backgroundColorRole;   /** Color role for background elements (InfoWidget::_backgroundColor will be used if zero) */
 
     static QColor defaultForegroundColor;
     static QColor defaultBackgroundColor;

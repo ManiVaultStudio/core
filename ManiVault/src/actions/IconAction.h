@@ -31,12 +31,6 @@ public:
     Q_INVOKABLE IconAction(QObject* parent, const QString& title);
 
     /**
-     * Get the current icon
-     * @return Icon
-     */
-    QIcon getIcon() const;
-
-    /**
      * Set the current icon from \p image
      * @param image Image to convert to icon
      */

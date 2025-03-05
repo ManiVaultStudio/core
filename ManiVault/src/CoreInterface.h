@@ -11,6 +11,7 @@
 #include "Application.h"
 
 #include "AbstractActionsManager.h"
+#include "AbstractThemeManager.h"
 #include "AbstractPluginManager.h"
 #include "AbstractDataManager.h"
 #include "AbstractDataHierarchyManager.h"
@@ -58,6 +59,7 @@ public:
     /** Enumeration for distinguishing manager types */
     enum class ManagerType {
         Actions = 0,        /** Actions manager for storing actions */
+        Theme,              /** Manager for controlling the application theme */
         Plugins,            /** Plugin manager responsible for loading plug-ins and adding them to the core */
         Events,             /** Event manager for emitting global events */
         Data,               /** Data manager responsible for storing data sets and data selections */
@@ -113,6 +115,7 @@ public: // Managers
     virtual AbstractManager* getManager(const ManagerType& managerType) = 0;
 
     virtual AbstractActionsManager& getActionsManager() = 0;
+    virtual AbstractThemeManager& getThemeManager() = 0;
     virtual AbstractPluginManager& getPluginManager() = 0;
     virtual AbstractEventManager& getEventManager() = 0;
     virtual AbstractDataManager& getDataManager() = 0;
@@ -153,6 +156,14 @@ CORE_EXPORT inline CoreInterface* core() {
  */
 CORE_EXPORT inline AbstractActionsManager& actions() {
     return core()->getActionsManager();
+}
+
+/**
+* Convenience function to obtain access to the theme manager in the core
+* @return Reference to abstract theme manager
+*/
+CORE_EXPORT inline AbstractThemeManager& theme() {
+    return core()->getThemeManager();
 }
 
 /**

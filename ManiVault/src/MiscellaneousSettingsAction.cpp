@@ -40,7 +40,7 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     addAction(&_askConfirmationBeforeRemovingDatasetsAction);
     addAction(&_keepDescendantsAfterRemovalAction);
     addAction(&_statusBarVisibleAction);
-    addAction(&_statusBarOptionsAction);
+    //addAction(&_statusBarOptionsAction);
     addAction(&_showSimplifiedGuidsAction);
 }
 

@@ -41,7 +41,7 @@ DataHierarchyItem::DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<Datas
     if (parentDataset.isValid())
         setParent(&parentDataset->getDataHierarchyItem());
 
-    setIcon(getDataset()->getIcon());
+    setIcon(getDataset()->icon());
     setVisible(visible);
 }
 

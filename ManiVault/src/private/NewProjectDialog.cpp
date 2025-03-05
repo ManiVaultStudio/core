@@ -8,7 +8,6 @@
 
 #include <AbstractWorkspaceManager.h>
 
-#include <Application.h>
 #include <CoreInterface.h>
 
 #include <QVBoxLayout>
@@ -19,13 +18,14 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _workspacesWidget(this, "", false),
     _cancelAction(this, "Cancel")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    setWindowIcon(StyledIcon("file"));
     setModal(true);
     setWindowTitle("New Project From Workspace");
 

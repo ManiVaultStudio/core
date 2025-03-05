@@ -38,7 +38,7 @@ public:
      * Facade for IconAction::getIcon()
      * @return Icon
      */
-    QIcon getIcon() const;
+    const QIcon& getIcon() const;
 
     /**
      * Set the current icon to \p icon

@@ -95,7 +95,7 @@ QVariant AbstractDatasetsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) 
             return "Dataset name: " + data(Qt::DisplayRole).toString();
 
         case Qt::DecorationRole:
-            return nonConstThis->getDatasetsModel().getShowIconAction().isChecked() ? nonConstThis->getDataset()->getIcon() : QIcon();
+            return nonConstThis->getDatasetsModel().getShowIconAction().isChecked() ? StyledIcon(nonConstThis->getDataset()->icon()) : QIcon();
 
         default:
             break;

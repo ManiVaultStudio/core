@@ -14,7 +14,7 @@ using namespace mv;
 using namespace mv::gui;
 
 SettingsStatusBarAction::SettingsStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title, "cogs")
+    StatusBarAction(parent, title, "gears")
 {
     setToolTip("Settings");
 

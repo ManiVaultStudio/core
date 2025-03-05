@@ -769,7 +769,7 @@ QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
     if (!_pluginFactories.contains(pluginKind))
         return {};
 
-    return _pluginFactories[pluginKind]->getIcon();
+    return StyledIcon(_pluginFactories[pluginKind]->icon());
 }
 
 void PluginManager::fromVariantMap(const QVariantMap& variantMap)

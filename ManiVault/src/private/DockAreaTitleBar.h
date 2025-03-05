@@ -6,9 +6,6 @@
 
 #include <DockAreaTitleBar.h>
 
-#include <QToolButton>
-#include <QMenu>
-
 class ViewMenu;
 class LoadSystemViewMenu;
 
@@ -28,18 +25,6 @@ public:
      * @param dockAreaWidget Pointer to owning dock area widget
      */
     DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget);
-    
-protected:
-    /**
-     * Override QObject's event handling
-     * @return Boolean Whether the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
-
-public: // Themes
-    
-    /** refresh the widget and its children according to new style */
-    void updateStyle();
 
 private:
     QToolButton*            _addViewPluginToolButton;   /** Tool button which is added to the dock area title bar to add new (system) views */

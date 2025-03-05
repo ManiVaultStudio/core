@@ -8,16 +8,13 @@
 #include "InfoAction.h"
 
 #include <Application.h>
-#include <DataHierarchyItem.h>
 
 #include <actions/GroupAction.h>
 #include <event/Event.h>
 #include <graphics/Vector2f.h>
 #include <util/Serialization.h>
-#include <util/Timer.h>
 
 #include <QDebug>
-#include <QPainter>
 #include <QtCore>
 
 #include <cstring>
@@ -39,7 +36,6 @@ PointData::~PointData(void)
 
 void PointData::init()
 {
-
 }
 
 mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
@@ -310,7 +306,7 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
 }
 
 Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& guid /*= ""*/) :
-    mv::DatasetImpl(dataName, mayUnderive, guid),
+    DatasetImpl(dataName, mayUnderive, guid),
     _infoAction(nullptr),
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
@@ -390,6 +386,8 @@ void Points::init()
             }
         }
     });
+
+    setIconByName("database");
 }
 
 // =============================================================================
@@ -537,47 +535,6 @@ Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& gui
     subsetSelection->indices = localSelectionIndices;
 
     return mv::data().createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
-}
-
-QIcon Points::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return mv::Application::getIconFont("FontAwesome").getIcon("database", color);
-
-    /*
-    const auto size = QSize(100, 100);
-
-    QPixmap pixmap(size);
-
-    pixmap.fill(Qt::transparent);
-
-    const auto iconRectangle = QRect(0, 0, size.width(), size.height());
-
-    QPainter painter(&pixmap);
-
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    QPen linepen(Qt::black);
-    linepen.setCapStyle(Qt::RoundCap);
-    linepen.setWidth(15);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setPen(linepen);
-
-    QVector<QPoint> points;
-
-    QPolygon polygon;
-
-    const auto numSteps     = 3;
-    const auto stepSizeX    = static_cast<float>(size.width()) / static_cast<float>(numSteps + 1);
-    const auto stepSizeY    = static_cast<float>(size.height()) / static_cast<float>(numSteps + 1);
-
-    for (int x = stepSizeX; x < size.width(); x += stepSizeX)
-        for (int y = stepSizeY; y < size.height(); y += stepSizeY)
-            polygon << QPoint(x, y);
-
-    painter.drawPoints(polygon);
-
-    return QIcon(pixmap);
-    */
 }
 
 void Points::setProxyMembers(const Datasets& proxyMembers)
@@ -1156,9 +1113,10 @@ QVariantMap Points::toVariantMap() const
 // Factory
 // =============================================================================
 
-QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
+PointDataFactory::PointDataFactory()
 {
-    return Application::getIconFont("FontAwesome").getIcon("circle", color);
+    setIconByName("database");
+    setCategoryIconByName("database");
 }
 
 QUrl PointDataFactory::getReadmeMarkdownUrl() const

@@ -44,7 +44,8 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
     _videosListView.setModel(&_videosFilterModel);
     _videosListView.setModelColumn(static_cast<int>(LearningCenterVideosModel::Column::Delegate));
     _videosListView.setItemDelegateForColumn(static_cast<int>(LearningCenterVideosModel::Column::Delegate), new LearningPageVideoStyledItemDelegate(this));
-    
+    _videosListView.setSpacing(10);
+
     setLayout(&_mainLayout);
 
     const auto openPersistentEditors = [this]() -> void {
@@ -70,16 +71,9 @@ LearningPageVideosWidget::LearningPageVideosWidget(QWidget* parent /*= nullptr*/
 
     updateCustomStyle();
 
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &LearningPageVideosWidget::updateCustomStyle);
+
     _videosFilterModel.invalidate();
-
-}
-
-bool LearningPageVideosWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
 }
 
 void LearningPageVideosWidget::updateCustomStyle()
@@ -91,5 +85,5 @@ void LearningPageVideosWidget::updateCustomStyle()
         } \
         QListView#Videos::item:hover { \
             background-color: transparent; \
-        }").arg(QApplication::palette().color(QPalette::Normal, QPalette::Midlight).name()));
+        }").arg(QApplication::palette().color(QPalette::Normal, QPalette::Window).name()));
 }

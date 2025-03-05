@@ -6,9 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QEnterEvent>
-#include <QEvent>
-#include <QIcon>
+#include "util/StyledIcon.h"
+
 #include <QGraphicsOpacityEffect>
 #include <QLabel>
 #include <QString>
@@ -35,7 +34,7 @@ public:
 
     /**
      * Construct from \p icon and \p parent widget
-     * @param icon Label icon
+     * @param icon Icon
      * @param parent Pointer to parent widget
      */
     IconLabel(const QIcon& icon, QWidget* parent = nullptr);

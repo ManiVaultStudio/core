@@ -6,13 +6,9 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "actions/WidgetActionBadge.h" 
+#include "util/Badge.h" 
 
-#include <QString>
-#include <QFont>
 #include <QIcon>
-#include <QMap>
-#include <QDebug>
 
 namespace mv::gui {
 
@@ -45,10 +41,9 @@ CORE_EXPORT QIcon combineIcons(const QIcon& iconA, const QIcon& iconB);
 /**
  * Convenience function to create a plugin icon, which consists of maximum of four characters laid out in a grid
  * @param characters Characters
- * @param color Icon color
  * @return Plugin icon
  */
-CORE_EXPORT QIcon createPluginIcon(const QString& characters, const QColor& color);
+CORE_EXPORT QIcon createPluginIcon(const QString& characters);
 
 /**
  * Combines two (or more) icons into a horizontal icon
@@ -71,7 +66,7 @@ CORE_EXPORT QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/,
  * @param widgetActionBadge Widget action badge configuration
  * @return Number badge pixmap
  */
-CORE_EXPORT QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadge);
+CORE_EXPORT QPixmap createNumberBadgeOverlayPixmap(const util::Badge& widgetActionBadge);
 
 /**
  * Overlays \p icon with a \p number badge in \p color and with \p alignment
@@ -80,6 +75,6 @@ CORE_EXPORT QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widg
  * @param iconMargin Icon margin
  * @return Icon with badge overlay
  */
-CORE_EXPORT QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const WidgetActionBadge& widgetActionBadge, std::uint32_t iconMargin = 0);
+CORE_EXPORT QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const util::Badge& widgetActionBadge, std::uint32_t iconMargin = 0);
 
 }

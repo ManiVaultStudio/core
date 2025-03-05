@@ -31,14 +31,8 @@ WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* ac
     const auto heightHint = WidgetActionToolButton::sizeHintPushButton->sizeHint().height();
     
     setMinimumSize(QSize(heightHint, heightHint));
-    
-#ifdef __APPLE__
+
     setIconSize(QSize(12, 12));
-           
-    // This is a work-around to prevent sizing issues with tool buttons that have only an icon
-    //setText(" ");
-    
-#endif
 }
 
 WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction) :
@@ -83,6 +77,19 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
         painter.setBrush(Qt::NoBrush);
         painter.drawPoint(center);
     }
+
+    //if (_action) {
+    //    auto rect = QRect({}, iconSize());
+
+    //    rect.moveCenter(geometry().center());
+
+    //    QIcon::Mode iconMode = isEnabled() ? QIcon::Mode::Normal : QIcon::Mode::Disabled;
+
+    //    if (isActiveWindow())
+    //        iconMode = QIcon::Mode::Active;
+
+    //    painter.drawPixmap(rect, _action->icon().pixmap(iconSize(), iconMode, isEnabled() ? QIcon::State::On : QIcon::State::Off));
+    //}
 }
 
 WidgetAction* WidgetActionToolButton::getAction() const
@@ -104,7 +111,6 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
 
     if (_action) {
         const auto actionChanged = [this]() {
-            setIcon(_action->icon());
             setToolTip(_action->toolTip());
         };
 
@@ -123,6 +129,8 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
         connect(_action, &WidgetAction::changed, this, actionChanged);
         connect(_action, &WidgetAction::enabledChanged, this, actionEnabledChanged);
         connect(_action, &WidgetAction::visibleChanged, this, actionVisibilityChanged);
+
+        setIcon(_action->icon());
     }
     
     setAutoRaise(_action ? _action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise) : false);

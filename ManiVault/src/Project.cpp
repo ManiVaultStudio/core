@@ -242,7 +242,7 @@ void Project::initialize()
 
     updateContributors();
 
-    getStudioModeAction().setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
+    getStudioModeAction().setIconByName("pen-ruler");
 
     connect(&getStudioModeAction(), &ToggleAction::toggled, this, &Project::setStudioMode);
 

@@ -3,9 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PixelSelectionTool.h"
-#include "Application.h"
 
 #include <QDebug>
+
 #include <QEvent>
 #include <QMouseEvent>
 #include <QPainter>
@@ -23,20 +23,9 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _notifyDuringSelection(true),
     _brushRadius(BRUSH_RADIUS_DEFAULT),
     _fixedBrushRadiusModifier(Qt::NoModifier),
-    _mousePosition(),
-    _mousePositions(),
     _mouseButtons(),
-    _shapePixmap(),
-    _areaPixmap(),
     _preventContextMenu(false),
-    _aborted(false),
-    _mainColor(),
-    _fillColor(),
-    _areaBrush(),
-    _penLineForeGround(),
-    _penLineBackGround(),
-    _penControlPoint(),
-    _penClosingPoint()
+    _aborted(false)
 {
     setMainColor(QColor(Qt::black));
 
@@ -204,7 +193,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
         case QEvent::KeyPress:
         {
             // Get key that was pressed
-            auto keyEvent = static_cast<QKeyEvent*>(event);
+            auto keyEvent = dynamic_cast<QKeyEvent*>(event);
 
             // Do not handle repeating keys
             if (!keyEvent->isAutoRepeat()) {
@@ -228,7 +217,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Resize:
         {
-            const auto resizeEvent = static_cast<QResizeEvent*>(event);
+            const auto resizeEvent = dynamic_cast<QResizeEvent*>(event);
 
             _shapePixmap    = QPixmap(resizeEvent->size());
             _areaPixmap     = QPixmap(resizeEvent->size());
@@ -243,7 +232,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::MouseButtonDblClick:
         {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
+            auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
             switch (mouseEvent->button())
             {
@@ -282,7 +271,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::MouseButtonPress:
         {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
+            auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
             _mouseButtons = mouseEvent->buttons();
 
@@ -347,7 +336,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::MouseButtonRelease:
         {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
+            auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
             _mouseButtons = mouseEvent->buttons();
 
@@ -406,7 +395,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::MouseMove:
         {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
+            auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
             _mousePosition = mouseEvent->pos();
 
@@ -496,7 +485,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Wheel:
         {
-            auto wheelEvent = static_cast<QWheelEvent*>(event);
+            auto wheelEvent = dynamic_cast<QWheelEvent*>(event);
 
             switch (_type)
             {
@@ -788,12 +777,12 @@ void PixelSelectionTool::paint()
 
                 case PixelSelectionModifierType::Add:
                     shapePainter.setPen(_penLineForeGround);
-                    shapePainter.drawText(textRectangle, mv::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
+                    shapePainter.drawText(textRectangle, StyledIcon::getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
                     break;
 
                 case PixelSelectionModifierType::Subtract:
                     shapePainter.setPen(_penLineForeGround);
-                    shapePainter.drawText(textRectangle, mv::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
+                    shapePainter.drawText(textRectangle, StyledIcon::getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
                     break;
 
                 default:

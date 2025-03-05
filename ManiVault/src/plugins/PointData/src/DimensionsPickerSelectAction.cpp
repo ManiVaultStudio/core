@@ -26,7 +26,7 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
     _loadExclusionAction(this, "Load exclusion")
 {
     setText("Select");
-    setIconByName("mouse-pointer");
+    setIconByName("arrow-pointer");
 
     //_selectionThresholdAction.setEnabled(false);
 

@@ -4,11 +4,11 @@
 
 #include "SettingsManagerDialog.h"
 
-#include <Application.h>
 #include <CoreInterface.h>
 #include <QVBoxLayout>
 
 using namespace mv;
+using namespace mv::util;
 
 #ifdef _DEBUG
     #define SETTINGS_MANAGER_DIALOG_VERBOSE
@@ -20,7 +20,7 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _groupsAction(this, "Groups")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+    setWindowIcon(StyledIcon("gears"));
     setWindowModality(Qt::ApplicationModal);
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setWindowTitle("Settings");
@@ -32,27 +32,21 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
+    _groupsAction.addGroupAction(&mv::settings().getAppearanceSettingsAction());
     _groupsAction.addGroupAction(&mv::settings().getParametersSettings());
     _groupsAction.addGroupAction(&mv::settings().getMiscellaneousSettings());
     _groupsAction.addGroupAction(&mv::settings().getTasksSettingsAction());
-
-#ifdef Q_OS_MACX
-    _groupsAction.addGroupAction(&mv::settings().getApplicationSettings());
-#endif
-
     _groupsAction.addGroupAction(&mv::settings().getTemporaryDirectoriesSettingsAction());
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        auto pluginGlobalSettingsGroupAction = pluginFactory->getGlobalSettingsGroupAction();
-
-        if (pluginGlobalSettingsGroupAction)
+        if (auto pluginGlobalSettingsGroupAction = pluginFactory->getGlobalSettingsGroupAction())
             _groupsAction.addGroupAction(pluginGlobalSettingsGroupAction);
     }
 }
 
 QSize SettingsManagerDialog::sizeHint() const
 {
-    return QSize(400, 500);
+    return { 400, 500 };
 }
 
 }

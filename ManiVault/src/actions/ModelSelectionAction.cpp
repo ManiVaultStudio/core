@@ -4,8 +4,6 @@
 
 #include "ModelSelectionAction.h"
 
-#include "Application.h"
-
 #include <QAbstractItemModel>
 #include <QItemSelectionModel>
 
@@ -21,7 +19,7 @@ ModelSelectionAction::ModelSelectionAction(QObject* parent, const QString& title
 {
     setText(title);
     setToolTip("Item selection");
-    setIconByName("mouse-pointer");
+    setIconByName("arrow-pointer");
     setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     setDefaultWidgetFlags(WidgetFlag::Default);
 
@@ -42,8 +40,6 @@ void ModelSelectionAction::initialize(QItemSelectionModel* selectionModel)
 
     _selectionModel = selectionModel;
     _sourceModel    = _selectionModel->model();
-
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     const auto updateReadOnly = [this]() -> void {
         const auto numberOfSelectedRows = _selectionModel->selectedRows().count();

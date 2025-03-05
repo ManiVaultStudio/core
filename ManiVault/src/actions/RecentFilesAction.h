@@ -192,13 +192,11 @@ public:
 
     /**
      * Initializes the action
-     * @param parent Pointer to parent object
      * @param settingsKey Settings key where the recent file paths are stored
      * @param fileType Type of file e.g. project or workspace
      * @param shortcutPrefix Prefix of the shortcut
-     * @param icon Icon in menu
      */
-    void initialize(const QString& settingsKey, const QString& fileType, const QString& shortcutPrefix, const QIcon& icon);
+    void initialize(const QString& settingsKey, const QString& fileType, const QString& shortcutPrefix);
 
     /**
      * Add recent \p filePath
@@ -223,12 +221,6 @@ public:
      * @return Shortcut prefix (if empty, no shortcut is created)
      */
     QString getShortcutPrefix() const;
-
-    /**
-     * Get icon
-     * @return Icon for the recent file type
-     */
-    QIcon getIcon() const;
 
     /**
      * Get model
@@ -284,7 +276,6 @@ private:
     QString         _settingsKey;       /** Settings key where the recent file paths will be stored */
     QString         _fileType;          /** Recent file type */
     QString         _shortcutPrefix;    /** Shortcut prefix (if empty, no shortcut is created) */
-    QIcon           _icon;              /** Icon for the recent file type */
     Model           _model;             /** Model for storing recent file paths */
     FilterModel     _filterModel;       /** Sort/filter model */
     TriggerAction   _editAction;        /** Action which triggers a dialog in which the recent file paths can be edited */

@@ -6,6 +6,7 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
+
 #include <widgets/HierarchyWidget.h>
 
 #ifdef _DEBUG
@@ -16,6 +17,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title, "plug"),
@@ -41,7 +43,7 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
             return;
 
         hierarchyWidget->setHeaderHidden(true);
-        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+        hierarchyWidget->setWindowIcon(StyledIcon("plug"));
         
         hierarchyWidget->getFilterGroupAction().setVisible(false);
         hierarchyWidget->getColumnsGroupAction().setVisible(false);

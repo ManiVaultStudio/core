@@ -4,30 +4,25 @@
 
 #pragma once
 
-/**
-* Writer.h
-*
-* Base plugin class for plugins that write data to a file.
-*/
-
-#include "Application.h"
 #include "Plugin.h"
 
 #include <QString>
 
-using namespace mv::util;
-
-namespace mv
-{
-namespace plugin
+namespace mv::plugin
 {
 
 class CORE_EXPORT WriterPlugin : public Plugin
 {
 public:
+
+    /**
+     * Construct with pointer to plugin factory
+     * @param factory Pointer to plugin factory
+     */
     WriterPlugin(const PluginFactory* factory);
 
-    ~WriterPlugin() override {};
+    /** No need for custom destructor */
+    ~WriterPlugin() override = default;
 
     virtual void writeData() = 0;
 
@@ -70,11 +65,14 @@ class CORE_EXPORT WriterPluginFactory : public PluginFactory
     
 public:
     WriterPluginFactory() :
-        PluginFactory(Type::WRITER)
+        PluginFactory(Type::WRITER, "Writer")
     {
+        setIconByName("file-export");
+        setCategoryIconByName("file-export");
     }
 
-    ~WriterPluginFactory() = default;
+    /** No need for custom destructor */
+    ~WriterPluginFactory() override = default;
 
     /**
      * Set name of the object
@@ -85,29 +83,9 @@ public:
         QObject::setObjectName("Plugins/Writer/" + name);
     }
 
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-export", color);
-    }
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    QIcon getCategoryIcon() const override;
-
-    /**
-    * Produces an instance of a writer plugin. This function gets called by the plugin manager.
-    */
     WriterPlugin* produce() override = 0;
 };
 
-} // namespace plugin
-
-} // namespace mv
+}
 
 Q_DECLARE_INTERFACE(mv::plugin::WriterPluginFactory, "ManiVault.WriterPluginFactory")

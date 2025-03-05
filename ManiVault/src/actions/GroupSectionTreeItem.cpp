@@ -5,21 +5,17 @@
 #include "GroupSectionTreeItem.h"
 #include "GroupWidgetTreeItem.h"
 #include "GroupAction.h"
-#include "Application.h"
 
-#include <QDebug>
-#include <QMenu>
 #include <QResizeEvent>
 #include <QOperatingSystemVersion>
 
 //#define GROUP_SECTION_TREE_ITEM_VERBOSE
 
-namespace mv {
+using namespace mv::util;
 
-namespace gui {
+namespace mv::gui {
 
 GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction* groupAction) :
-    QTreeWidgetItem(),
     _groupAction(groupAction),
     _pushButton(new PushButton(this, groupAction)),
     _groupWidgetTreeItem(nullptr)
@@ -43,12 +39,12 @@ GroupSectionTreeItem::~GroupSectionTreeItem()
     delete _groupWidgetTreeItem;
 }
 
-GroupSectionTreeItem::PushButton& GroupSectionTreeItem::getPushButton()
+GroupSectionTreeItem::PushButton& GroupSectionTreeItem::getPushButton() const
 {
     return *_pushButton;
 }
 
-GroupAction* GroupSectionTreeItem::getGroupAction()
+GroupAction* GroupSectionTreeItem::getGroupAction() const
 {
     return _groupAction;
 }
@@ -59,9 +55,7 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _groupTreeWidgetItem(nullptr),
     _parentTreeWidgetItem(treeWidgetItem),
     _groupWidget(nullptr),
-    _overlayWidget(this),
-    _overlayLayout(),
-    _iconLabel()
+    _overlayWidget(this)
 {
     auto isMacOS = QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS;
     
@@ -69,9 +63,6 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     if (!isMacOS) {
         setFixedHeight(22);
     }
-
-    // Get reference to the Font Awesome icon font
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _overlayWidget.setLayout(&_overlayLayout);
     _overlayWidget.raise();
@@ -83,9 +74,9 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _iconLabel.setAlignment(Qt::AlignCenter);
 
     if (isMacOS) {
-        _iconLabel.setFont(fontAwesome.getFont());
+        _iconLabel.setFont(util::StyledIcon::getIconFont());
     } else {
-        _iconLabel.setFont(fontAwesome.getFont(7));
+        _iconLabel.setFont(util::StyledIcon::getIconFont(7));
     }
 
     // Install event filter to synchronize overlay widget size with push button size
@@ -97,14 +88,14 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     });
 
     // Update the state of the push button when the group action changes
-    const auto update = [this, &fontAwesome]() -> void {
+    const auto update = [this]() -> void {
         if (_widgetActionGroup->isExpanded())
             _parentTreeWidgetItem->setExpanded(true);
         else
             _parentTreeWidgetItem->setExpanded(false);
 
         // Assign the icon characters
-        _iconLabel.setText(fontAwesome.getIconCharacter(_widgetActionGroup->isExpanded() ? "angle-down" : "angle-right"));
+        _iconLabel.setText(StyledIcon::getIconCharacter(_widgetActionGroup->isExpanded() ? "angle-down" : "angle-right"));
     };
 
     const auto updateText = [this, groupAction]() -> void {
@@ -127,7 +118,7 @@ bool GroupSectionTreeItem::PushButton::eventFilter(QObject* target, QEvent* even
         case QEvent::Resize:
         {
             if (target == this)
-                _overlayWidget.setFixedSize(static_cast<QResizeEvent*>(event)->size());
+                _overlayWidget.setFixedSize(dynamic_cast<QResizeEvent*>(event)->size());
 
             break;
         }
@@ -139,5 +130,4 @@ bool GroupSectionTreeItem::PushButton::eventFilter(QObject* target, QEvent* even
     return QPushButton::eventFilter(target, event);
 }
 
-}
 }

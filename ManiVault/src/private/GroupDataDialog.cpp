@@ -12,6 +12,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 GroupDataDialog::GroupDataDialog(QWidget* parent, const mv::Datasets& datasets) :
     QDialog(parent),
@@ -19,7 +20,7 @@ GroupDataDialog::GroupDataDialog(QWidget* parent, const mv::Datasets& datasets) 
     _groupNameAction(this, "Group name"),
     _showDialogAction(this, "Show dialog next time", true)
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setWindowIcon(StyledIcon("gear"));
     setModal(true);
     setWindowTitle(QString("Group %1 datasets").arg(QString::number(_datasets.count())));
     

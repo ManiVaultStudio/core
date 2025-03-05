@@ -4,7 +4,6 @@
 
 #include "ViewPluginOverlayWidget.h"
 
-#include "Application.h"
 #include "ViewPlugin.h"
 
 #include <QDebug>
@@ -12,6 +11,8 @@
 #ifdef _DEBUG
     #define VIEW_PLUGIN_OVERLAY_WIDGET_VERBOSE
 #endif
+
+using namespace mv::util;
 
 namespace mv::gui
 {
@@ -62,7 +63,7 @@ ViewPluginOverlayWidget::ViewPluginOverlayWidget(plugin::ViewPlugin* viewPlugin)
     _toolbarLayout.addWidget(&_closeIconLabel);
 
     _closeIconLabel.setStyleSheet("opacity: 0.5");
-    _closeIconLabel.setPixmap(Application::getIconFont("FontAwesome").getIcon("times", QColor(0, 0, 0, 150)).pixmap(QSize(14, 14)));
+    _closeIconLabel.setPixmap(QIcon(StyledIcon("xmark").withColor(QColor(0, 0, 0, 150))).pixmap(QSize(14, 14)));
 }
 
 QVBoxLayout& ViewPluginOverlayWidget::getMainLayout()
