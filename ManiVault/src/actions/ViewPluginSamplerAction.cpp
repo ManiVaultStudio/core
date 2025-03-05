@@ -248,39 +248,39 @@ void ViewPluginSamplerAction::setSamplingMode(const SamplingMode& samplingMode)
 
 bool ViewPluginSamplerAction::canView() const
 {
-	switch (_generatedViewType) {
-	    case GeneratedViewType::HTML:
-	        return _enabledAction.isChecked() && _htmlViewGeneratorFunction && getViewingMode() != ViewingMode::None;
+	switch (_viewGeneratorType) {
+	    case ViewGeneratorType::HTML:
+	        return _enabledAction.isChecked() && _htmlViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
 
-	    case GeneratedViewType::Widget:
-	        return _enabledAction.isChecked() && _widgetViewGeneratorFunction && getViewingMode() != ViewingMode::None;
+	    case ViewGeneratorType::Widget:
+	        return _enabledAction.isChecked() && _widgetViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
 	}
 
     return false;
 }
 
-ViewPluginSamplerAction::GeneratedViewType ViewPluginSamplerAction::getGeneratedViewType() const
+ViewPluginSamplerAction::ViewGeneratorType ViewPluginSamplerAction::getViewGeneratorType() const
 {
-    return _generatedViewType;
+    return _viewGeneratorType;
 }
 
-void ViewPluginSamplerAction::setGeneratedViewType(const GeneratedViewType& generatedViewType)
+void ViewPluginSamplerAction::setViewGeneratorType(const ViewGeneratorType& viewGeneratorType)
 {
-    if (generatedViewType == _generatedViewType)
+    if (viewGeneratorType == _viewGeneratorType)
         return;
 
-    const auto previousGeneratedViewType = _generatedViewType;
+    const auto previousGeneratedViewType = _viewGeneratorType;
 
-    _generatedViewType = generatedViewType;
+    _viewGeneratorType = viewGeneratorType;
 
-    emit generatedViewTypeChanged(previousGeneratedViewType, _generatedViewType);
+    emit viewGeneratorTypeChanged(previousGeneratedViewType, _viewGeneratorType);
 }
 
 void ViewPluginSamplerAction::setHtmlViewGeneratorFunction(const HtmlViewGeneratorFunction& htmlViewGeneratorFunction)
 {
     _htmlViewGeneratorFunction = htmlViewGeneratorFunction;
 
-    setGeneratedViewType(GeneratedViewType::HTML);
+    setViewGeneratorType(ViewGeneratorType::HTML);
     setViewingMode(_htmlViewGeneratorFunction ? ViewingMode::Windowed : ViewingMode::None);
     updateReadOnly();
 
@@ -291,7 +291,7 @@ void ViewPluginSamplerAction::setWidgetViewGeneratorFunction(const WidgetViewGen
 {
     _widgetViewGeneratorFunction = widgetViewGeneratorFunction;
 
-    setGeneratedViewType(GeneratedViewType::Widget);
+    setViewGeneratorType(ViewGeneratorType::Widget);
     setViewingMode(_widgetViewGeneratorFunction ? ViewingMode::Windowed : ViewingMode::None);
     updateReadOnly();
 
@@ -312,8 +312,8 @@ void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContex
     _sampleContextDirty = true;
 
     if (_enabledAction.isChecked()) {
-	    switch (_generatedViewType) {
-	        case GeneratedViewType::HTML:
+	    switch (_viewGeneratorType) {
+	        case ViewGeneratorType::HTML:
 	        {
 	            if (_htmlViewGeneratorFunction)
 	                setViewString(_htmlViewGeneratorFunction(_sampleContext));
@@ -321,7 +321,7 @@ void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContex
 	            break;
 	        }
 
-            case GeneratedViewType::Widget:
+            case ViewGeneratorType::Widget:
 			{
                 if (_widgetViewGeneratorFunction)
                     setViewWidget(_widgetViewGeneratorFunction(_sampleContext));
@@ -329,6 +329,8 @@ void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContex
                 break;
 		    }
 	    }
+
+        emit canViewChanged(canView());
     }
 }
 
@@ -463,14 +465,14 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 
 void ViewPluginSamplerAction::updateReadOnly()
 {
-	switch (_generatedViewType) {
-	    case GeneratedViewType::HTML:
+	switch (_viewGeneratorType) {
+	    case ViewGeneratorType::HTML:
 	    {
 	        setEnabled(_htmlViewGeneratorFunction ? true : false);
 	        break;
 	    }
 
-        case GeneratedViewType::Widget:
+        case ViewGeneratorType::Widget:
         {
             setEnabled(_widgetViewGeneratorFunction ? true : false);
             break;

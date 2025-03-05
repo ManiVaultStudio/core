@@ -55,17 +55,27 @@ public:
      */
     mv::gui::InfoOverlayWidget& getNoSamplesOverlayWidget();
 
+    /**
+     * Resize the SampleScopeWidget#_widgetViewScene when the SampleScopeWidget size changes
+     * @param event Pointer to resize event
+     */
+    void resizeEvent(QResizeEvent* event) override;
+
 private:
 
     /** Toggles the visibility of the widgets */
     void updateVisibility();
 
+    /** Updates the size of the widget proxy */
+    void updateViewWidgetProxySize() const;
+    
 private:
     SampleScopePlugin*              _sampleScopePlugin;         /** Pointer to parent sample scope plugin */
     QVBoxLayout                     _layout;                    /** Main layout */
     QWebEngineView                  _htmlView;                  /** Web engine view for displaying HTML content */
     QGraphicsView                   _widgetView;                /** Graphics view in which the widget is displayed */
     QGraphicsScene                  _widgetViewScene;           /** Graphics scene in which the widget is displayed */
+    QGraphicsProxyWidget*           _proxyWidget;               /** Proxy widget for the widget */
     QWidget*                        _currentViewWidget;         /** Pointer to the current view widget */
     mv::gui::InfoOverlayWidget      _noSamplesOverlayWidget;    /** Overlay widget with a message saying there are no samples available */
     mv::plugin::ViewPlugin*         _currentViewPlugin;         /** Pointer to the current view plugin */

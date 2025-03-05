@@ -18,6 +18,7 @@ using namespace mv::plugin;
 SampleScopeWidget::SampleScopeWidget(SampleScopePlugin* sampleScopePlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _sampleScopePlugin(sampleScopePlugin),
+    _proxyWidget(nullptr),
     _currentViewWidget(nullptr),
     _noSamplesOverlayWidget(&_htmlView, Application::getIconFont("FontAwesome").getIcon("eye-dropper"), "No samples view", "There is currently no samples view available..."),
     _currentViewPlugin(nullptr)
@@ -28,6 +29,8 @@ void SampleScopeWidget::initialize()
 {
     setAutoFillBackground(true);
     setLayout(&_layout);
+    
+    _widgetView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto& widgetFader = _noSamplesOverlayWidget.getWidgetFader();
 
@@ -39,19 +42,21 @@ void SampleScopeWidget::initialize()
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.addWidget(&_htmlView);
     _layout.addWidget(&_widgetView);
-    _layout.addStretch(1);
+
+	_widgetView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _widgetView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     _noSamplesOverlayWidget.show();
 
     connect(&_sampleScopePlugin->getSourcePluginPickerAction(), &PluginPickerAction::pluginPicked, this, [this](plugin::Plugin* plugin) -> void {
         if (_currentViewPlugin) {
-            disconnect(&_currentViewPlugin->getSamplerAction(), &ViewPluginSamplerAction::generatedViewTypeChanged, this, nullptr);
+            disconnect(&_currentViewPlugin->getSamplerAction(), &ViewPluginSamplerAction::viewGeneratorTypeChanged, this, nullptr);
         }
 
         _currentViewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
         if (_currentViewPlugin) {
-            connect(&_currentViewPlugin->getSamplerAction(), &ViewPluginSamplerAction::generatedViewTypeChanged, this, &SampleScopeWidget::updateVisibility);
+            connect(&_currentViewPlugin->getSamplerAction(), &ViewPluginSamplerAction::viewGeneratorTypeChanged, this, &SampleScopeWidget::updateVisibility);
 
             updateVisibility();
         }
@@ -79,16 +84,26 @@ void SampleScopeWidget::setViewWidget(const QWidget* widget)
         _currentViewWidget = const_cast<QWidget*>(widget);
         _widgetViewScene.clear();
 
-        auto proxy = _widgetViewScene.addWidget(const_cast<QWidget*>(widget));
+        _proxyWidget = _widgetViewScene.addWidget(const_cast<QWidget*>(widget));
 
-        proxy->setPos(0, 0);
+        _proxyWidget->setPos(0, 0);
+
+        updateViewWidgetProxySize();
     }
-    
 }
 
 InfoOverlayWidget& SampleScopeWidget::getNoSamplesOverlayWidget()
 {
     return _noSamplesOverlayWidget;
+}
+
+void SampleScopeWidget::resizeEvent(QResizeEvent* event)
+{
+	QWidget::resizeEvent(event);
+
+    _widgetViewScene.setSceneRect(0, 0, width(), height());
+
+    updateViewWidgetProxySize();
 }
 
 void SampleScopeWidget::updateVisibility()
@@ -98,23 +113,27 @@ void SampleScopeWidget::updateVisibility()
 
     auto& viewPluginSamplerAction = _currentViewPlugin->getSamplerAction();
 
-	switch (viewPluginSamplerAction.getGeneratedViewType()) {
-	    case ViewPluginSamplerAction::GeneratedViewType::HTML:
+	switch (viewPluginSamplerAction.getViewGeneratorType()) {
+	    case ViewPluginSamplerAction::ViewGeneratorType::HTML:
         {
-            qDebug() << "HTML view";
 	        _htmlView.show();
 	        _widgetView.hide();
 
 	        break;
 	    }
 
-	    case ViewPluginSamplerAction::GeneratedViewType::Widget:
+	    case ViewPluginSamplerAction::ViewGeneratorType::Widget:
 	    {
-            qDebug() << "Widget view";
 	        _htmlView.hide();
 	        _widgetView.show();
 
 	        break;
 	    }
     }
+}
+
+void SampleScopeWidget::updateViewWidgetProxySize() const
+{
+    if (_proxyWidget)
+        _proxyWidget->resize(width(), height());
 }

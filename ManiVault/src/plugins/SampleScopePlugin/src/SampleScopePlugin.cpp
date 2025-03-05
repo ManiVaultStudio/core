@@ -37,7 +37,10 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
     });
 
     const auto updateNoSamplesOverlayWidget = [this]() -> void {
+        
         const auto canView = _viewPluginSamplerAction && _viewPluginSamplerAction->canView();
+
+        qDebug() << "updateNoSamplesOverlayWidget" << canView;
 
         auto& widgetFader = _sampleScopeWidget.getNoSamplesOverlayWidget().getWidgetFader();
 
@@ -70,7 +73,7 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
 					_sampleScopeWidget.setViewHtml(_viewPluginSamplerAction->getViewString());
             };
 
-            if (_viewPluginSamplerAction->getGeneratedViewType() == ViewPluginSamplerAction::GeneratedViewType::HTML)
+            if (_viewPluginSamplerAction->getViewGeneratorType() == ViewPluginSamplerAction::ViewGeneratorType::HTML)
 				updateViewHtml();
 
             connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewStringChanged, this, updateViewHtml);
@@ -81,7 +84,7 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
 				_sampleScopeWidget.setViewWidget(_viewPluginSamplerAction->getViewWidget());
             };
 
-            if (_viewPluginSamplerAction->getGeneratedViewType() == ViewPluginSamplerAction::GeneratedViewType::Widget)
+            if (_viewPluginSamplerAction->getViewGeneratorType() == ViewPluginSamplerAction::ViewGeneratorType::Widget)
 				updateViewWidget();
 
             connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewWidgetChanged, this, updateViewWidget);
