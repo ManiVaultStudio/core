@@ -278,6 +278,8 @@ void Clusters::init()
             setSelectionNames(foreignSelectedClusterNames);
         }
     });
+
+    setIconByName("table-cells-large");
 }
 
 void Clusters::addCluster(Cluster& cluster)

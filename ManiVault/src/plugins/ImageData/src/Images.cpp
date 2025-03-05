@@ -54,6 +54,7 @@ void Images::init()
         !(getDataHierarchyItem().getParent()->getDataType() == PointType || getDataHierarchyItem().getParent()->getDataType() == ClusterType))
         qCritical() << "Images: warning: image data set must be derived from points or clusters.";
 
+    setIconByName("images");
 }
 
 std::tuple<mv::Dataset<mv::DatasetImpl>, mv::Dataset<Images>> Images::addImageDataset(QString datasetGuiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const QString pluginKind /*= "Points"*/)

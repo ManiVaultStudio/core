@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QStyleHints>
+#include <windows.h>
 
 namespace mv::util
 {
@@ -18,12 +19,11 @@ StyledIconEngine::StyledIconEngine(const StyledIconSettings& styledIconSettings)
 
 void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state)
 {
+    painter->drawPixmap(rect, pixmap(rect.size(), mode, state));
 }
 
 QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
-    
-
     if (StyledIcon::pixmaps.contains(_iconSettings._sha)) {
 	    auto iconPixmap = StyledIcon::pixmaps[_iconSettings._sha].copy();
 
@@ -33,6 +33,8 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 		    switch (_iconSettings._mode) {
                 case StyledIconMode::ThemeAware:
                 {
+                    mode = std::clamp(mode, QIcon::Normal, QIcon::Active);
+
                     const auto recolorColor    = qApp->palette().color(static_cast<QPalette::ColorGroup>(mode), _iconSettings.getColorRoleForCurrentTheme());
                     const auto recoloredPixmap = recolorPixmap(iconPixmap, recolorColor).scaled(size, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation);
 

@@ -87,7 +87,7 @@ QVariant AbstractDataHierarchyModel::NameItem::data(int role /*= Qt::UserRole + 
             if (!getDataset().isValid())
                 break;
 
-            return QIcon(StyledIcon(getDataset()->icon()));
+            return getDataset()->icon();
         }
 
         default:
@@ -498,7 +498,7 @@ void AbstractDataHierarchyModel::IsSubsetItem::createFullIcon(float pieRadius /*
     painter.setPen(QPen(Qt::black, 2.f * pieRadius, Qt::SolidLine, Qt::RoundCap));
     painter.drawPoint(QPointF(50.f, 50.f));
 
-    _fullIcon = createIcon(pixmap);
+    _fullIcon = StyledIcon(createIcon(pixmap));
 }
 
 void AbstractDataHierarchyModel::IsSubsetItem::createSubsetIcon(float pieRadius /*= 35.f*/)
@@ -520,7 +520,7 @@ void AbstractDataHierarchyModel::IsSubsetItem::createSubsetIcon(float pieRadius 
     painter.setBrush(Qt::black);
     painter.drawPie(QRectF(margin, margin, 100.f - (2.f * margin), 100.f - (2.f * margin)), 90 * 16, 270 * 16);
 
-    _subsetIcon = createIcon(pixmap);
+    _subsetIcon = StyledIcon(createIcon(pixmap));
 }
 
 void AbstractDataHierarchyModel::IsSubsetItem::drawExtents(QPainter& painter)

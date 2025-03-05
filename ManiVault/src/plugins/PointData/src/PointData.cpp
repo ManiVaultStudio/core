@@ -36,7 +36,6 @@ PointData::~PointData(void)
 
 void PointData::init()
 {
-
 }
 
 mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
@@ -387,6 +386,8 @@ void Points::init()
             }
         }
     });
+
+    setIconByName("database");
 }
 
 // =============================================================================
