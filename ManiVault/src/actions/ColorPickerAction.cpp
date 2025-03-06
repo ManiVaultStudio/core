@@ -85,10 +85,11 @@ ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPicke
     setAcceptDrops(true);
 
     _colorDialog.setCurrentColor(colorPickerAction->getColor());
-
+    _colorDialog.setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::ShowAlphaChannel);
+    
     const auto getWidgetFromColorDialog = [this](const QString& name) -> QWidget* {
         auto allChildWidgets = _colorDialog.findChildren<QWidget *>();
-
+                           
         for (auto widget : allChildWidgets) {
             if (strcmp(widget->metaObject()->className(), name.toLatin1()) == 0)
                 return widget;
