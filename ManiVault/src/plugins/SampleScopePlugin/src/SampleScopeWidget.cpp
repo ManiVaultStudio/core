@@ -23,32 +23,32 @@ SampleScopeWidget::SampleScopeWidget(SampleScopePlugin* sampleScopePlugin, QWidg
     _sampleScopePlugin(sampleScopePlugin),
     _proxyWidget(nullptr),
     _currentViewWidget(nullptr),
-    _noSamplesOverlayWidget(&_textHtmlView, StyledIcon("eye-dropper"), "No samples view", "There is currently no samples view available...")
+    _noSamplesOverlayWidget(&_viewsWidget, StyledIcon("eye-dropper"), "No samples view", "There is currently no samples view available..."),
     _currentViewPlugin(nullptr)
 {
 }
 
 void SampleScopeWidget::initialize()
 {
-    setAutoFillBackground(true);
-    setLayout(&_layout);
-    
+    setLayout(&_mainLayout);
+
+    _mainLayout.setContentsMargins(0, 0, 0, 0);
+    _viewsWidgetLayout.setContentsMargins(0, 0, 0, 0);
+
+    _viewsWidget.setAutoFillBackground(true);
+
+    _viewsWidget.setLayout(&_viewsWidgetLayout);
+
+    _mainLayout.addWidget(&_viewsWidget);
+
     _widgetView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    auto& widgetFader = _noSamplesOverlayWidget.getWidgetFader();
-
-    widgetFader.setOpacity(1.0f);
-    widgetFader.setMaximumOpacity(0.5f);
-    widgetFader.setFadeInDuration(100);
-    widgetFader.setFadeOutDuration(300);
-
-    _layout.setContentsMargins(0, 0, 0, 0);
-    _layout.addWidget(&_htmlView);
-    _layout.addWidget(&_widgetView);
+    _viewsWidgetLayout.addWidget(&_htmlView);
+    _viewsWidgetLayout.addWidget(&_widgetView);
 
 	_widgetView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _widgetView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
+    
     _noSamplesOverlayWidget.show();
 
     connect(&_sampleScopePlugin->getSourcePluginPickerAction(), &PluginPickerAction::pluginPicked, this, [this](plugin::Plugin* plugin) -> void {
@@ -114,24 +114,29 @@ void SampleScopeWidget::updateVisibility()
     if (!_currentViewPlugin)
         return;
 
+    _htmlView.hide();
+    _widgetView.hide();
+
     auto& viewPluginSamplerAction = _currentViewPlugin->getSamplerAction();
 
-	switch (viewPluginSamplerAction.getViewGeneratorType()) {
-	    case ViewPluginSamplerAction::ViewGeneratorType::HTML:
-        {
-	        _htmlView.show();
-	        _widgetView.hide();
+    if (viewPluginSamplerAction.canView()) {
+        switch (viewPluginSamplerAction.getViewGeneratorType()) {
+	        case ViewPluginSamplerAction::ViewGeneratorType::HTML:
+	        {
+	            _htmlView.show();
+	            _widgetView.hide();
 
-	        break;
-	    }
+	            break;
+	        }
 
-	    case ViewPluginSamplerAction::ViewGeneratorType::Widget:
-	    {
-	        _htmlView.hide();
-	        _widgetView.show();
+	        case ViewPluginSamplerAction::ViewGeneratorType::Widget:
+	        {
+	            _htmlView.hide();
+	            _widgetView.show();
 
-	        break;
-	    }
+	            break;
+	        }
+        }
     }
 }
 

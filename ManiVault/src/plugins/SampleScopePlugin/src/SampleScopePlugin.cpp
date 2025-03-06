@@ -42,12 +42,12 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
 
         auto& widgetFader = _sampleScopeWidget.getNoSamplesOverlayWidget().getWidgetFader();
 
+        _sampleScopeWidget.getNoSamplesOverlayWidget().raise();
+
         if (canView)
             widgetFader.fadeOut();
         else
             widgetFader.fadeIn();
-
-        widgetFader.fadeIn();
     };
 
     updateNoSamplesOverlayWidget();
@@ -59,6 +59,7 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
         if (_viewPluginSamplerAction) {
             disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewStringChanged, this, nullptr);
             disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewWidgetChanged, this, nullptr);
+            disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::sampleContextChanged, this, nullptr);
             disconnect(&_viewPluginSamplerAction->getSamplingModeAction(), &OptionAction::currentIndexChanged, this, nullptr);
             disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::canViewChanged, this, nullptr);
         }
@@ -100,6 +101,7 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
             updateNoSamplesOverlayWidget();
 
             connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::canViewChanged, this, updateNoSamplesOverlayWidget);
+            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::sampleContextChanged, this, updateNoSamplesOverlayWidget);
         }
     });
 

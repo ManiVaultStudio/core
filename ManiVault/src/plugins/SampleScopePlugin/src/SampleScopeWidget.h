@@ -71,7 +71,9 @@ private:
     
 private:
     SampleScopePlugin*              _sampleScopePlugin;         /** Pointer to parent sample scope plugin */
-    QVBoxLayout                     _layout;                    /** Main layout */
+    QVBoxLayout                     _mainLayout;                /** Main layout */  
+    QWidget                         _viewsWidget;               /** Widget containing the views */
+    QVBoxLayout                     _viewsWidgetLayout;         /** Layout of the views widget */
     QWebEngineView                  _htmlView;                  /** Web engine view for displaying HTML content */
     QGraphicsView                   _widgetView;                /** Graphics view in which the widget is displayed */
     QGraphicsScene                  _widgetViewScene;           /** Graphics scene in which the widget is displayed */

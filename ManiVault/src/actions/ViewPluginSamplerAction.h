@@ -292,6 +292,13 @@ signals:
     void sampleContextRequested();
 
     /**
+     * Signals that the sample context changed from \p previousSampleContext to \p currentSampleContext
+     * @param previousSampleContext Previous sample context
+     * @param currentSampleContext Current sample context
+     */
+    void sampleContextChanged(const SampleContext& previousSampleContext, const SampleContext& currentSampleContext);
+
+    /**
      * Signals that the view-ability changed to \p canView
      * @param canView Current view-ability
      */

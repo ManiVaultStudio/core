@@ -308,6 +308,8 @@ void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContex
     if (sampleContext == _sampleContext)
         return;
 
+    const auto previousSampleContext = _sampleContext;
+
     _sampleContext      = sampleContext;
     _sampleContextDirty = true;
 
@@ -332,6 +334,8 @@ void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContex
 
         emit canViewChanged(canView());
     }
+
+    emit sampleContextChanged(previousSampleContext, _sampleContext);
 }
 
 QString ViewPluginSamplerAction::getViewString() const
