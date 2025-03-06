@@ -95,7 +95,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     connect(&_lazyUpdateIntervalAction, &IntegralAction::valueChanged, this, updateSampleContextLazyUpdateTimerInterval);
 
     connect(&_sampleContextLazyUpdateTimer, &QTimer::timeout, this, [this]() -> void {
-        if (!_sampleContextDirty || !_viewGeneratorFunction || getViewingMode() == ViewingMode::None)
+        if (!_sampleContextDirty || (!_htmlViewGeneratorFunction && !_widgetViewGeneratorFunction) || getViewingMode() == ViewingMode::None)
             return;
 
         if (getSamplingMode() == SamplingMode::FocusRegion)
@@ -248,14 +248,51 @@ void ViewPluginSamplerAction::setSamplingMode(const SamplingMode& samplingMode)
 
 bool ViewPluginSamplerAction::canView() const
 {
-    return _enabledAction.isChecked() && _viewGeneratorFunction && getViewingMode() != ViewingMode::None;
+	switch (_viewGeneratorType) {
+	    case ViewGeneratorType::HTML:
+	        return _enabledAction.isChecked() && _htmlViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
+
+	    case ViewGeneratorType::Widget:
+	        return _enabledAction.isChecked() && _widgetViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
+	}
+
+    return false;
 }
 
-void ViewPluginSamplerAction::setViewGeneratorFunction(const ViewGeneratorFunction& viewGeneratorFunction)
+ViewPluginSamplerAction::ViewGeneratorType ViewPluginSamplerAction::getViewGeneratorType() const
 {
-    _viewGeneratorFunction = viewGeneratorFunction;
+    return _viewGeneratorType;
+}
 
-    setViewingMode(viewGeneratorFunction ? ViewingMode::Windowed : ViewingMode::None);
+void ViewPluginSamplerAction::setViewGeneratorType(const ViewGeneratorType& viewGeneratorType)
+{
+    if (viewGeneratorType == _viewGeneratorType)
+        return;
+
+    const auto previousGeneratedViewType = _viewGeneratorType;
+
+    _viewGeneratorType = viewGeneratorType;
+
+    emit viewGeneratorTypeChanged(previousGeneratedViewType, _viewGeneratorType);
+}
+
+void ViewPluginSamplerAction::setHtmlViewGeneratorFunction(const HtmlViewGeneratorFunction& htmlViewGeneratorFunction)
+{
+    _htmlViewGeneratorFunction = htmlViewGeneratorFunction;
+
+    setViewGeneratorType(ViewGeneratorType::HTML);
+    setViewingMode(_htmlViewGeneratorFunction ? ViewingMode::Windowed : ViewingMode::None);
+    updateReadOnly();
+
+    emit canViewChanged(canView());
+}
+
+void ViewPluginSamplerAction::setWidgetViewGeneratorFunction(const WidgetViewGeneratorFunction& widgetViewGeneratorFunction)
+{
+    _widgetViewGeneratorFunction = widgetViewGeneratorFunction;
+
+    setViewGeneratorType(ViewGeneratorType::Widget);
+    setViewingMode(_widgetViewGeneratorFunction ? ViewingMode::Windowed : ViewingMode::None);
     updateReadOnly();
 
     emit canViewChanged(canView());
@@ -274,13 +311,37 @@ void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContex
     _sampleContext      = sampleContext;
     _sampleContextDirty = true;
 
-    if (_enabledAction.isChecked())
-        setViewString(_viewGeneratorFunction(_sampleContext));
+    if (_enabledAction.isChecked()) {
+	    switch (_viewGeneratorType) {
+	        case ViewGeneratorType::HTML:
+	        {
+	            if (_htmlViewGeneratorFunction)
+	                setViewString(_htmlViewGeneratorFunction(_sampleContext));
+
+	            break;
+	        }
+
+            case ViewGeneratorType::Widget:
+			{
+                if (_widgetViewGeneratorFunction)
+                    setViewWidget(_widgetViewGeneratorFunction(_sampleContext));
+
+                break;
+		    }
+	    }
+
+        emit canViewChanged(canView());
+    }
 }
 
 QString ViewPluginSamplerAction::getViewString() const
 {
     return _viewString;
+}
+
+const QWidget* ViewPluginSamplerAction::getViewWidget() const
+{
+    return _viewWidget;
 }
 
 void ViewPluginSamplerAction::setViewString(const QString& viewString)
@@ -295,6 +356,18 @@ void ViewPluginSamplerAction::setViewString(const QString& viewString)
     drawToolTip();
 
     emit viewStringChanged(previousViewString, _viewString);
+}
+
+void ViewPluginSamplerAction::setViewWidget(QWidget* widget)
+{
+    if (widget == _viewWidget)
+        return;
+
+    auto previousWidget = _viewWidget;
+
+    _viewWidget = widget;
+
+    emit viewWidgetChanged(previousWidget, _viewWidget);
 }
 
 void ViewPluginSamplerAction::drawToolTip()
@@ -392,7 +465,19 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 
 void ViewPluginSamplerAction::updateReadOnly()
 {
-    setEnabled(_viewGeneratorFunction ? true : false);
+	switch (_viewGeneratorType) {
+	    case ViewGeneratorType::HTML:
+	    {
+	        setEnabled(_htmlViewGeneratorFunction ? true : false);
+	        break;
+	    }
+
+        case ViewGeneratorType::Widget:
+        {
+            setEnabled(_widgetViewGeneratorFunction ? true : false);
+            break;
+        }
+	}
 }
 
 QWidget* ViewPluginSamplerAction::getTargetWidget() const
