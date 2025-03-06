@@ -19,19 +19,14 @@
     #define COLOR_MAP_EDITOR_1D_WIDGET_VERBOSE
 #endif
 
-namespace mv {
-
-namespace gui {
+namespace mv::gui {
 
 ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1DAction& colorMapEditor1DAction) :
     QGraphicsView(parent),
     _colorMapEditor1DAction(colorMapEditor1DAction),
     _scene(*this),
     _margins(52, 15, 25, 40),
-    _graphRectangle(),
-    _currentNode(),
-    _nodes(),
-    _colorMap()
+    _currentNode()
 {
     setMinimumHeight(100);
 
@@ -39,6 +34,10 @@ ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1D
 
     _scene.addItem(new ColorMapEditor1DEdgesGraphicsItem(*this));
     _scene.addItem(new ColorMapEditor1DHistogramGraphicsItem(*this));
+
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, [this]() -> void {
+        update();
+    });
 }
 
 ColorMapEditor1DWidget::~ColorMapEditor1DWidget()
@@ -172,7 +171,7 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
     styleOption.initFrom(this);
 
-    painter->fillRect(rect, isEnabled() ? QColor(244, 244, 244) : styleOption.palette.color(QPalette::Normal, QPalette::Window));
+    painter->fillRect(rect, styleOption.palette.color(isEnabled() ? QPalette::ColorGroup::Normal : QPalette::ColorGroup::Disabled, QPalette::Window));
 
     const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
 
@@ -233,7 +232,6 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
         const auto textRectangleSize    = QSizeF(100, 50);
         const auto textRectangle        = QRectF(origin - QPointF(textRectangleSize.width() / 2, -10), textRectangleSize);
-        const auto startOrEndAxis       = percentage == 0.0f || percentage == 1.0f;
 
         painter->setPen(labelPen);
         painter->drawText(textRectangle, QString::number(value, 'f', 2), QTextOption(Qt::AlignHCenter | Qt::AlignTop));
@@ -259,5 +257,4 @@ QImage ColorMapEditor1DWidget::getColorMap()
     return _colorMap;
 }
 
-}
 }

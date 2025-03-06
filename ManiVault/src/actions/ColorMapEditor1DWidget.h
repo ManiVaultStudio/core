@@ -13,9 +13,7 @@
 #include <QResizeEvent>
 #include <QGraphicsView>
 
-namespace mv {
-
-namespace gui {
+namespace mv::gui {
 
 class ColorMapEditor1DAction;
 class ColorMapEditor1DNodeGraphicsItem;
@@ -148,5 +146,4 @@ signals:
     
 };
 
-}
 }
