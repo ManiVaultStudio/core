@@ -85,7 +85,7 @@ public:
      * @param title Title of the action
      * @param icon Icon
      */
-    StatusBarAction(QObject* parent, const QString& title, const QIcon& icon = QIcon());
+    StatusBarAction(QObject* parent, const QString& title, const util::StyledIcon& icon = util::StyledIcon());
 
     /**
      * Construct with \p parent object, \p title and possibly a FontAwesome \p icon
@@ -96,7 +96,7 @@ public:
     StatusBarAction(QObject* parent, const QString& title, const QString& icon = "");
 
     /** Destructor for removing this action from StatusBarAction#statusBarActions */
-    ~StatusBarAction();
+    ~StatusBarAction() override;
 
     /**
      * Get registered status bar action

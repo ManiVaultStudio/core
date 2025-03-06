@@ -34,7 +34,8 @@ PageHeaderWidget::PageHeaderWidget(const QString& title, QWidget* parent /*= nul
     _layout.setContentsMargins(50, 25, 50, 0);
     _layout.addWidget(&_iconLabel);
 
-    updateCustomStyle();
+    setBackgroundRole(QPalette::Window);
+    setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
 void PageHeaderWidget::resizeEvent(QResizeEvent* event)
@@ -45,14 +46,6 @@ void PageHeaderWidget::resizeEvent(QResizeEvent* event)
 void PageHeaderWidget::showEvent(QShowEvent* event)
 {
     resizeIcon(size());
-}
-
-bool PageHeaderWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
 }
 
 void PageHeaderWidget::resizeIcon(const QSize& newSize)
@@ -69,7 +62,3 @@ void PageHeaderWidget::resizeIcon(const QSize& newSize)
     }
 }
 
-void PageHeaderWidget::updateCustomStyle()
-{
-    PageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
-}

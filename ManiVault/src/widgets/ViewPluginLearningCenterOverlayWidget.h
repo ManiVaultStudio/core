@@ -46,7 +46,7 @@ protected:
          * @param overlayWidget Pointer to overlay widget
          * @param iconSize Size of the item icon
          */
-        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize = QSize(14, 14));
+        AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize = QSize(16, 16));
 
         /** Show only when required (when AbstractToolbarItemWidget::shouldDisplay() returns true) */
         void showConditionally();
@@ -76,7 +76,7 @@ protected:
         virtual bool shouldDisplay() const = 0;
 
         /** Updates the item icon (for badge update) */
-        void updateIcon();
+        virtual void updateIcon();
 
         /**
          * Get widget fader
@@ -104,7 +104,7 @@ protected:
          */
         ViewPluginLearningCenterOverlayWidget* getOverlayWidget() const;
 
-    private:
+    protected:
         const plugin::ViewPlugin*                   _viewPlugin;            /** Const pointer to source view plugin */
         ViewPluginLearningCenterOverlayWidget*      _overlayWidget;         /** Pointer to overlay widget */
         const QSize                                 _iconSize;              /** Size of the item icon */

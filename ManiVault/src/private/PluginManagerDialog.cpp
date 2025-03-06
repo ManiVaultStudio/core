@@ -8,12 +8,15 @@
 #include <CoreInterface.h>
 #include <Plugin.h>
 
+#include <util/StyledIcon.h>
+
 #include <QVBoxLayout>
 #include <QMenu>
 #include <QHeaderView>
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 #ifdef _DEBUG
     #define PLUGIN_MANAGER_DIALOG_VERBOSE
@@ -25,7 +28,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
     _hierarchyWidget(this, "Plugin", _model, &_filterModel),
     _okAction(this, "Ok")
 {
-    const auto pluginIcon = Application::getIconFont("FontAwesome").getIcon("plug");
+    const auto pluginIcon = StyledIcon("plug");
 
     setWindowIcon(pluginIcon);
     setWindowModality(Qt::ApplicationModal);
@@ -89,7 +92,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
         QMenu contextMenu;
 
-        contextMenu.addAction(Application::getIconFont("FontAwesome").getIcon("trash"), QString("Destroy %1 plugin%2").arg(QString::number(selectedRows.count()), selectedRows.count() >= 2 ? "s" : ""), [this, selectedRows] {
+        contextMenu.addAction(StyledIcon("trash"), QString("Destroy %1 plugin%2").arg(QString::number(selectedRows.count()), selectedRows.count() >= 2 ? "s" : ""), [this, selectedRows] {
             QList<plugin::Plugin*> plugins;
 
             for (const auto& selectedRow : selectedRows)

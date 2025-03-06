@@ -105,7 +105,7 @@ void PluginTriggerAction::initialize()
 {
     _sha = QString(QCryptographicHash::hash(QString("%1_%2").arg(_pluginFactory->getKind(), getLocation()).toUtf8(), QCryptographicHash::Sha1).toHex());
 
-    setIcon(_pluginFactory->getIcon());
+    setIcon(_pluginFactory->icon());
 }
 
 void PluginTriggerAction::setText(const QString& text)

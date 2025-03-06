@@ -11,7 +11,7 @@
 #include <CoreInterface.h>
 #include <ProjectMetaAction.h>
 
-#include <util/Icon.h>
+#include <util/StyledIcon.h>
 
 #include <QDebug>
 #include <QPainter>
@@ -47,7 +47,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
 
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
     connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
 
@@ -121,11 +121,9 @@ void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment
 
 void StartPageOpenProjectWidget::updateOpenCreateActions()
 {
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     _openCreateProjectWidget.getModel().reset();
 
-    PageAction openProjectPageAction(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
+    PageAction openProjectPageAction(StyledIcon("folder-open"), "Open project", "Open an existing project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
 
@@ -133,7 +131,7 @@ void StartPageOpenProjectWidget::updateOpenCreateActions()
 
     _openCreateProjectWidget.getModel().add(openProjectPageAction);
 
-    PageAction blankProjectPageAction(fontAwesome.getIcon("file"), "Blank", "Create project without plugins", "Create project without any plugins", "", []() -> void {
+    PageAction blankProjectPageAction(StyledIcon("file"), "Blank", "Create project without plugins", "Create project without any plugins", "", []() -> void {
         projects().newProject();
     });
 
@@ -170,7 +168,7 @@ void StartPageOpenProjectWidget::updateRecentActions()
 {
     _recentProjectsWidget.getModel().reset();
 
-    auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
+    auto clockIcon = StyledIcon("clock");
 
     const auto recentFiles = _recentProjectsAction.getRecentFiles();
 

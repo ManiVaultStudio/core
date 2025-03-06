@@ -42,20 +42,10 @@ public:
      */
     mv::LearningCenterTutorialsFilterModel& getTutorialsFilterModel();
 
-protected:
-    /**
-     * Override QObject's event handling
-     * @return Boolean Whether the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
-
 private:
 
     /** Update actions for launching tutorials */
     void updateActions();
-
-    /** Update all custom style elements */
-    void updateCustomStyle();
 
 private:
     mv::gui::HorizontalGroupAction              _toolbarAction;             /** Horizontal toolbar (group) action */

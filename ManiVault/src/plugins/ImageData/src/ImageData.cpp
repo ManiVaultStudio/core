@@ -91,9 +91,9 @@ Dataset<DatasetImpl> ImageData::createDataSet(const QString& guid /*= ""*/) cons
     return Dataset<DatasetImpl>(new Images(getName(), false, guid));
 }
 
-QIcon ImageDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
+ImageDataFactory::ImageDataFactory()
 {
-    return mv::Application::getIconFont("FontAwesome").getIcon("images", color);
+    setIconByName("images");
 }
 
 QUrl ImageDataFactory::getReadmeMarkdownUrl() const

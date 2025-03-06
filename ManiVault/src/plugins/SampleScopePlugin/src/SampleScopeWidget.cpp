@@ -6,6 +6,8 @@
 
 #include <Application.h>
 
+#include <util/StyledIcon.h>
+
 #include "SampleScopePlugin.h"
 
 #include <QDebug>
@@ -14,13 +16,14 @@
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::plugin;
+using namespace mv::util;
 
 SampleScopeWidget::SampleScopeWidget(SampleScopePlugin* sampleScopePlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _sampleScopePlugin(sampleScopePlugin),
     _proxyWidget(nullptr),
     _currentViewWidget(nullptr),
-    _noSamplesOverlayWidget(&_htmlView, Application::getIconFont("FontAwesome").getIcon("eye-dropper"), "No samples view", "There is currently no samples view available..."),
+    _noSamplesOverlayWidget(&_textHtmlView, StyledIcon("eye-dropper"), "No samples view", "There is currently no samples view available...")
     _currentViewPlugin(nullptr)
 {
 }

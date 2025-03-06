@@ -58,13 +58,6 @@ LearningCenterTutorialsFilterModel& PageTutorialsWidget::getTutorialsFilterModel
     return _tutorialsFilterModel;
 }
 
-bool PageTutorialsWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return PageActionsWidget::event(event);
-}
 
 void PageTutorialsWidget::updateActions()
 {
@@ -75,7 +68,7 @@ void PageTutorialsWidget::updateActions()
 
         auto tutorial = dynamic_cast<LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceRowIndex))->getTutorial();
 
-        PageAction tutorialAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
+        PageAction tutorialAction(StyledIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
                     mv::projects().openProject(tutorial->getProjectUrl());
@@ -117,6 +110,3 @@ void PageTutorialsWidget::updateActions()
     }
 }
 
-void PageTutorialsWidget::updateCustomStyle()
-{
-}

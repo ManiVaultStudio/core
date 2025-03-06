@@ -3,11 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PageContentWidget.h"
-#include "PageWidget.h"
 
 #include <QLabel>
 #include <QString>
-#include <QEvent>
 
 PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget* parent /*= nullptr*/) :
     QWidget(parent)
@@ -32,29 +30,29 @@ PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget
 
     setLayout(&_mainLayout);
 
-    updateCustomStyle();
-}
-
-bool PageContentWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
+    setBackgroundRole(QPalette::Window);
 }
 
 QLabel* PageContentWidget::createHeaderLabel(const QString& title, const QString& tooltip)
 {
-    auto label = new QLabel(title);
+    auto headerLabel = new QLabel(title);
 
-    label->setAlignment(Qt::AlignLeft);
-    label->setStyleSheet("QLabel { font-weight: 200; font-size: 13pt; }");
-    label->setToolTip(tooltip);
+    headerLabel->setAlignment(Qt::AlignLeft);
+    headerLabel->setToolTip(tooltip);
 
-    return label;
+    const auto updateCustomStyle = [headerLabel]() -> void {
+        headerLabel->setStyleSheet(QString(
+            "QLabel {"
+                "color: %1;"
+                "font-weight: 200;"
+                "font-size: 13pt;"
+            "}").arg(qApp->palette().text().color().name()));
+    };
+
+    updateCustomStyle();
+
+    connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, headerLabel, updateCustomStyle);
+
+    return headerLabel;
 }
 
-void PageContentWidget::updateCustomStyle()
-{
-    PageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
-}

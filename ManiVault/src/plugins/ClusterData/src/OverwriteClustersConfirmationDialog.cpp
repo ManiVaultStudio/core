@@ -10,6 +10,7 @@
 #include <QLabel>
 
 using namespace mv;
+using namespace mv::util;
 
 OverwriteClustersConfirmationDialog::OverwriteClustersConfirmationDialog(QWidget* parent, std::uint32_t numberOfUserClusters, std::uint32_t numberOfUserModifiedClusters) :
     QDialog(parent),
@@ -17,7 +18,7 @@ OverwriteClustersConfirmationDialog::OverwriteClustersConfirmationDialog(QWidget
     _discardAction(this, "Discard"),
     _cancelAction(this, "Cancel")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("random"));
+    setWindowIcon(StyledIcon("shuffle"));
     setWindowTitle("About to overwrite all cluster(s)");
     setModal(true);
 

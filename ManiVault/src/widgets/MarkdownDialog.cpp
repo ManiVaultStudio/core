@@ -23,7 +23,7 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
     QDialog(parent),
     _markdownUrl(markdownUrl)
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("book"));
+    setWindowIcon(StyledIcon("book"));
     setModal(true);
 
     auto channel = new QWebChannel(this);

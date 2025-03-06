@@ -4,16 +4,14 @@
 
 #include "WriterPlugin.h"
 
-namespace mv
-{
-namespace plugin
+using namespace mv::util;
+
+namespace mv::plugin
 {
 
 WriterPlugin::WriterPlugin(const PluginFactory* factory) :
-    Plugin(factory),
-    _input()
+    Plugin(factory)
 {
-
 }
 
 void WriterPlugin::setInputDataset(const Dataset<DatasetImpl>& inputDataset)
@@ -24,13 +22,6 @@ void WriterPlugin::setInputDataset(const Dataset<DatasetImpl>& inputDataset)
 void WriterPlugin::setInputDatasets(const Datasets& inputDatasets)
 {
     _input = inputDatasets;
-}
-
-QIcon WriterPluginFactory::getCategoryIcon() const
-{
-    return Application::getIconFont("FontAwesome").getIcon("file-export");
-}
-
 }
 
 }

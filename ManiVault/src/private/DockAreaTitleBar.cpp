@@ -7,8 +7,9 @@
 #include "ViewMenu.h"
 #include "LoadSystemViewMenu.h"
 
-#include <Application.h>
 #include <CoreInterface.h>
+
+#include <util/StyledIcon.h>
 
 #include <QToolButton>
 
@@ -90,18 +91,17 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
 
     updateReadOnly();
 
-    updateStyle();
-}
+    _addViewPluginToolButton->setIcon(StyledIcon("plus"));
+    _addViewPluginToolButton->setIconSize(QSize(12, 12));
 
-void DockAreaTitleBar::updateStyle()
-{
-    _addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
-}
+    const auto patchTabStyling = [this]() -> void {
+        setStyleSheet(QString(" \
+			ads--CDockWidgetTab { \
+				background-color: %1; \
+			}").arg(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Window).name()));
+	};
 
-bool DockAreaTitleBar::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateStyle();
+    patchTabStyling();
 
-    return ads::CDockAreaTitleBar::event(event);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, patchTabStyling);
 }

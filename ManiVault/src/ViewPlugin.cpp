@@ -33,7 +33,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _dockingOptionsAction(this, "Docking options", { "May Close", "May Float", "May Move" }),
     _lockingAction(this),
     _visibleAction(this, "Visible", true),
-    _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
+    _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), StyledIcon(factory->icon())),
     _samplerAction(this, "Sampler"),
     _progressTask(nullptr)
 {
@@ -45,7 +45,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget.addAction(&_screenshotAction);
     _widget.addAction(&_isolateAction);
 
-    _editorAction.setIconByName("cog");
+    _editorAction.setIconByName("gear");
     _editorAction.setShortcut(tr("F12"));
     _editorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
@@ -81,7 +81,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _lockingAction.setWhat("Layout");
 
     _visibleAction.setToolTip("Determines whether the view plugin is visible or not");
-    _visibleAction.setIcon(getIcon());
+    _visibleAction.setIcon(StyledIcon(icon()));
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
 
     _samplerAction.setToolTip(QStringLiteral("Element sampler"));
@@ -327,17 +327,15 @@ void ViewPlugin::setProgressTask(Task* progressTask)
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
-    PluginFactory(Type::VIEW),
+    PluginFactory(Type::VIEW, "View"),
     _producesSystemViewPlugins(producesSystemViewPlugins),
     _preferredDockArea(DockAreaFlag::Right)
 {
+    setIconByName("eye");
+    setCategoryIconByName("eye");
+
     if (_producesSystemViewPlugins)
         setMaximumNumberOfInstances(1);
-}
-
-QIcon ViewPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("eye", color);
 }
 
 bool ViewPluginFactory::producesSystemViewPlugins() const
@@ -353,11 +351,6 @@ DockAreaFlag ViewPluginFactory::getPreferredDockArea() const
 void ViewPluginFactory::setPreferredDockArea(const gui::DockAreaFlag& preferredDockArea)
 {
     _preferredDockArea = preferredDockArea;
-}
-
-QIcon ViewPluginFactory::getCategoryIcon() const
-{
-    return Application::getIconFont("FontAwesome").getIcon("eye");
 }
 
 }

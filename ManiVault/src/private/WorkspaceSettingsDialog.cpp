@@ -17,13 +17,14 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _groupAction(this, "Group"),
     _okAction(this, "Ok")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setWindowIcon(StyledIcon("gear"));
     setModal(true);
     setWindowTitle("Workspace Settings");
 

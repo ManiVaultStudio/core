@@ -39,7 +39,7 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& t
     _miscellaneousAction(*this)
 {
     setText("Dimensions");
-    setIconByName("columns");
+    setIconByName("table-columns");
 
     _summaryAction.setEnabled(false);
 

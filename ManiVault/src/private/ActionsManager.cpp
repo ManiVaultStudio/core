@@ -153,8 +153,6 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
         if (name.isEmpty()) {
             if (askForSharedParameterNameAction.isChecked()) {
-                auto& fontAwesome = Application::getIconFont("FontAwesome");
-
                 ActionsFilterModel actionsFilterModel;
 
                 actionsFilterModel.setSourceModel(&getActionsListModel());
@@ -164,7 +162,7 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
                 QDialog publishDialog;
 
-                publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
+                publishDialog.setWindowIcon(StyledIcon("cloud-arrow-up"));
                 publishDialog.setWindowTitle("Publish " + privateAction->getLocation());
                 publishDialog.setMinimumWidth(400);
 

@@ -16,7 +16,7 @@ namespace mv::gui {
 /**
  * YouTube video dialog class
  * 
- * Dialog class for displaying a YouTube video
+ * Dialog class for displaying a YouTube video (WIP)
  * 
  * @author Thomas Kroes
  */

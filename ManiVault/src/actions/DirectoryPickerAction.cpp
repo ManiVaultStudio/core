@@ -40,7 +40,7 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
 
     // Update the trailing action of the string action to indicate whether the (typed) directory is valid or not
     const auto updateStatusAction = [this]() -> void {
-        _directoryAction.getTrailingAction().setIcon(isValid() ? Application::getIconFont("FontAwesome").getIcon("check") : Application::getIconFont("FontAwesome").getIcon("exclamation"));
+        _directoryAction.getTrailingAction().setIcon(isValid() ? StyledIcon("check") : StyledIcon("exclamation"));
         _directoryAction.getTrailingAction().setToolTip(isValid() ? "Directory exists and is valid" : "Directory does not exist");
     };
 

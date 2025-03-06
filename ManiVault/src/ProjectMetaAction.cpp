@@ -113,7 +113,7 @@ void ProjectMetaAction::initialize()
     _descriptionAction.setPlaceHolderString("Enter project description here...");
     _descriptionAction.setClearable(true);
 
-    _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
+    _tagsAction.setIconByName("tag");
     _tagsAction.setCategory("Tag");
     _tagsAction.setStretch(2);
 
@@ -122,7 +122,7 @@ void ProjectMetaAction::initialize()
     _commentsAction.setStretch(2);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
 
-    _contributorsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user"));
+    _contributorsAction.setIconByName("user");
     _contributorsAction.setCategory("Contributor");
     _contributorsAction.setEnabled(false);
     _contributorsAction.setStretch(1);
@@ -131,7 +131,7 @@ void ProjectMetaAction::initialize()
     _applicationIconAction.setToolTip("Application icon settings");
 }
 
-Project* ProjectMetaAction::getProject()
+Project* ProjectMetaAction::getProject() const
 {
     return _project;
 }

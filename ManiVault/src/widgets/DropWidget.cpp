@@ -5,22 +5,17 @@
 #include "DropWidget.h"
 #include "Application.h"
 
-#include <QApplication>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QResizeEvent>
-#include <QDragEnterEvent>
 #include <QLabel>
-#include <QVBoxLayout>
 #include <QMimeData>
 #include <QIcon>
 #include <QGraphicsOpacityEffect>
-#include <QPropertyAnimation>
 
-namespace mv
-{
+using namespace mv::util;
 
-namespace gui
+namespace mv::gui
 {
 
 DropWidget::DropWidget(QWidget* parent) :
@@ -256,11 +251,9 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QS
     auto titleLabel         = new QLabel(title);
     auto descriptionLabel   = new QLabel(description);
 
-    const auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     iconLabel->setAlignment(Qt::AlignCenter);
-    iconLabel->setFont(fontAwesome.getFont(14));
-    iconLabel->setText(fontAwesome.getIconCharacter(dropAllowed ? iconName : "exclamation-circle"));
+    iconLabel->setFont(StyledIcon::getIconFont(14));
+    iconLabel->setText(StyledIcon::getIconCharacter(dropAllowed ? iconName : "exclamation-circle"));
     iconLabel->setStyleSheet("QLabel { padding: 10px; }");
 
     titleLabel->setAlignment(Qt::AlignCenter);
@@ -305,11 +298,9 @@ DropWidget::DropIndicatorWidget::DropIndicatorWidget(QWidget* parent, const QStr
     auto titleLabel         = new QLabel(title);
     auto descriptionLabel   = new QLabel(description);
 
-    const auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     iconLabel->setAlignment(Qt::AlignCenter);
-    iconLabel->setFont(fontAwesome.getFont(14));
-    iconLabel->setText(fontAwesome.getIconCharacter("file-import"));
+    iconLabel->setFont(StyledIcon::getIconFont(14));
+    iconLabel->setText(StyledIcon::getIconCharacter("file-import"));
     iconLabel->setStyleSheet("QLabel { padding: 10px; }");
 
     titleLabel->setAlignment(Qt::AlignCenter);
@@ -333,5 +324,4 @@ DropWidget::DropIndicatorWidget::DropIndicatorWidget(QWidget* parent, const QStr
     setStyleSheet("QWidget#DropIndicatorWidget > QLabel { color: gray; } QWidget#DropIndicatorWidget { background-color: hsl(0, 0%, 97%); }");
 }
 
-}
 }

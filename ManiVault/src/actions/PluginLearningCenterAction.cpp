@@ -41,7 +41,7 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
     _moveToBottomRightAction(this, "Move to bottom-right"),
     _learningCenterOverlayWidget(nullptr)
 {
-    setIconByName("question-circle");
+    setIconByName("circle-question");
 
     _viewHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _viewHelpAction.setConnectionPermissionsToForceNone();
@@ -78,10 +78,10 @@ PluginLearningCenterAction::PluginLearningCenterAction(QObject* parent, const QS
 
     connect(&_toolbarVisibleAction, &ToggleAction::toggled, this, pluginOverlayVisibleChanged);
 
-    _moveToTopLeftAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignLeft));
-    _moveToTopRightAction.setIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignRight));
-    _moveToBottomLeftAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignLeft));
-    _moveToBottomRightAction.setIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignRight));
+    _moveToTopLeftAction.setIcon(StyledIcon::fromQIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignLeft)));
+    _moveToTopRightAction.setIcon(StyledIcon::fromQIcon(getAlignmentIcon(Qt::AlignTop | Qt::AlignRight)));
+    _moveToBottomLeftAction.setIcon(StyledIcon::fromQIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignLeft)));
+    _moveToBottomRightAction.setIcon(StyledIcon::fromQIcon(getAlignmentIcon(Qt::AlignBottom | Qt::AlignRight)));
 
     connect(&_moveToTopLeftAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("TopLeft"); });
     connect(&_moveToTopRightAction, &TriggerAction::triggered, this, [this]() -> void { _alignmentAction.setCurrentText("TopRight"); });
@@ -108,7 +108,7 @@ QMenu* PluginLearningCenterAction::getContextMenu(QWidget* parent)
 {
     auto contextMenu = new QMenu("Learning center", parent);
 
-    contextMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("chalkboard-teacher"));
+    contextMenu->setIcon(StyledIcon("chalkboard-user"));
 
     contextMenu->addAction(&_toolbarVisibleAction);
     contextMenu->addMenu(getAlignmentContextMenu());
@@ -121,7 +121,7 @@ QMenu* PluginLearningCenterAction::getAlignmentContextMenu(QWidget* parent)
     auto contextMenu = new QMenu("Alignment", parent);
 
     contextMenu->setEnabled(_toolbarVisibleAction.isChecked());
-    contextMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("arrows-alt"));
+    contextMenu->setIcon(StyledIcon("arrows-up-down-left-right"));
 
     if (getAlignment() != (Qt::AlignTop | Qt::AlignLeft))
         contextMenu->addAction(&_moveToTopLeftAction);

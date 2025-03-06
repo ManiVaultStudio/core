@@ -25,6 +25,8 @@
     #define SPLASH_SCREEN_WIDGET_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, QWidget* parent /*= nullptr*/) :
@@ -233,7 +235,7 @@ void SplashScreenWidget::createToolbar()
 
     _closeToolButton.setFixedSize(fixedSize, fixedSize);
     _closeToolButton.setVisible(_splashScreenAction.getMayCloseSplashScreenWidget());
-    _closeToolButton.setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
+    _closeToolButton.setIcon(StyledIcon("xmark"));
     _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
     _closeToolButton.setAutoRaise(true);
     _closeToolButton.setToolTip("Close the splash screen");
@@ -325,8 +327,6 @@ void SplashScreenWidget::createBody()
         ").arg(versionString, bodyColor));
 
         htmlLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
-
-        auto& fontAwesome = Application::getIconFont("FontAwesome", 6, 4);
 
         rightColumn->addStretch(1);
 
@@ -487,13 +487,11 @@ SplashScreenWidget::ExternalLinkWidget::ExternalLinkWidget(const QString& fontAw
     QWidget(parent),
     _externalLink(externalLink)
 {
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     auto layout     = new QHBoxLayout();
-    auto iconLabel  = new QLabel(fontAwesome.getIconCharacter(fontAwesomeIconName));
+    auto iconLabel  = new QLabel(StyledIcon::getIconCharacter(fontAwesomeIconName));
     auto textLabel = new QLabel(QString("<a href='%1' style='color: gray'>%2</a>").arg(externalLink.toString(), text));
 
-    iconLabel->setFont(fontAwesome.getFont());
+    iconLabel->setFont(StyledIcon::getIconFont());
     iconLabel->setAlignment(Qt::AlignCenter);
 
     textLabel->setTextFormat(Qt::RichText);

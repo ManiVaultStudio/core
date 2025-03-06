@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "AnalysisPlugin.h"
-#include "Application.h"
 
 namespace mv
 {
@@ -12,9 +11,7 @@ namespace plugin
 {
 
 AnalysisPlugin::AnalysisPlugin(const PluginFactory* factory) :
-    Plugin(factory),
-    _input(),
-    _output()
+    Plugin(factory)
 {
 }
 
@@ -67,20 +64,10 @@ QVariantMap AnalysisPlugin::toVariantMap() const
     for (auto& output : _output)
         outputDatasetsIDs << output->getId();
 
-    variantMap["InputDatasetsIDs"] = inputDatasetsIDs;
+    variantMap["InputDatasetsIDs"]  = inputDatasetsIDs;
     variantMap["OutputDatasetsIDs"] = outputDatasetsIDs;
 
     return variantMap;
-}
-
-QIcon AnalysisPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("square-root-alt", color);
-}
-
-QIcon AnalysisPluginFactory::getCategoryIcon() const
-{
-    return Application::getIconFont("FontAwesome").getIcon("square-root-alt");
 }
 
 }

@@ -4,11 +4,7 @@
 
 #include "Preset.h"
 
-#include "Application.h"
-
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 Preset::Preset(const QString& name, const QString& description, const PresetType& presetType /*= PresetType::Normal*/) :
     _name(name),
@@ -33,19 +29,16 @@ QIcon Preset::getIcon() const
     switch (_presetType)
     {
         case PresetType::Normal:
-            return Application::getIconFont("FontAwesome").getIcon("sliders-h");
+            return StyledIcon("sliders");
 
         case PresetType::Global:
-            return Application::getIconFont("FontAwesome").getIcon("globe-europe");
+            return StyledIcon("globe-europe");
 
         case PresetType::FactoryDefault:
-            return Application::getIconFont("FontAwesome").getIcon("industry");
-
-        default:
-            break;
+            return StyledIcon("industry");
     }
 
-    return QIcon();
+    return {};
 }
 
 bool Preset::isDivergent() const
@@ -58,5 +51,4 @@ void Preset::isDivergent(bool isDivergent)
     _isDivergent = isDivergent;
 }
 
-}
 }

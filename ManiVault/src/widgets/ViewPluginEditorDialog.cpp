@@ -5,14 +5,12 @@
 #include "ViewPluginEditorDialog.h"
 #include "ViewPlugin.h"
 
-#include <Application.h>
-
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
-#include <QPushButton>
 
 using namespace mv;
 using namespace mv::plugin;
+using namespace mv::util;
 
 namespace mv::gui {
 
@@ -48,10 +46,9 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, WidgetAction* ro
     init();
 }
 
-
 void ViewPluginEditorDialog::init()
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setWindowIcon(StyledIcon("gear"));
     setMinimumSize(QSize(640, 480));
 
     auto layout = new QVBoxLayout();

@@ -26,7 +26,7 @@ LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDock
     setTitle("System views");
     setToolTip("Manage system view plugins");
     //setEnabled(mayProducePlugins());
-    setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+    setIcon(StyledIcon("gears"));
 
     _loadViewsDockedMenus.insert(gui::DockAreaFlag::Left, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Left), this)));
     _loadViewsDockedMenus.insert(gui::DockAreaFlag::Right, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Right), this)));

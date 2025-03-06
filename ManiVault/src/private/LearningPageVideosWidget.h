@@ -30,12 +30,6 @@ protected:
      */
     LearningPageVideosWidget(QWidget* parent = nullptr);
 
-    /**
-     * Override QObject's event handling
-     * @return Boolean Whether the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
-
 private:
 
     /** Update all custom style elements */

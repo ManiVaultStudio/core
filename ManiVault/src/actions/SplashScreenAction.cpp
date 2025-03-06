@@ -9,27 +9,29 @@
 
 #include "widgets/SplashScreenWidget.h"
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 SplashScreenAction::Alert SplashScreenAction::Alert::info(const QString& message)
 {
     const auto color = QColor::fromHsv(220, 200, 150);
 
-    return Alert(Type::Info, Application::getIconFont("FontAwesome").getIcon("info-circle", color), message, color);
+    return Alert(Type::Info, StyledIcon("info-circle"), message, color);
 }
 
 SplashScreenAction::Alert SplashScreenAction::Alert::debug(const QString& message)
 {
     const auto color = QColor::fromHsv(125, 200, 150);
 
-    return Alert(Type::Debug, Application::getIconFont("FontAwesome").getIcon("bug", color), message, color);
+    return Alert(Type::Debug, StyledIcon("bug"), message, color);
 }
 
 SplashScreenAction::Alert SplashScreenAction::Alert::warning(const QString& message)
 {
     const auto color = QColor::fromHsv(0, 200, 150);
 
-    return Alert(Type::Warning, Application::getIconFont("FontAwesome").getIcon("exclamation-circle", color), message, color);
+    return Alert(Type::Warning, StyledIcon("exclamation-circle"), message, color);
 }
 
 SplashScreenAction::Alert::Type SplashScreenAction::Alert::getType() const
@@ -87,9 +89,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _editAction(this, "Edit"),
     _openAction(this, "Open splash screen"),
     _closeAction(this, "Close splash screen"),
-    _taskAction(this, "ManiVault"),
-    _splashScreenWidget(),
-    _alerts()
+    _taskAction(this, "ManiVault")
 {
     addAction(&_enabledAction);
     addAction(&_editAction);
@@ -103,31 +103,29 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     _enabledAction.setStretch(1);
     _enabledAction.setToolTip("Show splash screen at startup");
 
     _openAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _openAction.setIcon(fontAwesome.getIcon("eye"));
+    _openAction.setIconByName("eye");
     _openAction.setToolTip("Open the splash screen");
 
     _closeAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _closeAction.setIcon(fontAwesome.getIcon("eye-slash"));
+    _closeAction.setIconByName("eye-slash");
     _closeAction.setToolTip("Close the splash screen");
 
     _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    _editAction.setIcon(fontAwesome.getIcon("cog"));
+    _editAction.setIconByName("gear");
     _editAction.setToolTip("Edit the splash screen settings");
     _editAction.setPopupSizeHint(QSize(350, 0));
 
     _projectImageAction.setDefaultWidgetFlags(ImageAction::Loader);
-    _projectImageAction.setIcon(fontAwesome.getIcon("image"));
+    _projectImageAction.setIconByName("image");
     _projectImageAction.setToolTip("Project image");
 
     _affiliateLogosImageAction.setDefaultWidgetFlags(ImageAction::Loader);
-    _affiliateLogosImageAction.setIcon(fontAwesome.getIcon("image"));
+    _affiliateLogosImageAction.setIconByName("image");
     _affiliateLogosImageAction.setToolTip("Affiliate logos image");
 
     connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenWidget);
@@ -137,10 +135,6 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
         if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
             closeSplashScreenWidget();
     });
-}
-
-SplashScreenAction::~SplashScreenAction()
-{
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)

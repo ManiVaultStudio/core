@@ -5,7 +5,7 @@
 #include "RemoveDatasetsDialog.h"
 
 #include <CoreInterface.h>
-#include <Application.h>
+
 #include <Set.h>
 
 #include <widgets/HierarchyWidget.h>
@@ -14,6 +14,7 @@
 #include <QHeaderView>
 
 using namespace mv;
+using namespace mv::util;
 
 RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
@@ -34,7 +35,7 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
     _removeAction(this, "Remove"),
     _cancelAction(this, "Cancel")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    setWindowIcon(StyledIcon("trash"));
     setWindowTitle("About to remove dataset(s)");
     setModal(true);
 
@@ -78,7 +79,7 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
 
     connect(&_selectAllDatasetsAction, &TriggerAction::triggered, &_model, &DatasetsToRemoveModel::checkAll);
 
-    _selectDatasetsGroupAction.setIconByName("mouse-pointer");
+    _selectDatasetsGroupAction.setIconByName("arrow-pointer");
     _selectDatasetsGroupAction.setShowLabels(false);
     _selectDatasetsGroupAction.setPopupSizeHint(QSize(400, 400));
     _selectDatasetsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
@@ -92,7 +93,7 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
         if (hierarchyWidget == nullptr)
             return;
 
-        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+        hierarchyWidget->setWindowIcon(StyledIcon("database"));
 
         auto treeView = widget->findChild<QTreeView*>("TreeView");
 

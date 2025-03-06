@@ -4,7 +4,6 @@
 
 #include "HorizontalHeaderAction.h"
 
-#include "Application.h"
 #include "OptionsAction.h"
 
 #include <QEvent>
@@ -15,7 +14,7 @@ namespace mv::gui {
 HorizontalHeaderAction::HorizontalHeaderAction(QObject* parent, const QString& title, QHeaderView* horizontalHeaderView /*= nullptr*/) :
     VerticalGroupAction(parent, title),
     _horizontalHeaderView(nullptr),
-    _columnsAction(new OptionsAction(this, "Columns")),
+    _columnsAction(new OptionsAction(this, "table-columns")),
     _showHeaderAction(this, "Visible")
 {
     setText(title);
@@ -39,8 +38,6 @@ void HorizontalHeaderAction::initialize(QHeaderView* horizontalHeaderView)
         return;
 
     _horizontalHeaderView = horizontalHeaderView;
-
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     connect(_horizontalHeaderView, &QHeaderView::sectionResized, this, &HorizontalHeaderAction::updateColumnsOptionsAction);
 

@@ -49,17 +49,6 @@ private: // Window geometry persistence
      * @param coverage Fraction of the total screen size
      */
     void setDefaultWindowGeometry(const float& coverage = 0.7f);
-    
-    /**
-     * Override QObject's event handling
-     * @return Boolean Whether the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
-
-public: // Themes
-    
-    /** refresh the widget and its children according to new style */
-    void updateStyle();
 
 public: // Miscellaneous
 

@@ -38,6 +38,8 @@ void LoggingPlugin::init()
 LoggingPluginFactory::LoggingPluginFactory() :
     ViewPluginFactory(true)
 {
+    setIconByName("scroll");
+
     setPreferredDockArea(DockAreaFlag::Bottom);
 
     getPluginMetadata().setDescription("For interacting logs");
@@ -52,11 +54,6 @@ LoggingPluginFactory::LoggingPluginFactory() :
         { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
 	});
     getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
-}
-
-QIcon LoggingPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("scroll", color);
 }
 
 QUrl LoggingPluginFactory::getReadmeMarkdownUrl() const

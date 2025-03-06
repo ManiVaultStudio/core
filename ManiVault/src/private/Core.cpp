@@ -5,6 +5,7 @@
 #include "Core.h"
 
 #include "ActionsManager.h"
+#include "ThemeManager.h"
 #include "PluginManager.h"
 #include "EventManager.h"
 #include "DataManager.h"
@@ -52,7 +53,8 @@ void Core::createManagers()
     _managers.resize(static_cast<int>(ManagerType::Count));
 
     _managers[static_cast<int>(ManagerType::Actions)]       = std::make_unique<ActionsManager>(this);
-    _managers[static_cast<int>(ManagerType::Plugins)]       = std::make_unique<PluginManager>(this);
+    _managers[static_cast<int>(ManagerType::Theme)]         = std::make_unique<ThemeManager>(this);
+	_managers[static_cast<int>(ManagerType::Plugins)]       = std::make_unique<PluginManager>(this);
     _managers[static_cast<int>(ManagerType::Events)]        = std::make_unique<EventManager>(this);
     _managers[static_cast<int>(ManagerType::Data)]          = std::make_unique<DataManager>(this);
     _managers[static_cast<int>(ManagerType::DataHierarchy)] = std::make_unique<DataHierarchyManager>(this);
@@ -142,6 +144,11 @@ AbstractManager* Core::getManager(const ManagerType& managerType)
 AbstractActionsManager& Core::getActionsManager()
 {
     return *dynamic_cast<AbstractActionsManager*>(getManager(ManagerType::Actions));
+}
+
+AbstractThemeManager& Core::getThemeManager()
+{
+    return *dynamic_cast<AbstractThemeManager*>(getManager(ManagerType::Theme));
 }
 
 AbstractPluginManager& Core::getPluginManager()

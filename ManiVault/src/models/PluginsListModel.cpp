@@ -64,7 +64,7 @@ void PluginsListModel::addPlugin(plugin::Plugin* plugin)
     if (!plugin)
         return;
 
-    appendRow(Row(plugin, plugin->getGuiName(), "Instance", plugin->getId(), plugin->getIcon()));
+    appendRow(Row(plugin, plugin->getGuiName(), "Instance", plugin->getId(), StyledIcon(plugin->icon())));
 }
 
 void PluginsListModel::removePlugin(plugin::Plugin* plugin)

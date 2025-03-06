@@ -65,8 +65,10 @@ class CORE_EXPORT LoaderPluginFactory : public PluginFactory
     
 public:
     LoaderPluginFactory() :
-        PluginFactory(Type::LOADER)
+        PluginFactory(Type::LOADER, "Loader")
     {
+        setIconByName("file-import");
+        setCategoryIconByName("file-import");
     }
 
     ~LoaderPluginFactory() override = default;
@@ -79,19 +81,6 @@ public:
     {
         QObject::setObjectName("Plugins/Loader/" + name);
     }
-
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    QIcon getCategoryIcon() const override;
 
     /**
     * Produces an instance of a loader plugin. This function gets called by the plugin manager.

@@ -5,9 +5,6 @@
 #pragma once
 
 #include <QHBoxLayout>
-#include <QLabel>
-#include <QString>
-#include <QVBoxLayout>
 #include <QWidget>
 
 /**
@@ -46,7 +43,7 @@ protected:
      */
     QVBoxLayout& getMainLayout() {
         return _mainLayout;
-    };
+    }
 
     /**
      * Get columns layout
@@ -54,7 +51,7 @@ protected:
      */
     QHBoxLayout& getColumnsLayout() {
         return _columnsLayout;
-    };
+    }
 
     /**
      * Get rows layout
@@ -62,21 +59,11 @@ protected:
      */
     QVBoxLayout& getRowsLayout() {
         return _rowsLayout;
-    };
-
-    /**
-     * Override QObject's event handling
-     * @return Boolean Whether the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
-
-private:
-
-    /** Update custom theme parts not caught by the system itself */
-    void updateCustomStyle() ;
+    }
 
 private:
     QVBoxLayout     _mainLayout;        /** Main layout */
     QHBoxLayout     _columnsLayout;     /** Columns layout */
     QVBoxLayout     _rowsLayout;        /** Rows layout */
+    QLabel          _headerLabel;       /** Header label */ 
 };

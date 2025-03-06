@@ -32,15 +32,6 @@ Dataset<DatasetImpl> ColorData::createDataSet(const QString& guid /*= ""*/) cons
     return Dataset<DatasetImpl>(new Colors(getName(), true, guid));
 }
 
-// =============================================================================
-// Color Data Set
-// =============================================================================
-
-QIcon Colors::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return QIcon();
-}
-
 std::vector<std::uint32_t>& Colors::getSelectionIndices()
 {
     return getSelection<Colors>()->indices;
@@ -83,9 +74,9 @@ void Colors::selectInvert()
 {
 }
 
-QIcon ColorDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
+ColorDataFactory::ColorDataFactory()
 {
-    return mv::Application::getIconFont("FontAwesome").getIcon("palette", color);
+    setIconByName("palette");
 }
 
 QUrl ColorDataFactory::getReadmeMarkdownUrl() const 

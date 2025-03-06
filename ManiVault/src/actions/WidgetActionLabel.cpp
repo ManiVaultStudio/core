@@ -25,8 +25,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
     setAction(action);
     setAcceptDrops(true);
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     connect(getAction(), &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateNameLabel);
     connect(getAction(), &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
 
@@ -217,7 +215,6 @@ void WidgetActionLabel::updateCustomStyle()
             _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().link().color().name()));
         else
             _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().text().color().name()));
-            ;
     } else {
         _nameLabel.setStyleSheet("color: gray;");
     }

@@ -7,12 +7,9 @@
 #include "ManiVaultGlobals.h"
 
 #include <QString>
-#include <QIcon>
 #include <QMap>
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 /** Preset types enum */
 enum class PresetType
@@ -90,5 +87,4 @@ private:
     friend class PresetsModel;
 };
 
-}
 }

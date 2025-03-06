@@ -278,6 +278,8 @@ void Clusters::init()
             setSelectionNames(foreignSelectedClusterNames);
         }
     });
+
+    setIconByName("table-cells-large");
 }
 
 void Clusters::addCluster(Cluster& cluster)
@@ -293,11 +295,6 @@ void Clusters::removeClusterById(const QString& id)
 void Clusters::removeClustersById(const QStringList& ids)
 {
     getRawData<ClusterData>()->removeClustersById(ids);
-}
-
-QIcon Clusters::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("th-large", color);
 }
 
 std::vector<std::uint32_t> Clusters::getSelectedIndices() const
@@ -471,9 +468,9 @@ void Clusters::selectInvert()
     events().notifyDatasetDataSelectionChanged(this);
 }
 
-QIcon ClusterDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
+ClusterDataFactory::ClusterDataFactory()
 {
-    return Application::getIconFont("FontAwesome").getIcon("th-large", color);
+    setIconByName("table-cells-large");
 }
 
 QUrl ClusterDataFactory::getReadmeMarkdownUrl() const
