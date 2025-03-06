@@ -40,10 +40,16 @@ QStringList findResourcesWithPrefix(const QString& prefix) {
 
 QMap<QString, QVariantMap>          StyledIcon::fontMetadata                = {};
 QMap<QString, QFont>                StyledIcon::fonts                       = {};
+
+#ifdef Q_OS_MAC
 QString                             StyledIcon::defaultIconFontName         = "FontAwesomeSolid";
+#else
+QString                             StyledIcon::defaultIconFontName         = "FontAwesomeSolid";
+#endif
+
 Version                             StyledIcon::defaultIconFontVersion      = { 6, 7, 2 };
 QMap<QString, QPixmap>              StyledIcon::pixmaps                     = {};
-QVector<QStringList>                StyledIcon::iconFontPreferenceGroups    = { { "FontAwesomeSolid", "FontAwesomeRegular", "FontAwesomeBrandsRegular" } };
+QVector<QStringList>                StyledIcon::iconFontPreferenceGroups    = { { "FontAwesomeRegular", "FontAwesomeSolid", "FontAwesomeBrandsRegular" } };
 QMap<QString, QVector<Version>>     StyledIcon::iconFontVersions            = {};
 
 StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/, QWidget* parent /*= nullptr*/)
@@ -57,7 +63,7 @@ StyledIcon::StyledIcon(const QIcon& other)
     if (!other.isNull()) {
         _iconSettings._sha = Serializable::createId();
 
-        pixmaps[_iconSettings._sha] = other.pixmap(32, 32);
+        pixmaps[_iconSettings._sha] = other.pixmap(64, 64);
     }
 }
 

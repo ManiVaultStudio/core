@@ -62,10 +62,11 @@ private:
     /**
      * Re-color \p pixmap with \p color
      * @param pixmap Pixmap to re-color
+     * @param size Size of the re-colored pixmap
      * @param color New color
      * @return Re-colored pixmap
      */
-    static QPixmap recolorPixmap(const QPixmap& pixmap, const QColor& color);
+    static QPixmap recolorPixmap(const QPixmap& pixmap, const QSize& size, const QColor& color);
 
 private:
     StyledIconSettings      _iconSettings;      /** Icon settings */

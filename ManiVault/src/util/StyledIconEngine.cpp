@@ -34,9 +34,10 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
                 {
                     mode = std::clamp(mode, QIcon::Normal, QIcon::Active);
 
-                    const auto recolorColor    = qApp->palette().color(static_cast<QPalette::ColorGroup>(mode), _iconSettings.getColorRoleForCurrentTheme());
-                    const auto recoloredPixmap = recolorPixmap(iconPixmap, recolorColor).scaled(size, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation);
-
+                    const auto recolorColor     = qApp->palette().color(static_cast<QPalette::ColorGroup>(mode), _iconSettings.getColorRoleForCurrentTheme());
+                    const auto scaledPixmap     = iconPixmap.scaled(size, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation);
+                    const auto recoloredPixmap  = recolorPixmap(scaledPixmap, size, recolorColor);
+                    
 					result = recoloredPixmap;
 
                     break;
@@ -44,7 +45,9 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 
                 case StyledIconMode::FixedColor:
                 {
-                    result = recolorPixmap(iconPixmap, _iconSettings._fixedColor).scaled(size, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation);
+                    const auto scaledPixmap = iconPixmap.scaled(size, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation);
+                    
+                    result = recolorPixmap(scaledPixmap, size, _iconSettings._fixedColor);
 
                     break;
                 }
@@ -115,16 +118,16 @@ QIconEngine* StyledIconEngine::clone() const
     return new StyledIconEngine(*this);
 }
 
-QPixmap StyledIconEngine::recolorPixmap(const QPixmap& pixmap, const QColor& color)
+QPixmap StyledIconEngine::recolorPixmap(const QPixmap& pixmap, const QSize& size, const QColor& color)
 {
-    QPixmap coloredPixmap(pixmap.size());
+    QPixmap coloredPixmap(size);
     coloredPixmap.fill(Qt::transparent);
 
     QPainter painter(&coloredPixmap);
-    painter.drawPixmap(0, 0, pixmap);
+    painter.drawPixmap(0, 0, size.width(), size.height(), pixmap);
 
     painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    painter.fillRect(coloredPixmap.rect(), color);
+    painter.fillRect(QRect(QPoint(0, 0), size), color);
 
     painter.end();
 
