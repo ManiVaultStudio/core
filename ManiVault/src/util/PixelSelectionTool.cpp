@@ -61,6 +61,9 @@ void PixelSelectionTool::setType(const PixelSelectionType& type)
 
     _type = type;
 
+    if (_type == PixelSelectionType::Sample)
+        _active = true;
+
     emit typeChanged(_type);
 
     endSelection();
@@ -175,6 +178,22 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
     switch (event->type())
     {
+		case QEvent::Enter:
+	    {
+            if (getType() == PixelSelectionType::Sample)
+                _active = true;
+                
+            break;
+	    }
+
+        case QEvent::Leave:
+        {
+            if (getType() == PixelSelectionType::Sample)
+                _active = false;
+
+            break;
+        }
+
         // Prevent recursive paint events
         case QEvent::Paint:
             return false;
@@ -470,6 +489,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                 case PixelSelectionType::Sample:
                 {
                     _mousePositions = { _mousePosition };
+                    _active         = true;
 
                     shouldPaint = true;
 
