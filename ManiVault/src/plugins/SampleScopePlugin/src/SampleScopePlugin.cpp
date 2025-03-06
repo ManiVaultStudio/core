@@ -39,12 +39,14 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
     const auto updateNoSamplesOverlayWidget = [this]() -> void {
         const auto canView = _viewPluginSamplerAction && _viewPluginSamplerAction->canView();
 
-        auto& widgetfader = _sampleScopeWidget.getNoSamplesOverlayWidget().getWidgetFader();
+        auto& widgetFader = _sampleScopeWidget.getNoSamplesOverlayWidget().getWidgetFader();
 
         if (canView)
-            widgetfader.fadeOut();
+            widgetFader.fadeOut();
         else
-            widgetfader.fadeIn();
+            widgetFader.fadeIn();
+
+        widgetFader.fadeIn();
     };
 
     updateNoSamplesOverlayWidget();

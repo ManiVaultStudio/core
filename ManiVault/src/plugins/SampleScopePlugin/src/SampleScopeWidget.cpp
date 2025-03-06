@@ -27,7 +27,7 @@ SampleScopeWidget::SampleScopeWidget(SampleScopePlugin* sampleScopePlugin, QWidg
 
     auto& widgetFader = _noSamplesOverlayWidget.getWidgetFader();
 
-    widgetFader.setOpacity(0.0f);
+    widgetFader.setOpacity(1.0f);
     widgetFader.setMaximumOpacity(0.5f);
     widgetFader.setFadeInDuration(100);
     widgetFader.setFadeOutDuration(300);
