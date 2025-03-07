@@ -68,7 +68,7 @@ std::uint64_t PointData::getNumberOfElements() const
 }
 
 
-std::uint64_t  PointData::getRawDataSize() const
+std::uint64_t PointData::getRawDataSize() const
 {
     if (_isDense)
     {
@@ -77,7 +77,7 @@ std::uint64_t  PointData::getRawDataSize() const
     }
     else
     {
-        return (_numRows + 4) * sizeof(size_t) + _sparseData.getNumNonZeros() * (sizeof(size_t) + sizeof(float));
+        return static_cast<std::uint64_t>(_numRows + 4) * sizeof(size_t) + _sparseData.getNumNonZeros() * (sizeof(size_t) + sizeof(float));
     }
 }
 

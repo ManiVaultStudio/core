@@ -25,14 +25,14 @@ namespace mv::util
  * @param count Integer count
  * @return Human readable string of an integer count
  */
-CORE_EXPORT QString getIntegerCountHumanReadable(const float& count);
+CORE_EXPORT QString getIntegerCountHumanReadable(const double& count);
 
 /**
  * Returns a human readable string of a byte count
  * @param noBytes Number of bytes
  * @return Human readable string of a byte count
  */
-CORE_EXPORT QString getNoBytesHumanReadable(float noBytes);
+CORE_EXPORT QString getNoBytesHumanReadable(double noBytes);
 
 /**
  * Sort action based on their text
