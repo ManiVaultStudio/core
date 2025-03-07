@@ -235,6 +235,15 @@ QVariantMap storeOnDisk(const QStringList& list)
     return variantMap;
 }
 
+QVariantMap storeOnDisk(const QVector<uint32_t>& vec)
+{
+    QByteArray byteArray;
+    QDataStream dataStream(&byteArray, QIODevice::WriteOnly);
+    dataStream << vec;
+    QVariantMap variantMap = rawDataToVariantMap((const char*)byteArray.data(), byteArray.size(), true);
+    return variantMap;
+}
+
 void loadFromDisk(const QVariantMap& variantMap, QStringList& list)
 {
     std::vector<char> bytes(variantMap["Size"].value<uint64_t>());
@@ -242,5 +251,14 @@ void loadFromDisk(const QVariantMap& variantMap, QStringList& list)
     QByteArray byteArray(bytes.data(), bytes.size());
     QDataStream dataStream(byteArray);
     dataStream >> list;
+}
+
+void loadFromDisk(const QVariantMap& variantMap, QVector<uint32_t>& vec)
+{
+    std::vector<char> bytes(variantMap["Size"].value<uint64_t>());
+    populateDataBufferFromVariantMap(variantMap, (char*)bytes.data());
+    QByteArray byteArray(bytes.data(), bytes.size());
+    QDataStream dataStream(byteArray);
+    dataStream >> vec;
 }
 }

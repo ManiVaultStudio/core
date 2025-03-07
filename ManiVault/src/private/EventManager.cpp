@@ -316,4 +316,36 @@ void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
     }
 }
 
+void EventManager::fromVariantMap(const QVariantMap& variantMap)
+{
+    AbstractEventManager::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "SelectionGroups");
+
+    QVariantList selectionGroupsList = variantMap["SelectionGroups"].value<QVariantList>();
+
+    for (int i = 0; i < selectionGroupsList.size(); i++)
+    {
+        KeyBasedSelectionGroup selectionGroup;
+        selectionGroup.fromVariantMap(selectionGroupsList[i].toMap());
+        _selectionGroups.push_back(selectionGroup);
+    }
+}
+
+QVariantMap EventManager::toVariantMap() const
+{
+    QVariantMap variantMap = AbstractEventManager::toVariantMap();
+
+    QVariantList selectionGroups;
+
+    for (auto& selectionGroup : _selectionGroups)
+    {
+        selectionGroups.append(selectionGroup.toVariantMap());
+    }
+
+    variantMap["SelectionGroups"] = selectionGroups;
+
+    return variantMap;
+}
+
 }

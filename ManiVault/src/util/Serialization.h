@@ -11,6 +11,7 @@
 #include <QDir>
 #include <QVariantMap>
 #include <QStringList>
+#include <QVector>
 
 inline constexpr auto DEFAULT_MAX_BLOCK_SIZE = std::numeric_limits<std::int32_t>::max() / 2;
 
@@ -73,7 +74,18 @@ QVariant loadQVariant(const QVariant& variant);
 CORE_EXPORT QVariantMap storeOnDisk(const QStringList& list);
 
 /**
+* Convenience function to store QVector of uints on disk
+*/
+CORE_EXPORT QVariantMap storeOnDisk(const QVector<uint32_t>& vec);
+
+/**
 * Convenience function to load QStringList from disk
 */
 CORE_EXPORT void loadFromDisk(const QVariantMap& variantMap, QStringList& list);
+
+/**
+* Convenience function to store QVector of uints on disk
+*/
+CORE_EXPORT void loadFromDisk(const QVariantMap& variantMap, QVector<uint32_t>& vec);
+
 }
