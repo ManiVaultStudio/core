@@ -14,7 +14,7 @@ namespace mv::gui {
 /**
  * Toggle action class
  *
- * Toggle action with check/toggle button UI
+ * Toggle action with check/setEnabled button UI
  *
  * @author Thomas Kroes
  */
@@ -32,7 +32,7 @@ public:
         Text                = 0x00002,          /** Enable push button text */
 
         CheckBox            = 0x00004,          /** The widget includes a check box */
-        PushButton          = 0x00008 | Text,   /** The widget includes a toggle push button with text */
+        PushButton          = 0x00008 | Text,   /** The widget includes a setEnabled push button with text */
 
         /** Push button configurations */
         PushButtonIcon          = (PushButton & ~Text) | Icon,  /** Push button with icon only */
@@ -44,7 +44,7 @@ public:
 
 public:
 
-    /** Check box widget class for toggle action */
+    /** Check box widget class for setEnabled action */
     class CORE_EXPORT CheckBoxWidget : public QCheckBox
     {
     protected:
@@ -64,12 +64,12 @@ public:
         bool eventFilter(QObject* target, QEvent* event) override;
 
     protected:
-        ToggleAction*   _toggleAction;      /** Pointer to toggle action */
+        ToggleAction*   _toggleAction;      /** Pointer to setEnabled action */
 
         friend class ToggleAction;
     };
 
-    /** Push button widget class for toggle action */
+    /** Push button widget class for setEnabled action */
     class CORE_EXPORT PushButtonWidget : public QPushButton
     {
     protected:
@@ -89,7 +89,7 @@ public:
         void resizeEvent(QResizeEvent* event) override;
 
     protected:
-        ToggleAction*   _toggleAction;      /** Pointer to toggle action */
+        ToggleAction*   _toggleAction;      /** Pointer to setEnabled action */
         std::int32_t    _widgetFlags;       /** Widget flags */
 
         friend class ToggleAction;
@@ -98,7 +98,7 @@ public:
 protected:
 
     /**
-     * Get widget representation of the toggle action
+     * Get widget representation of the setEnabled action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
@@ -170,7 +170,7 @@ signals:
     void indeterminateChanged(bool indeterminate);
 
 protected:
-    bool    _indeterminate;     /** Whether the toggle action is in an indeterminate state */
+    bool    _indeterminate;     /** Whether the setEnabled action is in an indeterminate state */
 
     friend class AbstractActionsManager;
 };

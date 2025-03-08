@@ -13,6 +13,7 @@
 #include "TasksSettingsAction.h"
 #include "AppearanceSettingsAction.h"
 #include "TemporaryDirectoriesSettingsAction.h"
+#include "ErrorLoggingSettingsAction.h"
 #include "PluginGlobalSettingsGroupAction.h"
 
 namespace mv {
@@ -60,6 +61,7 @@ public: // Global settings actions
     virtual gui::TasksSettingsAction& getTasksSettingsAction() = 0;
     virtual gui::AppearanceSettingsAction& getAppearanceSettingsAction() = 0;
     virtual gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
+    virtual gui::ErrorLoggingSettingsAction& getErrorLoggingSettingsAction() = 0;
 
     /**
      * Get plugin global settings for plugin \p kind

@@ -9,17 +9,20 @@
 #include "private/NoProxyRectanglesFusionStyle.h"
 
 #include <Application.h>
-#include <ProjectMetaAction.h>
 #include <ManiVaultVersion.h>
+#include <ProjectMetaAction.h>
 
 #include <util/Icon.h>
 
+#include <QProxyStyle>
 #include <QStyleFactory>
 #include <QSurfaceFormat>
 #include <QQuickWindow>
 #include <QCommandLineParser>
 #include <QTemporaryDir>
 #include <QFileInfo>
+
+#include "private/ErrorLoggingConsentDialog.h"
 
 using namespace mv;
 using namespace mv::util;
@@ -107,6 +110,7 @@ int main(int argc, char *argv[])
     Application application(argc, argv);
 
     QString startupProjectFilePath;
+
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
 
     if (commandLineParser.isSet("project")) {

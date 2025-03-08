@@ -230,6 +230,23 @@ void StringAction::setTextElideMode(const Qt::TextElideMode& textElideMode)
     emit textElideModeChanged(_textElideMode);
 }
 
+QRegularExpressionValidator& StringAction::getValidator()
+{
+    return _validator;
+}
+
+QValidator::State StringAction::isValid() const
+{
+    if (_validator.regularExpression().pattern().isEmpty())
+        return QValidator::State::Acceptable;
+
+    int position{};
+
+    auto string = _string;
+
+    return _validator.validate(string, position);
+}
+
 StringAction::InlineAction::StyledToolButton::StyledToolButton(InlineAction& inlineAction, QWidget* parent):
 	QToolButton(parent),
 	_inlineAction(inlineAction)
@@ -360,6 +377,21 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
+    setValidator(&_stringAction->getValidator());
+
+    addAction(&_validatorAction, QLineEdit::TrailingPosition);
+
+    const auto updateValidatorAction = [this]() -> void {
+        _validatorAction.setVisible(!_stringAction->getString().isEmpty() && !_stringAction->getValidator().regularExpression().pattern().isEmpty());
+
+        if (hasAcceptableInput())
+            _validatorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("check"));
+        else
+            _validatorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("exclamation"));
+    };
+
+    connect(_stringAction, &StringAction::stringChanged, this, updateValidatorAction);
+    connect(&_stringAction->getValidator(), &QRegularExpressionValidator::regularExpressionChanged, this, updateValidatorAction);
 
     addAction(&_stringAction->getLeadingAction(), QLineEdit::LeadingPosition);
     addAction(&_stringAction->getTrailingAction(), QLineEdit::TrailingPosition);
@@ -417,6 +449,7 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     updateLeadingAction();
     updateTrailingAction();
     updateCompleter();
+    updateValidatorAction();
 }
 
 StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :

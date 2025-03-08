@@ -208,7 +208,7 @@ public: // Action getters
 private:
     bool                            _mayCloseSplashScreenWidget;    /** Whether the user can close the splash screen widget with a close tool button */
     ProjectMetaAction*              _projectMetaAction;             /** Pointer to project meta action (used by the splash screen widget to display project information) */
-    ToggleAction                    _enabledAction;                 /** Action to toggle the splash screen on/off */
+    ToggleAction                    _enabledAction;                 /** Action to setEnabled the splash screen on/off */
     ImageAction                     _projectImageAction;            /** Image action for the project image */
     ImageAction                     _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
     VerticalGroupAction             _editAction;                    /** Vertical group action for editing the splash screen */

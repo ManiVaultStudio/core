@@ -162,6 +162,13 @@ public: // Miscellaneous
 public: // Settings API
 
     /**
+     * Get whether a setting exists
+     * @param path Path of the setting (e.g. General/Computation/NumberOfIterations)
+     * @return Boolean determining whether a setting exists
+     */
+    bool hasSetting(const QString& path) const;
+
+    /**
      * Load setting
      * @param path Path of the setting (e.g. General/Computation/NumberOfIterations)
      * @param defaultValue Value to return if the setting with \p path was not found

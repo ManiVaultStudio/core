@@ -21,6 +21,7 @@
 #include "AbstractProjectManager.h"
 #include "AbstractSettingsManager.h"
 #include "AbstractHelpManager.h"
+#include "AbstractErrorManager.h"
 
 #include <QString>
 #include <QObject>
@@ -58,7 +59,8 @@ public:
 
     /** Enumeration for distinguishing manager types */
     enum class ManagerType {
-        Actions = 0,        /** Actions manager for storing actions */
+        Errors = 0,         /** Manager for errors */
+        Actions,            /** Actions manager for storing actions */
         Theme,              /** Manager for controlling the application theme */
         Plugins,            /** Plugin manager responsible for loading plug-ins and adding them to the core */
         Events,             /** Event manager for emitting global events */
@@ -114,6 +116,7 @@ public: // Managers
 
     virtual AbstractManager* getManager(const ManagerType& managerType) = 0;
 
+    virtual AbstractErrorManager& getErrorManager() = 0;
     virtual AbstractActionsManager& getActionsManager() = 0;
     virtual AbstractThemeManager& getThemeManager() = 0;
     virtual AbstractPluginManager& getPluginManager() = 0;
@@ -148,6 +151,14 @@ signals:
  */
 CORE_EXPORT inline CoreInterface* core() {
     return Application::core();
+}
+
+/**
+* Convenience function to obtain access to the error manager in the core
+* @return Reference to abstract error manager
+*/
+CORE_EXPORT inline AbstractErrorManager& errors() {
+    return core()->getErrorManager();
 }
 
 /**
