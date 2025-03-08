@@ -11,7 +11,7 @@
 #include "ParametersSettingsAction.h"
 #include "MiscellaneousSettingsAction.h"
 #include "TasksSettingsAction.h"
-#include "ApplicationSettingsAction.h"
+#include "AppearanceSettingsAction.h"
 #include "TemporaryDirectoriesSettingsAction.h"
 #include "ErrorLoggingSettingsAction.h"
 #include "PluginGlobalSettingsGroupAction.h"
@@ -59,7 +59,7 @@ public: // Global settings actions
     virtual gui::ParametersSettingsAction& getParametersSettings() = 0;
     virtual gui::MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
     virtual gui::TasksSettingsAction& getTasksSettingsAction() = 0;
-    virtual gui::ApplicationSettingsAction& getApplicationSettings() = 0;
+    virtual gui::AppearanceSettingsAction& getAppearanceSettingsAction() = 0;
     virtual gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
     virtual gui::ErrorLoggingSettingsAction& getErrorLoggingSettingsAction() = 0;
 

@@ -4,8 +4,6 @@
 
 #include "GroupsAction.h"
 #include "GroupSectionTreeItem.h"
-#include "Application.h"
-#include "widgets/Divider.h"
 
 #include <QDebug>
 
@@ -15,8 +13,6 @@ namespace mv::gui {
 
 GroupsAction::GroupsAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
-    _groupActions(),
-    _visibility(),
     _updateTask(this, "Update " + title)
 {
     setDefaultWidgetFlags(Default);
@@ -245,6 +241,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     _groupsAction(groupsAction),
     _filteredActionsAction(this, "Filtered Actions", true),
     _toolbarWidget(parent),
+    _toolbarAction(this, "Group"),
     _filterAction(this, "Search"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all")
@@ -278,31 +275,28 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
     _filterAction.setPlaceHolderString("Filter by name...");
 
     // Set action icon
-    _expandAllAction.setIconByName("angle-double-down");
-    _collapseAllAction.setIconByName("angle-double-up");
+    _expandAllAction.setIconByName("angles-down");
+    _collapseAllAction.setIconByName("angles-up");
+
+    _expandAllAction.setText(" ");
+    _expandAllAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
+    _collapseAllAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
 
     // Set action tooltips
     _filterAction.setToolTip("Filter properties by name");
     _expandAllAction.setToolTip("Expand all property sections");
     _collapseAllAction.setToolTip("Collapse all property sections");
 
-    // Configure toolbar layout
-    _toolbarLayout.setContentsMargins(0, 2, 0, 2);
-
     // Add toolbar items
     if (widgetFlags & Filtering)
-        _toolbarLayout.addWidget(_filterAction.createWidget(this), 2);
+        _toolbarAction.addAction(&_filterAction);
 
     if (widgetFlags & Expansion) {
-        _toolbarLayout.addWidget(_expandAllAction.createWidget(this, TriggerAction::Icon));
-        _toolbarLayout.addWidget(_collapseAllAction.createWidget(this, TriggerAction::Icon));
+        _toolbarAction.addAction(&_expandAllAction);
+        _toolbarAction.addAction(&_collapseAllAction);
     }
 
-    // Set toolbar widget layout
-    _toolbarWidget.setLayout(&_toolbarLayout);
-
-    // And add to the main layout
-    _layout.addWidget(&_toolbarWidget);
+    _layout.addWidget(_toolbarAction.createWidget(this));
 
     // Update toolbar when a group action is expanded/collapsed/added/removed/shown/hidden
     connect(_groupsAction, &GroupsAction::groupActionExpanded, this, &Widget::updateToolbar);
@@ -329,7 +323,9 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     _treeWidget.setSelectionMode(QAbstractItemView::NoSelection);
     _treeWidget.setUniformRowHeights(false);
     _treeWidget.setEditTriggers(QTreeWidget::NoEditTriggers);
-    
+    _treeWidget.setForegroundRole(QPalette::ColorRole::Text);
+    _treeWidget.setBackgroundRole(QPalette::ColorRole::Window);
+
     // Add tree widget to the layout
     _layout.addWidget(&_treeWidget);
 
@@ -340,23 +336,12 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     // Show/hide group section tree items when requested
     connect(_groupsAction, &GroupsAction::groupActionShown, this, &Widget::showGroupAction);
     connect(_groupsAction, &GroupsAction::groupActionHidden, this, &Widget::hideGroupAction);
-    
-    // We do all styling here
-    updateCustomStyle();
-}
-
-bool GroupsAction::Widget::event(QEvent* event)
-{
-    if (event->type() == QEvent::ApplicationPaletteChange)
-        updateCustomStyle();
-
-    return QWidget::event(event);
 }
 
 void GroupsAction::Widget::updateToolbar()
 {
     // Set toolbar read-only status based on whether a dataset is loaded
-    _toolbarWidget.setEnabled(_groupsAction->getGroupActions().count() > 1);
+    _toolbarAction.setEnabled(_groupsAction->getGroupActions().count() > 1);
 
     // Set read-only states of actions
     _expandAllAction.setEnabled(_groupsAction->canExpandAll());
@@ -459,17 +444,6 @@ void GroupsAction::Widget::hideGroupAction(GroupAction* groupAction)
     Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
 
     _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
-}
-
-void GroupsAction::Widget::updateCustomStyle()
-{
-    // update custome style settings
-    auto color = QApplication::palette().color(QPalette::Normal, QPalette::Button).name();
-    QString styleSheet = QString("QTreeWidget { border: none; background-color: %1;}").arg(color);
-    
-    //_treeWidget.setPalette(palette);
-    _treeWidget.setStyleSheet(styleSheet);
-
 }
 
 }

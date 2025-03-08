@@ -17,7 +17,7 @@ Notifications::Notifications(QWidget* parent) :
 
 void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs)
 {
-    Q_ASSERT(_parentWidget);
+    //Q_ASSERT(_parentWidget);
 
     if (!_parentWidget)
         return;

@@ -79,7 +79,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     setLayout(layout);
 
-    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
+    _hierarchyWidget.setWindowIcon(StyledIcon("play"));
 
     auto& treeView = _hierarchyWidget.getTreeView();
 

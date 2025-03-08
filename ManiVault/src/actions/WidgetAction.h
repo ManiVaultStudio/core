@@ -5,10 +5,11 @@
 #pragma once
 
 #include "WidgetActionWidget.h"
-#include "WidgetActionBadge.h"
 #include "WidgetActionDrag.h"
 
 #include "util/Serializable.h"
+#include "util/Version.h"
+#include "util/Badge.h"
 
 #include <QWidgetAction>
 #include <QPointer>
@@ -124,6 +125,13 @@ public:
     /** Destructor */
     ~WidgetAction() override;
 
+private:
+
+    using QWidgetAction::setDefaultWidget;
+    using QWidgetAction::defaultWidget;
+    using QWidgetAction::releaseWidget;
+    using QWidgetAction::deleteWidget;
+    
 public: // Hierarchy queries
 
     /**
@@ -251,9 +259,9 @@ public: // Hierarchy queries
     }
 
     /**
-     * Determine whether this action is a child of \p action of \p WidgetActionType
+     * Determine whether this action is a descendant of \p action of \p WidgetActionType
      * @param action Action to check for
-     * @return Boolean determining whether \p action is an ancestor or not
+     * @return Boolean determining whether \p action is a descendant or not
      */
     template<typename WidgetActionType = WidgetAction>
     bool isChildOf(WidgetAction* action) const {
@@ -261,9 +269,9 @@ public: // Hierarchy queries
     }
 
     /**
-     * Determine whether this action is a child of \p actions of \p WidgetActionType
+     * Determine whether this action is a descendant of \p actions of \p WidgetActionType
      * @param actions Actions to check for
-     * @return Boolean determining whether this action is child of one of \p actions or not
+     * @return Boolean determining whether this action is descendant of one of \p actions or not
      */
     template<typename WidgetActionType = WidgetAction>
     bool isChildOf(WidgetActions actions) const {
@@ -422,13 +430,6 @@ public: // Widgets
      * @param widgetConfigurationFunction This function is called right after a widget action widget is created (useful for manual manipulation of the generated widget)
      */
     void setWidgetConfigurationFunction(const WidgetConfigurationFunction& widgetConfigurationFunction);
-
-protected:
-    /**
-     * Override QObject's event handling
-     * @return Boolean Wheter the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
 
 public: // Visibility
 
@@ -873,29 +874,29 @@ public: // Studio mode
      */
     void setStudioMode(bool studioMode, bool recursive = true);
     
-public: // Font Icon
-    
-    /**
-     * Set the icon using a icon font name (i.e., fontawesome)
-     * @param setIcon the name of the icon in fontawesome v5
-     */
-    void setIconByName(QString namedIcon);
+public: // Styled icon
 
-private:
-    
-    /** refresh the icon when a icon font is used */
-    void refreshIcon();
-    
-    /** refresh the icon when a icon font is used */
-    void updateCustomStyle();
-    
+    /**
+     * Set the icon by \p iconName and use the default icon font and version
+     * @param iconName Name of the icon
+     */
+    void setIconByName(const QString& iconName);
+
+    /**
+     * Set the icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion
+     * @param iconName Name of the icon
+     * @param iconFontName Name of the icon font
+     * @param iconFontVersion Version of the icon font
+     */
+    void setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion);
+
 public: // Badge-related
 
     /**
      * Get badge
      * @return Reference to the widget action badge
      */
-    WidgetActionBadge& getBadge();
+    util::Badge& getBadge();
 
 public: // Drag-related
 
@@ -1028,9 +1029,8 @@ private:
     std::int32_t                    _configuration;                 /** Configuration flags */
     QMap<QString, QVariant>         _cachedStates;                  /** Maps cache name to state */
     QString                         _location;                      /** The path relative to the root in string format */
-    QString                         _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
-    WidgetActionBadge               _badge;                         /** Badge configuration */
+    util::Badge                     _badge;                         /** Badge configuration */
     WidgetActionDrag                _drag;                          /** Drag behaviour */
     QString                         _description;                   /** Action description */
 

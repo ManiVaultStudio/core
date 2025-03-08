@@ -8,9 +8,8 @@
 #include "actions/WidgetAction.h"
 #include "actions/WidgetActionMimeData.h"
 
-#include "models/ActionsListModel.h"
-
 using namespace mv::gui;
+using namespace mv::util;
 
 #ifdef _DEBUG
     //#define ABSTRACT_ACTIONS_MODEL_VERBOSE
@@ -20,7 +19,6 @@ namespace mv
 {
 
 AbstractActionsModel::HeaderItem::HeaderItem(const ColumHeaderInfo& columHeaderInfo) :
-    QStandardItem(),
     _columHeaderInfo(columHeaderInfo)
 {
 }
@@ -46,8 +44,6 @@ QVariant AbstractActionsModel::HeaderItem::data(int role /*= Qt::UserRole + 1*/)
 }
 
 AbstractActionsModel::Item::Item(gui::WidgetAction* action, bool editable /*= false*/) :
-    QStandardItem(),
-    QObject(),
     _action(action)
 {
     Q_ASSERT(_action != nullptr);
@@ -216,8 +212,6 @@ QVariant AbstractActionsModel::ForceDisabledItem::data(int role /*= Qt::UserRole
     if (getAction()->isPublic())
         return {};
 
-    const auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     switch (role)
     {
         case Qt::DisplayRole:
@@ -226,8 +220,8 @@ QVariant AbstractActionsModel::ForceDisabledItem::data(int role /*= Qt::UserRole
         case Qt::EditRole:
             return getAction()->getForceDisabled();
 
-        case Qt::DecorationRole:
-            return fontAwesome.getIcon("lock");
+    case Qt::DecorationRole:
+            return QIcon(StyledIcon("lock"));
 
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
@@ -276,7 +270,7 @@ QVariant AbstractActionsModel::ForceHiddenItem::data(int role /*= Qt::UserRole +
             return getAction()->getForceHidden();
 
         case Qt::DecorationRole:
-            return Application::getIconFont("FontAwesome").getIcon("eye-slash");
+            return QIcon(StyledIcon("eye-slash"));
 
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
@@ -328,16 +322,14 @@ QVariant AbstractActionsModel::ConnectionPermissionItem::data(int role /*= Qt::U
             if (getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone))
                 break;
 
-            auto& fontAwesome = Application::getIconFont("FontAwesome");
-
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui)
-                return fontAwesome.getIcon("cloud-upload-alt");
+                return StyledIcon("cloud-arrow-up");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui)
-                return fontAwesome.getIcon("link");
+                return StyledIcon("link");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui)
-                return fontAwesome.getIcon("unlink");
+                return StyledIcon("unlink");
 
             break;
         }
@@ -595,26 +587,26 @@ QVariant AbstractActionsModel::IsLeafItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
-QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> AbstractActionsModel::columnInfo = QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo>({
-    { AbstractActionsModel::Column::ForceDisabled, { "" , "Enabled", "Whether the parameter is enabled or not" } },
-    { AbstractActionsModel::Column::Name, { "Name" , "Name", "Name of the parameter" } },
-    { AbstractActionsModel::Column::Location, { "Location" , "Location", "Where the parameter is located in the user interface" } },
-    { AbstractActionsModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the parameter" } },
-    { AbstractActionsModel::Column::Type, { "Type",  "Type", "Type of parameter" } },
-    { AbstractActionsModel::Column::Scope, { "Scope",  "Scope", "Scope of the parameter (whether the parameter is public or private)" } },
-    { AbstractActionsModel::Column::ForceDisabled, { "", "Force Disabled", "Whether the parameter is forcibly disabled (regardless of its programmatic enabled setting)" } },
-    { AbstractActionsModel::Column::ForceHidden, { "", "Force Hidden", "Whether the parameter is forcibly hidden (regardless of its programmatic visibility setting)" } },
-    { AbstractActionsModel::Column::MayPublish, { "", "May Publish", "Whether the parameter may be published" } },
-    { AbstractActionsModel::Column::MayConnect, { "", "May Connect", "Whether the parameter may connect to a public parameter" } },
-    { AbstractActionsModel::Column::MayDisconnect, { "", "May Disconnect", "Whether the parameter may disconnect from a public parameter" } },
-    { AbstractActionsModel::Column::SortIndex, { "Sort Index", "Sort Index", "The sorting index of the parameter (its relative position in parameter groups)" } },
-    { AbstractActionsModel::Column::Stretch, { "Stretch", "Stretch", "The parameter stretch in parameter groups" } },
-    { AbstractActionsModel::Column::ParentActionId, { "Parent ID", "Parent ID", "The identifier of the parent parameter (if not a top-level parameter)" } },
-    { AbstractActionsModel::Column::IsConnected, { "Connected", "Connected", "Whether the parameter is connected or not" } },
-    { AbstractActionsModel::Column::NumberOfConnectedActions, { "No. Connected Parameters", "No. Connected Parameters", "The number of connected parameters (in case the parameter is public)" } },
-    { AbstractActionsModel::Column::PublicActionID, { "Public Parameter ID", "Public Parameter ID", "The identifier of the public parameter with which the parameter is connected" } },
-    { AbstractActionsModel::Column::IsRoot, { "Root", "Root", "Whether the parameter is located at the root of the hierarchy" } },
-    { AbstractActionsModel::Column::IsLeaf, { "Leaf", "Leaf", "Whether the parameter is a leaf or not" } }
+QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> AbstractActionsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
+    { Column::ForceDisabled, { "" , "Enabled", "Whether the parameter is enabled or not" } },
+    { Column::Name, { "Name" , "Name", "Name of the parameter" } },
+    { Column::Location, { "Location" , "Location", "Where the parameter is located in the user interface" } },
+    { Column::ID, { "ID",  "ID", "Globally unique identifier of the parameter" } },
+    { Column::Type, { "Type",  "Type", "Type of parameter" } },
+    { Column::Scope, { "Scope",  "Scope", "Scope of the parameter (whether the parameter is public or private)" } },
+    { Column::ForceDisabled, { "", "Force Disabled", "Whether the parameter is forcibly disabled (regardless of its programmatic enabled setting)" } },
+    { Column::ForceHidden, { "", "Force Hidden", "Whether the parameter is forcibly hidden (regardless of its programmatic visibility setting)" } },
+    { Column::MayPublish, { "", "May Publish", "Whether the parameter may be published" } },
+    { Column::MayConnect, { "", "May Connect", "Whether the parameter may connect to a public parameter" } },
+    { Column::MayDisconnect, { "", "May Disconnect", "Whether the parameter may disconnect from a public parameter" } },
+    { Column::SortIndex, { "Sort Index", "Sort Index", "The sorting index of the parameter (its relative position in parameter groups)" } },
+    { Column::Stretch, { "Stretch", "Stretch", "The parameter stretch in parameter groups" } },
+    { Column::ParentActionId, { "Parent ID", "Parent ID", "The identifier of the parent parameter (if not a top-level parameter)" } },
+    { Column::IsConnected, { "Connected", "Connected", "Whether the parameter is connected or not" } },
+    { Column::NumberOfConnectedActions, { "No. Connected Parameters", "No. Connected Parameters", "The number of connected parameters (in case the parameter is public)" } },
+    { Column::PublicActionID, { "Public Parameter ID", "Public Parameter ID", "The identifier of the public parameter with which the parameter is connected" } },
+    { Column::IsRoot, { "Root", "Root", "Whether the parameter is located at the root of the hierarchy" } },
+    { Column::IsLeaf, { "Leaf", "Leaf", "Whether the parameter is a leaf or not" } }
 });
 
 AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :
@@ -639,9 +631,9 @@ Qt::ItemFlags AbstractActionsModel::flags(const QModelIndex& index) const
     return  QStandardItemModel::flags(index) | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
 }
 
-WidgetAction* AbstractActionsModel::getAction(const QModelIndex& index)
+WidgetAction* AbstractActionsModel::getAction(const QModelIndex& index) const
 {
-    auto actionItem = static_cast<Item*>(itemFromIndex(index));
+    auto actionItem = dynamic_cast<Item*>(itemFromIndex(index));
 
     if (!actionItem)
         return nullptr;
@@ -649,12 +641,12 @@ WidgetAction* AbstractActionsModel::getAction(const QModelIndex& index)
     return actionItem->getAction();
 }
 
-WidgetAction* AbstractActionsModel::getAction(std::int32_t rowIndex)
+WidgetAction* AbstractActionsModel::getAction(std::int32_t rowIndex) const
 {
-    return static_cast<Item*>(item(rowIndex, 0))->getAction();
+    return dynamic_cast<Item*>(item(rowIndex, 0))->getAction();
 }
 
-WidgetAction* AbstractActionsModel::getAction(const QString& name)
+WidgetAction* AbstractActionsModel::getAction(const QString& name) const
 {
     const auto matches = match(index(0, 0), Qt::DisplayRole, name, -1, Qt::MatchFlag::MatchRecursive);
 
@@ -712,7 +704,7 @@ QMimeData* AbstractActionsModel::mimeData(const QModelIndexList& indexes) const
     if (indexes.isEmpty())
         return nullptr;
 
-    return new WidgetActionMimeData(static_cast<Item*>(itemFromIndex(indexes.first()))->getAction());
+    return new WidgetActionMimeData(dynamic_cast<Item*>(itemFromIndex(indexes.first()))->getAction());
 }
 
 bool AbstractActionsModel::canDropMimeData(const QMimeData* mimeData, Qt::DropAction dropAction, int row, int column, const QModelIndex& parent) const
@@ -725,7 +717,7 @@ bool AbstractActionsModel::canDropMimeData(const QMimeData* mimeData, Qt::DropAc
     if (row >= 0 && column != 0)
         return false;
 
-    auto action = const_cast<AbstractActionsModel*>(this)->getAction(row < 0 ? parent : index(row, 0, parent));
+    auto action = getAction(row < 0 ? parent : index(row, 0, parent));
 
     if (action != nullptr) {
         if (action->isPrivate())

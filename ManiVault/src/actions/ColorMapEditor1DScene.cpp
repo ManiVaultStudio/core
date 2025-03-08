@@ -8,15 +8,19 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 
-namespace mv {
-
-namespace gui {
+namespace mv::gui {
 
 ColorMapEditor1DScene::ColorMapEditor1DScene(ColorMapEditor1DWidget& colorMapEditor1DWidget) :
     QGraphicsScene(&colorMapEditor1DWidget),
     _colorMapEditor1DWidget(colorMapEditor1DWidget)
 {
-    setBackgroundBrush(QColor(150, 150, 150));
+    const auto updateCustomStyle = [this]() -> void {
+        setBackgroundBrush(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Window));
+	};
+
+    updateCustomStyle();
+
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, updateCustomStyle);
 }
 
 void ColorMapEditor1DScene::mousePressEvent(QGraphicsSceneMouseEvent* graphicsSceneMouseEvent) {
@@ -38,5 +42,4 @@ void ColorMapEditor1DScene::mousePressEvent(QGraphicsSceneMouseEvent* graphicsSc
         QGraphicsScene::mousePressEvent(graphicsSceneMouseEvent);
 }
 
-}
 }

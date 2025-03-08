@@ -9,10 +9,8 @@
 #include "DataHierarchyItem.h"
 
 #include "util/Exception.h"
-#include "util/Icon.h"
 #include "util/Serialization.h"
 
-#include "Application.h"
 
 #include <algorithm>
 
@@ -373,11 +371,8 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
     _rawDataName(rawDataName),
     _all(true),
     _derived(false),
-    _sourceDataset(),
-    _properties(),
     _groupIndex(-1),
     _analysis(nullptr),
-    _linkedData(),
     _linkedDataFlags(LinkedDataFlag::SendReceive),
     _locked(false),
     _lockedCache(false),
@@ -475,22 +470,7 @@ mv::Dataset<mv::DatasetImpl>& DatasetImpl::getSmartPointer()
 
 mv::Dataset<mv::DatasetImpl> DatasetImpl::toSmartPointer() const
 {
-    return Dataset<DatasetImpl>(const_cast<DatasetImpl*>(this));
-}
-
-QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::black*/) const
-{
-    switch (storageType)
-    {
-        case StorageType::Owner:
-        case StorageType::Proxy:
-            return getIcon(color);
-
-        default:
-            break;
-    }
-
-    return QIcon();
+    return { const_cast<DatasetImpl*>(this) };
 }
 
 const std::vector<mv::LinkedData>& DatasetImpl::getLinkedData() const

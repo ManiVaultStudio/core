@@ -11,6 +11,7 @@
 #include <actions/HorizontalGroupAction.h>
 #include <actions/PluginPickerAction.h>
 #include <actions/ViewPluginSamplerAction.h>
+#include <actions/EventAction.h>
 
 /**
  * Sample scope plugin
@@ -33,6 +34,14 @@ public:
 
     /** Perform plugin initialization */
     void init() override;
+
+protected:
+
+    /**
+     * Get the view plugin sampler action
+     * @return Pointer to view plugin sampler action
+     */
+    mv::gui::ViewPluginSamplerAction* getViewPluginSamplerAction() const;
 
 public: // Serialization
 
@@ -59,6 +68,8 @@ private:
     mv::gui::PluginPickerAction         _sourcePluginPickerAction;      /** Action for picking the source plugin */
     mv::gui::ToggleAction               _freezeViewAction;              /** Action for freezing the current view */
     mv::gui::ViewPluginSamplerAction*   _viewPluginSamplerAction;       /** Pointer to current view plugin sampler action */
+
+    friend class SampleScopeWidget;
 };
 
 class SampleScopePluginFactory : public mv::plugin::ViewPluginFactory
@@ -72,13 +83,6 @@ public:
 
     /** Override default constructor to set plugin metadata */
     SampleScopePluginFactory();
-
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /**
      * Get the URL of the GitHub repository

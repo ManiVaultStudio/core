@@ -265,7 +265,7 @@ void ViewPluginLearningCenterOverlayWidget::collapse()
         _toolbarItemWidget->getWidgetFader().fadeOut(animationDuration, true);
 }
 
-ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(14, 14)*/) :
+ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolbarItemWidget(const plugin::ViewPlugin* viewPlugin, ViewPluginLearningCenterOverlayWidget* overlayWidget, const QSize& iconSize /*= QSize(16, 16)*/) :
     _viewPlugin(viewPlugin),
     _overlayWidget(overlayWidget),
     _iconSize(iconSize),
@@ -274,6 +274,7 @@ ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::AbstractToolba
     setObjectName("ToolbarItemWidget");
 
     _iconLabel.setAlignment(Qt::AlignCenter);
+    _iconLabel.setFixedSize(QSize(20, 20));
 
     constexpr auto margin = 3;
 
@@ -311,7 +312,8 @@ void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::hideEvent
 
 void ViewPluginLearningCenterOverlayWidget::AbstractToolbarItemWidget::updateIcon()
 {
-    _iconLabel.setFixedSize(QSize(16, 16));
+    const auto icon = StyledIcon(getIcon()).withColorGroups(QPalette::ColorGroup::Normal, QPalette::ColorGroup::Normal).withColorRoles(QPalette::ColorRole::Text, QPalette::ColorRole::Text);
+
     _iconLabel.setPixmap(getIcon().pixmap(_iconSize));
 }
 
@@ -383,13 +385,13 @@ void ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::mousePressE
 
 QIcon ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::getIcon() const
 {
-    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getLearningCenterAction().getVideos().size()));
+    Badge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getLearningCenterAction().getVideos().size()));
 
     badge.setScale(.6f);
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("video"), badge);
+    return StyledIcon("video").withBadge(badge.getParameters());
 }
 
 bool ViewPluginLearningCenterOverlayWidget::VideosToolbarItemWidget::shouldDisplay() const
@@ -410,7 +412,7 @@ void ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::mousePre
     auto contextMenu = new QMenu(this);
 
     for (const auto tutorial : getViewPlugin()->getLearningCenterAction().getTutorials()) {
-        auto watchTutorialAction = new QAction(Application::getIconFont("FontAwesome").getIcon(tutorial->getIconName()), tutorial->getTitle());
+        auto watchTutorialAction = new QAction(StyledIcon(tutorial->getIconName()), tutorial->getTitle());
 
         connect(watchTutorialAction, &QAction::triggered, watchTutorialAction, [tutorial]() -> void {
             if (auto tutorialPlugin = mv::plugins().requestViewPlugin("Tutorial")) {
@@ -430,13 +432,13 @@ void ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::mousePre
 
 QIcon ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::getIcon() const
 {
-    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getLearningCenterAction().getTutorials().size()));
+    Badge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getLearningCenterAction().getTutorials().size()));
 
     badge.setScale(.6f);
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("user-graduate"), badge);
+    return StyledIcon("user-graduate").withBadge(badge.getParameters());
 }
 
 bool ViewPluginLearningCenterOverlayWidget::TutorialsToolbarItemWidget::shouldDisplay() const
@@ -459,7 +461,7 @@ void ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::
 
 QIcon ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("file-prescription");
+    return StyledIcon("file-prescription");
 }
 
 bool ViewPluginLearningCenterOverlayWidget::ShowDocumentationToolbarItemWidget::shouldDisplay() const
@@ -480,7 +482,7 @@ void ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::mousePressEv
 
 QIcon ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("info");
+    return StyledIcon("info");
 }
 
 bool ViewPluginLearningCenterOverlayWidget::AboutToolbarItemWidget::shouldDisplay() const
@@ -501,13 +503,13 @@ void ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::mousePre
 
 QIcon ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::getIcon() const
 {
-    WidgetActionBadge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getShortcuts().getMap().getShortcuts().size()));
+    Badge badge(nullptr, static_cast<std::uint32_t>(getViewPlugin()->getShortcuts().getMap().getShortcuts().size()));
 
     badge.setScale(.6f);
     badge.setEnabled(true);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    return createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("keyboard"), badge);
+    return StyledIcon("keyboard").withBadge(badge.getParameters());
 }
 
 bool ViewPluginLearningCenterOverlayWidget::ShortcutsToolbarItemWidget::shouldDisplay() const
@@ -530,7 +532,7 @@ void ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::mo
 
 QIcon ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::getIcon() const
 {
-    return const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata().getVisitRepositoryAction().icon();
+    return StyledIcon(const_cast<plugin::PluginFactory*>(getViewPlugin()->getFactory())->getPluginMetadata().getVisitRepositoryAction().icon());
 }
 
 bool ViewPluginLearningCenterOverlayWidget::VisitGithubRepoToolbarItemWidget::shouldDisplay() const
@@ -553,7 +555,7 @@ void ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::m
 
 QIcon ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::getIcon() const
 {
-    return mv::help().getToLearningCenterAction().icon();
+    return StyledIcon(mv::help().getToLearningCenterAction().icon());
 }
 
 bool ViewPluginLearningCenterOverlayWidget::ToLearningCenterToolbarItemWidget::shouldDisplay() const
@@ -576,7 +578,7 @@ void ViewPluginLearningCenterOverlayWidget::HideToolbarItemWidget::mousePressEve
 
 QIcon ViewPluginLearningCenterOverlayWidget::HideToolbarItemWidget::getIcon() const
 {
-    return getViewPlugin()->getLearningCenterAction().getHideToolbarAction().icon();
+    return StyledIcon(getViewPlugin()->getLearningCenterAction().getHideToolbarAction().icon());
 }
 
 bool ViewPluginLearningCenterOverlayWidget::HideToolbarItemWidget::shouldDisplay() const
@@ -611,7 +613,7 @@ void ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::mousePre
 
 QIcon ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("arrows-alt");
+    return StyledIcon("arrows-up-down-left-right");
 }
 
 bool ViewPluginLearningCenterOverlayWidget::AlignmentToolbarItemWidget::shouldDisplay() const
@@ -661,7 +663,11 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
     painter.setRenderHint(QPainter::RenderHint::Antialiasing);
 
     constexpr auto  rectangleMargin = 3;
-    const auto      backgroundColor = qApp->palette().highlightedText().color();
+    const auto      backgroundColor = qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Window);
+
+	auto borderColor = qApp->palette().color(QPalette::ColorGroup::Inactive, QPalette::ColorRole::Text);
+
+    borderColor.setAlpha(15);
 
     QPixmap backgroundPixmap(size());
 
@@ -669,7 +675,10 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
     QPainter pixmapPainter(&backgroundPixmap);
 
-    pixmapPainter.setPen(Qt::NoPen);
+    pixmapPainter.setRenderHint(QPainter::Antialiasing);
+    pixmapPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    pixmapPainter.setRenderHint(QPainter::LosslessImageRendering, true);
+    pixmapPainter.setPen(QPen(borderColor, 1.5));
     pixmapPainter.setBrush(backgroundColor);
 
     auto backgroundRectangle = rect();
@@ -690,7 +699,7 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
 
     pixmapPainter.drawRoundedRect(backgroundRectangle, radius, radius);
 
-    QGraphicsScene scene;
+    /*QGraphicsScene scene;
 
     auto pixmapItem = new QGraphicsPixmapItem(backgroundPixmap);
     auto blurEffect = new QGraphicsBlurEffect;
@@ -711,7 +720,9 @@ void ViewPluginLearningCenterOverlayWidget::ToolbarWidget::BackgroundWidget::pai
     scene.render(&scenePainter);
     scenePainter.end();
 
-    painter.drawPixmap(0, 0, blurredBackgroundPixmap);
+    painter.drawPixmap(0, 0, blurredBackgroundPixmap);*/
+
+    painter.drawPixmap(0, 0, backgroundPixmap);
 
     QWidget::paintEvent(event);
 }

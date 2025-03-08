@@ -46,6 +46,8 @@ void DataHierarchyPlugin::init()
 DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
     ViewPluginFactory(true)
 {
+    setIconByName("sitemap");
+
     getPluginMetadata().setDescription("Hierarchical overview of all loaded data");
     getPluginMetadata().setSummary("This plugin is for interacting with the ManiVault Studio dataset hierarchy");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
@@ -64,11 +66,6 @@ DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
 void DataHierarchyPluginFactory::initialize()
 {
 	ViewPluginFactory::initialize();
-}
-
-QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("sitemap", color);
 }
 
 QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const

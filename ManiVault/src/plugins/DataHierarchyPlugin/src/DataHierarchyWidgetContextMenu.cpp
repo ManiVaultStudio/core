@@ -93,7 +93,7 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
 
         auto copyAction = new QAction(QString("Copy dataset ID%1").arg(_selectedDatasets.count() > 1 ? "'s" : ""));
 
-        copyAction->setIcon(Application::getIconFont("FontAwesome").getIcon("barcode"));
+        copyAction->setIcon(StyledIcon("barcode"));
 
         connect(copyAction, &QAction::triggered, copyAction, copySelectedDatasetIdsToClipboard);
 
@@ -124,7 +124,7 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
                         menus[previousMenuPath]->addAction(pluginTriggerAction);
                     else {
                         if (titleSegment == "Group") {
-                            //menus[menuPath]->setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
+                            //menus[menuPath]->setIcon(StyledIcon("object-group"));
 
                             if (menus[previousMenuPath]->actions().isEmpty())
                                 menus[previousMenuPath]->addMenu(menus[menuPath]);
@@ -153,7 +153,7 @@ QAction* DataHierarchyWidgetContextMenu::getGroupAction()
     auto groupDataAction = new QAction("Group...");
 
     groupDataAction->setToolTip("Group datasets into one");
-    groupDataAction->setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
+    groupDataAction->setIcon(StyledIcon("object-group"));
 
     connect(groupDataAction, &QAction::triggered, [this]() -> void {
         mv::data().groupDatasets(_selectedDatasets);
@@ -166,7 +166,7 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
 {
     auto lockMenu = new QMenu("Lock");
 
-    lockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
+    lockMenu->setIcon(StyledIcon("lock"));
 
     auto lockAllAction = new QAction("All");
 
@@ -185,7 +185,7 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
 
     auto lockSelectedAction = new QAction("Selected");
 
-    lockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    lockSelectedAction->setIcon(StyledIcon("arrow-pointer"));
     lockSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(lockSelectedAction, &QAction::triggered, this, [this]() -> void {
@@ -203,7 +203,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
 {
     auto unlockMenu = new QMenu("Unlock");
 
-    unlockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("unlock"));
+    unlockMenu->setIcon(StyledIcon("unlock"));
     unlockMenu->setEnabled(false);
 
     const auto numberOfLockedDatasets = std::count_if(_allDatasets.begin(), _allDatasets.end(), [](auto& dataset) -> bool {
@@ -221,7 +221,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
 
     auto unlockSelectedAction = new QAction("Selected");
 
-    unlockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    unlockSelectedAction->setIcon(StyledIcon("arrow-pointer"));
     unlockSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(unlockSelectedAction, &QAction::triggered, this, [this]() -> void {
@@ -239,7 +239,7 @@ QMenu* DataHierarchyWidgetContextMenu::getHideMenu()
 {
     auto hideMenu = new QMenu("Hide");
 
-    hideMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye-slash"));
+    hideMenu->setIcon(StyledIcon("eye-slash"));
     hideMenu->setEnabled(!_selectedDatasets.isEmpty());
 
     const auto numberOfVisibleItems = std::count_if(_allDatasets.begin(), _allDatasets.end(), [](auto& dataset) -> bool {
@@ -263,7 +263,7 @@ QMenu* DataHierarchyWidgetContextMenu::getHideMenu()
 
     auto hideSelectedAction = new QAction("Selected");
 
-    hideSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    hideSelectedAction->setIcon(StyledIcon("arrow-pointer"));
     hideSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(hideSelectedAction, &QAction::triggered, this, [this]() -> void {
@@ -295,7 +295,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
 
     auto unhideMenu = new QMenu("Unhide");
 
-    unhideMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+    unhideMenu->setIcon(StyledIcon("eye"));
     
     const auto numberOfHiddenItems = std::count_if(_allDatasets.begin(), _allDatasets.end(), [](auto& dataset) -> bool {
         return !dataset->getDataHierarchyItem().isVisible();
@@ -326,7 +326,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
 
             auto unhideDatasetAction = new QAction(dataHierarchyItem->getLocation(true));
 
-            unhideDatasetAction->setIcon(datasetToUnhide->getIcon());
+            unhideDatasetAction->setIcon(StyledIcon(datasetToUnhide->icon()));
 
             connect(unhideDatasetAction, &QAction::triggered, this, [dataHierarchyItem]() -> void {
                 dataHierarchyItem->setVisible(true);

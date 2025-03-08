@@ -13,6 +13,8 @@
 
 #include <QDebug>
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions actions) :
@@ -27,9 +29,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 {
     Q_ASSERT(actions.count() != 0);
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    _publishAction.setIconByName("cloud-upload-alt");
+    _publishAction.setIconByName("cloud-arrow-up");
     _connectAction.setIconByName("crosshairs");
     _disconnectAction.setIconByName("unlink");
     _disconnectAllAction.setIconByName("unlink");
@@ -92,7 +92,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
             auto connectMenu = new QMenu("Connect to:");
 
-            connectMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
+            connectMenu->setIcon(StyledIcon("link"));
 
             for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
                 auto publicAction = actionsFilterModel.getAction(rowIndex);
@@ -238,7 +238,7 @@ WidgetActionContextMenu::ConfirmRemovePublicActionDialog::ConfirmRemovePublicAct
     _removeAction(this, "Remove"),
     _cancelAction(this, "Cancel")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    setWindowIcon(StyledIcon("trash"));
     setMinimumWidth(400);
     
     QStringList names;
@@ -293,7 +293,7 @@ WidgetActionContextMenu::EditActionsDialog::EditActionsDialog(QWidget* parent, W
     _actions(actions),
     _actionsGroupAction(this, "Actions")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("edit"));
+    setWindowIcon(StyledIcon("edit"));
     setWindowTitle(QString("Edit %1").arg(actions.count() == 1 ? _actions.first()->text() : QString("%1 parameters").arg(QString::number(_actions.count()))));
 
     auto layout = new QGridLayout();

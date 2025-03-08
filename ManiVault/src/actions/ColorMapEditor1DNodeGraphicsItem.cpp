@@ -78,7 +78,7 @@ bool ColorMapEditor1DNodeGraphicsItem::eventFilter(QObject* target, QEvent* even
 
 QRectF ColorMapEditor1DNodeGraphicsItem::boundingRect() const
 {
-    return QRectF(-_node.getRadius(), -_node.getRadius(), 2 * _node.getRadius(), 2 * _node.getRadius());
+    return { -_node.getRadius(), -_node.getRadius(), 2 * _node.getRadius(), 2 * _node.getRadius() };
 }
 
 QPainterPath ColorMapEditor1DNodeGraphicsItem::shape() const
@@ -99,8 +99,8 @@ void ColorMapEditor1DNodeGraphicsItem::paint(QPainter* painter, const QStyleOpti
     if (_colorMapEditor1DWidget.isEnabled() && _hover) {
         QPen hoverPen;
 
-        hoverPen.setWidthF(8.0f);
-        hoverPen.setColor(QColor(60, 60, 60, 100));
+        hoverPen.setWidthF(6.0f);
+        hoverPen.setColor(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Accent));
 
         painter->setPen(hoverPen);
         painter->setBrush(Qt::NoBrush);
@@ -110,8 +110,10 @@ void ColorMapEditor1DNodeGraphicsItem::paint(QPainter* painter, const QStyleOpti
 
     QPen perimeterPen;
 
-    perimeterPen.setWidthF(_colorMapEditor1DWidget.getCurrentNode() == &_node ? 2.0f : 1.5f);
-    perimeterPen.setColor(_colorMapEditor1DWidget.isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText));
+    const auto isSelected = _colorMapEditor1DWidget.getCurrentNode() == &_node;
+
+    perimeterPen.setWidthF(isSelected ? 3.0f : 1.5f);
+    perimeterPen.setColor(_colorMapEditor1DWidget.isEnabled() ? styleOption.palette.color(QPalette::Normal, isSelected ? QPalette::ColorRole::Accent : QPalette::Text) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText));
 
     painter->setPen(perimeterPen);
 

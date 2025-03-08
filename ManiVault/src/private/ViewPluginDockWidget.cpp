@@ -75,7 +75,7 @@ QString ViewPluginDockWidget::getTypeString() const
 
 void ViewPluginDockWidget::initialize()
 {
-	_toggleMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("low-vision"));
+	_toggleMenu.setIcon(StyledIcon("eye-low-vision"));
 
 	_helpAction.setIconByName("question");
 	_helpAction.setShortcut(tr("F1"));
@@ -312,7 +312,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
     //_progressTask.setRunningIndeterminate();
     //_progressTask.setProgressTextFormatter([](Task& task) -> QString { return ""; });
 
-	setWindowIcon(_viewPlugin->getIcon());
+	setWindowIcon(_viewPlugin->icon());
 
     const auto updateViewPluginIdProperty = [this](const QString& viewPluginId) -> void {
         setProperty("ViewPluginId", viewPluginId);
@@ -331,101 +331,15 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
     centralDockWidget->dockAreaWidget()->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
-	auto hideAllAction = new TriggerAction(this, "Hide All");
-	auto showAllAction = new TriggerAction(this, "Show All");
-
-	hideAllAction->setEnabled(true);
-	showAllAction->setEnabled(false);
-
-	const auto updateHideShowAllActionsReadOnly = [this, hideAllAction, showAllAction]() -> void {
-		const auto settingsDockWidgets                = _settingsDockWidgetsMap.values();
-		const auto numberOfSettingsDockWidgets        = _settingsDockWidgetsMap.count();
-		const auto numberOfVisibleSettingsDockWidgets = std::count_if(settingsDockWidgets.begin(), settingsDockWidgets.end(), [](CDockWidget* settingsDockWidget) {
-			return settingsDockWidget->isVisible();
-		});
-
-		hideAllAction->setEnabled(numberOfVisibleSettingsDockWidgets >= 1);
-		showAllAction->setEnabled(numberOfVisibleSettingsDockWidgets < numberOfSettingsDockWidgets);
-	};
-
 	for (auto settingsAction : _viewPlugin->getDockingActions()) {
-		auto settingsDockWidget    = new CDockWidget(settingsAction->text(), this);
-		auto settingsWidget        = new SettingsActionWidget(this, settingsAction);
-		auto containerWidget       = new QWidget();
-		auto containerWidgetLayout = new QVBoxLayout();
-
-		containerWidgetLayout->setContentsMargins(0, 0, 0, 0);
-
-		containerWidgetLayout->addWidget(settingsWidget);
-
-		containerWidget->setAutoFillBackground(true);
-		containerWidget->setLayout(containerWidgetLayout);
-
-		settingsDockWidget->setWidget(containerWidget, eInsertMode::ForceNoScrollArea);
-		settingsDockWidget->setAutoFillBackground(true);
-		settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
-		settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);
-
-		_settingsDockWidgetsMap[settingsAction->text()] = settingsDockWidget;
-
-		const auto dockToSettingsActionName = settingsAction->property("DockToDockingActionName").toString();
-
-		CDockAreaWidget* dockAreaWidget = nullptr;
-
-		if (_settingsDockWidgetsMap.contains(dockToSettingsActionName))
-			dockAreaWidget = _settingsDockWidgetsMap[dockToSettingsActionName]->dockAreaWidget();
-
-		_dockManager.addDockWidget(static_cast<DockWidgetArea>(settingsAction->property("DockArea").toInt()), settingsDockWidget, dockAreaWidget);
-
-		const auto autoHide         = settingsAction->property("AutoHide").toBool();
-		const auto autoHideLocation = static_cast<SideBarLocation>(settingsAction->property("AutoHideLocation").toInt());
-
-		settingsDockWidget->setAutoHide(autoHide, autoHideLocation);
-
-		if (autoHide) {
-			switch (settingsDockWidget->autoHideDockContainer()->sideBarLocation()) {
-				case SideBarLeft:
-				case SideBarRight: settingsDockWidget->autoHideDockContainer()->setSize(settingsWidget->minimumSizeHint().width());
-					break;
-
-				case SideBarTop:
-				case SideBarBottom: settingsDockWidget->autoHideDockContainer()->setSize(settingsWidget->minimumSizeHint().height());
-					break;
-
-				case SideBarNone: break;
-			}
-		}
-
-		const auto studioModeChanged = [settingsDockWidget]() -> void {
-			const auto isInStudioMode = projects().getCurrentProject()->getStudioModeAction().isChecked();
-
-			settingsDockWidget->setFeature(CDockWidget::DockWidgetClosable, isInStudioMode);
-			settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, isInStudioMode);
-		};
-
-		studioModeChanged();
-
-		connect(&projects().getCurrentProject()->getStudioModeAction(), &ToggleAction::toggled, this, studioModeChanged);
-
-		auto toggleAction = new ToggleAction(this, settingsAction->text(), true);
-
-		_toggleMenu.addAction(toggleAction);
-
-		connect(toggleAction, &ToggleAction::toggled, this, [this, settingsDockWidget](bool toggled) {
-			settingsDockWidget->toggleView(toggled);
-		});
-
-		connect(settingsDockWidget, &CDockWidget::viewToggled, this, [this, settingsDockWidget, toggleAction, updateHideShowAllActionsReadOnly](bool toggled) {
-			QSignalBlocker toggleActionBlocker(toggleAction);
-
-			toggleAction->setChecked(toggled);
-
-			updateHideShowAllActionsReadOnly();
-		});
+        addDockingAction(settingsAction);
 	}
+
+    connect(_viewPlugin, &ViewPlugin::dockingActionAdded, this, &ViewPluginDockWidget::addDockingAction);
 
 	_toggleMenu.setEnabled(!_viewPlugin->getDockingActions().isEmpty());
 
+    /*
 	if (!_viewPlugin->getDockingActions().isEmpty()) {
 		_toggleMenu.addSeparator();
 
@@ -442,10 +356,11 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 		_toggleMenu.addAction(hideAllAction);
 		_toggleMenu.addAction(showAllAction);
 	}
+    */
 
 	_dockManager.setStyleSheet("");
 
-	setIcon(viewPlugin->getIcon());
+	setIcon(StyledIcon(viewPlugin->icon()));
 	setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
 	setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
 
@@ -478,6 +393,100 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
 		viewPlugin->getVisibleAction().setChecked(toggled);
 	});
+}
+
+void ViewPluginDockWidget::addDockingAction(mv::gui::WidgetAction* dockingAction)
+{
+    auto hideAllAction = new TriggerAction(this, "Hide All");
+    auto showAllAction = new TriggerAction(this, "Show All");
+
+    hideAllAction->setEnabled(true);
+    showAllAction->setEnabled(false);
+
+    const auto updateHideShowAllActionsReadOnly = [this, hideAllAction, showAllAction]() -> void {
+        const auto settingsDockWidgets = _settingsDockWidgetsMap.values();
+        const auto numberOfSettingsDockWidgets = _settingsDockWidgetsMap.count();
+        const auto numberOfVisibleSettingsDockWidgets = std::count_if(settingsDockWidgets.begin(), settingsDockWidgets.end(), [](CDockWidget* settingsDockWidget) {
+            return settingsDockWidget->isVisible();
+            });
+
+        hideAllAction->setEnabled(numberOfVisibleSettingsDockWidgets >= 1);
+        showAllAction->setEnabled(numberOfVisibleSettingsDockWidgets < numberOfSettingsDockWidgets);
+        };
+
+    auto settingsDockWidget = new CDockWidget(dockingAction->text(), this);
+    auto settingsWidget = new SettingsActionWidget(this, dockingAction);
+    auto containerWidget = new QWidget();
+    auto containerWidgetLayout = new QVBoxLayout();
+
+    containerWidgetLayout->setContentsMargins(0, 0, 0, 0);
+
+    containerWidgetLayout->addWidget(settingsWidget);
+
+    containerWidget->setAutoFillBackground(true);
+    containerWidget->setLayout(containerWidgetLayout);
+
+    settingsDockWidget->setWidget(containerWidget, eInsertMode::ForceNoScrollArea);
+    settingsDockWidget->setAutoFillBackground(true);
+    settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
+    settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);
+
+    _settingsDockWidgetsMap[dockingAction->text()] = settingsDockWidget;
+
+    const auto dockToSettingsActionName = dockingAction->property("DockToDockingActionName").toString();
+
+    CDockAreaWidget* dockAreaWidget = nullptr;
+
+    if (_settingsDockWidgetsMap.contains(dockToSettingsActionName))
+        dockAreaWidget = _settingsDockWidgetsMap[dockToSettingsActionName]->dockAreaWidget();
+
+    _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockingAction->property("DockArea").toInt()), settingsDockWidget, dockAreaWidget);
+
+    const auto autoHide = dockingAction->property("AutoHide").toBool();
+    const auto autoHideLocation = static_cast<SideBarLocation>(dockingAction->property("AutoHideLocation").toInt());
+
+    settingsDockWidget->setAutoHide(autoHide, autoHideLocation);
+
+    if (autoHide) {
+        switch (settingsDockWidget->autoHideDockContainer()->sideBarLocation()) {
+            case SideBarLeft:
+            case SideBarRight: settingsDockWidget->autoHideDockContainer()->setSize(settingsWidget->minimumSizeHint().width());
+                break;
+
+            case SideBarTop:
+            case SideBarBottom: settingsDockWidget->autoHideDockContainer()->setSize(settingsWidget->minimumSizeHint().height());
+                break;
+
+            case SideBarNone: break;
+        }
+    }
+
+    const auto studioModeChanged = [settingsDockWidget]() -> void {
+        const auto isInStudioMode = projects().getCurrentProject()->getStudioModeAction().isChecked();
+
+        settingsDockWidget->setFeature(CDockWidget::DockWidgetClosable, isInStudioMode);
+        settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, isInStudioMode);
+        };
+
+    studioModeChanged();
+
+    connect(&projects().getCurrentProject()->getStudioModeAction(), &ToggleAction::toggled, this, studioModeChanged);
+
+    auto toggleAction = new ToggleAction(this, dockingAction->text(), true);
+
+    _toggleMenu.addAction(toggleAction);
+
+    connect(toggleAction, &ToggleAction::toggled, this, [this, settingsDockWidget](bool toggled) {
+        settingsDockWidget->toggleView(toggled);
+        });
+
+    connect(settingsDockWidget, &CDockWidget::viewToggled, this, [this, settingsDockWidget, toggleAction, updateHideShowAllActionsReadOnly](bool toggled) {
+        QSignalBlocker toggleActionBlocker(toggleAction);
+
+        toggleAction->setChecked(toggled);
+
+        updateHideShowAllActionsReadOnly();
+        });
 }
 
 ViewPluginDockWidget::SettingsActionWidget::SettingsActionWidget(QWidget* parent, mv::gui::WidgetAction* settingsAction) :

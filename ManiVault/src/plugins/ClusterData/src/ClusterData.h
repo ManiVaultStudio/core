@@ -207,13 +207,6 @@ public:
         return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-
 public: // Selection
 
     /**
@@ -296,15 +289,9 @@ class ClusterDataFactory : public mv::plugin::RawDataFactory
                       FILE  "ClusterData.json")
     
 public:
-    ClusterDataFactory(void) {}
-    ~ClusterDataFactory(void) override {}
-    
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    ClusterDataFactory();
+
+    ~ClusterDataFactory() override {}
 
     /**
      * Get the read me markdown file URL

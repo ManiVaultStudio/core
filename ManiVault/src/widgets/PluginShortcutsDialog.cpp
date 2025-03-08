@@ -4,8 +4,6 @@
 
 #include "PluginShortcutsDialog.h"
 
-#include "Application.h"
-
 #include "util/ShortcutMap.h"
 
 #include <QDebug>
@@ -24,7 +22,7 @@ PluginShortcutsDialog::PluginShortcutsDialog(const plugin::PluginMetadata& plugi
     _pluginMetaData(pluginMetaData)
 {
     setAutoFillBackground(true);
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("keyboard"));
+    setWindowIcon(StyledIcon("keyboard"));
     setWindowTitle(QString("%1 shortcuts").arg(_pluginMetaData.getGuiName()));
 
     auto layout = new QVBoxLayout();

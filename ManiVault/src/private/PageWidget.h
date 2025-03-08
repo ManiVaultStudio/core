@@ -32,13 +32,6 @@ public:
      */
     void paintEvent(QPaintEvent* paintEvent);
 
-    /**
-     * Set the widget background color role
-     * @param widget Pointer to widget to apply the background color to
-     * @param colorRole Background color role
-     */
-    static void setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole);
-
 protected:
 
     /**
@@ -47,21 +40,9 @@ protected:
      */
     QVBoxLayout& getContentLayout();
 
-    /**
-     * Override QObject's event handling
-     * @return Boolean Wheter the event was recognized and processed
-     */
-    bool event(QEvent* event) override;
-
-private:
-
-    /** Update custom theme parts not caught by the system itself */
-    void updateCustomStyle();
-
 private:
     QHBoxLayout         _layout;                /** Main layout */
     QVBoxLayout         _contentLayout;         /** Layout for the main content */
     PageHeaderWidget    _pageHeaderWidget;      /** Widget which contains the header */
-    QLabel              _titleLabel;            /** Title label */
     QPixmap             _backgroundImage;       /** Background image */
 };

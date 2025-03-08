@@ -73,7 +73,7 @@ private:
     protected:
         /**
          * Override QObject's event handling
-         * @return Boolean Wheter the event was recognized and processed
+         * @return Boolean Whether the event was recognized and processed
          */
         bool event(QEvent* event) override;
 
@@ -194,6 +194,9 @@ private:
      * @param viewPlugin Pointer to view plugin
      */
     void setViewPlugin(mv::plugin::ViewPlugin* viewPlugin);
+
+    
+    void addDockingAction(mv::gui::WidgetAction* dockingAction);
 
 private:
     QPointer<mv::plugin::ViewPlugin>    _viewPlugin;                /** Pointer to view plugin */

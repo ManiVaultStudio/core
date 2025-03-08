@@ -89,19 +89,6 @@ public:
     /** Destructor */
     ~TransformationPluginFactory() override = default;
     
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    QIcon getCategoryIcon() const override;
-
     /** Produces an instance of a transformation plugin */
     TransformationPlugin* produce() override = 0;
 };

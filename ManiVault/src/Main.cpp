@@ -6,6 +6,7 @@
 #include "private/Archiver.h"
 #include "private/Core.h"
 #include "private/StartupProjectSelectorDialog.h"
+#include "private/NoProxyRectanglesFusionStyle.h"
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
@@ -14,6 +15,8 @@
 #include <util/Icon.h>
 
 #include <QProxyStyle>
+#include <QStyleFactory>
+#include <QSurfaceFormat>
 #include <QQuickWindow>
 #include <QCommandLineParser>
 #include <QTemporaryDir>
@@ -24,21 +27,6 @@
 using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;
-
-class NoFocusProxyStyle : public QProxyStyle {
-public:
-    NoFocusProxyStyle(QStyle *baseStyle = 0) :
-        QProxyStyle(baseStyle)
-    {
-    }
-
-    void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const {
-        if (element == QStyle::PE_FrameFocusRect)
-            return;
-
-        QProxyStyle::drawPrimitive(element, option, painter, widget);
-    }
-};
 
 QSharedPointer<ProjectMetaAction> getStartupProjectMetaAction(const QString& startupProjectFilePath)
 {
@@ -237,15 +225,18 @@ int main(int argc, char *argv[])
 
     loadGuiTask.setSubtaskStarted("Apply styles");
 
-    application.setStyle(new NoFocusProxyStyle);
+    application.setStyle(new NoProxyRectanglesFusionStyle);
 
-    QFile styleSheetFile(":/styles/default.qss");
+#ifdef _WIN32
+    //QFile styleSheetFile(":/styles/default.qss");
 
-    styleSheetFile.open(QFile::ReadOnly);
+    //styleSheetFile.open(QFile::ReadOnly);
 
-    QString styleSheet = QLatin1String(styleSheetFile.readAll());
+    //QString styleSheet = QLatin1String(styleSheetFile.readAll());
 
-    application.setStyleSheet(styleSheet);
+    //application.setStyleSheet(styleSheet);
+#endif
+
     loadGuiTask.setSubtaskFinished("Apply styles");
 
     MainWindow mainWindow;

@@ -6,9 +6,13 @@
 
 #include <widgets/InfoOverlayWidget.h>
 
+#include <ViewPlugin.h>
+
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QWebEngineView>
+#include <QGraphicsView>
+#include <QGraphicsScene>
 
 class SampleScopePlugin;
 
@@ -30,11 +34,20 @@ public:
      */
     SampleScopeWidget(SampleScopePlugin* sampleScopePlugin, QWidget* parent = nullptr);
 
+    /** Initialize the widget */
+    void initialize();
+
     /**
-     * Set text
-     * @param htmlText Text in HTML format
+     * Set html text
+     * @param html Text in HTML format
      */
-    void setHtmlText(const QString& htmlText);
+    void setViewHtml(const QString& html);
+
+    /**
+     * Set widget to \p widget
+     * @param widget Pointer to widget
+     */
+    void setViewWidget(const QWidget* widget);
 
     /**
      * Get no samples overlay widget
@@ -42,9 +55,30 @@ public:
      */
     mv::gui::InfoOverlayWidget& getNoSamplesOverlayWidget();
 
+    /**
+     * Resize the SampleScopeWidget#_widgetViewScene when the SampleScopeWidget size changes
+     * @param event Pointer to resize event
+     */
+    void resizeEvent(QResizeEvent* event) override;
+
+private:
+
+    /** Toggles the visibility of the widgets */
+    void updateVisibility();
+
+    /** Updates the size of the widget proxy */
+    void updateViewWidgetProxySize() const;
+    
 private:
     SampleScopePlugin*              _sampleScopePlugin;         /** Pointer to parent sample scope plugin */
-    QVBoxLayout                     _layout;                    /** Main layout */
-    QWebEngineView                  _textHtmlView;              /** Web engine view in which the HTML is displayed */
+    QVBoxLayout                     _mainLayout;                /** Main layout */  
+    QWidget                         _viewsWidget;               /** Widget containing the views */
+    QVBoxLayout                     _viewsWidgetLayout;         /** Layout of the views widget */
+    QWebEngineView                  _htmlView;                  /** Web engine view for displaying HTML content */
+    QGraphicsView                   _widgetView;                /** Graphics view in which the widget is displayed */
+    QGraphicsScene                  _widgetViewScene;           /** Graphics scene in which the widget is displayed */
+    QGraphicsProxyWidget*           _proxyWidget;               /** Proxy widget for the widget */
+    QWidget*                        _currentViewWidget;         /** Pointer to the current view widget */
     mv::gui::InfoOverlayWidget      _noSamplesOverlayWidget;    /** Overlay widget with a message saying there are no samples available */
+    mv::plugin::ViewPlugin*         _currentViewPlugin;         /** Pointer to the current view plugin */
 };

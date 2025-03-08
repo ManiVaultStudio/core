@@ -125,7 +125,7 @@ public:
      * A destructor is mandatory here because of the SplashScreenAction#_splashScreenDialog QScopePointer
      * https://doc.qt.io/qt-6/qscopedpointer.html#forward-declared-pointers
      */
-    ~SplashScreenAction();
+    ~SplashScreenAction() override = default;
 
     /**
      * Add \p alert to the splash screen

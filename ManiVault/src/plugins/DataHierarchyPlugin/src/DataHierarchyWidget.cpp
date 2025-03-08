@@ -184,7 +184,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     setLayout(layout);
 
-    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+    _hierarchyWidget.setWindowIcon(StyledIcon("database"));
     _hierarchyWidget.setNoItemsDescription(mv::plugins().getPluginFactoriesByType(plugin::Type::LOADER).empty() ? "No loader plugins available"  : "Right-click > Import to load data");
 
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
@@ -250,7 +250,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setMinimumSectionSize(18);
 
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::Name, 150);
-    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::SelectionGroupIndex, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::SelectionGroupIndex, 30);
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsVisible, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsDerived, treeViewHeader->minimumSectionSize());

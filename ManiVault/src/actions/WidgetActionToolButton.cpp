@@ -12,6 +12,8 @@
 
 namespace mv::gui {
 
+QPushButton* WidgetActionToolButton::sizeHintPushButton = nullptr;
+
 WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* action) :
     QToolButton(parent),
     _action(nullptr),
@@ -20,6 +22,17 @@ WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* ac
     _menu(*this)
 {
     initialize(action);
+    
+    if (!WidgetActionToolButton::sizeHintPushButton) {
+        WidgetActionToolButton::sizeHintPushButton = new QPushButton(" ");
+        sizeHintPushButton->ensurePolished();
+    }
+    
+    const auto heightHint = WidgetActionToolButton::sizeHintPushButton->sizeHint().height();
+    
+    setMinimumSize(QSize(heightHint, heightHint));
+
+    setIconSize(QSize(12, 12));
 }
 
 WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction) :
@@ -60,10 +73,23 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
         if (_indicatorAlignment & Qt::AlignRight)
             center.setX(width() - margin);
 
-        painter.setPen(QPen(QBrush(isEnabled() ? Qt::black : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
+        painter.setPen(QPen(QBrush(isEnabled() ? qApp->palette().text().color() : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
         painter.setBrush(Qt::NoBrush);
         painter.drawPoint(center);
     }
+
+    //if (_action) {
+    //    auto rect = QRect({}, iconSize());
+
+    //    rect.moveCenter(geometry().center());
+
+    //    QIcon::Mode iconMode = isEnabled() ? QIcon::Mode::Normal : QIcon::Mode::Disabled;
+
+    //    if (isActiveWindow())
+    //        iconMode = QIcon::Mode::Active;
+
+    //    painter.drawPixmap(rect, _action->icon().pixmap(iconSize(), iconMode, isEnabled() ? QIcon::State::On : QIcon::State::Off));
+    //}
 }
 
 WidgetAction* WidgetActionToolButton::getAction() const
@@ -85,7 +111,6 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
 
     if (_action) {
         const auto actionChanged = [this]() {
-            setIcon(_action->icon());
             setToolTip(_action->toolTip());
         };
 
@@ -104,6 +129,8 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
         connect(_action, &WidgetAction::changed, this, actionChanged);
         connect(_action, &WidgetAction::enabledChanged, this, actionEnabledChanged);
         connect(_action, &WidgetAction::visibleChanged, this, actionVisibilityChanged);
+
+        setIcon(_action->icon());
     }
     
     setAutoRaise(_action ? _action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise) : false);

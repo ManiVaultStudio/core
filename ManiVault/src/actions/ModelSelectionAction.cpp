@@ -4,8 +4,6 @@
 
 #include "ModelSelectionAction.h"
 
-#include "Application.h"
-
 #include <QAbstractItemModel>
 #include <QItemSelectionModel>
 
@@ -14,13 +12,14 @@ namespace mv::gui {
 ModelSelectionAction::ModelSelectionAction(QObject* parent, const QString& title, QItemSelectionModel* selectionModel /*= nullptr*/) :
     HorizontalGroupAction(parent, title),
     _selectionModel(nullptr),
+    _sourceModel(nullptr),
     _selectAllAction(this, "All"),
     _clearSelectionAction(this, "Clear"),
     _invertSelectionAction(this, "Invert")
 {
     setText(title);
     setToolTip("Item selection");
-    setIconByName("mouse-pointer");
+    setIconByName("arrow-pointer");
     setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     setDefaultWidgetFlags(WidgetFlag::Default);
 
@@ -41,8 +40,6 @@ void ModelSelectionAction::initialize(QItemSelectionModel* selectionModel)
 
     _selectionModel = selectionModel;
     _sourceModel    = _selectionModel->model();
-
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     const auto updateReadOnly = [this]() -> void {
         const auto numberOfSelectedRows = _selectionModel->selectedRows().count();

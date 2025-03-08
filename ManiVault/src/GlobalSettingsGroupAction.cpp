@@ -27,14 +27,16 @@ void GlobalSettingsGroupAction::addAction(WidgetAction* action, std::int32_t wid
     if (!action)
         return;
 
-    const auto actionName = getSettingsPrefix() + action->getSerializationName();
+    if (action->isChildOf(this)) {
+        const auto actionName = getSettingsPrefix() + action->getSerializationName();
 
-    auto parts = actionName.split(" ");
+        auto parts = actionName.split(" ");
 
-    for (int i = 0; i < parts.size(); ++i)
-        parts[i].replace(0, 1, parts[i][0].toUpper());
+        for (int i = 0; i < parts.size(); ++i)
+            parts[i].replace(0, 1, parts[i][0].toUpper());
 
-    action->setSettingsPrefix(parts.join(""));
+        action->setSettingsPrefix(parts.join(""));
+    }
 
     GroupAction::addAction(action, widgetFlags, widgetConfigurationFunction);
 }

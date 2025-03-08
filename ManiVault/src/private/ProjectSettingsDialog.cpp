@@ -6,11 +6,9 @@
 
 #include <AbstractProjectManager.h>
 
-#include <Application.h>
 #include <CoreInterface.h>
 
 #include <QVBoxLayout>
-#include <QVector>
 
 #ifdef _DEBUG
     #define PROJECT_SETTINGS_DIALOG_VERBOSE
@@ -18,13 +16,14 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _groupAction(this, "Group"),
     _okAction(this, "Ok")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setWindowIcon(util::StyledIcon("gear"));
     setModal(true);
     setWindowTitle("Project Settings");
 

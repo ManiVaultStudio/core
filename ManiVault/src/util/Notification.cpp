@@ -26,7 +26,6 @@ Notification::Notification(const QString& title, const QString& description, con
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setAttribute(Qt::WA_ShowWithoutActivating);
-    setAutoFillBackground(true);
     setMinimumHeight(10);
 
     if (_previousNotification)
@@ -49,10 +48,11 @@ Notification::Notification(const QString& title, const QString& description, con
     const auto borderColorName = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Mid).name();
 
     notificationWidget->setObjectName("Notification");
-    notificationWidget->setStyleSheet(QString("QWidget#Notification { background-color: %1; border: 1px solid %2; border-radius: 5px; }").arg(windowColorName, borderColorName));
+    notificationWidget->setStyleSheet(QString("QWidget#Notification { background-color: %1, border: 1px solid %2; border-radius: 2px; }").arg(qApp->palette().color(QPalette::ColorRole::Window).name(), borderColorName));
     notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
+    notificationWidget->setAutoFillBackground(true);
 
     iconLabel->setStyleSheet("padding: 3px;");
     iconLabel->setPixmap(icon.pixmap(32, 32));
@@ -64,8 +64,8 @@ Notification::Notification(const QString& title, const QString& description, con
     messageLabel->setMinimumHeight(10);
     messageLabel->setOpenExternalLinks(true);
 
-    closePushButton->setFixedSize(16, 16);
-    closePushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
+    closePushButton->setFixedSize(18, 18);
+    closePushButton->setIcon(StyledIcon("xmark"));
     closePushButton->setAutoRaise(true);
 
     notificationWidgetLayout->setContentsMargins(10, 10, 10, 10);

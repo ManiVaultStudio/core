@@ -39,9 +39,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     _settingsAction.setText("Toggle Views");
     _settingsAction.setToolTip("Adjust page settings");
-    _settingsAction.setIconByName("cog");
+    _settingsAction.setIconByName("gear");
 
-    _toLearningCenterAction.setIconByName("chalkboard-teacher");
+    _toLearningCenterAction.setIconByName("chalkboard-user");
     _toLearningCenterAction.setToolTip("Go to the learning center");
     _toLearningCenterAction.setDefaultWidgetFlags(TriggerAction::Icon);
 

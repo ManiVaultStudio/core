@@ -37,14 +37,17 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
     });
 
     const auto updateNoSamplesOverlayWidget = [this]() -> void {
+        
         const auto canView = _viewPluginSamplerAction && _viewPluginSamplerAction->canView();
 
-        auto& widgetfader = _sampleScopeWidget.getNoSamplesOverlayWidget().getWidgetFader();
+        auto& widgetFader = _sampleScopeWidget.getNoSamplesOverlayWidget().getWidgetFader();
+
+        _sampleScopeWidget.getNoSamplesOverlayWidget().raise();
 
         if (canView)
-            widgetfader.fadeOut();
+            widgetFader.fadeOut();
         else
-            widgetfader.fadeIn();
+            widgetFader.fadeIn();
     };
 
     updateNoSamplesOverlayWidget();
@@ -55,6 +58,8 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
 
         if (_viewPluginSamplerAction) {
             disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewStringChanged, this, nullptr);
+            disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewWidgetChanged, this, nullptr);
+            disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::sampleContextChanged, this, nullptr);
             disconnect(&_viewPluginSamplerAction->getSamplingModeAction(), &OptionAction::currentIndexChanged, this, nullptr);
             disconnect(_viewPluginSamplerAction, &ViewPluginSamplerAction::canViewChanged, this, nullptr);
         }
@@ -62,14 +67,28 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
         _viewPluginSamplerAction = dynamic_cast<ViewPluginSamplerAction*>(plugin->findChildByPath("Sampler"));
 
         if (_viewPluginSamplerAction) {
-            const auto updateHtmlText = [this]() -> void {
+            const auto updateViewHtml = [this]() -> void {
+                _freezeViewAction.setVisible(true);
+
                 if (!_freezeViewAction.isChecked())
-					_sampleScopeWidget.setHtmlText(_viewPluginSamplerAction->getViewString());
+					_sampleScopeWidget.setViewHtml(_viewPluginSamplerAction->getViewString());
             };
 
-            updateHtmlText();
+            if (_viewPluginSamplerAction->getViewGeneratorType() == ViewPluginSamplerAction::ViewGeneratorType::HTML)
+				updateViewHtml();
 
-            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewStringChanged, this, updateHtmlText);
+            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewStringChanged, this, updateViewHtml);
+
+            const auto updateViewWidget = [this]() -> void {
+                _freezeViewAction.setVisible(false);
+
+				_sampleScopeWidget.setViewWidget(_viewPluginSamplerAction->getViewWidget());
+            };
+
+            if (_viewPluginSamplerAction->getViewGeneratorType() == ViewPluginSamplerAction::ViewGeneratorType::Widget)
+				updateViewWidget();
+
+            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::viewWidgetChanged, this, updateViewWidget);
 
             const auto updateFreezeActionReadOnly = [this]() -> void {
                 _freezeViewAction.setEnabled(_viewPluginSamplerAction->getSamplingMode() == ViewPluginSamplerAction::SamplingMode::Selection);
@@ -82,11 +101,14 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
             updateNoSamplesOverlayWidget();
 
             connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::canViewChanged, this, updateNoSamplesOverlayWidget);
+            connect(_viewPluginSamplerAction, &ViewPluginSamplerAction::sampleContextChanged, this, updateNoSamplesOverlayWidget);
         }
     });
 
     getLearningCenterAction().addVideos(QStringList({ "Practitioner", "Developer" }));
     getLearningCenterAction().addTutorials(QStringList({ "GettingStarted", "SampleScopePlugin" }));
+
+    _sampleScopeWidget.initialize();
 }
 
 void SampleScopePlugin::init()
@@ -97,6 +119,11 @@ void SampleScopePlugin::init()
     layout->addWidget(&_sampleScopeWidget, 1);
 
     getWidget().setLayout(layout);
+}
+
+ViewPluginSamplerAction* SampleScopePlugin::getViewPluginSamplerAction() const
+{
+	return _viewPluginSamplerAction;
 }
 
 void SampleScopePlugin::fromVariantMap(const QVariantMap& variantMap)
@@ -119,6 +146,8 @@ QVariantMap SampleScopePlugin::toVariantMap() const
 
 SampleScopePluginFactory::SampleScopePluginFactory()
 {
+    setIconByName("microscope");
+
     getPluginMetadata().setDescription("For displaying sample information from another view plugin");
     getPluginMetadata().setSummary("This view plugin displays sample information obtained from another view plugin.");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
@@ -130,11 +159,6 @@ SampleScopePluginFactory::SampleScopePluginFactory()
         { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }
 	});
     getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
-}
-
-QIcon SampleScopePluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("microscope", color);
 }
 
 QUrl SampleScopePluginFactory::getRepositoryUrl() const

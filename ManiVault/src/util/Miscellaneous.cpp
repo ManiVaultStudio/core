@@ -26,7 +26,7 @@
 namespace mv::util
 {
 
-QString getIntegerCountHumanReadable(const float& count)
+QString getIntegerCountHumanReadable(const double& count)
 {
     if (count >= 0 && count < 1000)
         return QString::number(count);
@@ -40,7 +40,7 @@ QString getIntegerCountHumanReadable(const float& count)
     return "";
 }
 
-QString getNoBytesHumanReadable(float noBytes)
+QString getNoBytesHumanReadable(double noBytes)
 {
     QStringList list{ "KB", "MB", "GB", "TB" };
 

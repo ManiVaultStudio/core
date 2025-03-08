@@ -4,7 +4,6 @@
 
 #include "LearningPagePluginAction.h"
 
-#include <Application.h>
 #include <PluginFactory.h>
 
 #include <QDebug>
@@ -12,6 +11,7 @@
 
 using namespace mv;
 using namespace mv::plugin;
+using namespace mv::util;
 
 LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugin::PluginFactory* pluginFactory, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
@@ -30,7 +30,7 @@ LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugi
     auto nameLabel          = new QLabel(_pluginFactory->getKind());
     auto versionLabel       = new QLabel(QString("v%1").arg(QString::fromStdString(_pluginFactory->getVersion().getVersionString())));
 
-    categoryIconLabel->setPixmap(_pluginFactory->getCategoryIcon().pixmap(QSize(12, 12)));
+    categoryIconLabel->setPixmap(QIcon(_pluginFactory->getCategoryIcon()).pixmap(QSize(12, 12)));
 
     categoryIconLabel->setToolTip("Plugin category");
     nameLabel->setToolTip("Name of the plugin");
@@ -49,7 +49,7 @@ LearningPagePluginActionsWidget::LearningPagePluginActionsWidget(const mv::plugi
     if (hasOverlay()) {
         auto elipsisLabel = new QLabel();
 
-        elipsisLabel->setPixmap(Application::getIconFont("FontAwesome").getIcon("ellipsis-h").pixmap(QSize(12, 12)));
+        elipsisLabel->setPixmap(QIcon(StyledIcon("ellipsis")).pixmap(QSize(12, 12)));
         elipsisLabel->setToolTip("Plugin has additional resources");
 
         _mainLayout.addWidget(elipsisLabel);
@@ -200,5 +200,7 @@ void LearningPagePluginActionsWidget::ActionWidget::leaveEvent(QEvent* leaveEven
 
 void LearningPagePluginActionsWidget::ActionWidget::updateStyle()
 {
-    setPixmap(mv::Application::getIconFont("FontAwesome").getIcon(_iconName, underMouse() ? QColor(40, 40, 40) : QColor(0, 0, 0)).pixmap(QSize(12, 12)));
+    const auto icon = StyledIcon(_iconName).withColor(underMouse() ? QColor(40, 40, 40) : QColor(0, 0, 0));
+
+    setPixmap(QIcon(icon).pixmap(QSize(12, 12)));
 }

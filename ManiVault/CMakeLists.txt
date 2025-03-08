@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 # -----------------------------------------------------------------------------
 # Project: ManiVault-core
@@ -20,7 +20,7 @@ message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
 # -----------------------------------------------------------------------------
 # CMake Settings
 # -----------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -45,7 +45,7 @@ include(mv_install_dependencies_utils)
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
 
-# Cmake package manager, downloads dependencies during configuration
+# CMake package manager, downloads dependencies during configuration
 include(CPM)
 
 # create a file that defines MV_VERSION_MAJOR, etc
@@ -102,10 +102,11 @@ endif()
 # -----------------------------------------------------------------------------
 # Windows compiler and linker flags
 # -----------------------------------------------------------------------------
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 	
 	# No linking optimization for MSVC builds with error logging (linking optimization screws up the program database which prohibits symbolication)
@@ -120,6 +121,12 @@ if(MSVC)
 		string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
 	endif()
 endif(MSVC)
+endif()
+
+# -----------------------------------------------------------------------------
+# Resources
+# -----------------------------------------------------------------------------
+include(DownloadFontAwesome)
 
 # Add preprocessor directive to notify sources of error logging
 if(${MV_USE_ERROR_LOGGING})
@@ -131,7 +138,7 @@ endif()
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
+find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
@@ -163,21 +170,21 @@ CPMAddPackage(
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
-  GIT_TAG           4.3.1
+  GIT_TAG           4.4.0
   OPTIONS "BUILD_EXAMPLES OFF"
 )
 
 if(MV_UNITY_BUILD)
-    set_target_properties(qt6advanceddocking PROPERTIES UNITY_BUILD ON)
+    set_target_properties(qtadvanceddocking-qt6 PROPERTIES UNITY_BUILD ON)
 endif()
 
-set_target_properties(qt6advanceddocking PROPERTIES PROJECT_LABEL "qtadvanceddocking" OUTPUT_NAME "qtadvanceddocking")
+set_target_properties(qtadvanceddocking-qt6 PROPERTIES PROJECT_LABEL "qtadvanceddocking" OUTPUT_NAME "qtadvanceddocking")
 
 # bfloat16 implementation for pre c++23
 CPMAddPackage(
   NAME              biovault_bfloat16
   GITHUB_REPOSITORY biovault/biovault_bfloat16
-  GIT_TAG           v1.0.1
+  GIT_TAG           v1.0.2
   DOWNLOAD_ONLY     YES
   EXCLUDE_FROM_ALL  YES
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
@@ -210,6 +217,8 @@ if(${MV_USE_ERROR_LOGGING})
 		FOLDER CoreDependencies/Crashpad
 	)
 	
+if(APPLE)
+    set(CMAKE_XCODE_GENERATE_SCHEME ON)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -242,7 +251,7 @@ target_sources(${MV_PUBLIC_LIB}
 
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
+target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_20)
 
 target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
 
@@ -291,7 +300,7 @@ target_include_directories(${MV_EXE} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
 )
 
-target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
+target_compile_features(${MV_EXE} PRIVATE cxx_std_20)
 
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
@@ -299,7 +308,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
+target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
 if(${MV_USE_ERROR_LOGGING})
@@ -322,22 +331,25 @@ if(MV_UNITY_BUILD)
     set_target_properties(${MV_EXE} PROPERTIES UNITY_BUILD ON)
 endif()
 
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_target_properties(${MV_EXE} PROPERTIES
-        WIN32_EXECUTABLE YES
-        LINK_FLAGS "/ENTRY:mainCRTStartup"
-        LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+        LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:CONSOLE"
     )
-endif(MSVC)
+endif()
 
 if(APPLE)
     
     # Find libraries relative to the executable in the macOS .app tree
     set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 
+    # Debug ManiVault Studio from the install directory
+    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>")   
+    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO)
+    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app")
+    
 endif()
 
-set_target_properties(qt6advanceddocking QuaZip zlib zlibstatic
+set_target_properties(qtadvanceddocking-qt6 QuaZip zlib zlibstatic
     PROPERTIES
     FOLDER CoreDependencies
 )
@@ -387,14 +399,20 @@ if(APPLE)
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
+    
     install(CODE "
-            message(\"**** MacOS bundle install ****\")
-            file(MAKE_DIRECTORY \"${BUNDLE_DIR}\")
-            message(\"**** Run macdeployqt for \"${BUNDLE_DIR}\" ****\")
-            execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite RESULT_VARIABLE retval)
+        message(\"**** MacOS bundle install ****\")
+
+        # Check if the Frameworks folder exists to determine if macdeployqt already ran
+        if(EXISTS \"${BUNDLE_DIR}/Contents/Frameworks/QtCore.framework\")
+            message(\"**** Skipping macdeployqt, bundle already deployed. ****\")
+        else()
+            message(\"**** Running macdeployqt for \"${BUNDLE_DIR}\" ****\")
+            execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -no-strip RESULT_VARIABLE retval)
             if(NOT retval EQUAL 0)
-        	    message(FATAL_ERROR \"macdeployqt failed\")
+                message(FATAL_ERROR \"macdeployqt failed\")
             endif()
+
             set(ADDITIONAL_LIBS
 				\"$<TARGET_FILE:qt6advanceddocking>\"
 				\"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
@@ -402,12 +420,13 @@ if(APPLE)
 				\"$<TARGET_FILE:crashpad_wer>\"
 				\"$<TARGET_FILE:crashpad_handler}>\"
 			)
+
+            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qtadvanceddocking-qt6>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
-            
-        "
-        COMPONENT MACOS_BUNDLE
-    )
+        endif()
+    " COMPONENT MACOS_BUNDLE)
+
       
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"
@@ -464,10 +483,12 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
         COMPONENT MVPUBLIC_CMAKE_HELPER
 )
 
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Install program database (.pdb) files
     install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
     install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "RelWithDebInfo" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "RelWithDebInfo" OPTIONAL)
 endif()
 
 # Generate the version file for use with find_package
@@ -570,7 +591,7 @@ if(NOT APPLE)
     # on windows, the DLLs should be placed in the same directory as the executable
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 	
 	if(${MV_USE_ERROR_LOGGING})
@@ -659,7 +680,7 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 # -----------------------------------------------------------------------------
 
 # Automatically set the debug environment (command + working directory) for MSVC
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_ENVIRONMENT "PATH=${QT_DIR}/../../../bin")
     set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>)
     set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${MV_INSTALL_DIR}/Debug/${MV_APPLICATION_NAME}.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${MV_INSTALL_DIR}/RelWithDebInfo/${MV_APPLICATION_NAME}.exe","${MV_INSTALL_DIR}/Release/${MV_APPLICATION_NAME}.exe">>)

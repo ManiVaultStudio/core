@@ -11,34 +11,30 @@
     #define INFO_WIDGET_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv::gui
 {
 
+QColor InfoWidget::defaultForegroundColor = Qt::black;
+QColor InfoWidget::defaultBackgroundColor = Qt::lightGray;
+
 InfoWidget::InfoWidget(QWidget* parent) :
     QWidget(parent),
-    _icon(),
-    _iconLabel(),
-    _titleLabel(),
-    _descriptionLabel(),
-    _foregroundColor(),
-    _backgroundColor()
+    _foregroundColor(defaultForegroundColor),
+    _backgroundColor(defaultBackgroundColor),
+    _foregroundColorRole(QPalette::ColorRole::Text),
+    _backgroundColorRole(QPalette::ColorRole::Window)
 {
-    setColors(Qt::black, Qt::lightGray);
     initialize();
 }
 
-InfoWidget::InfoWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor foregroundColor /*= Qt::black*/, const QColor backgroundColor /*= Qt::lightGray*/) :
-    QWidget(parent),
-    _icon(),
-    _iconLabel(),
-    _titleLabel(),
-    _descriptionLabel(),
-    _foregroundColor(),
-    _backgroundColor()
+InfoWidget::InfoWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/) :
+    InfoWidget(parent)
 {
-    set(icon, title, description);
-    setColors(foregroundColor, backgroundColor);
     initialize();
+
+    set(icon, title, description);
 }
 
 void InfoWidget::set(const QIcon& icon, const QString& title, const QString& description /*= ""*/)
@@ -53,42 +49,88 @@ void InfoWidget::set(const QIcon& icon, const QString& title, const QString& des
     _descriptionLabel.setVisible(!_descriptionLabel.text().isEmpty());
 }
 
-void InfoWidget::setColor(const QColor color)
+QColor InfoWidget::getForegroundColor() const
 {
-    _foregroundColor    = color;
-    _backgroundColor    = color;
-    
-    _backgroundColor.setAlphaF(0.1f);
-
-    setColors(_foregroundColor, _backgroundColor);
+    return _foregroundColor;
 }
 
-void InfoWidget::setColors(const QColor foregroundColor /*= Qt::black*/, const QColor backgroundColor /*= Qt::lightGray*/)
+void InfoWidget::setForegroundColor(const QColor foregroundColor)
 {
-    _foregroundColor    = foregroundColor;
-    _backgroundColor    = backgroundColor;
+    if (foregroundColor == _foregroundColor)
+        return;
 
-    const auto colorToRgba = [](const QColor& color) -> QString {
-        return QString("rgba(%1,%2,%3,%4)").arg(QString::number(color.red()), QString::number(color.green()), QString::number(color.blue()), QString::number(color.alpha()));
-    };
+    const auto previousForegroundColor = _foregroundColor;
 
-    setStyleSheet(QString("QWidget#InfoWidget { background-color: %1; } QWidget#InfoWidget > QLabel { color: %2; }").arg(colorToRgba(_backgroundColor), colorToRgba(_foregroundColor)));
+    _foregroundColor = foregroundColor;
 
-    QImage tmp = _icon.pixmap(QSize(24, 24)).toImage();
+    emit foregroundColorChanged(previousForegroundColor, _foregroundColor);
 
-    for (int pixelY = 0; pixelY < tmp.height(); pixelY++)
-    {
-        for (int pixelX = 0; pixelX < tmp.width(); pixelX++)
-        {
-            auto color = _foregroundColor;
+    updateStyling();
+}
 
-            color.setAlpha(_foregroundColor.alphaF() * tmp.pixelColor(pixelX, pixelY).alpha());
+QColor InfoWidget::getBackgroundColor() const
+{
+    return _backgroundColor;
+}
 
-            tmp.setPixelColor(pixelX, pixelY, color);
-        }
-    }
+void InfoWidget::setBackgroundColor(const QColor backgroundColor)
+{
+    if (backgroundColor == _backgroundColor)
+        return;
 
-    _iconLabel.setPixmap(QPixmap::fromImage(tmp));
+    const auto previousBackgroundColor = _backgroundColor;
+
+    _backgroundColor = backgroundColor;
+
+    emit backgroundColorChanged(previousBackgroundColor, _backgroundColor);
+
+    updateStyling();
+}
+
+void InfoWidget::setColors(const QColor& foregroundColor, const QColor& backgroundColor)
+{
+    setForegroundColor(foregroundColor);
+    setBackgroundColor(backgroundColor);
+}
+
+std::int32_t InfoWidget::getForegroundColorRole() const
+{
+    return _foregroundColorRole;
+}
+
+void InfoWidget::setForegroundColorRole(const QPalette::ColorRole& foregroundColorRole)
+{
+    if (foregroundColorRole == _foregroundColorRole)
+        return;
+
+    const auto previousForegroundColorRole = _foregroundColorRole;
+
+    _foregroundColorRole = foregroundColorRole;
+
+    emit foregroundColorRoleChanged(static_cast<QPalette::ColorRole>(previousForegroundColorRole), static_cast<QPalette::ColorRole>(_foregroundColorRole));
+}
+
+std::int32_t InfoWidget::getBackgroundColorRole() const
+{
+    return _backgroundColorRole;
+}
+
+void InfoWidget::setBackgroundColorRole(const QPalette::ColorRole& backgroundColorRole)
+{
+    if (backgroundColorRole == _backgroundColorRole)
+        return;
+
+    const auto previousBackgroundColorRole = _backgroundColorRole;
+
+    _backgroundColorRole = backgroundColorRole;
+
+    emit backgroundColorRoleChanged(static_cast<QPalette::ColorRole>(previousBackgroundColorRole), static_cast<QPalette::ColorRole>(_backgroundColorRole));
+}
+
+void InfoWidget::setColorRoles(const QPalette::ColorRole& foregroundColorRole, const QPalette::ColorRole& backgroundColorRole)
+{
+    setForegroundColorRole(foregroundColorRole);
+    setBackgroundColorRole(backgroundColorRole);
 }
 
 void InfoWidget::initialize()
@@ -115,20 +157,26 @@ void InfoWidget::initialize()
     layout->addStretch(1);
 
     setLayout(layout);
+
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &InfoWidget::updateStyling);
 }
 
-void InfoWidget::setForegroundColor(const QColor foregroundColor /*= Qt::black*/)
+void InfoWidget::updateStyling()
 {
-    _foregroundColor = foregroundColor;
+    const auto foregroundColor = _foregroundColorRole > 0 ? qApp->palette().color(QPalette::ColorGroup::Normal, static_cast<QPalette::ColorRole>(_foregroundColorRole)) : _foregroundColor;
+    const auto backgroundColor = _backgroundColorRole > 0 ? qApp->palette().color(QPalette::ColorGroup::Normal, static_cast<QPalette::ColorRole>(_backgroundColorRole)) : _backgroundColor;
 
-    setColors(_foregroundColor, _backgroundColor);
-}
+    setStyleSheet(QString(
+        "QWidget#InfoWidget"
+        "{"
+			"background-color: %1;"
+        "}"
+        "QWidget#InfoWidget > QLabel"
+        "{"
+			"color: %2;"
+        "}").arg(backgroundColor.name(), foregroundColor.name()));
 
-void InfoWidget::setBackgroundColor(const QColor backgroundColor /*= Qt::lightGray*/)
-{
-    _backgroundColor = backgroundColor;
-
-    setColors(_foregroundColor, _backgroundColor);
+    _iconLabel.setPixmap(_icon.pixmap(QSize(24, 24)));
 }
 
 }

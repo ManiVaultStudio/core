@@ -23,7 +23,7 @@ void TextData::init()
 
 Dataset<DatasetImpl> TextData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Text(getName(), true, guid));
+    return { new Text(getName(), true, guid) };
 }
 
 void TextData::fromVariantMap(const QVariantMap& variantMap)
@@ -44,9 +44,9 @@ QVariantMap TextData::toVariantMap() const
     return variantMap;
 }
 
-QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
+TextDataFactory::TextDataFactory()
 {
-    return Application::getIconFont("FontAwesome").getIcon("font", color);
+    setIconByName("font");
 }
 
 QUrl TextDataFactory::getReadmeMarkdownUrl() const
@@ -73,11 +73,6 @@ void Text::init()
     DatasetImpl::init();
 
     _infoAction = new InfoAction(this, *this);
-}
-
-QIcon Text::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("font", color);
 }
 
 std::vector<std::uint32_t>& Text::getSelectionIndices()

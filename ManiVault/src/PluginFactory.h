@@ -14,7 +14,6 @@
 #include "actions/PluginTriggerAction.h"
 
 #include <QObject>
-#include <QIcon>
 
 namespace mv {
     class DatasetImpl;
@@ -34,7 +33,7 @@ namespace mv::plugin
 
 class Plugin;
 
-class CORE_EXPORT PluginFactory : public QObject
+class CORE_EXPORT PluginFactory : public gui::WidgetAction
 {
     Q_OBJECT
 
@@ -43,9 +42,11 @@ public:
     /**
      * Constructor
      * @param type The plugin type
+     * @param title The plugin factory title
      */
-    PluginFactory(Type type);
+    PluginFactory(Type type, const QString& title);
 
+    /** No need for custom destructor */
     ~PluginFactory() override = default;
 
     /**
@@ -68,6 +69,20 @@ public:
 
     /** Perform post-construction initialization */
     virtual void initialize();
+
+    /**
+     * Get plugin category icon
+     * @return Category icon
+     */
+    const QIcon& getCategoryIcon() const;
+
+protected:
+
+    /**
+     * Set category icon by name
+     * @param category Category name
+     */
+    void setCategoryIconByName(const QString& category);
 
 public: // Global settings
 
@@ -157,21 +172,6 @@ public: // Meta data
      * @param version Plugin semantic version
      */
     void setVersion(const util::Version& version);
-
-public:
-
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    virtual QIcon getIcon(const QColor& color = Qt::black) const;
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    virtual QIcon getCategoryIcon() const = 0;
 
     /**
      * Produces the plugin
@@ -393,6 +393,7 @@ private:
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
     bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
     PluginMetadata                          _pluginMetadata;                        /** Plugin metadata */
+	QIcon                                   _categoryIcon;                          /** Category icon */
 };
 
 }

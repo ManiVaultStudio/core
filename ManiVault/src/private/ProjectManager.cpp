@@ -72,31 +72,31 @@ ProjectManager::ProjectManager(QObject* parent) :
 
     //_saveProjectAction.setShortcut(QKeySequence("Ctrl+S"));
     //_saveProjectAction.setShortcutContext(Qt::ApplicationShortcut);
-    _saveProjectAction.setIconByName("save");
+    _saveProjectAction.setIconByName("floppy-disk");
     _saveProjectAction.setToolTip("Save project to disk");
 
     //_saveProjectAsAction.setShortcut(QKeySequence("Ctrl+Shift+S"));
     //_saveProjectAsAction.setShortcutContext(Qt::ApplicationShortcut);
-    _saveProjectAsAction.setIconByName("save");
+    _saveProjectAsAction.setIconByName("floppy-disk");
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
 
     //_editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+Shift+P"));
     //_editProjectSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
-    _editProjectSettingsAction.setIconByName("cog");
+    _editProjectSettingsAction.setIconByName("gear");
 
-    _newProjectMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    _newProjectMenu.setIcon(StyledIcon("file"));
     _newProjectMenu.setTitle("New Project");
     _newProjectMenu.setToolTip("Create new project");
     _newProjectMenu.addAction(&_newBlankProjectAction);
     //_newProjectMenu.addAction(&_newProjectFromWorkspaceAction);
 
-    _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _importDataMenu.setIcon(StyledIcon("file-import"));
     _importDataMenu.setTitle("Import data...");
     _importDataMenu.setToolTip("Import data into ManiVault");
 
     //_publishAction.setShortcut(QKeySequence("Ctrl+P"));
     //_publishAction.setShortcutContext(Qt::ApplicationShortcut);
-    _publishAction.setIconByName("cloud-upload-alt");
+    _publishAction.setIconByName("cloud-arrow-up");
     _publishAction.setToolTip("Publish the ManiVault application");
 
     //_pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
@@ -204,7 +204,7 @@ ProjectManager::ProjectManager(QObject* parent) :
 
     updateActionsReadOnly();
 
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
     connect(&_recentProjectsAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         openProject(filePath);
@@ -642,7 +642,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 GroupAction settingsGroupAction(this, "Settings");
 
-                settingsGroupAction.setIconByName("cog");
+                settingsGroupAction.setIconByName("gear");
                 settingsGroupAction.setToolTip("Edit project settings");
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
@@ -835,7 +835,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
                 FileSaveDialog saveFileDialog;
 
-                saveFileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
+                saveFileDialog.setWindowIcon(StyledIcon("cloud-arrow-up"));
                 saveFileDialog.setWindowTitle("Publish ManiVault Project");
                 saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
                 saveFileDialog.setDefaultSuffix(".mv");
@@ -885,7 +885,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
                     fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
 
-                    settingsGroupAction.setIconByName("cog");
+                    settingsGroupAction.setIconByName("gear");
                     settingsGroupAction.setToolTip("Edit project settings");
                     settingsGroupAction.setPopupSizeHint(QSize(420, 0));
                     settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);

@@ -3,9 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ModalTaskHandler.h"
-#include "ModalTask.h"
 #include "Application.h"
-#include "CoreInterface.h"
 
 #include <QMainWindow>
 
@@ -16,6 +14,7 @@
 namespace mv {
 
 using namespace gui;
+using namespace util;
 
 ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
@@ -128,7 +127,7 @@ void ModalTaskHandler::ModalTasksDialog::updateWindowTitleAndIcon()
 
     const auto numberOfModalTasks = tasksFilterModel.rowCount();
 
-    const auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
+    const auto clockIcon = StyledIcon("clock");
 
     if (numberOfModalTasks == 1) {
         const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));

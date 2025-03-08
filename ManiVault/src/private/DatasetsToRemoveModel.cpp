@@ -128,7 +128,7 @@ QVariant DatasetsToRemoveModel::NameItem::data(int role /*= Qt::UserRole + 1*/) 
             if (!getDataset().isValid())
                 break;
 
-            return getDataset()->getIcon();
+            return StyledIcon(getDataset()->icon());
         }
 
         case Qt::CheckStateRole:
@@ -210,7 +210,7 @@ QVariant DatasetsToRemoveModel::InfoItem::data(int role /*= Qt::UserRole + 1*/) 
         case Qt::DecorationRole:
         {
             if (showInfo)
-                return Application::getIconFont("FontAwesome").getIcon("info-circle");
+                return StyledIcon("info-circle");
 
             break;
         }

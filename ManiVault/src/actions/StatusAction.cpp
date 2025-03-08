@@ -4,9 +4,9 @@
 
 #include "StatusAction.h"
 
-#include <Application.h>
-
 #include <QTimer>
+
+using namespace mv::util;
 
 namespace mv::gui {
 
@@ -84,10 +84,7 @@ StatusAction::LineEditWidget::LineEditWidget(QWidget* parent, StatusAction* stat
 
             case Status::Warning:
             case Status::Error:
-                _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("exclamation-circle"));
-                break;
-
-            default:
+                _trailingAction.setIcon(StyledIcon("exclamation-circle"));
                 break;
         }
     };

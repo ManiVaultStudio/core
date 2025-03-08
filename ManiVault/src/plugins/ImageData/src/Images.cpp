@@ -54,6 +54,7 @@ void Images::init()
         !(getDataHierarchyItem().getParent()->getDataType() == PointType || getDataHierarchyItem().getParent()->getDataType() == ClusterType))
         qCritical() << "Images: warning: image data set must be derived from points or clusters.";
 
+    setIconByName("images");
 }
 
 std::tuple<mv::Dataset<mv::DatasetImpl>, mv::Dataset<Images>> Images::addImageDataset(QString datasetGuiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const QString pluginKind /*= "Points"*/)
@@ -159,11 +160,6 @@ QRect Images::getRectangle() const
 QRect Images::getVisibleRectangle() const
 {
     return _visibleRectangle;
-}
-
-QIcon Images::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return mv::Application::getIconFont("FontAwesome").getIcon("images", color);
 }
 
 std::vector<std::uint32_t>& Images::getSelectionIndices()

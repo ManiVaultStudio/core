@@ -193,9 +193,8 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
                 addViewPluginDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
             } else {
                 auto notLoadedDockWidget    = new CDockWidget(QString("%1 (not loaded)").arg(guiName));
-                auto notLoadedInfoWidget    = new InfoWidget(this, Application::getIconFont("FontAwesome").getIcon("exclamation-circle"), "View not loaded", QString("We were unable to load the %1 because the plugin is not loaded properly.\nThe workspace might not behave as expected, please ensure the required plugin is loaded properly...").arg(pluginKind));
+                auto notLoadedInfoWidget    = new InfoWidget(this, StyledIcon("exclamation-circle"), "View not loaded", QString("We were unable to load the %1 because the plugin is not loaded properly.\nThe workspace might not behave as expected, please ensure the required plugin is loaded properly...").arg(pluginKind));
 
-                notLoadedInfoWidget->setColor(Qt::gray);
                 notLoadedDockWidget->setWidget(notLoadedInfoWidget);
                 notLoadedDockWidget->setObjectName(viewPluginDockWidgetVariant.toMap()["ID"].toString());
 

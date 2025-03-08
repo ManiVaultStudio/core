@@ -69,19 +69,12 @@ class CORE_EXPORT RawDataFactory : public PluginFactory
     
 public:
     RawDataFactory() :
-        PluginFactory(Type::DATA)
+        PluginFactory(Type::DATA, "Raw data")
     {
-
+        setIconByName("table");
+        setCategoryIconByName("table");
     }
     ~RawDataFactory() override {};
-
-    /**
-     * Get plugin category (loader/writer/transformation etc.) icon
-     * @return Icon which belongs to the plugin factory category
-     */
-    QIcon getCategoryIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("table");
-    }
 
     /**
      * Produces the plugin

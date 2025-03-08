@@ -88,8 +88,10 @@ void OptionAction::setOptions(const QStringList& options)
 
     emit modelChanged();
 
-    emit currentIndexChanged(_currentIndex);
-    emit currentTextChanged(getCurrentText());
+    if (_currentIndex != oldCurrentIndex) {
+        emit currentIndexChanged(_currentIndex);
+        emit currentTextChanged(getCurrentText());
+    }
 }
 
 const QAbstractItemModel* OptionAction::getModel() const
@@ -389,7 +391,7 @@ void OptionAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     initStyleOption(&styleOptionComboBox);
 
     //if (_optionAction->getCurrentIndex() == -1)
-    //    styleOptionComboBox.currentIcon = Application::getIconFont("FontAwesome").getIcon("list");
+    //    styleOptionComboBox.currentIcon = StyledIcon("list");
 
     painter->drawComplexControl(QStyle::CC_ComboBox, styleOptionComboBox);
 
@@ -405,8 +407,7 @@ void OptionAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 
 OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* optionAction) :
     QLineEdit(parent),
-    _optionAction(optionAction),
-    _completer()
+    _optionAction(optionAction)
 {
     setObjectName("LineEdit");
     setCompleter(&_completer);
@@ -540,7 +541,7 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     if (widgetFlags & WidgetFlag::Clearable) {
         auto clearSelectionAction = new TriggerAction(parent, "Clear");
 
-        clearSelectionAction->setIconByName("times");
+        clearSelectionAction->setIconByName("xmark");
         clearSelectionAction->setToolTip("Clear the current selection");
 
         connect(clearSelectionAction, &TriggerAction::triggered, this, [this]() -> void {

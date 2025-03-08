@@ -7,18 +7,20 @@
 #include <Application.h>
 #include <CoreInterface.h>
 
-#include <util/Miscellaneous.h>
-
 #include <models/LearningCenterVideosModel.h>
+
+#include <QDebug>
 
 #include <QAbstractTextDocumentLayout>
 #include <QDateTime>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QEvent>
 #include <QLocale>
 #include <QModelIndex>
 #include <QString>
+#include <QToolTip>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsSceneHelpEvent>
 
 //#define USE_YOUTUBE_DIALOG
 
@@ -26,36 +28,139 @@ using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
+GraphicsItemFader::GraphicsItemFader(QGraphicsItem* item, qreal opacity, QObject* parent):
+	QObject(parent),
+	_item(item),
+	_opacityEffect(this),
+	_opacityAnimation(&_opacityEffect, "opacity")
+{
+	_item->setGraphicsEffect(&_opacityEffect);
+
+	fadeIn(opacity);
+}
+
+void GraphicsItemFader::fadeIn(qreal opacity, int duration, int delay)
+{
+	return setOpacity(opacity, duration, delay);
+}
+
+void GraphicsItemFader::fadeIn(int duration, int delay)
+{
+	return setOpacity(1.0, duration, delay);
+}
+
+void GraphicsItemFader::fadeOut(qreal opacity, int duration, int delay)
+{
+	return setOpacity(opacity, duration, delay);
+}
+
+void GraphicsItemFader::fadeOut(int duration, int delay)
+{
+	return setOpacity(0.0, duration, delay);
+}
+
+void GraphicsItemFader::setOpacity(qreal opacity, int duration, int delay)
+{
+	if (_opacityEffect.opacity() == opacity)
+		return;
+
+    const auto animateOpacity = [this, duration, opacity]() -> void {
+        _opacityAnimation.stop();
+        _opacityAnimation.setDuration(duration);
+        _opacityAnimation.setStartValue(_opacityAnimation.currentValue());
+        _opacityAnimation.setEndValue(opacity);
+
+        _opacityAnimation.start();
+	};
+
+    if (delay > 0) {
+        QTimer::singleShot(delay, animateOpacity);
+    } else {
+        animateOpacity();
+    }
+}
+
+GraphicsIconItem::GraphicsIconItem(const QString& iconName, const QSize& iconSize, qreal intermediateOpacity /*= 0.5*/, QGraphicsItem* parent /*= nullptr*/):
+	QGraphicsPixmapItem(QIcon(StyledIcon(iconName)).pixmap(iconSize), parent),
+	_fader(this),
+    _intermediateOpacity(intermediateOpacity)
+{
+	setAcceptHoverEvents(true);
+
+    //
+}
+
+void GraphicsIconItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsPixmapItem::hoverEnterEvent(event);
+
+	_fader.fadeIn(1.0, 150);
+}
+
+void GraphicsIconItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsPixmapItem::hoverLeaveEvent(event);
+
+	_fader.setOpacity(_intermediateOpacity);
+}
+
+void GraphicsIconItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+	QGraphicsPixmapItem::mousePressEvent(event);
+
+    emit clicked();
+}
+
+OverlayRectangleItem::OverlayRectangleItem(QGraphicsItem* parent) :
+	QGraphicsRectItem(parent),
+    _fader(this)
+{
+}
+
+void OverlayRectangleItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+	QGraphicsRectItem::hoverEnterEvent(event);
+
+    _fader.fadeIn(1.0, 150);
+}
+
+void OverlayRectangleItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+	QGraphicsRectItem::hoverLeaveEvent(event);
+
+    _fader.setOpacity(0);
+}
+
+GraphicsItemFader& OverlayRectangleItem::getFader()
+{
+	return _fader;
+}
+
 LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _index(index),
-    _overlayWidget(index, &_thumbnailLabel)
+    _overlayGraphicsScene(this),
+    _overlayGraphicsView(this),
+	_playIconItem("play", { 32, 32 }, 0.5),
+	_summaryIconItem("scroll", { 12, 12 }, 0.3),
+	_dateIconItem("calendar", { 12, 12 }, 0.3),
+	_tagsIconItem("tags", { 12, 12 }, 0.3)
 {
     const auto title = _index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Title)).data().toString();
 
     _propertiesTextBrowser.setReadOnly(true);
-    _propertiesTextBrowser.setStyleSheet("background-color: transparent; border: none; margin: 0px; padding: 0px;");
     _propertiesTextBrowser.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _propertiesTextBrowser.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _propertiesTextBrowser.document()->setDocumentMargin(0);
     _propertiesTextBrowser.setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     _propertiesTextBrowser.setFixedWidth(200);
-    _propertiesTextBrowser.setHtml(QString("<p style='margin-top: 0px; rgb(75, 75, 75)'><b>%1</b></p>").arg(title));
-    _propertiesTextBrowser.setStyleSheet(" \
-        background-color: transparent; \
-        border: none; \
-        margin: 0px; \
-        padding: 0px; \
-    ");
+    _propertiesTextBrowser.setHtml(QString("<p style='margin-top: 0px;'>%1</p>").arg(title));
 
     connect(_propertiesTextBrowser.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [this]() -> void {
         _propertiesTextBrowser.setFixedHeight(static_cast<int>(_propertiesTextBrowser.document()->size().height()));
     });
 
-    _overlayWidget.hide();
-
-    _mainLayout.setContentsMargins(0, 0, 15, 0);
-    _mainLayout.setSpacing(1);
+    _mainLayout.setContentsMargins(0, 0, 0, 0);
     _mainLayout.setAlignment(Qt::AlignTop);
 
     _mainLayout.addWidget(&_thumbnailLabel);
@@ -63,18 +168,11 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
 
     setLayout(&_mainLayout);
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     _thumbnailLabel.setObjectName("ThumbnailLabel");
-    _thumbnailLabel.setFont(fontAwesome.getFont(20));
-    _thumbnailLabel.setText(fontAwesome.getIconCharacter("spinner"));
+    _thumbnailLabel.setFont(StyledIcon::getIconFont(20));
+    _thumbnailLabel.setText(StyledIcon::getIconCharacter("spinner"));
     _thumbnailLabel.setAlignment(Qt::AlignCenter);
     _thumbnailLabel.setFixedSize(QSize(200, 102));
-    _thumbnailLabel.setStyleSheet("QLabel#ThumbnailLabel { \
-        background-color: rgb(200, 200, 200); \
-        color: rgb(100, 100, 100); \
-        border: 1px solid rgb(150, 150, 150); \
-    }");
 
     const auto sourceModelIndex = dynamic_cast<const QSortFilterProxyModel*>(_index.model())->mapToSource(_index);
     const auto modelItem        = mv::help().getVideosModel().itemFromIndex(sourceModelIndex.siblingAtColumn(0));
@@ -98,65 +196,26 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     else
         connect(video, &LearningCenterVideo::thumbnailImageReady, this, updateThumbnailImage);
 
-    _thumbnailLabel.installEventFilter(this);
-}
+    _overlayGraphicsScene.setSceneRect(QRect(QPoint(0, 0), QSize(200, 102)));
 
-bool LearningPageVideoWidget::eventFilter(QObject* target, QEvent* event)
-{
-    switch (event->type())
-    {
-        case QEvent::Enter:
-        {
-            if (target == &_thumbnailLabel) {
-                _overlayWidget.show();
-                _overlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-            }
-            
-            break;
-        }
+    _overlayGraphicsView.setScene(&_overlayGraphicsScene);
+    _overlayGraphicsView.setGeometry(0, 0, width(), height());
 
-        case QEvent::Leave:
-        {
-            if (target == &_thumbnailLabel) {
-                _overlayWidget.hide();
-                _overlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-            }
+    _overlayRectangleItem.setRect(QRect(QPoint(0, 1), QSize(200, 101)));
 
-            break;
-        }
+    _playIconItem.setPos(100 - 16, 50 - 16);
+    _summaryIconItem.setPos(140, 80);
+    _dateIconItem.setPos(160, 80);
+    _tagsIconItem.setPos(180, 80);
 
-        default:
-            break;
-    }
+    connect(&_playIconItem, &GraphicsIconItem::clicked, this, [this]() -> void {
+#ifdef USE_YOUTUBE_DIALOG
+        YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Resource)).data().toString());
+#else
+        QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Resource)).data().toString()));
+#endif
+	});
 
-    return QWidget::eventFilter(target, event);
-}
-
-LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, QWidget* parent) :
-    QWidget(parent),
-    _index(index),
-    _widgetOverlayer(this, this, parent)
-{
-    setObjectName("OverlayWidget");
-
-    _mainLayout.setContentsMargins(4, 2, 4, 2);
-
-    _mainLayout.addStretch(1);
-    _mainLayout.addLayout(&_centerLayout, 1);
-    _mainLayout.addLayout(&_bottomLayout, 1);
-
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    _playIconLabel.setFont(fontAwesome.getFont(32));
-    _summaryIconLabel.setFont(fontAwesome.getFont(8));
-    _dateIconLabel.setFont(fontAwesome.getFont(8));
-    _tagsIconLabel.setFont(fontAwesome.getFont(8));
-
-    _playIconLabel.setText(fontAwesome.getIconCharacter("play-circle"));
-    _summaryIconLabel.setText(fontAwesome.getIconCharacter("scroll"));
-    _dateIconLabel.setText(fontAwesome.getIconCharacter("calendar-alt"));
-    _tagsIconLabel.setText(fontAwesome.getIconCharacter("tags"));
-    
     QLocale locale;
 
     const auto summary      = _index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Summary)).data().toString();
@@ -165,61 +224,64 @@ LearningPageVideoWidget::OverlayWidget::OverlayWidget(const QModelIndex& index, 
     const auto dateString   = locale.toString(dateTime.date());
     const auto tags         = _index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Tags)).data().toStringList();
 
-    _playIconLabel.setToolTip("Click to start the video");
-    _summaryIconLabel.setToolTip(summary);
-    _dateIconLabel.setToolTip(dateString);
-    _tagsIconLabel.setToolTip(QString("%1").arg(tags.join(", ")));
+    _playIconItem.setToolTip("Play the video on YouTube");
+    _summaryIconItem.setToolTip(summary);
+    _dateIconItem.setToolTip(dateString);
+    _tagsIconItem.setToolTip(tags.join(", "));
 
-    _centerLayout.setAlignment(Qt::AlignCenter);
+    _overlayGraphicsScene.addItem(&_overlayRectangleItem);
+    _overlayGraphicsScene.addItem(&_playIconItem);
+    _overlayGraphicsScene.addItem(&_summaryIconItem);
+    _overlayGraphicsScene.addItem(&_dateIconItem);
+    _overlayGraphicsScene.addItem(&_tagsIconItem);
 
-    _centerLayout.addWidget(&_playIconLabel);
+    _overlayGraphicsView.setObjectName("OverlayGraphicsView");
+    _overlayGraphicsView.setRenderHint(QPainter::Antialiasing);
+    _overlayGraphicsView.setRenderHint(QPainter::SmoothPixmapTransform);
+    _overlayGraphicsView.setStyleSheet("QGraphicsView#OverlayGraphicsView { background: transparent; border: none; }");
+    _overlayGraphicsView.setAttribute(Qt::WA_TranslucentBackground);
+    _overlayGraphicsView.show();
+    _overlayGraphicsView.raise();
+    _overlayGraphicsView.setGeometry(0, 0, 200, 101);
+    _overlayGraphicsView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _overlayGraphicsView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    _bottomLayout.addStretch(1);
+    updateCustomStyle();
 
-    _bottomLayout.addWidget(&_summaryIconLabel);
-    _bottomLayout.addWidget(&_dateIconLabel);
-    _bottomLayout.addWidget(&_tagsIconLabel);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &LearningPageVideoWidget::updateCustomStyle);
 
-    auto backgroundColor = QApplication::palette().color(QPalette::Normal, QPalette::Midlight);
-
-    backgroundColor.setAlpha(200);
-
-    setStyleSheet("QWidget#OverlayWidget { \
-        background-color: rgba(230, 230, 230, 230); \
-        border: 1px solid rgb(150, 150, 150); \
-    }");
-
-    setLayout(&_mainLayout);
-
-    _playIconLabel.installEventFilter(this);
-    _summaryIconLabel.installEventFilter(this);
-    _dateIconLabel.installEventFilter(this);
-    _tagsIconLabel.installEventFilter(this);
-
-    updateStyle();
+    installEventFilter(this);
 }
 
-bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent* event)
+bool LearningPageVideoWidget::eventFilter(QObject* target, QEvent* event)
 {
     switch (event->type())
     {
-        case QEvent::MouseButtonPress:
+        case QEvent::Enter:
         {
-            if (target == &_playIconLabel) {
-#ifdef USE_YOUTUBE_DIALOG
-                YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Resource)).data().toString());
-#else
-                QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Resource)).data().toString()));
-#endif
-            }
+            _overlayRectangleItem.getFader().fadeIn(250);
+            _playIconItem.getFader().fadeIn(0.5, 250, 50);
+            _summaryIconItem.getFader().fadeIn(0.3, 250, 75);
+            _dateIconItem.getFader().fadeIn(0.3, 250, 100);
+            _tagsIconItem.getFader().fadeIn(0.3, 250, 125);
 
             break;
         }
 
-        case QEvent::Enter:
         case QEvent::Leave:
-            updateStyle();
+        {
+            if (rect().contains(mapFromGlobal(QCursor::pos()))) {
+                return true;
+            }
+
+            _overlayRectangleItem.getFader().fadeOut(200, 25);
+            _playIconItem.getFader().fadeOut(150, 50);
+            _summaryIconItem.getFader().fadeOut(100, 75);
+            _dateIconItem.getFader().fadeOut(100, 100);
+            _tagsIconItem.getFader().fadeOut(100, 125);
+
             break;
+        }
 
         default:
             break;
@@ -228,13 +290,18 @@ bool LearningPageVideoWidget::OverlayWidget::eventFilter(QObject* target, QEvent
     return QWidget::eventFilter(target, event);
 }
 
-void LearningPageVideoWidget::OverlayWidget::updateStyle()
+void LearningPageVideoWidget::updateCustomStyle()
 {
-    auto colorEnter = getColorAsCssString(QColor(0, 0, 0, 150));
-    auto colorLeave = getColorAsCssString(QColor(0, 0, 0, 70));
+    _thumbnailLabel.setStyleSheet(QString("QLabel#ThumbnailLabel { \
+        border: 1px solid %1; \
+    }").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Window).name()));
 
-    _playIconLabel.setStyleSheet(QString("color: %1").arg(_playIconLabel.underMouse() ? colorEnter : colorLeave));
-    _summaryIconLabel.setStyleSheet(QString("color: %1").arg(_summaryIconLabel.underMouse() ? colorEnter : colorLeave));
-    _dateIconLabel.setStyleSheet(QString("color: %1").arg(_dateIconLabel.underMouse() ? colorEnter : colorLeave));
-    _tagsIconLabel.setStyleSheet(QString("color: %1").arg(_tagsIconLabel.underMouse() ? colorEnter : colorLeave));
+    _propertiesTextBrowser.setStyleSheet(QString("background-color: transparent; color: %1; border: none; margin: 0px; padding: 0px;").arg(qApp->palette().color(QPalette::ColorGroup::Inactive, QPalette::ColorRole::Text).name()));
+
+    auto windowBackgroundColor = qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Window);
+
+    windowBackgroundColor.setAlphaF(0.9f);
+
+    _overlayRectangleItem.setBrush(windowBackgroundColor);
+    _overlayRectangleItem.setPen(QPen(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Accent), 1));
 }

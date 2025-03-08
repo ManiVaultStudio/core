@@ -53,7 +53,13 @@ public:
          * @param event Pointer to resize event
          */
         void resizeEvent(QResizeEvent* event) override;
-
+        
+        /**
+         * Override paint event to fix icon alignment issues
+         * @param event Pointer to paint event
+         */
+        void paintEvent(QPaintEvent* event) override;
+        
     protected:
         TriggerAction*  _triggerAction;     /** Pointer to trigger action */
         std::int32_t    _widgetFlags;       /** Widget flags */

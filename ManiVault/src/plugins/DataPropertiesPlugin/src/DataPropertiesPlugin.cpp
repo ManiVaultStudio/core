@@ -19,7 +19,7 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     _additionalEditorAction(this, "Edit dataset parameters..."),
     _dataPropertiesWidget(this, nullptr)
 {
-    _additionalEditorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+    _additionalEditorAction.setIcon(StyledIcon("gears"));
     _additionalEditorAction.setShortcut(tr("F11"));
     _additionalEditorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _additionalEditorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
@@ -73,6 +73,8 @@ void DataPropertiesPlugin::init()
 DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
     ViewPluginFactory(true)
 {
+    setIconByName("sliders");
+
     getPluginMetadata().setDescription("For interacting with dataset properties");
     getPluginMetadata().setSummary("This view plugin is for interacting with dataset properties.");
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
@@ -87,11 +89,6 @@ DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
     getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 }
 
-QIcon DataPropertiesPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("sliders-h", color);
-}
-
 QUrl DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
 {
 #ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
@@ -103,7 +100,7 @@ QUrl DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
 
 QUrl DataPropertiesPluginFactory::getRepositoryUrl() const
 {
-    return QUrl("https://github.com/ManiVaultStudio/core");
+    return { "https://github.com/ManiVaultStudio/core" };
 }
 
 ViewPlugin* DataPropertiesPluginFactory::produce()

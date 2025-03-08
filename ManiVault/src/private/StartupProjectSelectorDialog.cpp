@@ -4,13 +4,12 @@
 
 #include "StartupProjectSelectorDialog.h"
 
-#include <Application.h>
-
 #include <QVBoxLayout>
 #include <QHeaderView>
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 #ifdef _DEBUG
     #define STARTUP_PROJECT_SELECTOR_DIALOG_VERBOSE
@@ -26,7 +25,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<Q
 {
     _model.initialize(startupProjectsMetaActions);
 
-    const auto windowIcon = Application::getIconFont("FontAwesome").getIcon("file-import");
+    const auto windowIcon = StyledIcon("file-import");
 
     setWindowIcon(windowIcon);
     setModal(true);

@@ -119,6 +119,11 @@ namespace mv
         return _columnHeaders;
     }
 
+    bool OrderedMap::hasColumn(QString columnName) const
+    {
+        return _columns.find(columnName) != _columns.end();
+    }
+
     const std::vector<QString>& OrderedMap::getColumn(QString columnName) const
     {
         try
@@ -163,7 +168,7 @@ namespace mv
 
         variantMapMustContain(variantMap, "NumRows");
         variantMapMustContain(variantMap, "ColumnHeaders");
-        variantMapMustContain(variantMap, "Columns");
+        variantMapMustContain(variantMap, "table-columns");
 
         _numRows = variantMap["NumRows"].value<size_t>();
 
@@ -175,7 +180,7 @@ namespace mv
             _columnHeaders.push_back(header);
         }
 
-        stdFromVariantMap(variantMap["Columns"].toMap(), _columns);
+        stdFromVariantMap(variantMap["table-columns"].toMap(), _columns);
     }
 
     QVariantMap OrderedMap::toVariantMap() const
@@ -193,7 +198,7 @@ namespace mv
         variantMap.insert({
             { "NumRows", QVariant::fromValue(_numRows) },
             { "ColumnHeaders", QVariant::fromValue(storeOnDisk(columnHeaders)) },
-            { "Columns", QVariant::fromValue(columnsMap) }
+            { "table-columns", QVariant::fromValue(columnsMap) }
         });
 
         return variantMap;

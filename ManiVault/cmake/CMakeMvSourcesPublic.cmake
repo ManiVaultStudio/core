@@ -18,6 +18,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractHelpManager.h
     src/AbstractErrorManager.h
     src/AbstractErrorLogger.h
+    src/AbstractThemeManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_SOURCES
@@ -279,6 +280,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/TableAction.h
     src/actions/StatusBarAction.h
     src/actions/PluginStatusBarAction.h
+    src/actions/EventAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -294,6 +296,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/TableAction.cpp
     src/actions/StatusBarAction.cpp
     src/actions/PluginStatusBarAction.cpp
+    src/actions/EventAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
@@ -325,7 +328,6 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionViewWidget.h
     src/actions/WidgetActionMimeData.h
     src/actions/WidgetActionHighlightWidget.h
-    src/actions/WidgetActionBadge.h
     src/actions/WidgetActionDrag.h
     src/actions/TasksTreeAction.h
     src/actions/TasksListAction.h
@@ -348,6 +350,11 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/ViewPluginSamplerAction.h
     src/actions/PluginLearningCenterAction.h
     src/actions/WatchVideoAction.h
+    src/actions/PaletteAction.h
+    src/actions/PaletteColorAction.h
+    src/actions/PaletteColorRoleAction.h
+    src/actions/ColorSchemeAction.h
+    src/actions/EditColorSchemeAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -359,7 +366,6 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionViewWidget.cpp
     src/actions/WidgetActionMimeData.cpp
     src/actions/WidgetActionHighlightWidget.cpp
-    src/actions/WidgetActionBadge.cpp
     src/actions/WidgetActionDrag.cpp
     src/actions/TasksTreeAction.cpp
     src/actions/TasksListAction.cpp
@@ -382,6 +388,11 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/ViewPluginSamplerAction.cpp
     src/actions/PluginLearningCenterAction.cpp
     src/actions/WatchVideoAction.cpp
+    src/actions/PaletteAction.cpp
+    src/actions/PaletteColorAction.cpp
+    src/actions/PaletteColorRoleAction.cpp
+    src/actions/ColorSchemeAction.cpp
+    src/actions/EditColorSchemeAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -512,10 +523,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Math.h
     src/util/Timer.h
     src/util/Icon.h
-    src/util/IconFont.h
-    src/util/IconFonts.h
     src/util/Interpolation.h
-    src/util/FontAwesome.h
     src/util/ColorMap.h
     src/util/ColorMapFilterModel.h
     src/util/ColorMapModel.h
@@ -537,10 +545,15 @@ set(PUBLIC_UTIL_HEADERS
     src/util/NumericalRange.h
     src/util/FileDownloader.h
     src/util/ShortcutMap.h
-	src/util/Notification.h
+    src/util/Notification.h
     src/util/Notifications.h
     src/util/LearningCenterVideo.h
     src/util/LearningCenterTutorial.h
+    src/util/StyledIconCommon.h
+    src/util/StyledIcon.h
+    src/util/StyledIconEngine.h
+    src/util/Badge.h
+    src/util/ColorScheme.h
 )
 
 if(APPLE)
@@ -562,10 +575,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Math.cpp
     src/util/Timer.cpp
     src/util/Icon.cpp
-    src/util/IconFont.cpp
-    src/util/IconFonts.cpp
     src/util/Interpolation.cpp
-    src/util/FontAwesome.cpp
     src/util/ColorMap.cpp
     src/util/ColorMapFilterModel.cpp
     src/util/ColorMapModel.cpp
@@ -587,10 +597,15 @@ set(PUBLIC_UTIL_SOURCES
     src/util/NumericalRange.cpp
     src/util/FileDownloader.cpp
     src/util/ShortcutMap.cpp
-	src/util/Notification.cpp
+    src/util/Notification.cpp
     src/util/Notifications.cpp
     src/util/LearningCenterVideo.cpp
     src/util/LearningCenterTutorial.cpp
+    src/util/StyledIconCommon.cpp
+    src/util/StyledIcon.cpp
+    src/util/StyledIconEngine.cpp
+    src/util/Badge.cpp
+    src/util/ColorScheme.cpp
 )
 
 if(APPLE)
@@ -938,12 +953,29 @@ set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
     ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
 )
 
+set(PUBLIC_COLOR_SCHEMES_MODEL_HEADERS
+    src/models/AbstractColorSchemesModel.h
+	src/models/ColorSchemesListModel.h
+    src/models/ColorSchemesFilterModel.h
+)
+
+set(PUBLIC_COLOR_SCHEMES_MODEL_SOURCES
+    src/models/AbstractColorSchemesModel.cpp
+	src/models/ColorSchemesListModel.cpp
+    src/models/ColorSchemesFilterModel.cpp
+)
+
+set(PUBLIC_COLOR_SCHEMES_MODEL_FILES
+    ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
+    ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
     src/MiscellaneousSettingsAction.h
     src/TasksSettingsAction.h
-    src/ApplicationSettingsAction.h
+    src/AppearanceSettingsAction.h
     src/TemporaryDirectoriesSettingsAction.h
 	src/ErrorLoggingSettingsAction.h
     src/PluginGlobalSettingsGroupAction.h
@@ -954,7 +986,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/ParametersSettingsAction.cpp
     src/MiscellaneousSettingsAction.cpp
     src/TasksSettingsAction.cpp
-    src/ApplicationSettingsAction.cpp
+    src/AppearanceSettingsAction.cpp
     src/TemporaryDirectoriesSettingsAction.cpp
     src/ErrorLoggingSettingsAction.cpp
     src/PluginGlobalSettingsGroupAction.cpp
@@ -1056,6 +1088,7 @@ set(PUBLIC_HEADERS
 	${PUBLIC_DATASETS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
+    ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_NOTIFICATIONS_HEADERS}
@@ -1103,6 +1136,7 @@ set(PUBLIC_SOURCES
 	${PUBLIC_DATASETS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
+    ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_NOTIFICATIONS_SOURCES}
@@ -1163,6 +1197,7 @@ source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
 source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Videos FILES ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES})
+source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})

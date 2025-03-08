@@ -11,7 +11,6 @@
 
 #include <actions/WatchVideoAction.h>
 
-#include <Application.h>
 #include <Task.h>
 
 #include <QDesktopServices>
@@ -40,10 +39,10 @@ HelpManager::HelpManager(QObject* parent) :
     _toLearningCenterAction(this, "Go to learning center"),
     _fileDownloader(FileDownloader::StorageMode::File, Task::GuiScope::Background)
 {
-    _showLearningCenterPageAction.setIconByName("chalkboard-teacher");
+    _showLearningCenterPageAction.setIconByName("chalkboard-user");
     _showLearningCenterPageAction.setToolTip("Go to the learning center");
 
-    _toDiscordAction.setIcon(Application::getIconFont("FontAwesomeBrands", 5, 14).getIcon("discord"));
+    _toDiscordAction.setIcon(StyledIcon("discord", "FontAwesomeBrandsRegular"));
     _toDiscordAction.setToolTip("Get in touch on our Discord");
     _toDiscordAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
@@ -55,13 +54,13 @@ HelpManager::HelpManager(QObject* parent) :
     _toWikiAction.setToolTip("Visit our wiki");
     _toWikiAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
-    _toRepositoryAction.setIcon(Application::getIconFont("FontAwesomeBrands", 6, 5).getIcon("github"));
+    _toRepositoryAction.setIcon(StyledIcon("github", "FontAwesomeBrandsRegular"));
     _toRepositoryAction.setToolTip("Contribute to ManiVault on Github");
     _toRepositoryAction.setDefaultWidgetFlags(TriggerAction::Icon);
     //_toRepositoryAction.setShortcut(QKeySequence("Ctrl+F4"));
     //_toRepositoryAction.setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
 
-    _toLearningCenterAction.setIconByName("chalkboard-teacher");
+    _toLearningCenterAction.setIconByName("chalkboard-user");
     //_toLearningCenterAction.setShortcut(QKeySequence(tr("Ctrl+F5")));
     //_toLearningCenterAction.setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
 
@@ -191,12 +190,12 @@ QMenu* HelpManager::getVideosMenu() const
 {
     auto videosMenu = new QMenu("Videos");
 
-    videosMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("video"));
+    videosMenu->setIcon(StyledIcon("video"));
 
     for (const auto video : getVideos({})) {
         auto videoAction = new WatchVideoAction(videosMenu, video->getTitle(), video);
 
-        videoAction->setIconByName("external-link-square-alt");
+        videoAction->setIconByName("square-up-right");
 
         videosMenu->addAction(videoAction);
     }
@@ -246,7 +245,7 @@ QMenu* HelpManager::getTutorialsMenu() const
 {
     auto tutorialsMenu = new QMenu("Tutorials");
 
-    tutorialsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
+    tutorialsMenu->setIcon(StyledIcon("user-graduate"));
 
     for (const auto tutorial : getTutorials({}, { "Installation" })) {
         

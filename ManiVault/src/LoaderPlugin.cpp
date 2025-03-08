@@ -4,8 +4,6 @@
 
 #include "LoaderPlugin.h"
 
-#include "Application.h"
-
 #include "actions/PluginTriggerAction.h"
 
 #include "widgets/FileDialog.h"
@@ -14,6 +12,7 @@
 #include <QString>
 
 using namespace mv::gui;
+using namespace mv::util;
 
 namespace mv::plugin {
 
@@ -33,19 +32,9 @@ QString LoaderPlugin::AskForFileName(const QString& fileNameFilter) const
     return fileName;
 }
 
-QIcon LoaderPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("file-import", color);
-}
-
-QIcon LoaderPluginFactory::getCategoryIcon() const
-{
-    return Application::getIconFont("FontAwesome").getIcon("file-import");
-}
-
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const Datasets& datasets) const
 {
-    return { new PluginTriggerAction(const_cast<LoaderPluginFactory*>(this), this, QString("%1").arg(getKind()), QString("Load %1").arg(getKind()), getIcon()) };
+    return { new PluginTriggerAction(const_cast<LoaderPluginFactory*>(this), this, QString("%1").arg(getKind()), QString("Load %1").arg(getKind()), StyledIcon(icon())) };
 }
 
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const DataTypes& dataTypes) const

@@ -87,7 +87,7 @@ QVariant AbstractDataHierarchyModel::NameItem::data(int role /*= Qt::UserRole + 
             if (!getDataset().isValid())
                 break;
 
-            return getDataset()->getIcon();
+            return QIcon(StyledIcon(getDataset()->icon()));
         }
 
         default:
@@ -136,7 +136,7 @@ QVariant AbstractDataHierarchyModel::LocationItem::data(int role /*= Qt::UserRol
             if (!getDataset().isValid())
                 break;
 
-            return getDataset()->getIcon();
+            return QVariant::fromValue(getDataset()->icon());
         }
 
         default:
@@ -351,7 +351,7 @@ QVariant AbstractDataHierarchyModel::IsVisibleItem::data(int role /*= Qt::UserRo
             break;
 
         case Qt::DecorationRole:
-            return Application::getIconFont("FontAwesome").getIcon(data(Qt::EditRole).toBool() ? "eye" : "eye-slash");
+            return QIcon(StyledIcon(data(Qt::EditRole).toBool() ? "eye" : "eye-slash"));
 
         case Qt::ToolTipRole:
             return QString("Dataset is visible: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
@@ -407,7 +407,7 @@ QVariant AbstractDataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole
                 break;
 
             if (getDataset()->isProxy())
-                return Application::getIconFont("FontAwesome").getIcon("object-group");
+                return QIcon(StyledIcon("object-group"));
 
             break;
         }
@@ -437,7 +437,7 @@ QVariant AbstractDataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRo
             return QString("Dataset %1 derived").arg(data(Qt::EditRole).toBool() ? "is" : "is not");
 
         case Qt::DecorationRole:
-            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("square-root-alt") : QIcon();
+            return data(Qt::EditRole).toBool() ? StyledIcon("square-root-variable") : QIcon();
 
         default:
             break;
@@ -498,7 +498,7 @@ void AbstractDataHierarchyModel::IsSubsetItem::createFullIcon(float pieRadius /*
     painter.setPen(QPen(Qt::black, 2.f * pieRadius, Qt::SolidLine, Qt::RoundCap));
     painter.drawPoint(QPointF(50.f, 50.f));
 
-    _fullIcon = createIcon(pixmap);
+    _fullIcon = StyledIcon(createIcon(pixmap));
 }
 
 void AbstractDataHierarchyModel::IsSubsetItem::createSubsetIcon(float pieRadius /*= 35.f*/)
@@ -520,7 +520,7 @@ void AbstractDataHierarchyModel::IsSubsetItem::createSubsetIcon(float pieRadius 
     painter.setBrush(Qt::black);
     painter.drawPie(QRectF(margin, margin, 100.f - (2.f * margin), 100.f - (2.f * margin)), 90 * 16, 270 * 16);
 
-    _subsetIcon = createIcon(pixmap);
+    _subsetIcon = StyledIcon(createIcon(pixmap));
 }
 
 void AbstractDataHierarchyModel::IsSubsetItem::drawExtents(QPainter& painter)
@@ -557,7 +557,7 @@ QVariant AbstractDataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRol
             return QString("Dataset is %1").arg(data(Qt::EditRole).toBool() ? "locked" : "not locked");
 
         case Qt::DecorationRole:
-            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("lock") : Application::getIconFont("FontAwesome").getIcon("lock-open");
+            return data(Qt::EditRole).toBool() ? StyledIcon("lock") : StyledIcon("lock-open");
 
         default:
             break;

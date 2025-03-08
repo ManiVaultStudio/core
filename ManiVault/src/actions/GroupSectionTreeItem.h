@@ -80,13 +80,13 @@ public:
      * Get section push button
      * @return Reference to section push button
      */
-    PushButton& getPushButton();
+    PushButton& getPushButton() const;
 
     /**
      * Get group action
      * @return Pointer to group action
      */
-    GroupAction* getGroupAction();
+    GroupAction* getGroupAction() const;
 
 protected:
     GroupAction*            _groupAction;               /** Pointer to group action (used for toggling) */

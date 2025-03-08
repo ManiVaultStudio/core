@@ -1,12 +1,9 @@
 #include "SelectionGroup.h"
 
+#include <stdexcept>
+
 namespace mv
 {
-    BiMap::BiMap()
-    {
-
-    }
-
     void BiMap::addKeyValuePairs(const std::vector<QString>& keys, const std::vector<uint32_t>& values)
     {
         if (keys.size() != values.size())
@@ -18,7 +15,7 @@ namespace mv
         _kvMap.clear();
         _vkMap.clear();
 
-        for (int i = 0; i < keys.size(); i++)
+        for (size_t i = 0; i < keys.size(); i++)
         {
             _kvMap[keys[i]] = values[i];
             _vkMap[values[i]] = keys[i];
@@ -29,7 +26,7 @@ namespace mv
     {
         std::vector<QString> keys(values.size());
 
-        for (int i = 0; i < values.size(); i++)
+        for (size_t i = 0; i < values.size(); i++)
         {
             try
             {
@@ -37,7 +34,7 @@ namespace mv
             }
             catch (std::out_of_range& oor)
             {
-                qWarning() << "Trying to find value: " << values[i] << " in value-key map, but no such value exists.";
+                qWarning() << "Trying to find value: " << values[i] << " in value-key map, but no such value exists. Error: " << oor.what();
                 return std::vector<QString>();
             }
         }
@@ -62,7 +59,7 @@ namespace mv
         //    }
         //}
 
-        for (int i = 0; i < keys.size(); i++)
+        for (size_t i = 0; i < keys.size(); i++)
         {
             if (auto it = _kvMap.find(keys[i]); it != _kvMap.end()) {
                 values.push_back(it->second);
@@ -85,7 +82,7 @@ namespace mv
         std::vector<QString> keys;
 
         // Find the keys associated with the given indices
-        for (int i = 0; i < _datasets.size(); i++)
+        for (size_t i = 0; i < _datasets.size(); i++)
         {
             Dataset<DatasetImpl> d = _datasets[i];
             if (d == dataset)
@@ -94,7 +91,7 @@ namespace mv
             }
         }
         // Find values associated with the found keys in other datasets
-        for (int i = 0; i < _datasets.size(); i++)
+        for (size_t i = 0; i < _datasets.size(); i++)
         {
             Dataset<DatasetImpl> d = _datasets[i];
             if (d != dataset)

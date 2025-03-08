@@ -224,6 +224,19 @@ set(PRIVATE_ERROR_MANAGER_FILES
     ${PRIVATE_ERROR_MANAGER_SOURCES}
 )
 
+set(PRIVATE_THEME_MANAGER_HEADERS
+    src/private/ThemeManager.h
+)
+
+set(PRIVATE_THEME_MANAGER_SOURCES
+    src/private/ThemeManager.cpp
+)
+
+set(PRIVATE_THEME_MANAGER_FILES
+    ${PRIVATE_THEME_MANAGER_HEADERS}
+    ${PRIVATE_THEME_MANAGER_SOURCES}
+)
+
 set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
     ${PRIVATE_PLUGIN_MANAGER_HEADERS}
@@ -236,6 +249,7 @@ set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_TASK_MANAGER_HEADERS}
     ${PRIVATE_HELP_MANAGER_HEADERS}
     ${PRIVATE_ERROR_MANAGER_HEADERS}
+    ${PRIVATE_THEME_MANAGER_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -251,6 +265,7 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_TASK_MANAGER_SOURCES}
     ${PRIVATE_HELP_MANAGER_SOURCES}
     ${PRIVATE_ERROR_MANAGER_SOURCES}
+    ${PRIVATE_THEME_MANAGER_SOURCES}
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -266,6 +281,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadedViewsMenu.h
     src/private/HelpMenu.h
     src/private/StartupProjectSelectorDialog.h
+    src/private/NoProxyRectanglesFusionStyle.h
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -284,6 +300,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadedViewsMenu.cpp
     src/private/HelpMenu.cpp
     src/private/StartupProjectSelectorDialog.cpp
+    src/private/NoProxyRectanglesFusionStyle.cpp
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -452,6 +469,7 @@ source_group(Managers\\Settings FILES ${PRIVATE_SETTINGS_MANAGER_FILES})
 source_group(Managers\\Task FILES ${PRIVATE_TASK_MANAGER_FILES})
 source_group(Managers\\Help FILES ${PRIVATE_HELP_MANAGER_FILES})
 source_group(Managers\\Error FILES ${PRIVATE_ERROR_MANAGER_FILES})
+source_group(Managers\\Theme FILES ${PRIVATE_THEME_MANAGER_FILES})
 source_group(Pages\\Common FILES ${PRIVATE_PAGES_COMMON_FILES})
 source_group(Pages\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Pages\\Learning FILES ${PRIVATE_LEARNING_PAGE_FILES})

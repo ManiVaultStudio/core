@@ -20,6 +20,16 @@ class AbstractProjectManager;
 class AbstractSettingsManager;
 class AbstractHelpManager;
 
+/**
+ * Core class
+ *
+ * This class provides the core implementation of the application
+ * It is responsible for creating and managing all managers
+ * It is also responsible for initializing and resetting the application
+ * It is a singleton class
+ *
+ * @author Julian Thijssen and Thomas Kroes
+ */
 class Core final : public CoreInterface
 {
 public:
@@ -67,6 +77,7 @@ public: // Managers
 
     AbstractErrorManager& getErrorManager() override;
     AbstractActionsManager& getActionsManager() override;
+    AbstractThemeManager& getThemeManager() override;
     AbstractPluginManager& getPluginManager() override;
     AbstractEventManager& getEventManager() override;
     AbstractDataManager& getDataManager() override;

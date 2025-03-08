@@ -16,7 +16,8 @@ using namespace mv::util;
 namespace mv::plugin
 {
 
-PluginFactory::PluginFactory(Type type) :
+PluginFactory::PluginFactory(Type type, const QString& title) :
+    WidgetAction(nullptr, title),
     _type(type),
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
     _numberOfInstances(0),
@@ -53,12 +54,22 @@ void PluginFactory::initialize()
     getPluginTriggerAction().initialize();
 
     getPluginMetadata().getTriggerHelpAction().setText(_kind);
-    getPluginMetadata().getTriggerHelpAction().setIcon(getIcon());
+    getPluginMetadata().getTriggerHelpAction().setIcon(icon());
+}
+
+const QIcon& PluginFactory::getCategoryIcon() const
+{
+    return _categoryIcon;
+}
+
+void PluginFactory::setCategoryIconByName(const QString& category)
+{
+    _categoryIcon = StyledIcon(category);
 }
 
 QString PluginFactory::getGlobalSettingsPrefix() const
 {
-    return QString("%1/").arg(getKind());
+    return QString("Plugins/%1/").arg(getKind());
 }
 
 PluginGlobalSettingsGroupAction* PluginFactory::getGlobalSettingsGroupAction() const
@@ -119,11 +130,6 @@ const util::Version& PluginFactory::getVersion() const
 void PluginFactory::setVersion(const util::Version& version)
 {
     getPluginMetadata().setVersion(version);
-}
-
-QIcon PluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return {};
 }
 
 bool PluginFactory::mayProduce() const

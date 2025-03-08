@@ -29,7 +29,7 @@ TasksListAction::TasksListAction(QObject* parent, const QString& title) :
     _loadTasksPluginAction(this, "Plugin")
 {
     setShowLabels(false);
-    setIconByName("tasks");
+    setIconByName("list-check");
     setDefaultWidgetFlag(NoMargins);
 
     _loadTasksPluginAction.setIconByName("window-maximize");
@@ -37,7 +37,7 @@ TasksListAction::TasksListAction(QObject* parent, const QString& title) :
     _loadTasksPluginAction.setToolTip("Load tasks plugin");
 
     connect(&_loadTasksPluginAction, &TriggerAction::triggered, this, [this]() -> void {
-        mv::plugins().requestViewPlugin("Tasks", nullptr, DockAreaFlag::Bottom);
+        mv::plugins().requestViewPlugin("list-check", nullptr, DockAreaFlag::Bottom);
 
         _loadTasksPluginAction.setEnabled(false);
     });

@@ -10,6 +10,7 @@
 #endif
 
 using namespace mv::gui;
+using namespace mv::util;
 
 namespace mv::plugin
 {
@@ -49,6 +50,11 @@ Plugin::~Plugin()
     const_cast<PluginFactory*>(_factory)->setNumberOfInstances(_factory->getNumberOfInstances() - 1);
 }
 
+QIcon Plugin::icon() const
+{
+    return _factory->icon();
+}
+
 const mv::plugin::PluginFactory* Plugin::getFactory() const
 {
     return _factory;
@@ -62,11 +68,6 @@ QString Plugin::getName() const
 QString Plugin::getGuiName() const
 {
     return _guiNameAction.getString();
-}
-
-QIcon Plugin::getIcon() const
-{
-    return _factory->getIcon();
 }
 
 QString Plugin::getKind() const
@@ -175,7 +176,7 @@ void Plugin::destroy()
 
 void Plugin::addNotification(const QString& description, const util::Notification::DurationType& durationType /*= util::Notification::DurationType::Fixed*/, std::int32_t delayMs /*= 0*/) const
 {
-    mv::help().addNotification(getGuiName(), description, getIcon(), durationType, delayMs);
+    mv::help().addNotification(getGuiName(), description, StyledIcon(icon()), durationType, delayMs);
 }
 
 }

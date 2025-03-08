@@ -6,8 +6,12 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "util/StyledIcon.h"
+
 #include <QWidget>
 #include <QLabel>
+
+#include "actions/ColorAction.h"
 
 namespace mv::gui
 {
@@ -21,25 +25,25 @@ namespace mv::gui
  */
 class CORE_EXPORT InfoWidget : public QWidget
 {
+    Q_OBJECT
+
 public:
 
     /**
-     * Construct info widget with \p parent
+     * Construct info widget with no text and style with application foreground and background color roles
      * @param parent Pointer to parent widget
      */
     InfoWidget(QWidget* parent);
 
     /**
-     * Construct info widget with \parent, \p icon, \p title, \p description, \p backgroundColor and \p textColor
+     * Construct info widget with text and style with foreground and background colors
      * @param parent Pointer to parent widget
      * @param icon Icon
      * @param title Title of the overlay
      * @param description Overlay description
-     * @param foregroundColor Foreground color
-     * @param backgroundColor Background color
      */
-    InfoWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description = "", const QColor foregroundColor = Qt::black, const QColor backgroundColor = Qt::lightGray);
-    
+    InfoWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description = "");
+
     /**
      * Set overlay parameters
      * @param icon Icon
@@ -49,42 +53,117 @@ public:
     void set(const QIcon& icon, const QString& title, const QString& description = "");
 
     /**
-     * Set color
-     * @param color Color of the widget
+     * Get foreground color
+     * @return Foreground color
      */
-    void setColor(const QColor color);
+    QColor getForegroundColor() const;
 
     /**
-     * Set overlay colors
+     * Set foreground color to \p foregroundColor (resets the color roles)
+     * @param foregroundColor Foreground color
+     */
+    void setForegroundColor(const QColor foregroundColor);
+
+    /**
+     * Get background color
+     * @return Background color
+     */
+    QColor getBackgroundColor() const;
+
+    /**
+     * Set background color to \p backgroundColor (resets the color roles)
+     * @param backgroundColor Background color
+     */
+    void setBackgroundColor(const QColor backgroundColor);
+
+    /**
+     * Set colors (resets the color roles)
      * @param foregroundColor Foreground color
      * @param backgroundColor Background color
      */
-    void setColors(const QColor foregroundColor = Qt::black, const QColor backgroundColor = Qt::lightGray);
+    void setColors(const QColor& foregroundColor, const QColor& backgroundColor);
 
     /**
-     * Set foreground color to \p foregroundColor
-     * @param foregroundColor Foreground color
+     * Get foreground color role
+     * @return Foreground color role (zero if not used)
      */
-    void setForegroundColor(const QColor foregroundColor = Qt::black);
+    std::int32_t getForegroundColorRole() const;
 
     /**
-     * Set background color to \p backgroundColor
-     * @param backgroundColor Background color
+     * Set foreground color role to \p foregroundColorRole
+     * @param foregroundColorRole Foreground color role
      */
-    void setBackgroundColor(const QColor backgroundColor = Qt::lightGray);
+    void setForegroundColorRole(const QPalette::ColorRole& foregroundColorRole);
+
+    /**
+     * Get background color role
+     * @return Background color role (zero if not used)
+     */
+    std::int32_t getBackgroundColorRole() const;
+
+    /**
+     * Set background color role to \p backgroundColorRole
+     * @param backgroundColorRole Background color role
+     */
+    void setBackgroundColorRole(const QPalette::ColorRole& backgroundColorRole);
+
+    /**
+     * Set color roles
+     * @param foregroundColorRole Foreground color role
+     * @param backgroundColorRole Background color role
+     */
+    void setColorRoles(const QPalette::ColorRole& foregroundColorRole, const QPalette::ColorRole& backgroundColorRole);
 
 private:
 
     /** Initializes the controls */
     void initialize();
 
+    /** Updates the styling in response to color and/or theme changes */
+    void updateStyling();
+
+signals:
+
+    /**
+     * Signals that the foreground color changed from \p previousForegroundColor to \p currentForegroundColor
+     * @param previousForegroundColor Previous foreground color
+     * @param currentForegroundColor Current foreground color
+     */
+    void foregroundColorChanged(const QColor& previousForegroundColor, const QColor& currentForegroundColor);
+
+    /**
+     * Signals that the background color changed from \p previousBackgroundColor to \p currentBackgroundColor
+     * @param previousBackgroundColor Previous background color
+     * @param currentBackgroundColor Current background color
+     */
+    void backgroundColorChanged(const QColor& previousBackgroundColor, const QColor& currentBackgroundColor);
+
+    /**
+     * Signals that the foreground color role changed from \p previousForegroundColorRole to \p currentForegroundColorRole
+     * @param previousForegroundColorRole Previous foreground color role
+     * @param currentForegroundColorRole Current foreground color role
+     */
+    void foregroundColorRoleChanged(const QPalette::ColorRole& previousForegroundColorRole, const QPalette::ColorRole& currentForegroundColorRole);
+
+    /**
+     * Signals that the background color role changed from \p previousBackgroundColorRole to \p currentBackgroundColorRole
+     * @param previousBackgroundColorRole Previous background color role
+     * @param currentBackgroundColorRole Current background color role
+     */
+    void backgroundColorRoleChanged(const QPalette::ColorRole& previousBackgroundColorRole, const QPalette::ColorRole& currentBackgroundColorRole);
+
 private:
-    QIcon       _icon;                  /** Icon */
-    QLabel      _iconLabel;             /** Label for displaying the icon */
-    QLabel      _titleLabel;            /** Label for displaying the title */
-    QLabel      _descriptionLabel;      /** Label for displaying the description */
-    QColor      _foregroundColor;       /** Foreground color of the widget */
-    QColor      _backgroundColor;       /** Background color of the widget */
+    QIcon           _icon;                  /** Icon */
+    QLabel          _iconLabel;             /** Label for displaying the icon */
+    QLabel          _titleLabel;            /** Label for displaying the title */
+    QLabel          _descriptionLabel;      /** Label for displaying the description */
+    QColor          _foregroundColor;       /** Foreground color of the widget */
+    QColor          _backgroundColor;       /** Background color of the widget */
+    std::int32_t    _foregroundColorRole;   /** Color role for foreground elements (InfoWidget::_foregroundColor will be used if zero) */
+    std::int32_t    _backgroundColorRole;   /** Color role for background elements (InfoWidget::_backgroundColor will be used if zero) */
+
+    static QColor defaultForegroundColor;
+    static QColor defaultBackgroundColor;
 };
 
 }

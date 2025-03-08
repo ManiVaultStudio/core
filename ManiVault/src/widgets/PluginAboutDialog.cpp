@@ -23,12 +23,12 @@ namespace mv::gui
 PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaData, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _pluginMetaData(pluginMetaData),
-    _waitingOverlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-start"), "Loading", "Please wait while the content is generated...")
+    _waitingOverlayWidget(this, StyledIcon("hourglass-start"), "Loading", "Please wait while the content is generated...")
 {
     _waitingOverlayWidget.getWidgetFader().setOpacity(0.5f);
 
     setAutoFillBackground(true);
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("book-reader"));
+    setWindowIcon(StyledIcon("book-reader"));
     setWindowTitle(QString("%1 plugin").arg(_pluginMetaData.getGuiName()));
 
     auto layout = new QVBoxLayout();

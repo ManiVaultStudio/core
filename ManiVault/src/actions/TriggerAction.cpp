@@ -36,6 +36,8 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     _triggerAction(triggerAction),
     _widgetFlags(widgetFlags)
 {
+    setIconSize(QSize(12, 12));
+
     connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();
 	});
@@ -45,11 +47,17 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
         setEnabled(triggerAction->isEnabled());
 
-        if (widgetFlags & WidgetFlag::Text)
+        if (widgetFlags & WidgetFlag::Text) {
             setText(triggerAction->text());
-
-        if (widgetFlags & WidgetFlag::Icon)
-            setIcon(triggerAction->icon());
+            
+            if (triggerAction->text().isEmpty())
+                setText(" ");
+        }
+        
+        if (widgetFlags & WidgetFlag::Icon) {
+            if ((widgetFlags & WidgetFlag::Text) == 0)
+                setText(" ");
+        }
 
         setToolTip(triggerAction->toolTip());
         setVisible(triggerAction->isVisible());
@@ -68,6 +76,20 @@ void TriggerAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
 		setFixedSize(event->size().height(), event->size().height());
     else
 		QPushButton::resizeEvent(event);
+}
+
+void TriggerAction::PushButtonWidget::paintEvent(QPaintEvent* event) {
+    QPushButton::paintEvent(event);
+    
+    if (_widgetFlags & WidgetFlag::Icon && (_widgetFlags & WidgetFlag::Text) == 0) {
+        QPainter painter(this);
+        
+        auto rect = QRect({}, iconSize());
+
+        rect.moveCenter(geometry().center());
+
+        painter.drawPixmap(rect, _triggerAction->icon().pixmap(iconSize(), isEnabled() ? QIcon::Mode::Normal : QIcon::Mode::Disabled));
+    }
 }
 
 QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

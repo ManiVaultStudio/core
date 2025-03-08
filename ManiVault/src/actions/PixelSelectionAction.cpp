@@ -41,7 +41,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
     _notifyDuringSelectionAction(this, "Notify during selection", true)
 {
-    setIconByName("mouse-pointer");
+    setIconByName("arrow-pointer");
 
     addAction(&_overlayColorAction);
     addAction(&_overlayOpacityAction);
@@ -50,8 +50,6 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     addAction(&_selectAction);
     addAction(&_brushRadiusAction);
     addAction(&_notifyDuringSelectionAction);
-
-    const auto& fontAwesome = mv::Application::getIconFont("FontAwesome");
 
     _overlayColorAction.setToolTip("Selection color");
 

@@ -131,13 +131,6 @@ public: // Image retrieval functions
     /** Get the rectangle which bounds the visible pixels */
     QRect getVisibleRectangle() const;
 
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-
 public: // Selection
 
     /**
@@ -290,5 +283,5 @@ private:
     QSharedPointer<InfoAction>      _infoAction;            /** Shared pointer to info action */
     QRect                           _visibleRectangle;      /** Rectangle which bounds the visible pixels */
     std::vector<std::uint8_t>       _maskData;              /** Mask data */
-    bool                            _maskDataGiven;         /** Wheter mask data was set externally */
+    bool                            _maskDataGiven;         /** Whether mask data was set externally */
 };

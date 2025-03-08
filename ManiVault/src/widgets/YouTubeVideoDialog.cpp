@@ -4,8 +4,6 @@
 
 #include "YouTubeVideoDialog.h"
 
-#include <Application.h>
-
 #include <QVBoxLayout>
 #include <QWebEngineView>
 
@@ -13,28 +11,28 @@
     #define YOUTUBE_VIDEO_DIALOG_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 YouTubeVideoDialog::YouTubeVideoDialog(const QString& videoId, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _videoId(videoId),
-    _webEngineView(),
-    _videoPage()
+    _videoId(videoId)
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("video"));
+    setWindowIcon(StyledIcon("video"));
     setModal(true);
 
-    const auto videoUrl = QUrl(QString("https://www.youtube.com/embed/%1").arg("Ai0fitThkz8"));// _videoId));
+    //const auto videoUrl = QUrl(QString("https://www.youtube.com/embed/%1").arg("Ai0fitThkz8"));// _videoId));
 
-    auto wev = new QWebEngineView(this);
+    //auto wev = new QWebEngineView(this);
 
-    wev->load(videoUrl);
+    //wev->load(videoUrl);
 
-    auto layout = new QVBoxLayout();
+    //auto layout = new QVBoxLayout();
 
-    layout->addWidget(wev);
+    //layout->addWidget(wev);
 
-    setLayout(layout);
+    //setLayout(layout);
 }
 
 void YouTubeVideoDialog::play(const QString& videoId)

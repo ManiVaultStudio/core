@@ -910,13 +910,6 @@ public:
     mv::Dataset<mv::DatasetImpl> createSubsetFromVisibleSelection(const QString& guiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet = mv::Dataset<mv::DatasetImpl>(), const bool& visible = true) const;
 
     /**
-     * Get set icon
-     * @param color Global icon color (for font icons)
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-
-    /**
      * Set the proxy member datasets (automatically sets the dataset type to Type::Proxy)
      * @param proxyMembers Proxy member datasets
      */
@@ -1027,15 +1020,9 @@ class PointDataFactory : public RawDataFactory
                           FILE  "PointData.json")
 
 public:
-    PointDataFactory(void) {}
-    ~PointDataFactory(void) override {}
+    PointDataFactory();
 
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    ~PointDataFactory() override = default;
 
     /**
      * Get the read me markdown file URL

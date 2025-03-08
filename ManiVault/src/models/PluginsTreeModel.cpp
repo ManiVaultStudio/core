@@ -12,6 +12,8 @@ using namespace mv;
     #define PLUGINS_TREE_MODEL_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv {
 
 PluginsTreeModel::PluginsTreeModel(PopulationMode populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
@@ -53,7 +55,7 @@ void PluginsTreeModel::populateFromPluginManager()
         appendRow(pluginTypeRow);
 
         for (auto pluginFactory : plugins().getPluginFactoriesByType(pluginType)) {
-            auto pluginFactoryRow = Row(nullptr, pluginFactory->getKind(), "Factory", "", pluginFactory->getIcon());
+            auto pluginFactoryRow = Row(nullptr, pluginFactory->getKind(), "Factory", "", StyledIcon(pluginFactory->icon()));
 
             pluginFactoryRow.first()->setEnabled(false);
             pluginFactoryRow.first()->setEditable(false);
@@ -61,7 +63,7 @@ void PluginsTreeModel::populateFromPluginManager()
             pluginTypeRow.first()->appendRow(pluginFactoryRow);
 
             for (auto plugin : plugins().getPluginsByFactory(pluginFactory))
-                pluginFactoryRow.first()->appendRow(Row(plugin, plugin->getGuiName(), "Instance", plugin->getId(), plugin->getIcon()));
+                pluginFactoryRow.first()->appendRow(Row(plugin, plugin->getGuiName(), "Instance", plugin->getId(), StyledIcon(plugin->icon())));
         }
     }
 }

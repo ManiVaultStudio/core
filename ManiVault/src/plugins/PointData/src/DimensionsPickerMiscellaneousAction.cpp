@@ -19,7 +19,7 @@ DimensionsPickerMiscellaneousAction::DimensionsPickerMiscellaneousAction(Dimensi
     _ignoreZeroValuesAction(this, "Ignore zero values")
 {
     setText("Settings");
-    setIconByName("cog");
+    setIconByName("gear");
 
     // Set only show selected dimensions when the corresponding action is triggered
     connect(&_showOnlySelectedDimensionsAction, &ToggleAction::triggered, this, [this](bool checked) {

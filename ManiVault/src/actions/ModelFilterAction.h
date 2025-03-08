@@ -53,7 +53,7 @@ public: // Action getters
     StringAction& getFilterNameAction() { return _filterNameAction; }
     OptionAction& getFilterColumnAction() { return _filterColumnAction; }
     GroupAction& getFilterGroupAction() { return _filterGroupAction; }
-    ToggleAction& getFfilterCaseSensitiveAction() { return _filterCaseSensitiveAction; }
+    ToggleAction& getFilterCaseSensitiveAction() { return _filterCaseSensitiveAction; }
     ToggleAction& getFilterRegularExpressionAction() { return _filterRegularExpressionAction; }
 
 private:

@@ -49,6 +49,15 @@ public:
     Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
     /**
+     * Determine if a column exists with the given header name
+     * @return Whether a column with the given header name exists
+     */
+    bool hasColumn(QString columnName) const
+    {
+        return _data.hasColumn(columnName);
+    }
+
+    /**
      * Get a column by the name of its header
      * @return The column of text data associated with the given header name
      */
@@ -130,11 +139,27 @@ public:
         return text;
     }
 
+    /**
+     * Determine if a column exists with the given header name
+     * @return Whether a column with the given header name exists
+     */
+    bool hasColumn(QString columnName) const
+    {
+        return getRawData<TextData>()->hasColumn(columnName);
+    }
+
+    /**
+     * Get a column by the name of its header
+     * @return The column of text data associated with the given header name
+     */
     const std::vector<QString>& getColumn(QString columnName) const
     {
         return getRawData<TextData>()->getColumn(columnName);
     }
 
+    /**
+     * Add a column with a given header name to the dataset
+     */
     void addColumn(QString columnName, std::vector<QString>& columnData)
     {
         getRawData<TextData>()->addColumn(columnName, columnData);
@@ -166,13 +191,6 @@ public:
     {
         return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
-
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
 
 public: // Serialization
 
@@ -243,15 +261,9 @@ class TextDataFactory : public RawDataFactory
                       FILE  "TextData.json")
     
 public:
-    TextDataFactory(void) {}
-    ~TextDataFactory(void) override {}
+    TextDataFactory();
 
-    /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    ~TextDataFactory() override {}
 
     /**
      * Get the read me markdown file URL

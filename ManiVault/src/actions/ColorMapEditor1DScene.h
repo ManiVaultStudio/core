@@ -10,9 +10,7 @@
 
 class QGraphicsSceneMouseEvent;
 
-namespace mv {
-
-namespace gui {
+namespace mv::gui {
 
 class ColorMapEditor1DWidget;
 
@@ -49,5 +47,4 @@ signals:
     void pressed(QGraphicsSceneMouseEvent* graphicsSceneMouseEvent);
 };
 
-}
 }
