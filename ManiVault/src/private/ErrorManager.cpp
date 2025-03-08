@@ -36,6 +36,10 @@ ErrorManager::ErrorManager(QObject* parent) :
     //_loggingEnabledAction.setSettingsPrefix(QString("%1Logging/Enabled").arg(getSettingsPrefix()));
     _loggingEnabledAction.setToolTip("Toggle Sentry error logging");
 
+#ifdef _DEBUG
+    _loggingEnabledAction.setEnabled(false);
+#endif
+	
     //_loggingDsnAction.setSettingsPrefix(QString("%1Logging/DSN").arg(getSettingsPrefix()));
     _loggingDsnAction.setToolTip("The Sentry error logging data source name");
     _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
