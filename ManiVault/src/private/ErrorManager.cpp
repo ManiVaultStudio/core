@@ -30,21 +30,21 @@ ErrorManager::ErrorManager(QObject* parent) :
     _loggingAskConsentDialogAction.setToolTip("Show the error logging consent dialog");
     _loggingAskConsentDialogAction.setDefaultWidgetFlags(TriggerAction::IconText);
 
-    //_loggingUserHasOptedAction.setSettingsPrefix(QString("%1Logging/UserHasOpted").arg(getSettingsPrefix()));
+    _loggingUserHasOptedAction.setSettingsPrefix(QString("%1Logging/UserHasOpted").arg(getSettingsPrefix()));
     _loggingUserHasOptedAction.setToolTip("Whether the user has opted in or out");
 
-    //_loggingEnabledAction.setSettingsPrefix(QString("%1Logging/Enabled").arg(getSettingsPrefix()));
+    _loggingEnabledAction.setSettingsPrefix(QString("%1Logging/Enabled").arg(getSettingsPrefix()));
     _loggingEnabledAction.setToolTip("Toggle Sentry error logging");
 
 #ifdef _DEBUG
     _loggingEnabledAction.setEnabled(false);
 #endif
 	
-    //_loggingDsnAction.setSettingsPrefix(QString("%1Logging/DSN").arg(getSettingsPrefix()));
+    _loggingDsnAction.setSettingsPrefix(QString("%1Logging/DSN").arg(getSettingsPrefix()));
     _loggingDsnAction.setToolTip("The Sentry error logging data source name");
     _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
 
-    //_loggingShowCrashReportDialogAction.setSettingsPrefix(QString("%1Logging/ShowCrashReportDialog").arg(getSettingsPrefix()));
+    _loggingShowCrashReportDialogAction.setSettingsPrefix(QString("%1Logging/ShowCrashReportDialog").arg(getSettingsPrefix()));
     _loggingShowCrashReportDialogAction.setToolTip("Show the crash report dialog prior to sending an error report");
 
     const auto allowErrorReportingChanged = [this]() -> void {
