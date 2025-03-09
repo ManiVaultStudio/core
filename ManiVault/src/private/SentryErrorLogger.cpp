@@ -13,6 +13,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 SentryErrorLogger::SentryErrorLogger(QObject* parent /*= nullptr*/) :
     AbstractErrorLogger("Sentry", parent)
@@ -129,7 +130,7 @@ void SentryErrorLogger::start()
     addNotification("Started", {
         QString("%1 error logging").arg(getLoggerName()),
         "Error logging using <a href='https://sentry.io/'>Sentry</a> is active, crash reports will be logged to improve the application.",
-        Application::getIconFont("FontAwesome").getIcon("bug"),
+        StyledIcon("bug"),
         2500
 	});
 

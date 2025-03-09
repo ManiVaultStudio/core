@@ -15,6 +15,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
 	QDialog(parent),
@@ -27,7 +28,7 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check-square"));
+    setWindowIcon(StyledIcon("check-square"));
     setFixedSize({ 500, 420 });
 
     _notificationLabel.setWordWrap(true);

@@ -4,15 +4,11 @@
 
 #pragma once
 
-#include "Application.h"
 
 #include "actions/ToggleAction.h"
 #include "actions/StringAction.h"
 
-#include <QObject>
-#include <QTimer>
-
-#include <queue>
+#include "util/StyledIcon.h"
 
 namespace mv
 {
@@ -107,7 +103,7 @@ public:
             addNotification("Enabled", {
                 QString("%1 error logging").arg(_loggerName),
                 QString("Logging will be <b>%1</b> after restarting the application.").arg(toggled ? "enabled" : "disabled"),
-                Application::getIconFont("FontAwesome").getIcon("bug")
+            	util::StyledIcon("bug")
             });
         });
 
@@ -116,22 +112,22 @@ public:
                 addNotification("DSN", {
                 	QString("%1 error logging").arg(_loggerName),
                 	QString("The logging Data Source Name (DSN) will be changed to <a href='%1'>%1</a> after restarting the application.").arg(dsn),
-                	Application::getIconFont("FontAwesome").getIcon("bug")
+                	util::StyledIcon("bug")
                 });
 		});
 
         connect(&mv::errors().getLoggingShowCrashReportDialogAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
             if (toggled)
                 addNotification("ShowCrashReportDialog", {
-                        QString("%1 error logging").arg(_loggerName),
-                        QString("A crash report dialog will popup when an fatal error occurs."),
-                        Application::getIconFont("FontAwesome").getIcon("bug")
+                    QString("%1 error logging").arg(_loggerName),
+                    QString("A crash report dialog will popup when an fatal error occurs."),
+                	util::StyledIcon("bug")
 				});
             else
                 addNotification("ShowCrashReportDialog", {
                     QString("%1 error logging").arg(_loggerName),
                     QString("A crash report will be sent to the Sentry server unsupervised."),
-                    Application::getIconFont("FontAwesome").getIcon("bug")
+                	util::StyledIcon("bug")
                 });
 		});
     }

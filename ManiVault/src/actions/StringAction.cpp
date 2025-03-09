@@ -31,8 +31,8 @@ StringAction::StringAction(QObject* parent, const QString& title, const QString&
 
     _leadingAction.setEnabled(false);
 
-    _leadingAction.setIconByName("magnifying-glass");
-    _trailingAction.setIconByName("xmark");
+    _leadingAction.setIcon(StyledIcon("magnifying-glass"));
+    _trailingAction.setIcon(StyledIcon("xmark"));
 
     _leadingAction.setToolTip("Search");
     _trailingAction.setToolTip("Clear");
@@ -385,9 +385,9 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
         _validatorAction.setVisible(!_stringAction->getString().isEmpty() && !_stringAction->getValidator().regularExpression().pattern().isEmpty());
 
         if (hasAcceptableInput())
-            _validatorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("check"));
+            _validatorAction.setIcon(StyledIcon("check"));
         else
-            _validatorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("exclamation"));
+            _validatorAction.setIcon(StyledIcon("exclamation"));
     };
 
     connect(_stringAction, &StringAction::stringChanged, this, updateValidatorAction);

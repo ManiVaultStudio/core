@@ -93,7 +93,7 @@ CrashReportDialog::CrashUserInfo CrashReportDialog::getCrashUserInfo() const
 
 void CrashReportDialog::initialize()
 {
-    windowIcon      = Application::getIconFont("FontAwesome").getIcon("bug");
-    frownIcon       = Application::getIconFont("FontAwesome").getIcon("frown");
-    exclamationIcon = Application::getIconFont("FontAwesome").getIcon("exclamation");
+    windowIcon      = StyledIcon("bug");
+    frownIcon       = StyledIcon("frown");
+    exclamationIcon = StyledIcon("exclamation");
 }

@@ -120,7 +120,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 		string(REPLACE "/OPT:ICF" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
 		string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
 	endif()
-endif(MSVC)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -216,7 +215,8 @@ if(${MV_USE_ERROR_LOGGING})
 		PROPERTIES
 		FOLDER CoreDependencies/Crashpad
 	)
-	
+endif()
+
 if(APPLE)
     set(CMAKE_XCODE_GENERATE_SCHEME ON)
 endif()

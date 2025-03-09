@@ -31,9 +31,8 @@ SettingsManager::SettingsManager(QObject* parent) :
     _miscellaneousSettingsAction(this),
     _tasksSettingsAction(this),
     _temporaryDirectoriesSettingsAction(this),
-    _errorLoggingSettingsAction(this)
-    _appearanceSettingsAction(this),
-    _temporaryDirectoriesSettingsAction(this)
+    _errorLoggingSettingsAction(this),
+    _appearanceSettingsAction(this)
 {
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 

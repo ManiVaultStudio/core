@@ -240,7 +240,6 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
     _filteredActionsAction(this, "Filtered Actions", true),
-    _toolbarWidget(parent),
     _toolbarAction(this, "Group"),
     _filterAction(this, "Search"),
     _expandAllAction(this, "Expand all"),
