@@ -192,7 +192,8 @@ CPMAddPackage(
 if(${MV_USE_ERROR_LOGGING})
 	
 	# Add Sentry with CPM
-	CPMAddPackage(
+	if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+		CPMAddPackage(
 		NAME sentry-native
 		GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
 		GIT_TAG 0.7.19 														# Use the latest stable version
@@ -200,6 +201,16 @@ if(${MV_USE_ERROR_LOGGING})
 			"SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
 			"SENTRY_TRANSPORT winhttp" 										# Use the default HTTP transport
 	)
+	else()
+		CPMAddPackage(
+		NAME sentry-native
+		GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+		GIT_TAG 0.7.19 														# Use the latest stable version
+		OPTIONS
+			"SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
+			"SENTRY_TRANSPORT curl" 										# Use curl for HTTP transport
+	)
+	endif()
 
 	include_directories(${sentry-native_SOURCE_DIR}/include)
 	include_directories(${sentry-native_SOURCE_DIR}/external/crashpad/client)
