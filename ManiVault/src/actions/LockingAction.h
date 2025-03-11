@@ -34,7 +34,7 @@ public:
     Q_INVOKABLE LockingAction(QObject* parent, const QString& what = "", bool locked = false);
 
     /**
-     * Initialize the toggle action
+     * Initialize the setEnabled action
      * @param locked Locked
      */
     void initialize(bool locked = false);

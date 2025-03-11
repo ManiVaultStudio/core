@@ -31,8 +31,8 @@ StringAction::StringAction(QObject* parent, const QString& title, const QString&
 
     _leadingAction.setEnabled(false);
 
-    _leadingAction.setIconByName("magnifying-glass");
-    _trailingAction.setIconByName("xmark");
+    _leadingAction.setIcon(StyledIcon("magnifying-glass"));
+    _trailingAction.setIcon(StyledIcon("xmark"));
 
     _leadingAction.setToolTip("Search");
     _trailingAction.setToolTip("Clear");
@@ -230,6 +230,23 @@ void StringAction::setTextElideMode(const Qt::TextElideMode& textElideMode)
     emit textElideModeChanged(_textElideMode);
 }
 
+QRegularExpressionValidator& StringAction::getValidator()
+{
+    return _validator;
+}
+
+QValidator::State StringAction::isValid() const
+{
+    if (_validator.regularExpression().pattern().isEmpty())
+        return QValidator::State::Acceptable;
+
+    int position{};
+
+    auto string = _string;
+
+    return _validator.validate(string, position);
+}
+
 StringAction::InlineAction::StyledToolButton::StyledToolButton(InlineAction& inlineAction, QWidget* parent):
 	QToolButton(parent),
 	_inlineAction(inlineAction)
@@ -360,6 +377,21 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
+    setValidator(&_stringAction->getValidator());
+
+    addAction(&_validatorAction, QLineEdit::TrailingPosition);
+
+    const auto updateValidatorAction = [this]() -> void {
+        _validatorAction.setVisible(!_stringAction->getString().isEmpty() && !_stringAction->getValidator().regularExpression().pattern().isEmpty());
+
+        if (hasAcceptableInput())
+            _validatorAction.setIcon(StyledIcon("check"));
+        else
+            _validatorAction.setIcon(StyledIcon("exclamation"));
+    };
+
+    connect(_stringAction, &StringAction::stringChanged, this, updateValidatorAction);
+    connect(&_stringAction->getValidator(), &QRegularExpressionValidator::regularExpressionChanged, this, updateValidatorAction);
 
     addAction(&_stringAction->getLeadingAction(), QLineEdit::LeadingPosition);
     addAction(&_stringAction->getTrailingAction(), QLineEdit::TrailingPosition);
@@ -417,6 +449,7 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     updateLeadingAction();
     updateTrailingAction();
     updateCompleter();
+    updateValidatorAction();
 }
 
 StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :

@@ -103,7 +103,7 @@ public:
 protected:
 
     /**
-     * Get widget representation of the toggle action
+     * Get widget representation of the setEnabled action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
