@@ -10,10 +10,10 @@
 #include <Set.h>
 
 #include <actions/PluginTriggerAction.h>
-#include <actions/TriggerAction.h>
 
 #include <QDebug>
 #include <QMenu>
+#include <QMessageBox>
 #include <QAction>
 #include <QClipboard>
 
@@ -41,6 +41,7 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
     if (_selectedDatasets.count() >= 2 && dataTypes.count() == 1) {
         addSeparator();
         addAction(getGroupAction());
+        addAction(getSelectionGroupAction());
     }
 
     if (!_allDatasets.isEmpty()) {
@@ -160,6 +161,33 @@ QAction* DataHierarchyWidgetContextMenu::getGroupAction()
     });
 
     return groupDataAction;
+}
+
+QAction* DataHierarchyWidgetContextMenu::getSelectionGroupAction()
+{
+    auto selectionGroupAction = new QAction("Selection group...");
+
+    selectionGroupAction->setToolTip("Add datasets to the same selection group");
+    selectionGroupAction->setIcon(StyledIcon("ellipsis"));
+
+    connect(selectionGroupAction, &QAction::triggered, 
+        [this]() -> void {
+            SelectionGroupIndexDialog selectionIndexDialog(nullptr);
+            selectionIndexDialog.setModal(true);
+            const int ok = selectionIndexDialog.exec();
+
+            if ((ok == QDialog::Accepted)) {
+
+                const int SelectionGroupIndex = selectionIndexDialog.getSelectionGroupIndex();
+                for (auto& selectedDataset : _selectedDatasets) {
+                    selectedDataset->setGroupIndex(SelectionGroupIndex);
+                }
+            }
+
+        }
+        );
+
+    return selectionGroupAction;
 }
 
 QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
@@ -339,3 +367,28 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
     return unhideMenu;
 }
 
+SelectionGroupIndexDialog::SelectionGroupIndexDialog(QWidget* parent) :
+    QDialog(parent),
+    confirmButton(this, "Ok"),
+    selectionIndexAction(this, "Selection group index", -1, 250, -1)
+{
+    setWindowTitle(tr("Selection group index"));
+
+    QLabel* indicesLabel = new QLabel("Set the same selection group index for all selected datasets.");
+
+    confirmButton.setEnabled(false);
+    confirmButton.setToolTip("Selection group index must be larger than -1");
+
+    connect(&confirmButton, &TriggerAction::triggered, this, &SelectionGroupIndexDialog::closeDialogAction);
+    connect(this, &SelectionGroupIndexDialog::closeDialog, this, &QDialog::accept);
+
+    connect(&selectionIndexAction, &IntegralAction::valueChanged, [this](int value) {
+        confirmButton.setEnabled(value >= 0);
+        });
+
+    QHBoxLayout* layout = new QHBoxLayout();
+    layout->addWidget(indicesLabel);
+    layout->addWidget(selectionIndexAction.createWidget(this));
+    layout->addWidget(confirmButton.createWidget(this));
+    setLayout(layout);
+}
