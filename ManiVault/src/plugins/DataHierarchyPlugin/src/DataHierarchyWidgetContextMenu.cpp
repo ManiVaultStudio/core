@@ -182,6 +182,8 @@ QAction* DataHierarchyWidgetContextMenu::getSelectionGroupAction()
                 for (auto& selectedDataset : _selectedDatasets) {
                     selectedDataset->setGroupIndex(SelectionGroupIndex);
                 }
+
+                mv::data().getSelectionGroupingAction()->setChecked(true);
             }
 
         }
