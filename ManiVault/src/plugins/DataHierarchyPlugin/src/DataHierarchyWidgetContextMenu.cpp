@@ -13,7 +13,6 @@
 
 #include <QDebug>
 #include <QMenu>
-#include <QMessageBox>
 #include <QAction>
 #include <QClipboard>
 
