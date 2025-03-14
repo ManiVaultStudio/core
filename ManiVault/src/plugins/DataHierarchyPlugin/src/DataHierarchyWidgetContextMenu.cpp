@@ -374,7 +374,7 @@ SelectionGroupIndexDialog::SelectionGroupIndexDialog(QWidget* parent) :
 {
     setWindowTitle(tr("Selection group index"));
 
-    QLabel* indicesLabel = new QLabel("Set the same selection group index for all selected datasets.");
+    QLabel* indicesLabel = new QLabel("Set the same selection group index for all selected datasets:");
 
     confirmButton.setEnabled(false);
     confirmButton.setToolTip("Selection group index must be larger than -1");
