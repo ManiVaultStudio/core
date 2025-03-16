@@ -30,10 +30,16 @@ void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction, 
     if (publicIntegralRectangleAction == nullptr)
         return;
 
-    if (recursive) {
-        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::X), &publicIntegralRectangleAction->getRangeAction(Axis::X), recursive);
-        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::Y), &publicIntegralRectangleAction->getRangeAction(Axis::Y), recursive);
-    }
+    publicIntegralRectangleAction->setRectangle(getLeft(), getRight(), getBottom(), getTop());
+
+    connect(this, &IntegralRectangleAction::rectangleChanged, publicIntegralRectangleAction, [this, publicIntegralRectangleAction](std::int32_t left, std::int32_t right, std::int32_t bottom, std::int32_t top) -> void {
+        publicIntegralRectangleAction->setRectangle(left, right, bottom, top);
+        });
+
+    connect(publicIntegralRectangleAction, &IntegralRectangleAction::rectangleChanged, this, [this](std::int32_t left, std::int32_t right, std::int32_t bottom, std::int32_t top) -> void {
+        setRectangle(left, right, bottom, top);
+        });
+
 
     RectangleAction<IntegralRangeAction>::connectToPublicAction(publicAction, recursive);
 }

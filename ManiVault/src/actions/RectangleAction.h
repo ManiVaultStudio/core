@@ -63,6 +63,12 @@ public:
         getRangeAction(Axis::Y).getRangeMinAction().setPrefix("yMin: ");
         getRangeAction(Axis::Y).getRangeMaxAction().setPrefix("yMax: ");
 
+        getRangeAction(Axis::X).getRangeMinAction().setStaySilent(true);
+        getRangeAction(Axis::X).getRangeMaxAction().setStaySilent(true);
+
+        getRangeAction(Axis::Y).getRangeMinAction().setStaySilent(true);
+        getRangeAction(Axis::Y).getRangeMaxAction().setStaySilent(true);
+
         addAction(&getRangeAction(Axis::X));
         addAction(&getRangeAction(Axis::Y));
     }
@@ -100,6 +106,9 @@ public:
      */
     void setRectangle(NumValType left, NumValType right, NumValType bottom, NumValType top) {
 
+        if (getLeft() == left && getRight() == right && getBottom() == bottom && getTop() == top)
+            return;
+
         blockRectangleChangedCallBack();
         {
             getRangeAction(Axis::X).setRange(ValueRange(static_cast<NumValType>(left), static_cast<NumValType>(right)));
@@ -115,6 +124,9 @@ public:
      * @param bounds Rectangle bounds
      */
     void setBounds(const Bounds& bounds) {
+
+        if (getLeft() == bounds.getLeft() && getRight() == bounds.getRight() && getBottom() == bounds.getBottom() && getTop() == bounds.getTop())
+            return;
 
         blockRectangleChangedCallBack();
         {

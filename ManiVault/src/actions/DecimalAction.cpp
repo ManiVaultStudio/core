@@ -63,12 +63,12 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recur
     if (publicDecimalAction == nullptr)
         return;
 
-    connect(this, &DecimalAction::valueChanged, publicDecimalAction, [publicDecimalAction](float value) -> void {
-        publicDecimalAction->setValue(value);
+    connect(this, &DecimalAction::valueChanged, publicDecimalAction, [this, publicDecimalAction](float value) -> void {
+        publicDecimalAction->setValue(value, _staySilent);
     });
 
     connect(publicDecimalAction, &DecimalAction::valueChanged, this, [this](float value) -> void {
-        setValue(value);
+        setValue(value, _staySilent);
     });
 
     setValue(publicDecimalAction->getValue());

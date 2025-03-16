@@ -233,6 +233,17 @@ public:
         _updateDuringDrag = updateDuringDrag;
     }
 
+    bool getStaySilent() const {
+        return _staySilent;
+    }
+
+    void setStaySilent(bool staySilent) {
+        if (staySilent == _staySilent)
+            return;
+
+        _staySilent = staySilent;
+    }
+
     /** Returns whether the current value is at its minimum */
     virtual bool isAtMinimum() const final {
         return _value == _minimum;
@@ -262,6 +273,7 @@ protected: // Numerical and auxiliary data
     QString             _suffix;                /** Suffix string */
     std::uint32_t       _numberOfDecimals;      /** Number of decimals */
     bool                _updateDuringDrag;      /** Whether the value should update during interaction */
+    bool                _staySilent = false;
 
 protected: // Callbacks for implementations of the numerical action
     ValueChangedCB              _valueChanged;                  /** Callback which is called when the value changed */
