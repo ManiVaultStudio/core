@@ -80,6 +80,7 @@ class TutorialPluginFactory : public mv::plugin::ViewPluginFactory
 
 public:
 
+    /** Default constructor */
     TutorialPluginFactory();
 
     /**

@@ -130,7 +130,8 @@ QVariantMap TutorialPlugin::toVariantMap() const
     return variantMap;
 }
 
-TutorialPluginFactory::TutorialPluginFactory()
+TutorialPluginFactory::TutorialPluginFactory() :
+	ViewPluginFactory(false, true)
 {
     setIconByName("chalkboard");
 
