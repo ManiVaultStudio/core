@@ -64,11 +64,11 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recur
         return;
 
     connect(this, &DecimalAction::valueChanged, publicDecimalAction, [this, publicDecimalAction](float value) -> void {
-        publicDecimalAction->setValue(value, _staySilent);
+        publicDecimalAction->setValue(value, _notifyConnected);
     });
 
     connect(publicDecimalAction, &DecimalAction::valueChanged, this, [this](float value) -> void {
-        setValue(value, _staySilent);
+        setValue(value, _notifyConnected);
     });
 
     setValue(publicDecimalAction->getValue());

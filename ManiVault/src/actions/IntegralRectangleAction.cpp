@@ -40,7 +40,6 @@ void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction, 
         setRectangle(left, right, bottom, top);
         });
 
-
     RectangleAction<IntegralRangeAction>::connectToPublicAction(publicAction, recursive);
 }
 

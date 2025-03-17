@@ -40,7 +40,6 @@ void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction, b
         setRectangle(left, right, bottom, top);
         });
     
-
     RectangleAction<DecimalRangeAction>::connectToPublicAction(publicAction, recursive);
 }
 

@@ -233,15 +233,20 @@ public:
         _updateDuringDrag = updateDuringDrag;
     }
 
-    bool getStaySilent() const {
-        return _staySilent;
+    /** Gets whether connected actions invoke the _valueChanged callback on value change */
+    bool getNotifyConnected() const {
+        return _notifyConnected;
     }
 
-    void setStaySilent(bool staySilent) {
-        if (staySilent == _staySilent)
+    /**
+     * Sets whether connected actions invoke the _valueChanged callback on value change
+     * @param notifyConnected Whether connected actions invoke the _valueChanged callback on value change
+     */
+    void setNotifyConnected(bool notifyConnected) {
+        if (notifyConnected == _notifyConnected)
             return;
 
-        _staySilent = staySilent;
+        _notifyConnected = notifyConnected;
     }
 
     /** Returns whether the current value is at its minimum */
@@ -273,7 +278,7 @@ protected: // Numerical and auxiliary data
     QString             _suffix;                /** Suffix string */
     std::uint32_t       _numberOfDecimals;      /** Number of decimals */
     bool                _updateDuringDrag;      /** Whether the value should update during interaction */
-    bool                _staySilent = false;
+    bool                _notifyConnected = true;  /** If true, does not invoke the _valueChanged callback in connected actions */
 
 protected: // Callbacks for implementations of the numerical action
     ValueChangedCB              _valueChanged;                  /** Callback which is called when the value changed */

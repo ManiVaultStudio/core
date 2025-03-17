@@ -63,11 +63,11 @@ public:
         getRangeAction(Axis::Y).getRangeMinAction().setPrefix("yMin: ");
         getRangeAction(Axis::Y).getRangeMaxAction().setPrefix("yMax: ");
 
-        getRangeAction(Axis::X).getRangeMinAction().setStaySilent(true);
-        getRangeAction(Axis::X).getRangeMaxAction().setStaySilent(true);
+        getRangeAction(Axis::X).getRangeMinAction().setNotifyConnected(false);
+        getRangeAction(Axis::X).getRangeMaxAction().setNotifyConnected(false);
 
-        getRangeAction(Axis::Y).getRangeMinAction().setStaySilent(true);
-        getRangeAction(Axis::Y).getRangeMaxAction().setStaySilent(true);
+        getRangeAction(Axis::Y).getRangeMinAction().setNotifyConnected(false);
+        getRangeAction(Axis::Y).getRangeMaxAction().setNotifyConnected(false);
 
         addAction(&getRangeAction(Axis::X));
         addAction(&getRangeAction(Axis::Y));
