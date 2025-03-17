@@ -42,12 +42,12 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recu
     if (publicIntegralAction == nullptr)
         return;
 
-    connect(this, &IntegralAction::valueChanged, publicIntegralAction, [this, publicIntegralAction](const std::int32_t& value) -> void {
-        publicIntegralAction->setValue(value, _notifyConnected);
+    connect(this, &IntegralAction::valueChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& value) -> void {
+        publicIntegralAction->setValue(value);
     });
 
     connect(publicIntegralAction, &IntegralAction::valueChanged, [this](const std::int32_t& value) -> void {
-        setValue(value, _notifyConnected);
+        setValue(value);
     });
 
     setValue(publicIntegralAction->getValue());
