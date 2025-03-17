@@ -326,10 +326,11 @@ void ViewPlugin::setProgressTask(Task* progressTask)
     emit progressTaskChanged(_progressTask);
 }
 
-ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
+ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/, bool preferFloating /*= false*/) :
     PluginFactory(Type::VIEW, "View"),
     _producesSystemViewPlugins(producesSystemViewPlugins),
-    _preferredDockArea(DockAreaFlag::Right)
+    _preferredDockArea(DockAreaFlag::Right),
+    _preferFloating(preferFloating)
 {
     setIconByName("eye");
     setCategoryIconByName("eye");
@@ -346,6 +347,11 @@ bool ViewPluginFactory::producesSystemViewPlugins() const
 DockAreaFlag ViewPluginFactory::getPreferredDockArea() const
 {
     return _preferredDockArea;
+}
+
+bool ViewPluginFactory::preferFloating() const
+{
+    return _preferFloating;
 }
 
 void ViewPluginFactory::setPreferredDockArea(const gui::DockAreaFlag& preferredDockArea)
