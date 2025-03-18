@@ -124,7 +124,6 @@ HelpManager::HelpManager(QObject* parent) :
                 else
                     qWarning() << "Tutorial" << tutorialMap["title"].toString() << "cannot be added to the tutorials model because one (or more) required plugins are not available: " << missingRequiredPlugins.join(", ");
             }
-                
 
             emit tutorialsModelPopulatedFromWebsite();
         }
