@@ -119,7 +119,7 @@ TasksTreeAction::TasksTreeAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
     _model(nullptr),
     _filterModel(nullptr),
-    _treeAction(this, "list-check"),
+    _treeAction(this, "Tasks"),
     _mayLoadTasksPlugin(true),
     _loadTasksPluginAction(this, "Plugin")
 {
@@ -135,7 +135,7 @@ TasksTreeAction::TasksTreeAction(QObject* parent, const QString& title) :
 
         widget->layout()->setContentsMargins(0, 0, 0, 0);
 
-        _loadTasksPluginAction.setEnabled(mv::plugins().getPluginFactory("list-check")->getNumberOfInstances() == 0);
+        _loadTasksPluginAction.setEnabled(mv::plugins().getPluginFactory("Tasks")->getNumberOfInstances() == 0);
 
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
