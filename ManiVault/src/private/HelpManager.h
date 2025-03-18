@@ -83,7 +83,7 @@ public:
      * Get tutorials menu (e.g. for use in the main menu)
      * @return Pointer to tutorials menu
      */
-    QMenu* getTutorialsMenu() const;
+    QMenu* getTutorialsMenu() const override;
 
     /**
      * Add toaster notification in the main window
