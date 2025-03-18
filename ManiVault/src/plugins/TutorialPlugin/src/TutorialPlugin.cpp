@@ -23,6 +23,8 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _openInBrowserAction(this, "Open in browser"),
     _autoOpenProject(true)
 {
+    getLearningCenterAction().getToolbarVisibleAction().setChecked(false);
+
     _horizontalGroupAction.setShowLabels(false);
 
     auto tutorialsModel = const_cast<mv::LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel());
@@ -45,40 +47,6 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _horizontalGroupAction.addAction(&_tutorialsFilterModel.getFilterGroupAction());
     _horizontalGroupAction.addAction(&tagsFilterAction);
     _horizontalGroupAction.addAction(&_openInBrowserAction);
-
-    const auto currentTutorialChanged = [this, tutorialsModel]() -> void {
-        const auto currentIndex = _tutorialPickerAction.getCurrentIndex();
-
-        _openInBrowserAction.setEnabled(currentIndex >= 0);
-
-        if (currentIndex < 0)
-            return;
-
-        const auto contentIndex             = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Content));
-        const auto urlIndex                 = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Url));
-        const auto projectUrlIndex          = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::ProjectUrl));
-        const auto sourceContentIndex       = _tutorialsFilterModel.mapToSource(contentIndex);
-        const auto sourceUrlIndex           = _tutorialsFilterModel.mapToSource(urlIndex);
-        const auto sourceProjectUrlIndex    = _tutorialsFilterModel.mapToSource(projectUrlIndex);
-        const auto content                  = tutorialsModel->data(sourceContentIndex, Qt::EditRole).toString();
-        const auto url                      = tutorialsModel->data(sourceUrlIndex, Qt::EditRole).toString();
-        const auto projectUrl               = tutorialsModel->data(sourceProjectUrlIndex, Qt::EditRole).toString();
-
-        if (_autoOpenProject && !projectUrl.isEmpty()) {
-            mv::projects().openProject(QUrl(projectUrl));
-        } else {
-            _tutorialWidget.setHtmlText(content, url);
-            _openInBrowserAction.setToolTip(QString("Go to: %1").arg(_tutorialWidget.getBaseUrl().toString()));
-        }
-    };
-
-    currentTutorialChanged();
-
-    connect(&_tutorialPickerAction, &OptionAction::currentIndexChanged, this, currentTutorialChanged);
-
-    connect(&_openInBrowserAction, &TriggerAction::triggered, this, [this]() -> void {
-        QDesktopServices::openUrl(_tutorialWidget.getBaseUrl());
-    });
 }
 
 void TutorialPlugin::init()
@@ -91,6 +59,15 @@ void TutorialPlugin::init()
     getWidget().setLayout(layout);
 
     getLearningCenterAction().getToolbarVisibleAction().setChecked(false);
+
+    connect(&_tutorialPickerAction, &OptionAction::currentIndexChanged, this, &TutorialPlugin::currentTutorialChanged);
+
+    connect(&_openInBrowserAction, &TriggerAction::triggered, this, [this]() -> void {
+        QDesktopServices::openUrl(_tutorialWidget.getBaseUrl());
+    });
+
+    // Not sure why this is needed, but without it the HTML is not displayed and the wen engine view is empty and the dock widget disappears
+    _tutorialWidget.setHtmlText("", {});
 }
 
 const mv::util::LearningCenterTutorial* TutorialPlugin::getCurrentTutorial() const
@@ -106,6 +83,36 @@ const mv::util::LearningCenterTutorial* TutorialPlugin::getCurrentTutorial() con
         return {};
 
     return tutorialItem->getTutorial();
+}
+
+void TutorialPlugin::currentTutorialChanged()
+{
+    const auto currentIndex = _tutorialPickerAction.getCurrentIndex();
+
+    _openInBrowserAction.setEnabled(currentIndex >= 0);
+
+    if (currentIndex < 0)
+        return;
+
+    auto tutorialsModel = const_cast<mv::LearningCenterTutorialsModel*>(&mv::help().getTutorialsModel());
+
+    const auto contentIndex             = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Content));
+    const auto urlIndex                 = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::Url));
+    const auto projectUrlIndex          = _tutorialsFilterModel.index(currentIndex, static_cast<int>(LearningCenterTutorialsModel::Column::ProjectUrl));
+    const auto sourceContentIndex       = _tutorialsFilterModel.mapToSource(contentIndex);
+    const auto sourceUrlIndex           = _tutorialsFilterModel.mapToSource(urlIndex);
+    const auto sourceProjectUrlIndex    = _tutorialsFilterModel.mapToSource(projectUrlIndex);
+    const auto content                  = tutorialsModel->data(sourceContentIndex, Qt::EditRole).toString();
+    const auto url                      = tutorialsModel->data(sourceUrlIndex, Qt::EditRole).toString();
+    const auto projectUrl               = tutorialsModel->data(sourceProjectUrlIndex, Qt::EditRole).toString();
+
+    if (_autoOpenProject && !projectUrl.isEmpty()) {
+        mv::projects().openProject(QUrl(projectUrl));
+    }
+    else {
+        _tutorialWidget.setHtmlText(content, url);
+        _openInBrowserAction.setToolTip(QString("Go to: %1").arg(_tutorialWidget.getBaseUrl().toString()));
+    }
 }
 
 void TutorialPlugin::fromVariantMap(const QVariantMap& variantMap)
