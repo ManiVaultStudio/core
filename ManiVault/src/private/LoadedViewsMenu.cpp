@@ -55,7 +55,7 @@ void LoadedViewsMenu::populate()
 
     _viewsToggleActions << loadedSystemViewActions;
 
-    if (!loadedSystemViewActions.isEmpty()) {
+    if (!_viewsToggleActions.isEmpty()) {
         setEnabled(true);
 
         _loadedSystemViewsMenu->clear();

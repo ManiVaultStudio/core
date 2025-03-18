@@ -70,7 +70,7 @@ void ThemeManager::ThemeSettings::updateTheme()
 		case ColorSchemeMode::System:
 		{
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-			qApp->styleHints()->setColorScheme(Qt::ColorScheme::Unknown);
+			qApp->styleHints()->setColorScheme(_colorScheme);
 			qApp->setPalette(QApplication::style()->standardPalette());
 #endif
 

@@ -53,9 +53,6 @@ WorkspaceManager::WorkspaceManager(QObject* parent) :
     _importWorkspaceFromProjectAction(this, "Import from project"),
     _recentWorkspacesAction(this, getSettingsPrefix() + "RecentWorkspaces")
 {
-    // Temporary solution for https://github.com/ManiVaultStudio/core/issues/274
-    new QOpenGLWidget();
-
     //CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
     CDockManager::setAutoHideConfigFlags(CDockManager::DefaultAutoHideConfig);
     //CDockManager::setAutoHideConfigFlag(CDockManager::AutoHideShowOnMouseOver, true);
@@ -90,15 +87,6 @@ WorkspaceManager::WorkspaceManager(QObject* parent) :
 
     _importWorkspaceFromProjectAction.setIconByName("file-zipper");
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
-
-    auto mainWindow = Application::topLevelWidgets().first();
-
-    mainWindow->addAction(&_resetWorkspaceAction);
-    mainWindow->addAction(&_importWorkspaceAction);
-    mainWindow->addAction(&_exportWorkspaceAction);
-    mainWindow->addAction(&_exportWorkspaceAsAction);
-    mainWindow->addAction(&_importWorkspaceFromProjectAction);
-    mainWindow->addAction(&_editWorkspaceSettingsAction);
 
     connect(&_resetWorkspaceAction, &TriggerAction::triggered, [this](bool) {
         newWorkspace();
@@ -163,6 +151,15 @@ void WorkspaceManager::initialize()
 
     beginInitialization();
     {
+        auto mainWindow = Application::topLevelWidgets().first();
+
+        mainWindow->addAction(&_resetWorkspaceAction);
+        mainWindow->addAction(&_importWorkspaceAction);
+        mainWindow->addAction(&_exportWorkspaceAction);
+        mainWindow->addAction(&_exportWorkspaceAsAction);
+        mainWindow->addAction(&_importWorkspaceFromProjectAction);
+        mainWindow->addAction(&_editWorkspaceSettingsAction);
+
         const auto updateActionsReadOnly = [this]() -> void {
             _resetWorkspaceAction.setEnabled(!getLockingAction().isLocked());
             _importWorkspaceAction.setEnabled(!getLockingAction().isLocked());

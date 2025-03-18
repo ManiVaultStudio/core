@@ -42,6 +42,11 @@ public:
      */
     const mv::util::LearningCenterTutorial* getCurrentTutorial() const;
 
+private:
+
+    /** Slot for when the current tutorial changes */
+    void currentTutorialChanged();
+
 public: // Serialization
 
     /**
@@ -80,6 +85,7 @@ class TutorialPluginFactory : public mv::plugin::ViewPluginFactory
 
 public:
 
+    /** Default constructor */
     TutorialPluginFactory();
 
     /**

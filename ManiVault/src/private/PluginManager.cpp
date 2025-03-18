@@ -438,15 +438,35 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
 
 plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
 {
-    if (kind == "Tutorial")
-        return requestViewPluginFloated(kind, datasets);
+    try
+    {
+	    if (!_pluginFactories.keys().contains(kind))
+	        throw std::runtime_error("Unrecognized view plugin kind");
 
-    const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
+        auto viewPluginFactory = dynamic_cast<plugin::ViewPluginFactory*>(_pluginFactories[kind]);
 
-    if (viewPlugin != nullptr)
-        mv::workspaces().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
+        if (!viewPluginFactory)
+            throw std::runtime_error(QString("%1 plugin factory does not exist").arg(kind).toStdString());
 
-    return viewPlugin;
+	    if (viewPluginFactory->getStartFloating())
+	        return requestViewPluginFloated(kind, datasets);
+
+	    const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
+
+	    if (viewPlugin != nullptr)
+	        mv::workspaces().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
+
+	    return viewPlugin;
+	}
+	catch (std::exception& e)
+	{
+	    exceptionMessageBox("Unable to create view plugin", e);
+	}
+	catch (...) {
+	    exceptionMessageBox("Unable to create view plugin");
+	}
+
+	return {};
 }
 
 plugin::ViewPlugin* PluginManager::requestViewPluginFloated(const QString& kind, Datasets datasets)

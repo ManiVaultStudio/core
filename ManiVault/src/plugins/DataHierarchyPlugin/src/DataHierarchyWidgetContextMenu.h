@@ -9,6 +9,9 @@
 
 #include <QMenu>
 
+#include <actions/TriggerAction.h>
+#include <actions/IntegralAction.h>
+
 class QAction;
 
 using namespace mv;
@@ -48,6 +51,12 @@ private:
     QAction* getGroupAction();
 
     /**
+     * Get action for selection grouping
+     * @return Pointer to action for selection grouping
+     */
+    QAction* getSelectionGroupAction();
+
+    /**
      * Get menu for item locking
      * @return Pointer to menu for item locking
      */
@@ -74,4 +83,31 @@ private:
 private:
     Datasets    _allDatasets;           /** All datasets in the data hierarchy */
     Datasets    _selectedDatasets;      /** Selected datasets in the data hierarchy widget */
+};
+
+/**
+ * Helper dialog for selection index selection
+ */
+class SelectionGroupIndexDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    SelectionGroupIndexDialog(QWidget* parent);
+
+    std::int32_t getSelectionGroupIndex() {
+        return selectionIndexAction.getValue();
+    }
+
+signals:
+    void closeDialog(bool onlyIndices);
+
+public slots:
+    // Pass selected data set name from SelectionGroupIndexDialog to BinExporter (dialogClosed)
+    void closeDialogAction() {
+        emit closeDialog(confirmButton.isChecked());
+    }
+
+private:
+    gui::IntegralAction      selectionIndexAction;
+    gui::TriggerAction       confirmButton;
 };

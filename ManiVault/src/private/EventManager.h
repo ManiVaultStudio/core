@@ -14,7 +14,7 @@
 
 namespace mv
 {
-
+    
 class EventManager final : public AbstractEventManager
 {
     Q_OBJECT
@@ -99,6 +99,20 @@ public:
      * @param eventListener Pointer to event listener to unregister
      */
     void unregisterEventListener(EventListener* eventListener) override;
+
+public: // Serialization
+
+    /**
+     * Load event manager from variant
+     * @param Variant representation of the event manager
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save event manager to variant
+     * @return Variant representation of the event manager
+     */
+    QVariantMap toVariantMap() const override;
 
 private:
     std::vector<EventListener*>         _eventListeners;    /** List of classes listening for core events */
