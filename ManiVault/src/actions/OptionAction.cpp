@@ -14,6 +14,8 @@
 #include <QListView>
 #include <QStylePainter>
 
+#include "models/LoggingFilterModel.h"
+
 using namespace mv::util;
 
 namespace mv::gui {
@@ -293,7 +295,14 @@ void OptionAction::setCurrentText(const QString& currentText)
     if (currentText == getCurrentText())
         return;
 
-    _currentIndex = hasOption(currentText) ? getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, currentText).first().row() : -1;
+    _currentIndex = -1;
+
+    if (hasOption(currentText)) {
+	    const auto matches = getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, currentText, 1, Qt::MatchExactly);
+
+        if (!matches.isEmpty())
+            _currentIndex = matches.first().row();
+    }
 
     emit currentTextChanged(getCurrentText());
     emit currentIndexChanged(_currentIndex);
@@ -416,8 +425,9 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     _completer.setFilterMode(Qt::MatchContains);
     _completer.setCompletionColumn(0);
     _completer.setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+    _completer.setModelSorting(QCompleter::ModelSorting::CaseInsensitivelySortedModel);
 
-    _proxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+	_proxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
     _proxyModel.setDynamicSortFilter(true);
     _proxyModel.sort(0);
 
