@@ -499,6 +499,7 @@ namespace mv
             int w = _windowSize.width();
             int h = _windowSize.height();
             int size = w < h ? w : h;
+
             glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
 
             // World to clip transformation

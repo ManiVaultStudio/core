@@ -15,7 +15,7 @@ using namespace mv;
 using namespace mv::gui;
 
 ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title, "Tasks"),
+    StatusBarAction(parent, title, "list-check"),
     _tasksAction(this, "Tasks"),
     _numberOfTasks(0)
 {

@@ -161,7 +161,7 @@ set(ZLIB_LIBRARIES zlibstatic)
 CPMAddPackage(
   NAME              quazip
   GITHUB_REPOSITORY stachenov/quazip
-  GIT_TAG           v1.4
+  GIT_TAG           v1.5
   OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF" "BUILD_SHARED_LIBS OFF"
 )
 

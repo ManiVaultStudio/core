@@ -99,8 +99,31 @@ HelpManager::HelpManager(QObject* parent) :
 
             emit videosModelPopulatedFromWebsite();
 
-            for (const auto tutorial : tutorials)
-                addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+            for (const auto tutorial : tutorials) {
+                const auto tutorialMap = tutorial.toVariant().toMap();
+
+                bool areRequiredPluginsLoaded = true;
+
+                QStringList missingRequiredPlugins;
+
+                if (tutorialMap.contains("plugins")) {
+                    for (const auto& pluginVariant : tutorialMap["plugins"].toList()) {
+                        const auto pluginKind = pluginVariant.toString();
+
+                        if (!mv::plugins().isPluginLoaded(pluginKind)) {
+                            areRequiredPluginsLoaded = false;
+                            missingRequiredPlugins.push_back(pluginKind);
+                        }
+                    }
+                } else {
+                    qWarning() << "Tutorial" << tutorialMap["title"].toString() << "does not specify any required plugins. The tutorial can be loaded but there is no guarantee that its required plugins are available";
+                }
+
+                if (areRequiredPluginsLoaded)
+					addTutorial(new LearningCenterTutorial(tutorialMap));
+                else
+                    qWarning() << "Tutorial" << tutorialMap["title"].toString() << "cannot be added to the tutorials model because one (or more) required plugins are not available: " << missingRequiredPlugins.join(", ");
+            }
 
             emit tutorialsModelPopulatedFromWebsite();
         }
@@ -247,7 +270,9 @@ QMenu* HelpManager::getTutorialsMenu() const
 
     tutorialsMenu->setIcon(StyledIcon("user-graduate"));
 
-    for (const auto tutorial : getTutorials({}, { "Installation" })) {
+    const auto tutorials = getTutorials({}, { "Installation" });
+
+    for (const auto tutorial : tutorials) {
         
         auto tutorialAction = new TriggerAction(tutorialsMenu, tutorial->getTitle());
 
@@ -274,6 +299,8 @@ QMenu* HelpManager::getTutorialsMenu() const
 
         tutorialsMenu->addAction(tutorialAction);
     }
+
+    tutorialsMenu->setEnabled(!tutorials.empty());
 
     return tutorialsMenu;
 }

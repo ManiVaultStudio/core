@@ -136,6 +136,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     dataHierarchy().fromParentVariantMap(variantMap);
     actions().fromParentVariantMap(variantMap);
     plugins().fromParentVariantMap(variantMap);
+    events().fromParentVariantMap(variantMap);
 }
 
 QVariantMap Project::toVariantMap() const
@@ -166,6 +167,7 @@ QVariantMap Project::toVariantMap() const
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);
     actions().insertIntoVariantMap(variantMap);
+    events().insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

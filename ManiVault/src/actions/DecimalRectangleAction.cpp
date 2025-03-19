@@ -30,11 +30,16 @@ void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction, b
     if (publicDecimalRectangleAction == nullptr)
         return;
 
-    if (recursive) {
-        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::X), &publicDecimalRectangleAction->getRangeAction(Axis::X), recursive);
-        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::Y), &publicDecimalRectangleAction->getRangeAction(Axis::Y), recursive);
-    }
+    publicDecimalRectangleAction->setRectangle(getLeft(), getRight(), getBottom(), getTop());
 
+    connect(this, &DecimalRectangleAction::rectangleChanged, publicDecimalRectangleAction, [this, publicDecimalRectangleAction](float left, float right, float bottom, float top) -> void {
+        publicDecimalRectangleAction->setRectangle(left, right, bottom, top);
+        });
+
+    connect(publicDecimalRectangleAction, &DecimalRectangleAction::rectangleChanged, this, [this](float left, float right, float bottom, float top) -> void {
+        setRectangle(left, right, bottom, top);
+        });
+    
     RectangleAction<DecimalRangeAction>::connectToPublicAction(publicAction, recursive);
 }
 

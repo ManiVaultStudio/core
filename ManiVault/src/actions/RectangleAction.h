@@ -100,6 +100,9 @@ public:
      */
     void setRectangle(NumValType left, NumValType right, NumValType bottom, NumValType top) {
 
+        if (getLeft() == left && getRight() == right && getBottom() == bottom && getTop() == top)
+            return;
+
         blockRectangleChangedCallBack();
         {
             getRangeAction(Axis::X).setRange(ValueRange(static_cast<NumValType>(left), static_cast<NumValType>(right)));
@@ -115,6 +118,9 @@ public:
      * @param bounds Rectangle bounds
      */
     void setBounds(const Bounds& bounds) {
+
+        if (getLeft() == bounds.getLeft() && getRight() == bounds.getRight() && getBottom() == bounds.getBottom() && getTop() == bounds.getTop())
+            return;
 
         blockRectangleChangedCallBack();
         {

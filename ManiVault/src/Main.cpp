@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
 
-#ifdef __APPLE__
+#ifdef Q_OS_MAC
     QSurfaceFormat defaultFormat;
     
     defaultFormat.setVersion(3, 3);
@@ -101,6 +101,14 @@ int main(int argc, char *argv[])
     defaultFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
     
     QSurfaceFormat::setDefaultFormat(defaultFormat);
+#endif
+
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+    QSurfaceFormat format;
+
+	format.setRenderableType(QSurfaceFormat::OpenGL);
+
+    QSurfaceFormat::setDefaultFormat(format);
 #endif
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);

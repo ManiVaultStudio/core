@@ -191,8 +191,9 @@ public:
     /**
      * Constructor
      * @param producesSystemViewPlugins Whether this factory generates system view plugins or not
+     * @param startFloating Whether the view plugin is initially floating rather than docker to other view plugins
      */
-    ViewPluginFactory(bool producesSystemViewPlugins = false);
+    ViewPluginFactory(bool producesSystemViewPlugins = false, bool startFloating = false);
 
     /** Destructor */
     ~ViewPluginFactory() override = default;
@@ -215,6 +216,12 @@ public:
      */
     gui::DockAreaFlag getPreferredDockArea() const;
 
+    /**
+     * Get whether the view plugin is initially floating (not docked to other view plugins)
+     * @return Boolean determining whether the view plugin initially floats
+     */
+    bool getStartFloating() const;
+
 protected:
 
     /**
@@ -226,6 +233,7 @@ protected:
 private:
     const bool          _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
     gui::DockAreaFlag   _preferredDockArea;             /** Preferred initial dock area when the view plugin is added to the workspace */
+    const bool          _startFloating;                 /** Whether the view plugin is initially floating rather than docker to other view plugins */
 };
 
 }
