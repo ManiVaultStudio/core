@@ -415,10 +415,14 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
     _completer.setFilterMode(Qt::MatchContains);
     _completer.setCompletionColumn(0);
-    _completer.setCompletionMode(QCompleter::PopupCompletion);
+    _completer.setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+
+    _proxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+    _proxyModel.setDynamicSortFilter(true);
+    _proxyModel.sort(0);
 
     const auto updateCompleterModel = [this, optionAction]() {
-        _completer.setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+        _completer.setModel(&_proxyModel);
     };
 
     connect(optionAction, &OptionAction::modelChanged, this, updateCompleterModel);
