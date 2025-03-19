@@ -82,5 +82,6 @@
     </qresource>
 	<qresource prefix="/HTML">
         <file alias="Markdown">html/markdown.html</file>
+        <file alias="ErrorLoggingConsent">html/ErrorLoggingConsent.html</file>
     </qresource>
 </RCC>
