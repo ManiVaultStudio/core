@@ -130,6 +130,8 @@ namespace mv
         class CORE_EXPORT PointRenderer : public Renderer2D
         {
         public:
+            using Renderer2D::Renderer2D;
+
             void setData(const std::vector<Vector2f>& points);
             void setHighlights(const std::vector<char>& highlights, const std::int32_t& numSelectedPoints);
             void setFocusHighlights(const std::vector<char>& focusHighlights, const std::int32_t& numberOfFocusHighlights);

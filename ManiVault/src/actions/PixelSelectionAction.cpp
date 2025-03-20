@@ -417,15 +417,15 @@ QMenu* PixelSelectionAction::getContextMenu()
 bool PixelSelectionAction::eventFilter(QObject* object, QEvent* event)
 {
     if (!isEnabled())
-        return QObject::eventFilter(object, event);
+        return QWidgetAction::eventFilter(object, event);
 
     const auto keyEvent = dynamic_cast<QKeyEvent*>(event);
 
     if (!keyEvent)
-        return QObject::eventFilter(object, event);
+        return QWidgetAction::eventFilter(object, event);
 
     if (keyEvent->isAutoRepeat())
-        return QObject::eventFilter(object, event);
+        return QWidgetAction::eventFilter(object, event);
 
     switch (keyEvent->type())
     {
@@ -471,7 +471,7 @@ bool PixelSelectionAction::eventFilter(QObject* object, QEvent* event)
             break;
     }
 
-    return QObject::eventFilter(object, event);
+    return QWidgetAction::eventFilter(object, event);
 }
 
 void PixelSelectionAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
