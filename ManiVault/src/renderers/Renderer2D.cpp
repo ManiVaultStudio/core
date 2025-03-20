@@ -2,27 +2,18 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ImageRenderer.h"
+#include "Renderer2D.h"
 
 namespace mv
 {
-    void ImageRenderer::init()
-    {
 
+Renderer2D::Renderer2D(QWidget* sourceWidget, QObject* parent) :
+    Renderer(parent),
+    _sourceWidget(sourceWidget)
+{
+    if (_sourceWidget) {
+        _sourceWidget->installEventFilter(this);
     }
+}
 
-    void ImageRenderer::resize(QSize renderSize)
-    {
-
-    }
-
-    void ImageRenderer::render()
-    {
-
-    }
-
-    void ImageRenderer::destroy()
-    {
-
-    }
 }
