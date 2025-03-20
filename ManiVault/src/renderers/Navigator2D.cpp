@@ -14,8 +14,9 @@
 namespace mv
 {
 
-Navigator2D::Navigator2D(QObject* parent) :
+Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     QObject(parent),
+    _renderer(renderer),
     _initialized(false),
     _isNavigating(false),
     _isPanning(false),
@@ -23,13 +24,12 @@ Navigator2D::Navigator2D(QObject* parent) :
 {
 }
 
-void Navigator2D::initialize(QWidget* sourceWidget, Renderer2D* renderer)
+void Navigator2D::initialize(QWidget* sourceWidget)
 {
-    Q_ASSERT(sourceWidget && renderer);
+    Q_ASSERT(sourceWidget);
 
-    if (sourceWidget && renderer) {
+    if (sourceWidget) {
         _sourceWidget = sourceWidget;
-        _renderer = renderer;
 
         _sourceWidget->installEventFilter(this);
         _sourceWidget->setFocusPolicy(Qt::StrongFocus);
@@ -102,9 +102,9 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
 
                 if (mouseEvent->buttons() == Qt::LeftButton && _mousePositions.size() >= 2)
                 {
-                    const auto& previousMousePosition = _mousePositions[_mousePositions.size() - 2];
-                    const auto& currentMousePosition = _mousePositions[_mousePositions.size() - 1];
-                    const auto panVector = currentMousePosition - previousMousePosition;
+                    const auto& previousMousePosition   = _mousePositions[_mousePositions.size() - 2];
+                    const auto& currentMousePosition    = _mousePositions[_mousePositions.size() - 1];
+                    const auto panVector                = currentMousePosition - previousMousePosition;
 
                     panBy(panVector);
                 }
@@ -120,7 +120,7 @@ void Navigator2D::zoomAround(const QPointF& center, float factor)
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__ << center << factor;
 #endif
 
@@ -138,7 +138,7 @@ void Navigator2D::zoomToRectangle(const QRectF& zoomRectangle)
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__ << zoomRectangle;
 #endif
 
@@ -163,7 +163,7 @@ void Navigator2D::panBy(const QPointF& to)
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__ << to;
 #endif
 
@@ -205,7 +205,7 @@ void Navigator2D::resetView()
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 }
@@ -269,7 +269,7 @@ void Navigator2D::beginPanning()
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -283,7 +283,7 @@ void Navigator2D::endPanning()
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -297,7 +297,7 @@ void Navigator2D::beginZooming()
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -311,7 +311,7 @@ void Navigator2D::endZooming()
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -325,7 +325,7 @@ void Navigator2D::beginNavigation()
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -339,7 +339,7 @@ void Navigator2D::endNavigation()
     if (!_initialized)
         return;
 
-#ifdef RENDERER_2D_VERBOSE
+#ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 

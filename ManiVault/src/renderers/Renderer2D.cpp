@@ -14,7 +14,8 @@ namespace mv
 {
 
 Renderer2D::Renderer2D(QObject* parent) :
-    Renderer(parent)
+    Renderer(parent),
+    _navigator(*this)
 {
 }
 

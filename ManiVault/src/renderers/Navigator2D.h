@@ -28,17 +28,17 @@ public:
     /**
      * Construct a new two-dimensional navigator
      *
+     * @param renderer Reference to parent renderer
      * @param parent Pointer to the parent object
      */
-    explicit Navigator2D(QObject* parent = nullptr);
+    explicit Navigator2D(Renderer2D& renderer, QObject* parent = nullptr);
 
     /**
-     * Initializes the two-dimensional navigator with a \p widget and a \p renderer
+     * Initializes the two-dimensional navigator with a \p sourceWidget
      *
      * @param sourceWidget Pointer to the renderer widget
-     * @param renderer Pointer to the renderer
      */
-    void initialize(QWidget* sourceWidget, Renderer2D* renderer);
+    void initialize(QWidget* sourceWidget);
 
     /**
      * Watch \p watched for events
@@ -179,7 +179,7 @@ signals:
 
 private:
     QPointer<QWidget>       _sourceWidget;      /** Source widget for panning and zooming */
-    QPointer<Renderer2D>    _renderer;          /** Source widget for panning and zooming */
+    Renderer2D&             _renderer;          /** Reference to parent renderer */
     bool                    _initialized;       /** Initialized flag */
     QVector<QPoint>         _mousePositions;    /** Recorded mouse positions */
     bool                    _isNavigating;      /** Navigating flag */
