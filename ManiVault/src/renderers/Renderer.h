@@ -19,8 +19,10 @@
 
 namespace mv
 {
-    class CORE_EXPORT Renderer : protected QOpenGLFunctions_3_3_Core
+    class CORE_EXPORT Renderer : protected QObject, protected QOpenGLFunctions_3_3_Core
     {
+        explicit Renderer(QObject* parent = nullptr) : QObject(parent) {}
+
         virtual void init() = 0;
         virtual void resize(QSize renderSize) = 0;
         virtual void render() = 0;

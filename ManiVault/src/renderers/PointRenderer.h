@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Renderer.h"
+#include "Renderer2D.h"
 
 #include "graphics/Bounds.h"
 #include "graphics/BufferObject.h"
@@ -127,7 +127,7 @@ namespace mv
             float               _alpha                  = DEFAULT_ALPHA_VALUE;
         };
 
-        class CORE_EXPORT PointRenderer : public Renderer
+        class CORE_EXPORT PointRenderer : public Renderer2D
         {
         public:
             void setData(const std::vector<Vector2f>& points);

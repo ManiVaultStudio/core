@@ -8,14 +8,31 @@
 
 namespace mv
 {
-    class CORE_EXPORT ImageRenderer : public Renderer
-    {
-    public:
-        void init() override;
-        void resize(QSize renderSize) override;
-        void render() override;
-        void destroy() override;
-    private:
-        ShaderProgram _shader;
-    };
-} // namespace mv
+
+/**
+ * Renderer 2D class
+ *
+ * Supports two-dimensional rendering:
+ * - Organizes panning and zooming
+ * - Sets up the matrix transformations
+ * - Renders 2D data
+ *
+ * @author Thomas Kroes
+ */
+class CORE_EXPORT Renderer2D : public Renderer
+{
+public:
+
+    /**
+     * Construct a new two-dimensional renderer
+     *
+     * @param sourceWidget If set, use this widget to do panning and zooming
+     * @param parent Pointer to the parent object
+     */
+    explicit Renderer2D(QWidget* sourceWidget = nullptr, QObject* parent = nullptr);
+
+private:
+    QPointer<QWidget>   _sourceWidget;      /** Source widget for panning and zooming */
+};
+
+}
