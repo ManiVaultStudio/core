@@ -472,13 +472,13 @@ set(PUBLIC_RENDERERS_HEADERS
     src/renderers/Renderer.h
     src/renderers/PointRenderer.h
     src/renderers/DensityRenderer.h
-    src/renderers/ImageRenderer.h
+    src/renderers/Renderer2D.h
 )
 
 set(PUBLIC_RENDERERS_SOURCES
     src/renderers/PointRenderer.cpp
     src/renderers/DensityRenderer.cpp
-    src/renderers/ImageRenderer.cpp
+    src/renderers/Renderer2D.cpp
 )
 
 set(PUBLIC_RENDERERS_FILES
