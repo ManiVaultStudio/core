@@ -471,12 +471,14 @@ set(PUBLIC_RENDERERS_HEADERS
     src/renderers/PointRenderer.h
     src/renderers/DensityRenderer.h
     src/renderers/Renderer2D.h
+    src/renderers/Navigator2D.h
 )
 
 set(PUBLIC_RENDERERS_SOURCES
     src/renderers/PointRenderer.cpp
     src/renderers/DensityRenderer.cpp
     src/renderers/Renderer2D.cpp
+    src/renderers/Navigator2D.cpp
 )
 
 set(PUBLIC_RENDERERS_FILES

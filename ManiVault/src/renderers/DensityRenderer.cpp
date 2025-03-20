@@ -9,8 +9,7 @@ namespace mv
     namespace gui
     {
 
-        DensityRenderer::DensityRenderer(RenderMode renderMode)
-            :
+        DensityRenderer::DensityRenderer(RenderMode renderMode) :
             _renderMode(renderMode)
         {
 
