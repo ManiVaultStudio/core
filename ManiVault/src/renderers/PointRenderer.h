@@ -166,7 +166,6 @@ namespace mv
             Matrix3f getProjectionMatrix() const;
 
             const PointArrayObject& getGpuPoints() const;
-            QSize getWindowsSize() const;
             std::int32_t getNumSelectedPoints() const;
 
             const PointSettings& getPointSettings() const;
@@ -198,7 +197,6 @@ namespace mv
             void setRandomizedDepthEnabled(bool randomizedDepth);
 
             void init() override;
-            void resize(QSize renderSize) override;
             void render() override;
             void destroy() override;
 
@@ -220,9 +218,6 @@ namespace mv
 
             /* Depth control */
             bool                        _randomizedDepthEnabled             = true;
-
-            /* Window properties */
-            QSize                       _windowSize;
 
             /* Rendering variables */
             ShaderProgram               _shader;

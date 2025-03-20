@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Renderer.h"
+#include "Renderer2D.h"
 
 #include "graphics/Bounds.h"
 #include "graphics/Shader.h"
@@ -21,7 +21,7 @@ namespace mv
     namespace gui
     {
 
-        class CORE_EXPORT DensityRenderer : public Renderer
+        class CORE_EXPORT DensityRenderer : public Renderer2D
         {
 
         public:
@@ -50,8 +50,10 @@ namespace mv
 
             void init() override;
             void resize(QSize renderSize) override;
-            void render() override;
-            void destroy() override;
+
+        	void render() override;
+
+        	void destroy() override;
 
             void setColorMapRange(const float& min, const float& max);
 

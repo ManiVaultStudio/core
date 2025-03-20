@@ -19,15 +19,37 @@
 
 namespace mv
 {
-    class CORE_EXPORT Renderer : public QObject, protected QOpenGLFunctions_3_3_Core
-    {
-    public:
-        explicit Renderer(QObject* parent = nullptr) : QObject(parent) {}
 
-    protected:
-        virtual void init() = 0;
-        virtual void resize(QSize renderSize) = 0;
-        virtual void render() = 0;
-        virtual void destroy() = 0;
-    };
+class CORE_EXPORT Renderer : public QObject, protected QOpenGLFunctions_3_3_Core
+{
+protected:
+
+    /**
+     * Construct a new renderer
+     * @param parent Pointer to the parent object
+     */
+    explicit Renderer(QObject* parent = nullptr) : QObject(parent) {}
+
+    virtual void init() = 0;
+    virtual void resize(QSize renderSize) = 0;
+    
+    /**
+     * Get the render size
+     * @return Render size
+     */
+    virtual QSize getRenderSize() const = 0;
+
+    /** Begin rendering */
+    virtual void beginRender() = 0;
+
+    /** Render */
+    virtual void render() = 0;
+
+    /** End rendering */
+    virtual void endRender() = 0;
+
+    /** Destroy the renderer */
+    virtual void destroy() = 0;
+};
+
 }
