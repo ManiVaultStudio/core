@@ -10,24 +10,6 @@ namespace mv
 {
     namespace gui
     {
-        namespace
-        {
-            /**
-             * Builds an orthographic projection matrix that transforms the given bounds
-             * to the range [-1, 1] in both directions.
-             */
-            Matrix3f createProjectionMatrix(const Bounds& bounds)
-            {
-                Matrix3f m;
-                m.setIdentity();
-                m[0] = 2 / bounds.getWidth();
-                m[4] = 2 / bounds.getHeight();
-                m[6] = -((bounds.getRight() + bounds.getLeft()) / bounds.getWidth());
-                m[7] = -((bounds.getTop() + bounds.getBottom()) / bounds.getHeight());
-                return m;
-            }
-        }
-
         void PointArrayObject::init()
         {
             initializeOpenGLFunctions();
@@ -328,42 +310,6 @@ namespace mv
             _colormap.loadFromImage(image);
         }
 
-        Bounds PointRenderer::getBounds() const
-        {
-            return getViewBounds();
-        }
-
-        Bounds PointRenderer::getViewBounds() const
-        {
-            return _boundsView;
-        }
-
-        Bounds PointRenderer::getDataBounds() const
-        {
-            return _boundsData;
-        }
-
-        void PointRenderer::setBounds(const Bounds& bounds)
-        {
-            setViewBounds(bounds);
-            setDataBounds(bounds);
-        }
-
-        void PointRenderer::setViewBounds(const Bounds& boundsView)
-        {
-            _boundsView = boundsView;
-        }
-
-        void PointRenderer::setDataBounds(const Bounds& boundsData)
-        {
-            _boundsData = boundsData;
-        }
-
-        Matrix3f PointRenderer::getProjectionMatrix() const
-        {
-            return _orthoM;
-        }
-
         const PointArrayObject& PointRenderer::getGpuPoints() const
         {
             return _gpuPoints;
@@ -484,41 +430,29 @@ namespace mv
         {
             beginRender();
             {
-                qDebug() << getZoomRectangle();
-
-                const float aspectRatio = getRenderSize().width() / static_cast<float>(getRenderSize().height());
-
-                QMatrix4x4 projection;
-
-
-            	projection.ortho(aspectRatio * getZoomRectangle().left(), aspectRatio * getZoomRectangle().right(), getZoomRectangle().bottom(), getZoomRectangle().top(), -1.f, 1.f);
-
-                // World to clip transformation
-                _orthoM = createProjectionMatrix(Bounds(getZoomRectangle().left(), getZoomRectangle().right(), getZoomRectangle().top(), getZoomRectangle().bottom()));
-
                 _shader.bind();
 
+                QMatrix4x4 modelMatrix;
+
+                modelMatrix.setToIdentity();
+
+                const auto mvp                  = QMatrix4x4(getProjectionMatrix()) * getNavigator().getViewMatrix() * modelMatrix;
                 const bool absoluteRendering    = _pointSettings._scalingMode == PointScaling::Absolute;
-                const auto size                 = std::max(getRenderSize().width(), getRenderSize().height());
+                const auto size                 = static_cast<float>(std::max(getRenderSize().width(), getRenderSize().height()));
 
                 _shader.uniform1f("pointSize", _pointSettings._pointSize);
-                _shader.uniform1f("pointSizeScale", absoluteRendering ? (1.0 / size) : 1.0f / size);
-
-                _shader.uniformMatrix3f("orthoM", _orthoM);
+                _shader.uniform1f("pointSizeScale", absoluteRendering ? 1.0f / size : 1.0f / size);
+                _shader.uniformMatrix4f("mvp", mvp.data());
                 _shader.uniform1f("pointOpacity", _pointSettings._alpha);
                 _shader.uniform1i("scalarEffect", _pointEffect);
-
-                _shader.uniform4f("dataBounds", _boundsData.getLeft(), _boundsData.getRight(), _boundsData.getBottom(), _boundsData.getTop());
-
+                _shader.uniform4f("dataBounds", getDataRectangle().left(), getDataRectangle().right(), getDataRectangle().bottom(), getDataRectangle().top());
                 _shader.uniform1i("selectionDisplayMode", static_cast<std::int32_t>(_selectionDisplayMode));
                 _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
                 _shader.uniform3f("selectionOutlineColor", _selectionOutlineColor);
                 _shader.uniform1i("selectionOutlineOverrideColor", _selectionOutlineOverrideColor);
                 _shader.uniform1f("selectionOutlineOpacity", _selectionOutlineOpacity);
                 _shader.uniform1i("selectionHaloEnabled", _selectionHaloEnabled);
-
                 _shader.uniform1i("randomizedDepthEnabled", _randomizedDepthEnabled);
-
                 _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
                 _shader.uniform1i("hasFocusHighlights", _gpuPoints.hasFocusHighlights());
                 _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());

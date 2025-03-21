@@ -16,7 +16,7 @@ uniform float 	pointSize;        		/** Point size */
 uniform float 	pointSizeScale;   		/** Scale factor in absolute point size mode */
 uniform int   	scalarEffect;
 uniform float 	pointOpacity;     		/** Point opacity */
-uniform mat3 	orthoM;            		/** Projection matrix from bounds space to clip space */
+uniform mat4 	mvp;            		/** Projection matrix from bounds space to clip space */
 uniform bool 	hasHighlights;     		/** Whether a highlight buffer is used */
 uniform bool 	hasFocusHighlights;		/** Whether a focus highlight buffer is used */
 uniform bool 	hasScalars;        		/** Whether a scalar buffer is used */
@@ -103,8 +103,6 @@ float floatConstruct( uint m ) {
     return f - 1.0;                        // Range [0:1]
 }
 
-
-
 // Pseudo-random value in half-open range [0:1].
 float random( float x ) { return floatConstruct(hash(floatBitsToUint(x))); }
 float random( vec2  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
@@ -129,10 +127,8 @@ void main()
     if (hasOpacities)
         vOpacity = opacity;
 
-    vPosOrig = position;
-
     // Transform position to clip space
-    vec2 pos = (orthoM * vec4(position, 0, 1)).xy;
+    vec2 pos = (mvp * vec4(position, 0, 1)).xy;
     
     // Resize point quad according to properties
     vec2 scaledVertex = vertex * pointSize * pointSizeScale * ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);

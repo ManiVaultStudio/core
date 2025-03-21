@@ -59,6 +59,9 @@ float normalize(float minPixelValue, float maxPixelValue, float pixelValue)
 
 void main()
 {
+	fragColor = vec4(1, 0, 0, 1);
+	return;
+	
 	bool isSelectionHighlighted	= vHighlight == 1;
 	bool isFocusHighlighted 	= vFocusHighlight == 1;
 	bool isHighlighted			= isSelectionHighlighted || isFocusHighlighted;

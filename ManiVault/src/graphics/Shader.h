@@ -39,6 +39,8 @@ public:
 
     void uniformMatrix3f(const char* name, float* data);
 
+    void uniformMatrix4f(const char* name, float* data);
+
     //void uniformMatrix4f(const char* name, Matrix4f& m);
     void uniformMatrix4f(const char* name, const float* const m);
 
