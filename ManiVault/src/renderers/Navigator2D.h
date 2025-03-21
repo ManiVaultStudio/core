@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QObject>
+#include <QVector2D>
 
 namespace mv
 {
@@ -35,7 +36,6 @@ public:
 
     /**
      * Initializes the two-dimensional navigator with a \p sourceWidget
-     *
      * @param sourceWidget Pointer to the renderer widget
      */
     void initialize(QWidget* sourceWidget);
@@ -53,46 +53,40 @@ public: // Navigation
 
     /**
      * Zoom by \p factor around \p center
-     *
      * @param center Point to zoom around
      * @param factor Zoom factor
      */
-    void zoomAround(const QPointF& center, float factor);
+    void zoomAround(const QPoint& center, float factor);
 
     /**
      * Zoom to \p zoomRectangle
-     *
      * @param zoomRectangle Zoom to this rectangle
      */
     void zoomToRectangle(const QRectF& zoomRectangle);
 
     /**
-     * Pan by \p to
-     *
-     * @param to Pan by this amount
+     * Pan by \p delta
+     * @param delta Pan by this amount
      */
-    void panBy(const QPointF& to);
+    void panBy(const QPointF& delta);
 
     /** Zoom to extents of the data bounds (with a margin around it) */
     void resetView();
 
     /**
      * Get whether the renderer is panning
-     *
      * @return Boolean determining whether the renderer is panning
      */
     bool isPanning() const;
 
     /**
      * Get whether the renderer is zooming
-     *
      * @return Boolean determining whether the renderer is zooming
      */
     bool isZooming() const;
 
     /**
      * Get whether the renderer is navigating
-     *
      * @return Boolean determining whether the renderer is navigating
      */
     bool isNavigating() const;
@@ -101,25 +95,21 @@ protected: // Navigation
 
     /**
      * Set whether the renderer is panning to \p isPanning
-     *
      * @param isPanning Boolean determining whether the renderer is panning
      */
     void setIsPanning(bool isPanning);
 
     /**
      * Set whether the renderer is zooming to \p isZooming
-     *
      * @param isZooming Boolean determining whether the renderer is zooming
      */
     void setIsZooming(bool isZooming);
 
     /**
      * Set whether the renderer is navigating to \p isNavigating
-     *
      * @param isNavigating Boolean determining whether the renderer is navigating
      */
     void setIsNavigating(bool isNavigating);
-
 
     /** Panning has begun */
     void beginPanning();
@@ -138,6 +128,11 @@ protected: // Navigation
 
     /** Navigation has ended */
     void endNavigation();
+
+private:
+
+    /** Compute the zoom rectangle in world space */
+    void computeZoomRectangle() const;
 
 signals:
 
@@ -161,7 +156,7 @@ signals:
 
     /**
      * Signals that is zooming changed to \p isZooming
-     * @param isZooming
+     * @param isZooming Boolean determining whether the renderer is zooming
      */
     void isZoomingChanged(bool isZooming);
 
@@ -173,7 +168,7 @@ signals:
 
     /**
      * Signals that is navigating changed to \p isNavigating
-     * @param isNavigating
+     * @param isNavigating Boolean determining whether the renderer is navigating
      */
     void isNavigatingChanged(bool isNavigating);
 
@@ -185,6 +180,8 @@ private:
     bool                    _isNavigating;      /** Navigating flag */
     bool                    _isPanning;         /** Panning flag */
     bool                    _isZooming;         /** Zooming flag */
+    float                   _zoomFactor;        /** Zoom factor */
+    QVector2D               _panCoordinates;    /** Pan coordinates in world space */
 };
 
 }

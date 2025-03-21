@@ -36,6 +36,9 @@ public:
     void uniform3fv(const char* name, int count, Vector3f* v);
     void uniform4f(const char* name, float v0, float v1, float v2, float v3);
     void uniformMatrix3f(const char* name, Matrix3f& m);
+
+    void uniformMatrix3f(const char* name, float* data);
+
     //void uniformMatrix4f(const char* name, Matrix4f& m);
     void uniformMatrix4f(const char* name, const float* const m);
 
