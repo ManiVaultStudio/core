@@ -132,7 +132,7 @@ void main()
     vPosOrig = position;
 
     // Transform position to clip space
-    vec2 pos = (orthoM * vec3(position, 1)).xy;
+    vec2 pos = (orthoM * vec4(position, 0, 1)).xy;
     
     // Resize point quad according to properties
     vec2 scaledVertex = vertex * pointSize * pointSizeScale * ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);

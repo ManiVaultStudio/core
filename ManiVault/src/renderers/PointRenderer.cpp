@@ -484,8 +484,17 @@ namespace mv
         {
             beginRender();
             {
+                qDebug() << getZoomRectangle();
+
+                const float aspectRatio = getRenderSize().width() / static_cast<float>(getRenderSize().height());
+
+                QMatrix4x4 projection;
+
+
+            	projection.ortho(aspectRatio * getZoomRectangle().left(), aspectRatio * getZoomRectangle().right(), getZoomRectangle().bottom(), getZoomRectangle().top(), -1.f, 1.f);
+
                 // World to clip transformation
-                _orthoM = createProjectionMatrix(_boundsView);
+                _orthoM = createProjectionMatrix(Bounds(getZoomRectangle().left(), getZoomRectangle().right(), getZoomRectangle().top(), getZoomRectangle().bottom()));
 
                 _shader.bind();
 

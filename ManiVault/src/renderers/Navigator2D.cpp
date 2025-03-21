@@ -20,7 +20,8 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _initialized(false),
     _isNavigating(false),
     _isPanning(false),
-    _isZooming(false)
+    _isZooming(false),
+    _zoomFactor(1.0f)
 {
 }
 
@@ -66,18 +67,22 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
     if (isNavigating()) {
 
         if (event->type() == QEvent::Wheel) {
-            if (auto* wheelEvent = dynamic_cast<QWheelEvent*>(event))
-                zoomAround(wheelEvent->position().toPoint(), static_cast<float>(wheelEvent->angleDelta().x()) / 1200.f);
+            if (auto* wheelEvent = dynamic_cast<QWheelEvent*>(event)) {
+                constexpr auto zoomSensitivity = .1f;
+
+                if (wheelEvent->angleDelta().x() < 0)
+                    zoomAround(wheelEvent->position().toPoint(), 1.0f - zoomSensitivity);
+                else
+                    zoomAround(wheelEvent->position().toPoint(), 1.0f + zoomSensitivity);
+            }
         }
 
         if (event->type() == QEvent::MouseButtonPress) {
-            if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event))
-            {
+            if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
                 if (mouseEvent->button() == Qt::MiddleButton)
                     resetView();
 
-                if (mouseEvent->buttons() == Qt::LeftButton)
-                {
+                if (mouseEvent->buttons() == Qt::LeftButton) {
                     _sourceWidget->setCursor(Qt::ClosedHandCursor);
 
                     _mousePositions << mouseEvent->pos();
@@ -96,12 +101,10 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
         }
 
         if (event->type() == QEvent::MouseMove) {
-            if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event))
-            {
+            if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
                 _mousePositions << mouseEvent->pos();
 
-                if (mouseEvent->buttons() == Qt::LeftButton && _mousePositions.size() >= 2)
-                {
+                if (mouseEvent->buttons() == Qt::LeftButton && _mousePositions.size() >= 2) {
                     const auto& previousMousePosition   = _mousePositions[_mousePositions.size() - 2];
                     const auto& currentMousePosition    = _mousePositions[_mousePositions.size() - 1];
                     const auto panVector                = currentMousePosition - previousMousePosition;
@@ -115,7 +118,7 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
     return QObject::eventFilter(watched, event);
 }
 
-void Navigator2D::zoomAround(const QPointF& center, float factor)
+void Navigator2D::zoomAround(const QPoint& center, float factor)
 {
     if (!_initialized)
         return;
@@ -126,7 +129,22 @@ void Navigator2D::zoomAround(const QPointF& center, float factor)
 
     beginZooming();
     {
+        _zoomFactor *= factor;
 
+        computeZoomRectangle();
+
+        /*
+        const auto p1 = _renderer.getScreenPointToWorldPosition(_renderer.getViewMatrix(), center).toPointF();
+        const auto v1 = _renderer.getZoomRectangle().topLeft() - p1;
+        const auto v2 = v1 / factor;
+
+        auto zoomRectangle = _renderer.getZoomRectangle();
+
+        zoomRectangle.setTopLeft(p1 + v2);
+        zoomRectangle.setSize(zoomRectangle.size() / factor);
+
+        _renderer.setZoomRectangle(zoomRectangle);
+        */
     }
     endZooming();
 
@@ -158,18 +176,29 @@ void Navigator2D::zoomToRectangle(const QRectF& zoomRectangle)
     //update();
 }
 
-void Navigator2D::panBy(const QPointF& to)
+void Navigator2D::panBy(const QPointF& delta)
 {
     if (!_initialized)
         return;
 
 #ifdef NAVIGATOR_2D_VERBOSE
-    qDebug() << __FUNCTION__ << to;
+    qDebug() << __FUNCTION__ << delta;
 #endif
 
     beginPanning();
     {
+        const auto p1       = _renderer.getScreenPointToWorldPosition(_renderer.getViewMatrix(), QPoint()).toPointF();
+        const auto p2       = _renderer.getScreenPointToWorldPosition(_renderer.getViewMatrix(), delta.toPoint()).toPointF();
 
+        //auto zoomRectangle = _renderer.getZoomRectangle();
+
+        //zoomRectangle.setTopLeft(zoomRectangle.topLeft() + (p2 - p1));
+
+        //_renderer.setZoomRectangle(zoomRectangle);
+
+        _panCoordinates -= QVector2D(p2 - p1) / _zoomFactor;
+
+        computeZoomRectangle();
     }
     endPanning();
 
@@ -346,6 +375,13 @@ void Navigator2D::endNavigation()
     setIsNavigating(false);
 
     emit navigationEnded();
+}
+
+void Navigator2D::computeZoomRectangle() const
+{
+    QRectF zoomRectangle(_panCoordinates.toPointF(), _zoomFactor * _renderer.getRenderSize());
+
+    _renderer.setZoomRectangle(zoomRectangle);
 }
 
 }
