@@ -16,7 +16,7 @@ namespace mv
 Renderer2D::Renderer2D(QObject* parent) :
     Renderer(parent),
     _navigator(*this),
-    _zoomRectangle(0, 0, 200, 100)
+    _zoomRectangle(0, 0, 2000, 1000)
 {
 }
 
@@ -40,8 +40,6 @@ void Renderer2D::beginRender()
 #ifdef RENDERER_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-
-    const auto size = _renderSize.width() < _renderSize.height() ? _renderSize.width() : _renderSize.height();
 
     glViewport(0, 0, _renderSize.width(), _renderSize.height());
 }
@@ -74,6 +72,19 @@ void Renderer2D::setZoomRectangle(const QRectF& zoomRectangle)
     emit zoomRectangleChanged(previousZoomRectangle, _zoomRectangle);
 }
 
+QRectF Renderer2D::getDataRectangle() const
+{
+    return _dataRectangle;
+}
+
+void Renderer2D::setDataRectangle(const QRectF& dataRectangle)
+{
+    if (dataRectangle == _dataRectangle)
+        return;
+
+    _dataRectangle = dataRectangle;
+}
+
 QVector3D Renderer2D::getScreenPointToWorldPosition(const QMatrix4x4& modelViewMatrix, const QPoint& screenPoint) const
 {
     return QVector3D(screenPoint.x(), getRenderSize().height() - screenPoint.y(), 0).unproject(modelViewMatrix, getProjectionMatrix(), QRect(0, 0, getRenderSize().width(), getRenderSize().height()));
@@ -81,7 +92,7 @@ QVector3D Renderer2D::getScreenPointToWorldPosition(const QMatrix4x4& modelViewM
 
 QVector2D Renderer2D::getWorldPositionToNormalizedScreenPoint(const QVector3D& position) const
 {
-    const auto clipSpacePos = getProjectionMatrix() * (getViewMatrix() * QVector4D(position, 1.0));
+    const auto clipSpacePos = getProjectionMatrix() * (_navigator.getViewMatrix() * QVector4D(position, 1.0));
     return (clipSpacePos.toVector3D() / clipSpacePos.w()).toVector2D();
 }
 
@@ -122,30 +133,13 @@ QMatrix4x4 Renderer2D::getNormalizedScreenToScreenMatrix() const
     return translate * scale;
 }
 
-QMatrix4x4 Renderer2D::getViewMatrix() const
+float Renderer2D::getZoomPercentage() const
 {
-    QMatrix4x4 lookAt, scale;
+    const auto factorX      = static_cast<float>(getDataRectangle().width()) / static_cast<float>(getZoomRectangle().width());
+    const auto factorY      = static_cast<float>(getDataRectangle().height()) / static_cast<float>(getZoomRectangle().height());
+    const auto scaleFactor  = factorX < factorY ? factorX : factorY;
 
-    // Construct look-at parameters
-    const auto eye      = QVector3D(_zoomRectangle.center().x(), _zoomRectangle.center().y(), 1);
-    const auto center   = QVector3D(_zoomRectangle.center().x(), _zoomRectangle.center().y(), 0);
-    const auto up       = QVector3D(0, 1, 0);
-
-    // Create look-at transformation matrix
-    lookAt.lookAt(eye, center, up);
-
-    const auto viewerSize       = getRenderSize();
-    const auto factorX          = static_cast<float>(viewerSize.width()) / (_zoomRectangle.isValid() ? static_cast<float>(_zoomRectangle.width()) : 1.0f);
-    const auto factorY          = static_cast<float>(viewerSize.height()) / (_zoomRectangle.isValid() ? static_cast<float>(_zoomRectangle.height()) : 1.0f);
-    const auto scaleFactor      = factorX < factorY ? factorX : factorY;
-
-    const auto d = 1.0f - (2 * _zoomMargin) / std::max(viewerSize.width(), viewerSize.height());
-
-    // Create scale matrix
-    scale.scale(scaleFactor * d, scaleFactor * d, scaleFactor * d);
-
-    // Return composite matrix of scale and look-at transformation matrix
-    return scale * lookAt;
+    return scaleFactor;
 }
 
 QMatrix4x4 Renderer2D::getProjectionMatrix() const

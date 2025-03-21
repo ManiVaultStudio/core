@@ -21,7 +21,9 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _isNavigating(false),
     _isPanning(false),
     _isZooming(false),
-    _zoomFactor(1.0f)
+    _zoomFactor(1.0f),
+    _zoomRectangleSize(1000, 1000),
+    _zoomRectangleMargin(0.f)
 {
 }
 
@@ -109,13 +111,47 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
                     const auto& currentMousePosition    = _mousePositions[_mousePositions.size() - 1];
                     const auto panVector                = currentMousePosition - previousMousePosition;
 
-                    panBy(panVector);
+                    panBy(-panVector);
                 }
             }
         }
     }
 
     return QObject::eventFilter(watched, event);
+}
+
+QMatrix4x4 Navigator2D::getViewMatrix() const
+{
+    QMatrix4x4 lookAt, scale;
+
+    // Construct look-at parameters
+    const auto eye      = QVector3D(getZoomRectangle().center().x(), getZoomRectangle().center().y(), 1);
+    const auto center   = QVector3D(getZoomRectangle().center().x(), getZoomRectangle().center().y(), 0);
+    const auto up       = QVector3D(0, 1, 0);
+
+    // Create look-at transformation matrix
+    lookAt.lookAt(eye, center, up);
+
+    const auto viewerSize   = _renderer.getRenderSize();
+    const auto factorX      = static_cast<float>(viewerSize.width()) / (getZoomRectangle().isValid() ? static_cast<float>(getZoomRectangle().width()) : 1.0f);
+    const auto factorY      = static_cast<float>(viewerSize.height()) / (getZoomRectangle().isValid() ? static_cast<float>(getZoomRectangle().height()) : 1.0f);
+    const auto scaleFactor  = factorX < factorY ? factorX : factorY;
+
+    const auto d = 1.0f - (2 * _zoomRectangleMargin) / std::max(viewerSize.width(), viewerSize.height());
+
+    // Create scale matrix
+    scale.scale(scaleFactor * d, scaleFactor * d, scaleFactor * d);
+
+    // Return composite matrix of scale and look-at transformation matrix
+    return scale * lookAt;
+}
+
+QRectF Navigator2D::getZoomRectangle() const
+{
+    return {
+    	_zoomRectangleTopLeft,
+    	_zoomRectangleSize
+    };
 }
 
 void Navigator2D::zoomAround(const QPoint& center, float factor)
@@ -129,26 +165,16 @@ void Navigator2D::zoomAround(const QPoint& center, float factor)
 
     beginZooming();
     {
-        _zoomFactor *= factor;
-
-        computeZoomRectangle();
-
-        /*
-        const auto p1 = _renderer.getScreenPointToWorldPosition(_renderer.getViewMatrix(), center).toPointF();
-        const auto v1 = _renderer.getZoomRectangle().topLeft() - p1;
+        const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), center).toPointF();
+        const auto v1 = getZoomRectangle().topLeft() - p1;
         const auto v2 = v1 / factor;
 
-        auto zoomRectangle = _renderer.getZoomRectangle();
+        _zoomRectangleTopLeft   = p1 + v2;
+        _zoomRectangleSize      = getZoomRectangle().size() / factor;
 
-        zoomRectangle.setTopLeft(p1 + v2);
-        zoomRectangle.setSize(zoomRectangle.size() / factor);
-
-        _renderer.setZoomRectangle(zoomRectangle);
-        */
+        _renderer.setZoomRectangle(getZoomRectangle());
     }
     endZooming();
-
-    // _navigationAction.getZoomRectangleAction().setBounds(_dataRectangleAction.getBounds());
 }
 
 void Navigator2D::zoomToRectangle(const QRectF& zoomRectangle)
@@ -165,15 +191,6 @@ void Navigator2D::zoomToRectangle(const QRectF& zoomRectangle)
 
     }
     endZooming();
-
-    //auto& zoomRectangleAction = _navigationAction.getZoomRectangleAction();
-
-    //const auto moveBy = QPointF(to.x() / _widgetSizeInfo.width * zoomRectangleAction.getWidth() * _widgetSizeInfo.ratioWidth * -1.f,
-    //    to.y() / _widgetSizeInfo.height * zoomRectangleAction.getHeight() * _widgetSizeInfo.ratioHeight);
-
-    //zoomRectangleAction.translateBy({ moveBy.x(), moveBy.y() });
-
-    //update();
 }
 
 void Navigator2D::panBy(const QPointF& delta)
@@ -187,46 +204,14 @@ void Navigator2D::panBy(const QPointF& delta)
 
     beginPanning();
     {
-        const auto p1       = _renderer.getScreenPointToWorldPosition(_renderer.getViewMatrix(), QPoint()).toPointF();
-        const auto p2       = _renderer.getScreenPointToWorldPosition(_renderer.getViewMatrix(), delta.toPoint()).toPointF();
+        const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), QPoint()).toPointF();
+        const auto p2 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), delta.toPoint()).toPointF();
 
-        //auto zoomRectangle = _renderer.getZoomRectangle();
+        _zoomRectangleTopLeft = getZoomRectangle().topLeft() + (p2 - p1);
 
-        //zoomRectangle.setTopLeft(zoomRectangle.topLeft() + (p2 - p1));
-
-        //_renderer.setZoomRectangle(zoomRectangle);
-
-        _panCoordinates -= QVector2D(p2 - p1) / _zoomFactor;
-
-        computeZoomRectangle();
+        _renderer.setZoomRectangle(getZoomRectangle());
     }
     endPanning();
-
-    //auto& zoomRectangleAction = _navigationAction.getZoomRectangleAction();
-
-    //// the widget might have a different aspect ratio than the square opengl viewport
-    //const auto offsetBounds = QPointF(zoomRectangleAction.getWidth() * (0.5f * (1 - _widgetSizeInfo.ratioWidth)),
-    //    zoomRectangleAction.getHeight() * (0.5f * (1 - _widgetSizeInfo.ratioHeight)) * -1.f);
-
-    //const auto originBounds = QPointF(zoomRectangleAction.getLeft(), zoomRectangleAction.getTop());
-
-    //// translate mouse point in widget to mouse point in bounds coordinates
-    //const auto atTransformed = QPointF(at.x() / _widgetSizeInfo.width * zoomRectangleAction.getWidth() * _widgetSizeInfo.ratioWidth,
-    //    at.y() / _widgetSizeInfo.height * zoomRectangleAction.getHeight() * _widgetSizeInfo.ratioHeight * -1.f);
-
-    //const auto atInBounds = originBounds + offsetBounds + atTransformed;
-
-    //// ensure mouse position is the same after zooming
-    //const auto currentBoundCenter = zoomRectangleAction.getCenter();
-
-    //float moveMouseX = (atInBounds.x() - currentBoundCenter.first) * factor;
-    //float moveMouseY = (atInBounds.y() - currentBoundCenter.second) * factor;
-
-    //// zoom and move view
-    //zoomRectangleAction.translateBy({ moveMouseX, moveMouseY });
-    //zoomRectangleAction.expandBy(-1.f * factor);
-
-    //update();
 }
 
 void Navigator2D::resetView()
@@ -375,13 +360,6 @@ void Navigator2D::endNavigation()
     setIsNavigating(false);
 
     emit navigationEnded();
-}
-
-void Navigator2D::computeZoomRectangle() const
-{
-    QRectF zoomRectangle(_panCoordinates.toPointF(), _zoomFactor * _renderer.getRenderSize());
-
-    _renderer.setZoomRectangle(zoomRectangle);
 }
 
 }

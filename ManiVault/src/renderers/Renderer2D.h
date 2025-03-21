@@ -93,10 +93,9 @@ public: // Coordinate conversions
     /** Returns the matrix that converts normalized screen coordinates [-1..1, -1..1] to screen coordinates [0..width, 0..height] */
     QMatrix4x4 getNormalizedScreenToScreenMatrix() const;
 
-    /** Returns the view matrix */
-    QMatrix4x4 getViewMatrix() const;
+	float getZoomPercentage() const;
 
-    /** Returns the projection matrix */
+/** Returns the projection matrix */
     QMatrix4x4 getProjectionMatrix() const;
 
     /**
@@ -125,6 +124,20 @@ protected:
      */
     void setZoomRectangle(const QRectF& zoomRectangle);
 
+public:
+
+	/**
+	 * Get data rectangle
+     * @return Data rectangle
+	 */
+	QRectF getDataRectangle() const;
+
+    /**
+     * Set data rectangle to \p dataRectangle
+     * @param dataRectangle Data rectangle
+     */
+    void setDataRectangle(const QRectF& dataRectangle);
+    
 signals:
 
     /**
@@ -139,6 +152,7 @@ private:
     Navigator2D     _navigator;             /** 2D navigator */
     float           _zoomMargin = 100.f;    /** Margin for zooming */
     QRectF          _zoomRectangle;         /** Zoom rectangle */
+    QRectF          _dataRectangle;         /** Data rectangle */
 
     friend class Navigator2D;
 };

@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QVector2D>
+#include <QMatrix4x4>
 
 namespace mv
 {
@@ -48,6 +49,18 @@ public:
      * @return True if the event was handled, false otherwise
      */
     bool eventFilter(QObject* watched, QEvent* event) override;
+
+    /**
+     * Get the view matrix
+     * @return View matrix
+     */
+    QMatrix4x4 getViewMatrix() const;
+
+    /**
+     * Get the zoom rectangle
+     * @return Zoom rectangle
+     */
+    QRectF getZoomRectangle() const;
 
 public: // Navigation
 
@@ -129,11 +142,6 @@ protected: // Navigation
     /** Navigation has ended */
     void endNavigation();
 
-private:
-
-    /** Compute the zoom rectangle in world space */
-    void computeZoomRectangle() const;
-
 signals:
 
     /** Signals that panning has started */
@@ -173,15 +181,19 @@ signals:
     void isNavigatingChanged(bool isNavigating);
 
 private:
-    QPointer<QWidget>       _sourceWidget;      /** Source widget for panning and zooming */
-    Renderer2D&             _renderer;          /** Reference to parent renderer */
-    bool                    _initialized;       /** Initialized flag */
-    QVector<QPoint>         _mousePositions;    /** Recorded mouse positions */
-    bool                    _isNavigating;      /** Navigating flag */
-    bool                    _isPanning;         /** Panning flag */
-    bool                    _isZooming;         /** Zooming flag */
-    float                   _zoomFactor;        /** Zoom factor */
-    QVector2D               _panCoordinates;    /** Pan coordinates in world space */
+    QPointer<QWidget>       _sourceWidget;              /** Source widget for panning and zooming */
+    Renderer2D&             _renderer;                  /** Reference to parent renderer */
+    bool                    _initialized;               /** Initialized flag */
+    QVector<QPoint>         _mousePositions;            /** Recorded mouse positions */
+    bool                    _isNavigating;              /** Navigating flag */
+    bool                    _isPanning;                 /** Panning flag */
+    bool                    _isZooming;                 /** Zooming flag */
+    float                   _zoomFactor;                /** Zoom factor */
+
+private:
+    QPointF                 _zoomRectangleTopLeft;      /** Zoom rectangle top-left in world coordinates */
+    QSizeF                  _zoomRectangleSize;         /** Zoom rectangle size in world coordinates */
+    float                   _zoomRectangleMargin;       /** Zoom rectangle margin */
 };
 
 }
