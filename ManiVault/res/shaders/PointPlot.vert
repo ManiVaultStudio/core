@@ -116,6 +116,21 @@ float random( vec4  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
 
 void main()
 {
+	// Convert quad size from pixels to normalized device coordinates (NDC)
+    vec2 pixelSize = vec2(pointSize) / viewportSize;
+
+    // Apply projection only to the instance position, NOT to the quad size
+    vec4 worldPos = mvp * vec4(position, 0.0, 1.0);
+
+    // Aspect ratio correction for screen-space scaling
+    vec2 aspectCorrection = vec2(1.0, 1.0);
+
+    // Keep quad size in screen-space while maintaining correct aspect ratio
+    vec2 finalPos = worldPos.xy + (vertex * pixelSize * aspectCorrection);
+
+    gl_Position = vec4(finalPos, 0.0, 1.0); // Convert to NDC [-1,1]
+	
+/*
     // The texture coordinates match vertex coordinates
     vTexCoord = vertex;
 	
@@ -128,6 +143,9 @@ void main()
     //vec2 scaledPos	= vertex * pixelSize;
     //vec2 finalPos 	= position + scaledPos;
 	
+	// Aspect ratio correction for screen-space scaling
+    vec2 aspectCorrection = vec2(viewportSize.y / viewportSize.x, 1.0f);
+	
 	// Apply projection only to the instance position, NOT to the quad size
     vec4 worldPos = mvp * vec4(position, 0.0, 1.0);
 	
@@ -135,7 +153,7 @@ void main()
     vec2 finalPos = worldPos.xy + (vertex * pixelSize);
 	
 	gl_Position = vec4(finalPos, 0.0, 1.0);
-	
+*/	
 	/*
     // Selection and focus highlighting
     vHighlight 		= hasHighlights ? highlight : 0;

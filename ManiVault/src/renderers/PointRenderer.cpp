@@ -438,11 +438,6 @@ namespace mv
 
                 const auto mvp                  = QMatrix4x4(getProjectionMatrix()) * getNavigator().getViewMatrix() * modelMatrix;
                 const bool absoluteRendering    = _pointSettings._scalingMode == PointScaling::Absolute;
-                const auto size                 = static_cast<float>(std::max(getRenderSize().width(), getRenderSize().height()));
-                const auto windowAspectRatio    = static_cast<float>(getRenderSize().width()) / static_cast<float>(getRenderSize().height());
-                const auto pointSizeNDC         = QVector2D(_pointSettings._pointSize / size, _pointSettings._pointSize / size);
-
-                qDebug() << "zoom factor: " << getNavigator().getZoomFactor() << "windowAspectRatio" << windowAspectRatio;
 
                 _shader.uniform1f("pointSize", _pointSettings._pointSize);
                 _shader.uniform2f("viewportSize", static_cast<float>(getRenderSize().width()), static_cast<float>(getRenderSize().height()));
