@@ -4,9 +4,11 @@
 
 #version 330 core
 
+uniform mat4 	mvp;
+
 out vec2 pass_texCoord;
 
 void main() {
     pass_texCoord = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
-    gl_Position = vec4(pass_texCoord * 2 - 1, 0, 1);
+    gl_Position = mvp * vec4(pass_texCoord * 2 - 1, 0, 1);
 }

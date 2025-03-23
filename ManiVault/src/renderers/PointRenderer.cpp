@@ -445,7 +445,7 @@ namespace mv
                 _shader.uniformMatrix4f("mvp", mvp.data());
                 _shader.uniform1f("pointOpacity", _pointSettings._alpha);
                 _shader.uniform1i("scalarEffect", _pointEffect);
-                _shader.uniform4f("dataBounds", getDataRectangle().left(), getDataRectangle().right(), getDataRectangle().bottom(), getDataRectangle().top());
+                _shader.uniform4f("dataBounds", getDataBounds().left(), getDataBounds().right(), getDataBounds().bottom(), getDataBounds().top());
                 _shader.uniform1i("selectionDisplayMode", static_cast<std::int32_t>(_selectionDisplayMode));
                 _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
                 _shader.uniform3f("selectionOutlineColor", _selectionOutlineColor);

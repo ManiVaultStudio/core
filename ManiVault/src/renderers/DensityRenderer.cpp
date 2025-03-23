@@ -12,7 +12,7 @@ namespace mv
         DensityRenderer::DensityRenderer(RenderMode renderMode) :
             _renderMode(renderMode)
         {
-
+            getNavigator().setZoomRectangle(QRectF(0, 0, 1, 1));
         }
 
         DensityRenderer::~DensityRenderer()
@@ -88,29 +88,23 @@ namespace mv
             _densityComputation.init(QOpenGLContext::currentContext());
         }
 
-        void DensityRenderer::resize(QSize renderSize)
-        {
-            int w = renderSize.width();
-            int h = renderSize.height();
-
-            _windowSize.setWidth(w);
-            _windowSize.setHeight(h);
-        }
-
         void DensityRenderer::render()
         {
-            glViewport(0, 0, _windowSize.width(), _windowSize.height());
+            beginRender();
+            {
+                switch (_renderMode) {
+					case DENSITY: {
+						drawDensity();
+						break;
+					}
 
-            int w = _windowSize.width();
-            int h = _windowSize.height();
-            int size = w < h ? w : h;
-            glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
-
-            // Draw density or isolines map
-            switch (_renderMode) {
-            case DENSITY: drawDensity(); break;
-            case LANDSCAPE: drawLandscape(); break;
+					case LANDSCAPE: {
+						drawLandscape();
+						break;
+					}
+                }
             }
+            endRender();
         }
 
         void DensityRenderer::destroy()
@@ -138,6 +132,16 @@ namespace mv
             _shaderDensityDraw.bind();
 
             _densityComputation.getDensityTexture().bind(0);
+
+            QMatrix4x4 modelMatrix;
+
+            modelMatrix.setToIdentity();
+
+            const auto mvp = QMatrix4x4(getProjectionMatrix()) * getNavigator().getViewMatrix() * modelMatrix;
+
+            qDebug() << mvp;
+
+            _shaderDensityDraw.uniformMatrix4f("mvp", mvp.data());
             _shaderDensityDraw.uniform1i("tex", 0);
             _shaderDensityDraw.uniform1f("norm", 1 / maxDensity);
 

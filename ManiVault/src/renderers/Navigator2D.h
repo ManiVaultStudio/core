@@ -62,11 +62,29 @@ public:
      */
     QRectF getZoomRectangle() const;
 
+    /**
+     * Set the zoom rectangle to \p zoomRectangle
+     * @param zoomRectangle Zoom rectangle
+     */
+    void setZoomRectangle(const QRectF& zoomRectangle);
+
 	/**
      * Get the zoom factor
 	 * @return Zoom factor
 	 */
 	float getZoomFactor() const;
+
+    /**
+     * Get whether the navigator is enabled
+     * @return Boolean determining whether the navigator is enabled
+     */
+    bool isEnabled() const;
+
+    /**
+     * Set enabled to \p enabled
+     * @param enabled Boolean determining whether the navigator is enabled
+     */
+    void setEnabled(bool enabled);
 
 public: // Navigation
 
@@ -89,8 +107,11 @@ public: // Navigation
      */
     void panBy(const QPointF& delta);
 
-    /** Zoom to extents of the data bounds (with a margin around it) */
-    void resetView();
+    /**
+     * Reset the view
+     * @param force Force reset event when the user has navigated
+     */
+    void resetView(bool force = true);
 
     /**
      * Get whether the renderer is panning
@@ -109,6 +130,12 @@ public: // Navigation
      * @return Boolean determining whether the renderer is navigating
      */
     bool isNavigating() const;
+
+    /**
+     * Get whether the user has navigated
+     * @return Boolean determining whether the user has navigated
+     */
+    bool hasUserNavigated() const;
 
 protected: // Navigation
 
@@ -148,6 +175,12 @@ protected: // Navigation
     /** Navigation has ended */
     void endNavigation();
 
+    /** Begin changing the zoom rectangle */
+    void beginChangeZoomRectangle();
+
+    /** End changing the zoom rectangle */
+    void endChangeZoomRectangle();
+
 signals:
 
     /** Signals that panning has started */
@@ -186,20 +219,34 @@ signals:
      */
     void isNavigatingChanged(bool isNavigating);
 
-private:
-    QPointer<QWidget>       _sourceWidget;              /** Source widget for panning and zooming */
-    Renderer2D&             _renderer;                  /** Reference to parent renderer */
-    bool                    _initialized;               /** Initialized flag */
-    QVector<QPoint>         _mousePositions;            /** Recorded mouse positions */
-    bool                    _isNavigating;              /** Navigating flag */
-    bool                    _isPanning;                 /** Panning flag */
-    bool                    _isZooming;                 /** Zooming flag */
-    float                   _zoomFactor;                /** Zoom factor */
+	/**
+     * Signals that enabled changed to \p enabled
+     * @param enabled Boolean determining whether the navigator is enabled
+	 */
+	void enabledChanged(bool enabled);
+
+    /**
+     * Signals that the zoom rectangle has changed from \p previousZoomRectangle to \p currentZoomRectangle
+     * @param previousZoomRectangle Previous zoom rectangle
+     * @param currentZoomRectangle Current zoom rectangle
+     */
+    void zoomRectangleChanged(const QRectF& previousZoomRectangle, const QRectF& currentZoomRectangle);
 
 private:
-    QPointF                 _zoomRectangleTopLeft;      /** Zoom rectangle top-left in world coordinates */
-    QSizeF                  _zoomRectangleSize;         /** Zoom rectangle size in world coordinates */
-    float                   _zoomRectangleMargin;       /** Zoom rectangle margin */
+    QPointer<QWidget>   _sourceWidget;              /** Source widget for panning and zooming */
+    Renderer2D&         _renderer;                  /** Reference to parent renderer */
+    bool                _enabled;                   /** Enabled flag */
+    bool                _initialized;               /** Initialized flag */
+    QVector<QPoint>     _mousePositions;            /** Recorded mouse positions */
+    bool                _isNavigating;              /** Navigating flag */
+    bool                _isPanning;                 /** Panning flag */
+    bool                _isZooming;                 /** Zooming flag */
+    float               _zoomFactor;                /** Zoom factor */
+    QPointF             _zoomRectangleTopLeft;      /** Zoom rectangle top-left in world coordinates */
+    QSizeF              _zoomRectangleSize;         /** Zoom rectangle size in world coordinates */
+    float               _zoomRectangleMargin;       /** Zoom rectangle margin */
+    QRectF              _previousZoomRectangle;     /** Previous zoom rectangle */
+    bool                _userHasNavigated;          /** Boolean determining whether the user has navigated */
 };
 
 }

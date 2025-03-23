@@ -11,8 +11,6 @@
 #define EFFECT_OUTLINE 3
 #define EFFECT_COLOR_2D 4
 
-
-
 // Point properties
 uniform float 	pointSize;        		/** Point size in x- and y direction to account for anisotropy of the render canvas */
 uniform bool	pointSizeAbsolute;		/** Whether the point size is in world or screen coordinates */
