@@ -154,6 +154,11 @@ QRectF Navigator2D::getZoomRectangle() const
     };
 }
 
+float Navigator2D::getZoomFactor() const
+{
+    return _zoomFactor;
+}
+
 void Navigator2D::zoomAround(const QPoint& center, float factor)
 {
     if (!_initialized)
@@ -171,6 +176,8 @@ void Navigator2D::zoomAround(const QPoint& center, float factor)
 
         _zoomRectangleTopLeft   = p1 + v2;
         _zoomRectangleSize      = getZoomRectangle().size() / factor;
+
+    	_zoomFactor /= factor;
 
         _renderer.setZoomRectangle(getZoomRectangle());
     }
