@@ -116,70 +116,40 @@ float random( vec4  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
 
 void main()
 {
+	// Use normalized quad vertices as texture coordinates
+	vTexCoord = vertex;
+	
 	// Convert quad size from pixels to normalized device coordinates (NDC)
     vec2 pixelSize = vec2(pointSize) / viewportSize;
 
     // Apply projection only to the instance position, NOT to the quad size
     vec4 worldPos = mvp * vec4(position, 0.0, 1.0);
-
-    // Aspect ratio correction for screen-space scaling
-    vec2 aspectCorrection = vec2(1.0, 1.0);
-
+	
+	vec2 scaledVertex;
+	
+	if (hasSizes)
+        scaledVertex = vertex * (vec2(size) / viewportSize);
+	else
+		scaledVertex = vertex * pixelSize;
+		
+	// Scale the vertex based on the selection display mode
+	scaledVertex *= ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
+	
     // Keep quad size in screen-space while maintaining correct aspect ratio
-    vec2 finalPos = worldPos.xy + (vertex * pixelSize * aspectCorrection);
-
-    gl_Position = vec4(finalPos, 0.0, 1.0); // Convert to NDC [-1,1]
+    vec2 finalPos = worldPos.xy + scaledVertex;
 	
-/*
-    // The texture coordinates match vertex coordinates
-    vTexCoord = vertex;
+	// Compute random depth
+	float depth = randomizedDepthEnabled ? random(worldPos.xy) : 0;
 	
-	// Convert quad size from pixels to normalized device coordinates (NDC)
-    vec2 pixelSize = vec2(pointSize) / viewportSize;
-    
-    // Apply aspect ratio correction
-    pixelSize.x *= viewportSize.y / viewportSize.x; // Correct X-axis scaling
+	// Set the final position
+    gl_Position = vec4(finalPos, depth, 1.0); // Convert to NDC [-1,1]
 	
-    //vec2 scaledPos	= vertex * pixelSize;
-    //vec2 finalPos 	= position + scaledPos;
-	
-	// Aspect ratio correction for screen-space scaling
-    vec2 aspectCorrection = vec2(viewportSize.y / viewportSize.x, 1.0f);
-	
-	// Apply projection only to the instance position, NOT to the quad size
-    vec4 worldPos = mvp * vec4(position, 0.0, 1.0);
-	
-	// Keep quad size in screen-space (do NOT apply projection to `pixelSize`)
-    vec2 finalPos = worldPos.xy + (vertex * pixelSize);
-	
-	gl_Position = vec4(finalPos, 0.0, 1.0);
-*/	
-	/*
-    // Selection and focus highlighting
-    vHighlight 		= hasHighlights ? highlight : 0;
+	vHighlight 		= hasHighlights ? highlight : 0;
 	vFocusHighlight = hasFocusHighlights ? focusHighlight : 0;
-    
-    vScalar = hasScalars ? (scalar - colorMapRange.x) / colorMapRange.z : 0;
-    
-    vColor = hasColors ? color : vec3(0.5);
-
-    vOpacity = pointOpacity;
+    vScalar 		= hasScalars ? (scalar - colorMapRange.x) / colorMapRange.z : 0;
+    vColor 			= hasColors ? color : vec3(0.5);
+    vOpacity 		= pointOpacity;
 	
     if (hasOpacities)
         vOpacity = opacity;
-	
-	vec2 windowAspectRatioCorrection = vec2(windowAspectRatio, 1);
-	
-    // Transform position to clip space
-    vec2 pos = (mvp * vec4(position, 0, 1)).xy;
-    
-    // Resize point quad according to properties
-    vec2 scaledVertex = vertex * pointSize * windowAspectRatioCorrection * ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
-	
-    if (hasSizes)
-        scaledVertex = vertex * size * ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
-    
-    // Move quad by position and output
-    gl_Position = vec4(scaledVertex + pos, randomizedDepthEnabled ? random(pos) : 0, 1);
-	*/
 }
