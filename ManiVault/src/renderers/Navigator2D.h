@@ -62,6 +62,12 @@ public:
      */
     QRectF getZoomRectangle() const;
 
+	/**
+     * Get the zoom factor
+	 * @return Zoom factor
+	 */
+	float getZoomFactor() const;
+
 public: // Navigation
 
     /**
