@@ -15,6 +15,7 @@
 
 // Point properties
 uniform float 	pointSize;        		/** Point size in x- and y direction to account for anisotropy of the render canvas */
+uniform bool	pointSizeAbsolute;		/** Whether the point size is in world or screen coordinates */
 uniform vec2 	viewportSize;  			/** (width, height) of viewport */
 uniform int   	scalarEffect;
 uniform float 	pointOpacity;     		/** Point opacity */
@@ -120,17 +121,16 @@ void main()
 	vTexCoord = vertex;
 	
 	// Convert quad size from pixels to normalized device coordinates (NDC)
-    vec2 pixelSize = vec2(pointSize) / viewportSize;
+    vec2 pixelSize = vec2(hasSizes ? size : pointSize) / viewportSize;
 
+//	if (!pointSizeAbsolute)
+//		pixelSize /= viewportSize;
+		 
     // Apply projection only to the instance position, NOT to the quad size
     vec4 worldPos = mvp * vec4(position, 0.0, 1.0);
 	
-	vec2 scaledVertex;
-	
-	if (hasSizes)
-        scaledVertex = vertex * (vec2(size) / viewportSize);
-	else
-		scaledVertex = vertex * pixelSize;
+	// Compute the scaled vertex position
+	vec2 scaledVertex = vertex * pixelSize;
 		
 	// Scale the vertex based on the selection display mode
 	scaledVertex *= ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
@@ -138,6 +138,9 @@ void main()
     // Keep quad size in screen-space while maintaining correct aspect ratio
     vec2 finalPos = worldPos.xy + scaledVertex;
 	
+//	if (pointSizeAbsolute)
+//		finalPos = (mvp * vec4(position + scaledVertex, 0.0, 1.0)).xy;
+		
 	// Compute random depth
 	float depth = randomizedDepthEnabled ? random(worldPos.xy) : 0;
 	

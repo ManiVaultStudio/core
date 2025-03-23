@@ -437,9 +437,10 @@ namespace mv
                 modelMatrix.setToIdentity();
 
                 const auto mvp                  = QMatrix4x4(getProjectionMatrix()) * getNavigator().getViewMatrix() * modelMatrix;
-                const bool absoluteRendering    = _pointSettings._scalingMode == PointScaling::Absolute;
+                const bool pointSizeAbsolute    = _pointSettings._scalingMode == PointScaling::Absolute;
 
                 _shader.uniform1f("pointSize", _pointSettings._pointSize);
+                _shader.uniform1i("pointSizeAbsolute", pointSizeAbsolute);
                 _shader.uniform2f("viewportSize", static_cast<float>(getRenderSize().width()), static_cast<float>(getRenderSize().height()));
                 _shader.uniformMatrix4f("mvp", mvp.data());
                 _shader.uniform1f("pointOpacity", _pointSettings._alpha);
