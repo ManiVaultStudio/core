@@ -14,4 +14,7 @@ out vec4 fragColor;
 void main() {
     float f = 1 - (texture(tex, pass_texCoord).r * norm);
     fragColor = vec4(vec3(f), 1);
+	
+	if (pass_texCoord.x < 0.1 || pass_texCoord.x > 0.9)
+		fragColor = vec4(1,0,0,1);
 }

@@ -79,8 +79,6 @@ namespace mv
 
             void draw();
 
-            void updateQuadVertices(const QSizeF& quadSize);
-
             void destroy();
 
         private:

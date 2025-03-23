@@ -16,7 +16,7 @@ namespace mv
 Renderer2D::Renderer2D(QObject* parent) :
     Renderer(parent),
     _navigator(*this),
-    _zoomRectangle(0, 0, 2000, 1000)
+    _zoomMargin(10.f)
 {
 }
 
@@ -35,6 +35,11 @@ Navigator2D& Renderer2D::getNavigator()
 	return _navigator;
 }
 
+const Navigator2D& Renderer2D::getNavigator() const
+{
+    return _navigator;
+}
+
 void Renderer2D::beginRender()
 {
 #ifdef RENDERER_2D_VERBOSE
@@ -51,38 +56,24 @@ void Renderer2D::endRender()
 #endif
 }
 
-QRectF Renderer2D::getZoomRectangle() const
+QRectF Renderer2D::getDataBounds() const
 {
-    return _zoomRectangle;
+    return _dataBounds;
 }
 
-void Renderer2D::setZoomRectangle(const QRectF& zoomRectangle)
+void Renderer2D::setDataBounds(const QRectF& dataBounds)
 {
 #ifdef RENDERER_2D_VERBOSE
-    qDebug() << __FUNCTION__ << zoomRectangle;
+    qDebug() << __FUNCTION__ << dataBounds;
 #endif
 
-    if (zoomRectangle == _zoomRectangle)
+    if (dataBounds == _dataBounds)
         return;
 
-    const auto previousZoomRectangle = _zoomRectangle;
-
-    _zoomRectangle = zoomRectangle;
-
-    emit zoomRectangleChanged(previousZoomRectangle, _zoomRectangle);
-}
-
-QRectF Renderer2D::getDataRectangle() const
-{
-    return _dataRectangle;
-}
-
-void Renderer2D::setDataRectangle(const QRectF& dataRectangle)
-{
-    if (dataRectangle == _dataRectangle)
-        return;
-
-    _dataRectangle = dataRectangle;
+    _dataBounds = dataBounds;
+    
+    //if (!_navigator.hasUserNavigated())
+    getNavigator().setZoomRectangle(_dataBounds);//.marginsAdded({ _zoomMargin, _zoomMargin, _zoomMargin, _zoomMargin }));
 }
 
 QVector3D Renderer2D::getScreenPointToWorldPosition(const QMatrix4x4& modelViewMatrix, const QPoint& screenPoint) const
@@ -93,13 +84,14 @@ QVector3D Renderer2D::getScreenPointToWorldPosition(const QMatrix4x4& modelViewM
 QVector2D Renderer2D::getWorldPositionToNormalizedScreenPoint(const QVector3D& position) const
 {
     const auto clipSpacePos = getProjectionMatrix() * (_navigator.getViewMatrix() * QVector4D(position, 1.0));
+
     return (clipSpacePos.toVector3D() / clipSpacePos.w()).toVector2D();
 }
 
 QPoint Renderer2D::getWorldPositionToScreenPoint(const QVector3D& position) const
 {
-    const auto normalizedScreenPoint = QVector2D(1.0f, -1.0f) * getWorldPositionToNormalizedScreenPoint(position);
-    const auto viewSize = QVector2D(getRenderSize().width(), getRenderSize().height());
+    const auto normalizedScreenPoint    = QVector2D(1.0f, -1.0f) * getWorldPositionToNormalizedScreenPoint(position);
+    const auto viewSize                 = QVector2D(getRenderSize().width(), getRenderSize().height());
 
     return (viewSize * ((QVector2D(1.0f, 1.0f) + normalizedScreenPoint) / 2.0f)).toPoint();
 }
@@ -107,6 +99,7 @@ QPoint Renderer2D::getWorldPositionToScreenPoint(const QVector3D& position) cons
 QVector2D Renderer2D::getScreenPointToNormalizedScreenPoint(const QVector2D& screenPoint) const
 {
     const auto viewSize = QVector2D(getRenderSize().width(), getRenderSize().height());
+
     return QVector2D(-1.f, -1.f) + 2.f * (QVector2D(screenPoint.x(), getRenderSize().height() - screenPoint.y()) / viewSize);
 }
 
@@ -124,7 +117,7 @@ QMatrix4x4 Renderer2D::getNormalizedScreenToScreenMatrix() const
 {
     QMatrix4x4 translate, scale;
 
-    const auto size = QSizeF(getRenderSize());
+    const auto size     = QSizeF(getRenderSize());
     const auto halfSize = 0.5f * size;
 
     scale.scale(halfSize.width(), halfSize.height(), 1.0f);
@@ -135,8 +128,8 @@ QMatrix4x4 Renderer2D::getNormalizedScreenToScreenMatrix() const
 
 float Renderer2D::getZoomPercentage() const
 {
-    const auto factorX      = static_cast<float>(getDataRectangle().width()) / static_cast<float>(getZoomRectangle().width());
-    const auto factorY      = static_cast<float>(getDataRectangle().height()) / static_cast<float>(getZoomRectangle().height());
+    const auto factorX      = static_cast<float>(getDataBounds().width()) / static_cast<float>(getNavigator().getZoomRectangle().width());
+    const auto factorY      = static_cast<float>(getDataBounds().height()) / static_cast<float>(getNavigator().getZoomRectangle().height());
     const auto scaleFactor  = factorX < factorY ? factorX : factorY;
 
     return scaleFactor;
@@ -158,8 +151,8 @@ QMatrix4x4 Renderer2D::getProjectionMatrix() const
 QRect Renderer2D::getScreenRectangleFromWorldRectangle(const QRectF& worldBoundingRectangle) const
 {
     // Compute screen bounding rectangle extremes
-    const auto topLeftScreen = getWorldPositionToScreenPoint(QVector3D(worldBoundingRectangle.bottomLeft()));
-    const auto bottomRightScreen = getWorldPositionToScreenPoint(QVector3D(worldBoundingRectangle.topRight()));
+    const auto topLeftScreen        = getWorldPositionToScreenPoint(QVector3D(worldBoundingRectangle.bottomLeft()));
+    const auto bottomRightScreen    = getWorldPositionToScreenPoint(QVector3D(worldBoundingRectangle.topRight()));
 
     return {
         topLeftScreen,

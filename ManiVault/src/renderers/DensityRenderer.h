@@ -49,7 +49,6 @@ namespace mv
             void setColormap(const QImage& image);
 
             void init() override;
-            void resize(QSize renderSize) override;
 
         	void render() override;
 
@@ -64,8 +63,6 @@ namespace mv
             void drawFullscreenQuad();
 
         private:
-            QSize _windowSize;
-
             bool _isSelecting = false;
             bool _hasColorMap = false;
 

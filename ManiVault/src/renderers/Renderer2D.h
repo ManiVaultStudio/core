@@ -51,10 +51,15 @@ public:
 
     /**
      * Get the 2D navigator
-     *
      * @return Reference to the 2D navigator
      */
     Navigator2D& getNavigator();
+
+    /**
+     * Get the 2D navigator
+     * @return Reference to the 2D navigator
+     */
+    const Navigator2D& getNavigator() const;
 
 public: // Coordinate conversions
 
@@ -112,47 +117,25 @@ protected:
     /** End rendering */
     void endRender() override;
 
-    /**
-     * Get the zoom rectangle
-     * @return Zoom rectangle
-     */
-    QRectF getZoomRectangle() const;
-
-    /**
-     * Set the zoom rectangle to \p zoomRectangle
-     * @param zoomRectangle Zoom rectangle
-     */
-    void setZoomRectangle(const QRectF& zoomRectangle);
-
 public:
 
 	/**
-	 * Get data rectangle
-     * @return Data rectangle
+	 * Get data bounds
+     * @return Data bounds
 	 */
-	QRectF getDataRectangle() const;
+	QRectF getDataBounds() const;
 
     /**
-     * Set data rectangle to \p dataRectangle
-     * @param dataRectangle Data rectangle
+     * Set data bounds to \p dataBounds
+     * @param dataBounds Data bounds
      */
-    void setDataRectangle(const QRectF& dataRectangle);
-    
-signals:
-
-    /**
-     * Signals that the zoom rectangle has changed from \p previousZoomRectangle to \p currentZoomRectangle
-     * @param previousZoomRectangle Previous zoom rectangle
-     * @param currentZoomRectangle Current zoom rectangle
-     */
-    void zoomRectangleChanged(const QRectF& previousZoomRectangle, const QRectF& currentZoomRectangle);
+    void setDataBounds(const QRectF& dataBounds);
 
 private:
-    QSize           _renderSize;            /** Size of the renderer canvas */
-    Navigator2D     _navigator;             /** 2D navigator */
-    float           _zoomMargin = 100.f;    /** Margin for zooming */
-    QRectF          _zoomRectangle;         /** Zoom rectangle */
-    QRectF          _dataRectangle;         /** Data rectangle */
+    QSize           _renderSize;        /** Size of the renderer canvas */
+    Navigator2D     _navigator;         /** 2D navigator */
+    float           _zoomMargin;        /** Margin for zooming */
+    QRectF          _dataBounds;        /** Bounds of the data */
 
     friend class Navigator2D;
 };
