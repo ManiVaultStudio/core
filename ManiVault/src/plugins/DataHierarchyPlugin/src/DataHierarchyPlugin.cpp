@@ -12,11 +12,6 @@ using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
-void simulate_segfault() {
-    int* ptr = nullptr;
-    *ptr = 42; // Writing to a null pointer causes a crash
-}
-
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataHierarchyWidget(nullptr)
@@ -39,8 +34,6 @@ void DataHierarchyPlugin::init()
     layout->addWidget(&_dataHierarchyWidget);
 
     getWidget().setLayout(layout);
-
-    simulate_segfault();
 }
 
 DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
