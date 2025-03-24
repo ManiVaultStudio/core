@@ -18,8 +18,6 @@ using namespace util;
 
 ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
-    _model(),
-    _filterModel(),
     _modalTasksDialog(this)
 {
     setMinimumDuration(0);

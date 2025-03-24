@@ -282,7 +282,7 @@ void SplashScreenWidget::createBody()
 
     rightColumn->setSpacing(8);
 
-    const auto bodyColor = "rgb(50, 50, 50)";
+    const auto bodyColor = qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Dark).name();
 
     if (shouldDisplayProjectInfo()) {
         auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
@@ -295,7 +295,7 @@ void SplashScreenWidget::createBody()
 
         auto& versionAction = projectMetaAction->getProjectVersionAction();
         auto title          = projectMetaAction->getTitleAction().getString();
-        auto version        = QString("%1.%2 <i>%3</i>").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), versionAction.getSuffixAction().getString().toLower());
+        auto version        = QString("%1.%2.%3-%4").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), QString::number(versionAction.getPatchAction().getValue()), versionAction.getSuffixAction().getString().toLower());
         auto description    = projectMetaAction->getDescriptionAction().getString();
         auto comments       = projectMetaAction->getCommentsAction().getString();
 
@@ -316,12 +316,12 @@ void SplashScreenWidget::createBody()
         projectLogoLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
         const auto applicationVersion   = Application::current()->getVersion();
-        const auto versionString        = QString("%1.%2%3").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString(MV_VERSION_SUFFIX.data()));
+        const auto versionString        = QString("%1.%2.%3-%4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data()));
 
         htmlLabel->setText(QString(" \
             <div> \
                 <p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span></p> \
-                <p style='font-weight: bold; color: %5;'>Version: %2</p> \
+                <p style='font-weight: bold; color: %2;'>Version: %1</p> \
                 <p style='color: %2;'><i>An extensible open-source visual analytics framework for analyzing high-dimensional data</i></p> \
             </div> \
         ").arg(versionString, bodyColor));
