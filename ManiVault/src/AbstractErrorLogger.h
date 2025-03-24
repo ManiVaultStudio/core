@@ -99,6 +99,9 @@ public:
 
     /** Begin the initialization of the error logger */
     virtual void beginInitialization() {
+        if (!mv::errors().getLoggingUserHasOptedAction().isChecked())
+            return;
+
         connect(&mv::errors().getLoggingEnabledAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
             addNotification("Enabled", {
                 QString("%1 error logging").arg(_loggerName),
@@ -120,13 +123,13 @@ public:
             if (toggled)
                 addNotification("ShowCrashReportDialog", {
                     QString("%1 error logging").arg(_loggerName),
-                    QString("A crash report dialog will popup when an fatal error occurs."),
+                    QString("A window will popup when a fatal error occurs in which you can give details surrounding the crash. This setting will take effect after restarting the application."),
                 	util::StyledIcon("bug")
 				});
             else
                 addNotification("ShowCrashReportDialog", {
                     QString("%1 error logging").arg(_loggerName),
-                    QString("A crash report will be sent to the Sentry server unsupervised."),
+                    QString("You will not be asked for details surrounding a crash, a report will be sent automatically to the Sentry server. This setting will take effect after restarting the application."),
                 	util::StyledIcon("bug")
                 });
 		});
@@ -153,7 +156,7 @@ protected: // Action getters
     static gui::TriggerAction& getAskConsentDialogAction() { return mv::errors().getLoggingAskConsentDialogAction(); }              /** Get action for asking the user for consent to log errors */
     static gui::ToggleAction& getUserHasOptedAction() { return mv::errors().getLoggingUserHasOptedAction(); }                       /** Get action for user has opted */
     static gui::ToggleAction& getEnabledAction() { return mv::errors().getLoggingEnabledAction(); }                                 /** Get action for logging enabled */
-    static gui::StringAction& getDsnAction() { return mv::errors().getLoggingDsnAction(); };                                        /** Get action for logging data source name (DSN) */
+    static gui::StringAction& getDsnAction() { return mv::errors().getLoggingDsnAction(); }                                         /** Get action for logging data source name (DSN) */
     static gui::ToggleAction& getShowCrashReportDialogAction() { return mv::errors().getLoggingShowCrashReportDialogAction(); }     /** Get action for showing a crash report dialog when the application fails */
 
 private:

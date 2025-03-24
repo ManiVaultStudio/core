@@ -31,7 +31,7 @@ public:
     void reset() override;
 
     /** Show the error logging consent dialog */
-    void showErrorLoggingConsentDialog();
+    void showErrorLoggingConsentDialog() override;
 
 public: // Action getters
 

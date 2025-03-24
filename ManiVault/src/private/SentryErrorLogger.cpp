@@ -91,12 +91,15 @@ void SentryErrorLogger::start()
 	sentry_set_tag("build_type", "release");
 #endif
 
-    auto showCrashReportDialog = getShowCrashReportDialogAction().isChecked();
+    static const bool showCrashReportDialog = getShowCrashReportDialogAction().isChecked();
+
+    qDebug() << "showCrashReportDialog" << showCrashReportDialog;
 
     sentry_options_set_before_send(options, [](sentry_value_t event, void* hint, void* closure) -> sentry_value_t {
-        auto showCrashReportDialogAction = static_cast<bool*>(closure);
+        //auto showCrashReportDialog = static_cast<bool*>(closure);
 
-    	if (!*showCrashReportDialogAction)
+        //qDebug() << "Sending crash report..." << showCrashReportDialog;
+    	if (!showCrashReportDialog)
             return event;
 
         CrashReportDialog crashReportDialog;
@@ -118,7 +121,7 @@ void SentryErrorLogger::start()
         }
 
         return event;
-    }, &showCrashReportDialog);
+    }, nullptr);
 
     if (sentry_init(options) == 0)
         qDebug() << "Sentry error logging is running, crash reports will send to: " + dsn;

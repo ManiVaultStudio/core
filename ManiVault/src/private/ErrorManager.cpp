@@ -25,7 +25,7 @@ ErrorManager::ErrorManager(QObject* parent) :
     _loggingUserHasOptedAction(this, "User has opted", false),
     _loggingEnabledAction(this, "Toggle error reporting", false),
     _loggingDsnAction(this, "Sentry DSN", "https://211289c773dcc267b1bb536b6c3a23f7@lkebsentry.nl/2"),
-    _loggingShowCrashReportDialogAction(this, "Show crash report dialog")
+    _loggingShowCrashReportDialogAction(this, "Show crash report dialog", true)
 {
     _loggingAskConsentDialogAction.setToolTip("Show the error logging consent dialog");
     _loggingAskConsentDialogAction.setDefaultWidgetFlags(TriggerAction::IconText);
