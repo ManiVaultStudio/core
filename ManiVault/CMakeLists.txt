@@ -639,22 +639,21 @@ if(NOT APPLE)
 			FOLDER CoreDependencies/Miscellaneous
 		)
 		
-		if(MSVC)
-			# Find all .pdb files in the build directory
-			file(GLOB_RECURSE PDB_FILES "${CMAKE_BINARY_DIR}/**/*.pdb")
+		# if(MSVC)
+			# # Find all .pdb files in the build directory
+			# file(GLOB_RECURSE PDB_FILES "${CMAKE_BINARY_DIR}/**/*.pdb")
 			
-			# Program database files target directory
-			set(PDB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/pdb/")
+			# # Program database files target directory
+			# set(PDB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/pdb/")
 			
-			# Copy all PDB files after the ManiVault executable has been built
-			add_custom_command(
-				TARGET ${MV_EXE} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E make_directory ${PDB_DIR}  					# Ensure the target PDB directory exists
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PDB_FILES} ${PDB_DIR}	# Copy all .pdb files
-				COMMENT "Copying .pdb files to ${PDB_DIR}"
-			)
-
-		endif()
+			# # Copy all PDB files after the ManiVault executable has been built
+			# add_custom_command(
+				# TARGET ${MV_EXE} POST_BUILD
+				# COMMAND ${CMAKE_COMMAND} -E make_directory ${PDB_DIR}  					# Ensure the target PDB directory exists
+				# COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PDB_FILES} ${PDB_DIR}	# Copy all .pdb files
+				# COMMENT "Copying .pdb files to ${PDB_DIR}"
+			# )
+		# endif()
 	endif()
 endif()
 
