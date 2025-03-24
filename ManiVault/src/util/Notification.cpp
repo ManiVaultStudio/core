@@ -73,7 +73,7 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+    notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
     notificationWidget->setAutoFillBackground(true);
@@ -81,12 +81,12 @@ Notification::Notification(const QString& title, const QString& description, con
 
     iconLabel->setStyleSheet("padding: 3px;");
     iconLabel->setPixmap(icon.pixmap(32, 32));
-    iconLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    iconLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
     messageLabel->setWordWrap(true);
     messageLabel->setTextFormat(Qt::RichText);
     messageLabel->setText("<b>" + title + "</b>" + "<br>" + description);
-    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
     messageLabel->setMinimumHeight(10);
     messageLabel->setOpenExternalLinks(true);
 
