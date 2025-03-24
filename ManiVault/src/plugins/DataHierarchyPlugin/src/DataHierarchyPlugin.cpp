@@ -16,8 +16,6 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataHierarchyWidget(nullptr)
 {
-    int* ptr = nullptr;
-    *ptr = 42; // Writing to a null pointer causes a crash
     auto& shortcuts = getShortcuts();
 
     shortcuts.add({ QKeySequence(Qt::CTRL | Qt::Key_Minus), "Expand/collapse", "Collapse all" });
