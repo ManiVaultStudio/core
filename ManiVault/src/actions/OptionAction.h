@@ -11,6 +11,7 @@
 #include <QCompleter>
 #include <QStringListModel>
 #include <QItemSelection>
+#include <QSortFilterProxyModel>
 
 class QWidget;
 class QAbstractListModel;
@@ -78,8 +79,9 @@ public: // Widgets
         LineEditWidget(QWidget* parent, OptionAction* optionAction);
 
     protected:
-        OptionAction*   _optionAction;  /** Pointer to owning option action */
-        QCompleter      _completer;     /** Completer for searching and filtering */
+        OptionAction*           _optionAction;  /** Pointer to owning option action */
+        QCompleter              _completer;     /** Completer for searching and filtering */
+        QSortFilterProxyModel   _proxyModel;    /** Proxy model for sorting the options */
 
         friend class OptionAction;
     };
