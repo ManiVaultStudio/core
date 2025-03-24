@@ -12,11 +12,32 @@
 #include <QMainWindow>
 #include <QStatusBar>
 #include <QPushButton>
+#include <QPainterPath>
 
 #include "actions/ColorAction.h"
 
 namespace mv::util
 {
+
+void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
+{
+    QPainter painter(this);
+
+	painter.setRenderHint(QPainter::Antialiasing);
+
+    const auto windowColor = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Window);
+    const auto borderColor = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Light);
+
+    constexpr int radius = 10;
+
+    QPainterPath path;
+
+	path.addRoundedRect(rect().adjusted(1, 1, -1, -1), radius, radius);
+
+    painter.fillPath(path, windowColor);
+    painter.setPen(QPen(borderColor, 1));
+    painter.drawPath(path);
+}
 
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
 	QWidget(parent),
@@ -36,7 +57,7 @@ Notification::Notification(const QString& title, const QString& description, con
     }
 
     auto mainLayout                 = new QVBoxLayout();
-    auto notificationWidget         = new QWidget();
+    auto notificationWidget         = new NotificationWidget();
     auto notificationWidgetLayout   = new QHBoxLayout(this);
     auto iconLabel                  = new QLabel(this);
     auto messageLabel               = new QLabel(this);
@@ -44,11 +65,10 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    const auto windowColorName = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Window).name();
-    const auto borderColorName = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Mid).name();
+    
 
     notificationWidget->setObjectName("Notification");
-    notificationWidget->setStyleSheet(QString("QWidget#Notification { background-color: %1, border: 1px solid %2; border-radius: 2px; }").arg(qApp->palette().color(QPalette::ColorRole::Window).name(), borderColorName));
+    //notificationWidget->setStyleSheet(QString("QWidget#Notification { background-color: %1; border: 1px solid %2; border-radius: 5px; }").arg(windowColorName, borderColorName));
     notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
