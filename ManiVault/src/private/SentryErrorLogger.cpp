@@ -18,8 +18,6 @@ using namespace mv::util;
 SentryErrorLogger::SentryErrorLogger(QObject* parent /*= nullptr*/) :
     AbstractErrorLogger("Sentry", parent)
 {
-    //CrashReportDialog::initialize();
-    //ErrorLoggingConsentDialog::setErrorLoggingInstance(this);
 }
 
 QString SentryErrorLogger::getCrashpadHandlerExecutableName() const
