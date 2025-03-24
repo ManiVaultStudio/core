@@ -39,6 +39,14 @@ void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
     painter.drawPath(path);
 }
 
+QSize Notification::NotificationWidget::sizeHint() const
+{
+	return {
+        400,
+        0
+	};
+}
+
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
 	QWidget(parent),
     _previousNotification(previousNotification),
@@ -65,17 +73,15 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    
-
-    notificationWidget->setObjectName("Notification");
-    //notificationWidget->setStyleSheet(QString("QWidget#Notification { background-color: %1; border: 1px solid %2; border-radius: 5px; }").arg(windowColorName, borderColorName));
     notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
     notificationWidget->setAutoFillBackground(true);
+    notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
 
     iconLabel->setStyleSheet("padding: 3px;");
     iconLabel->setPixmap(icon.pixmap(32, 32));
+    iconLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
     messageLabel->setWordWrap(true);
     messageLabel->setTextFormat(Qt::RichText);
@@ -102,6 +108,10 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidget->setLayout(notificationWidgetLayout);
 
     mainLayout->addWidget(notificationWidget);
+
+    qApp->processEvents();
+
+    notificationWidget->adjustSize();
 
     setLayout(mainLayout);
 

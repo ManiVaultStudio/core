@@ -39,6 +39,8 @@ protected:
          * @param event Pointer to paint event that occurred
          */
         void paintEvent(QPaintEvent* event) override;
+
+        QSize sizeHint() const override;
     };
 
 public:
