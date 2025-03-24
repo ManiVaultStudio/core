@@ -295,7 +295,7 @@ void SplashScreenWidget::createBody()
 
         auto& versionAction = projectMetaAction->getProjectVersionAction();
         auto title          = projectMetaAction->getTitleAction().getString();
-        auto version        = QString("%1.%2 <i>%3</i>").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), versionAction.getSuffixAction().getString().toLower());
+        auto version        = QString("%1.%2.%3-%4").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), QString::number(versionAction.getPatchAction().getValue()), versionAction.getSuffixAction().getString().toLower());
         auto description    = projectMetaAction->getDescriptionAction().getString();
         auto comments       = projectMetaAction->getCommentsAction().getString();
 
