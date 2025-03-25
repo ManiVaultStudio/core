@@ -56,8 +56,10 @@ namespace mv::gui {
  *
  * The scatter plot plugin is a good example of how this view plugin sampler can be integrated
  * into a view plugin class.
- *
- * Note: This action is developed for internal use only
+ * 
+ * Special considerations:
+ * - ViewPluginSamplerAction::setWidgetViewGeneratorFunction(...) does not work reliably together with QWebEngineView and QLabel for HTML-based view, use QTextBrowser instead
+ * - This action is developed for internal use only
  *
  * @author Thomas Kroes
  */
