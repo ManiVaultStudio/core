@@ -140,7 +140,7 @@ void main()
 //		finalPos = (mvp * vec4(position + scaledVertex, 0.0, 1.0)).xy;
 		
 	// Compute random depth
-	float depth = randomizedDepthEnabled ? random(worldPos.xy) : 0;
+	float depth = randomizedDepthEnabled ? random(vec2(gl_InstanceID, 0)) : 0;
 	
 	// Set the final position
     gl_Position = vec4(finalPos, depth, 1.0); // Convert to NDC [-1,1]

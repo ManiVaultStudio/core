@@ -280,8 +280,8 @@ void Navigator2D::resetView(bool force /*= true*/)
     {
         beginChangeZoomRectangleWorld();
 	    {
-            _zoomRectangleWorldTopLeft = _renderer.getDataBounds().topLeft() + QPoint(0, -_renderer.getDataBounds().height());
-            _zoomRectangleWorldSize = _renderer.getDataBounds().size();
+            _zoomRectangleWorldTopLeft  = _renderer.getDataBounds().topLeft() + QPoint(0, -_renderer.getDataBounds().height());
+            _zoomRectangleWorldSize     = _renderer.getDataBounds().size();
 
             setZoomRectangleWorld(getZoomRectangleWorld());
 
