@@ -23,7 +23,7 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _isPanning(false),
     _isZooming(false),
     _zoomFactor(1.0f),
-    _zoomRectangleSize(1, 1),
+    _zoomRectangleWorldSize(1, 1),
     _zoomRectangleMargin(0.f),
     _userHasNavigated()
 {
@@ -126,17 +126,23 @@ QMatrix4x4 Navigator2D::getViewMatrix() const
 {
     QMatrix4x4 lookAt, scale;
 
+    const auto zoomRectangle = getZoomRectangleWorld();
+
     // Construct look-at parameters
-    const auto eye      = QVector3D(getZoomRectangle().center().x(), getZoomRectangle().center().y(), 1);
-    const auto center   = QVector3D(getZoomRectangle().center().x(), getZoomRectangle().center().y(), 0);
+    const auto eye      = QVector3D(zoomRectangle.center().x(), zoomRectangle.center().y(), 1);
+    const auto center   = QVector3D(zoomRectangle.center().x(), zoomRectangle.center().y(), 0);
     const auto up       = QVector3D(0, 1, 0);
+
+#ifdef NAVIGATOR_2D_VERBOSE
+    qDebug() << __FUNCTION__ << getZoomRectangleWorld() << _renderer.getDataBounds() << eye;
+#endif
 
     // Create look-at transformation matrix
     lookAt.lookAt(eye, center, up);
 
     const auto viewerSize   = _renderer.getRenderSize();
-    const auto factorX      = static_cast<float>(viewerSize.width()) / (getZoomRectangle().isValid() ? static_cast<float>(getZoomRectangle().width()) : 1.0f);
-    const auto factorY      = static_cast<float>(viewerSize.height()) / (getZoomRectangle().isValid() ? static_cast<float>(getZoomRectangle().height()) : 1.0f);
+    const auto factorX      = static_cast<float>(viewerSize.width()) / (zoomRectangle.isValid() ? static_cast<float>(zoomRectangle.width()) : 1.0f);
+    const auto factorY      = static_cast<float>(viewerSize.height()) / (zoomRectangle.isValid() ? static_cast<float>(zoomRectangle.height()) : 1.0f);
     const auto scaleFactor  = factorX < factorY ? factorX : factorY;
 
     const auto d = 1.0f - (2 * _zoomRectangleMargin) / std::max(viewerSize.width(), viewerSize.height());
@@ -148,26 +154,26 @@ QMatrix4x4 Navigator2D::getViewMatrix() const
     return scale * lookAt;
 }
 
-QRectF Navigator2D::getZoomRectangle() const
+QRectF Navigator2D::getZoomRectangleWorld() const
 {
     return {
-    	_zoomRectangleTopLeft,
-    	_zoomRectangleSize
+    	_zoomRectangleWorldTopLeft,
+    	_zoomRectangleWorldSize
     };
 }
 
-void Navigator2D::setZoomRectangle(const QRectF& zoomRectangle)
+void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 {
 #ifdef NAVIGATOR_2D_VERBOSE
-    qDebug() << __FUNCTION__ << zoomRectangle;
+    qDebug() << __FUNCTION__ << zoomRectangleWorld;
 #endif
 
-    const auto previousZoomRectangle = getZoomRectangle();
+    const auto previousZoomRectangleWorld = getZoomRectangleWorld();
 
-    _zoomRectangleTopLeft   = zoomRectangle.topLeft();
-    _zoomRectangleSize      = zoomRectangle.size();
+    _zoomRectangleWorldTopLeft   = zoomRectangleWorld.topLeft();
+    _zoomRectangleWorldSize      = zoomRectangleWorld.size();
 
-	emit zoomRectangleChanged(previousZoomRectangle, getZoomRectangle());
+	emit zoomRectangleWorldChanged(previousZoomRectangleWorld, getZoomRectangleWorld());
 }
 
 float Navigator2D::getZoomFactor() const
@@ -201,20 +207,20 @@ void Navigator2D::zoomAround(const QPoint& center, float factor)
 
     beginZooming();
     {
-        beginChangeZoomRectangle();
+        beginChangeZoomRectangleWorld();
         {
 	        const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), center).toPointF();
-	        const auto v1 = getZoomRectangle().topLeft() - p1;
+	        const auto v1 = getZoomRectangleWorld().topLeft() - p1;
 	        const auto v2 = v1 / factor;
 
-	        _zoomRectangleTopLeft   = p1 + v2;
-	        _zoomRectangleSize      = getZoomRectangle().size() / factor;
+	        _zoomRectangleWorldTopLeft  = p1 + v2;
+	        _zoomRectangleWorldSize     = getZoomRectangleWorld().size() / factor;
 
     		_zoomFactor /= factor;
 
-	        setZoomRectangle(getZoomRectangle());
+	        setZoomRectangleWorld(getZoomRectangleWorld());
         }
-        endChangeZoomRectangle();
+        endChangeZoomRectangleWorld();
     }
     endZooming();
 }
@@ -230,10 +236,10 @@ void Navigator2D::zoomToRectangle(const QRectF& zoomRectangle)
 
     beginZooming();
     {
-        beginChangeZoomRectangle();
+        beginChangeZoomRectangleWorld();
         {
         }
-        endChangeZoomRectangle();
+        endChangeZoomRectangleWorld();
     }
     endZooming();
 }
@@ -249,14 +255,14 @@ void Navigator2D::panBy(const QPointF& delta)
 
     beginPanning();
     {
-        beginChangeZoomRectangle();
+        beginChangeZoomRectangleWorld();
         {
             const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), QPoint()).toPointF();
             const auto p2 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), delta.toPoint()).toPointF();
 
-            _zoomRectangleTopLeft = getZoomRectangle().topLeft() + (p2 - p1);
+            _zoomRectangleWorldTopLeft = getZoomRectangleWorld().topLeft() + (p2 - p1);
         }
-        endChangeZoomRectangle();
+        endChangeZoomRectangleWorld();
     }
     endPanning();
 }
@@ -272,17 +278,20 @@ void Navigator2D::resetView(bool force /*= true*/)
 
     beginZooming();
     {
-        beginChangeZoomRectangle();
+        beginChangeZoomRectangleWorld();
 	    {
-            setZoomRectangle(_renderer.getDataBounds());
+            _zoomRectangleWorldTopLeft = _renderer.getDataBounds().topLeft() + QPoint(0, -_renderer.getDataBounds().height());
+            _zoomRectangleWorldSize = _renderer.getDataBounds().size();
 
-		    if (!_userHasNavigated || force) {
-		    	setZoomRectangle(_renderer.getDataBounds());
+            setZoomRectangleWorld(getZoomRectangleWorld());
 
-		    	_userHasNavigated = false;
-			}
+		 //   if (!_userHasNavigated || force) {
+		 //   	setZoomRectangleWorld(_renderer.getDataBounds());
+
+		 //   	_userHasNavigated = false;
+			//}
         }
-        endChangeZoomRectangle();
+        endChangeZoomRectangleWorld();
     }
     endZooming();
 }
@@ -434,14 +443,14 @@ void Navigator2D::endNavigation()
     emit navigationEnded();
 }
 
-void Navigator2D::beginChangeZoomRectangle()
+void Navigator2D::beginChangeZoomRectangleWorld()
 {
-    _previousZoomRectangle = getZoomRectangle();
+    _previousZoomRectangleWorld = getZoomRectangleWorld();
 }
 
-void Navigator2D::endChangeZoomRectangle()
+void Navigator2D::endChangeZoomRectangleWorld()
 {
-    emit zoomRectangleChanged(_previousZoomRectangle, getZoomRectangle());
+    emit zoomRectangleWorldChanged(_previousZoomRectangleWorld, getZoomRectangleWorld());
 }
 
 }

@@ -436,7 +436,7 @@ namespace mv
 
                 modelMatrix.setToIdentity();
 
-                const auto mvp                  = QMatrix4x4(getProjectionMatrix()) * getNavigator().getViewMatrix() * modelMatrix;
+                const auto mvp                  = QMatrix4x4(getProjectionMatrix())* getNavigator().getViewMatrix()* modelMatrix;
                 const bool pointSizeAbsolute    = _pointSettings._scalingMode == PointScaling::Absolute;
 
                 _shader.uniform1f("pointSize", _pointSettings._pointSize);
