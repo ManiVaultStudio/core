@@ -57,16 +57,16 @@ public:
     QMatrix4x4 getViewMatrix() const;
 
     /**
-     * Get the zoom rectangle
-     * @return Zoom rectangle
+     * Get the world zoom rectangle
+     * @return Zoom rectangle in world coordinates
      */
-    QRectF getZoomRectangle() const;
+    QRectF getZoomRectangleWorld() const;
 
     /**
-     * Set the zoom rectangle to \p zoomRectangle
-     * @param zoomRectangle Zoom rectangle
+     * Set the world zoom rectangle to \p zoomRectangleWorld
+     * @param zoomRectangleWorld Zoom rectangle in world coordinates
      */
-    void setZoomRectangle(const QRectF& zoomRectangle);
+    void setZoomRectangleWorld(const QRectF& zoomRectangleWorld);
 
 	/**
      * Get the zoom factor
@@ -175,11 +175,11 @@ protected: // Navigation
     /** Navigation has ended */
     void endNavigation();
 
-    /** Begin changing the zoom rectangle */
-    void beginChangeZoomRectangle();
+    /** Begin changing the zoom rectangle in world coordinates */
+    void beginChangeZoomRectangleWorld();
 
-    /** End changing the zoom rectangle */
-    void endChangeZoomRectangle();
+    /** End changing the zoom rectangle in world coordinates */
+    void endChangeZoomRectangleWorld();
 
 signals:
 
@@ -226,27 +226,27 @@ signals:
 	void enabledChanged(bool enabled);
 
     /**
-     * Signals that the zoom rectangle has changed from \p previousZoomRectangle to \p currentZoomRectangle
-     * @param previousZoomRectangle Previous zoom rectangle
-     * @param currentZoomRectangle Current zoom rectangle
+     * Signals that the zoom rectangle in world coordinates has changed from \p previousZoomRectangleWorld to \p currentZoomRectangleWorld
+     * @param previousZoomRectangleWorld Previous world zoom rectangle
+     * @param currentZoomRectangleWorld Current world zoom rectangle
      */
-    void zoomRectangleChanged(const QRectF& previousZoomRectangle, const QRectF& currentZoomRectangle);
+    void zoomRectangleWorldChanged(const QRectF& previousZoomRectangleWorld, const QRectF& currentZoomRectangleWorld);
 
 private:
-    QPointer<QWidget>   _sourceWidget;              /** Source widget for panning and zooming */
-    Renderer2D&         _renderer;                  /** Reference to parent renderer */
-    bool                _enabled;                   /** Enabled flag */
-    bool                _initialized;               /** Initialized flag */
-    QVector<QPoint>     _mousePositions;            /** Recorded mouse positions */
-    bool                _isNavigating;              /** Navigating flag */
-    bool                _isPanning;                 /** Panning flag */
-    bool                _isZooming;                 /** Zooming flag */
-    float               _zoomFactor;                /** Zoom factor */
-    QPointF             _zoomRectangleTopLeft;      /** Zoom rectangle top-left in world coordinates */
-    QSizeF              _zoomRectangleSize;         /** Zoom rectangle size in world coordinates */
-    float               _zoomRectangleMargin;       /** Zoom rectangle margin */
-    QRectF              _previousZoomRectangle;     /** Previous zoom rectangle */
-    bool                _userHasNavigated;          /** Boolean determining whether the user has navigated */
+    QPointer<QWidget>   _sourceWidget;                  /** Source widget for panning and zooming */
+    Renderer2D&         _renderer;                      /** Reference to parent renderer */
+    bool                _enabled;                       /** Enabled flag */
+    bool                _initialized;                   /** Initialized flag */
+    QVector<QPoint>     _mousePositions;                /** Recorded mouse positions */
+    bool                _isNavigating;                  /** Navigating flag */
+    bool                _isPanning;                     /** Panning flag */
+    bool                _isZooming;                     /** Zooming flag */
+    float               _zoomFactor;                    /** Zoom factor */
+    QPointF             _zoomRectangleWorldTopLeft;          /** Zoom rectangle top-left in world coordinates */
+    QSizeF              _zoomRectangleWorldSize;             /** Zoom rectangle size in world coordinates */
+    float               _zoomRectangleMargin;           /** Zoom rectangle margin */
+    QRectF              _previousZoomRectangleWorld;    /** Previous world zoom rectangle */
+    bool                _userHasNavigated;              /** Boolean determining whether the user has navigated */
 };
 
 }

@@ -72,8 +72,7 @@ void Renderer2D::setDataBounds(const QRectF& dataBounds)
 
     _dataBounds = dataBounds;
     
-    //if (!_navigator.hasUserNavigated())
-    getNavigator().setZoomRectangle(_dataBounds);//.marginsAdded({ _zoomMargin, _zoomMargin, _zoomMargin, _zoomMargin }));
+    getNavigator().resetView();
 }
 
 QVector3D Renderer2D::getScreenPointToWorldPosition(const QMatrix4x4& modelViewMatrix, const QPoint& screenPoint) const
@@ -128,8 +127,8 @@ QMatrix4x4 Renderer2D::getNormalizedScreenToScreenMatrix() const
 
 float Renderer2D::getZoomPercentage() const
 {
-    const auto factorX      = static_cast<float>(getDataBounds().width()) / static_cast<float>(getNavigator().getZoomRectangle().width());
-    const auto factorY      = static_cast<float>(getDataBounds().height()) / static_cast<float>(getNavigator().getZoomRectangle().height());
+    const auto factorX      = static_cast<float>(getDataBounds().width()) / static_cast<float>(getNavigator().getZoomRectangleWorld().width());
+    const auto factorY      = static_cast<float>(getDataBounds().height()) / static_cast<float>(getNavigator().getZoomRectangleWorld().height());
     const auto scaleFactor  = factorX < factorY ? factorX : factorY;
 
     return scaleFactor;
@@ -144,6 +143,7 @@ QMatrix4x4 Renderer2D::getProjectionMatrix() const
 
     // Create an orthogonal transformation matrix
     matrix.ortho(-halfSize.width(), halfSize.width(), -halfSize.height(), halfSize.height(), -1000.0f, +1000.0f);
+    //matrix.ortho(-halfSize.width(), halfSize.width(), -getRenderSize().height(), 0, -1000.0f, +1000.0f);
 
     return matrix;
 }

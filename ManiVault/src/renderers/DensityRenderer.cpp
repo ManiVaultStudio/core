@@ -12,7 +12,7 @@ namespace mv
         DensityRenderer::DensityRenderer(RenderMode renderMode) :
             _renderMode(renderMode)
         {
-            getNavigator().setZoomRectangle(QRectF(0, 0, 1, 1));
+            getNavigator().setZoomRectangleWorld(QRectF(0, 0, 1, 1));
         }
 
         DensityRenderer::~DensityRenderer()
