@@ -24,7 +24,7 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _isPanning(false),
     _isZooming(false),
     _zoomFactor(1.0f),
-    _zoomRectangleMargin(0.f),
+    _zoomRectangleMargin(50.f),
     _userHasNavigated()
 {
 }
@@ -145,7 +145,7 @@ QMatrix4x4 Navigator2D::getViewMatrix() const
     const auto factorY      = static_cast<float>(viewerSize.height()) / (zoomRectangle.isValid() ? static_cast<float>(zoomRectangle.height()) : 1.0f);
     const auto scaleFactor  = factorX < factorY ? factorX : factorY;
 
-    const auto d = 1.0f - (2 * _zoomRectangleMargin) / std::max(viewerSize.width(), viewerSize.height());
+    const auto d = 1.0f - (2 * 0) / std::max(viewerSize.width(), viewerSize.height());
 
     // Create scale matrix
     scale.scale(scaleFactor * d, scaleFactor * d, scaleFactor * d);
@@ -287,7 +287,7 @@ void Navigator2D::resetView(bool force /*= true*/)
             const auto zoomFactorX = _renderer.getDataBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
             const auto zoomFactorY = _renderer.getDataBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
 
-            _zoomFactor      = std::max(zoomFactorX, zoomFactorY);
+            _zoomFactor      = std::max(zoomFactorX, zoomFactorY) + (_zoomRectangleMargin / _renderer.getRenderSize().height()) / 2.f;
             _zoomCenterWorld = _renderer.getDataBounds().center() - QPointF(0.f, _renderer.getDataBounds().height());
 
             setZoomRectangleWorld(getZoomRectangleWorld());

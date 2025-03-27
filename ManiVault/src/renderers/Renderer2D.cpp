@@ -145,7 +145,6 @@ QMatrix4x4 Renderer2D::getProjectionMatrix() const
 
     // Create an orthogonal transformation matrix
     matrix.ortho(-halfSize.width(), halfSize.width(), -halfSize.height(), halfSize.height(), -1000.0f, +1000.0f);
-    //matrix.ortho(-halfSize.width(), halfSize.width(), -getRenderSize().height(), 0, -1000.0f, +1000.0f);
 
     return matrix;
 }
