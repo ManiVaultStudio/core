@@ -156,7 +156,7 @@ QMatrix4x4 Navigator2D::getViewMatrix() const
 
 QRectF Navigator2D::getZoomRectangleWorld() const
 {
-    const auto zoomRectangleWorldSize       = _renderer.getRenderSize().toSizeF() / _zoomFactor;
+    const auto zoomRectangleWorldSize       = _renderer.getRenderSize().toSizeF() * _zoomFactor;
     const auto zoomRectangleWorldTopLeft    = _zoomCenterWorld - QPointF(.5f * static_cast<float>(zoomRectangleWorldSize.width()), .5f * static_cast<float>(zoomRectangleWorldSize.height()));
 
     return {
@@ -173,8 +173,8 @@ void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 
     const auto previousZoomRectangleWorld = getZoomRectangleWorld();
 
-    _zoomFactor         = _renderer.getRenderSize().width() / zoomRectangleWorld.width();
-    _zoomCenterWorld    = zoomRectangleWorld.center();
+    //_zoomFactor         = _renderer.getRenderSize().width() / zoomRectangleWorld.width();
+    //_zoomCenterWorld    = zoomRectangleWorld.center();
 
 	emit zoomRectangleWorldChanged(previousZoomRectangleWorld, getZoomRectangleWorld());
 }
@@ -220,8 +220,9 @@ void Navigator2D::zoomAround(const QPoint& center, float factor)
             const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), center).toPointF();
 
             _zoomFactor /= factor;
-        	_zoomCenterWorld = p1 + (getZoomRectangleWorld().center() - p1) * factor;
+        	_zoomCenterWorld = p1 + (_zoomCenterWorld - p1) / factor;
 
+            qDebug() << "-----------" << _zoomFactor << _zoomCenterWorld;
 	        setZoomRectangleWorld(getZoomRectangleWorld());
         }
         endChangeZoomRectangleWorld();
@@ -284,8 +285,10 @@ void Navigator2D::resetView(bool force /*= true*/)
     {
         beginChangeZoomRectangleWorld();
 	    {
-            _zoomFactor         = _renderer.getDataBounds().width() / _renderer.getRenderSize().width();
-            _zoomCenterWorld    = _renderer.getDataBounds().center();
+            _zoomFactor      = _renderer.getDataBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
+            _zoomCenterWorld = _renderer.getDataBounds().center();
+
+            qDebug() << _renderer.getDataBounds() << _renderer.getRenderSize() << _zoomFactor << _zoomCenterWorld;
 
             setZoomRectangleWorld(getZoomRectangleWorld());
 
