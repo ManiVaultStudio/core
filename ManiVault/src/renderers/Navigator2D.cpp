@@ -222,7 +222,6 @@ void Navigator2D::zoomAround(const QPoint& center, float factor)
             _zoomFactor /= factor;
         	_zoomCenterWorld = p1 + (_zoomCenterWorld - p1) / factor;
 
-            qDebug() << "-----------" << _zoomFactor << _zoomCenterWorld;
 	        setZoomRectangleWorld(getZoomRectangleWorld());
         }
         endChangeZoomRectangleWorld();
@@ -285,10 +284,11 @@ void Navigator2D::resetView(bool force /*= true*/)
     {
         beginChangeZoomRectangleWorld();
 	    {
-            _zoomFactor      = _renderer.getDataBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
-            _zoomCenterWorld = _renderer.getDataBounds().center();
+            const auto zoomFactorX = _renderer.getDataBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
+            const auto zoomFactorY = _renderer.getDataBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
 
-            qDebug() << _renderer.getDataBounds() << _renderer.getRenderSize() << _zoomFactor << _zoomCenterWorld;
+            _zoomFactor      = std::max(zoomFactorX, zoomFactorY);
+            _zoomCenterWorld = _renderer.getDataBounds().center() - QPointF(0.f, _renderer.getDataBounds().height());
 
             setZoomRectangleWorld(getZoomRectangleWorld());
 
