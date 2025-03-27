@@ -3,13 +3,14 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Navigator2D.h"
+
 #include "Renderer2D.h"
 
 #ifdef _DEBUG
     //#define NAVIGATOR_2D_VERBOSE
 #endif
 
-#define NAVIGATOR_2D_VERBOSE
+//#define NAVIGATOR_2D_VERBOSE
 
 namespace mv
 {
@@ -176,6 +177,11 @@ void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 	emit zoomRectangleWorldChanged(previousZoomRectangleWorld, getZoomRectangleWorld());
 }
 
+float Navigator2D::getZoomRectangleMargin() const
+{
+    return _zoomRectangleMargin;
+}
+
 float Navigator2D::getZoomFactor() const
 {
     return _zoomFactor;
@@ -280,8 +286,23 @@ void Navigator2D::resetView(bool force /*= true*/)
     {
         beginChangeZoomRectangleWorld();
 	    {
-            _zoomRectangleWorldTopLeft  = _renderer.getDataBounds().topLeft() + QPoint(0, -_renderer.getDataBounds().height());
+            
             _zoomRectangleWorldSize     = _renderer.getDataBounds().size();
+
+            const auto size         = QSizeF(_renderer.getRenderSize().width(), _renderer.getRenderSize().height());
+            const auto aspectRatio  = size.width() / size.height();
+
+            if (aspectRatio < 1) {
+                _zoomRectangleWorldSize.setHeight(static_cast<double>(_zoomRectangleWorldSize.width()) / aspectRatio);
+            }
+            else {
+                _zoomRectangleWorldSize.setWidth(static_cast<double>(_zoomRectangleWorldSize.height()) * aspectRatio);
+            }
+
+            const auto zoomRectangleWorldCenter = _renderer.getDataBounds().center();
+            const auto zoomRectangleWorldOffset = QPointF(_zoomRectangleWorldSize.width() / 2.f, _zoomRectangleWorldSize.height() / 2.f);
+
+            _zoomRectangleWorldTopLeft = zoomRectangleWorldCenter - zoomRectangleWorldOffset + QPoint(0, -_renderer.getDataBounds().height());//_renderer.getDataBounds().topLeft() + QPoint(0, -_renderer.getDataBounds().height());
 
             setZoomRectangleWorld(getZoomRectangleWorld());
 

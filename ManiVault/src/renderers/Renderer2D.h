@@ -100,7 +100,7 @@ public: // Coordinate conversions
 
 	float getZoomPercentage() const;
 
-/** Returns the projection matrix */
+	/** Returns the projection matrix */
     QMatrix4x4 getProjectionMatrix() const;
 
     /**
@@ -134,7 +134,6 @@ public:
 private:
     QSize           _renderSize;        /** Size of the renderer canvas */
     Navigator2D     _navigator;         /** 2D navigator */
-    float           _zoomMargin;        /** Margin for zooming */
     QRectF          _dataBounds;        /** Bounds of the data */
 
     friend class Navigator2D;
