@@ -68,6 +68,12 @@ public:
      */
     void setZoomRectangleWorld(const QRectF& zoomRectangleWorld);
 
+    /**
+     * Get the zoom rectangle margin
+     * @return Zoom rectangle margin
+     */
+    float getZoomRectangleMargin() const;
+
 	/**
      * Get the zoom factor
 	 * @return Zoom factor

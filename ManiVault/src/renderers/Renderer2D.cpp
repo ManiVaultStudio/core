@@ -8,15 +8,14 @@
     //#define RENDERER_2D_VERBOSE
 #endif
 
-#define RENDERER_2D_VERBOSE
+//#define RENDERER_2D_VERBOSE
 
 namespace mv
 {
 
 Renderer2D::Renderer2D(QObject* parent) :
     Renderer(parent),
-    _navigator(*this),
-    _zoomMargin(10.f)
+    _navigator(*this)
 {
 }
 
@@ -71,7 +70,10 @@ void Renderer2D::setDataBounds(const QRectF& dataBounds)
         return;
 
     _dataBounds = dataBounds;
-    
+
+    //_dataBounds.setWidth(std::max(_dataBounds.width(), 0.00000001));
+    //_dataBounds.setHeight(std::max(_dataBounds.height(), 0.0001));
+
     getNavigator().resetView();
 }
 
