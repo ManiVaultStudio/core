@@ -248,8 +248,8 @@ private:
     bool                _isPanning;                     /** Panning flag */
     bool                _isZooming;                     /** Zooming flag */
     float               _zoomFactor;                    /** Zoom factor */
-    QPointF             _zoomRectangleWorldTopLeft;          /** Zoom rectangle top-left in world coordinates */
-    QSizeF              _zoomRectangleWorldSize;             /** Zoom rectangle size in world coordinates */
+    QPointF             _zoomCenterWorld;          /** Zoom rectangle top-left in world coordinates */
+    //QSizeF              _zoomRectangleWorldSize;             /** Zoom rectangle size in world coordinates */
     float               _zoomRectangleMargin;           /** Zoom rectangle margin */
     QRectF              _previousZoomRectangleWorld;    /** Previous world zoom rectangle */
     bool                _userHasNavigated;              /** Boolean determining whether the user has navigated */

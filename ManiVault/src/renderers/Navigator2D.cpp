@@ -24,7 +24,6 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _isPanning(false),
     _isZooming(false),
     _zoomFactor(1.0f),
-    _zoomRectangleWorldSize(1, 1),
     _zoomRectangleMargin(0.f),
     _userHasNavigated()
 {
@@ -157,9 +156,12 @@ QMatrix4x4 Navigator2D::getViewMatrix() const
 
 QRectF Navigator2D::getZoomRectangleWorld() const
 {
+    const auto zoomRectangleWorldSize       = _renderer.getRenderSize().toSizeF() / _zoomFactor;
+    const auto zoomRectangleWorldTopLeft    = _zoomCenterWorld - QPointF(.5f * static_cast<float>(zoomRectangleWorldSize.width()), .5f * static_cast<float>(zoomRectangleWorldSize.height()));
+
     return {
-    	_zoomRectangleWorldTopLeft,
-    	_zoomRectangleWorldSize
+        zoomRectangleWorldTopLeft,
+        zoomRectangleWorldSize
     };
 }
 
@@ -171,8 +173,8 @@ void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 
     const auto previousZoomRectangleWorld = getZoomRectangleWorld();
 
-    _zoomRectangleWorldTopLeft   = zoomRectangleWorld.topLeft();
-    _zoomRectangleWorldSize      = zoomRectangleWorld.size();
+    _zoomFactor         = _renderer.getRenderSize().width() / zoomRectangleWorld.width();
+    _zoomCenterWorld    = zoomRectangleWorld.center();
 
 	emit zoomRectangleWorldChanged(previousZoomRectangleWorld, getZoomRectangleWorld());
 }
@@ -215,14 +217,10 @@ void Navigator2D::zoomAround(const QPoint& center, float factor)
     {
         beginChangeZoomRectangleWorld();
         {
-	        const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), center).toPointF();
-	        const auto v1 = getZoomRectangleWorld().topLeft() - p1;
-	        const auto v2 = v1 / factor;
+            const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), center).toPointF();
 
-	        _zoomRectangleWorldTopLeft  = p1 + v2;
-	        _zoomRectangleWorldSize     = getZoomRectangleWorld().size() / factor;
-
-    		_zoomFactor /= factor;
+            _zoomFactor /= factor;
+        	_zoomCenterWorld = p1 + (getZoomRectangleWorld().center() - p1) * factor;
 
 	        setZoomRectangleWorld(getZoomRectangleWorld());
         }
@@ -266,7 +264,7 @@ void Navigator2D::panBy(const QPointF& delta)
             const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), QPoint()).toPointF();
             const auto p2 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), delta.toPoint()).toPointF();
 
-            _zoomRectangleWorldTopLeft = getZoomRectangleWorld().topLeft() + (p2 - p1);
+            _zoomCenterWorld = getZoomRectangleWorld().center() + (p2 - p1);
         }
         endChangeZoomRectangleWorld();
     }
@@ -286,23 +284,8 @@ void Navigator2D::resetView(bool force /*= true*/)
     {
         beginChangeZoomRectangleWorld();
 	    {
-            
-            _zoomRectangleWorldSize     = _renderer.getDataBounds().size();
-
-            const auto size         = QSizeF(_renderer.getRenderSize().width(), _renderer.getRenderSize().height());
-            const auto aspectRatio  = size.width() / size.height();
-
-            if (aspectRatio < 1) {
-                _zoomRectangleWorldSize.setHeight(static_cast<double>(_zoomRectangleWorldSize.width()) / aspectRatio);
-            }
-            else {
-                _zoomRectangleWorldSize.setWidth(static_cast<double>(_zoomRectangleWorldSize.height()) * aspectRatio);
-            }
-
-            const auto zoomRectangleWorldCenter = _renderer.getDataBounds().center();
-            const auto zoomRectangleWorldOffset = QPointF(_zoomRectangleWorldSize.width() / 2.f, _zoomRectangleWorldSize.height() / 2.f);
-
-            _zoomRectangleWorldTopLeft = zoomRectangleWorldCenter - zoomRectangleWorldOffset + QPoint(0, -_renderer.getDataBounds().height());//_renderer.getDataBounds().topLeft() + QPoint(0, -_renderer.getDataBounds().height());
+            _zoomFactor         = _renderer.getDataBounds().width() / _renderer.getRenderSize().width();
+            _zoomCenterWorld    = _renderer.getDataBounds().center();
 
             setZoomRectangleWorld(getZoomRectangleWorld());
 
