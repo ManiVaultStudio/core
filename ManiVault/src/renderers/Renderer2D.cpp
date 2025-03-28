@@ -46,6 +46,8 @@ void Renderer2D::beginRender()
 #endif
 
     glViewport(0, 0, _renderSize.width(), _renderSize.height());
+
+    updateModelViewProjectionMatrix();
 }
 
 void Renderer2D::endRender()
@@ -75,6 +77,11 @@ void Renderer2D::setDataBounds(const QRectF& dataBounds)
     //_dataBounds.setHeight(std::max(_dataBounds.height(), 0.0001));
 
     getNavigator().resetView();
+}
+
+void Renderer2D::updateModelViewProjectionMatrix()
+{
+    _modelViewProjectionMatrix = QMatrix4x4(getProjectionMatrix()) * getNavigator().getViewMatrix() * _modelMatrix;
 }
 
 QVector3D Renderer2D::getScreenPointToWorldPosition(const QMatrix4x4& modelViewMatrix, const QPoint& screenPoint) const
@@ -159,6 +166,21 @@ QRect Renderer2D::getScreenRectangleFromWorldRectangle(const QRectF& worldBoundi
         topLeftScreen,
         bottomRightScreen
     };
+}
+
+QMatrix4x4 Renderer2D::getModelMatrix() const
+{
+    return _modelMatrix;
+}
+
+void Renderer2D::setModelMatrix(const QMatrix4x4& modelMatrix)
+{
+    _modelMatrix = modelMatrix;
+}
+
+QMatrix4x4 Renderer2D::getModelViewProjectionMatrix() const
+{
+    return _modelViewProjectionMatrix;
 }
 
 }

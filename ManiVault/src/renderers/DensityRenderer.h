@@ -6,7 +6,6 @@
 
 #include "Renderer2D.h"
 
-#include "graphics/Bounds.h"
 #include "graphics/Shader.h"
 #include "graphics/Texture.h"
 #include "graphics/Vector2f.h"
@@ -14,12 +13,8 @@
 
 #include "util/MeanShift.h"
 
-#include <memory>
-
-namespace mv
+namespace mv::gui
 {
-    namespace gui
-    {
 
         class CORE_EXPORT DensityRenderer : public Renderer2D
         {
@@ -35,7 +30,6 @@ namespace mv
             void setRenderMode(RenderMode renderMode);
             void setData(const std::vector<Vector2f>* data);
             void setWeights(const std::vector<float>* weights);
-            void setBounds(const Bounds& bounds);
             void setSigma(const float sigma);
             void computeDensity();
             float getMaxDensity() const;
@@ -78,6 +72,4 @@ namespace mv
             GLuint _quad = 0;
         };
 
-    } // namespace gui
-
-} // namespace mv
+}

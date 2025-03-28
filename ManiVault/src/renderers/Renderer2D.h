@@ -109,9 +109,27 @@ public: // Coordinate conversions
      */
     QRect getScreenRectangleFromWorldRectangle(const QRectF& worldBoundingRectangle) const;
 
+	/**
+     * Get model matrix
+     * @return Model matrix
+	 */
+	QMatrix4x4 getModelMatrix() const;
+
+    /**
+     * Set model matrix to \p modelMatrix
+     * @param modelMatrix Model matrix
+     */
+    void setModelMatrix(const QMatrix4x4& modelMatrix);
+
+	/**
+	 * Get model-view-projection matrix
+	 * @return Model-view-projection matrix
+	 */
+	QMatrix4x4 getModelViewProjectionMatrix() const;
+
 protected:
 
-    /** Begin rendering */
+    /** Begin rendering (sets up the OpenGL viewport and computes the model-view-projection matrix) */
     void beginRender() override;
 
     /** End rendering */
@@ -132,9 +150,16 @@ public:
     void setDataBounds(const QRectF& dataBounds);
 
 private:
-    QSize           _renderSize;        /** Size of the renderer canvas */
-    Navigator2D     _navigator;         /** 2D navigator */
-    QRectF          _dataBounds;        /** Bounds of the data */
+
+    /** Update the model-view-projection matrix */
+    void updateModelViewProjectionMatrix();
+
+private:
+    QSize           _renderSize;                    /** Size of the renderer canvas */
+    Navigator2D     _navigator;                     /** 2D navigator */
+    QRectF          _dataBounds;                    /** Bounds of the data */
+    QMatrix4x4      _modelMatrix;   
+    QMatrix4x4      _modelViewProjectionMatrix;     /** Model-view-projection matrix */
 
     friend class Navigator2D;
 };
