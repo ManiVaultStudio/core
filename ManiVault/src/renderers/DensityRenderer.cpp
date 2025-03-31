@@ -41,6 +41,8 @@ void DensityRenderer::setDataBounds(const QRectF& dataBounds)
     //_densityComputation.setBounds(-100, -100, -100, 100);
 
     updateQuad();
+
+    getNavigator().setZoomRectangleWorld(dataBounds);
 }
 
 void DensityRenderer::setRenderMode(RenderMode renderMode)
@@ -111,7 +113,6 @@ void DensityRenderer::init()
 
 void DensityRenderer::render()
 {
-    qDebug() << "DensityRenderer::render()" << _renderMode;
     beginRender();
     {
         switch (_renderMode) {
@@ -212,7 +213,7 @@ void DensityRenderer::drawDensity()
 
         drawQuad();
     }
-    //_shaderDensityDraw.release();
+    _shaderDensityDraw.release();
 }
 
 void DensityRenderer::drawLandscape()
