@@ -39,6 +39,10 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         _sourceWidget->installEventFilter(this);
         _sourceWidget->setFocusPolicy(Qt::StrongFocus);
 
+        connect(&_updateNavigationTimer, &QTimer::timeout, this, &Navigator2D::updateNavigation);
+
+    	_updateNavigationTimer.start(16);
+
         _initialized = true;
     }
 }
@@ -220,9 +224,8 @@ void Navigator2D::zoomAround(const QPoint& center, float factor)
             const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), center).toPointF();
 
             _zoomFactor /= factor;
-        	_zoomCenterWorld = p1 + (_zoomCenterWorld - p1) / factor;
 
-	        setZoomRectangleWorld(getZoomRectangleWorld());
+            setZoomCenterWorld(p1 + (_zoomCenterWorld - p1) / factor);
         }
         endChangeZoomRectangleWorld();
     }
@@ -264,11 +267,30 @@ void Navigator2D::panBy(const QPointF& delta)
             const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), QPoint()).toPointF();
             const auto p2 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), delta.toPoint()).toPointF();
 
-            _zoomCenterWorld = getZoomRectangleWorld().center() + (p2 - p1);
+            setZoomCenterWorld(getZoomRectangleWorld().center() + (p2 - p1));
         }
         endChangeZoomRectangleWorld();
     }
     endPanning();
+}
+
+void Navigator2D::setZoomCenterWorld(const QPointF& zoomCenterWorld)
+{
+    if (zoomCenterWorld == _zoomCenterWorld)
+        return;
+
+    _zoomCenterWorld = zoomCenterWorld;
+
+    setZoomRectangleWorld(getZoomRectangleWorld());
+
+    //if (std::isnan(zoomCenterWorld.x()) || std::isnan(zoomCenterWorld.y()))
+    //    return;
+
+    //_zoomCenterHistory.push_front(zoomCenterWorld);
+
+    //if (_zoomCenterHistory.size() > Navigator2D::maxZoomHistorySize) {
+    //    _zoomCenterHistory.pop_back();
+    //}
 }
 
 void Navigator2D::resetView(bool force /*= true*/)
@@ -287,10 +309,11 @@ void Navigator2D::resetView(bool force /*= true*/)
             const auto zoomFactorX = _renderer.getDataBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
             const auto zoomFactorY = _renderer.getDataBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
 
-            _zoomFactor      = std::max(zoomFactorX, zoomFactorY) + (_zoomRectangleMargin / _renderer.getRenderSize().height()) / 2.f;
-            _zoomCenterWorld = _renderer.getDataBounds().center() - QPointF(0.f, _renderer.getDataBounds().height());
+            _zoomFactor = std::max(zoomFactorX, zoomFactorY) + (_zoomRectangleMargin / _renderer.getRenderSize().height()) / 2.f;
 
-            setZoomRectangleWorld(getZoomRectangleWorld());
+            setZoomCenterWorld(_renderer.getDataBounds().center() - QPointF(0.f, _renderer.getDataBounds().height()));
+
+            
 
 		 //   if (!_userHasNavigated || force) {
 		 //   	setZoomRectangleWorld(_renderer.getDataBounds());
@@ -458,6 +481,35 @@ void Navigator2D::beginChangeZoomRectangleWorld()
 void Navigator2D::endChangeZoomRectangleWorld()
 {
     emit zoomRectangleWorldChanged(_previousZoomRectangleWorld, getZoomRectangleWorld());
+}
+
+void Navigator2D::updateNavigation()
+{
+
+    //QPointF smoothedZoomCenterWorld{};
+
+    //if (!_zoomCenterHistory.empty()) {
+    //    QPointF sum(0, 0);
+
+    //    for (const auto& zoomCenterWorld : _zoomCenterHistory) {
+    //        sum += zoomCenterWorld;
+    //    }
+
+    //    smoothedZoomCenterWorld = sum / static_cast<float>(_zoomCenterHistory.size());
+
+    //    _zoomCenterWorld += (smoothedZoomCenterWorld - _zoomCenterWorld);
+
+    //    if (!_zoomCenterHistory.empty()) {
+    //        _zoomCenterHistory.pop_back();
+    //    }
+    //}
+
+    //qDebug() << __FUNCTION__ << _zoomCenterWorld;
+
+    
+    
+
+    //setZoomRectangleWorld(getZoomRectangleWorld());
 }
 
 }

@@ -16,60 +16,75 @@
 namespace mv::gui
 {
 
-        class CORE_EXPORT DensityRenderer : public Renderer2D
-        {
+class CORE_EXPORT DensityRenderer : public Renderer2D
+{
 
-        public:
-            enum RenderMode {
-                DENSITY, LANDSCAPE
-            };
+public:
+    enum RenderMode {
+        DENSITY, LANDSCAPE
+    };
 
-            DensityRenderer(RenderMode renderMode);
-            ~DensityRenderer() override;
+    DensityRenderer(RenderMode renderMode);
+    ~DensityRenderer() override;
 
-            void setRenderMode(RenderMode renderMode);
-            void setData(const std::vector<Vector2f>* data);
-            void setWeights(const std::vector<float>* weights);
-            void setSigma(const float sigma);
-            void computeDensity();
-            float getMaxDensity() const;
-            Vector3f getColorMapRange() const;
+    /**
+     * Resize the renderer to \p renderSize
+     * @param renderSize New size of the renderer
+     */
+    void resize(QSize renderSize) override;
 
-            /**
-             * Loads a colormap from an image and loads as 
-             *the current colormap for the landscape view.
-             * @param image Color map image
-             */
-            void setColormap(const QImage& image);
+    /**
+     * Set data bounds to \p dataBounds
+     * @param dataBounds Data bounds
+     */
+    void setDataBounds(const QRectF& dataBounds) override;
 
-            void init() override;
+    void setRenderMode(RenderMode renderMode);
+    void setData(const std::vector<Vector2f>* data);
+    void setWeights(const std::vector<float>* weights);
+    void setSigma(const float sigma);
+    void computeDensity();
+    float getMaxDensity() const;
+    Vector3f getColorMapRange() const;
 
-        	void render() override;
+    /**
+     * Loads a colormap from an image and loads as 
+     *the current colormap for the landscape view.
+     * @param image Color map image
+     */
+    void setColormap(const QImage& image);
 
-        	void destroy() override;
+    void init() override;
 
-            void setColorMapRange(const float& min, const float& max);
+	void render() override;
 
-        private:
-            void drawDensity();
-            void drawLandscape();
+	void destroy() override;
 
-            void drawFullscreenQuad();
+    void setColorMapRange(const float& min, const float& max);
 
-        private:
-            bool _isSelecting = false;
-            bool _hasColorMap = false;
+private:
+    void drawDensity();
+    void drawLandscape();
 
-            ShaderProgram _shaderDensityDraw;
-            ShaderProgram _shaderIsoDensityDraw;
-            DensityComputation _densityComputation;
-            Texture2D _colormap;
-            
-            Vector3f _colorMapRange;
+    void updateQuad();
+    void drawQuad();
 
-            RenderMode _renderMode;
+private:
+    bool _isSelecting = false;
+    bool _hasColorMap = false;
 
-            GLuint _quad = 0;
-        };
+    ShaderProgram _shaderDensityDraw;
+    ShaderProgram _shaderIsoDensityDraw;
+    DensityComputation _densityComputation;
+    Texture2D _colormap;
+    
+    Vector3f _colorMapRange;
+
+    RenderMode _renderMode;
+
+    GLuint  _VAO = 0;
+    GLuint  _VBO = 0;
+    GLuint  _EBO = 0;
+};
 
 }
