@@ -9,10 +9,10 @@ layout(location = 1) in vec2 uv;
 
 uniform mat4 	mvp;
 
-out vec2 outUv;
+out vec2 passUv;
 
 void main() {
     gl_Position 	= mvp * vec4(vertex, 0, 1);
 	
-	outUv = (vertex / vec2(128.f, 128.f));
+	passUv = uv;
 }

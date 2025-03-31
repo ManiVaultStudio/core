@@ -10,19 +10,19 @@ uniform sampler2D densityMap;
 uniform vec2 renderParams;
 uniform vec3 colorMapRange;
 
-in vec2 uv;
+in vec2 passUv;
 
 out vec4 fragColor;
 
 // Get the normalized density from the color map range
-float getNormalizedDensity(vec2 uv)
+float getNormalizedDensity(vec2 passUv)
 {
-	float density = texture(densityMap, uv).r;
+	float density = texture(densityMap, passUv).r;
 	return (density - colorMapRange.x) / colorMapRange.z;
 }
 
 void main() {
-	float density = getNormalizedDensity(uv);
+	float density = getNormalizedDensity(passUv);
     
 	if (density < renderParams.y)
 		discard;
@@ -40,10 +40,10 @@ void main() {
 	// Central differences to find out if we draw the iso contour instead of the color
 	vec4 neighborDensities;
 
-	neighborDensities.x = getNormalizedDensity(uv + texelSize.xz);
-	neighborDensities.y = getNormalizedDensity(uv - texelSize.xz);
-	neighborDensities.z = getNormalizedDensity(uv + texelSize.zy);
-	neighborDensities.w = getNormalizedDensity(uv - texelSize.zy);
+	neighborDensities.x = getNormalizedDensity(passUv + texelSize.xz);
+	neighborDensities.y = getNormalizedDensity(passUv - texelSize.xz);
+	neighborDensities.z = getNormalizedDensity(passUv + texelSize.zy);
+	neighborDensities.w = getNormalizedDensity(passUv - texelSize.zy);
 
 	ivec4 stepId 	= min(ivec4(floor(neighborDensities * vec4(numSteps+1))), ivec4(numSteps));
 	isBoundary 		= (any(notEqual(stepId.xxx, stepId.yzw)));
