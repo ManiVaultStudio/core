@@ -143,9 +143,10 @@ void DensityRenderer::destroy()
 
 void DensityRenderer::updateQuad()
 {
-    const float width = 128.f;//static_cast<float>(getDataBounds().width());
-    const float height  = 128.f;//static_cast<float>(getDataBounds().height());
-
+    const auto textureSize  = _densityComputation.getDensityTextureSize().toSizeF();
+    const auto width        = static_cast<float>(textureSize.width());
+    const auto height       = static_cast<float>(textureSize.height());
+	
     float vertices[] = {
         0.f,    0.f,        0.0f, 0.0f,
         width,  0.f,        1.0f, 0.0f,
@@ -200,8 +201,6 @@ void DensityRenderer::drawDensity()
     if (maxDensity <= 0) {
         return;
     }
-
-    qDebug() << "DensityRenderer::drawDensity()" << maxDensity;
 
     _shaderDensityDraw.bind();
     {

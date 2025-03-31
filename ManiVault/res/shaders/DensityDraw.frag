@@ -13,7 +13,5 @@ out vec4 fragColor;
 
 void main() {
     float f = 1 - (texture(tex, outUv).r * norm);
-    fragColor = vec4(vec3(f, 0, 1), 1);
-	//fragColor = vec4(outUv.y, 0, 0, 1);
-	//fragColor = vec4(1, 0, 0, 1);
+    fragColor = vec4(vec3(f), 1);
 }
