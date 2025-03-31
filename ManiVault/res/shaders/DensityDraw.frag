@@ -7,14 +7,13 @@
 uniform sampler2D tex;
 uniform float norm;
 
-in vec2 pass_texCoord;
+in vec2 outUv;
 
 out vec4 fragColor;
 
 void main() {
-    float f = 1 - (texture(tex, pass_texCoord).r * norm);
-    fragColor = vec4(vec3(f), 1);
-	
-	if (pass_texCoord.x < 0.1 || pass_texCoord.x > 0.9)
-		fragColor = vec4(1,0,0,1);
+    float f = 1 - (texture(tex, outUv).r * norm);
+    fragColor = vec4(vec3(f, 0, 1), 1);
+	//fragColor = vec4(outUv.y, 0, 0, 1);
+	//fragColor = vec4(1, 0, 0, 1);
 }

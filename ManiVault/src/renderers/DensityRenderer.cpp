@@ -4,6 +4,12 @@
 
 #include "DensityRenderer.h"
 
+#ifdef _DEBUG
+    //#define DENSITY_RENDERER_VERBOSE
+#endif
+
+#define DENSITY_RENDERER_VERBOSE
+
 namespace mv::gui
 {
 
@@ -17,6 +23,24 @@ DensityRenderer::~DensityRenderer()
 {
     // Delete objects
     _densityComputation.cleanup();
+}
+
+void DensityRenderer::resize(QSize renderSize)
+{
+    Renderer2D::resize(renderSize);
+
+    updateQuad();
+}
+
+void DensityRenderer::setDataBounds(const QRectF& dataBounds)
+{
+    Renderer2D::setDataBounds(dataBounds);
+
+    qDebug() << "DensityRenderer::setDataBounds()" << dataBounds;
+    _densityComputation.setBounds(dataBounds.left(), dataBounds.right(), dataBounds.bottom(), dataBounds.top());
+    //_densityComputation.setBounds(-100, -100, -100, 100);
+
+    updateQuad();
 }
 
 void DensityRenderer::setRenderMode(RenderMode renderMode)
@@ -53,7 +77,11 @@ float DensityRenderer::getMaxDensity() const
 
 mv::Vector3f DensityRenderer::getColorMapRange() const
 {
-    return Vector3f(0.0f, _densityComputation.getMaxDensity(), _densityComputation.getMaxDensity());
+    return {
+    	0.0f,
+    	_densityComputation.getMaxDensity(),
+    	_densityComputation.getMaxDensity()
+    };
 }
 
 void DensityRenderer::setColormap(const QImage& image)
@@ -66,14 +94,14 @@ void DensityRenderer::init()
 {
     initializeOpenGLFunctions();
 
-    // Create a simple VAO for full-screen quad rendering
-    glGenVertexArrays(1, &_quad);
+    updateQuad();
 
     // Load the necessary shaders for density drawing
     bool loaded = true;
     loaded &= _shaderDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/DensityDraw.frag");
     loaded &= _shaderIsoDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/IsoDensityDraw.frag");
-    if (!loaded) {
+
+	if (!loaded) {
         qDebug() << "Failed to load one of the Density shaders";
     }
 
@@ -83,6 +111,7 @@ void DensityRenderer::init()
 
 void DensityRenderer::render()
 {
+    qDebug() << "DensityRenderer::render()" << _renderMode;
     beginRender();
     {
         switch (_renderMode) {
@@ -107,39 +136,94 @@ void DensityRenderer::destroy()
     _densityComputation.cleanup();
     _colormap.destroy();
 
-    glDeleteVertexArrays(1, &_quad);
+    glDeleteVertexArrays(1, &_VAO);
+    glDeleteVertexArrays(1, &_VBO);
+    glDeleteVertexArrays(1, &_EBO);
 }
 
-void DensityRenderer::drawFullscreenQuad()
+void DensityRenderer::updateQuad()
 {
-    glBindVertexArray(_quad);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    const float width = 128.f;//static_cast<float>(getDataBounds().width());
+    const float height  = 128.f;//static_cast<float>(getDataBounds().height());
+
+    float vertices[] = {
+        0.f,    0.f,        0.0f, 0.0f,
+        width,  0.f,        1.0f, 0.0f,
+        width,  height,     1.0f, 1.0f,
+        0.f,    height,     0.0f, 1.0f
+    };
+
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_VBO);
+    glGenBuffers(1, &_EBO);
+
+    glBindVertexArray(_VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture coordinates attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void DensityRenderer::drawQuad()
+{
+    glBindVertexArray(_VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
 void DensityRenderer::drawDensity()
 {
+#ifdef DENSITY_RENDERER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     const auto maxDensity = _densityComputation.getMaxDensity();
 
     if (maxDensity <= 0) {
         return;
     }
 
+    qDebug() << "DensityRenderer::drawDensity()" << maxDensity;
+
     _shaderDensityDraw.bind();
+    {
+        _densityComputation.getDensityTexture().bind(0);
 
-    _densityComputation.getDensityTexture().bind(0);
+        _shaderDensityDraw.uniformMatrix4f("mvp", getModelViewProjectionMatrix().data());
+        _shaderDensityDraw.uniform1i("tex", 0);
+        _shaderDensityDraw.uniform1f("norm", 1.0f / maxDensity);
 
-    _shaderDensityDraw.uniformMatrix4f("mvp", getModelViewProjectionMatrix().data());
-    _shaderDensityDraw.uniform1i("tex", 0);
-    _shaderDensityDraw.uniform1f("norm", 1 / maxDensity);
-
-    drawFullscreenQuad();
+        drawQuad();
+    }
+    //_shaderDensityDraw.release();
 }
 
 void DensityRenderer::drawLandscape()
 {
     if (!_hasColorMap)
         return;
+
+#ifdef DENSITY_RENDERER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 
     const auto maxDensity = _densityComputation.getMaxDensity();
 
@@ -148,17 +232,21 @@ void DensityRenderer::drawLandscape()
 	}
 
     _shaderIsoDensityDraw.bind();
+    {
+        _densityComputation.getDensityTexture().bind(0);
 
-    _densityComputation.getDensityTexture().bind(0);
-    _shaderIsoDensityDraw.uniform1i("tex", 0);
+        _shaderIsoDensityDraw.uniformMatrix4f("mvp", getModelViewProjectionMatrix().data());
+    	_shaderIsoDensityDraw.uniform1i("tex", 0);
+        _shaderIsoDensityDraw.uniform2f("renderParams", 1.0f / maxDensity, 1.0f / _densityComputation.getNumPoints());
+        _shaderIsoDensityDraw.uniform3f("colorMapRange", _colorMapRange);
 
-    _shaderIsoDensityDraw.uniform2f("renderParams", 1.0f / maxDensity, 1.0f / _densityComputation.getNumPoints());
-    _shaderIsoDensityDraw.uniform3f("colorMapRange", _colorMapRange);
+        _colormap.bind(1);
 
-    _colormap.bind(1);
-    _shaderIsoDensityDraw.uniform1i("colormap", 1);
+        _shaderIsoDensityDraw.uniform1i("colormap", 1);
 
-    drawFullscreenQuad();
+        drawQuad();
+    }
+    _shaderIsoDensityDraw.release();
 }
 
 void DensityRenderer::setColorMapRange(const float& min, const float& max)

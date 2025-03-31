@@ -38,7 +38,6 @@ public:
 
 	/**
      * Resize the renderer to \p renderSize
-     *
      * @param renderSize New size of the renderer
 	 */
 	void resize(QSize renderSize) override;
@@ -147,7 +146,7 @@ public:
      * Set data bounds to \p dataBounds
      * @param dataBounds Data bounds
      */
-    void setDataBounds(const QRectF& dataBounds);
+    virtual void setDataBounds(const QRectF& dataBounds);
 
 private:
 
