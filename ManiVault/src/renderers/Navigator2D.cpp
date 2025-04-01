@@ -12,6 +12,8 @@
 
 //#define NAVIGATOR_2D_VERBOSE
 
+using namespace mv::gui;
+
 namespace mv
 {
 
@@ -25,7 +27,8 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _isZooming(false),
     _zoomFactor(1.0f),
     _zoomRectangleMargin(50.f),
-    _userHasNavigated()
+    _userHasNavigated(),
+    _navigationAction(this, "Navigation")
 {
 }
 
@@ -33,18 +36,21 @@ void Navigator2D::initialize(QWidget* sourceWidget)
 {
     Q_ASSERT(sourceWidget);
 
-    if (sourceWidget) {
-        _sourceWidget = sourceWidget;
+    if (!sourceWidget)
+        return;
 
-        _sourceWidget->installEventFilter(this);
-        _sourceWidget->setFocusPolicy(Qt::StrongFocus);
+    _sourceWidget = sourceWidget;
 
-        connect(&_updateNavigationTimer, &QTimer::timeout, this, &Navigator2D::updateNavigation);
+    _sourceWidget->installEventFilter(this);
+    _sourceWidget->setFocusPolicy(Qt::StrongFocus);
 
-    	_updateNavigationTimer.start(16);
+    connect(&_updateNavigationTimer, &QTimer::timeout, this, &Navigator2D::updateNavigation);
 
-        _initialized = true;
-    }
+    _updateNavigationTimer.start(16);
+
+    connect(&getNavigationAction().getZoomExtentsAction(), &TriggerAction::triggered, this, &Navigator2D::resetView);
+
+    _initialized = true;
 }
 
 bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
@@ -206,6 +212,16 @@ void Navigator2D::setEnabled(bool enabled)
     _enabled = enabled;
 
     emit enabledChanged(_enabled);
+}
+
+gui::NavigationAction& Navigator2D::getNavigationAction()
+{
+    return _navigationAction;
+}
+
+const gui::NavigationAction& Navigator2D::getNavigationAction() const
+{
+    return _navigationAction;
 }
 
 void Navigator2D::zoomAround(const QPoint& center, float factor)

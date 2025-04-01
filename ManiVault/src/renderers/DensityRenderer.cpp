@@ -36,9 +36,7 @@ void DensityRenderer::setDataBounds(const QRectF& dataBounds)
 {
     Renderer2D::setDataBounds(dataBounds);
 
-    qDebug() << "DensityRenderer::setDataBounds()" << dataBounds;
     _densityComputation.setBounds(dataBounds.left(), dataBounds.right(), dataBounds.bottom(), dataBounds.top());
-    //_densityComputation.setBounds(-100, -100, -100, 100);
 
     updateQuad();
 
