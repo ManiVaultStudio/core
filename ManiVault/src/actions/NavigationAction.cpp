@@ -10,6 +10,8 @@
 
 //#define NAVIGATION_ACTION_VERBOSE
 
+using namespace mv::util;
+
 namespace mv::gui
 {
 
@@ -20,7 +22,8 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomInAction(this, "Zoom In"),
     _zoomExtentsAction(this, "Zoom All"),
     _zoomSelectionAction(this, "Zoom Around Selection"),
-    _zoomRegionAction(this, "Zoom Region")
+    _zoomRegionAction(this, "Zoom Region"),
+    _zoomRectangleAction(this, "Zoom Rectangle")
 {
     setShowLabels(false);
 
@@ -45,11 +48,31 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomPercentageAction.setSuffix("%");
     _zoomPercentageAction.setUpdateDuringDrag(false);
 
+    _zoomRectangleAction.setToolTip("Extents of the current view");
+    _zoomRectangleAction.setIcon(combineIcons(StyledIcon("expand"), StyledIcon("ellipsis-h")));
+    _zoomRectangleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+
 	addAction(&_zoomOutAction, gui::TriggerAction::Icon);
 	addAction(&_zoomPercentageAction);
 	addAction(&_zoomInAction, gui::TriggerAction::Icon);
 	addAction(&_zoomExtentsAction, gui::TriggerAction::Icon);
 	addAction(&_zoomSelectionAction, gui::TriggerAction::Icon);
+}
+
+void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
+{
+	HorizontalGroupAction::fromVariantMap(variantMap);
+
+    _zoomRectangleAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap NavigationAction::toVariantMap() const
+{
+    auto variantMap = HorizontalGroupAction::toVariantMap();
+
+    _zoomRectangleAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 }

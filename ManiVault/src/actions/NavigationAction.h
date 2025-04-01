@@ -8,6 +8,7 @@
 #include <actions/TriggerAction.h>
 #include <actions/DecimalAction.h>
 #include <actions/HorizontalGroupAction.h>
+#include <actions/DecimalRectangleAction.h>
 
 #include <QObject>
 
@@ -37,6 +38,21 @@ public:
      */
     Q_INVOKABLE NavigationAction(QObject* parent, const QString& title);
 
+public: // Serialization
+
+    /**
+     * Load navigation action from variant map
+     * @param variantMap Variant map representation of the navigation action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+
+    QVariantMap toVariantMap() const override;
+
 public: // Action getters
 
     TriggerAction& getZoomOutAction() { return _zoomOutAction; }
@@ -45,6 +61,7 @@ public: // Action getters
     TriggerAction& getZoomExtentsAction() { return _zoomExtentsAction; }
     TriggerAction& getZoomSelectionAction() { return _zoomSelectionAction; }
     TriggerAction& getZoomRegionAction() { return _zoomRegionAction; }
+    DecimalRectangleAction& getZoomRectangleAction() { return _zoomRectangleAction; }
 
 private:
     TriggerAction           _zoomOutAction;             /** Zoom out action */
@@ -53,6 +70,7 @@ private:
     TriggerAction           _zoomExtentsAction;         /** Zoom extents action */
     TriggerAction           _zoomSelectionAction;       /** Zoom to selection extents action */
     TriggerAction           _zoomRegionAction;          /** Zoom to region action */
+    DecimalRectangleAction  _zoomRectangleAction;       /** Rectangle action for setting the current zoom bounds */
 };
 
 }
