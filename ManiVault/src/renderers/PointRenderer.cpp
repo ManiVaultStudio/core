@@ -256,6 +256,13 @@ namespace mv
             _positionBuffer.destroy();
         }
 
+        void PointRenderer::setDataBounds(const QRectF& dataBounds)
+        {
+	        Renderer2D::setDataBounds(dataBounds);
+
+            setWorldBounds(dataBounds);
+        }
+
         void PointRenderer::setData(const std::vector<Vector2f>& positions)
         {
             _gpuPoints.setPositions(positions);

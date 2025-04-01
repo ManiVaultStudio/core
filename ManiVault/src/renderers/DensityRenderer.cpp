@@ -17,6 +17,7 @@ DensityRenderer::DensityRenderer(RenderMode renderMode) :
     _renderMode(renderMode)
 {
     getNavigator().setZoomRectangleWorld(QRectF(0, 0, 1, 1));
+    setWorldBounds(QRectF(QPointF(), _densityComputation.getDensityTextureSize()));
 }
 
 DensityRenderer::~DensityRenderer()

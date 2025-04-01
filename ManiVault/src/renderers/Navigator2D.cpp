@@ -44,7 +44,9 @@ void Navigator2D::initialize(QWidget* sourceWidget)
     _sourceWidget->installEventFilter(this);
     _sourceWidget->setFocusPolicy(Qt::StrongFocus);
 
-    connect(&getNavigationAction().getZoomExtentsAction(), &TriggerAction::triggered, this, &Navigator2D::resetView);
+    connect(&getNavigationAction().getZoomExtentsAction(), &TriggerAction::triggered, this, [this]() -> void {
+        resetView(true);
+    });
 
     const auto zoomRectangleChanged = [this]() -> void {
         setZoomRectangleWorld(_navigationAction.getZoomRectangleAction().toRectF());
@@ -66,8 +68,12 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         }
         connect(&_navigationAction.getZoomRectangleAction(), &DecimalRectangleAction::rectangleChanged, this, zoomRectangleChanged);
 
-        qDebug() << __FUNCTION__ << getZoomPercentage();
         _navigationAction.getZoomPercentageAction().setValue(getZoomPercentage());
+
+        //const auto zoomFactorX = _renderer.getDataBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
+        //const auto zoomFactorY = _renderer.getDataBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
+
+        //qDebug() << "-----" << _zoomFactor << 0.01f * getZoomPercentage() << zoomFactorY / (0.01f * getZoomPercentage());
 	});
 
     connect(&_navigationAction.getZoomInAction(), &TriggerAction::triggered, this, [this]() -> void {
@@ -80,6 +86,11 @@ void Navigator2D::initialize(QWidget* sourceWidget)
 
     connect(&_navigationAction.getZoomOutAction(), &TriggerAction::triggered, this, [this]() -> void {
         zoomAround(_sourceWidget->rect().center(), .9f);
+	});
+
+    connect(&_renderer, &Renderer2D::worldBoundsChanged, this, [this](const QRectF& worldBounds) -> void {
+        if (!hasUserNavigated())
+            resetView();
 	});
 
     _initialized = true;
@@ -239,8 +250,6 @@ float Navigator2D::getZoomPercentage() const
     if (!dataBounds.isValid() || !zoomRectangleWorld.isValid())
         return 1.0f;
 
-    const auto viewerSize   = _sourceWidget->size();
-    const auto totalMargins = 2 * _zoomRectangleMargin;
     const auto factorX      = static_cast<float>(dataBounds.width()) / static_cast<float>(zoomRectangleWorld.width());
     const auto factorY      = static_cast<float>(dataBounds.height()) / static_cast<float>(zoomRectangleWorld.height());
     const auto scaleFactor  = factorX > factorY ? factorX : factorY;
@@ -250,9 +259,16 @@ float Navigator2D::getZoomPercentage() const
 
 void Navigator2D::setZoomPercentage(float zoomPercentage)
 {
-    //_zoomFactor = 100.f / zoomPercentage;
+    if (zoomPercentage < 0.05f)
+        return;
 
-    //setZoomRectangleWorld(getZoomRectangleWorld());
+    const auto zoomPercentageNormalized = .01f * zoomPercentage;
+    const auto zoomFactorX              = static_cast<float>(_renderer.getDataBounds().width()) / static_cast<float>(_renderer.getRenderSize().width());
+	const auto zoomFactorY              = static_cast<float>(_renderer.getDataBounds().height()) / static_cast<float>(_renderer.getRenderSize().height());
+
+    _zoomFactor = std::max(zoomFactorX, zoomFactorY) / zoomPercentageNormalized;
+
+    setZoomRectangleWorld(getZoomRectangleWorld());
 }
 
 bool Navigator2D::isEnabled() const
@@ -356,9 +372,12 @@ void Navigator2D::setZoomCenterWorld(const QPointF& zoomCenterWorld)
     setZoomRectangleWorld(getZoomRectangleWorld());
 }
 
-void Navigator2D::resetView(bool force /*= true*/)
+void Navigator2D::resetView(bool force /*= false*/)
 {
     if (!_initialized)
+        return;
+
+    if (!force && hasUserNavigated())
         return;
 
 #ifdef NAVIGATOR_2D_VERBOSE
@@ -374,17 +393,21 @@ void Navigator2D::resetView(bool force /*= true*/)
 
             _zoomFactor = std::max(zoomFactorX, zoomFactorY) + (_zoomRectangleMargin / _renderer.getRenderSize().height()) / 2.f;
 
-            setZoomCenterWorld(QPoint());
+            setZoomCenterWorld(_renderer.getDataBounds().center());
 
 		 //   if (!_userHasNavigated || force) {
 		 //   	setZoomRectangleWorld(_renderer.getDataBounds());
 
 		 //   	_userHasNavigated = false;
 			//}
+
+            
         }
         endChangeZoomRectangleWorld();
     }
     endZooming();
+
+    _userHasNavigated = false;
 }
 
 bool Navigator2D::isPanning() const
@@ -514,6 +537,8 @@ void Navigator2D::beginNavigation()
 #ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    _userHasNavigated = true;
 
     setIsNavigating(true);
 
