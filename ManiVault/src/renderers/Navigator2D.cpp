@@ -26,7 +26,7 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _isPanning(false),
     _isZooming(false),
     _zoomFactor(1.0f),
-    _zoomRectangleMargin(50.f),
+    _zoomRectangleMargin(0.f),
     _userHasNavigated(),
     _navigationAction(this, "Navigation")
 {
@@ -66,12 +66,17 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         }
         connect(&_navigationAction.getZoomRectangleAction(), &DecimalRectangleAction::rectangleChanged, this, zoomRectangleChanged);
 
+        qDebug() << __FUNCTION__ << getZoomPercentage();
         _navigationAction.getZoomPercentageAction().setValue(getZoomPercentage());
 	});
 
     connect(&_navigationAction.getZoomInAction(), &TriggerAction::triggered, this, [this]() -> void {
         zoomAround(_sourceWidget->rect().center(), 1.1f);
     });
+
+    connect(&_navigationAction.getZoomPercentageAction(), &DecimalAction::valueChanged, this, [this](float value) -> void {
+        setZoomPercentage(value);
+	});
 
     connect(&_navigationAction.getZoomOutAction(), &TriggerAction::triggered, this, [this]() -> void {
         zoomAround(_sourceWidget->rect().center(), .9f);
@@ -228,19 +233,26 @@ float Navigator2D::getZoomFactor() const
 
 float Navigator2D::getZoomPercentage() const
 {
-    const auto& dataBounds = _renderer.getDataBounds();
+    const auto dataBounds           = _renderer.getDataBounds();
+    const auto zoomRectangleWorld   = getZoomRectangleWorld();
 
-    float zoomPercentage = 1.f;
+    if (!dataBounds.isValid() || !zoomRectangleWorld.isValid())
+        return 1.0f;
 
-    const auto zoomRectangleMarginWorld             = (_renderer.getScreenPointToWorldPosition(getViewMatrix(), QPoint(_zoomRectangleMargin, 0)) - _renderer.getScreenPointToWorldPosition(getViewMatrix(), QPoint())).x();
-    const auto zoomRectangleWorldWithMarginsAdded   = getZoomRectangleWorld().marginsRemoved(QMarginsF(zoomRectangleMarginWorld, zoomRectangleMarginWorld, zoomRectangleMarginWorld, zoomRectangleMarginWorld));
+    const auto viewerSize   = _sourceWidget->size();
+    const auto totalMargins = 2 * _zoomRectangleMargin;
+    const auto factorX      = static_cast<float>(dataBounds.width()) / static_cast<float>(zoomRectangleWorld.width());
+    const auto factorY      = static_cast<float>(dataBounds.height()) / static_cast<float>(zoomRectangleWorld.height());
+    const auto scaleFactor  = factorX > factorY ? factorX : factorY;
 
-    if (dataBounds.width() < dataBounds.height())
-        zoomPercentage = static_cast<float>(dataBounds.height()) / static_cast<float>(zoomRectangleWorldWithMarginsAdded.height());
-    else
-		zoomPercentage = static_cast<float>(dataBounds.width()) / static_cast<float>(zoomRectangleWorldWithMarginsAdded.width());
+    return scaleFactor * 100.f;
+}
 
-    return zoomPercentage * 100.f;
+void Navigator2D::setZoomPercentage(float zoomPercentage)
+{
+    //_zoomFactor = 100.f / zoomPercentage;
+
+    //setZoomRectangleWorld(getZoomRectangleWorld());
 }
 
 bool Navigator2D::isEnabled() const
@@ -342,15 +354,6 @@ void Navigator2D::setZoomCenterWorld(const QPointF& zoomCenterWorld)
     _zoomCenterWorld = zoomCenterWorld;
 
     setZoomRectangleWorld(getZoomRectangleWorld());
-
-    //if (std::isnan(zoomCenterWorld.x()) || std::isnan(zoomCenterWorld.y()))
-    //    return;
-
-    //_zoomCenterHistory.push_front(zoomCenterWorld);
-
-    //if (_zoomCenterHistory.size() > Navigator2D::maxZoomHistorySize) {
-    //    _zoomCenterHistory.pop_back();
-    //}
 }
 
 void Navigator2D::resetView(bool force /*= true*/)
@@ -371,7 +374,7 @@ void Navigator2D::resetView(bool force /*= true*/)
 
             _zoomFactor = std::max(zoomFactorX, zoomFactorY) + (_zoomRectangleMargin / _renderer.getRenderSize().height()) / 2.f;
 
-            setZoomCenterWorld(_renderer.getDataBounds().center() - QPointF(0.f, _renderer.getDataBounds().height()));
+            setZoomCenterWorld(QPoint());
 
 		 //   if (!_userHasNavigated || force) {
 		 //   	setZoomRectangleWorld(_renderer.getDataBounds());
