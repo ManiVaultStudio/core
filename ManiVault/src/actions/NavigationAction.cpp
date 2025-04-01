@@ -33,7 +33,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomExtentsAction.setToolTip("Zoom to the boundaries of the scene (z)");
     _zoomSelectionAction.setToolTip("Zoom to the boundaries of the current selection (d)");
 
-    _zoomPercentageAction.setOverrideSizeHint(QSize(500, 0));
+    _zoomPercentageAction.setOverrideSizeHint(QSize(300, 0));
 
     _zoomOutAction.setIconByName("search-minus");
     _zoomInAction.setIconByName("search-plus");

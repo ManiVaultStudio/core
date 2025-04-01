@@ -81,6 +81,7 @@ void Navigator2D::initialize(QWidget* sourceWidget)
     });
 
     connect(&_navigationAction.getZoomPercentageAction(), &DecimalAction::valueChanged, this, [this](float value) -> void {
+        _userHasNavigated = true;
         setZoomPercentage(value);
 	});
 
@@ -259,16 +260,24 @@ float Navigator2D::getZoomPercentage() const
 
 void Navigator2D::setZoomPercentage(float zoomPercentage)
 {
-    if (zoomPercentage < 0.05f)
-        return;
+    beginZooming();
+    {
+        beginChangeZoomRectangleWorld();
+        {
+            if (zoomPercentage < 0.05f)
+                return;
 
-    const auto zoomPercentageNormalized = .01f * zoomPercentage;
-    const auto zoomFactorX              = static_cast<float>(_renderer.getDataBounds().width()) / static_cast<float>(_renderer.getRenderSize().width());
-	const auto zoomFactorY              = static_cast<float>(_renderer.getDataBounds().height()) / static_cast<float>(_renderer.getRenderSize().height());
+            const auto zoomPercentageNormalized = .01f * zoomPercentage;
+            const auto zoomFactorX              = static_cast<float>(_renderer.getDataBounds().width()) / static_cast<float>(_renderer.getRenderSize().width());
+            const auto zoomFactorY              = static_cast<float>(_renderer.getDataBounds().height()) / static_cast<float>(_renderer.getRenderSize().height());
 
-    _zoomFactor = std::max(zoomFactorX, zoomFactorY) / zoomPercentageNormalized;
+            _zoomFactor = std::max(zoomFactorX, zoomFactorY) / zoomPercentageNormalized;
 
-    setZoomRectangleWorld(getZoomRectangleWorld());
+            setZoomRectangleWorld(getZoomRectangleWorld());
+        }
+        endChangeZoomRectangleWorld();
+    }
+    endZooming();
 }
 
 bool Navigator2D::isEnabled() const
