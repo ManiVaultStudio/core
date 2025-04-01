@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <actions/NavigationAction.h>
+
 #include <QObject>
 #include <QTimer>
 #include <QMatrix4x4>
@@ -90,6 +92,18 @@ public:
 	 * @param enabled Boolean determining whether the navigator is enabled
 	 */
 	void setEnabled(bool enabled);
+
+    /**
+     * Get the navigation action
+     * @return Reference to the navigation action
+     */
+    gui::NavigationAction& getNavigationAction();
+
+    /**
+     * Get the navigation action
+     * @return Reference to the navigation action
+     */
+    const gui::NavigationAction& getNavigationAction() const;
 
 public: // Navigation
 
@@ -263,8 +277,7 @@ private:
 	QRectF                  _previousZoomRectangleWorld;    /** Previous world zoom rectangle */
 	bool                    _userHasNavigated;              /** Boolean determining whether the user has navigated */
 	QTimer                  _updateNavigationTimer;         /** Timer for updating the navigation */
-    QList<QPointF>          _zoomCenterHistory;             /** History of zoom centers */
-    QList<float>            _zoomFactorHistory;             /** History of zoom factors */
+    gui::NavigationAction   _navigationAction;               /** Navigation group action */
 
     static constexpr int    maxZoomHistorySize = 10;        /** Maximum history size */
 };

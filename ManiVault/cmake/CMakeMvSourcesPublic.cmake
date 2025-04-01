@@ -355,6 +355,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/PaletteColorRoleAction.h
     src/actions/ColorSchemeAction.h
     src/actions/EditColorSchemeAction.h
+    src/actions/NavigationAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -393,6 +394,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/PaletteColorRoleAction.cpp
     src/actions/ColorSchemeAction.cpp
     src/actions/EditColorSchemeAction.cpp
+    src/actions/NavigationAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
