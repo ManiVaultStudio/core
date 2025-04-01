@@ -18,10 +18,10 @@ namespace mv::gui
 NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _zoomOutAction(this, "Zoom out"),
-    _zoomPercentageAction(this, "Zoom Percentage", 10.0f, 1000.0f, 100.0f, 1),
+    _zoomPercentageAction(this, "Zoom Percentage", 0.01f, 1000.0f, 100.0f, 1),
     _zoomInAction(this, "Zoom In"),
     _zoomExtentsAction(this, "Zoom All"),
-    _zoomSelectionAction(this, "Zoom Around Selection"),
+    _zoomSelectionAction(this, "Zoom Selection"),
     _zoomRegionAction(this, "Zoom Region"),
     _zoomRectangleAction(this, "Zoom Rectangle")
 {
@@ -55,8 +55,9 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
 	addAction(&_zoomOutAction, gui::TriggerAction::Icon);
 	addAction(&_zoomPercentageAction);
 	addAction(&_zoomInAction, gui::TriggerAction::Icon);
-	addAction(&_zoomExtentsAction, gui::TriggerAction::Icon);
-	addAction(&_zoomSelectionAction, gui::TriggerAction::Icon);
+	addAction(&_zoomExtentsAction);
+	//addAction(&_zoomSelectionAction);
+	//addAction(&_zoomRegionAction);
 }
 
 void NavigationAction::fromVariantMap(const QVariantMap& variantMap)

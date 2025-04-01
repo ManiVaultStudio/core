@@ -87,6 +87,12 @@ public:
      */
     float getZoomPercentage() const;
 
+    /**
+     * Set the zoom percentage to \p zoomPercentage
+     * @param zoomPercentage Zoom percentage
+     */
+    void setZoomPercentage(float zoomPercentage);
+
 	/**
 	 * Get whether the navigator is enabled
 	 * @return Boolean determining whether the navigator is enabled
