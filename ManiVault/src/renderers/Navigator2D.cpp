@@ -69,15 +69,10 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         connect(&_navigationAction.getZoomRectangleAction(), &DecimalRectangleAction::rectangleChanged, this, zoomRectangleChanged);
 
         _navigationAction.getZoomPercentageAction().setValue(getZoomPercentage());
-
-        //const auto zoomFactorX = _renderer.getDataBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
-        //const auto zoomFactorY = _renderer.getDataBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
-
-        //qDebug() << "-----" << _zoomFactor << 0.01f * getZoomPercentage() << zoomFactorY / (0.01f * getZoomPercentage());
 	});
 
     connect(&_navigationAction.getZoomInAction(), &TriggerAction::triggered, this, [this]() -> void {
-        zoomAround(_sourceWidget->rect().center(), 1.1f);
+        setZoomPercentage(getZoomPercentage() + 10.f);
     });
 
     connect(&_navigationAction.getZoomPercentageAction(), &DecimalAction::valueChanged, this, [this](float value) -> void {
@@ -86,7 +81,7 @@ void Navigator2D::initialize(QWidget* sourceWidget)
 	});
 
     connect(&_navigationAction.getZoomOutAction(), &TriggerAction::triggered, this, [this]() -> void {
-        zoomAround(_sourceWidget->rect().center(), .9f);
+        setZoomPercentage(getZoomPercentage() - 10.f);
 	});
 
     connect(&_renderer, &Renderer2D::worldBoundsChanged, this, [this](const QRectF& worldBounds) -> void {
