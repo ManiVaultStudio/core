@@ -81,6 +81,12 @@ public:
 	 */
 	float getZoomFactor() const;
 
+    /**
+     * Get the zoom percentage
+     * @return Zoom percentage
+     */
+    float getZoomPercentage() const;
+
 	/**
 	 * Get whether the navigator is enabled
 	 * @return Boolean determining whether the navigator is enabled
@@ -206,11 +212,6 @@ protected: // Navigation
 	/** End changing the zoom rectangle in world coordinates */
 	void endChangeZoomRectangleWorld();
 
-private:
-
-    /** Smoothes the navigation over time */
-    void updateNavigation();
-
 signals:
 
 	/** Signals that panning has started */
@@ -276,7 +277,6 @@ private:
 	float                   _zoomRectangleMargin;           /** Zoom rectangle margin */
 	QRectF                  _previousZoomRectangleWorld;    /** Previous world zoom rectangle */
 	bool                    _userHasNavigated;              /** Boolean determining whether the user has navigated */
-	QTimer                  _updateNavigationTimer;         /** Timer for updating the navigation */
     gui::NavigationAction   _navigationAction;               /** Navigation group action */
 
     static constexpr int    maxZoomHistorySize = 10;        /** Maximum history size */
