@@ -8,8 +8,6 @@
     //#define DENSITY_RENDERER_VERBOSE
 #endif
 
-#define DENSITY_RENDERER_VERBOSE
-
 namespace mv::gui
 {
 
@@ -40,8 +38,6 @@ void DensityRenderer::setDataBounds(const QRectF& dataBounds)
     _densityComputation.setBounds(dataBounds.left(), dataBounds.right(), dataBounds.bottom(), dataBounds.top());
 
     updateQuad();
-
-    getNavigator().setZoomRectangleWorld(dataBounds);
 }
 
 void DensityRenderer::setRenderMode(RenderMode renderMode)
