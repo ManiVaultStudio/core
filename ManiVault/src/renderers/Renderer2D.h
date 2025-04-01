@@ -148,16 +148,45 @@ public:
      */
     virtual void setDataBounds(const QRectF& dataBounds);
 
+    /**
+     * Get world bounds
+     * @return World bounds
+     */
+    QRectF getWorldBounds() const;
+
+    /**
+     * Set world bounds to \p worldBounds
+     * @param worldBounds World bounds
+     */
+    virtual void setWorldBounds(const QRectF& worldBounds);
+
 private:
 
     /** Update the model-view-projection matrix */
     void updateModelViewProjectionMatrix();
 
+signals:
+
+	/**
+	 * Signals that the data bounds have changed from \p previousDataBounds to \p currentDataBounds
+     * @param previousDataBounds Previous data bounds
+     * @param currentDataBounds Current data bounds
+	 */
+	void dataBoundsChanged(const QRectF& previousDataBounds, const QRectF& currentDataBounds);
+
+    /**
+     * Signals that the world bounds have changed from \p previousWorldBounds to \p currentWorldBounds
+     * @param previousWorldBounds Previous world bounds
+     * @param currentWorldBounds Current world bounds
+     */
+    void worldBoundsChanged(const QRectF& previousWorldBounds, const QRectF& currentWorldBounds);
+
 private:
     QSize           _renderSize;                    /** Size of the renderer canvas */
     Navigator2D     _navigator;                     /** 2D navigator */
     QRectF          _dataBounds;                    /** Bounds of the data */
-    QMatrix4x4      _modelMatrix;   
+    QRectF          _worldBounds;                   /** Bounds of the world */
+    QMatrix4x4      _modelMatrix;                   /** Model matrix */
     QMatrix4x4      _modelViewProjectionMatrix;     /** Model-view-projection matrix */
 
     friend class Navigator2D;

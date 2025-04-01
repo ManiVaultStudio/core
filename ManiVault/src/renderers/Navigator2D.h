@@ -148,7 +148,7 @@ public: // Navigation
 	 * Reset the view
 	 * @param force Force reset event when the user has navigated
 	 */
-	void resetView(bool force = true);
+	void resetView(bool force = false);
 
 	/**
 	 * Get whether the renderer is panning

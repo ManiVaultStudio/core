@@ -68,15 +68,35 @@ void Renderer2D::setDataBounds(const QRectF& dataBounds)
     qDebug() << __FUNCTION__ << dataBounds;
 #endif
 
+    const auto previousDataBounds = _dataBounds;
+
     if (dataBounds == _dataBounds)
         return;
 
     _dataBounds = dataBounds;
 
-    //_dataBounds.setWidth(std::max(_dataBounds.width(), 0.00000001));
-    //_dataBounds.setHeight(std::max(_dataBounds.height(), 0.0001));
+    emit dataBoundsChanged(previousDataBounds, _dataBounds);
+}
 
-    getNavigator().resetView();
+QRectF Renderer2D::getWorldBounds() const
+{
+    return _worldBounds;
+}
+
+void Renderer2D::setWorldBounds(const QRectF& worldBounds)
+{
+#ifdef RENDERER_2D_VERBOSE
+    qDebug() << __FUNCTION__ << _worldBounds;
+#endif
+
+    const auto previousWorldBounds = _worldBounds;
+
+    if (worldBounds == _worldBounds)
+        return;
+
+    _worldBounds = worldBounds;
+
+    emit worldBoundsChanged(previousWorldBounds, _worldBounds);
 }
 
 void Renderer2D::updateModelViewProjectionMatrix()
@@ -151,7 +171,7 @@ QMatrix4x4 Renderer2D::getProjectionMatrix() const
     QMatrix4x4 matrix;
 
     // Create an orthogonal transformation matrix
-    matrix.ortho(-halfSize.width(), halfSize.width(),0, 2 *  halfSize.height(), -1000.0f, +1000.0f);
+    matrix.ortho(-halfSize.width(), halfSize.width(), halfSize.height(), -halfSize.height(), -1000.0f, +1000.0f);
 
     return matrix;
 }
