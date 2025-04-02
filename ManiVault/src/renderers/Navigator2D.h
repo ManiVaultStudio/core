@@ -82,6 +82,12 @@ public:
 	float getZoomFactor() const;
 
     /**
+     * Set the zoom factor to \p zoomFactor
+     * @param zoomFactor Zoom factor
+     */
+    void setZoomFactor(float zoomFactor);
+
+    /**
      * Get the zoom percentage
      * @return Zoom percentage
      */
@@ -268,6 +274,20 @@ signals:
 	 * @param currentZoomRectangleWorld Current world zoom rectangle
 	 */
 	void zoomRectangleWorldChanged(const QRectF& previousZoomRectangleWorld, const QRectF& currentZoomRectangleWorld);
+
+    /**
+     * Signals that the zoom center in world coordinates has changed from \p previousZoomCenterWorld to \p currentZoomCenterWorld
+     * @param previousZoomCenterWorld Previous world zoom center
+     * @param currentZoomCenterWorld Current world zoom center
+     */
+    void zoomCenterWorldChanged(const QPointF& previousZoomCenterWorld, const QPointF& currentZoomCenterWorld);
+
+    /**
+     * Signals that the zoom factor has changed from \p previousZoomFactor to \p currentZoomFactor
+     * @param previousZoomFactor Previous zoom factor
+     * @param currentZoomFactor Current zoom factor
+     */
+    void zoomFactorChanged(float previousZoomFactor, float currentZoomFactor);
 
 private:
 	QPointer<QWidget>       _sourceWidget;                  /** Source widget for panning and zooming */

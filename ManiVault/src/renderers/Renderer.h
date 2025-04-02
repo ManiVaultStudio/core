@@ -12,6 +12,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "actions/WidgetAction.h"
+
 #include <QOpenGLFunctions_3_3_Core>
 #include <QSize>
 
@@ -24,11 +26,14 @@ class CORE_EXPORT Renderer : public QObject, protected QOpenGLFunctions_3_3_Core
 {
 protected:
 
-    /**
-     * Construct a new renderer
-     * @param parent Pointer to the parent object
+	/**
+     * Construct with pointer to \p parent object
+     * @param parent Pointer to parent object
      */
-    explicit Renderer(QObject* parent = nullptr) : QObject(parent) {}
+    explicit Renderer(QObject* parent = nullptr) :
+        QObject(parent)
+	{
+	}
 
     virtual void init() = 0;
     virtual void resize(QSize renderSize) = 0;

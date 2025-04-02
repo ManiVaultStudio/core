@@ -14,8 +14,6 @@ namespace mv::gui
 DensityRenderer::DensityRenderer(RenderMode renderMode) :
     _renderMode(renderMode)
 {
-    getNavigator().setZoomRectangleWorld(QRectF(0, 0, 1, 1));
-    setWorldBounds(QRectF(QPointF(), _densityComputation.getDensityTextureSize()));
 }
 
 DensityRenderer::~DensityRenderer()
@@ -36,6 +34,10 @@ void DensityRenderer::setDataBounds(const QRectF& dataBounds)
     Renderer2D::setDataBounds(dataBounds);
 
     _densityComputation.setBounds(dataBounds.left(), dataBounds.right(), dataBounds.bottom(), dataBounds.top());
+
+    // .0f, -_densityComputation.getDensityTextureSize().height()
+
+    setWorldBounds(QRectF(QPointF(), _densityComputation.getDensityTextureSize()));
 
     updateQuad();
 }

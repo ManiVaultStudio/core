@@ -91,6 +91,12 @@ set(PUBLIC_NUMERICAL_ACTIONS_HEADERS
     src/actions/NumericalRangeAction.h
     src/actions/DecimalRangeAction.h
     src/actions/IntegralRangeAction.h
+    src/actions/NumericalPointAction.h
+    src/actions/DecimalPointAction.h
+    src/actions/IntegralPointAction.h
+	src/actions/RectangleAction.h
+    src/actions/IntegralRectangleAction.h
+    src/actions/DecimalRectangleAction.h
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
@@ -100,28 +106,17 @@ set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
     src/actions/NumericalRangeAction.cpp
     src/actions/DecimalRangeAction.cpp
     src/actions/IntegralRangeAction.cpp
+	src/actions/NumericalPointAction.cpp
+    src/actions/DecimalPointAction.cpp
+    src/actions/IntegralPointAction.cpp
+	src/actions/RectangleAction.cpp
+    src/actions/IntegralRectangleAction.cpp
+    src/actions/DecimalRectangleAction.cpp
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_FILES
     ${PUBLIC_NUMERICAL_ACTIONS_HEADERS}    
     ${PUBLIC_NUMERICAL_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_RECTANGLE_ACTIONS_HEADERS
-    src/actions/RectangleAction.h
-    src/actions/IntegralRectangleAction.h
-    src/actions/DecimalRectangleAction.h
-)
-
-set(PUBLIC_RECTANGLE_ACTIONS_SOURCES
-    src/actions/RectangleAction.cpp
-    src/actions/IntegralRectangleAction.cpp
-    src/actions/DecimalRectangleAction.cpp
-)
-
-set(PUBLIC_RECTANGLE_ACTIONS_FILES
-    ${PUBLIC_RECTANGLE_ACTIONS_HEADERS}    
-    ${PUBLIC_RECTANGLE_ACTIONS_SOURCES}
 )
 
 set(PUBLIC_TEXTUAL_ACTIONS_HEADERS
@@ -1052,7 +1047,6 @@ set(PUBLIC_HEADERS
     ${PUBLIC_EVENT_HEADERS}
     ${PUBLIC_COLOR_MAP_ACTION_HEADERS}
     ${PUBLIC_NUMERICAL_ACTIONS_HEADERS}
-    ${PUBLIC_RECTANGLE_ACTIONS_HEADERS}
     ${PUBLIC_TEXTUAL_ACTIONS_HEADERS}
     ${PUBLIC_GROUPING_ACTIONS_HEADERS}
     ${PUBLIC_TRIGGER_ACTIONS_HEADERS}
@@ -1100,7 +1094,6 @@ set(PUBLIC_SOURCES
     ${PUBLIC_EVENT_SOURCES}
     ${PUBLIC_COLOR_MAP_ACTION_SOURCES}
     ${PUBLIC_NUMERICAL_ACTIONS_SOURCES}
-    ${PUBLIC_RECTANGLE_ACTIONS_SOURCES}
     ${PUBLIC_TEXTUAL_ACTIONS_SOURCES}
     ${PUBLIC_GROUPING_ACTIONS_SOURCES}
     ${PUBLIC_TRIGGER_ACTIONS_SOURCES}
@@ -1161,7 +1154,6 @@ source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
 source_group(Event FILES ${PUBLIC_EVENT_FILES})
 source_group(Actions\\Colormap FILES ${PUBLIC_COLOR_MAP_ACTION_FILES})
 source_group(Actions\\Numerical FILES ${PUBLIC_NUMERICAL_ACTIONS_FILES})
-source_group(Actions\\Rectangle FILES ${PUBLIC_RECTANGLE_ACTIONS_FILES})
 source_group(Actions\\Textual FILES ${PUBLIC_TEXTUAL_ACTIONS_FILES})
 source_group(Actions\\Grouping FILES ${PUBLIC_GROUPING_ACTIONS_FILES})
 source_group(Actions\\Trigger FILES ${PUBLIC_TRIGGER_ACTIONS_FILES})
