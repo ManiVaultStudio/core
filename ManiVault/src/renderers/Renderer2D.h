@@ -30,9 +30,8 @@ Q_OBJECT
 public:
 
     /**
-     * Construct a new two-dimensional renderer
-     *
-     * @param parent Pointer to the parent object
+     * Construct with pointer to \p parent object
+     * @param parent Pointer to parent object
      */
     explicit Renderer2D(QObject* parent = nullptr);
 

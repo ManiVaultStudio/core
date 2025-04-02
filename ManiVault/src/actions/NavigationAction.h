@@ -9,6 +9,7 @@
 #include <actions/DecimalAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/DecimalRectangleAction.h>
+#include <actions/DecimalPointAction.h>
 
 #include <QObject>
 
@@ -68,6 +69,8 @@ public: // Action getters
     TriggerAction& getZoomSelectionAction() { return _zoomSelectionAction; }
     TriggerAction& getZoomRegionAction() { return _zoomRegionAction; }
     DecimalRectangleAction& getZoomRectangleAction() { return _zoomRectangleAction; }
+    DecimalPointAction& getZoomCenterAction() { return _zoomCenterAction; }
+    DecimalAction& getZoomFactorAction() { return _zoomFactorAction; }
 
 private:
     TriggerAction           _zoomOutAction;             /** Zoom out action */
@@ -77,6 +80,8 @@ private:
     TriggerAction           _zoomSelectionAction;       /** Zoom to selection extents action */
     TriggerAction           _zoomRegionAction;          /** Zoom to region action */
     DecimalRectangleAction  _zoomRectangleAction;       /** Rectangle action for setting the current zoom bounds */
+    DecimalPointAction      _zoomCenterAction;          /** Zoom center action */
+    DecimalAction           _zoomFactorAction;          /** Zoom factor action */
 };
 
 }

@@ -4,6 +4,8 @@
 
 #include "NavigationAction.h"
 
+#include "GroupSectionTreeItem.h"
+
 #ifdef _DEBUG
     //#define NAVIGATION_ACTION_VERBOSE
 #endif
@@ -23,7 +25,9 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomExtentsAction(this, "Zoom All"),
     _zoomSelectionAction(this, "Zoom Selection"),
     _zoomRegionAction(this, "Zoom Region"),
-    _zoomRectangleAction(this, "Zoom Rectangle")
+    _zoomRectangleAction(this, "Zoom Rectangle"),
+    _zoomCenterAction(this, "Zoom Center"),
+    _zoomFactorAction(this, "Zoom Factor")
 {
     setShowLabels(false);
 
@@ -48,12 +52,33 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomRectangleAction.setIcon(combineIcons(StyledIcon("expand"), StyledIcon("ellipsis-h")));
     _zoomRectangleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
+    _zoomCenterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _zoomCenterAction.setIconByName("ruler");
+    _zoomCenterAction.setDefaultWidgetFlags(GroupAction::WidgetFlag::Vertical);
+    _zoomCenterAction.setPopupSizeHint(QSize(250, 0));
+
+    _zoomCenterAction.getXAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
+    _zoomCenterAction.getYAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
+
 	addAction(&_zoomOutAction, gui::TriggerAction::Icon);
 	addAction(&_zoomPercentageAction);
 	addAction(&_zoomInAction, gui::TriggerAction::Icon);
 	addAction(&_zoomExtentsAction);
-	//addAction(&_zoomSelectionAction);
+	addAction(&_zoomCenterAction);
+
 	//addAction(&_zoomRegionAction);
+
+ //   connect(&_zoomCenterXAction, &DecimalAction::valueChanged, this, [this](float value) -> void {
+ //       qDebug() << "Zoom center x: " << value;
+	//});
+
+ //   connect(&_zoomCenterYAction, &DecimalAction::valueChanged, this, [this](float value) -> void {
+ //       qDebug() << "Zoom center y: " << value;
+	//});
+
+    connect(&_zoomFactorAction, &DecimalAction::valueChanged, this, [this](float value) -> void {
+        qDebug() << "Zoom factor: " << value;
+	});
 }
 
 void NavigationAction::setShortcutsEnabled(bool shortcutsEnabled)
@@ -68,14 +93,16 @@ void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
 {
 	HorizontalGroupAction::fromVariantMap(variantMap);
 
-    _zoomRectangleAction.fromParentVariantMap(variantMap);
+    _zoomCenterAction.fromParentVariantMap(variantMap);
+    _zoomFactorAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap NavigationAction::toVariantMap() const
 {
     auto variantMap = HorizontalGroupAction::toVariantMap();
 
-    _zoomRectangleAction.insertIntoVariantMap(variantMap);
+    _zoomCenterAction.insertIntoVariantMap(variantMap);
+    _zoomFactorAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

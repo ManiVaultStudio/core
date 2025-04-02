@@ -68,6 +68,28 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         _navigationAction.getZoomPercentageAction().setValue(getZoomPercentage());
 	});
 
+    connect(this, &Navigator2D::zoomCenterWorldChanged, this, [this](const QPointF& previousZoomCenterWorld, const QPointF& currentZoomCenterWorld) -> void {
+        _navigationAction.getZoomCenterAction().set(currentZoomCenterWorld);
+
+        qDebug() << currentZoomCenterWorld;
+	});
+
+    connect(this, &Navigator2D::zoomFactorChanged, this, [this](float previousZoomFactor, float currentZoomFactor) -> void {
+        _navigationAction.getZoomFactorAction().setValue(currentZoomFactor);
+	});
+
+    connect(&_navigationAction.getZoomCenterAction(), &DecimalPointAction::valueChanged, this, [this](float x, float y) -> void {
+        beginChangeZoomRectangleWorld();
+        {
+            setZoomCenterWorld(QPointF(x, y));
+        }
+        endChangeZoomRectangleWorld();
+	});
+
+ //   connect(&_navigationAction.getZoomCenterYAction(), &DecimalAction::valueChanged, this, [this](float value) -> void {
+ //       setZoomCenterWorld(QPointF(_zoomCenterWorld.x(), value));
+	//});
+
     connect(&_navigationAction.getZoomInAction(), &TriggerAction::triggered, this, [this]() -> void {
         setZoomPercentage(getZoomPercentage() + 10.f);
     });
@@ -81,10 +103,16 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         setZoomPercentage(getZoomPercentage() - 10.f);
 	});
 
+    connect(&_navigationAction.getZoomFactorAction(), &DecimalAction::valueChanged, this, [this](float value) -> void {
+        setZoomFactor(value);
+	});
+
     connect(&_renderer, &Renderer2D::worldBoundsChanged, this, [this](const QRectF& worldBounds) -> void {
         if (!hasUserNavigated())
             resetView();
 	});
+
+    setZoomFactor(_navigationAction.getZoomFactorAction().getValue());
 
     _sourceWidget->addAction(&_navigationAction.getZoomInAction());
     _sourceWidget->addAction(&_navigationAction.getZoomExtentsAction());
@@ -246,16 +274,29 @@ float Navigator2D::getZoomFactor() const
     return _zoomFactor;
 }
 
+void Navigator2D::setZoomFactor(float zoomFactor)
+{
+    qDebug() << __FUNCTION__ << zoomFactor;
+    if (zoomFactor == _zoomFactor)
+        return;
+
+    const auto previousZoomFactor = _zoomFactor;
+
+    _zoomFactor = zoomFactor;
+
+	emit zoomFactorChanged(previousZoomFactor, _zoomFactor);
+}
+
 float Navigator2D::getZoomPercentage() const
 {
-    const auto dataBounds           = _renderer.getDataBounds();
+    const auto worldBounds          = _renderer.getWorldBounds();
     const auto zoomRectangleWorld   = getZoomRectangleWorld();
 
-    if (!dataBounds.isValid() || !zoomRectangleWorld.isValid())
+    if (!worldBounds.isValid() || !zoomRectangleWorld.isValid())
         return 1.0f;
 
-    const auto factorX      = static_cast<float>(dataBounds.width()) / static_cast<float>(zoomRectangleWorld.width());
-    const auto factorY      = static_cast<float>(dataBounds.height()) / static_cast<float>(zoomRectangleWorld.height());
+    const auto factorX      = static_cast<float>(worldBounds.width()) / static_cast<float>(zoomRectangleWorld.width());
+    const auto factorY      = static_cast<float>(worldBounds.height()) / static_cast<float>(zoomRectangleWorld.height());
     const auto scaleFactor  = factorX > factorY ? factorX : factorY;
 
     return scaleFactor * 100.f;
@@ -271,12 +312,10 @@ void Navigator2D::setZoomPercentage(float zoomPercentage)
                 return;
 
             const auto zoomPercentageNormalized = .01f * zoomPercentage;
-            const auto zoomFactorX              = static_cast<float>(_renderer.getDataBounds().width()) / static_cast<float>(_renderer.getRenderSize().width());
-            const auto zoomFactorY              = static_cast<float>(_renderer.getDataBounds().height()) / static_cast<float>(_renderer.getRenderSize().height());
+            const auto zoomFactorX              = static_cast<float>(_renderer.getWorldBounds().width()) / static_cast<float>(_renderer.getRenderSize().width());
+            const auto zoomFactorY              = static_cast<float>(_renderer.getWorldBounds().height()) / static_cast<float>(_renderer.getRenderSize().height());
 
-            _zoomFactor = std::max(zoomFactorX, zoomFactorY) / zoomPercentageNormalized;
-
-            setZoomRectangleWorld(getZoomRectangleWorld());
+            setZoomFactor(std::max(zoomFactorX, zoomFactorY) / zoomPercentageNormalized);
         }
         endChangeZoomRectangleWorld();
     }
@@ -325,8 +364,7 @@ void Navigator2D::zoomAround(const QPoint& center, float factor)
         {
             const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), center).toPointF();
 
-            _zoomFactor /= factor;
-
+            setZoomFactor(_zoomFactor /= factor);
             setZoomCenterWorld(p1 + (_zoomCenterWorld - p1) / factor);
         }
         endChangeZoomRectangleWorld();
@@ -382,13 +420,18 @@ void Navigator2D::setZoomCenterWorld(const QPointF& zoomCenterWorld)
     if (zoomCenterWorld == _zoomCenterWorld)
         return;
 
+    const auto previousZoomCenterWorld = _zoomCenterWorld;
+
     _zoomCenterWorld = zoomCenterWorld;
 
-    setZoomRectangleWorld(getZoomRectangleWorld());
+    emit zoomCenterWorldChanged(previousZoomCenterWorld, _zoomCenterWorld);
 }
 
 void Navigator2D::resetView(bool force /*= false*/)
 {
+    if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
+        return;
+
     if (!_initialized)
         return;
 
@@ -403,20 +446,11 @@ void Navigator2D::resetView(bool force /*= false*/)
     {
         beginChangeZoomRectangleWorld();
 	    {
-            const auto zoomFactorX = _renderer.getDataBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
-            const auto zoomFactorY = _renderer.getDataBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
+            const auto zoomFactorX = _renderer.getWorldBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
+            const auto zoomFactorY = _renderer.getWorldBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
 
-            _zoomFactor = std::max(zoomFactorX, zoomFactorY) + (_zoomRectangleMargin / _renderer.getRenderSize().height()) / 2.f;
-
-            setZoomCenterWorld(_renderer.getDataBounds().center());
-
-		 //   if (!_userHasNavigated || force) {
-		 //   	setZoomRectangleWorld(_renderer.getDataBounds());
-
-		 //   	_userHasNavigated = false;
-			//}
-
-            
+            setZoomFactor(std::max(zoomFactorX, zoomFactorY) + (_zoomRectangleMargin / _renderer.getRenderSize().height()) / 2.f);
+            setZoomCenterWorld(_renderer.getWorldBounds().center());
         }
         endChangeZoomRectangleWorld();
     }
