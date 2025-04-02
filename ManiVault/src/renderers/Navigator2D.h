@@ -284,8 +284,6 @@ private:
 	QRectF                  _previousZoomRectangleWorld;    /** Previous world zoom rectangle */
 	bool                    _userHasNavigated;              /** Boolean determining whether the user has navigated */
     gui::NavigationAction   _navigationAction;               /** Navigation group action */
-
-    static constexpr int    maxZoomHistorySize = 10;        /** Maximum history size */
 };
 
 }
