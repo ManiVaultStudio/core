@@ -61,10 +61,7 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         {
             _navigationAction.getZoomExtentsAction().setEnabled(hasUserNavigated());
 
-            _navigationAction.getZoomRectangleAction().setLeft(static_cast<float>(currentZoomRectangleWorld.left()));
-            _navigationAction.getZoomRectangleAction().setRight(static_cast<float>(currentZoomRectangleWorld.right()));
-            _navigationAction.getZoomRectangleAction().setTop(static_cast<float>(currentZoomRectangleWorld.bottom()));
-            _navigationAction.getZoomRectangleAction().setBottom(static_cast<float>(currentZoomRectangleWorld.top()));
+            _navigationAction.getZoomRectangleAction().setRectangle(currentZoomRectangleWorld.left(), currentZoomRectangleWorld.right(), currentZoomRectangleWorld.bottom(), currentZoomRectangleWorld.top());
         }
         connect(&_navigationAction.getZoomRectangleAction(), &DecimalRectangleAction::rectangleChanged, this, zoomRectangleChanged);
 
@@ -88,6 +85,10 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         if (!hasUserNavigated())
             resetView();
 	});
+
+    _sourceWidget->addAction(&_navigationAction.getZoomInAction());
+    _sourceWidget->addAction(&_navigationAction.getZoomExtentsAction());
+    _sourceWidget->addAction(&_navigationAction.getZoomOutAction());
 
     _initialized = true;
 }
@@ -222,8 +223,15 @@ void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 
     const auto previousZoomRectangleWorld = getZoomRectangleWorld();
 
-    //_zoomFactor         = _renderer.getRenderSize().width() / zoomRectangleWorld.width();
-    //_zoomCenterWorld    = zoomRectangleWorld.center();
+    if (zoomRectangleWorld == previousZoomRectangleWorld)
+        return;
+
+    _zoomFactor = std::max(
+        static_cast<float>(zoomRectangleWorld.width()) / static_cast<float>(_renderer.getRenderSize().width()),
+        static_cast<float>(zoomRectangleWorld.height()) / static_cast<float>(_renderer.getRenderSize().height())
+    );
+
+    _zoomCenterWorld = zoomRectangleWorld.center();
 
 	emit zoomRectangleWorldChanged(previousZoomRectangleWorld, getZoomRectangleWorld());
 }
@@ -287,6 +295,8 @@ void Navigator2D::setEnabled(bool enabled)
 
     _enabled = enabled;
 
+    _navigationAction.setShortcutsEnabled(_enabled);
+
     emit enabledChanged(_enabled);
 }
 
@@ -337,6 +347,7 @@ void Navigator2D::zoomToRectangle(const QRectF& zoomRectangle)
     {
         beginChangeZoomRectangleWorld();
         {
+            setZoomRectangleWorld(zoomRectangle);
         }
         endChangeZoomRectangleWorld();
     }

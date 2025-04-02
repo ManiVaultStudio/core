@@ -40,10 +40,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomExtentsAction.setIconByName("compress");
     _zoomSelectionAction.setIconByName("search-location");
 
-    _zoomOutAction.setShortcut(QKeySequence("-"));
-    _zoomInAction.setShortcut(QKeySequence("+"));
-    _zoomExtentsAction.setShortcut(QKeySequence("z"));
-    _zoomSelectionAction.setShortcut(QKeySequence("d"));
+    
 
     _zoomSelectionAction.setEnabled(false);
 
@@ -60,6 +57,14 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
 	addAction(&_zoomExtentsAction);
 	//addAction(&_zoomSelectionAction);
 	//addAction(&_zoomRegionAction);
+}
+
+void NavigationAction::setShortcutsEnabled(bool shortcutsEnabled)
+{
+    _zoomOutAction.setShortcut(shortcutsEnabled ? QKeySequence("-") : QKeySequence());
+    _zoomInAction.setShortcut(shortcutsEnabled ? QKeySequence("+") : QKeySequence());
+    _zoomExtentsAction.setShortcut(shortcutsEnabled ? QKeySequence("z") : QKeySequence());
+    //_zoomSelectionAction.setShortcut(shortcutsEnabled ? QKeySequence("d") : QKeySequence());
 }
 
 void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
