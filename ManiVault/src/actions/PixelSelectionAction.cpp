@@ -61,32 +61,26 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _rectangleAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Rectangle));
     _rectangleAction.setToolTip("Select pixels inside a rectangle (R)");
     _rectangleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _rectangleAction.setShortcut(QKeySequence("R"));
 
     _brushAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Brush));
     _brushAction.setToolTip("Select pixels using a brush tool (B)");
     _brushAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _brushAction.setShortcut(QKeySequence("B"));
 
     _lassoAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Lasso));
     _lassoAction.setToolTip("Select pixels using a lasso (L)");
     _lassoAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _lassoAction.setShortcut(QKeySequence("L"));
 
     _polygonAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Polygon));
     _polygonAction.setToolTip("Select pixels by drawing a polygon (P)");
     _polygonAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _polygonAction.setShortcut(QKeySequence("P"));
 
     _sampleAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Sample));
     _sampleAction.setToolTip("Sample pixel by dragging over the image (S)");
     _sampleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _sampleAction.setShortcut(QKeySequence("S"));
 
     _roiAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _roiAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::ROI));
     _roiAction.setToolTip("Sample within region of interest (I)");
-    _roiAction.setShortcut(QKeySequence("I"));
     
     _modifierAction.setToolTip("Type of selection modifier");
     _modifierAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionModifierType::Replace));
@@ -113,22 +107,20 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
 
     _clearSelectionAction.setToolTip("Clears the selection (E)");
     _clearSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _clearSelectionAction.setShortcut(QKeySequence("E"));
-
     _selectAllAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _selectAllAction.setShortcut(QKeySequence("A"));
     _selectAllAction.setToolTip("Select all data points (A)");
-
+    
     _invertSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _invertSelectionAction.setShortcut(QKeySequence("I"));
     _invertSelectionAction.setToolTip("Invert the selection (I)");
+
+    _invertSelectionAction.setToolTip("Invert the selection (I)");
+    _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
 
     _brushRadiusAction.setToolTip("Brush selection tool radius");
     _brushRadiusAction.setSuffix("px");
 
     _notifyDuringSelectionAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
     _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
     _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process (U)");
 
     const auto updatePixelSelectionTypesModel = [this]() {
@@ -207,6 +199,16 @@ void PixelSelectionAction::initialize(QWidget* targetWidget, util::PixelSelectio
 
     setShortcutsEnabled(true);
 
+    _targetWidget->addAction(&_rectangleAction);
+    _targetWidget->addAction(&_brushAction);
+    _targetWidget->addAction(&_lassoAction);
+    _targetWidget->addAction(&_polygonAction);
+    _targetWidget->addAction(&_sampleAction);
+    _targetWidget->addAction(&_roiAction);
+    _targetWidget->addAction(&_selectAllAction);
+    _targetWidget->addAction(&_clearSelectionAction);
+    _targetWidget->addAction(&_invertSelectionAction);
+
     _targetWidget->installEventFilter(this);
     _initialized = true;
 }
@@ -226,34 +228,15 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
     if (!isInitialized())
         return;
 
-    if (shortcutsEnabled) {
-        _targetWidget->addAction(&_rectangleAction);
-        _targetWidget->addAction(&_brushAction);
-        _targetWidget->addAction(&_lassoAction);
-        _targetWidget->addAction(&_polygonAction);
-        _targetWidget->addAction(&_sampleAction);
-        _targetWidget->addAction(&_modifierAddAction);
-        _targetWidget->addAction(&_modifierSubtractAction);
-        _targetWidget->addAction(&_clearSelectionAction);
-        _targetWidget->addAction(&_selectAllAction);
-        _targetWidget->addAction(&_invertSelectionAction);
-        _targetWidget->addAction(&_brushRadiusAction);
-        _targetWidget->addAction(&_notifyDuringSelectionAction);
-    }
-    else {
-        _targetWidget->removeAction(&_rectangleAction);
-        _targetWidget->removeAction(&_brushAction);
-        _targetWidget->removeAction(&_lassoAction);
-        _targetWidget->removeAction(&_polygonAction);
-        _targetWidget->removeAction(&_sampleAction);
-        _targetWidget->removeAction(&_modifierAddAction);
-        _targetWidget->removeAction(&_modifierSubtractAction);
-        _targetWidget->removeAction(&_clearSelectionAction);
-        _targetWidget->removeAction(&_selectAllAction);
-        _targetWidget->removeAction(&_invertSelectionAction);
-        _targetWidget->removeAction(&_brushRadiusAction);
-        _targetWidget->removeAction(&_notifyDuringSelectionAction);
-    }
+    _rectangleAction.setShortcut(shortcutsEnabled ? QKeySequence("R") : QKeySequence());
+    _brushAction.setShortcut(shortcutsEnabled ? QKeySequence("B") : QKeySequence());
+    _lassoAction.setShortcut(shortcutsEnabled ? QKeySequence("L") : QKeySequence());
+    _polygonAction.setShortcut(shortcutsEnabled ? QKeySequence("P") : QKeySequence());
+    _sampleAction.setShortcut(shortcutsEnabled ? QKeySequence("U") : QKeySequence());
+    _roiAction.setShortcut(shortcutsEnabled ? QKeySequence("W") : QKeySequence());
+    _selectAllAction.setShortcut(shortcutsEnabled ? QKeySequence("A") : QKeySequence());
+    _clearSelectionAction.setShortcut(shortcutsEnabled ? QKeySequence("E") : QKeySequence());
+    _invertSelectionAction.setShortcut(shortcutsEnabled ? QKeySequence("I") : QKeySequence());
 }
 
 void PixelSelectionAction::initType()

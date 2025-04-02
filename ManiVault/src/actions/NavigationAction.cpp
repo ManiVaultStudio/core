@@ -39,9 +39,6 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomInAction.setIconByName("search-plus");
     _zoomExtentsAction.setIconByName("compress");
     _zoomSelectionAction.setIconByName("search-location");
-
-    
-
     _zoomSelectionAction.setEnabled(false);
 
     _zoomPercentageAction.setSuffix("%");
@@ -63,7 +60,7 @@ void NavigationAction::setShortcutsEnabled(bool shortcutsEnabled)
 {
     _zoomOutAction.setShortcut(shortcutsEnabled ? QKeySequence("-") : QKeySequence());
     _zoomInAction.setShortcut(shortcutsEnabled ? QKeySequence("+") : QKeySequence());
-    _zoomExtentsAction.setShortcut(shortcutsEnabled ? QKeySequence("z") : QKeySequence());
+    _zoomExtentsAction.setShortcut(shortcutsEnabled ? QKeySequence("O") : QKeySequence());
     //_zoomSelectionAction.setShortcut(shortcutsEnabled ? QKeySequence("d") : QKeySequence());
 }
 
