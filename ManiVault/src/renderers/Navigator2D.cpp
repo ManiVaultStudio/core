@@ -150,12 +150,16 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
 
         if (event->type() == QEvent::Wheel) {
             if (auto* wheelEvent = dynamic_cast<QWheelEvent*>(event)) {
-                constexpr auto zoomSensitivity = .1f;
+                changeCursor(Qt::ClosedHandCursor);
+                {
+                    constexpr auto zoomSensitivity = .1f;
 
-                if (wheelEvent->angleDelta().x() < 0)
-                    zoomAround(wheelEvent->position().toPoint(), 1.0f - zoomSensitivity);
-                else
-                    zoomAround(wheelEvent->position().toPoint(), 1.0f + zoomSensitivity);
+                    if (wheelEvent->angleDelta().x() < 0)
+                        zoomAround(wheelEvent->position().toPoint(), 1.0f - zoomSensitivity);
+                    else
+                        zoomAround(wheelEvent->position().toPoint(), 1.0f + zoomSensitivity);
+                }
+                restoreCursor();
             }
         }
 
@@ -165,7 +169,7 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
                     resetView();
 
                 if (mouseEvent->buttons() == Qt::LeftButton) {
-                    _sourceWidget->setCursor(Qt::ClosedHandCursor);
+                    changeCursor(Qt::ClosedHandCursor);
 
                     _mousePositions << mouseEvent->pos();
 
@@ -175,7 +179,7 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
         }
 
         if (event->type() == QEvent::MouseButtonRelease) {
-            _sourceWidget->setCursor(Qt::ArrowCursor);
+            restoreCursor();
 
             _mousePositions.clear();
 
@@ -276,7 +280,6 @@ float Navigator2D::getZoomFactor() const
 
 void Navigator2D::setZoomFactor(float zoomFactor)
 {
-    qDebug() << __FUNCTION__ << zoomFactor;
     if (zoomFactor == _zoomFactor)
         return;
 
@@ -591,6 +594,8 @@ void Navigator2D::beginNavigation()
 
     _userHasNavigated = true;
 
+    changeCursor(Qt::OpenHandCursor);
+
     setIsNavigating(true);
 
     emit navigationStarted();
@@ -604,6 +609,8 @@ void Navigator2D::endNavigation()
 #ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    restoreCursor();
 
     setIsNavigating(false);
 
@@ -620,4 +627,23 @@ void Navigator2D::endChangeZoomRectangleWorld()
     emit zoomRectangleWorldChanged(_previousZoomRectangleWorld, getZoomRectangleWorld());
 }
 
+void Navigator2D::changeCursor(const QCursor& cursor) const
+{
+	Q_ASSERT(_sourceWidget);
+
+	if (!_sourceWidget)
+		return;
+
+	_sourceWidget->setCursor(cursor);
+}
+
+void Navigator2D::restoreCursor() const
+{
+	Q_ASSERT(_sourceWidget);
+
+	if (!_sourceWidget)
+		return;
+
+    _sourceWidget->setCursor(_cachedCursor);
+}
 }
