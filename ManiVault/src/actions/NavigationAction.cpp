@@ -34,15 +34,16 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomOutAction.setToolTip("Zoom out by 10% (-)");
     _zoomPercentageAction.setToolTip("Zoom in/out (+)");
     _zoomInAction.setToolTip("Zoom in by 10%");
-    _zoomExtentsAction.setToolTip("Zoom to the boundaries of the scene (z)");
-    _zoomSelectionAction.setToolTip("Zoom to the boundaries of the current selection (d)");
+    _zoomExtentsAction.setToolTip("Zoom to the boundaries of the scene (o)");
+    _zoomSelectionAction.setToolTip("Zoom to the boundaries of the current selection (b)");
 
     _zoomPercentageAction.setOverrideSizeHint(QSize(300, 0));
 
     _zoomOutAction.setIconByName("search-minus");
     _zoomInAction.setIconByName("search-plus");
-    _zoomExtentsAction.setIconByName("compress");
-    _zoomSelectionAction.setIconByName("search-location");
+    _zoomExtentsAction.setIconByName("expand");
+
+	_zoomSelectionAction.setIcon(StyledIcon("expand").withModifier("mouse-pointer"));
     _zoomSelectionAction.setEnabled(false);
 
     _zoomPercentageAction.setSuffix("%");
@@ -63,8 +64,8 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
 	addAction(&_zoomOutAction, gui::TriggerAction::Icon);
 	addAction(&_zoomPercentageAction);
 	addAction(&_zoomInAction, gui::TriggerAction::Icon);
-	addAction(&_zoomExtentsAction);
-	addAction(&_zoomSelectionAction);
+	addAction(&_zoomExtentsAction, gui::TriggerAction::Icon);
+	addAction(&_zoomSelectionAction, gui::TriggerAction::Icon);
 	addAction(&_zoomCenterAction);
 
 	//addAction(&_zoomRegionAction);
