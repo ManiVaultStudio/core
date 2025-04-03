@@ -71,8 +71,6 @@ void Navigator2D::initialize(QWidget* sourceWidget)
 
     connect(this, &Navigator2D::zoomCenterWorldChanged, this, [this](const QPointF& previousZoomCenterWorld, const QPointF& currentZoomCenterWorld) -> void {
         _navigationAction.getZoomCenterAction().set(currentZoomCenterWorld);
-
-        qDebug() << currentZoomCenterWorld;
 	});
 
     connect(this, &Navigator2D::zoomFactorChanged, this, [this](float previousZoomFactor, float currentZoomFactor) -> void {
@@ -86,10 +84,6 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         }
         endChangeZoomRectangleWorld();
 	});
-
- //   connect(&_navigationAction.getZoomCenterYAction(), &DecimalAction::valueChanged, this, [this](float value) -> void {
- //       setZoomCenterWorld(QPointF(_zoomCenterWorld.x(), value));
-	//});
 
     connect(&_navigationAction.getZoomInAction(), &TriggerAction::triggered, this, [this]() -> void {
         setZoomPercentage(getZoomPercentage() + 10.f);
