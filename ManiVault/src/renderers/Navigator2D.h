@@ -28,6 +28,30 @@ class CORE_EXPORT Navigator2D : public QObject
 
 public:
 
+    /** For drawing the zoom region */
+    class ZoomOverlayWidget : public gui::OverlayWidget
+    {
+	public:
+
+        /**
+         * Construct a new zoom overlay widget
+         * @param navigator Reference to the navigator
+         * @param targetWidget Pointer to the target widget
+         */
+        ZoomOverlayWidget(Navigator2D& navigator, QWidget* targetWidget);
+
+        /**
+         * Override the paint event to draw the zoom regio rectangle
+         * @param event 
+         */
+        void paintEvent(QPaintEvent* event) override;
+
+    private:
+        Navigator2D&    _navigator;    /** Reference to the navigator */
+    };
+
+public:
+
 	/**
 	 * Construct a new two-dimensional navigator
 	 *
@@ -180,6 +204,12 @@ public: // Navigation
 	 */
 	bool hasUserNavigated() const;
 
+    /**
+     * Get the zoom region rectangle in screen coordinates
+     * @return Zoom region rectangle in screen coordinates
+     */
+    QRect getZoomRegionRectangle() const;
+
 protected: // Navigation
 
 	/**
@@ -223,6 +253,12 @@ protected: // Navigation
 
 	/** End changing the zoom rectangle in world coordinates */
 	void endChangeZoomRectangleWorld();
+
+    /** Begin zooming to a region */
+    void beginZoomToRegion();
+
+    /** End zooming to a region */
+    void endZoomToRegion();
 
 protected: // Cursor
 
@@ -301,22 +337,26 @@ signals:
     void zoomFactorChanged(float previousZoomFactor, float currentZoomFactor);
 
 private:
-	QPointer<QWidget>       _sourceWidget;                  /** Source widget for panning and zooming */
-	Renderer2D&             _renderer;                      /** Reference to parent renderer */
-	bool                    _enabled;                       /** Enabled flag */
-	bool                    _initialized;                   /** Initialized flag */
-	QVector<QPoint>         _mousePositions;                /** Recorded mouse positions */
-	bool                    _isNavigating;                  /** Navigating flag */
-	bool                    _isPanning;                     /** Panning flag */
-	bool                    _isZooming;                     /** Zooming flag */
-	float                   _zoomFactor;                    /** Zoom factor */
-	QPointF                 _zoomCenterWorld;               /** Zoom rectangle top-left in world coordinates */
-    float                   _zoomMarginScreen;              /** Zoom margin in screen coordinates */
-    float                   _zoomMarginWorld;               /** Zoom margin in world coordinates */
-	QRectF                  _previousZoomRectangleWorld;    /** Previous world zoom rectangle */
-	bool                    _userHasNavigated;              /** Boolean determining whether the user has navigated */
-    gui::NavigationAction   _navigationAction;              /** Navigation group action */
-    QCursor                 _cachedCursor;                  /** Cached cursor */
+	QPointer<QWidget>               _sourceWidget;                  /** Source widget for panning and zooming */
+	Renderer2D&                     _renderer;                      /** Reference to parent renderer */
+	bool                            _enabled;                       /** Enabled flag */
+	bool                            _initialized;                   /** Initialized flag */
+	QVector<QPoint>                 _mousePositions;                /** Recorded mouse positions */
+	bool                            _isNavigating;                  /** Navigating flag */
+	bool                            _isPanning;                     /** Panning flag */
+	bool                            _isZooming;                     /** Zooming flag */
+	float                           _zoomFactor;                    /** Zoom factor */
+	QPointF                         _zoomCenterWorld;               /** Zoom rectangle top-left in world coordinates */
+    float                           _zoomMarginScreen;              /** Zoom margin in screen coordinates */
+    float                           _zoomMarginWorld;               /** Zoom margin in world coordinates */
+    QVector<QPoint>                 _zoomRegionPoints;              /** Zoom region points */
+    QRect                           _zoomRegionRectangle;           /** Zoom region rectangle */
+    bool                            _zoomRegionInProgress;          /** Zoom region in progress flag */
+	QRectF                          _previousZoomRectangleWorld;    /** Previous world zoom rectangle */
+	bool                            _userHasNavigated;              /** Boolean determining whether the user has navigated */
+    gui::NavigationAction           _navigationAction;              /** Navigation group action */
+    QCursor                         _cachedCursor;                  /** Cached cursor */
+    QPointer<ZoomOverlayWidget>     _zoomOverlayWidget;             /** Zoom overlay widget */
 };
 
 }

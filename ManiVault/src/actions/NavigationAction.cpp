@@ -25,6 +25,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomExtentsAction(this, "Zoom All"),
     _zoomSelectionAction(this, "Zoom Selection"),
     _zoomRegionAction(this, "Zoom Region"),
+    _freezeNavigation(this, "Freeze Navigation"),
     _zoomRectangleAction(this, "Zoom Rectangle"),
     _zoomCenterAction(this, "Zoom Center"),
     _zoomFactorAction(this, "Zoom Factor")
@@ -36,6 +37,8 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomInAction.setToolTip("Zoom in by 10%");
     _zoomExtentsAction.setToolTip("Zoom to the boundaries of the scene (o)");
     _zoomSelectionAction.setToolTip("Zoom to the boundaries of the current selection (b)");
+    _zoomRegionAction.setToolTip("Zoom to a picked region");
+    _freezeNavigation.setToolTip("Freeze the navigation");
 
     _zoomPercentageAction.setOverrideSizeHint(QSize(300, 0));
 
@@ -45,6 +48,8 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
 
 	_zoomSelectionAction.setIcon(StyledIcon("compress").withModifier("mouse-pointer"));
     _zoomSelectionAction.setEnabled(false);
+
+    _zoomRegionAction.setIcon(StyledIcon("compress").withModifier("search"));
 
     _zoomPercentageAction.setSuffix("%");
     _zoomPercentageAction.setUpdateDuringDrag(false);
@@ -67,6 +72,24 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     addAction(&_zoomCenterAction);
 	addAction(&_zoomExtentsAction, gui::TriggerAction::Icon);
 	addAction(&_zoomSelectionAction, gui::TriggerAction::Icon);
+	addAction(&_zoomRegionAction, gui::TriggerAction::Icon);
+	addAction(&_freezeNavigation, gui::ToggleAction::WidgetFlag::CheckBox);
+
+    const auto updateReadOnly = [this]() -> void {
+        const auto notFrozen = _freezeNavigation.isChecked();
+
+        _zoomOutAction.setEnabled(!notFrozen);
+        _zoomPercentageAction.setEnabled(!notFrozen);
+        _zoomInAction.setEnabled(!notFrozen);
+        _zoomExtentsAction.setEnabled(!notFrozen);
+        _zoomSelectionAction.setEnabled(!notFrozen);
+        _zoomRegionAction.setEnabled(!notFrozen);
+        _zoomCenterAction.setEnabled(!notFrozen);
+	};
+
+    updateReadOnly();
+
+    connect(&_freezeNavigation, &ToggleAction::toggled, this, updateReadOnly);
 }
 
 void NavigationAction::setShortcutsEnabled(bool shortcutsEnabled)

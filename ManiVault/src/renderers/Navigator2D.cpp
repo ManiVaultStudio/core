@@ -6,6 +6,8 @@
 
 #include "Renderer2D.h"
 
+#include <QPainter>
+
 #ifdef _DEBUG
     //#define NAVIGATOR_2D_VERBOSE
 #endif
@@ -16,6 +18,25 @@ using namespace mv::gui;
 
 namespace mv
 {
+
+Navigator2D::ZoomOverlayWidget::ZoomOverlayWidget(Navigator2D& navigator, QWidget* targetWidget):
+	gui::OverlayWidget(targetWidget),
+	_navigator(navigator)
+{
+}
+
+void Navigator2D::ZoomOverlayWidget::paintEvent(QPaintEvent* event)
+{
+    if (_navigator.getZoomRegionRectangle().isValid()) {
+        QPainter painter(this);
+
+        painter.setBrush(QColor(0, 0, 0, 50));
+        painter.setPen(QPen(QColor(0, 0, 0, 150), 2));
+        painter.drawRect(_navigator.getZoomRegionRectangle());
+
+        event->accept();
+    }
+}
 
 Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     QObject(parent),
@@ -28,6 +49,7 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _zoomFactor(1.0f),
     _zoomMarginScreen(100.f),
     _zoomMarginWorld(.0f),
+    _zoomRegionInProgress(false),
     _userHasNavigated(),
     _navigationAction(this, "Navigation")
 {
@@ -107,11 +129,17 @@ void Navigator2D::initialize(QWidget* sourceWidget)
             resetView();
 	});
 
+    connect(&_navigationAction.getZoomRegionAction(), &TriggerAction::triggered, this, [this]() -> void {
+        beginZoomToRegion();
+	});
+
     setZoomFactor(_navigationAction.getZoomFactorAction().getValue());
 
     _sourceWidget->addAction(&_navigationAction.getZoomInAction());
     _sourceWidget->addAction(&_navigationAction.getZoomExtentsAction());
     _sourceWidget->addAction(&_navigationAction.getZoomOutAction());
+
+    _zoomOverlayWidget = new ZoomOverlayWidget(*this, _sourceWidget);
 
     _initialized = true;
 }
@@ -120,6 +148,9 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
 {
     if (!_initialized || !_enabled)
         return false;
+
+    if (getNavigationAction().getFreezeNavigation().isChecked())
+        return QObject::eventFilter(watched, event);
 
     if (event->type() == QEvent::KeyPress) {
         if (const auto* keyEvent = dynamic_cast<QKeyEvent*>(event)) {
@@ -142,51 +173,93 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
     }
 
     if (isNavigating()) {
+        if (_zoomRegionInProgress) {
+            const auto updateZoomRegion = [this]() -> void {
+                int x1 = std::min(_zoomRegionPoints[0].x(), _zoomRegionPoints[1].x());
+                int y1 = std::min(_zoomRegionPoints[0].y(), _zoomRegionPoints[1].y());
+                int x2 = std::max(_zoomRegionPoints[0].x(), _zoomRegionPoints[1].x());
+                int y2 = std::max(_zoomRegionPoints[0].y(), _zoomRegionPoints[1].y());
 
-        if (event->type() == QEvent::Wheel) {
-            if (auto* wheelEvent = dynamic_cast<QWheelEvent*>(event)) {
-                constexpr auto zoomSensitivity = .1f;
+				_zoomRegionRectangle = QRect(x1, y1, x2 - x1, y2 - y1);
 
-                if (wheelEvent->angleDelta().x() < 0)
-                    zoomAround(wheelEvent->position().toPoint(), 1.0f - zoomSensitivity);
-                else
-                    zoomAround(wheelEvent->position().toPoint(), 1.0f + zoomSensitivity);
-            }
-        }
+                if (_zoomOverlayWidget)
+                    _zoomOverlayWidget->update();
+			};
 
-        if (event->type() == QEvent::MouseButtonPress) {
-            if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
-                if (mouseEvent->button() == Qt::MiddleButton)
-                    resetView();
+            if (event->type() == QEvent::MouseButtonPress) {
+                if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
+                    if (mouseEvent->buttons() == Qt::LeftButton) {
+                        _zoomRegionPoints << mouseEvent->pos() << mouseEvent->pos();
 
-                if (mouseEvent->buttons() == Qt::LeftButton) {
-                    changeCursor(Qt::ClosedHandCursor);
-
-                    _mousePositions << mouseEvent->pos();
-
-                    _sourceWidget->update();
+                        updateZoomRegion();
+                    }
                 }
             }
-        }
 
-        if (event->type() == QEvent::MouseButtonRelease) {
-            restoreCursor();
+            if (event->type() == QEvent::MouseMove) {
+                if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
+                    if (mouseEvent->buttons() == Qt::LeftButton) {
+                        if (_zoomRegionPoints.size() == 2)
+                            _zoomRegionPoints[1] = mouseEvent->pos();
 
-            _mousePositions.clear();
+                        updateZoomRegion();
+                    }
+                }
+            }
 
-            _sourceWidget->update();
-        }
+            if (event->type() == QEvent::MouseButtonRelease) {
+                if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
+                    if (mouseEvent->button() == Qt::LeftButton) {
+                        endZoomToRegion();
+                    }
+                }
+            }
+        } else {
+            if (event->type() == QEvent::Wheel) {
+                if (auto* wheelEvent = dynamic_cast<QWheelEvent*>(event)) {
+                    constexpr auto zoomSensitivity = .1f;
 
-        if (event->type() == QEvent::MouseMove) {
-            if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
-                _mousePositions << mouseEvent->pos();
+                    if (wheelEvent->angleDelta().x() < 0)
+                        zoomAround(wheelEvent->position().toPoint(), 1.0f - zoomSensitivity);
+                    else
+                        zoomAround(wheelEvent->position().toPoint(), 1.0f + zoomSensitivity);
+                }
+            }
 
-                if (mouseEvent->buttons() == Qt::LeftButton && _mousePositions.size() >= 2) {
-                    const auto& previousMousePosition   = _mousePositions[_mousePositions.size() - 2];
-                    const auto& currentMousePosition    = _mousePositions[_mousePositions.size() - 1];
-                    const auto panVector                = currentMousePosition - previousMousePosition;
+            if (event->type() == QEvent::MouseButtonPress) {
+                if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
+                    if (mouseEvent->button() == Qt::MiddleButton)
+                        resetView();
 
-                    panBy(-panVector);
+                    if (mouseEvent->buttons() == Qt::LeftButton) {
+                        changeCursor(Qt::ClosedHandCursor);
+
+                        _mousePositions << mouseEvent->pos();
+
+                        _sourceWidget->update();
+                    }
+                }
+            }
+
+            if (event->type() == QEvent::MouseButtonRelease) {
+                restoreCursor();
+
+                _mousePositions.clear();
+
+                _sourceWidget->update();
+            }
+
+            if (event->type() == QEvent::MouseMove) {
+                if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
+                    _mousePositions << mouseEvent->pos();
+
+                    if (mouseEvent->buttons() == Qt::LeftButton && _mousePositions.size() >= 2) {
+                        const auto& previousMousePosition   = _mousePositions[_mousePositions.size() - 2];
+                        const auto& currentMousePosition    = _mousePositions[_mousePositions.size() - 1];
+                        const auto panVector                = currentMousePosition - previousMousePosition;
+
+                        panBy(-panVector);
+                    }
                 }
             }
         }
@@ -240,6 +313,9 @@ QRectF Navigator2D::getZoomRectangleWorld() const
 
 void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 {
+    if (getNavigationAction().getFreezeNavigation().isChecked())
+        return;
+
 #ifdef NAVIGATOR_2D_VERBOSE
     qDebug() << __FUNCTION__ << zoomRectangleWorld;
 #endif
@@ -271,6 +347,9 @@ float Navigator2D::getZoomFactor() const
 
 void Navigator2D::setZoomFactor(float zoomFactor)
 {
+    if (getNavigationAction().getFreezeNavigation().isChecked())
+        return;
+
     if (zoomFactor == _zoomFactor)
         return;
 
@@ -300,11 +379,14 @@ float Navigator2D::getZoomPercentage() const
 
 void Navigator2D::setZoomPercentage(float zoomPercentage)
 {
+    if (getNavigationAction().getFreezeNavigation().isChecked())
+        return;
+
     beginZooming();
     {
         beginChangeZoomRectangleWorld();
         {
-            if (zoomPercentage < 0.05f)
+            if (zoomPercentage < 0.01f)
                 return;
 
             const auto zoomPercentageNormalized = .01f * zoomPercentage;
@@ -347,12 +429,11 @@ const gui::NavigationAction& Navigator2D::getNavigationAction() const
 
 void Navigator2D::zoomAround(const QPoint& center, float factor)
 {
-    if (!_initialized)
+    if (getNavigationAction().getFreezeNavigation().isChecked())
         return;
 
-#ifdef NAVIGATOR_2D_VERBOSE
-    qDebug() << __FUNCTION__ << center << factor;
-#endif
+    if (!_initialized)
+        return;
 
     beginZooming();
     {
@@ -370,12 +451,11 @@ void Navigator2D::zoomAround(const QPoint& center, float factor)
 
 void Navigator2D::zoomToRectangle(const QRectF& zoomRectangle)
 {
-    if (!_initialized)
+    if (getNavigationAction().getFreezeNavigation().isChecked())
         return;
 
-#ifdef NAVIGATOR_2D_VERBOSE
-    qDebug() << __FUNCTION__ << zoomRectangle;
-#endif
+	if (!_initialized)
+        return;
 
     beginZooming();
     {
@@ -390,12 +470,11 @@ void Navigator2D::zoomToRectangle(const QRectF& zoomRectangle)
 
 void Navigator2D::panBy(const QPointF& delta)
 {
-    if (!_initialized)
+    if (getNavigationAction().getFreezeNavigation().isChecked())
         return;
 
-#ifdef NAVIGATOR_2D_VERBOSE
-    qDebug() << __FUNCTION__ << delta;
-#endif
+	if (!_initialized)
+        return;
 
     beginPanning();
     {
@@ -413,6 +492,9 @@ void Navigator2D::panBy(const QPointF& delta)
 
 void Navigator2D::setZoomCenterWorld(const QPointF& zoomCenterWorld)
 {
+    if (getNavigationAction().getFreezeNavigation().isChecked())
+        return;
+
     if (zoomCenterWorld == _zoomCenterWorld)
         return;
 
@@ -432,6 +514,9 @@ void Navigator2D::resetView(bool force /*= false*/)
         return;
 
     if (!force && hasUserNavigated())
+        return;
+
+    if (_navigationAction.getFreezeNavigation().isChecked())
         return;
 
 #ifdef NAVIGATOR_2D_VERBOSE
@@ -473,6 +558,11 @@ bool Navigator2D::isNavigating() const
 bool Navigator2D::hasUserNavigated() const
 {
     return _userHasNavigated;
+}
+
+QRect Navigator2D::getZoomRegionRectangle() const
+{
+	return _zoomRegionRectangle;
 }
 
 void Navigator2D::setIsPanning(bool isPanning)
@@ -616,6 +706,33 @@ void Navigator2D::beginChangeZoomRectangleWorld()
 void Navigator2D::endChangeZoomRectangleWorld()
 {
     emit zoomRectangleWorldChanged(_previousZoomRectangleWorld, getZoomRectangleWorld());
+}
+
+void Navigator2D::beginZoomToRegion()
+{
+    setIsNavigating(true);
+
+    _zoomRegionInProgress   = true;
+    _zoomRegionRectangle    = QRect();
+
+    if (_zoomOverlayWidget)
+        _zoomOverlayWidget->update();
+}
+
+void Navigator2D::endZoomToRegion()
+{
+    _zoomRegionPoints.clear();
+
+    const auto p1 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), _zoomRegionRectangle.topLeft()).toPointF();
+    const auto p2 = _renderer.getScreenPointToWorldPosition(getViewMatrix(), _zoomRegionRectangle.bottomRight()).toPointF();
+
+    setZoomRectangleWorld(QRectF(p1, p2));
+
+	_zoomRegionInProgress   = false;
+    _zoomRegionRectangle    = QRect();
+
+    if (_zoomOverlayWidget)
+        _zoomOverlayWidget->update();
 }
 
 void Navigator2D::changeCursor(const QCursor& cursor)

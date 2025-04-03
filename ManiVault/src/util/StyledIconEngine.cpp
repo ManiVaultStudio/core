@@ -55,15 +55,16 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 		    }
 
             if (!_iconSettings._modifierSha.isEmpty()) {
-                const auto recolorColor         = qApp->palette().color(static_cast<QPalette::ColorGroup>(mode), _iconSettings.getColorRoleForCurrentTheme());
-                const auto modifierIconPixmap   = recolorPixmap(StyledIcon::pixmaps[_iconSettings._modifierSha], size / 2, recolorColor);
+                const auto recolorColor                 = qApp->palette().color(static_cast<QPalette::ColorGroup>(mode), _iconSettings.getColorRoleForCurrentTheme());
+                const auto scaledModifierIconPixmap     = StyledIcon::pixmaps[_iconSettings._modifierSha].scaled(size / 2, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation);
+                const auto recoloredModifierIconPixmap  = recolorPixmap(scaledModifierIconPixmap, size / 2, recolorColor);
 
                 QPainter modifierIconPixmapPainter(&result);
 
                 modifierIconPixmapPainter.setRenderHint(QPainter::Antialiasing);
                 modifierIconPixmapPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
                 modifierIconPixmapPainter.setRenderHint(QPainter::LosslessImageRendering, true);
-                modifierIconPixmapPainter.drawPixmap(QPoint(size.width() / 2, size.height() / 2), modifierIconPixmap);
+                modifierIconPixmapPainter.drawPixmap(QPointF(std::round(size.width() / 2.f), std::round(size.height() / 2.f)), recoloredModifierIconPixmap);
             }
             
             auto& badgeParameters = _iconSettings._badgeParameters;
