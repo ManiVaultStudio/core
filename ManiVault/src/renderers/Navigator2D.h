@@ -224,6 +224,17 @@ protected: // Navigation
 	/** End changing the zoom rectangle in world coordinates */
 	void endChangeZoomRectangleWorld();
 
+protected: // Cursor
+
+	/**
+     * Change the cursor to \p cursor
+	 * @param cursor Cursor
+	 */
+	void changeCursor(const QCursor& cursor) const;
+
+	/**  Restore cached cursor */
+    void restoreCursor() const;
+
 signals:
 
 	/** Signals that panning has started */
@@ -303,7 +314,8 @@ private:
 	float                   _zoomRectangleMargin;           /** Zoom rectangle margin */
 	QRectF                  _previousZoomRectangleWorld;    /** Previous world zoom rectangle */
 	bool                    _userHasNavigated;              /** Boolean determining whether the user has navigated */
-    gui::NavigationAction   _navigationAction;               /** Navigation group action */
+    gui::NavigationAction   _navigationAction;              /** Navigation group action */
+    QCursor                 _cachedCursor;                  /** Cached cursor */
 };
 
 }
