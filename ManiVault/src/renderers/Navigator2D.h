@@ -73,7 +73,7 @@ public:
 	 * Get the zoom rectangle margin
 	 * @return Zoom rectangle margin
 	 */
-	float getZoomRectangleMargin() const;
+	float getZoomMarginScreen() const;
 
 	/**
 	 * Get the zoom factor
@@ -311,7 +311,8 @@ private:
 	bool                    _isZooming;                     /** Zooming flag */
 	float                   _zoomFactor;                    /** Zoom factor */
 	QPointF                 _zoomCenterWorld;               /** Zoom rectangle top-left in world coordinates */
-	float                   _zoomRectangleMargin;           /** Zoom rectangle margin */
+    float                   _zoomMarginScreen;              /** Zoom margin in screen coordinates */
+    float                   _zoomMarginWorld;               /** Zoom margin in world coordinates */
 	QRectF                  _previousZoomRectangleWorld;    /** Previous world zoom rectangle */
 	bool                    _userHasNavigated;              /** Boolean determining whether the user has navigated */
     gui::NavigationAction   _navigationAction;              /** Navigation group action */

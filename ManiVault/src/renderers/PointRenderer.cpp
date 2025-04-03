@@ -259,8 +259,16 @@ namespace mv
         void PointRenderer::setDataBounds(const QRectF& dataBounds)
         {
 	        Renderer2D::setDataBounds(dataBounds);
+        }
 
-            setWorldBounds(dataBounds);
+        QRectF PointRenderer::computeWorldBounds() const
+        {
+            const auto marginX  = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height() - 2.f * getNavigator().getZoomMarginScreen()));
+            const auto marginY  = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width() - 2.f * getNavigator().getZoomMarginScreen()));
+            const auto margin   = std::max(marginX, marginY);
+            const auto margins  = QMarginsF(margin, margin, margin, margin);
+
+            return getDataBounds().marginsAdded(margins);
         }
 
         void PointRenderer::setData(const std::vector<Vector2f>& positions)

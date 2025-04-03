@@ -41,9 +41,9 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
 
     _zoomOutAction.setIconByName("search-minus");
     _zoomInAction.setIconByName("search-plus");
-    _zoomExtentsAction.setIconByName("expand");
+    _zoomExtentsAction.setIconByName("compress");
 
-	_zoomSelectionAction.setIcon(StyledIcon("expand").withModifier("mouse-pointer"));
+	_zoomSelectionAction.setIcon(StyledIcon("compress").withModifier("mouse-pointer"));
     _zoomSelectionAction.setEnabled(false);
 
     _zoomPercentageAction.setSuffix("%");
@@ -64,23 +64,9 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
 	addAction(&_zoomOutAction, gui::TriggerAction::Icon);
 	addAction(&_zoomPercentageAction);
 	addAction(&_zoomInAction, gui::TriggerAction::Icon);
+    addAction(&_zoomCenterAction);
 	addAction(&_zoomExtentsAction, gui::TriggerAction::Icon);
 	addAction(&_zoomSelectionAction, gui::TriggerAction::Icon);
-	addAction(&_zoomCenterAction);
-
-	//addAction(&_zoomRegionAction);
-
- //   connect(&_zoomCenterXAction, &DecimalAction::valueChanged, this, [this](float value) -> void {
- //       qDebug() << "Zoom center x: " << value;
-	//});
-
- //   connect(&_zoomCenterYAction, &DecimalAction::valueChanged, this, [this](float value) -> void {
- //       qDebug() << "Zoom center y: " << value;
-	//});
-
-    connect(&_zoomFactorAction, &DecimalAction::valueChanged, this, [this](float value) -> void {
-        qDebug() << "Zoom factor: " << value;
-	});
 }
 
 void NavigationAction::setShortcutsEnabled(bool shortcutsEnabled)
