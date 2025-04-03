@@ -85,6 +85,7 @@ public:
 
     /**
      * Addition operator
+     * @param other Other range
      * @return Added range
      */
     NumericalRange<NumericalType>& operator += (const NumericalRange<NumericalType>& other)
@@ -96,10 +97,23 @@ public:
     }
 
     /**
+     * Addition operator
+     * @param value Value to add
+     * @return Added range
+     */
+    NumericalRange<NumericalType>& operator += (float value)
+    {
+        this->first     = std::min(this->first, value);
+        this->second    = std::max(this->second, value);
+
+        return *this;
+    }
+
+    /**
      * Equality operator
      * @param rhs Right-hand-side operator
      */
-    const bool operator == (const NumericalRange<NumericalType>& rhs) const {
+    bool operator == (const NumericalRange<NumericalType>& rhs) const {
         return rhs.getMinimum() == getMinimum() && rhs.getMaximum() == getMaximum();
     }
 
@@ -107,7 +121,7 @@ public:
      * Inequality operator
      * @param rhs Right-hand-side operator
      */
-    const bool operator != (const NumericalRange<NumericalType>& rhs) const {
+    bool operator != (const NumericalRange<NumericalType>& rhs) const {
         return rhs.getMinimum() != getMinimum() || rhs.getMaximum() != getMaximum();
     }
 };

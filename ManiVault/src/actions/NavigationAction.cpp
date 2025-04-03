@@ -64,6 +64,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
 	addAction(&_zoomPercentageAction);
 	addAction(&_zoomInAction, gui::TriggerAction::Icon);
 	addAction(&_zoomExtentsAction);
+	addAction(&_zoomSelectionAction);
 	addAction(&_zoomCenterAction);
 
 	//addAction(&_zoomRegionAction);
