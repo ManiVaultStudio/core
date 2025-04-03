@@ -285,6 +285,8 @@ void Navigator2D::setZoomFactor(float zoomFactor)
     _zoomFactor = zoomFactor;
 
 	emit zoomFactorChanged(previousZoomFactor, _zoomFactor);
+
+    setZoomPercentage(getZoomPercentage());
 }
 
 float Navigator2D::getZoomPercentage() const
