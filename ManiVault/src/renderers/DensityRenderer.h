@@ -39,6 +39,9 @@ public:
      */
     void setDataBounds(const QRectF& dataBounds) override;
 
+    /** Update the world bounds */
+    QRectF computeWorldBounds() const override;
+
     void setRenderMode(RenderMode renderMode);
     void setData(const std::vector<Vector2f>* data);
     void setWeights(const std::vector<float>* weights);

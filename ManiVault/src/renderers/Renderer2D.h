@@ -164,6 +164,11 @@ private:
     /** Update the model-view-projection matrix */
     void updateModelViewProjectionMatrix();
 
+protected:
+
+    /** Compute the world bounds */
+    virtual QRectF computeWorldBounds() const = 0;
+
 signals:
 
 	/**

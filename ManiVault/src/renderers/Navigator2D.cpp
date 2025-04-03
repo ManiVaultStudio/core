@@ -26,7 +26,8 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _isPanning(false),
     _isZooming(false),
     _zoomFactor(1.0f),
-    _zoomRectangleMargin(0.f),
+    _zoomMarginScreen(100.f),
+    _zoomMarginWorld(.0f),
     _userHasNavigated(),
     _navigationAction(this, "Navigation")
 {
@@ -264,9 +265,9 @@ void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 	emit zoomRectangleWorldChanged(previousZoomRectangleWorld, getZoomRectangleWorld());
 }
 
-float Navigator2D::getZoomRectangleMargin() const
+float Navigator2D::getZoomMarginScreen() const
 {
-    return _zoomRectangleMargin;
+    return _zoomMarginScreen;
 }
 
 float Navigator2D::getZoomFactor() const
@@ -450,7 +451,7 @@ void Navigator2D::resetView(bool force /*= false*/)
             const auto zoomFactorX = _renderer.getWorldBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
             const auto zoomFactorY = _renderer.getWorldBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
 
-            setZoomFactor(std::max(zoomFactorX, zoomFactorY) + (_zoomRectangleMargin / _renderer.getRenderSize().height()) / 2.f);
+            setZoomFactor(std::max(zoomFactorX, zoomFactorY));
             setZoomCenterWorld(_renderer.getWorldBounds().center());
         }
         endChangeZoomRectangleWorld();

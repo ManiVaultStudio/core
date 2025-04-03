@@ -22,6 +22,10 @@ Renderer2D::Renderer2D(QObject* parent) :
 void Renderer2D::resize(QSize renderSize)
 {
     _renderSize = renderSize;
+
+    setWorldBounds(computeWorldBounds());
+
+    getNavigator().resetView();
 }
 
 QSize Renderer2D::getRenderSize() const
@@ -68,14 +72,16 @@ void Renderer2D::setDataBounds(const QRectF& dataBounds)
     qDebug() << __FUNCTION__ << dataBounds;
 #endif
 
-    const auto previousDataBounds = _dataBounds;
+    const auto previousDataBounds   = _dataBounds;
 
     if (dataBounds == _dataBounds)
         return;
 
     _dataBounds = dataBounds;
-
+    
     emit dataBoundsChanged(previousDataBounds, _dataBounds);
+
+    setWorldBounds(computeWorldBounds());
 }
 
 QRectF Renderer2D::getWorldBounds() const

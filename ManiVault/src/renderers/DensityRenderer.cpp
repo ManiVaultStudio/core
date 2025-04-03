@@ -35,11 +35,18 @@ void DensityRenderer::setDataBounds(const QRectF& dataBounds)
 
     _densityComputation.setBounds(dataBounds.left(), dataBounds.right(), dataBounds.bottom(), dataBounds.top());
 
-    // .0f, -_densityComputation.getDensityTextureSize().height()
-
-    setWorldBounds(QRectF(QPointF(), _densityComputation.getDensityTextureSize()));
-
     updateQuad();
+}
+
+QRectF DensityRenderer::computeWorldBounds() const
+{
+    const auto textureSize  = static_cast<float>(_densityComputation.getDensityTextureSize().height());
+    const auto marginX      = getNavigator().getZoomMarginScreen() * textureSize / (static_cast<float>(getRenderSize().height() - 2.f * getNavigator().getZoomMarginScreen()));
+    const auto marginY      = getNavigator().getZoomMarginScreen() * textureSize / (static_cast<float>(getRenderSize().width() - 2.f * getNavigator().getZoomMarginScreen()));
+    const auto margin       = std::max(marginX, marginY);
+    const auto margins      = QMarginsF(margin, margin, margin, margin);
+
+    return QRectF(QPointF(),_densityComputation.getDensityTextureSize()).marginsAdded(margins);
 }
 
 void DensityRenderer::setRenderMode(RenderMode renderMode)
