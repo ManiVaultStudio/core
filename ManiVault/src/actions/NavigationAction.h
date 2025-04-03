@@ -6,6 +6,7 @@
 
 #include <actions/HorizontalToolbarAction.h>
 #include <actions/TriggerAction.h>
+#include <actions/ToggleAction.h>
 #include <actions/DecimalAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/DecimalRectangleAction.h>
@@ -68,6 +69,7 @@ public: // Action getters
     TriggerAction& getZoomExtentsAction() { return _zoomExtentsAction; }
     TriggerAction& getZoomSelectionAction() { return _zoomSelectionAction; }
     TriggerAction& getZoomRegionAction() { return _zoomRegionAction; }
+    ToggleAction& getFreezeNavigation() { return _freezeNavigation; }
     DecimalRectangleAction& getZoomRectangleAction() { return _zoomRectangleAction; }
     DecimalPointAction& getZoomCenterAction() { return _zoomCenterAction; }
     DecimalAction& getZoomFactorAction() { return _zoomFactorAction; }
@@ -79,6 +81,7 @@ private:
     TriggerAction           _zoomExtentsAction;         /** Zoom extents action */
     TriggerAction           _zoomSelectionAction;       /** Zoom to selection extents action */
     TriggerAction           _zoomRegionAction;          /** Zoom to region action */
+    ToggleAction            _freezeNavigation;          /** Freeze navigation action */
     DecimalRectangleAction  _zoomRectangleAction;       /** Rectangle action for setting the current zoom bounds */
     DecimalPointAction      _zoomCenterAction;          /** Zoom center action */
     DecimalAction           _zoomFactorAction;          /** Zoom factor action */
