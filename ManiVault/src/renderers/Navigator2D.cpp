@@ -150,16 +150,12 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
 
         if (event->type() == QEvent::Wheel) {
             if (auto* wheelEvent = dynamic_cast<QWheelEvent*>(event)) {
-                changeCursor(Qt::ClosedHandCursor);
-                {
-                    constexpr auto zoomSensitivity = .1f;
+                constexpr auto zoomSensitivity = .1f;
 
-                    if (wheelEvent->angleDelta().x() < 0)
-                        zoomAround(wheelEvent->position().toPoint(), 1.0f - zoomSensitivity);
-                    else
-                        zoomAround(wheelEvent->position().toPoint(), 1.0f + zoomSensitivity);
-                }
-                restoreCursor();
+                if (wheelEvent->angleDelta().x() < 0)
+                    zoomAround(wheelEvent->position().toPoint(), 1.0f - zoomSensitivity);
+                else
+                    zoomAround(wheelEvent->position().toPoint(), 1.0f + zoomSensitivity);
             }
         }
 
@@ -610,7 +606,7 @@ void Navigator2D::endNavigation()
     qDebug() << __FUNCTION__;
 #endif
 
-    restoreCursor();
+    changeCursor(Qt::ArrowCursor);
 
     setIsNavigating(false);
 
@@ -627,12 +623,14 @@ void Navigator2D::endChangeZoomRectangleWorld()
     emit zoomRectangleWorldChanged(_previousZoomRectangleWorld, getZoomRectangleWorld());
 }
 
-void Navigator2D::changeCursor(const QCursor& cursor) const
+void Navigator2D::changeCursor(const QCursor& cursor)
 {
 	Q_ASSERT(_sourceWidget);
 
 	if (!_sourceWidget)
 		return;
+
+    _cachedCursor = _sourceWidget->cursor();
 
 	_sourceWidget->setCursor(cursor);
 }

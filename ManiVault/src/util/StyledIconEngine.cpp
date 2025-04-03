@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QStyleHints>
+#include <QGraphicsPixmapItem>
 
 namespace mv::util
 {
@@ -52,6 +53,18 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
                     break;
                 }
 		    }
+
+            if (!_iconSettings._modifierSha.isEmpty()) {
+                const auto recolorColor         = qApp->palette().color(static_cast<QPalette::ColorGroup>(mode), _iconSettings.getColorRoleForCurrentTheme());
+                const auto modifierIconPixmap   = recolorPixmap(StyledIcon::pixmaps[_iconSettings._modifierSha], size / 2, recolorColor);
+
+                QPainter modifierIconPixmapPainter(&result);
+
+                modifierIconPixmapPainter.setRenderHint(QPainter::Antialiasing);
+                modifierIconPixmapPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+                modifierIconPixmapPainter.setRenderHint(QPainter::LosslessImageRendering, true);
+                modifierIconPixmapPainter.drawPixmap(QPoint(size.width() / 2, size.height() / 2), modifierIconPixmap);
+            }
             
             auto& badgeParameters = _iconSettings._badgeParameters;
 
@@ -124,6 +137,11 @@ QPixmap StyledIconEngine::recolorPixmap(const QPixmap& pixmap, const QSize& size
     coloredPixmap.fill(Qt::transparent);
 
     QPainter painter(&coloredPixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    painter.setRenderHint(QPainter::LosslessImageRendering, true);
+
     painter.drawPixmap(0, 0, size.width(), size.height(), pixmap);
 
     painter.setCompositionMode(QPainter::CompositionMode_SourceIn);

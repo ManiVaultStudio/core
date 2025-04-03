@@ -230,7 +230,7 @@ protected: // Cursor
      * Change the cursor to \p cursor
 	 * @param cursor Cursor
 	 */
-	void changeCursor(const QCursor& cursor) const;
+	void changeCursor(const QCursor& cursor);
 
 	/**  Restore cached cursor */
     void restoreCursor() const;
