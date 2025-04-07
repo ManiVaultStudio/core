@@ -5,9 +5,7 @@
 #include "LogoWidget.h"
 
 LogoWidget::LogoWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _layout(),
-    _headerLabel()
+    QWidget(parent)
 {
     setAutoFillBackground(true);
     setLayout(&_layout);

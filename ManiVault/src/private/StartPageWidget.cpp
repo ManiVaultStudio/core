@@ -8,7 +8,7 @@
 #include <QDebug>
 
 StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
-    PageWidget(QString("<b>ManiVault</b> v%1.%2.%3%4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data())), parent),
+    PageWidget(QString("<b>ManiVault</b> v%1.%2.%3-%4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data())), parent),
     _startPageContentWidget(this)
 {
     getContentLayout().addWidget(&_startPageContentWidget, Qt::AlignTop);

@@ -24,6 +24,25 @@ class CORE_EXPORT Notification : public QWidget
 {
     Q_OBJECT
 
+protected:
+
+    /** For custom drawing of the notification widget background */
+    class NotificationWidget : public QWidget
+    {
+    public:
+
+        /** No need for custom constructor*/
+    	using QWidget::QWidget;
+
+        /**
+         * Override the default paint behavior
+         * @param event Pointer to paint event that occurred
+         */
+        void paintEvent(QPaintEvent* event) override;
+
+        QSize sizeHint() const override;
+    };
+
 public:
 
     /** Duration types */

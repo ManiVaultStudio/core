@@ -4,6 +4,7 @@
 
 #include "Core.h"
 
+#include "ErrorManager.h"
 #include "ActionsManager.h"
 #include "ThemeManager.h"
 #include "PluginManager.h"
@@ -44,14 +45,11 @@ Core::Core() :
     });
 }
 
-Core::~Core()
-{
-}
-
 void Core::createManagers()
 {
     _managers.resize(static_cast<int>(ManagerType::Count));
 
+    _managers[static_cast<int>(ManagerType::Errors)]        = std::make_unique<ErrorManager>(this);
     _managers[static_cast<int>(ManagerType::Actions)]       = std::make_unique<ActionsManager>(this);
     _managers[static_cast<int>(ManagerType::Theme)]         = std::make_unique<ThemeManager>(this);
 	_managers[static_cast<int>(ManagerType::Plugins)]       = std::make_unique<PluginManager>(this);
@@ -141,6 +139,11 @@ AbstractManager* Core::getManager(const ManagerType& managerType)
     return _managers[static_cast<int>(managerType)].get();
 }
 
+AbstractErrorManager& Core::getErrorManager()
+{
+    return *dynamic_cast<AbstractErrorManager*>(getManager(ManagerType::Errors));
+}
+
 AbstractActionsManager& Core::getActionsManager()
 {
     return *dynamic_cast<AbstractActionsManager*>(getManager(ManagerType::Actions));
@@ -191,7 +194,7 @@ AbstractSettingsManager& Core::getSettingsManager()
     return *dynamic_cast<AbstractSettingsManager*>(getManager(ManagerType::Settings));
 }
 
-mv::AbstractHelpManager& Core::getHelpManager()
+AbstractHelpManager& Core::getHelpManager()
 {
     return *dynamic_cast<AbstractHelpManager*>(getManager(ManagerType::Help));
 }

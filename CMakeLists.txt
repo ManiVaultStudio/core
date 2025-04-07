@@ -17,6 +17,7 @@ file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 # Other user-facing options
 option(MV_USE_GTEST "Use GoogleTest" OFF)
 option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
+option(MV_USE_ERROR_LOGGING "Use error logging with Sentry" ON)
 option(MV_PRECOMPILE_HEADERS "Precompile several headers for faster compilation" ON)
 option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
 

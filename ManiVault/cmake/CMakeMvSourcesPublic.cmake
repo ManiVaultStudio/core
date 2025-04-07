@@ -16,6 +16,8 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractSettingsManager.h
     src/AbstractTaskManager.h
     src/AbstractHelpManager.h
+    src/AbstractErrorManager.h
+    src/AbstractErrorLogger.h
     src/AbstractThemeManager.h
 )
 
@@ -974,6 +976,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/TasksSettingsAction.h
     src/AppearanceSettingsAction.h
     src/TemporaryDirectoriesSettingsAction.h
+	src/ErrorLoggingSettingsAction.h
     src/PluginGlobalSettingsGroupAction.h
 )
 
@@ -984,6 +987,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/TasksSettingsAction.cpp
     src/AppearanceSettingsAction.cpp
     src/TemporaryDirectoriesSettingsAction.cpp
+    src/ErrorLoggingSettingsAction.cpp
     src/PluginGlobalSettingsGroupAction.cpp
 )
 
