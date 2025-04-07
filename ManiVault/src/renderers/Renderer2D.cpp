@@ -35,12 +35,30 @@ QSize Renderer2D::getRenderSize() const
 
 Navigator2D& Renderer2D::getNavigator()
 {
+    if (_customNavigator) {
+        return *_customNavigator;
+    }
+
 	return _navigator;
 }
 
 const Navigator2D& Renderer2D::getNavigator() const
 {
+    if (_customNavigator) {
+        return *_customNavigator;
+    }
+
     return _navigator;
+}
+
+QPointer<Navigator2D> Renderer2D::getCustomNavigator() const
+{
+	return _customNavigator;
+}
+
+void Renderer2D::setCustomNavigator(const QPointer<Navigator2D>& customNavigator)
+{
+	_customNavigator = customNavigator;
 }
 
 void Renderer2D::beginRender()
@@ -117,7 +135,7 @@ QVector3D Renderer2D::getScreenPointToWorldPosition(const QMatrix4x4& modelViewM
 
 QVector2D Renderer2D::getWorldPositionToNormalizedScreenPoint(const QVector3D& position) const
 {
-    const auto clipSpacePos = getProjectionMatrix() * (_navigator.getViewMatrix() * QVector4D(position, 1.0));
+    const auto clipSpacePos = getProjectionMatrix() * (getNavigator().getViewMatrix() * QVector4D(position, 1.0));
 
     return (clipSpacePos.toVector3D() / clipSpacePos.w()).toVector2D();
 }

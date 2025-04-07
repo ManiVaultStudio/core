@@ -42,6 +42,12 @@ public:
     /** Update the world bounds */
     QRectF computeWorldBounds() const override;
 
+    /**
+     * Set density computation data boundss
+     * @param bounds Density computation data bounds
+     */
+    void setDensityComputationDataBounds(const QRectF& bounds);
+
     void setRenderMode(RenderMode renderMode);
     void setData(const std::vector<Vector2f>* data);
     void setWeights(const std::vector<float>* weights);

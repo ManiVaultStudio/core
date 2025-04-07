@@ -33,20 +33,24 @@ void DensityRenderer::setDataBounds(const QRectF& dataBounds)
 {
     Renderer2D::setDataBounds(dataBounds);
 
-    _densityComputation.setBounds(dataBounds.left(), dataBounds.right(), dataBounds.bottom(), dataBounds.top());
-
     updateQuad();
 }
 
-QRectF DensityRenderer::computeWorldBounds() const
+QRectF DensityRenderer::computeWorldBounds() const 
 {
-    const auto textureSize  = static_cast<float>(_densityComputation.getDensityTextureSize().height());
-    const auto marginX      = getNavigator().getZoomMarginScreen() * textureSize / (static_cast<float>(getRenderSize().height() - 2.f * getNavigator().getZoomMarginScreen()));
-    const auto marginY      = getNavigator().getZoomMarginScreen() * textureSize / (static_cast<float>(getRenderSize().width() - 2.f * getNavigator().getZoomMarginScreen()));
-    const auto margin       = std::max(marginX, marginY);
-    const auto margins      = QMarginsF(margin, margin, margin, margin);
+    const auto squareSize       = std::max(getDataBounds().width(), getDataBounds().height());
+    const auto squareDataBounds = QRectF(getDataBounds().center() - QPointF(squareSize / 2.f, squareSize / 2.f), QSizeF(squareSize, squareSize));
+    const auto marginX          = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().height() - 2.f * getNavigator().getZoomMarginScreen()));
+    const auto marginY          = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().width() - 2.f * getNavigator().getZoomMarginScreen()));
+    const auto margin           = std::max(marginX, marginY);
+    const auto margins          = QMarginsF(margin, margin, margin, margin);
 
-    return QRectF(QPointF(),_densityComputation.getDensityTextureSize()).marginsAdded(margins);
+    return squareDataBounds.marginsAdded(margins);
+}
+
+void DensityRenderer::setDensityComputationDataBounds(const QRectF& bounds)
+{
+    _densityComputation.setBounds(bounds.left(), bounds.right(), bounds.bottom(), bounds.top());
 }
 
 void DensityRenderer::setRenderMode(RenderMode renderMode)
@@ -148,15 +152,17 @@ void DensityRenderer::destroy()
 
 void DensityRenderer::updateQuad()
 {
-    const auto textureSize  = _densityComputation.getDensityTextureSize().toSizeF();
-    const auto width        = static_cast<float>(textureSize.width());
-    const auto height       = static_cast<float>(textureSize.height());
-	
+    const auto worldBounds = getDataBounds();//computeWorldBounds();
+    const auto left         = static_cast<float>(worldBounds.left());
+    const auto right        = static_cast<float>(worldBounds.right());
+    const auto top          = static_cast<float>(worldBounds.top());
+    const auto bottom       = static_cast<float>(worldBounds.bottom());
+
     float vertices[] = {
-        0.f,    0.f,        0.0f, 0.0f,
-        width,  0.f,        1.0f, 0.0f,
-        width,  height,     1.0f, 1.0f,
-        0.f,    height,     0.0f, 1.0f
+        left,   bottom, 0.0f,   0.0f,
+        right,  bottom, 1.0f,   0.0f,
+        right,  top,    1.0f,   1.0f,
+        left,   top,    0.0f,   1.0f
     };
 
     unsigned int indices[] = {
@@ -190,6 +196,8 @@ void DensityRenderer::updateQuad()
 
 void DensityRenderer::drawQuad()
 {
+    updateQuad();
+
     glBindVertexArray(_VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
