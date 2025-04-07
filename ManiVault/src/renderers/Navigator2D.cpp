@@ -138,6 +138,8 @@ void Navigator2D::initialize(QWidget* sourceWidget)
     _sourceWidget->addAction(&_navigationAction.getZoomInAction());
     _sourceWidget->addAction(&_navigationAction.getZoomExtentsAction());
     _sourceWidget->addAction(&_navigationAction.getZoomOutAction());
+    _sourceWidget->addAction(&_navigationAction.getZoomSelectionAction());
+    _sourceWidget->addAction(&_navigationAction.getZoomRegionAction());
 
     _zoomOverlayWidget = new ZoomOverlayWidget(*this, _sourceWidget);
 

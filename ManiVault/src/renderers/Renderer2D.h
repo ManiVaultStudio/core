@@ -59,6 +59,20 @@ public:
      */
     const Navigator2D& getNavigator() const;
 
+public:
+
+	/**
+	 * Get custom navigator
+	 * @return Pointer to custom navigator
+	 */
+	QPointer<Navigator2D> getCustomNavigator() const;
+
+/**
+     * Set custom navigator to \p customNavigator
+     * @param customNavigator Pointer to custom navigator
+     */
+    void setCustomNavigator(const QPointer<Navigator2D>& customNavigator);
+
 public: // Coordinate conversions
 
     /**
@@ -186,12 +200,13 @@ signals:
     void worldBoundsChanged(const QRectF& previousWorldBounds, const QRectF& currentWorldBounds);
 
 private:
-    QSize           _renderSize;                    /** Size of the renderer canvas */
-    Navigator2D     _navigator;                     /** 2D navigator */
-    QRectF          _dataBounds;                    /** Bounds of the data */
-    QRectF          _worldBounds;                   /** Bounds of the world */
-    QMatrix4x4      _modelMatrix;                   /** Model matrix */
-    QMatrix4x4      _modelViewProjectionMatrix;     /** Model-view-projection matrix */
+    QSize                   _renderSize;                    /** Size of the renderer canvas */
+    Navigator2D             _navigator;                     /** 2D navigator */
+    QPointer<Navigator2D>   _customNavigator;               /** Use this one in stead of Renderer2D#_navigator when set */
+    QRectF                  _dataBounds;                    /** Bounds of the data */
+    QRectF                  _worldBounds;                   /** Bounds of the world */
+    QMatrix4x4              _modelMatrix;                   /** Model matrix */
+    QMatrix4x4              _modelViewProjectionMatrix;     /** Model-view-projection matrix */
 
     friend class Navigator2D;
 };

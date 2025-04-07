@@ -97,7 +97,8 @@ void NavigationAction::setShortcutsEnabled(bool shortcutsEnabled)
     _zoomOutAction.setShortcut(shortcutsEnabled ? QKeySequence("-") : QKeySequence());
     _zoomInAction.setShortcut(shortcutsEnabled ? QKeySequence("+") : QKeySequence());
     _zoomExtentsAction.setShortcut(shortcutsEnabled ? QKeySequence("O") : QKeySequence());
-    //_zoomSelectionAction.setShortcut(shortcutsEnabled ? QKeySequence("d") : QKeySequence());
+    _zoomSelectionAction.setShortcut(shortcutsEnabled ? QKeySequence("H") : QKeySequence());
+    _zoomRegionAction.setShortcut(shortcutsEnabled ? QKeySequence("F") : QKeySequence());
 }
 
 void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
