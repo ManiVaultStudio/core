@@ -5,12 +5,13 @@
 #pragma once
 
 #include "PageContentWidget.h"
+
+#include <util/Serializable.h>
+#include <actions/ToggleAction.h>
+#include <actions/TriggerAction.h>
+
 #include "StartPageOpenProjectWidget.h"
 #include "StartPageGetStartedWidget.h"
-
-#include <actions/ToggleAction.h>
-#include <actions/OptionsAction.h>
-#include <actions/TriggerAction.h>
 
 /**
  * Start page content widget class
@@ -19,7 +20,7 @@
  *
  * @author Thomas Kroes
  */
-class StartPageContentWidget final : public PageContentWidget
+class StartPageContentWidget final : public PageContentWidget, public mv::util::Serializable
 {
 protected:
 
@@ -31,6 +32,13 @@ protected:
 
     /** Updates the actions to reflect changes */
     void updateActions();
+
+    /**
+     * Override to conditionally add the export action
+     * @param event Pointer to event that occurred
+     * @return 
+     */
+    bool event(QEvent* event) override;
 
 public: // Action getters
 
@@ -50,6 +58,7 @@ private:
     mv::gui::ToggleAction           _toggleTutorialsAction;             /** Toggle tutorials section */
     mv::gui::GroupAction            _settingsAction;                    /** Settings action */
     mv::gui::TriggerAction          _toLearningCenterAction;            /** Trigger action for showing the learning center */
+    mv::gui::TriggerAction          _exportAction;                      /** Trigger action for exporting the current configuration */
     mv::gui::HorizontalGroupAction  _toolbarAction;                     /** Bottom toolbar action */
     StartPageOpenProjectWidget      _openProjectWidget;                 /** Left column widget for opening existing projects */
     StartPageGetStartedWidget       _getStartedWidget;                  /** Right column widget for getting started operations */

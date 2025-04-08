@@ -12,10 +12,12 @@
 #include <QDebug>
 
 using namespace mv;
+using namespace mv::util;
 using namespace mv::gui;
 
 StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     PageContentWidget(Qt::Horizontal, parent),
+    Serializable("StartPageContent"),
     _compactViewAction(this, "Compact"),
     _toggleOpenCreateProjectAction(this, "Open & Create", true),
     _toggleRecentProjectsAction(this, "Recent Projects", true),
@@ -24,6 +26,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleTutorialsAction(this, "Tutorials", true),
     _settingsAction(this, "Settings"),
     _toLearningCenterAction(this, "Learning center"),
+    _exportAction(this, "Export"),
     _toolbarAction(this, "Toolbar settings"),
     _openProjectWidget(this),
     _getStartedWidget(this)
@@ -44,6 +47,8 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toLearningCenterAction.setIconByName("chalkboard-user");
     _toLearningCenterAction.setToolTip("Go to the learning center");
     _toLearningCenterAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _exportAction.setIconByName("save");
 
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
@@ -66,6 +71,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toolbarAction.addAction(&_settingsAction);
     _toolbarAction.addAction(&_toLearningCenterAction);
     _toolbarAction.addAction(&mv::projects().getBackToProjectAction());
+    _toolbarAction.addAction(&_exportAction);
 
     getMainLayout().addWidget(_toolbarAction.createWidget(this));
 
@@ -73,6 +79,10 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
         mv::projects().getShowStartPageAction().setChecked(false);
         mv::help().getShowLearningCenterPageAction().setChecked(true);
     });
+
+    connect(&_exportAction, &TriggerAction::triggered, this, [this]() -> void {
+        toJsonFile();
+	});
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
 }
@@ -83,4 +93,16 @@ void StartPageContentWidget::updateActions()
 
     _openProjectWidget.updateActions();
     _getStartedWidget.updateActions();
+}
+
+bool StartPageContentWidget::event(QEvent* event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        if (auto keyEvent = dynamic_cast<QKeyEvent*>(event)) {
+            if (keyEvent->key() == Qt::Key_F8) {
+                _exportAction.setVisible(true);
+            }
+        }
+    }
+	return PageContentWidget::event(event);
 }

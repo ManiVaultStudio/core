@@ -113,7 +113,7 @@ public:
      * Save to JSON file
      * @param filePath Path to the JSON file (if none/invalid a file save dialog is automatically opened)
      */
-    void toJsonFile(const QString& filePath = "");
+    void toJsonFile(const QString& filePath = "") const;
 
     /** Assigns a fresh new identifier to the serializable object */
     void makeUnique();
