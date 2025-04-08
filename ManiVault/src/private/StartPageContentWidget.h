@@ -33,12 +33,19 @@ protected:
     /** Updates the actions to reflect changes */
     void updateActions();
 
+public: // Serialization
+
     /**
-     * Override to conditionally add the export action
-     * @param event Pointer to event that occurred
-     * @return 
+     * Load widget action from variant
+     * @param variantMap Variant representation of the widget action
      */
-    bool event(QEvent* event) override;
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 public: // Action getters
 
@@ -48,6 +55,9 @@ public: // Action getters
     const mv::gui::ToggleAction& getToggleProjectFromWorkspaceAction() const { return _toggleProjectFromWorkspaceAction; }
     const mv::gui::ToggleAction& getToggleProjectFromDataAction() const { return _toggleProjectFromDataAction; }
     const mv::gui::ToggleAction& getToggleTutorialsAction() const { return _toggleTutorialsAction; }
+    const mv::gui::GroupAction& getSettingsAction() const { return _settingsAction; }
+    const mv::gui::TriggerAction& getToLearningCenterAction() const { return _toLearningCenterAction; }
+    mv::gui::HorizontalGroupAction& getToolbarAction() { return _toolbarAction; }
 
 private:
     mv::gui::ToggleAction           _compactViewAction;                 /** Toggle compact view on/off */
@@ -58,7 +68,6 @@ private:
     mv::gui::ToggleAction           _toggleTutorialsAction;             /** Toggle tutorials section */
     mv::gui::GroupAction            _settingsAction;                    /** Settings action */
     mv::gui::TriggerAction          _toLearningCenterAction;            /** Trigger action for showing the learning center */
-    mv::gui::TriggerAction          _exportAction;                      /** Trigger action for exporting the current configuration */
     mv::gui::HorizontalGroupAction  _toolbarAction;                     /** Bottom toolbar action */
     StartPageOpenProjectWidget      _openProjectWidget;                 /** Left column widget for opening existing projects */
     StartPageGetStartedWidget       _getStartedWidget;                  /** Right column widget for getting started operations */

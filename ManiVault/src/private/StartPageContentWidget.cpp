@@ -26,31 +26,28 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleTutorialsAction(this, "Tutorials", true),
     _settingsAction(this, "Settings"),
     _toLearningCenterAction(this, "Learning center"),
-    _exportAction(this, "Export"),
     _toolbarAction(this, "Toolbar settings"),
     _openProjectWidget(this),
     _getStartedWidget(this)
 {
-    _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
-    _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
-    _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
-    _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
-    _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
-    _toggleTutorialsAction.setSettingsPrefix("StartPage/ToggleTutorials");
+    if (!QFileInfo("StartPage.json").exists()) {
+        _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
+        _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
+        _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
+        _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
+        _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
+        _toggleTutorialsAction.setSettingsPrefix("StartPage/ToggleTutorials");
+    }
 
     _toggleProjectFromWorkspaceAction.setEnabled(false);
 
     _settingsAction.setText("Toggle Views");
     _settingsAction.setToolTip("Adjust page settings");
-    _settingsAction.setIconByName("gear");
+    _settingsAction.setIconByName("toggle-on");
 
     _toLearningCenterAction.setIconByName("chalkboard-user");
     _toLearningCenterAction.setToolTip("Go to the learning center");
     _toLearningCenterAction.setDefaultWidgetFlags(TriggerAction::Icon);
-
-    _exportAction.setIconByName("save");
-    _exportAction.setVisible(false);
-    _exportAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
 
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
@@ -73,7 +70,6 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toolbarAction.addAction(&_settingsAction);
     _toolbarAction.addAction(&_toLearningCenterAction);
     _toolbarAction.addAction(&mv::projects().getBackToProjectAction());
-    _toolbarAction.addAction(&_exportAction);
 
     getMainLayout().addWidget(_toolbarAction.createWidget(this));
 
@@ -81,10 +77,6 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
         mv::projects().getShowStartPageAction().setChecked(false);
         mv::help().getShowLearningCenterPageAction().setChecked(true);
     });
-
-    connect(&_exportAction, &TriggerAction::triggered, this, [this]() -> void {
-        toJsonFile();
-	});
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
 }
@@ -97,14 +89,28 @@ void StartPageContentWidget::updateActions()
     _getStartedWidget.updateActions();
 }
 
-bool StartPageContentWidget::event(QEvent* event)
+void StartPageContentWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (event->type() == QEvent::KeyPress) {
-        if (auto keyEvent = dynamic_cast<QKeyEvent*>(event)) {
-            if (keyEvent->key() == Qt::Key_F8) {
-                _exportAction.setVisible(true);
-            }
-        }
-    }
-	return PageContentWidget::event(event);
+	Serializable::fromVariantMap(variantMap);
+
+    _compactViewAction.fromParentVariantMap(variantMap);
+    _toggleOpenCreateProjectAction.fromParentVariantMap(variantMap);
+    _toggleRecentProjectsAction.fromParentVariantMap(variantMap);
+    _toggleProjectFromWorkspaceAction.fromParentVariantMap(variantMap);
+    _toggleProjectFromDataAction.fromParentVariantMap(variantMap);
+    _toggleTutorialsAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap StartPageContentWidget::toVariantMap() const
+{
+	auto variantMap = Serializable::toVariantMap();
+
+    _compactViewAction.insertIntoVariantMap(variantMap);
+    _toggleOpenCreateProjectAction.insertIntoVariantMap(variantMap);
+    _toggleRecentProjectsAction.insertIntoVariantMap(variantMap);
+    _toggleProjectFromWorkspaceAction.insertIntoVariantMap(variantMap);
+    _toggleProjectFromDataAction.insertIntoVariantMap(variantMap);
+    _toggleTutorialsAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }

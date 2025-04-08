@@ -105,13 +105,13 @@ public:
 
     /**
      * Load from JSON file
-     * @param filePath Path to the JSON file (if none/invalid a file open dialog is automatically opened)
+     * @param filePath Path to the JSON file
      */
     void fromJsonFile(const QString& filePath = "");
 
     /**
      * Save to JSON file
-     * @param filePath Path to the JSON file (if none/invalid a file save dialog is automatically opened)
+     * @param filePath Path to the JSON file
      */
     void toJsonFile(const QString& filePath = "") const;
 
