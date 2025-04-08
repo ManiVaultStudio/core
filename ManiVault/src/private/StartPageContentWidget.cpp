@@ -49,6 +49,8 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toLearningCenterAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _exportAction.setIconByName("save");
+    _exportAction.setVisible(false);
+    _exportAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
 
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 

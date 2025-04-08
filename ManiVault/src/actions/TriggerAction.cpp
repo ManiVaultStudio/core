@@ -72,8 +72,10 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
 void TriggerAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
 {
+    //QPushButton::resizeEvent(event);
+    //return;
     if (_widgetFlags & WidgetFlag::Icon && (_widgetFlags & WidgetFlag::Text) == 0)
-		setFixedSize(event->size().height(), event->size().height());
+		setFixedSize(sizeHint().height(), sizeHint().height());
     else
 		QPushButton::resizeEvent(event);
 }
