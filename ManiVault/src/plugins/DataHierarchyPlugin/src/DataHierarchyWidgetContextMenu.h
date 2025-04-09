@@ -9,8 +9,9 @@
 
 #include <QMenu>
 
-#include <actions/TriggerAction.h>
 #include <actions/IntegralAction.h>
+#include <actions/StringAction.h>
+#include <actions/TriggerAction.h>
 
 class QAction;
 
@@ -55,6 +56,12 @@ private:
      * @return Pointer to action for selection grouping
      */
     QAction* getSelectionGroupAction();
+
+    /**
+     * Get action for selection-pattern grouping
+     * @return Pointer to action for selection-pattern grouping
+     */
+    QAction* getSelectionGroupPatternAction();
 
     /**
      * Get menu for item locking
@@ -102,7 +109,6 @@ signals:
     void closeDialog(bool onlyIndices);
 
 public slots:
-    // Pass selected data set name from SelectionGroupIndexDialog to BinExporter (dialogClosed)
     void closeDialogAction() {
         emit closeDialog(confirmButton.isChecked());
     }
@@ -110,4 +116,35 @@ public slots:
 private:
     gui::IntegralAction      selectionIndexAction;
     gui::TriggerAction       confirmButton;
+};
+
+/**
+ * Helper dialog for selection pattern selection
+ */
+class SelectionPatternGroupIndexDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    SelectionPatternGroupIndexDialog(QWidget* parent);
+
+    std::int32_t getSelectionGroupIndex() {
+        return selectionIndexAction.getValue();
+    }
+
+    QString getSelectionGroupPattern() {
+        return selectionPatternAction.getString();
+    }
+
+signals:
+    void closeDialog(bool onlyIndices);
+
+public slots:
+    void closeDialogAction() {
+        emit closeDialog(confirmButton.isChecked());
+    }
+
+private:
+    gui::IntegralAction     selectionIndexAction;
+    gui::StringAction       selectionPatternAction;
+    gui::TriggerAction      confirmButton;
 };

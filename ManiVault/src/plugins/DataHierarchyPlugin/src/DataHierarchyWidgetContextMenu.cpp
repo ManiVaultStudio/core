@@ -16,6 +16,10 @@
 #include <QAction>
 #include <QClipboard>
 
+#include <string>
+#include <unordered_set>
+#include <vector>
+
 using namespace mv;
 using namespace mv::util;
 using namespace mv::plugin;
@@ -41,6 +45,10 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
         addSeparator();
         addAction(getGroupAction());
         addAction(getSelectionGroupAction());
+    }
+    else if (_selectedDatasets.count() == 0) {
+        addSeparator();
+        addAction(getSelectionGroupPatternAction());
     }
 
     if (!_allDatasets.isEmpty()) {
@@ -177,9 +185,9 @@ QAction* DataHierarchyWidgetContextMenu::getSelectionGroupAction()
 
             if ((ok == QDialog::Accepted)) {
 
-                const int SelectionGroupIndex = selectionIndexDialog.getSelectionGroupIndex();
+                const std::int32_t selectionGroupIndex = selectionIndexDialog.getSelectionGroupIndex();
                 for (auto& selectedDataset : _selectedDatasets) {
-                    selectedDataset->setGroupIndex(SelectionGroupIndex);
+                    selectedDataset->setGroupIndex(selectionGroupIndex);
                 }
 
                 mv::data().getSelectionGroupingAction()->setChecked(true);
@@ -189,6 +197,83 @@ QAction* DataHierarchyWidgetContextMenu::getSelectionGroupAction()
         );
 
     return selectionGroupAction;
+}
+
+QAction* DataHierarchyWidgetContextMenu::getSelectionGroupPatternAction()
+{
+    auto selectionGroupPatternAction = new QAction("Selection group pattern...");
+
+    selectionGroupPatternAction->setToolTip("Define a suffix for selection groups");
+    selectionGroupPatternAction->setIcon(StyledIcon("ellipsis"));
+
+    connect(selectionGroupPatternAction, &QAction::triggered,
+        [this]() -> void {
+            SelectionPatternGroupIndexDialog selectionPatternDialog(nullptr);
+            selectionPatternDialog.setModal(true);
+            const int ok = selectionPatternDialog.exec();
+
+            if ((ok == QDialog::Accepted)) {
+
+                std::string selectionGroupPattern = selectionPatternDialog.getSelectionGroupPattern().toStdString();
+                
+                if (selectionGroupPattern.length() == 0)
+                    return;
+
+                Datasets allDatasets = mv::data().getAllDatasets();
+
+                if (allDatasets.isEmpty())
+                    return;
+
+                std::unordered_set<std::string> potential_bases;
+
+                // First Pass: Identify potential base strings
+                // Store all strings that *don't* end with the suffix (selectionGroupPattern).
+                for (const Dataset<DatasetImpl>& dataset : allDatasets) {
+                    std::string datasetName = dataset->getGuiName().toStdString();
+                    // Only add if it does NOT end with the suffix
+                    if (datasetName.ends_with(selectionGroupPattern)) {
+                        size_t prefix_length = datasetName.length() - selectionGroupPattern.length();
+                        potential_bases.insert(datasetName.substr(0, prefix_length));
+                    }
+                }
+
+                // Do not continue if no matched we found
+                if (potential_bases.empty())
+                    return;
+
+                std::vector<std::vector<Dataset<DatasetImpl>>> selectionGroups;
+
+                // Second Pass: Find masks and match them to bases
+                for (const std::string_view potential_base : potential_bases) {
+                    auto& current_results = selectionGroups.emplace_back(std::vector<Dataset<DatasetImpl>>{});
+                    for (const Dataset<DatasetImpl>& dataset : allDatasets) {
+                        std::string datasetName = dataset->getGuiName().toStdString();
+                        if (datasetName.starts_with(potential_base)) {
+                            current_results.push_back(dataset);
+                        }
+                    }
+                }
+
+                // Do not continue if no matched we found
+                if (selectionGroups.empty() || std::all_of(selectionGroups.begin(), selectionGroups.end(), [](const std::vector<Dataset<DatasetImpl>>& v) { return v.empty();}))
+                    return;
+
+                std::int32_t selectionGroupStartIndex = selectionPatternDialog.getSelectionGroupIndex();
+
+                for (std::vector<Dataset<DatasetImpl>>& selectionGroup : selectionGroups) {
+                    for (auto& dataset : selectionGroup) {
+                        dataset->setGroupIndex(selectionGroupStartIndex);
+                    }
+                    selectionGroupStartIndex++;
+                }
+
+                mv::data().getSelectionGroupingAction()->setChecked(true);
+            }
+
+        }
+        );
+
+    return selectionGroupPatternAction;
 }
 
 QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
@@ -392,5 +477,35 @@ SelectionGroupIndexDialog::SelectionGroupIndexDialog(QWidget* parent) :
     layout->addWidget(indicesLabel);
     layout->addWidget(selectionIndexAction.createWidget(this));
     layout->addWidget(confirmButton.createWidget(this));
+    setLayout(layout);
+}
+
+SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* parent) :
+    QDialog(parent),
+    confirmButton(this, "Ok"),
+    selectionPatternAction(this, "Pattern"),
+    selectionIndexAction(this, "Selection group starting index", -1, 1024, -1)
+{
+    setWindowTitle(tr("Selection group index"));
+    setWindowIcon(StyledIcon("ellipsis"));
+    
+    QLabel* indicesLabel = new QLabel("Start selection group indices at:");
+
+    confirmButton.setEnabled(false);
+    confirmButton.setToolTip("Selection group index must be larger than -1");
+
+    connect(&confirmButton, &TriggerAction::triggered, this, &SelectionPatternGroupIndexDialog::closeDialogAction);
+    connect(this, &SelectionPatternGroupIndexDialog::closeDialog, this, &QDialog::accept);
+
+    connect(&selectionIndexAction, &IntegralAction::valueChanged, [this](int value) {
+        confirmButton.setEnabled(value >= 0);
+        });
+
+    QGridLayout* layout = new QGridLayout();
+    layout->addWidget(selectionPatternAction.createLabelWidget(this), 0, 0);
+    layout->addWidget(selectionPatternAction.createWidget(this), 0, 1);
+    layout->addWidget(indicesLabel, 1, 0);
+    layout->addWidget(selectionIndexAction.createWidget(this), 1, 1);
+    layout->addWidget(confirmButton.createWidget(this), 2, 1);
     setLayout(layout);
 }
