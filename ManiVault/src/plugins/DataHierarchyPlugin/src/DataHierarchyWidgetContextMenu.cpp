@@ -46,7 +46,7 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
         addAction(getGroupAction());
         addAction(getSelectionGroupAction());
     }
-    else if (_selectedDatasets.count() == 0) {
+    else if (_selectedDatasets.count() == 0 && !_allDatasets.isEmpty()) {
         addSeparator();
         addAction(getSelectionGroupPatternAction());
     }
