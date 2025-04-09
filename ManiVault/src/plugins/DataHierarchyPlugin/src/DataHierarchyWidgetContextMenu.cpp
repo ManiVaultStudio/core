@@ -214,7 +214,8 @@ QAction* DataHierarchyWidgetContextMenu::getSelectionGroupPatternAction()
 
             if ((ok == QDialog::Accepted)) {
 
-                std::string selectionGroupPattern = selectionPatternDialog.getSelectionGroupPattern().toStdString();
+                const std::string selectionGroupPattern = selectionPatternDialog.getSelectionGroupPattern().toStdString();
+                const std::int32_t selectionGroupOption = selectionPatternDialog.getSelectionGroupOption();
                 
                 if (selectionGroupPattern.length() == 0)
                     return;
@@ -224,26 +225,37 @@ QAction* DataHierarchyWidgetContextMenu::getSelectionGroupPatternAction()
                 if (allDatasets.isEmpty())
                     return;
 
-                std::unordered_set<std::string> potential_bases;
-
-                // First Pass: Identify potential base strings
-                // Store all strings that *don't* end with the suffix (selectionGroupPattern).
-                for (const Dataset<DatasetImpl>& dataset : allDatasets) {
-                    std::string datasetName = dataset->getGuiName().toStdString();
-                    // Only add if it does NOT end with the suffix
-                    if (datasetName.ends_with(selectionGroupPattern)) {
-                        size_t prefix_length = datasetName.length() - selectionGroupPattern.length();
-                        potential_bases.insert(datasetName.substr(0, prefix_length));
+                auto extractBase = [&selectionGroupOption, &selectionGroupPattern](const Datasets& allDatasets) -> std::unordered_set<std::string> {
+                    std::unordered_set<std::string> potential_bases;
+                    if (selectionGroupOption == 0) { // Suffix
+                        // Identify potential base strings
+                        for (const Dataset<DatasetImpl>& dataset : allDatasets) {
+                            std::string datasetName = dataset->getGuiName().toStdString();
+                            if (datasetName.ends_with(selectionGroupPattern)) {
+                                size_t prefix_length = datasetName.length() - selectionGroupPattern.length();
+                                potential_bases.insert(datasetName.substr(0, prefix_length));
+                            }
+                        }
                     }
-                }
+                    else { // Prefix
+                        potential_bases = { selectionGroupPattern };
+                    }
 
-                // Do not continue if no matched we found
+                    return potential_bases;
+                    };
+
+                std::unordered_set<std::string> potential_bases = extractBase(allDatasets);
+
+                // Do not continue if no matches were found
                 if (potential_bases.empty())
                     return;
 
+                for (const std::string_view potential_base : potential_bases)
+                    qDebug() << potential_base;
+
                 std::vector<std::vector<Dataset<DatasetImpl>>> selectionGroups;
 
-                // Second Pass: Find masks and match them to bases
+                // Find masks and match them to bases
                 for (const std::string_view potential_base : potential_bases) {
                     auto& current_results = selectionGroups.emplace_back(std::vector<Dataset<DatasetImpl>>{});
                     for (const Dataset<DatasetImpl>& dataset : allDatasets) {
@@ -254,7 +266,7 @@ QAction* DataHierarchyWidgetContextMenu::getSelectionGroupPatternAction()
                     }
                 }
 
-                // Do not continue if no matched we found
+                // Do not continue if no matches were found
                 if (selectionGroups.empty() || std::all_of(selectionGroups.begin(), selectionGroups.end(), [](const std::vector<Dataset<DatasetImpl>>& v) { return v.empty();}))
                     return;
 
@@ -484,6 +496,7 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
     QDialog(parent),
     confirmButton(this, "Ok"),
     selectionPatternAction(this, "Pattern"),
+    selectionOptionAction(this, "Prefix/Suffix"),
     selectionIndexAction(this, "Selection group starting index", -1, 1024, -1)
 {
     setWindowTitle(tr("Selection group index"));
@@ -494,6 +507,8 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
     confirmButton.setEnabled(false);
     confirmButton.setToolTip("Selection group index must be larger than -1");
 
+    selectionOptionAction.initialize({ "Suffix", "Prefix" }, "Suffix");
+
     connect(&confirmButton, &TriggerAction::triggered, this, &SelectionPatternGroupIndexDialog::closeDialogAction);
     connect(this, &SelectionPatternGroupIndexDialog::closeDialog, this, &QDialog::accept);
 
@@ -501,11 +516,14 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
         confirmButton.setEnabled(value >= 0);
         });
 
+    int row = 0; // start a new row with ++row
     QGridLayout* layout = new QGridLayout();
-    layout->addWidget(selectionPatternAction.createLabelWidget(this), 0, 0);
-    layout->addWidget(selectionPatternAction.createWidget(this), 0, 1);
-    layout->addWidget(indicesLabel, 1, 0);
-    layout->addWidget(selectionIndexAction.createWidget(this), 1, 1);
-    layout->addWidget(confirmButton.createWidget(this), 2, 1);
+    layout->addWidget(selectionPatternAction.createLabelWidget(this), row, 0);
+    layout->addWidget(selectionPatternAction.createWidget(this), row, 1);
+    layout->addWidget(selectionOptionAction.createLabelWidget(this), ++row, 0);
+    layout->addWidget(selectionOptionAction.createWidget(this), row, 1);
+    layout->addWidget(indicesLabel, ++row, 0);
+    layout->addWidget(selectionIndexAction.createWidget(this), row, 1);
+    layout->addWidget(confirmButton.createWidget(this), ++row, 1);
     setLayout(layout);
 }
