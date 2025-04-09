@@ -499,7 +499,7 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
     selectionOptionAction(this, "Prefix/Suffix"),
     selectionIndexAction(this, "Selection group starting index", -1, 1024, -1)
 {
-    setWindowTitle(tr("Selection group index"));
+    setWindowTitle(tr("Selection group pattern"));
     setWindowIcon(StyledIcon("ellipsis"));
     
     QLabel* indicesLabel = new QLabel("Start selection group indices at:");
