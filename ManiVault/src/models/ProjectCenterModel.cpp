@@ -4,11 +4,15 @@
 
 #include "ProjectCenterModel.h"
 
+#include <QJsonObject>
+#include <QJsonArray>
+
 #ifdef _DEBUG
     //#define PROJECT_CENTER_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
+using namespace mv::gui;
 
 namespace mv {
 
@@ -24,9 +28,41 @@ QMap<ProjectCenterModel::Column, ProjectCenterModel::ColumHeaderInfo> ProjectCen
 });
 
 ProjectCenterModel::ProjectCenterModel(QObject* parent /*= nullptr*/) :
-    StandardItemModel(parent)
+    StandardItemModel(parent),
+    _sourceUrlAction(this, "Source URL")
 {
     setColumnCount(static_cast<int>(Column::Count));
+
+    _sourceUrlAction.setIconByName("globe");
+    _sourceUrlAction.setToolTip("Source location of the projects");
+
+    connect(&_sourceUrlAction, &StringAction::textChanged, this, [this](const QString& string) -> void {
+        _fileDownloader.download(QUrl(string));
+    });
+
+    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
+        try
+        {
+            const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
+            const auto projects     = jsonDocument.object()["projects"].toArray();
+
+            for (const auto project : projects) {
+                auto projectMap = project.toVariant().toMap();
+
+                addProject(new ProjectCenterProject(projectMap));
+            }
+
+            emit populatedFromSourceUrl();
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to process project center JSON", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to process project center JSON");
+        }
+	});
 }
 
 QVariant ProjectCenterModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const

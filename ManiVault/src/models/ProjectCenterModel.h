@@ -7,6 +7,9 @@
 #include "models/StandardItemModel.h"
 
 #include "util/ProjectCenterProject.h"
+#include "util/FileDownloader.h"
+
+#include "actions/StringAction.h"
 
 #include <QMap>
 
@@ -423,9 +426,18 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
+    /** Signals that the model was populated from the website */
+    void populatedFromSourceUrl();
+
+public: // Action getters
+
+    gui::StringAction& getSourceUrlAction() { return _sourceUrlAction; }
+
 private:
-    util::ProjectCenterProjects     _projects;      /** Model projects */
-    QSet<QString>                   _tags;          /** All tags */
+    util::ProjectCenterProjects     _projects;          /** Model projects */
+    QSet<QString>                   _tags;              /** All tags */
+    gui::StringAction               _sourceUrlAction;   /** Source URL action */
+    util::FileDownloader            _fileDownloader;    /** For downloading the project center JSON file */
 };
 
 }

@@ -25,6 +25,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
+    _projectCenterWidget(this, "Project center"),
     _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects")
 {
     auto layout = new QVBoxLayout();
@@ -33,21 +34,23 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     layout->addWidget(&_openCreateProjectWidget);
     layout->addWidget(&_recentProjectsWidget);
+    layout->addWidget(&_projectCenterWidget);
 
     setLayout(layout);
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
     _recentProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _projectCenterWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
-
     _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
-
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
+
+    _projectCenterWidget.getHierarchyWidget().setItemTypeName("Project");
 
     connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
 
@@ -84,7 +87,6 @@ void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment
     const auto margin           = 12.0;
     const auto spacing          = 14.0;
     const auto halfSpacing      = spacing / 2.0;
-    const auto lineThickness    = 7.0;
     const auto offset           = 80.0;
     const auto loggingHeight    = logging ? 25.0 : 0.0;
     const auto halfSize         = logging ? margin + ((size - margin - margin - loggingHeight - spacing) / 2.0) : size / 2.0;
@@ -204,6 +206,11 @@ void StartPageOpenProjectWidget::updateRecentActions()
         }
     }
 
+}
+
+void StartPageOpenProjectWidget::updateProjectCenterActions()
+{
+	
 }
 
 void StartPageOpenProjectWidget::createCustomIcons()
