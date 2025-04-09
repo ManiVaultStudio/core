@@ -6,6 +6,9 @@
 
 #include <AbstractProjectManager.h>
 
+#include <models/ProjectCenterModel.h>
+#include <models/ProjectCenterFilterModel.h>
+
 #include <QObject>
 
 namespace mv
@@ -123,9 +126,16 @@ public:
     /**
      * Get preview image of the project workspace
      * @param projectFilePath Path of the project file
+     * @param targetSize Target size of the preview image
      * @return Preview image
      */
     QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
+
+    /**
+     * Get project center model
+     * @return Reference to the project center model
+     */
+    const ProjectCenterModel& getProjectCenterModel() const override;
 
 public: // Menus
 
@@ -150,7 +160,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant
-     * @param Variant representation of the widget action
+     * @param variantMap Variant representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
     
@@ -176,21 +186,22 @@ public: // Action getters
     mv::gui::TriggerAction& getBackToProjectAction() override { return _backToProjectAction; }
 
 private:
-    QScopedPointer<mv::Project>         _project;                           /** Current project */
-    mv::gui::TriggerAction              _newBlankProjectAction;             /** Action for creating a blank project (without view plugins and data) */
-    mv::gui::TriggerAction              _newProjectFromWorkspaceAction;     /** Action for creating a new project from a workspace */
-    mv::gui::TriggerAction              _openProjectAction;                 /** Action for opening a project */
-    mv::gui::TriggerAction              _importProjectAction;               /** Action for importing a project */
-    mv::gui::TriggerAction              _saveProjectAction;                 /** Action for saving a project */
-    mv::gui::TriggerAction              _saveProjectAsAction;               /** Action for saving a project under a new name */
-    mv::gui::TriggerAction              _editProjectSettingsAction;         /** Action for triggering the project settings dialog */
-    mv::gui::RecentFilesAction          _recentProjectsAction;              /** Menu for loading recent projects */
-    QMenu                               _newProjectMenu;                    /** Menu for creating a new project */
-    QMenu                               _importDataMenu;                    /** Menu for importing data */
-    mv::gui::TriggerAction              _publishAction;                     /** Action for publishing the project to an end-user */
-    mv::gui::TriggerAction              _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
-    mv::gui::ToggleAction               _showStartPageAction;               /** Action for toggling the start page */
-    mv::gui::TriggerAction              _backToProjectAction;               /** Action for going back to the project */
+    QScopedPointer<mv::Project>     _project;                           /** Current project */
+    gui::TriggerAction              _newBlankProjectAction;             /** Action for creating a blank project (without view plugins and data) */
+    gui::TriggerAction              _newProjectFromWorkspaceAction;     /** Action for creating a new project from a workspace */
+    gui::TriggerAction              _openProjectAction;                 /** Action for opening a project */
+    gui::TriggerAction              _importProjectAction;               /** Action for importing a project */
+    gui::TriggerAction              _saveProjectAction;                 /** Action for saving a project */
+    gui::TriggerAction              _saveProjectAsAction;               /** Action for saving a project under a new name */
+    gui::TriggerAction              _editProjectSettingsAction;         /** Action for triggering the project settings dialog */
+    gui::RecentFilesAction          _recentProjectsAction;              /** Menu for loading recent projects */
+    QMenu                           _newProjectMenu;                    /** Menu for creating a new project */
+    QMenu                           _importDataMenu;                    /** Menu for importing data */
+    gui::TriggerAction              _publishAction;                     /** Action for publishing the project to an end-user */
+    gui::TriggerAction              _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
+    gui::ToggleAction               _showStartPageAction;               /** Action for toggling the start page */
+    gui::TriggerAction              _backToProjectAction;               /** Action for going back to the project */
+    ProjectCenterModel              _projectCenterModel;                /** Project center model */
 };
 
 }

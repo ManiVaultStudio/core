@@ -1067,6 +1067,11 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
     return {};
 }
 
+const ProjectCenterModel& ProjectManager::getProjectCenterModel() const
+{
+    return _projectCenterModel;
+}
+
 QMenu& ProjectManager::getNewProjectMenu()
 {
     return _newProjectMenu;

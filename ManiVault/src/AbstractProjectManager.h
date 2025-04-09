@@ -19,6 +19,8 @@
 
 namespace mv {
 
+class ProjectCenterModel;
+
 /**
  * Abstract project manager class
  *
@@ -183,6 +185,12 @@ public:
      * @return Pointer to current project (nullptr if no project is loaded)
      */
     virtual Project* getCurrentProject() = 0;
+
+    /**
+     * Get project center model
+     * @return Reference to the project center model
+     */
+    virtual const ProjectCenterModel& getProjectCenterModel() const = 0;
 
 public: // Temporary directories
 
