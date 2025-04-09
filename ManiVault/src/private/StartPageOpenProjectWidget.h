@@ -7,6 +7,10 @@
 #include "PageActionsWidget.h"
 
 #include <actions/RecentFilesAction.h>
+#include <actions/VerticalGroupAction.h>
+
+#include <models/ProjectCenterModel.h>
+#include <models/ProjectCenterFilterModel.h>
 
 #include <QWidget>
 
@@ -63,15 +67,17 @@ private:
     void updateCustomStyle();
 
 private:
-    StartPageContentWidget*         _startPageContentWidget;    /** Non-owning pointer to start page content widget */
-    PageActionsWidget               _openCreateProjectWidget;   /** Actions widget for open and create project action */
-    PageActionsWidget               _recentProjectsWidget;      /** Actions widget for existing projects action */
-    PageActionsWidget               _projectCenterWidget;       /** Actions widget for project center */
-    mv::gui::RecentFilesAction      _recentProjectsAction;      /** Action for recent projects */
-    QIcon                           _leftAlignedIcon;           /** Icon for left-aligned default project */
-    QIcon                           _leftAlignedLoggingIcon;    /** Icon for left-aligned default project with logging */
-    QIcon                           _rightAlignedIcon;          /** Icon for right-aligned default project */
-    QIcon                           _rightAlignedLoggingIcon;   /** Icon for right-aligned default project with logging */
+    StartPageContentWidget*         _startPageContentWidget;        /** Non-owning pointer to start page content widget */
+    PageActionsWidget               _openCreateProjectWidget;       /** Actions widget for open and create project action */
+    PageActionsWidget               _recentProjectsWidget;          /** Actions widget for existing projects action */
+    PageActionsWidget               _projectCenterWidget;           /** Actions widget for project center */
+    mv::gui::RecentFilesAction      _recentProjectsAction;          /** Action for recent projects */
+    QIcon                           _leftAlignedIcon;               /** Icon for left-aligned default project */
+    QIcon                           _leftAlignedLoggingIcon;        /** Icon for left-aligned default project with logging */
+    QIcon                           _rightAlignedIcon;              /** Icon for right-aligned default project */
+    QIcon                           _rightAlignedLoggingIcon;       /** Icon for right-aligned default project with logging */
+    mv::ProjectCenterFilterModel    _projectCenterFilterModel;      /** Filter model for project center */
+    mv::gui::VerticalGroupAction    _projectCenterSettingsAction;   /** Action for project center settings */
 
     friend class StartPageContentWidget;
 };

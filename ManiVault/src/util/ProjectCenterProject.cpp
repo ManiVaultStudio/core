@@ -21,12 +21,12 @@ ProjectCenterProject::ProjectCenterProject(const QString& title, const QStringLi
 }
 
 ProjectCenterProject::ProjectCenterProject(const QVariantMap& variantMap) :
-    _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
+    _title(variantMap.contains("projectName") ? variantMap["projectName"].toString() : ""),
     _tags(variantMap.contains("tags") ? variantMap["tags"].toStringList() : QStringList()),
     _date(variantMap.contains("date") ? variantMap["date"].toString() : ""),
     _iconName(variantMap.contains("icon") ? variantMap["icon"].toString() : ""),
-    _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
-    _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
+    _summary(variantMap.contains("projectComments") ? variantMap["projectComments"].toString() : ""),
+    _url(QUrl(variantMap.contains("projectUrl") ? variantMap["projectUrl"].toString() : "")),
     _minimumVersionMajor(variantMap.contains("minimum-version-major") ? variantMap["minimum-version-major"].toInt() : -1),
     _minimumVersionMinor(variantMap.contains("minimum-version-minor") ? variantMap["minimum-version-minor"].toInt() : -1)
 {

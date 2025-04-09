@@ -28,27 +28,21 @@ QMap<ProjectCenterModel::Column, ProjectCenterModel::ColumHeaderInfo> ProjectCen
 });
 
 ProjectCenterModel::ProjectCenterModel(QObject* parent /*= nullptr*/) :
-    StandardItemModel(parent),
-    _sourceUrlAction(this, "Source URL")
+    StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
-    _sourceUrlAction.setIconByName("globe");
-    _sourceUrlAction.setToolTip("Source location of the projects");
-
-    connect(&_sourceUrlAction, &StringAction::textChanged, this, [this](const QString& string) -> void {
-        _fileDownloader.download(QUrl(string));
-    });
-
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
+        
         try
         {
             const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-            const auto projects     = jsonDocument.object()["projects"].toArray();
+            const auto projects     = jsonDocument.object()["cytosploreViewerProjectDownloads"].toArray();
 
             for (const auto project : projects) {
                 auto projectMap = project.toVariant().toMap();
 
+                qDebug() << "Project center project:" << projectMap["projectName"];
                 addProject(new ProjectCenterProject(projectMap));
             }
 
@@ -100,6 +94,11 @@ QVariant ProjectCenterModel::headerData(int section, Qt::Orientation orientation
     return {};
 }
 
+void ProjectCenterModel::setSourceUrl(const QUrl& sourceUrl)
+{
+	_fileDownloader.download(sourceUrl);
+}
+
 QSet<QString> ProjectCenterModel::getTagsSet() const
 {
     return _tags;
@@ -127,6 +126,28 @@ void ProjectCenterModel::updateTags()
             _tags.insert(tag);
 
     emit tagsChanged(_tags);
+}
+
+const ProjectCenterProject* ProjectCenterModel::getProject(const QModelIndex& index) const
+{
+    Q_ASSERT(index.isValid());
+
+    if (!index.isValid())
+        return nullptr;
+
+    const auto itemAtIndex = dynamic_cast<Item*>(itemFromIndex(index));
+
+    Q_ASSERT(itemAtIndex);
+
+    if (!itemAtIndex)
+        return nullptr;
+
+    return itemAtIndex->getProject();
+}
+
+const ProjectCenterProjects& ProjectCenterModel::getProjects() const
+{
+	return _projects;
 }
 
 ProjectCenterModel::Item::Item(const mv::util::ProjectCenterProject* project, bool editable /*= false*/) :

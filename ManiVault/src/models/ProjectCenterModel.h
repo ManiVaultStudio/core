@@ -404,6 +404,12 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     /**
+     * Set the source URL to \p sourceUrl
+     * @param sourceUrl Source URL
+     */
+    void setSourceUrl(const QUrl& sourceUrl);
+
+    /**
      * Get tags
      * @return All tags
      */
@@ -418,6 +424,18 @@ public:
     /** Builds a set of all video tags and emits ProjectCenterModel::tagsChanged(...) */
     void updateTags();
 
+    /**
+     * Get the project at \p index
+     * @return Project at index
+     */
+    const util::ProjectCenterProject* getProject(const QModelIndex& index) const;
+
+    /**
+     * Get the projects
+     * @return Projects
+     */
+    const util::ProjectCenterProjects& getProjects() const;
+
 signals:
 
     /**
@@ -429,14 +447,9 @@ signals:
     /** Signals that the model was populated from the website */
     void populatedFromSourceUrl();
 
-public: // Action getters
-
-    gui::StringAction& getSourceUrlAction() { return _sourceUrlAction; }
-
 private:
     util::ProjectCenterProjects     _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
-    gui::StringAction               _sourceUrlAction;   /** Source URL action */
     util::FileDownloader            _fileDownloader;    /** For downloading the project center JSON file */
 };
 

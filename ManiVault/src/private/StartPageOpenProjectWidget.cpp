@@ -25,8 +25,9 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
-    _projectCenterWidget(this, "Project center"),
-    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects")
+    _projectCenterWidget(this, "Projects"),
+    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
+    _projectCenterSettingsAction(this, "Projects source")
 {
     auto layout = new QVBoxLayout();
 
@@ -50,7 +51,17 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
+    _projectCenterSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _projectCenterSettingsAction.addAction(&mv::projects().getProjectCenterSourceUrlAction());
+    _projectCenterSettingsAction.setIconByName("globe");
+    _projectCenterSettingsAction.setPopupSizeHint(QSize(400, 10));
+
     _projectCenterWidget.getHierarchyWidget().setItemTypeName("Project");
+    _projectCenterWidget.getHierarchyWidget().getToolbarAction().addAction(&_projectCenterSettingsAction);
+
+    _projectCenterFilterModel.setSourceModel(const_cast<ProjectCenterModel*>(&mv::projects().getProjectCenterModel()));
+
+    connect(&mv::projects().getProjectCenterModel(), &ProjectCenterModel::populatedFromSourceUrl, this, &StartPageOpenProjectWidget::updateProjectCenterActions);
 
     connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
 
@@ -205,12 +216,31 @@ void StartPageOpenProjectWidget::updateRecentActions()
             _recentProjectsWidget.getModel().add(recentProjectPageAction);
         }
     }
-
 }
 
 void StartPageOpenProjectWidget::updateProjectCenterActions()
 {
-	
+    _projectCenterWidget.getModel().reset();
+    
+    const auto& projectCenterModel = mv::projects().getProjectCenterModel();
+
+    for (int filterRowIndex = 0; _projectCenterFilterModel.rowCount() > filterRowIndex; ++filterRowIndex) {
+        const auto filterIndex = _projectCenterFilterModel.index(filterRowIndex, 0);
+        const auto sourceIndex = _projectCenterFilterModel.mapToSource(filterIndex);
+
+    	if (sourceIndex.isValid()) {
+            if (const auto project = projectCenterModel.getProject(sourceIndex)) {
+                PageAction recentProjectPageAction(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
+                    projects().openProject(project->getUrl());
+				});
+
+                recentProjectPageAction.setTags(project->getTags());
+                //recentProjectPageAction.setMetaData(project->getDate().toString("dd/MM/yyyy hh:mm"));
+
+            	_projectCenterWidget.getModel().add(recentProjectPageAction);
+            }
+        }
+    }
 }
 
 void StartPageOpenProjectWidget::createCustomIcons()

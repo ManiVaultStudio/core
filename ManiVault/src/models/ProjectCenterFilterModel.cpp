@@ -68,6 +68,7 @@ bool ProjectCenterFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
             return false;
     }
 
+    /*
     const auto tagsList                 = index.siblingAtColumn(static_cast<int>(ProjectCenterModel::Column::Tags)).data(Qt::EditRole).toStringList();
     const auto filterTagsList           = _tagsFilterAction.getSelectedOptions();
     const auto filterExcludeTagsList    = _excludeTagsFilterAction.getSelectedOptions();
@@ -103,6 +104,7 @@ bool ProjectCenterFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
 
     if (targetAppVersion > tutorialMinimumAppVersion)
         return false;
+    */
 
     return true;
 }

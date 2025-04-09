@@ -48,7 +48,8 @@ ProjectManager::ProjectManager(QObject* parent) :
     _publishAction(nullptr, "Publish"),
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
-    _backToProjectAction(nullptr, "Back to project")
+    _backToProjectAction(nullptr, "Back to project"),
+    _projectCenterSourceUrlAction(this, "Source URL")
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -116,6 +117,14 @@ ProjectManager::ProjectManager(QObject* parent) :
     _backToProjectAction.setToolTip("Go back to the current project");
     _backToProjectAction.setDefaultWidgetFlags(TriggerAction::Icon);
     //_backToProjectAction.setChecked(!Application::current()->shouldOpenProjectAtStartup());
+
+    _projectCenterSourceUrlAction.setIconByName("globe");
+    _projectCenterSourceUrlAction.setToolTip("Source location of the projects");
+
+    connect(&_projectCenterSourceUrlAction, &StringAction::stringChanged, this, [this](const QString& string) -> void {
+        qDebug() << "Project center source URL changed to" << string;
+        _projectCenterModel.setSourceUrl(QUrl(string));
+    });
 
     auto mainWindow = Application::topLevelWidgets().first();
 
