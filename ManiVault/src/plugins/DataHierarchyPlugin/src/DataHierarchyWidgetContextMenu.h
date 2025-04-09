@@ -10,6 +10,7 @@
 #include <QMenu>
 
 #include <actions/IntegralAction.h>
+#include <actions/OptionAction.h>
 #include <actions/StringAction.h>
 #include <actions/TriggerAction.h>
 
@@ -135,6 +136,10 @@ public:
         return selectionPatternAction.getString();
     }
 
+    std::int32_t getSelectionGroupOption() {
+        return selectionOptionAction.getCurrentIndex();
+    }
+
 signals:
     void closeDialog(bool onlyIndices);
 
@@ -146,5 +151,6 @@ public slots:
 private:
     gui::IntegralAction     selectionIndexAction;
     gui::StringAction       selectionPatternAction;
+    gui::OptionAction       selectionOptionAction;
     gui::TriggerAction      confirmButton;
 };
