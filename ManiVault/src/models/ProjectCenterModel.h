@@ -455,6 +455,8 @@ protected:
             append(new UrlItem(project));
             append(new MinimumVersionMajorItem(project));
             append(new MinimumVersionMinorItem(project));
+            append(new RequiredPluginsItem(project));
+            append(new MissingPluginsItem(project));
         }
     };
 

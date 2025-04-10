@@ -554,7 +554,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/StyledIconEngine.h
     src/util/Badge.h
     src/util/ColorScheme.h
-    src/util/ProjectCenterProject.h
+    src/util/ProjectDatabaseProject.h
 )
 
 if(APPLE)
@@ -607,7 +607,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/StyledIconEngine.cpp
     src/util/Badge.cpp
     src/util/ColorScheme.cpp
-    src/util/ProjectCenterProject.cpp
+    src/util/ProjectDatabaseProject.cpp
 )
 
 if(APPLE)

@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "Version.h"
+
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -22,29 +24,17 @@ namespace mv::util {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectCenterProject : public QObject
+class CORE_EXPORT ProjectDatabaseProject : public QObject
 {
     Q_OBJECT
 
 public:
     
     /**
-     * Construct project center project from individual properties
-     * @param title Project title
-     * @param tags Project tags for filtering
-     * @param date Issue date
-     * @param iconName Font Awesome icon name
-     * @param summary Project summary (brief description)
-     * @param minimumVersionMajor Minimum supported ManiVault Studio major version
-     * @param minimumVersionMinor Minimum supported ManiVault Studio minor version
-     */
-    explicit ProjectCenterProject(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QUrl& url, const std::int32_t minimumVersionMajor, const std::int32_t minimumVersionMinor);
-
-    /**
      * Construct project from \p variantMap
      * @param variantMap Variant map containing the project properties
      */
-    explicit ProjectCenterProject(const QVariantMap& variantMap);
+    explicit ProjectDatabaseProject(const QVariantMap& variantMap);
 
     /**
      * Get title
@@ -83,23 +73,29 @@ public:
     const QUrl& getUrl() const;
 
     /**
-     * Get minimum supported ManiVault Studio major version
-     * @return Minimum supported ManiVault Studio major version
+     * Get minimum supported ManiVault Studio core version
+     * @return Minimum supported ManiVault Studio core  version
      */
-    const std::int32_t& getMinimumVersionMajor() const;
+    const Version& getMinimumCoreVersion() const;
 
     /**
-     * Get minimum supported ManiVault Studio minor version
-     * @return Minimum supported ManiVault Studio minor version
+     * Get required plugins
+     * @return Required plugins
      */
-    const std::int32_t& getMinimumVersionMinor() const;
+    const QStringList& getRequiredPlugins() const;
+
+    /**
+     * Get missing plugins
+     * @return Missing plugins
+     */
+    const QStringList& getMissingPlugins() const;
 
     /**
      * Overload assignment operator
      * @param rhs Right hand side project
      * @return Assigned project
      */
-    ProjectCenterProject& operator=(const ProjectCenterProject& rhs)
+    ProjectDatabaseProject& operator=(const ProjectDatabaseProject& rhs)
     {
         _title                  = rhs.getTitle();
         _tags                   = rhs.getTags();
@@ -107,8 +103,9 @@ public:
         _iconName               = rhs.getIconName();
         _summary                = rhs.getSummary();
         _url                    = rhs.getUrl();
-        _minimumVersionMajor    = rhs.getMinimumVersionMajor();
-        _minimumVersionMinor    = rhs.getMinimumVersionMinor();
+        _minimumCoreVersion     = rhs.getMinimumCoreVersion();
+        _requiredPlugins        = rhs.getRequiredPlugins();
+        _missingPlugins         = rhs.getMissingPlugins();
 
         return *this;
     }
@@ -120,10 +117,11 @@ private:
     QString         _iconName;              /** Font Awesome icon name */
     QString         _summary;               /** Summary (brief description) */
     QUrl            _url;                   /** Project URL */
-    std::int32_t    _minimumVersionMajor;   /** Minimum supported ManiVault Studio major version */
-    std::int32_t    _minimumVersionMinor;   /** Minimum supported ManiVault Studio minor version */
+    Version         _minimumCoreVersion;    /** Minimum supported ManiVault Studio major version */
+    QStringList     _requiredPlugins;       /** Required plugins */
+    QStringList     _missingPlugins;        /** Missing plugins */
 };
 
-using ProjectCenterProjects = std::vector<const ProjectCenterProject*>;
+using ProjectDatabaseProjects = std::vector<const ProjectDatabaseProject*>;
 
 }
