@@ -13,16 +13,16 @@
 
 namespace mv {
 
-class ProjectCenterModel;
+class ProjectDatabaseModel;
 
 /**
- * Project center filter model class
+ * Project database filter model class
  *
- * Sorting and filtering model for the project center model
+ * Sorting and filtering model for the project database model
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectCenterFilterModel : public SortFilterProxyModel
+class CORE_EXPORT ProjectDatabaseFilterModel : public SortFilterProxyModel
 {
 public:
 
@@ -30,7 +30,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
     */
-    ProjectCenterFilterModel(QObject* parent = nullptr);
+    ProjectDatabaseFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether \p row with \p parent is filtered out (false) or in (true)
@@ -75,7 +75,7 @@ public: // Action getters
 	gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
-    ProjectCenterModel*         _projectCenterModel;            /** Pointer to source model */
+    ProjectDatabaseModel*       _projectDatabaseModel;          /** Pointer to source model */
     gui::OptionsAction          _tagsFilterAction;              /** Filter based on tag(s) */
     gui::OptionsAction          _excludeTagsFilterAction;       /** Filter out based on tag(s) */
     gui::VersionAction          _targetAppVersionAction;        /** Target app minimum version filter action */

@@ -49,7 +49,7 @@ ProjectManager::ProjectManager(QObject* parent) :
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
     _backToProjectAction(nullptr, "Back to project"),
-    _projectCenterSourceUrlAction(this, "Source URL")
+    _projectDatabaseSourceUrlAction(this, "Source URL")
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -118,12 +118,12 @@ ProjectManager::ProjectManager(QObject* parent) :
     _backToProjectAction.setDefaultWidgetFlags(TriggerAction::Icon);
     //_backToProjectAction.setChecked(!Application::current()->shouldOpenProjectAtStartup());
 
-    _projectCenterSourceUrlAction.setIconByName("globe");
-    _projectCenterSourceUrlAction.setToolTip("Source location of the projects");
+    _projectDatabaseSourceUrlAction.setIconByName("globe");
+    _projectDatabaseSourceUrlAction.setToolTip("Source location of the projects");
 
-    connect(&_projectCenterSourceUrlAction, &StringAction::stringChanged, this, [this](const QString& string) -> void {
+    connect(&_projectDatabaseSourceUrlAction, &StringAction::stringChanged, this, [this](const QString& string) -> void {
         qDebug() << "Project center source URL changed to" << string;
-        _projectCenterModel.setSourceUrl(QUrl(string));
+        _projectDatabaseModel.setSourceUrl(QUrl(string));
     });
 
     auto mainWindow = Application::topLevelWidgets().first();
@@ -1078,9 +1078,9 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
     return {};
 }
 
-const ProjectCenterModel& ProjectManager::getProjectCenterModel() const
+const ProjectDatabaseModel& ProjectManager::getProjectDatabaseModel() const
 {
-    return _projectCenterModel;
+    return _projectDatabaseModel;
 }
 
 QMenu& ProjectManager::getNewProjectMenu()

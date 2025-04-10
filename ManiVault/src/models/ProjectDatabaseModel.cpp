@@ -2,13 +2,13 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ProjectCenterModel.h"
+#include "ProjectDatabaseModel.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
 
 #ifdef _DEBUG
-    //#define PROJECT_CENTER_MODEL_VERBOSE
+    //#define PROJECT_DATABASE_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -16,7 +16,7 @@ using namespace mv::gui;
 
 namespace mv {
 
-QMap<ProjectCenterModel::Column, ProjectCenterModel::ColumHeaderInfo> ProjectCenterModel::columnInfo = QMap<Column, ColumHeaderInfo>({
+QMap<ProjectDatabaseModel::Column, ProjectDatabaseModel::ColumHeaderInfo> ProjectDatabaseModel::columnInfo = QMap<Column, ColumHeaderInfo>({
     { Column::Title, { "Title" , "Title", "Title" } },
     { Column::Tags, { "Tags" , "Tags", "Tags" } },
     { Column::Date, { "Date" , "Date", "Issue date" } },
@@ -28,7 +28,7 @@ QMap<ProjectCenterModel::Column, ProjectCenterModel::ColumHeaderInfo> ProjectCen
     { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
 });
 
-ProjectCenterModel::ProjectCenterModel(QObject* parent /*= nullptr*/) :
+ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
     StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
@@ -50,16 +50,16 @@ ProjectCenterModel::ProjectCenterModel(QObject* parent /*= nullptr*/) :
         }
         catch (std::exception& e)
         {
-            exceptionMessageBox("Unable to process project center JSON", e);
+            exceptionMessageBox("Unable to process project database JSON", e);
         }
         catch (...)
         {
-            exceptionMessageBox("Unable to process project center JSON");
+            exceptionMessageBox("Unable to process project database JSON");
         }
 	});
 }
 
-QVariant ProjectCenterModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant ProjectDatabaseModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
     switch (static_cast<Column>(section))
     {
@@ -97,17 +97,17 @@ QVariant ProjectCenterModel::headerData(int section, Qt::Orientation orientation
     return {};
 }
 
-void ProjectCenterModel::setSourceUrl(const QUrl& sourceUrl)
+void ProjectDatabaseModel::setSourceUrl(const QUrl& sourceUrl)
 {
 	_fileDownloader.download(sourceUrl);
 }
 
-QSet<QString> ProjectCenterModel::getTagsSet() const
+QSet<QString> ProjectDatabaseModel::getTagsSet() const
 {
     return _tags;
 }
 
-void ProjectCenterModel::addProject(const ProjectDatabaseProject* project)
+void ProjectDatabaseModel::addProject(const ProjectDatabaseProject* project)
 {
     Q_ASSERT(project);
 
@@ -122,7 +122,7 @@ void ProjectCenterModel::addProject(const ProjectDatabaseProject* project)
     _projects.push_back(project);
 }
 
-void ProjectCenterModel::updateTags()
+void ProjectDatabaseModel::updateTags()
 {
     for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
         for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getProject()->getTags())
@@ -131,7 +131,7 @@ void ProjectCenterModel::updateTags()
     emit tagsChanged(_tags);
 }
 
-const ProjectDatabaseProject* ProjectCenterModel::getProject(const QModelIndex& index) const
+const ProjectDatabaseProject* ProjectDatabaseModel::getProject(const QModelIndex& index) const
 {
     Q_ASSERT(index.isValid());
 
@@ -148,22 +148,22 @@ const ProjectDatabaseProject* ProjectCenterModel::getProject(const QModelIndex& 
     return itemAtIndex->getProject();
 }
 
-const ProjectDatabaseProjects& ProjectCenterModel::getProjects() const
+const ProjectDatabaseProjects& ProjectDatabaseModel::getProjects() const
 {
 	return _projects;
 }
 
-ProjectCenterModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
+ProjectDatabaseModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
     _project(project)
 {
 }
 
-const ProjectDatabaseProject* ProjectCenterModel::Item::getProject() const
+const ProjectDatabaseProject* ProjectDatabaseModel::Item::getProject() const
 {
     return _project;
 }
 
-QVariant ProjectCenterModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -183,7 +183,7 @@ QVariant ProjectCenterModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) co
     return Item::data(role);
 }
 
-QVariant ProjectCenterModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -202,7 +202,7 @@ QVariant ProjectCenterModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) con
     return Item::data(role);
 }
 
-QVariant ProjectCenterModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -219,7 +219,7 @@ QVariant ProjectCenterModel::DateItem::data(int role /*= Qt::UserRole + 1*/) con
     return Item::data(role);
 }
 
-QVariant ProjectCenterModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -236,7 +236,7 @@ QVariant ProjectCenterModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
-QVariant ProjectCenterModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -253,7 +253,7 @@ QVariant ProjectCenterModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) 
     return Item::data(role);
 }
 
-QVariant ProjectCenterModel::UrlItem::data(int role) const
+QVariant ProjectDatabaseModel::UrlItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -272,7 +272,7 @@ QVariant ProjectCenterModel::UrlItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant ProjectCenterModel::MinimumCoreVersionItem::data(int role) const
+QVariant ProjectDatabaseModel::MinimumCoreVersionItem::data(int role) const
 {
     switch (role) {
 		case Qt::EditRole:
@@ -291,7 +291,7 @@ QVariant ProjectCenterModel::MinimumCoreVersionItem::data(int role) const
 	return Item::data(role);
 }
 
-QVariant ProjectCenterModel::RequiredPluginsItem::data(int role) const
+QVariant ProjectDatabaseModel::RequiredPluginsItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -310,7 +310,7 @@ QVariant ProjectCenterModel::RequiredPluginsItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant ProjectCenterModel::MissingPluginsItem::data(int role) const
+QVariant ProjectDatabaseModel::MissingPluginsItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:

@@ -6,8 +6,8 @@
 
 #include <AbstractProjectManager.h>
 
-#include <models/ProjectCenterModel.h>
-#include <models/ProjectCenterFilterModel.h>
+#include <models/ProjectDatabaseModel.h>
+#include <models/ProjectDatabaseFilterModel.h>
 
 #include <QObject>
 
@@ -133,10 +133,10 @@ public:
     QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
 
     /**
-     * Get project center model
-     * @return Reference to the project center model
+     * Get project database model
+     * @return Reference to the project database model
      */
-    const ProjectCenterModel& getProjectCenterModel() const override;
+    const ProjectDatabaseModel& getProjectDatabaseModel() const override;
 
 public: // Menus
 
@@ -185,7 +185,7 @@ public: // Action getters
     mv::gui::TriggerAction& getPluginManagerAction() override { return _pluginManagerAction; }
     mv::gui::ToggleAction& getShowStartPageAction() override { return _showStartPageAction; }
     mv::gui::TriggerAction& getBackToProjectAction() override { return _backToProjectAction; }
-    mv::gui::StringAction& getProjectCenterSourceUrlAction() override { return _projectCenterSourceUrlAction; }
+    mv::gui::StringAction& getProjectDatabaseSourceUrlAction() override { return _projectDatabaseSourceUrlAction; }
 
 private:
     QScopedPointer<mv::Project>     _project;                           /** Current project */
@@ -203,8 +203,8 @@ private:
     gui::TriggerAction              _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
     gui::ToggleAction               _showStartPageAction;               /** Action for toggling the start page */
     gui::TriggerAction              _backToProjectAction;               /** Action for going back to the project */
-    ProjectCenterModel              _projectCenterModel;                /** Project center model */
-    gui::StringAction               _projectCenterSourceUrlAction;      /** Source URL action */
+    ProjectDatabaseModel            _projectDatabaseModel;              /** Project database model */
+    gui::StringAction               _projectDatabaseSourceUrlAction;    /** Project database source URL action */
 };
 
 }

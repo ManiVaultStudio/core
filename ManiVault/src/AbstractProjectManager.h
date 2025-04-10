@@ -17,6 +17,8 @@
 #include <QMenu>
 #include <QTemporaryDir>
 
+#include "models/ProjectDatabaseModel.h"
+
 namespace mv {
 
 class ProjectCenterModel;
@@ -188,10 +190,10 @@ public:
     virtual Project* getCurrentProject() = 0;
 
     /**
-     * Get project center model
-     * @return Reference to the project center model
+     * Get project database model
+     * @return Reference to the project database model
      */
-    virtual const ProjectCenterModel& getProjectCenterModel() const = 0;
+    virtual const ProjectDatabaseModel& getProjectDatabaseModel() const = 0;
 
 public: // Temporary directories
 
@@ -342,7 +344,7 @@ public: // Action getters
     virtual gui::TriggerAction& getPluginManagerAction() = 0;
     virtual gui::ToggleAction& getShowStartPageAction() = 0;
     virtual gui::TriggerAction& getBackToProjectAction() = 0;
-    virtual gui::StringAction& getProjectCenterSourceUrlAction() = 0;
+    virtual gui::StringAction& getProjectDatabaseSourceUrlAction() = 0;
 
 signals:
 

@@ -14,13 +14,13 @@
 namespace mv {
 
 /**
- * Project center model class
+ * Project database model class
  *
- * Contains project content for the project center.
+ * Contains project content for the project database.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectCenterModel final : public StandardItemModel
+class CORE_EXPORT ProjectDatabaseModel final : public StandardItemModel
 {
     Q_OBJECT
 
@@ -428,7 +428,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    ProjectCenterModel(QObject* parent = nullptr);
+    ProjectDatabaseModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -457,7 +457,7 @@ public:
      */
     void addProject(const util::ProjectDatabaseProject* project);
 
-    /** Builds a set of all video tags and emits ProjectCenterModel::tagsChanged(...) */
+    /** Builds a set of all video tags and emits ProjectDatabaseModel::tagsChanged(...) */
     void updateTags();
 
     /**
@@ -486,7 +486,7 @@ signals:
 private:
     util::ProjectDatabaseProjects   _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
-    util::FileDownloader            _fileDownloader;    /** For downloading the project center JSON file */
+    util::FileDownloader            _fileDownloader;    /** For downloading the project database JSON file */
 };
 
 }

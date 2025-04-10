@@ -13,7 +13,7 @@
 
 #include <util/StyledIcon.h>
 
-#include <models/ProjectCenterModel.h>
+#include <models/ProjectDatabaseModel.h>
 
 #include <QDebug>
 #include <QPainter>
@@ -30,7 +30,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _recentProjectsWidget(this, "Recent"),
     _projectDatabaseWidget(this, "Project Database"),
     _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
-    _projectCenterSettingsAction(this, "Projects source")
+    _projectDatabaseSettingsAction(this, "Projects source")
 {
     auto layout = new QVBoxLayout();
 
@@ -54,17 +54,17 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
-    _projectCenterSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _projectCenterSettingsAction.addAction(&mv::projects().getProjectCenterSourceUrlAction());
-    _projectCenterSettingsAction.setIconByName("globe");
-    _projectCenterSettingsAction.setPopupSizeHint(QSize(400, 10));
+    _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _projectDatabaseSettingsAction.addAction(&mv::projects().getProjectDatabaseSourceUrlAction());
+    _projectDatabaseSettingsAction.setIconByName("globe");
+    _projectDatabaseSettingsAction.setPopupSizeHint(QSize(400, 10));
 
     _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
-    _projectDatabaseWidget.getHierarchyWidget().getToolbarAction().addAction(&_projectCenterSettingsAction);
+    _projectDatabaseWidget.getHierarchyWidget().getToolbarAction().addAction(&_projectDatabaseSettingsAction);
 
-    _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectCenterModel*>(&mv::projects().getProjectCenterModel()));
+    _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectDatabaseModel*>(&mv::projects().getProjectDatabaseModel()));
 
-    connect(&mv::projects().getProjectCenterModel(), &ProjectCenterModel::populatedFromSourceUrl, this, &StartPageOpenProjectWidget::updateProjectCenterActions);
+    connect(&mv::projects().getProjectDatabaseModel(), &ProjectDatabaseModel::populatedFromSourceUrl, this, &StartPageOpenProjectWidget::updateProjectCenterActions);
 
     connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
 
@@ -227,7 +227,7 @@ void StartPageOpenProjectWidget::updateProjectCenterActions()
 {
     _projectDatabaseWidget.getModel().reset();
     
-    const auto& projectCenterModel = mv::projects().getProjectCenterModel();
+    const auto& projectCenterModel = mv::projects().getProjectDatabaseModel();
 
     for (int filterRowIndex = 0; _projectDatabaseFilterModel.rowCount() > filterRowIndex; ++filterRowIndex) {
         const auto filterIndex = _projectDatabaseFilterModel.index(filterRowIndex, 0);
