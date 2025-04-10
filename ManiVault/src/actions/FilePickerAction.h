@@ -66,10 +66,10 @@ public:
     QString getFilePath() const;
 
     /**
-     * Get the relative file path
-     * @return Relative file path (path relative to the last application dir)
+     * Get the application-relative file path (if it exists)
+     * @return File path relative to the application directory when the file was picked, if the picked file path was a sub-path of the application directory
      */
-    QString getRelativeFilePath() const;
+    QString getApplicationRelativeFilePath() const;
 
     /**
      * Set the file path
@@ -196,15 +196,15 @@ signals:
     void fileTypeChanged(const QString& fileType);
 
 private:
-    QPointer<QFileSystemModel>  _dirModel;              /** Directory model */
-    QPointer<QCompleter>        _completer;             /** Completer */
-    StringAction                _filePathAction;        /** File path action */
-    TriggerAction               _pickAction;            /** Pick file action */
-    QStringList                 _nameFilters;           /** File type filters */
-    QString                     _defaultSuffix;         /** Default suffix */
-    QString                     _fileType;              /** File type (e.g. image and project)*/
-    bool                        _useNativeDialog;       /** Whether to use native or Qt file dialog */
-    QString                     _relativeFilePath;      /** Path of the file, relative to the application directory */
+    QPointer<QFileSystemModel>  _dirModel;                      /** Directory model */
+    QPointer<QCompleter>        _completer;                     /** Completer */
+    StringAction                _filePathAction;                /** File path action */
+    TriggerAction               _pickAction;                    /** Pick file action */
+    QStringList                 _nameFilters;                   /** File type filters */
+    QString                     _defaultSuffix;                 /** Default suffix */
+    QString                     _fileType;                      /** File type (e.g. image and project)*/
+    bool                        _useNativeDialog;               /** Whether to use native or Qt file dialog */
+    QString                     _applicationRelativeFilePath;   /** Path of the file, relative to the application directory */
 };
 
 }

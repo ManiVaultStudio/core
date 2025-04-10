@@ -82,22 +82,26 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
             if (!getSettingsPrefix().isEmpty())
                 setFilePath(QFileInfo(filePath).absoluteFilePath());
 
+            QDir applicationDir;
+
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-            _relativeFilePath = QDir(filePath).relativeFilePath(QCoreApplication::applicationDirPath());
+            applicationDir = QCoreApplication::applicationDirPath();
 #endif
 
 #ifdef Q_OS_MAC
-            const auto bundleRoot       = QCoreApplication::applicationDirPath() + "/../..";
-            const auto applicationDir   = QDir(bundleRoot).canonicalPath();
-
-            _relativeFilePath = QDir(filePath).relativeFilePath(applicationDir);
+            applicationDir = QDir(QCoreApplication::applicationDirPath() + "/../..").canonicalPath();
 #endif
+
+            const auto canonicalAppDir      = applicationDir.canonicalPath();
+            const auto canonicalFilePath    = QFileInfo(filePath).canonicalFilePath();
+
+            if (canonicalFilePath.startsWith(canonicalAppDir + QDir::separator()))
+                _applicationRelativeFilePath = QDir(filePath).relativeFilePath(applicationDir.path());
 		});
 
         connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
         fileDialog->open();
-
     });
 
     connect(&_filePathAction, &StringAction::stringChanged, this, &FilePickerAction::filePathChanged);
@@ -111,9 +115,9 @@ QString FilePickerAction::getFilePath() const
     return _filePathAction.getString();
 }
 
-QString FilePickerAction::getRelativeFilePath() const
+QString FilePickerAction::getApplicationRelativeFilePath() const
 {
-
+    return _applicationRelativeFilePath;
 }
 
 void FilePickerAction::setFilePath(const QString& filePath)
@@ -196,7 +200,7 @@ bool FilePickerAction::isValid() const
 
 QString FilePickerAction::getApplicationDirectory() const
 {
-    return _relativeFilePath;
+    return _applicationRelativeFilePath;
 }
 
 QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -222,7 +226,7 @@ void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
         setFilePath(variantMap["Value"].toString());
 
 	if (variantMap.contains("RelativeFilePath"))
-        _relativeFilePath = variantMap["RelativeFilePath"].toString();
+        _applicationRelativeFilePath = variantMap["RelativeFilePath"].toString();
 }
 
 QVariantMap FilePickerAction::toVariantMap() const
@@ -231,7 +235,7 @@ QVariantMap FilePickerAction::toVariantMap() const
 
     variantMap.insert({
         { "Value", getFilePath() },
-        { "RelativeFilePath", _relativeFilePath }
+        { "RelativeFilePath", _applicationRelativeFilePath }
     });
 
     return variantMap;
