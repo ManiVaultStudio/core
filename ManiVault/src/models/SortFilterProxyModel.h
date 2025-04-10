@@ -8,6 +8,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "util/Serializable.h"
+
 #include "NumberOfRowsAction.h"
 
 #include "actions/StringAction.h"
@@ -27,7 +29,7 @@ class DatasetImpl;
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT SortFilterProxyModel : public QSortFilterProxyModel
+class CORE_EXPORT SortFilterProxyModel : public QSortFilterProxyModel, public mv::util::Serializable
 {
     Q_OBJECT
 
@@ -82,6 +84,20 @@ signals:
      * @param rowTypeName Type name by which to identify a row
      */
     void rowTypeNameChanged(const QString& rowTypeName);
+
+public: // Serialization
+
+    /**
+     * Load from variant map
+     * @param variantMap Variant map
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save to variant map
+     * @return Variant map
+     */
+    QVariantMap toVariantMap() const override;
 
 public: // Action getters
 

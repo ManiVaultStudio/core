@@ -17,6 +17,7 @@ namespace mv
 
 SortFilterProxyModel::SortFilterProxyModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
+    Serializable("SortFilterProxyModel"),
     _rowTypeName("Item"),
     _numberOfRowsAction(this, "Number of rows"),
     _textFilterAction(this, "Text filter"),
@@ -163,4 +164,25 @@ void SortFilterProxyModel::updateFilterColumnAction()
     _textFilterColumnAction.setCurrentText(previousFilterColumn.isEmpty() ? "" : (columnNames.contains(previousFilterColumn) ? previousFilterColumn : ""));
 }
 
+void SortFilterProxyModel::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+
+    _textFilterAction.fromParentVariantMap(variantMap);
+    _textFilterColumnAction.fromParentVariantMap(variantMap);
+    _textFilterCaseSensitiveAction.fromParentVariantMap(variantMap);
+    _textFilterRegularExpressionAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap SortFilterProxyModel::toVariantMap() const
+{
+	auto variantMap = Serializable::toVariantMap();
+
+    _textFilterAction.insertIntoVariantMap(variantMap);
+    _textFilterColumnAction.insertIntoVariantMap(variantMap);
+    _textFilterCaseSensitiveAction.insertIntoVariantMap(variantMap);
+    _textFilterRegularExpressionAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
 }
