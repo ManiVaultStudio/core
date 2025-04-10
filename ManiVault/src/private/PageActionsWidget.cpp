@@ -192,3 +192,13 @@ void PageActionsWidget::updateCustomStyle()
 
 	treeView.setStyleSheet(styleSheet);
 }
+
+void PageActionsWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+}
+
+QVariantMap PageActionsWidget::toVariantMap() const
+{
+	return Serializable::toVariantMap();
+}

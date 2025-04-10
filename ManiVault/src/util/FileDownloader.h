@@ -44,7 +44,7 @@ public:
     explicit FileDownloader(const StorageMode& mode = StorageMode::All, const Task::GuiScope& taskGuiScope = Task::GuiScope::None, QObject* parent = nullptr);
 
     /** No need for custom destructor */
-    virtual ~FileDownloader() = default;
+    ~FileDownloader() override = default;
 
     /**
      * Download file with \p url
@@ -76,6 +76,18 @@ public:
      */
     void downloadFinished(QNetworkReply* reply);
 
+    /**
+     * Get the target directory
+     * @return Target directory
+     */
+    const QString& getTargetDirectory() const;
+
+    /**
+     * Set the target directory to \p targetDirectory
+     * @param targetDirectory Target directory
+     */
+    void setTargetDirectory(const QString& targetDirectory);
+
 signals:
 
     /** Signals that the file is correctly downloaded */
@@ -98,6 +110,7 @@ private:
     QByteArray              _downloadedData;            /** Downloaded data as byte array */
     QString                 _downloadedFilePath;        /** Location where the downloaded file is stored */
     Task                    _task;                      /** Task for reporting progress */
+    QString                 _targetDirectory;           /** Directory where the file is downloaded to (when FileDownloader#_storageMode is StorageMode#File) */  
 };
 
 }

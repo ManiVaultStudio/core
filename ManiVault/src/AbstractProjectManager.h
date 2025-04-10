@@ -139,12 +139,13 @@ public:
     virtual void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
 
     /**
-     * Open project from \p url
+     * Download project from \p url, store it in \p targetDir and open it
      * @param url URL of the project
+     * @param targetDirectory Directory where the project is stored (temporary directory when empty)
      * @param importDataOnly Whether to only import the data from the project
      * @param loadWorkspace Whether to load the workspace which is accompanied by the project
      */
-    virtual void openProject(QUrl url, bool importDataOnly = false, bool loadWorkspace = true) = 0;
+    virtual void openProject(QUrl url, const QString& targetDirectory = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
 
     /**
      * Import project from \p filePath (only import the data)

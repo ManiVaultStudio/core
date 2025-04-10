@@ -188,4 +188,14 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
     }
 }
 
+void StartPageGetStartedWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+}
+
+QVariantMap StartPageGetStartedWidget::toVariantMap() const
+{
+	return Serializable::toVariantMap();
+}
+
 

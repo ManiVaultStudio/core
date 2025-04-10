@@ -7,6 +7,8 @@
 #include "PageActionsWidget.h"
 #include "PageTutorialsWidget.h"
 
+#include <util/Serializable.h>
+
 #include <actions/OptionAction.h>
 #include <actions/RecentFilesAction.h>
 
@@ -22,7 +24,7 @@ class StartPageContentWidget;
  *
  * @author Thomas Kroes
  */
-class StartPageGetStartedWidget : public QWidget
+class StartPageGetStartedWidget : public QWidget, public mv::util::Serializable
 {
 public:
 
@@ -52,7 +54,19 @@ private:
     /** Update actions for creating a project from dataset */
     void updateCreateProjectFromDatasetActions();
 
-    
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param variantMap Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 private:
     StartPageContentWidget*                     _startPageContentWidget;                /** Non-owning pointer to start page content widget */

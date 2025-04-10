@@ -99,7 +99,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowTitleHint);
-    setWindowFlag(Qt::WindowStaysOnTopHint);
+    //setWindowFlag(Qt::WindowStaysOnTopHint);
 
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 

@@ -23,6 +23,7 @@ namespace mv::gui
 
 HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, const QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :
     QWidget(parent),
+    Serializable("HierarchyWidget"),
     _itemTypeName(itemTypeName),
     _headerHidden(false),
     _model(model),
@@ -592,6 +593,30 @@ void HierarchyWidget::updateFilterModel()
         _filterModel->invalidate();
 
     updateOverlayWidget();
+}
+
+void HierarchyWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+
+    _filterNameAction.fromParentVariantMap(variantMap);
+    _filterColumnAction.fromParentVariantMap(variantMap);
+    _filterCaseSensitiveAction.fromParentVariantMap(variantMap);
+    _filterRegularExpressionAction.fromParentVariantMap(variantMap);
+    _columnsGroupAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap HierarchyWidget::toVariantMap() const
+{
+	auto variantMap = Serializable::toVariantMap();
+
+    _filterNameAction.insertIntoVariantMap(variantMap);
+    _filterColumnAction.insertIntoVariantMap(variantMap);
+    _filterCaseSensitiveAction.insertIntoVariantMap(variantMap);
+    _filterRegularExpressionAction.insertIntoVariantMap(variantMap);
+    _columnsGroupAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 void HierarchyWidget::updateHeaderVisibility()
