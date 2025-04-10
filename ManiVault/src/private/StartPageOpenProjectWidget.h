@@ -59,7 +59,7 @@ private:
     /** Update actions for opening recent projects */
     void updateRecentActions();
 
-    void updateProjectCenterActions();
+    void updateProjectDatabaseActions();
 
     /** Create the custom drawn icons  */
     void createCustomIcons();

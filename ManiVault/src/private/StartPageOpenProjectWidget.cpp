@@ -56,15 +56,22 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _projectDatabaseSettingsAction.addAction(&mv::projects().getProjectDatabaseSourceUrlAction());
+    
     _projectDatabaseSettingsAction.setIconByName("globe");
     _projectDatabaseSettingsAction.setPopupSizeHint(QSize(400, 10));
 
     _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
-    _projectDatabaseWidget.getHierarchyWidget().getToolbarAction().addAction(&_projectDatabaseSettingsAction);
+
+    auto& toolbarAction = _projectDatabaseWidget.getHierarchyWidget().getToolbarAction();
+
+    toolbarAction.addAction(&_projectDatabaseSettingsAction);
+    toolbarAction.addAction(&_projectDatabaseFilterModel.getFilterGroupAction());
+    toolbarAction.addAction(&_projectDatabaseFilterModel.getTagsFilterAction());
 
     _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectDatabaseModel*>(&mv::projects().getProjectDatabaseModel()));
 
-    connect(&mv::projects().getProjectDatabaseModel(), &ProjectDatabaseModel::populatedFromSourceUrl, this, &StartPageOpenProjectWidget::updateProjectCenterActions);
+    connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
+    connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
 
     connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
 
@@ -223,7 +230,7 @@ void StartPageOpenProjectWidget::updateRecentActions()
     }
 }
 
-void StartPageOpenProjectWidget::updateProjectCenterActions()
+void StartPageOpenProjectWidget::updateProjectDatabaseActions()
 {
     _projectDatabaseWidget.getModel().reset();
     
@@ -270,6 +277,8 @@ void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
     _recentProjectsWidget.fromParentVariantMap(variantMap);
     _projectDatabaseWidget.fromParentVariantMap(variantMap);
     _projectDatabaseFilterModel.fromParentVariantMap(variantMap);
+
+    mv::projects().getProjectDatabaseSourceUrlAction().fromParentVariantMap(variantMap);
 }
 
 QVariantMap StartPageOpenProjectWidget::toVariantMap() const
@@ -280,6 +289,8 @@ QVariantMap StartPageOpenProjectWidget::toVariantMap() const
     _recentProjectsWidget.insertIntoVariantMap(variantMap);
     _projectDatabaseWidget.insertIntoVariantMap(variantMap);
     _projectDatabaseFilterModel.insertIntoVariantMap(variantMap);
+
+    mv::projects().getProjectDatabaseSourceUrlAction().insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

@@ -26,6 +26,7 @@ ProjectDatabaseFilterModel::ProjectDatabaseFilterModel(QObject* parent /*= nullp
     _tagsFilterAction(this, "Tags filter"),
     _excludeTagsFilterAction(this, "Exclude tags filter"),
     _targetAppVersionAction(this, "App version"),
+    _filterLoadableOnlyAction(this, "Loadable only"),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
@@ -33,9 +34,9 @@ ProjectDatabaseFilterModel::ProjectDatabaseFilterModel(QObject* parent /*= nullp
     setRowTypeName("Project");
 
     _tagsFilterAction.setIconByName("tag");
+    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::WidgetFlag::Tags | OptionsAction::WidgetFlag::Selection);
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
-    _tagsFilterAction.setPopupSizeHint(QSize(500, 200));
+    _tagsFilterAction.setPopupSizeHint(QSize(400, 100));
 
     const auto applicationVersion = Application::current()->getVersion();
 
@@ -48,10 +49,14 @@ ProjectDatabaseFilterModel::ProjectDatabaseFilterModel(QObject* parent /*= nullp
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &ProjectDatabaseFilterModel::invalidate);
     connect(&_excludeTagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &ProjectDatabaseFilterModel::invalidate);
     connect(&_targetAppVersionAction, &VersionAction::versionChanged, this, &ProjectDatabaseFilterModel::invalidate);
+    connect(&_filterLoadableOnlyAction, &ToggleAction::toggled, this, &ProjectDatabaseFilterModel::invalidate);
+
+    _filterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _filterGroupAction.addAction(&getTextFilterCaseSensitiveAction());
     _filterGroupAction.addAction(&getTextFilterRegularExpressionAction());
     _filterGroupAction.addAction(&getTargetAppVersionAction());
+    _filterGroupAction.addAction(&getFilterLoadableOnlyAction());
 }
 
 bool ProjectDatabaseFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -68,10 +73,8 @@ bool ProjectDatabaseFilterModel::filterAcceptsRow(int row, const QModelIndex& pa
             return false;
     }
 
-    /*
-    const auto tagsList                 = index.siblingAtColumn(static_cast<int>(ProjectDatabaseModel::Column::Tags)).data(Qt::EditRole).toStringList();
-    const auto filterTagsList           = _tagsFilterAction.getSelectedOptions();
-    const auto filterExcludeTagsList    = _excludeTagsFilterAction.getSelectedOptions();
+    const auto tagsList         = index.siblingAtColumn(static_cast<int>(ProjectDatabaseModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
 
     if (_tagsFilterAction.hasOptions()) {
         auto matchTags = false;
@@ -89,22 +92,17 @@ bool ProjectDatabaseFilterModel::filterAcceptsRow(int row, const QModelIndex& pa
             return false;
     }
 
-    if (_excludeTagsFilterAction.hasOptions()) {
-        for (const auto& tag : tagsList) {
-            if (filterExcludeTagsList.contains(tag))
-                return false;
-        }
-    }
+    const auto projectMinimumCoreVersion  = index.siblingAtColumn(static_cast<int>(ProjectDatabaseModel::Column::MinimumCoreVersion)).data(Qt::EditRole).value<Version>();
 
-    const auto minimumVersionMajor  = index.siblingAtColumn(static_cast<int>(ProjectDatabaseModel::Column::MinimumVersionMajor)).data(Qt::EditRole).toInt();
-    const auto minimumVersionMinor  = index.siblingAtColumn(static_cast<int>(ProjectDatabaseModel::Column::MinimumVersionMinor)).data(Qt::EditRole).toInt();
-
-    const Version tutorialMinimumAppVersion(minimumVersionMajor, minimumVersionMinor, 0) ;
     const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0) ;
 
-    if (targetAppVersion > tutorialMinimumAppVersion)
+    if (targetAppVersion > projectMinimumCoreVersion)
         return false;
-    */
+
+    const auto missingPlugins = index.siblingAtColumn(static_cast<int>(ProjectDatabaseModel::Column::MissingPlugins)).data(Qt::EditRole).toStringList();
+
+    if (_filterLoadableOnlyAction.isChecked() && !missingPlugins.isEmpty())
+        return false;
 
     return true;
 }

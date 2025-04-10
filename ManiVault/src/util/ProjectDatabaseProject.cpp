@@ -18,21 +18,23 @@ ProjectDatabaseProject::ProjectDatabaseProject(const QVariantMap& variantMap) :
     if (variantMap.contains("CoreVersion")) {
         const auto coreVersionMap = variantMap["CoreVersion"].toMap();
 
+        qDebug() << coreVersionMap;
+
         if (coreVersionMap.contains("Major"))
 			_minimumCoreVersion.setMajor(coreVersionMap["Major"].toInt());
 
         if (coreVersionMap.contains("Minor"))
-            _minimumCoreVersion.setMajor(coreVersionMap["Minor"].toInt());
+            _minimumCoreVersion.setMinor(coreVersionMap["Minor"].toInt());
 
         if (coreVersionMap.contains("Patch"))
-            _minimumCoreVersion.setMajor(coreVersionMap["Patch"].toInt());
+            _minimumCoreVersion.setPatch(coreVersionMap["Patch"].toInt());
 
         if (coreVersionMap.contains("Suffix"))
-            _minimumCoreVersion.setMajor(coreVersionMap["Suffix"].toInt());
+            _minimumCoreVersion.setSuffix(coreVersionMap["Suffix"].toString().toStdString());
     }
 
     if (variantMap.contains("RequiredPlugins")) {
-        const auto requiredPluginsMap = variantMap["RequiredPlugins"].toMap();
+        const auto requiredPluginsMap = variantMap["RequiredPlugins"].toList();
 
         for (const auto& requiredPluginVariant : requiredPluginsMap) {
             const auto requiredPluginMap = requiredPluginVariant.toMap();

@@ -72,6 +72,7 @@ public: // Action getters
     gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
     gui::OptionsAction& getExcludeTagsFilterAction() { return _excludeTagsFilterAction; }
     gui::VersionAction& getTargetAppVersionAction() { return _targetAppVersionAction; }
+	gui::ToggleAction& getFilterLoadableOnlyAction() { return _filterLoadableOnlyAction; }
 	gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
@@ -79,6 +80,7 @@ private:
     gui::OptionsAction          _tagsFilterAction;              /** Filter based on tag(s) */
     gui::OptionsAction          _excludeTagsFilterAction;       /** Filter out based on tag(s) */
     gui::VersionAction          _targetAppVersionAction;        /** Target app minimum version filter action */
+    gui::ToggleAction           _filterLoadableOnlyAction;      /** Filter out projects that are not loadable */
     gui::VerticalGroupAction    _filterGroupAction;             /** Groups the filter text, filter settings and minimum version settings */
 };
 

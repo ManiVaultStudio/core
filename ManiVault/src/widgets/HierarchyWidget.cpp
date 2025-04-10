@@ -230,8 +230,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     const auto filterModelRowsChanged = [this]() -> void {
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
 
-        for (auto action : _toolbarAction.getActions())
-            const_cast<WidgetAction*>(action)->setEnabled(hasItems);
+        //for (auto action : _toolbarAction.getActions())
+        //    const_cast<WidgetAction*>(action)->setEnabled(hasItems);
 
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
         _filterColumnAction.setEnabled(_model.rowCount() >= 1);
