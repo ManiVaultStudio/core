@@ -6,10 +6,11 @@
 
 #include "PageActionsWidget.h"
 
+#include <util/Serializable.h>
+
 #include <actions/RecentFilesAction.h>
 #include <actions/VerticalGroupAction.h>
 
-#include <models/ProjectCenterModel.h>
 #include <models/ProjectCenterFilterModel.h>
 
 #include <QWidget>
@@ -23,7 +24,7 @@ class StartPageContentWidget;
  *
  * @author Thomas Kroes
  */
-class StartPageOpenProjectWidget : public QWidget
+class StartPageOpenProjectWidget : public QWidget, public mv::util::Serializable
 {
 protected:
 
@@ -65,6 +66,20 @@ private:
     
     /** Update all  custom style elements */
     void updateCustomStyle();
+
+public: // Serialization
+
+    /**
+     * Load from variant map
+     * @param variantMap Variant map
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save to variant map
+     * @return Variant map
+     */
+    QVariantMap toVariantMap() const override;
 
 private:
     StartPageContentWidget*         _startPageContentWidget;        /** Non-owning pointer to start page content widget */

@@ -13,6 +13,8 @@
 
 #include <util/StyledIcon.h>
 
+#include <models/ProjectCenterModel.h>
+
 #include <QDebug>
 #include <QPainter>
 
@@ -255,4 +257,26 @@ void StartPageOpenProjectWidget::updateCustomStyle()
 {
     createCustomIcons();
     updateActions();
+}
+
+void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+
+    _openCreateProjectWidget.fromParentVariantMap(variantMap);
+    _recentProjectsWidget.fromParentVariantMap(variantMap);
+    _projectCenterWidget.fromParentVariantMap(variantMap);
+    _projectCenterFilterModel.fromParentVariantMap(variantMap);
+}
+
+QVariantMap StartPageOpenProjectWidget::toVariantMap() const
+{
+	auto variantMap = Serializable::toVariantMap();
+
+    _openCreateProjectWidget.insertIntoVariantMap(variantMap);
+    _recentProjectsWidget.insertIntoVariantMap(variantMap);
+    _projectCenterWidget.insertIntoVariantMap(variantMap);
+    _projectCenterFilterModel.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }

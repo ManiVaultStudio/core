@@ -4,8 +4,6 @@
 
 #include "StandardItemModel.h"
 
-#include <util/Exception.h>
-
 #ifdef _DEBUG
     #define STANDARD_ITEM_MODEL_VERBOSE
 #endif

@@ -10,12 +10,12 @@
 
 #include "util/Serializable.h"
 
-#include "NumberOfRowsAction.h"
-
 #include "actions/StringAction.h"
 #include "actions/VerticalGroupAction.h"
 #include "actions/OptionAction.h"
 #include "actions/ToggleAction.h"
+
+#include "NumberOfRowsAction.h"
 
 namespace mv
 {
