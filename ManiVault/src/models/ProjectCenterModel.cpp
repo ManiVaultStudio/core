@@ -23,8 +23,9 @@ QMap<ProjectCenterModel::Column, ProjectCenterModel::ColumHeaderInfo> ProjectCen
     { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
     { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
     { Column::Url, { "URL" , "URL", "Project URL" } },
-    { Column::MinimumVersionMajor, { "Min. app version (major)" , "Min. app version (major)", "Minimum ManiVault Studio application version (major)" } },
-    { Column::MinimumVersionMinor, { "Min. app version (minor)" , "Min. app version (minor)", "Minimum ManiVault Studio application version (minor)" } }
+    { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
+    { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
+    { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
 });
 
 ProjectCenterModel::ProjectCenterModel(QObject* parent /*= nullptr*/) :
@@ -37,13 +38,12 @@ ProjectCenterModel::ProjectCenterModel(QObject* parent /*= nullptr*/) :
         try
         {
             const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-            const auto projects     = jsonDocument.object()["cytosploreViewerProjectDownloads"].toArray();
+            const auto projects     = jsonDocument.object()["Projects"].toArray();
 
             for (const auto project : projects) {
                 auto projectMap = project.toVariant().toMap();
 
-                qDebug() << "Project center project:" << projectMap["projectName"];
-                addProject(new ProjectCenterProject(projectMap));
+                addProject(new ProjectDatabaseProject(projectMap));
             }
 
             emit populatedFromSourceUrl();
@@ -81,11 +81,14 @@ QVariant ProjectCenterModel::headerData(int section, Qt::Orientation orientation
         case Column::Url:
             return UrlItem::headerData(orientation, role);
 
-        case Column::MinimumVersionMajor:
-            return MinimumVersionMajorItem::headerData(orientation, role);
+        case Column::MinimumCoreVersion:
+            return MinimumCoreVersionItem::headerData(orientation, role);
 
-        case Column::MinimumVersionMinor:
-            return MinimumVersionMinorItem::headerData(orientation, role);
+        case Column::RequiredPlugins:
+            return RequiredPluginsItem::headerData(orientation, role);
+
+        case Column::MissingPlugins:
+            return MissingPluginsItem::headerData(orientation, role);
 
 		case Column::Count:
             break;
@@ -104,7 +107,7 @@ QSet<QString> ProjectCenterModel::getTagsSet() const
     return _tags;
 }
 
-void ProjectCenterModel::addProject(const ProjectCenterProject* project)
+void ProjectCenterModel::addProject(const ProjectDatabaseProject* project)
 {
     Q_ASSERT(project);
 
@@ -114,7 +117,7 @@ void ProjectCenterModel::addProject(const ProjectCenterProject* project)
     appendRow(Row(project));
     updateTags();
 
-    const_cast<ProjectCenterProject*>(project)->setParent(this);
+    const_cast<ProjectDatabaseProject*>(project)->setParent(this);
 
     _projects.push_back(project);
 }
@@ -128,7 +131,7 @@ void ProjectCenterModel::updateTags()
     emit tagsChanged(_tags);
 }
 
-const ProjectCenterProject* ProjectCenterModel::getProject(const QModelIndex& index) const
+const ProjectDatabaseProject* ProjectCenterModel::getProject(const QModelIndex& index) const
 {
     Q_ASSERT(index.isValid());
 
@@ -145,17 +148,17 @@ const ProjectCenterProject* ProjectCenterModel::getProject(const QModelIndex& in
     return itemAtIndex->getProject();
 }
 
-const ProjectCenterProjects& ProjectCenterModel::getProjects() const
+const ProjectDatabaseProjects& ProjectCenterModel::getProjects() const
 {
 	return _projects;
 }
 
-ProjectCenterModel::Item::Item(const mv::util::ProjectCenterProject* project, bool editable /*= false*/) :
+ProjectCenterModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
     _project(project)
 {
 }
 
-const ProjectCenterProject* ProjectCenterModel::Item::getProject() const
+const ProjectDatabaseProject* ProjectCenterModel::Item::getProject() const
 {
     return _project;
 }
@@ -269,41 +272,22 @@ QVariant ProjectCenterModel::UrlItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant ProjectCenterModel::MinimumVersionMajorItem::data(int role) const
+QVariant ProjectCenterModel::MinimumCoreVersionItem::data(int role) const
 {
     switch (role) {
-	    case Qt::EditRole:
-            return getProject()->getMinimumVersionMajor();
+		case Qt::EditRole:
+            return QVariant::fromValue(getProject()->getMinimumCoreVersion());
 
-		case Qt::DisplayRole:
-	        return QString::number(data(Qt::EditRole).toInt());
+    case Qt::DisplayRole:
+	        return QString::fromStdString(data(Qt::EditRole).value<Version>().getVersionString());
 
 	    case Qt::ToolTipRole:
-	        return "Minimum ManiVault Studio application version (major): " + data(Qt::DisplayRole).toString();
+	        return "Minimum ManiVault Studio application core version: " + data(Qt::DisplayRole).toString();
 
 	    default:
 	        break;
     }
     
-	return Item::data(role);
-}
-
-QVariant ProjectCenterModel::MinimumVersionMinorItem::data(int role) const
-{
-    switch (role) {
-	    case Qt::EditRole:
-	        return getProject()->getMinimumVersionMinor();
-
-	    case Qt::DisplayRole:
-	        return QString::number(data(Qt::EditRole).toInt());
-
-	    case Qt::ToolTipRole:
-	        return "Minimum ManiVault Studio application version (minor): " + data(Qt::DisplayRole).toString();
-
-	    default:
-	        break;
-    }
-
 	return Item::data(role);
 }
 

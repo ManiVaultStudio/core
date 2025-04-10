@@ -6,7 +6,7 @@
 
 #include "models/StandardItemModel.h"
 
-#include "util/ProjectCenterProject.h"
+#include "util/ProjectDatabaseProject.h"
 #include "util/FileDownloader.h"
 
 #include <QMap>
@@ -34,8 +34,7 @@ public:
         IconName,
         Summary,
         Url,
-        MinimumVersionMajor,
-        MinimumVersionMinor,
+        MinimumCoreVersion,
         RequiredPlugins,
         MissingPlugins,
 
@@ -61,16 +60,16 @@ public:
          * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        Item(const util::ProjectCenterProject* project, bool editable = false);
+        Item(const util::ProjectDatabaseProject* project, bool editable = false);
 
         /**
          * Get project
          * return Pointer to the project
          */
-        const util::ProjectCenterProject* getProject() const;
+        const util::ProjectDatabaseProject* getProject() const;
 
     private:
-        const util::ProjectCenterProject*   _project;      /** The project data */
+        const util::ProjectDatabaseProject*   _project;      /** The project data */
     };
 
 protected:
@@ -291,8 +290,8 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the project minimum application version (major) */
-    class MinimumVersionMajorItem final : public Item {
+    /** Standard model item class for displaying the project minimum application core version */
+    class MinimumCoreVersionItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -314,46 +313,10 @@ protected:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Min. app version (major)";
+	                return "Min. app core version";
 
 	            case Qt::ToolTipRole:
-	                return "Minimum ManiVault Studio application version (major)";
-
-	            default:
-	                break;
-            }
-
-            return {};
-        }
-    };
-
-    /** Standard model item class for displaying the project minimum application version (minor) */
-    class MinimumVersionMinorItem final : public Item {
-    public:
-
-        /** No need for custom constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Min. app version (minor)";
-
-	            case Qt::ToolTipRole:
-	                return "Minimum ManiVault Studio application version (minor)";
+	                return "Minimum ManiVault Studio application core version";
 
 	            default:
 	                break;
@@ -444,7 +407,7 @@ protected:
          * Construct with pointer to \p project object
          * @param project Pointer to project object
          */
-        Row(const util::ProjectCenterProject* project) :
+        Row(const util::ProjectDatabaseProject* project) :
             QList<QStandardItem*>()
         {
         	append(new TitleItem(project));
@@ -453,8 +416,7 @@ protected:
             append(new IconNameItem(project));
             append(new SummaryItem(project));
             append(new UrlItem(project));
-            append(new MinimumVersionMajorItem(project));
-            append(new MinimumVersionMinorItem(project));
+            append(new MinimumCoreVersionItem(project));
             append(new RequiredPluginsItem(project));
             append(new MissingPluginsItem(project));
         }
@@ -493,7 +455,7 @@ public:
      * Add \p project
      * @param project Pointer to project to add
      */
-    void addProject(const util::ProjectCenterProject* project);
+    void addProject(const util::ProjectDatabaseProject* project);
 
     /** Builds a set of all video tags and emits ProjectCenterModel::tagsChanged(...) */
     void updateTags();
@@ -502,13 +464,13 @@ public:
      * Get the project at \p index
      * @return Project at index
      */
-    const util::ProjectCenterProject* getProject(const QModelIndex& index) const;
+    const util::ProjectDatabaseProject* getProject(const QModelIndex& index) const;
 
     /**
      * Get the projects
      * @return Projects
      */
-    const util::ProjectCenterProjects& getProjects() const;
+    const util::ProjectDatabaseProjects& getProjects() const;
 
 signals:
 
@@ -522,7 +484,7 @@ signals:
     void populatedFromSourceUrl();
 
 private:
-    util::ProjectCenterProjects     _projects;          /** Model projects */
+    util::ProjectDatabaseProjects   _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
     util::FileDownloader            _fileDownloader;    /** For downloading the project center JSON file */
 };
