@@ -99,6 +99,8 @@ void StartPageContentWidget::fromVariantMap(const QVariantMap& variantMap)
     _toggleProjectFromWorkspaceAction.fromParentVariantMap(variantMap);
     _toggleProjectFromDataAction.fromParentVariantMap(variantMap);
     _toggleTutorialsAction.fromParentVariantMap(variantMap);
+    _openProjectWidget.fromParentVariantMap(variantMap);
+    _getStartedWidget.fromParentVariantMap(variantMap);
 }
 
 QVariantMap StartPageContentWidget::toVariantMap() const
@@ -111,6 +113,8 @@ QVariantMap StartPageContentWidget::toVariantMap() const
     _toggleProjectFromWorkspaceAction.insertIntoVariantMap(variantMap);
     _toggleProjectFromDataAction.insertIntoVariantMap(variantMap);
     _toggleTutorialsAction.insertIntoVariantMap(variantMap);
+    _openProjectWidget.insertIntoVariantMap(variantMap);
+    _getStartedWidget.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
