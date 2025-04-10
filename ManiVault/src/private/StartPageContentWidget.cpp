@@ -21,8 +21,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _compactViewAction(this, "Compact"),
     _toggleOpenCreateProjectAction(this, "Open & Create", true),
     _toggleRecentProjectsAction(this, "Recent Projects", true),
-    _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleProjectFromDataAction(this, "Project From Data", true),
+    _toggleProjectsRepositoryAction(this, "Projects", true),
+    _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleTutorialsAction(this, "Tutorials", true),
     _settingsAction(this, "Settings"),
     _toLearningCenterAction(this, "Learning center"),
@@ -53,8 +54,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
     _settingsAction.addAction(&_toggleRecentProjectsAction);
-    _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);
+    _settingsAction.addAction(&_toggleProjectsRepositoryAction);
+    _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
     _settingsAction.addAction(&_toggleTutorialsAction);
     _settingsAction.addAction(&_compactViewAction);
 
@@ -96,8 +98,8 @@ void StartPageContentWidget::fromVariantMap(const QVariantMap& variantMap)
     _compactViewAction.fromParentVariantMap(variantMap);
     _toggleOpenCreateProjectAction.fromParentVariantMap(variantMap);
     _toggleRecentProjectsAction.fromParentVariantMap(variantMap);
-    _toggleProjectFromWorkspaceAction.fromParentVariantMap(variantMap);
     _toggleProjectFromDataAction.fromParentVariantMap(variantMap);
+    _toggleProjectFromWorkspaceAction.fromParentVariantMap(variantMap);
     _toggleTutorialsAction.fromParentVariantMap(variantMap);
     _openProjectWidget.fromParentVariantMap(variantMap);
     _getStartedWidget.fromParentVariantMap(variantMap);
@@ -110,8 +112,8 @@ QVariantMap StartPageContentWidget::toVariantMap() const
     _compactViewAction.insertIntoVariantMap(variantMap);
     _toggleOpenCreateProjectAction.insertIntoVariantMap(variantMap);
     _toggleRecentProjectsAction.insertIntoVariantMap(variantMap);
-    _toggleProjectFromWorkspaceAction.insertIntoVariantMap(variantMap);
     _toggleProjectFromDataAction.insertIntoVariantMap(variantMap);
+    _toggleProjectFromWorkspaceAction.insertIntoVariantMap(variantMap);
     _toggleTutorialsAction.insertIntoVariantMap(variantMap);
     _openProjectWidget.insertIntoVariantMap(variantMap);
     _getStartedWidget.insertIntoVariantMap(variantMap);
