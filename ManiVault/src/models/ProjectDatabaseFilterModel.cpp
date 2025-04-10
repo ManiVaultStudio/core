@@ -26,7 +26,7 @@ ProjectDatabaseFilterModel::ProjectDatabaseFilterModel(QObject* parent /*= nullp
     _tagsFilterAction(this, "Tags filter"),
     _excludeTagsFilterAction(this, "Exclude tags filter"),
     _targetAppVersionAction(this, "App version"),
-    _filterLoadableOnlyAction(this, "Loadable only"),
+    _filterLoadableOnlyAction(this, "Loadable only", true),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
