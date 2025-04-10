@@ -7,6 +7,8 @@
 #include "PageActionsModel.h"
 #include "PageActionsFilterModel.h"
 
+#include <util/Serializable.h>
+
 #include <widgets/HierarchyWidget.h>
 
 #include <QWidget>
@@ -18,7 +20,7 @@
  *
  * @author Thomas Kroes
  */
-class PageActionsWidget : public QWidget
+class PageActionsWidget : public QWidget, public mv::util::Serializable
 {
 public:
 
@@ -70,6 +72,20 @@ private:
     
     /** Update all  custom style elements */
     void updateCustomStyle();
+
+public: // Serialization
+
+    /**
+     * Load from variant map
+     * @param variantMap Variant map
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save to variant map
+     * @return Variant map
+     */
+    QVariantMap toVariantMap() const override;
 
 private:
     QVBoxLayout                 _layout;            /** Main layout */

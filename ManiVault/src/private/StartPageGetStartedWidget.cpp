@@ -24,10 +24,11 @@ using namespace mv::util;
 
 StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
+    Serializable("GetStartedWidget"),
     _startPageContentWidget(startPageContentWidget),
     _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
     _createProjectFromDatasetWidget(this, "Project From Data"),
-    _tutorialsWidget(this, { "GettingStarted" }),
+    _tutorialsWidget(this),
     _workspaceLocationTypeAction(this, "Workspace location type"),
     _workspaceLocationTypesModel(this),
     _recentWorkspacesAction(this, mv::workspaces().getSettingsPrefix() + "RecentWorkspaces"),
@@ -83,6 +84,11 @@ void StartPageGetStartedWidget::updateActions()
 {
     updateCreateProjectFromWorkspaceActions();
     updateCreateProjectFromDatasetActions();
+}
+
+PageTutorialsWidget& StartPageGetStartedWidget::getTutorialsWidget()
+{
+    return _tutorialsWidget;
 }
 
 void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
@@ -186,6 +192,26 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
 
         _createProjectFromDatasetWidget.getModel().add(fromDataPageAction);
     }
+}
+
+void StartPageGetStartedWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+
+    _createProjectFromWorkspaceWidget.fromParentVariantMap(variantMap);
+    _createProjectFromDatasetWidget.fromParentVariantMap(variantMap);
+    _tutorialsWidget.fromParentVariantMap(variantMap);
+}
+
+QVariantMap StartPageGetStartedWidget::toVariantMap() const
+{
+	auto variantMap = Serializable::toVariantMap();
+
+    _createProjectFromWorkspaceWidget.insertIntoVariantMap(variantMap);
+    _createProjectFromDatasetWidget.insertIntoVariantMap(variantMap);
+    _tutorialsWidget.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 

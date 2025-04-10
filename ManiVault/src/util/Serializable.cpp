@@ -115,7 +115,7 @@ void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
     }
 }
 
-void Serializable::toJsonFile(const QString& filePath /*= ""*/)
+void Serializable::toJsonFile(const QString& filePath /*= ""*/) const
 {
     if (Application::isSerializationAborted())
         return;

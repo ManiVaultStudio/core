@@ -880,7 +880,7 @@ public: // Styled icon
      * Set the icon by \p iconName and use the default icon font and version
      * @param iconName Name of the icon
      */
-    void setIconByName(const QString& iconName);
+    virtual void setIconByName(const QString& iconName);
 
     /**
      * Set the icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion
@@ -888,7 +888,7 @@ public: // Styled icon
      * @param iconFontName Name of the icon font
      * @param iconFontVersion Version of the icon font
      */
-    void setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion);
+    virtual void setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion);
 
 public: // Badge-related
 

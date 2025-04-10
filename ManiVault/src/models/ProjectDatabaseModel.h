@@ -4,23 +4,23 @@
 
 #pragma once
 
-#include "ManiVaultGlobals.h"
+#include "models/StandardItemModel.h"
 
-#include "util/LearningCenterTutorial.h"
+#include "util/ProjectDatabaseProject.h"
+#include "util/FileDownloader.h"
 
 #include <QMap>
-#include <QStandardItemModel>
 
 namespace mv {
 
 /**
- * Learning center tutorial model class
+ * Project database model class
  *
- * Contains tutorial content for the learning center
+ * Contains project content for the project database.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT LearningCenterTutorialsModel final : public QStandardItemModel
+class CORE_EXPORT ProjectDatabaseModel final : public StandardItemModel
 {
     Q_OBJECT
 
@@ -33,9 +33,7 @@ public:
         Date,
         IconName,
         Summary,
-        Content,
         Url,
-        ProjectUrl,
         MinimumCoreVersion,
         RequiredPlugins,
         MissingPlugins,
@@ -53,30 +51,30 @@ public:
     /** Column name and tooltip */
     static QMap<Column, ColumHeaderInfo> columnInfo;
 
-    /** Base standard model item class for tutorial */
+    /** Base standard model item class for project */
     class CORE_EXPORT Item : public QStandardItem {
     public:
 
         /**
-         * Construct with pointer \p tutorial
-         * @param tutorial Const pointer to tutorial
+         * Construct with pointer \p project
+         * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        Item(const util::LearningCenterTutorial* tutorial, bool editable = false);
+        Item(const util::ProjectDatabaseProject* project, bool editable = false);
 
         /**
-         * Get tutorial
-         * return Pointer to the tutorial
+         * Get project
+         * return Pointer to the project
          */
-        const util::LearningCenterTutorial* getTutorial() const;
+        const util::ProjectDatabaseProject* getProject() const;
 
     private:
-        const util::LearningCenterTutorial*   _tutorial;      /** The tutorial data */
+        const util::ProjectDatabaseProject*   _project;      /** The project data */
     };
 
 protected:
 
-    /** Standard model item class for displaying the tutorial title */
+    /** Standard model item class for displaying the project title */
     class TitleItem final : public Item {
     public:
 
@@ -112,7 +110,7 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial tags */
+    /** Standard model item class for displaying the project tags */
     class TagsItem final : public Item {
     public:
 
@@ -148,7 +146,7 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial date */
+    /** Standard model item class for displaying the project date */
     class DateItem final : public Item {
     public:
 
@@ -174,7 +172,7 @@ protected:
                     return "Date";
 
                 case Qt::ToolTipRole:
-                    return "Date at which the tutorial was published";
+                    return "Date at which the project was published";
 
                 default:
                     break;
@@ -184,7 +182,7 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial icon name */
+    /** Standard model item class for displaying the project icon name */
     class IconNameItem final : public Item {
     public:
 
@@ -210,7 +208,7 @@ protected:
 	                return "Icon name";
 
 	            case Qt::ToolTipRole:
-	                return "Tutorial Font Awesome icon name";
+	                return "Project Font Awesome icon name";
 
 	            default:
 	                break;
@@ -220,7 +218,7 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial summary */
+    /** Standard model item class for displaying the project summary */
     class SummaryItem final : public Item {
     public:
 
@@ -246,7 +244,7 @@ protected:
 	                return "Summary";
 
 	            case Qt::ToolTipRole:
-	                return "Tutorial description";
+	                return "Project description";
 
 	            default:
 	                break;
@@ -256,43 +254,7 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial summary */
-    class ContentItem final : public Item {
-    public:
-
-        /** No need for custom constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Content";
-
-	            case Qt::ToolTipRole:
-	                return "Tutorial content";
-
-	            default:
-	                break;
-            }
-
-            return {};
-        }
-    };
-
-    /** Standard model item class for displaying the tutorial URL */
+    /** Standard model item class for displaying the project URL */
     class UrlItem final : public Item {
     public:
 
@@ -318,42 +280,6 @@ protected:
                     return "URL";
 
                 case Qt::ToolTipRole:
-                    return "Tutorial URL";
-
-                default:
-                    break;
-            }
-
-            return {};
-        }
-    };
-
-    /** Standard model item class for displaying the tutorial project URL */
-    class ProjectUrlItem final : public Item {
-    public:
-
-        /** No need for custom constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Project URL";
-
-                case Qt::ToolTipRole:
                     return "Project URL";
 
                 default:
@@ -364,7 +290,7 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial minimum application core version */
+    /** Standard model item class for displaying the project minimum application core version */
     class MinimumCoreVersionItem final : public Item {
     public:
 
@@ -426,7 +352,7 @@ protected:
 	                return "Required plugins";
 
 	            case Qt::ToolTipRole:
-	                return "Required plugins for the tutorial";
+	                return "Required plugins for the project";
 
 	            default:
 	                break;
@@ -457,15 +383,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Missing plugins";
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "Missing plugins";
 
-	            case Qt::ToolTipRole:
-	                return "Missing plugins for the tutorial";
+            case Qt::ToolTipRole:
+                return "Missing plugins for the project";
 
-	            default:
-	                break;
+            default:
+                break;
             }
 
             return {};
@@ -478,23 +404,21 @@ protected:
     public:
 
         /**
-         * Construct with pointer to \p tutorial object
-         * @param tutorial Pointer to tutorial object
+         * Construct with pointer to \p project object
+         * @param project Pointer to project object
          */
-        Row(const util::LearningCenterTutorial* tutorial) :
+        Row(const util::ProjectDatabaseProject* project) :
             QList<QStandardItem*>()
         {
-        	append(new TitleItem(tutorial));
-            append(new TagsItem(tutorial));
-            append(new DateItem(tutorial));
-            append(new IconNameItem(tutorial));
-            append(new SummaryItem(tutorial));
-            append(new ContentItem(tutorial));
-            append(new UrlItem(tutorial));
-            append(new ProjectUrlItem(tutorial));
-            append(new MinimumCoreVersionItem(tutorial));
-            append(new RequiredPluginsItem(tutorial));
-            append(new MissingPluginsItem(tutorial));
+        	append(new TitleItem(project));
+            append(new TagsItem(project));
+            append(new DateItem(project));
+            append(new IconNameItem(project));
+            append(new SummaryItem(project));
+            append(new UrlItem(project));
+            append(new MinimumCoreVersionItem(project));
+            append(new RequiredPluginsItem(project));
+            append(new MissingPluginsItem(project));
         }
     };
 
@@ -504,7 +428,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    LearningCenterTutorialsModel(QObject* parent = nullptr);
+    ProjectDatabaseModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -516,19 +440,37 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     /**
+     * Set the source URL to \p sourceUrl
+     * @param sourceUrl Source URL
+     */
+    void setSourceUrl(const QUrl& sourceUrl);
+
+    /**
      * Get tags
      * @return All tags
      */
     QSet<QString> getTagsSet() const;
 
     /**
-     * Add \p tutorial
-     * @param tutorial Pointer to tutorial to add
+     * Add \p project
+     * @param project Pointer to project to add
      */
-    void addTutorial(const util::LearningCenterTutorial* tutorial);
+    void addProject(const util::ProjectDatabaseProject* project);
 
-    /** Builds a set of all video tags and emits LearningCenterTutorialsModel::tagsChanged(...) */
+    /** Builds a set of all video tags and emits ProjectDatabaseModel::tagsChanged(...) */
     void updateTags();
+
+    /**
+     * Get the project at \p index
+     * @return Project at index
+     */
+    const util::ProjectDatabaseProject* getProject(const QModelIndex& index) const;
+
+    /**
+     * Get the projects
+     * @return Projects
+     */
+    const util::ProjectDatabaseProjects& getProjects() const;
 
 signals:
 
@@ -538,9 +480,13 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
+    /** Signals that the model was populated from the website */
+    void populatedFromSourceUrl();
+
 private:
-    util::LearningCenterTutorials   _tutorials;     /** Model tutorials */
-    QSet<QString>                   _tags;          /** All tags */
+    util::ProjectDatabaseProjects   _projects;          /** Model projects */
+    QSet<QString>                   _tags;              /** All tags */
+    util::FileDownloader            _fileDownloader;    /** For downloading the project database JSON file */
 };
 
 }

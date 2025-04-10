@@ -4,23 +4,7 @@
 
 #include "LearningCenterTutorial.h"
 
-#include <QVariantMap>
-
 namespace mv::util {
-
-LearningCenterTutorial::LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QUrl& projectUrl, const std::int32_t minimumVersionMajor, const std::int32_t minimumVersionMinor) :
-    _title(title),
-    _tags(tags),
-    _date(date),
-    _iconName(iconName),
-    _summary(summary),
-    _content(content),
-    _url(url),
-    _projectUrl(projectUrl),
-    _minimumVersionMajor(minimumVersionMajor),
-    _minimumVersionMinor(minimumVersionMinor)
-{
-}
 
 LearningCenterTutorial::LearningCenterTutorial(const QVariantMap& variantMap) :
     _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
@@ -30,10 +14,35 @@ LearningCenterTutorial::LearningCenterTutorial(const QVariantMap& variantMap) :
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _content(variantMap.contains("fullpost") ? variantMap["fullpost"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
-    _projectUrl(variantMap.contains("project") ? QUrl(variantMap["project"].toString()) : QUrl()),
-    _minimumVersionMajor(variantMap.contains("minimum-version-major") ? variantMap["minimum-version-major"].toInt() : -1),
-    _minimumVersionMinor(variantMap.contains("minimum-version-minor") ? variantMap["minimum-version-minor"].toInt() : -1)
+    _projectUrl(variantMap.contains("project") ? QUrl(variantMap["project"].toString()) : QUrl())
 {
+    if (variantMap.contains("minimum-version-major"))
+        _minimumCoreVersion.setMajor(variantMap["minimum-version-major"].toInt());
+
+    if (variantMap.contains("minimum-version-minor"))
+        _minimumCoreVersion.setMinor(variantMap["minimum-version-minor"].toInt());
+
+    _minimumCoreVersion.setPatch(0);
+
+    if (variantMap.contains("plugins")) {
+        for (const auto& requiredPluginVariant : variantMap["plugins"].toList()) {
+            const auto requiredPluginName = requiredPluginVariant.toString();
+
+			_requiredPlugins << requiredPluginName;
+
+            if (!mv::plugins().isPluginLoaded(requiredPluginName)) {
+				_missingPlugins << requiredPluginName;
+            }
+        }
+    }
+
+    if (_requiredPlugins.isEmpty()) {
+        qWarning() << "Tutorial" << _title << "does not specify any required plugins. The tutorial can be loaded but there is no guarantee that its required plugins are available";
+    }
+
+    if (!_missingPlugins.isEmpty()) {
+        qWarning() << "Tutorial" << _title << "is added to the tutorials model but likely will not open properly because the following plugins are not available: " << _missingPlugins.join(", ");
+    }
 }
 
 const QString& LearningCenterTutorial::getTitle() const
@@ -76,14 +85,19 @@ const QUrl& LearningCenterTutorial::getProjectUrl() const
     return _projectUrl;
 }
 
-const std::int32_t& LearningCenterTutorial::getMinimumVersionMajor() const
+const Version& LearningCenterTutorial::getMinimumCoreVersion() const
 {
-    return _minimumVersionMajor;
+    return _minimumCoreVersion;
 }
 
-const std::int32_t& LearningCenterTutorial::getMinimumVersionMinor() const
+const QStringList& LearningCenterTutorial::getRequiredPlugins() const
 {
-    return _minimumVersionMinor;
+    return _requiredPlugins;
+}
+
+const QStringList& LearningCenterTutorial::getMissingPlugins() const
+{
+    return _missingPlugins;
 }
 
 bool LearningCenterTutorial::hasProject() const

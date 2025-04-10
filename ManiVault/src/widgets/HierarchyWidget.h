@@ -15,6 +15,8 @@
 
 #include "InfoOverlayWidget.h"
 
+#include "util/Serializable.h"
+
 #include <QAbstractItemModel>
 #include <QHBoxLayout>
 #include <QTreeView>
@@ -91,7 +93,7 @@ signals:
  * 
  * @author Thomas Kroes
  */
-class CORE_EXPORT HierarchyWidget : public QWidget
+class CORE_EXPORT HierarchyWidget : public QWidget, public util::Serializable
 {
     Q_OBJECT
 
@@ -346,6 +348,20 @@ private:
 
     /** Update the filter model and related actions */
     void updateFilterModel();
+
+public: // Serialization
+
+    /**
+     * Load from variant map
+     * @param variantMap Variant map
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save to variant map
+     * @return Variant map
+     */
+    QVariantMap toVariantMap() const override;
 
 public: // Action getters
 

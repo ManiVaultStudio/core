@@ -38,25 +38,35 @@ PageHeaderWidget::PageHeaderWidget(const QString& title, QWidget* parent /*= nul
     setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
+void PageHeaderWidget::setPixmap(const QPixmap& pixmap)
+{
+    _pixmap = pixmap;
+
+    resizeLogo(size());
+}
+
 void PageHeaderWidget::resizeEvent(QResizeEvent* event)
 {
-    resizeIcon(event->size());
+    resizeLogo(event->size());
 }
 
 void PageHeaderWidget::showEvent(QShowEvent* event)
 {
-    resizeIcon(size());
+    resizeLogo(size());
 }
 
-void PageHeaderWidget::resizeIcon(const QSize& newSize)
+void PageHeaderWidget::resizeLogo(const QSize& newSize)
 {
     // only update when visible and if the window height changed, i.e. ignore width changes
-    if (isVisible() && newSize.height() != _previousHeight)
+    if (isVisible())// && newSize.height() != _previousHeight
     {
         float fracHeight =   newSize.height() / 296.0f; // 296 = 2 * top margin + default pixmap size
         float scale         = std::clamp(fracHeight, 0.1f, 1.0f);
 
-        _iconLabel.setPixmap(QPixmap(_iconName).scaled(scale * 256, scale * 256));
+        if (_pixmap.isNull())
+			_iconLabel.setPixmap(QPixmap(_iconName).scaled(scale * 256, scale * 256));
+        else
+            _iconLabel.setPixmap(_pixmap.scaled(scale * 256, scale * 256));
 
         _previousHeight = newSize.height();
     }

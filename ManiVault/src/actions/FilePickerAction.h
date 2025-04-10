@@ -66,6 +66,12 @@ public:
     QString getFilePath() const;
 
     /**
+     * Get the application-relative file path (if it exists)
+     * @return File path relative to the application directory when the file was picked, if the picked file path was a sub-path of the application directory
+     */
+    QString getApplicationRelativeFilePath() const;
+
+    /**
      * Set the file path
      * @param filePath Current file path
      */
@@ -79,7 +85,7 @@ public:
 
     /**
      * Set the name filters to \p nameFilters
-     * @param filePath Name filters
+     * @param nameFilters Name filters
      */
     void setNameFilters(const QStringList& nameFilters);
 
@@ -143,6 +149,13 @@ public:
      */
     bool isValid() const;
 
+    /**
+     * Get the application directory
+     * @return Application directory
+     */
+    QString getApplicationDirectory() const;
+
+
 public: // Serialization
 
     /**
@@ -183,14 +196,15 @@ signals:
     void fileTypeChanged(const QString& fileType);
 
 private:
-    QPointer<QFileSystemModel>  _dirModel;          /** Directory model */
-    QPointer<QCompleter>        _completer;         /** Completer */
-    StringAction                _filePathAction;    /** File path action */
-    TriggerAction               _pickAction;        /** Pick file action */
-    QStringList                 _nameFilters;       /** File type filters */
-    QString                     _defaultSuffix;     /** Default suffix */
-    QString                     _fileType;          /** File type (e.g. image and project)*/
-    bool                        _useNativeDialog;   /** Whether to use native or Qt file dialog */
+    QPointer<QFileSystemModel>  _dirModel;                      /** Directory model */
+    QPointer<QCompleter>        _completer;                     /** Completer */
+    StringAction                _filePathAction;                /** File path action */
+    TriggerAction               _pickAction;                    /** Pick file action */
+    QStringList                 _nameFilters;                   /** File type filters */
+    QString                     _defaultSuffix;                 /** Default suffix */
+    QString                     _fileType;                      /** File type (e.g. image and project)*/
+    bool                        _useNativeDialog;               /** Whether to use native or Qt file dialog */
+    QString                     _applicationRelativeFilePath;   /** Path of the file, relative to the application directory */
 };
 
 }

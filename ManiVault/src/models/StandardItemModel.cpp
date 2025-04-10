@@ -4,8 +4,6 @@
 
 #include "StandardItemModel.h"
 
-#include <util/Exception.h>
-
 #ifdef _DEBUG
     #define STANDARD_ITEM_MODEL_VERBOSE
 #endif
@@ -16,11 +14,21 @@ namespace mv
 using namespace util;
 using namespace gui;
 
-StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/) :
+StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/, const QString& title /*= "StandardItemModel"*/) :
     QStandardItemModel(parent),
+    Serializable(title),
     _numberOfRowsAction(nullptr, "Number of rows")
 {
     _numberOfRowsAction.initialize(this);
 }
 
+void StandardItemModel::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+}
+
+QVariantMap StandardItemModel::toVariantMap() const
+{
+	return Serializable::toVariantMap();
+}
 }

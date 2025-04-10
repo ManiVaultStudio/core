@@ -72,8 +72,10 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
 void TriggerAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
 {
+    //QPushButton::resizeEvent(event);
+    //return;
     if (_widgetFlags & WidgetFlag::Icon && (_widgetFlags & WidgetFlag::Text) == 0)
-		setFixedSize(event->size().height(), event->size().height());
+		setFixedSize(sizeHint().height(), sizeHint().height());
     else
 		QPushButton::resizeEvent(event);
 }
@@ -144,4 +146,17 @@ void TriggerAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
+void TriggerAction::setIconByName(const QString& iconName)
+{
+	WidgetAction::setIconByName(iconName);
+
+    setDefaultWidgetFlag(WidgetFlag::Icon);
+}
+
+void TriggerAction::setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)
+{
+	WidgetAction::setIconByName(iconName, iconFontName, iconFontVersion);
+
+    setDefaultWidgetFlag(WidgetFlag::Icon);
+}
 }

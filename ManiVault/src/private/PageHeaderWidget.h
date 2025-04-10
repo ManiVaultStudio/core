@@ -25,6 +25,12 @@ public:
      */
     explicit PageHeaderWidget(const QString& title, QWidget* parent = nullptr);
 
+    /**
+     * Set logo pixmap to \p pixmap
+     * @param pixmap Logo pixmap
+     */
+    void setPixmap(const QPixmap& pixmap);
+
 protected:
     /**
      * Override resize event to resize header icon when main window is resized
@@ -43,7 +49,7 @@ private:
      * Resize the main icon shown in the header to newSize x newSize pixels
      * @param newSize new icon width and height
      */
-    void resizeIcon(const QSize& newSize);
+    void resizeLogo(const QSize& newSize);
     
 protected:
     QVBoxLayout     _layout;            /** Main layout */
@@ -52,4 +58,5 @@ protected:
 private:
     QString         _iconName;          /** Name of background icon */
     int             _previousHeight;    /** Height of main header icon */
+    QPixmap         _pixmap;            /** Custom pixmap */
 };

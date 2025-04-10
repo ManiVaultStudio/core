@@ -7,6 +7,8 @@
 #include "PageActionsWidget.h"
 #include "PageTutorialsWidget.h"
 
+#include <util/Serializable.h>
+
 #include <actions/OptionAction.h>
 #include <actions/RecentFilesAction.h>
 
@@ -22,7 +24,7 @@ class StartPageContentWidget;
  *
  * @author Thomas Kroes
  */
-class StartPageGetStartedWidget : public QWidget
+class StartPageGetStartedWidget : public QWidget, public mv::util::Serializable
 {
 public:
 
@@ -44,6 +46,12 @@ protected:
     /** Updates the actions to reflect changes */
     void updateActions();
 
+    /**
+     * Get the tutorials widget
+     * @return Reference to tutorials widget
+     */
+    PageTutorialsWidget& getTutorialsWidget();
+
 private:
 
     /** Update actions for creating a project from workspace */
@@ -52,17 +60,29 @@ private:
     /** Update actions for creating a project from dataset */
     void updateCreateProjectFromDatasetActions();
 
-    
+public: // Serialization
+
+    /**
+     * Load from variant map
+     * @param variantMap Variant map
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save to variant map
+     * @return Variant map
+     */
+    QVariantMap toVariantMap() const override;
 
 private:
-    StartPageContentWidget*                     _startPageContentWidget;                /** Non-owning pointer to start page content widget */
-    PageActionsWidget                           _createProjectFromWorkspaceWidget;      /** Actions widget for creating a project from workspace */
-    PageActionsWidget                           _createProjectFromDatasetWidget;        /** Actions widget for creating a project from a dataset */
-    PageTutorialsWidget                         _tutorialsWidget;                       /** Actions widget for launching tutorials */
-    mv::gui::OptionAction                       _workspaceLocationTypeAction;           /** Action for filtering workspace location types (create project from built-in workspace or import from project) */
-    QStandardItemModel                          _workspaceLocationTypesModel;           /** Input model for the above workspace location type action */
-    mv::gui::RecentFilesAction                  _recentWorkspacesAction;                /** Action for recent workspaces (create project from recent workspace) */
-    mv::gui::RecentFilesAction                  _recentProjectsAction;                  /** Action for recent projects (replicate workspace from recent project) */
+    StartPageContentWidget*         _startPageContentWidget;                /** Non-owning pointer to start page content widget */
+    PageActionsWidget               _createProjectFromWorkspaceWidget;      /** Actions widget for creating a project from workspace */
+    PageActionsWidget               _createProjectFromDatasetWidget;        /** Actions widget for creating a project from a dataset */
+    PageTutorialsWidget             _tutorialsWidget;                       /** Actions widget for launching tutorials */
+    mv::gui::OptionAction           _workspaceLocationTypeAction;           /** Action for filtering workspace location types (create project from built-in workspace or import from project) */
+    QStandardItemModel              _workspaceLocationTypesModel;           /** Input model for the above workspace location type action */
+    mv::gui::RecentFilesAction      _recentWorkspacesAction;                /** Action for recent workspaces (create project from recent workspace) */
+    mv::gui::RecentFilesAction      _recentProjectsAction;                  /** Action for recent projects (replicate workspace from recent project) */
 
     friend class StartPageContentWidget;
 };

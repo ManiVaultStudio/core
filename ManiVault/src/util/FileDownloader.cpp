@@ -46,6 +46,8 @@ void FileDownloader::download(const QUrl& url)
     _task.setIcon(StyledIcon("download"));
     _task.setRunning();
 
+    disconnect(&_task, &Task::requestAbort, this, nullptr);
+
     connect(&_task, &Task::requestAbort, this, [this, networkReply]() -> void {
         networkReply->abort();
 
@@ -86,7 +88,10 @@ void FileDownloader::downloadFinished(QNetworkReply* reply)
     {
         const auto fileName = QFileInfo(_url.toString()).fileName();
 
-    	_downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(fileName);
+        if (_targetDirectory.isEmpty())
+    		_downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(fileName);
+        else
+            _downloadedFilePath = QDir(_targetDirectory).filePath(fileName);
 
 #ifdef FILE_DOWNLOADER_VERBOSE
         qDebug() << fileName << _downloadedFilePath;
@@ -116,6 +121,16 @@ void FileDownloader::downloadFinished(QNetworkReply* reply)
 
 		emit downloaded();
     }
+}
+
+const QString& FileDownloader::getTargetDirectory() const
+{
+    return _targetDirectory;
+}
+
+void FileDownloader::setTargetDirectory(const QString& targetDirectory)
+{
+    _targetDirectory = targetDirectory;
 }
 
 QByteArray FileDownloader::downloadedData() const {

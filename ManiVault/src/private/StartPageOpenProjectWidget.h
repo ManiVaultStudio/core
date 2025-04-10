@@ -6,7 +6,12 @@
 
 #include "PageActionsWidget.h"
 
+#include <util/Serializable.h>
+
 #include <actions/RecentFilesAction.h>
+#include <actions/VerticalGroupAction.h>
+
+#include <models/ProjectDatabaseFilterModel.h>
 
 #include <QWidget>
 
@@ -19,7 +24,7 @@ class StartPageContentWidget;
  *
  * @author Thomas Kroes
  */
-class StartPageOpenProjectWidget : public QWidget
+class StartPageOpenProjectWidget : public QWidget, public mv::util::Serializable
 {
 protected:
 
@@ -53,22 +58,41 @@ private:
 
     /** Update actions for opening recent projects */
     void updateRecentActions();
-    
+
+    void updateProjectDatabaseActions();
+
     /** Create the custom drawn icons  */
     void createCustomIcons();
     
     /** Update all  custom style elements */
     void updateCustomStyle();
 
+public: // Serialization
+
+    /**
+     * Load from variant map
+     * @param variantMap Variant map
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save to variant map
+     * @return Variant map
+     */
+    QVariantMap toVariantMap() const override;
+
 private:
-    StartPageContentWidget*         _startPageContentWidget;    /** Non-owning pointer to start page content widget */
-    PageActionsWidget               _openCreateProjectWidget;   /** Actions widget for open and create project action */
-    PageActionsWidget               _recentProjectsWidget;      /** Actions widget for existing projects action */
-    mv::gui::RecentFilesAction      _recentProjectsAction;      /** Action for recent projects */
-    QIcon                           _leftAlignedIcon;           /** Icon for left-aligned default project */
-    QIcon                           _leftAlignedLoggingIcon;    /** Icon for left-aligned default project with logging */
-    QIcon                           _rightAlignedIcon;          /** Icon for right-aligned default project */
-    QIcon                           _rightAlignedLoggingIcon;   /** Icon for right-aligned default project with logging */
+    StartPageContentWidget*         _startPageContentWidget;            /** Non-owning pointer to start page content widget */
+    PageActionsWidget               _openCreateProjectWidget;           /** Actions widget for open and create project action */
+    PageActionsWidget               _recentProjectsWidget;              /** Actions widget for existing projects action */
+    PageActionsWidget               _projectDatabaseWidget;             /** Actions widget for the project database */
+    mv::gui::RecentFilesAction      _recentProjectsAction;              /** Action for recent projects */
+    QIcon                           _leftAlignedIcon;                   /** Icon for left-aligned default project */
+    QIcon                           _leftAlignedLoggingIcon;            /** Icon for left-aligned default project with logging */
+    QIcon                           _rightAlignedIcon;                  /** Icon for right-aligned default project */
+    QIcon                           _rightAlignedLoggingIcon;           /** Icon for right-aligned default project with logging */
+    mv::ProjectDatabaseFilterModel  _projectDatabaseFilterModel;        /** Filter model for project database */
+    mv::gui::VerticalGroupAction    _projectDatabaseSettingsAction;     /** Action for project database settings */
 
     friend class StartPageContentWidget;
 };

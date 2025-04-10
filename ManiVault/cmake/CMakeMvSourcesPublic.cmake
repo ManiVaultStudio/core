@@ -554,6 +554,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/StyledIconEngine.h
     src/util/Badge.h
     src/util/ColorScheme.h
+    src/util/ProjectDatabaseProject.h
 )
 
 if(APPLE)
@@ -606,6 +607,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/StyledIconEngine.cpp
     src/util/Badge.cpp
     src/util/ColorScheme.cpp
+    src/util/ProjectDatabaseProject.cpp
 )
 
 if(APPLE)
@@ -953,6 +955,21 @@ set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
     ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
 )
 
+set(PUBLIC_PROJECT_DATABASE_MODEL_HEADERS
+    src/models/ProjectDatabaseModel.h
+	src/models/ProjectDatabaseFilterModel.h
+)
+
+set(PUBLIC_PROJECT_DATABASE_MODEL_SOURCES
+    src/models/ProjectDatabaseModel.cpp
+	src/models/ProjectDatabaseFilterModel.cpp
+)
+
+set(PUBLIC_PROJECT_DATABASE_MODEL_FILES
+    ${PUBLIC_PROJECT_DATABASE_MODEL_HEADERS}
+    ${PUBLIC_PROJECT_DATABASE_MODEL_SOURCES}
+)
+
 set(PUBLIC_COLOR_SCHEMES_MODEL_HEADERS
     src/models/AbstractColorSchemesModel.h
 	src/models/ColorSchemesListModel.h
@@ -1088,6 +1105,7 @@ set(PUBLIC_HEADERS
 	${PUBLIC_DATASETS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
+	${PUBLIC_PROJECT_DATABASE_MODEL_HEADERS}
     ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
@@ -1136,6 +1154,7 @@ set(PUBLIC_SOURCES
 	${PUBLIC_DATASETS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
+	${PUBLIC_PROJECT_DATABASE_MODEL_SOURCES}
     ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
@@ -1197,6 +1216,7 @@ source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
 source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Videos FILES ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES})
+source_group(Models\\ProjectDatabase FILES ${PUBLIC_PROJECT_DATABASE_MODEL_FILES})
 source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})

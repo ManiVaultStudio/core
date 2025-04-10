@@ -48,7 +48,8 @@ ProjectManager::ProjectManager(QObject* parent) :
     _publishAction(nullptr, "Publish"),
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
-    _backToProjectAction(nullptr, "Back to project")
+    _backToProjectAction(nullptr, "Back to project"),
+    _projectDatabaseSourceUrlAction(this, "Source URL")
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -116,6 +117,13 @@ ProjectManager::ProjectManager(QObject* parent) :
     _backToProjectAction.setToolTip("Go back to the current project");
     _backToProjectAction.setDefaultWidgetFlags(TriggerAction::Icon);
     //_backToProjectAction.setChecked(!Application::current()->shouldOpenProjectAtStartup());
+
+    _projectDatabaseSourceUrlAction.setIconByName("globe");
+    _projectDatabaseSourceUrlAction.setToolTip("Source location of the projects");
+
+    connect(&_projectDatabaseSourceUrlAction, &StringAction::stringChanged, this, [this](const QString& string) -> void {
+        _projectDatabaseModel.setSourceUrl(QUrl(string));
+    });
 
     auto mainWindow = Application::topLevelWidgets().first();
 
@@ -532,13 +540,15 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
     }
 }
 
-void ProjectManager::openProject(QUrl url, bool importDataOnly, bool loadWorkspace)
+void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= false*/)
 {
     try {
    //     if (hasProject())
 			//saveProjectAs();
 
         auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
+
+        projectDownloader->setTargetDirectory(targetDirectory);
 
         connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
             mv::projects().openProject(projectDownloader->getDownloadedFilePath());
@@ -1065,6 +1075,11 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
     }
 
     return {};
+}
+
+const ProjectDatabaseModel& ProjectManager::getProjectDatabaseModel() const
+{
+    return _projectDatabaseModel;
 }
 
 QMenu& ProjectManager::getNewProjectMenu()
