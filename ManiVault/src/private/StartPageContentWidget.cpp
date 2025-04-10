@@ -20,9 +20,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     Serializable("StartPageContent"),
     _compactViewAction(this, "Compact"),
     _toggleOpenCreateProjectAction(this, "Open & Create", true),
+    _toggleProjectDatabaseAction(this, "Project Database", true),
     _toggleRecentProjectsAction(this, "Recent Projects", true),
-    _toggleProjectFromDataAction(this, "Project From Data", true),
-    _toggleProjectsRepositoryAction(this, "Projects", true),
+	_toggleProjectFromDataAction(this, "Project From Data", true),
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleTutorialsAction(this, "Tutorials", true),
     _settingsAction(this, "Settings"),
@@ -34,6 +34,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     if (!QFileInfo("StartPage.json").exists()) {
         _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
         _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
+        _toggleProjectDatabaseAction.setSettingsPrefix("StartPage/ToggleProjectsRepository");
         _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
         _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
         _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
@@ -53,9 +54,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
+    _settingsAction.addAction(&_toggleProjectDatabaseAction);
     _settingsAction.addAction(&_toggleRecentProjectsAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);
-    _settingsAction.addAction(&_toggleProjectsRepositoryAction);
     _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
     _settingsAction.addAction(&_toggleTutorialsAction);
     _settingsAction.addAction(&_compactViewAction);
@@ -97,6 +98,7 @@ void StartPageContentWidget::fromVariantMap(const QVariantMap& variantMap)
 
     _compactViewAction.fromParentVariantMap(variantMap);
     _toggleOpenCreateProjectAction.fromParentVariantMap(variantMap);
+    _toggleProjectDatabaseAction.fromParentVariantMap(variantMap);
     _toggleRecentProjectsAction.fromParentVariantMap(variantMap);
     _toggleProjectFromDataAction.fromParentVariantMap(variantMap);
     _toggleProjectFromWorkspaceAction.fromParentVariantMap(variantMap);
@@ -111,6 +113,7 @@ QVariantMap StartPageContentWidget::toVariantMap() const
 
     _compactViewAction.insertIntoVariantMap(variantMap);
     _toggleOpenCreateProjectAction.insertIntoVariantMap(variantMap);
+    _toggleProjectDatabaseAction.insertIntoVariantMap(variantMap);
     _toggleRecentProjectsAction.insertIntoVariantMap(variantMap);
     _toggleProjectFromDataAction.insertIntoVariantMap(variantMap);
     _toggleProjectFromWorkspaceAction.insertIntoVariantMap(variantMap);
