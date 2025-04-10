@@ -53,6 +53,20 @@ public:
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
+public: // Serialization
+
+    /**
+     * Load from variant map
+     * @param variantMap Variant map
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save to variant map
+     * @return Variant map
+     */
+    QVariantMap toVariantMap() const override;
+
 public: // Action getters
 
     gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }

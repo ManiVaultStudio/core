@@ -135,4 +135,24 @@ bool ProjectCenterFilterModel::lessThan(const QModelIndex& lhs, const QModelInde
     return lhs.data().toString() < rhs.data().toString();
 }
 
+void ProjectCenterFilterModel::fromVariantMap(const QVariantMap& variantMap)
+{
+	SortFilterProxyModel::fromVariantMap(variantMap);
+
+    _tagsFilterAction.fromParentVariantMap(variantMap);
+    _excludeTagsFilterAction.fromParentVariantMap(variantMap);
+    _targetAppVersionAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap ProjectCenterFilterModel::toVariantMap() const
+{
+	auto variantMap = SortFilterProxyModel::toVariantMap();
+
+    _tagsFilterAction.insertIntoVariantMap(variantMap);
+    _excludeTagsFilterAction.insertIntoVariantMap(variantMap);
+    _targetAppVersionAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
+
 }
