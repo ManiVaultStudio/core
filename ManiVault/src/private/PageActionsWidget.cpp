@@ -196,9 +196,15 @@ void PageActionsWidget::updateCustomStyle()
 void PageActionsWidget::fromVariantMap(const QVariantMap& variantMap)
 {
 	Serializable::fromVariantMap(variantMap);
+
+    _hierarchyWidget.fromParentVariantMap(variantMap);
 }
 
 QVariantMap PageActionsWidget::toVariantMap() const
 {
-	return Serializable::toVariantMap();
+	auto variantMap = Serializable::toVariantMap();
+
+    _hierarchyWidget.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
