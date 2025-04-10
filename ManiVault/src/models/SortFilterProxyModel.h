@@ -37,8 +37,9 @@ public:
 
     /** Construct with parent \p parent object
      * @param parent Pointer to parent object
+     * @param title Title of the model
     */
-    SortFilterProxyModel(QObject* parent = nullptr);
+    SortFilterProxyModel(QObject* parent = nullptr, const QString& title = "SortFilterProxyModel");
 
     /**
      * Set source model to \p sourceModel

@@ -42,7 +42,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
     _selectionGroupAction(this, "Selection"),
-    _columnsGroupAction(this, "table-columns"),
+    _columnsGroupAction(this, "Columns"),
     _settingsGroupAction(this, "Settings"),
     _toolbarAction(this, "Toolbar")
 {

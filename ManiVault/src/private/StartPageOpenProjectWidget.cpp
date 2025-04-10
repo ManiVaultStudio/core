@@ -28,6 +28,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
+    _projectCenterFilterModel(this),
     _projectDatabaseWidget(this, "Project Database"),
     _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
     _projectCenterSettingsAction(this, "Projects source")

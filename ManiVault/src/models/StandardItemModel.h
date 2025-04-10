@@ -22,7 +22,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT StandardItemModel : public QStandardItemModel, public mv::util::Serializable
+class CORE_EXPORT StandardItemModel : public QStandardItemModel, public util::Serializable
 {
     Q_OBJECT
 
@@ -31,8 +31,9 @@ public:
     /**
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
+     * @param title Title of the model
      */
-    StandardItemModel(QObject* parent = nullptr);
+    StandardItemModel(QObject* parent = nullptr, const QString& title = "StandardItemModel");
 
 public: // Serialization
 

@@ -24,6 +24,7 @@ using namespace mv::util;
 
 PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
     QWidget(parent),
+	Serializable(title),
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Item", _model, &_filterModel, true, true),

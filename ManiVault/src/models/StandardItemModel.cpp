@@ -14,8 +14,9 @@ namespace mv
 using namespace util;
 using namespace gui;
 
-StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/) :
+StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/, const QString& title /*= "StandardItemModel"*/) :
     QStandardItemModel(parent),
+    Serializable(title),
     _numberOfRowsAction(nullptr, "Number of rows")
 {
     _numberOfRowsAction.initialize(this);

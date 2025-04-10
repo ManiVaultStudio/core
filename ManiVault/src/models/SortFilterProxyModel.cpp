@@ -15,9 +15,9 @@ using namespace mv::gui;
 namespace mv
 {
 
-SortFilterProxyModel::SortFilterProxyModel(QObject* parent /*= nullptr*/) :
+SortFilterProxyModel::SortFilterProxyModel(QObject* parent /*= nullptr*/, const QString& title /*= "SortFilterProxyModel"*/) :
     QSortFilterProxyModel(parent),
-    Serializable("SortFilterProxyModel"),
+    Serializable(title),
     _rowTypeName("Item"),
     _numberOfRowsAction(this, "Number of rows"),
     _textFilterAction(this, "Text filter"),
