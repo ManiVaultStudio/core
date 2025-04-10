@@ -81,6 +81,17 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
             if (!getSettingsPrefix().isEmpty())
                 setFilePath(QFileInfo(filePath).absoluteFilePath());
+
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+            _relativeFilePath = QDir(filePath).relativeFilePath(QCoreApplication::applicationDirPath());
+#endif
+
+#ifdef Q_OS_MAC
+            const auto bundleRoot       = QCoreApplication::applicationDirPath() + "/../..";
+            const auto applicationDir   = QDir(bundleRoot).canonicalPath();
+
+            _relativeFilePath = QDir(filePath).relativeFilePath(applicationDir);
+#endif
 		});
 
         connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
@@ -98,6 +109,11 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 QString FilePickerAction::getFilePath() const
 {
     return _filePathAction.getString();
+}
+
+QString FilePickerAction::getRelativeFilePath() const
+{
+
 }
 
 void FilePickerAction::setFilePath(const QString& filePath)
@@ -178,6 +194,11 @@ bool FilePickerAction::isValid() const
     return !getFilePath().isEmpty() && QFileInfo(getFilePath()).exists();
 }
 
+QString FilePickerAction::getApplicationDirectory() const
+{
+    return _relativeFilePath;
+}
+
 QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     auto groupAction = new HorizontalGroupAction(this, "Group");
@@ -199,6 +220,9 @@ void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap.contains("Value"))
         setFilePath(variantMap["Value"].toString());
+
+	if (variantMap.contains("RelativeFilePath"))
+        _relativeFilePath = variantMap["RelativeFilePath"].toString();
 }
 
 QVariantMap FilePickerAction::toVariantMap() const
@@ -206,7 +230,8 @@ QVariantMap FilePickerAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Value", getFilePath() }
+        { "Value", getFilePath() },
+        { "RelativeFilePath", _relativeFilePath }
     });
 
     return variantMap;
