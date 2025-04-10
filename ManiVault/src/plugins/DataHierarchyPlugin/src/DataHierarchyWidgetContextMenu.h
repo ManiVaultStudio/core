@@ -24,7 +24,7 @@ using namespace mv::plugin;
  * 
  * Constructs a data hierarchy widget context menu based on the current dataset selection
  * 
- * @author Thomas Kroes
+ * @author Thomas Kroes, Alexander Vieth
  */
 class DataHierarchyWidgetContextMenu final : public QMenu
 {
@@ -95,15 +95,18 @@ private:
 
 /**
  * Helper dialog for selection index selection
+ *
+ * @author Alexander Vieth
  */
 class SelectionGroupIndexDialog : public QDialog
 {
     Q_OBJECT
+
 public:
     SelectionGroupIndexDialog(QWidget* parent);
 
-    std::int32_t getSelectionGroupIndex() {
-        return selectionIndexAction.getValue();
+    std::int32_t getSelectionGroupIndex() const {
+        return _selectionIndexAction.getValue();
     }
 
 signals:
@@ -111,33 +114,36 @@ signals:
 
 public slots:
     void closeDialogAction() {
-        emit closeDialog(confirmButton.isChecked());
+        emit closeDialog(_confirmButton.isChecked());
     }
 
 private:
-    gui::IntegralAction      selectionIndexAction;
-    gui::TriggerAction       confirmButton;
+    gui::IntegralAction      _selectionIndexAction;
+    gui::TriggerAction       _confirmButton;
 };
 
 /**
  * Helper dialog for selection pattern selection
+ *
+ * @author Alexander Vieth
  */
 class SelectionPatternGroupIndexDialog : public QDialog
 {
     Q_OBJECT
+
 public:
     SelectionPatternGroupIndexDialog(QWidget* parent);
 
-    std::int32_t getSelectionGroupIndex() {
-        return selectionIndexAction.getValue();
+    std::int32_t getSelectionGroupIndex() const {
+        return _selectionIndexAction.getValue();
     }
 
-    QString getSelectionGroupPattern() {
-        return selectionPatternAction.getString();
+    QString getSelectionGroupPattern() const {
+        return _selectionPatternAction.getString();
     }
 
-    std::int32_t getSelectionGroupOption() {
-        return selectionOptionAction.getCurrentIndex();
+    std::int32_t getSelectionGroupOption() const {
+        return _selectionOptionAction.getCurrentIndex();
     }
 
 signals:
@@ -145,12 +151,12 @@ signals:
 
 public slots:
     void closeDialogAction() {
-        emit closeDialog(confirmButton.isChecked());
+        emit closeDialog(_confirmButton.isChecked());
     }
 
 private:
-    gui::IntegralAction     selectionIndexAction;
-    gui::StringAction       selectionPatternAction;
-    gui::OptionAction       selectionOptionAction;
-    gui::TriggerAction      confirmButton;
+    gui::IntegralAction     _selectionIndexAction;
+    gui::StringAction       _selectionPatternAction;
+    gui::OptionAction       _selectionOptionAction;
+    gui::TriggerAction      _confirmButton;
 };
