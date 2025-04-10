@@ -52,7 +52,7 @@ public: // Action getters
 
     const mv::gui::ToggleAction& getCompactViewAction() const { return _compactViewAction; }
     const mv::gui::ToggleAction& getToggleOpenCreateProjectAction() const { return _toggleOpenCreateProjectAction; }
-    const mv::gui::ToggleAction& getToggleProjectsRepositoryAction() const { return _toggleProjectDatabaseAction; }
+    const mv::gui::ToggleAction& getToggleProjectDatabaseAction() const { return _toggleProjectDatabaseAction; }
     const mv::gui::ToggleAction& getToggleRecentProjectsAction() const { return _toggleRecentProjectsAction; }
     const mv::gui::ToggleAction& getToggleProjectFromDataAction() const { return _toggleProjectFromDataAction; }
     const mv::gui::ToggleAction& getToggleProjectFromWorkspaceAction() const { return _toggleProjectFromWorkspaceAction; }

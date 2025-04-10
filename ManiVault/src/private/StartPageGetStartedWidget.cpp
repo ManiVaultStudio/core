@@ -24,6 +24,7 @@ using namespace mv::util;
 
 StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
+    Serializable("GetStartedWidget"),
     _startPageContentWidget(startPageContentWidget),
     _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
     _createProjectFromDatasetWidget(this, "Project From Data"),

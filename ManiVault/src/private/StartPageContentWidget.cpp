@@ -17,7 +17,7 @@ using namespace mv::gui;
 
 StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     PageContentWidget(Qt::Horizontal, parent),
-    Serializable("StartPageContent"),
+    Serializable("StartPageContentWidget"),
     _compactViewAction(this, "Compact"),
     _toggleOpenCreateProjectAction(this, "Open & Create", true),
     _toggleProjectDatabaseAction(this, "Project Database", true),
