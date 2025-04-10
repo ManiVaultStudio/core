@@ -57,14 +57,14 @@ private:
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param variantMap Variant representation of the widget action
+     * Load from variant map
+     * @param variantMap Variant map
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Save to variant map
+     * @return Variant map
      */
     QVariantMap toVariantMap() const override;
 

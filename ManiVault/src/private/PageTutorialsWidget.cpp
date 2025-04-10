@@ -8,8 +8,6 @@
 
 #include <CoreInterface.h>
 
-#include <QEvent>
-
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
@@ -108,5 +106,21 @@ void PageTutorialsWidget::updateActions()
 
         getModel().add(tutorialAction);
     }
+}
+
+void PageTutorialsWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+    PageActionsWidget::fromVariantMap(variantMap);
+
+
+}
+
+QVariantMap PageTutorialsWidget::toVariantMap() const
+{
+    auto variantMap = PageActionsWidget::toVariantMap();
+
+
+
+    return variantMap;
 }
 
