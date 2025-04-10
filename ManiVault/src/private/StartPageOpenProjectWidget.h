@@ -85,13 +85,13 @@ private:
     StartPageContentWidget*         _startPageContentWidget;        /** Non-owning pointer to start page content widget */
     PageActionsWidget               _openCreateProjectWidget;       /** Actions widget for open and create project action */
     PageActionsWidget               _recentProjectsWidget;          /** Actions widget for existing projects action */
-    PageActionsWidget               _projectDatabaseWidget;           /** Actions widget for project center */
+    PageActionsWidget               _projectDatabaseWidget;         /** Actions widget for the project database */
     mv::gui::RecentFilesAction      _recentProjectsAction;          /** Action for recent projects */
     QIcon                           _leftAlignedIcon;               /** Icon for left-aligned default project */
     QIcon                           _leftAlignedLoggingIcon;        /** Icon for left-aligned default project with logging */
     QIcon                           _rightAlignedIcon;              /** Icon for right-aligned default project */
     QIcon                           _rightAlignedLoggingIcon;       /** Icon for right-aligned default project with logging */
-    mv::ProjectCenterFilterModel    _projectCenterFilterModel;      /** Filter model for project center */
+    mv::ProjectCenterFilterModel    _projectDatabaseFilterModel;    /** Filter model for project center */
     mv::gui::VerticalGroupAction    _projectCenterSettingsAction;   /** Action for project center settings */
 
     friend class StartPageContentWidget;

@@ -307,4 +307,42 @@ QVariant ProjectCenterModel::MinimumVersionMinorItem::data(int role) const
 	return Item::data(role);
 }
 
+QVariant ProjectCenterModel::RequiredPluginsItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getProject()->getRequiredPlugins();
+
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toStringList();
+
+	    case Qt::ToolTipRole:
+	        return "Required plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant ProjectCenterModel::MissingPluginsItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getProject()->getMissingPlugins();
+
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toStringList();
+
+	    case Qt::ToolTipRole:
+	        return "Missing plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
 }

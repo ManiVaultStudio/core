@@ -28,7 +28,6 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
-    _projectCenterFilterModel(this),
     _projectDatabaseWidget(this, "Project Database"),
     _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
     _projectCenterSettingsAction(this, "Projects source")
@@ -63,7 +62,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
     _projectDatabaseWidget.getHierarchyWidget().getToolbarAction().addAction(&_projectCenterSettingsAction);
 
-    _projectCenterFilterModel.setSourceModel(const_cast<ProjectCenterModel*>(&mv::projects().getProjectCenterModel()));
+    _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectCenterModel*>(&mv::projects().getProjectCenterModel()));
 
     connect(&mv::projects().getProjectCenterModel(), &ProjectCenterModel::populatedFromSourceUrl, this, &StartPageOpenProjectWidget::updateProjectCenterActions);
 
@@ -230,9 +229,9 @@ void StartPageOpenProjectWidget::updateProjectCenterActions()
     
     const auto& projectCenterModel = mv::projects().getProjectCenterModel();
 
-    for (int filterRowIndex = 0; _projectCenterFilterModel.rowCount() > filterRowIndex; ++filterRowIndex) {
-        const auto filterIndex = _projectCenterFilterModel.index(filterRowIndex, 0);
-        const auto sourceIndex = _projectCenterFilterModel.mapToSource(filterIndex);
+    for (int filterRowIndex = 0; _projectDatabaseFilterModel.rowCount() > filterRowIndex; ++filterRowIndex) {
+        const auto filterIndex = _projectDatabaseFilterModel.index(filterRowIndex, 0);
+        const auto sourceIndex = _projectDatabaseFilterModel.mapToSource(filterIndex);
 
     	if (sourceIndex.isValid()) {
             if (const auto project = projectCenterModel.getProject(sourceIndex)) {
@@ -270,7 +269,7 @@ void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
     _openCreateProjectWidget.fromParentVariantMap(variantMap);
     _recentProjectsWidget.fromParentVariantMap(variantMap);
     _projectDatabaseWidget.fromParentVariantMap(variantMap);
-    _projectCenterFilterModel.fromParentVariantMap(variantMap);
+    _projectDatabaseFilterModel.fromParentVariantMap(variantMap);
 }
 
 QVariantMap StartPageOpenProjectWidget::toVariantMap() const
@@ -280,7 +279,7 @@ QVariantMap StartPageOpenProjectWidget::toVariantMap() const
     _openCreateProjectWidget.insertIntoVariantMap(variantMap);
     _recentProjectsWidget.insertIntoVariantMap(variantMap);
     _projectDatabaseWidget.insertIntoVariantMap(variantMap);
-    _projectCenterFilterModel.insertIntoVariantMap(variantMap);
+    _projectDatabaseFilterModel.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

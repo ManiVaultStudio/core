@@ -9,8 +9,6 @@
 #include "util/ProjectCenterProject.h"
 #include "util/FileDownloader.h"
 
-#include "actions/StringAction.h"
-
 #include <QMap>
 
 namespace mv {
@@ -38,6 +36,8 @@ public:
         Url,
         MinimumVersionMajor,
         MinimumVersionMinor,
+        RequiredPlugins,
+        MissingPlugins,
 
         Count
     };
@@ -357,6 +357,78 @@ protected:
 
 	            default:
 	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying required plugins */
+    class RequiredPluginsItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Required plugins";
+
+	            case Qt::ToolTipRole:
+	                return "Required plugins for the project";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying missing plugins */
+    class MissingPluginsItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "Missing plugins";
+
+            case Qt::ToolTipRole:
+                return "Missing plugins for the project";
+
+            default:
+                break;
             }
 
             return {};

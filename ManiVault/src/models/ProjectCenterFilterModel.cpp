@@ -21,7 +21,7 @@ using namespace mv::util;
 namespace mv {
 
 ProjectCenterFilterModel::ProjectCenterFilterModel(QObject* parent /*= nullptr*/) :
-    SortFilterProxyModel(parent),
+    SortFilterProxyModel(parent, "ProjectDatabaseFilterModel"),
     _projectCenterModel(nullptr),
     _tagsFilterAction(this, "Tags filter"),
     _excludeTagsFilterAction(this, "Exclude tags filter"),
