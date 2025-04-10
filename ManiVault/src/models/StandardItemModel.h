@@ -4,11 +4,13 @@
 
 #pragma once
 
+#include <QStandardItemModel>
+
 #include "ManiVaultGlobals.h"
 
-#include "NumberOfRowsAction.h"
+#include "util/Serializable.h"
 
-#include <QStandardItemModel>
+#include "NumberOfRowsAction.h"
 
 namespace mv
 {
@@ -20,7 +22,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT StandardItemModel : public QStandardItemModel
+class CORE_EXPORT StandardItemModel : public QStandardItemModel, public mv::util::Serializable
 {
     Q_OBJECT
 
@@ -32,6 +34,20 @@ public:
      */
     StandardItemModel(QObject* parent = nullptr);
 
+public: // Serialization
+
+    /**
+     * Load from variant map
+     * @param variantMap Variant map
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save to variant map
+     * @return Variant map
+     */
+    QVariantMap toVariantMap() const override;
+
 public: // Action getters
 
     gui::NumberOfRowsAction& getNumberOfRowsAction() { return _numberOfRowsAction; }
@@ -39,7 +55,7 @@ public: // Action getters
     const gui::NumberOfRowsAction& getNumberOfRowsAction() const { return _numberOfRowsAction; }
 
 private:
-    gui::NumberOfRowsAction _numberOfRowsAction;       /** String action for displaying the number of rows */
+    gui::NumberOfRowsAction     _numberOfRowsAction;    /** String action for displaying the number of rows */
 };
 
 }

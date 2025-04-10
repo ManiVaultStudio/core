@@ -23,4 +23,13 @@ StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/) :
     _numberOfRowsAction.initialize(this);
 }
 
+void StandardItemModel::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+}
+
+QVariantMap StandardItemModel::toVariantMap() const
+{
+	return Serializable::toVariantMap();
+}
 }
