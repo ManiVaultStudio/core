@@ -49,6 +49,10 @@ StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
 
     connect(&_loadAction, &TriggerAction::triggered, this, &StartPageWidget::loadConfiguration);
     connect(&_saveAction, &TriggerAction::triggered, this, &StartPageWidget::saveConfiguration);
+
+    if (QFileInfo(getConfigurationFileName()).exists()) {
+        loadConfiguration();
+    }
 }
 
 void StartPageWidget::showEvent(QShowEvent* showEvent)

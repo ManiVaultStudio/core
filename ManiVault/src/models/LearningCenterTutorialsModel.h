@@ -36,8 +36,9 @@ public:
         Content,
         Url,
         ProjectUrl,
-        MinimumVersionMajor,
-        MinimumVersionMinor,
+        MinimumCoreVersion,
+        RequiredPlugins,
+        MissingPlugins,
 
         Count
     };
@@ -363,8 +364,8 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial minimum application version (major) */
-    class MinimumVersionMajorItem final : public Item {
+    /** Standard model item class for displaying the tutorial minimum application core version */
+    class MinimumCoreVersionItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -386,10 +387,10 @@ protected:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Min. app version (major)";
+	                return "Min. app core version";
 
 	            case Qt::ToolTipRole:
-	                return "Minimum ManiVault Studio application version (major)";
+	                return "Minimum ManiVault Studio application core version";
 
 	            default:
 	                break;
@@ -399,8 +400,8 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial minimum application version (minor) */
-    class MinimumVersionMinorItem final : public Item {
+    /** Standard model item class for displaying required plugins */
+    class RequiredPluginsItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -422,10 +423,46 @@ protected:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Min. app version (minor)";
+	                return "Required plugins";
 
 	            case Qt::ToolTipRole:
-	                return "Minimum ManiVault Studio application version (minor)";
+	                return "Required plugins for the tutorial";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying missing plugins */
+    class MissingPluginsItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Missing plugins";
+
+	            case Qt::ToolTipRole:
+	                return "Missing plugins for the tutorial";
 
 	            default:
 	                break;
@@ -455,8 +492,9 @@ protected:
             append(new ContentItem(tutorial));
             append(new UrlItem(tutorial));
             append(new ProjectUrlItem(tutorial));
-            append(new MinimumVersionMajorItem(tutorial));
-            append(new MinimumVersionMinorItem(tutorial));
+            append(new MinimumCoreVersionItem(tutorial));
+            append(new RequiredPluginsItem(tutorial));
+            append(new MissingPluginsItem(tutorial));
         }
     };
 

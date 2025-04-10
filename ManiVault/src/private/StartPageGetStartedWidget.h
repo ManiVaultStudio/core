@@ -46,6 +46,12 @@ protected:
     /** Updates the actions to reflect changes */
     void updateActions();
 
+    /**
+     * Get the tutorials widget
+     * @return Reference to tutorials widget
+     */
+    PageTutorialsWidget& getTutorialsWidget();
+
 private:
 
     /** Update actions for creating a project from workspace */

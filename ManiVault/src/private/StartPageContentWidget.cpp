@@ -39,6 +39,8 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
         _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
         _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
         _toggleTutorialsAction.setSettingsPrefix("StartPage/ToggleTutorials");
+
+        _getStartedWidget.getTutorialsWidget().getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions({ "GettingStarted" });
     }
 
     _toggleProjectFromWorkspaceAction.setEnabled(false);

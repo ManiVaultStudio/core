@@ -53,10 +53,10 @@ ProjectDatabaseFilterModel::ProjectDatabaseFilterModel(QObject* parent /*= nullp
 
     _filterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
+    _filterGroupAction.addAction(&getFilterLoadableOnlyAction());
     _filterGroupAction.addAction(&getTextFilterCaseSensitiveAction());
     _filterGroupAction.addAction(&getTextFilterRegularExpressionAction());
     _filterGroupAction.addAction(&getTargetAppVersionAction());
-    _filterGroupAction.addAction(&getFilterLoadableOnlyAction());
 }
 
 bool ProjectDatabaseFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -140,6 +140,7 @@ void ProjectDatabaseFilterModel::fromVariantMap(const QVariantMap& variantMap)
     _tagsFilterAction.fromParentVariantMap(variantMap);
     _excludeTagsFilterAction.fromParentVariantMap(variantMap);
     _targetAppVersionAction.fromParentVariantMap(variantMap);
+    _filterLoadableOnlyAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ProjectDatabaseFilterModel::toVariantMap() const
@@ -149,6 +150,7 @@ QVariantMap ProjectDatabaseFilterModel::toVariantMap() const
     _tagsFilterAction.insertIntoVariantMap(variantMap);
     _excludeTagsFilterAction.insertIntoVariantMap(variantMap);
     _targetAppVersionAction.insertIntoVariantMap(variantMap);
+    _filterLoadableOnlyAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

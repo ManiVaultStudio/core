@@ -41,8 +41,10 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
 
     updateActions();
 
-    connect(&mv::help(), &mv::AbstractHelpManager::tutorialsModelPopulatedFromWebsite, this, [this, tags]() -> void {
-        getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tags.isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tags);
+    connect(&mv::help(), &mv::AbstractHelpManager::tutorialsModelPopulatedFromWebsite, this, [this]() -> void {
+        auto& tagsFilterAction = _tutorialsFilterModel.getTagsFilterAction();
+
+        getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tagsFilterAction.getSelectedOptions().isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tagsFilterAction.getSelectedOptions());
 	});
 }
 
@@ -112,14 +114,14 @@ void PageTutorialsWidget::fromVariantMap(const QVariantMap& variantMap)
 {
     PageActionsWidget::fromVariantMap(variantMap);
 
-
+    _tutorialsFilterModel.fromParentVariantMap(variantMap);
 }
 
 QVariantMap PageTutorialsWidget::toVariantMap() const
 {
     auto variantMap = PageActionsWidget::toVariantMap();
 
-
+    _tutorialsFilterModel.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

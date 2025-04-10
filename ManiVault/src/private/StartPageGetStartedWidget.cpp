@@ -28,7 +28,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _startPageContentWidget(startPageContentWidget),
     _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
     _createProjectFromDatasetWidget(this, "Project From Data"),
-    _tutorialsWidget(this, { "GettingStarted" }),
+    _tutorialsWidget(this),
     _workspaceLocationTypeAction(this, "Workspace location type"),
     _workspaceLocationTypesModel(this),
     _recentWorkspacesAction(this, mv::workspaces().getSettingsPrefix() + "RecentWorkspaces"),
@@ -84,6 +84,11 @@ void StartPageGetStartedWidget::updateActions()
 {
     updateCreateProjectFromWorkspaceActions();
     updateCreateProjectFromDatasetActions();
+}
+
+PageTutorialsWidget& StartPageGetStartedWidget::getTutorialsWidget()
+{
+    return _tutorialsWidget;
 }
 
 void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()

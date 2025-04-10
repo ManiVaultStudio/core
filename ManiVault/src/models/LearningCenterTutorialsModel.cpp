@@ -22,8 +22,9 @@ QMap<LearningCenterTutorialsModel::Column, LearningCenterTutorialsModel::ColumHe
     { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
     { Column::Content, { "Content" , "Content", "Full tutorial content in HTML format" } },
     { Column::Url, { "URL" , "URL", "ManiVault website tutorial URL" } },
-    { Column::MinimumVersionMajor, { "Min. app version (major)" , "Min. app version (major)", "Minimum ManiVault Studio application version (major)" } },
-    { Column::MinimumVersionMinor, { "Min. app version (minor)" , "Min. app version (minor)", "Minimum ManiVault Studio application version (minor)" } }
+    { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
+    { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
+    { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
 });
 
 LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= nullptr*/) :
@@ -60,11 +61,14 @@ QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation o
         case Column::ProjectUrl:
             return ProjectUrlItem::headerData(orientation, role);
 
-        case Column::MinimumVersionMajor:
-            return MinimumVersionMajorItem::headerData(orientation, role);
+        case Column::MinimumCoreVersion:
+            return MinimumCoreVersionItem::headerData(orientation, role);
 
-        case Column::MinimumVersionMinor:
-            return MinimumVersionMinorItem::headerData(orientation, role);
+        case Column::RequiredPlugins:
+            return RequiredPluginsItem::headerData(orientation, role);
+
+        case Column::MissingPlugins:
+            return MissingPluginsItem::headerData(orientation, role);
 
         default:
             break;
@@ -257,42 +261,61 @@ QVariant LearningCenterTutorialsModel::ProjectUrlItem::data(int role /*= Qt::Use
     return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::MinimumVersionMajorItem::data(int role) const
+QVariant LearningCenterTutorialsModel::MinimumCoreVersionItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
-            return getTutorial()->getMinimumVersionMajor();
-
-		case Qt::DisplayRole:
-	        return QString::number(data(Qt::EditRole).toInt());
-
-	    case Qt::ToolTipRole:
-	        return "Minimum ManiVault Studio application version (major): " + data(Qt::DisplayRole).toString();
-
-	    default:
-	        break;
-    }
-    
-	return Item::data(role);
-}
-
-QVariant LearningCenterTutorialsModel::MinimumVersionMinorItem::data(int role) const
-{
-    switch (role) {
-	    case Qt::EditRole:
-	        return getTutorial()->getMinimumVersionMinor();
+	        return QVariant::fromValue(getTutorial()->getMinimumCoreVersion());
 
 	    case Qt::DisplayRole:
-	        return QString::number(data(Qt::EditRole).toInt());
+	        return QString::fromStdString(data(Qt::EditRole).value<Version>().getVersionString());
 
 	    case Qt::ToolTipRole:
-	        return "Minimum ManiVault Studio application version (minor): " + data(Qt::DisplayRole).toString();
+	        return "Minimum ManiVault Studio application core version: " + data(Qt::DisplayRole).toString();
 
 	    default:
 	        break;
     }
 
-	return Item::data(role);
+    return Item::data(role);
+}
+
+QVariant LearningCenterTutorialsModel::RequiredPluginsItem::data(int role) const
+{
+    switch (role) {
+    case Qt::EditRole:
+        return getTutorial()->getRequiredPlugins();
+
+    case Qt::DisplayRole:
+        return data(Qt::EditRole).toStringList();
+
+    case Qt::ToolTipRole:
+        return "Required plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+
+    default:
+        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant LearningCenterTutorialsModel::MissingPluginsItem::data(int role) const
+{
+    switch (role) {
+    case Qt::EditRole:
+        return getTutorial()->getMissingPlugins();
+
+    case Qt::DisplayRole:
+        return data(Qt::EditRole).toStringList();
+
+    case Qt::ToolTipRole:
+        return "Missing plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+
+    default:
+        break;
+    }
+
+    return Item::data(role);
 }
 
 }

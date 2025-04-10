@@ -255,12 +255,12 @@ void StartPageOpenProjectWidget::updateProjectDatabaseActions()
                             QMessageBox downloadAgainMessageBox;
 
                             downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
-                            downloadAgainMessageBox.setWindowTitle(QString("Download %1 again?").arg(fileName));
-                            downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to overwrite it?").arg(fileName));
+                            downloadAgainMessageBox.setWindowTitle(QString("%1 already exists?").arg(fileName));
+                            downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
                             downloadAgainMessageBox.setIcon(QMessageBox::Warning);
 
                             auto yesButton  = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
-                            auto noButton   = downloadAgainMessageBox.addButton("Cancel", QMessageBox::RejectRole);
+                            auto noButton   = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
 
                             downloadAgainMessageBox.setDefaultButton(noButton);
 
