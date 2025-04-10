@@ -18,8 +18,6 @@ ProjectDatabaseProject::ProjectDatabaseProject(const QVariantMap& variantMap) :
     if (variantMap.contains("CoreVersion")) {
         const auto coreVersionMap = variantMap["CoreVersion"].toMap();
 
-        qDebug() << coreVersionMap;
-
         if (coreVersionMap.contains("Major"))
 			_minimumCoreVersion.setMajor(coreVersionMap["Major"].toInt());
 

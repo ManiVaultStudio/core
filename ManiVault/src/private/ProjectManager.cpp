@@ -122,7 +122,6 @@ ProjectManager::ProjectManager(QObject* parent) :
     _projectDatabaseSourceUrlAction.setToolTip("Source location of the projects");
 
     connect(&_projectDatabaseSourceUrlAction, &StringAction::stringChanged, this, [this](const QString& string) -> void {
-        qDebug() << "Project center source URL changed to" << string;
         _projectDatabaseModel.setSourceUrl(QUrl(string));
     });
 

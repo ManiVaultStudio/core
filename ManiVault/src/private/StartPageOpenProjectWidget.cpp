@@ -17,6 +17,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QStandardPaths>
 
 using namespace mv;
 using namespace mv::util;
@@ -243,11 +244,43 @@ void StartPageOpenProjectWidget::updateProjectDatabaseActions()
     	if (sourceIndex.isValid()) {
             if (const auto project = projectCenterModel.getProject(sourceIndex)) {
                 PageAction recentProjectPageAction(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
-                    projects().openProject(project->getUrl());
+                    const auto fileName = QFileInfo(project->getUrl().toString()).fileName();
+
+                    if (!fileName.isEmpty()) {
+                        const auto basePath         = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+                        const auto targetDirectory  = basePath + "/projects";
+                        const auto projectFilePath  = targetDirectory + "/" + fileName;
+
+                        if (QDir().mkpath(targetDirectory) && QFile::exists(projectFilePath)) {
+                            QMessageBox downloadAgainMessageBox;
+
+                            downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
+                            downloadAgainMessageBox.setWindowTitle(QString("Download %1 again?").arg(fileName));
+                            downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to overwrite it?").arg(fileName));
+                            downloadAgainMessageBox.setIcon(QMessageBox::Warning);
+
+                            auto yesButton  = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+                            auto noButton   = downloadAgainMessageBox.addButton("Cancel", QMessageBox::RejectRole);
+
+                            downloadAgainMessageBox.setDefaultButton(noButton);
+
+                            downloadAgainMessageBox.exec();
+
+                            if (downloadAgainMessageBox.clickedButton() == yesButton) {
+                                QFile::remove(targetDirectory);
+                                projects().openProject(project->getUrl(), targetDirectory);
+                            }
+                            else {
+                                projects().openProject(projectFilePath);
+                            }
+                        }
+                        else {
+	                        projects().openProject(project->getUrl(), targetDirectory);
+                        }
+                    }
 				});
 
                 recentProjectPageAction.setTags(project->getTags());
-                //recentProjectPageAction.setMetaData(project->getDate().toString("dd/MM/yyyy hh:mm"));
 
             	_projectDatabaseWidget.getModel().add(recentProjectPageAction);
             }

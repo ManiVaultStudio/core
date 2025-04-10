@@ -42,38 +42,6 @@ void FileDownloader::download(const QUrl& url)
 
     const auto fileName = QFileInfo(_url.toString()).fileName();
 
-    if (getTargetDirectory().isEmpty() && !fileName.isEmpty()) {
-        const auto downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(fileName);
-
-        //if (QFile::exists(downloadedFilePath)) {
-        //    QMessageBox msgBox;
-
-        //    msgBox.setWindowTitle("Overwrite File?");
-        //    msgBox.setText("The file already exists. Do you want to overwrite it?");
-        //    msgBox.setIcon(QMessageBox::Warning);
-
-        //    // Add custom buttons
-        //    QPushButton* overwriteButton = msgBox.addButton("Overwrite", QMessageBox::AcceptRole);
-        //    QPushButton* cancelButton = msgBox.addButton("Cancel", QMessageBox::RejectRole);
-
-        //    // Optionally set default button
-        //    msgBox.setDefaultButton(cancelButton);
-
-        //    // Show dialog and wait for response
-        //    msgBox.exec();
-
-        //    if (msgBox.clickedButton() == overwriteButton) {
-        //        // User chose to overwrite
-        //    }
-        //    else {
-        //        // User cancelled
-        //    }
-
-
-        //	QFile::remove(downloadedFilePath);
-        //}
-    }
-
     _task.setName(QString("Download %1").arg(fileName));
     _task.setIcon(StyledIcon("download"));
     _task.setRunning();
