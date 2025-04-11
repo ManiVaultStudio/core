@@ -205,8 +205,6 @@ if(${MV_USE_ERROR_LOGGING})
 	)
 	endif()
 
-	include_directories(${sentry-native_SOURCE_DIR}/include)
-	include_directories(${sentry-native_SOURCE_DIR}/external/crashpad/client)
 
 	# Put targets in the proper source folder
 	set_target_properties(sentry mini_chromium
