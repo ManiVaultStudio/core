@@ -108,10 +108,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	
 	# No linking optimization for MSVC builds with error logging (linking optimization screws up the program database which prohibits symbolication)
 	if(${MV_USE_ERROR_LOGGING})
-		# set(CMAKE_C_FLAGS_RELEASE "/Od /Zi")        	# Disable optimization and enable debug info
-		# set(CMAKE_CXX_FLAGS_RELEASE "/Od /Zi")     		# Same for C++
-		# set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/DEBUG")  	# Keep debug symbols in the executable
-		
 		# Remove /OPT:ICF from the linker flags
 		string(REPLACE "/OPT:ICF" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 		string(REPLACE "/OPT:ICF" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
@@ -636,21 +632,6 @@ if(NOT APPLE)
 			FOLDER CoreDependencies/Miscellaneous
 		)
 		
-		# if(MSVC)
-			# # Find all .pdb files in the build directory
-			# file(GLOB_RECURSE PDB_FILES "${CMAKE_BINARY_DIR}/**/*.pdb")
-			
-			# # Program database files target directory
-			# set(PDB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/pdb/")
-			
-			# # Copy all PDB files after the ManiVault executable has been built
-			# add_custom_command(
-				# TARGET ${MV_EXE} POST_BUILD
-				# COMMAND ${CMAKE_COMMAND} -E make_directory ${PDB_DIR}  					# Ensure the target PDB directory exists
-				# COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PDB_FILES} ${PDB_DIR}	# Copy all .pdb files
-				# COMMENT "Copying .pdb files to ${PDB_DIR}"
-			# )
-		# endif()
 	endif()
 endif()
 
