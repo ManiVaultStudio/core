@@ -204,18 +204,19 @@ if(${MV_USE_ERROR_LOGGING})
     )
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	# Put targets in the proper source folder
-	set_target_properties(sentry mini_chromium
-		PROPERTIES
-		FOLDER CoreDependencies
-	)
-	
-	# Put targets in the proper source folder
-	set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
-		PROPERTIES
-		FOLDER CoreDependencies/Crashpad
-	)
+        # Put targets in the proper source folder
+        set_target_properties(sentry mini_chromium
+            PROPERTIES
+            FOLDER CoreDependencies
+        )
+        
+        # Put targets in the proper source folder
+        set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
+            PROPERTIES
+            FOLDER CoreDependencies/Crashpad
+        )
     endif()
+
 endif()
 
 if(APPLE)
