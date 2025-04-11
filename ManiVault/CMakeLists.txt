@@ -215,6 +215,15 @@ if(${MV_USE_ERROR_LOGGING})
             PROPERTIES
             FOLDER CoreDependencies/Crashpad
         )
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set_target_properties(sentry PROPERTIES
+            CXX_EXTENSIONS ON
+            C_EXTENSIONS ON
+        )
+
+        target_compile_definitions(sentry PRIVATE
+            _GNU_SOURCE
+        )
     endif()
 
 endif()
