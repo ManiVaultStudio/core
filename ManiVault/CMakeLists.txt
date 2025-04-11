@@ -309,8 +309,10 @@ target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
 if(${MV_USE_ERROR_LOGGING})
-	target_link_libraries(${MV_EXE} PRIVATE sentry)
-	target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
+    target_link_libraries(${MV_EXE} PRIVATE sentry)
+    target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
+    
+    add_dependencies(${MV_EXE} crashpad_handler)
 endif()
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
@@ -590,42 +592,15 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
-	
-	if(${MV_USE_ERROR_LOGGING})
-		
-		# Copy sentry-native runtime to install directory after successful compilation
-		add_custom_target(sentry_post_build ALL
-			COMMAND ${CMAKE_COMMAND} -E echo "Installing: sentry runtime library"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:sentry> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
-			DEPENDS sentry  # Ensure sentry_native is built first
-		)
-		
-		# Copy crashpad_wer runtime to install directory after successful compilation
-		add_custom_target(crashpad_wer_post_build ALL
-			COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_wer runtime library"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_wer> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
-			DEPENDS crashpad_wer  # Ensure crashpad_wer is built first
-		)
-		
-		# Copy crashpad_handler runtime to install directory after successful compilation
-		add_custom_target(crashpad_handler_post_build ALL
-			COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler runtime library"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
-			DEPENDS crashpad_handler  # Ensure sentry_native is built first
-		)
-		
-		# Make ManiVault executable depend on the custom post-build targets
-		add_dependencies(${MV_EXE} sentry_post_build)
-		add_dependencies(${MV_EXE} crashpad_wer_post_build)
-		add_dependencies(${MV_EXE} crashpad_handler_post_build)
-		
-		# Put custom post-build targets in the proper source folder
-		set_target_properties(sentry_post_build crashpad_wer_post_build crashpad_handler_post_build
-			PROPERTIES
-			FOLDER CoreDependencies/Miscellaneous
-		)
-		
-	endif()
+
+    if(${MV_USE_ERROR_LOGGING})
+        # Install sentry artifacts
+        add_custom_command(TARGET ${MV_EXE}  POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler executable"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
+        )
+    endif()
+
 endif()
 
 # Install examples
