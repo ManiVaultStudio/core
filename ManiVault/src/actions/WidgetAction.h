@@ -772,14 +772,12 @@ public: // Popups
      * Get override size hint
      * @return Override size hint
      */
-    [[deprecated("This method is a placeholder and not operational yet")]]
     QSize getOverrideSizeHint() const;
 
     /**
      * Set override size hint
      * @param overrideSizeHint Override size hint
      */
-    [[deprecated("This method is a placeholder and not operational yet")]]
     void setOverrideSizeHint(const QSize& overrideSizeHint);
 
 public: // Configuration flags

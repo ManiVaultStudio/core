@@ -30,8 +30,8 @@ QSize WidgetActionWidget::sizeHint() const
             return popupSizeHint;
     }
 
-    //if (!action->getOverrideSizeHint().isNull())
-    //    return action->getOverrideSizeHint();
+    if (action->getOverrideSizeHint().width() > 0 && action->getOverrideSizeHint().height() > 0)
+        return action->getOverrideSizeHint();
 
     return QWidget::sizeHint();
 }

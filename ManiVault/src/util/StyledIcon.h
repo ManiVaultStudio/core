@@ -39,9 +39,8 @@ public:
      * @param iconName Name of the icon
      * @param iconFontName Name of the icon font
      * @param iconFontVersion Version of the icon font
-     * @param parent Pointer to parent object (maybe nullptr)
      */
-    explicit StyledIcon(const QString& iconName = "", const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion, QWidget* parent = nullptr);
+    explicit StyledIcon(const QString& iconName = "", const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion);
 
     /**
      * Copy construct from \p other styled icon
@@ -149,6 +148,14 @@ public:
      * @return Reference to changed styled icon
      */
     StyledIcon withMode(const StyledIconMode& mode);
+
+    /**
+     * Set icon modifier
+     * @param iconName Name of the modifier icon
+     * @param iconFontName Name of the modifier icon font
+     * @param iconFontVersion Version of the modifier icon font
+     */
+    StyledIcon withModifier(const QString& iconName, const QString& iconFontName = defaultIconFontName, const Version& iconFontVersion = defaultIconFontVersion);
 
     /**
      * Get icon font for \p iconFontName at \p iconFontVersion
@@ -260,10 +267,13 @@ private:
     static void updateIconFontVersions(const QString& iconFontName);
 
 private:
-	QString                 _iconName;          /** Name of the icon */
-    QString                 _iconFontName;      /** Name of the icon font */
-    Version                 _iconFontVersion;   /** Version of the icon font */
-    StyledIconSettings      _iconSettings;      /** Icon settings */
+	QString                 _iconName;                  /** Name of the icon */
+    QString                 _iconFontName;              /** Name of the icon font */
+    Version                 _iconFontVersion;           /** Version of the icon font */
+    StyledIconSettings      _iconSettings;              /** Icon settings */
+    QString                 _modifierIconName;          /** Name of the modifier icon */
+    QString                 _modifierIconFontName;      /** Name of the modifier icon font */
+    Version                 _modifierIconFontVersion;   /** Version of the modifier icon font */
 
 protected:
 	static QMap<QString, QVariantMap>       fontMetadata;               /** Font-specific metadata */
