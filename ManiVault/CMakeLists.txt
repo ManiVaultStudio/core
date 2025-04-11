@@ -14,9 +14,6 @@ set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
 set(MV_EXE MV_Application)                   # The ManiVault executable target
 set(MV_PUBLIC_LIB Core)                      # A public shared library used by plugin builders and the ManiVault executable
 
-message(STATUS "ManiVault version ${MV_VERSION_FULL}")
-message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
-
 # -----------------------------------------------------------------------------
 # CMake Settings
 # -----------------------------------------------------------------------------
