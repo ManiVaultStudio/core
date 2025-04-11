@@ -9,8 +9,10 @@
 
 #include <QMenu>
 
-#include <actions/TriggerAction.h>
 #include <actions/IntegralAction.h>
+#include <actions/OptionAction.h>
+#include <actions/StringAction.h>
+#include <actions/TriggerAction.h>
 
 class QAction;
 
@@ -22,7 +24,7 @@ using namespace mv::plugin;
  * 
  * Constructs a data hierarchy widget context menu based on the current dataset selection
  * 
- * @author Thomas Kroes
+ * @author Thomas Kroes, Alexander Vieth
  */
 class DataHierarchyWidgetContextMenu final : public QMenu
 {
@@ -57,6 +59,12 @@ private:
     QAction* getSelectionGroupAction();
 
     /**
+     * Get action for selection-pattern grouping
+     * @return Pointer to action for selection-pattern grouping
+     */
+    QAction* getSelectionGroupPatternAction();
+
+    /**
      * Get menu for item locking
      * @return Pointer to menu for item locking
      */
@@ -87,27 +95,68 @@ private:
 
 /**
  * Helper dialog for selection index selection
+ *
+ * @author Alexander Vieth
  */
 class SelectionGroupIndexDialog : public QDialog
 {
     Q_OBJECT
+
 public:
     SelectionGroupIndexDialog(QWidget* parent);
 
-    std::int32_t getSelectionGroupIndex() {
-        return selectionIndexAction.getValue();
+    std::int32_t getSelectionGroupIndex() const {
+        return _selectionIndexAction.getValue();
     }
 
 signals:
     void closeDialog(bool onlyIndices);
 
 public slots:
-    // Pass selected data set name from SelectionGroupIndexDialog to BinExporter (dialogClosed)
     void closeDialogAction() {
-        emit closeDialog(confirmButton.isChecked());
+        emit closeDialog(_confirmButton.isChecked());
     }
 
 private:
-    gui::IntegralAction      selectionIndexAction;
-    gui::TriggerAction       confirmButton;
+    gui::IntegralAction      _selectionIndexAction;
+    gui::TriggerAction       _confirmButton;
+};
+
+/**
+ * Helper dialog for selection pattern selection
+ *
+ * @author Alexander Vieth
+ */
+class SelectionPatternGroupIndexDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    SelectionPatternGroupIndexDialog(QWidget* parent);
+
+    std::int32_t getSelectionGroupIndex() const {
+        return _selectionIndexAction.getValue();
+    }
+
+    QString getSelectionGroupPattern() const {
+        return _selectionPatternAction.getString();
+    }
+
+    std::int32_t getSelectionGroupOption() const {
+        return _selectionOptionAction.getCurrentIndex();
+    }
+
+signals:
+    void closeDialog(bool onlyIndices);
+
+public slots:
+    void closeDialogAction() {
+        emit closeDialog(_confirmButton.isChecked());
+    }
+
+private:
+    gui::IntegralAction     _selectionIndexAction;
+    gui::StringAction       _selectionPatternAction;
+    gui::OptionAction       _selectionOptionAction;
+    gui::TriggerAction      _confirmButton;
 };
