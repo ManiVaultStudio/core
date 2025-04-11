@@ -198,6 +198,7 @@ if(${MV_USE_ERROR_LOGGING})
         OPTIONS
             "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
             "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
+            "SENTRY_BUILD_SHARED_LIBS OFF"
     )
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
