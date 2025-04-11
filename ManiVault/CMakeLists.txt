@@ -183,28 +183,22 @@ CPMAddPackage(
 )
 
 if(${MV_USE_ERROR_LOGGING})
-	
-	# Add Sentry with CPM
-	if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-		CPMAddPackage(
-		NAME sentry-native
-		GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-		GIT_TAG 0.7.19 														# Use the latest stable version
-		OPTIONS
-			"SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
-			"SENTRY_TRANSPORT winhttp" 										# Use the default HTTP transport
-	)
-	else()
-		CPMAddPackage(
-		NAME sentry-native
-		GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-		GIT_TAG 0.7.19 														# Use the latest stable version
-		OPTIONS
-			"SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
-			"SENTRY_TRANSPORT curl" 										# Use curl for HTTP transport
-	)
-	endif()
 
+    # Add Sentry with CPM
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(SENTRY_TRANSPORT "winhttp")     # Use the default HTTP transport
+    else()
+        set(SENTRY_TRANSPORT "curl")        # Use the curl HTTP transport
+    endif()
+
+    CPMAddPackage(
+        NAME sentry-native
+        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+        GIT_TAG 0.7.19 														# Use the latest stable version
+        OPTIONS
+            "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
+            "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
+    )
 
 	# Put targets in the proper source folder
 	set_target_properties(sentry mini_chromium
@@ -217,6 +211,7 @@ if(${MV_USE_ERROR_LOGGING})
 		PROPERTIES
 		FOLDER CoreDependencies/Crashpad
 	)
+
 endif()
 
 if(APPLE)
