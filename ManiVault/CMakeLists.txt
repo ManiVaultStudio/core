@@ -195,6 +195,7 @@ if(${MV_USE_ERROR_LOGGING})
         NAME sentry-native
         GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
         GIT_TAG 0.7.19 														# Use the latest stable version
+        EXCLUDE_FROM_ALL  YES
         OPTIONS
             "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
             "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
