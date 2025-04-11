@@ -183,7 +183,6 @@ CPMAddPackage(
 )
 
 if(${MV_USE_ERROR_LOGGING})
-
     # Add Sentry with CPM
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(SENTRY_TRANSPORT "winhttp")     # Use the default HTTP transport
@@ -201,6 +200,7 @@ if(${MV_USE_ERROR_LOGGING})
             "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
     )
 
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	# Put targets in the proper source folder
 	set_target_properties(sentry mini_chromium
 		PROPERTIES
@@ -212,7 +212,7 @@ if(${MV_USE_ERROR_LOGGING})
 		PROPERTIES
 		FOLDER CoreDependencies/Crashpad
 	)
-
+    endif()
 endif()
 
 if(APPLE)
