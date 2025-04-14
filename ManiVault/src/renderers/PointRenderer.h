@@ -197,7 +197,7 @@ namespace mv
 
         private:
             /* Point properties */
-            PointSettings               _pointSettings;
+            PointSettings               _pointSettings = {};
             PointEffect                 _pointEffect = PointEffect::Size;
 
             /** Selection visualization */
@@ -212,9 +212,9 @@ namespace mv
             bool                        _randomizedDepthEnabled             = true;
 
             /* Rendering variables */
-            ShaderProgram               _shader;
-            PointArrayObject            _gpuPoints;
-            Texture2D                   _colormap;                                                          /** 2D colormap, sets point color based on point position */
+            ShaderProgram               _shader = {};
+            PointArrayObject            _gpuPoints = {};
+            Texture2D                   _colormap = {};                                                     /** 2D colormap, sets point color based on point position */
             std::int32_t                _numSelectedPoints                  = 0;                            /** Number of selected (highlighted points) */
             std::int32_t                _numberOfFocusHighlights            = 0;                            /** Number of focus highlights */
         };
