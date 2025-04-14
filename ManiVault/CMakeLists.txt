@@ -48,15 +48,6 @@ include(CPM)
 # create a file that defines MV_VERSION_MAJOR, etc
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
 
-include(CheckTypeSize)
-
-# Check for size of long.
-check_type_size("long" CMAKE_SIZEOF_LONG)
-
-message("HAVE_SIZEOF_LONG: ${HAVE_CMAKE_SIZEOF_LONG}")
-message("SIZEOF_LONG: ${CMAKE_SIZEOF_LONG}")
-message("SIZEOF_LONG_CODE: ${CMAKE_SIZEOF_LONG_CODE}")
-
 # -----------------------------------------------------------------------------
 # Apple settings
 # -----------------------------------------------------------------------------
@@ -114,14 +105,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-	
-	# No linking optimization for MSVC builds with error logging (linking optimization screws up the program database which prohibits symbolication)
-	if(${MV_USE_ERROR_LOGGING})
-		# Remove /OPT:ICF from the linker flags
-		string(REPLACE "/OPT:ICF" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
-		string(REPLACE "/OPT:ICF" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
-		string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
-	endif()
 endif()
 
 # -----------------------------------------------------------------------------
@@ -129,11 +112,6 @@ endif()
 # -----------------------------------------------------------------------------
 include(DownloadFontAwesome)
 
-# Add preprocessor directive to notify sources of error logging
-if(${MV_USE_ERROR_LOGGING})
-	add_compile_definitions(ERROR_LOGGING)
-endif()
-	
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
@@ -199,6 +177,13 @@ if(${MV_USE_ERROR_LOGGING})
         set(SENTRY_TRANSPORT "curl")        # Use the curl HTTP transport
     endif()
 
+    # Add preprocessor directive to notify sources of error logging
+    add_compile_definitions(ERROR_LOGGING)
+
+    # Check for size of long (used in sentry)
+    include(CheckTypeSize)
+    check_type_size("long" CMAKE_SIZEOF_LONG LANGUAGE C)
+
     CPMAddPackage(
         NAME sentry-native
         GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
@@ -233,6 +218,14 @@ if(${MV_USE_ERROR_LOGGING})
         target_compile_definitions(sentry PRIVATE
             _GNU_SOURCE
         )
+    endif()
+
+    # No linking optimization for MSVC builds with error logging (linking optimization screws up the program database which prohibits symbolication)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        # Remove /OPT:ICF from the linker flags
+        string(REPLACE "/OPT:ICF" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+        string(REPLACE "/OPT:ICF" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+        string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
     endif()
 
 endif()
