@@ -46,6 +46,12 @@ include(CPM)
 # create a file that defines MV_VERSION_MAJOR, etc
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
 
+if(${MV_USE_ERROR_LOGGING})
+    # Check for size of long (used in sentry)
+    include(CheckTypeSize)
+    check_type_size("long" CMAKE_SIZEOF_LONG LANGUAGE C)
+endif()
+
 # -----------------------------------------------------------------------------
 # Apple settings
 # -----------------------------------------------------------------------------
@@ -177,10 +183,6 @@ if(${MV_USE_ERROR_LOGGING})
 
     # Add preprocessor directive to notify sources of error logging
     add_compile_definitions(ERROR_LOGGING)
-
-    # Check for size of long (used in sentry)
-    include(CheckTypeSize)
-    check_type_size("long" CMAKE_SIZEOF_LONG LANGUAGE C)
 
     CPMAddPackage(
         NAME sentry-native
