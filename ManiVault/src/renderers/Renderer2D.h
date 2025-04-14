@@ -59,6 +59,12 @@ public:
      */
     const Navigator2D& getNavigator() const;
 
+    /**
+     * Initializes the source widget used for setting the renderer view
+     * @param sourceWidget Pointer to the renderer widget
+     */
+    void setSourceWidget(QWidget* sourceWidget);
+
 public:
 
 	/**

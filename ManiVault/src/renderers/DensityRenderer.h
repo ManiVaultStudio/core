@@ -24,7 +24,7 @@ public:
         DENSITY, LANDSCAPE
     };
 
-    DensityRenderer(RenderMode renderMode);
+    DensityRenderer(RenderMode renderMode, QWidget* sourceWidget = nullptr, QObject* parent = nullptr);
     ~DensityRenderer() override;
 
     /**

@@ -10,10 +10,12 @@
 
 namespace mv::gui
 {
-
-DensityRenderer::DensityRenderer(RenderMode renderMode) :
+DensityRenderer::DensityRenderer(RenderMode renderMode, QWidget* sourceWidget, QObject* parent) :
+    Renderer2D(parent),
     _renderMode(renderMode)
 {
+    if (sourceWidget)
+        setSourceWidget(sourceWidget);
 }
 
 DensityRenderer::~DensityRenderer()
