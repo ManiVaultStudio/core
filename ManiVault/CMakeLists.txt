@@ -49,7 +49,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAK
 if(${MV_USE_ERROR_LOGGING})
     # Check for size of long (used in sentry)
     include(CheckTypeSize)
-    check_type_size("long" CMAKE_SIZEOF_LONG LANGUAGE C)
+    check_type_size("long" CMAKE_SIZEOF_LONG)
 endif()
 
 # -----------------------------------------------------------------------------
