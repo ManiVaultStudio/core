@@ -104,7 +104,8 @@ class HdpsCoreConan(ConanFile):
                 "libasound2-dev",
                 "libdbus-1-dev",
                 "libcups2-dev",
-                "libicu-dev"
+                "libicu-dev",
+                "libcurl4-openssl-dev"      # for sentry
                 ]
             
             installer = tools.SystemPackageTool()
