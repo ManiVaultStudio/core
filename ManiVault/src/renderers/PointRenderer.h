@@ -135,6 +135,9 @@ namespace mv
         public:
             using Renderer2D::Renderer2D;
 
+            PointRenderer() = default;
+            PointRenderer(QWidget* sourceWidget, QObject* parent = nullptr);
+
             /**
              * Set data bounds to \p dataBounds
              * @param dataBounds Data bounds
@@ -164,6 +167,8 @@ namespace mv
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
+
+            void initView();
 
         public: // Selection visualization
 

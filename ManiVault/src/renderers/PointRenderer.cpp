@@ -256,6 +256,13 @@ namespace mv
             _positionBuffer.destroy();
         }
 
+        PointRenderer::PointRenderer(QWidget* sourceWidget, QObject* parent) :
+            Renderer2D(parent)
+        {
+            if(sourceWidget)
+                setSourceWidget(sourceWidget);
+        }
+
         void PointRenderer::setDataBounds(const QRectF& dataBounds)
         {
 	        Renderer2D::setDataBounds(dataBounds);
@@ -425,6 +432,11 @@ namespace mv
         void PointRenderer::setRandomizedDepthEnabled(bool randomizedDepth)
         {
             _randomizedDepthEnabled = randomizedDepth;
+        }
+
+        void PointRenderer::initView()
+        {
+            getNavigator().resetView(true);
         }
 
         void PointRenderer::init()

@@ -51,6 +51,11 @@ const Navigator2D& Renderer2D::getNavigator() const
     return _navigator;
 }
 
+void Renderer2D::setSourceWidget(QWidget* sourceWidget)
+{
+    getNavigator().initialize(sourceWidget);
+}
+
 QPointer<Navigator2D> Renderer2D::getCustomNavigator() const
 {
 	return _customNavigator;
