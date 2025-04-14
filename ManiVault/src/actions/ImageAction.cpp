@@ -11,7 +11,6 @@ namespace mv::gui {
 
 ImageAction::ImageAction(QObject* parent, const QString& title, bool populateFilePickerCompleter /*= true*/) :
     WidgetAction(parent, title),
-    _image(),
     _filePathAction(this, "File Path"),
     _fileNameAction(this, "File Name"),
     _filePickerAction(parent, "File Picker", QString(), populateFilePickerCompleter),
