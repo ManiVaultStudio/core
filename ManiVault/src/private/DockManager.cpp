@@ -228,14 +228,14 @@ QVariantMap DockManager::toVariantMap() const
 
     _serializationTask->setEnabled(true);
 
-    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
+    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets(true))
         ViewPluginDockWidget::preRegisterSerializationTask(const_cast<DockManager*>(this), viewPluginDockWidget->getId(), const_cast<DockManager*>(this));
 
     auto variantMap = Serializable::toVariantMap();
 
     QVariantList viewPluginDockWidgetsList;
 
-    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
+    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets(true))
         viewPluginDockWidgetsList << viewPluginDockWidget->toVariantMap();
 
     const_cast<DockManager*>(this)->_layoutTask.setRunning();
