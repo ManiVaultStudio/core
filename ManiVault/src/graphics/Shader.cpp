@@ -49,12 +49,14 @@ namespace
 
         if (status != GL_TRUE) {
             GLint logLength = 0;
-            f->glGetShaderiv(program, GL_INFO_LOG_LENGTH, &logLength);
+            f->glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
             
             std::vector<GLchar> infoLog(logLength);
             f->glGetProgramInfoLog(program, logLength, &logLength, infoLog.data());
             
-            qCritical().noquote() << "Shader program failed to link: \n" << infoLog.data();
+            qCritical().noquote() << "[Shader linking] Shader program failed to link.";
+            qCritical().noquote() << "[Shader linking] Linking Error message(Len" << logLength << ") :" << infoLog.data();
+            qCritical().noquote() << "[Shader linking] Last OpenGL error code: " << f->glGetError();
             return false;
         }
 
