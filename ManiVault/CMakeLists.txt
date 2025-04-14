@@ -48,6 +48,15 @@ include(CPM)
 # create a file that defines MV_VERSION_MAJOR, etc
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
 
+include(CheckTypeSize)
+
+# Check for size of long.
+check_type_size("long" CMAKE_SIZEOF_LONG)
+
+message("HAVE_SIZEOF_LONG: ${HAVE_CMAKE_SIZEOF_LONG}")
+message("SIZEOF_LONG: ${CMAKE_SIZEOF_LONG}")
+message("SIZEOF_LONG_CODE: ${CMAKE_SIZEOF_LONG_CODE}")
+
 # -----------------------------------------------------------------------------
 # Apple settings
 # -----------------------------------------------------------------------------
