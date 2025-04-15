@@ -25,6 +25,7 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
     _toolbarAction.setShowLabels(false);
 
     _toolbarAction.addAction(&_tutorialsFilterModel.getTextFilterAction());
+    _toolbarAction.addAction(const_cast<StringsAction*>(&mv::help().getTutorialsModel().getDsnsAction()));
     _toolbarAction.addAction(&_tutorialsFilterModel.getTagsFilterAction());
     _toolbarAction.addAction(&_tutorialsFilterModel.getFilterGroupAction());
 

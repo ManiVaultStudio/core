@@ -544,6 +544,12 @@ private:
      */
     static QByteArray downloadTutorialsFromDsn(const QString& dsn);
 
+public: // Action getters
+
+    gui::StringsAction& getDsnsAction() { return _dsnsAction; }
+
+    const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
+
 signals:
 
     /**
