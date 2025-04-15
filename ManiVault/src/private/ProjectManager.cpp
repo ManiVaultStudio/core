@@ -245,6 +245,9 @@ void ProjectManager::initialize()
         return;
 
     beginInitialization();
+    {
+	    
+    }
     endInitialization();
 }
 

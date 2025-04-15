@@ -440,12 +440,6 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     /**
-     * Set the source URL to \p sourceUrl
-     * @param sourceUrl Source URL
-     */
-    void setSourceUrl(const QUrl& sourceUrl);
-
-    /**
      * Get tags
      * @return All tags
      */
@@ -457,7 +451,7 @@ public:
      */
     void addProject(const util::ProjectDatabaseProject* project);
 
-    /** Builds a set of all video tags and emits ProjectDatabaseModel::tagsChanged(...) */
+    /** Builds a set of all project tags and emits ProjectDatabaseModel::tagsChanged(...) */
     void updateTags();
 
     /**
@@ -472,6 +466,10 @@ public:
      */
     const util::ProjectDatabaseProjects& getProjects() const;
 
+public: // Action getters
+    
+    gui::StringsAction& getDsnsAction() { return _dsnsAction; }
+
 signals:
 
     /**
@@ -480,13 +478,14 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
-    /** Signals that the model was populated from the website */
-    void populatedFromSourceUrl();
+    /** Signals that the model was populated from one or more source DSNs */
+    void populatedFromDsns();
 
 private:
     util::ProjectDatabaseProjects   _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
     util::FileDownloader            _fileDownloader;    /** For downloading the project database JSON file */
+    gui::StringsAction              _dsnsAction;        /** Data source names action */
 };
 
 }

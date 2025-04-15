@@ -29,12 +29,16 @@ QMap<ProjectDatabaseModel::Column, ProjectDatabaseModel::ColumHeaderInfo> Projec
 });
 
 ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
-    StandardItemModel(parent)
+    StandardItemModel(parent),
+    _dsnsAction(this, "Data Source Names")
 {
     setColumnCount(static_cast<int>(Column::Count));
 
+    connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
+        //_fileDownloader.download(_dsnsAction.getUrl());
+	});
+
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-        
         try
         {
             const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
@@ -46,7 +50,7 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
                 addProject(new ProjectDatabaseProject(projectMap));
             }
 
-            emit populatedFromSourceUrl();
+            emit populatedFromDsns();
         }
         catch (std::exception& e)
         {
@@ -95,11 +99,6 @@ QVariant ProjectDatabaseModel::headerData(int section, Qt::Orientation orientati
     }
 
     return {};
-}
-
-void ProjectDatabaseModel::setSourceUrl(const QUrl& sourceUrl)
-{
-	_fileDownloader.download(sourceUrl);
 }
 
 QSet<QString> ProjectDatabaseModel::getTagsSet() const
