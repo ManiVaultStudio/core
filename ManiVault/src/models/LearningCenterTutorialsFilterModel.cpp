@@ -126,7 +126,6 @@ void LearningCenterTutorialsFilterModel::setSourceModel(QAbstractItemModel* sour
             return;
 
         _tagsFilterAction.setOptions(uniqueTags);
-    	_tagsFilterAction.setSelectedOptions(_tagsFilterAction.hasSelectedOptions() ? _tagsFilterAction.getSelectedOptions() : uniqueTags);
     };
 
     connect(_learningCenterTutorialsModel, &LearningCenterTutorialsModel::tagsChanged, this, updateTags);

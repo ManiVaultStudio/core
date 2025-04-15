@@ -55,7 +55,7 @@ DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
     });
     getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 
-    //getProjectsDsnsAction().addString("https://sec.lumc.nl/mtg-viewer/MV_data/CytosploreViewer/CytosploreViewerProjectInfo.json");
+    getProjectsDsnsAction().addString("https://sec.lumc.nl/mtg-viewer/MV_data/CytosploreViewer/CytosploreViewerProjectInfo.json");
 }
 
 void DataHierarchyPluginFactory::initialize()

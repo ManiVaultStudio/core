@@ -26,8 +26,8 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
 
     _toolbarAction.addAction(&_tutorialsFilterModel.getTextFilterAction());
     _toolbarAction.addAction(const_cast<StringsAction*>(&mv::help().getTutorialsModel().getDsnsAction()));
-    _toolbarAction.addAction(&_tutorialsFilterModel.getTagsFilterAction());
     _toolbarAction.addAction(&_tutorialsFilterModel.getFilterGroupAction());
+    _toolbarAction.addAction(&_tutorialsFilterModel.getTagsFilterAction());
 
     getHierarchyWidget().getToolbarAction().setVisible(false);
     getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -45,7 +45,8 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
     connect(&mv::help().getTutorialsModel(), &mv::LearningCenterTutorialsModel::populatedFromDsns, this, [this]() -> void {
         auto& tagsFilterAction = _tutorialsFilterModel.getTagsFilterAction();
 
-        getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tagsFilterAction.getSelectedOptions().isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tagsFilterAction.getSelectedOptions());
+        qDebug() << "Populated from DSNs, setting tags filter action to:" << tagsFilterAction.getOptions();
+        //getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tagsFilterAction.getSelectedOptions().isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tagsFilterAction.getSelectedOptions());
 	});
 }
 
@@ -58,7 +59,6 @@ LearningCenterTutorialsFilterModel& PageTutorialsWidget::getTutorialsFilterModel
 {
     return _tutorialsFilterModel;
 }
-
 
 void PageTutorialsWidget::updateActions()
 {
