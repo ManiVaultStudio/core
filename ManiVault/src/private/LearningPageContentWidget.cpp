@@ -24,7 +24,11 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     _examplesWidget(this),
     _pluginResourcesWidget(this)
 {
-    _tutorialsWidget.getHierarchyWidget().getToolbarAction().addAction(&_tutorialsWidget.getTutorialsFilterModel().getTagsFilterAction());
+    auto& tutorialsTagFilterAction = _tutorialsWidget.getTutorialsFilterModel().getTagsFilterAction();
+
+    _tutorialsWidget.getHierarchyWidget().getToolbarAction().addAction(&tutorialsTagFilterAction);
+
+    _tutorialsWidget.getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tutorialsTagFilterAction.getOptions());
 
     auto& rowsLayout = getRowsLayout();
 
