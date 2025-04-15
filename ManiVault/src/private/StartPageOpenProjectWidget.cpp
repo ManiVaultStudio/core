@@ -39,8 +39,11 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     layout->addWidget(&_openCreateProjectWidget);
     layout->addWidget(&_recentProjectsWidget);
-    layout->addWidget(&_projectDatabaseWidget);
 
+    if (QFileInfo("StartPage.json").exists()) {
+        layout->addWidget(&_projectDatabaseWidget);
+    }
+    
     setLayout(layout);
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");

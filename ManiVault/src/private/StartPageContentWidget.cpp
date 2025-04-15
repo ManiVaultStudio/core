@@ -59,10 +59,17 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
-    _settingsAction.addAction(&_toggleProjectDatabaseAction);
+
+    if (QFileInfo("StartPage.json").exists()) {
+        _settingsAction.addAction(&_toggleProjectDatabaseAction);
+    }
+
     _settingsAction.addAction(&_toggleRecentProjectsAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);
-    _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
+
+    // Disable until the project from workspace action is implemented properly
+    //_settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
+
     _settingsAction.addAction(&_toggleTutorialsAction);
     _settingsAction.addAction(&_compactViewAction);
 
