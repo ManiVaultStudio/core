@@ -81,4 +81,7 @@ private:
     QWidget*                        _currentViewWidget;         /** Pointer to the current view widget */
     mv::gui::InfoOverlayWidget      _noSamplesOverlayWidget;    /** Overlay widget with a message saying there are no samples available */
     mv::plugin::ViewPlugin*         _currentViewPlugin;         /** Pointer to the current view plugin */
+
+    mv::plugin::ViewPlugin*         _previousViewPlugin = nullptr;         /** Pointer to the previous view plugin */
+    QMap<QString, QWidget*>  _widgetMap; // key: view plugin gui name, value: the widget
 };
