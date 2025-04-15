@@ -4,8 +4,6 @@
 
 #include "ProjectDatabaseModel.h"
 
-#include <QJsonObject>
-#include <QJsonArray>
 #include <QtConcurrent>
 #include <QFuture>
 #include <QFutureWatcher>
@@ -40,7 +38,6 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
     _dsnsAction.setIconByName("globe");
     _dsnsAction.setToolTip("Project database data source names");
     _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    //_dsnsAction.setEnabled(false);
     _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
 
     connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
