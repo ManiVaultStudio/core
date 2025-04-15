@@ -26,7 +26,9 @@ PluginFactory::PluginFactory(Type type, const QString& title) :
     _pluginGlobalSettingsGroupAction(nullptr),
     _statusBarAction(nullptr),
     _allowPluginCreationFromStandardGui(true),
-    _pluginMetadata(*this)
+    _pluginMetadata(*this),
+    _tutorialsDsnsAction(this, "Tutorials DSNs"),
+    _projectsDsnsAction(this, "Projects sDSNs")
 {
 }
 

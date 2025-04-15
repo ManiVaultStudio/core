@@ -314,6 +314,11 @@ public: // Miscellaneous
      */
     const PluginMetadata& getPluginMetadata() const;
 
+public: // Action getters
+
+    gui::StringsAction& getTutorialsDsnsAction()  { return _tutorialsDsnsAction; }
+    gui::StringsAction& getProjectsDsnsAction()  { return _projectsDsnsAction; }
+
 signals:
 
     /**
@@ -394,6 +399,8 @@ private:
     bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
     PluginMetadata                          _pluginMetadata;                        /** Plugin metadata */
 	QIcon                                   _categoryIcon;                          /** Category icon */
+    gui::StringsAction                      _tutorialsDsnsAction;                   /** Action for editing the tutorials Data Source Names */
+    gui::StringsAction                      _projectsDsnsAction;                    /** Action for editing the project Data Source Names */
 };
 
 }
