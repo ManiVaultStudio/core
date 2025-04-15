@@ -466,9 +466,20 @@ public:
      */
     const util::ProjectDatabaseProjects& getProjects() const;
 
+private:
+
+    /**
+     * Download projects from \p dsn
+     * @param dsn Projects Data Source Name (DSN)
+     * @return Downloaded data
+     */
+    static QByteArray downloadProjectsFromDsn(const QString& dsn);
+
 public: // Action getters
     
     gui::StringsAction& getDsnsAction() { return _dsnsAction; }
+
+    const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
 
 signals:
 
@@ -484,7 +495,6 @@ signals:
 private:
     util::ProjectDatabaseProjects   _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
-    util::FileDownloader            _fileDownloader;    /** For downloading the project database JSON file */
     gui::StringsAction              _dsnsAction;        /** Data source names action */
 };
 

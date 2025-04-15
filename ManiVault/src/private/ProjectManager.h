@@ -185,7 +185,6 @@ public: // Action getters
     mv::gui::TriggerAction& getPluginManagerAction() override { return _pluginManagerAction; }
     mv::gui::ToggleAction& getShowStartPageAction() override { return _showStartPageAction; }
     mv::gui::TriggerAction& getBackToProjectAction() override { return _backToProjectAction; }
-    mv::gui::StringAction& getProjectDatabaseSourceUrlAction() override { return _projectDatabaseSourceUrlAction; }
 
 private:
     QScopedPointer<mv::Project>     _project;                           /** Current project */
@@ -204,7 +203,6 @@ private:
     gui::ToggleAction               _showStartPageAction;               /** Action for toggling the start page */
     gui::TriggerAction              _backToProjectAction;               /** Action for going back to the project */
     ProjectDatabaseModel            _projectDatabaseModel;              /** Project database model */
-    gui::StringAction               _projectDatabaseSourceUrlAction;    /** Project database source URL action */
 };
 
 }

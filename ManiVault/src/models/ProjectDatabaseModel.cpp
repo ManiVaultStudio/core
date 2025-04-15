@@ -6,6 +6,9 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QtConcurrent>
+#include <QFuture>
+#include <QFutureWatcher>
 
 #ifdef _DEBUG
     //#define PROJECT_DATABASE_MODEL_VERBOSE
@@ -34,32 +37,38 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
 {
     setColumnCount(static_cast<int>(Column::Count));
 
+    _dsnsAction.setIconByName("globe");
+    _dsnsAction.setToolTip("Project database data source names");
+    _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _dsnsAction.setEnabled(false);
+
     connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
-        //_fileDownloader.download(_dsnsAction.getUrl());
-	});
+        setRowCount(0);
 
-    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-        try
-        {
-            const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-            const auto projects     = jsonDocument.object()["Projects"].toArray();
+        QFuture<QByteArray> future = QtConcurrent::mapped(_dsnsAction.getStrings(), &ProjectDatabaseModel::downloadProjectsFromDsn);
 
-            for (const auto project : projects) {
-                auto projectMap = project.toVariant().toMap();
+        QFutureWatcher<QByteArray> watcher;
 
-                addProject(new ProjectDatabaseProject(projectMap));
-            }
+    	connect(&watcher, &QFutureWatcher<QString>::finished, [&]() {
+            QStringList results;
+
+    		for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+                results << future.resultAt(dsnIndex);
+
+                const auto jsonDocument = QJsonDocument::fromJson(future.resultAt(dsnIndex));
+                const auto projects     = jsonDocument.object()["Projects"].toArray();
+
+                for (const auto project : projects) {
+                    auto projectMap = project.toVariant().toMap();
+
+                    addProject(new ProjectDatabaseProject(projectMap));
+                }
+    		}
 
             emit populatedFromDsns();
-        }
-        catch (std::exception& e)
-        {
-            exceptionMessageBox("Unable to process project database JSON", e);
-        }
-        catch (...)
-        {
-            exceptionMessageBox("Unable to process project database JSON");
-        }
+		});
+
+        watcher.setFuture(future);
 	});
 }
 
@@ -150,6 +159,37 @@ const ProjectDatabaseProject* ProjectDatabaseModel::getProject(const QModelIndex
 const ProjectDatabaseProjects& ProjectDatabaseModel::getProjects() const
 {
 	return _projects;
+}
+
+QByteArray ProjectDatabaseModel::downloadProjectsFromDsn(const QString& dsn)
+{
+    QEventLoop loop;
+
+    QByteArray downloadedData;
+
+    FileDownloader fileDownloader;
+
+    connect(&fileDownloader, &FileDownloader::downloaded, [&]() -> void {
+        try
+        {
+            downloadedData = fileDownloader.downloadedData();
+            loop.quit();
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to download projects JSON from DSN", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to download projects JSON from DSN");
+        }
+    });
+
+    fileDownloader.download(dsn);
+
+    loop.exec();
+
+    return downloadedData;
 }
 
 ProjectDatabaseModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :

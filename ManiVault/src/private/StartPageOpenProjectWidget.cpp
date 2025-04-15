@@ -56,7 +56,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
     _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _projectDatabaseSettingsAction.addAction(&mv::projects().getProjectDatabaseSourceUrlAction());
+    _projectDatabaseSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectDatabaseModel().getDsnsAction()));
     
     _projectDatabaseSettingsAction.setIconByName("globe");
     _projectDatabaseSettingsAction.setPopupSizeHint(QSize(400, 10));
@@ -310,8 +310,6 @@ void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
     _recentProjectsWidget.fromParentVariantMap(variantMap);
     _projectDatabaseWidget.fromParentVariantMap(variantMap);
     _projectDatabaseFilterModel.fromParentVariantMap(variantMap);
-
-    mv::projects().getProjectDatabaseSourceUrlAction().fromParentVariantMap(variantMap);
 }
 
 QVariantMap StartPageOpenProjectWidget::toVariantMap() const
@@ -322,8 +320,6 @@ QVariantMap StartPageOpenProjectWidget::toVariantMap() const
     _recentProjectsWidget.insertIntoVariantMap(variantMap);
     _projectDatabaseWidget.insertIntoVariantMap(variantMap);
     _projectDatabaseFilterModel.insertIntoVariantMap(variantMap);
-
-    mv::projects().getProjectDatabaseSourceUrlAction().insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

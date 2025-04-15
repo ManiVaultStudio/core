@@ -344,7 +344,6 @@ public: // Action getters
     virtual gui::TriggerAction& getPluginManagerAction() = 0;
     virtual gui::ToggleAction& getShowStartPageAction() = 0;
     virtual gui::TriggerAction& getBackToProjectAction() = 0;
-    virtual gui::StringAction& getProjectDatabaseSourceUrlAction() = 0;
 
 signals:
 

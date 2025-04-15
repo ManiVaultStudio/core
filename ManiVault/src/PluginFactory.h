@@ -12,6 +12,7 @@
 #include "PluginType.h"
 
 #include "actions/PluginTriggerAction.h"
+#include "actions/StringsAction.h"
 
 #include <QObject>
 
