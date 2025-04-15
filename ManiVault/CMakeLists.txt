@@ -130,7 +130,7 @@ endif()
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
+find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
@@ -272,6 +272,7 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})

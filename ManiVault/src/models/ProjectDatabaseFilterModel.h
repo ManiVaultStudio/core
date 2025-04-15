@@ -13,16 +13,16 @@
 
 namespace mv {
 
-class LearningCenterTutorialsModel;
+class ProjectDatabaseModel;
 
 /**
- * Learning center tutorials filter model class
+ * Project database filter model class
  *
- * Sorting and filtering model for the learning center tutorials model
+ * Sorting and filtering model for the project database model
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT LearningCenterTutorialsFilterModel : public SortFilterProxyModel
+class CORE_EXPORT ProjectDatabaseFilterModel : public SortFilterProxyModel
 {
 public:
 
@@ -30,7 +30,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
     */
-    LearningCenterTutorialsFilterModel(QObject* parent = nullptr);
+    ProjectDatabaseFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether \p row with \p parent is filtered out (false) or in (true)
@@ -72,16 +72,16 @@ public: // Action getters
     gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
     gui::OptionsAction& getExcludeTagsFilterAction() { return _excludeTagsFilterAction; }
     gui::VersionAction& getTargetAppVersionAction() { return _targetAppVersionAction; }
-    gui::ToggleAction& getFilterLoadableOnlyAction() { return _filterLoadableOnlyAction; }
+	gui::ToggleAction& getFilterLoadableOnlyAction() { return _filterLoadableOnlyAction; }
 	gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
-    LearningCenterTutorialsModel*   _learningCenterTutorialsModel;  /** Pointer to source model */
-    gui::OptionsAction              _tagsFilterAction;              /** Filter based on tag(s) */
-    gui::OptionsAction              _excludeTagsFilterAction;       /** Filter out based on tag(s) */
-    gui::VersionAction              _targetAppVersionAction;        /** Target app minimum version filter action */
-    gui::ToggleAction               _filterLoadableOnlyAction;      /** Filter out projects that are not loadable */
-    gui::VerticalGroupAction        _filterGroupAction;             /** Groups the filter text, filter settings and minimum version settings */
+    ProjectDatabaseModel*       _projectDatabaseModel;          /** Pointer to source model */
+    gui::OptionsAction          _tagsFilterAction;              /** Filter based on tag(s) */
+    gui::OptionsAction          _excludeTagsFilterAction;       /** Filter out based on tag(s) */
+    gui::VersionAction          _targetAppVersionAction;        /** Target app minimum version filter action */
+    gui::ToggleAction           _filterLoadableOnlyAction;      /** Filter out projects that are not loadable */
+    gui::VerticalGroupAction    _filterGroupAction;             /** Groups the filter text, filter settings and minimum version settings */
 };
 
 }

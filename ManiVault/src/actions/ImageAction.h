@@ -114,7 +114,7 @@ public: // Serialization
 
     /**
      * Load image action from variant
-     * @param Variant representation of the image action
+     * @param variantMap Variant representation of the image action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -137,7 +137,7 @@ signals:
      * Signals that the current image changed
      * @param image Current image that changed
      */
-    void imageChanged(const QImage& string);
+    void imageChanged(const QImage& image);
 
 protected:
     QImage              _image;             /** Current image */
