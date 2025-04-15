@@ -175,7 +175,6 @@ QWidget* StringsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, stringsAction, widgetFlags),
     _model(this),
-    _filterModel(),
     _hierarchyWidget(this, stringsAction->getCategory(), _model, &_filterModel, false)
 {
     resize(0, 150);
@@ -237,7 +236,7 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
         _model.removeRows(0, _model.rowCount());
 
         for (const auto& string : strings)
-            _model.appendRow(new QStandardItem(stringsAction->icon(), string));
+            _model.appendRow(new QStandardItem(string));
 
         updateActions();
     };

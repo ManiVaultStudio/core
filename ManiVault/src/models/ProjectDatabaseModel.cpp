@@ -41,6 +41,7 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
     _dsnsAction.setToolTip("Project database data source names");
     _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _dsnsAction.setEnabled(false);
+    _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
 
     connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
         setRowCount(0);
@@ -233,7 +234,7 @@ QVariant ProjectDatabaseModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) 
         case Qt::ToolTipRole:
             return "Title: " + data(Qt::DisplayRole).toString();
 
-    case Qt::DecorationRole:
+		case Qt::DecorationRole:
             return StyledIcon(getProject()->getIconName());
 
         default:
