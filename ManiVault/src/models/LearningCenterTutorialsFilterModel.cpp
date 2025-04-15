@@ -26,7 +26,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     _tagsFilterAction(this, "Tags filter"),
     _excludeTagsFilterAction(this, "Exclude tags filter"),
     _targetAppVersionAction(this, "App version"),
-    _filterLoadableOnlyAction(this, "Loadable only", false),
+    _filterLoadableOnlyAction(this, "Loadable only", true),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
