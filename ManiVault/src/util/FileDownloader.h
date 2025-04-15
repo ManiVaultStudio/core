@@ -88,6 +88,12 @@ public:
      */
     void setTargetDirectory(const QString& targetDirectory);
 
+    /**
+     * Get whether the file is downloaded in the main thread
+     * @return Whether running in the main thread or not
+     */
+    bool isInMainThread() const;
+
 signals:
 
     /** Signals that the file is correctly downloaded */

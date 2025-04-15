@@ -238,7 +238,7 @@ void ProjectManager::initialize()
 
     beginInitialization();
     {
-	    
+        _projectDatabaseModel.synchronizeWithDsns();
     }
     endInitialization();
 }

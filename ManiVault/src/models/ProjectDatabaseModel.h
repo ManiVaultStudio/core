@@ -466,6 +466,9 @@ public:
      */
     const util::ProjectDatabaseProjects& getProjects() const;
 
+    /** Synchronize the model with the data source names */
+    void synchronizeWithDsns();
+
 private:
 
     /**

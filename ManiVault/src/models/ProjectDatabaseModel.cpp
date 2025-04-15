@@ -49,27 +49,31 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
 
         QFutureWatcher<QByteArray> watcher;
 
-    	connect(&watcher, &QFutureWatcher<QString>::finished, [&]() {
-            QStringList results;
+  //  	connect(&watcher, &QFutureWatcher<QString>::finished, [&]() {
+  //          QStringList results;
 
-    		for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-                results << future.resultAt(dsnIndex);
+  //  		for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+  //              results << future.resultAt(dsnIndex);
 
-                const auto jsonDocument = QJsonDocument::fromJson(future.resultAt(dsnIndex));
-                const auto projects     = jsonDocument.object()["Projects"].toArray();
+  //              const auto jsonDocument = QJsonDocument::fromJson(future.resultAt(dsnIndex));
+  //              const auto projects     = jsonDocument.object()["Projects"].toArray();
 
-                for (const auto project : projects) {
-                    auto projectMap = project.toVariant().toMap();
+  //              for (const auto project : projects) {
+  //                  auto projectMap = project.toVariant().toMap();
 
-                    addProject(new ProjectDatabaseProject(projectMap));
-                }
-    		}
+  //                  addProject(new ProjectDatabaseProject(projectMap));
+  //              }
+  //  		}
 
-            emit populatedFromDsns();
-		});
+  //          emit populatedFromDsns();
+		//});
 
         watcher.setFuture(future);
 	});
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectDatabaseModel::synchronizeWithDsns);
+    }
 }
 
 QVariant ProjectDatabaseModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -159,6 +163,17 @@ const ProjectDatabaseProject* ProjectDatabaseModel::getProject(const QModelIndex
 const ProjectDatabaseProjects& ProjectDatabaseModel::getProjects() const
 {
 	return _projects;
+}
+
+void ProjectDatabaseModel::synchronizeWithDsns()
+{
+    QStringList dsns;
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        dsns << pluginFactory->getProjectsDsnsAction().getStrings();
+    }
+
+    _dsnsAction.setStrings(dsns);
 }
 
 QByteArray ProjectDatabaseModel::downloadProjectsFromDsn(const QString& dsn)
