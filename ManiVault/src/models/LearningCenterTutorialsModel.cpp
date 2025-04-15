@@ -156,13 +156,15 @@ void LearningCenterTutorialsModel::updateTags()
 
 void LearningCenterTutorialsModel::synchronizeWithDsns()
 {
-    QStringList dsns;
+    QStringList uniqueDsns;
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        dsns << pluginFactory->getTutorialsDsnsAction().getStrings();
+        uniqueDsns << pluginFactory->getTutorialsDsnsAction().getStrings();
     }
 
-    _dsnsAction.setStrings(dsns);
+    uniqueDsns.removeDuplicates();
+
+    _dsnsAction.setStrings(uniqueDsns);
 }
 
 QByteArray LearningCenterTutorialsModel::downloadTutorialsFromDsn(const QString& dsn)

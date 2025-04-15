@@ -171,13 +171,15 @@ const ProjectDatabaseProjects& ProjectDatabaseModel::getProjects() const
 
 void ProjectDatabaseModel::synchronizeWithDsns()
 {
-    QStringList dsns;
+    QStringList uniqueDsns;
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        dsns << pluginFactory->getProjectsDsnsAction().getStrings();
+        uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
     }
 
-    _dsnsAction.setStrings(dsns);
+    uniqueDsns.removeDuplicates();
+
+    _dsnsAction.setStrings(uniqueDsns);
 }
 
 QByteArray ProjectDatabaseModel::downloadProjectsFromDsn(const QString& dsn)
