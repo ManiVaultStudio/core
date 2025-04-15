@@ -28,7 +28,7 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
 
     _tutorialsWidget.getHierarchyWidget().getToolbarAction().addAction(&tutorialsTagFilterAction);
 
-    _tutorialsWidget.getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tutorialsTagFilterAction.getOptions());
+    _tutorialsWidget.getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions({ "GettingStarted" });
 
     auto& rowsLayout = getRowsLayout();
 
