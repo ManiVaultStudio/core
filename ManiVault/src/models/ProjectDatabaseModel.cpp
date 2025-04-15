@@ -36,7 +36,7 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
     setColumnCount(static_cast<int>(Column::Count));
 
     _dsnsAction.setIconByName("globe");
-    _dsnsAction.setToolTip("Project database data source names");
+    _dsnsAction.setToolTip("Projects Data Source Names (DSN)");
     _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
     _dsnsAction.setPopupSizeHint(QSize(550, 100));
@@ -172,7 +172,7 @@ const ProjectDatabaseProjects& ProjectDatabaseModel::getProjects() const
 
 void ProjectDatabaseModel::synchronizeWithDsns()
 {
-    QStringList uniqueDsns;
+    auto uniqueDsns = _dsnsAction.getStrings();
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
         uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();

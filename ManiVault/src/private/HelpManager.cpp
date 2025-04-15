@@ -129,6 +129,9 @@ void HelpManager::initialize()
     beginInitialization();
     {
         _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
+
+        _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
+        _tutorialsModel.synchronizeWithDsns();
     }
     endInitialization();
 }
