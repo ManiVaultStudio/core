@@ -45,30 +45,36 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
     connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
         setRowCount(0);
 
-        QFuture<QByteArray> future = QtConcurrent::mapped(_dsnsAction.getStrings(), &ProjectDatabaseModel::downloadProjectsFromDsn);
+        _future = QtConcurrent::mapped(
+            _dsnsAction.getStrings(),
+            [this](const QString& dsn) {
+                return downloadProjectsFromDsn(dsn);
+		});
 
-        QFutureWatcher<QByteArray> watcher;
+    	connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
+    		for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+                QJsonParseError jsonParseError;
 
-  //  	connect(&watcher, &QFutureWatcher<QString>::finished, [&]() {
-  //          QStringList results;
+                const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
 
-  //  		for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-  //              results << future.resultAt(dsnIndex);
+                if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                    qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+                    continue;
+                }
 
-  //              const auto jsonDocument = QJsonDocument::fromJson(future.resultAt(dsnIndex));
-  //              const auto projects     = jsonDocument.object()["Projects"].toArray();
+                const auto projects = jsonDocument.object()["Projects"].toArray();
 
-  //              for (const auto project : projects) {
-  //                  auto projectMap = project.toVariant().toMap();
+                for (const auto project : projects) {
+                    auto projectMap = project.toVariant().toMap();
 
-  //                  addProject(new ProjectDatabaseProject(projectMap));
-  //              }
-  //  		}
+                    addProject(new ProjectDatabaseProject(projectMap));
+                }
+    		}
 
-  //          emit populatedFromDsns();
-		//});
+            emit populatedFromDsns();
+		});
 
-        watcher.setFuture(future);
+        _watcher.setFuture(_future);
 	});
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {

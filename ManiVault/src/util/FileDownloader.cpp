@@ -19,12 +19,12 @@ FileDownloader::FileDownloader(const StorageMode& mode, const Task::GuiScope& ta
     QObject(parent),
     _storageMode(mode),
     _isDownloading(false),
-    _task(this, "Downloading", { taskGuiScope }, Task::Status::Undefined, true)
+    _task(QThread::currentThread() == QCoreApplication::instance()->thread() ? new Task(this, "Downloading", { taskGuiScope }, Task::Status::Undefined, true) : nullptr)
 {
     connect(&_networkAccessManager, &QNetworkAccessManager::finished, this, &FileDownloader::downloadFinished);
 
-    if (isInMainThread())
-		_task.setEnabled(taskGuiScope != Task::GuiScope::None);
+    if (_task)
+		_task->setEnabled(taskGuiScope != Task::GuiScope::None);
 }
 
 void FileDownloader::download(const QUrl& url)
@@ -45,30 +45,30 @@ void FileDownloader::download(const QUrl& url)
 
     const auto fileName = QFileInfo(_url.toString()).fileName();
 
-    if (isInMainThread()) {
-        _task.setName(QString("Download %1").arg(fileName));
-        _task.setIcon(StyledIcon("download"));
-        _task.setRunning();
+    if (_task) {
+        _task->setName(QString("Download %1").arg(fileName));
+        _task->setIcon(StyledIcon("download"));
+        _task->setRunning();
 
-        disconnect(&_task, &Task::requestAbort, this, nullptr);
+        disconnect(_task, &Task::requestAbort, this, nullptr);
 
-        connect(&_task, &Task::requestAbort, this, [this, networkReply]() -> void {
+        connect(_task, &Task::requestAbort, this, [this, networkReply]() -> void {
             networkReply->abort();
 
-            _task.setAborted();
+            _task->setAborted();
 
             emit aborted();
-            });
+		});
     }
 
     connect(networkReply, &QNetworkReply::downloadProgress, this, [&](qint64 downloaded, qint64 total) -> void {
-        if (isInMainThread() && _task.isAborting())
+        if (_task && _task->isAborting())
             return;
 			
         const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
 
-        if (isInMainThread())
-			_task.setProgress(progress);
+        if (_task)
+			_task->setProgress(progress);
 
         emit downloadProgress(progress);
     });
@@ -123,8 +123,8 @@ void FileDownloader::downloadFinished(QNetworkReply* reply)
     _isDownloading = false;
 
     if (reply->error() == QNetworkReply::NoError) {
-        if (isInMainThread())
-            _task.setFinished();
+        if (_task)
+            _task->setFinished();
 
 		emit downloaded();
     }
@@ -138,11 +138,6 @@ const QString& FileDownloader::getTargetDirectory() const
 void FileDownloader::setTargetDirectory(const QString& targetDirectory)
 {
     _targetDirectory = targetDirectory;
-}
-
-bool FileDownloader::isInMainThread() const
-{
-    return QThread::currentThread() == QCoreApplication::instance()->thread();
 }
 
 QByteArray FileDownloader::downloadedData() const {

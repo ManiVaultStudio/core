@@ -88,12 +88,6 @@ public:
      */
     void setTargetDirectory(const QString& targetDirectory);
 
-    /**
-     * Get whether the file is downloaded in the main thread
-     * @return Whether running in the main thread or not
-     */
-    bool isInMainThread() const;
-
 signals:
 
     /** Signals that the file is correctly downloaded */
@@ -115,7 +109,7 @@ private:
     bool                    _isDownloading;             /** Boolean determining whether a download is taking place */
     QByteArray              _downloadedData;            /** Downloaded data as byte array */
     QString                 _downloadedFilePath;        /** Location where the downloaded file is stored */
-    Task                    _task;                      /** Task for reporting progress */
+    QPointer<Task>          _task;                      /** Task for reporting progress */
     QString                 _targetDirectory;           /** Directory where the file is downloaded to (when FileDownloader#_storageMode is StorageMode#File) */  
 };
 

@@ -9,6 +9,9 @@
 #include "util/ProjectDatabaseProject.h"
 #include "util/FileDownloader.h"
 
+#include <QFuture>
+#include <QFutureWatcher>
+
 #include <QMap>
 
 namespace mv {
@@ -499,6 +502,8 @@ private:
     util::ProjectDatabaseProjects   _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
     gui::StringsAction              _dsnsAction;        /** Data source names action */
+    QFuture<QByteArray>             _future;            /** Future for downloading projects */
+    QFutureWatcher<QByteArray>      _watcher;           /** Future watcher for downloading projects */
 };
 
 }
