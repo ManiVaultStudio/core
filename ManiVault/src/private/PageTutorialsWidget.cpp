@@ -41,7 +41,7 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
 
     updateActions();
 
-    connect(&mv::help(), &mv::AbstractHelpManager::tutorialsModelPopulatedFromWebsite, this, [this]() -> void {
+    connect(&mv::help().getTutorialsModel(), &mv::LearningCenterTutorialsModel::populatedFromDsns, this, [this]() -> void {
         auto& tagsFilterAction = _tutorialsFilterModel.getTagsFilterAction();
 
         getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tagsFilterAction.getSelectedOptions().isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tagsFilterAction.getSelectedOptions());

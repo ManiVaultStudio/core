@@ -59,22 +59,18 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
                     continue;
                 }
 
-                /*
-                const auto projects = jsonDocument.object()["Projects"].toArray();
+                const auto tutorials = jsonDocument.object()["tutorials"].toArray();
 
-                for (const auto project : projects) {
-                    auto projectMap = project.toVariant().toMap();
-
-                    addProject(new ProjectDatabaseProject(projectMap));
+            	for (const auto tutorial : tutorials) {
+                    addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
                 }
-                */
             }
 
             emit populatedFromDsns();
-            });
+        });
 
         _watcher.setFuture(_future);
-        });
+	});
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
         connect(&pluginFactory->getTutorialsDsnsAction(), &StringsAction::stringsChanged, this, &LearningCenterTutorialsModel::synchronizeWithDsns);
@@ -118,7 +114,7 @@ QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation o
         case Column::MissingPlugins:
             return MissingPluginsItem::headerData(orientation, role);
 
-        default:
+		case Column::Count:
             break;
     }
 
