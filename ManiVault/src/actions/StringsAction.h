@@ -166,6 +166,18 @@ signals:
      */
     void stringsChanged(const QStringList& strings);
 
+    /**
+     * Signals that \p strings were added
+     * @param strings Added strings
+     */
+    void stringsAdded(const QStringList& strings);
+
+    /**
+     * Signals that \p strings were removed
+     * @param strings Removed strings
+     */
+    void stringsRemoved(const QStringList& strings);
+
 protected:
     QString                 _category;          /** Type of string */
     QStringList             _strings;           /** Current strings */

@@ -15,7 +15,6 @@ namespace mv::gui {
 StringsAction::StringsAction(QObject* parent, const QString& title, const QStringList& strings /*= QStringList()*/) :
     WidgetAction(parent, title),
     _category("String"),
-    _strings(),
     _toolbarAction(this, "Toolbar"),
     _nameAction(&_toolbarAction, "Name"),
     _addAction(&_toolbarAction, "Add"),
@@ -49,6 +48,23 @@ void StringsAction::setStrings(const QStringList& strings)
     emit stringsChanged(_strings);
 
     saveToSettings();
+
+    auto removedStrings = _strings;
+    auto addedStrings   = strings;
+
+    for (const auto& item : strings) {
+        removedStrings.removeAll(item);
+    }
+
+    for (const QString& item : _strings) {
+        addedStrings.removeAll(item);
+    }
+
+    if (!addedStrings.isEmpty())
+        emit stringsAdded(addedStrings);
+
+    if (!removedStrings.isEmpty())
+        emit stringsRemoved(removedStrings);
 }
 
 void StringsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -121,6 +137,7 @@ void StringsAction::addString(const QString& string)
     _strings << string;
 
     emit stringsChanged(_strings);
+    emit stringsAdded({ string });
 }
 
 void StringsAction::removeString(const QString& string)
@@ -128,6 +145,7 @@ void StringsAction::removeString(const QString& string)
     _strings.removeOne(string);
 
     emit stringsChanged(_strings);
+    emit stringsRemoved({ string });
 }
 
 void StringsAction::removeStrings(const QStringList& strings)
@@ -136,6 +154,7 @@ void StringsAction::removeStrings(const QStringList& strings)
         _strings.removeOne(string);
 
     emit stringsChanged(_strings);
+    emit stringsRemoved(strings);
 }
 
 QWidget* StringsAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
