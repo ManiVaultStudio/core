@@ -29,9 +29,9 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
-    _projectDatabaseWidget(this, "Project Database"),
+    _projectDatabaseWidget(this, "Projects"),
     _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
-    _projectDatabaseSettingsAction(this, "Projects source")
+    _projectDatabaseSettingsAction(this, "Data Source Names")
 {
     auto layout = new QVBoxLayout();
 

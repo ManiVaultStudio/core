@@ -31,6 +31,7 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
 
     _tutorialsFilterModel.setSourceModel(tutorialsModel);
     _tutorialsFilterModel.getFilterGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _tutorialsFilterModel.getTagsFilterAction().selectAll();
     _tutorialsFilterModel.getExcludeTagsFilterAction().initialize({ "Installation" }, { "Installation" });
 
     _tutorialPickerAction.setCustomModel(&_tutorialsFilterModel);

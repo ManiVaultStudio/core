@@ -42,12 +42,14 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
 
     updateActions();
 
+    /*
     connect(&mv::help().getTutorialsModel(), &mv::LearningCenterTutorialsModel::populatedFromDsns, this, [this]() -> void {
         auto& tagsFilterAction = _tutorialsFilterModel.getTagsFilterAction();
 
         qDebug() << "Populated from DSNs, setting tags filter action to:" << tagsFilterAction.getOptions();
         //getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tagsFilterAction.getSelectedOptions().isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tagsFilterAction.getSelectedOptions());
 	});
+    */
 }
 
 HorizontalGroupAction& PageTutorialsWidget::getToolbarAction()

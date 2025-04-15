@@ -59,6 +59,8 @@ public: // Action getters
     const mv::gui::ToggleAction& getToggleTutorialsAction() const { return _toggleTutorialsAction; }
     const mv::gui::GroupAction& getSettingsAction() const { return _settingsAction; }
     const mv::gui::TriggerAction& getToLearningCenterAction() const { return _toLearningCenterAction; }
+
+	mv::gui::GroupAction& getSettingsAction() { return _settingsAction; }
     mv::gui::HorizontalGroupAction& getToolbarAction() { return _toolbarAction; }
 
 private:

@@ -65,6 +65,7 @@ bool StartPageWidget::event(QEvent* event)
     if (event->type() == QEvent::KeyPress) {
         if (auto keyEvent = dynamic_cast<QKeyEvent*>(event)) {
             if (keyEvent->key() == Qt::Key_F8) {
+                _startPageContentWidget.getSettingsAction().setVisible(true);
                 _configurationAction.setVisible(true);
             }
         }
