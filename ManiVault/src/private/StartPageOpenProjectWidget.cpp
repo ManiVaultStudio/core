@@ -56,10 +56,11 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
     _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _projectDatabaseSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectDatabaseModel().getDsnsAction()));
-    
+    _projectDatabaseSettingsAction.setShowLabels(false);
     _projectDatabaseSettingsAction.setIconByName("globe");
-    _projectDatabaseSettingsAction.setPopupSizeHint(QSize(400, 10));
+    _projectDatabaseSettingsAction.setPopupSizeHint(QSize(550, 100));
+
+    _projectDatabaseSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectDatabaseModel().getDsnsAction()));
 
     _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
 
