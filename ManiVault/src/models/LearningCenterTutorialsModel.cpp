@@ -4,13 +4,14 @@
 
 #include "LearningCenterTutorialsModel.h"
 
-#include "Application.h"
+#include <QtConcurrent>
 
 #ifdef _DEBUG
     //#define LEARNING_CENTER_TUTORIALS_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
+using namespace mv::gui;
 
 namespace mv {
 
@@ -28,9 +29,56 @@ QMap<LearningCenterTutorialsModel::Column, LearningCenterTutorialsModel::ColumHe
 });
 
 LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+    QStandardItemModel(parent),
+    _dsnsAction(this, "Data Source Names")
 {
     setColumnCount(static_cast<int>(Column::Count));
+
+    _dsnsAction.setIconByName("globe");
+    _dsnsAction.setToolTip("Project database data source names");
+    _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
+
+    connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
+        setRowCount(0);
+
+        _future = QtConcurrent::mapped(
+            _dsnsAction.getStrings(),
+            [this](const QString& dsn) {
+                return downloadTutorialsFromDsn(dsn);
+		});
+
+        connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
+            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+                QJsonParseError jsonParseError;
+
+                const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+
+                if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                    qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+                    continue;
+                }
+
+                /*
+                const auto projects = jsonDocument.object()["Projects"].toArray();
+
+                for (const auto project : projects) {
+                    auto projectMap = project.toVariant().toMap();
+
+                    addProject(new ProjectDatabaseProject(projectMap));
+                }
+                */
+            }
+
+            emit populatedFromDsns();
+            });
+
+        _watcher.setFuture(_future);
+        });
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        connect(&pluginFactory->getTutorialsDsnsAction(), &StringsAction::stringsChanged, this, &LearningCenterTutorialsModel::synchronizeWithDsns);
+    }
 }
 
 QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -104,6 +152,48 @@ void LearningCenterTutorialsModel::updateTags()
             _tags.insert(tag);
 
     emit tagsChanged(_tags);
+}
+
+void LearningCenterTutorialsModel::synchronizeWithDsns()
+{
+    QStringList dsns;
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        dsns << pluginFactory->getTutorialsDsnsAction().getStrings();
+    }
+
+    _dsnsAction.setStrings(dsns);
+}
+
+QByteArray LearningCenterTutorialsModel::downloadTutorialsFromDsn(const QString& dsn)
+{
+    QEventLoop loop;
+
+    QByteArray downloadedData;
+
+    FileDownloader fileDownloader;
+
+    connect(&fileDownloader, &FileDownloader::downloaded, [&]() -> void {
+        try
+        {
+            downloadedData = fileDownloader.downloadedData();
+            loop.quit();
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to download tutorials JSON from DSN", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to download tutorials JSON from DSN");
+        }
+        });
+
+    fileDownloader.download(dsn);
+
+    loop.exec();
+
+    return downloadedData;
 }
 
 LearningCenterTutorialsModel::Item::Item(const mv::util::LearningCenterTutorial* tutorial, bool editable /*= false*/) :

@@ -10,6 +10,8 @@
 
 #include <QMap>
 #include <QStandardItemModel>
+#include <QFuture>
+#include <QFutureWatcher>
 
 namespace mv {
 
@@ -530,6 +532,18 @@ public:
     /** Builds a set of all video tags and emits LearningCenterTutorialsModel::tagsChanged(...) */
     void updateTags();
 
+    /** Synchronize the model with the data source names */
+    void synchronizeWithDsns();
+
+private:
+
+    /**
+     * Download tutorials from \p dsn
+     * @param dsn Tutorials Data Source Name (DSN)
+     * @return Downloaded data
+     */
+    static QByteArray downloadTutorialsFromDsn(const QString& dsn);
+
 signals:
 
     /**
@@ -538,9 +552,15 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
+    /** Signals that the model was populated from one or more source DSNs */
+    void populatedFromDsns();
+
 private:
     util::LearningCenterTutorials   _tutorials;     /** Model tutorials */
     QSet<QString>                   _tags;          /** All tags */
+    gui::StringsAction              _dsnsAction;    /** Data source names action */
+    QFuture<QByteArray>             _future;        /** Future for downloading projects */
+    QFutureWatcher<QByteArray>      _watcher;       /** Future watcher for downloading projects */
 };
 
 }

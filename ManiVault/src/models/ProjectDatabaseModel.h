@@ -7,7 +7,6 @@
 #include "models/StandardItemModel.h"
 
 #include "util/ProjectDatabaseProject.h"
-#include "util/FileDownloader.h"
 
 #include <QFuture>
 #include <QFutureWatcher>

@@ -4,9 +4,9 @@
 
 #include "ProjectDatabaseModel.h"
 
+#include "util/FileDownloader.h"
+
 #include <QtConcurrent>
-#include <QFuture>
-#include <QFutureWatcher>
 
 #ifdef _DEBUG
     //#define PROJECT_DATABASE_MODEL_VERBOSE
