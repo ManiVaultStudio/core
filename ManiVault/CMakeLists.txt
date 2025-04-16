@@ -645,11 +645,21 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
 )
+
+if(${MV_USE_ERROR_LOGGING})
+    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses (optional: sentry, crashpad)"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${sentry-native_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry/LICENSE
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${sentry-native_SOURCE_DIR}/external/crashpad/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad/LICENSE
+    )
+endif()
 
 # -----------------------------------------------------------------------------
 # Miscellaneous
