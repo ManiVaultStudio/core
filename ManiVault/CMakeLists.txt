@@ -174,7 +174,7 @@ CPMAddPackage(
 )
 
 # Use of Sentry on MacOS breaks the build so turn it off for now...
-if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
+if(${MV_USE_ERROR_LOGGING})
 
     # Add Sentry with CPM
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -327,7 +327,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
-if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
+if(${MV_USE_ERROR_LOGGING})
     target_link_libraries(${MV_EXE} PRIVATE sentry)
     target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
     
@@ -417,7 +417,16 @@ if(APPLE)
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-    
+
+    set(MACOSX_BUNDLE_ADDITIONAL_LIBS
+        \"$<TARGET_FILE:qtadvanceddocking-qt6>\"
+        \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
+    )
+
+    if(${MV_USE_ERROR_LOGGING})
+        list(APPEND MACOSX_BUNDLE_ADDITIONAL_LIBS \"$<TARGET_FILE:sentry>\" \"$<TARGET_FILE:crashpad_wer>\" \"$<TARGET_FILE:crashpad_handler}>\")
+    endif()
+
     install(CODE "
         message(\"**** MacOS bundle install ****\")
 
@@ -431,17 +440,9 @@ if(APPLE)
                 message(FATAL_ERROR \"macdeployqt failed\")
             endif()
 
-            set(ADDITIONAL_LIBS
-				\"$<TARGET_FILE:qt6advanceddocking>\"
-				\"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
-				\"$<TARGET_FILE:sentry>\"
-				\"$<TARGET_FILE:crashpad_wer>\"
-				\"$<TARGET_FILE:crashpad_handler}>\"
-			)
 
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qtadvanceddocking-qt6>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
-            message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
-            file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
+            message(\"**** Copy additional libs: \${MACOSX_BUNDLE_ADDITIONAL_LIBS}\")
+            file(COPY \${MACOSX_BUNDLE_ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
         endif()
     " COMPONENT MACOS_BUNDLE)
 
@@ -612,7 +613,7 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
-    if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
+    if(${MV_USE_ERROR_LOGGING})
         # Install sentry artifacts
         add_custom_command(TARGET ${MV_EXE}  POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler executable"
@@ -638,17 +639,30 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 )
 
 # Install dependency licenses
-add_custom_command(TARGET ${MV_EXE} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses"
+set(INSTALL_LICENSE_COMMANDS)
+list(APPEND INSTALL_LICENSE_COMMANDS
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses: core"
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
 )
+
+if(${MV_USE_ERROR_LOGGING})
+    list(APPEND INSTALL_LICENSE_COMMANDS
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses: error logging"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sentry-native_SOURCE_DIR}/LICENSE" ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry/LICENSE
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sentry-native_SOURCE_DIR}/external/crashpad/LICENSE" ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad/LICENSE
+    )
+endif()
+
+add_custom_command(TARGET ${MV_EXE} POST_BUILD ${INSTALL_LICENSE_COMMANDS})
 
 # -----------------------------------------------------------------------------
 # Miscellaneous

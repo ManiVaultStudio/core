@@ -154,6 +154,10 @@ class HdpsCoreConan(ConanFile):
         tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
         tc.variables["MV_UNITY_BUILD"] = "ON"
 
+        # TEMPORARILY disable sentry on macos, 16/04/25
+        if self.settings.os == "Macos":
+            tc.variables["MV_USE_ERROR_LOGGING"] = "OFF"
+
         try:
             tc.generate()
         except KeyError as e:
