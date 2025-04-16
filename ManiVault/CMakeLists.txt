@@ -432,14 +432,14 @@ if(APPLE)
             endif()
 
             set(ADDITIONAL_LIBS
-				\"$<TARGET_FILE:qtadvanceddocking-qt6>\"
-				\"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
-				\"$<TARGET_FILE:sentry>\"
-				\"$<TARGET_FILE:crashpad_wer>\"
-				\"$<TARGET_FILE:crashpad_handler}>\"
-			)
+                \"$<TARGET_FILE:qtadvanceddocking-qt6>\"
+                \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
+            )
 
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qtadvanceddocking-qt6>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
+            if(${MV_USE_ERROR_LOGGING})
+                list(APPEND ADDITIONAL_LIBS \"$<TARGET_FILE:sentry>\" \"$<TARGET_FILE:crashpad_wer>\" \"$<TARGET_FILE:crashpad_handler}>\")
+            endif()
+            
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
         endif()
