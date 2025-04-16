@@ -17,24 +17,20 @@ file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 # Other user-facing options
 option(MV_USE_GTEST "Use GoogleTest" OFF)
 option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
+option(MV_USE_ERROR_LOGGING "Use error logging with Sentry" ON)
 option(MV_PRECOMPILE_HEADERS "Precompile several headers for faster compilation" ON)
 option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
-
-if(MV_PRECOMPILE_HEADERS)
-    message(STATUS "Using precompiled headers: ON")
-endif()
-
-if(MV_UNITY_BUILD)
-    message(STATUS "Using unity build: ON")
-endif()
-
-if(MV_USE_AVX)
-    message(STATUS "Using AVX: ON")
-endif()
 
 # defines MV_VERSION
 include(ManiVault/cmake/Utils.cmake)
 mv_set_version()
+
+message(STATUS "Building ManiVault ${MV_VERSION_FULL}")
+message(STATUS "  Using precompiled headers: ${MV_PRECOMPILE_HEADERS}")
+message(STATUS "  Using unity build: ${MV_UNITY_BUILD}")
+message(STATUS "  Using AVX: ${MV_USE_AVX}")
+message(STATUS "  Using sentry for error logging: ${MV_USE_ERROR_LOGGING}")
+message(STATUS "  Install dir: ${MV_INSTALL_DIR}")
 
 # -----------------------------------------------------------------------------
 # Tests

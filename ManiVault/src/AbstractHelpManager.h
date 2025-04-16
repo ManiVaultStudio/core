@@ -113,9 +113,6 @@ signals:
     /** Invoked when the videos model has been successfully populated from the website */
     void videosModelPopulatedFromWebsite();
 
-    /** Invoked when the tutorials model has been successfully populated from the website */
-    void tutorialsModelPopulatedFromWebsite();
-
 public: // Action getters
 
     virtual gui::ToggleAction& getShowLearningCenterPageAction() = 0;

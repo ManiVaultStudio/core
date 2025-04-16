@@ -312,7 +312,7 @@ public: // Dataset and selection grouping
     virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
 
     /**
-     * Get selection grouping toggle action
+     * Get selection grouping setEnabled action
      * @return Pointer to selection grouping toggle action (only valid if there is a current project)
      */
     virtual gui::ToggleAction* getSelectionGroupingAction() = 0;

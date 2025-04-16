@@ -6,6 +6,8 @@
 
 #include "PageActionsWidget.h"
 
+#include <util/Serializable.h>
+
 #include <actions/HorizontalGroupAction.h>
 
 #include <models/LearningCenterTutorialsFilterModel.h>
@@ -46,6 +48,20 @@ private:
 
     /** Update actions for launching tutorials */
     void updateActions();
+
+public: // Serialization
+
+    /**
+     * Load from variant map
+     * @param variantMap Variant map
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save to variant map
+     * @return Variant map
+     */
+    QVariantMap toVariantMap() const override;
 
 private:
     mv::gui::HorizontalGroupAction              _toolbarAction;             /** Horizontal toolbar (group) action */

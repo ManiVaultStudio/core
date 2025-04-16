@@ -18,8 +18,6 @@ using namespace util;
 
 ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
-    _model(),
-    _filterModel(),
     _modalTasksDialog(this)
 {
     setMinimumDuration(0);
@@ -101,7 +99,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowTitleHint);
-    setWindowFlag(Qt::WindowStaysOnTopHint);
+    //setWindowFlag(Qt::WindowStaysOnTopHint);
 
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 

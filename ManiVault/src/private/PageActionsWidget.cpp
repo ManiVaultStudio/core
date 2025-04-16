@@ -24,6 +24,7 @@ using namespace mv::util;
 
 PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
     QWidget(parent),
+	Serializable(title),
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Item", _model, &_filterModel, true, true),
@@ -191,4 +192,20 @@ void PageActionsWidget::updateCustomStyle()
 	styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
 
 	treeView.setStyleSheet(styleSheet);
+}
+
+void PageActionsWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+
+    _hierarchyWidget.fromParentVariantMap(variantMap);
+}
+
+QVariantMap PageActionsWidget::toVariantMap() const
+{
+	auto variantMap = Serializable::toVariantMap();
+
+    _hierarchyWidget.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }

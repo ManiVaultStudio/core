@@ -23,6 +23,7 @@ namespace mv::gui
 
 HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, const QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :
     QWidget(parent),
+    Serializable("HierarchyWidget"),
     _itemTypeName(itemTypeName),
     _headerHidden(false),
     _model(model),
@@ -41,7 +42,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
     _selectionGroupAction(this, "Selection"),
-    _columnsGroupAction(this, "table-columns"),
+    _columnsGroupAction(this, "Columns"),
     _settingsGroupAction(this, "Settings"),
     _toolbarAction(this, "Toolbar")
 {
@@ -229,8 +230,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     const auto filterModelRowsChanged = [this]() -> void {
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
 
-        for (auto action : _toolbarAction.getActions())
-            const_cast<WidgetAction*>(action)->setEnabled(hasItems);
+        //for (auto action : _toolbarAction.getActions())
+        //    const_cast<WidgetAction*>(action)->setEnabled(hasItems);
 
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
         _filterColumnAction.setEnabled(_model.rowCount() >= 1);
@@ -592,6 +593,30 @@ void HierarchyWidget::updateFilterModel()
         _filterModel->invalidate();
 
     updateOverlayWidget();
+}
+
+void HierarchyWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+
+    _filterNameAction.fromParentVariantMap(variantMap);
+    _filterColumnAction.fromParentVariantMap(variantMap);
+    _filterCaseSensitiveAction.fromParentVariantMap(variantMap);
+    _filterRegularExpressionAction.fromParentVariantMap(variantMap);
+    _columnsGroupAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap HierarchyWidget::toVariantMap() const
+{
+	auto variantMap = Serializable::toVariantMap();
+
+    _filterNameAction.insertIntoVariantMap(variantMap);
+    _filterColumnAction.insertIntoVariantMap(variantMap);
+    _filterCaseSensitiveAction.insertIntoVariantMap(variantMap);
+    _filterRegularExpressionAction.insertIntoVariantMap(variantMap);
+    _columnsGroupAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 void HierarchyWidget::updateHeaderVisibility()

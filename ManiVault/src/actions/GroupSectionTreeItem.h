@@ -74,7 +74,7 @@ public:
     GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction* groupAction);
 
     /** Destructor */
-    ~GroupSectionTreeItem();
+    ~GroupSectionTreeItem() override;
 
     /**
      * Get section push button

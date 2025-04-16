@@ -12,11 +12,40 @@
 #include <QMainWindow>
 #include <QStatusBar>
 #include <QPushButton>
+#include <QPainterPath>
 
 #include "actions/ColorAction.h"
 
 namespace mv::util
 {
+
+void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
+{
+    QPainter painter(this);
+
+	painter.setRenderHint(QPainter::Antialiasing);
+
+    const auto windowColor = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Window);
+    const auto borderColor = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Light);
+
+    constexpr int radius = 10;
+
+    QPainterPath path;
+
+	path.addRoundedRect(rect().adjusted(1, 1, -1, -1), radius, radius);
+
+    painter.fillPath(path, windowColor);
+    painter.setPen(QPen(borderColor, 1));
+    painter.drawPath(path);
+}
+
+QSize Notification::NotificationWidget::sizeHint() const
+{
+	return {
+        400,
+        0
+	};
+}
 
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
 	QWidget(parent),
@@ -36,7 +65,7 @@ Notification::Notification(const QString& title, const QString& description, con
     }
 
     auto mainLayout                 = new QVBoxLayout();
-    auto notificationWidget         = new QWidget();
+    auto notificationWidget         = new NotificationWidget();
     auto notificationWidgetLayout   = new QHBoxLayout(this);
     auto iconLabel                  = new QLabel(this);
     auto messageLabel               = new QLabel(this);
@@ -44,22 +73,20 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    const auto borderColorName = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Mid).name();
-
-    notificationWidget->setObjectName("Notification");
-    notificationWidget->setStyleSheet(QString("QWidget#Notification { background-color: %1, border: 1px solid %2; border-radius: 2px; }").arg(qApp->palette().color(QPalette::ColorRole::Window).name(), borderColorName));
-    notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+    notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
     notificationWidget->setAutoFillBackground(true);
+    notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
 
     iconLabel->setStyleSheet("padding: 3px;");
     iconLabel->setPixmap(icon.pixmap(32, 32));
+    iconLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
     messageLabel->setWordWrap(true);
     messageLabel->setTextFormat(Qt::RichText);
     messageLabel->setText("<b>" + title + "</b>" + "<br>" + description);
-    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
     messageLabel->setMinimumHeight(10);
     messageLabel->setOpenExternalLinks(true);
 
@@ -68,7 +95,7 @@ Notification::Notification(const QString& title, const QString& description, con
     closePushButton->setAutoRaise(true);
 
     notificationWidgetLayout->setContentsMargins(10, 10, 10, 10);
-    notificationWidgetLayout->setSpacing(20);
+    notificationWidgetLayout->setSpacing(10);
     notificationWidgetLayout->setAlignment(Qt::AlignTop);
 
     notificationWidgetLayout->addWidget(iconLabel);
@@ -81,6 +108,10 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidget->setLayout(notificationWidgetLayout);
 
     mainLayout->addWidget(notificationWidget);
+
+    qApp->processEvents();
+
+    notificationWidget->adjustSize();
 
     setLayout(mainLayout);
 
@@ -136,9 +167,9 @@ void Notification::slideIn()
 
 void Notification::slideOut()
 {
-    auto animationGroup = new QParallelAnimationGroup(this);
+    auto animationGroup         = new QParallelAnimationGroup(this);
     auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
-    auto positionAnimation = new QPropertyAnimation(this, "pos");
+    auto positionAnimation      = new QPropertyAnimation(this, "pos");
 
     animationGroup->addAnimation(windowOpacityAnimation);
     animationGroup->addAnimation(positionAnimation);
@@ -160,7 +191,7 @@ void Notification::slideOut()
 
 double Notification::getEstimatedReadingTime(const QString& text)
 {
-    QRegularExpression wordRegex("\\b\\w+\\b");
+    QRegularExpression wordRegex(R"(\b\w+\b)");
 
 	auto wordIterator = wordRegex.globalMatch(text);
 
@@ -222,7 +253,7 @@ void Notification::updatePosition()
         _previousNotification->updateGeometry();
         _previousNotification->adjustSize();
 
-        move(QPoint(_previousNotification->pos().x(), _previousNotification->pos().y() - height() - spacing));
+        move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
     } else {
         const auto statusBarHeight = Application::getMainWindow()->statusBar()->isVisible() ? Application::getMainWindow()->statusBar()->height() : 0;
 

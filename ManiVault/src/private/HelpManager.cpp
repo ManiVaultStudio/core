@@ -98,34 +98,6 @@ HelpManager::HelpManager(QObject* parent) :
             }
 
             emit videosModelPopulatedFromWebsite();
-
-            for (const auto tutorial : tutorials) {
-                const auto tutorialMap = tutorial.toVariant().toMap();
-
-                bool areRequiredPluginsLoaded = true;
-
-                QStringList missingRequiredPlugins;
-
-                if (tutorialMap.contains("plugins")) {
-                    for (const auto& pluginVariant : tutorialMap["plugins"].toList()) {
-                        const auto pluginKind = pluginVariant.toString();
-
-                        if (!mv::plugins().isPluginLoaded(pluginKind)) {
-                            areRequiredPluginsLoaded = false;
-                            missingRequiredPlugins.push_back(pluginKind);
-                        }
-                    }
-                } else {
-                    qWarning() << "Tutorial" << tutorialMap["title"].toString() << "does not specify any required plugins. The tutorial can be loaded but there is no guarantee that its required plugins are available";
-                }
-
-                if (areRequiredPluginsLoaded)
-					addTutorial(new LearningCenterTutorial(tutorialMap));
-                else
-                    qWarning() << "Tutorial" << tutorialMap["title"].toString() << "cannot be added to the tutorials model because one (or more) required plugins are not available: " << missingRequiredPlugins.join(", ");
-            }
-
-            emit tutorialsModelPopulatedFromWebsite();
         }
         catch (std::exception& e)
         {
@@ -157,6 +129,9 @@ void HelpManager::initialize()
     beginInitialization();
     {
         _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
+
+        _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
+        _tutorialsModel.synchronizeWithDsns();
     }
     endInitialization();
 }

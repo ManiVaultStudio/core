@@ -10,6 +10,8 @@
 
 #include <QMap>
 #include <QStandardItemModel>
+#include <QFuture>
+#include <QFutureWatcher>
 
 namespace mv {
 
@@ -36,8 +38,9 @@ public:
         Content,
         Url,
         ProjectUrl,
-        MinimumVersionMajor,
-        MinimumVersionMinor,
+        MinimumCoreVersion,
+        RequiredPlugins,
+        MissingPlugins,
 
         Count
     };
@@ -363,8 +366,8 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial minimum application version (major) */
-    class MinimumVersionMajorItem final : public Item {
+    /** Standard model item class for displaying the tutorial minimum application core version */
+    class MinimumCoreVersionItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -386,10 +389,10 @@ protected:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Min. app version (major)";
+	                return "Min. app core version";
 
 	            case Qt::ToolTipRole:
-	                return "Minimum ManiVault Studio application version (major)";
+	                return "Minimum ManiVault Studio application core version";
 
 	            default:
 	                break;
@@ -399,8 +402,8 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the tutorial minimum application version (minor) */
-    class MinimumVersionMinorItem final : public Item {
+    /** Standard model item class for displaying required plugins */
+    class RequiredPluginsItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -422,10 +425,46 @@ protected:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Min. app version (minor)";
+	                return "Required plugins";
 
 	            case Qt::ToolTipRole:
-	                return "Minimum ManiVault Studio application version (minor)";
+	                return "Required plugins for the tutorial";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying missing plugins */
+    class MissingPluginsItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Missing plugins";
+
+	            case Qt::ToolTipRole:
+	                return "Missing plugins for the tutorial";
 
 	            default:
 	                break;
@@ -455,8 +494,9 @@ protected:
             append(new ContentItem(tutorial));
             append(new UrlItem(tutorial));
             append(new ProjectUrlItem(tutorial));
-            append(new MinimumVersionMajorItem(tutorial));
-            append(new MinimumVersionMinorItem(tutorial));
+            append(new MinimumCoreVersionItem(tutorial));
+            append(new RequiredPluginsItem(tutorial));
+            append(new MissingPluginsItem(tutorial));
         }
     };
 
@@ -492,6 +532,24 @@ public:
     /** Builds a set of all video tags and emits LearningCenterTutorialsModel::tagsChanged(...) */
     void updateTags();
 
+    /** Synchronize the model with the data source names */
+    void synchronizeWithDsns();
+
+private:
+
+    /**
+     * Download tutorials from \p dsn
+     * @param dsn Tutorials Data Source Name (DSN)
+     * @return Downloaded data
+     */
+    static QByteArray downloadTutorialsFromDsn(const QString& dsn);
+
+public: // Action getters
+
+    gui::StringsAction& getDsnsAction() { return _dsnsAction; }
+
+    const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
+
 signals:
 
     /**
@@ -500,9 +558,15 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
+    /** Signals that the model was populated from one or more source DSNs */
+    void populatedFromDsns();
+
 private:
     util::LearningCenterTutorials   _tutorials;     /** Model tutorials */
     QSet<QString>                   _tags;          /** All tags */
+    gui::StringsAction              _dsnsAction;    /** Data source names action */
+    QFuture<QByteArray>             _future;        /** Future for downloading projects */
+    QFutureWatcher<QByteArray>      _watcher;       /** Future watcher for downloading projects */
 };
 
 }

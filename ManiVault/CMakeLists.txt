@@ -14,9 +14,6 @@ set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
 set(MV_EXE MV_Application)                   # The ManiVault executable target
 set(MV_PUBLIC_LIB Core)                      # A public shared library used by plugin builders and the ManiVault executable
 
-message(STATUS "ManiVault version ${MV_VERSION_FULL}")
-message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
-
 # -----------------------------------------------------------------------------
 # CMake Settings
 # -----------------------------------------------------------------------------
@@ -108,6 +105,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+	
+	# No linking optimization for MSVC builds with error logging (linking optimization screws up the program database which prohibits symbolication)
+	if(${MV_USE_ERROR_LOGGING})
+		# Remove /OPT:ICF from the linker flags
+		string(REPLACE "/OPT:ICF" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+		string(REPLACE "/OPT:ICF" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+		string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
+	endif()
 endif()
 
 # -----------------------------------------------------------------------------
@@ -115,12 +120,17 @@ endif()
 # -----------------------------------------------------------------------------
 include(DownloadFontAwesome)
 
+# Add preprocessor directive to notify sources of error logging
+if(${MV_USE_ERROR_LOGGING})
+	add_compile_definitions(ERROR_LOGGING)
+endif()
+	
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
+find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
@@ -131,7 +141,7 @@ CPMAddPackage(
   NAME              ZLIB
   GITHUB_REPOSITORY madler/zlib
   GIT_TAG           v1.3.1
-  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON"
+  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON" "ZLIB_BUILD_SHARED OFF" "ZLIB_BUILD_STATIC ON"
 )
 
 set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -171,6 +181,52 @@ CPMAddPackage(
   EXCLUDE_FROM_ALL  YES
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
+
+if(${MV_USE_ERROR_LOGGING})
+    # Add Sentry with CPM
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(SENTRY_TRANSPORT "winhttp")     # Use the default HTTP transport
+    else()
+        set(SENTRY_TRANSPORT "curl")        # Use the curl HTTP transport
+    endif()
+
+    CPMAddPackage(
+        NAME sentry-native
+        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+        GIT_TAG 0.7.20 														# Use the latest stable version
+        EXCLUDE_FROM_ALL  YES
+        OPTIONS
+            "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
+            "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
+            "SENTRY_BUILD_SHARED_LIBS OFF"
+            "CRASHPAD_ENABLE_INSTALL OFF"
+            "CRASHPAD_ENABLE_INSTALL_DEV OFF"
+    )
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        # Put targets in the proper source folder
+        set_target_properties(sentry mini_chromium
+            PROPERTIES
+            FOLDER CoreDependencies
+        )
+        
+        # Put targets in the proper source folder
+        set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
+            PROPERTIES
+            FOLDER CoreDependencies/Crashpad
+        )
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set_target_properties(sentry PROPERTIES
+            CXX_EXTENSIONS ON
+            C_EXTENSIONS ON
+        )
+
+        target_compile_definitions(sentry PRIVATE
+            _GNU_SOURCE
+        )
+    endif()
+
+endif()
 
 if(APPLE)
     set(CMAKE_XCODE_GENERATE_SCHEME ON)
@@ -216,6 +272,7 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
@@ -265,6 +322,13 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
+
+if(${MV_USE_ERROR_LOGGING})
+    target_link_libraries(${MV_EXE} PRIVATE sentry)
+    target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
+    
+    add_dependencies(${MV_EXE} crashpad_handler)
+endif()
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
@@ -362,6 +426,15 @@ if(APPLE)
             if(NOT retval EQUAL 0)
                 message(FATAL_ERROR \"macdeployqt failed\")
             endif()
+
+            set(ADDITIONAL_LIBS
+				\"$<TARGET_FILE:qt6advanceddocking>\"
+				\"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
+				\"$<TARGET_FILE:sentry>\"
+				\"$<TARGET_FILE:crashpad_wer>\"
+				\"$<TARGET_FILE:crashpad_handler}>\"
+			)
+
             set(ADDITIONAL_LIBS \"$<TARGET_FILE:qtadvanceddocking-qt6>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
             message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
             file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
@@ -535,6 +608,14 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
+    if(${MV_USE_ERROR_LOGGING})
+        # Install sentry artifacts
+        add_custom_command(TARGET ${MV_EXE}  POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler executable"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
+        )
+    endif()
+
 endif()
 
 # Install examples
@@ -573,5 +654,5 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_ENVIRONMENT "PATH=${QT_DIR}/../../../bin")
     set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>)
-    set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug/${MV_APPLICATION_NAME}.exe,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo/${MV_APPLICATION_NAME}.exe,${MV_INSTALL_DIR}/Release/${MV_APPLICATION_NAME}.exe>>)
+    set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${MV_INSTALL_DIR}/Debug/${MV_APPLICATION_NAME}.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${MV_INSTALL_DIR}/RelWithDebInfo/${MV_APPLICATION_NAME}.exe","${MV_INSTALL_DIR}/Release/${MV_APPLICATION_NAME}.exe">>)
 endif()
