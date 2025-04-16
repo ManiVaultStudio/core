@@ -173,7 +173,9 @@ CPMAddPackage(
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
 
-if(${MV_USE_ERROR_LOGGING})
+# Use of Sentry on MacOS breaks the build so turn it off for now...
+if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
+
     # Add Sentry with CPM
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(SENTRY_TRANSPORT "winhttp")     # Use the default HTTP transport
