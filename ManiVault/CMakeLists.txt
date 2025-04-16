@@ -417,7 +417,16 @@ if(APPLE)
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-    
+
+    set(MACOSX_BUNDLE_ADDITIONAL_LIBS
+        \"$<TARGET_FILE:qtadvanceddocking-qt6>\"
+        \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
+    )
+
+    if(${MV_USE_ERROR_LOGGING})
+        list(APPEND MACOSX_BUNDLE_ADDITIONAL_LIBS \"$<TARGET_FILE:sentry>\" \"$<TARGET_FILE:crashpad_wer>\" \"$<TARGET_FILE:crashpad_handler}>\")
+    endif()
+
     install(CODE "
         message(\"**** MacOS bundle install ****\")
 
@@ -431,17 +440,9 @@ if(APPLE)
                 message(FATAL_ERROR \"macdeployqt failed\")
             endif()
 
-            set(ADDITIONAL_LIBS
-                \"$<TARGET_FILE:qtadvanceddocking-qt6>\"
-                \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
-            )
 
-            if(${MV_USE_ERROR_LOGGING})
-                list(APPEND ADDITIONAL_LIBS \"$<TARGET_FILE:sentry>\" \"$<TARGET_FILE:crashpad_wer>\" \"$<TARGET_FILE:crashpad_handler}>\")
-            endif()
-            
-            message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
-            file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
+            message(\"**** Copy additional libs: \${MACOSX_BUNDLE_ADDITIONAL_LIBS}\")
+            file(COPY \${MACOSX_BUNDLE_ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
         endif()
     " COMPONENT MACOS_BUNDLE)
 
