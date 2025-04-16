@@ -639,7 +639,8 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 )
 
 # Install dependency licenses
-add_custom_command(TARGET ${MV_EXE} POST_BUILD
+set(INSTALL_LICENSE_COMMANDS)
+list(APPEND INSTALL_LICENSE_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses: core"
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
@@ -652,14 +653,16 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 )
 
 if(${MV_USE_ERROR_LOGGING})
-    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+    list(APPEND INSTALL_LICENSE_COMMANDS
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses: error logging"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry
-        #COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sentry-native_SOURCE_DIR}/LICENSE" ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry/LICENSE
-        #COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad
-        #COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sentry-native_SOURCE_DIR}/external/crashpad/LICENSE" ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad/LICENSE
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sentry-native_SOURCE_DIR}/LICENSE" ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry/LICENSE
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sentry-native_SOURCE_DIR}/external/crashpad/LICENSE" ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad/LICENSE
     )
 endif()
+
+add_custom_command(TARGET ${MV_EXE} POST_BUILD ${INSTALL_LICENSE_COMMANDS})
 
 # -----------------------------------------------------------------------------
 # Miscellaneous
