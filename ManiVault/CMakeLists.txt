@@ -653,7 +653,7 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 
 if(${MV_USE_ERROR_LOGGING})
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses (optional: sentry, crashpad)"
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses, error logging: sentry, crashpad"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${sentry-native_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry/LICENSE
         COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad
