@@ -103,18 +103,18 @@ jobs:
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
           
-      #- name: Mac build
-      #  if: startsWith(matrix.os, 'macos')
-      #  uses: ManiVaultStudio/github-actions/conan_linuxmac_build@main
-      #  with:
-      #    conan-compiler: ${{matrix.build-compiler}}
-      #    conan-cc: ${{matrix.build-cc}}
-      #    conan-cxx: ${{matrix.build-cxx}}
-      #    conan-compiler-version: ${{matrix.build-cversion}}
-      #    conan-libcxx-version: ${{matrix.build-libcxx}}
-      #    conan-build-type: ${{matrix.build-config}}
-      #    conan-build-os: ${{matrix.build-os}}
-      #    build-arch: ${{matrix.build-arch}}
-      #    conan-user: ${{secrets.LKEB_UPLOAD_USER}}
-      #    conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
-      #    conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
+      - name: Mac build
+        if: startsWith(matrix.os, 'macos')
+        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@main
+        with:
+          conan-compiler: ${{matrix.build-compiler}}
+          conan-cc: ${{matrix.build-cc}}
+          conan-cxx: ${{matrix.build-cxx}}
+          conan-compiler-version: ${{matrix.build-cversion}}
+          conan-libcxx-version: ${{matrix.build-libcxx}}
+          conan-build-type: ${{matrix.build-config}}
+          conan-build-os: ${{matrix.build-os}}
+          build-arch: ${{matrix.build-arch}}
+          conan-user: ${{secrets.LKEB_UPLOAD_USER}}
+          conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
+          conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
