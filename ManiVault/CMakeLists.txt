@@ -432,7 +432,7 @@ if(APPLE)
             endif()
 
             set(ADDITIONAL_LIBS
-				\"$<TARGET_FILE:qt6advanceddocking>\"
+				\"$<TARGET_FILE:qtadvanceddocking-qt6>\"
 				\"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
 				\"$<TARGET_FILE:sentry>\"
 				\"$<TARGET_FILE:crashpad_wer>\"
