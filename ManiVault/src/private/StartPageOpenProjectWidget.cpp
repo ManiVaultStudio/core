@@ -33,6 +33,8 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
     _projectDatabaseSettingsAction(this, "Data Source Names")
 {
+    _projectDatabaseWidget.hide();
+
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
@@ -42,6 +44,26 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     if (QFileInfo("StartPage.json").exists()) {
         layout->addWidget(&_projectDatabaseWidget);
+
+        _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+        _projectDatabaseSettingsAction.setShowLabels(false);
+        _projectDatabaseSettingsAction.setIconByName("globe");
+        _projectDatabaseSettingsAction.setPopupSizeHint(QSize(550, 100));
+
+        _projectDatabaseSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectDatabaseModel().getDsnsAction()));
+
+        _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
+
+        auto& toolbarAction = _projectDatabaseWidget.getHierarchyWidget().getToolbarAction();
+
+        toolbarAction.addAction(&_projectDatabaseSettingsAction);
+        toolbarAction.addAction(&_projectDatabaseFilterModel.getFilterGroupAction());
+        toolbarAction.addAction(&_projectDatabaseFilterModel.getTagsFilterAction());
+
+        _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectDatabaseModel*>(&mv::projects().getProjectDatabaseModel()));
+
+        connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
+        connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
     }
     
     setLayout(layout);
@@ -58,33 +80,13 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
-    _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _projectDatabaseSettingsAction.setShowLabels(false);
-    _projectDatabaseSettingsAction.setIconByName("globe");
-    _projectDatabaseSettingsAction.setPopupSizeHint(QSize(550, 100));
-
-    _projectDatabaseSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectDatabaseModel().getDsnsAction()));
-
-    _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
-
-    auto& toolbarAction = _projectDatabaseWidget.getHierarchyWidget().getToolbarAction();
-
-    toolbarAction.addAction(&_projectDatabaseSettingsAction);
-    toolbarAction.addAction(&_projectDatabaseFilterModel.getFilterGroupAction());
-    toolbarAction.addAction(&_projectDatabaseFilterModel.getTagsFilterAction());
-
-    _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectDatabaseModel*>(&mv::projects().getProjectDatabaseModel()));
-
-    connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
-    connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
-
     connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
 
     createCustomIcons();
 
     const auto toggleViews = [this]() -> void {
         _openCreateProjectWidget.setVisible(_startPageContentWidget->getToggleOpenCreateProjectAction().isChecked());
-        _projectDatabaseWidget.setVisible(_startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
+        _projectDatabaseWidget.setVisible(QFileInfo("StartPage.json").exists() && _startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
         _recentProjectsWidget.setVisible(_startPageContentWidget->getToggleRecentProjectsAction().isChecked());
     };
 
