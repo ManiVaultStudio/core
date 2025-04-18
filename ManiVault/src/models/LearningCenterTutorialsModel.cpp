@@ -4,13 +4,14 @@
 
 #include "LearningCenterTutorialsModel.h"
 
-#include "Application.h"
+#include <QtConcurrent>
 
 #ifdef _DEBUG
     //#define LEARNING_CENTER_TUTORIALS_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
+using namespace mv::gui;
 
 namespace mv {
 
@@ -22,14 +23,59 @@ QMap<LearningCenterTutorialsModel::Column, LearningCenterTutorialsModel::ColumHe
     { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
     { Column::Content, { "Content" , "Content", "Full tutorial content in HTML format" } },
     { Column::Url, { "URL" , "URL", "ManiVault website tutorial URL" } },
-    { Column::MinimumVersionMajor, { "Min. app version (major)" , "Min. app version (major)", "Minimum ManiVault Studio application version (major)" } },
-    { Column::MinimumVersionMinor, { "Min. app version (minor)" , "Min. app version (minor)", "Minimum ManiVault Studio application version (minor)" } }
+    { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
+    { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
+    { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
 });
 
 LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+    QStandardItemModel(parent),
+    _dsnsAction(this, "Data Source Names")
 {
     setColumnCount(static_cast<int>(Column::Count));
+
+    _dsnsAction.setIconByName("globe");
+    _dsnsAction.setToolTip("Tutorials Data Source Names (DSN)");
+    _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
+    _dsnsAction.setPopupSizeHint(QSize(550, 100));
+
+    connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
+        setRowCount(0);
+
+        _future = QtConcurrent::mapped(
+            _dsnsAction.getStrings(),
+            [this](const QString& dsn) {
+                return downloadTutorialsFromDsn(dsn);
+		});
+
+        connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
+            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+                QJsonParseError jsonParseError;
+
+                const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+
+                if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                    qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+                    continue;
+                }
+
+                const auto tutorials = jsonDocument.object()["tutorials"].toArray();
+
+            	for (const auto tutorial : tutorials) {
+                    addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+                }
+            }
+
+            emit populatedFromDsns();
+        });
+
+        _watcher.setFuture(_future);
+	});
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        connect(&pluginFactory->getTutorialsDsnsAction(), &StringsAction::stringsChanged, this, &LearningCenterTutorialsModel::synchronizeWithDsns);
+    }
 }
 
 QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -60,13 +106,16 @@ QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation o
         case Column::ProjectUrl:
             return ProjectUrlItem::headerData(orientation, role);
 
-        case Column::MinimumVersionMajor:
-            return MinimumVersionMajorItem::headerData(orientation, role);
+        case Column::MinimumCoreVersion:
+            return MinimumCoreVersionItem::headerData(orientation, role);
 
-        case Column::MinimumVersionMinor:
-            return MinimumVersionMinorItem::headerData(orientation, role);
+        case Column::RequiredPlugins:
+            return RequiredPluginsItem::headerData(orientation, role);
 
-        default:
+        case Column::MissingPlugins:
+            return MissingPluginsItem::headerData(orientation, role);
+
+		case Column::Count:
             break;
     }
 
@@ -100,6 +149,50 @@ void LearningCenterTutorialsModel::updateTags()
             _tags.insert(tag);
 
     emit tagsChanged(_tags);
+}
+
+void LearningCenterTutorialsModel::synchronizeWithDsns()
+{
+    auto uniqueDsns = _dsnsAction.getStrings();
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        uniqueDsns << pluginFactory->getTutorialsDsnsAction().getStrings();
+    }
+
+    uniqueDsns.removeDuplicates();
+
+    _dsnsAction.setStrings(uniqueDsns);
+}
+
+QByteArray LearningCenterTutorialsModel::downloadTutorialsFromDsn(const QString& dsn)
+{
+    QEventLoop loop;
+
+    QByteArray downloadedData;
+
+    FileDownloader fileDownloader;
+
+    connect(&fileDownloader, &FileDownloader::downloaded, [&]() -> void {
+        try
+        {
+            downloadedData = fileDownloader.downloadedData();
+            loop.quit();
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to download tutorials JSON from DSN", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to download tutorials JSON from DSN");
+        }
+        });
+
+    fileDownloader.download(dsn);
+
+    loop.exec();
+
+    return downloadedData;
 }
 
 LearningCenterTutorialsModel::Item::Item(const mv::util::LearningCenterTutorial* tutorial, bool editable /*= false*/) :
@@ -257,42 +350,61 @@ QVariant LearningCenterTutorialsModel::ProjectUrlItem::data(int role /*= Qt::Use
     return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::MinimumVersionMajorItem::data(int role) const
+QVariant LearningCenterTutorialsModel::MinimumCoreVersionItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
-            return getTutorial()->getMinimumVersionMajor();
-
-		case Qt::DisplayRole:
-	        return QString::number(data(Qt::EditRole).toInt());
-
-	    case Qt::ToolTipRole:
-	        return "Minimum ManiVault Studio application version (major): " + data(Qt::DisplayRole).toString();
-
-	    default:
-	        break;
-    }
-    
-	return Item::data(role);
-}
-
-QVariant LearningCenterTutorialsModel::MinimumVersionMinorItem::data(int role) const
-{
-    switch (role) {
-	    case Qt::EditRole:
-	        return getTutorial()->getMinimumVersionMinor();
+	        return QVariant::fromValue(getTutorial()->getMinimumCoreVersion());
 
 	    case Qt::DisplayRole:
-	        return QString::number(data(Qt::EditRole).toInt());
+	        return QString::fromStdString(data(Qt::EditRole).value<Version>().getVersionString());
 
 	    case Qt::ToolTipRole:
-	        return "Minimum ManiVault Studio application version (minor): " + data(Qt::DisplayRole).toString();
+	        return "Minimum ManiVault Studio application core version: " + data(Qt::DisplayRole).toString();
 
 	    default:
 	        break;
     }
 
-	return Item::data(role);
+    return Item::data(role);
+}
+
+QVariant LearningCenterTutorialsModel::RequiredPluginsItem::data(int role) const
+{
+    switch (role) {
+    case Qt::EditRole:
+        return getTutorial()->getRequiredPlugins();
+
+    case Qt::DisplayRole:
+        return data(Qt::EditRole).toStringList();
+
+    case Qt::ToolTipRole:
+        return "Required plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+
+    default:
+        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant LearningCenterTutorialsModel::MissingPluginsItem::data(int role) const
+{
+    switch (role) {
+    case Qt::EditRole:
+        return getTutorial()->getMissingPlugins();
+
+    case Qt::DisplayRole:
+        return data(Qt::EditRole).toStringList();
+
+    case Qt::ToolTipRole:
+        return "Missing plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+
+    default:
+        break;
+    }
+
+    return Item::data(role);
 }
 
 }

@@ -8,9 +8,7 @@
 
 #include "util/WidgetOverlayer.h"
 
-#include <QWidget>
 #include <QLayout>
-#include <QRect>
 #include <QWidgetItem>
 #include <QStyle>
 #include <QSize>

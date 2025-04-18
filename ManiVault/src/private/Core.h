@@ -8,6 +8,18 @@
 
 namespace mv {
 
+class AbstractErrorManager;
+class AbstractActionsManager;
+class AbstractPluginManager;
+class AbstractEventManager;
+class AbstractDataManager;
+class AbstractDataHierarchyManager;
+class AbstractTaskManager;
+class AbstractWorkspaceManager;
+class AbstractProjectManager;
+class AbstractSettingsManager;
+class AbstractHelpManager;
+
 /**
  * Core class
  *
@@ -16,7 +28,7 @@ namespace mv {
  * It is also responsible for initializing and resetting the application
  * It is a singleton class
  *
- * @author Thomas Kroes
+ * @author Julian Thijssen and Thomas Kroes
  */
 class Core final : public CoreInterface
 {
@@ -24,9 +36,6 @@ public:
 
     /** Default constructor */
     Core();
-
-    /** Reset plugin managers upon destruction */
-    ~Core() override;
 
 public:
 
@@ -66,6 +75,7 @@ public: // Managers
 
     AbstractManager* getManager(const ManagerType& managerType) override;
 
+    AbstractErrorManager& getErrorManager() override;
     AbstractActionsManager& getActionsManager() override;
     AbstractThemeManager& getThemeManager() override;
     AbstractPluginManager& getPluginManager() override;

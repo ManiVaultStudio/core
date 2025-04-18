@@ -237,6 +237,9 @@ void ProjectManager::initialize()
         return;
 
     beginInitialization();
+    {
+        _projectDatabaseModel.synchronizeWithDsns();
+    }
     endInitialization();
 }
 
@@ -532,13 +535,15 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
     }
 }
 
-void ProjectManager::openProject(QUrl url, bool importDataOnly, bool loadWorkspace)
+void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= false*/)
 {
     try {
    //     if (hasProject())
 			//saveProjectAs();
 
         auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
+
+        projectDownloader->setTargetDirectory(targetDirectory);
 
         connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
             mv::projects().openProject(projectDownloader->getDownloadedFilePath());
@@ -1065,6 +1070,11 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
     }
 
     return {};
+}
+
+const ProjectDatabaseModel& ProjectManager::getProjectDatabaseModel() const
+{
+    return _projectDatabaseModel;
 }
 
 QMenu& ProjectManager::getNewProjectMenu()

@@ -554,6 +554,10 @@ void PixelSelectionTool::paint()
     if (!_enabled) // _type != PixelSelectionType::ROI && 
         return;
 
+    // Don't try to paint until these pixmaps have been created
+    if (!_shapePixmap || !_areaPixmap)
+        return;
+
     auto shapePixmap    = _shapePixmap;
     auto areaPixmap     = _areaPixmap;
 

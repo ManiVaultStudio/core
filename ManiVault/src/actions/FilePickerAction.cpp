@@ -81,12 +81,27 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
             if (!getSettingsPrefix().isEmpty())
                 setFilePath(QFileInfo(filePath).absoluteFilePath());
+
+            QDir applicationDir;
+
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+            applicationDir = QCoreApplication::applicationDirPath();
+#endif
+
+#ifdef Q_OS_MAC
+            applicationDir = QDir(QCoreApplication::applicationDirPath() + "/../..").canonicalPath();
+#endif
+
+            const auto canonicalAppDir      = applicationDir.canonicalPath();
+            const auto canonicalFilePath    = QFileInfo(filePath).canonicalFilePath();
+
+            if (canonicalFilePath.startsWith(canonicalAppDir + QDir::separator()))
+                _applicationRelativeFilePath = QDir(filePath).relativeFilePath(applicationDir.path());
 		});
 
         connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
         fileDialog->open();
-
     });
 
     connect(&_filePathAction, &StringAction::stringChanged, this, &FilePickerAction::filePathChanged);
@@ -98,6 +113,11 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 QString FilePickerAction::getFilePath() const
 {
     return _filePathAction.getString();
+}
+
+QString FilePickerAction::getApplicationRelativeFilePath() const
+{
+    return _applicationRelativeFilePath;
 }
 
 void FilePickerAction::setFilePath(const QString& filePath)
@@ -178,6 +198,11 @@ bool FilePickerAction::isValid() const
     return !getFilePath().isEmpty() && QFileInfo(getFilePath()).exists();
 }
 
+QString FilePickerAction::getApplicationDirectory() const
+{
+    return _applicationRelativeFilePath;
+}
+
 QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     auto groupAction = new HorizontalGroupAction(this, "Group");
@@ -199,6 +224,9 @@ void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap.contains("Value"))
         setFilePath(variantMap["Value"].toString());
+
+	if (variantMap.contains("RelativeFilePath"))
+        _applicationRelativeFilePath = variantMap["RelativeFilePath"].toString();
 }
 
 QVariantMap FilePickerAction::toVariantMap() const
@@ -206,7 +234,8 @@ QVariantMap FilePickerAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Value", getFilePath() }
+        { "Value", getFilePath() },
+        { "RelativeFilePath", _applicationRelativeFilePath }
     });
 
     return variantMap;
