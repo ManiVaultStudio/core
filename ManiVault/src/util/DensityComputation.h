@@ -43,6 +43,9 @@ public:
 
     void compute();
 
+
+    QSize getDensityTextureSize() const { return QSize(RESOLUTION, RESOLUTION); }
+
 private:
     bool hasData() const;
     float calculateMaxKDE();

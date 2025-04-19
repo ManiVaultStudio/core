@@ -4,9 +4,8 @@
 
 #pragma once
 
-#include "Renderer.h"
+#include "Renderer2D.h"
 
-#include "graphics/Bounds.h"
 #include "graphics/Shader.h"
 #include "graphics/Texture.h"
 #include "graphics/Vector2f.h"
@@ -14,71 +13,87 @@
 
 #include "util/MeanShift.h"
 
-#include <memory>
-
-namespace mv
+namespace mv::gui
 {
-    namespace gui
-    {
 
-        class CORE_EXPORT DensityRenderer : public Renderer
-        {
+class CORE_EXPORT DensityRenderer : public Renderer2D
+{
 
-        public:
-            enum RenderMode {
-                DENSITY, LANDSCAPE
-            };
+public:
+    enum RenderMode {
+        DENSITY, LANDSCAPE
+    };
 
-            DensityRenderer(RenderMode renderMode);
-            ~DensityRenderer() override;
+    DensityRenderer(RenderMode renderMode, QWidget* sourceWidget = nullptr, QObject* parent = nullptr);
+    ~DensityRenderer() override;
 
-            void setRenderMode(RenderMode renderMode);
-            void setData(const std::vector<Vector2f>* data);
-            void setWeights(const std::vector<float>* weights);
-            void setBounds(const Bounds& bounds);
-            void setSigma(const float sigma);
-            void computeDensity();
-            float getMaxDensity() const;
-            Vector3f getColorMapRange() const;
+    /**
+     * Resize the renderer to \p renderSize
+     * @param renderSize New size of the renderer
+     */
+    void resize(QSize renderSize) override;
 
-            /**
-             * Loads a colormap from an image and loads as 
-             *the current colormap for the landscape view.
-             * @param image Color map image
-             */
-            void setColormap(const QImage& image);
+    /**
+     * Set data bounds to \p dataBounds
+     * @param dataBounds Data bounds
+     */
+    void setDataBounds(const QRectF& dataBounds) override;
 
-            void init() override;
-            void resize(QSize renderSize) override;
-            void render() override;
-            void destroy() override;
+    /** Update the world bounds */
+    QRectF computeWorldBounds() const override;
 
-            void setColorMapRange(const float& min, const float& max);
+    /**
+     * Set density computation data boundss
+     * @param bounds Density computation data bounds
+     */
+    void setDensityComputationDataBounds(const QRectF& bounds);
 
-        private:
-            void drawDensity();
-            void drawLandscape();
+    void setRenderMode(RenderMode renderMode);
+    void setData(const std::vector<Vector2f>* data);
+    void setWeights(const std::vector<float>* weights);
+    void setSigma(const float sigma);
+    void computeDensity();
+    float getMaxDensity() const;
+    Vector3f getColorMapRange() const;
 
-            void drawFullscreenQuad();
+    /**
+     * Loads a colormap from an image and loads as 
+     *the current colormap for the landscape view.
+     * @param image Color map image
+     */
+    void setColormap(const QImage& image);
 
-        private:
-            QSize _windowSize;
+    void init() override;
 
-            bool _isSelecting = false;
-            bool _hasColorMap = false;
+	void render() override;
 
-            ShaderProgram _shaderDensityDraw;
-            ShaderProgram _shaderIsoDensityDraw;
-            DensityComputation _densityComputation;
-            Texture2D _colormap;
-            
-            Vector3f _colorMapRange;
+	void destroy() override;
 
-            RenderMode _renderMode;
+    void setColorMapRange(const float& min, const float& max);
 
-            GLuint _quad = 0;
-        };
+private:
+    void drawDensity();
+    void drawLandscape();
 
-    } // namespace gui
+    void updateQuad();
+    void drawQuad();
 
-} // namespace mv
+private:
+    bool _isSelecting = false;
+    bool _hasColorMap = false;
+
+    ShaderProgram _shaderDensityDraw;
+    ShaderProgram _shaderIsoDensityDraw;
+    DensityComputation _densityComputation;
+    Texture2D _colormap;
+    
+    Vector3f _colorMapRange;
+
+    RenderMode _renderMode;
+
+    GLuint  _VAO = 0;
+    GLuint  _VBO = 0;
+    GLuint  _EBO = 0;
+};
+
+}

@@ -12,11 +12,12 @@
 #define EFFECT_COLOR_2D 4
 
 // Point properties
-uniform float 	pointSize;        		/** Point size */
-uniform float 	pointSizeScale;   		/** Scale factor in absolute point size mode */
+uniform float 	pointSize;        		/** Point size in x- and y direction to account for anisotropy of the render canvas */
+uniform bool	pointSizeAbsolute;		/** Whether the point size is in world or screen coordinates */
+uniform vec2 	viewportSize;  			/** (width, height) of viewport */
 uniform int   	scalarEffect;
 uniform float 	pointOpacity;     		/** Point opacity */
-uniform mat3 	orthoM;            		/** Projection matrix from bounds space to clip space */
+uniform mat4 	mvp;            		/** Projection matrix from bounds space to clip space */
 uniform bool 	hasHighlights;     		/** Whether a highlight buffer is used */
 uniform bool 	hasFocusHighlights;		/** Whether a focus highlight buffer is used */
 uniform bool 	hasScalars;        		/** Whether a scalar buffer is used */
@@ -41,6 +42,9 @@ uniform float 	focusOutlineScale;     		/** Focus outline scale */
 uniform float 	focusOutlineOpacity;		/** Focus outline opacity */
 
 uniform bool 	randomizedDepthEnabled;		/** Whether to randomize the z-order */
+
+// Miscellaneous
+uniform float 	windowAspectRatio;			/** Window aspect ratio (width / height) */
 
 layout(location = 0) in vec2    vertex;         	/** Vertex input, always a [-1, 1] quad */
 layout(location = 1) in vec2    position;       	/** 2-Dimensional positions of points */
@@ -103,8 +107,6 @@ float floatConstruct( uint m ) {
     return f - 1.0;                        // Range [0:1]
 }
 
-
-
 // Pseudo-random value in half-open range [0:1].
 float random( float x ) { return floatConstruct(hash(floatBitsToUint(x))); }
 float random( vec2  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
@@ -113,33 +115,42 @@ float random( vec4  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
 
 void main()
 {
-    // The texture coordinates match vertex coordinates
-    vTexCoord = vertex;
+	// Use normalized quad vertices as texture coordinates
+	vTexCoord = vertex;
+	
+	// Convert quad size from pixels to normalized device coordinates (NDC)
+    vec2 pixelSize = vec2(hasSizes ? size : pointSize) / viewportSize;
 
-    // Selection and focus highlighting
-    vHighlight 		= hasHighlights ? highlight : 0;
+//	if (!pointSizeAbsolute)
+//		pixelSize /= viewportSize;
+		 
+    // Apply projection only to the instance position, NOT to the quad size
+    vec4 worldPos = mvp * vec4(position, 0.0, 1.0);
+	
+	// Compute the scaled vertex position
+	vec2 scaledVertex = vertex * pixelSize;
+		
+	// Scale the vertex based on the selection display mode
+	scaledVertex *= ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
+	
+    // Keep quad size in screen-space while maintaining correct aspect ratio
+    vec2 finalPos = worldPos.xy + scaledVertex;
+	
+//	if (pointSizeAbsolute)
+//		finalPos = (mvp * vec4(position + scaledVertex, 0.0, 1.0)).xy;
+		
+	// Compute random depth
+	float depth = randomizedDepthEnabled ? random(vec2(gl_InstanceID, 0)) : 0;
+	
+	// Set the final position
+    gl_Position = vec4(finalPos, depth, 1.0); // Convert to NDC [-1,1]
+	
+	vHighlight 		= hasHighlights ? highlight : 0;
 	vFocusHighlight = hasFocusHighlights ? focusHighlight : 0;
-    
-    vScalar = hasScalars ? (scalar - colorMapRange.x) / colorMapRange.z : 0;
-    
-    vColor = hasColors ? color : vec3(0.5);
-
-    vOpacity = pointOpacity;
+    vScalar 		= hasScalars ? (scalar - colorMapRange.x) / colorMapRange.z : 0;
+    vColor 			= hasColors ? color : vec3(0.5);
+    vOpacity 		= pointOpacity;
 	
     if (hasOpacities)
         vOpacity = opacity;
-
-    vPosOrig = position;
-
-    // Transform position to clip space
-    vec2 pos = (orthoM * vec3(position, 1)).xy;
-    
-    // Resize point quad according to properties
-    vec2 scaledVertex = vertex * pointSize * pointSizeScale * ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
-	
-    if (hasSizes)
-        scaledVertex = vertex * size * pointSizeScale * ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
-    
-    // Move quad by position and output
-    gl_Position = vec4(scaledVertex + pos, randomizedDepthEnabled ? random(pos) : 0, 1);
 }

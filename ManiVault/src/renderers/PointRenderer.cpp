@@ -10,24 +10,6 @@ namespace mv
 {
     namespace gui
     {
-        namespace
-        {
-            /**
-             * Builds an orthographic projection matrix that transforms the given bounds
-             * to the range [-1, 1] in both directions.
-             */
-            Matrix3f createProjectionMatrix(const Bounds& bounds)
-            {
-                Matrix3f m;
-                m.setIdentity();
-                m[0] = 2 / bounds.getWidth();
-                m[4] = 2 / bounds.getHeight();
-                m[6] = -((bounds.getRight() + bounds.getLeft()) / bounds.getWidth());
-                m[7] = -((bounds.getTop() + bounds.getBottom()) / bounds.getHeight());
-                return m;
-            }
-        }
-
         void PointArrayObject::init()
         {
             initializeOpenGLFunctions();
@@ -274,6 +256,28 @@ namespace mv
             _positionBuffer.destroy();
         }
 
+        PointRenderer::PointRenderer(QWidget* sourceWidget, QObject* parent) :
+            Renderer2D(parent)
+        {
+            if(sourceWidget)
+                setSourceWidget(sourceWidget);
+        }
+
+        void PointRenderer::setDataBounds(const QRectF& dataBounds)
+        {
+	        Renderer2D::setDataBounds(dataBounds);
+        }
+
+        QRectF PointRenderer::computeWorldBounds() const
+        {
+            const auto marginX  = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height() - 2.f * getNavigator().getZoomMarginScreen()));
+            const auto marginY  = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width() - 2.f * getNavigator().getZoomMarginScreen()));
+            const auto margin   = std::max(marginX, marginY);
+            const auto margins  = QMarginsF(margin, margin, margin, margin);
+
+            return getDataBounds().marginsAdded(margins);
+        }
+
         void PointRenderer::setData(const std::vector<Vector2f>& positions)
         {
             _gpuPoints.setPositions(positions);
@@ -328,50 +332,9 @@ namespace mv
             _colormap.loadFromImage(image);
         }
 
-        Bounds PointRenderer::getBounds() const
-        {
-            return getViewBounds();
-        }
-
-        Bounds PointRenderer::getViewBounds() const
-        {
-            return _boundsView;
-        }
-
-        Bounds PointRenderer::getDataBounds() const
-        {
-            return _boundsData;
-        }
-
-        void PointRenderer::setBounds(const Bounds& bounds)
-        {
-            setViewBounds(bounds);
-            setDataBounds(bounds);
-        }
-
-        void PointRenderer::setViewBounds(const Bounds& boundsView)
-        {
-            _boundsView = boundsView;
-        }
-
-        void PointRenderer::setDataBounds(const Bounds& boundsData)
-        {
-            _boundsData = boundsData;
-        }
-
-        Matrix3f PointRenderer::getProjectionMatrix() const
-        {
-            return _orthoM;
-        }
-
         const PointArrayObject& PointRenderer::getGpuPoints() const
         {
             return _gpuPoints;
-        }
-
-        QSize PointRenderer::getWindowsSize() const
-        {
-            return _windowSize;
         }
 
         std::int32_t PointRenderer::getNumSelectedPoints() const
@@ -471,6 +434,11 @@ namespace mv
             _randomizedDepthEnabled = randomizedDepth;
         }
 
+        void PointRenderer::initView()
+        {
+            getNavigator().resetView(true);
+        }
+
         void PointRenderer::init()
         {
             initializeOpenGLFunctions();
@@ -485,66 +453,48 @@ namespace mv
             }
         }
 
-        void PointRenderer::resize(QSize renderSize)
-        {
-            int w = renderSize.width();
-            int h = renderSize.height();
-
-            _windowSize.setWidth(w);
-            _windowSize.setHeight(h);
-        }
-
         void PointRenderer::render()
         {
-            int w = _windowSize.width();
-            int h = _windowSize.height();
-            int size = w < h ? w : h;
-
-            glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
-
-            // World to clip transformation
-            _orthoM = createProjectionMatrix(_boundsView);
-
-            _shader.bind();
-
-            // Point size uniforms
-            bool absoluteRendering = _pointSettings._scalingMode == PointScaling::Absolute;
-            _shader.uniform1f("pointSize", _pointSettings._pointSize);
-            _shader.uniform1f("pointSizeScale", absoluteRendering ? (1.0 / size) : 1.0f / size);
-
-            _shader.uniformMatrix3f("orthoM", _orthoM);
-            _shader.uniform1f("pointOpacity", _pointSettings._alpha);
-            _shader.uniform1i("scalarEffect", _pointEffect);
-            
-            _shader.uniform4f("dataBounds", _boundsData.getLeft(), _boundsData.getRight(), _boundsData.getBottom(), _boundsData.getTop());
-
-            _shader.uniform1i("selectionDisplayMode", static_cast<std::int32_t>(_selectionDisplayMode));
-            _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
-            _shader.uniform3f("selectionOutlineColor", _selectionOutlineColor);
-            _shader.uniform1i("selectionOutlineOverrideColor", _selectionOutlineOverrideColor);
-            _shader.uniform1f("selectionOutlineOpacity", _selectionOutlineOpacity);
-            _shader.uniform1i("selectionHaloEnabled", _selectionHaloEnabled);
-
-            _shader.uniform1i("randomizedDepthEnabled", _randomizedDepthEnabled);
-
-            _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
-            _shader.uniform1i("hasFocusHighlights", _gpuPoints.hasFocusHighlights());
-            _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
-            _shader.uniform1i("hasColors", _gpuPoints.hasColors());
-            _shader.uniform1i("hasSizes", _gpuPoints.hasSizeScalars());
-            _shader.uniform1i("hasOpacities", _gpuPoints.hasOpacityScalars());
-            _shader.uniform1i("numSelectedPoints", _numSelectedPoints);
-
-            if (_gpuPoints.hasColorScalars())
-                _shader.uniform3f("colorMapRange", _gpuPoints.getColorMapRange());
-
-            if (_colormap.isCreated() && (_pointEffect == PointEffect::Color || _pointEffect == PointEffect::Color2D))
+            beginRender();
             {
-                _colormap.bind(0);
-                _shader.uniform1i("colormap", 0);
-            }
+                _shader.bind();
+                
+                const bool pointSizeAbsolute    = _pointSettings._scalingMode == PointScaling::Absolute;
 
-            _gpuPoints.draw();
+                _shader.uniform1f("pointSize", _pointSettings._pointSize);
+                _shader.uniform1i("pointSizeAbsolute", pointSizeAbsolute);
+                _shader.uniform2f("viewportSize", static_cast<float>(getRenderSize().width()), static_cast<float>(getRenderSize().height()));
+                _shader.uniformMatrix4f("mvp", getModelViewProjectionMatrix().data());
+                _shader.uniform1f("pointOpacity", _pointSettings._alpha);
+                _shader.uniform1i("scalarEffect", _pointEffect);
+                _shader.uniform4f("dataBounds", getDataBounds().left(), getDataBounds().right(), getDataBounds().bottom(), getDataBounds().top());
+                _shader.uniform1i("selectionDisplayMode", static_cast<std::int32_t>(_selectionDisplayMode));
+                _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
+                _shader.uniform3f("selectionOutlineColor", _selectionOutlineColor);
+                _shader.uniform1i("selectionOutlineOverrideColor", _selectionOutlineOverrideColor);
+                _shader.uniform1f("selectionOutlineOpacity", _selectionOutlineOpacity);
+                _shader.uniform1i("selectionHaloEnabled", _selectionHaloEnabled);
+                _shader.uniform1i("randomizedDepthEnabled", _randomizedDepthEnabled);
+                _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
+                _shader.uniform1i("hasFocusHighlights", _gpuPoints.hasFocusHighlights());
+                _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
+                _shader.uniform1i("hasColors", _gpuPoints.hasColors());
+                _shader.uniform1i("hasSizes", _gpuPoints.hasSizeScalars());
+                _shader.uniform1i("hasOpacities", _gpuPoints.hasOpacityScalars());
+                _shader.uniform1i("numSelectedPoints", _numSelectedPoints);
+
+                if (_gpuPoints.hasColorScalars())
+                    _shader.uniform3f("colorMapRange", _gpuPoints.getColorMapRange());
+
+                if (_colormap.isCreated() && (_pointEffect == PointEffect::Color || _pointEffect == PointEffect::Color2D))
+                {
+                    _colormap.bind(0);
+                    _shader.uniform1i("colormap", 0);
+                }
+
+                _gpuPoints.draw();
+            }
+            endRender();
         }
 
         void PointRenderer::destroy()

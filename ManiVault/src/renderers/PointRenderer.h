@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Renderer.h"
+#include "Renderer2D.h"
 
 #include "graphics/Bounds.h"
 #include "graphics/BufferObject.h"
@@ -78,6 +78,7 @@ namespace mv
             }
 
             void draw();
+
             void destroy();
 
         private:
@@ -113,6 +114,8 @@ namespace mv
             bool _dirtySizeScalars      = false;
             bool _dirtyOpacityScalars   = false;
             bool _dirtyColors           = false;
+
+            BufferObject _quadBufferObject;
         };
 
         struct CORE_EXPORT PointSettings
@@ -127,9 +130,23 @@ namespace mv
             float               _alpha                  = DEFAULT_ALPHA_VALUE;
         };
 
-        class CORE_EXPORT PointRenderer : public Renderer
+        class CORE_EXPORT PointRenderer : public Renderer2D
         {
         public:
+            using Renderer2D::Renderer2D;
+
+            PointRenderer() = default;
+            PointRenderer(QWidget* sourceWidget, QObject* parent = nullptr);
+
+            /**
+             * Set data bounds to \p dataBounds
+             * @param dataBounds Data bounds
+             */
+            void setDataBounds(const QRectF& dataBounds) override;
+
+            /** Update the world bounds */
+            QRectF computeWorldBounds() const override;
+
             void setData(const std::vector<Vector2f>& points);
             void setHighlights(const std::vector<char>& highlights, const std::int32_t& numSelectedPoints);
             void setFocusHighlights(const std::vector<char>& focusHighlights, const std::int32_t& numberOfFocusHighlights);
@@ -143,34 +160,15 @@ namespace mv
 
             void setColormap(const QImage& image);
 
-            // Returns getViewBounds()
-            Bounds getBounds() const;
-
-            // Retuns _boundsView
-            Bounds getViewBounds() const;
-
-            // Returns _boundsData
-            Bounds getDataBounds() const;
-
-            // Calls both setViewBounds() and setDataBounds()
-            void setBounds(const Bounds& bounds);
-
-            // sets _boundsView, used for computing the projection matrix _orthoM
-            void setViewBounds(const Bounds& boundsView);
-
-            // sets _boundsData, used for scaling the 2d _colormap
-            void setDataBounds(const Bounds& boundsData);
-
-            Matrix3f getProjectionMatrix() const;
-
             const PointArrayObject& getGpuPoints() const;
-            QSize getWindowsSize() const;
             std::int32_t getNumSelectedPoints() const;
 
             const PointSettings& getPointSettings() const;
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
+
+            void initView();
 
         public: // Selection visualization
 
@@ -196,7 +194,6 @@ namespace mv
             void setRandomizedDepthEnabled(bool randomizedDepth);
 
             void init() override;
-            void resize(QSize renderSize) override;
             void render() override;
             void destroy() override;
 
@@ -205,7 +202,7 @@ namespace mv
 
         private:
             /* Point properties */
-            PointSettings               _pointSettings;
+            PointSettings               _pointSettings = {};
             PointEffect                 _pointEffect = PointEffect::Size;
 
             /** Selection visualization */
@@ -219,19 +216,10 @@ namespace mv
             /* Depth control */
             bool                        _randomizedDepthEnabled             = true;
 
-            /* Window properties */
-            QSize                       _windowSize;
-
             /* Rendering variables */
-            ShaderProgram               _shader;
-
-            PointArrayObject            _gpuPoints;
-            Texture2D                   _colormap;                                                          /** 2D colormap, sets point color based on point position */
-
-            Matrix3f                    _orthoM                             = {};                           /** Projection matrix from bounds space to clip space */
-            Bounds                      _boundsView                         = Bounds(-1, 1, -1, 1);         /** Used for computing the projection matrix _orthoM */
-            Bounds                      _boundsData                         = Bounds(-1, 1, -1, 1);         /** Used for scaling the 2d _colormap */
-
+            ShaderProgram               _shader = {};
+            PointArrayObject            _gpuPoints = {};
+            Texture2D                   _colormap = {};                                                     /** 2D colormap, sets point color based on point position */
             std::int32_t                _numSelectedPoints                  = 0;                            /** Number of selected (highlighted points) */
             std::int32_t                _numberOfFocusHighlights            = 0;                            /** Number of focus highlights */
         };
