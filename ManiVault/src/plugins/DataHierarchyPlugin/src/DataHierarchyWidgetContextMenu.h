@@ -158,5 +158,6 @@ private:
     gui::IntegralAction     _selectionIndexAction;
     gui::StringAction       _selectionPatternAction;
     gui::OptionAction       _selectionOptionAction;
+    gui::StringAction       _infoTextAction;            // TODO: how to I make this just an info text
     gui::TriggerAction      _confirmButton;
 };

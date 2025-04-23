@@ -499,12 +499,16 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
     QDialog(parent),
     _confirmButton(this, "Ok"),
     _selectionPatternAction(this, "Pattern"),
-    _selectionOptionAction(this, "Prefix/Suffix"),
+    _selectionOptionAction(this, "Setting"),
+    _infoTextAction(this, "Info"),
     _selectionIndexAction(this, "Start selection group indices at", -1, 1024, -1)
 {
     setWindowTitle(tr("Selection group pattern"));
     setWindowIcon(StyledIcon("ellipsis"));
     
+    _infoTextAction.setString("\"Prefix\" defines the prefix to match names with.\n\"Suffix\" is used to define a prefix, taken from entries with matching suffix.");
+    _infoTextAction.setToolTip("E.g. given the data names \"A\", \"A.end\", \"B\", \"B.end\" and a suffix \".end\",\nthis will group (\"A\", \"A.end\") and (\"B\", \"B.end\")");
+
     _confirmButton.setEnabled(false);
     _confirmButton.setToolTip("Selection group index must be larger than -1");
 
@@ -522,6 +526,7 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
 
     settingsGroupAction->addAction(&_selectionPatternAction);
     settingsGroupAction->addAction(&_selectionOptionAction);
+    settingsGroupAction->addAction(&_infoTextAction);
     settingsGroupAction->addAction(&_selectionIndexAction);
     settingsGroupAction->addAction(&_confirmButton);
 
