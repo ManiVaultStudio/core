@@ -506,8 +506,12 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
     setWindowTitle(tr("Selection group pattern"));
     setWindowIcon(StyledIcon("ellipsis"));
     
-    _infoTextAction.setString("\"Prefix\" defines the prefix to match names with.\n\"Suffix\" is used to define a prefix, taken from entries with matching suffix.");
-    _infoTextAction.setToolTip("E.g. given the data names \"A\", \"A.end\", \"B\", \"B.end\" and a suffix \".end\",\nthis will group (\"A\", \"A.end\") and (\"B\", \"B.end\")");
+    QString infoString = QStringLiteral("\"Prefix\" defines the prefix to match names with.\n"
+        "\"Suffix\" is used to define a prefix, taken from entries with matching suffix.\n"
+        "E.g.given the data names \"A\", \"A.end\", \"B\", \"B.end\" and a suffix \".end\",\n"
+        "this will group (\"A\", \"A.end\") and (\"B\", \"B.end\")");
+
+    _infoTextAction.setString(infoString);
 
     _confirmButton.setEnabled(false);
     _confirmButton.setToolTip("Selection group index must be larger than -1");
@@ -521,12 +525,19 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
         _confirmButton.setEnabled(value >= 0);
         });
 
+    // Adjust GUI element
+    auto widgetConfigurationFunction = [](WidgetAction* widgetAction, QWidget* widget) -> void {
+        widget->setEnabled(false);
+        widget->setFixedHeight(75);
+        widget->setMinimumWidth(400);
+        widget->setStyleSheet("border: none;");
+        };
 
     auto settingsGroupAction = new VerticalGroupAction(this, "Settings");
 
     settingsGroupAction->addAction(&_selectionPatternAction);
     settingsGroupAction->addAction(&_selectionOptionAction);
-    settingsGroupAction->addAction(&_infoTextAction);
+    settingsGroupAction->addAction(&_infoTextAction, StringAction::WidgetFlag::TextEdit, widgetConfigurationFunction);
     settingsGroupAction->addAction(&_selectionIndexAction);
     settingsGroupAction->addAction(&_confirmButton);
 
