@@ -525,19 +525,11 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
         _confirmButton.setEnabled(value >= 0);
         });
 
-    // Adjust GUI element
-    auto widgetConfigurationFunction = [](WidgetAction* widgetAction, QWidget* widget) -> void {
-        widget->setEnabled(false);
-        widget->setFixedHeight(75);
-        widget->setMinimumWidth(400);
-        widget->setStyleSheet("border: none;");
-        };
-
     auto settingsGroupAction = new VerticalGroupAction(this, "Settings");
 
     settingsGroupAction->addAction(&_selectionPatternAction);
     settingsGroupAction->addAction(&_selectionOptionAction);
-    settingsGroupAction->addAction(&_infoTextAction, StringAction::WidgetFlag::TextEdit, widgetConfigurationFunction);
+    settingsGroupAction->addAction(&_infoTextAction, StringAction::WidgetFlag::Label);
     settingsGroupAction->addAction(&_selectionIndexAction);
     settingsGroupAction->addAction(&_confirmButton);
 
