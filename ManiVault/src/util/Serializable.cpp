@@ -25,7 +25,8 @@ namespace mv::util {
 
 Serializable::Serializable(const QString& name /*= ""*/) :
     _id(createId()),
-    _serializationName(name)
+    _serializationName(name),
+    _serializationCounter{ 0, 0 }
 {
 }
 
