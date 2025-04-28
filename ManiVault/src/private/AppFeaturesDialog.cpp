@@ -2,22 +2,20 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ErrorLoggingConsentDialog.h"
+#include "AppFeaturesDialog.h"
 #include "AbstractErrorLogger.h"
-
-#include <Application.h>
 
 #include <QDesktopServices>
 
 #ifdef _DEBUG
-    #define ERROR_LOGGING_CONSENT_DIALOG_VERBOSE
+    #define APP_FEATURES_DIALOG_VERBOSE
 #endif
 
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
-ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
+AppFeaturesDialog::AppFeaturesDialog(QWidget* parent):
 	QDialog(parent),
     _acceptPushButton("Accept"),
     _optOutPushButton( "Opt Out"),
