@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <AbstractErrorLogger.h>
-
 #include <QDialog>
 #include <QPlainTextEdit>
 #include <QPushButton>
