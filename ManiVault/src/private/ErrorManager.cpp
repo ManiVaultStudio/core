@@ -3,7 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ErrorManager.h"
-#include "ErrorLoggingConsentDialog.h"
+#include "AppFeaturesDialog.h"
 
 using namespace mv::gui;
 using namespace mv::util;
