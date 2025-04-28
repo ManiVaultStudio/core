@@ -993,7 +993,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/TasksSettingsAction.h
     src/AppearanceSettingsAction.h
     src/TemporaryDirectoriesSettingsAction.h
-	src/ErrorLoggingSettingsAction.h
+	src/AppFeaturesSettingsAction.h
     src/PluginGlobalSettingsGroupAction.h
 )
 
@@ -1004,7 +1004,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/TasksSettingsAction.cpp
     src/AppearanceSettingsAction.cpp
     src/TemporaryDirectoriesSettingsAction.cpp
-    src/ErrorLoggingSettingsAction.cpp
+    src/AppFeaturesSettingsAction.cpp
     src/PluginGlobalSettingsGroupAction.cpp
 )
 
