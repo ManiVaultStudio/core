@@ -31,6 +31,11 @@ public:
         Writing     /** The serializable object is being written */
     };
 
+    /** Describes the serialization direction */
+    enum class Direction {
+        From,   /** From variant map to serializable object */
+        To      /** From serializable object to variant map */
+    };
 public:
 
     /**
@@ -124,6 +129,25 @@ public:
      */
     static QString createId();
 
+    /**
+     * Get serialization count
+     * @param direction Serialization direction
+     * @return Serialization count
+     */
+    std::int32_t getSerializationCount(const Direction& direction) const;
+
+    /**
+     * Get serialization count from
+     * @return Serialization count from
+     */
+    std::int32_t getSerializationCountFrom() const;
+
+    /**
+     * Get serialization count to
+     * @return Serialization count to
+     */
+    std::int32_t getSerializationCountTo() const;
+
 protected: // Serialization
 
     /**
@@ -182,8 +206,9 @@ public: // Operators
     }
 
 private:
-    QString     _id;                    /** Globally unique identifier of the serializable object */
-    QString     _serializationName;     /** Serialization name */
+    QString         _id;                        /** Globally unique identifier of the serializable object */
+    QString         _serializationName;         /** Serialization name */
+    std::int32_t    _serializationCounter[2];   /** Serialization counter (used to query how many times the action is serialized to- and from) */
 };
 
 }
