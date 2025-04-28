@@ -25,7 +25,8 @@ namespace mv::util {
 
 Serializable::Serializable(const QString& name /*= ""*/) :
     _id(createId()),
-    _serializationName(name)
+    _serializationName(name),
+    _serializationCounter{ 0, 0 }
 {
 }
 
@@ -57,10 +58,14 @@ void Serializable::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "ID");
 
     _id = variantMap["ID"].toString();
+
+    _serializationCounter[static_cast<int>(Direction::From)]++;
 }
 
 QVariantMap Serializable::toVariantMap() const
 {
+    const_cast<Serializable*>(this)->_serializationCounter[static_cast<int>(Direction::To)]++;
+
     return {
         { "ID", _id }
     };
@@ -155,6 +160,21 @@ void Serializable::makeUnique()
 QString Serializable::createId()
 {
     return QUuid::createUuid().toString(QUuid::WithoutBraces);
+}
+
+std::int32_t Serializable::getSerializationCount(const Direction& direction) const
+{
+    return _serializationCounter[static_cast<int>(direction)];
+}
+
+std::int32_t Serializable::getSerializationCountFrom() const
+{
+    return getSerializationCount(Direction::From);
+}
+
+std::int32_t Serializable::getSerializationCountTo() const
+{
+    return getSerializationCount(Direction::To);
 }
 
 void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)
