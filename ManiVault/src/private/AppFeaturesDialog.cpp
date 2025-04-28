@@ -32,7 +32,7 @@ AppFeaturesDialog::AppFeaturesDialog(QWidget* parent):
     _notificationLabel.setWordWrap(true);
     _notificationLabel.setOpenExternalLinks(true);
 
-    QFile errorLoggingConsentHtmlFile(":/HTML/ErrorLoggingConsent");
+    QFile errorLoggingConsentHtmlFile(":/HTML/AppFeatures.html");
 
     if (errorLoggingConsentHtmlFile.open(QIODevice::ReadOnly)) {
         _notificationLabel.setText(errorLoggingConsentHtmlFile.readAll());
