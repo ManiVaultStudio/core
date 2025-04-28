@@ -33,6 +33,44 @@ public:
      */
     void showEvent(QShowEvent* showEvent);
 
+    /**
+     * Override to conditionally add the export action
+     * @param event Pointer to event that occurred
+     * @return
+     */
+    bool event(QEvent* event) override;
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param variantMap Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
+private:
+
+    /** Load the current configuration from a file */
+    void loadConfiguration();
+
+    /** Save the current configuration to a file */
+    void saveConfiguration() const;
+
+public: // Action getters
+
+    mv::gui::TriggerAction& getLoadAction() { return _loadAction; }
+    mv::gui::TriggerAction& getSaveAction() { return _saveAction; }
+
 protected:
-    StartPageContentWidget  _startPageContentWidget;    /** Widget which contains all the actions */
+    StartPageContentWidget          _startPageContentWidget;    /** Widget which contains all the actions */
+    mv::gui::TriggerAction          _loadAction;                /** Trigger action for loading a configuration (ony for experimental purposes) */
+    mv::gui::TriggerAction          _saveAction;                /** Trigger action for saving a configuration (ony for experimental purposes) */
+    mv::gui::HorizontalGroupAction  _fileAction;                /** Group action for load/save configurations */
+    mv::gui::VerticalGroupAction    _configurationAction;       /** Group action for the configuration */
 };

@@ -104,7 +104,8 @@ class HdpsCoreConan(ConanFile):
                 "libasound2-dev",
                 "libdbus-1-dev",
                 "libcups2-dev",
-                "libicu-dev"
+                "libicu-dev",
+                "libcurl4-openssl-dev"      # for sentry
                 ]
             
             installer = tools.SystemPackageTool()
@@ -152,6 +153,10 @@ class HdpsCoreConan(ConanFile):
         # Set some build options
         tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
         tc.variables["MV_UNITY_BUILD"] = "ON"
+
+        # TEMPORARILY disable sentry on macos, 16/04/25
+        if self.settings.os == "Macos":
+            tc.variables["MV_USE_ERROR_LOGGING"] = "OFF"
 
         try:
             tc.generate()

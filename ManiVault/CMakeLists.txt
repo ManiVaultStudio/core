@@ -14,9 +14,6 @@ set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
 set(MV_EXE MV_Application)                   # The ManiVault executable target
 set(MV_PUBLIC_LIB Core)                      # A public shared library used by plugin builders and the ManiVault executable
 
-message(STATUS "ManiVault version ${MV_VERSION_FULL}")
-message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
-
 # -----------------------------------------------------------------------------
 # CMake Settings
 # -----------------------------------------------------------------------------
@@ -24,11 +21,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if (NOT (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION LESS 1930))
-    set(CMAKE_C_STANDARD 17)
-    set(CMAKE_C_STANDARD_REQUIRED ON)
-    set(CMAKE_C_EXTENSIONS OFF)
-endif()
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INSTALL_MESSAGE LAZY)
@@ -50,6 +45,12 @@ include(CPM)
 
 # create a file that defines MV_VERSION_MAJOR, etc
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
+
+if(${MV_USE_ERROR_LOGGING})
+    # Check for size of long (used in sentry)
+    include(CheckTypeSize)
+    check_type_size("long" CMAKE_SIZEOF_LONG)
+endif()
 
 # -----------------------------------------------------------------------------
 # Apple settings
@@ -108,18 +109,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-	
-	# No linking optimization for MSVC builds with error logging (linking optimization screws up the program database which prohibits symbolication)
-	if(${MV_USE_ERROR_LOGGING})
-		# set(CMAKE_C_FLAGS_RELEASE "/Od /Zi")        	# Disable optimization and enable debug info
-		# set(CMAKE_CXX_FLAGS_RELEASE "/Od /Zi")     		# Same for C++
-		# set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/DEBUG")  	# Keep debug symbols in the executable
-		
-		# Remove /OPT:ICF from the linker flags
-		string(REPLACE "/OPT:ICF" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
-		string(REPLACE "/OPT:ICF" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
-		string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
-	endif()
 endif()
 
 # -----------------------------------------------------------------------------
@@ -127,17 +116,12 @@ endif()
 # -----------------------------------------------------------------------------
 include(DownloadFontAwesome)
 
-# Add preprocessor directive to notify sources of error logging
-if(${MV_USE_ERROR_LOGGING})
-	add_compile_definitions(ERROR_LOGGING)
-endif()
-	
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
+find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
@@ -148,7 +132,7 @@ CPMAddPackage(
   NAME              ZLIB
   GITHUB_REPOSITORY madler/zlib
   GIT_TAG           v1.3.1
-  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON"
+  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON" "ZLIB_BUILD_SHARED OFF" "ZLIB_BUILD_STATIC ON"
 )
 
 set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -189,43 +173,63 @@ CPMAddPackage(
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
 
+# Use of Sentry on MacOS breaks the build so turn it off for now...
 if(${MV_USE_ERROR_LOGGING})
-	
-	# Add Sentry with CPM
-	if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-		CPMAddPackage(
-		NAME sentry-native
-		GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-		GIT_TAG 0.7.19 														# Use the latest stable version
-		OPTIONS
-			"SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
-			"SENTRY_TRANSPORT winhttp" 										# Use the default HTTP transport
-	)
-	else()
-		CPMAddPackage(
-		NAME sentry-native
-		GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-		GIT_TAG 0.7.19 														# Use the latest stable version
-		OPTIONS
-			"SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
-			"SENTRY_TRANSPORT curl" 										# Use curl for HTTP transport
-	)
-	endif()
 
-	include_directories(${sentry-native_SOURCE_DIR}/include)
-	include_directories(${sentry-native_SOURCE_DIR}/external/crashpad/client)
+    # Add Sentry with CPM
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(SENTRY_TRANSPORT "winhttp")     # Use the default HTTP transport
+    else()
+        set(SENTRY_TRANSPORT "curl")        # Use the curl HTTP transport
+    endif()
 
-	# Put targets in the proper source folder
-	set_target_properties(sentry mini_chromium
-		PROPERTIES
-		FOLDER CoreDependencies
-	)
-	
-	# Put targets in the proper source folder
-	set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
-		PROPERTIES
-		FOLDER CoreDependencies/Crashpad
-	)
+    # Add preprocessor directive to notify sources of error logging
+    add_compile_definitions(ERROR_LOGGING)
+
+    CPMAddPackage(
+        NAME sentry-native
+        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+        GIT_TAG 0.7.20 														# Use the latest stable version
+        EXCLUDE_FROM_ALL  YES
+        OPTIONS
+            "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
+            "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
+            "SENTRY_BUILD_SHARED_LIBS OFF"
+            "CRASHPAD_ENABLE_INSTALL OFF"
+            "CRASHPAD_ENABLE_INSTALL_DEV OFF"
+    )
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        # Put targets in the proper source folder
+        set_target_properties(sentry mini_chromium
+            PROPERTIES
+            FOLDER CoreDependencies
+        )
+        
+        # Put targets in the proper source folder
+        set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
+            PROPERTIES
+            FOLDER CoreDependencies/Crashpad
+        )
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set_target_properties(sentry PROPERTIES
+            CXX_EXTENSIONS ON
+            C_EXTENSIONS ON
+        )
+
+        target_compile_definitions(sentry PRIVATE
+            _GNU_SOURCE
+        )
+    endif()
+
+    # No linking optimization for MSVC builds with error logging (linking optimization screws up the program database which prohibits symbolication)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        # Remove /OPT:ICF from the linker flags
+        string(REPLACE "/OPT:ICF" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+        string(REPLACE "/OPT:ICF" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+        string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
+    endif()
+
 endif()
 
 if(APPLE)
@@ -272,6 +276,7 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
@@ -323,8 +328,10 @@ target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
 if(${MV_USE_ERROR_LOGGING})
-	target_link_libraries(${MV_EXE} PRIVATE sentry)
-	target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
+    target_link_libraries(${MV_EXE} PRIVATE sentry)
+    target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
+    
+    add_dependencies(${MV_EXE} crashpad_handler)
 endif()
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
@@ -410,7 +417,16 @@ if(APPLE)
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-    
+
+    set(MACOSX_BUNDLE_ADDITIONAL_LIBS
+        \"$<TARGET_FILE:qtadvanceddocking-qt6>\"
+        \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
+    )
+
+    if(${MV_USE_ERROR_LOGGING})
+        list(APPEND MACOSX_BUNDLE_ADDITIONAL_LIBS \"$<TARGET_FILE:sentry>\" \"$<TARGET_FILE:crashpad_wer>\" \"$<TARGET_FILE:crashpad_handler}>\")
+    endif()
+
     install(CODE "
         message(\"**** MacOS bundle install ****\")
 
@@ -424,17 +440,9 @@ if(APPLE)
                 message(FATAL_ERROR \"macdeployqt failed\")
             endif()
 
-            set(ADDITIONAL_LIBS
-				\"$<TARGET_FILE:qt6advanceddocking>\"
-				\"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
-				\"$<TARGET_FILE:sentry>\"
-				\"$<TARGET_FILE:crashpad_wer>\"
-				\"$<TARGET_FILE:crashpad_handler}>\"
-			)
 
-            set(ADDITIONAL_LIBS \"$<TARGET_FILE:qtadvanceddocking-qt6>\" \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\")
-            message(\"**** Copy additional libs: \${ADDITIONAL_LIBS}\")
-            file(COPY \${ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
+            message(\"**** Copy additional libs: \${MACOSX_BUNDLE_ADDITIONAL_LIBS}\")
+            file(COPY \${MACOSX_BUNDLE_ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
         endif()
     " COMPONENT MACOS_BUNDLE)
 
@@ -604,57 +612,15 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
-	
-	if(${MV_USE_ERROR_LOGGING})
-		
-		# Copy sentry-native runtime to install directory after successful compilation
-		add_custom_target(sentry_post_build ALL
-			COMMAND ${CMAKE_COMMAND} -E echo "Installing: sentry runtime library"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:sentry> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
-			DEPENDS sentry  # Ensure sentry_native is built first
-		)
-		
-		# Copy crashpad_wer runtime to install directory after successful compilation
-		add_custom_target(crashpad_wer_post_build ALL
-			COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_wer runtime library"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_wer> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
-			DEPENDS crashpad_wer  # Ensure crashpad_wer is built first
-		)
-		
-		# Copy crashpad_handler runtime to install directory after successful compilation
-		add_custom_target(crashpad_handler_post_build ALL
-			COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler runtime library"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
-			DEPENDS crashpad_handler  # Ensure sentry_native is built first
-		)
-		
-		# Make ManiVault executable depend on the custom post-build targets
-		add_dependencies(${MV_EXE} sentry_post_build)
-		add_dependencies(${MV_EXE} crashpad_wer_post_build)
-		add_dependencies(${MV_EXE} crashpad_handler_post_build)
-		
-		# Put custom post-build targets in the proper source folder
-		set_target_properties(sentry_post_build crashpad_wer_post_build crashpad_handler_post_build
-			PROPERTIES
-			FOLDER CoreDependencies/Miscellaneous
-		)
-		
-		# if(MSVC)
-			# # Find all .pdb files in the build directory
-			# file(GLOB_RECURSE PDB_FILES "${CMAKE_BINARY_DIR}/**/*.pdb")
-			
-			# # Program database files target directory
-			# set(PDB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/pdb/")
-			
-			# # Copy all PDB files after the ManiVault executable has been built
-			# add_custom_command(
-				# TARGET ${MV_EXE} POST_BUILD
-				# COMMAND ${CMAKE_COMMAND} -E make_directory ${PDB_DIR}  					# Ensure the target PDB directory exists
-				# COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PDB_FILES} ${PDB_DIR}	# Copy all .pdb files
-				# COMMENT "Copying .pdb files to ${PDB_DIR}"
-			# )
-		# endif()
-	endif()
+
+    if(${MV_USE_ERROR_LOGGING})
+        # Install sentry artifacts
+        add_custom_command(TARGET ${MV_EXE}  POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler executable"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
+        )
+    endif()
+
 endif()
 
 # Install examples
@@ -673,17 +639,30 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 )
 
 # Install dependency licenses
-add_custom_command(TARGET ${MV_EXE} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses"
+set(INSTALL_LICENSE_COMMANDS)
+list(APPEND INSTALL_LICENSE_COMMANDS
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses: core"
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
 )
+
+if(${MV_USE_ERROR_LOGGING})
+    list(APPEND INSTALL_LICENSE_COMMANDS
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses: error logging"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sentry-native_SOURCE_DIR}/LICENSE" ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/sentry/LICENSE
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sentry-native_SOURCE_DIR}/external/crashpad/LICENSE" ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad/LICENSE
+    )
+endif()
+
+add_custom_command(TARGET ${MV_EXE} POST_BUILD ${INSTALL_LICENSE_COMMANDS})
 
 # -----------------------------------------------------------------------------
 # Miscellaneous

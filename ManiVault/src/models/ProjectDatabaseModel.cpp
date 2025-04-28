@@ -2,12 +2,14 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "LearningCenterTutorialsModel.h"
+#include "ProjectDatabaseModel.h"
+
+#include "util/FileDownloader.h"
 
 #include <QtConcurrent>
 
 #ifdef _DEBUG
-    //#define LEARNING_CENTER_TUTORIALS_MODEL_VERBOSE
+    //#define PROJECT_DATABASE_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -15,27 +17,26 @@ using namespace mv::gui;
 
 namespace mv {
 
-QMap<LearningCenterTutorialsModel::Column, LearningCenterTutorialsModel::ColumHeaderInfo> LearningCenterTutorialsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
+QMap<ProjectDatabaseModel::Column, ProjectDatabaseModel::ColumHeaderInfo> ProjectDatabaseModel::columnInfo = QMap<Column, ColumHeaderInfo>({
     { Column::Title, { "Title" , "Title", "Title" } },
     { Column::Tags, { "Tags" , "Tags", "Tags" } },
     { Column::Date, { "Date" , "Date", "Issue date" } },
     { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
     { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
-    { Column::Content, { "Content" , "Content", "Full tutorial content in HTML format" } },
-    { Column::Url, { "URL" , "URL", "ManiVault website tutorial URL" } },
+    { Column::Url, { "URL" , "URL", "Project URL" } },
     { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
     { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
     { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
 });
 
-LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent),
+ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
+    StandardItemModel(parent),
     _dsnsAction(this, "Data Source Names")
 {
     setColumnCount(static_cast<int>(Column::Count));
 
     _dsnsAction.setIconByName("globe");
-    _dsnsAction.setToolTip("Tutorials Data Source Names (DSN)");
+    _dsnsAction.setToolTip("Projects Data Source Names (DSN)");
     _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
     _dsnsAction.setPopupSizeHint(QSize(550, 100));
@@ -46,11 +47,11 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
         _future = QtConcurrent::mapped(
             _dsnsAction.getStrings(),
             [this](const QString& dsn) {
-                return downloadTutorialsFromDsn(dsn);
+                return downloadProjectsFromDsn(dsn);
 		});
 
-        connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
-            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+    	connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
+    		for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
                 QJsonParseError jsonParseError;
 
                 const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
@@ -60,25 +61,27 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
                     continue;
                 }
 
-                const auto tutorials = jsonDocument.object()["tutorials"].toArray();
+                const auto projects = jsonDocument.object()["Projects"].toArray();
 
-            	for (const auto tutorial : tutorials) {
-                    addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+                for (const auto project : projects) {
+                    auto projectMap = project.toVariant().toMap();
+
+                    addProject(new ProjectDatabaseProject(projectMap));
                 }
-            }
+    		}
 
             emit populatedFromDsns();
-        });
+		});
 
         _watcher.setFuture(_future);
 	});
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        connect(&pluginFactory->getTutorialsDsnsAction(), &StringsAction::stringsChanged, this, &LearningCenterTutorialsModel::synchronizeWithDsns);
+        connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectDatabaseModel::synchronizeWithDsns);
     }
 }
 
-QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant ProjectDatabaseModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
     switch (static_cast<Column>(section))
     {
@@ -97,14 +100,8 @@ QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation o
         case Column::Summary:
             return SummaryItem::headerData(orientation, role);
 
-        case Column::Content:
-            return ContentItem::headerData(orientation, role);
-
         case Column::Url:
             return UrlItem::headerData(orientation, role);
-
-        case Column::ProjectUrl:
-            return ProjectUrlItem::headerData(orientation, role);
 
         case Column::MinimumCoreVersion:
             return MinimumCoreVersionItem::headerData(orientation, role);
@@ -122,41 +119,63 @@ QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation o
     return {};
 }
 
-QSet<QString> LearningCenterTutorialsModel::getTagsSet() const
+QSet<QString> ProjectDatabaseModel::getTagsSet() const
 {
     return _tags;
 }
 
-void LearningCenterTutorialsModel::addTutorial(const LearningCenterTutorial* tutorial)
+void ProjectDatabaseModel::addProject(const ProjectDatabaseProject* project)
 {
-    Q_ASSERT(tutorial);
+    Q_ASSERT(project);
 
-    if (!tutorial)
+    if (!project)
         return;
 
-    appendRow(Row(tutorial));
+    appendRow(Row(project));
     updateTags();
 
-    const_cast<LearningCenterTutorial*>(tutorial)->setParent(this);
+    const_cast<ProjectDatabaseProject*>(project)->setParent(this);
 
-    _tutorials.push_back(tutorial);
+    _projects.push_back(project);
 }
 
-void LearningCenterTutorialsModel::updateTags()
+void ProjectDatabaseModel::updateTags()
 {
     for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
-        for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getTutorial()->getTags())
+        for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getProject()->getTags())
             _tags.insert(tag);
 
     emit tagsChanged(_tags);
 }
 
-void LearningCenterTutorialsModel::synchronizeWithDsns()
+const ProjectDatabaseProject* ProjectDatabaseModel::getProject(const QModelIndex& index) const
+{
+    Q_ASSERT(index.isValid());
+
+    if (!index.isValid())
+        return nullptr;
+
+    const auto itemAtIndex = dynamic_cast<Item*>(itemFromIndex(index));
+
+    Q_ASSERT(itemAtIndex);
+
+    if (!itemAtIndex)
+        return nullptr;
+
+    return itemAtIndex->getProject();
+}
+
+const ProjectDatabaseProjects& ProjectDatabaseModel::getProjects() const
+{
+	return _projects;
+}
+
+void ProjectDatabaseModel::synchronizeWithDsns()
 {
     auto uniqueDsns = _dsnsAction.getStrings();
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        uniqueDsns << pluginFactory->getTutorialsDsnsAction().getStrings();
+        uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
     }
 
     uniqueDsns.removeDuplicates();
@@ -164,7 +183,7 @@ void LearningCenterTutorialsModel::synchronizeWithDsns()
     _dsnsAction.setStrings(uniqueDsns);
 }
 
-QByteArray LearningCenterTutorialsModel::downloadTutorialsFromDsn(const QString& dsn)
+QByteArray ProjectDatabaseModel::downloadProjectsFromDsn(const QString& dsn)
 {
     QEventLoop loop;
 
@@ -180,13 +199,13 @@ QByteArray LearningCenterTutorialsModel::downloadTutorialsFromDsn(const QString&
         }
         catch (std::exception& e)
         {
-            exceptionMessageBox("Unable to download tutorials JSON from DSN", e);
+            exceptionMessageBox("Unable to download projects JSON from DSN", e);
         }
         catch (...)
         {
-            exceptionMessageBox("Unable to download tutorials JSON from DSN");
+            exceptionMessageBox("Unable to download projects JSON from DSN");
         }
-        });
+    });
 
     fileDownloader.download(dsn);
 
@@ -195,28 +214,28 @@ QByteArray LearningCenterTutorialsModel::downloadTutorialsFromDsn(const QString&
     return downloadedData;
 }
 
-LearningCenterTutorialsModel::Item::Item(const mv::util::LearningCenterTutorial* tutorial, bool editable /*= false*/) :
-    _tutorial(tutorial)
+ProjectDatabaseModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
+    _project(project)
 {
 }
 
-const LearningCenterTutorial* LearningCenterTutorialsModel::Item::getTutorial() const
+const ProjectDatabaseProject* ProjectDatabaseModel::Item::getProject() const
 {
-    return _tutorial;
+    return _project;
 }
 
-QVariant LearningCenterTutorialsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getTutorial()->getTitle();
+            return getProject()->getTitle();
 
         case Qt::ToolTipRole:
             return "Title: " + data(Qt::DisplayRole).toString();
 
-    case Qt::DecorationRole:
-            return StyledIcon(getTutorial()->getIconName());
+		case Qt::DecorationRole:
+            return StyledIcon(getProject()->getIconName());
 
         default:
             break;
@@ -225,11 +244,11 @@ QVariant LearningCenterTutorialsModel::TitleItem::data(int role /*= Qt::UserRole
     return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
-            return getTutorial()->getTags();
+            return getProject()->getTags();
 
         case Qt::DisplayRole:
             return data(Qt::EditRole).toStringList().join(",");
@@ -244,12 +263,12 @@ QVariant LearningCenterTutorialsModel::TagsItem::data(int role /*= Qt::UserRole 
     return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getTutorial()->getDate();
+            return getProject()->getDate();
 
         case Qt::ToolTipRole:
             return "Date: " + data(Qt::DisplayRole).toString();
@@ -261,12 +280,12 @@ QVariant LearningCenterTutorialsModel::DateItem::data(int role /*= Qt::UserRole 
     return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
 	    case Qt::EditRole:
 	    case Qt::DisplayRole:
-	        return getTutorial()->getIconName();
+	        return getProject()->getIconName();
 
 	    case Qt::ToolTipRole:
 	        return "Icon name: " + data(Qt::DisplayRole).toString();
@@ -278,12 +297,12 @@ QVariant LearningCenterTutorialsModel::IconNameItem::data(int role /*= Qt::UserR
     return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getTutorial()->getSummary();
+            return getProject()->getSummary();
 
         case Qt::ToolTipRole:
             return "Summary: " + data(Qt::DisplayRole).toString();
@@ -295,31 +314,14 @@ QVariant LearningCenterTutorialsModel::SummaryItem::data(int role /*= Qt::UserRo
     return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::ContentItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-        case Qt::DisplayRole:
-            return getTutorial()->getContent();
-
-        case Qt::ToolTipRole:
-            return "Content: " + data(Qt::DisplayRole).toString();
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
-QVariant LearningCenterTutorialsModel::UrlItem::data(int role) const
+QVariant ProjectDatabaseModel::UrlItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
-            return QVariant::fromValue(getTutorial()->getUrl());
+            return QVariant::fromValue(getProject()->getUrl());
 
 	    case Qt::DisplayRole:
-            return QVariant::fromValue(getTutorial()->getUrl().toString());
+            return QVariant::fromValue(getProject()->getUrl().toString());
 
         case Qt::ToolTipRole:
             return "URL: " + data(Qt::DisplayRole).toString();
@@ -331,32 +333,13 @@ QVariant LearningCenterTutorialsModel::UrlItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::ProjectUrlItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseModel::MinimumCoreVersionItem::data(int role) const
 {
     switch (role) {
-        case Qt::EditRole:
-            return QVariant::fromValue(getTutorial()->getProjectUrl());
+		case Qt::EditRole:
+            return QVariant::fromValue(getProject()->getMinimumCoreVersion());
 
-        case Qt::DisplayRole:
-            return QVariant::fromValue(data(Qt::EditRole).toString());
-
-        case Qt::ToolTipRole:
-            return "Project URL: " + data(Qt::DisplayRole).toString();
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
-QVariant LearningCenterTutorialsModel::MinimumCoreVersionItem::data(int role) const
-{
-    switch (role) {
-	    case Qt::EditRole:
-	        return QVariant::fromValue(getTutorial()->getMinimumCoreVersion());
-
-	    case Qt::DisplayRole:
+    case Qt::DisplayRole:
 	        return QString::fromStdString(data(Qt::EditRole).value<Version>().getVersionString());
 
 	    case Qt::ToolTipRole:
@@ -365,43 +348,43 @@ QVariant LearningCenterTutorialsModel::MinimumCoreVersionItem::data(int role) co
 	    default:
 	        break;
     }
-
-    return Item::data(role);
+    
+	return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::RequiredPluginsItem::data(int role) const
+QVariant ProjectDatabaseModel::RequiredPluginsItem::data(int role) const
 {
     switch (role) {
-    case Qt::EditRole:
-        return getTutorial()->getRequiredPlugins();
+	    case Qt::EditRole:
+	        return getProject()->getRequiredPlugins();
 
-    case Qt::DisplayRole:
-        return data(Qt::EditRole).toStringList();
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toStringList();
 
-    case Qt::ToolTipRole:
-        return "Required plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+	    case Qt::ToolTipRole:
+	        return "Required plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
 
-    default:
-        break;
+	    default:
+	        break;
     }
 
     return Item::data(role);
 }
 
-QVariant LearningCenterTutorialsModel::MissingPluginsItem::data(int role) const
+QVariant ProjectDatabaseModel::MissingPluginsItem::data(int role) const
 {
     switch (role) {
-    case Qt::EditRole:
-        return getTutorial()->getMissingPlugins();
+	    case Qt::EditRole:
+	        return getProject()->getMissingPlugins();
 
-    case Qt::DisplayRole:
-        return data(Qt::EditRole).toStringList();
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toStringList();
 
-    case Qt::ToolTipRole:
-        return "Missing plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+	    case Qt::ToolTipRole:
+	        return "Missing plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
 
-    default:
-        break;
+	    default:
+	        break;
     }
 
     return Item::data(role);

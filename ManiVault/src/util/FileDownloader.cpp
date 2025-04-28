@@ -7,6 +7,8 @@
 #include "Task.h"
 #include "Application.h"
 
+#include <QThread>
+
 #ifdef _DEBUG
 	#define FILE_DOWNLOADER_VERBOSE
 #endif
@@ -17,11 +19,12 @@ FileDownloader::FileDownloader(const StorageMode& mode, const Task::GuiScope& ta
     QObject(parent),
     _storageMode(mode),
     _isDownloading(false),
-    _task(this, "Downloading", { taskGuiScope }, Task::Status::Undefined, true)
+    _task(QThread::currentThread() == QCoreApplication::instance()->thread() ? new Task(this, "Downloading", { taskGuiScope }, Task::Status::Undefined, true) : nullptr)
 {
     connect(&_networkAccessManager, &QNetworkAccessManager::finished, this, &FileDownloader::downloadFinished);
 
-    _task.setEnabled(taskGuiScope != Task::GuiScope::None);
+    if (_task)
+		_task->setEnabled(taskGuiScope != Task::GuiScope::None);
 }
 
 void FileDownloader::download(const QUrl& url)
@@ -42,25 +45,30 @@ void FileDownloader::download(const QUrl& url)
 
     const auto fileName = QFileInfo(_url.toString()).fileName();
 
-    _task.setName(QString("Download %1").arg(fileName));
-    _task.setIcon(StyledIcon("download"));
-    _task.setRunning();
+    if (_task) {
+        _task->setName(QString("Download %1").arg(fileName));
+        _task->setIcon(StyledIcon("download"));
+        _task->setRunning();
 
-    connect(&_task, &Task::requestAbort, this, [this, networkReply]() -> void {
-        networkReply->abort();
+        disconnect(_task, &Task::requestAbort, this, nullptr);
 
-        _task.setAborted();
+        connect(_task, &Task::requestAbort, this, [this, networkReply]() -> void {
+            networkReply->abort();
 
-        emit aborted();
-    });
+            _task->setAborted();
 
-    connect(networkReply, &QNetworkReply::downloadProgress, this, [this, networkReply](qint64 downloaded, qint64 total) -> void {
-        if (_task.isAborting())
+            emit aborted();
+		});
+    }
+
+    connect(networkReply, &QNetworkReply::downloadProgress, this, [&](qint64 downloaded, qint64 total) -> void {
+        if (_task && _task->isAborting())
             return;
 			
         const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
 
-        _task.setProgress(progress);
+        if (_task)
+			_task->setProgress(progress);
 
         emit downloadProgress(progress);
     });
@@ -86,7 +94,10 @@ void FileDownloader::downloadFinished(QNetworkReply* reply)
     {
         const auto fileName = QFileInfo(_url.toString()).fileName();
 
-    	_downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(fileName);
+        if (_targetDirectory.isEmpty())
+    		_downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(fileName);
+        else
+            _downloadedFilePath = QDir(_targetDirectory).filePath(fileName);
 
 #ifdef FILE_DOWNLOADER_VERBOSE
         qDebug() << fileName << _downloadedFilePath;
@@ -112,10 +123,21 @@ void FileDownloader::downloadFinished(QNetworkReply* reply)
     _isDownloading = false;
 
     if (reply->error() == QNetworkReply::NoError) {
-        _task.setFinished();
+        if (_task)
+            _task->setFinished();
 
 		emit downloaded();
     }
+}
+
+const QString& FileDownloader::getTargetDirectory() const
+{
+    return _targetDirectory;
+}
+
+void FileDownloader::setTargetDirectory(const QString& targetDirectory)
+{
+    _targetDirectory = targetDirectory;
 }
 
 QByteArray FileDownloader::downloadedData() const {

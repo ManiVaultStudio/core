@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "Version.h"
+
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -16,33 +18,33 @@
 namespace mv::util {
 
 /**
- * LearningCenterTutorial class
+ * Project center project class
  *
- * Contains tutorial information
+ * Contains project information which is used in the project center
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT LearningCenterTutorial : public QObject
+class CORE_EXPORT ProjectDatabaseProject : public QObject
 {
     Q_OBJECT
 
 public:
     
     /**
-     * Construct tutorial from \p variantMap
-     * @param variantMap Variant map containing the tutorial properties
+     * Construct project from \p variantMap
+     * @param variantMap Variant map containing the project properties
      */
-    explicit LearningCenterTutorial(const QVariantMap& variantMap);
+    explicit ProjectDatabaseProject(const QVariantMap& variantMap);
 
     /**
      * Get title
-     * @return Tutorial title
+     * @return Project title
      */
     const QString& getTitle() const;
 
     /**
      * Get tags
-     * @return Tutorial tags
+     * @return Project tags
      */
     const QStringList& getTags() const;
 
@@ -60,27 +62,15 @@ public:
 
     /**
      * Get summary
-     * @return Tutorial summary (brief description)
+     * @return Project summary (brief description)
      */
     const QString& getSummary() const;
 
     /**
-     * Get content
-     * @return Full tutorial content in HTML format
-     */
-    const QString& getContent() const;
-
-    /**
      * Get URL
-     * @return ManiVault website tutorial URL
+     * @return ManiVault website project URL
      */
     const QUrl& getUrl() const;
-
-    /**
-     * Get project URL
-     * @return Location of the ManiVault tutorial project (if any)
-     */
-    const QUrl& getProjectUrl() const;
 
     /**
      * Get minimum supported ManiVault Studio core version
@@ -101,26 +91,18 @@ public:
     const QStringList& getMissingPlugins() const;
 
     /**
-     * Get whether the tutorial has a project
-     * @return Boolean determining whether the tutorial has a project
-     */
-    bool hasProject() const;
-
-    /**
      * Overload assignment operator
-     * @param rhs Right hand side tutorial
-     * @return Assigned tutorial
+     * @param rhs Right hand side project
+     * @return Assigned project
      */
-    LearningCenterTutorial& operator=(const LearningCenterTutorial& rhs)
+    ProjectDatabaseProject& operator=(const ProjectDatabaseProject& rhs)
     {
         _title                  = rhs.getTitle();
         _tags                   = rhs.getTags();
         _date                   = rhs.getDate();
         _iconName               = rhs.getIconName();
         _summary                = rhs.getSummary();
-        _content                = rhs.getContent();
         _url                    = rhs.getUrl();
-        _projectUrl             = rhs.getProjectUrl();
         _minimumCoreVersion     = rhs.getMinimumCoreVersion();
         _requiredPlugins        = rhs.getRequiredPlugins();
         _missingPlugins         = rhs.getMissingPlugins();
@@ -134,14 +116,12 @@ private:
     QString         _date;                  /** Issue date */
     QString         _iconName;              /** Font Awesome icon name */
     QString         _summary;               /** Summary (brief description) */
-    QString         _content;               /** Full tutorial content in HTML format */
-    QUrl            _url;                   /** ManiVault website tutorial URL */
-    QUrl            _projectUrl;            /** Location of the ManiVault tutorial project (if any) */
+    QUrl            _url;                   /** Project URL */
     Version         _minimumCoreVersion;    /** Minimum supported ManiVault Studio major version */
     QStringList     _requiredPlugins;       /** Required plugins */
     QStringList     _missingPlugins;        /** Missing plugins */
 };
 
-using LearningCenterTutorials = std::vector<const LearningCenterTutorial*>;
+using ProjectDatabaseProjects = std::vector<const ProjectDatabaseProject*>;
 
 }
