@@ -509,7 +509,7 @@ void Navigator2D::setZoomCenterWorld(const QPointF& zoomCenterWorld)
 
 void Navigator2D::resetView(bool force /*= false*/)
 {
-    if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
+    if (!force && (mv::projects().isOpeningProject() || mv::projects().isImportingProject()))
         return;
 
     if (!_initialized)
