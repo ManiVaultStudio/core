@@ -288,7 +288,6 @@ if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_HEADERS
 		src/private/SentryErrorLogger.h
 		src/private/CrashReportDialog.h
-		src/private/ErrorLoggingConsentDialog.h
 	)
 endif()
 
@@ -307,13 +306,25 @@ if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_SOURCES
 		src/private/SentryErrorLogger.cpp
 		src/private/CrashReportDialog.cpp
-		src/private/ErrorLoggingConsentDialog.cpp
 	)
 endif()
 
 set(PRIVATE_APPLICATION_FILES
     ${PRIVATE_APPLICATION_HEADERS}
     ${PRIVATE_APPLICATION_SOURCES}
+)
+
+set(PRIVATE_APP_FEATURES_HEADERS
+    src/private/AppFeaturesDialog.h
+)
+
+set(PRIVATE_APP_FEATURES_SOURCES
+    src/private/AppFeaturesDialog.cpp
+)
+
+set(PRIVATE_APP_FEATURES_FILES
+    ${PRIVATE_APP_FEATURES_HEADERS}
+    ${PRIVATE_APP_FEATURES_SOURCES}
 )
 
 set(PRIVATE_STARTUP_PROJECT_HEADERS
