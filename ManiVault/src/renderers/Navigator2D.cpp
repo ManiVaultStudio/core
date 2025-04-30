@@ -342,6 +342,22 @@ float Navigator2D::getZoomMarginScreen() const
     return _zoomMarginScreen;
 }
 
+void Navigator2D::setZoomMarginScreen(float zoomMarginScreen)
+{
+    if (zoomMarginScreen == _zoomMarginScreen)
+        return;
+
+    beginZooming();
+    {
+        beginChangeZoomRectangleWorld();
+        {
+            _zoomMarginScreen = zoomMarginScreen;
+        }
+        endChangeZoomRectangleWorld();
+    }
+    endZooming();
+}
+
 float Navigator2D::getZoomFactor() const
 {
     return _zoomFactor;
