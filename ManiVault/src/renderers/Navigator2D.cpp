@@ -429,6 +429,14 @@ const gui::NavigationAction& Navigator2D::getNavigationAction() const
     return _navigationAction;
 }
 
+qreal Navigator2D::getDevicePixelRatio() const
+{
+    if (_sourceWidget)
+        return _sourceWidget->devicePixelRatioF();
+
+    return 1.0;
+}
+
 void Navigator2D::zoomAround(const QPoint& center, float factor)
 {
     if (getNavigationAction().getFreezeNavigation().isChecked())

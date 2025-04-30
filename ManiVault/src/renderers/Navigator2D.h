@@ -147,6 +147,12 @@ public:
      */
     const gui::NavigationAction& getNavigationAction() const;
 
+    /**
+     * Get the source widget device pixel ratio
+     * @return Device pixel ratio
+     */
+    qreal getDevicePixelRatio() const;
+
 public: // Navigation
 
 	/**

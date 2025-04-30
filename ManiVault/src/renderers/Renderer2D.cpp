@@ -72,7 +72,9 @@ void Renderer2D::beginRender()
     qDebug() << __FUNCTION__;
 #endif
 
-    glViewport(0, 0, _renderSize.width(), _renderSize.height());
+    const auto dpr = getNavigator().getDevicePixelRatio();
+
+    glViewport(0, 0, static_cast<int>(dpr * _renderSize.width()), static_cast<int>(dpr * _renderSize.height()));
 
     updateModelViewProjectionMatrix();
 }
