@@ -476,12 +476,15 @@ SelectionGroupIndexDialog::SelectionGroupIndexDialog(QWidget* parent) :
     _confirmAction.setEnabled(false);
     _confirmAction.setToolTip("Selection group index must be larger than -1");
 
-    connect(&_confirmAction, &TriggerAction::triggered, this, &SelectionGroupIndexDialog::closeDialogAction);
+    connect(&_confirmAction, &TriggerAction::triggered, this, [this]() -> void {
+        emit closeDialog(_confirmAction.isChecked());
+    });
+
     connect(this, &SelectionGroupIndexDialog::closeDialog, this, &QDialog::accept);
 
     connect(&_selectionIndexAction, &IntegralAction::valueChanged, [this](int value) {
         _confirmAction.setEnabled(value >= 0);
-        });
+    });
 
     auto groupAction = new HorizontalGroupAction(this, "Settings");
 
@@ -506,7 +509,7 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
     setWindowTitle(tr("Selection group pattern"));
     setWindowIcon(StyledIcon("ellipsis"));
     
-    QString infoString = QStringLiteral("\"Prefix\" defines the prefix to match names with.\n"
+    const auto infoString = QStringLiteral("\"Prefix\" defines the prefix to match names with.\n"
         "\"Suffix\" is used to define a prefix, taken from entries with matching suffix.\n"
         "E.g.given the data names \"A\", \"A.end\", \"B\", \"B.end\" and a suffix \".end\",\n"
         "this will group (\"A\", \"A.end\") and (\"B\", \"B.end\")");
@@ -518,12 +521,15 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
 
     _selectionOptionAction.initialize({ "Suffix", "Prefix" }, "Suffix");
 
-    connect(&_confirmAction, &TriggerAction::triggered, this, &SelectionPatternGroupIndexDialog::closeDialogAction);
+    connect(&_confirmAction, &TriggerAction::triggered, this, [this]() -> void {
+        emit closeDialog(_confirmAction.isChecked());
+    });
+
     connect(this, &SelectionPatternGroupIndexDialog::closeDialog, this, &QDialog::accept);
 
     connect(&_selectionIndexAction, &IntegralAction::valueChanged, [this](int value) {
         _confirmAction.setEnabled(value >= 0);
-        });
+    });
 
     auto settingsGroupAction = new VerticalGroupAction(this, "Settings");
 

@@ -103,19 +103,28 @@ class SelectionGroupIndexDialog : public QDialog
     Q_OBJECT
 
 public:
+
+    /**
+     * Construct with \p parent widget
+     * @param parent Parent widget
+     */
     SelectionGroupIndexDialog(QWidget* parent);
 
+    /**
+     * Convenience function to get the selection group index from the corresponding action
+     * @return The selection group index
+     */
     std::int32_t getSelectionGroupIndex() const {
         return _selectionIndexAction.getValue();
     }
 
 signals:
-    void closeDialog(bool onlyIndices);
 
-public slots:
-    void closeDialogAction() {
-        emit closeDialog(_confirmAction.isChecked());
-    }
+    /**
+     * Invoked when the dialog needs to be closed
+     * @param onlyIndices Whether the selection index is valid or not
+     */
+    void closeDialog(bool onlyIndices);
 
 private:
     gui::IntegralAction      _selectionIndexAction;      /** For setting the selection group index */
@@ -132,27 +141,44 @@ class SelectionPatternGroupIndexDialog : public QDialog
     Q_OBJECT
 
 public:
+
+    /**
+     * Construct with \p parent widget
+     * @param parent Parent widget
+     */
     SelectionPatternGroupIndexDialog(QWidget* parent);
 
+    /**
+     * Convenience function to get the selection group index from the corresponding action
+     * @return The selection group index
+     */
     std::int32_t getSelectionGroupIndex() const {
         return _selectionIndexAction.getValue();
     }
 
+    /**
+     * Convenience function to get the selection group pattern from the corresponding action
+     * @return The selection group index
+     */
     QString getSelectionGroupPattern() const {
         return _selectionPatternAction.getString();
     }
 
+    /**
+     * Convenience function to get the selection group option from the corresponding action
+     * @return The selection group option
+     */
     std::int32_t getSelectionGroupOption() const {
         return _selectionOptionAction.getCurrentIndex();
     }
 
 signals:
-    void closeDialog(bool onlyIndices);
 
-public slots:
-    void closeDialogAction() {
-        emit closeDialog(_confirmAction.isChecked());
-    }
+    /**
+     * Invoked when the dialog needs to be closed
+     * @param onlyIndices Whether the selection index is valid or not
+     */
+    void closeDialog(bool onlyIndices);
 
 private:
     gui::IntegralAction     _selectionIndexAction;      /** For setting the selection group index */
