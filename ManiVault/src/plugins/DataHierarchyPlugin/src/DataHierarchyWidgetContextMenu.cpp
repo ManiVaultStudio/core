@@ -467,26 +467,26 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
 
 SelectionGroupIndexDialog::SelectionGroupIndexDialog(QWidget* parent) :
     QDialog(parent),
-    _confirmButton(this, "Ok"),
+    _confirmAction(this, "Ok"),
     _selectionIndexAction(this, "Set the same selection group index for all selected datasets", -1, 250, -1)
 {
     setWindowTitle(tr("Selection group index"));
     setWindowIcon(StyledIcon("ellipsis"));
     
-    _confirmButton.setEnabled(false);
-    _confirmButton.setToolTip("Selection group index must be larger than -1");
+    _confirmAction.setEnabled(false);
+    _confirmAction.setToolTip("Selection group index must be larger than -1");
 
-    connect(&_confirmButton, &TriggerAction::triggered, this, &SelectionGroupIndexDialog::closeDialogAction);
+    connect(&_confirmAction, &TriggerAction::triggered, this, &SelectionGroupIndexDialog::closeDialogAction);
     connect(this, &SelectionGroupIndexDialog::closeDialog, this, &QDialog::accept);
 
     connect(&_selectionIndexAction, &IntegralAction::valueChanged, [this](int value) {
-        _confirmButton.setEnabled(value >= 0);
+        _confirmAction.setEnabled(value >= 0);
         });
 
     auto groupAction = new HorizontalGroupAction(this, "Settings");
 
     groupAction->addAction(&_selectionIndexAction);
-    groupAction->addAction(&_confirmButton);
+    groupAction->addAction(&_confirmAction);
 
     auto layout = new QHBoxLayout();
 
@@ -497,7 +497,7 @@ SelectionGroupIndexDialog::SelectionGroupIndexDialog(QWidget* parent) :
 
 SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* parent) :
     QDialog(parent),
-    _confirmButton(this, "Ok"),
+    _confirmAction(this, "Ok"),
     _selectionPatternAction(this, "Pattern"),
     _selectionOptionAction(this, "Setting"),
     _infoTextAction(this, "Info"),
@@ -513,16 +513,16 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
 
     _infoTextAction.setString(infoString);
 
-    _confirmButton.setEnabled(false);
-    _confirmButton.setToolTip("Selection group index must be larger than -1");
+    _confirmAction.setEnabled(false);
+    _confirmAction.setToolTip("Selection group index must be larger than -1");
 
     _selectionOptionAction.initialize({ "Suffix", "Prefix" }, "Suffix");
 
-    connect(&_confirmButton, &TriggerAction::triggered, this, &SelectionPatternGroupIndexDialog::closeDialogAction);
+    connect(&_confirmAction, &TriggerAction::triggered, this, &SelectionPatternGroupIndexDialog::closeDialogAction);
     connect(this, &SelectionPatternGroupIndexDialog::closeDialog, this, &QDialog::accept);
 
     connect(&_selectionIndexAction, &IntegralAction::valueChanged, [this](int value) {
-        _confirmButton.setEnabled(value >= 0);
+        _confirmAction.setEnabled(value >= 0);
         });
 
     auto settingsGroupAction = new VerticalGroupAction(this, "Settings");
@@ -531,7 +531,7 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
     settingsGroupAction->addAction(&_selectionOptionAction);
     settingsGroupAction->addAction(&_infoTextAction, StringAction::WidgetFlag::Label);
     settingsGroupAction->addAction(&_selectionIndexAction);
-    settingsGroupAction->addAction(&_confirmButton);
+    settingsGroupAction->addAction(&_confirmAction);
 
     auto layout = new QVBoxLayout();
 

@@ -114,12 +114,12 @@ signals:
 
 public slots:
     void closeDialogAction() {
-        emit closeDialog(_confirmButton.isChecked());
+        emit closeDialog(_confirmAction.isChecked());
     }
 
 private:
-    gui::IntegralAction      _selectionIndexAction;
-    gui::TriggerAction       _confirmButton;
+    gui::IntegralAction      _selectionIndexAction;      /** For setting the selection group index */
+    gui::TriggerAction       _confirmAction;             /** Triggers the grouping */
 };
 
 /**
@@ -151,13 +151,13 @@ signals:
 
 public slots:
     void closeDialogAction() {
-        emit closeDialog(_confirmButton.isChecked());
+        emit closeDialog(_confirmAction.isChecked());
     }
 
 private:
-    gui::IntegralAction     _selectionIndexAction;
-    gui::StringAction       _selectionPatternAction;
-    gui::OptionAction       _selectionOptionAction;
-    gui::StringAction       _infoTextAction;
-    gui::TriggerAction      _confirmButton;
+    gui::IntegralAction     _selectionIndexAction;      /** For setting the selection group index */
+    gui::StringAction       _selectionPatternAction;    /** For setting the selection group pattern */
+    gui::OptionAction       _selectionOptionAction;     /** Action for choosing whether to use prefix or suffix */
+    gui::StringAction       _infoTextAction;            /** For displaying some information */
+    gui::TriggerAction      _confirmAction;             /** Triggers the grouping */
 };
