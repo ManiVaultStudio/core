@@ -18,9 +18,9 @@ DownloadableContentAppFeaturesAction::DownloadableContentAppFeaturesAction(QObje
 
 	setDefaultWidgetFlag(GroupAction::WidgetFlag::NoMargins);
 
-    _projectsAppFeatureAction.getEnabledAction().setDefaultWidgetFlag(ToggleAction::Text);
-    _tutorialsAppFeatureAction.getEnabledAction().setDefaultWidgetFlag(ToggleAction::Text);
-    _videosAppFeatureAction.getEnabledAction().setDefaultWidgetFlag(ToggleAction::Text);
+    _projectsAppFeatureAction.getEnabledAction().setDefaultWidgetFlags(ToggleAction::ToggleImageText);
+    _tutorialsAppFeatureAction.getEnabledAction().setDefaultWidgetFlags(ToggleAction::ToggleImageText);
+    _videosAppFeatureAction.getEnabledAction().setDefaultWidgetFlags(ToggleAction::ToggleImageText);
 
     addAction(&_projectsAppFeatureAction);
     addAction(&_tutorialsAppFeatureAction);

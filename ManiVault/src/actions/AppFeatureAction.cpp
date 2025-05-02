@@ -10,7 +10,7 @@ namespace mv::gui {
 
 AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
-    _enabledAction(this, "Enabled", false),
+    _enabledAction(this, title, false),
     _settingsAction(this, QString("App Feature: %1").arg(title))
 {
     setShowLabels(false);
