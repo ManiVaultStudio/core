@@ -18,6 +18,10 @@ DownloadableContentAppFeaturesAction::DownloadableContentAppFeaturesAction(QObje
 
 	setDefaultWidgetFlag(GroupAction::WidgetFlag::NoMargins);
 
+    _projectsAppFeatureAction.getEnabledAction().setDefaultWidgetFlag(ToggleAction::Text);
+    _tutorialsAppFeatureAction.getEnabledAction().setDefaultWidgetFlag(ToggleAction::Text);
+    _videosAppFeatureAction.getEnabledAction().setDefaultWidgetFlag(ToggleAction::Text);
+
     addAction(&_projectsAppFeatureAction);
     addAction(&_tutorialsAppFeatureAction);
     addAction(&_videosAppFeatureAction);

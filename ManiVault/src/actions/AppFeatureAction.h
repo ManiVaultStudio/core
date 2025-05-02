@@ -43,7 +43,7 @@ public:
 
 public: // Action getters
 
-    const ToggleAction& getEnabledAction() const { return _enabledAction; }
+    ToggleAction& getEnabledAction() { return _enabledAction; }
 
 private:
     ToggleAction            _enabledAction;     /** Settings action for the app feature */ 
