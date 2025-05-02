@@ -8,7 +8,7 @@
 
 #include <QCheckBox>
 #include <QPushButton>
-#include <QLabel>
+#include <QWidget>
 
 namespace mv::gui {
 
@@ -40,6 +40,7 @@ public:
         PushButtonIcon          = (PushButton & ~Text) | Icon,  /** Push button with icon only */
         PushButtonText          = PushButton,                   /** Push button with text only */
         PushButtonIconText      = PushButton | Icon,            /** Push button with icon and text */
+        ToggleImageText         = ToggleImage | Text,           /** Toggle image with text */
 
         Default = CheckBox
     };
@@ -97,8 +98,8 @@ public:
         friend class ToggleAction;
     };
 
-    /** Toggle image label widget class for toggle action */
-    class CORE_EXPORT ToggleImageLabelWidget : public QLabel
+    /** Toggle image widget class for toggle action */
+    class CORE_EXPORT ToggleImageLabelWidget : public QWidget
     {
     protected:
 
@@ -106,8 +107,9 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param toggleAction Pointer to toggle action
+         * @param widgetFlags Widget flags
          */
-        ToggleImageLabelWidget(QWidget* parent, ToggleAction* toggleAction);
+        ToggleImageLabelWidget(QWidget* parent, ToggleAction* toggleAction, const std::int32_t& widgetFlags);
 
         /**
          * Invoked when the mouse button is pressed
@@ -116,7 +118,7 @@ public:
         void mousePressEvent(QMouseEvent* event) override;
 
     protected:
-        ToggleAction* _toggleAction;      /** Pointer to toggle action */
+        ToggleAction*   _toggleAction;      /** Pointer to toggle action */
 
         friend class ToggleAction;
     };
