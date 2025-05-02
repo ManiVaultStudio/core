@@ -317,13 +317,17 @@ set(PUBLIC_TASK_ACTIONS_FILES
 set(PUBLIC_APP_FEATURE_ACTIONS_HEADERS
     src/actions/AppFeatureAction.h
     src/actions/ErrorLoggingAppFeatureAction.h
-    src/actions/DynamicContentAppFeatureAction.h
+    src/actions/TutorialsAppFeatureAction.h
+    src/actions/ProjectsAppFeatureAction.h
+    src/actions/VideosAppFeatureAction.h
 )
 
 set(PUBLIC_APP_FEATURE_ACTIONS_SOURCES
     src/actions/AppFeatureAction.cpp
     src/actions/ErrorLoggingAppFeatureAction.cpp   
-    src/actions/DynamicContentAppFeatureAction.cpp   
+    src/actions/TutorialsAppFeatureAction.cpp
+    src/actions/ProjectsAppFeatureAction.cpp
+    src/actions/VideosAppFeatureAction.cpp
 )
 
 set(PUBLIC_APP_FEATURE_ACTIONS_FILES

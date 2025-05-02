@@ -7,7 +7,9 @@
 #include "GlobalSettingsGroupAction.h"
 
 #include "actions/ErrorLoggingAppFeatureAction.h"
-#include "actions/DynamicContentAppFeatureAction.h"
+#include "actions/ProjectsAppFeatureAction.h"
+#include "actions/TutorialsAppFeatureAction.h"
+#include "actions/VideosAppFeatureAction.h"
 
 namespace mv::gui
 {
@@ -31,12 +33,16 @@ public:
 
 public: // Action getters
 
-    const gui::ErrorLoggingAppFeatureAction& getErrorLoggingAppFeatureAction() const { return _errorLoggingAppFeatureAction; }
-    const gui::DynamicContentAppFeatureAction& getDynamicContentAppFeatureAction() const { return _dynamicContentAppFeatureAction; }
+    const ErrorLoggingAppFeatureAction& getErrorLoggingAppFeatureAction() const { return _errorLoggingAppFeatureAction; }
+    const ProjectsAppFeatureAction& getProjectsAppFeatureAction() const { return _projectsAppFeatureAction; }
+    const TutorialsAppFeatureAction& getTutorialsAppFeatureAction() const { return _tutorialsAppFeatureAction; }
+    const VideosAppFeatureAction& getVideosAppFeatureAction() const { return _videosAppFeatureAction; }
 
 private:
-    ErrorLoggingAppFeatureAction        _errorLoggingAppFeatureAction;      /** App feature action for configuring error logging */
-    DynamicContentAppFeatureAction      _dynamicContentAppFeatureAction;    /** App feature action for configuring dynamic content */
+    ErrorLoggingAppFeatureAction    _errorLoggingAppFeatureAction;  /** App feature action for configuring error logging */
+    ProjectsAppFeatureAction        _projectsAppFeatureAction;      /** App feature action for configuring projects dynamic content */
+    TutorialsAppFeatureAction       _tutorialsAppFeatureAction;     /** App feature action for configuring tutorials dynamic content */
+    VideosAppFeatureAction          _videosAppFeatureAction;        /** App feature action for configuring videos dynamic content */
 };
 
 }

@@ -10,14 +10,18 @@ namespace mv::gui
 AppFeaturesSettingsAction::AppFeaturesSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "App Features", false),
     _errorLoggingAppFeatureAction(this),
-    _dynamicContentAppFeatureAction(this)
+    _projectsAppFeatureAction(this),
+    _tutorialsAppFeatureAction(this),
+    _videosAppFeatureAction(this)
 {
 
 #ifdef ERROR_LOGGING
 	addAction(&_errorLoggingAppFeatureAction);
 #endif
 
-    addAction(&_dynamicContentAppFeatureAction);
+    addAction(&_projectsAppFeatureAction);
+    addAction(&_tutorialsAppFeatureAction);
+    addAction(&_videosAppFeatureAction);
 }
 
 /*

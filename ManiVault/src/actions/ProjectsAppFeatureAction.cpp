@@ -2,11 +2,11 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "TutorialsAppFeatureAction.h"
+#include "ProjectsAppFeatureAction.h"
 
 namespace mv::gui {
 
-TutorialsAppFeatureAction::TutorialsAppFeatureAction(QObject* parent, const QString& title /*= "Tutorials"*/) :
+ProjectsAppFeatureAction::ProjectsAppFeatureAction(QObject* parent, const QString& title /*= "Projects"*/) :
     AppFeatureAction(parent, title)
 {
 }

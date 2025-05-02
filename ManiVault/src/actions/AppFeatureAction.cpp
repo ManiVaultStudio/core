@@ -4,6 +4,8 @@
 
 #include "AppFeatureAction.h"
 
+using namespace mv::util;
+
 namespace mv::gui {
 
 AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
@@ -27,6 +29,10 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     updateSettingsActionReadOnly();
 
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
+
+    connect(&_enabledAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        mv::help().addNotification("App Feature", QString("%1 app feature has been %2").arg(text(), toggled ? "enabled" : "disabled"), StyledIcon(toggled ? "toggle-on" : "toggle-off"));
+	});
 }
 
 void AppFeatureAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/, bool load)
