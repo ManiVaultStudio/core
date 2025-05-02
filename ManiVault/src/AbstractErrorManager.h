@@ -82,7 +82,6 @@ private:
     AbstractErrorLogger*    _errorLogger;   /** Pointer to the error logger */
 
     friend class AbstractErrorLogger;
-    friend class gui::ErrorLoggingSettingsAction;
 };
 
 }

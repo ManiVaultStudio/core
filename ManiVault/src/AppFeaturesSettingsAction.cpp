@@ -15,6 +15,7 @@ AppFeaturesSettingsAction::AppFeaturesSettingsAction(QObject* parent) :
 //#endif
 }
 
+/*
 const gui::TriggerAction& AppFeaturesSettingsAction::getLoggingAskConsentDialogAction() const
 {
 	return mv::errors().getLoggingAskConsentDialogAction();
@@ -39,5 +40,6 @@ const gui::ToggleAction& AppFeaturesSettingsAction::getShowCrashReportDialogActi
 {
     return mv::errors().getLoggingShowCrashReportDialogAction();
 }
+*/
 
 }
