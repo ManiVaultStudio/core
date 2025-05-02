@@ -95,9 +95,15 @@ public:
 
 	/**
 	 * Get the zoom rectangle margin
-	 * @return Zoom rectangle margin
+	 * @return Zoom rectangle margin in screen coordinates 
 	 */
 	float getZoomMarginScreen() const;
+
+    /**
+     * Set the zoom margin in screen coordinates to \p zoomMarginScreen
+     * @param zoomMarginScreen Zoom margin in screen coordinates
+     */
+    void setZoomMarginScreen(float zoomMarginScreen);
 
 	/**
 	 * Get the zoom factor
@@ -146,6 +152,12 @@ public:
      * @return Reference to the navigation action
      */
     const gui::NavigationAction& getNavigationAction() const;
+
+    /**
+     * Get the source widget device pixel ratio
+     * @return Device pixel ratio
+     */
+    qreal getDevicePixelRatio() const;
 
 public: // Navigation
 

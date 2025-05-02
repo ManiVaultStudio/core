@@ -342,6 +342,22 @@ float Navigator2D::getZoomMarginScreen() const
     return _zoomMarginScreen;
 }
 
+void Navigator2D::setZoomMarginScreen(float zoomMarginScreen)
+{
+    if (zoomMarginScreen == _zoomMarginScreen)
+        return;
+
+    beginZooming();
+    {
+        beginChangeZoomRectangleWorld();
+        {
+            _zoomMarginScreen = zoomMarginScreen;
+        }
+        endChangeZoomRectangleWorld();
+    }
+    endZooming();
+}
+
 float Navigator2D::getZoomFactor() const
 {
     return _zoomFactor;
@@ -427,6 +443,14 @@ gui::NavigationAction& Navigator2D::getNavigationAction()
 const gui::NavigationAction& Navigator2D::getNavigationAction() const
 {
     return _navigationAction;
+}
+
+qreal Navigator2D::getDevicePixelRatio() const
+{
+    if (_sourceWidget)
+        return _sourceWidget->devicePixelRatioF();
+
+    return 1.0;
 }
 
 void Navigator2D::zoomAround(const QPoint& center, float factor)
