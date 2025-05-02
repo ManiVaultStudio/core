@@ -6,9 +6,13 @@
 
 namespace mv::gui {
 
-    DynamicContentAppFeatureAction::DynamicContentAppFeatureAction(QObject* parent, const QString& title /*= "Dynamic Content"*/) :
-    AppFeatureAction(parent, title)
+DynamicContentAppFeatureAction::DynamicContentAppFeatureAction(QObject* parent, const QString& title /*= "Dynamic Content"*/) :
+    AppFeatureAction(parent, title),
+    _tutorialsAction(this, "Tutorials"),
+    _projectsAction(this, "Projects")
 {
+    addAction(&_tutorialsAction);
+    addAction(&_projectsAction);
 }
 
 }

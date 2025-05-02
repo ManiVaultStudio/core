@@ -29,7 +29,7 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
 }
 
-void AppFeatureAction::addAction(WidgetAction* action, std::int32_t widgetFlags, WidgetConfigurationFunction widgetConfigurationFunction, bool load)
+void AppFeatureAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/, bool load)
 {
     _settingsAction.addAction(action, widgetFlags, widgetConfigurationFunction, load);
 }

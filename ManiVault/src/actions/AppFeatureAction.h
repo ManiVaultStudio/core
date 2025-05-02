@@ -39,7 +39,7 @@ public:
      * @param widgetConfigurationFunction When set, overrides the standard widget configuration function in the widget action
      * @param load Currently not used
      */
-    void addAction(WidgetAction* action, std::int32_t widgetFlags, WidgetConfigurationFunction widgetConfigurationFunction, bool load) override;
+    void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction(), bool load = true) override;
 
 public: // Action getters
 

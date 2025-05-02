@@ -6,6 +6,8 @@
 
 #include "AppFeatureAction.h"
 
+#include "actions/ToggleAction.h"
+
 namespace mv::gui {
 
 /**
@@ -29,6 +31,15 @@ public:
      * @param title Title of the action
      */
     Q_INVOKABLE DynamicContentAppFeatureAction(QObject* parent, const QString& title = "Dynamic Content");
+
+public: // Action getters
+
+    const ToggleAction& getTutorialsAction() const { return _tutorialsAction; }
+    const ToggleAction& getProjectsAction() const { return _projectsAction; }
+
+private:
+    ToggleAction    _tutorialsAction;   /** Toggle tutorials dynamic content */
+    ToggleAction    _projectsAction;    /** Toggle projects dynamic content */
 };
 
 }
