@@ -172,7 +172,7 @@ public: // Actions management
      * @param action Pointer to action to add
      * @param widgetFlags Action widget flags (default flags if -1)
      * @param widgetConfigurationFunction When set, overrides the standard widget configuration function in the widget action
-     * @param load
+     * @param load Currently not used
      */
     virtual void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction(), bool load = true);
 

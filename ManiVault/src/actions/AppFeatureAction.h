@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "HorizontalGroupAction.h"
+#include "ToggleAction.h"
 #include "VerticalGroupAction.h"
 
 namespace mv::gui {
@@ -17,7 +19,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT AppFeatureAction : public WidgetAction
+class CORE_EXPORT AppFeatureAction : public HorizontalGroupAction
 {
     Q_OBJECT
 
@@ -30,6 +32,22 @@ public:
      */
     Q_INVOKABLE AppFeatureAction(QObject* parent, const QString& title);
 
+    /**
+     * Add \p action to the group
+     * @param action Pointer to action to add
+     * @param widgetFlags Action widget flags (default flags if -1)
+     * @param widgetConfigurationFunction When set, overrides the standard widget configuration function in the widget action
+     * @param load Currently not used
+     */
+    void addAction(WidgetAction* action, std::int32_t widgetFlags, WidgetConfigurationFunction widgetConfigurationFunction, bool load) override;
+
+public: // Action getters
+
+    const ToggleAction& getEnabledAction() const { return _enabledAction; }
+
+private:
+    ToggleAction            _enabledAction;     /** Settings action for the app feature */ 
+    VerticalGroupAction     _settingsAction;    /** Vertical group action for settings */
 };
 
 }

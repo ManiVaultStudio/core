@@ -7,8 +7,17 @@
 namespace mv::gui {
 
 AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
-    WidgetAction(parent, title)
+    HorizontalGroupAction(parent, title),
+    _settingsAction(this, "Settings")
 {
+    _settingsAction.setIconByName("gear");
+    _settingsAction.setToolTip(QString("%1 settings").arg(title));
+
+    HorizontalGroupAction::addAction(&_settingsAction);
 }
 
+void AppFeatureAction::addAction(WidgetAction* action, std::int32_t widgetFlags, WidgetConfigurationFunction widgetConfigurationFunction, bool load)
+{
+    _settingsAction.addAction(action, widgetFlags, widgetConfigurationFunction, load);
+}
 }

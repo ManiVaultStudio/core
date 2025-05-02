@@ -12,9 +12,12 @@ AppFeaturesSettingsAction::AppFeaturesSettingsAction(QObject* parent) :
     _errorLoggingAppFeatureAction(this),
     _dynamicContentAppFeatureAction(this)
 {
-//#ifdef ERROR_LOGGING
-//    _groupsAction.addGroupAction(&mv::settings().getErrorLoggingSettingsAction());
-//#endif
+
+#ifdef ERROR_LOGGING
+	addAction(&_errorLoggingAppFeatureAction);
+#endif
+
+    addAction(&_dynamicContentAppFeatureAction);
 }
 
 /*
