@@ -8,12 +8,25 @@ namespace mv::gui {
 
 AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
+    _enabledAction(this, "Enabled", false),
     _settingsAction(this, "Settings")
 {
+    setShowLabels(false);
+
     _settingsAction.setIconByName("gear");
     _settingsAction.setToolTip(QString("%1 settings").arg(title));
+    _settingsAction.setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
 
+    HorizontalGroupAction::addAction(&_enabledAction);
     HorizontalGroupAction::addAction(&_settingsAction);
+
+    const auto updateSettingsActionReadOnly = [this]() -> void {
+        _settingsAction.setEnabled(_enabledAction.isChecked());
+	};
+
+    updateSettingsActionReadOnly();
+
+    connect(&_enabledAction, &ToggleAction::toggled, this, updateSettingsActionReadOnly);
 }
 
 void AppFeatureAction::addAction(WidgetAction* action, std::int32_t widgetFlags, WidgetConfigurationFunction widgetConfigurationFunction, bool load)
