@@ -8,12 +8,12 @@
 
 #include "actions/TriggerAction.h"
 
+#include "AppFeaturesSettingsAction.h"
 #include "ParametersSettingsAction.h"
 #include "MiscellaneousSettingsAction.h"
 #include "TasksSettingsAction.h"
 #include "AppearanceSettingsAction.h"
 #include "TemporaryDirectoriesSettingsAction.h"
-#include "ErrorLoggingSettingsAction.h"
 #include "PluginGlobalSettingsGroupAction.h"
 
 namespace mv {
@@ -56,12 +56,13 @@ public: // Action getters
 
 public: // Global settings actions
 
+    virtual gui::AppFeaturesSettingsAction& getAppFeaturesSettingsAction() = 0;
     virtual gui::ParametersSettingsAction& getParametersSettings() = 0;
     virtual gui::MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
     virtual gui::TasksSettingsAction& getTasksSettingsAction() = 0;
     virtual gui::AppearanceSettingsAction& getAppearanceSettingsAction() = 0;
     virtual gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
-    virtual gui::ErrorLoggingSettingsAction& getErrorLoggingSettingsAction() = 0;
+    
 
     /**
      * Get plugin global settings for plugin \p kind

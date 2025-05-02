@@ -2,37 +2,40 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ErrorLoggingSettingsAction.h"
+#include "AppFeaturesSettingsAction.h"
 
 namespace mv::gui
 {
 
-ErrorLoggingSettingsAction::ErrorLoggingSettingsAction(QObject* parent) :
-    GlobalSettingsGroupAction(parent, "Error logging", false)
+AppFeaturesSettingsAction::AppFeaturesSettingsAction(QObject* parent) :
+    GlobalSettingsGroupAction(parent, "App Features", false)
 {
+//#ifdef ERROR_LOGGING
+//    _groupsAction.addGroupAction(&mv::settings().getErrorLoggingSettingsAction());
+//#endif
 }
 
-const gui::TriggerAction& ErrorLoggingSettingsAction::getLoggingAskConsentDialogAction() const
+const gui::TriggerAction& AppFeaturesSettingsAction::getLoggingAskConsentDialogAction() const
 {
 	return mv::errors().getLoggingAskConsentDialogAction();
 }
 
-const gui::ToggleAction& ErrorLoggingSettingsAction::getUserHasOptedAction() const
+const gui::ToggleAction& AppFeaturesSettingsAction::getUserHasOptedAction() const
 {
     return mv::errors().getLoggingUserHasOptedAction();
 }
 
-const gui::ToggleAction& ErrorLoggingSettingsAction::getEnabledAction() const
+const gui::ToggleAction& AppFeaturesSettingsAction::getEnabledAction() const
 {
     return mv::errors().getLoggingEnabledAction();
 }
 
-const gui::StringAction& ErrorLoggingSettingsAction::getDsnAction() const
+const gui::StringAction& AppFeaturesSettingsAction::getDsnAction() const
 {
     return mv::errors().getLoggingDsnAction();
 }
 
-const gui::ToggleAction& ErrorLoggingSettingsAction::getShowCrashReportDialogAction() const
+const gui::ToggleAction& AppFeaturesSettingsAction::getShowCrashReportDialogAction() const
 {
     return mv::errors().getLoggingShowCrashReportDialogAction();
 }
