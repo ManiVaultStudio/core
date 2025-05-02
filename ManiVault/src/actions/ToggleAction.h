@@ -35,12 +35,12 @@ public:
         CheckBox            = 0x00004,          /** The widget includes a checkbox */
         PushButton          = 0x00008 | Text,   /** The widget includes a setEnabled push button with text */
         ToggleImage         = 0x00010,          /** Widget uses an image that changes based on toggle state */
+        ToggleImageText     = 0x00020,          /** Widget uses an image that changes based on toggle state and also includes a title label */
 
         /** Push button configurations */
         PushButtonIcon          = (PushButton & ~Text) | Icon,  /** Push button with icon only */
         PushButtonText          = PushButton,                   /** Push button with text only */
         PushButtonIconText      = PushButton | Icon,            /** Push button with icon and text */
-        ToggleImageText         = ToggleImage | Text,           /** Toggle image with text */
 
         Default = CheckBox
     };
