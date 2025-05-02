@@ -8,6 +8,7 @@
 
 #include <QCheckBox>
 #include <QPushButton>
+#include <QLabel>
 
 namespace mv::gui {
 
@@ -31,8 +32,9 @@ public:
         Icon                = 0x00001,          /** Enable push button icon */
         Text                = 0x00002,          /** Enable push button text */
 
-        CheckBox            = 0x00004,          /** The widget includes a check box */
+        CheckBox            = 0x00004,          /** The widget includes a checkbox */
         PushButton          = 0x00008 | Text,   /** The widget includes a setEnabled push button with text */
+        ToggleImage         = 0x00010,          /** Widget uses an image that changes based on toggle state */
 
         /** Push button configurations */
         PushButtonIcon          = (PushButton & ~Text) | Icon,  /** Push button with icon only */
@@ -44,7 +46,7 @@ public:
 
 public:
 
-    /** Check box widget class for setEnabled action */
+    /** Check box widget class for toggle action */
     class CORE_EXPORT CheckBoxWidget : public QCheckBox
     {
     protected:
@@ -64,12 +66,12 @@ public:
         bool eventFilter(QObject* target, QEvent* event) override;
 
     protected:
-        ToggleAction*   _toggleAction;      /** Pointer to setEnabled action */
+        ToggleAction*   _toggleAction;      /** Pointer to toggle action */
 
         friend class ToggleAction;
     };
 
-    /** Push button widget class for setEnabled action */
+    /** Push button widget class for toggle action */
     class CORE_EXPORT PushButtonWidget : public QPushButton
     {
     protected:
@@ -89,8 +91,32 @@ public:
         void resizeEvent(QResizeEvent* event) override;
 
     protected:
-        ToggleAction*   _toggleAction;      /** Pointer to setEnabled action */
+        ToggleAction*   _toggleAction;      /** Pointer to toggle action */
         std::int32_t    _widgetFlags;       /** Widget flags */
+
+        friend class ToggleAction;
+    };
+
+    /** Toggle image label widget class for toggle action */
+    class CORE_EXPORT ToggleImageLabelWidget : public QLabel
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param toggleAction Pointer to toggle action
+         */
+        ToggleImageLabelWidget(QWidget* parent, ToggleAction* toggleAction);
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event that occurred
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+    protected:
+        ToggleAction* _toggleAction;      /** Pointer to toggle action */
 
         friend class ToggleAction;
     };

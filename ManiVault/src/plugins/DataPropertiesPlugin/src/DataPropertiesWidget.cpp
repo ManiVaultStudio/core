@@ -18,10 +18,6 @@ using namespace mv::gui;
 DataPropertiesWidget::DataPropertiesWidget(DataPropertiesPlugin* dataPropertiesPlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _dataPropertiesPlugin(dataPropertiesPlugin),
-    _layout(),
-    _populateTimer(),
-    _scheduledItems(),
-    _currentItems(),
     _abortPopulate(false),
     _isPopulating(false),
     _groupsAction(parent, "Groups"),
