@@ -233,6 +233,30 @@ void ToggleAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
         QPushButton::resizeEvent(event);
 }
 
+ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, ToggleAction* toggleAction) :
+    QLabel(parent),
+    _toggleAction(toggleAction)
+{
+    setAcceptDrops(true);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    const auto updatePixmap = [this]() -> void {
+		setPixmap(QIcon(StyledIcon(_toggleAction->isChecked() ? "toggle-on" : "toggle-off")).pixmap(QSize(20, 20)));
+	};
+
+    updatePixmap();
+
+    connect(_toggleAction, &ToggleAction::changed, this, updatePixmap);
+}
+
+void ToggleAction::ToggleImageLabelWidget::mousePressEvent(QMouseEvent* event)
+{
+    QLabel::mousePressEvent(event);
+
+    if (_toggleAction->isEnabled() && event->button() == Qt::LeftButton && !_toggleAction->getDrag().isDragging())
+        _toggleAction->setChecked(!_toggleAction->isChecked());
+}
+
 QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     if (dynamic_cast<QMenu*>(parent))
@@ -250,6 +274,9 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
 
     if (widgetFlags & WidgetFlag::PushButton)
         layout->addWidget(new ToggleAction::PushButtonWidget(parent, this, widgetFlags));
+
+    if (widgetFlags & WidgetFlag::ToggleImage)
+        layout->addWidget(new ToggleAction::ToggleImageLabelWidget(parent, this));
 
     widget->setLayout(layout);
 
