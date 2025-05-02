@@ -10,6 +10,7 @@
 #include <QHBoxLayout>
 #include <QEvent>
 #include <QMouseEvent>
+#include <QLabel>
 
 using namespace mv::util;
 
@@ -233,16 +234,46 @@ void ToggleAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
         QPushButton::resizeEvent(event);
 }
 
-ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, ToggleAction* toggleAction) :
-    QLabel(parent),
+ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, ToggleAction* toggleAction, const std::int32_t& widgetFlags) :
+    QWidget(parent),
     _toggleAction(toggleAction)
 {
     setAcceptDrops(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     setAlignment(Qt::AlignVCenter);
 
-    const auto updatePixmap = [this]() -> void {
-		setPixmap(QIcon(StyledIcon(_toggleAction->isChecked() ? "toggle-on" : "toggle-off")).pixmap(QSize(20, 20)));
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    auto imageLabel = new QLabel(this);
+
+    QLabel* titleLabel = nullptr;
+
+    layout->addWidget(imageLabel);
+    
+    if (widgetFlags & WidgetFlag::Text)
+    {
+        titleLabel = new QLabel(_toggleAction->text(), this);
+
+        layout->addWidget(titleLabel);
+
+        const auto updateTitle = [this, titleLabel]() -> void {
+            titleLabel->setText(_toggleAction->text());
+		};
+
+        updateTitle();
+
+        connect(_toggleAction, &ToggleAction::textChanged, this, updateTitle);
+    }
+
+    const auto updatePixmap = [this, imageLabel, titleLabel]() -> void {
+        imageLabel->setPixmap(QIcon(StyledIcon(_toggleAction->isChecked() ? "toggle-on" : "toggle-off")).pixmap(QSize(20, 20)));
+
+    	imageLabel->setToolTip(_toggleAction->toolTip());
+
+        if (titleLabel)
+			titleLabel->setToolTip(_toggleAction->toolTip());
 	};
 
     updatePixmap();
@@ -252,7 +283,7 @@ ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, To
 
 void ToggleAction::ToggleImageLabelWidget::mousePressEvent(QMouseEvent* event)
 {
-    QLabel::mousePressEvent(event);
+    QWidget::mousePressEvent(event);
 
     if (_toggleAction->isEnabled() && event->button() == Qt::LeftButton && !_toggleAction->getDrag().isDragging())
         _toggleAction->setChecked(!_toggleAction->isChecked());
@@ -277,7 +308,7 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
         layout->addWidget(new ToggleAction::PushButtonWidget(parent, this, widgetFlags));
 
     if (widgetFlags & WidgetFlag::ToggleImage)
-        layout->addWidget(new ToggleAction::ToggleImageLabelWidget(parent, this));
+        layout->addWidget(new ToggleAction::ToggleImageLabelWidget(parent, this, widgetFlags));
 
     widget->setLayout(layout);
 
