@@ -6,9 +6,8 @@
 
 #include "GlobalSettingsGroupAction.h"
 
-#include "actions/ToggleAction.h"
-#include "actions/StringAction.h"
-#include "actions/TriggerAction.h"
+#include "actions/ErrorLoggingAppFeatureAction.h"
+#include "actions/DynamicContentAppFeatureAction.h"
 
 namespace mv::gui
 {
@@ -32,11 +31,12 @@ public:
 
 public: // Action getters
 
-    //const gui::TriggerAction& getLoggingAskConsentDialogAction() const;     /** Get action for asking the user for consent to log errors */
-    //const gui::ToggleAction& getUserHasOptedAction() const;                 /** Get action for user has opted */  
-    //const gui::ToggleAction& getEnabledAction() const;                      /** Get action for logging enabled */
-    //const gui::StringAction& getDsnAction() const;                          /** Get action for logging data source name (DSN) */
-    //const gui::ToggleAction& getShowCrashReportDialogAction() const;        /** Get action for showing a crash report dialog when the application fails */
+    const gui::ErrorLoggingAppFeatureAction& getErrorLoggingAppFeatureAction() const { return _errorLoggingAppFeatureAction; }
+    const gui::DynamicContentAppFeatureAction& getDynamicContentAppFeatureAction() const { return _dynamicContentAppFeatureAction; }
+
+private:
+    ErrorLoggingAppFeatureAction        _errorLoggingAppFeatureAction;      /** App feature action for configuring error logging */
+    DynamicContentAppFeatureAction      _dynamicContentAppFeatureAction;    /** App feature action for configuring dynamic content */
 };
 
 }

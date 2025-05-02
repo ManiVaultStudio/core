@@ -8,7 +8,9 @@ namespace mv::gui
 {
 
 AppFeaturesSettingsAction::AppFeaturesSettingsAction(QObject* parent) :
-    GlobalSettingsGroupAction(parent, "App Features", false)
+    GlobalSettingsGroupAction(parent, "App Features", false),
+    _errorLoggingAppFeatureAction(this),
+    _dynamicContentAppFeatureAction(this)
 {
 //#ifdef ERROR_LOGGING
 //    _groupsAction.addGroupAction(&mv::settings().getErrorLoggingSettingsAction());
