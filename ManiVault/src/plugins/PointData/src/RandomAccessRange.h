@@ -35,7 +35,7 @@ namespace mv
             return _end;
         }
 
-        decltype(auto) operator[](std::size_t i) const
+        auto operator[](std::size_t i) const
         {
             return _begin[i];
         }

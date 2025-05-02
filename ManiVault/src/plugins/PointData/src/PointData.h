@@ -8,14 +8,19 @@
 
 #include "RawData.h"
 
+
 #include "LinkedData.h"
 #include "PointDataRange.h"
 #include "Set.h"
 #include "SparseMatrix.h"
 
+#include "PointDataUtil.h"
+#include "VariantOfMatrixTypes.h"
+#include "MatrixUtils.h"
+
 #include "event/EventListener.h"
 
-#include <biovault_bfloat16/biovault_bfloat16.h>
+//#include <biovault_bfloat16/biovault_bfloat16.h>
 
 #include <QDebug>
 #include <QMap>
@@ -30,6 +35,9 @@
 
 using namespace mv::plugin;
 
+
+
+
 namespace mv
 {
     // From "graphics/Vector2f.h"
@@ -38,6 +46,10 @@ namespace mv
     namespace gui {
         class GroupAction;
     }
+
+    using point_size_t = std::uint32_t;
+    using dimension_size_t = std::uint32_t;
+    using element_size_t = std::uint64_t;
 }
 
 // =============================================================================
@@ -56,7 +68,135 @@ class ClusterAction;
 
 class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
+
+    
+
 public:
+
+    
+
+    using VariantOfMatrices = mv_matrix::VariantOfMatrices;
+
+    class StorageConfiguration : protected mv_matrix::Configuration
+    {
+        friend class PointData;
+        static constexpr std::array<const char*, 3> SpecialDataTypeNames = { "Original", "Optimized (lossless)", "Optimized (bfloat16)" };
+        enum SpecialDataTypeID { SET_Original, SET_lossless, SET_bfloat16 };
+
+        StorageConfiguration() = delete;
+    public:
+        StorageConfiguration(const StorageConfiguration  &other) = default;
+            
+        StorageConfiguration(const std::string &storageTypeName, const std::string &dataTypeName)
+            : mv_matrix::Configuration(storageTypeName, dataTypeName)
+        {
+
+        }
+
+        StorageConfiguration(const QString &storageTypeName, const QString &dataTypeName)
+            : mv_matrix::Configuration(storageTypeName.toStdString(), dataTypeName.toStdString())
+        {
+
+        }
+
+        StorageConfiguration(const std::string &dataTypeName)
+            : mv_matrix::Configuration(dataTypeName)
+        {
+
+        }
+
+        StorageConfiguration(const char * dataTypeName)
+            : mv_matrix::Configuration(dataTypeName)
+        {
+
+        }
+
+        template<typename T>
+        StorageConfiguration(const std::string &storageTypeName, T )
+            : mv_matrix::Configuration::Configuration(storageTypeName, T())
+        {
+            static_assert(std::numeric_limits<T>::is_specialized);
+        }
+
+        template<typename T>
+        StorageConfiguration(std::nullptr_t a, T)
+            : mv_matrix::Configuration::Configuration(a, T())
+        {
+            static_assert(std::numeric_limits<T>::is_specialized);
+        }
+       
+
+        template<typename T>
+        void setDataType()
+        {
+            setDataTypeTo<T>();
+        }
+
+
+        QString qStorageTypeName() const
+        {
+            return QString::fromStdString(storageType());
+        }
+
+        QString qDataTypeName() const
+        {
+            return QString::fromStdString(dataType());
+        }
+
+        bool isSpecialDataType() const
+        {
+            auto found = std::find(SpecialDataTypeNames.cbegin(), SpecialDataTypeNames.cend(), dataType());
+            return (found != SpecialDataTypeNames.cend());
+        }
+
+        bool allowBfloat16Optimization() const
+        {
+            return (dataType() == SpecialDataTypeNames[SET_bfloat16]);
+        }
+
+        bool isOriginal() const
+        {
+            return (dataType() == SpecialDataTypeNames[SET_Original]);
+        }
+
+        bool isLosslessOptimized() const
+        {
+            return (dataType() == SpecialDataTypeNames[SET_lossless]);
+        }
+
+        bool isOptimized() const
+        {
+            return (allowBfloat16Optimization() || isLosslessOptimized());
+        }
+
+        void optimizeDataType()
+        {
+            Configuration::setDataType(SpecialDataTypeNames[SET_lossless]);
+        }
+
+        static QStringList getListOfSpecialDataTypeNames()
+        {
+            return QStringList(SpecialDataTypeNames.cbegin(), SpecialDataTypeNames.cend());
+        }
+    };
+
+    static constexpr std::size_t NumberOfElementTypes = VariantOfMatrices::NumberOfElementTypes;
+
+    static constexpr auto ElementTypeNames()
+    {
+        return VariantOfMatrices::getElementTypeNames();
+    }
+
+    static constexpr auto MatrixTypeNames()
+    {
+        return VariantOfMatrices::getMatrixTypeNames();
+    }
+
+    __declspec(deprecated) static constexpr auto getElementTypeNames()
+    {
+        return VariantOfMatrices::getElementTypeNames();
+    }
+    
     enum class ElementTypeSpecifier
     {
         float32,
@@ -70,96 +210,55 @@ public:
     };
 
 private:
-    using VariantOfVectors = std::variant <
-        std::vector<float>,
-        std::vector<biovault::bfloat16_t>,
-        std::vector<std::int32_t>,
-        std::vector<std::uint32_t>,
-        std::vector<std::int16_t>,
-        std::vector<std::uint16_t>,
-        std::vector<std::int8_t>,
-        std::vector<std::uint8_t> >;
-
-    // Sets the index of the specified variant. If the new index is different from the previous one, the value will be reset. 
-    // Inspired by `expand_type` from kmbeutel at
-    // https://www.reddit.com/r/cpp/comments/f8cbzs/creating_stdvariant_based_on_index_at_runtime/?rdt=52905
-    template <typename... Alternatives>
-    static void setIndexOfVariant(std::variant<Alternatives...>& var, std::size_t index)
-    {
-        if (index != var.index())
-        {
-            assert(index < sizeof...(Alternatives));
-            const std::variant<Alternatives...> variants[] = { Alternatives{ }... };
-            var = variants[index];
-        }
-    }
-
-
-    // Returns the index of the specified alternative: the position of the alternative type withing the variant.
-    // Inspired by `variant_index` from Bargor at
-    // https://stackoverflow.com/questions/52303316/get-index-by-type-in-stdvariant
-    template<typename Variant, typename Alternative, std::size_t index = 0>
-    static constexpr std::size_t getIndexOfVariantAlternative()
-    {
-        static_assert(index < std::variant_size_v<Variant>);
-
-        if constexpr (std::is_same_v<std::variant_alternative_t<index, Variant>, Alternative>)
-        {
-            return index;
-        }
-        else
-        {
-            return getIndexOfVariantAlternative<Variant, Alternative, index + 1>();
-        }
-    }
 
     template <typename T>
     static constexpr ElementTypeSpecifier getElementTypeSpecifier()
     {
-        constexpr auto index = getIndexOfVariantAlternative<VariantOfVectors, std::vector<T>>();
+        constexpr auto index = VariantOfMatrices::getIndexOfType<mv_matrix::DenseMatrix<T>>();
         return static_cast<ElementTypeSpecifier>(index);
     }
 
     template <typename T>
-    const std::vector<T>& getConstVector() const
+    __declspec(deprecated)  const std::vector<T>& getConstVector() const
     {
         // This function should only be used to access the currently selected vector.
-        assert(std::holds_alternative<std::vector<T>>(_variantOfVectors));
-        return std::get<std::vector<T>>(_variantOfVectors);
+        static_assert(std::holds_alternative<mv_matrix::DenseMatrix<T>>(_variantOfMatrices));
+        return getConstVector<T>(std::get<mv_matrix::DenseMatrix<T>>(_variantOfMatrices));
     }
 
     template <typename T>
-    const std::vector<T>& getVector() const
+    __declspec(deprecated) const std::vector<T>& getVector() const
     {
         return getConstVector<T>();
     }
 
     template <typename T>
-    std::vector<T>& getVector()
+    __declspec(deprecated) std::vector<T>& getVector()
     {
         return const_cast<std::vector<T>&>(getConstVector<T>());
     }
 
     /// Returns the size of the std::vector currently held by _variantOfVectors.
-    std::size_t getSizeOfVector() const
+    __declspec(deprecated) std::size_t getSizeOfVector() const
     {
-        return std::visit([](const auto& vec) { return vec.size(); }, _variantOfVectors);
+        const std::string mesg = __FUNCSIG__ + std::string(" is not implemented");
+        throw std::exception(mesg.c_str());
+        return 0;
     }
 
     /// Resizes the std::vector currently held by _variantOfVectors.
-    void resizeVector(const std::size_t newSize)
+    __declspec(deprecated) void resizeVector(const std::size_t newSize)
     {
-        std::visit([newSize](auto& vec) { vec.resize(newSize); }, _variantOfVectors);
+        const std::string mesg = __FUNCSIG__ + std::string(" is not implemented");
+        throw std::exception(mesg.c_str());
+       
     }
 
-    void setElementTypeSpecifier(const ElementTypeSpecifier elementTypeSpecifier)
-    {
-        setIndexOfVariant(_variantOfVectors, static_cast<std::size_t>(elementTypeSpecifier));
-    }
+   
 
     ElementTypeSpecifier getElementTypeSpecifier() const
     {
-        return static_cast<ElementTypeSpecifier>(_variantOfVectors.index());
+        return static_cast<ElementTypeSpecifier>(_variantOfMatrices.getElementTypeIndex());
     }
 
     /// Resizes the currently held data vector to the specified
@@ -168,18 +267,12 @@ private:
     template <typename T>
     void convertData(const T* const data, const std::size_t numberOfElements)
     {
-        std::visit([data, numberOfElements](auto& vec)
-        {
-            vec.resize(numberOfElements);
-
-            std::size_t i{};
-            for (auto& elem: vec)
+        
+        std::visit([data, numberOfElements](auto& mat)
             {
-                elem = static_cast<std::remove_reference_t<decltype(elem)>>(data[i]);
-                ++i;
-            }
-        },
-        _variantOfVectors);
+                mat.convertData(data, numberOfElements);
+            },
+            _variantOfMatrices);
     }
 
 
@@ -203,7 +296,7 @@ public:
     /// Yields the n-th supported element type. Corresponds to the n-th entry
     /// in the array of type names, returned by getElementTypeNames().
     template <std::size_t N>
-    using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
+    using ElementTypeAt = VariantOfMatrices::ElementTypeAt<N>;
 
     PointData(PluginFactory* factory) : RawData(factory, PointType) { }
     ~PointData(void) override;
@@ -212,11 +305,11 @@ public:
 
     mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
-    std::uint32_t getNumPoints() const;
+    mv::point_size_t getNumPoints() const;
 
-    std::uint32_t getNumDimensions() const;
+    mv::dimension_size_t getNumDimensions() const;
 
-    std::uint64_t getNumberOfElements() const;
+    mv::element_size_t getNumberOfElements() const;
 
     /**
      * Get amount of data occupied by the raw data
@@ -230,92 +323,292 @@ public:
     void* getDataVoidPtr();
     const void* getDataConstVoidPtr() const;
 
-    static constexpr std::array<const char*, std::variant_size_v<VariantOfVectors>> getElementTypeNames()
-    {
-        return
-        { {
-            "float32",
-            "bfloat16",
-            "int32",
-            "uint32",
-            "int16",
-            "uint16",
-            "int8",
-            "uint8"
-        } };
-    }
-
     // Similar to C++17 std::visit.
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
     {
-        return std::visit([functionObject](const auto& vec) -> ReturnType
+        
+        return std::visit([functionObject](const auto& matrix) -> ReturnType
             {
-                return functionObject(std::cbegin(vec), std::cend(vec));
+                return matrix.constVisitFromBeginToEnd<ReturnType>(functionObject);
             },
-            _variantOfVectors);
+            _variantOfMatrices);
     }
 
     // Similar to C++17 std::visit.
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType visitFromBeginToEnd(FunctionObject functionObject)
     {
-        return std::visit([functionObject](auto& vec) -> ReturnType
+        
+        return std::visit([functionObject](auto& matrix) -> ReturnType
             {
-                return functionObject(std::begin(vec), std::end(vec));
+                return matrix.visitFromBeginToEnd<ReturnType>(functionObject);
             },
-            _variantOfVectors);
+            _variantOfMatrices);
     }
 
-    void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
-    void extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
-    void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
+    // New Dense and Sparse Matrix visit functions
+
+    /**
+     * Visit elements in a sparse manner (so ignore zero values).
+     *
+     * @param functionObject  Function or lambda to apply to each data element in the matrix
+     * @param task pointer to DatasetTask to track progress.
+     */
+    template <typename FunctionObject>
+    void sparseVisit(FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([functionObject,task](auto& matrix)
+            {
+                matrix.sparseVisitElements(functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Visit elements in a dense manner (so also visit 0 values).
+    *
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename FunctionObject>
+    void denseVisit(FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([functionObject, task](auto& matrix)
+            {
+                matrix.denseVisitElements(functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements row-wise in a sparse manner
+    *
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename FunctionObject>
+    void sparseParRowVisit(FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([functionObject, task](auto& matrix)
+            {
+                matrix.rowParallelSparseVisitElements(functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+   * Parallel Visit elements row-wise in a dense manner
+   *
+   * @param functionObject  Function or lambda to apply to each data element in the matrix
+   * @param task pointer to DatasetTask to track progress.
+   */
+    template <typename FunctionObject>
+    void denseParRowVisit(FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([functionObject, task](auto& matrix)
+            {
+                matrix.rowParallelDenseVisitElements(functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements column-wise in a sparse manner
+    *
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename FunctionObject>
+    void sparseParColVisit(FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([functionObject, task](auto& matrix)
+            {
+                matrix.columnParallelSparseVisitElements(functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements column-wise in a dense manner
+    *
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename FunctionObject>
+    void denseParColVisit(FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([functionObject, task](auto& matrix)
+            {
+                matrix.columnParallelDenseVisitElements(functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements row-wise in a sparse manner
+    *
+    * @param rows The range of rows to visit
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename RowRange, typename FunctionObject>
+    void sparseParRowVisit(const RowRange& rows, FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([rows, functionObject, task](auto& matrix)
+            {
+                matrix.rowParallelSparseVisitElements(rows, functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements row-wise in a dense manner
+    *
+    * @param rows The range of rows to visit
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename RowRange, typename FunctionObject>
+    void denseParRowVisit(const RowRange& rows, FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([rows, functionObject, task](auto& matrix)
+            {
+                matrix.rowParallelDenseVisitElements(rows, functionObject, task);
+            }, _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements column-wise in a sparse manner
+    *
+    * @param rows The range of rows to visit
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename RowRange, typename FunctionObject>
+    void sparseParColVisit(const RowRange& rows, FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([rows, functionObject, task](auto& matrix)
+            {
+                matrix.columnParallelSparseVisitElements(rows, functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+   * Parallel Visit elements column-wise in a dense manner
+   *
+   * @param rows The range of rows to visit
+   * @param functionObject  Function or lambda to apply to each data element in the matrix
+   * @param task pointer to DatasetTask to track progress.
+   */
+    template <typename RowRange, typename FunctionObject>
+    void denseParColVisit(const RowRange& rows, FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([rows, functionObject, task](auto& matrix)
+            {
+                matrix.columnParallelDenseVisitElements(rows, functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements row-wise in a sparse manner
+    *
+    * @param rows The range of rows to visit
+    * @param rows The range of columns to visit
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename RowRange, typename ColumnRange, typename FunctionObject>
+    void sparseParRowVisit(const RowRange& rows, const ColumnRange& columns, FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([rows, columns, functionObject, task](auto& matrix)
+            {
+                matrix.rowParallelSparseVisitElements(rows, columns, functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements row-wise in a dense manner
+    *
+    * @param rows The range of rows to visit
+    * @param rows The range of columns to visit
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename RowRange, typename ColumnRange, typename FunctionObject>
+    void denseParRowVisit(const RowRange& rows, const ColumnRange& columns, FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([rows, columns, functionObject, task](auto& matrix)
+            {
+                matrix.rowParallelDenseVisitElements(rows, columns, functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements column-wise in a sparse manner
+    *
+    * @param rows The range of rows to visit
+    * @param rows The range of columns to visit
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename RowRange, typename ColumnRange, typename FunctionObject>
+    void sparseParColVisit(const RowRange& rows, const ColumnRange& columns, FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([rows, columns, functionObject, task](auto& matrix)
+            {
+                matrix.columnParallelSparseVisitElements(rows, columns, functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+    /**
+    * Parallel Visit elements column-wise in a dense manner
+    *
+    * @param rows The range of rows to visit
+    * @param rows The range of columns to visit
+    * @param functionObject  Function or lambda to apply to each data element in the matrix
+    * @param task pointer to DatasetTask to track progress.
+    */
+    template <typename RowRange, typename ColumnRange, typename FunctionObject>
+    void denseParColVisit(const RowRange& rows, const ColumnRange& columns, FunctionObject functionObject, mv::DatasetTask* task = nullptr) const
+    {
+        return std::visit([rows, columns, functionObject, task](auto& matrix)
+            {
+                matrix.columnParallelDenseVisitElements(rows, columns, functionObject, task);
+            },
+            _variantOfMatrices);
+    }
+
+
+    void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex, mv::DatasetTask* task = nullptr) const;
+    void extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, mv::DatasetTask* task = nullptr) const;
+    void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices, mv::DatasetTask* task = nullptr) const;
     
     template <typename ResultContainer, typename DimensionIndices>
-    void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
+    void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, mv::DatasetTask* task = nullptr) const
     {
         CheckDimensionIndices(dimensionIndices);
-        std::visit([&resultContainer, this, &dimensionIndices](const auto& vec)
+        std::visit([&resultContainer, &dimensionIndices, task](const auto& matrix)
             {
-                const std::ptrdiff_t numPoints{ getNumPoints() };
-                std::ptrdiff_t resultIndex{};
-
-                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
-                {
-                    const std::ptrdiff_t n{ pointIndex * _numDimensions };
-
-                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
-                    {
-                        resultContainer[resultIndex] = vec[n + dimensionIndex];
-                        ++resultIndex;
-                    }
-                }
+                matrix.populateFullDataForDimensions(resultContainer, dimensionIndices, task);
             },
-            _variantOfVectors);
+            _variantOfMatrices);
     }
 
     template <typename ResultContainer, typename DimensionIndices, typename Indices>
-    void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const Indices& indices) const
+    void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const Indices& indices, mv::DatasetTask* task = nullptr) const
     {
         CheckDimensionIndices(dimensionIndices);
-
-        std::visit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
+        std::visit([&resultContainer, &dimensionIndices, &indices, task](const auto& matrix)
             {
-                const std::ptrdiff_t numPoints{ static_cast<std::uint32_t>(indices.size()) };
-                std::ptrdiff_t resultIndex{};
-
-                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
-                {
-                    const std::ptrdiff_t n{ indices[pointIndex] * _numDimensions };
-
-                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
-                    {
-                        resultContainer[resultIndex] = vec[n + dimensionIndex];
-                        ++resultIndex;
-                    }
-                }
+                matrix.populateDataForDimensions(resultContainer, dimensionIndices, indices, task);
             },
-            _variantOfVectors);
+            _variantOfMatrices);
     }
 
     const std::vector<QString>& getDimensionNames() const;
@@ -323,24 +616,20 @@ public:
     /// Returns the number of types, supported as element type of the internal data storage. 
     static constexpr auto getNumberOfSupportedElementTypes()
     {
-        return getElementTypeNames().size();
+        return ElementTypeNames().size();
     }
 
-    ElementTypeSpecifier getElementType() const
-    {
-        return getElementTypeSpecifier();
-    }
-
-    void setElementType(const ElementTypeSpecifier elementTypSpecifier)
-    {
-        setElementTypeSpecifier(elementTypSpecifier);
-    }
+   
 
     template <typename T>
     void setElementType()
     {
-        constexpr auto elementTypSpecifier = getElementTypeSpecifier<T>();
-        setElementType(elementTypSpecifier);
+        _variantOfMatrices.setMatrixType<mv_matrix::DenseMatrix<T>>();
+    }
+
+    bool setStorageConfiguration(const StorageConfiguration &config)
+    {
+        return _variantOfMatrices.setConfiguration(config);
     }
 
     /// Converts the specified data to the internal data, using static_cast for
@@ -349,9 +638,12 @@ public:
     /// points.
     /// \note This function does not affect the selected internal data type.
     template <typename T>
-    void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
+    void convertData(const T* const data, const mv::point_size_t numPoints, const  mv::dimension_size_t numDimensions)
     {
-        convertData(data, numPoints * numDimensions);
+        std::visit([this, data, numPoints, numDimensions](auto& matrix)
+            {
+                matrix.convertData(data, numPoints * numDimensions);
+            }, _variantOfMatrices);
         _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
@@ -359,9 +651,12 @@ public:
     /// Convenience overload, allowing an std::vector or an std::array as
     /// input data container.
     template <typename T>
-    void convertData(const T& inputDataContainer, const std::size_t numDimensions)
+    void convertData(const T& inputDataContainer, const  mv::dimension_size_t numDimensions)
     {
-        convertData(inputDataContainer.data(), inputDataContainer.size());
+        std::visit([this, &inputDataContainer, numDimensions](auto& matrix)
+            {
+                matrix.convertData(inputDataContainer.data(), inputDataContainer.size());
+            }, _variantOfMatrices);
         _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
@@ -369,36 +664,187 @@ public:
     /// dimensions as specified, and sets the selected internal data type
     /// according to the specified data type T.
     template <typename T>
-    void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
+    void setData(const T* const data, const mv::point_size_t numPoints, const mv::dimension_size_t numDimensions)
     {
-         _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
-         _numDimensions = static_cast<std::uint32_t>(numDimensions);
+        _variantOfMatrices.setMatrixType<mv_matrix::DenseMatrix<T>>();
+        _numRows = static_cast<std::uint64_t>(numPoints);
+        _numDimensions = static_cast<std::uint32_t>(numDimensions);
+
+        std::visit([&data, numPoints, numDimensions](auto& matrix)
+            {
+                matrix.setData(data, numPoints, numDimensions);
+            }, _variantOfMatrices);
     }
 
 
     /// Convenience overload to allow clearing the data by setData(nullptr, 0, numDimensions). 
     void setData(std::nullptr_t data, std::size_t numPoints, std::size_t numDimensions);
 
+    
+    
 
-    /// Copies the data from the specified vector into the internal data, sets
-    /// the number of dimensions as specified, and sets the selected internal
-    /// data type according to the specified data type T.
-    template <typename T>
-    void setData(const std::vector<T>& data, const std::size_t numDimensions)
+private:
+
+    template <typename T, typename U>
+    bool tryToSetStorageTypeHead(const std::string& matrixType, const T minVal, const T maxVal)
     {
-        _variantOfVectors = VariantOfVectors(data);
-        _numDimensions = static_cast<unsigned int>(numDimensions);
+        if constexpr (sizeof(U) <= sizeof(T))
+            if (mv_matrix::in_range<U>(minVal, maxVal))
+                if (_variantOfMatrices.setConfiguration(mv_matrix::Configuration(matrixType, U() )))
+                return true;
+        return false;
     }
 
-    /// Efficiently "moves" the data from the specified vector into the internal
-    /// data, sets the number of dimensions as specified, and sets the selected
-    /// internal data type according to the specified data type T.
-    template <typename T>
-    void setData(std::vector<T>&& data, const std::size_t numDimensions)
+    template <typename T, typename Head, typename... Tail>
+    bool tryToSetStorageType(const std::string& matrixType, const T minVal, const T maxVal)
     {
-        _variantOfVectors = VariantOfVectors(std::move(data));
-        _numDimensions = static_cast<unsigned int>(numDimensions);
+        if (tryToSetStorageTypeHead<T, Head>(matrixType, minVal, maxVal))
+            return true;
+        else if constexpr (sizeof...(Tail))
+            return tryToSetStorageType<T, Tail...>(matrixType, minVal, maxVal);
+        return false;
     }
+
+
+    template <typename T>
+    bool setDataStorageType(StorageConfiguration storageConfiguration, const std::vector<T>& values)
+    {
+        bool storageTypeSet = false;
+
+        if (!storageConfiguration.isSpecialDataType())
+        {
+            storageTypeSet = setStorageConfiguration(storageConfiguration);
+            if (!storageTypeSet)
+            {
+                // try to find an alternative
+                storageConfiguration.optimizeDataType();
+                return setDataStorageType(storageConfiguration, values);
+            }
+        }
+        else
+        {
+            if (storageConfiguration.isOriginal())
+            {
+                storageConfiguration.setDataType<T>();
+                storageTypeSet = setStorageConfiguration(storageConfiguration);
+                if (!storageTypeSet)
+                {
+                    // try to find an alternative
+                    storageConfiguration.optimizeDataType();
+                    return setDataStorageType(storageConfiguration, values);
+                }
+            }
+            else // Find optimal elementType to store the data 
+            {
+                const bool allowBfloat16 = storageConfiguration.allowBfloat16Optimization();
+                auto sizeOfT = sizeof(T);
+                auto minmax_pair = std::minmax_element(values.cbegin(), values.cend());
+                T minVal = *(minmax_pair.first);
+                T maxVal = *(minmax_pair.second);
+
+                const std::string storageType = storageConfiguration.storageType();
+                if (mv::pointutils::is_integer(minVal) && mv::pointutils::is_integer(maxVal) && mv::pointutils::contains_only_integers(values))
+                {
+                    if (*(minmax_pair.first) < 0)
+                    {
+                        if (allowBfloat16)
+                            storageTypeSet = tryToSetStorageType<T, std::int8_t, std::int16_t, biovault::bfloat16_t, std::int32_t>(storageType, minVal, maxVal);
+                        else
+                            storageTypeSet = tryToSetStorageType<T, std::int8_t, std::int16_t, std::int32_t>(storageType, minVal, maxVal);
+                    }
+                    else
+                    {
+                        if (allowBfloat16)
+                            storageTypeSet = tryToSetStorageType<T, std::uint8_t, std::uint16_t, biovault::bfloat16_t, std::uint32_t, float, std::uint64_t, double>(storageType, minVal, maxVal);
+                        else
+                            storageTypeSet = tryToSetStorageType<T, std::uint8_t, std::uint16_t, std::uint32_t, float, std::uint64_t, double>(storageType, minVal, maxVal);
+                    }
+                }
+
+                if (!storageTypeSet)
+                {
+                    if (allowBfloat16)
+                        storageTypeSet = tryToSetStorageType<T, biovault::bfloat16_t, float, double>(storageType, minVal, maxVal);
+                    else
+                        storageTypeSet = tryToSetStorageType<T, float, double>(storageType, minVal, maxVal);
+                }
+            }
+        }
+        
+        return storageTypeSet;
+    }
+public:
+
+    
+
+    template <typename T>
+    bool setDataAs(const StorageConfiguration &storageConfiguration, std::vector<T>& data, const std::size_t numDimensions)
+    {
+        bool storageTypeSet = setDataStorageType(storageConfiguration, data);
+
+        if (storageTypeSet)
+        {
+            std::visit([&data, numDimensions,this](auto& matrix) {
+
+                matrix.setData(data, numDimensions);
+                _numDimensions = matrix.columns();
+                _numRows = matrix.rows();
+
+                }, _variantOfMatrices);
+        }
+
+        return storageTypeSet;
+    }
+
+   
+
+    template <typename T>
+    __declspec(deprecated) void setData(std::vector<T> data, const mv::dimension_size_t numDimensions)
+    {
+        setDataAs(data, numDimensions);
+    }
+
+    template<typename RowSizeType, typename DimensionSizeType, typename RowType, typename ColumnType, typename ValueType>
+    bool setDataAs(const StorageConfiguration &storageConfiguration, RowSizeType numRows, DimensionSizeType numDimensions, std::vector<RowType>& rowPointers, std::vector<ColumnType>& colIndices, std::vector<ValueType>& values)
+    {
+        bool storageTypeSet = setDataStorageType(storageConfiguration, values);
+
+        if (storageTypeSet)
+        {
+            std::visit([&rowPointers, &colIndices, &values, numRows, numDimensions,this](auto& matrix) {
+
+                matrix.setData(numRows, numDimensions, rowPointers, colIndices, values);
+                _numDimensions = matrix.columns();
+                _numRows = matrix.rows();
+                }, _variantOfMatrices);
+        }
+
+        return storageTypeSet;
+    }
+
+    template<typename RowSizeType, typename DimensionSizeType, typename RowType, typename ColumnType, typename ValueType>
+    bool setDataAs(const QString& matrixType, RowSizeType numRows, DimensionSizeType numDimensions, std::vector<RowType>& rowPointers, std::vector<ColumnType>& colIndices, std::vector<ValueType>& values)
+    {
+        StorageConfiguration config(matrixType, ValueType());
+        return setDataAs(config, data, numDimensions);
+    }
+
+    template <typename T>
+    bool setDataAs(const QString& matrixType, std::vector<T>& data, const std::size_t numDimensions)
+    {
+        StorageConfiguration config(matrixType, T());
+        return setDataAs(config, data, numDimensions);
+    }
+
+    template <typename T>
+    bool setDataAs(std::vector<T>& data, const std::size_t numDimensions)
+    {
+        StorageConfiguration config(nullptr, T());
+        return setDataAs(config, data, numDimensions);
+    }
+
+    static QMap<QString, QStringList> getSupportedStorageTypes();
+    
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
@@ -406,66 +852,28 @@ public:
     // data vector, converted to float.
     // Will work fine, even when the internal data element type is not float.
     // However, may not perform well when retrieving a large number of values.
-    float getValueAt(std::size_t index) const;
+    __declspec(deprecated) float getValueAt(mv::element_size_t index) const;
 
     // Sets the value of the element at the specified position in the current
     // data vector, converted to the internal data element type. 
     // Will work fine, even when the internal data element type is not float.
     // However, may not perform well when setting a large number of values.
-    void setValueAt(std::size_t index, float newValue);
+    __declspec(deprecated) void setValueAt(mv::element_size_t index, float newValue);
 
-public: // Sparse data, test implementation
-    class Experimental {
-        friend class PointData;
-    public:
+    // Returns the value of the element at the specified position in the current
+    // data vector, converted to float.
+    // Will work fine, even when the internal data element type is not float.
+    // However, may not perform well when retrieving a large number of values.
+    float getValueAt(mv::point_size_t point_idx, mv::dimension_size_t dim_idx) const;
 
-        static void setSparseData(PointData* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
-        {
-            points->_sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
-            points->_numRows = static_cast<uint32_t>(numRows);
-            points->setData(std::vector<float> {}, numCols);
-            points->_isDense = false;
-        }
+    // Sets the value of the element at the specified position in the current
+    // data vector, converted to the internal data element type. 
+    // Will work fine, even when the internal data element type is not float.
+    // However, may not perform well when setting a large number of values.
+    void setValueAt(mv::point_size_t point_idx, mv::dimension_size_t dim_idx, float newValue);
 
-        static void setSparseData(PointData* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<size_t>&& colIndices, std::vector<float>&& values)
-        {
-            points->_sparseData.setData(numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
-            points->_numRows = static_cast<uint32_t>(numRows);
-            points->setData(std::vector<float> {}, numCols);
-            points->_isDense = false;
-        }
+  
 
-        static SparseMatrix<size_t, size_t, float>& getSparseData(PointData* points)
-        { 
-            return points->_sparseData; 
-        }
-
-        static bool isDense(const PointData* points)
-        {
-            return points->_isDense;
-        }
-
-        static void setIsDense(PointData* points, bool isDense)
-        {
-            points->_isDense = isDense;
-        }
-
-        static size_t getNumNonZeroElements(const PointData* points)
-        {
-            return points->_sparseData.getNumNonZeros();
-        }
-
-        static std::vector<float> row(const PointData* points, size_t rowIndex)
-        {
-            if (points->_isDense)
-            {
-                qWarning() << ".row() not implemented for dense data";
-                return {};
-            }
-
-            return points->_sparseData.getDenseRow(rowIndex);
-        }
-    };
 
 public: // Serialization
     /**
@@ -480,19 +888,23 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const final;
 
+    
+
 private:
-    VariantOfVectors _variantOfVectors;
+    VariantOfMatrices _variantOfMatrices;
 
     /** Number of features of each data point */
-    unsigned int _numDimensions = 1;
+    mv::dimension_size_t _numDimensions = 1;
 
     std::vector<QString> _dimNames;
 
-private: // Sparse data, experimental
-    unsigned int _numRows = 0;
-    SparseMatrix<size_t, size_t, float> _sparseData = {};
 
+    mv::point_size_t _numRows = 0;
+
+    
     bool _isDense = true;
+
+    
 };
 
 // =============================================================================
@@ -501,13 +913,17 @@ private: // Sparse data, experimental
 
 class POINTDATA_EXPORT Points : public mv::DatasetImpl
 {
-private:
+
+    mv::DatasetTask* getDatasetTaskPtr(const QString& description) const;
+
     /* Private helper function for visitData. Helps to reduces duplicate
     * code between const and non-const overloads of visitData.
     */
     template <typename ReturnType = void, typename FunctionObject>
     static ReturnType privateVisitData(Points& points, const FunctionObject functionObject)
     {
+        assert(false); // still need to check this for sparse matrices
+
         return points.template visitFromBeginToEnd<ReturnType>(
                 [&points, functionObject](const auto begin, const auto end) -> ReturnType
                 {
@@ -546,6 +962,8 @@ private:
     template <typename ReturnType = void, typename FunctionObject>
     static ReturnType privateVisitSourceData(Points& points, const FunctionObject functionObject)
     {
+        assert(false); // still need to check this for sparse matrices
+
         // Note that PointsType may or may not be "const".
         auto sourceData = points.getSourceDataset<Points>();
 
@@ -596,6 +1014,9 @@ private:
     }
 
 public:
+
+    using StorageConfiguration = PointData::StorageConfiguration;
+
     Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
     ~Points() override;
 
@@ -604,25 +1025,109 @@ public:
     /// Allows read-only access to the internal point data vector, from its begin to its end.
     /// Similar to C++17 std::visit.
     template <typename ReturnType = void, typename FunctionObject>
-    ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
+    __declspec(deprecated) ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
     {
         return getRawData<PointData>()->constVisitFromBeginToEnd<ReturnType>(functionObject);
     }
 
     /// Convenience member function, just calling constVisitFromBeginToEnd.
     template <typename ReturnType = void, typename FunctionObject>
-    ReturnType visitFromBeginToEnd(FunctionObject functionObject) const
+    __declspec(deprecated) ReturnType visitFromBeginToEnd(FunctionObject functionObject) const
     {
         return constVisitFromBeginToEnd<ReturnType>(functionObject);
     }
 
     /// Non-const overload, allowing read + write access to the internal point data vector, from its begin to its end.
     template <typename ReturnType = void, typename FunctionObject>
-    ReturnType visitFromBeginToEnd(FunctionObject functionObject)
+    __declspec(deprecated) ReturnType visitFromBeginToEnd(FunctionObject functionObject)
     {
         return getRawData<PointData>()->visitFromBeginToEnd<ReturnType>(functionObject);
     }
 
+    template <typename FunctionObject>
+    void sparseVisit(FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->sparseVisitElements(functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename FunctionObject>
+    void denseVisit(FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->denseVisitElements(functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename FunctionObject>
+    void sparseParRowVisit(FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->sparseParRowVisit(functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename FunctionObject>
+    void denseParRowVisit(FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->denseParRowVisit(functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename FunctionObject>
+    void sparseParColVisit(FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->sparseParColVisit(functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename FunctionObject>
+    void denseParColVisit(FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->denseParColVisit(functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename RowRange, typename FunctionObject>
+    void sparseParRowVisit(const RowRange& rows, FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->sparseParRowVisit(rows, functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename RowRange, typename FunctionObject>
+    void denseParRowVisit(const RowRange& rows, FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->denseParRowVisit(rows, functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename RowRange, typename FunctionObject>
+    void sparseParColVisit(const RowRange& rows, FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->sparseParColVisit(rows, functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename RowRange, typename FunctionObject>
+    void denseParColVisit(const RowRange& rows, FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->denseParColVisit(rows, functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename RowRange, typename ColumnRange, typename FunctionObject>
+    void sparseParRowVisit(const RowRange& rows, const ColumnRange& columns, FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->sparseParRowVisit(rows, columns, functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename RowRange, typename ColumnRange, typename FunctionObject>
+    void denseParRowVisit(const RowRange& rows, const ColumnRange& columns, FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->denseParRowVisit(rows, columns, functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename RowRange, typename ColumnRange, typename FunctionObject>
+    void sparseParColVisit(const RowRange& rows, const ColumnRange& columns, FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->sparseParColVisit(rows, columns, functionObject, getDatasetTaskPtr(taskDescription));
+    }
+
+    template <typename RowRange, typename ColumnRange, typename FunctionObject>
+    void denseParColVisit(const RowRange& rows, const ColumnRange& columns, FunctionObject functionObject, const QString& taskDescription = QString()) const
+    {
+        getRawData<PointData>()->denseParColVisit(rows, columns, functionObject, getDatasetTaskPtr(taskDescription));
+    }
+    
 
     /* Allows visiting the point data, which is either _all_ data (if this data
      * set is full), or (otherwise) the subset specified by its indices.
@@ -699,27 +1204,75 @@ public:
 
     /// Just calls the corresponding member function of its PointData.
     template <typename T>
-    void setData(const std::vector<T>& data, const std::size_t numDimensions)
+    void setDataAs(std::vector<T>& data, const std::size_t numDimensions)
     {
         const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
-        getRawData<PointData>()->setData(data, numDimensions);
+        bool result = getRawData<PointData>()->setDataAs(data, numDimensions);
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
+
+        return result;
     }
+
+    template <typename T>
+    __declspec(deprecated) void setData(std::vector<T> data, const std::size_t numDimensions)
+    {
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
+
+       getRawData<PointData>()->setDataAs(data, numDimensions);
+
+        if (notifyDimensionsChanged)
+            mv::events().notifyDatasetDataDimensionsChanged(this);
+
+        
+    }
+
+    
 
     /// Just calls the corresponding member function of its PointData.
+    
+
     template <typename T>
-    void setData(std::vector<T>&& data, const std::size_t numDimensions)
+    bool setDataAs(const StorageConfiguration& config, std::vector<T>& data, const std::size_t numDimensions)
     {
         const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
-        getRawData<PointData>()->setData(std::move(data), numDimensions);
+        bool result = getRawData<PointData>()->setDataAs(config, data, numDimensions);
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
+
+        return result;
     }
+
+    template<typename RowSizeType, typename DimensionSizeType, typename RowType, typename ColumnType, typename ValueType>
+    bool setDataAs(StorageConfiguration storageConfiguration, RowSizeType numRows, DimensionSizeType numDimensions, std::vector<RowType>& rowPointers, std::vector<ColumnType>& colIndices, std::vector<ValueType>& values)
+    {
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
+
+        bool result = getRawData<PointData>()->setDataAs(storageConfiguration, numRows, numDimensions, rowPointers, colIndices, values);
+
+        if (notifyDimensionsChanged)
+            mv::events().notifyDatasetDataDimensionsChanged(this);
+
+        return result;
+    }
+
+    template<typename RowSizeType, typename DimensionSizeType, typename RowType, typename ColumnType, typename ValueType>
+    bool setDataAs(const QString& matrixType, RowSizeType numRows, DimensionSizeType numDimensions, std::vector<RowType>& rowPointers, std::vector<ColumnType>& colIndices, std::vector<ValueType>& values)
+    {
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
+
+        bool result = getRawData<PointData>()->setDataAs(matrixType, numRows, numDimensions, rowPointers, colIndices, values);
+
+        if (notifyDimensionsChanged)
+            mv::events().notifyDatasetDataDimensionsChanged(this);
+
+        return result;
+    }
+    
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
 
@@ -815,6 +1368,8 @@ public:
         }
     }
 
+    static QMap<QString, QStringList> getSupportedStorageTypes();
+
     const std::vector<QString>& getDimensionNames() const;
 
     void setDimensionNames(const std::vector<QString>& dimNames);
@@ -831,58 +1386,37 @@ public:
         }
     }
 
+  
+
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
     // Will work fine, even when the internal data element type is not float.
     // However, may not perform well when retrieving a large number of values.
-    float getValueAt(std::size_t index) const;
+    __declspec(deprecated) float getValueAt(std::size_t index) const;
 
     // Sets the value of the element at the specified position in the current
     // data vector, converted to the internal data element type. 
     // Will work fine, even when the internal data element type is not float.
     // However, may not perform well when setting a large number of values.
-    void setValueAt(std::size_t index, float newValue);
+    __declspec(deprecated) void setValueAt(std::size_t index, float newValue);
+
+    // Returns the value of the element at the specified position in the current
+    // data vector, converted to float.
+    // Will work fine, even when the internal data element type is not float.
+    // However, may not perform well when retrieving a large number of values.
+    float getValueAt(mv::point_size_t row, mv::dimension_size_t column) const;
+
+    // Sets the value of the element at the specified position in the current
+    // data vector, converted to the internal data element type. 
+    // Will work fine, even when the internal data element type is not float.
+    // However, may not perform well when setting a large number of values.
+    void setValueAt(mv::point_size_t row, mv::dimension_size_t column, float newValue);
+
+   
+    bool setStorageConfiguration(const StorageConfiguration& config);
 
     public: // Dense, test implementation
-    class Experimental {
-        friend class Points;
-    public:
-
-        static SparseMatrix<size_t, size_t, float>& getSparseData(Points* points)
-        {
-            return PointData::Experimental::getSparseData(points->getRawData<PointData>());
-        }
-
-        static void setSparseData(Points* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
-        {
-            PointData::Experimental::setSparseData(points->getRawData<PointData>(), numRows, numCols, rowPointers, colIndices, values);
-        }
-
-        static void setSparseData(Points* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<size_t>&& colIndices, std::vector<float>&& values)
-        {
-            PointData::Experimental::setSparseData(points->getRawData<PointData>(), numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
-        }
-
-        static std::vector<float> row(const Points* points, size_t rowIndex)
-        {
-            return PointData::Experimental::row(points->getRawData<PointData>(), rowIndex);
-        }
-
-        static size_t getNumNonZeroElements(const Points* points)
-        {
-            return PointData::Experimental::getNumNonZeroElements(points->getRawData<PointData>());
-        }
-
-        static bool isDense(const Points* points)
-        {
-            return PointData::Experimental::isDense(points->getRawData<PointData>());
-        }
-
-        static void setIsDense(Points* points, bool isDense)
-        {
-            PointData::Experimental::setIsDense(points->getRawData<PointData>(), isDense);
-        }
-    };
+    
 
     /**
      * Get a copy of the dataset

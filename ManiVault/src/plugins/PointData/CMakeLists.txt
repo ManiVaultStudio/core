@@ -5,7 +5,25 @@ PROJECT(${POINTDATA})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+
+set(MATRIX_HEADERS
+    src/CSRMatrix.h
+    src/DenseMatrix.h
+    src/MatrixUtils.h
+    src/MatrixConfiguration.h
+    src/VariantOfMatrixTypes.h
+)
+
+
+set(MATRIX_SOURCES
+    ${MATRIX_HEADERS}
+    src/MatrixConfiguration.cpp
+    src/VariantOfMatrixTypes.cpp
+)
+
 set(POINTS_SOURCES
+    src/PointDataUtil.h
+    src/PointDataUtil.cpp
     src/PointData.h
     src/PointData.cpp
     src/PointData.json
@@ -17,6 +35,7 @@ set(POINTS_SOURCES
 )
 
 set(POINTS_HEADERS
+    src/PointDataUtil.h
     src/PointData.h
     src/PointDataIterator.h
     src/PointDataRange.h
@@ -38,6 +57,10 @@ set(POINTS_HEADERS
     src/ModelResetter.h
     src/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
+    
+    src/PointDataStorageSelection.h
+
+     ${MATRIX_HEADERS}
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
@@ -45,6 +68,10 @@ set(BFLOAT_HEADER
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
 )
 
+set(WIDGETS_SOURCES
+    src/PointDataStorageSelection.h
+    src/PointDataStorageSelection.cpp
+)
 set(ACTIONS_SOURCES
     src/InfoAction.h
     src/InfoAction.cpp
@@ -78,10 +105,12 @@ set(ACTIONS_SOURCES
     src/ModelResetter.cpp
 )
 
+source_group(Matrices FILES ${MATRIX_SOURCES})
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
+source_group(Widgets FILES ${WIDGETS_SOURCES})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${WIDGETS_SOURCES} ${MATRIX_SOURCES})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 

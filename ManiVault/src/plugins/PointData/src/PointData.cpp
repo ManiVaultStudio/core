@@ -20,14 +20,28 @@
 #include <cstring>
 #include <set>
 #include <type_traits>
+#include <QMetaType>
 
 Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
+
+
+
 
 // =============================================================================
 // PointData
 // =============================================================================
 
 using namespace mv::util;
+
+namespace internal
+{
+    template<typename T>
+    std::size_t rawVectorSize(std::vector<T> v)
+    {
+        return (v.size() * sizeof(T));
+    }
+}
+
 
 PointData::~PointData(void)
 {
@@ -43,52 +57,40 @@ mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) 
     return mv::Dataset<DatasetImpl>(new Points(getName(), true, guid));
 }
 
-std::uint32_t PointData::getNumPoints() const
+mv::point_size_t PointData::getNumPoints() const
 {
-    if (_numDimensions == 0)
-    {
-        qWarning() << "Number of dimensions is 0 in point data ";
-        return 0;
-    }
-
-    if (_isDense)
-        return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
-    else
-        return _numRows;
+    return _numRows;
 }
 
-std::uint32_t PointData::getNumDimensions() const
+mv::dimension_size_t PointData::getNumDimensions() const
 {
     return _numDimensions;
 }
 
-std::uint64_t PointData::getNumberOfElements() const
+mv::element_size_t PointData::getNumberOfElements() const
 {
-    return getSizeOfVector();
+    return (_numRows * _numDimensions);
 }
 
 
 std::uint64_t PointData::getRawDataSize() const
 {
-    if (_isDense)
-    {
-        std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
-        return elementSize * getNumberOfElements();
-    }
-    else
-    {
-        return static_cast<std::uint64_t>(_numRows + 4) * sizeof(size_t) + _sparseData.getNumNonZeros() * (sizeof(size_t) + sizeof(float));
-    }
+    return std::visit([](const auto& matrix) -> std::uint64_t
+        {
+            return matrix.bytes();
+        }, _variantOfMatrices);
 }
 
 void* PointData::getDataVoidPtr()
 {
-    return std::visit([](auto& vec) { return (void*)vec.data(); }, _variantOfVectors);
+    const std::string mesg = __FUNCSIG__ + std::string(" is not implemented");
+    throw std::exception(mesg.c_str());
 }
 
 const void* PointData::getDataConstVoidPtr() const
 {
-    return std::visit([](const auto& vec) { return (const void*)vec.data(); }, _variantOfVectors);
+    const std::string mesg = __FUNCSIG__ + std::string(" is not implemented");
+    throw std::exception(mesg.c_str());
 }
 
 const std::vector<QString>& PointData::getDimensionNames() const
@@ -98,8 +100,37 @@ const std::vector<QString>& PointData::getDimensionNames() const
 
 void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
+    assert(false);
+    const std::string mesg = __FUNCSIG__ + std::string(" is not implemented");
+    throw std::exception(mesg.c_str());
     resizeVector(numPoints * numDimensions);
+    _numRows = numPoints;
     _numDimensions = static_cast<unsigned int>(numDimensions);
+}
+
+QMap<QString, QStringList> PointData::getSupportedStorageTypes() 
+{
+    static QMap<QString, QStringList> supportedStorageTypes;
+    if (supportedStorageTypes.isEmpty())
+    {
+        constexpr auto matrixTypeNames = VariantOfMatrices::getMatrixTypeNames();
+        constexpr auto elementTypeNames = VariantOfMatrices::getElementTypeNames();
+        static_assert(matrixTypeNames.size() == elementTypeNames.size());
+
+
+        const std::size_t size = elementTypeNames.size();
+        for (std::size_t i = 0; i < size; ++i)
+        {
+            QString elementTypeName = elementTypeNames[i];
+            QString matrixTypeName = matrixTypeNames[i];
+            if (!supportedStorageTypes.contains(matrixTypeName))
+            {
+                supportedStorageTypes[matrixTypeName] = StorageConfiguration::getListOfSpecialDataTypeNames();
+            }
+            supportedStorageTypes[matrixTypeName].append(elementTypeName);
+        }
+    }
+    return supportedStorageTypes;
 }
 
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
@@ -113,197 +144,176 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
         qWarning() << "PointData: Number of dimension names does not equal the number of data dimensions";
 }
 
-float PointData::getValueAt(const std::size_t index) const
+float PointData::getValueAt(const mv::element_size_t index) const
 {
-    return std::visit([index](const auto& vec)
-        {
-            return static_cast<float>(vec[index]);
-        },
-        _variantOfVectors);
+    std::size_t row = index / _numDimensions;
+    std::size_t column = index % _numDimensions;
+    return getValueAt(row, column);
 }
 
-void PointData::setValueAt(const std::size_t index, const float newValue)
+float PointData::getValueAt(mv::point_size_t point_idx, mv::dimension_size_t dim_idx) const
 {
-    std::visit([index, newValue](auto& vec)
+
+    return std::visit([point_idx, dim_idx](const auto& matrix) -> float
         {
-            using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
-            vec[index] = static_cast<value_type>(newValue);
-        },
-        _variantOfVectors);
+            return static_cast<float>(matrix(point_idx, dim_idx));
+        }, _variantOfMatrices);
+}
+
+void PointData::setValueAt(const mv::element_size_t index, const float newValue)
+{
+    std::size_t row = index / _numDimensions;
+    std::size_t column = index % _numDimensions;
+    setValueAt(row, column, newValue);
+}
+
+void PointData::setValueAt(mv::point_size_t point_idx, mv::dimension_size_t dim_idx, const float newValue)
+{
+    std::visit([point_idx, dim_idx, newValue](auto& matrix)
+        {
+            matrix(point_idx, dim_idx) = newValue;
+        }, _variantOfMatrices);
 }
 
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "Data");
-    variantMapMustContain(variantMap, "NumberOfPoints");
-    variantMapMustContain(variantMap, "NumberOfDimensions");
-
-    const auto data                 = variantMap["Data"].toMap();
-    const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toUInt();
-    const auto numberOfElements     = numberOfPoints * numberOfDimensions;
-    const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
-    const auto rawData              = data["Raw"].toMap();
-
-    bool isDense = true;
-    if (variantMap.contains("Dense"))
-        isDense = variantMap["Dense"].toBool();;
-
-    _isDense = isDense;
-    _numDimensions = numberOfDimensions;
-
-    if (_isDense)
+    if (variantMap.contains("MatrixType") && variantMap.contains("ElementType"))
     {
-        setElementTypeSpecifier(elementTypeIndex);
-        resizeVector(numberOfElements);
-        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
+        // new data storage format
+        variantMapMustContain(variantMap, "Version");
+        const auto version = variantMap["Version"].toUInt();
+
+        assert(version == 1); // currently we only have version 1
+       
+        _variantOfMatrices.fromVariantMap(variantMap);
+        mv::dimension_size_t numberOfDimensions = 0;
+        mv::point_size_t numberOfPoints = 0;
+        std::visit([&numberOfPoints, &numberOfDimensions](const auto& matrix)
+            {
+                numberOfPoints = matrix.rows(); 
+                numberOfDimensions = matrix.columns();
+            }, _variantOfMatrices);
+        _numRows = numberOfPoints;
+        _numDimensions = numberOfDimensions;
+        _isDense = false;
+        
     }
     else
     {
-        variantMapMustContain(variantMap, "NumberOfNonZeroElements");
+        // the old format
+        variantMapMustContain(variantMap, "Data");
+        variantMapMustContain(variantMap, "NumberOfPoints");
+        variantMapMustContain(variantMap, "NumberOfDimensions");
 
-        const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
+        const auto data = variantMap["Data"].toMap();
+        const auto numberOfPoints = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
+        const auto numberOfDimensions = variantMap["NumberOfDimensions"].toUInt();
+        const auto numberOfElements = numberOfPoints * numberOfDimensions;
+        const auto elementTypeIndex = data["TypeIndex"].toInt();
+        const auto rawData = data["Raw"].toMap();
 
-        std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
+        bool isDense = true;
+        if (variantMap.contains("Dense"))
+            isDense = variantMap["Dense"].toBool();;
 
-        populateDataBufferFromVariantMap(rawData, bytes.data());
-        _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
+        _isDense = isDense;
+        _numDimensions = numberOfDimensions;
+        _numRows = numberOfPoints;
 
-        size_t offset = 0;
-        std::vector<size_t> rowPointers(numberOfPoints + 1);
-        std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
+        if (_isDense)
+        {
+           
+            _variantOfMatrices.setIndexOfVariant(elementTypeIndex);
+            std::visit([numberOfPoints, numberOfDimensions, &rawData](auto& matrix)
+                {
+                    matrix.resize(numberOfPoints, numberOfDimensions);
+                    // next steps can also be done differently
+                    std::vector<char> buffer(matrix.bytes());
+                    populateDataBufferFromVariantMap(rawData, buffer.data());
+                    matrix.fromRawDataBuffer(buffer);
+                }, _variantOfMatrices);
+        }
+        else
+        {
+           // _variantOfMatrices.setAsCSRMatrixOfElementType(static_cast<std::size_t>(elementTypeIndex));
 
-        offset += rowPointers.size() * sizeof(size_t);
-        std::vector<size_t> colIndices(numberOfNonZeroElements);
-        std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(size_t));
+            variantMapMustContain(variantMap, "NumberOfNonZeroElements");
 
-        offset += colIndices.size() * sizeof(float);
-        std::vector<float> values(numberOfNonZeroElements);
-        std::memcpy(values.data(), bytes.data() + offset, values.size() * sizeof(float));
+            const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
 
-        _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
+            std::vector<char> buffer((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
-        qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
+            populateDataBufferFromVariantMap(rawData, buffer.data());
+
+            std::visit([numberOfPoints, numberOfDimensions, numberOfNonZeroElements, &buffer](auto& matrix)
+                {
+                    matrix.resize(numberOfPoints, numberOfDimensions, numberOfNonZeroElements);
+                    assert(buffer.size() == matrix.bytes());
+                    matrix.fromRawDataBuffer(buffer);
+                }, _variantOfMatrices);
+
+
+           
+
+            qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
+        }
     }
+    
 }
 
 QVariantMap PointData::toVariantMap() const
 {
-    const auto numberOfElements = getNumberOfElements();
-
-    if (_isDense)
-    {
-        const auto typeSpecifier = getElementTypeSpecifier();
-        const auto typeSpecifierName = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
-        const auto typeIndex = static_cast<std::int32_t>(typeSpecifier);
-
-        QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize(), true);
-
-        return {
-            { "TypeIndex", QVariant::fromValue(typeIndex) },
-            { "TypeName", QVariant(typeSpecifierName) },
-            { "Raw", QVariant::fromValue(rawData) },
-            { "NumberOfElements", QVariant::fromValue(numberOfElements) }
-        };
-    }
-    else
-    {
-        std::vector<char> bytes;
-
-        const std::vector<size_t>& indexPointers = _sparseData.getIndexPointers();
-        const std::vector<size_t>& colIndices = _sparseData.getColIndices();
-        const std::vector<float>& values = _sparseData.getValues();
-
-        const char* indexPointersBytes = (const char*) (indexPointers.data());
-        const char* colIndicesBytes = (const char*) (colIndices.data());
-        const char* valuesBytes = (const char*) (values.data());
-
-        bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
-        bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
-        bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
-
-        QVariantMap rawData = rawDataToVariantMap(bytes.data(), bytes.size(), true);
-
-        return {
-            { "Raw", QVariant::fromValue(rawData) }
-        };
-    }
+    return this->_variantOfMatrices.toVariantMap();
 }
 
-void PointData::extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const
+void PointData::extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex, mv::DatasetTask* task) const
 {
     CheckDimensionIndex(dimensionIndex);
 
-    result.resize(getNumPoints());
-
-    std::visit(
-        [&result, this, dimensionIndex](const auto& vec)
+    const PointData* ptr = this;
+    std::visit([&result, dimensionIndex, task](const auto& matrix)
         {
-            const auto resultSize = result.size();
-
-            for (std::size_t i{}; i < resultSize; ++i)
-                result[i] = vec[i * _numDimensions + dimensionIndex];
-
-        },
-        _variantOfVectors);
+            matrix.extractFullDataForDimension(result, dimensionIndex, task);
+        }, _variantOfMatrices);
 }
 
 
-void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
-{
-    if (_isDense)
-    {
-        CheckDimensionIndex(dimensionIndex1);
-        CheckDimensionIndex(dimensionIndex2);
-
-        result.resize(getNumPoints());
-
-        std::visit(
-            [&result, this, dimensionIndex1, dimensionIndex2](const auto& vec)
-            {
-                const auto resultSize = result.size();
-
-                for (std::size_t i{}; i < resultSize; ++i)
-                {
-                    const auto n = i * _numDimensions;
-                    result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
-                }
-            },
-            _variantOfVectors);
-    }
-    else
-    {
-        result.resize(getNumPoints());
-
-        std::vector<float> col1 = _sparseData.getDenseCol(dimensionIndex1);
-        std::vector<float> col2 = _sparseData.getDenseCol(dimensionIndex2);
-
-        for (size_t i = 0; i < result.size(); i++)
-            result[i].set(col1[i], col2[i]);
-    }
-}
-
-
-void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const
+void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, mv::DatasetTask* task) const
 {
     CheckDimensionIndex(dimensionIndex1);
     CheckDimensionIndex(dimensionIndex2);
 
-    result.resize(indices.size());
-
-    std::visit(
-        [&result, this, dimensionIndex1, dimensionIndex2, indices](const auto& vec)
+    std::visit([&result, dimensionIndex1, dimensionIndex2,task](const auto& matrix)
         {
-            const auto resultSize = result.size();
-
-            for (std::size_t i{}; i < resultSize; ++i)
-            {
-                const auto n = std::size_t{ indices[i] } *_numDimensions;
-                result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
-            }
-        },
-        _variantOfVectors);
+            matrix.extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2, task);
+        }, _variantOfMatrices);
 }
+
+
+void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices, mv::DatasetTask* task) const
+{
+    CheckDimensionIndex(dimensionIndex1);
+    CheckDimensionIndex(dimensionIndex2);
+
+    std::visit([&result, dimensionIndex1, dimensionIndex2, indices, task](const auto& matrix)
+        {
+            matrix.extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices, task);
+        }, _variantOfMatrices);
+}
+
+DatasetTask* Points::getDatasetTaskPtr(const QString& description) const
+{
+    if (description.isEmpty())
+        return nullptr;
+
+    DatasetTask& task = const_cast<Points*>(this)->getTask();
+    task.setName(description);
+    task.setProgressDescription(description);
+    task.setProgressMode(Task::ProgressMode::Subtasks);
+    task.setRunning();
+    return &task;
+}
+
 
 Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& guid /*= ""*/) :
     DatasetImpl(dataName, mayUnderive, guid),
@@ -750,6 +760,12 @@ std::vector<std::uint32_t>& Points::getSelectionIndices()
     return getSelection<Points>()->indices;
 }
 
+
+QMap<QString, QStringList> Points::getSupportedStorageTypes()
+{
+    return PointData::getSupportedStorageTypes();
+}
+
 const std::vector<QString>& Points::getDimensionNames() const
 {
     if (isProxy()) {
@@ -776,6 +792,17 @@ void Points::setValueAt(const std::size_t index, const float newValue)
 {
     getRawData<PointData>()->setValueAt(index, newValue);
 }
+float  Points::getValueAt(mv::point_size_t row, mv::dimension_size_t column) const
+{
+    return getRawData<PointData>()->getValueAt(row,column);
+}
+
+void Points::setValueAt(mv::point_size_t row, mv::dimension_size_t column, float newValue)
+{
+    getRawData<PointData>()->setValueAt(row,column, newValue);
+}
+
+
 
 static void resolveLinkedPointData(const LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
 {
@@ -1093,18 +1120,7 @@ QVariantMap Points::toVariantMap() const
         selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
     }
 
-    variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
-    variantMap["NumberOfPoints"]        = getNumPoints();
-    variantMap["Indices"]               = indices;
-    variantMap["Selection"]             = selection;
-    variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
-    variantMap["NumberOfDimensions"]    = getNumDimensions();
-    variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
-
-    variantMap["Dense"]                 = Experimental::isDense(this);
-
-    if (!Experimental::isDense(this))
-        variantMap["NumberOfNonZeroElements"] = QVariant::fromValue(Experimental::getNumNonZeroElements(this));
+    variantMap["Data"] = getRawData<PointData>()->toVariantMap();
     
     return variantMap;
 }
