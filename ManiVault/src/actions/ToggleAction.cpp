@@ -240,7 +240,6 @@ ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, To
 {
     setAcceptDrops(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    setAlignment(Qt::AlignVCenter);
 
     auto layout = new QHBoxLayout();
 
@@ -248,25 +247,12 @@ ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, To
 
     auto imageLabel = new QLabel(this);
 
+    imageLabel->setFixedSize(20, 20);
+
     QLabel* titleLabel = nullptr;
 
     layout->addWidget(imageLabel);
     
-    if (widgetFlags & WidgetFlag::Text)
-    {
-        titleLabel = new QLabel(_toggleAction->text(), this);
-
-        layout->addWidget(titleLabel);
-
-        const auto updateTitle = [this, titleLabel]() -> void {
-            titleLabel->setText(_toggleAction->text());
-		};
-
-        updateTitle();
-
-        connect(_toggleAction, &ToggleAction::textChanged, this, updateTitle);
-    }
-
     const auto updatePixmap = [this, imageLabel, titleLabel]() -> void {
         imageLabel->setPixmap(QIcon(StyledIcon(_toggleAction->isChecked() ? "toggle-on" : "toggle-off")).pixmap(QSize(20, 20)));
 
@@ -279,6 +265,23 @@ ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, To
     updatePixmap();
 
     connect(_toggleAction, &ToggleAction::changed, this, updatePixmap);
+
+    if (widgetFlags == WidgetFlag::ToggleImageText)
+    {
+        titleLabel = new QLabel(_toggleAction->text(), this);
+
+        layout->addWidget(titleLabel);
+
+        const auto updateTitle = [this, titleLabel]() -> void {
+            titleLabel->setText(_toggleAction->text());
+            };
+
+        updateTitle();
+
+        connect(_toggleAction, &ToggleAction::textChanged, this, updateTitle);
+    }
+
+    setLayout(layout);
 }
 
 void ToggleAction::ToggleImageLabelWidget::mousePressEvent(QMouseEvent* event)
@@ -307,7 +310,7 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     if (widgetFlags & WidgetFlag::PushButton)
         layout->addWidget(new ToggleAction::PushButtonWidget(parent, this, widgetFlags));
 
-    if (widgetFlags & WidgetFlag::ToggleImage)
+    if (widgetFlags & WidgetFlag::ToggleImage || widgetFlags & WidgetFlag::ToggleImageText)
         layout->addWidget(new ToggleAction::ToggleImageLabelWidget(parent, this, widgetFlags));
 
     widget->setLayout(layout);
