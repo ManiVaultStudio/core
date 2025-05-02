@@ -320,6 +320,7 @@ set(PUBLIC_APP_FEATURE_ACTIONS_HEADERS
     src/actions/TutorialsAppFeatureAction.h
     src/actions/ProjectsAppFeatureAction.h
     src/actions/VideosAppFeatureAction.h
+    src/actions/DownloadableContentAppFeaturesAction.h
 )
 
 set(PUBLIC_APP_FEATURE_ACTIONS_SOURCES
@@ -328,6 +329,7 @@ set(PUBLIC_APP_FEATURE_ACTIONS_SOURCES
     src/actions/TutorialsAppFeatureAction.cpp
     src/actions/ProjectsAppFeatureAction.cpp
     src/actions/VideosAppFeatureAction.cpp
+    src/actions/DownloadableContentAppFeaturesAction.cpp
 )
 
 set(PUBLIC_APP_FEATURE_ACTIONS_FILES

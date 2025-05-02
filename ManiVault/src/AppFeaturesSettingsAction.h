@@ -7,9 +7,7 @@
 #include "GlobalSettingsGroupAction.h"
 
 #include "actions/ErrorLoggingAppFeatureAction.h"
-#include "actions/ProjectsAppFeatureAction.h"
-#include "actions/TutorialsAppFeatureAction.h"
-#include "actions/VideosAppFeatureAction.h"
+#include "actions/DownloadableContentAppFeaturesAction.h"
 
 namespace mv::gui
 {
@@ -34,15 +32,11 @@ public:
 public: // Action getters
 
     const ErrorLoggingAppFeatureAction& getErrorLoggingAppFeatureAction() const { return _errorLoggingAppFeatureAction; }
-    const ProjectsAppFeatureAction& getProjectsAppFeatureAction() const { return _projectsAppFeatureAction; }
-    const TutorialsAppFeatureAction& getTutorialsAppFeatureAction() const { return _tutorialsAppFeatureAction; }
-    const VideosAppFeatureAction& getVideosAppFeatureAction() const { return _videosAppFeatureAction; }
+    const DownloadableContentAppFeaturesAction& getDownloadableContentAppFeaturesAction() const { return _downloadableContentAppFeaturesAction; }
 
 private:
-    ErrorLoggingAppFeatureAction    _errorLoggingAppFeatureAction;  /** App feature action for configuring error logging */
-    ProjectsAppFeatureAction        _projectsAppFeatureAction;      /** App feature action for configuring projects dynamic content */
-    TutorialsAppFeatureAction       _tutorialsAppFeatureAction;     /** App feature action for configuring tutorials dynamic content */
-    VideosAppFeatureAction          _videosAppFeatureAction;        /** App feature action for configuring videos dynamic content */
+    ErrorLoggingAppFeatureAction            _errorLoggingAppFeatureAction;          /** App feature action for configuring error logging */
+    DownloadableContentAppFeaturesAction    _downloadableContentAppFeaturesAction;  /** App feature action for configuring downloadable dynamic content */
 };
 
 }

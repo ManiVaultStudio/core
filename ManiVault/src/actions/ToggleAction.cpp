@@ -239,6 +239,7 @@ ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, To
 {
     setAcceptDrops(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    setAlignment(Qt::AlignVCenter);
 
     const auto updatePixmap = [this]() -> void {
 		setPixmap(QIcon(StyledIcon(_toggleAction->isChecked() ? "toggle-on" : "toggle-off")).pixmap(QSize(20, 20)));

@@ -11,9 +11,11 @@ namespace mv::gui {
 AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _enabledAction(this, "Enabled", false),
-    _settingsAction(this, "Settings")
+    _settingsAction(this, QString("App Feature: %1").arg(title))
 {
     setShowLabels(false);
+
+    _enabledAction.setDefaultWidgetFlags(ToggleAction::WidgetFlag::ToggleImage);
 
     _settingsAction.setIconByName("gear");
     _settingsAction.setToolTip(QString("%1 settings").arg(title));
