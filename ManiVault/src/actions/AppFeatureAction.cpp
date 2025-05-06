@@ -4,6 +4,8 @@
 
 #include "AppFeatureAction.h"
 
+#include <QTextEdit>
+
 using namespace mv::util;
 
 namespace mv::gui {
@@ -31,6 +33,16 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     _descriptionAction.setIconByName("circle-info");
     _descriptionAction.setToolTip(QString("%1 settings").arg(title));
     _descriptionAction.setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
+    _descriptionAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextBrowser);
+    _descriptionAction.setPopupSizeHint(QSize(550, 400));
+
+    //_descriptionAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+    //    auto textEdit = widget->findChild<QTextEdit*>("TextEdit");
+
+    //    textEdit->setAcceptRichText(true);
+    //    textEdit->setHtml(_descriptionAction.getString());
+    //    textEdit->setHtml("<h1>Hello</h1><p>This is <b>bold</b> text</p>");
+    //});
 
     _settingsAction.setIconByName("gear");
     _settingsAction.setToolTip(QString("%1 settings").arg(title));
@@ -82,6 +94,19 @@ QString AppFeatureAction::getSettingsPrefix(const PrefixType& prefixType) const
 bool AppFeatureAction::hasSetting(const PrefixType& prefixType) const
 {
     return Application::current()->hasSetting(getSettingsPrefix(prefixType));
+}
+
+void AppFeatureAction::loadDescriptionFromResource(const QString& resourceLocation)
+{
+    QFile appFeatureHtmlFile(resourceLocation);
+
+    if (appFeatureHtmlFile.open(QIODevice::ReadOnly)) {
+        _descriptionAction.setString(appFeatureHtmlFile.readAll());
+        appFeatureHtmlFile.close();
+    }
+    else {
+        qWarning() << QString("No description available for %1: %2").arg(text(), appFeatureHtmlFile.errorString());
+    }
 }
 
 bool AppFeatureAction::getEnabledFromSettings() const

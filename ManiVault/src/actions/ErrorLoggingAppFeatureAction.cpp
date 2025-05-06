@@ -9,6 +9,15 @@ namespace mv::gui {
 ErrorLoggingAppFeatureAction::ErrorLoggingAppFeatureAction(QObject* parent, const QString& title /*= "Error Logging"*/) :
     AppFeatureAction(parent, title)
 {
+    loadDescriptionFromResource(":/HTML/AppFeatureErrorLogging");
+
+    /*QFile file(":/HTML/AppFeatureErrorLogging");
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "Failed to load resource:" << file.errorString();
+    }
+    else {
+        qDebug() << "Resource loaded successfully.";
+    }*/
     getSummaryAction().setString("Send anonymous crash reports to improve the application");
 }
 

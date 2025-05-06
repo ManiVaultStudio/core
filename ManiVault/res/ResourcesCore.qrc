@@ -82,6 +82,9 @@
     </qresource>
 	<qresource prefix="/HTML">
         <file alias="Markdown">html/markdown.html</file>
-        <file alias="AppFeatures">html/AppFeatures.html</file>
+        <file alias="AppFeatureErrorLogging">html/AppFeatureErrorLogging.html</file>
+        <file alias="AppFeatureProjects">html/AppFeatureProjects.html</file>
+        <file alias="AppFeatureTutorials">html/AppFeatureTutorials.html</file>
+        <file alias="AppFeatureVideos">html/AppFeatureVideos.html</file>
     </qresource>
 </RCC>

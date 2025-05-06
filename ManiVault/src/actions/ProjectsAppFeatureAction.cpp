@@ -9,6 +9,8 @@ namespace mv::gui {
 ProjectsAppFeatureAction::ProjectsAppFeatureAction(QObject* parent, const QString& title /*= "Projects"*/) :
     AppFeatureAction(parent, title)
 {
+    loadDescriptionFromResource(":/HTML/AppFeatureProjects");
+
     getSummaryAction().setString("Allow ManiVault Studio to download projects");
 }
 

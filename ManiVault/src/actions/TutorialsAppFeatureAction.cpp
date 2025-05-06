@@ -9,6 +9,8 @@ namespace mv::gui {
 TutorialsAppFeatureAction::TutorialsAppFeatureAction(QObject* parent, const QString& title /*= "Tutorials"*/) :
     AppFeatureAction(parent, title)
 {
+    loadDescriptionFromResource(":/HTML/AppFeatureTutorials");
+
     getSummaryAction().setString("Allow ManiVault Studio to download learning center tutorial content");
 }
 

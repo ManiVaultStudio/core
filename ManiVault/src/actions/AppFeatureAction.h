@@ -50,7 +50,7 @@ public:
      */
     void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction(), bool load = true) override;
 
-protected: // Settings
+protected:
 
     /**
      * Get the settings prefix for the given \p prefixType
@@ -65,6 +65,12 @@ protected: // Settings
      * @return Pointer to the settings action
      */
     bool hasSetting(const PrefixType& prefixType) const;
+
+    /**
+     * Load the description from \p resourceName
+     * @param resourceLocation Location of the resource to load
+     */
+    void loadDescriptionFromResource(const QString& resourceLocation);
 
 private: // Settings
 
@@ -85,19 +91,21 @@ public: // Action getters
     const ToggleAction& getEnabledAction() const { return _enabledAction; }
     const StringAction& getSummaryAction() const { return _summaryAction; }
     const ToggleAction& getUserHasOptedAction() const { return _userHasOptedAction; }
+    const StringAction& getDescriptionAction() const { return _descriptionAction; }
 
 protected: // Action getters
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
     StringAction& getSummaryAction() { return _summaryAction; }
     ToggleAction& getUserHasOptedAction() { return _userHasOptedAction; }
+    StringAction& getDescriptionAction() { return _descriptionAction; }
 
 private:
     ToggleAction            _enabledAction;         /** Determines whether the app feature is enabled or not */
     StringAction            _summaryAction;         /** Short one-liner that describes the app feature */
     ToggleAction            _userHasOptedAction;    /** Determines if the user has given permission to use the app feature */
-    VerticalGroupAction     _descriptionAction;     /** Vertical group action for app feature description */
-    VerticalGroupAction     _settingsAction;        /** Vertical group action for app feature settings */
+    StringAction            _descriptionAction;     /** App feature description */
+    VerticalGroupAction     _settingsAction;        /** App feature settings */
 
     friend class AppFeaturesSettingsAction; // Allow access to private members
 };
