@@ -9,6 +9,7 @@ namespace mv::gui {
 ErrorLoggingAppFeatureAction::ErrorLoggingAppFeatureAction(QObject* parent, const QString& title /*= "Error Logging"*/) :
     AppFeatureAction(parent, title)
 {
+    getSummaryAction().setString("Send anonymous crash reports to improve the application");
 }
 
 }

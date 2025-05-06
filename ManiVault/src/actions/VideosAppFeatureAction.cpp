@@ -9,6 +9,7 @@ namespace mv::gui {
 VideosAppFeatureAction::VideosAppFeatureAction(QObject* parent, const QString& title /*= "Videos"*/) :
     AppFeatureAction(parent, title)
 {
+    getSummaryAction().setString("Allow ManiVault Studio to download data for learning center videos.");
 }
 
 }

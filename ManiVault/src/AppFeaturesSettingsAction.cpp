@@ -4,20 +4,31 @@
 
 #include "AppFeaturesSettingsAction.h"
 
+#include "actions/VerticalGroupAction.h"
+
 namespace mv::gui
 {
 
 AppFeaturesSettingsAction::AppFeaturesSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "App Features", false),
     _errorLoggingAppFeatureAction(this),
-    _downloadableContentAppFeaturesAction(this)
+    _projectsAppFeatureAction(this),
+    _tutorialsAppFeatureAction(this),
+    _videosAppFeatureAction(this)
 {
 
 #ifdef ERROR_LOGGING
 	addAction(&_errorLoggingAppFeatureAction);
 #endif
 
-    addAction(&_downloadableContentAppFeaturesAction);
+    auto downloadableContentAppFeaturesAction = new VerticalGroupAction(this, "Downloadable Content");
+
+    downloadableContentAppFeaturesAction->setShowLabels(false);
+    downloadableContentAppFeaturesAction->setDefaultWidgetFlag(GroupAction::WidgetFlag::NoMargins);
+
+    addAction(&_projectsAppFeatureAction);
+    addAction(&_tutorialsAppFeatureAction);
+    addAction(&_videosAppFeatureAction);
 }
 
 /*
