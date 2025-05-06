@@ -34,7 +34,7 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     _descriptionAction.setToolTip(QString("%1 settings").arg(title));
     _descriptionAction.setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
     _descriptionAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextBrowser);
-    _descriptionAction.setPopupSizeHint(QSize(550, 400));
+    _descriptionAction.setPopupSizeHint(QSize(550, 350));
 
     //_descriptionAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
     //    auto textEdit = widget->findChild<QTextEdit*>("TextEdit");
@@ -44,6 +44,7 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     //    textEdit->setHtml("<h1>Hello</h1><p>This is <b>bold</b> text</p>");
     //});
 
+    _settingsAction.setVisible(false);
     _settingsAction.setIconByName("gear");
     _settingsAction.setToolTip(QString("%1 settings").arg(title));
     _settingsAction.setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
@@ -76,6 +77,7 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
 void AppFeatureAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/, bool load)
 {
     _settingsAction.addAction(action, widgetFlags, widgetConfigurationFunction, load);
+    _settingsAction.setVisible(true);
 }
 
 QString AppFeatureAction::getSettingsPrefix(const PrefixType& prefixType) const
