@@ -13,17 +13,26 @@ ErrorLoggingAppFeatureAction::ErrorLoggingAppFeatureAction(QObject* parent, cons
 {
     loadDescriptionFromResource(":/HTML/AppFeatureErrorLogging");
 
-    /*QFile file(":/HTML/AppFeatureErrorLogging");
-    if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "Failed to load resource:" << file.errorString();
-    }
-    else {
-        qDebug() << "Resource loaded successfully.";
-    }*/
     getSummaryAction().setString("Send anonymous crash reports to improve the application");
+
+    _loggingDsnAction.setSettingsPrefix("AppFeatures/Logging/DSN");
+    _loggingDsnAction.setToolTip("The Sentry error logging data source name");
+    _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
+
+    _loggingShowCrashReportDialogAction.setSettingsPrefix("AppFeatures/Logging/ShowCrashReportDialog");
+    _loggingShowCrashReportDialogAction.setToolTip("Show the crash report dialog prior to sending an error report");
 
     addAction(&_loggingDsnAction);
     addAction(&_loggingShowCrashReportDialogAction);
+
+    const auto allowErrorReportingChanged = [this]() -> void {
+        _loggingShowCrashReportDialogAction.setEnabled(getEnabledAction().isChecked());
+        _loggingDsnAction.setEnabled(getEnabledAction().isChecked());
+        };
+
+    allowErrorReportingChanged();
+
+    connect(&getEnabledAction(), &ToggleAction::toggled, this, allowErrorReportingChanged);
 }
 
 }

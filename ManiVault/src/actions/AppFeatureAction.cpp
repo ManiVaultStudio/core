@@ -4,8 +4,6 @@
 
 #include "AppFeatureAction.h"
 
-#include <QTextEdit>
-
 using namespace mv::util;
 
 namespace mv::gui {
@@ -16,7 +14,7 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     _summaryAction(this, "Summary"),
     _userHasOptedAction(this, "User has opted", false),
     _descriptionAction(this, "Description"),
-    _settingsAction(this, QString("App Feature: %1").arg(title))
+    _settingsAction(this, QString("%1 Settings").arg(title))
 {
     setShowLabels(false);
 
@@ -36,18 +34,11 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
     _descriptionAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextBrowser);
     _descriptionAction.setPopupSizeHint(QSize(550, 350));
 
-    //_descriptionAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-    //    auto textEdit = widget->findChild<QTextEdit*>("TextEdit");
-
-    //    textEdit->setAcceptRichText(true);
-    //    textEdit->setHtml(_descriptionAction.getString());
-    //    textEdit->setHtml("<h1>Hello</h1><p>This is <b>bold</b> text</p>");
-    //});
-
     _settingsAction.setVisible(false);
     _settingsAction.setIconByName("gear");
     _settingsAction.setToolTip(QString("%1 settings").arg(title));
     _settingsAction.setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
+    _settingsAction.setPopupSizeHint(QSize(400, 10));
 
     HorizontalGroupAction::addAction(&_enabledAction);
     HorizontalGroupAction::addAction(&_summaryAction);
