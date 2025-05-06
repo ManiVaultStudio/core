@@ -6,6 +6,9 @@
 
 #include "AppFeatureAction.h"
 
+#include "actions/StringAction.h"
+#include "actions/ToggleAction.h"
+
 namespace mv::gui {
 
 /**
@@ -29,6 +32,15 @@ public:
      * @param title Title of the action
      */
     Q_INVOKABLE ErrorLoggingAppFeatureAction(QObject* parent, const QString& title = "Error Logging");
+
+public: // Action getters
+
+    gui::StringAction& getLoggingDsnAction() { return _loggingDsnAction; }
+    gui::ToggleAction& getLoggingShowCrashReportDialogAction() { return _loggingShowCrashReportDialogAction; }
+
+private:
+    StringAction    _loggingDsnAction;                      /** Error logging data source name action */
+    ToggleAction    _loggingShowCrashReportDialogAction;    /** Toggle crash dialog on/off */
 };
 
 }

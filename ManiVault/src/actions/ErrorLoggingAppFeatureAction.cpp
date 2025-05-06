@@ -7,7 +7,9 @@
 namespace mv::gui {
 
 ErrorLoggingAppFeatureAction::ErrorLoggingAppFeatureAction(QObject* parent, const QString& title /*= "Error Logging"*/) :
-    AppFeatureAction(parent, title)
+    AppFeatureAction(parent, title),
+    _loggingDsnAction(this, "Sentry DSN", "https://211289c773dcc267b1bb536b6c3a23f7@lkebsentry.nl/2"),
+    _loggingShowCrashReportDialogAction(this, "Show crash report dialog", true)
 {
     loadDescriptionFromResource(":/HTML/AppFeatureErrorLogging");
 
@@ -19,6 +21,9 @@ ErrorLoggingAppFeatureAction::ErrorLoggingAppFeatureAction(QObject* parent, cons
         qDebug() << "Resource loaded successfully.";
     }*/
     getSummaryAction().setString("Send anonymous crash reports to improve the application");
+
+    addAction(&_loggingDsnAction);
+    addAction(&_loggingShowCrashReportDialogAction);
 }
 
 }
