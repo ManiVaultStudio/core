@@ -15,11 +15,11 @@ ErrorLoggingAppFeatureAction::ErrorLoggingAppFeatureAction(QObject* parent, cons
 
     getSummaryAction().setString("Send anonymous crash reports to improve the application");
 
-    _loggingDsnAction.setSettingsPrefix("AppFeatures/Logging/DSN");
+    _loggingDsnAction.setSettingsPrefix(QString("%1/DSN").arg(WidgetAction::getSettingsPrefix()));
     _loggingDsnAction.setToolTip("The Sentry error logging data source name");
     _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
 
-    _loggingShowCrashReportDialogAction.setSettingsPrefix("AppFeatures/Logging/ShowCrashReportDialog");
+    _loggingShowCrashReportDialogAction.setSettingsPrefix(QString("%1/ShowCrashReportDialog").arg(WidgetAction::getSettingsPrefix()));
     _loggingShowCrashReportDialogAction.setToolTip("Show the crash report dialog prior to sending an error report");
 
     addAction(&_loggingDsnAction);

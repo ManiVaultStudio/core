@@ -18,8 +18,14 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
 {
     setShowLabels(false);
 
-    //_enabledAction.setSettingsPrefix(QString("AppFeatures/%1/Enabled").arg(title));
-    //_userHasOptedAction.setSettingsPrefix(QString("AppFeatures/%1/Enabled").arg(title));
+    auto settingsPrefix = QString("AppFeatures/%1/").arg(title);
+
+    settingsPrefix.replace(" ", "");
+
+    setSettingsPrefix(settingsPrefix);
+
+    _enabledAction.setSettingsPrefix(QString("%1/Enabled").arg(WidgetAction::getSettingsPrefix()));
+    _userHasOptedAction.setSettingsPrefix(QString("%1/UserHasOpted").arg(WidgetAction::getSettingsPrefix()));
 
     _enabledAction.setDefaultWidgetFlags(ToggleAction::WidgetFlag::ToggleImage);
 
