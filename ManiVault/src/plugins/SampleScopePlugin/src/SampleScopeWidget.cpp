@@ -59,13 +59,6 @@ void SampleScopeWidget::initialize()
 
         _currentViewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
-        if (_previousViewPlugin) {
-            qDebug() << "SourcePluginPicker: Previous plugin was:" << _previousViewPlugin->getGuiName();
-        }
-        if (_currentViewPlugin) {
-            qDebug() << "SourcePluginPicker: Current plugin is:" << _currentViewPlugin->getGuiName();
-        }
-
         if (_currentViewPlugin) {
             connect(&_currentViewPlugin->getSamplerAction(), &ViewPluginSamplerAction::viewGeneratorTypeChanged, this, &SampleScopeWidget::updateVisibility);
 
@@ -91,81 +84,28 @@ void SampleScopeWidget::setViewWidget(const QWidget* widget)
     if (!widget)
         return;
 
-    //if (widget != _currentViewWidget) 
-    //{
-        /*_currentViewWidget = const_cast<QWidget*>(widget);
-        _widgetViewScene.clear();
-
-        _proxyWidget = _widgetViewScene.addWidget(const_cast<QWidget*>(widget));
-
-        _proxyWidget->setPos(0, 0);
-
-        updateViewWidgetProxySize();*/
-
-        // 1) Detach old widget from the proxy, so it won't be destroyed
-        if (_proxyWidget)
-        {
-            // Get the currently attached widget (if any)
-            QWidget* oldWidget = _proxyWidget->widget();
-            if (oldWidget) {
-                // Detach it from the proxy so it doesn't get destroyed
-                _proxyWidget->setWidget(nullptr);
-                oldWidget->setParent(nullptr);
-
-                /*if (_previousViewPlugin) {
-                    oldWidget->setParent(&_previousViewPlugin->getWidget());
-                    qDebug() << "Previous plugin was:" << _previousViewPlugin->getGuiName();
-                }
-                if (_currentViewPlugin) {
-                    qDebug() << "Current plugin is:" << _currentViewPlugin->getGuiName();
-                }*/
-            }
-
-            // Remove _proxyWidget itself from the scene
-            _widgetViewScene.removeItem(_proxyWidget);
-            delete _proxyWidget;
-            _proxyWidget = nullptr;
+    if (_proxyWidget)
+    {
+        if (auto previousWidget = _proxyWidget->widget()) {
+            _proxyWidget->setWidget(nullptr);
+            previousWidget->setParent(nullptr);
         }
 
-        // 2) Clear the scene
-        _widgetViewScene.clear();
+        _widgetViewScene.removeItem(_proxyWidget);
 
-        QString pluginName;
-        if (_currentViewPlugin) {
-            pluginName = _currentViewPlugin->getGuiName();
-        }
-        else {
-            pluginName = "UnknownPlugin";
-        }
-        qDebug() << "SetWidget: Plugin name:" << pluginName;
+    	delete _proxyWidget;
 
-        QWidget* storedWidget = _widgetMap.value(pluginName, nullptr);
+        _proxyWidget = nullptr;
+    }
 
-        if (!storedWidget) {
-            // Not in the map yet
-            QWidget* newWidget = const_cast<QWidget*>(widget);
+    _widgetViewScene.clear();
 
-            // Store in the map
-            _widgetMap[pluginName] = newWidget;
-            storedWidget = newWidget;
-            qDebug() << "SetWidget: Stored widget:" << storedWidget;
-        }
-        else {
-           // ?
-            qDebug() << "SetWidget: Stored widget already exists:" << storedWidget;
-        }
+    _currentViewWidget = const_cast<QWidget*>(widget);
 
-        // 3) Store the new widget as current
-        //_currentViewWidget = const_cast<QWidget*>(widget);
-        _currentViewWidget = storedWidget;
+    _proxyWidget = _widgetViewScene.addWidget(_currentViewWidget);
+    _proxyWidget->setPos(0, 0);
 
-        // 4) Create a new proxy for the new widget
-        _proxyWidget = _widgetViewScene.addWidget(_currentViewWidget);
-        _proxyWidget->setPos(0, 0);
-
-        // 5) Update the size or layout
-        updateViewWidgetProxySize();
-    //}
+    updateViewWidgetProxySize();
 }
 
 InfoOverlayWidget& SampleScopeWidget::getNoSamplesOverlayWidget()
