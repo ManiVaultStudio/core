@@ -49,16 +49,13 @@ public:
         _notifications()
     {
         _notificationTimer.setInterval(2500);
-        
+
         connect(&_notificationTimer, &QTimer::timeout, this, [this]() -> void {
-            for (auto& pair : _notifications) {
-                const auto& notification = pair.second;
-
+            for (auto& [name, notification] : _notifications) {
                 mv::help().addNotification(notification._title, notification._message, notification._icon, util::Notification::DurationType::Calculated, notification._delay);
-
-				_notifications.erase(pair.first);
             }
-		});
+            _notifications.clear();
+            });
 
         _notificationTimer.start();
     }
