@@ -81,12 +81,27 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
             if (!getSettingsPrefix().isEmpty())
                 setFilePath(QFileInfo(filePath).absoluteFilePath());
+
+            QDir applicationDir;
+
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+            applicationDir = QCoreApplication::applicationDirPath();
+#endif
+
+#ifdef Q_OS_MAC
+            applicationDir = QDir(QCoreApplication::applicationDirPath() + "/../..").canonicalPath();
+#endif
+
+            const auto canonicalAppDir      = applicationDir.canonicalPath();
+            const auto canonicalFilePath    = QFileInfo(filePath).canonicalFilePath();
+
+            if (canonicalFilePath.startsWith(canonicalAppDir + QDir::separator()))
+                _applicationRelativeFilePath = QDir(filePath).relativeFilePath(applicationDir.path());
 		});
 
         connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
         fileDialog->open();
-
     });
 
     connect(&_filePathAction, &StringAction::stringChanged, this, &FilePickerAction::filePathChanged);
@@ -98,6 +113,11 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 QString FilePickerAction::getFilePath() const
 {
     return _filePathAction.getString();
+}
+
+QString FilePickerAction::getApplicationRelativeFilePath() const
+{
+    return _applicationRelativeFilePath;
 }
 
 void FilePickerAction::setFilePath(const QString& filePath)
@@ -178,17 +198,30 @@ bool FilePickerAction::isValid() const
     return !getFilePath().isEmpty() && QFileInfo(getFilePath()).exists();
 }
 
+QString FilePickerAction::getApplicationDirectory() const
+{
+    return _applicationRelativeFilePath;
+}
+
 QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto groupAction = new HorizontalGroupAction(this, "Group");
+    if (dynamic_cast<QMenu*>(parent))
+        return QWidgetAction::createWidget(parent);
+
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::LineEdit)
-        groupAction->addAction(&_filePathAction);
+        layout->addWidget(_filePathAction.createWidget(widget));
 
     if (widgetFlags & WidgetFlag::PushButton)
-        groupAction->addAction(&_pickAction);
+        layout->addWidget(_pickAction.createWidget(widget));
 
-    return groupAction->createWidget(parent);
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
@@ -199,6 +232,9 @@ void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap.contains("Value"))
         setFilePath(variantMap["Value"].toString());
+
+	if (variantMap.contains("RelativeFilePath"))
+        _applicationRelativeFilePath = variantMap["RelativeFilePath"].toString();
 }
 
 QVariantMap FilePickerAction::toVariantMap() const
@@ -206,7 +242,8 @@ QVariantMap FilePickerAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Value", getFilePath() }
+        { "Value", getFilePath() },
+        { "RelativeFilePath", _applicationRelativeFilePath }
     });
 
     return variantMap;

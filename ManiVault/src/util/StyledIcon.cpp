@@ -52,7 +52,7 @@ QMap<QString, QPixmap>              StyledIcon::pixmaps                     = {}
 QVector<QStringList>                StyledIcon::iconFontPreferenceGroups    = { { "FontAwesomeRegular", "FontAwesomeSolid", "FontAwesomeBrandsRegular" } };
 QMap<QString, QVector<Version>>     StyledIcon::iconFontVersions            = {};
 
-StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/, QWidget* parent /*= nullptr*/)
+StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/)
 {
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
 		set(iconName, iconFontName, iconFontVersion);
@@ -256,6 +256,34 @@ StyledIcon& StyledIcon::withColor(const QColor& color)
 StyledIcon StyledIcon::withMode(const StyledIconMode& mode)
 {
     _iconSettings._mode = mode;
+
+    return *this;
+}
+
+StyledIcon StyledIcon::withModifier(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion)
+{
+    try
+    {
+        if (iconName.isEmpty() || iconFontName.isEmpty()) {
+            return *this;
+        }
+
+        _modifierIconName           = iconName;
+        _modifierIconFontName       = iconFontName;
+        _modifierIconFontVersion    = iconFontVersion;
+        _iconSettings._modifierSha  = generateSha(_modifierIconName, _modifierIconFontName, _modifierIconFontVersion);
+
+        const auto iconFontResourcePath = getIconFontResourcePath(_modifierIconFontName, _modifierIconFontVersion);
+
+        if (!QFile::exists(iconFontResourcePath))
+            throw std::runtime_error(QString("Font resource not found: %1").arg(iconFontResourcePath).toStdString());
+
+        pixmaps[_iconSettings._modifierSha] = createIconPixmap(_modifierIconName, _modifierIconFontName, _modifierIconFontVersion, _iconSettings._mode == StyledIconMode::FixedColor ? Qt::black : _iconSettings._fixedColor);
+    }
+    catch (std::exception& e)
+    {
+        qWarning() << "Unable to set icon modifier: " << e.what();
+    }
 
     return *this;
 }

@@ -42,6 +42,7 @@ struct StyledIconSettings
     QPalette::ColorRole getColorRoleForCurrentTheme() const;
 
     QString                 _sha;                       /** Icon key */
+    QString                 _modifierSha;               /** Modifier icon key */
     StyledIconMode          _mode;                      /** Styled icon coloring mode */
     QPalette::ColorGroup    _colorGroupLightTheme;      /** Color group for light theme */
     QPalette::ColorGroup    _colorGroupDarkTheme;       /** Color group for dark theme */

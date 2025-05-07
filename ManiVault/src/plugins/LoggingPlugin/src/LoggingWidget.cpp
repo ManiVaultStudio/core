@@ -7,6 +7,7 @@
 #include <Application.h>
 
 #include <util/FileUtil.h>
+#include <util/StyledIcon.h>
 
 #include <QDebug>
 #include <QHeaderView>

@@ -26,8 +26,15 @@ PluginFactory::PluginFactory(Type type, const QString& title) :
     _pluginGlobalSettingsGroupAction(nullptr),
     _statusBarAction(nullptr),
     _allowPluginCreationFromStandardGui(true),
-    _pluginMetadata(*this)
+    _pluginMetadata(*this),
+    _tutorialsDsnsAction(this, "Tutorials DSNs"),
+    _projectsDsnsAction(this, "Projects DSNs")
 {
+    _tutorialsDsnsAction.setIconByName("globe");
+    _tutorialsDsnsAction.setToolTip(QString("Data Source Names for %1 tutorials").arg(title));
+
+    _projectsDsnsAction.setIconByName("globe");
+    _projectsDsnsAction.setToolTip(QString("Data Source Names for %1 projects").arg(title));
 }
 
 QString PluginFactory::getKind() const

@@ -5,6 +5,7 @@
 #include "SettingsManagerDialog.h"
 
 #include <CoreInterface.h>
+#include <QOperatingSystemVersion>
 #include <QVBoxLayout>
 
 using namespace mv;
@@ -31,6 +32,10 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     setLayout(layout);
 
     layout->addWidget(_groupsAction.createWidget(this));
+
+#ifdef ERROR_LOGGING
+    _groupsAction.addGroupAction(&mv::settings().getErrorLoggingSettingsAction());
+#endif
 
     _groupsAction.addGroupAction(&mv::settings().getAppearanceSettingsAction());
     _groupsAction.addGroupAction(&mv::settings().getParametersSettings());

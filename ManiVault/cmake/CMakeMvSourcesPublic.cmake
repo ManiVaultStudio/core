@@ -16,6 +16,8 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractSettingsManager.h
     src/AbstractTaskManager.h
     src/AbstractHelpManager.h
+    src/AbstractErrorManager.h
+    src/AbstractErrorLogger.h
     src/AbstractThemeManager.h
 )
 
@@ -91,6 +93,12 @@ set(PUBLIC_NUMERICAL_ACTIONS_HEADERS
     src/actions/NumericalRangeAction.h
     src/actions/DecimalRangeAction.h
     src/actions/IntegralRangeAction.h
+    src/actions/NumericalPointAction.h
+    src/actions/DecimalPointAction.h
+    src/actions/IntegralPointAction.h
+	src/actions/RectangleAction.h
+    src/actions/IntegralRectangleAction.h
+    src/actions/DecimalRectangleAction.h
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
@@ -100,28 +108,17 @@ set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
     src/actions/NumericalRangeAction.cpp
     src/actions/DecimalRangeAction.cpp
     src/actions/IntegralRangeAction.cpp
+	src/actions/NumericalPointAction.cpp
+    src/actions/DecimalPointAction.cpp
+    src/actions/IntegralPointAction.cpp
+	src/actions/RectangleAction.cpp
+    src/actions/IntegralRectangleAction.cpp
+    src/actions/DecimalRectangleAction.cpp
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_FILES
     ${PUBLIC_NUMERICAL_ACTIONS_HEADERS}    
     ${PUBLIC_NUMERICAL_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_RECTANGLE_ACTIONS_HEADERS
-    src/actions/RectangleAction.h
-    src/actions/IntegralRectangleAction.h
-    src/actions/DecimalRectangleAction.h
-)
-
-set(PUBLIC_RECTANGLE_ACTIONS_SOURCES
-    src/actions/RectangleAction.cpp
-    src/actions/IntegralRectangleAction.cpp
-    src/actions/DecimalRectangleAction.cpp
-)
-
-set(PUBLIC_RECTANGLE_ACTIONS_FILES
-    ${PUBLIC_RECTANGLE_ACTIONS_HEADERS}    
-    ${PUBLIC_RECTANGLE_ACTIONS_SOURCES}
 )
 
 set(PUBLIC_TEXTUAL_ACTIONS_HEADERS
@@ -353,6 +350,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/PaletteColorRoleAction.h
     src/actions/ColorSchemeAction.h
     src/actions/EditColorSchemeAction.h
+    src/actions/NavigationAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -391,6 +389,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/PaletteColorRoleAction.cpp
     src/actions/ColorSchemeAction.cpp
     src/actions/EditColorSchemeAction.cpp
+    src/actions/NavigationAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -470,13 +469,15 @@ set(PUBLIC_RENDERERS_HEADERS
     src/renderers/Renderer.h
     src/renderers/PointRenderer.h
     src/renderers/DensityRenderer.h
-    src/renderers/ImageRenderer.h
+    src/renderers/Renderer2D.h
+    src/renderers/Navigator2D.h
 )
 
 set(PUBLIC_RENDERERS_SOURCES
     src/renderers/PointRenderer.cpp
     src/renderers/DensityRenderer.cpp
-    src/renderers/ImageRenderer.cpp
+    src/renderers/Renderer2D.cpp
+    src/renderers/Navigator2D.cpp
 )
 
 set(PUBLIC_RENDERERS_FILES
@@ -552,6 +553,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/StyledIconEngine.h
     src/util/Badge.h
     src/util/ColorScheme.h
+    src/util/ProjectDatabaseProject.h
 )
 
 if(APPLE)
@@ -604,6 +606,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/StyledIconEngine.cpp
     src/util/Badge.cpp
     src/util/ColorScheme.cpp
+    src/util/ProjectDatabaseProject.cpp
 )
 
 if(APPLE)
@@ -951,6 +954,21 @@ set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
     ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
 )
 
+set(PUBLIC_PROJECT_DATABASE_MODEL_HEADERS
+    src/models/ProjectDatabaseModel.h
+	src/models/ProjectDatabaseFilterModel.h
+)
+
+set(PUBLIC_PROJECT_DATABASE_MODEL_SOURCES
+    src/models/ProjectDatabaseModel.cpp
+	src/models/ProjectDatabaseFilterModel.cpp
+)
+
+set(PUBLIC_PROJECT_DATABASE_MODEL_FILES
+    ${PUBLIC_PROJECT_DATABASE_MODEL_HEADERS}
+    ${PUBLIC_PROJECT_DATABASE_MODEL_SOURCES}
+)
+
 set(PUBLIC_COLOR_SCHEMES_MODEL_HEADERS
     src/models/AbstractColorSchemesModel.h
 	src/models/ColorSchemesListModel.h
@@ -975,6 +993,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/TasksSettingsAction.h
     src/AppearanceSettingsAction.h
     src/TemporaryDirectoriesSettingsAction.h
+	src/ErrorLoggingSettingsAction.h
     src/PluginGlobalSettingsGroupAction.h
 )
 
@@ -985,6 +1004,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/TasksSettingsAction.cpp
     src/AppearanceSettingsAction.cpp
     src/TemporaryDirectoriesSettingsAction.cpp
+    src/ErrorLoggingSettingsAction.cpp
     src/PluginGlobalSettingsGroupAction.cpp
 )
 
@@ -1048,7 +1068,6 @@ set(PUBLIC_HEADERS
     ${PUBLIC_EVENT_HEADERS}
     ${PUBLIC_COLOR_MAP_ACTION_HEADERS}
     ${PUBLIC_NUMERICAL_ACTIONS_HEADERS}
-    ${PUBLIC_RECTANGLE_ACTIONS_HEADERS}
     ${PUBLIC_TEXTUAL_ACTIONS_HEADERS}
     ${PUBLIC_GROUPING_ACTIONS_HEADERS}
     ${PUBLIC_TRIGGER_ACTIONS_HEADERS}
@@ -1084,6 +1103,7 @@ set(PUBLIC_HEADERS
 	${PUBLIC_DATASETS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
+	${PUBLIC_PROJECT_DATABASE_MODEL_HEADERS}
     ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
@@ -1096,7 +1116,6 @@ set(PUBLIC_SOURCES
     ${PUBLIC_EVENT_SOURCES}
     ${PUBLIC_COLOR_MAP_ACTION_SOURCES}
     ${PUBLIC_NUMERICAL_ACTIONS_SOURCES}
-    ${PUBLIC_RECTANGLE_ACTIONS_SOURCES}
     ${PUBLIC_TEXTUAL_ACTIONS_SOURCES}
     ${PUBLIC_GROUPING_ACTIONS_SOURCES}
     ${PUBLIC_TRIGGER_ACTIONS_SOURCES}
@@ -1132,6 +1151,7 @@ set(PUBLIC_SOURCES
 	${PUBLIC_DATASETS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
+	${PUBLIC_PROJECT_DATABASE_MODEL_SOURCES}
     ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
@@ -1157,7 +1177,6 @@ source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
 source_group(Event FILES ${PUBLIC_EVENT_FILES})
 source_group(Actions\\Colormap FILES ${PUBLIC_COLOR_MAP_ACTION_FILES})
 source_group(Actions\\Numerical FILES ${PUBLIC_NUMERICAL_ACTIONS_FILES})
-source_group(Actions\\Rectangle FILES ${PUBLIC_RECTANGLE_ACTIONS_FILES})
 source_group(Actions\\Textual FILES ${PUBLIC_TEXTUAL_ACTIONS_FILES})
 source_group(Actions\\Grouping FILES ${PUBLIC_GROUPING_ACTIONS_FILES})
 source_group(Actions\\Trigger FILES ${PUBLIC_TRIGGER_ACTIONS_FILES})
@@ -1193,6 +1212,7 @@ source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
 source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Videos FILES ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES})
+source_group(Models\\ProjectDatabase FILES ${PUBLIC_PROJECT_DATABASE_MODEL_FILES})
 source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})

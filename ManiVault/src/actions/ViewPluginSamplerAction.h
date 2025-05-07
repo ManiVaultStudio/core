@@ -56,8 +56,10 @@ namespace mv::gui {
  *
  * The scatter plot plugin is a good example of how this view plugin sampler can be integrated
  * into a view plugin class.
- *
- * Note: This action is developed for internal use only
+ * 
+ * Special considerations:
+ * - ViewPluginSamplerAction::setWidgetViewGeneratorFunction(...) does not work reliably together with QWebEngineView and QLabel for HTML-based view, use QTextBrowser instead
+ * - This action is developed for internal use only
  *
  * @author Thomas Kroes
  */
@@ -315,7 +317,7 @@ private:
     ToggleAction                    _enabledAction;                             /** Action to toggle computation on/off */
     ToggleAction                    _highlightFocusedElementsAction;            /** Action to toggle focus elements highlighting */
     VerticalGroupAction             _settingsAction;                            /** Additional vertical group action for settings */
-    ToggleAction                    _restrictNumberOfElementsAction;            /** Action to toggle the restriction of the maximum number of elements in the focus region */
+    ToggleAction                    _restrictNumberOfElementsAction;            /** Action to setEnabled the restriction of the maximum number of elements in the focus region */
     IntegralAction                  _maximumNumberOfElementsAction;             /** Action to restrict the maximum number of elements in the focus region */
     IntegralAction                  _lazyUpdateIntervalAction;                  /** Action to control the view update timer interval */
     OptionAction                    _samplingModeAction;                        /** Action to control the sampling mode */

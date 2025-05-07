@@ -94,9 +94,10 @@ bool GroupWidgetTreeItem::SizeSynchronizer::eventFilter(QObject* target, QEvent*
             if (target == _groupTreeItem->getGroupWidget())
                 _groupTreeItem->setSizeHint(0, QSize(_groupTreeItem->getGroupSectionWidth(), _groupTreeItem->getGroupWidget()->sizeHint().height()));
 
-            auto treeWidget = dynamic_cast<GroupsAction::TreeWidget*>(_groupTreeItem->treeWidget());
-
-            treeWidget->updateGeometries();
+            /*
+            //auto treeWidget = dynamic_cast<GroupsAction::TreeWidget*>(_groupTreeItem->treeWidget());
+            //treeWidget->updateGeometries();
+            */
 
             break;
         }

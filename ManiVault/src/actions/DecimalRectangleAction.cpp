@@ -21,6 +21,21 @@ DecimalRectangleAction::DecimalRectangleAction(QObject * parent, const QString& 
     connect(&getRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this]() -> void { _rectangleChanged(); });
 }
 
+QRectF DecimalRectangleAction::toRectF() const
+{
+    return {
+        getLeft(),
+        getTop(),
+        getWidth(),
+        getHeight()
+    };
+}
+
+void DecimalRectangleAction::setRectF(const QRectF& rectangle)
+{
+    setRectangle(rectangle.left(), rectangle.right(), rectangle.bottom(), rectangle.top());
+}
+
 void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDecimalRectangleAction = dynamic_cast<DecimalRectangleAction*>(publicAction);

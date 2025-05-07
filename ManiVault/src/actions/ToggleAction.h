@@ -8,13 +8,14 @@
 
 #include <QCheckBox>
 #include <QPushButton>
+#include <QWidget>
 
 namespace mv::gui {
 
 /**
  * Toggle action class
  *
- * Toggle action with check/toggle button UI
+ * Toggle action with check/setEnabled button UI
  *
  * @author Thomas Kroes
  */
@@ -31,8 +32,10 @@ public:
         Icon                = 0x00001,          /** Enable push button icon */
         Text                = 0x00002,          /** Enable push button text */
 
-        CheckBox            = 0x00004,          /** The widget includes a check box */
-        PushButton          = 0x00008 | Text,   /** The widget includes a toggle push button with text */
+        CheckBox            = 0x00004,          /** The widget includes a checkbox */
+        PushButton          = 0x00008 | Text,   /** The widget includes a setEnabled push button with text */
+        ToggleImage         = 0x00010,          /** Widget uses an image that changes based on toggle state */
+        ToggleImageText     = 0x00020,          /** Widget uses an image that changes based on toggle state and also includes a title label */
 
         /** Push button configurations */
         PushButtonIcon          = (PushButton & ~Text) | Icon,  /** Push button with icon only */
@@ -95,10 +98,35 @@ public:
         friend class ToggleAction;
     };
 
+    /** Toggle image widget class for toggle action */
+    class CORE_EXPORT ToggleImageLabelWidget : public QWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param toggleAction Pointer to toggle action
+         * @param widgetFlags Widget flags
+         */
+        ToggleImageLabelWidget(QWidget* parent, ToggleAction* toggleAction, const std::int32_t& widgetFlags);
+
+        /**
+         * Invoked when the mouse button is pressed
+         * @param event Pointer to mouse event that occurred
+         */
+        void mousePressEvent(QMouseEvent* event) override;
+
+    protected:
+        ToggleAction*   _toggleAction;      /** Pointer to toggle action */
+
+        friend class ToggleAction;
+    };
+
 protected:
 
     /**
-     * Get widget representation of the toggle action
+     * Get widget representation of the setEnabled action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
@@ -170,7 +198,7 @@ signals:
     void indeterminateChanged(bool indeterminate);
 
 protected:
-    bool    _indeterminate;     /** Whether the toggle action is in an indeterminate state */
+    bool    _indeterminate;     /** Whether the setEnabled action is in an indeterminate state */
 
     friend class AbstractActionsManager;
 };

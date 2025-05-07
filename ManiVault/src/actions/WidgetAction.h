@@ -597,7 +597,7 @@ protected:
 
     /**
      * Connect this action to a public action
-     * @param publicAction Pointer to public action to connect to
+     * @param publicActionName Pointer to public action to connect to
      */
     void connectToPublicActionByName(const QString& publicActionName);
 
@@ -772,14 +772,12 @@ public: // Popups
      * Get override size hint
      * @return Override size hint
      */
-    [[deprecated("This method is a placeholder and not operational yet")]]
     QSize getOverrideSizeHint() const;
 
     /**
      * Set override size hint
      * @param overrideSizeHint Override size hint
      */
-    [[deprecated("This method is a placeholder and not operational yet")]]
     void setOverrideSizeHint(const QSize& overrideSizeHint);
 
 public: // Configuration flags
@@ -880,7 +878,7 @@ public: // Styled icon
      * Set the icon by \p iconName and use the default icon font and version
      * @param iconName Name of the icon
      */
-    void setIconByName(const QString& iconName);
+    virtual void setIconByName(const QString& iconName);
 
     /**
      * Set the icon by \p iconName and possibly override the default \p iconFontName and \p iconFontVersion
@@ -888,7 +886,7 @@ public: // Styled icon
      * @param iconFontName Name of the icon font
      * @param iconFontVersion Version of the icon font
      */
-    void setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion);
+    virtual void setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion);
 
 public: // Badge-related
 
@@ -1032,6 +1030,7 @@ private:
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
     util::Badge                     _badge;                         /** Badge configuration */
     WidgetActionDrag                _drag;                          /** Drag behaviour */
+    QString                         _description;                   /** Action description */
 
 protected:
     friend class mv::AbstractActionsManager;

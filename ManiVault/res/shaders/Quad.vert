@@ -4,9 +4,15 @@
 
 #version 330 core
 
-out vec2 pass_texCoord;
+layout(location = 0) in vec2 vertex;
+layout(location = 1) in vec2 uv;
+
+uniform mat4 	mvp;
+
+out vec2 passUv;
 
 void main() {
-    pass_texCoord = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
-    gl_Position = vec4(pass_texCoord * 2 - 1, 0, 1);
+    gl_Position 	= mvp * vec4(vertex, 0, 1);
+	
+	passUv = uv;
 }

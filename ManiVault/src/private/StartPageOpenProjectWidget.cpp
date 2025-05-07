@@ -13,8 +13,11 @@
 
 #include <util/StyledIcon.h>
 
+#include <models/ProjectDatabaseModel.h>
+
 #include <QDebug>
 #include <QPainter>
+#include <QStandardPaths>
 
 using namespace mv;
 using namespace mv::util;
@@ -22,11 +25,16 @@ using namespace mv::gui;
 
 StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
+    Serializable("OpenProjectWidget"),
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
-    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects")
+    _projectDatabaseWidget(this, "Projects"),
+    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
+    _projectDatabaseSettingsAction(this, "Data Source Names")
 {
+    _projectDatabaseWidget.hide();
+
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
@@ -34,19 +42,42 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     layout->addWidget(&_openCreateProjectWidget);
     layout->addWidget(&_recentProjectsWidget);
 
+    if (QFileInfo("StartPage.json").exists()) {
+        layout->addWidget(&_projectDatabaseWidget);
+
+        _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+        _projectDatabaseSettingsAction.setShowLabels(false);
+        _projectDatabaseSettingsAction.setIconByName("globe");
+        _projectDatabaseSettingsAction.setPopupSizeHint(QSize(550, 100));
+
+        _projectDatabaseSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectDatabaseModel().getDsnsAction()));
+
+        _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
+
+        auto& toolbarAction = _projectDatabaseWidget.getHierarchyWidget().getToolbarAction();
+
+        toolbarAction.addAction(&_projectDatabaseSettingsAction);
+        toolbarAction.addAction(&_projectDatabaseFilterModel.getFilterGroupAction());
+        toolbarAction.addAction(&_projectDatabaseFilterModel.getTagsFilterAction());
+
+        _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectDatabaseModel*>(&mv::projects().getProjectDatabaseModel()));
+
+        connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
+        connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
+    }
+    
     setLayout(layout);
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
     _recentProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _projectDatabaseWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
-
     _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
-
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
     connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
@@ -55,10 +86,12 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     const auto toggleViews = [this]() -> void {
         _openCreateProjectWidget.setVisible(_startPageContentWidget->getToggleOpenCreateProjectAction().isChecked());
+        _projectDatabaseWidget.setVisible(QFileInfo("StartPage.json").exists() && _startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
         _recentProjectsWidget.setVisible(_startPageContentWidget->getToggleRecentProjectsAction().isChecked());
     };
 
     connect(&_startPageContentWidget->getToggleOpenCreateProjectAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&_startPageContentWidget->getToggleProjectDatabaseAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleRecentProjectsAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
@@ -84,7 +117,6 @@ void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment
     const auto margin           = 12.0;
     const auto spacing          = 14.0;
     const auto halfSpacing      = spacing / 2.0;
-    const auto lineThickness    = 7.0;
     const auto offset           = 80.0;
     const auto loggingHeight    = logging ? 25.0 : 0.0;
     const auto halfSize         = logging ? margin + ((size - margin - margin - loggingHeight - spacing) / 2.0) : size / 2.0;
@@ -203,7 +235,63 @@ void StartPageOpenProjectWidget::updateRecentActions()
             _recentProjectsWidget.getModel().add(recentProjectPageAction);
         }
     }
+}
 
+void StartPageOpenProjectWidget::updateProjectDatabaseActions()
+{
+    _projectDatabaseWidget.getModel().reset();
+    
+    const auto& projectCenterModel = mv::projects().getProjectDatabaseModel();
+
+    for (int filterRowIndex = 0; _projectDatabaseFilterModel.rowCount() > filterRowIndex; ++filterRowIndex) {
+        const auto filterIndex = _projectDatabaseFilterModel.index(filterRowIndex, 0);
+        const auto sourceIndex = _projectDatabaseFilterModel.mapToSource(filterIndex);
+
+    	if (sourceIndex.isValid()) {
+            if (const auto project = projectCenterModel.getProject(sourceIndex)) {
+                PageAction recentProjectPageAction(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
+                    const auto fileName = QFileInfo(project->getUrl().toString()).fileName();
+
+                    if (!fileName.isEmpty()) {
+                        const auto basePath         = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+                        const auto targetDirectory  = basePath + "/projects";
+                        const auto projectFilePath  = targetDirectory + "/" + fileName;
+
+                        if (QDir().mkpath(targetDirectory) && QFile::exists(projectFilePath)) {
+                            QMessageBox downloadAgainMessageBox;
+
+                            downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
+                            downloadAgainMessageBox.setWindowTitle(QString("%1 already exists?").arg(fileName));
+                            downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
+                            downloadAgainMessageBox.setIcon(QMessageBox::Warning);
+
+                            auto yesButton  = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+                            auto noButton   = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
+
+                            downloadAgainMessageBox.setDefaultButton(noButton);
+
+                            downloadAgainMessageBox.exec();
+
+                            if (downloadAgainMessageBox.clickedButton() == yesButton) {
+                                QFile::remove(targetDirectory);
+                                projects().openProject(project->getUrl(), targetDirectory);
+                            }
+                            else {
+                                projects().openProject(projectFilePath);
+                            }
+                        }
+                        else {
+	                        projects().openProject(project->getUrl(), targetDirectory);
+                        }
+                    }
+				});
+
+                recentProjectPageAction.setTags(project->getTags());
+
+            	_projectDatabaseWidget.getModel().add(recentProjectPageAction);
+            }
+        }
+    }
 }
 
 void StartPageOpenProjectWidget::createCustomIcons()
@@ -218,4 +306,26 @@ void StartPageOpenProjectWidget::updateCustomStyle()
 {
     createCustomIcons();
     updateActions();
+}
+
+void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+
+    _openCreateProjectWidget.fromParentVariantMap(variantMap);
+    _recentProjectsWidget.fromParentVariantMap(variantMap);
+    _projectDatabaseWidget.fromParentVariantMap(variantMap);
+    _projectDatabaseFilterModel.fromParentVariantMap(variantMap);
+}
+
+QVariantMap StartPageOpenProjectWidget::toVariantMap() const
+{
+	auto variantMap = Serializable::toVariantMap();
+
+    _openCreateProjectWidget.insertIntoVariantMap(variantMap);
+    _recentProjectsWidget.insertIntoVariantMap(variantMap);
+    _projectDatabaseWidget.insertIntoVariantMap(variantMap);
+    _projectDatabaseFilterModel.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }

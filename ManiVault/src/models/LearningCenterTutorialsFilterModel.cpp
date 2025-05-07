@@ -26,6 +26,7 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     _tagsFilterAction(this, "Tags filter"),
     _excludeTagsFilterAction(this, "Exclude tags filter"),
     _targetAppVersionAction(this, "App version"),
+    _filterLoadableOnlyAction(this, "Loadable only", true),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
@@ -48,7 +49,9 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
     connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
     connect(&_excludeTagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
     connect(&_targetAppVersionAction, &VersionAction::versionChanged, this, &LearningCenterTutorialsFilterModel::invalidate);
+    connect(&_filterLoadableOnlyAction, &ToggleAction::toggled, this, &LearningCenterTutorialsFilterModel::invalidate);
 
+    _filterGroupAction.addAction(&getFilterLoadableOnlyAction());
     _filterGroupAction.addAction(&getTextFilterCaseSensitiveAction());
     _filterGroupAction.addAction(&getTextFilterRegularExpressionAction());
     _filterGroupAction.addAction(&getTargetAppVersionAction());
@@ -95,13 +98,16 @@ bool LearningCenterTutorialsFilterModel::filterAcceptsRow(int row, const QModelI
         }
     }
 
-    const auto minimumVersionMajor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMajor)).data(Qt::EditRole).toInt();
-    const auto minimumVersionMinor  = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumVersionMinor)).data(Qt::EditRole).toInt();
+    const auto tutorialMinimumCoreVersion = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MinimumCoreVersion)).data(Qt::EditRole).value<Version>();
 
-    const Version tutorialMinimumAppVersion(minimumVersionMajor, minimumVersionMinor, 0) ;
-    const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0) ;
+    const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0);
 
-    if (targetAppVersion > tutorialMinimumAppVersion)
+    if (targetAppVersion > tutorialMinimumCoreVersion)
+        return false;
+
+    const auto missingPlugins = index.siblingAtColumn(static_cast<int>(LearningCenterTutorialsModel::Column::MissingPlugins)).data(Qt::EditRole).toStringList();
+
+    if (_filterLoadableOnlyAction.isChecked() && !missingPlugins.isEmpty())
         return false;
 
     return true;
@@ -120,7 +126,6 @@ void LearningCenterTutorialsFilterModel::setSourceModel(QAbstractItemModel* sour
             return;
 
         _tagsFilterAction.setOptions(uniqueTags);
-    	_tagsFilterAction.setSelectedOptions(_tagsFilterAction.hasSelectedOptions() ? _tagsFilterAction.getSelectedOptions() : uniqueTags);
     };
 
     connect(_learningCenterTutorialsModel, &LearningCenterTutorialsModel::tagsChanged, this, updateTags);
@@ -131,6 +136,28 @@ void LearningCenterTutorialsFilterModel::setSourceModel(QAbstractItemModel* sour
 bool LearningCenterTutorialsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     return lhs.data().toString() < rhs.data().toString();
+}
+
+void LearningCenterTutorialsFilterModel::fromVariantMap(const QVariantMap& variantMap)
+{
+	SortFilterProxyModel::fromVariantMap(variantMap);
+
+    _excludeTagsFilterAction.fromParentVariantMap(variantMap);
+    _tagsFilterAction.fromParentVariantMap(variantMap);
+    _targetAppVersionAction.fromParentVariantMap(variantMap);
+    _filterLoadableOnlyAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap LearningCenterTutorialsFilterModel::toVariantMap() const
+{
+	auto variantMap = SortFilterProxyModel::toVariantMap();
+
+    _excludeTagsFilterAction.insertIntoVariantMap(variantMap);
+    _tagsFilterAction.insertIntoVariantMap(variantMap);
+    _targetAppVersionAction.insertIntoVariantMap(variantMap);
+    _filterLoadableOnlyAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 }

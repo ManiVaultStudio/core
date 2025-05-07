@@ -51,7 +51,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/6.8.2@lkeb/stable")
+    requires = ("qt/6.8.3@lkeb/stable")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
@@ -104,7 +104,8 @@ class HdpsCoreConan(ConanFile):
                 "libasound2-dev",
                 "libdbus-1-dev",
                 "libcups2-dev",
-                "libicu-dev"
+                "libicu-dev",
+                "libcurl4-openssl-dev"      # for sentry
                 ]
             
             installer = tools.SystemPackageTool()
@@ -152,6 +153,10 @@ class HdpsCoreConan(ConanFile):
         # Set some build options
         tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
         tc.variables["MV_UNITY_BUILD"] = "ON"
+
+        # TEMPORARILY disable sentry on macos, 16/04/25
+        if self.settings.os == "Macos":
+            tc.variables["MV_USE_ERROR_LOGGING"] = "OFF"
 
         try:
             tc.generate()

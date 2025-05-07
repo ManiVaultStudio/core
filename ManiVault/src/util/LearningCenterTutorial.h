@@ -29,21 +29,6 @@ class CORE_EXPORT LearningCenterTutorial : public QObject
 public:
     
     /**
-     * Construct tutorial from individual properties
-     * @param title Tutorial title
-     * @param tags Tutorial tags for filtering
-     * @param date Issue date
-     * @param iconName Font Awesome icon name
-     * @param summary Tutorial summary (brief description)
-     * @param content Full tutorial content in HTML format
-     * @param url ManiVault website tutorial URL
-     * @param projectUrl Location of the ManiVault tutorial project (if any)
-     * @param minimumVersionMajor Minimum supported ManiVault Studio major version
-     * @param minimumVersionMinor Minimum supported ManiVault Studio minor version
-     */
-    explicit LearningCenterTutorial(const QString& title, const QStringList& tags, const QString& date, const QString& iconName, const QString& summary, const QString& content, const QUrl& url, const QUrl& projectUrl, const std::int32_t minimumVersionMajor, const std::int32_t minimumVersionMinor);
-
-    /**
      * Construct tutorial from \p variantMap
      * @param variantMap Variant map containing the tutorial properties
      */
@@ -98,16 +83,22 @@ public:
     const QUrl& getProjectUrl() const;
 
     /**
-     * Get minimum supported ManiVault Studio major version
-     * @return Minimum supported ManiVault Studio major version
+     * Get minimum supported ManiVault Studio core version
+     * @return Minimum supported ManiVault Studio core  version
      */
-    const std::int32_t& getMinimumVersionMajor() const;
+    const Version& getMinimumCoreVersion() const;
 
     /**
-     * Get minimum supported ManiVault Studio minor version
-     * @return Minimum supported ManiVault Studio minor version
+     * Get required plugins
+     * @return Required plugins
      */
-    const std::int32_t& getMinimumVersionMinor() const;
+    const QStringList& getRequiredPlugins() const;
+
+    /**
+     * Get missing plugins
+     * @return Missing plugins
+     */
+    const QStringList& getMissingPlugins() const;
 
     /**
      * Get whether the tutorial has a project
@@ -130,8 +121,9 @@ public:
         _content                = rhs.getContent();
         _url                    = rhs.getUrl();
         _projectUrl             = rhs.getProjectUrl();
-        _minimumVersionMajor    = rhs.getMinimumVersionMajor();
-        _minimumVersionMinor    = rhs.getMinimumVersionMinor();
+        _minimumCoreVersion     = rhs.getMinimumCoreVersion();
+        _requiredPlugins        = rhs.getRequiredPlugins();
+        _missingPlugins         = rhs.getMissingPlugins();
 
         return *this;
     }
@@ -145,8 +137,9 @@ private:
     QString         _content;               /** Full tutorial content in HTML format */
     QUrl            _url;                   /** ManiVault website tutorial URL */
     QUrl            _projectUrl;            /** Location of the ManiVault tutorial project (if any) */
-    std::int32_t    _minimumVersionMajor;   /** Minimum supported ManiVault Studio major version */
-    std::int32_t    _minimumVersionMinor;   /** Minimum supported ManiVault Studio minor version */
+    Version         _minimumCoreVersion;    /** Minimum supported ManiVault Studio major version */
+    QStringList     _requiredPlugins;       /** Required plugins */
+    QStringList     _missingPlugins;        /** Missing plugins */
 };
 
 using LearningCenterTutorials = std::vector<const LearningCenterTutorial*>;

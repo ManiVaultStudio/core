@@ -8,8 +8,6 @@
 
 #include <CoreInterface.h>
 
-#include <QEvent>
-
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
@@ -27,8 +25,9 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
     _toolbarAction.setShowLabels(false);
 
     _toolbarAction.addAction(&_tutorialsFilterModel.getTextFilterAction());
-    _toolbarAction.addAction(&_tutorialsFilterModel.getTagsFilterAction());
+    _toolbarAction.addAction(const_cast<StringsAction*>(&mv::help().getTutorialsModel().getDsnsAction()));
     _toolbarAction.addAction(&_tutorialsFilterModel.getFilterGroupAction());
+    _toolbarAction.addAction(&_tutorialsFilterModel.getTagsFilterAction());
 
     getHierarchyWidget().getToolbarAction().setVisible(false);
     getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -43,9 +42,14 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
 
     updateActions();
 
-    connect(&mv::help(), &mv::AbstractHelpManager::tutorialsModelPopulatedFromWebsite, this, [this, tags]() -> void {
-        getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tags.isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tags);
+    /*
+    connect(&mv::help().getTutorialsModel(), &mv::LearningCenterTutorialsModel::populatedFromDsns, this, [this]() -> void {
+        auto& tagsFilterAction = _tutorialsFilterModel.getTagsFilterAction();
+
+        qDebug() << "Populated from DSNs, setting tags filter action to:" << tagsFilterAction.getOptions();
+        //getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tagsFilterAction.getSelectedOptions().isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tagsFilterAction.getSelectedOptions());
 	});
+    */
 }
 
 HorizontalGroupAction& PageTutorialsWidget::getToolbarAction()
@@ -57,7 +61,6 @@ LearningCenterTutorialsFilterModel& PageTutorialsWidget::getTutorialsFilterModel
 {
     return _tutorialsFilterModel;
 }
-
 
 void PageTutorialsWidget::updateActions()
 {
@@ -108,5 +111,21 @@ void PageTutorialsWidget::updateActions()
 
         getModel().add(tutorialAction);
     }
+}
+
+void PageTutorialsWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+    PageActionsWidget::fromVariantMap(variantMap);
+
+    _tutorialsFilterModel.fromParentVariantMap(variantMap);
+}
+
+QVariantMap PageTutorialsWidget::toVariantMap() const
+{
+    auto variantMap = PageActionsWidget::toVariantMap();
+
+    _tutorialsFilterModel.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
