@@ -394,15 +394,26 @@ void Points::init()
 // Point Set
 // =============================================================================
 
+void Points::handleNumberDimensionsChanged(std::size_t newNumDimensions) {
+    std::vector<QString> dimensionNames = getDimensionNames();
+    std::size_t oldDimSize = dimensionNames.size();
+    dimensionNames.resize(newNumDimensions, "");
+
+    for (std::size_t addedDimension = oldDimSize; addedDimension < newNumDimensions; addedDimension++) {
+        dimensionNames[addedDimension] = QString("Dim %1").arg(addedDimension + 1);
+    }
+
+    setDimensionNames(dimensionNames);  // calls notifyDatasetDataDimensionsChanged
+}
 
 void Points::setData(std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
-    const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
+    const auto numDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
     getRawData<PointData>()->setData(nullptr, numPoints, numDimensions);
 
-    if (notifyDimensionsChanged)
-        events().notifyDatasetDataDimensionsChanged(this);
+    if (numDimensionsChanged)
+        handleNumberDimensionsChanged(numDimensions);
 }
 
 void Points::extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const
@@ -762,6 +773,8 @@ const std::vector<QString>& Points::getDimensionNames() const
 
 void Points::setDimensionNames(const std::vector<QString>& dimNames)
 {
+    assert(dimNames.size() == getRawData<PointData>()->getNumDimensions());
+
     getRawData<PointData>()->setDimensionNames(dimNames);
 
     mv::events().notifyDatasetDataDimensionsChanged(this);

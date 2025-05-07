@@ -595,6 +595,9 @@ private:
         }
     }
 
+    // When the number of dimensions is changed in setData(), update dimension names and notify core
+    void handleNumberDimensionsChanged(std::size_t newNumDimensions);
+
 public:
     Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
     ~Points() override;
@@ -686,12 +689,12 @@ public:
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
-        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
+        const auto numDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
         getRawData<PointData>()->setData(data, numPoints, numDimensions);
 
-        if (notifyDimensionsChanged)
-            mv::events().notifyDatasetDataDimensionsChanged(this);
+        if (numDimensionsChanged)
+            handleNumberDimensionsChanged(numDimensions);
     }
 
     /// Just calls the corresponding member function of its PointData.
@@ -701,24 +704,24 @@ public:
     template <typename T>
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
-        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
+        const auto numDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
         getRawData<PointData>()->setData(data, numDimensions);
 
-        if (notifyDimensionsChanged)
-            mv::events().notifyDatasetDataDimensionsChanged(this);
+        if (numDimensionsChanged)
+            handleNumberDimensionsChanged(numDimensions);
     }
 
     /// Just calls the corresponding member function of its PointData.
     template <typename T>
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
-        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
+        const auto numDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
         getRawData<PointData>()->setData(std::move(data), numDimensions);
 
-        if (notifyDimensionsChanged)
-            mv::events().notifyDatasetDataDimensionsChanged(this);
+        if (numDimensionsChanged)
+            handleNumberDimensionsChanged(numDimensions);
     }
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
