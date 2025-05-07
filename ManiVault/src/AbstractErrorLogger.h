@@ -44,7 +44,9 @@ public:
     AbstractErrorLogger(const QString& loggerName, QObject* parent = nullptr) :
         QObject(parent),
         _loggerName(loggerName),
-        _initialized(false)
+        _initialized(false),
+        _notificationTimer(),
+        _notifications()
     {
         _notificationTimer.setInterval(2500);
         
