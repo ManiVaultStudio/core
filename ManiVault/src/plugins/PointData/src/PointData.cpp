@@ -773,6 +773,8 @@ const std::vector<QString>& Points::getDimensionNames() const
 
 void Points::setDimensionNames(const std::vector<QString>& dimNames)
 {
+    assert(dimNames.size() == getRawData<PointData>()->getNumDimensions());
+
     getRawData<PointData>()->setDimensionNames(dimNames);
 
     mv::events().notifyDatasetDataDimensionsChanged(this);
