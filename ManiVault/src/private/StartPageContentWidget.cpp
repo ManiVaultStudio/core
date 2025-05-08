@@ -94,6 +94,16 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     });
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
+
+    const auto& tutorialsAppFeatureEnabledAction = mv::constSettings().getAppFeaturesSettingsAction().getTutorialsAppFeatureAction().getEnabledAction();
+
+    const auto updateTutorialsToggleVisibility = [this, &tutorialsAppFeatureEnabledAction]() -> void {
+        _toggleTutorialsAction.setVisible(tutorialsAppFeatureEnabledAction.isChecked());
+	};
+
+    updateTutorialsToggleVisibility();
+
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, updateTutorialsToggleVisibility);
 }
 
 void StartPageContentWidget::updateActions()

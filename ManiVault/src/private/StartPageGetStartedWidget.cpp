@@ -67,15 +67,18 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt");
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
 
-    const auto toggleViews = [this]() -> void {
+    const auto& tutorialsAppFeatureEnabledAction = mv::settings().getAppFeaturesSettingsAction().getTutorialsAppFeatureAction().getEnabledAction();
+
+    const auto toggleViews = [this, &tutorialsAppFeatureEnabledAction]() -> void {
         _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());
         _createProjectFromDatasetWidget.setVisible(_startPageContentWidget->getToggleProjectFromDataAction().isChecked());
-        _tutorialsWidget.setVisible(_startPageContentWidget->getToggleTutorialsAction().isChecked());
+        _tutorialsWidget.setVisible(tutorialsAppFeatureEnabledAction.isChecked() && _startPageContentWidget->getToggleTutorialsAction().isChecked());
     };
 
     connect(&_startPageContentWidget->getToggleProjectFromWorkspaceAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleTutorialsAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
 }

@@ -242,6 +242,14 @@ CORE_EXPORT inline AbstractSettingsManager& settings() {
 }
 
 /**
+* Convenience function to obtain access to the settings manager in the core
+* @return Reference to abstract settings manager
+*/
+CORE_EXPORT inline const AbstractSettingsManager& constSettings() {
+    return core()->getSettingsManager();
+}
+
+/**
  * Convenience function to obtain access to the help manager in the core
  * @return Reference to abstract help manager
  */

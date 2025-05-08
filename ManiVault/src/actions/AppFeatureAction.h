@@ -84,6 +84,12 @@ public:
     void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction(), bool load = true) override;
 
     /**
+     * Get whether the app feature is enabled or not
+     * @return Boolean determining whether the app feature is enabled or not
+     */
+    bool getEnabled() const;
+
+    /**
      * Get the HTML resource file location
      * @return Location of the app feature description HTML resource file
      */

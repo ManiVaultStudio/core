@@ -56,7 +56,7 @@ public: // Action getters
 
 public: // Global settings actions
 
-    virtual gui::AppFeaturesSettingsAction& getAppFeaturesSettingsAction() = 0;
+    //virtual gui::AppFeaturesSettingsAction& getAppFeaturesSettingsAction() = 0;
     virtual gui::ParametersSettingsAction& getParametersSettings() = 0;
     virtual gui::MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
     virtual gui::TasksSettingsAction& getTasksSettingsAction() = 0;

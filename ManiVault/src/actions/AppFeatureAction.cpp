@@ -91,6 +91,11 @@ void AppFeatureAction::addAction(WidgetAction* action, std::int32_t widgetFlags 
     _settingsAction.setVisible(true);
 }
 
+bool AppFeatureAction::getEnabled() const
+{
+	return _enabledAction.isChecked();
+}
+
 QString AppFeatureAction::getResourceLocation() const
 {
     return _resourceLocation;

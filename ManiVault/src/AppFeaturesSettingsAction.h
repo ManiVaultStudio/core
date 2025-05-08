@@ -34,9 +34,9 @@ public:
 public: // Action getters
 
     const ErrorLoggingAppFeatureAction& getErrorLoggingAppFeatureAction() const { return _errorLoggingAppFeatureAction; }
-    ProjectsAppFeatureAction& getProjectsAppFeatureAction() { return _projectsAppFeatureAction; }
-    TutorialsAppFeatureAction& getTutorialsAppFeatureAction() { return _tutorialsAppFeatureAction; }
-    VideosAppFeatureAction& getVideosAppFeatureAction() { return _videosAppFeatureAction; }
+    const ProjectsAppFeatureAction& getProjectsAppFeatureAction() const { return _projectsAppFeatureAction; }
+    const TutorialsAppFeatureAction& getTutorialsAppFeatureAction() const { return _tutorialsAppFeatureAction; }
+    const VideosAppFeatureAction& getVideosAppFeatureAction() const { return _videosAppFeatureAction; }
 
 private:
     ErrorLoggingAppFeatureAction    _errorLoggingAppFeatureAction;      /** App feature action for configuring error logging */
