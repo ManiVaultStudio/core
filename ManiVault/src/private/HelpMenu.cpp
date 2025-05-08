@@ -76,8 +76,15 @@ void HelpMenu::populate()
 
     addSeparator();
 
-    addMenu(mv::help().getVideosMenu());
-    addMenu(mv::help().getTutorialsMenu());
+    const auto& appFeatureEnabledAction             = mv::settings().getAppFeaturesSettingsAction();
+    const auto& videosAppFeatureEnabledAction       = appFeatureEnabledAction.getVideosAppFeatureAction().getEnabledAction();
+    const auto& tutorialsAppFeatureEnabledAction    = appFeatureEnabledAction.getTutorialsAppFeatureAction().getEnabledAction();
+
+    if (videosAppFeatureEnabledAction.isChecked())
+		addMenu(mv::help().getVideosMenu());
+    
+    if (tutorialsAppFeatureEnabledAction.isChecked())
+		addMenu(mv::help().getTutorialsMenu());
 
     if(!isEmpty())
         addSeparator();

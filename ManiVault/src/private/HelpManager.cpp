@@ -198,6 +198,17 @@ QMenu* HelpManager::getVideosMenu() const
         videosMenu->addAction(videoAction);
     }
 
+    const auto& videosAppFeatureEnabledAction = mv::settings().getAppFeaturesSettingsAction().getTutorialsAppFeatureAction().getEnabledAction();
+
+    const auto toggleVisibility = [videosMenu, &videosAppFeatureEnabledAction]() -> void {
+        videosMenu->setEnabled(videosAppFeatureEnabledAction.isChecked());
+
+        for (auto action : videosMenu->actions())
+            action->setVisible(videosAppFeatureEnabledAction.isChecked());
+        };
+
+    connect(&videosAppFeatureEnabledAction, &ToggleAction::toggled, videosMenu, toggleVisibility);
+
     return videosMenu;
 }
 
@@ -276,6 +287,17 @@ QMenu* HelpManager::getTutorialsMenu() const
     }
 
     tutorialsMenu->setEnabled(!tutorials.empty());
+
+    const auto& tutorialsAppFeatureEnabledAction = mv::settings().getAppFeaturesSettingsAction().getTutorialsAppFeatureAction().getEnabledAction();
+
+    const auto toggleVisibility = [tutorialsMenu, &tutorialsAppFeatureEnabledAction]() -> void {
+        tutorialsMenu->setEnabled(tutorialsAppFeatureEnabledAction.isChecked());
+
+        for (auto action : tutorialsMenu->actions())
+            action->setVisible(tutorialsAppFeatureEnabledAction.isChecked());
+	};
+
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, tutorialsMenu, toggleVisibility);
 
     return tutorialsMenu;
 }
