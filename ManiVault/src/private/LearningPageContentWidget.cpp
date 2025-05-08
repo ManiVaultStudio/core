@@ -110,5 +110,15 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
 
     connect(&videosAppFeatureEnabledAction, &ToggleAction::toggled, this, updateToggleSectionActionsVisibility);
     connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, updateToggleSectionActionsVisibility);
+
+    connect(&videosAppFeatureEnabledAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        if (toggled)
+            _toggleVideosSectionAction.setChecked(true);
+    });
+
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        if (toggled)
+            _toggleTutorialsSectionAction.setChecked(true);
+	});
 }
 

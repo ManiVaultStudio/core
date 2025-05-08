@@ -104,6 +104,11 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     updateTutorialsToggleVisibility();
 
     connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, updateTutorialsToggleVisibility);
+
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        if (toggled)
+            _toggleTutorialsSectionAction.setChecked(true);
+	});
 }
 
 void StartPageContentWidget::updateActions()

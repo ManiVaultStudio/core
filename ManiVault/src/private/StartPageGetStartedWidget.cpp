@@ -75,12 +75,13 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
         _tutorialsWidget.setVisible(tutorialsAppFeatureEnabledAction.isChecked() && _startPageContentWidget->getToggleTutorialsAction().isChecked());
     };
 
+    toggleViews();
+
     connect(&_startPageContentWidget->getToggleProjectFromWorkspaceAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleTutorialsAction(), &ToggleAction::toggled, this, toggleViews);
-    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, toggleViews);
 
-    toggleViews();
+	connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, toggleViews);
 }
 
 void StartPageGetStartedWidget::updateActions()
