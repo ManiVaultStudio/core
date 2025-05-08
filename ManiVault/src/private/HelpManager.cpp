@@ -36,8 +36,7 @@ HelpManager::HelpManager(QObject* parent) :
     _toWebsiteAction(this, "Website"),
     _toWikiAction(this, "Wiki"),
     _toRepositoryAction(this, "Repository"),
-    _toLearningCenterAction(this, "Go to learning center"),
-    _fileDownloader(FileDownloader::StorageMode::File, Task::GuiScope::Background)
+    _toLearningCenterAction(this, "Go to learning center")
 {
     _showLearningCenterPageAction.setIconByName("chalkboard-user");
     _showLearningCenterPageAction.setToolTip("Go to the learning center");
@@ -84,6 +83,7 @@ HelpManager::HelpManager(QObject* parent) :
         _showLearningCenterPageAction.setChecked(true);
     });
 
+    /*
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         try
         {
@@ -108,6 +108,7 @@ HelpManager::HelpManager(QObject* parent) :
             exceptionMessageBox("Unable to process learning center JSON");
         }
 	});
+    */
 }
 
 HelpManager::~HelpManager()
@@ -128,10 +129,11 @@ void HelpManager::initialize()
 
     beginInitialization();
     {
-        _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
-
         _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
         _tutorialsModel.synchronizeWithDsns();
+
+        //_videosModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
+        //_videosModel.synchronizeWithDsns();
     }
     endInitialization();
 }
