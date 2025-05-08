@@ -319,6 +319,7 @@ public: // Action getters
 
     gui::StringsAction& getTutorialsDsnsAction()  { return _tutorialsDsnsAction; }
     gui::StringsAction& getProjectsDsnsAction()  { return _projectsDsnsAction; }
+    gui::StringsAction& getVideosDsnsAction()  { return _videosDsnsAction; }
 
 signals:
 
@@ -401,7 +402,8 @@ private:
     PluginMetadata                          _pluginMetadata;                        /** Plugin metadata */
 	QIcon                                   _categoryIcon;                          /** Category icon */
     gui::StringsAction                      _tutorialsDsnsAction;                   /** Action for editing the tutorials Data Source Names */
-    gui::StringsAction                      _projectsDsnsAction;                    /** Action for editing the project Data Source Names */
+    gui::StringsAction                      _projectsDsnsAction;                    /** Action for editing the projects Data Source Names */
+    gui::StringsAction                      _videosDsnsAction;                      /** Action for editing the videos Data Source Names */
 };
 
 }
