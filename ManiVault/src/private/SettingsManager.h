@@ -39,12 +39,19 @@ public: // Action getters
 
 public: // Global settings actions
 
-    gui::ParametersSettingsAction& getParametersSettings() override { return _parametersSettingsAction; };
-    gui::MiscellaneousSettingsAction& getMiscellaneousSettings() override { return _miscellaneousSettingsAction; };
-    gui::TasksSettingsAction& getTasksSettingsAction() override { return _tasksSettingsAction; };
-    gui::AppearanceSettingsAction& getAppearanceSettingsAction() override { return _appearanceSettingsAction; };
-    gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() override { return _temporaryDirectoriesSettingsAction; };
-    gui::ErrorLoggingSettingsAction& getErrorLoggingSettingsAction() override { return _errorLoggingSettingsAction; };
+    //gui::AppFeaturesSettingsAction& getAppFeaturesSettingsAction() override { return _appFeaturesSettingsAction; }
+    gui::ParametersSettingsAction& getParametersSettings() override { return _parametersSettingsAction; }
+    gui::MiscellaneousSettingsAction& getMiscellaneousSettings() override { return _miscellaneousSettingsAction; }
+    gui::TasksSettingsAction& getTasksSettingsAction() override { return _tasksSettingsAction; }
+    gui::AppearanceSettingsAction& getAppearanceSettingsAction() override { return _appearanceSettingsAction; }
+    gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() override { return _temporaryDirectoriesSettingsAction; }
+
+    const gui::AppFeaturesSettingsAction& getAppFeaturesSettingsAction() const override { return _appFeaturesSettingsAction; }
+    const gui::ParametersSettingsAction& getParametersSettings() const override { return _parametersSettingsAction; }
+    const gui::MiscellaneousSettingsAction& getMiscellaneousSettings() const override { return _miscellaneousSettingsAction; }
+    const gui::TasksSettingsAction& getTasksSettingsAction() const override { return _tasksSettingsAction; }
+    const gui::AppearanceSettingsAction& getAppearanceSettingsAction() const override { return _appearanceSettingsAction; }
+    const gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() const override { return _temporaryDirectoriesSettingsAction; }
 
     /**
      * Get plugin global settings for plugin \p kind
@@ -61,13 +68,13 @@ public: // Global settings actions
     gui::PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin) override;
 
 private:
+    gui::AppFeaturesSettingsAction              _appFeaturesSettingsAction;             /** App features global settings */
     gui::TriggerAction                          _editSettingsAction;                    /** Action for triggering the settings dialog */
     gui::ParametersSettingsAction               _parametersSettingsAction;              /** Parameters global settings */
     gui::MiscellaneousSettingsAction            _miscellaneousSettingsAction;           /** Miscellaneous global settings */
     gui::TasksSettingsAction                    _tasksSettingsAction;                   /** Tasks global settings */
     gui::AppearanceSettingsAction               _appearanceSettingsAction;              /** Appearance global settings */
     gui::TemporaryDirectoriesSettingsAction     _temporaryDirectoriesSettingsAction;    /** Temporary files global settings */
-    gui::ErrorLoggingSettingsAction             _errorLoggingSettingsAction;            /** Error logging settings */
 };
 
 }

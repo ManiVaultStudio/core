@@ -3,7 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ErrorManager.h"
-#include "ErrorLoggingConsentDialog.h"
+#include "AppFeaturesDialog.h"
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -75,12 +75,14 @@ void ErrorManager::initialize()
 
     beginInitialization();
     {
-        auto& errorLoggingSettingsAction = mv::settings().getErrorLoggingSettingsAction();
+        // TODO
+        //auto& errorLoggingSettingsAction = mv::settings().getErrorLoggingSettingsAction();
 
-        errorLoggingSettingsAction.addAction(&getLoggingAskConsentDialogAction());
-        errorLoggingSettingsAction.addAction(&getLoggingEnabledAction());
-        errorLoggingSettingsAction.addAction(&getLoggingDsnAction());
-        errorLoggingSettingsAction.addAction(&getLoggingShowCrashReportDialogAction());
+        // TODO
+        //errorLoggingSettingsAction.addAction(&getLoggingAskConsentDialogAction());
+        //errorLoggingSettingsAction.addAction(&getLoggingEnabledAction());
+        //errorLoggingSettingsAction.addAction(&getLoggingDsnAction());
+        //errorLoggingSettingsAction.addAction(&getLoggingShowCrashReportDialogAction());
 
 #ifdef ERROR_LOGGING
         setErrorLogger(new SentryErrorLogger(this));
@@ -112,10 +114,11 @@ void ErrorManager::reset()
 
 void ErrorManager::showErrorLoggingConsentDialog()
 {
-#ifdef ERROR_LOGGING
-    ErrorLoggingConsentDialog errorLoggingConsentDialog;
-    errorLoggingConsentDialog.exec();
-#endif
+// TODO
+//#ifdef ERROR_LOGGING
+//    ErrorLoggingConsentDialog errorLoggingConsentDialog;
+//    errorLoggingConsentDialog.exec();
+//#endif
 }
 
 }

@@ -38,6 +38,7 @@ public:
         Label       = 0x00001,      /** Widget includes a label */
         LineEdit    = 0x00002,      /** Widget includes a line edit */
         TextEdit    = 0x00004,      /** Widget includes a text edit */
+        TextBrowser = 0x00008,      /** Widget includes a text browser */
 
         Default = LineEdit,
     };
@@ -173,6 +174,21 @@ public:
          * @param stringAction Pointer to string action
          */
         TextEditWidget(QWidget* parent, StringAction* stringAction);
+
+        friend class StringAction;
+    };
+
+    /** Text browser widget class for multi-line (HTML) strings */
+    class CORE_EXPORT TextBrowserWidget : public QTextEdit
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param stringAction Pointer to string action
+         */
+        TextBrowserWidget(QWidget* parent, StringAction* stringAction);
 
         friend class StringAction;
     };

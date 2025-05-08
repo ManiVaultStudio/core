@@ -210,6 +210,9 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     if (widgetFlags & WidgetFlag::TextEdit)
         layout->addWidget(new StringAction::TextEditWidget(parent, this));
 
+    if (widgetFlags & WidgetFlag::TextBrowser)
+        layout->addWidget(new StringAction::TextBrowserWidget(parent, this));
+
     widget->setLayout(layout);
 
     return widget;
@@ -502,6 +505,50 @@ StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stri
     });
 
     updateTextEdit();
+    updatePlaceHolderText();
+}
+
+StringAction::TextBrowserWidget::TextBrowserWidget(QWidget* parent, StringAction* stringAction) :
+    QTextEdit(parent)
+{
+    setObjectName("TextBrowser");
+    setAcceptDrops(true);
+
+    const auto updateToolTip = [this, stringAction]() -> void {
+        setToolTip(stringAction->getString());
+    };
+
+    updateToolTip();
+
+    connect(stringAction, &QAction::changed, this, updateToolTip);
+
+    const auto updateTextBrowser = [this, stringAction]() {
+        QSignalBlocker blocker(this);
+
+        const auto cacheCursorPosition = textCursor().position();
+
+        setHtml(stringAction->getString());
+
+        auto updateCursor = textCursor();
+
+        updateCursor.setPosition(cacheCursorPosition);
+
+        setTextCursor(updateCursor);
+    };
+
+    const auto updatePlaceHolderText = [this, stringAction]() -> void {
+        setPlaceholderText(stringAction->getPlaceholderString());
+    };
+
+    connect(stringAction, &StringAction::stringChanged, this, updateTextBrowser);
+
+    connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
+
+    connect(this, &QTextEdit::textChanged, this, [this, stringAction]() {
+        stringAction->setString(toPlainText());
+    });
+
+    updateTextBrowser();
     updatePlaceHolderText();
 }
 

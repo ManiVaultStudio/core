@@ -409,6 +409,24 @@ public:
     /** Builds a set of all video tags and emits LearningCenterVideosModel::tagsChanged(...) */
     void updateTags();
 
+    /** Synchronize the model with the data source names */
+    void synchronizeWithDsns();
+
+private:
+
+    /**
+     * Download videos from \p dsn
+     * @param dsn Videos Data Source Name (DSN)
+     * @return Downloaded data
+     */
+    static QByteArray downloadVideosFromDsn(const QString& dsn);
+
+public: // Action getters
+
+    gui::StringsAction& getDsnsAction() { return _dsnsAction; }
+
+    const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
+
 signals:
 
     /**
@@ -417,9 +435,15 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
+    /** Signals that the model was populated from one or more source DSNs */
+    void populatedFromDsns();
+
 private:
-    util::LearningCenterVideos      _videos;    /** Model videos */
-    QSet<QString>                   _tags;      /** All tags */
+    util::LearningCenterVideos      _videos;        /** Model videos */
+    QSet<QString>                   _tags;          /** All tags */
+    gui::StringsAction              _dsnsAction;    /** Data source names action */
+    QFuture<QByteArray>             _future;        /** Future for downloading projects */
+    QFutureWatcher<QByteArray>      _watcher;       /** Future watcher for downloading projects */
 };
 
 }

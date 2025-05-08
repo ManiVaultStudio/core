@@ -22,8 +22,6 @@
 #include <QTemporaryDir>
 #include <QFileInfo>
 
-#include "private/ErrorLoggingConsentDialog.h"
-
 using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;

@@ -27,11 +27,11 @@ namespace mv
 SettingsManager::SettingsManager(QObject* parent) :
     AbstractSettingsManager(parent),
     _editSettingsAction(this, "Settings..."),
+    _appFeaturesSettingsAction(this),
     _parametersSettingsAction(this),
     _miscellaneousSettingsAction(this),
     _tasksSettingsAction(this),
     _temporaryDirectoriesSettingsAction(this),
-    _errorLoggingSettingsAction(this),
     _appearanceSettingsAction(this)
 {
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);

@@ -29,17 +29,17 @@ protected:
     LearningPageContentWidget(QWidget* parent = nullptr);
 
 private:
-    mv::gui::ToggleAction               _showVideosAction;              /** Action to toggle videos section */
-    mv::gui::ToggleAction               _showTutorialsAction;           /** Action to toggle tutorials section */
-    mv::gui::ToggleAction               _showExamplesAction;            /** Action to toggle examples section */
-    mv::gui::ToggleAction               _showPluginResourcesAction;     /** Action to toggle plugin resources section */
-    mv::gui::GroupAction                _settingsAction;                /** Page settings action */
-    mv::gui::TriggerAction              _toStartPageAction;             /** Trigger action for showing the start page */
-    mv::gui::HorizontalGroupAction      _toolbarAction;                 /** Bottom toolbar action */
-    LearningPageVideosWidget            _videosWidget;                  /** Learning page video section content widget */
-    PageTutorialsWidget                 _tutorialsWidget;               /** Learning page tutorials section content widget */
-    LearningPageExamplesWidget          _examplesWidget;                /** Learning page examples section content widget */
-    LearningPagePluginResourcesWidget   _pluginResourcesWidget;         /** Learning page plugin section resources content widget */
+    mv::gui::ToggleAction               _toggleVideosSectionAction;             /** Action to toggle the videos section */
+    mv::gui::ToggleAction               _toggleTutorialsSectionAction;          /** Action to toggle the tutorials section */
+    mv::gui::ToggleAction               _toggleExamplesSectionAction;           /** Action to toggle the examples section */
+    mv::gui::ToggleAction               _togglePluginResourcesSectionAction;    /** Action to toggle the plugin resources section */
+    mv::gui::GroupAction                _settingsAction;                        /** Page settings action */
+    mv::gui::TriggerAction              _toStartPageAction;                     /** Trigger action for showing the start page */
+    mv::gui::HorizontalGroupAction      _toolbarAction;                         /** Bottom toolbar action */
+    LearningPageVideosWidget            _videosWidget;                          /** Learning page video section content widget */
+    PageTutorialsWidget                 _tutorialsWidget;                       /** Learning page tutorials section content widget */
+    LearningPageExamplesWidget          _examplesWidget;                        /** Learning page examples section content widget */
+    LearningPagePluginResourcesWidget   _pluginResourcesWidget;                 /** Learning page plugin section resources content widget */
 
     friend class LearningPageWidget;
 };

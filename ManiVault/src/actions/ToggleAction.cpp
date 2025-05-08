@@ -239,7 +239,7 @@ ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, To
     _toggleAction(toggleAction)
 {
     setAcceptDrops(true);
-    //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     auto layout = new QHBoxLayout();
 

@@ -36,8 +36,7 @@ HelpManager::HelpManager(QObject* parent) :
     _toWebsiteAction(this, "Website"),
     _toWikiAction(this, "Wiki"),
     _toRepositoryAction(this, "Repository"),
-    _toLearningCenterAction(this, "Go to learning center"),
-    _fileDownloader(FileDownloader::StorageMode::File, Task::GuiScope::Background)
+    _toLearningCenterAction(this, "Go to learning center")
 {
     _showLearningCenterPageAction.setIconByName("chalkboard-user");
     _showLearningCenterPageAction.setToolTip("Go to the learning center");
@@ -83,31 +82,6 @@ HelpManager::HelpManager(QObject* parent) :
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, [this]() -> void {
         _showLearningCenterPageAction.setChecked(true);
     });
-
-    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-        try
-        {
-            const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-            const auto videos       = jsonDocument.object()["videos"].toArray();
-            const auto tutorials    = jsonDocument.object()["tutorials"].toArray();
-
-            for (const auto video : videos) {
-                auto videoMap = video.toVariant().toMap();
-
-                addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
-            }
-
-            emit videosModelPopulatedFromWebsite();
-        }
-        catch (std::exception& e)
-        {
-            exceptionMessageBox("Unable to process learning center JSON", e);
-        }
-        catch (...)
-        {
-            exceptionMessageBox("Unable to process learning center JSON");
-        }
-	});
 }
 
 HelpManager::~HelpManager()
@@ -128,10 +102,11 @@ void HelpManager::initialize()
 
     beginInitialization();
     {
-        _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
-
         _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
         _tutorialsModel.synchronizeWithDsns();
+
+        _videosModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
+        _videosModel.synchronizeWithDsns();
     }
     endInitialization();
 }
@@ -197,6 +172,17 @@ QMenu* HelpManager::getVideosMenu() const
 
         videosMenu->addAction(videoAction);
     }
+
+    const auto& videosAppFeatureEnabledAction = mv::settings().getAppFeaturesSettingsAction().getTutorialsAppFeatureAction().getEnabledAction();
+
+    const auto toggleVisibility = [videosMenu, &videosAppFeatureEnabledAction]() -> void {
+        videosMenu->setEnabled(videosAppFeatureEnabledAction.isChecked());
+
+        for (auto action : videosMenu->actions())
+            action->setVisible(videosAppFeatureEnabledAction.isChecked());
+        };
+
+    connect(&videosAppFeatureEnabledAction, &ToggleAction::toggled, videosMenu, toggleVisibility);
 
     return videosMenu;
 }
@@ -276,6 +262,17 @@ QMenu* HelpManager::getTutorialsMenu() const
     }
 
     tutorialsMenu->setEnabled(!tutorials.empty());
+
+    const auto& tutorialsAppFeatureEnabledAction = mv::settings().getAppFeaturesSettingsAction().getTutorialsAppFeatureAction().getEnabledAction();
+
+    const auto toggleVisibility = [tutorialsMenu, &tutorialsAppFeatureEnabledAction]() -> void {
+        tutorialsMenu->setEnabled(tutorialsAppFeatureEnabledAction.isChecked());
+
+        for (auto action : tutorialsMenu->actions())
+            action->setVisible(tutorialsAppFeatureEnabledAction.isChecked());
+	};
+
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, tutorialsMenu, toggleVisibility);
 
     return tutorialsMenu;
 }

@@ -4,11 +4,14 @@
 
 #include "LearningCenterVideosModel.h"
 
+#include <QtConcurrent>
+
 #ifdef _DEBUG
     //#define LEARNING_CENTER_VIDEOS_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
+using namespace mv::gui;
 
 namespace mv {
 
@@ -24,9 +27,57 @@ QMap<LearningCenterVideosModel::Column, LearningCenterVideosModel::ColumHeaderIn
 });
 
 LearningCenterVideosModel::LearningCenterVideosModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+    QStandardItemModel(parent),
+    _dsnsAction(this, "Data Source Names")
 {
     setColumnCount(static_cast<int>(Column::Count));
+
+    _dsnsAction.setIconByName("globe");
+    _dsnsAction.setToolTip("Videos Data Source Names (DSN)");
+    _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
+    _dsnsAction.setPopupSizeHint(QSize(550, 100));
+
+    connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
+        setRowCount(0);
+
+        _future = QtConcurrent::mapped(
+            _dsnsAction.getStrings(),
+            [this](const QString& dsn) {
+                return downloadVideosFromDsn(dsn);
+            });
+
+        connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
+            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+                QJsonParseError jsonParseError;
+
+                const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+
+                if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                    qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+                    continue;
+                }
+
+                const auto videos = jsonDocument.object()["videos"].toArray();
+
+                for (const auto video : videos) {
+                    auto videoMap = video.toVariant().toMap();
+
+                    addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
+                }
+            }
+
+            emit populatedFromDsns();
+            });
+
+        _watcher.setFuture(_future);
+        });
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        connect(&pluginFactory->getVideosDsnsAction(), &StringsAction::stringsChanged, this, &LearningCenterVideosModel::synchronizeWithDsns);
+    }
+
+    connect(&mv::settings().getAppFeaturesSettingsAction().getVideosAppFeatureAction(), &VideosAppFeatureAction::enabledChanged, this, &LearningCenterVideosModel::synchronizeWithDsns);
 }
 
 QVariant LearningCenterVideosModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -68,6 +119,53 @@ QVariant LearningCenterVideosModel::headerData(int section, Qt::Orientation orie
 QSet<QString> LearningCenterVideosModel::getTagsSet() const
 {
     return _tags;
+}
+
+void LearningCenterVideosModel::synchronizeWithDsns()
+{
+    if (!mv::settings().getAppFeaturesSettingsAction().getVideosAppFeatureAction().getEnabledAction().isChecked())
+        return;
+
+    auto uniqueDsns = _dsnsAction.getStrings();
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        uniqueDsns << pluginFactory->getVideosDsnsAction().getStrings();
+    }
+
+    uniqueDsns.removeDuplicates();
+
+    _dsnsAction.setStrings(uniqueDsns);
+}
+
+QByteArray LearningCenterVideosModel::downloadVideosFromDsn(const QString& dsn)
+{
+    QEventLoop loop;
+
+    QByteArray downloadedData;
+
+    FileDownloader fileDownloader;
+
+    connect(&fileDownloader, &FileDownloader::downloaded, [&]() -> void {
+        try
+        {
+            downloadedData = fileDownloader.downloadedData();
+            loop.quit();
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to download videos JSON from DSN", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to download videos JSON from DSN");
+        }
+        });
+
+    fileDownloader.download(dsn);
+
+    loop.exec();
+
+    return downloadedData;
 }
 
 void LearningCenterVideosModel::addVideo(const LearningCenterVideo* video)

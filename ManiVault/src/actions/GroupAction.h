@@ -172,7 +172,7 @@ public: // Actions management
      * @param action Pointer to action to add
      * @param widgetFlags Action widget flags (default flags if -1)
      * @param widgetConfigurationFunction When set, overrides the standard widget configuration function in the widget action
-     * @param load
+     * @param load Currently not used
      */
     virtual void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction(), bool load = true);
 
@@ -180,25 +180,25 @@ public: // Actions management
      * Remove \p action from the group
      * @param action Pointer to action to add
      */
-    virtual void removeAction(WidgetAction* action) final;
+    void removeAction(WidgetAction* action);
 
     /** Remove all actions */
-    virtual void removeAllActions() final;
+    void removeAllActions();
 
     /** Remove all actions (alias for GroupAction::removeAllActions()) */
-    virtual void clear() final;
+    void clear();
 
     /**
      * Get actions
      * @return Vector of pointers to actions
      */
-    virtual WidgetActions getActions() final;
+    WidgetActions getActions();
 
     /**
      * Get const actions
      * @return Vector of const pointers to actions
      */
-    virtual ConstWidgetActions getConstActions() final;
+    ConstWidgetActions getConstActions();
 
     /**
      * Get widget flags map (maps widget action pointer to widget creation flags)
@@ -247,7 +247,7 @@ public: // Label sizing for vertical layout
 private:
 
     /** Sort added actions based on their sort index */
-    virtual void sortActions() final;
+    void sortActions();
 
 public: // Serialization
 
