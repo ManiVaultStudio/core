@@ -46,6 +46,13 @@ public: // Global settings actions
     gui::AppearanceSettingsAction& getAppearanceSettingsAction() override { return _appearanceSettingsAction; };
     gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() override { return _temporaryDirectoriesSettingsAction; };
 
+    const gui::AppFeaturesSettingsAction& getAppFeaturesSettingsAction() const override { return _appFeaturesSettingsAction; };
+    const gui::ParametersSettingsAction& getParametersSettings() const override { return _parametersSettingsAction; };
+    const gui::MiscellaneousSettingsAction& getMiscellaneousSettings() const override { return _miscellaneousSettingsAction; };
+    const gui::TasksSettingsAction& getTasksSettingsAction() const override { return _tasksSettingsAction; };
+    const gui::AppearanceSettingsAction& getAppearanceSettingsAction() const override { return _appearanceSettingsAction; };
+    const gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() const override { return _temporaryDirectoriesSettingsAction; };
+
     /**
      * Get plugin global settings for plugin \p kind
      * @param kind Plugin kind

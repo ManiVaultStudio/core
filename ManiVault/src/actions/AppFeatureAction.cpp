@@ -58,10 +58,24 @@ AppFeatureAction::AppFeatureAction(QObject* parent, const QString& title) :
 
     updateActionsReadOnly();
 
-    connect(&_enabledAction, &ToggleAction::toggled, this, updateActionsReadOnly);
+    connect(&_enabledAction, &ToggleAction::toggled, this, [this, updateActionsReadOnly](bool toggled) -> void {
+        
+        if (toggled) {
+            ConsentDialog consentDialog(this);
 
-    connect(&_enabledAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-        mv::help().addNotification("App Feature", QString("%1 app feature has been %2").arg(text(), toggled ? "enabled" : "disabled"), StyledIcon(toggled ? "toggle-on" : "toggle-off"));
+            if (consentDialog.exec() == QDialog::Accepted) {
+                _userHasOptedAction.setChecked(true);
+                _enabledAction.setChecked(true);
+            }
+            else {
+                _enabledAction.setChecked(false);
+            }
+            _settingsAction.setEnabled(_enabledAction.isChecked());
+            _descriptionAction.setEnabled(_enabledAction.isChecked());
+        }
+
+        updateActionsReadOnly();
+        //mv::help().addNotification("App Feature", QString("%1 app feature has been %2").arg(text(), toggled ? "enabled" : "disabled"), StyledIcon(toggled ? "toggle-on" : "toggle-off"));
 	});
 
     if (hasSetting(PrefixType::UserHasOpted)) {
@@ -75,6 +89,11 @@ void AppFeatureAction::addAction(WidgetAction* action, std::int32_t widgetFlags 
 {
     _settingsAction.addAction(action, widgetFlags, widgetConfigurationFunction, load);
     _settingsAction.setVisible(true);
+}
+
+QString AppFeatureAction::getResourceLocation() const
+{
+    return _resourceLocation;
 }
 
 QString AppFeatureAction::getSettingsPrefix(const PrefixType& prefixType) const
@@ -97,6 +116,8 @@ bool AppFeatureAction::hasSetting(const PrefixType& prefixType) const
 
 void AppFeatureAction::loadDescriptionFromResource(const QString& resourceLocation)
 {
+    _resourceLocation = resourceLocation;
+
     QFile appFeatureHtmlFile(resourceLocation);
 
     if (appFeatureHtmlFile.open(QIODevice::ReadOnly)) {
@@ -122,6 +143,66 @@ bool AppFeatureAction::getUserHasOptedFromSettings() const
         return Application::current()->getSetting(getSettingsPrefix(PrefixType::UserHasOpted)).toBool();
 
     return false;
+}
+
+AppFeatureAction::ConsentDialog::ConsentDialog(AppFeatureAction* appFeatureAction, QWidget* parent /*= nullptr*/) :
+    QDialog(parent),
+    _acceptPushButton("Accept"),
+    _cancelPushButton("Cancel"),
+    _decideLaterPushButton("Decide Later")
+{
+    setWindowModality(Qt::ApplicationModal);
+    setWindowFlag(Qt::Dialog);
+    setWindowFlag(Qt::WindowTitleHint);
+    setWindowFlag(Qt::WindowStaysOnTopHint);
+    setWindowTitle(QString("Turn on %1 App Feature").arg(appFeatureAction->text()));
+    setWindowIcon(StyledIcon("toggle-on"));
+    move(QApplication::activeWindow()->geometry().center() - rect().center());
+
+    _notificationLabel.setWordWrap(true);
+    _notificationLabel.setOpenExternalLinks(true);
+
+    QFile errorLoggingConsentHtmlFile(appFeatureAction->getResourceLocation());
+
+    if (errorLoggingConsentHtmlFile.open(QIODevice::ReadOnly)) {
+        _notificationLabel.setText(errorLoggingConsentHtmlFile.readAll());
+        errorLoggingConsentHtmlFile.close();
+    }
+
+    _layout.addWidget(&_notificationLabel);
+    _layout.addStretch(1);
+
+    _buttonsLayout.setContentsMargins(9, 30, 9, 9);
+
+    _buttonsLayout.addStretch(1);
+    _buttonsLayout.addWidget(&_acceptPushButton);
+    _buttonsLayout.addWidget(&_cancelPushButton);
+
+    const auto& constErrorManager = mv::errors();
+
+    if (!constErrorManager.getLoggingUserHasOptedAction().isChecked())
+        _buttonsLayout.addWidget(&_decideLaterPushButton);
+
+    _layout.addLayout(&_buttonsLayout);
+
+    setLayout(&_layout);
+
+    connect(&_acceptPushButton, &QPushButton::clicked, this, [this, &constErrorManager]() -> void {
+        accept();
+	});
+
+    connect(&_cancelPushButton, &QPushButton::clicked, this, [this, &constErrorManager]() -> void {
+        reject();
+	});
+
+    connect(&_decideLaterPushButton, &QPushButton::clicked, this, [this]() -> void {
+        reject();
+    });
+}
+
+QSize AppFeatureAction::ConsentDialog::sizeHint() const
+{
+    return { 500, 300 };
 }
 
 }

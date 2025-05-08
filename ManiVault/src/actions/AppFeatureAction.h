@@ -32,6 +32,39 @@ public:
         UserHasOpted,   /** Prefix for the user has opted type */
     };
 
+protected:
+
+    /** Dialog for giving consent for a specific app feature */
+    class CORE_EXPORT ConsentDialog final : public QDialog
+    {
+    protected:
+
+        /**
+         * Construct a dialog with \p parent
+         * @param appFeatureAction Pointer to owning app feature action
+         * @param parent Pointer to parent widget
+         */
+        ConsentDialog(AppFeatureAction* appFeatureAction, QWidget* parent = nullptr);
+
+        /** Get preferred size */
+        QSize sizeHint() const override;
+
+        /** Get minimum size hint*/
+        QSize minimumSizeHint() const override {
+            return sizeHint();
+        }
+
+    private:
+        QVBoxLayout     _layout;                    /** Main layout */
+        QLabel          _notificationLabel;         /** Notification label */
+        QHBoxLayout     _buttonsLayout;             /** Bottom buttons layout */
+        QPushButton     _acceptPushButton;          /** Opt in of automated error reporting when clicked */
+        QPushButton     _cancelPushButton;          /** Abort consent process */
+        QPushButton     _decideLaterPushButton;     /** Exit the dialog and show it at next startup */
+
+        friend class AppFeatureAction;
+    };
+
 public:
 
     /**
@@ -49,6 +82,12 @@ public:
      * @param load Currently not used
      */
     void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction(), bool load = true) override;
+
+    /**
+     * Get the HTML resource file location
+     * @return Location of the app feature description HTML resource file
+     */
+    QString getResourceLocation() const;
 
 protected:
 
@@ -106,6 +145,7 @@ private:
     ToggleAction            _userHasOptedAction;    /** Determines if the user has given permission to use the app feature */
     StringAction            _descriptionAction;     /** App feature description */
     VerticalGroupAction     _settingsAction;        /** App feature settings */
+    QString                 _resourceLocation;      /** Location of the resource to load */
 
     friend class AppFeaturesSettingsAction; // Allow access to private members
 };
