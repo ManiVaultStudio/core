@@ -82,33 +82,6 @@ HelpManager::HelpManager(QObject* parent) :
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, [this]() -> void {
         _showLearningCenterPageAction.setChecked(true);
     });
-
-    /*
-    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-        try
-        {
-            const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-            const auto videos       = jsonDocument.object()["videos"].toArray();
-            const auto tutorials    = jsonDocument.object()["tutorials"].toArray();
-
-            for (const auto video : videos) {
-                auto videoMap = video.toVariant().toMap();
-
-                addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
-            }
-
-            emit videosModelPopulatedFromWebsite();
-        }
-        catch (std::exception& e)
-        {
-            exceptionMessageBox("Unable to process learning center JSON", e);
-        }
-        catch (...)
-        {
-            exceptionMessageBox("Unable to process learning center JSON");
-        }
-	});
-    */
 }
 
 HelpManager::~HelpManager()
@@ -132,8 +105,8 @@ void HelpManager::initialize()
         _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
         _tutorialsModel.synchronizeWithDsns();
 
-        //_videosModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
-        //_videosModel.synchronizeWithDsns();
+        _videosModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
+        _videosModel.synchronizeWithDsns();
     }
     endInitialization();
 }

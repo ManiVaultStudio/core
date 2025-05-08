@@ -108,11 +108,6 @@ public:
      */
     virtual void initializeNotifications(QWidget* parentWidget) = 0;
 
-signals:
-
-    /** Invoked when the videos model has been successfully populated from the website */
-    void videosModelPopulatedFromWebsite();
-
 public: // Action getters
 
     virtual gui::ToggleAction& getShowLearningCenterPageAction() = 0;
