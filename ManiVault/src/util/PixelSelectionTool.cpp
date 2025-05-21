@@ -710,6 +710,12 @@ void PixelSelectionTool::paint()
             areaPainter.setPen(QPen(_fillColor, _lineWidth, Qt::SolidLine, Qt::RoundCap));
             areaPainter.drawLine(p1, p2);
 
+            // Draw a dashed line connecting the control points (small circles)
+            QPen dashedPen(_mainColor, 1.0f, Qt::DashLine, Qt::RoundCap);
+            dashedPen.setDashPattern({ 2, 2 });
+            shapePainter.setPen(dashedPen);
+            shapePainter.drawLine(p1, p2);
+
             // Draw the modifier icon near the middle of the line
             const auto size = 2.0f;
             const auto textCenter = (p1 + p2) / 2 + QPoint(size, -size);
