@@ -80,17 +80,32 @@ public: // Getters/setters
     /** Get brush radius */
     float getBrushRadius() const;
 
+    /** Get line width */
+    float getLineWidth() const;
+
     /**
      * Set brush radius
      * @param brushRadius Brush radius
      */
     void setBrushRadius(const float& brushRadius);
 
+    /**
+     * Set line width
+     * @param lineWidth Line width
+     */
+    void setLineWidth(const float& lineWidth);
+
     /** Get fixed brush radius modifier */
     Qt::KeyboardModifier getFixedBrushRadiusModifier() const;
 
     /** Set fixed brush radius modifier */
     void setFixedBrushRadiusModifier(Qt::KeyboardModifier fixedBrushRadiusModifier);
+
+    /** Get fixed line width modifier */
+    Qt::KeyboardModifier getFixedLineWidthModifier() const;
+
+    /** Set fixed brush radius modifier */
+    void setFixedLineWidthModifier(Qt::KeyboardModifier fixedLineWidthModifier);
 
     /** Get main drawing color */
     QColor getMainColor() const;
@@ -172,6 +187,9 @@ signals:
     /** Signals that the brush radius has changed */
     void brushRadiusChanged(const float& brushRadius);
 
+    /** Signals that the brush radius has changed */
+    void lineWidthChanged(const float& lineWidth);
+
     /** Signals that the selection shape changed */
     void shapeChanged();
 
@@ -192,7 +210,9 @@ protected:
     bool                        _active;                    /** Whether the selection process is active */
     bool                        _notifyDuringSelection;     /** Whether the selection is published continuously or at the end */
     float                       _brushRadius;               /** Brush radius */
+    float                       _lineWidth;                 /** Line width */
     Qt::KeyboardModifier        _fixedBrushRadiusModifier;  /** Do not change brush radius when fixed by pressing a key (e.g. for navigation) */
+    Qt::KeyboardModifier        _fixedLineWidthModifier;    /** Do not change line width when fixed by pressing a key (e.g. for navigation) */
     QPoint                      _mousePosition;             /** Current mouse position */
     QVector<QPoint>             _mousePositions;            /** Recorded mouse positions */
     int                         _mouseButtons;              /** State of the left, middle and right mouse buttons */
@@ -217,6 +237,10 @@ public:
     static constexpr float BRUSH_RADIUS_MAX     = 500.0f;                   /** Maximum radius */
     static constexpr float BRUSH_RADIUS_DEFAULT = 50.0f;                    /** Default radius */
     static constexpr float BRUSH_RADIUS_DELTA   = 10.0f;                    /** Radius increment */
+    static constexpr float LINE_WIDTH_MIN       = 1.0f;                     /** Minimum width */
+    static constexpr float LINE_WIDTH_MAX       = 1000.0f;                   /** Maximum width */
+    static constexpr float LINE_WIDTH_DEFAULT   = 10.0f;                    /** Default width */
+    static constexpr float LINE_WIDTH_DELTA     = 10.0f;                    /** Width increment */
     static constexpr float CP_RADIUS_LINE       = 8.0f;                     /** Radius of line control points */
     static constexpr float CP_RADIUS_CLOSING    = 2.5f * CP_RADIUS_LINE;    /** Radius of the closing control point (e.g. for finishing polygon selection) */
 };

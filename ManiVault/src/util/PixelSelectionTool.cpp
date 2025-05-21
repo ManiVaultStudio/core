@@ -22,7 +22,9 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _active(false),
     _notifyDuringSelection(true),
     _brushRadius(BRUSH_RADIUS_DEFAULT),
+    _lineWidth(LINE_WIDTH_DEFAULT),
     _fixedBrushRadiusModifier(Qt::NoModifier),
+    _fixedLineWidthModifier(Qt::NoModifier),
     _mouseButtons(),
     _preventContextMenu(false),
     _aborted(false)
@@ -107,6 +109,11 @@ float PixelSelectionTool::getBrushRadius() const
     return _brushRadius;
 }
 
+float PixelSelectionTool::getLineWidth() const
+{
+    return _lineWidth;
+}
+
 void PixelSelectionTool::setBrushRadius(const float& brushRadius)
 {
     if (brushRadius == _brushRadius)
@@ -119,6 +126,18 @@ void PixelSelectionTool::setBrushRadius(const float& brushRadius)
     paint();
 }
 
+void PixelSelectionTool::setLineWidth(const float& lineWidth)
+{
+    if (lineWidth == _lineWidth)
+        return;
+
+    _lineWidth = std::max(std::min(lineWidth, LINE_WIDTH_MAX), LINE_WIDTH_MIN);
+
+    emit lineWidthChanged(_lineWidth);
+
+    paint();
+}
+
 Qt::KeyboardModifier PixelSelectionTool::getFixedBrushRadiusModifier() const
 {
     return _fixedBrushRadiusModifier;
@@ -127,6 +146,16 @@ Qt::KeyboardModifier PixelSelectionTool::getFixedBrushRadiusModifier() const
 void PixelSelectionTool::setFixedBrushRadiusModifier(Qt::KeyboardModifier fixedBrushRadiusModifier)
 {
     _fixedBrushRadiusModifier = fixedBrushRadiusModifier;
+}
+
+Qt::KeyboardModifier PixelSelectionTool::getFixedLineWidthModifier() const
+{
+    return _fixedLineWidthModifier;
+}
+
+void PixelSelectionTool::setFixedLineWidthModifier(Qt::KeyboardModifier fixedLineWidthModifier)
+{
+    _fixedLineWidthModifier = fixedLineWidthModifier;
 }
 
 QColor PixelSelectionTool::getMainColor() const
@@ -151,6 +180,7 @@ void PixelSelectionTool::setChanged()
     emit modifierChanged(_modifier);
     emit notifyDuringSelectionChanged(_notifyDuringSelection);
     emit brushRadiusChanged(_brushRadius);
+    emit lineWidthChanged(_lineWidth);
 }
 
 void PixelSelectionTool::update()
@@ -260,6 +290,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     switch (_type)
                     {
                         case PixelSelectionType::Rectangle:
+                        case PixelSelectionType::Line:
                         case PixelSelectionType::Brush:
                         case PixelSelectionType::Lasso:
                         case PixelSelectionType::Sample:
@@ -297,6 +328,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             switch (_type)
             {
                 case PixelSelectionType::Rectangle:
+                case PixelSelectionType::Line:
                 case PixelSelectionType::Brush:
                 case PixelSelectionType::Lasso:
                 case PixelSelectionType::Sample:
@@ -362,6 +394,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             switch (_type)
             {
                 case PixelSelectionType::Rectangle:
+                case PixelSelectionType::Line:
                 case PixelSelectionType::Brush:
                 case PixelSelectionType::Lasso:
                 case PixelSelectionType::Sample:
@@ -426,6 +459,28 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                         if (_mousePositions.size() == 1) {
                             _mousePositions << _mousePosition;
                         } else {
+                            if (_mousePositions.isEmpty()) {
+                                _mousePositions << _mousePosition;
+                            }
+                            else {
+                                _mousePositions.last() = _mousePosition;
+                            }
+                        }
+                    }
+
+                    if (isActive())
+                        shouldPaint = true;
+
+                    break;
+                }
+
+                case PixelSelectionType::Line:
+                {
+                    if (mouseEvent->buttons() & Qt::LeftButton) {
+                        if (_mousePositions.size() == 1) {
+                            _mousePositions << _mousePosition;
+                        }
+                        else {
                             if (_mousePositions.isEmpty()) {
                                 _mousePositions << _mousePosition;
                             }
@@ -511,7 +566,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             {
                 case PixelSelectionType::Rectangle:
                     break;
-
+                case PixelSelectionType::Line:
+                    break;
                 case PixelSelectionType::Brush:
                 case PixelSelectionType::Sample:
                 {
@@ -600,6 +656,33 @@ void PixelSelectionTool::paint()
 
             const auto size         = 8.0f;
             const auto textCenter   = rectangle.topRight() + QPoint(size, -size);
+
+            textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+
+            break;
+        }
+
+        case PixelSelectionType::Line:
+        {
+            if (noMousePositions != 2)
+                break;
+
+            const auto topLeft = QPointF(std::min(_mousePositions.first().x(), _mousePositions.last().x()), std::min(_mousePositions.first().y(), _mousePositions.last().y()));
+            const auto bottomRight = QPointF(std::max(_mousePositions.first().x(), _mousePositions.last().x()), std::max(_mousePositions.first().y(), _mousePositions.last().y()));
+            const auto rectangle = QRectF(topLeft, bottomRight);
+
+            controlPoints << _mousePositions.first();
+            controlPoints << _mousePositions.last();
+
+            areaPainter.setBrush(_areaBrush);
+            areaPainter.setPen(Qt::NoPen);
+            areaPainter.drawRect(rectangle);
+
+            shapePainter.setPen(_penLineForeGround);
+            shapePainter.drawRect(rectangle);
+
+            const auto size = 8.0f;
+            const auto textCenter = rectangle.topRight() + QPoint(size, -size);
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
@@ -790,6 +873,7 @@ void PixelSelectionTool::paint()
     switch (_type)
     {
         case PixelSelectionType::Rectangle:
+        case PixelSelectionType::Line:
         case PixelSelectionType::Brush:
         case PixelSelectionType::Lasso:
         case PixelSelectionType::Polygon:
