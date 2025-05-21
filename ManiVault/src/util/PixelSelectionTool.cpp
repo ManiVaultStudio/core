@@ -667,24 +667,31 @@ void PixelSelectionTool::paint()
             if (noMousePositions != 2)
                 break;
 
-            const auto topLeft = QPointF(std::min(_mousePositions.first().x(), _mousePositions.last().x()), std::min(_mousePositions.first().y(), _mousePositions.last().y()));
-            const auto bottomRight = QPointF(std::max(_mousePositions.first().x(), _mousePositions.last().x()), std::max(_mousePositions.first().y(), _mousePositions.last().y()));
-            const auto rectangle = QRectF(topLeft, bottomRight);
+            const auto p1 = _mousePositions.first();
+            const auto p2 = _mousePositions.last();
 
-            controlPoints << _mousePositions.first();
-            controlPoints << _mousePositions.last();
+            // Calculate the angle with respect to the y-axis (in degrees)
+            const auto dx = p2.x() - p1.x();
+            const auto dy = p2.y() - p1.y();
+            const double angleRadians = std::atan2(dx, dy); // dx, dy order for y-axis
+            const double angleDegrees = 180-( angleRadians * 180.0 / M_PI); // angleDegrees is positive anti-clockwise from the y-axis
 
-            areaPainter.setBrush(_areaBrush);
-            areaPainter.setPen(Qt::NoPen);
-            areaPainter.drawRect(rectangle);
+            controlPoints << p1 << p2;
 
-            shapePainter.setPen(_penLineForeGround);
-            shapePainter.drawRect(rectangle);
+            // Draw the line with the specified width
+            shapePainter.setPen(QPen(_mainColor, _lineWidth, Qt::SolidLine, Qt::RoundCap));
+            shapePainter.drawLine(p1, p2);
 
-            const auto size = 8.0f;
-            const auto textCenter = rectangle.topRight() + QPoint(size, -size);
+            // Draw a semi-transparent area under the line (comment out if not needed)
+            areaPainter.setPen(QPen(_fillColor, _lineWidth, Qt::SolidLine, Qt::RoundCap));
+            areaPainter.drawLine(p1, p2);
 
+            // Draw the modifier icon near the middle of the line
+            const auto size = 2.0f;
+            const auto textCenter = (p1 + p2) / 2 + QPoint(size, -size);
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+
+            //qDebug() << "Angle: " << angleDegrees;
 
             break;
         }
