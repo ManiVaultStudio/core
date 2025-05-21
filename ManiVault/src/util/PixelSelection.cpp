@@ -46,6 +46,12 @@ QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
             break;
         }
 
+        case PixelSelectionType::Line:
+        {
+            painter.drawRect(pixmapRectDeflated);
+            break;
+        }
+
         case PixelSelectionType::Brush:
         {
             painter.drawEllipse(pixmapRectDeflated.center(), 45, 45);
