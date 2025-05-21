@@ -144,6 +144,7 @@ public: // Action getters
     TriggerAction& getInvertSelectionAction() { return _invertSelectionAction; }
     DecimalAction& getBrushRadiusAction() { return _brushRadiusAction; }
     DecimalAction& getLineWidthAction() { return _lineWidthAction; }
+    DecimalAction& getLineAngleAction() { return _lineAngleAction; }
     ToggleAction& getNotifyDuringSelectionAction() { return _notifyDuringSelectionAction; }
 
 private:
@@ -173,6 +174,7 @@ private:
     TriggerAction                   _invertSelectionAction;             /** Invert selection action */
     DecimalAction                   _brushRadiusAction;                 /** Brush radius action */
     DecimalAction                   _lineWidthAction;                 /** Line width action */
+    DecimalAction                   _lineAngleAction;                 /** Line angle action */
     ToggleAction                    _notifyDuringSelectionAction;       /** Notify during selection action */
 
     friend class AbstractActionsManager;

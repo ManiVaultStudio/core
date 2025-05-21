@@ -23,8 +23,10 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _notifyDuringSelection(true),
     _brushRadius(BRUSH_RADIUS_DEFAULT),
     _lineWidth(LINE_WIDTH_DEFAULT),
+    _lineAngle(LINE_ANGLE_DEFAULT),
     _fixedBrushRadiusModifier(Qt::NoModifier),
     _fixedLineWidthModifier(Qt::NoModifier),
+    _fixedLineAngleModifier(Qt::NoModifier),
     _mouseButtons(),
     _preventContextMenu(false),
     _aborted(false)
@@ -114,6 +116,11 @@ float PixelSelectionTool::getLineWidth() const
     return _lineWidth;
 }
 
+float PixelSelectionTool::getLineAngle() const
+{
+    return _lineAngle;
+}
+
 void PixelSelectionTool::setBrushRadius(const float& brushRadius)
 {
     if (brushRadius == _brushRadius)
@@ -138,6 +145,18 @@ void PixelSelectionTool::setLineWidth(const float& lineWidth)
     paint();
 }
 
+void PixelSelectionTool::setLineAngle(const float& lineAngle)
+{
+    if (lineAngle == _lineAngle)
+        return;
+
+    _lineAngle = std::max(std::min(lineAngle, LINE_ANGLE_MAX), LINE_ANGLE_MIN);
+
+    emit lineAngleChanged(_lineAngle);
+
+    paint();
+}
+
 Qt::KeyboardModifier PixelSelectionTool::getFixedBrushRadiusModifier() const
 {
     return _fixedBrushRadiusModifier;
@@ -156,6 +175,16 @@ Qt::KeyboardModifier PixelSelectionTool::getFixedLineWidthModifier() const
 void PixelSelectionTool::setFixedLineWidthModifier(Qt::KeyboardModifier fixedLineWidthModifier)
 {
     _fixedLineWidthModifier = fixedLineWidthModifier;
+}
+
+Qt::KeyboardModifier PixelSelectionTool::getFixedLineAngleModifier() const
+{
+    return _fixedLineAngleModifier;
+}
+
+void PixelSelectionTool::setFixedLineAngleModifier(Qt::KeyboardModifier fixedLineAngleModifier)
+{
+    _fixedLineAngleModifier = fixedLineAngleModifier;
 }
 
 QColor PixelSelectionTool::getMainColor() const
@@ -181,6 +210,7 @@ void PixelSelectionTool::setChanged()
     emit notifyDuringSelectionChanged(_notifyDuringSelection);
     emit brushRadiusChanged(_brushRadius);
     emit lineWidthChanged(_lineWidth);
+    emit lineAngleChanged(_lineAngle);
 }
 
 void PixelSelectionTool::update()
@@ -722,7 +752,7 @@ void PixelSelectionTool::paint()
             const auto size = 2.0f;
             const auto textCenter = (p1 + p2) / 2 + QPoint(size, -size);
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
-
+            setLineAngle(angleDegrees);
             break;
         }
         
