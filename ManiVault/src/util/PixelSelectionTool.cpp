@@ -674,15 +674,24 @@ void PixelSelectionTool::paint()
             const auto dx = p2.x() - p1.x();
             const auto dy = p2.y() - p1.y();
             const double angleRadians = std::atan2(dx, dy); // dx, dy order for y-axis
-            const double angleDegrees = 180-( angleRadians * 180.0 / M_PI); // angleDegrees is positive anti-clockwise from the y-axis
+            const double angleDegrees = 180 - (angleRadians * 180.0 / M_PI); // angleDegrees is positive anti-clockwise from the y-axis
 
             controlPoints << p1 << p2;
 
-            // Draw the line with the specified width
+            // Draw the outer solid line (outline)
             shapePainter.setPen(QPen(_mainColor, _lineWidth, Qt::SolidLine, Qt::RoundCap));
             shapePainter.drawLine(p1, p2);
 
-            // Draw a semi-transparent area under the line (comment out if not needed)
+            // Draw the inner transparent line to "erase" the center
+            if (_lineWidth > 2.0f) {
+                QPen transparentPen(Qt::transparent, _lineWidth - 2.0f, Qt::SolidLine, Qt::RoundCap);
+                shapePainter.setCompositionMode(QPainter::CompositionMode_Clear);
+                shapePainter.setPen(transparentPen);
+                shapePainter.drawLine(p1, p2);
+                shapePainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+            }
+
+            // Draw a semi-transparent area under the line
             areaPainter.setPen(QPen(_fillColor, _lineWidth, Qt::SolidLine, Qt::RoundCap));
             areaPainter.drawLine(p1, p2);
 
@@ -690,8 +699,6 @@ void PixelSelectionTool::paint()
             const auto size = 2.0f;
             const auto textCenter = (p1 + p2) / 2 + QPoint(size, -size);
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
-
-            //qDebug() << "Angle: " << angleDegrees;
 
             break;
         }
