@@ -324,12 +324,9 @@ void EventManager::fromVariantMap(const QVariantMap& variantMap)
 
     QVariantList selectionGroupsList = variantMap["SelectionGroups"].value<QVariantList>();
 
+    _selectionGroups.resize(selectionGroupsList.size());
     for (int i = 0; i < selectionGroupsList.size(); i++)
-    {
-        KeyBasedSelectionGroup selectionGroup;
-        selectionGroup.fromVariantMap(selectionGroupsList[i].toMap());
-        _selectionGroups.push_back(selectionGroup);
-    }
+        _selectionGroups[i].fromVariantMap(selectionGroupsList[i].toMap());
 }
 
 QVariantMap EventManager::toVariantMap() const
