@@ -43,6 +43,8 @@ private:
 class CORE_EXPORT KeyBasedSelectionGroup : public util::Serializable
 {
 public:
+    BiMap& getBiMap(Dataset<DatasetImpl> dataset);
+
     void addDataset(Dataset<DatasetImpl> dataset, BiMap& bimap);
 
     void selectionChanged(Dataset<DatasetImpl> dataset, const std::vector<uint32_t>& indices) const;

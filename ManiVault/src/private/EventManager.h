@@ -36,6 +36,8 @@ public:
     /** Resets the contents of the event manager */
     void reset() override;
 
+    std::vector<KeyBasedSelectionGroup>& getSelectionGroups() override { return _selectionGroups; }
+
     void addSelectionGroup(KeyBasedSelectionGroup& selectionGroup) override { _selectionGroups.push_back(std::move(selectionGroup)); }
 
     /**
