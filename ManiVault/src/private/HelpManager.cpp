@@ -179,6 +179,11 @@ void HelpManager::addNotification(const QString& title, const QString& descripti
     _notifications.showMessage(title, description, icon, durationType, delayMs);
 }
 
+void HelpManager::addNotification(const Task& task)
+{
+
+}
+
 void HelpManager::initializeNotifications(QWidget* parentWidget)
 {
     _notifications.setParentWidget(parentWidget);
