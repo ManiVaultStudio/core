@@ -65,6 +65,15 @@ public:
     explicit Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent = nullptr);
 
     /**
+     * Construct a notification with \p task, \p previousNotification and pointer to \p parent widget
+     * @param task Task containing the notification details
+     * @param previousNotification Pointer to previous notification (maybe nullptr)
+     * @param durationType Duration type of the notification
+     * @param parent Pointer to parent widget
+     */
+    explicit Notification(const Task& task, Notification* previousNotification, const DurationType& durationType, QWidget* parent = nullptr);
+
+    /**
      * Get whether the notification is closing
      * @return Boolean determining Whether the notification is closing or not
      */

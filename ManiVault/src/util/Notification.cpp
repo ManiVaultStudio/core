@@ -122,6 +122,11 @@ Notification::Notification(const QString& title, const QString& description, con
     connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
 }
 
+Notification::Notification(const Task& task, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
+    Notification(task.getName(), task.getDescription(), task.getIcon(), previousNotification, durationType, parent)
+{
+}
+
 void Notification::requestFinish()
 {
     if (_closing)
