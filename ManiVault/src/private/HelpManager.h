@@ -96,6 +96,12 @@ public:
     void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0) override;
 
     /**
+     * Add toaster notification for \p task in the main window
+     * @param task Task containing the notification details
+     */
+    void addNotification(const Task& task) override;
+
+    /**
      * Initialize notifications manager with \p parentWidget widget
      * @param parentWidget Pointer to parent widget
      */
