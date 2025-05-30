@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "Task.h"
+
 #include <QWidget>
 
 namespace mv::util
@@ -48,7 +50,8 @@ public:
     /** Duration types */
     enum class DurationType {
         Fixed,          /** Standard 5000 ms */
-        Calculated      /** Calculated based on the number of characters */ 
+        Calculated,     /** Calculated based on the number of characters */
+        Task            /** Notification is visible as long as the task is running */
     };
 
 public:
@@ -68,10 +71,9 @@ public:
      * Construct a notification with \p task, \p previousNotification and pointer to \p parent widget
      * @param task Task containing the notification details
      * @param previousNotification Pointer to previous notification (maybe nullptr)
-     * @param durationType Duration type of the notification
      * @param parent Pointer to parent widget
      */
-    explicit Notification(const Task& task, Notification* previousNotification, const DurationType& durationType, QWidget* parent = nullptr);
+    explicit Notification(const Task& task, Notification* previousNotification, QWidget* parent = nullptr);
 
     /**
      * Get whether the notification is closing
@@ -103,6 +105,30 @@ public:
      */
     void setNextNotification(Notification* nextNotification);
 
+    /**
+     * Get the notification title
+     * @return Notification title
+     */
+    QString getTitle() const;
+
+    /**
+     * Set the notification title to \p title and update the message text label
+     * @param title Notification title
+     */
+    void setTitle(const QString& title);
+
+    /**
+     * Get the notification description
+     * @return Notification description
+     */
+    QString getDescription() const;
+
+    /**
+     * Set the notification description to \p description and update the message text label
+     * @param description Notification description
+     */
+    void setDescription(const QString& description);
+
 protected:
     
     /**
@@ -128,6 +154,9 @@ private:
     /** Slide the notification out */
     void slideOut();
 
+    /** Update the message label with the latest Notification#_title and Notification#_description */
+    void updateMessageLabel();
+
     /**
      * Estimate the reading time of \p text
      * @param text Input text
@@ -141,9 +170,12 @@ signals:
     void finished();
 
 private:
+    QString                 _title;                         /** Notification title (maybe HTML) */
+    QString                 _description;                   /** Notification description (maybe HTML) */
     QPointer<Notification>  _previousNotification;          /** Pointer to previous notification (maybe nullptr) */
     QPointer<Notification>  _nextNotification;              /** Pointer to next notification (maybe nullptr) */
     bool                    _closing;                       /** Whether this notification is being closed */
+    QLabel                  _messageLabel;                  /** Label for the message text */
 
     static const int    fixedWidth              = 400;      /** Width of the notification */
     static const int    spacing                 = 5;        /** Spacing between notifications */

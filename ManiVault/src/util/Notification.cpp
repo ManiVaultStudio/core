@@ -49,6 +49,8 @@ QSize Notification::NotificationWidget::sizeHint() const
 
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
 	QWidget(parent),
+    _title(title),
+    _description(description),
     _previousNotification(previousNotification),
     _closing(false)
 {
@@ -68,7 +70,6 @@ Notification::Notification(const QString& title, const QString& description, con
     auto notificationWidget         = new NotificationWidget();
     auto notificationWidgetLayout   = new QHBoxLayout(this);
     auto iconLabel                  = new QLabel(this);
-    auto messageLabel               = new QLabel(this);
     auto closePushButton            = new QToolButton(this);
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -83,12 +84,11 @@ Notification::Notification(const QString& title, const QString& description, con
     iconLabel->setPixmap(icon.pixmap(32, 32));
     iconLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
-    messageLabel->setWordWrap(true);
-    messageLabel->setTextFormat(Qt::RichText);
-    messageLabel->setText("<b>" + title + "</b>" + "<br>" + description);
-    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
-    messageLabel->setMinimumHeight(10);
-    messageLabel->setOpenExternalLinks(true);
+    _messageLabel.setWordWrap(true);
+    _messageLabel.setTextFormat(Qt::RichText);
+    _messageLabel.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+    _messageLabel.setMinimumHeight(10);
+    _messageLabel.setOpenExternalLinks(true);
 
     closePushButton->setFixedSize(18, 18);
     closePushButton->setIcon(StyledIcon("xmark"));
@@ -100,12 +100,14 @@ Notification::Notification(const QString& title, const QString& description, con
 
     notificationWidgetLayout->addWidget(iconLabel);
     notificationWidgetLayout->setAlignment(iconLabel, Qt::AlignTop);
-    notificationWidgetLayout->addWidget(messageLabel, 1);
-    notificationWidgetLayout->setAlignment(messageLabel, Qt::AlignTop);
+    notificationWidgetLayout->addWidget(&_messageLabel, 1);
+    notificationWidgetLayout->setAlignment(&_messageLabel, Qt::AlignTop);
     notificationWidgetLayout->addWidget(closePushButton);
     notificationWidgetLayout->setAlignment(closePushButton, Qt::AlignTop);
 
     notificationWidget->setLayout(notificationWidgetLayout);
+
+    updateMessageLabel();
 
     mainLayout->addWidget(notificationWidget);
 
@@ -115,15 +117,26 @@ Notification::Notification(const QString& title, const QString& description, con
 
     setLayout(mainLayout);
 
-    const auto duration = durationType == DurationType::Fixed ? fixedDuration : getEstimatedReadingTime(title + description);
+	switch (durationType) {
+	    case DurationType::Fixed:
+	    case DurationType::Calculated:
+	    {
+            const auto duration = durationType == DurationType::Fixed ? fixedDuration : getEstimatedReadingTime(title + description);
 
-	QTimer::singleShot(duration, this, &Notification::requestFinish);
+            QTimer::singleShot(duration, this, &Notification::requestFinish);
 
+	    	break;
+	    }
+
+        case DurationType::Task:
+            break;
+	}
+    
     connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
 }
 
-Notification::Notification(const Task& task, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
-    Notification(task.getName(), task.getDescription(), task.getIcon(), previousNotification, durationType, parent)
+Notification::Notification(const Task& task, Notification* previousNotification, QWidget* parent /*= nullptr*/) :
+    Notification(task.getName(), task.getDescription(), task.getIcon(), previousNotification, DurationType::Task, parent)
 {
 }
 
@@ -194,6 +207,13 @@ void Notification::slideOut()
     animationGroup->start();
 }
 
+void Notification::updateMessageLabel()
+{
+    qDebug() << "Updating message text label with title: " << _title << " and description: " << _description;
+    _messageLabel.setText("<b>" + _title + "</b>" + "<br>" + _description);
+    _messageLabel.adjustSize();
+}
+
 double Notification::getEstimatedReadingTime(const QString& text)
 {
     QRegularExpression wordRegex(R"(\b\w+\b)");
@@ -240,6 +260,36 @@ void Notification::setNextNotification(Notification* nextNotification)
     _nextNotification = nextNotification;
 
     updatePosition();
+}
+
+QString Notification::getTitle() const
+{
+	return _title;
+}
+
+void Notification::setTitle(const QString& title)
+{
+    if (_title == title)
+        return;
+
+	_title = title;
+
+	updateMessageLabel();
+}
+
+QString Notification::getDescription() const
+{
+	return _description;
+}
+
+void Notification::setDescription(const QString& description)
+{
+    if (_description == description)
+        return;
+
+	_description = description;
+
+	updateMessageLabel();
 }
 
 void Notification::showEvent(QShowEvent* event)

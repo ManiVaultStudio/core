@@ -46,7 +46,7 @@ void Notifications::showTask(const Task& task)
     if (!_parentWidget)
         return;
 
-    auto notification = new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, _parentWidget);
+    auto notification = new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), _parentWidget);
 
     notification->show();
 
