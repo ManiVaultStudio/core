@@ -73,7 +73,7 @@ public:
      * @param previousNotification Pointer to previous notification (maybe nullptr)
      * @param parent Pointer to parent widget
      */
-    explicit Notification(const Task& task, Notification* previousNotification, QWidget* parent = nullptr);
+    explicit Notification(QPointer<Task>& task, Notification* previousNotification, QWidget* parent = nullptr);
 
     /**
      * Get whether the notification is closing
@@ -104,6 +104,18 @@ public:
      * @param nextNotification Pointer to next notification (maybe nullptr)
      */
     void setNextNotification(Notification* nextNotification);
+
+    /**
+     * Get the notification icon
+     * @return Notification icon
+     */
+    QIcon getIcon() const;
+
+    /**
+     * Set the notification icon to \p icon and update the icon label
+     * @param icon Notification icon
+     */
+    void setIcon(const QIcon& icon);
 
     /**
      * Get the notification title
@@ -154,6 +166,9 @@ private:
     /** Slide the notification out */
     void slideOut();
 
+    /** Update the icon label with the latest Notification#_icon */
+    void updateIconLabel();
+
     /** Update the message label with the latest Notification#_title and Notification#_description */
     void updateMessageLabel();
 
@@ -170,11 +185,14 @@ signals:
     void finished();
 
 private:
-    QString                 _title;                         /** Notification title (maybe HTML) */
+    QIcon                   _icon;                          /** Notification icon (maybe empty) */
+	QString                 _title;                         /** Notification title (maybe HTML) */
     QString                 _description;                   /** Notification description (maybe HTML) */
+    QPointer<Task>          _task;                          /** Task associated with this notification (maybe nullptr) */
     QPointer<Notification>  _previousNotification;          /** Pointer to previous notification (maybe nullptr) */
     QPointer<Notification>  _nextNotification;              /** Pointer to next notification (maybe nullptr) */
     bool                    _closing;                       /** Whether this notification is being closed */
+    QLabel                  _iconLabel;                     /** Label for the icon (maybe empty) */
     QLabel                  _messageLabel;                  /** Label for the message text */
 
     static const int    fixedWidth              = 400;      /** Width of the notification */

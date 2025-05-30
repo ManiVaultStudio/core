@@ -51,6 +51,7 @@ Notification::Notification(const QString& title, const QString& description, con
 	QWidget(parent),
     _title(title),
     _description(description),
+    _icon(icon),
     _previousNotification(previousNotification),
     _closing(false)
 {
@@ -69,7 +70,6 @@ Notification::Notification(const QString& title, const QString& description, con
     auto mainLayout                 = new QVBoxLayout();
     auto notificationWidget         = new NotificationWidget();
     auto notificationWidgetLayout   = new QHBoxLayout(this);
-    auto iconLabel                  = new QLabel(this);
     auto closePushButton            = new QToolButton(this);
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -80,9 +80,8 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidget->setAutoFillBackground(true);
     notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
 
-    iconLabel->setStyleSheet("padding: 3px;");
-    iconLabel->setPixmap(icon.pixmap(32, 32));
-    iconLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+    _iconLabel.setStyleSheet("padding: 3px;");
+    _iconLabel.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
     _messageLabel.setWordWrap(true);
     _messageLabel.setTextFormat(Qt::RichText);
@@ -98,8 +97,8 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidgetLayout->setSpacing(10);
     notificationWidgetLayout->setAlignment(Qt::AlignTop);
 
-    notificationWidgetLayout->addWidget(iconLabel);
-    notificationWidgetLayout->setAlignment(iconLabel, Qt::AlignTop);
+    notificationWidgetLayout->addWidget(&_iconLabel);
+    notificationWidgetLayout->setAlignment(&_iconLabel, Qt::AlignTop);
     notificationWidgetLayout->addWidget(&_messageLabel, 1);
     notificationWidgetLayout->setAlignment(&_messageLabel, Qt::AlignTop);
     notificationWidgetLayout->addWidget(closePushButton);
@@ -107,6 +106,7 @@ Notification::Notification(const QString& title, const QString& description, con
 
     notificationWidget->setLayout(notificationWidgetLayout);
 
+	updateIconLabel();
     updateMessageLabel();
 
     mainLayout->addWidget(notificationWidget);
@@ -135,9 +135,17 @@ Notification::Notification(const QString& title, const QString& description, con
     connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
 }
 
-Notification::Notification(const Task& task, Notification* previousNotification, QWidget* parent /*= nullptr*/) :
-    Notification(task.getName(), task.getDescription(), task.getIcon(), previousNotification, DurationType::Task, parent)
+Notification::Notification(QPointer<Task>& task, Notification* previousNotification, QWidget* parent /*= nullptr*/) :
+    Notification("", "", QIcon(), previousNotification, DurationType::Task, parent)
 {
+    if (!task) {
+        qWarning() << "Notification task is null!";
+        return;
+    }
+
+    setTitle(task->getName());
+    setDescription(task->getDescription());
+    setIcon(task->getIcon());
 }
 
 void Notification::requestFinish()
@@ -207,9 +215,13 @@ void Notification::slideOut()
     animationGroup->start();
 }
 
+void Notification::updateIconLabel()
+{
+    _iconLabel.setPixmap(_icon.pixmap(32, 32));
+}
+
 void Notification::updateMessageLabel()
 {
-    qDebug() << "Updating message text label with title: " << _title << " and description: " << _description;
     _messageLabel.setText("<b>" + _title + "</b>" + "<br>" + _description);
     _messageLabel.adjustSize();
 }
@@ -260,6 +272,18 @@ void Notification::setNextNotification(Notification* nextNotification)
     _nextNotification = nextNotification;
 
     updatePosition();
+}
+
+QIcon Notification::getIcon() const
+{
+    return _icon;
+}
+
+void Notification::setIcon(const QIcon& icon)
+{
+	_icon = icon;
+
+	updateIconLabel();
 }
 
 QString Notification::getTitle() const
