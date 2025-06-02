@@ -132,6 +132,19 @@ void HelpManager::initialize()
 
         _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
         _tutorialsModel.synchronizeWithDsns();
+
+        _tasksFilterModel.setSourceModel(&_tasksModel);
+        _tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
+        _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
+        _tasksFilterModel.getTopLevelTasksOnlyAction().setChecked(true);
+
+        connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+            for (int filterModelRowIndex = first; filterModelRowIndex <= last; filterModelRowIndex++) {
+                const auto sourceModelIndex = _tasksFilterModel.mapToSource(_tasksFilterModel.index(filterModelRowIndex, 0));
+
+                addNotification(_tasksModel.getTask(sourceModelIndex.row()));
+            }
+        });
     }
     endInitialization();
 }
@@ -179,9 +192,9 @@ void HelpManager::addNotification(const QString& title, const QString& descripti
     _notifications.showMessage(title, description, icon, durationType, delayMs);
 }
 
-void HelpManager::addNotification(const Task& task)
+void HelpManager::addNotification(QPointer<Task> task)
 {
-
+    _notifications.showTask(task);
 }
 
 void HelpManager::initializeNotifications(QWidget* parentWidget)

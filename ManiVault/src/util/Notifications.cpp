@@ -41,7 +41,7 @@ void Notifications::showMessage(const QString& title, const QString& description
         addNotification();
 }
 
-void Notifications::showTask(const Task& task)
+void Notifications::showTask(QPointer<Task>& task)
 {
     if (!_parentWidget)
         return;

@@ -8,6 +8,8 @@
 
 #include "Task.h"
 
+#include "actions/TaskAction.h"
+
 #include <QWidget>
 
 namespace mv::util
@@ -73,7 +75,7 @@ public:
      * @param previousNotification Pointer to previous notification (maybe nullptr)
      * @param parent Pointer to parent widget
      */
-    explicit Notification(QPointer<Task>& task, Notification* previousNotification, QWidget* parent = nullptr);
+    explicit Notification(QPointer<Task> task, Notification* previousNotification, QWidget* parent = nullptr);
 
     /**
      * Get whether the notification is closing
@@ -192,8 +194,11 @@ private:
     QPointer<Notification>  _previousNotification;          /** Pointer to previous notification (maybe nullptr) */
     QPointer<Notification>  _nextNotification;              /** Pointer to next notification (maybe nullptr) */
     bool                    _closing;                       /** Whether this notification is being closed */
+    QHBoxLayout             _messageLayout;                 /** Message layout of the notification */
+    QHBoxLayout             _notificationWidgetLayout;      /** Layout of the notification widget */
     QLabel                  _iconLabel;                     /** Label for the icon (maybe empty) */
     QLabel                  _messageLabel;                  /** Label for the message text */
+    gui::TaskAction         _taskAction;                    /** Task action for the task associated with this notification */
 
     static const int    fixedWidth              = 400;      /** Width of the notification */
     static const int    spacing                 = 5;        /** Spacing between notifications */

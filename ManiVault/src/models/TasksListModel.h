@@ -28,6 +28,13 @@ public:
      */
     TasksListModel(QObject* parent = nullptr);
 
+    /**
+     * Get task by \p rowIndex
+     * @param rowIndex Row index of the task to get
+     * @return Pointer to task at \p rowIndex, or nullptr if no task is found
+     */
+    QPointer<Task> getTask(const std::int32_t& rowIndex) const;
+
 private:
 
     /**

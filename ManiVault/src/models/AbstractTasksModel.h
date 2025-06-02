@@ -418,7 +418,7 @@ private:
      * Remove \p task from the model (this method is called when a task is about to be removed from the manager)
      * @param task Pointer to task to remove
      */
-    virtual void removeTask(Task* task) final;
+    void removeTask(Task* task);
 
     friend class Item;
 };

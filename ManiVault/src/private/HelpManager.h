@@ -7,8 +7,10 @@
 #include <AbstractHelpManager.h>
 
 #include <util/FileDownloader.h>
-
 #include <util/Notification.h>
+
+#include <models/TasksListModel.h>
+#include <models/TasksFilterModel.h>
 
 namespace mv
 {
@@ -96,16 +98,18 @@ public:
     void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0) override;
 
     /**
-     * Add toaster notification for \p task in the main window
-     * @param task Task containing the notification details
-     */
-    void addNotification(const Task& task) override;
-
-    /**
      * Initialize notifications manager with \p parentWidget widget
      * @param parentWidget Pointer to parent widget
      */
     void initializeNotifications(QWidget* parentWidget) override;
+
+protected:
+
+    /**
+     * Add toaster notification for \p task in the main window
+     * @param task Task containing the notification details
+     */
+    void addNotification(QPointer<Task> task) override;
 
 public: // Action getters
 
@@ -127,6 +131,8 @@ private:
 	LearningCenterTutorialsModel    _tutorialsModel;                /** Tutorials model */
     util::Notifications     		_notifications;                 /** Notifications manager */
 	util::FileDownloader            _fileDownloader;                /** For downloading the learning center JSON file */
+    mv::TasksListModel              _tasksModel;                    /** Tasks list model */
+    mv::TasksFilterModel            _tasksFilterModel;              /** Filter model for the tasks model */
 };
 
 }

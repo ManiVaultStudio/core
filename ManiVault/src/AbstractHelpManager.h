@@ -103,16 +103,18 @@ public:
     virtual void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0) = 0;
 
     /**
-     * Add toaster notification for \p task in the main window
-     * @param task Task containing the notification details
-     */
-    virtual void addNotification(const Task& task) = 0;
-
-    /**
      * Initialize notifications manager with \p parentWidget widget
      * @param parentWidget Pointer to parent widget
      */
     virtual void initializeNotifications(QWidget* parentWidget) = 0;
+
+protected:
+
+    /**
+     * Add toaster notification for \p task in the main window
+     * @param task Task containing the notification details
+     */
+    virtual void addNotification(QPointer<Task> task) = 0;
 
 signals:
 
