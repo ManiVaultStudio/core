@@ -143,6 +143,18 @@ public:
      */
     void setDescription(const QString& description);
 
+    /**
+     * Returns the preferred minimum size (overriden to allow for less tall notification widget)
+     * @return Minimum size hint
+     */
+    QSize minimumSizeHint() const override;
+
+    /**
+     * Returns the preferred minimum size (overriden to allow for less tall notification widget)
+     * @return Minimum size hint
+     */
+    QSize sizeHint() const override;
+
 protected:
     
     /**
@@ -194,11 +206,11 @@ private:
     QPointer<Notification>  _previousNotification;          /** Pointer to previous notification (maybe nullptr) */
     QPointer<Notification>  _nextNotification;              /** Pointer to next notification (maybe nullptr) */
     bool                    _closing;                       /** Whether this notification is being closed */
-    QHBoxLayout             _messageLayout;                 /** Message layout of the notification */
     QHBoxLayout             _notificationWidgetLayout;      /** Layout of the notification widget */
+    QVBoxLayout             _messageLayout;                 /** Message layout of the notification */
     QLabel                  _iconLabel;                     /** Label for the icon (maybe empty) */
     QLabel                  _messageLabel;                  /** Label for the message text */
-    //gui::TaskAction         _taskAction;                    /** Task action for the task associated with this notification */
+    gui::TaskAction         _taskAction;                    /** Task action for the task associated with this notification */
 
     static const int    fixedWidth              = 400;      /** Width of the notification */
     static const int    spacing                 = 5;        /** Spacing between notifications */
