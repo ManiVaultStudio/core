@@ -53,8 +53,8 @@ Notification::Notification(const QString& title, const QString& description, con
     _description(description),
     _icon(icon),
     _previousNotification(previousNotification),
-    _closing(false),
-    _taskAction(nullptr, "Progress")
+    _closing(false)//,
+    //_taskAction(nullptr, "Task")
 {
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground);
@@ -148,9 +148,9 @@ Notification::Notification(QPointer<Task> task, Notification* previousNotificati
         return;
     }
 
-    _taskAction.setTask(task);
+    //_taskAction.setTask(task);
 
-    _messageLayout.addWidget(_taskAction.createWidget(this));
+    //_messageLayout.addWidget(_taskAction.createWidget(this));
 
     setTitle(task->getName());
     setDescription(task->getDescription());

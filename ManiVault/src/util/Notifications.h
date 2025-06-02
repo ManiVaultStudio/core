@@ -47,7 +47,7 @@ public:
      * Show \p task message
      * @param task Task containing the notification details
      */
-    void showTask(QPointer<Task>& task);
+    void showTask(QPointer<Task> task);
 
     /**
      * Set parent widget to \p parentWidget (notification widgets will anchor to this widget)

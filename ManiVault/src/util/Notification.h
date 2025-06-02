@@ -198,7 +198,7 @@ private:
     QHBoxLayout             _notificationWidgetLayout;      /** Layout of the notification widget */
     QLabel                  _iconLabel;                     /** Label for the icon (maybe empty) */
     QLabel                  _messageLabel;                  /** Label for the message text */
-    gui::TaskAction         _taskAction;                    /** Task action for the task associated with this notification */
+    //gui::TaskAction         _taskAction;                    /** Task action for the task associated with this notification */
 
     static const int    fixedWidth              = 400;      /** Width of the notification */
     static const int    spacing                 = 5;        /** Spacing between notifications */
