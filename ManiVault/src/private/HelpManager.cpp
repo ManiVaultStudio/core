@@ -141,15 +141,15 @@ void HelpManager::initialize()
         connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
             for (int filterModelRowIndex = first; filterModelRowIndex <= last; filterModelRowIndex++) {
                 const auto sourceModelIndex = _tasksFilterModel.mapToSource(_tasksFilterModel.index(filterModelRowIndex, 0));
-                auto task = _tasksModel.getTask(sourceModelIndex.row());
 
-                QStringList guiScopes;
+            	auto task = _tasksModel.getTask(sourceModelIndex.row());
 
-                for (const auto& guiScope : task->getGuiScopes())
-                    guiScopes << QString::number(static_cast<std::int32_t>(guiScope));
-
-                qDebug() << "Adding notification for task with gui scopes " << guiScopes.join(", ");
-                addNotification(_tasksModel.getTask(sourceModelIndex.row()));
+                // Avoid polluting the toaster with too many task-based notifications; only add task notifications for tasks that are running or running indeterminate after 500ms
+                QTimer::singleShot(500, this, [this, task, sourceModelIndex]() -> void {
+                    if (task->isRunning() || task->isRunningIndeterminate()) {
+                        addNotification(_tasksModel.getTask(sourceModelIndex.row()));
+                    }
+                });
             }
         });
     }
