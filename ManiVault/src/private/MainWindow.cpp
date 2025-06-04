@@ -24,7 +24,6 @@
 #include "PluginsStatusBarAction.h"
 #include "LoggingStatusBarAction.h"
 #include "BackgroundTasksStatusBarAction.h"
-#include "ForegroundTasksStatusBarAction.h"
 #include "SettingsStatusBarAction.h"
 #include "WorkspaceStatusBarAction.h"
 
@@ -108,7 +107,6 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
         auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
         auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
-        auto foregroundTasksStatusBarAction = new ForegroundTasksStatusBarAction(this, "Foreground Tasks");
         auto settingsTasksStatusBarAction   = new SettingsStatusBarAction(this, "Settings");
         auto workspaceStatusBarAction       = new WorkspaceStatusBarAction(this, "Workspace");
 
@@ -118,8 +116,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->insertPermanentWidget(3, workspaceStatusBarAction->createWidget(this));
         statusBar()->insertPermanentWidget(4, loggingStatusBarAction->createWidget(this), 4);
         statusBar()->insertPermanentWidget(5, backgroundTasksStatusBarAction->createWidget(this), 1);
-        statusBar()->insertPermanentWidget(6, foregroundTasksStatusBarAction->createWidget(this));
-        statusBar()->insertPermanentWidget(7, settingsTasksStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
 
         const auto updateStatusBarVisibility = [this]() -> void {
             statusBar()->setVisible(mv::projects().hasProject() && mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction().isChecked());

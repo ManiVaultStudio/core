@@ -25,7 +25,6 @@ set(PRIVATE_ACTIONS_HEADERS
     src/private/PluginsStatusBarAction.h
     src/private/LoggingStatusBarAction.h
     src/private/BackgroundTasksStatusBarAction.h
-    src/private/ForegroundTasksStatusBarAction.h
     src/private/FrontPagesStatusBarAction.h
     src/private/SettingsStatusBarAction.h
     src/private/WorkspaceStatusBarAction.h
@@ -36,7 +35,6 @@ set(PRIVATE_ACTIONS_SOURCES
     src/private/ManiVaultVersionStatusBarAction.cpp
     src/private/LoggingStatusBarAction.cpp
     src/private/BackgroundTasksStatusBarAction.cpp
-    src/private/ForegroundTasksStatusBarAction.cpp
     src/private/FrontPagesStatusBarAction.cpp
     src/private/SettingsStatusBarAction.cpp
     src/private/WorkspaceStatusBarAction.cpp

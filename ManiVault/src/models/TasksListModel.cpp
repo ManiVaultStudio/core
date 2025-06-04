@@ -30,6 +30,16 @@ TasksListModel::TasksListModel(QObject* parent /*= nullptr*/) :
         addTask(task);
 }
 
+QPointer<Task> TasksListModel::getTask(const std::int32_t& rowIndex) const
+{
+    auto taskItem = dynamic_cast<AbstractTasksModel::Item*>(itemFromIndex(index(rowIndex, 0)));
+
+    if (!taskItem)
+        return nullptr;
+
+    return taskItem->getTask();
+}
+
 void TasksListModel::addTask(Task* task)
 {
     try {

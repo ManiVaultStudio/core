@@ -9,6 +9,7 @@
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 #include <QHBoxLayout>
+#include <qlayout.h>
 #include <QMainWindow>
 #include <QStatusBar>
 #include <QPushButton>
@@ -42,20 +43,23 @@ void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
 QSize Notification::NotificationWidget::sizeHint() const
 {
 	return {
-        400,
+        fixedWidth,
         0
 	};
 }
 
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
 	QWidget(parent),
+    _title(title),
+    _icon(icon),
+    _description(description),
     _previousNotification(previousNotification),
-    _closing(false)
+    _closing(false),
+    _taskAction(nullptr, "Task")
 {
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setAttribute(Qt::WA_ShowWithoutActivating);
-    setMinimumHeight(10);
 
     if (_previousNotification)
         _previousNotification->_nextNotification = this;
@@ -66,9 +70,6 @@ Notification::Notification(const QString& title, const QString& description, con
 
     auto mainLayout                 = new QVBoxLayout();
     auto notificationWidget         = new NotificationWidget();
-    auto notificationWidgetLayout   = new QHBoxLayout(this);
-    auto iconLabel                  = new QLabel(this);
-    auto messageLabel               = new QLabel(this);
     auto closePushButton            = new QToolButton(this);
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -77,49 +78,94 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
     notificationWidget->setAutoFillBackground(true);
+    notificationWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
     notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
 
-    iconLabel->setStyleSheet("padding: 3px;");
-    iconLabel->setPixmap(icon.pixmap(32, 32));
-    iconLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+    _iconLabel.setStyleSheet("padding: 3px;");
 
-    messageLabel->setWordWrap(true);
-    messageLabel->setTextFormat(Qt::RichText);
-    messageLabel->setText("<b>" + title + "</b>" + "<br>" + description);
-    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
-    messageLabel->setMinimumHeight(10);
-    messageLabel->setOpenExternalLinks(true);
+    _messageLabel.setWordWrap(true);
+    _messageLabel.setTextFormat(Qt::RichText);
+    _messageLabel.setMinimumHeight(10);
+    _messageLabel.setOpenExternalLinks(true);
 
     closePushButton->setFixedSize(18, 18);
     closePushButton->setIcon(StyledIcon("xmark"));
     closePushButton->setAutoRaise(true);
 
-    notificationWidgetLayout->setContentsMargins(10, 10, 10, 10);
-    notificationWidgetLayout->setSpacing(10);
-    notificationWidgetLayout->setAlignment(Qt::AlignTop);
+    _messageLayout.setSpacing(4);
 
-    notificationWidgetLayout->addWidget(iconLabel);
-    notificationWidgetLayout->setAlignment(iconLabel, Qt::AlignTop);
-    notificationWidgetLayout->addWidget(messageLabel, 1);
-    notificationWidgetLayout->setAlignment(messageLabel, Qt::AlignTop);
-    notificationWidgetLayout->addWidget(closePushButton);
-    notificationWidgetLayout->setAlignment(closePushButton, Qt::AlignTop);
+    _messageLayout.addWidget(&_messageLabel);
 
-    notificationWidget->setLayout(notificationWidgetLayout);
+    _messageLayout.setAlignment(&_messageLabel, Qt::AlignTop);
+
+    _notificationWidgetLayout.setContentsMargins(margin, margin, margin, margin);
+    _notificationWidgetLayout.setSpacing(10);
+    _notificationWidgetLayout.setAlignment(Qt::AlignTop);
+
+    _notificationWidgetLayout.addWidget(&_iconLabel);
+    _notificationWidgetLayout.setAlignment(&_iconLabel, Qt::AlignTop);
+
+    _notificationWidgetLayout.addLayout(&_messageLayout, 1);
+
+	_notificationWidgetLayout.addWidget(closePushButton);
+    _notificationWidgetLayout.setAlignment(closePushButton, Qt::AlignTop);
+
+    notificationWidget->setLayout(&_notificationWidgetLayout);
+
+	updateIconLabel();
+    updateMessageLabel();
 
     mainLayout->addWidget(notificationWidget);
 
-    qApp->processEvents();
-
-    notificationWidget->adjustSize();
-
     setLayout(mainLayout);
 
-    const auto duration = durationType == DurationType::Fixed ? fixedDuration : getEstimatedReadingTime(title + description);
+	switch (durationType) {
+	    case DurationType::Fixed:
+	    case DurationType::Calculated:
+	    {
+            const auto duration = durationType == DurationType::Fixed ? fixedDuration : getEstimatedReadingTime(title + description);
 
-	QTimer::singleShot(duration, this, &Notification::requestFinish);
+            QTimer::singleShot(duration, this, &Notification::requestFinish);
 
+	    	break;
+	    }
+
+        case DurationType::Task:
+            break;
+	}
+    
     connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
+}
+
+Notification::Notification(QPointer<Task> task, Notification* previousNotification, QWidget* parent /*= nullptr*/) :
+    Notification("", "", QIcon(), previousNotification, DurationType::Task, parent)
+{
+    if (!task) {
+        qWarning() << "Notification task is null!";
+        return;
+    }
+
+    _task = task;
+
+	_taskAction.setTask(task);
+
+    _messageLayout.addWidget(_taskAction.createWidget(this));
+
+    setTitle(task->getName());
+
+    const auto taskIcon = task->getIcon();
+
+    setIcon(taskIcon.isNull() ? StyledIcon("stopwatch") : taskIcon);
+
+    connect(task, &Task::nameChanged, this, &Notification::setTitle);
+    connect(task, &Task::iconChanged, this, &Notification::setIcon);
+
+    connect(task, &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+        if (previousStatus == Task::Status::Running || previousStatus == Task::Status::RunningIndeterminate)
+            QTimer::singleShot(1000, this, &Notification::requestFinish);
+	});
+
+    updateMessageLabel();
 }
 
 void Notification::requestFinish()
@@ -189,6 +235,21 @@ void Notification::slideOut()
     animationGroup->start();
 }
 
+void Notification::updateIconLabel()
+{
+    _iconLabel.setPixmap(_icon.pixmap(32, 32));
+}
+
+void Notification::updateMessageLabel()
+{
+    if (_task.isNull())
+		_messageLabel.setText(QString("<b>%1</b><br>%2").arg(_title, _task.isNull() ? _description : ""));
+    else
+        _messageLabel.setText(QString("<b>%1</b>").arg(_title));
+
+    _messageLabel.adjustSize();
+}
+
 double Notification::getEstimatedReadingTime(const QString& text)
 {
     QRegularExpression wordRegex(R"(\b\w+\b)");
@@ -237,11 +298,64 @@ void Notification::setNextNotification(Notification* nextNotification)
     updatePosition();
 }
 
+QIcon Notification::getIcon() const
+{
+    return _icon;
+}
+
+void Notification::setIcon(const QIcon& icon)
+{
+	_icon = icon;
+
+	updateIconLabel();
+}
+
+QString Notification::getTitle() const
+{
+	return _title;
+}
+
+void Notification::setTitle(const QString& title)
+{
+    if (_title == title)
+        return;
+
+	_title = title;
+
+	updateMessageLabel();
+}
+
+QString Notification::getDescription() const
+{
+	return _description;
+}
+
+void Notification::setDescription(const QString& description)
+{
+    if (_description == description)
+        return;
+
+	_description = description;
+
+	updateMessageLabel();
+}
+
+QSize Notification::minimumSizeHint() const
+{
+	return { fixedWidth, 10 };
+}
+
+QSize Notification::sizeHint() const
+{
+	return minimumSizeHint();
+}
+
 void Notification::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
 
     QTimer::singleShot(10, this, [this]() -> void {
+        adjustSize();
         updatePosition();
         slideIn();
     });
