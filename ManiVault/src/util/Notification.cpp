@@ -346,8 +346,7 @@ void Notification::showEvent(QShowEvent* event)
     QWidget::showEvent(event);
 
     QTimer::singleShot(10, this, [this]() -> void {
-        adjustSize();//setFixedSize(notificationWidget->size());
-
+        adjustSize();
         updatePosition();
         slideIn();
     });
