@@ -1,3 +1,13 @@
+# -----------------------------------------------------------------------------
+# Handle plugin meta data,
+# -----------------------------------------------------------------------------
+# Appends the version to the target's output file, and sort target in plugin
+# type folder (if the generator supports this, and it's not disabled)
+#
+# Usage:
+#  mv_handle_plugin_config(${TARGET})
+#  mv_handle_plugin_config(${TARGET} 0)    # optional argument, disables automatic folder placement
+
 function(mv_handle_plugin_config plugin_target)
     
     # Read config file
