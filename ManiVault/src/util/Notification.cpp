@@ -51,8 +51,8 @@ QSize Notification::NotificationWidget::sizeHint() const
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
 	QWidget(parent),
     _title(title),
-    _description(description),
     _icon(icon),
+    _description(description),
     _previousNotification(previousNotification),
     _closing(false),
     _taskAction(nullptr, "Task")
