@@ -92,6 +92,8 @@ Notification::Notification(const QString& title, const QString& description, con
     closePushButton->setIcon(StyledIcon("xmark"));
     closePushButton->setAutoRaise(true);
 
+    _messageLayout.setSpacing(4);
+
     _messageLayout.addWidget(&_messageLabel);
 
     _messageLayout.setAlignment(&_messageLabel, Qt::AlignTop);
@@ -143,25 +145,27 @@ Notification::Notification(QPointer<Task> task, Notification* previousNotificati
         return;
     }
 
-    _taskAction.setTask(task);
+    _task = task;
+
+	_taskAction.setTask(task);
 
     _messageLayout.addWidget(_taskAction.createWidget(this));
 
     setTitle(task->getName());
-    setDescription(task->getDescription());
 
     const auto taskIcon = task->getIcon();
 
     setIcon(taskIcon.isNull() ? StyledIcon("stopwatch") : taskIcon);
 
     connect(task, &Task::nameChanged, this, &Notification::setTitle);
-    connect(task, &Task::descriptionChanged, this, &Notification::setDescription);
     connect(task, &Task::iconChanged, this, &Notification::setIcon);
 
     connect(task, &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
         if (previousStatus == Task::Status::Running || previousStatus == Task::Status::RunningIndeterminate)
             QTimer::singleShot(1000, this, &Notification::requestFinish);
 	});
+
+    updateMessageLabel();
 }
 
 void Notification::requestFinish()
@@ -238,7 +242,11 @@ void Notification::updateIconLabel()
 
 void Notification::updateMessageLabel()
 {
-    _messageLabel.setText("<b>" + _title + "</b>" + "<br>" + _description);
+    if (_task.isNull())
+		_messageLabel.setText(QString("<b>%1</b><br>%2").arg(_title, _task.isNull() ? _description : ""));
+    else
+        _messageLabel.setText(QString("<b>%1</b>").arg(_title));
+
     _messageLabel.adjustSize();
 }
 
