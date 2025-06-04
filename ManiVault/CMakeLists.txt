@@ -37,6 +37,9 @@ include(mv_check_and_set_AVX)
 # Helper function to install runtime dependencies
 include(mv_install_dependencies_utils)
 
+# Helper function to handle plugin meta data
+include(mv_plugin_meta_data)
+
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
 
@@ -487,17 +490,12 @@ install(EXPORT "ManiVaultPublicExport"
         COMPONENT MVPUBLIC_EXPORT
 )
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies_utils.cmake"
-        DESTINATION cmake/mv
-        COMPONENT MVPUBLIC_CMAKE_HELPER
-)
-
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
-        DESTINATION cmake/mv
-        COMPONENT MVPUBLIC_CMAKE_HELPER
-)
-
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
+# Copy cmake helper files
+install(FILES 
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies_utils.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_plugin_meta_data.cmake"
         DESTINATION cmake/mv
         COMPONENT MVPUBLIC_CMAKE_HELPER
 )
