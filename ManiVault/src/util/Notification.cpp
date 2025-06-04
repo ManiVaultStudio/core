@@ -81,15 +81,12 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidget->setMinimumHeight(10);
     notificationWidget->setAutoFillBackground(true);
     notificationWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-    //notificationWidget->setStyleSheet("background-color: red;");
-    //notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
+    notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
 
     _iconLabel.setStyleSheet("padding: 3px;");
-    //_iconLabel.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
     _messageLabel.setWordWrap(true);
     _messageLabel.setTextFormat(Qt::RichText);
-    //_messageLabel.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
     _messageLabel.setMinimumHeight(10);
     _messageLabel.setOpenExternalLinks(true);
 
@@ -120,12 +117,6 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->addWidget(notificationWidget);
 
-    //qApp->processEvents();
-
-    //notificationWidget->adjustSize();
-
-    
-
     setLayout(mainLayout);
 
 	switch (durationType) {
@@ -144,12 +135,6 @@ Notification::Notification(const QString& title, const QString& description, con
 	}
     
     connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
-
-    //
-
-    
-
-    //qApp->processEvents();
 }
 
 Notification::Notification(QPointer<Task> task, Notification* previousNotification, QWidget* parent /*= nullptr*/) :
