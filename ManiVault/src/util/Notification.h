@@ -212,7 +212,8 @@ private:
     QLabel                  _messageLabel;                  /** Label for the message text */
     gui::TaskAction         _taskAction;                    /** Task action for the task associated with this notification */
 
-    static const int    fixedWidth              = 400;      /** Width of the notification */
+    static const int    margin                  = 9;        /** Margin around the notification widget */
+    static const int    fixedWidth              = 500;      /** Width of the notification */
     static const int    spacing                 = 5;        /** Spacing between notifications */
     static const int    fixedDuration           = 5000;     /** Duration of notification display */
     static const int    animationDuration       = 300;      /** Duration of notification animation */

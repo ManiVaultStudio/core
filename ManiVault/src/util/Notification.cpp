@@ -43,7 +43,7 @@ void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
 QSize Notification::NotificationWidget::sizeHint() const
 {
 	return {
-        400,
+        fixedWidth,
         0
 	};
 }
@@ -80,14 +80,16 @@ Notification::Notification(const QString& title, const QString& description, con
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
     notificationWidget->setAutoFillBackground(true);
-    notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
+    notificationWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    //notificationWidget->setStyleSheet("background-color: red;");
+    //notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
 
     _iconLabel.setStyleSheet("padding: 3px;");
-    _iconLabel.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+    //_iconLabel.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
     _messageLabel.setWordWrap(true);
     _messageLabel.setTextFormat(Qt::RichText);
-    _messageLabel.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+    //_messageLabel.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
     _messageLabel.setMinimumHeight(10);
     _messageLabel.setOpenExternalLinks(true);
 
@@ -99,7 +101,7 @@ Notification::Notification(const QString& title, const QString& description, con
 
     _messageLayout.setAlignment(&_messageLabel, Qt::AlignTop);
 
-    _notificationWidgetLayout.setContentsMargins(10, 10, 10, 10);
+    _notificationWidgetLayout.setContentsMargins(margin, margin, margin, margin);
     _notificationWidgetLayout.setSpacing(10);
     _notificationWidgetLayout.setAlignment(Qt::AlignTop);
 
@@ -118,11 +120,11 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->addWidget(notificationWidget);
 
-    qApp->processEvents();
+    //qApp->processEvents();
 
-    notificationWidget->adjustSize();
+    //notificationWidget->adjustSize();
 
-    setFixedSize(notificationWidget->size());
+    
 
     setLayout(mainLayout);
 
@@ -143,7 +145,11 @@ Notification::Notification(const QString& title, const QString& description, con
     
     connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
 
-    adjustSize();
+    //
+
+    
+
+    //qApp->processEvents();
 }
 
 Notification::Notification(QPointer<Task> task, Notification* previousNotification, QWidget* parent /*= nullptr*/) :
@@ -342,7 +348,7 @@ void Notification::setDescription(const QString& description)
 
 QSize Notification::minimumSizeHint() const
 {
-	return { 400, 10 };
+	return { fixedWidth, 10 };
 }
 
 QSize Notification::sizeHint() const
@@ -355,6 +361,8 @@ void Notification::showEvent(QShowEvent* event)
     QWidget::showEvent(event);
 
     QTimer::singleShot(10, this, [this]() -> void {
+        adjustSize();//setFixedSize(notificationWidget->size());
+
         updatePosition();
         slideIn();
     });
