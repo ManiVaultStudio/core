@@ -149,7 +149,10 @@ Notification::Notification(QPointer<Task> task, Notification* previousNotificati
 
     setTitle(task->getName());
     setDescription(task->getDescription());
-    setIcon(task->getIcon());
+
+    const auto taskIcon = task->getIcon();
+
+    setIcon(taskIcon.isNull() ? StyledIcon("stopwatch") : taskIcon);
 
     connect(task, &Task::nameChanged, this, &Notification::setTitle);
     connect(task, &Task::descriptionChanged, this, &Notification::setDescription);
