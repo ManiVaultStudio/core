@@ -453,7 +453,7 @@ public: // GUI scopes
     
     /**
      * Sets GUI scopes to \p guiScopes
-     * @param guiScope GUI scope enum
+     * @param guiScopes GUI scope enum
      */
     void setGuiScopes(const GuiScopes& guiScopes);
 
@@ -474,7 +474,7 @@ public: // GUI scopes
      * @param guiScopesA GUI scopes A
      * @param guiScopesB GUI scopes B
      */
-    bool doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB);
+    bool doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB) const;
 
     /**
      * Convert \p guiScopes to string list

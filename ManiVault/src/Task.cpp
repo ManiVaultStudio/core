@@ -518,7 +518,7 @@ void Task::removeGuiScope(const GuiScope& guiScope)
     emit privateRemoveGuiScopeSignal(guiScope, QPrivateSignal());
 }
 
-bool Task::doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB)
+bool Task::doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB) const
 {
     for (const auto& guiScopeA : guiScopesA)
         if (guiScopesB.contains(guiScopeA))
