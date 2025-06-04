@@ -37,9 +37,13 @@ function(mv_handle_plugin_config plugin_target)
     if(HAS_PLUGIN_TYPE)
         string(JSON PLUGIN_TYPE GET "${PLUGIN_INFO_JSON}" type)
         message(STATUS "  type: ${PLUGIN_TYPE}")
-        set_target_properties(${plugin_target} PROPERTIES
-            FOLDER "${PLUGIN_TYPE}Plugins"
-        )
+
+        # Do not place target in folder if disabled
+        if(${ARGC} EQUAL 1)
+            set_target_properties(${plugin_target} PROPERTIES
+                FOLDER "${PLUGIN_TYPE}Plugins"
+            )
+        endif()
     endif()
 
 endfunction()
