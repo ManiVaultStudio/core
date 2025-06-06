@@ -12,37 +12,85 @@
 namespace mv::util
 {
 
-/** Script types */
-enum class ScriptType {
-    None = 0,               /** Not a valid script type */
-    DataLoader,             /** Data loading scripts */
-    DataWriter,             /** Data writer scripts */
-    DataAnalysis,           /** Data analysis scripts */
-    DataTransformation,     /** Data transformation scripts */
-    DataView                /** Data view scripts */
+/**
+ * Script class
+ *
+ * Contains information for running a script
+ *
+ * @author Thomas Kroes
+ */
+class CORE_EXPORT Script : public QObject
+{
+    Q_OBJECT
+
+public:
+
+    /** Script types */
+    enum class Type {
+        None = 0,               /** Not a valid script type */
+        DataLoader,             /** Data loading scripts */
+        DataWriter,             /** Data writer scripts */
+        DataAnalysis,           /** Data analysis scripts */
+        DataTransformation,     /** Data transformation scripts */
+        DataView                /** Data view scripts */
+    };
+
+    /** Maps type to type name */
+    static QMap<Type, QString> typeMap;
+
+    /**
+     * Get the type name from \p type
+     * @param type Type enum
+     * @return Script type name
+     */
+    static QString getTypeName(const Type& type);
+
+    /**
+     * Get type enum from \p typeName
+     * @param typeName Type name
+     * @return Script type enum
+     */
+    static Type getTypeEnum(const QString& typeName);
+
+    /** Script language */
+    enum class Language {
+        None = 0,   /** Not a valid script language */
+    	Python,     /** Python scripting */
+        R           /** R scripting */
+    };
+
+    /** Maps language enum to language name */
+    static QMap<Language, QString> languageMap;
+
+    /**
+     * Get the language name from \p language
+     * @param language Language enum
+     * @return Language name
+     */
+    static QString getLanguageName(const Language& language);
+
+    /**
+     * Get language enum from \p language name
+     * @param languageName Language name
+     * @return Language enum
+     */
+    static Language getLanguageEnum(const QString& languageName);
+
+    /**
+     * Construct script with \p type and \p language
+     * @param type Script type
+     * @param language Script language
+     * @param filePath File path to the script
+     * @param parent Pointer to parent object (optional, default is nullptr)
+     */
+    explicit Script(const Type& type, const Language& language, const QUrl& filePath, QObject* parent = nullptr);
+
+private:
+    Type        _type;          /** Script type */
+    Language    _language;      /** Script language */
+    QUrl        _filePath;      /** File path to the script */
 };
 
-/** Maps script type to script type name */
-static QMap<ScriptType, QString> scriptTypeMap({
-    { ScriptType::DataLoader, "DataLoader" },
-    { ScriptType::DataWriter, "DataWriter" },
-    { ScriptType::DataAnalysis, "DataAnalysis" },
-    { ScriptType::DataTransformation, "DataTransformation" },
-    { ScriptType::DataView, "DataView" }
-});
-
-/**
- * Get the script type name from \p scriptType
- * @param scriptType Script type
- * @return Script type name
- */
-QString getScriptTypeName(const ScriptType& scriptType);
-
-/**
- * Get script type from \p scriptTypeName
- * @param scriptTypeName Script type name
- * @return Script type
- */
-ScriptType getScriptType(const QString& scriptTypeName);
+using Scripts = std::vector<const Script*>;
 
 }
