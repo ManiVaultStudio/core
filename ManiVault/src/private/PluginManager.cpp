@@ -196,9 +196,22 @@ void PluginManager::loadPluginFactories()
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
         
         // Get metadata about plugin from the accompanying .json file compiled in the shared library
-        QString pluginKind      = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
-        QString menuName        = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
-        QString version         = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
+        const QJsonObject pluginMetaData = pluginLoader.metaData().value("MetaData").toObject();
+        QString pluginKind      = pluginMetaData.value("name").toString();
+
+        // Transition: (OLD) only plugin version, (NEW) nested version object for plugin and core
+        QString version         = "";
+        QJsonValue versionValue = pluginMetaData.value("version");
+        if (versionValue.isString()) {
+            version = versionValue.toString();
+        }
+        else if (versionValue.isObject()) {
+            QJsonObject versionObj  = versionValue.toObject();                  // contains plugin version and list of core versions
+            version                 = versionObj.value("plugin").toString();
+        }
+        else {
+            qDebug() << "Version descriptor is missing in meta data for " << pluginKind;
+        }
 
         // Create an instance of the plugin, i.e. the factory
         auto pluginFactory = dynamic_cast<PluginFactory*>(pluginLoader.instance());
