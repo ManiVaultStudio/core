@@ -5,10 +5,9 @@
 #include "DataHierarchyPlugin.h"
 
 #include <Application.h>
+#include <PointData/PointData.h>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
-
-using namespace mv;
+Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -78,4 +77,15 @@ QUrl DataHierarchyPluginFactory::getRepositoryUrl() const
 ViewPlugin* DataHierarchyPluginFactory::produce()
 {
     return new DataHierarchyPlugin(this);
+}
+
+mv::gui::ScriptTriggerActions DataHierarchyPluginFactory::getScriptTriggerActions(const mv::Datasets& datasets) const
+{
+    if (areAllDatasetsOfTheSameType(datasets, PointType)) {
+        auto scriptTriggerAction = new ScriptTriggerAction(nullptr, Script::Type::DataTransformation, Script::Language::Python, QUrl(), datasets, "Combine/Stitch", "Stitch the images together", QIcon(":/icons/sitemap.svg"));
+
+    	return { scriptTriggerAction };
+    }
+
+	return {};
 }

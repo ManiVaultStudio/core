@@ -33,12 +33,11 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param script Pointer to the script that should be executed when the trigger action is triggered
      * @param title Title of the plugin trigger action
      * @param icon Icon
      * @param tooltip Tooltip of the plugin trigger action
      */
-    Q_INVOKABLE ScriptTriggerAction(QObject* parent, util::Script* script, const QString& title, const QString& tooltip, const QIcon& icon);
+    Q_INVOKABLE ScriptTriggerAction(QObject* parent, const util::Script::Type& type, const util::Script::Language& language, const QUrl& location, const Datasets& datasets, const QString& title, const QString& tooltip, const QIcon& icon);
 
 private:
 
@@ -46,8 +45,8 @@ private:
     void runScript();
 
 private:
-    QPointer<util::Script>  _script;            /** Pointer to the script that should be executed when the trigger action is triggered */
-    QString                 _menuLocation;      /** Determines where the script trigger action resides w.r.t. other scrpt trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
+    util::Script    _script;            /** Script that should be executed when the trigger action is triggered */
+    QString         _menuLocation;      /** Determines where the script trigger action resides w.r.t. other scrpt trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
 
     friend class plugin::PluginFactory;
 };

@@ -6,9 +6,9 @@
 
 namespace mv::gui {
 
-ScriptTriggerAction::ScriptTriggerAction(QObject* parent, util::Script* script, const QString& title, const QString& tooltip, const QIcon& icon) :
+ScriptTriggerAction::ScriptTriggerAction(QObject* parent, const util::Script::Type& type, const util::Script::Language& language, const QUrl& location, const Datasets& datasets, const QString& title, const QString& tooltip, const QIcon& icon) :
     TriggerAction(parent, title),
-    _script(script)
+    _script(type, language, location, datasets)
 {
     setText(title);
     setToolTip(tooltip);
@@ -19,11 +19,9 @@ ScriptTriggerAction::ScriptTriggerAction(QObject* parent, util::Script* script, 
 
 void ScriptTriggerAction::runScript()
 {
-    if (_script) {
-        _script->run();
-    } else {
-        qWarning() << "Unable to run script: script is not available!";
-    }
+    qDebug().noquote() << QString("Running %1 script (%2): %3").arg(util::Script::getTypeName(_script.getType()), util::Script::getLanguageName(_script.getLanguage()), _script.getLocation().toString());
+
+    _script.run();
 }
 
 }

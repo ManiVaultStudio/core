@@ -176,7 +176,16 @@ public: // Miscellaneous
      * @param delayMs Delay in milliseconds before the notification is shown
      */
     void addNotification(const QString& description, const util::Notification::DurationType& durationType = util::Notification::DurationType::Fixed, std::int32_t delayMs = 0) const;
-    
+
+    /**
+     * Get script trigger actions given \p datasets
+     * @param datasets Vector of input datasets
+     * @return Vector of script trigger actions
+     */
+    virtual gui::ScriptTriggerActions getScriptTriggerActions(const Datasets& datasets) const {
+        return {};
+    }
+
 public: // Action getters
 
     gui::StringAction& getGuiNameAction() { return _guiNameAction; };

@@ -12,6 +12,8 @@
 #include "PluginType.h"
 
 #include "actions/PluginTriggerAction.h"
+#include "actions/ScriptTriggerAction.h"
+
 #include "actions/StringsAction.h"
 
 #include <QObject>
@@ -238,6 +240,15 @@ public: // Meta data
      * @return Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.)
      */
     bool getAllowPluginCreationFromStandardGui() const;
+
+    /**
+     * Get script trigger actions given \p datasets
+     * @param datasets Vector of input datasets
+     * @return Vector of script trigger actions
+     */
+    virtual gui::ScriptTriggerActions getScriptTriggerActions(const Datasets& datasets) const {
+        return {};
+    }
 
 public: // Number of instances
 
