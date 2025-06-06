@@ -33,11 +33,26 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param type Type of the script
+     * @param language Language of the script
+     * @param location Location of the script (e.g. file URL)
+     * @param datasets Datasets that the script should be run on (e.g. selected datasets in the data hierarchy)
      * @param title Title of the plugin trigger action
-     * @param icon Icon
-     * @param tooltip Tooltip of the plugin trigger action
+     * @param menuLocation Determines where the script trigger action resides w.r.t. other script trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images
      */
-    Q_INVOKABLE ScriptTriggerAction(QObject* parent, const util::Script::Type& type, const util::Script::Language& language, const QUrl& location, const Datasets& datasets, const QString& title, const QString& tooltip, const QIcon& icon);
+    Q_INVOKABLE ScriptTriggerAction(QObject* parent, const util::Script::Type& type, const util::Script::Language& language, const QUrl& location, const Datasets& datasets, const QString& title, const QString& menuLocation, QIcon icon = QIcon());
+
+    /**
+     * Get menu location
+     * @return Path-separated menu location
+     */
+    QString getMenuLocation() const;
+
+    /**
+     * Get icon representing the scripting language
+     * @return Icon representing the scripting language
+     */
+    QIcon getLanguageIcon() const;
 
 private:
 

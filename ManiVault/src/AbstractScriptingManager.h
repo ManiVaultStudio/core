@@ -33,6 +33,13 @@ public:
         AbstractManager(parent, "Scripting")
     {
     }
+
+    /**
+     * Get script trigger actions for \p datasets
+     * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
+     * @return Vector of script trigger actions
+     */
+    virtual gui::ScriptTriggerActions getScriptTriggerActions(const Datasets& datasets) const = 0;
 };
 
 }

@@ -79,13 +79,27 @@ ViewPlugin* DataHierarchyPluginFactory::produce()
     return new DataHierarchyPlugin(this);
 }
 
-mv::gui::ScriptTriggerActions DataHierarchyPluginFactory::getScriptTriggerActions(const mv::Datasets& datasets) const
+ScriptTriggerActions DataHierarchyPluginFactory::getScriptTriggerActions(const mv::Datasets& datasets) const
 {
-    if (areAllDatasetsOfTheSameType(datasets, PointType)) {
-        auto scriptTriggerAction = new ScriptTriggerAction(nullptr, Script::Type::DataTransformation, Script::Language::Python, QUrl(), datasets, "Combine/Stitch", "Stitch the images together", QIcon(":/icons/sitemap.svg"));
+    ScriptTriggerActions scriptTriggerActions;
 
-    	return { scriptTriggerAction };
+    if (areAllDatasetsOfTheSameType(datasets, PointType) && datasets.count() >= 2) {
+        auto scriptTriggerAction = new ScriptTriggerAction(nullptr, Script::Type::DataTransformation, Script::Language::Python, QUrl(), datasets, "Stitch", "Transformation/Stitch");
+
+        scriptTriggerActions << scriptTriggerAction;
     }
 
-	return {};
+    if (datasets.count() == 1 && datasets.first()->getDataType() == PointType) {
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataWriter, Script::Language::Python, QUrl(), datasets, "Export PNG", "Export/BIN");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataWriter, Script::Language::Python, QUrl(), datasets, "Export PNG", "Export/JSON");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataAnalysis, Script::Language::Python, QUrl(), datasets, "Average", "Analysis/Average");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataAnalysis, Script::Language::Python, QUrl(), datasets, "Min", "Analysis/Min");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataAnalysis, Script::Language::Python, QUrl(), datasets, "Max", "Analysis/Max");
+    }
+
+    if (datasets.count() == 1 && datasets.first()->getDataType() == PointType) {
+        
+    }
+
+	return scriptTriggerActions;
 }

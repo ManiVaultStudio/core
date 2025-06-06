@@ -29,6 +29,13 @@ public:
 
     /** Resets the contents of the event manager */
     void reset() override;
+
+    /**
+     * Get script trigger actions for \p datasets
+     * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
+     * @return Vector of script trigger actions
+     */
+    gui::ScriptTriggerActions getScriptTriggerActions(const Datasets& datasets) const override;
 };
 
 }

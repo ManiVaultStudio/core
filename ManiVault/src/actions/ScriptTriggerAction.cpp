@@ -6,20 +6,29 @@
 
 namespace mv::gui {
 
-ScriptTriggerAction::ScriptTriggerAction(QObject* parent, const util::Script::Type& type, const util::Script::Language& language, const QUrl& location, const Datasets& datasets, const QString& title, const QString& tooltip, const QIcon& icon) :
+ScriptTriggerAction::ScriptTriggerAction(QObject* parent, const util::Script::Type& type, const util::Script::Language& language, const QUrl& location, const Datasets& datasets, const QString& title, const QString& menuLocation, QIcon icon /*= QIcon()*/) :
     TriggerAction(parent, title),
-    _script(type, language, location, datasets)
+    _script(title, type, language, location, datasets),
+    _menuLocation(QString("%1/%2").arg(util::Script::getLanguageName(language), menuLocation))
 {
-    setText(title);
-    setToolTip(tooltip);
     setIcon(icon);
 
     connect(this, &TriggerAction::triggered, this, &ScriptTriggerAction::runScript);
 }
 
+QString ScriptTriggerAction::getMenuLocation() const
+{
+	return _menuLocation;
+}
+
+QIcon ScriptTriggerAction::getLanguageIcon() const
+{
+    return _script.getLanguageIcon();
+}
+
 void ScriptTriggerAction::runScript()
 {
-    qDebug().noquote() << QString("Running %1 script (%2): %3").arg(util::Script::getTypeName(_script.getType()), util::Script::getLanguageName(_script.getLanguage()), _script.getLocation().toString());
+    qDebug().noquote() << QString("Running %1 script %2 (%3): %4").arg(util::Script::getTypeName(_script.getType()), _script.getTitle(), util::Script::getLanguageName(_script.getLanguage()), _script.getLocation().toString());
 
     _script.run();
 }

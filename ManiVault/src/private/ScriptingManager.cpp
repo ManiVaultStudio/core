@@ -54,4 +54,19 @@ void ScriptingManager::reset()
     endReset();
 }
 
+ScriptTriggerActions ScriptingManager::getScriptTriggerActions(const Datasets& datasets) const
+{
+    ScriptTriggerActions scriptTriggerActions;
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+        scriptTriggerActions << pluginFactory->getScriptTriggerActions(datasets);
+
+    for (auto plugin : mv::plugins().getPluginsByTypes())
+        scriptTriggerActions << plugin->getScriptTriggerActions(datasets);
+
+    sortActions(scriptTriggerActions);
+
+    return scriptTriggerActions;
+}
+
 }

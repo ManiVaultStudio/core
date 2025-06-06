@@ -52,8 +52,9 @@ Script::Language Script::getLanguageEnum(const QString& languageName)
     return languagesEnums.first();
 }
 
-Script::Script(const Type& type, const Language& language, const QUrl& location, const Datasets& datasets, QObject* parent /*= nullptr*/) :
+Script::Script(const QString& title, const Type& type, const Language& language, const QUrl& location, const Datasets& datasets, QObject* parent /*= nullptr*/) :
     QObject(parent),
+    _title(title),
     _type(type),
     _language(language),
     _location(location),
@@ -63,7 +64,23 @@ Script::Script(const Type& type, const Language& language, const QUrl& location,
 
 void Script::run()
 {
-    qDebug() << "Running script of type" << getTypeName(_type) << "in language" << getLanguageName(_language) << "from location" << _location.toString();
+    //qDebug() << "Running script " << _title << " of type" << getTypeName(_type) << "in language" << getLanguageName(_language) << "from location" << _location.toString();
+}
+
+QIcon Script::getLanguageIcon() const
+{
+	switch (_language) {
+	    case Language::Python:
+	        return StyledIcon("python");
+
+	    case Language::R:
+	        return StyledIcon("r");
+
+        case Language::None:
+	        break;
+	}
+
+    return StyledIcon("play");
 }
 
 }
