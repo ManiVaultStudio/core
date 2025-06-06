@@ -6,6 +6,8 @@
 
 #include "AbstractManager.h"
 
+#include "util/Script.h"
+
 #include <QObject>
 
 namespace mv {
