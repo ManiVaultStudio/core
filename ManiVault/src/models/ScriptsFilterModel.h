@@ -11,13 +11,13 @@
 namespace mv {
 
 /**
- * Plugin factories filter model class
+ * Scripts filter model class
  *
- * Sorting and filtering model for plugin factories
+ * Sorting and filtering model for scripts
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT PluginFactoriesFilterModel : public SortFilterProxyModel
+class CORE_EXPORT ScriptsFilterModel : public SortFilterProxyModel
 {
 public:
 
@@ -25,7 +25,7 @@ public:
      * Construct the filter model with \p parent
      * @param parent Pointer to parent object
     */
-    PluginFactoriesFilterModel(QObject* parent = nullptr);
+    ScriptsFilterModel(QObject* parent = nullptr);
 };
 
 }

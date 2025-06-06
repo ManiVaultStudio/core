@@ -96,5 +96,30 @@ QVariant AbstractScriptsModel::LocationItem::data(int role /*= Qt::UserRole + 1*
     return Item::data(role);
 }
 
+AbstractScriptsModel::AbstractScriptsModel(QObject* parent) :
+    StandardItemModel(parent)
+{
+    setColumnCount(static_cast<int>(Column::Count));
+}
+
+QVariant AbstractScriptsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+{
+    switch (static_cast<Column>(section))
+    {
+	    case Column::Type:
+	        return TypeItem::headerData(orientation, role);
+
+	    case Column::Language:
+	        return LanguageItem::headerData(orientation, role);
+
+	    case Column::Location:
+	        return LocationItem::headerData(orientation, role);
+
+	    default:
+	        break;
+    }
+
+    return {};
+}
 
 }

@@ -17,7 +17,6 @@ using namespace mv::util;
 namespace mv {
 
 AbstractPluginFactoriesModel::Item::Item(const QString& type, plugin::PluginFactory* pluginFactory) :
-    QStandardItem(),
     _type(type),
     _pluginFactory(pluginFactory)
 {

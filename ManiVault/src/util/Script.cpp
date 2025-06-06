@@ -16,6 +16,12 @@ QMap<Script::Type, QString> Script::typeMap = {
     { Type::DataView, "Data View" }
 };
 
+QMap<Script::Language, QString> Script::languageMap = {
+    { Language::None, "None" },
+    { Language::Python, "Python" },
+    { Language::R, "R" }
+};
+
 QString Script::getTypeName(const Type& type)
 {
 	return typeMap.value(type, "None");

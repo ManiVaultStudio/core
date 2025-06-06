@@ -12,28 +12,9 @@ using namespace mv;
 
 namespace mv {
 
-ScriptsTreeModel::PluginFactoriesTreeModel(QObject* parent /*= nullptr*/) :
+ScriptsTreeModel::ScriptsTreeModel(QObject* parent /*= nullptr*/) :
     AbstractScriptsModel(parent)
 {
-    /*const auto pluginTypes = plugin::Types{
-        plugin::Type::ANALYSIS,
-        plugin::Type::DATA,
-        plugin::Type::LOADER,
-        plugin::Type::WRITER,
-        plugin::Type::TRANSFORMATION,
-        plugin::Type::VIEW
-    };
-
-    for (auto pluginType : pluginTypes) {
-        Row pluginTypeRow(getPluginTypeName(pluginType));
-
-        appendRow(pluginTypeRow);
-
-        for (auto pluginFactory : plugins().getPluginFactoriesByType(pluginType))
-            pluginTypeRow.first()->appendRow(Row(pluginFactory));
-
-        pluginTypeRow.first()->setEnabled(pluginTypeRow.first()->hasChildren());
-    }*/
 }
 
 }

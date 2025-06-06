@@ -4,18 +4,18 @@
 
 #pragma once
 
-#include "AbstractPluginFactoriesModel.h"
+#include "AbstractScriptsModel.h"
 
 namespace mv {
 
 /**
- * Plugin factories list model class
+ * Scripts list model class
  *
- * List model for loaded plugin factories
+ * List model for scripts
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT PluginFactoriesListModel : public AbstractPluginFactoriesModel
+class CORE_EXPORT ScriptsListModel : public AbstractScriptsModel
 {
 public:
 
@@ -23,7 +23,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    PluginFactoriesListModel(QObject* parent = nullptr);
+    ScriptsListModel(QObject* parent = nullptr);
 };
 
 }
