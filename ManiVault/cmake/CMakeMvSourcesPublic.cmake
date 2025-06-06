@@ -19,6 +19,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractErrorManager.h
     src/AbstractErrorLogger.h
     src/AbstractThemeManager.h
+	src/AbstractScriptingManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_SOURCES
