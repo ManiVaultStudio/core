@@ -2,23 +2,20 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "PluginFactoriesTreeModel.h"
-
-#include "AbstractPluginManager.h"
-#include "CoreInterface.h"
+#include "ScriptsTreeModel.h"
 
 using namespace mv;
 
 #ifdef _DEBUG
-    #define PLUGIN_FACTORIES_TREE_MODEL_VERBOSE
+    #define SCRIPTS_TREE_MODEL_VERBOSE
 #endif
 
 namespace mv {
 
-PluginFactoriesTreeModel::PluginFactoriesTreeModel(QObject* parent /*= nullptr*/) :
-    AbstractPluginFactoriesModel(parent)
+ScriptsTreeModel::PluginFactoriesTreeModel(QObject* parent /*= nullptr*/) :
+    AbstractScriptsModel(parent)
 {
-    const auto pluginTypes = plugin::Types{
+    /*const auto pluginTypes = plugin::Types{
         plugin::Type::ANALYSIS,
         plugin::Type::DATA,
         plugin::Type::LOADER,
@@ -36,7 +33,7 @@ PluginFactoriesTreeModel::PluginFactoriesTreeModel(QObject* parent /*= nullptr*/
             pluginTypeRow.first()->appendRow(Row(pluginFactory));
 
         pluginTypeRow.first()->setEnabled(pluginTypeRow.first()->hasChildren());
-    }
+    }*/
 }
 
 }

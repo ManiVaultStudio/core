@@ -26,43 +26,36 @@ public:
 
     /** Model columns */
     enum class Column {
-        Name,               /** Item name */
-        Version,            /** Plugin version */
-        NumberOfInstances,  /** Number of current instances */
+        Type,       /** Script type item */
+        Language,   /** Script language item */
+        Location,   /** Script location item */
 
         Count
     };
 
-    /** Base standard model item class for plugin factory item */
+    /** Base standard model item class for script item  */
     class CORE_EXPORT Item : public QStandardItem {
     public:
 
         /**
-         * Construct with \p type and pointer to \p pluginFactory
+         * Construct with \p type and pointer to \p script
          * @param type View type
-         * @param pluginFactory Pointer to plugin factory
+         * @param script Pointer to script
          */
-        Item(const QString& type, plugin::PluginFactory* pluginFactory);
+        Item(const QString& type, util::Script* script);
 
         /**
-         * Get type
-         * return Plugin type string
+         * Get script
+         * return Pointer to script
          */
-        QString getType() const;
-
-        /**
-         * Get plugin factory
-         * return Pointer to plugin factory
-         */
-        plugin::PluginFactory* getPluginFactory() const;
+        util::Script* getScript() const;
 
     private:
-        const QString           _type;              /** Plugin type */
-        plugin::PluginFactory*  _pluginFactory;     /** Pointer to plugin factory */
+        util::Script*   _script;  /** Pointer to script */
     };
 
-    /** Item class for displaying the plugin factory kind */
-    class CORE_EXPORT NameItem final : public Item {
+    /** Item class for displaying the script type */
+    class CORE_EXPORT TypeItem final : public Item {
     public:
 
         /** No need for specialized constructor */
@@ -84,10 +77,76 @@ public:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "Name";
+                    return "Type";
 
                 case Qt::ToolTipRole:
-                    return "Item name";
+                    return "Script type";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the script language */
+    class CORE_EXPORT LanguageItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Language";
+
+	            case Qt::ToolTipRole:
+	                return "Script language";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the script location */
+    class CORE_EXPORT LocationItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Location";
+
+	            case Qt::ToolTipRole:
+	                return "Script location";
             }
 
             return {};
@@ -102,26 +161,16 @@ protected:
     public:
 
         /**
-         * Construct with \p type and pointer to \p pluginFactory
+         * Construct with \p type and pointer to \p script
          * @param type View type
-         * @param pluginFactory Pointer to plugin factory
+         * @param script Pointer to the script
          */
-        Row(const QString& type, plugin::PluginFactory* pluginFactory) : QList<QStandardItem*>()
+        Row(const QString& type, util::Script* script) : QList<QStandardItem*>()
         {
-            append(new NameItem(type, pluginFactory));
+            append(new TypeItem(type, script));
+            append(new LanguageItem(type, script));
+            append(new LocationItem(type, script));
         }
-
-        /**
-         * Construct with \p type
-         * @param type View type
-         */
-        Row(const QString& type) : Row(type, nullptr) {}
-
-        /**
-         * Construct with pointer to \p pluginFactory
-         * @param pluginFactory Pointer to plugin factory
-         */
-        Row(plugin::PluginFactory* pluginFactory) : Row("", pluginFactory) {}
     };
 
 public:
@@ -130,7 +179,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractPluginFactoriesModel(QObject* parent = nullptr);
+    AbstractScriptsModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role

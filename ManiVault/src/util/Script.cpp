@@ -46,11 +46,11 @@ Script::Language Script::getLanguageEnum(const QString& languageName)
     return languagesEnums.first();
 }
 
-Script::Script(const Type& type, const Language& language, const QUrl& filePath, QObject* parent /*= nullptr*/) :
+Script::Script(const Type& type, const Language& language, const QUrl& location, QObject* parent /*= nullptr*/) :
     QObject(parent),
     _type(type),
     _language(language),
-    _filePath(filePath)
+    _location(location)
 {
 }
 

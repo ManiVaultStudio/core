@@ -80,15 +80,19 @@ public:
      * Construct script with \p type and \p language
      * @param type Script type
      * @param language Script language
-     * @param filePath File path to the script
+     * @param location Script location
      * @param parent Pointer to parent object (optional, default is nullptr)
      */
-    explicit Script(const Type& type, const Language& language, const QUrl& filePath, QObject* parent = nullptr);
+    explicit Script(const Type& type, const Language& language, const QUrl& location, QObject* parent = nullptr);
+
+    Type getType() const { return _type; }              /** Get script type */
+    Language getLanguage() const { return _language; }  /** Get script language */
+    QUrl getLocation() const { return _location; }      /** Get script location */
 
 private:
     Type        _type;          /** Script type */
     Language    _language;      /** Script language */
-    QUrl        _filePath;      /** File path to the script */
+    QUrl        _location;      /** Script location */
 };
 
 using Scripts = std::vector<const Script*>;
