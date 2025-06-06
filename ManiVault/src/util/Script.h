@@ -81,9 +81,13 @@ public:
      * @param type Script type
      * @param language Script language
      * @param location Script location
+     * @param datasets List of datasets that the script can work with (optional, default is empty)
      * @param parent Pointer to parent object (optional, default is nullptr)
      */
-    explicit Script(const Type& type, const Language& language, const QUrl& location, QObject* parent = nullptr);
+    explicit Script(const Type& type, const Language& language, const QUrl& location, const Datasets& datasets, QObject* parent = nullptr);
+
+    /** Runs the script */
+    void run();
 
     Type getType() const { return _type; }              /** Get script type */
     Language getLanguage() const { return _language; }  /** Get script language */
@@ -93,6 +97,7 @@ private:
     Type        _type;          /** Script type */
     Language    _language;      /** Script language */
     QUrl        _location;      /** Script location */
+    Datasets    _datasets;      /** Datasets that the script can work with */
 };
 
 using Scripts = std::vector<const Script*>;

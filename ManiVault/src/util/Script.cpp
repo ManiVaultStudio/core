@@ -52,12 +52,18 @@ Script::Language Script::getLanguageEnum(const QString& languageName)
     return languagesEnums.first();
 }
 
-Script::Script(const Type& type, const Language& language, const QUrl& location, QObject* parent /*= nullptr*/) :
+Script::Script(const Type& type, const Language& language, const QUrl& location, const Datasets& datasets, QObject* parent /*= nullptr*/) :
     QObject(parent),
     _type(type),
     _language(language),
-    _location(location)
+    _location(location),
+    _datasets(datasets)
 {
+}
+
+void Script::run()
+{
+    qDebug() << "Running script of type" << getTypeName(_type) << "in language" << getLanguageName(_language) << "from location" << _location.toString();
 }
 
 }

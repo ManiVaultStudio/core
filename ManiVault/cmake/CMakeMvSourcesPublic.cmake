@@ -333,6 +333,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/LockingAction.h
     src/actions/PluginTriggerPickerAction.h
     src/actions/PluginTriggerAction.h
+	src/actions/ScriptTriggerAction.h
     src/actions/LabelProxyAction.h
     src/actions/ModelFilterAction.h
     src/actions/ModelSelectionAction.h
@@ -372,6 +373,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/LockingAction.cpp
     src/actions/PluginTriggerPickerAction.cpp
     src/actions/PluginTriggerAction.cpp
+	src/actions/ScriptTriggerAction.cpp
     src/actions/LabelProxyAction.cpp
 	src/actions/ModelFilterAction.cpp
 	src/actions/ModelSelectionAction.cpp
