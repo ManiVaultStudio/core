@@ -31,7 +31,7 @@ public:
      * @param languageVersion Version of the scripting language
      * @param parent Pointer to parent object (optional, default is nullptr)
      */
-    explicit PythonScript(const QString& title, const Type& type, const QUrl& location, const Datasets& datasets, const Version& languageVersion = Version(3, 12, 0), QObject* parent = nullptr);
+    explicit PythonScript(const QString& title, const Type& type, const QString& location, const Datasets& datasets, const Version& languageVersion = Version(3, 12, 0), QObject* parent = nullptr);
 
     /** Runs the script */
     void run() override;

@@ -27,7 +27,7 @@ public:
 
     /** Script types */
     enum class Type {
-        None = 0,               /** Not a valid script type */
+        None = 0,           /** Not a valid script type */
         Loader,             /** Data loading scripts */
         Writer,             /** Data writer scripts */
         Analysis,           /** Data analysis scripts */
@@ -103,7 +103,7 @@ private:
     Type        _type;              /** Script type */
     Language    _language;          /** Script language */
     Version     _languageVersion;   /** Version of the scripting language */   
-    QUrl        _location;          /** Script location */
+    QString     _location;          /** Script location */
     Datasets    _datasets;          /** Datasets that the script can work with */
 };
 

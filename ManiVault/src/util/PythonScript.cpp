@@ -11,7 +11,7 @@
 namespace mv::util
 {
 
-PythonScript::PythonScript(const QString& title, const Type& type, const QUrl& location, const Datasets& datasets, const Version& languageVersion /*= Version(3, 12, 0)*/, QObject* parent /*= nullptr*/) :
+PythonScript::PythonScript(const QString& title, const Type& type, const QString& location, const Datasets& datasets, const Version& languageVersion /*= Version(3, 12, 0)*/, QObject* parent /*= nullptr*/) :
     Script(title, type, Language::Python, languageVersion, location, datasets, parent)
 {
 }
