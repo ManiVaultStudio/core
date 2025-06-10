@@ -95,7 +95,7 @@ public:
     Type getType() const { return _type; }                              /** Get script type */
     Language getLanguage() const { return _language; }                  /** Get script language */
     Version getLanguageVersion() const { return _languageVersion; }     /** Get script language version */
-    QUrl getLocation() const { return _location; }                      /** Get script location */
+    QString getLocation() const { return _location; }                   /** Get script location */
     QIcon getLanguageIcon() const;                                      /** Get icon representing the scripting language */
 
 private:
