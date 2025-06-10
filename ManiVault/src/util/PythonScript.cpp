@@ -19,6 +19,9 @@ PythonScript::PythonScript(const QString& title, const Type& type, const QUrl& l
 void PythonScript::run()
 {
     Script::run();
+
+
+
 }
 
 }

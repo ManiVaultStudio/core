@@ -28,11 +28,11 @@ public:
     /** Script types */
     enum class Type {
         None = 0,               /** Not a valid script type */
-        DataLoader,             /** Data loading scripts */
-        DataWriter,             /** Data writer scripts */
-        DataAnalysis,           /** Data analysis scripts */
-        DataTransformation,     /** Data transformation scripts */
-        DataView                /** Data view scripts */
+        Loader,             /** Data loading scripts */
+        Writer,             /** Data writer scripts */
+        Analysis,           /** Data analysis scripts */
+        Transformation,     /** Data transformation scripts */
+        View                /** Data view scripts */
     };
 
     /** Maps type to type name */
@@ -86,7 +86,7 @@ public:
      * @param datasets List of datasets that the script can work with (optional, default is empty)
      * @param parent Pointer to parent object (optional, default is nullptr)
      */
-    explicit Script(const QString& title, const Type& type, const Language& language, const Version& languageVersion, const QUrl& location, const Datasets& datasets, QObject* parent = nullptr);
+    explicit Script(const QString& title, const Type& type, const Language& language, const Version& languageVersion, const QString& location, const Datasets& datasets, QObject* parent = nullptr);
 
     /** Runs the script */
     virtual void run();

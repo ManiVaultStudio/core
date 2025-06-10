@@ -87,17 +87,17 @@ ScriptTriggerActions DataHierarchyPluginFactory::getScriptTriggerActions(const m
     ScriptTriggerActions scriptTriggerActions;
 
     if (areAllDatasetsOfTheSameType(datasets, PointType) && datasets.count() >= 2) {
-        auto scriptTriggerAction = new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Stitch", Script::Type::DataTransformation, QUrl(), datasets), "Transformation/Stitch");
+        auto scriptTriggerAction = new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Stitch", Script::Type::Transformation, QUrl(), datasets), "Transformation/Stitch");
 
         scriptTriggerActions << scriptTriggerAction;
     }
 
     if (datasets.count() == 1 && datasets.first()->getDataType() == PointType) {
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Export BIN", Script::Type::DataWriter, QUrl(), datasets), "Export/BIN");
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Export PNG", Script::Type::DataWriter, QUrl(), datasets), "Export/JSON");
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Average", Script::Type::DataAnalysis, QUrl(), datasets), "Analysis/Average");
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Min", Script::Type::DataAnalysis, QUrl(), datasets), "Analysis/Min");
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Max", Script::Type::DataAnalysis, QUrl(), datasets), "Analysis/Max");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Export BIN", Script::Type::Writer, QUrl(), datasets), "Export/BIN");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Export PNG", Script::Type::Writer, QUrl(), datasets), "Export/JSON");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Average", Script::Type::Analysis, QUrl(), datasets), "Analysis/Average");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Min", Script::Type::Analysis, QUrl(), datasets), "Analysis/Min");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Max", Script::Type::Analysis, QUrl(), datasets), "Analysis/Max");
     }
 
     if (datasets.count() == 1 && datasets.first()->getDataType() == PointType) {

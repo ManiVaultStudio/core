@@ -13,11 +13,11 @@ namespace mv::util
 
 QMap<Script::Type, QString> Script::typeMap = {
     { Type::None, "None" },
-    { Type::DataLoader, "Data Loader" },
-    { Type::DataWriter, "Data Writer" },
-    { Type::DataAnalysis, "Data Analysis" },
-    { Type::DataTransformation, "Data Transformation" },
-    { Type::DataView, "Data View" }
+    { Type::Loader, "Data Loader" },
+    { Type::Writer, "Data Writer" },
+    { Type::Analysis, "Data Analysis" },
+    { Type::Transformation, "Data Transformation" },
+    { Type::View, "Data View" }
 };
 
 QMap<Script::Language, QString> Script::languageMap = {
@@ -56,7 +56,7 @@ Script::Language Script::getLanguageEnum(const QString& languageName)
     return languagesEnums.first();
 }
 
-Script::Script(const QString& title, const Type& type, const Language& language, const Version& languageVersion, const QUrl& location, const Datasets& datasets, QObject* parent /*= nullptr*/) :
+Script::Script(const QString& title, const Type& type, const Language& language, const Version& languageVersion, const QString& location, const Datasets& datasets, QObject* parent /*= nullptr*/) :
     QObject(parent),
     _title(title),
     _type(type),
