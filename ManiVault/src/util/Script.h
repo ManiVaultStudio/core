@@ -81,27 +81,30 @@ public:
      * @param title Script title
      * @param type Script type
      * @param language Script language
+     * @param languageVersion Version of the scripting language
      * @param location Script location
      * @param datasets List of datasets that the script can work with (optional, default is empty)
      * @param parent Pointer to parent object (optional, default is nullptr)
      */
-    explicit Script(const QString& title, const Type& type, const Language& language, const QUrl& location, const Datasets& datasets, QObject* parent = nullptr);
+    explicit Script(const QString& title, const Type& type, const Language& language, const Version& languageVersion, const QUrl& location, const Datasets& datasets, QObject* parent = nullptr);
 
     /** Runs the script */
-    void run();
+    virtual void run();
 
-    QString getTitle() const { return _title; }       /** Get script title */
-    Type     getType() const { return _type; }         /** Get script type */
-    Language getLanguage() const { return _language; } /** Get script language */
-    QUrl     getLocation() const { return _location; } /** Get script location */
-    QIcon    getLanguageIcon() const;
+    QString getTitle() const { return _title; }                         /** Get script title */
+    Type getType() const { return _type; }                              /** Get script type */
+    Language getLanguage() const { return _language; }                  /** Get script language */
+    Version getLanguageVersion() const { return _languageVersion; }     /** Get script language version */
+    QUrl getLocation() const { return _location; }                      /** Get script location */
+    QIcon getLanguageIcon() const;                                      /** Get icon representing the scripting language */
 
 private:
-    QString     _title;         /** Script title */
-    Type        _type;          /** Script type */
-    Language    _language;      /** Script language */
-    QUrl        _location;      /** Script location */
-    Datasets    _datasets;      /** Datasets that the script can work with */
+    QString     _title;             /** Script title */
+    Type        _type;              /** Script type */
+    Language    _language;          /** Script language */
+    Version     _languageVersion;   /** Version of the scripting language */   
+    QUrl        _location;          /** Script location */
+    Datasets    _datasets;          /** Datasets that the script can work with */
 };
 
 using Scripts = std::vector<const Script*>;

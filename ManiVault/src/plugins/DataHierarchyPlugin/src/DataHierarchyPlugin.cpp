@@ -5,7 +5,10 @@
 #include "DataHierarchyPlugin.h"
 
 #include <Application.h>
+#include <memory>
 #include <PointData/PointData.h>
+
+#include <util/PythonScript.h>
 
 Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
 using namespace mv::gui;
@@ -84,17 +87,17 @@ ScriptTriggerActions DataHierarchyPluginFactory::getScriptTriggerActions(const m
     ScriptTriggerActions scriptTriggerActions;
 
     if (areAllDatasetsOfTheSameType(datasets, PointType) && datasets.count() >= 2) {
-        auto scriptTriggerAction = new ScriptTriggerAction(nullptr, Script::Type::DataTransformation, Script::Language::Python, QUrl(), datasets, "Stitch", "Transformation/Stitch");
+        auto scriptTriggerAction = new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Stitch", Script::Type::DataTransformation, QUrl(), datasets), "Transformation/Stitch");
 
         scriptTriggerActions << scriptTriggerAction;
     }
 
     if (datasets.count() == 1 && datasets.first()->getDataType() == PointType) {
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataWriter, Script::Language::Python, QUrl(), datasets, "Export PNG", "Export/BIN");
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataWriter, Script::Language::Python, QUrl(), datasets, "Export PNG", "Export/JSON");
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataAnalysis, Script::Language::Python, QUrl(), datasets, "Average", "Analysis/Average");
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataAnalysis, Script::Language::Python, QUrl(), datasets, "Min", "Analysis/Min");
-        scriptTriggerActions << new ScriptTriggerAction(nullptr, Script::Type::DataAnalysis, Script::Language::Python, QUrl(), datasets, "Max", "Analysis/Max");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Export BIN", Script::Type::DataWriter, QUrl(), datasets), "Export/BIN");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Export PNG", Script::Type::DataWriter, QUrl(), datasets), "Export/JSON");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Average", Script::Type::DataAnalysis, QUrl(), datasets), "Analysis/Average");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Min", Script::Type::DataAnalysis, QUrl(), datasets), "Analysis/Min");
+        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Max", Script::Type::DataAnalysis, QUrl(), datasets), "Analysis/Max");
     }
 
     if (datasets.count() == 1 && datasets.first()->getDataType() == PointType) {

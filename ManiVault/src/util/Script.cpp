@@ -4,6 +4,10 @@
 
 #include "Script.h"
 
+#ifdef _DEBUG
+	#define SCRIPT_VERBOSE
+#endif
+
 namespace mv::util
 {
 
@@ -52,11 +56,12 @@ Script::Language Script::getLanguageEnum(const QString& languageName)
     return languagesEnums.first();
 }
 
-Script::Script(const QString& title, const Type& type, const Language& language, const QUrl& location, const Datasets& datasets, QObject* parent /*= nullptr*/) :
+Script::Script(const QString& title, const Type& type, const Language& language, const Version& languageVersion, const QUrl& location, const Datasets& datasets, QObject* parent /*= nullptr*/) :
     QObject(parent),
     _title(title),
     _type(type),
     _language(language),
+    _languageVersion(languageVersion),
     _location(location),
     _datasets(datasets)
 {
@@ -64,7 +69,9 @@ Script::Script(const QString& title, const Type& type, const Language& language,
 
 void Script::run()
 {
-    //qDebug() << "Running script " << _title << " of type" << getTypeName(_type) << "in language" << getLanguageName(_language) << "from location" << _location.toString();
+#ifdef SCRIPT_VERBOSE
+    qDebug().noquote() << QString("Running %1 script %2 (%3): %4").arg(util::Script::getTypeName(getType()), getTitle(), util::Script::getLanguageName(getLanguage()), getLocation().toString());
+#endif
 }
 
 QIcon Script::getLanguageIcon() const

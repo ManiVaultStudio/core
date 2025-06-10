@@ -6,10 +6,10 @@
 
 namespace mv::gui {
 
-ScriptTriggerAction::ScriptTriggerAction(QObject* parent, const util::Script::Type& type, const util::Script::Language& language, const QUrl& location, const Datasets& datasets, const QString& title, const QString& menuLocation, QIcon icon /*= QIcon()*/) :
-    TriggerAction(parent, title),
-    _script(title, type, language, location, datasets),
-    _menuLocation(QString("%1/%2").arg(util::Script::getLanguageName(language), menuLocation))
+ScriptTriggerAction::ScriptTriggerAction(QObject* parent, const std::shared_ptr<util::Script>& script, const QString& menuLocation, const QIcon& icon /*= QIcon()*/) :
+    TriggerAction(parent, script ? script->getTitle() : ""),
+    _script(script),
+    _menuLocation(QString("%1 %2/%3").arg(util::Script::getLanguageName(script ? script->getLanguage() : util::Script::Language::None), script ? QString::fromStdString(script->getLanguageVersion().getVersionString()) : QString(), menuLocation))
 {
     setIcon(icon);
 
@@ -23,14 +23,20 @@ QString ScriptTriggerAction::getMenuLocation() const
 
 QIcon ScriptTriggerAction::getLanguageIcon() const
 {
-    return _script.getLanguageIcon();
+    if (_script)
+		return _script->getLanguageIcon();
+
+    return {};
 }
 
-void ScriptTriggerAction::runScript()
+void ScriptTriggerAction::runScript() const
 {
-    qDebug().noquote() << QString("Running %1 script %2 (%3): %4").arg(util::Script::getTypeName(_script.getType()), _script.getTitle(), util::Script::getLanguageName(_script.getLanguage()), _script.getLocation().toString());
+    if (!_script) {
+        qWarning() << "ScriptTriggerAction::runScript: No script is set for this action.";
+        return;
+    }
 
-    _script.run();
+    _script->run();
 }
 
 }

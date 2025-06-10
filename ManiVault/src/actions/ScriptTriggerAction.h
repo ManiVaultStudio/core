@@ -33,14 +33,12 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param type Type of the script
-     * @param language Language of the script
-     * @param location Location of the script (e.g. file URL)
-     * @param datasets Datasets that the script should be run on (e.g. selected datasets in the data hierarchy)
+     * @param script Smart pointer to the script that should be executed when the trigger action is triggered
      * @param title Title of the plugin trigger action
      * @param menuLocation Determines where the script trigger action resides w.r.t. other script trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images
+     * @param icon Icon representing the action (as shown in the menu)
      */
-    Q_INVOKABLE ScriptTriggerAction(QObject* parent, const util::Script::Type& type, const util::Script::Language& language, const QUrl& location, const Datasets& datasets, const QString& title, const QString& menuLocation, QIcon icon = QIcon());
+    Q_INVOKABLE ScriptTriggerAction(QObject* parent, const std::shared_ptr<util::Script>& script, const QString& menuLocation, const QIcon& icon = QIcon());
 
     /**
      * Get menu location
@@ -57,11 +55,11 @@ public:
 private:
 
     /** Run the script (invoked when the trigger action is triggered) */
-    void runScript();
+    void runScript() const;
 
 private:
-    util::Script    _script;            /** Script that should be executed when the trigger action is triggered */
-    QString         _menuLocation;      /** Determines where the script trigger action resides w.r.t. other scrpt trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
+    std::shared_ptr<util::Script>   _script;            /** Smart pointer to the script that should be executed when the trigger action is triggered */
+    QString                         _menuLocation;      /** Determines where the script trigger action resides w.r.t. other scrpt trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
 
     friend class plugin::PluginFactory;
 };
