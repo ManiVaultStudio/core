@@ -22,6 +22,10 @@ namespace mv
 DataHierarchyManager::DataHierarchyManager(QObject* parent) :
     AbstractDataHierarchyManager(parent)
 {
+    connect(core(), &CoreInterface::aboutToBeDestroyed, this, [this]() -> void {
+        for (auto& item : _items)
+            item->setParent(nullptr); // Clear parent to avoid dangling pointers
+    });
 }
 
 DataHierarchyManager::~DataHierarchyManager()

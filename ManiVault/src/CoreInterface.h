@@ -134,6 +134,9 @@ signals:
     /** Invoked when the core is about to be initialized */
     void aboutToBeInitialized();
 
+    /** Invoked when the core is about to be destroyed */
+    void aboutToBeDestroyed();
+
     /** Invoked when the core has been initialized */
     void initialized();
 
