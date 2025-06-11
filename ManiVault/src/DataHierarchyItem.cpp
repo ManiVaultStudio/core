@@ -40,7 +40,7 @@ DataHierarchyItem::DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<Datas
 
     if (parentDataset.isValid())
         setParent(&parentDataset->getDataHierarchyItem());
-
+    
     setIcon(getDataset()->icon());
     setVisible(visible);
 }
@@ -138,9 +138,7 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
         if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu))
             continue;
 
-        auto contextMenu = action->getContextMenu();
-
-        if (contextMenu)
+        if (auto contextMenu = action->getContextMenu())
             menu->addMenu(contextMenu);
     }
 
@@ -153,9 +151,7 @@ void DataHierarchyItem::populateContextMenu(QMenu* contextMenu)
         if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu))
             continue;
 
-        auto actionContextMenu = action->getContextMenu();
-
-        if (actionContextMenu)
+        if (auto actionContextMenu = action->getContextMenu())
             contextMenu->addMenu(actionContextMenu);
     }
 }
