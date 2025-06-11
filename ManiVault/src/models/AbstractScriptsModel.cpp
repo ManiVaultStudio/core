@@ -81,10 +81,8 @@ QVariant AbstractScriptsModel::LocationItem::data(int role /*= Qt::UserRole + 1*
 {
     switch (role) {
 	    case Qt::EditRole:
-	        return getScript()->getLocation();
-
 	    case Qt::DisplayRole:
-	        return getScript()->getLocation().toString();
+	        return getScript()->getLocation();
 
 	    case Qt::ToolTipRole:
 	        return QString("%1").arg(data(Qt::DisplayRole).toString());
