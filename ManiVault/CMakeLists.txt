@@ -154,13 +154,23 @@ CPMAddPackage(
 
 # Serialization: JSON
 CPMAddPackage(
-  NAME                nlohmann_json
-  GITHUB_REPOSITORY    nlohmann/json
-  GIT_TAG             v3.12.0          # latest release (2025-04-11) :contentReference[oaicite:0]{index=0}
+  NAME              nlohmann_json
+  GITHUB_REPOSITORY	nlohmann/json
+  GIT_TAG           v3.12.0          # latest release (2025-04-11) :contentReference[oaicite:0]{index=0}
   OPTIONS
       "JSON_BuildTests=OFF"            # skip upstream tests
       "JSON_BuildExamples=OFF"
       "JSON_MultipleHeaders=ON"        # shave compile time (optional)
+)
+
+# Serialization: JSON schema validation
+CPMAddPackage(
+  NAME 				nlohmann_json_schema_validator
+  GITHUB_REPOSITORY pboettch/json-schema-validator
+  GIT_TAG 			v2.1.0
+  OPTIONS
+    "JSON_VALIDATOR_BUILD_TESTS=OFF"
+    "JSON_VALIDATOR_INSTALL=OFF"
 )
 
 # Layout: Qt Advanced docking system
@@ -340,6 +350,8 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
+target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${MV_EXE} PRIVATE nlohmann_json_schema_validator)
 
 if(${MV_USE_ERROR_LOGGING})
     target_link_libraries(${MV_EXE} PRIVATE sentry)
