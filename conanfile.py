@@ -153,6 +153,7 @@ class HdpsCoreConan(ConanFile):
         # Set some build options
         tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
         tc.variables["MV_UNITY_BUILD"] = "ON"
+        tc.variables["MV_USE_ERROR_LOGGING"] = "ON"
 
         # TEMPORARILY disable sentry on macos, 16/04/25
         if self.settings.os == "Macos":
