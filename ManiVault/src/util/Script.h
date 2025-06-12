@@ -4,8 +4,10 @@
 
 #pragma once
 
-#include "ManiVaultGlobals.h"
+#include "Dataset.h"
+#include "util/Version.h"
 
+#include <QIcon>
 #include <QMap>
 #include <QString>
 
