@@ -4,11 +4,16 @@
 
 #include "LearningCenterTutorialsModel.h"
 
+#include <util/JSON.h>
+
 #include <QtConcurrent>
 
 #ifdef _DEBUG
     //#define LEARNING_CENTER_TUTORIALS_MODEL_VERBOSE
 #endif
+
+using nlohmann::json;
+using nlohmann::json_schema::json_validator;
 
 using namespace mv::util;
 using namespace mv::gui;
@@ -50,15 +55,28 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
 		});
 
         connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
-            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-                QJsonParseError jsonParseError;
+            QJsonParseError jsonParseError;
 
-                const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+                const auto jsonData     = _future.resultAt<QByteArray>(dsnIndex);
+                const auto jsonDocument = QJsonDocument::fromJson(jsonData, &jsonParseError);
+                const auto jsonSchema   = loadJsonFromResource(":/JSON/TutorialsSchema");
 
                 if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
                     qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
                     continue;
                 }
+
+                json_validator validator;
+
+                validator.set_root_schema(jsonSchema);
+
+                JsonSchemaErrorHandler jsonSchemaErrorHandler;
+
+                validator.validate(QJsonDocument(jsonDocument.object()["tutorials"].toArray()).toJson(QJsonDocument::Compact), jsonSchemaErrorHandler);
+
+                //if (!validator.validate(jsonData))
+                //    throw std::runtime_error("Invalid JSON schema for learning center tutorials.");
 
                 const auto tutorials = jsonDocument.object()["tutorials"].toArray();
 

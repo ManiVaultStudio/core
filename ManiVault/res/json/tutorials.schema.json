@@ -25,19 +25,17 @@
             "items": { "type": "string" }
           },
           "date": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "icon": { "type": "string" },
           "summary": { "type": "string" },
           "fullpost": { "type": "string" },
           "url": {
-            "type": "string",
-            "format": "uri"
+            "type": "string"
           },
           "project": {
             "anyOf": [
-              { "type": "string", "format": "uri" },
+              { "type": "string" },
               { "type": "null" }
             ]
           },
@@ -58,5 +56,5 @@
     }
   },
   "required": ["tutorials"],
-  "additionalProperties": false
+  "additionalProperties": true
 }
