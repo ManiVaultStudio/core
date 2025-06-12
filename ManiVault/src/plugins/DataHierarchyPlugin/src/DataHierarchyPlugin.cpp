@@ -11,7 +11,9 @@
 #include <util/Script.h>
 #include <util/PythonScript.h>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")using namespace mv;
+Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
+
+using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -66,11 +68,7 @@ void DataHierarchyPluginFactory::initialize()
 
 QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 {
-#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/DataHierarchyPlugin/README.md");
-#else
     return { "https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md" };
-#endif
 }
 
 QUrl DataHierarchyPluginFactory::getRepositoryUrl() const
