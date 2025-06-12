@@ -124,6 +124,8 @@ void main()
 //	if (!pointSizeAbsolute)
 //		pixelSize /= viewportSize;
 		 
+	vPosOrig = position;
+	
     // Apply projection only to the instance position, NOT to the quad size
     vec4 worldPos = mvp * vec4(position, 0.0, 1.0);
 	
