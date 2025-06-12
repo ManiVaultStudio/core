@@ -70,11 +70,4 @@ public:
      * @return Pointer to the produced plugin
      */
     ViewPlugin* produce() override;
-
-    /**
-     * Get script trigger actions given \p datasets
-     * @param datasets Vector of input datasets
-     * @return Vector of script trigger actions
-     */
-    mv::gui::ScriptTriggerActions getScriptTriggerActions(const mv::Datasets& datasets) const override;
 };
