@@ -167,7 +167,7 @@ CPMAddPackage(
 CPMAddPackage(
   NAME 				nlohmann_json_schema_validator
   GITHUB_REPOSITORY pboettch/json-schema-validator
-  GIT_TAG 			v2.1.0
+  GIT_TAG 			2.3.0
   OPTIONS
     "JSON_VALIDATOR_BUILD_TESTS=OFF"
     "JSON_VALIDATOR_INSTALL=OFF"
