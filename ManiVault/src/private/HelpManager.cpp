@@ -19,8 +19,14 @@
 #include <QJsonObject>
 #include <QUrl>
 
+#include <nlohmann/json.hpp>
+#include <nlohmann/json-schema.hpp>
+
 using namespace mv::gui;
 using namespace mv::util;
+
+using nlohmann::json;
+using nlohmann::json_schema::json_validator;
 
 #ifdef _DEBUG
     //#define HELP_MANAGER_VERBOSE
@@ -28,6 +34,16 @@ using namespace mv::util;
 
 namespace mv
 {
+
+    /* json-parse the people - with custom error handler */
+    class custom_error_handler : public nlohmann::json_schema::basic_error_handler
+    {
+        void error(const json::json_pointer& pointer, const json& instance, const std::string& message) override
+        {
+            nlohmann::json_schema::basic_error_handler::error(pointer, instance, message);
+            std::cerr << "ERROR: '" << pointer << "' - '" << instance << "': " << message << "\n";
+        }
+    };
 
 HelpManager::HelpManager(QObject* parent) :
     AbstractHelpManager(parent),
@@ -87,9 +103,31 @@ HelpManager::HelpManager(QObject* parent) :
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         try
         {
-            const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
+            const auto jsonData     = _fileDownloader.downloadedData();
+            const auto jsonDocument = QJsonDocument::fromJson(jsonData);
             const auto videos       = jsonDocument.object()["videos"].toArray();
             const auto tutorials    = jsonDocument.object()["tutorials"].toArray();
+
+            json schema = R"({
+		        "type": "object",
+		        "properties": {
+		            "name": { "type": "string" },
+		            "age": { "type": "integer", "minimum": 0 }
+		        },
+		        "required": ["name", "age"],
+		        "additionalProperties": false
+		    })"_json;
+
+            json_validator validator;
+
+            validator.set_root_schema(schema);
+
+        	custom_error_handler err;
+
+        	validator.validate(jsonData, err);
+
+            //if (!validator.validate(jsonData))
+            //    throw std::runtime_error("Invalid JSON schema for learning center tutorials.");
 
             for (const auto video : videos) {
                 auto videoMap = video.toVariant().toMap();
