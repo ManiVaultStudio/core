@@ -70,7 +70,7 @@ Script::Script(const QString& title, const Type& type, const Language& language,
 void Script::run()
 {
 #ifdef SCRIPT_VERBOSE
-    qDebug().noquote() << QString("Running %1 script %2 (%3): %4").arg(util::Script::getTypeName(getType()), getTitle(), util::Script::getLanguageName(getLanguage()), getLocation().toString());
+    qDebug().noquote() << QString("Running %1 script %2 (%3): %4").arg(util::Script::getTypeName(getType()), getTitle(), util::Script::getLanguageName(getLanguage()), getLocation());
 #endif
 }
 
