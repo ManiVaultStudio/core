@@ -152,7 +152,18 @@ CPMAddPackage(
   OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF" "BUILD_SHARED_LIBS OFF"
 )
 
-# Qt Advanced docking system
+# Serialization: JSON
+CPMAddPackage(
+  NAME                nlohmann_json
+  GITHUB_REPOSITORY    nlohmann/json
+  GIT_TAG             v3.12.0          # latest release (2025-04-11) :contentReference[oaicite:0]{index=0}
+  OPTIONS
+      "JSON_BuildTests=OFF"            # skip upstream tests
+      "JSON_BuildExamples=OFF"
+      "JSON_MultipleHeaders=ON"        # shave compile time (optional)
+)
+
+# Layout: Qt Advanced docking system
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
