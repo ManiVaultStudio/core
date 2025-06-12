@@ -21,7 +21,7 @@ StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
 {
     getContentLayout().addWidget(&_startPageContentWidget, Qt::AlignTop);
 
-    getTitleAction().setString(QString("<b>ManiVault</b> v%1.%2.%3-%4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data())));
+    getTitleAction().setString(QString("<b>ManiVault</b> v%1").arg(QString::fromStdString(MV_VERSION_STRING())));
 
     _fileAction.setShowLabels(false);
 
