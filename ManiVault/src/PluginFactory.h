@@ -243,6 +243,14 @@ public: // Meta data
 
     /**
      * Get script trigger actions given \p datasets
+     *
+     * Example:
+     *
+     *   ScriptTriggerActions scriptTriggerActions;
+     *   if (datasets.count() == 1 && datasets.first()->getDataType() == PointType)
+     *        scriptTriggerActions << new ScriptTriggerAction(nullptr, std::make_shared<PythonScript>("Min", Script::Type::Analysis, "", datasets), "Analysis/Min");
+     *   return scriptTriggerActions;
+     *
      * @param datasets Vector of input datasets
      * @return Vector of script trigger actions
      */
