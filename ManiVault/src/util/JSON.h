@@ -6,8 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QString>
-
 #include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
 
@@ -36,9 +34,10 @@ public:
     /**
      * Construct with json schema and json file location
      * @param jsonSchemaLocation Location of the JSON validation schema file
+     * @param publicJsonSchemaLocation Location of the public JSON validation schema file
      * @param jsonLocation Location of the validated JSON file
      */
-    JsonSchemaErrorHandler(const std::string& jsonSchemaLocation, const std::string& jsonLocation);
+    JsonSchemaErrorHandler(const std::string& jsonSchemaLocation, const std::string& publicJsonSchemaLocation, const std::string& jsonLocation);
 
     /** Show a dialog with errors when going out of scope */
     virtual ~JsonSchemaErrorHandler();
@@ -70,9 +69,10 @@ private:
     void printErrors() const;
 
 private:
-    std::string                         _jsonSchemaLocation;    /** Location of the JSON validation schema file */
-    std::string                         _jsonLocation;          /** Location of the validated JSON file */
-    std::vector<SchemaValidationError>  _errors;                /** List of errors encountered during validation */
+    std::string                         _jsonSchemaLocation;        /** Location of the JSON validation schema file */
+    std::string                         _publicJsonSchemaLocation;  /** Location of the public JSON validation schema file */
+    std::string                         _jsonLocation;              /** Location of the validated JSON file */
+    std::vector<SchemaValidationError>  _errors;                    /** List of errors encountered during validation */
 };
 
 /**
@@ -80,14 +80,15 @@ private:
  * @param resourcePath Path to the JSON resource file
  * @return Parsed JSON object
  */
-CORE_EXPORT nlohmann::json loadJsonFromResource(const QString& resourcePath);
+CORE_EXPORT nlohmann::json loadJsonFromResource(const std::string& resourcePath);
 
 /**
  * Validate JSON content against a schema defined in a resource file
  * @param json JSON content
  * @param jsonLocation Location of the JSON file
- * @param resourcePath Path to the JSON resource file
+ * @param jsonSchemaResourcePath Path to the JSON resource file
+ * @param publicJsonSchemaLocation Location of the public JSON schema
  */
-CORE_EXPORT void validateJsonWithResourceSchema(const nlohmann::json& json, const QString& jsonLocation, const QString& resourcePath);
+CORE_EXPORT void validateJsonWithResourceSchema(const nlohmann::json& json, const std::string& jsonLocation, const std::string& jsonSchemaResourcePath, const std::string& publicJsonSchemaLocation);
 
 }

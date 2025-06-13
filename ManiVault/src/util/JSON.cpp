@@ -6,13 +6,15 @@
 
 #include <regex>
 
+#include <QString>
+
 using nlohmann::json;
 using namespace nlohmann::json_schema;
 using nlohmann::json_schema::json_validator;
 
 namespace mv::util {
 
-void printIndentedJson(const nlohmann::json& json, std::int32_t indentLevel = 2) {
+void printIndentedJson(const nlohmann::json& json, std::int32_t indentLevel = 3) {
     QString prefix(indentLevel * 2, ' ');
 
     const auto dumped   = json.dump(2);
@@ -54,8 +56,9 @@ json JsonSchemaErrorHandler::truncateJsonForLogging(const json& json, size_t max
 	return json;
 }
 
-JsonSchemaErrorHandler::JsonSchemaErrorHandler(const std::string& jsonSchemaLocation, const std::string& jsonLocation) :
+JsonSchemaErrorHandler::JsonSchemaErrorHandler(const std::string& jsonSchemaLocation, const std::string& publicJsonSchemaLocation, const std::string& jsonLocation) :
     _jsonSchemaLocation(jsonSchemaLocation),
+    _publicJsonSchemaLocation(publicJsonSchemaLocation),
     _jsonLocation(jsonLocation)
 {
     qDebug() << "Validating" << _jsonLocation << "against" << _jsonSchemaLocation;
@@ -69,25 +72,26 @@ JsonSchemaErrorHandler::~JsonSchemaErrorHandler()
 void JsonSchemaErrorHandler::printErrors() const
 {
     if (_errors.empty()) {
-        qDebug() << _jsonLocation << "validated successfully with" << _jsonSchemaLocation;
+        qDebug() << "  " << _jsonLocation << "is valid!";
     } else {
-        qCritical() << "Encountered schema validation errors for " << _jsonLocation;
+        qCritical() << "  JSON file is not valid:";
 
         for (const auto& error : _errors) {
-            qCritical() << "  Schema Validation Error:";
-            qCritical() << "    Location: " << error._pointer.to_string();
-            qCritical().noquote() << "    Instance:";
+            qCritical() << "    Schema error:";
+            qCritical() << "      Schema:" << _publicJsonSchemaLocation;
+            qCritical() << "      Location: " << error._pointer.to_string();
+            qCritical().noquote() << "      Instance:";
         	printIndentedJson(truncateJsonForLogging(error._instance));
-            qCritical() << "    Message  : " << error._message;
+            qCritical() << "      Message: " << error._message;
         }
     }
 }
 
-json loadJsonFromResource(const QString& resourcePath) {
-    QFile file(resourcePath);
+json loadJsonFromResource(const std::string& resourcePath) {
+    QFile file(QString::fromStdString(resourcePath));
 
     if (!file.open(QIODevice::ReadOnly)) {
-        throw std::runtime_error("Failed to open resource: " + resourcePath.toStdString());
+        throw std::runtime_error("Failed to open resource: " + resourcePath);
     }
 
     QByteArray data = file.readAll();
@@ -95,9 +99,9 @@ json loadJsonFromResource(const QString& resourcePath) {
     return nlohmann::json::parse(data.constData());
 }
 
-void validateJsonWithResourceSchema(const nlohmann::json& json, const QString& jsonLocation, const QString& resourcePath)
+void validateJsonWithResourceSchema(const nlohmann::json& json, const std::string& jsonLocation, const std::string& jsonSchemaResourcePath, const std::string& publicJsonSchemaLocation /*= ""*/)
 {
-    const auto jsonSchema = loadJsonFromResource(resourcePath);
+    const auto jsonSchema = loadJsonFromResource(jsonSchemaResourcePath);
 
     json_validator jsonValidator;
 
@@ -111,7 +115,7 @@ void validateJsonWithResourceSchema(const nlohmann::json& json, const QString& j
 
     jsonValidator.set_root_schema(jsonSchema);
 
-    JsonSchemaErrorHandler jsonSchemaErrorHandler(jsonLocation.toStdString(), resourcePath.toStdString());
+    JsonSchemaErrorHandler jsonSchemaErrorHandler(jsonSchemaResourcePath, publicJsonSchemaLocation, jsonLocation);
 
     jsonValidator.validate(json, jsonSchemaErrorHandler);
 }

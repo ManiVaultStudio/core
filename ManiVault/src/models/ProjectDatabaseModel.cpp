@@ -62,7 +62,7 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
 	                json fullJson = json::parse(jsonData.constData());
 
 	                if (fullJson.contains("projects")) {
-	                    validateJsonWithResourceSchema(fullJson["projects"], _dsnsAction.getStrings()[dsnIndex], ":/JSON/ProjectsSchema");
+	                    validateJsonWithResourceSchema(fullJson["projects"], _dsnsAction.getStrings()[dsnIndex].toStdString(), ":/JSON/ProjectsSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
 	                }
 	                else {
 	                    throw std::runtime_error("/Projects key is missing");

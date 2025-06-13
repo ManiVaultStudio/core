@@ -62,7 +62,7 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
                     json fullJson = json::parse(jsonData.constData());
 
                     if (fullJson.contains("tutorials")) {
-                        validateJsonWithResourceSchema(fullJson["tutorials"], _dsnsAction.getStrings()[dsnIndex], ":/JSON/TutorialsSchema");
+                        validateJsonWithResourceSchema(fullJson["tutorials"], _dsnsAction.getStrings()[dsnIndex].toStdString(), ":/JSON/TutorialsSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
                     }
                     else {
                         throw std::runtime_error("Tutorials key is missing");
