@@ -13,11 +13,11 @@ namespace mv::util
 
 QMap<Script::Type, QString> Script::typeMap = {
     { Type::None, "None" },
-    { Type::Loader, "Data Loader" },
-    { Type::Writer, "Data Writer" },
-    { Type::Analysis, "Data Analysis" },
-    { Type::Transformation, "Data Transformation" },
-    { Type::View, "Data View" }
+    { Type::Loader, "Loader" },
+    { Type::Writer, "Writer" },
+    { Type::Analysis, "Analysis" },
+    { Type::Transformation, "Transformation" },
+    { Type::View, "View" }
 };
 
 QMap<Script::Language, QString> Script::languageMap = {
