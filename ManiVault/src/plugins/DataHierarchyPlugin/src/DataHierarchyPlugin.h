@@ -8,8 +8,6 @@
 
 #include <ViewPlugin.h>
 
-//#include <actions/ScriptTriggerAction.h>
-
 using namespace mv::plugin;
 
 /**
