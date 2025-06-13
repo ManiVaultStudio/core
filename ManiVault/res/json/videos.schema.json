@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
+  "type": "array",
   "properties": {
     "videos": {
       "type": "array",
@@ -10,7 +10,6 @@
           "title",
           "tags",
           "date",
-          "preview-image",
           "summary",
           "youtube-id",
           "url"
@@ -26,12 +25,10 @@
             }
           },
           "date": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "preview-image": {
-            "type": "string",
-            "format": "uri"
+            "type": "string"
           },
           "summary": {
             "type": "string"
@@ -41,8 +38,7 @@
             "pattern": "^[\\w-]{11}$"
           },
           "url": {
-            "type": "string",
-            "format": "uri"
+            "type": "string"
           }
         },
         "additionalProperties": false
