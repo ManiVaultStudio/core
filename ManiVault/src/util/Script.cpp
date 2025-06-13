@@ -56,6 +56,18 @@ Script::Language Script::getLanguageEnum(const QString& languageName)
     return languagesEnums.first();
 }
 
+Script::Script(const QString& title, const Type& type, const Language& language, const Version& languageVersion, const QString& location, QObject* parent /*= nullptr*/) :
+    QObject(parent),
+    _title(title),
+    _type(type),
+    _language(language),
+    _languageVersion(languageVersion),
+    _location(location),
+    _datasets(),
+    _dataTypes()
+{
+}
+
 Script::Script(const QString& title, const Type& type, const Language& language, const Version& languageVersion, const QString& location, const Datasets& datasets, QObject* parent /*= nullptr*/) :
     QObject(parent),
     _title(title),
@@ -63,7 +75,20 @@ Script::Script(const QString& title, const Type& type, const Language& language,
     _language(language),
     _languageVersion(languageVersion),
     _location(location),
-    _datasets(datasets)
+    _datasets(datasets),
+    _dataTypes()
+{
+}
+
+Script::Script(const QString& title, const Type& type, const Language& language, const Version& languageVersion, const QString& location, const DataTypes& dataTypes, QObject* parent /*= nullptr*/) :
+    QObject(parent),
+    _title(title),
+    _type(type),
+    _language(language),
+    _languageVersion(languageVersion),
+    _location(location),
+    _datasets(),
+    _dataTypes(dataTypes)
 {
 }
 
