@@ -4,7 +4,7 @@
 
 #include "LearningCenterTutorialsModel.h"
 
-#include <util/JSON.h>
+#include "util/JSON.h"
 
 #include <QtConcurrent>
 
@@ -82,11 +82,11 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
                 }
                 catch (std::exception& e)
                 {
-                    qCritical() << "Unable to add tutorials JSON from DSN:" << e.what();
+                    qCritical() << "Unable to add tutorials from DSN:" << e.what();
                 }
                 catch (...)
                 {
-                    qCritical() << "Unable to add tutorials JSON from DSN due to an unhandled exception";
+                    qCritical() << "Unable to add tutorials from DSN due to an unhandled exception";
                 }
             }
 

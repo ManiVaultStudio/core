@@ -5,12 +5,16 @@
 #include "ProjectDatabaseModel.h"
 
 #include "util/FileDownloader.h"
+#include "util/JSON.h"
 
 #include <QtConcurrent>
 
 #ifdef _DEBUG
     //#define PROJECT_DATABASE_MODEL_VERBOSE
 #endif
+
+using nlohmann::json;
+using nlohmann::json_schema::json_validator;
 
 using namespace mv::util;
 using namespace mv::gui;
@@ -52,21 +56,42 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
 
     	connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
     		for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-                QJsonParseError jsonParseError;
+                try {
+	                const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
 
-                const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+	                json fullJson = json::parse(jsonData.constData());
 
-                if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-                    qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
-                    continue;
+	                if (fullJson.contains("projects")) {
+	                    validateJsonWithResourceSchema(fullJson["projects"], _dsnsAction.getStrings()[dsnIndex], ":/JSON/ProjectsSchema");
+	                }
+	                else {
+	                    throw std::runtime_error("/Projects key is missing");
+	                }
+
+	                QJsonParseError jsonParseError;
+
+	                const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+
+	                if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+	                    qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+	                    continue;
+	                }
+
+	                const auto projects = jsonDocument.object()["Projects"].toArray();
+
+	                for (const auto project : projects) {
+	                    auto projectMap = project.toVariant().toMap();
+
+	                    addProject(new ProjectDatabaseProject(projectMap));
+	                }
                 }
-
-                const auto projects = jsonDocument.object()["Projects"].toArray();
-
-                for (const auto project : projects) {
-                    auto projectMap = project.toVariant().toMap();
-
-                    addProject(new ProjectDatabaseProject(projectMap));
+                catch (std::exception& e)
+                {
+                    qCritical() << "Unable to add projects from DSN:" << e.what();
+                }
+                catch (...)
+                {
+                    qCritical() << "Unable to add projects from DSN due to an unhandled exception";
                 }
     		}
 
