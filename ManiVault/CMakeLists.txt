@@ -351,7 +351,12 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
-target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
+
+add_library(nlohmann_json_schema_validator_shim INTERFACE)
+
+target_link_libraries(nlohmann_json_schema_validator_shim INTERFACE nlohmann_json_schema_validator)
+
+target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator_shim)
 
 if(${MV_USE_ERROR_LOGGING})
     target_link_libraries(${MV_EXE} PRIVATE sentry)
