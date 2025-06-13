@@ -170,7 +170,7 @@ CPMAddPackage(
   GIT_TAG 			2.3.0
   OPTIONS
     "JSON_VALIDATOR_BUILD_TESTS=OFF"
-    "JSON_VALIDATOR_INSTALL=OFF"
+    "JSON_VALIDATOR_INSTALL=ON"
 )
 
 # Layout: Qt Advanced docking system
@@ -302,11 +302,11 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
 
-add_library(nlohmann_json_schema_validator_shim INTERFACE)
+#add_library(nlohmann_json_schema_validator_shim INTERFACE)
 
-target_link_libraries(nlohmann_json_schema_validator_shim INTERFACE nlohmann_json_schema_validator)
+#target_link_libraries(nlohmann_json_schema_validator_shim INTERFACE nlohmann_json_schema_validator)
 
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator_shim)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
@@ -357,7 +357,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
-target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator_shim)
+target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
 
 if(${MV_USE_ERROR_LOGGING})
     target_link_libraries(${MV_EXE} PRIVATE sentry)
