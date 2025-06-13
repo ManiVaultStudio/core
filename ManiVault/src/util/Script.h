@@ -78,6 +78,8 @@ public:
      */
     static Language getLanguageEnum(const QString& languageName);
 
+public:
+     
     /**
      * Construct script with \p type and \p language
      * @param title Script title
@@ -117,12 +119,25 @@ public:
     /** Runs the script */
     virtual void run();
 
+public: // Getter
     QString getTitle() const { return _title; }                         /** Get script title */
     Type getType() const { return _type; }                              /** Get script type */
+    QString getTypeName() const { return getTypeName(_type); }          /** Get script type name */
     Language getLanguage() const { return _language; }                  /** Get script language */
     Version getLanguageVersion() const { return _languageVersion; }     /** Get script language version */
     QString getLocation() const { return _location; }                   /** Get script location */
+    Datasets getDatasets() const { return _datasets; }                  /** Get script datasets */
+    DataTypes getDataTypes() const { return _dataTypes; }               /** Get script compatible data types */
     QIcon getLanguageIcon() const;                                      /** Get icon representing the scripting language */
+
+public: // Setter
+    void setTitle(const QString& title) { _title = title; }                                             /** Set script title */
+    void setType(const Type& type) { _type = type; }                                                    /** Set script type */
+    void setLanguage(const Language& language) { _language = language; }                                /** Set script language */
+    void setLanguageVersion(const Version& languageVersion) { _languageVersion = languageVersion; }     /** Set script language version */
+    void setLocation(const QString& location) { _location = location; }                                 /** Set script location */
+    void setDatasets(const Datasets& datasets) { _datasets = datasets; }                                /** Set script datasets */
+    void setDataTypes(const DataTypes& dataTypes) { _dataTypes = dataTypes; }                           /** Set script compatible data types */
 
 private:
     QString     _title;             /** Script title */
