@@ -12,6 +12,77 @@ using nlohmann::json_schema::json_validator;
 
 namespace mv::util {
 
+void printIndentedJson(const nlohmann::json& json, std::int32_t indentLevel = 2) {
+    QString prefix(indentLevel * 2, ' ');
+
+    const auto dumped   = json.dump(2);
+	const auto lines    = QString::fromStdString(dumped).split('\n');
+
+    for (const QString& line : lines)
+        qCritical().noquote() << prefix + line;
+}
+
+json JsonSchemaErrorHandler::truncateJsonForLogging(const json& json, size_t maxStringLen /*= 60*/) {
+    if (json.is_object()) {
+        auto result = json::object();
+
+        for (auto it = json.begin(); it != json.end(); ++it)
+            result[it.key()] = truncateJsonForLogging(it.value(), maxStringLen);
+        
+        return result;
+    }
+
+	if (json.is_array()) {
+        auto result = json::array();
+
+        for (const auto& item : json)
+            result.push_back(truncateJsonForLogging(item, maxStringLen));
+        
+        return result;
+    }
+
+	if (json.is_string()) {
+        const auto& str = json.get_ref<const std::string&>();
+
+        if (str.length() > maxStringLen) {
+            return str.substr(0, maxStringLen) + "... (truncated)";
+        }
+        
+        return str;
+    }
+
+	return json;
+}
+
+JsonSchemaErrorHandler::JsonSchemaErrorHandler(const std::string& jsonSchemaLocation, const std::string& jsonLocation) :
+    _jsonSchemaLocation(jsonSchemaLocation),
+    _jsonLocation(jsonLocation)
+{
+    qDebug() << "Validating" << _jsonLocation << "against" << _jsonSchemaLocation;
+}
+
+JsonSchemaErrorHandler::~JsonSchemaErrorHandler()
+{
+    printErrors();
+}
+
+void JsonSchemaErrorHandler::printErrors() const
+{
+    if (_errors.empty()) {
+        qDebug() << _jsonLocation << "validated successfully with" << _jsonSchemaLocation;
+    } else {
+        qCritical() << "Encountered schema validation errors for " << _jsonLocation;
+
+        for (const auto& error : _errors) {
+            qCritical() << "  Schema Validation Error:";
+            qCritical() << "    Location: " << error._pointer.to_string();
+            qCritical().noquote() << "    Instance:";
+        	printIndentedJson(truncateJsonForLogging(error._instance));
+            qCritical() << "    Message  : " << error._message;
+        }
+    }
+}
+
 json loadJsonFromResource(const QString& resourcePath) {
     QFile file(resourcePath);
 
@@ -24,42 +95,25 @@ json loadJsonFromResource(const QString& resourcePath) {
     return nlohmann::json::parse(data.constData());
 }
 
-bool jsonIsUri(const std::string& value) {
-    static const std::regex uri_regex(R"(^https?://)");
-    return std::regex_search(value, uri_regex);
-}
-
-bool jsonIsDateTime(const std::string& value) {
-    static const std::regex datetime_regex(R"(^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$)");
-    return std::regex_match(value, datetime_regex);
-}
-
-static void my_format_checker(const std::string& format, const std::string& value)
-{
-    //if (format == "something") {
-    //    if (!check_value_for_something(value))
-    //        throw std::invalid_argument("value is not a good something");
-    //}
-    //else
-    //    throw std::logic_error("Don't know how to validate " + format);
-}
-
-void validateJsonWithResourceSchema(const QString& json, const QString& resourcePath)
+void validateJsonWithResourceSchema(const nlohmann::json& json, const QString& jsonLocation, const QString& resourcePath)
 {
     const auto jsonSchema = loadJsonFromResource(resourcePath);
 
-    //qDebug() << jsonSchema;
+    json_validator jsonValidator;
 
-    json_validator validator(nullptr, my_format_checker);
+    try {
+        jsonValidator.set_root_schema(jsonSchema);
+    }
+    catch (const std::exception& e) {
+        qCritical() << "Unable to assign JSON validator schema: " << e.what() << "\n";
+        return;
+    }
 
-    validator.set_root_schema(jsonSchema);
+    jsonValidator.set_root_schema(jsonSchema);
 
-    JsonSchemaErrorHandler jsonSchemaErrorHandler;
+    JsonSchemaErrorHandler jsonSchemaErrorHandler(jsonLocation.toStdString(), resourcePath.toStdString());
 
-    validator.validate(json.toStdString(), jsonSchemaErrorHandler);
-
-    //if (!validator.validate(jsonData))
-    //    throw std::runtime_error("Invalid JSON schema for learning center tutorials.");
+    jsonValidator.validate(json, jsonSchemaErrorHandler);
 }
 
 }

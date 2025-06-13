@@ -1,60 +1,51 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Tutorials List",
-  "type": "object",
-  "properties": {
-    "tutorials": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "title",
-          "tags",
-          "date",
-          "icon",
-          "summary",
-          "fullpost",
-          "url",
-          "minimum-version-major",
-          "minimum-version-minor"
-        ],
-        "properties": {
-          "title": { "type": "string" },
-          "tags": {
+  "title": "Tutorial Array",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "title",
+      "tags",
+      "date",
+      "icon2",
+      "summary",
+      "fullpost",
+      "url",
+      "minimum-version-major",
+      "minimum-version-minor"
+    ],
+    "properties": {
+      "title": { "type": "string" },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "date": { "type": "string" },
+      "icon": { "type": "string" },
+      "summary": { "type": "string" },
+      "fullpost": { "type": "string" },
+      "url": {
+        "type": "string"
+      },
+      "project": {
+        "anyOf": [
+          { "type": "string" },
+          { "type": "null" }
+        ]
+      },
+      "minimum-version-major": { "type": "integer", "minimum": 0 },
+      "minimum-version-minor": { "type": "integer", "minimum": 0 },
+      "plugins": {
+        "anyOf": [
+          { "type": "null" },
+          {
             "type": "array",
             "items": { "type": "string" }
-          },
-          "date": {
-            "type": "string"
-          },
-          "icon": { "type": "string" },
-          "summary": { "type": "string" },
-          "fullpost": { "type": "string" },
-          "url": {
-            "type": "string"
-          },
-          "project": {
-            "anyOf": [
-              { "type": "string" },
-              { "type": "null" }
-            ]
-          },
-          "minimum-version-major": { "type": "integer", "minimum": 0 },
-          "minimum-version-minor": { "type": "integer", "minimum": 0 },
-          "plugins": {
-            "anyOf": [
-              { "type": "null" },
-              {
-                "type": "array",
-                "items": { "type": "string" }
-              }
-            ]
           }
-        },
-        "additionalProperties": false
+        ]
       }
-    }
-  },
-  "required": ["tutorials"],
-  "additionalProperties": true
+    },
+    "additionalProperties": false
+  }
 }

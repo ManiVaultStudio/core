@@ -22,6 +22,27 @@ namespace mv::util {
  */
 class CORE_EXPORT JsonSchemaErrorHandler : public nlohmann::json_schema::basic_error_handler
 {
+private:
+
+    struct SchemaValidationError
+    {
+        nlohmann::json::json_pointer    _pointer;
+        nlohmann::json                  _instance;
+        std::string                     _message;
+    };
+
+public:
+
+    /**
+     * Construct with json schema and json file location
+     * @param jsonSchemaLocation Location of the JSON validation schema file
+     * @param jsonLocation Location of the validated JSON file
+     */
+    JsonSchemaErrorHandler(const std::string& jsonSchemaLocation, const std::string& jsonLocation);
+
+    /** Show a dialog with errors when going out of scope */
+    virtual ~JsonSchemaErrorHandler();
+
 	/**
      * Invoked when an error occurs during JSON schema validation
      * @param pointer JSON pointer to the error location
@@ -30,9 +51,28 @@ class CORE_EXPORT JsonSchemaErrorHandler : public nlohmann::json_schema::basic_e
 	 */
 	void error(const nlohmann::json::json_pointer& pointer, const nlohmann::json& instance, const std::string& message) override
 	{
-	    nlohmann::json_schema::basic_error_handler::error(pointer, instance, message);
-	    std::cerr << "ERROR: '" << pointer << "' - '" << instance << "': " << message << "\n";
+	    basic_error_handler::error(pointer, instance, message);
+
+        _errors.push_back({ pointer, instance, message });
 	}
+
+    /**
+     * Truncate JSON values to not pollute JSON logging
+     * @param json JSON content
+     * @param maxStringLen Maximum string length
+     * @return Truncated JSON
+     */
+    static nlohmann::json truncateJsonForLogging(const nlohmann::json& json, size_t maxStringLen = 60);
+
+private:
+
+    /** Print encountered errors s*/
+    void printErrors() const;
+
+private:
+    std::string                         _jsonSchemaLocation;    /** Location of the JSON validation schema file */
+    std::string                         _jsonLocation;          /** Location of the validated JSON file */
+    std::vector<SchemaValidationError>  _errors;                /** List of errors encountered during validation */
 };
 
 /**
@@ -44,9 +84,10 @@ CORE_EXPORT nlohmann::json loadJsonFromResource(const QString& resourcePath);
 
 /**
  * Validate JSON content against a schema defined in a resource file
- * @param json JSON content as a string
+ * @param json JSON content
+ * @param jsonLocation Location of the JSON file
  * @param resourcePath Path to the JSON resource file
  */
-CORE_EXPORT void validateJsonWithResourceSchema(const QString& json, const QString& resourcePath);
+CORE_EXPORT void validateJsonWithResourceSchema(const nlohmann::json& json, const QString& jsonLocation, const QString& resourcePath);
 
 }

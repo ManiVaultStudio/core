@@ -55,33 +55,38 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
 		});
 
         connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
-            QJsonParseError jsonParseError;
-
             for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-                const auto jsonData     = _future.resultAt<QByteArray>(dsnIndex);
-                const auto jsonDocument = QJsonDocument::fromJson(jsonData, &jsonParseError);
-                const auto jsonSchema   = loadJsonFromResource(":/JSON/TutorialsSchema");
+                try {
+                    const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
 
-                if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-                    qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
-                    continue;
+                    json fullJson = json::parse(jsonData.constData());
+
+                    if (fullJson.contains("tutorials")) {
+                        validateJsonWithResourceSchema(fullJson["tutorials"], _dsnsAction.getStrings()[dsnIndex], ":/JSON/TutorialsSchema");
+                    }
+                    else {
+                        throw std::runtime_error("Tutorials key is missing");
+                    }
+
+                    QJsonParseError jsonParseError;
+
+                    const auto jsonDocument = QJsonDocument::fromJson(jsonData, &jsonParseError);
+
+                    if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                        qCritical() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+                        continue;
+                    }
+
+                    for (const auto tutorial : jsonDocument.object()["tutorials"].toArray())
+                        addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
                 }
-
-                json_validator validator;
-
-                validator.set_root_schema(jsonSchema);
-
-                JsonSchemaErrorHandler jsonSchemaErrorHandler;
-
-                validator.validate(QJsonDocument(jsonDocument.object()["tutorials"].toArray()).toJson(QJsonDocument::Compact), jsonSchemaErrorHandler);
-
-                //if (!validator.validate(jsonData))
-                //    throw std::runtime_error("Invalid JSON schema for learning center tutorials.");
-
-                const auto tutorials = jsonDocument.object()["tutorials"].toArray();
-
-            	for (const auto tutorial : tutorials) {
-                    addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+                catch (std::exception& e)
+                {
+                    qCritical() << "Unable to add tutorials JSON from DSN:" << e.what();
+                }
+                catch (...)
+                {
+                    qCritical() << "Unable to add tutorials JSON from DSN due to an unhandled exception";
                 }
             }
 
@@ -204,7 +209,7 @@ QByteArray LearningCenterTutorialsModel::downloadTutorialsFromDsn(const QString&
         {
             exceptionMessageBox("Unable to download tutorials JSON from DSN");
         }
-        });
+    });
 
     fileDownloader.download(dsn);
 
