@@ -19,6 +19,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractErrorManager.h
     src/AbstractErrorLogger.h
     src/AbstractThemeManager.h
+	src/AbstractScriptingManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_SOURCES
@@ -332,6 +333,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/LockingAction.h
     src/actions/PluginTriggerPickerAction.h
     src/actions/PluginTriggerAction.h
+	src/actions/ScriptTriggerAction.h
     src/actions/LabelProxyAction.h
     src/actions/ModelFilterAction.h
     src/actions/ModelSelectionAction.h
@@ -371,6 +373,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/LockingAction.cpp
     src/actions/PluginTriggerPickerAction.cpp
     src/actions/PluginTriggerAction.cpp
+	src/actions/ScriptTriggerAction.cpp
     src/actions/LabelProxyAction.cpp
 	src/actions/ModelFilterAction.cpp
 	src/actions/ModelSelectionAction.cpp
@@ -554,6 +557,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Badge.h
     src/util/ColorScheme.h
     src/util/ProjectDatabaseProject.h
+    src/util/Script.h
 )
 
 if(APPLE)
@@ -607,6 +611,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Badge.cpp
     src/util/ColorScheme.cpp
     src/util/ProjectDatabaseProject.cpp
+    src/util/Script.cpp
 )
 
 if(APPLE)
@@ -986,6 +991,25 @@ set(PUBLIC_COLOR_SCHEMES_MODEL_FILES
     ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
 )
 
+set(PUBLIC_SCRIPTS_MODEL_HEADERS
+    src/models/AbstractScriptsModel.h
+    src/models/ScriptsListModel.h
+    src/models/ScriptsTreeModel.h
+    src/models/ScriptsFilterModel.h
+)
+
+set(PUBLIC_SCRIPTS_MODEL_SOURCES
+    src/models/AbstractScriptsModel.cpp
+    src/models/ScriptsListModel.cpp
+    src/models/ScriptsTreeModel.cpp
+    src/models/ScriptsFilterModel.cpp
+)
+
+set(PUBLIC_SCRIPTS_MODEL_FILES
+    ${PUBLIC_SCRIPTS_MODEL_HEADERS}
+    ${PUBLIC_SCRIPTS_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -1105,6 +1129,7 @@ set(PUBLIC_HEADERS
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
 	${PUBLIC_PROJECT_DATABASE_MODEL_HEADERS}
     ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
+    ${PUBLIC_SCRIPTS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_NOTIFICATIONS_HEADERS}
@@ -1153,6 +1178,7 @@ set(PUBLIC_SOURCES
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
 	${PUBLIC_PROJECT_DATABASE_MODEL_SOURCES}
     ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
+    ${PUBLIC_SCRIPTS_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_NOTIFICATIONS_SOURCES}
@@ -1214,6 +1240,7 @@ source_group(Models\\LearningCenter\\Videos FILES ${PUBLIC_LEARNING_CENTER_VIDEO
 source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES})
 source_group(Models\\ProjectDatabase FILES ${PUBLIC_PROJECT_DATABASE_MODEL_FILES})
 source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
+source_group(Models\\Scripts FILES ${PUBLIC_SCRIPTS_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})

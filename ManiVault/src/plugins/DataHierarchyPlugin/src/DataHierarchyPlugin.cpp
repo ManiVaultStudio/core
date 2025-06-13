@@ -4,8 +4,6 @@
 
 #include "DataHierarchyPlugin.h"
 
-#include <Application.h>
-
 Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
 
 using namespace mv;
@@ -63,11 +61,7 @@ void DataHierarchyPluginFactory::initialize()
 
 QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 {
-#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/DataHierarchyPlugin/README.md");
-#else
     return { "https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md" };
-#endif
 }
 
 QUrl DataHierarchyPluginFactory::getRepositoryUrl() const
