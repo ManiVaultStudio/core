@@ -558,7 +558,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/ColorScheme.h
     src/util/ProjectDatabaseProject.h
     src/util/Script.h
-	src/util/PythonScript.h
 )
 
 if(APPLE)
@@ -613,7 +612,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/ColorScheme.cpp
     src/util/ProjectDatabaseProject.cpp
     src/util/Script.cpp
-	src/util/PythonScript.cpp
 )
 
 if(APPLE)
