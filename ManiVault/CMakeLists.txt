@@ -152,7 +152,30 @@ CPMAddPackage(
   OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF" "BUILD_SHARED_LIBS OFF"
 )
 
-# Qt Advanced docking system
+# Serialization: JSON
+CPMAddPackage(
+  NAME              nlohmann_json
+  GITHUB_REPOSITORY	nlohmann/json
+  GIT_TAG           v3.12.0          # latest release (2025-04-11) :contentReference[oaicite:0]{index=0}
+  OPTIONS
+      "JSON_BuildTests=OFF"            # skip upstream tests
+      "JSON_BuildExamples=OFF"
+      "JSON_MultipleHeaders=ON"        # shave compile time (optional)
+)
+
+# Serialization: JSON schema validation
+CPMAddPackage(
+  NAME 				nlohmann_json_schema_validator
+  GITHUB_REPOSITORY pboettch/json-schema-validator
+  GIT_TAG 			2.3.0
+  OPTIONS
+    "JSON_VALIDATOR_BUILD_TESTS OFF"
+    "JSON_VALIDATOR_INSTALL OFF"
+	"CMAKE_POSITION_INDEPENDENT_CODE ON"
+    "CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE}"
+)
+
+# Layout: Qt Advanced docking system
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
@@ -281,6 +304,12 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
 
+#add_library(nlohmann_json_schema_validator_shim INTERFACE)
+
+#target_link_libraries(nlohmann_json_schema_validator_shim INTERFACE nlohmann_json_schema_validator)
+
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
+
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
 
@@ -329,6 +358,8 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
+
+target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
 
 if(${MV_USE_ERROR_LOGGING})
     target_link_libraries(${MV_EXE} PRIVATE sentry)

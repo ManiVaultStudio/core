@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "Projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Title": { "type": "string" },
+          "Url": { "type": "string", "format": "uri" },
+          "Summary": { "type": "string" },
+          "RequiredPlugins": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Name": { "type": "string" },
+                "RepoName": { "type": "string" },
+                "Version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }
+              },
+              "required": ["Name", "RepoName", "Version"]
+            }
+          },
+          "CoreVersion": {
+            "type": "object",
+            "properties": {
+              "Major": { "type": "integer" },
+              "Minor": { "type": "integer" },
+              "Patch": { "type": "integer" },
+              "Suffix": { "type": "string" }
+            },
+            "required": ["Major", "Minor", "Patch", "Suffix"]
+          },
+          "Tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "Date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["Title", "Url", "Summary", "RequiredPlugins", "CoreVersion", "Tags", "Date"]
+      }
+    }
+  },
+  "required": ["Projects"]
+}

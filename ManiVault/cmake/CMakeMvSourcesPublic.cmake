@@ -554,6 +554,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Badge.h
     src/util/ColorScheme.h
     src/util/ProjectDatabaseProject.h
+    src/util/JSON.h
 )
 
 if(APPLE)
@@ -607,6 +608,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Badge.cpp
     src/util/ColorScheme.cpp
     src/util/ProjectDatabaseProject.cpp
+    src/util/JSON.cpp
 )
 
 if(APPLE)
