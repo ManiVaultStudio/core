@@ -42,9 +42,12 @@ private:
     /**
      * Add menus for \p pluginType
      * Goes over all loaded plugins of \p pluginType and builds a hierarchical menu structure (based on plugin title)
-     * @parsm Pointer to menu for \p pluginType
+     * @param type PluginType
      */
     void addMenusForPluginType(plugin::Type pluginType);
+
+    /** Add menus for scripts  */
+    void addMenusForScripts();
 
     /**
      * Get action for item grouping

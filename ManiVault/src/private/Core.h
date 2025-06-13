@@ -18,7 +18,7 @@ class AbstractTaskManager;
 class AbstractWorkspaceManager;
 class AbstractProjectManager;
 class AbstractSettingsManager;
-class AbstractHelpManager;
+class AbstractScriptingManager;
 
 /**
  * Core class
@@ -87,6 +87,7 @@ public: // Managers
     AbstractProjectManager& getProjectManager() override;
     AbstractSettingsManager& getSettingsManager() override;
     AbstractHelpManager& getHelpManager() override;
+    AbstractScriptingManager& getScriptingManager() override;
 
 private:
     std::vector<std::unique_ptr<AbstractManager>>   _managers;              /** All managers in the core */

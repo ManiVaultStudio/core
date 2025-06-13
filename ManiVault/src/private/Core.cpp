@@ -16,6 +16,7 @@
 #include "ProjectManager.h"
 #include "SettingsManager.h"
 #include "HelpManager.h"
+#include "ScriptingManager.h"
 
 #include "Application.h"
 
@@ -63,6 +64,7 @@ void Core::createManagers()
     _managers[static_cast<int>(ManagerType::Projects)]      = std::make_unique<ProjectManager>(this);
     _managers[static_cast<int>(ManagerType::Settings)]      = std::make_unique<SettingsManager>(this);
     _managers[static_cast<int>(ManagerType::Help)]          = std::make_unique<HelpManager>(this);
+    _managers[static_cast<int>(ManagerType::Scripting)]     = std::make_unique<ScriptingManager>(this);
 
     setManagersCreated();
 }
@@ -199,6 +201,11 @@ AbstractSettingsManager& Core::getSettingsManager()
 AbstractHelpManager& Core::getHelpManager()
 {
     return *dynamic_cast<AbstractHelpManager*>(getManager(ManagerType::Help));
+}
+
+AbstractScriptingManager& Core::getScriptingManager()
+{
+    return *dynamic_cast<AbstractScriptingManager*>(getManager(ManagerType::Scripting));
 }
 
 }
