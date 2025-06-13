@@ -169,8 +169,8 @@ CPMAddPackage(
   GITHUB_REPOSITORY pboettch/json-schema-validator
   GIT_TAG 			2.3.0
   OPTIONS
-    "JSON_VALIDATOR_BUILD_TESTS=OFF"
-    "JSON_VALIDATOR_INSTALL=ON"
+    "JSON_VALIDATOR_BUILD_TESTS OFF"
+    "JSON_VALIDATOR_INSTALL OFF"
 )
 
 # Layout: Qt Advanced docking system
