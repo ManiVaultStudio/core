@@ -116,7 +116,7 @@ void FileDownloader::downloadFinished(QNetworkReply* reply)
             _downloadedFilePath = QDir(_targetDirectory).filePath(filename);
 
 #ifdef FILE_DOWNLOADER_VERBOSE
-        qDebug() << fileName << _downloadedFilePath;
+        qDebug() << filename << ": " << _downloadedFilePath;
 #endif
 
         QFile localFile(_downloadedFilePath);
