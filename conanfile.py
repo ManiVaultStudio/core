@@ -55,6 +55,9 @@ class HdpsCoreConan(ConanFile):
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
+    branch_info = CoreBranchInfo(self.recipe_folder)
+    self.branch_name = branch_info.branch_name
+
     def __get_git_path(self):
         path = load(
             pathlib.Path(pathlib.Path(__file__).parent.resolve(), "__gitpath.txt")
@@ -74,7 +77,6 @@ class HdpsCoreConan(ConanFile):
         # Assign a version from the branch name
         branch_info = CoreBranchInfo(self.recipe_folder)
         self.version = branch_info.version
-        self.branch_name = branch_info.branch_name
 
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
