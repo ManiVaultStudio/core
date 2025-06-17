@@ -62,6 +62,11 @@ class HdpsCoreConan(ConanFile):
         print(f"git info from {path}")
         return path
 
+    def get_current_branch_name(self):
+        from git import Repo
+        repo = Repo(path=self.__get_git_path())       
+        return = repo.active_branch.name
+    
     def export(self):
         print("In export")
         # save the original source path to the directory used to build the package
@@ -150,19 +155,13 @@ class HdpsCoreConan(ConanFile):
         # Give the installation directory to CMake
         tc.variables["MV_INSTALL_DIR"] = self.install_dir
 
-        # Set some build options
+        # Set some default build options
         MV_USE_ERROR_LOGGING = "ON"
         MV_PRECOMPILE_HEADERS = "ON"
         MV_UNITY_BUILD = "ON"
 
         # Do not use some options on the release builds 
-        from git import Repo
-        repo = Repo(path=self.__get_git_path())       
-        current_branch_name = repo.active_branch.name
-        
-        # TEST, REMOVE BEFORE MERGE
-        print(current_branch_name)
-        print(f"Branch name starts with feature: {current_branch_name.startswith('feature/')}")
+        current_branch_name = self.get_current_branch_name()
         
         if current_branch_name.startswith("release/"):
             MV_PRECOMPILE_HEADERS = "OFF"
