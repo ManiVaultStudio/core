@@ -160,7 +160,6 @@ CPMAddPackage(
   GIT_TAG           ${nlohmann_json_VERSION}    # latest release as of 17/06/25
   OPTIONS
       "JSON_BuildTests=OFF"            # skip upstream tests
-      "JSON_BuildExamples=OFF"
       "JSON_MultipleHeaders=ON"        # shave compile time (optional)
 )
 
