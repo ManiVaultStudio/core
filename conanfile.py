@@ -163,7 +163,7 @@ class HdpsCoreConan(ConanFile):
 
         # TEST, REMOVE BEFORE MERGE
         print(self.branch_name)
-        print(f"Branch name starts with feature: {self.branch_name.startswith("feature/")}")
+        print(f"Branch name starts with feature: {self.branch_name.startswith('feature/')}")
         
         # TEMPORARILY disable sentry on macos, 16/04/25
         if self.settings.os == "Macos":
