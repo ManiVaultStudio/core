@@ -19,7 +19,7 @@ def get_current_branch(repo_name, build_dir):
     match = pattern.search(build_dir)
     branch_name = None
     if match:
-        branch_name = match
+        branch_name = match.group()
     return branch_name
     
 
