@@ -13,15 +13,12 @@ import subprocess
 import traceback
 import re
 
-def get_current_branch(repo_path='.'):
-    try:
-        from git import Repo
-        repo = Repo(repo_path)
-        if repo.head.is_detached:
-            return 'HEAD (detached)'
-        return repo.active_branch.name
-    except Exception as e:
-        print(f"Error: {e}")
+def get_current_branch(repo_name, build_dir):
+    pattern = re.compile(rf'(?<={re.escape("/" + repo_name + "/")})[^/]+')
+    match = pattern.search(build_dir)
+    if match:
+        return branch_name
+    else 
         return None
 
 class HdpsCoreConan(ConanFile):
@@ -167,15 +164,16 @@ class HdpsCoreConan(ConanFile):
         MV_UNITY_BUILD = "ON"
 
         # Do not use some options on the release builds 
-        current_branch_name = get_current_branch()
-        if current_branch_name.startswith("release/"):
-            MV_PRECOMPILE_HEADERS = "OFF"
-            MV_UNITY_BUILD = "OFF"
-
+        current_branch_name = get_current_branch(self.name, self.build_folder)
+        
         # TEST, REMOVE BEFORE MERGE
         print(current_branch_name)
         print(f"Branch name starts with feature: {current_branch_name.startswith('feature/')}")
         
+        if current_branch_name.startswith("release/"):
+            MV_PRECOMPILE_HEADERS = "OFF"
+            MV_UNITY_BUILD = "OFF"
+
         # TEMPORARILY disable sentry on macos, 16/04/25
         if self.settings.os == "Macos":
             MV_USE_ERROR_LOGGING = "OFF"
