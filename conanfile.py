@@ -55,8 +55,6 @@ class HdpsCoreConan(ConanFile):
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
-    branch_name = CoreBranchInfo(self.recipe_folder).branch_name
-
     def __get_git_path(self):
         path = load(
             pathlib.Path(pathlib.Path(__file__).parent.resolve(), "__gitpath.txt")
@@ -158,13 +156,14 @@ class HdpsCoreConan(ConanFile):
         MV_UNITY_BUILD = "ON"
 
         # Do not use some options on the release builds 
-        if self.branch_name.startswith("release/"):
+        branch_name = CoreBranchInfo(self.recipe_folder).branch_name
+        if branch_name.startswith("release/"):
             MV_PRECOMPILE_HEADERS = "OFF"
             MV_UNITY_BUILD = "OFF"
 
         # TEST, REMOVE BEFORE MERGE
-        print(self.branch_name)
-        print(f"Branch name starts with feature: {self.branch_name.startswith('feature/')}")
+        print(branch_name)
+        print(f"Branch name starts with feature: {branch_name.startswith('feature/')}")
         
         # TEMPORARILY disable sentry on macos, 16/04/25
         if self.settings.os == "Macos":
