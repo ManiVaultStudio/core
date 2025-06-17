@@ -153,10 +153,11 @@ CPMAddPackage(
 )
 
 # Serialization: JSON
+set(nlohmann_json_VERSION v3.12.0)
 CPMAddPackage(
   NAME              nlohmann_json
   GITHUB_REPOSITORY	nlohmann/json
-  GIT_TAG           v3.12.0          # latest release (2025-04-11) :contentReference[oaicite:0]{index=0}
+  GIT_TAG           ${nlohmann_json_VERSION}    # latest release as of 17/06/25
   OPTIONS
       "JSON_BuildTests=OFF"            # skip upstream tests
       "JSON_BuildExamples=OFF"
