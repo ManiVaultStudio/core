@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "properties": {
+    "videos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "tags",
+          "date",
+          "summary",
+          "youtube-id",
+          "url"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "date": {
+            "type": "string"
+          },
+          "preview-image": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "youtube-id": {
+            "type": "string",
+            "pattern": "^[\\w-]{11}$"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["videos"],
+  "additionalProperties": false
+}

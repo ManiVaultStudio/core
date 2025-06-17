@@ -5,12 +5,17 @@
 #include "ProjectDatabaseModel.h"
 
 #include "util/FileDownloader.h"
+#include "util/JSON.h"
 
 #include <QtConcurrent>
+#include <nlohmann/json_fwd.hpp>
 
 #ifdef _DEBUG
     //#define PROJECT_DATABASE_MODEL_VERBOSE
 #endif
+
+using nlohmann::json;
+using nlohmann::json_schema::json_validator;
 
 using namespace mv::util;
 using namespace mv::gui;
@@ -51,26 +56,47 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
 		});
 
     	connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
-    		for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-                QJsonParseError jsonParseError;
+            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+	            try {
+					const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
 
-                const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+					json fullJson = json::parse(jsonData.constData());
 
-                if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-                    qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
-                    continue;
-                }
+					if (fullJson.contains("Projects")) {
+						validateJsonWithResourceSchema(fullJson["Projects"], _dsnsAction.getStrings()[dsnIndex].toStdString(), ":/JSON/ProjectsSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
+					}
+					else {
+						throw std::runtime_error("/Projects key is missing");
+					}
 
-                const auto projects = jsonDocument.object()["Projects"].toArray();
+					QJsonParseError jsonParseError;
 
-                for (const auto project : projects) {
-                    auto projectMap = project.toVariant().toMap();
+					const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
 
-                    addProject(new ProjectDatabaseProject(projectMap));
-                }
-    		}
+					if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+						qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+						continue;
+					}
 
-            emit populatedFromDsns();
+					const auto projects = jsonDocument.object()["Projects"].toArray();
+
+					for (const auto project : projects) {
+						auto projectMap = project.toVariant().toMap();
+
+						addProject(new ProjectDatabaseProject(projectMap));
+					}
+
+					emit populatedFromDsns();
+				}
+				catch (std::exception& e)
+				{
+					qCritical() << "Unable to add projects from DSN:" << e.what();
+				}
+				catch (...)
+				{
+					qCritical() << "Unable to add projects from DSN due to an unhandled exception";
+				}
+            }
 		});
 
         _watcher.setFuture(_future);

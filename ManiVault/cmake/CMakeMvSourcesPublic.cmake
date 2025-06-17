@@ -557,6 +557,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Badge.h
     src/util/ColorScheme.h
     src/util/ProjectDatabaseProject.h
+    src/util/JSON.h
     src/util/Script.h
 )
 
@@ -611,6 +612,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Badge.cpp
     src/util/ColorScheme.cpp
     src/util/ProjectDatabaseProject.cpp
+    src/util/JSON.cpp
     src/util/Script.cpp
 )
 
