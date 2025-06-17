@@ -65,7 +65,7 @@ class HdpsCoreConan(ConanFile):
     def get_current_branch_name(self):
         from git import Repo
         repo = Repo(path=self.__get_git_path())       
-        return = repo.active_branch.name
+        return repo.active_branch.name
     
     def export(self):
         print("In export")
