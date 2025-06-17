@@ -13,16 +13,6 @@ import subprocess
 import traceback
 import re
 
-
-def get_current_branch(repo_name, build_dir):
-    pattern = re.compile(rf'(?<={re.escape("/" + repo_name + "/")})[^/]+')
-    match = pattern.search(build_dir)
-    branch_name = None
-    if match:
-        branch_name = match.group()
-    return branch_name
-    
-
 class HdpsCoreConan(ConanFile):
     """Class to package hdps-core using conan
 
@@ -134,10 +124,6 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == "Linux":
             generator = "Ninja Multi-Config"
 
-        from git import Repo
-        repo = Repo(path=self.source_folder)
-        print(repo.active_branch.name)
-        
         tc = CMakeToolchain(self, generator=generator)
 
         tc.variables["CMAKE_CXX_STANDARD_REQUIRED"] = "ON"
@@ -170,7 +156,9 @@ class HdpsCoreConan(ConanFile):
         MV_UNITY_BUILD = "ON"
 
         # Do not use some options on the release builds 
-        current_branch_name = get_current_branch(self.name, self.build_folder)
+        from git import Repo
+        repo = Repo(path=self.__get_git_path())       
+        current_branch_name = repo.active_branch.name
         
         # TEST, REMOVE BEFORE MERGE
         print(current_branch_name)
