@@ -226,7 +226,7 @@ if(${MV_USE_ERROR_LOGGING})
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         # Put targets in the proper source folder
-        set_target_properties(sentry mini_chromium
+        set_target_properties(sentry mini_chromium nlohmann_json_schema_validator
             PROPERTIES
             FOLDER CoreDependencies
         )
