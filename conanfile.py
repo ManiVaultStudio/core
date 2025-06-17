@@ -134,6 +134,10 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == "Linux":
             generator = "Ninja Multi-Config"
 
+        from git import Repo
+        repo = Repo(path=self.source_folder)
+        print(repo.active_branch.name)
+        
         tc = CMakeToolchain(self, generator=generator)
 
         tc.variables["CMAKE_CXX_STANDARD_REQUIRED"] = "ON"
