@@ -36,6 +36,8 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
     addMenusForPluginType(plugin::Type::TRANSFORMATION);
     addMenusForPluginType(plugin::Type::VIEW);
 
+    addMenusForScripts();
+
     QSet<DataType> dataTypes;
 
     for (const auto& selectedDataset : _selectedDatasets)
@@ -113,7 +115,7 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
 {
     QMap<QString, QMenu*> menus;
 
-    for (const auto& pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _selectedDatasets)) {
+    for (const auto& pluginTriggerAction : mv::plugins().getPluginTriggerActions(pluginType, _selectedDatasets)) {
         const auto titleSegments = pluginTriggerAction->getMenuLocation().split("/");
 
         QString menuPath, previousMenuPath = titleSegments.first();
@@ -154,6 +156,55 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
             
     //menus["Analyze"]->setTitle(mv::plugin::getPluginTypeName(pluginType));
     //menus["Import"]->setIcon(mv::plugin::getPluginTypeIcon(pluginType));
+}
+
+void DataHierarchyWidgetContextMenu::addMenusForScripts()
+{
+    QMap<QString, QMenu*> menus;
+
+    for (const auto& scriptTriggerAction : mv::scripting().getScriptTriggerActions(_selectedDatasets)) {
+        const auto titleSegments = scriptTriggerAction->getMenuLocation().split("/");
+
+        QString menuPath, previousMenuPath = titleSegments.first();
+
+        for (const auto& titleSegment : titleSegments) {
+            if (titleSegment != titleSegments.first() && titleSegment != titleSegments.last())
+                menuPath += "/";
+
+            menuPath += titleSegment;
+
+            if (!menus.contains(menuPath)) {
+                menus[menuPath] = new QMenu(titleSegment);
+
+                if (titleSegment == titleSegments.first())
+					menus[menuPath]->setIcon(scriptTriggerAction->getLanguageIcon());
+
+                if (titleSegment != titleSegments.first()) {
+                    if (titleSegment == titleSegments.last())
+                        menus[previousMenuPath]->addAction(scriptTriggerAction);
+                    else {
+                        if (titleSegment == "Group") {
+                            //menus[menuPath]->setIcon(StyledIcon("object-group"));
+
+                            if (menus[previousMenuPath]->actions().isEmpty())
+                                menus[previousMenuPath]->addMenu(menus[menuPath]);
+                            else
+                                menus[previousMenuPath]->insertMenu(menus[previousMenuPath]->actions().first(), menus[menuPath]);
+
+                            if (menus[previousMenuPath]->actions().count() >= 2)
+                                menus[previousMenuPath]->insertSeparator(menus[previousMenuPath]->actions()[1]);
+                        }
+                        else
+                            menus[previousMenuPath]->addMenu(menus[menuPath]);
+                    }
+                }
+                else
+                    addMenu(menus[titleSegments.first()]);
+            }
+
+            previousMenuPath = menuPath;
+        }
+    }
 }
 
 QAction* DataHierarchyWidgetContextMenu::getGroupAction()

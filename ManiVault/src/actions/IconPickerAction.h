@@ -35,7 +35,7 @@ public:
 
     /**
      * Get the current icon
-     * Facade for IconAction::getIcon()
+     * Facade for IconAction::getLanguageIcon()
      * @return Icon
      */
     const QIcon& getIcon() const;

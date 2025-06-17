@@ -13,7 +13,7 @@ namespace mv
     {
         if (keys.size() != values.size())
         {
-            qWarning() << "Trying to create bimap from keys and values arrays of different sizes";
+            qWarning() << "[SelectionGroup] Trying to create bimap from keys and values arrays of different sizes";
             return;
         }
 
@@ -29,18 +29,38 @@ namespace mv
 
     std::vector<QString> BiMap::getKeysByValues(const std::vector<uint32_t>& values) const
     {
-        std::vector<QString> keys(values.size());
+        std::vector<QString> keys;
+        keys.reserve(values.size());
+
+        int invalidValueCount = 0;
+        std::vector<uint32_t> missingValues;
+        missingValues.reserve(3);
 
         for (size_t i = 0; i < values.size(); i++)
         {
-            try
+            // If the value is not in the map, count up how many times this happens, and store a few to report back
+            if (_vkMap.find(values[i]) == _vkMap.end())
             {
-                keys[i] = _vkMap.at(values[i]);
+                // Store several invalid values to report back to user
+                if (invalidValueCount < 3)
+                    missingValues.push_back(values[i]);
+
+                invalidValueCount++;
+                continue;
             }
-            catch (std::out_of_range& oor)
+
+            keys.push_back(_vkMap.at(values[i]));
+        }
+
+        // If missing values were tried, report on them
+        if (invalidValueCount > 0)
+        {
+            QDebug deb = qWarning();
+            deb << "[SelectionGroup] Tried to find " << invalidValueCount << " values that did not exist in the vkMap.";
+            deb << "Example missing values:";
+            for (uint32_t val : missingValues)
             {
-                qWarning() << "Trying to find value: " << values[i] << " in value-key map, but no such value exists. Error: " << oor.what();
-                return std::vector<QString>();
+                deb << val << ",";
             }
         }
 
@@ -119,6 +139,18 @@ namespace mv
         variantMap["kvValues"] = kvValues;
 
         return variantMap;
+    }
+
+    BiMap& KeyBasedSelectionGroup::getBiMap(Dataset<DatasetImpl> dataset)
+    {
+        for (size_t i = 0; i < _datasets.size(); i++)
+        {
+            Dataset<DatasetImpl> d = _datasets[i];
+            if (d == dataset)
+            {
+                return _biMaps[i];
+            }
+        }
     }
 
     void KeyBasedSelectionGroup::addDataset(Dataset<DatasetImpl> dataset, BiMap& bimap)

@@ -37,6 +37,8 @@ public:
 
     virtual ~AbstractEventManager() { }
 
+    virtual std::vector<KeyBasedSelectionGroup>& getSelectionGroups() = 0;
+
     virtual void addSelectionGroup(KeyBasedSelectionGroup& selectionGroup) = 0;
 
     /**
