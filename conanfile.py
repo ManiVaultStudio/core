@@ -13,13 +13,15 @@ import subprocess
 import traceback
 import re
 
+
 def get_current_branch(repo_name, build_dir):
     pattern = re.compile(rf'(?<={re.escape("/" + repo_name + "/")})[^/]+')
     match = pattern.search(build_dir)
+    branch_name = None
     if match:
-        return branch_name
-    else 
-        return None
+        branch_name = match
+    return branch_name
+    
 
 class HdpsCoreConan(ConanFile):
     """Class to package hdps-core using conan
