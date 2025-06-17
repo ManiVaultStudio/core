@@ -12,7 +12,18 @@ from rules_support import CoreBranchInfo
 import subprocess
 import traceback
 import re
-    
+
+def get_current_branch(repo_path='.'):
+    try:
+        from git import Repo
+        repo = Repo(repo_path)
+        if repo.head.is_detached:
+            return 'HEAD (detached)'
+        return repo.active_branch.name
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
 class HdpsCoreConan(ConanFile):
     """Class to package hdps-core using conan
 
@@ -156,14 +167,14 @@ class HdpsCoreConan(ConanFile):
         MV_UNITY_BUILD = "ON"
 
         # Do not use some options on the release builds 
-        branch_name = CoreBranchInfo(self.recipe_folder).branch_name
-        if branch_name.startswith("release/"):
+        current_branch_name = get_current_branch()
+        if current_branch_name.startswith("release/"):
             MV_PRECOMPILE_HEADERS = "OFF"
             MV_UNITY_BUILD = "OFF"
 
         # TEST, REMOVE BEFORE MERGE
-        print(branch_name)
-        print(f"Branch name starts with feature: {branch_name.startswith('feature/')}")
+        print(current_branch_name)
+        print(f"Branch name starts with feature: {current_branch_name.startswith('feature/')}")
         
         # TEMPORARILY disable sentry on macos, 16/04/25
         if self.settings.os == "Macos":
