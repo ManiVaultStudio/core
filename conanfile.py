@@ -55,8 +55,7 @@ class HdpsCoreConan(ConanFile):
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
-    branch_info = CoreBranchInfo(self.recipe_folder)
-    self.branch_name = branch_info.branch_name
+    branch_name = CoreBranchInfo(self.recipe_folder).branch_name
 
     def __get_git_path(self):
         path = load(
