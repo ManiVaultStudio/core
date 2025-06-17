@@ -74,6 +74,7 @@ class HdpsCoreConan(ConanFile):
         # Assign a version from the branch name
         branch_info = CoreBranchInfo(self.recipe_folder)
         self.version = branch_info.version
+        self.branch_name = branch_info.branch_name
 
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
@@ -151,14 +152,27 @@ class HdpsCoreConan(ConanFile):
         tc.variables["MV_INSTALL_DIR"] = self.install_dir
 
         # Set some build options
-        tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
-        tc.variables["MV_UNITY_BUILD"] = "ON"
-        tc.variables["MV_USE_ERROR_LOGGING"] = "ON"
+        MV_USE_ERROR_LOGGING = "ON"
+        MV_PRECOMPILE_HEADERS = "ON"
+        MV_UNITY_BUILD = "ON"
 
+        # Do not use some options on the release builds 
+        if self.branch_name.startswith("release/"):
+            MV_PRECOMPILE_HEADERS = "OFF"
+            MV_UNITY_BUILD = "OFF"
+
+        # TEST, REMOVE BEFORE MERGE
+        print(self.branch_name):
+        print(f"Branch name starts with feature: {self.branch_name.startswith("feature/")}"):
+        
         # TEMPORARILY disable sentry on macos, 16/04/25
         if self.settings.os == "Macos":
-            tc.variables["MV_USE_ERROR_LOGGING"] = "OFF"
+            MV_USE_ERROR_LOGGING = "OFF"
 
+        tc.variables["MV_PRECOMPILE_HEADERS"] = MV_PRECOMPILE_HEADERS
+        tc.variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
+        tc.variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
+        
         try:
             tc.generate()
         except KeyError as e:
