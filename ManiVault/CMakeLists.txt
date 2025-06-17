@@ -303,7 +303,7 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
 
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator::validator)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
@@ -354,7 +354,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
-target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
+target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator::validator)
 
 if(${MV_USE_ERROR_LOGGING})
     target_link_libraries(${MV_EXE} PRIVATE sentry)
