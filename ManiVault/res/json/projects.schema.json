@@ -1,49 +1,43 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "properties": {
-    "Projects": {
-      "type": "array",
-      "items": {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "Title": { "type": "string" },
+      "Url": { "type": "string" },
+      "Summary": { "type": "string" },
+      "RequiredPlugins": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "Name": { "type": "string" },
+            "RepoName": { "type": "string" },
+            "Version": { "type": "string" }
+          },
+          "required": ["Name", "RepoName", "Version"],
+          "additionalProperties": false
+        }
+      },
+      "CoreVersion": {
         "type": "object",
         "properties": {
-          "Title": { "type": "string" },
-          "Url": { "type": "string", "format": "uri" },
-          "Summary": { "type": "string" },
-          "RequiredPlugins": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "Name": { "type": "string" },
-                "RepoName": { "type": "string" },
-                "Version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }
-              },
-              "required": ["Name", "RepoName", "Version"]
-            }
-          },
-          "CoreVersion": {
-            "type": "object",
-            "properties": {
-              "Major": { "type": "integer" },
-              "Minor": { "type": "integer" },
-              "Patch": { "type": "integer" },
-              "Suffix": { "type": "string" }
-            },
-            "required": ["Major", "Minor", "Patch", "Suffix"]
-          },
-          "Tags": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "Date": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "Major": { "type": "integer" },
+          "Minor": { "type": "integer" },
+          "Patch": { "type": "integer" },
+          "Suffix": { "type": "string" }
         },
-        "required": ["Title", "Url", "Summary", "RequiredPlugins", "CoreVersion", "Tags", "Date"]
-      }
-    }
-  },
-  "required": ["Projects"]
+        "required": ["Major", "Minor", "Patch", "Suffix"],
+        "additionalProperties": false
+      },
+      "Tags": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "Date": { "type": "string" }
+    },
+    "required": ["Title", "Url", "Summary", "RequiredPlugins", "CoreVersion", "Tags", "Date"],
+    "additionalProperties": false
+  }
 }
