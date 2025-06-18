@@ -274,7 +274,7 @@ include(CMakeMvSourcesResources)      # defines RESOURCE_FILES, MAIN_APP_ICON_RE
 # -----------------------------------------------------------------------------
 add_library(${MV_PUBLIC_LIB} SHARED)
 
-add_library(ManiVault::Core ALIAS Core)
+add_library(ManiVault::Core ALIAS ${MV_PUBLIC_LIB})
 
 set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
     POSITION_INDEPENDENT_CODE ON
@@ -304,7 +304,8 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
 
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
+target_link_libraries(${MV_PUBLIC_LIB} INTERFACE nlohmann_json::nlohmann_json)
+target_link_libraries(${MV_PUBLIC_LIB} PUBLIC nlohmann_json_schema_validator)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
