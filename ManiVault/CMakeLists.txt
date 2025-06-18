@@ -304,8 +304,7 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
 
-target_link_libraries(${MV_PUBLIC_LIB} INTERFACE nlohmann_json::nlohmann_json)
-target_link_libraries(${MV_PUBLIC_LIB} PUBLIC nlohmann_json_schema_validator)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
