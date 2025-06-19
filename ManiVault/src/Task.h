@@ -131,7 +131,7 @@ public:
      * @param humanFriendly Whether to include the task namespace or not
      * @return Task type name
      */
-    virtual QString getTypeName(bool humanFriendly = true) const final;
+    QString getTypeName(bool humanFriendly = true) const;
 
 public: // Configuration flags
 
@@ -139,29 +139,29 @@ public: // Configuration flags
      * Get configuration
      * @return Configuration
      */
-    virtual std::int32_t getConfiguration() const final;
+    std::int32_t getConfiguration() const;
 
     /**
      * Check whether \p configurationFlag is set or not
      * @param configurationFlag Configuration flag
      * @return Boolean determining whether \p configurationFlag is set or not
      */
-    virtual bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) const final;
+    bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) const;
 
     /**
      * Set configuration flag
      * @param configurationFlag Configuration flag to set
      * @param unset Whether to unset the \p configurationFlag flag
-     * @param recursive Whether to recursively set child child configuration flag
+     * @param recursive Whether to recursively set child configuration flag
      */
-    virtual void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false, bool recursive = false) final;
+    void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false, bool recursive = false);
 
     /**
      * Set configuration
      * @param configuration Configuration value
-     * @param recursive Whether to recursively set child child configuration flag
+     * @param recursive Whether to recursively set child configuration flag
      */
-    virtual void setConfiguration(std::int32_t configuration, bool recursive = false) final;
+    void setConfiguration(std::int32_t configuration, bool recursive = false);
 
 public: // Weight
 
@@ -253,69 +253,69 @@ public: // Name, description, icon and may kill
      * Get task name
      * @return Task name
      */
-    virtual QString getName() const final;
+    QString getName() const;
 
     /**
      * Set task name to \p name
      * @param name Name of the task
      */
-    virtual void setName(const QString& name) final;
+    void setName(const QString& name);
 
     /** Gets the task description */
-    virtual QString getDescription() const final;
+    QString getDescription() const;
 
     /**
      * Sets the task description to \p description
      * @param description Task description
      */
-    virtual void setDescription(const QString& description) final;
+    void setDescription(const QString& description);
 
     /** Gets the task icon */
-    virtual QIcon getIcon() const final;
+    QIcon getIcon() const;
 
     /**
      * Sets the task icon to \p icon
      * @param icon Task icon
      */
-    virtual void setIcon(const QIcon& icon) final;
+    void setIcon(const QIcon& icon);
 
     /**
      * Get whether the task is enabled or not
      * @return Boolean determining whether the task is enabled or not
      */
-    virtual bool getEnabled() const final;
+    bool getEnabled() const;
 
     /**
      * Sets whether the task is enabled or not
      * @param enabled Boolean determining whether the task is enabled or not
      * @param recursive Whether to set all descendants to \p enabled as well
      */
-    virtual void setEnabled(bool enabled, bool recursive = false) final;
+    void setEnabled(bool enabled, bool recursive = false);
 
     /**
      * Get whether the task is visible or not
      * @return Boolean determining whether the task is visible or not
      */
-    virtual bool getVisible() const final;
+    bool getVisible() const;
 
     /**
      * Sets whether the task is visible or not
      * @param visible Boolean determining whether the task is visible or not
      */
-    virtual void setVisible(bool visible) final;
+    void setVisible(bool visible);
 
     /**
      * Get whether the task may be killed or not
      * @return Whether the task may be killed or not
      */
-    virtual bool getMayKill() const final;
+    bool getMayKill() const;
 
     /**
      * Sets whether the task may be killed or not
      * @param mayKill Boolean determining whether the task may be killed or not
      * @param recursive Whether to set all descendants to \p mayKill as well
      */
-    virtual void setMayKill(bool mayKill, bool recursive = false) final;
+    void setMayKill(bool mayKill, bool recursive = false);
 
     /**
      * Get whether the task is killable
@@ -324,58 +324,58 @@ public: // Name, description, icon and may kill
      *  - Task#_mayKill is true
      * @return Whether the task is killable
      */
-    virtual bool isKillable() const final;
+    bool isKillable() const;
 
     /**
      * Resets the task internals
      * @param recursive Whether to reset all descendants as well
      */
-    virtual void reset(bool recursive = false) final;
+    void reset(bool recursive = false);
 
     /**
      * Envoke Qt's processEvents on updates
      * @param alwaysProcessEvents Whether to invoke Qt's processEvents on updates
      */
-    virtual void setAlwaysProcessEvents(bool alwaysProcessEvents) final;
+    void setAlwaysProcessEvents(bool alwaysProcessEvents);
 
     /**
      * Get whether the task envokes Qt processEvents on updates
      * @return Whether the task envokes Qt's processEvents on updates
      */
-    virtual bool getAlwaysProcessEvents() const final;
+    bool getAlwaysProcessEvents() const;
 
 public: // Status
 
     /** Get task status */
-    virtual Status getStatus() const final;
+    Status getStatus() const;
 
     /** Check if task is idle */
-    virtual bool isIdle() const final;
+    bool isIdle() const;
 
     /** Check if task is running */
-    virtual bool isRunning() const final;
+    bool isRunning() const;
 
     /** Check if task is running indeterminate */
-    virtual bool isRunningIndeterminate() const final;
+    bool isRunningIndeterminate() const;
 
     /** Check if task is finished */
-    virtual bool isFinished() const final;
+    bool isFinished() const;
 
     /** Check if task is about to be aborted */
-    virtual bool isAboutToBeAborted() const final;
+    bool isAboutToBeAborted() const;
 
     /** Check if task is being aborted */
-    virtual bool isAborting() const final;
+    bool isAborting() const;
 
     /** Check if task is aborted */
-    virtual bool isAborted() const final;
+    bool isAborted() const;
 
     /**
      * Set task status to \p status, possibly \p recursive
      * @param status Task status
      * @param recursive Whether to set all descendants statuses as well
      */
-    virtual void setStatus(const Status& status, bool recursive = false) final;
+    void setStatus(const Status& status, bool recursive = false);
 
     /**
      * Set task status deferred to \p status, possibly \p recursively and after \p delay
@@ -383,37 +383,37 @@ public: // Status
      * @param recursive Whether to set all descendants statuses as well
      * @param delay Delay after which the deferred task status is set
      */
-    virtual void setStatusDeferred(const Status& status, bool recursive = false, std::uint32_t delay = DEFERRED_TASK_STATUS_INTERVAL) final;
+    void setStatusDeferred(const Status& status, bool recursive = false, std::uint32_t delay = DEFERRED_TASK_STATUS_INTERVAL);
 
     /** Convenience method to set task status to undefined */
-    virtual void setUndefined() final;
+    void setUndefined();
 
     /** Convenience method to set task status to idle */
-    virtual void setIdle() final;
+    void setIdle();
 
     /** Convenience method to set task status to running */
-    virtual void setRunning() final;
+    void setRunning();
 
     /** Convenience method to set task status to running indeterminate */
-    virtual void setRunningIndeterminate() final;
+    void setRunningIndeterminate();
 
     /** Convenience method to set task status to finished and use a custom progress description */
-    virtual void setFinished() final;
+    void setFinished();
 
     /** Convenience method to set task status to about to be aborted */
-    virtual void setAboutToBeAborted() final;
+    void setAboutToBeAborted();
 
     /** Convenience method to set task status to aborting */
-    virtual void setAborting() final;
+    void setAborting();
 
     /** Convenience method to set task status to aborted */
-    virtual void setAborted() final;
+    void setAborted();
 
     /**
      * Kill the task and trigger Task::abort() signal
      * @param recursive Boolean determining whether to also kill chill tasks recursively
      */
-    virtual void kill(bool recursive = true) final;
+    void kill(bool recursive = true);
 
 public: // Handler
 
@@ -421,13 +421,13 @@ public: // Handler
      * Get task handler
      * @return Pointer to task handler
      */
-    virtual AbstractTaskHandler* getHandler() final;
+    AbstractTaskHandler* getHandler();
 
     /**
      * Set task handler to \p handler
      * @param handler Pointer to task handler
      */
-    virtual void setHandler(AbstractTaskHandler* handler) final;
+    void setHandler(AbstractTaskHandler* handler);
 
 public: // Progress mode
 
@@ -435,7 +435,7 @@ public: // Progress mode
      * Get progress mode
      * @return Progress mode enum
      */
-    virtual ProgressMode getProgressMode() const final;
+    ProgressMode getProgressMode() const;
 
     /**
      * Sets progress mode to to \p progressMode
@@ -449,32 +449,32 @@ public: // GUI scopes
      * Get GUI scopes
      * @return GUI scopes
      */
-    virtual GuiScopes getGuiScopes() const final;
+    GuiScopes getGuiScopes() const;
     
     /**
      * Sets GUI scopes to \p guiScopes
-     * @param guiScope GUI scope enum
+     * @param guiScopes GUI scope enum
      */
-    virtual void setGuiScopes(const GuiScopes& guiScopes) final;
+    void setGuiScopes(const GuiScopes& guiScopes);
 
     /**
      * Add \p guiScope to the GUI scopes set
      * @param guiScope GUI scope to add
      */
-    virtual void addGuiScope(const GuiScope& guiScope) final;
+    void addGuiScope(const GuiScope& guiScope);
 
     /**
      * Remove \p guiScope from the GUI scopes set
      * @param guiScope GUI scope to remove
      */
-    virtual void removeGuiScope(const GuiScope& guiScope) final;
+    void removeGuiScope(const GuiScope& guiScope);
 
     /**
      * Function to establish whether at lease one GUI scope is present in both \p guiScopesA and \p guiScopesB
      * @param guiScopesA GUI scopes A
      * @param guiScopesB GUI scopes B
      */
-    static bool doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB);
+    bool doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB) const;
 
     /**
      * Convert \p guiScopes to string list
@@ -485,7 +485,7 @@ public: // GUI scopes
 public: // Manual
 
     /** Gets the task progress [0, 1] */
-    virtual float getProgress() const final;
+    float getProgress() const;
 
     /**
      * Sets the task progress percentage to \p progress
@@ -523,14 +523,14 @@ public: // Subtasks
      * This method sets the Task#_progressMode to ProgressMode::Subtasks
      * @param numberOfSubtasks Number of subtasks
      */
-    virtual void setSubtasks(std::uint32_t numberOfSubtasks) final;
+    void setSubtasks(std::uint32_t numberOfSubtasks);
 
     /**
      * Initializes the subtasks with \p subtasksNames
      * This method sets the Task#_progressMode to ProgressMode::Subtasks
      * @param subtasksNames Subtasks names
      */
-    virtual void setSubtasks(const QStringList& subtasksNames) final;
+    void setSubtasks(const QStringList& subtasksNames);
 
     /**
      * Flag item with \p subtaskIndex as started
@@ -539,7 +539,7 @@ public: // Subtasks
      * @param subtaskIndex Index of the subtask
      * @param progressDescription Override the default progress description when set to a non-empty string
      */
-    virtual void setSubtaskStarted(std::uint32_t subtaskIndex, const QString& progressDescription = QString()) final;
+    void setSubtaskStarted(std::uint32_t subtaskIndex, const QString& progressDescription = QString());
 
     /**
      * Flag item with \p subtaskName as started
@@ -548,7 +548,7 @@ public: // Subtasks
      * @param subtaskName Name of the subtask
      * @param progressDescription Override the default progress description when set to a non-empty string
      */
-    virtual void setSubtaskStarted(const QString& subtaskName, const QString& progressDescription = QString()) final;
+    void setSubtaskStarted(const QString& subtaskName, const QString& progressDescription = QString());
 
     /**
      * Flag item with \p subtaskIndex as finished, the progress percentage will be computed automatically
@@ -557,7 +557,7 @@ public: // Subtasks
      * @param subtaskIndex Index of the subtask
      * @param progressDescription Override the default progress description when set to a non-empty string
      */
-    virtual void setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription = QString()) final;
+    void setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription = QString());
 
     /**
      * Flag item with \p subtaskName as finished, the progress percentage will be computed automatically
@@ -567,7 +567,7 @@ public: // Subtasks
      * @param subtaskName Name of the subtask
      * @param progressDescription Override the default progress description when set to a non-empty string
      */
-    virtual void setSubtaskFinished(const QString& subtaskName, const QString& progressDescription = QString()) final;
+    void setSubtaskFinished(const QString& subtaskName, const QString& progressDescription = QString());
 
     /**
      * Set subtask name to \p subtaskName for \p subtaskIndex
@@ -575,39 +575,39 @@ public: // Subtasks
      * @param subtaskIndex Subtask index to set the description for
      * @param subtaskName Name of the subtask
      */
-    virtual void setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName) final;
+    void setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName);
 
     /**
      * Get subtask names
      * @return Subtasks names
      */
-    virtual QStringList getSubtasksNames() const final;
+    QStringList getSubtasksNames() const;
 
     /**
      * Get subtask name for \p subtaskIndex
      * @param subtaskIndex Index of the subtask
      * @return Subtasks name for \p subtaskIndex, empty string if not found
      */
-    virtual QString getSubtasksName(std::uint32_t subtaskIndex) const final;
+    QString getSubtasksName(std::uint32_t subtaskIndex) const;
 
     /**
      * Get subtask index for \p subtaskName
      * Returns -1 when \p subtaskName is not found or Task#_progressMode is set to ProgressMode::Manual
      * @param subtaskName Name of the subtask
      */
-    virtual std::int32_t getSubtaskIndex(const QString& subtaskName) const final;
+    std::int32_t getSubtaskIndex(const QString& subtaskName) const;
 
     /**
      * Get subtask name prefix
      * @return String to prefix unnamed subtasks with
      */
-    virtual QString getSubtaskNamePrefix() const final;
+    QString getSubtaskNamePrefix() const;
 
     /**
      * Set subtask name prefix to \p subtaskNamePrefix
      * @param subtaskNamePrefix String to prefix unnamed subtasks with
      */
-    virtual void setSubtaskNamePrefix(const QString& subtaskNamePrefix) final;
+    void setSubtaskNamePrefix(const QString& subtaskNamePrefix);
 
 public: // Progress description
 
@@ -615,30 +615,30 @@ public: // Progress description
      * Get progress description
      * @return Progress description
      */
-    virtual QString getProgressDescription() const final;
+    QString getProgressDescription() const;
 
     /**
      * Set progress description to \p progressDescription
      * @param progressDescription Progress description
      * @param clearDelay Progress description will be cleared after this delay (do not clear if zero)
      */
-    virtual void setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay = 0) final;
+    void setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay = 0);
 
 public: // Progress text
 
     /** Gets the task progress text */
-    virtual QString getProgressText() const final;
+    QString getProgressText() const;
 
     /**
      * Set progress text formatter to \p progressTextFormatter
      * @param progressTextFormatter Progress formatter function
      */
-    virtual void setProgressTextFormatter(const ProgressTextFormatter& progressTextFormatter) final;
+    void setProgressTextFormatter(const ProgressTextFormatter& progressTextFormatter);
 
 private:
 
     /** Gets the standard task progress text */
-    virtual QString getStandardProgressText() const final;
+    QString getStandardProgressText() const;
 
 private:
 
@@ -666,7 +666,7 @@ private: // For aggregate task
      * Update status of aggregate task
      * This method only has an effect when Task#_progressMode is set to ProgressMode::Aggregate
      */
-    virtual void updateAggregateStatus() final;
+    void updateAggregateStatus();
 
 private: // Private setters (these call private signals under the hood, an essential part to make cross thread task usage possible)
 

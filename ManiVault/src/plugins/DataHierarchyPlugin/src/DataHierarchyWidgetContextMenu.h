@@ -9,8 +9,10 @@
 
 #include <QMenu>
 
-#include <actions/TriggerAction.h>
 #include <actions/IntegralAction.h>
+#include <actions/OptionAction.h>
+#include <actions/StringAction.h>
+#include <actions/TriggerAction.h>
 
 class QAction;
 
@@ -22,7 +24,7 @@ using namespace mv::plugin;
  * 
  * Constructs a data hierarchy widget context menu based on the current dataset selection
  * 
- * @author Thomas Kroes
+ * @author Thomas Kroes, Alexander Vieth
  */
 class DataHierarchyWidgetContextMenu final : public QMenu
 {
@@ -57,6 +59,12 @@ private:
     QAction* getSelectionGroupAction();
 
     /**
+     * Get action for selection-pattern grouping
+     * @return Pointer to action for selection-pattern grouping
+     */
+    QAction* getSelectionGroupPatternAction();
+
+    /**
      * Get menu for item locking
      * @return Pointer to menu for item locking
      */
@@ -87,27 +95,95 @@ private:
 
 /**
  * Helper dialog for selection index selection
+ *
+ * @author Alexander Vieth
  */
 class SelectionGroupIndexDialog : public QDialog
 {
     Q_OBJECT
+
 public:
+
+    /**
+     * Construct with \p parent widget
+     * @param parent Parent widget
+     */
     SelectionGroupIndexDialog(QWidget* parent);
 
-    std::int32_t getSelectionGroupIndex() {
-        return selectionIndexAction.getValue();
+    /**
+     * Convenience function to get the selection group index from the corresponding action
+     * @return The selection group index
+     */
+    std::int32_t getSelectionGroupIndex() const {
+        return _selectionIndexAction.getValue();
     }
 
 signals:
+
+    /**
+     * Invoked when the dialog needs to be closed
+     * @param onlyIndices Whether the selection index is valid or not
+     */
     void closeDialog(bool onlyIndices);
 
-public slots:
-    // Pass selected data set name from SelectionGroupIndexDialog to BinExporter (dialogClosed)
-    void closeDialogAction() {
-        emit closeDialog(confirmButton.isChecked());
+private:
+    gui::IntegralAction      _selectionIndexAction;      /** For setting the selection group index */
+    gui::TriggerAction       _confirmAction;             /** Triggers the grouping */
+};
+
+/**
+ * Helper dialog for selection pattern selection
+ *
+ * @author Alexander Vieth
+ */
+class SelectionPatternGroupIndexDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+
+    /**
+     * Construct with \p parent widget
+     * @param parent Parent widget
+     */
+    SelectionPatternGroupIndexDialog(QWidget* parent);
+
+    /**
+     * Convenience function to get the selection group index from the corresponding action
+     * @return The selection group index
+     */
+    std::int32_t getSelectionGroupIndex() const {
+        return _selectionIndexAction.getValue();
     }
 
+    /**
+     * Convenience function to get the selection group pattern from the corresponding action
+     * @return The selection group index
+     */
+    QString getSelectionGroupPattern() const {
+        return _selectionPatternAction.getString();
+    }
+
+    /**
+     * Convenience function to get the selection group option from the corresponding action
+     * @return The selection group option
+     */
+    std::int32_t getSelectionGroupOption() const {
+        return _selectionOptionAction.getCurrentIndex();
+    }
+
+signals:
+
+    /**
+     * Invoked when the dialog needs to be closed
+     * @param onlyIndices Whether the selection index is valid or not
+     */
+    void closeDialog(bool onlyIndices);
+
 private:
-    gui::IntegralAction      selectionIndexAction;
-    gui::TriggerAction       confirmButton;
+    gui::IntegralAction     _selectionIndexAction;      /** For setting the selection group index */
+    gui::StringAction       _selectionPatternAction;    /** For setting the selection group pattern */
+    gui::OptionAction       _selectionOptionAction;     /** Action for choosing whether to use prefix or suffix */
+    gui::StringAction       _infoTextAction;            /** For displaying some information */
+    gui::TriggerAction      _confirmAction;             /** Triggers the grouping */
 };

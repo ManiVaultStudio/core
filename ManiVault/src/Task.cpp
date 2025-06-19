@@ -44,8 +44,6 @@ Task::Task(QObject* parent, const QString& name, const GuiScopes& guiScopes /*= 
     _configuration(0),
     _weight(1.f),
     _name(name),
-    _description(),
-    _icon(),
     _enabled(true),
     _visible(true),
     _status(status),
@@ -58,14 +56,8 @@ Task::Task(QObject* parent, const QString& name, const GuiScopes& guiScopes /*= 
     _guiScopes(guiScopes),
     _progress(0.f),
     _timers(),
-    _subtasks(),
-    _subtasksNames(),
     _subtaskNamePrefix("Subtask"),
-    _progressDescription(),
-    _parentTask(nullptr),
-    _childTasks(),
-    _progressText(),
-    _progressTextFormatter()
+    _parentTask(nullptr)
 {
     privateAddToTaskManager();
     
@@ -526,7 +518,7 @@ void Task::removeGuiScope(const GuiScope& guiScope)
     emit privateRemoveGuiScopeSignal(guiScope, QPrivateSignal());
 }
 
-bool Task::doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB)
+bool Task::doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB) const
 {
     for (const auto& guiScopeA : guiScopesA)
         if (guiScopesB.contains(guiScopeA))

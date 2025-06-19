@@ -442,20 +442,26 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 
             case QEvent::MouseButtonPress:
             {
-                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
+				_samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
+                _toolTipLabel.hide();
                 break;
             }
 
             case QEvent::MouseButtonRelease:
             case QEvent::Enter:
             {
-                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(getSamplingMode() == SamplingMode::FocusRegion && getEnabledAction().isChecked() && canView());
+                const auto enabled = getSamplingMode() == SamplingMode::FocusRegion && getEnabledAction().isChecked() && canView();
+
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(enabled);
+                _toolTipLabel.setVisible(enabled);
+
                 break;
             }
 
             case QEvent::Leave:
             {
                 _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
+                _toolTipLabel.hide();
                 break;
             }
 

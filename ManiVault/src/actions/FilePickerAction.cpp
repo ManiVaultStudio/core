@@ -205,15 +205,23 @@ QString FilePickerAction::getApplicationDirectory() const
 
 QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto groupAction = new HorizontalGroupAction(this, "Group");
+    if (dynamic_cast<QMenu*>(parent))
+        return QWidgetAction::createWidget(parent);
+
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::LineEdit)
-        groupAction->addAction(&_filePathAction);
+        layout->addWidget(_filePathAction.createWidget(widget));
 
     if (widgetFlags & WidgetFlag::PushButton)
-        groupAction->addAction(&_pickAction);
+        layout->addWidget(_pickAction.createWidget(widget));
 
-    return groupAction->createWidget(parent);
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)

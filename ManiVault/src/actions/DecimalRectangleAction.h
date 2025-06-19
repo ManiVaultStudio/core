@@ -44,6 +44,18 @@ public:
         RectangleAction::setRectangle(rectangle.left(), rectangle.right(), rectangle.bottom(), rectangle.top());
     }
 
+    /**
+     * Get rectangle as Qt rectangle
+     * @return Qt Rectangle
+     */
+    QRectF toRectF() const;
+
+    /**
+     * Set rectangle from Qt \p rectangle
+     * @param rectangle Qt Rectangle
+     */
+    void setRectF(const QRectF& rectangle);
+
 protected: // Linking
 
     /**

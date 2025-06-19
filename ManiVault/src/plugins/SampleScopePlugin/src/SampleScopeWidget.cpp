@@ -54,6 +54,7 @@ void SampleScopeWidget::initialize()
     connect(&_sampleScopePlugin->getSourcePluginPickerAction(), &PluginPickerAction::pluginPicked, this, [this](plugin::Plugin* plugin) -> void {
         if (_currentViewPlugin) {
             disconnect(&_currentViewPlugin->getSamplerAction(), &ViewPluginSamplerAction::viewGeneratorTypeChanged, this, nullptr);
+            _previousViewPlugin = _currentViewPlugin;
         }
 
         _currentViewPlugin = dynamic_cast<ViewPlugin*>(plugin);
@@ -83,16 +84,28 @@ void SampleScopeWidget::setViewWidget(const QWidget* widget)
     if (!widget)
         return;
 
-    if (widget != _currentViewWidget) {
-        _currentViewWidget = const_cast<QWidget*>(widget);
-        _widgetViewScene.clear();
+    if (_proxyWidget)
+    {
+        if (auto previousWidget = _proxyWidget->widget()) {
+            _proxyWidget->setWidget(nullptr);
+            previousWidget->setParent(nullptr);
+        }
 
-        _proxyWidget = _widgetViewScene.addWidget(const_cast<QWidget*>(widget));
+        _widgetViewScene.removeItem(_proxyWidget);
 
-        _proxyWidget->setPos(0, 0);
+    	delete _proxyWidget;
 
-        updateViewWidgetProxySize();
+        _proxyWidget = nullptr;
     }
+
+    _widgetViewScene.clear();
+
+    _currentViewWidget = const_cast<QWidget*>(widget);
+
+    _proxyWidget = _widgetViewScene.addWidget(_currentViewWidget);
+    _proxyWidget->setPos(0, 0);
+
+    updateViewWidgetProxySize();
 }
 
 InfoOverlayWidget& SampleScopeWidget::getNoSamplesOverlayWidget()

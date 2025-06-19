@@ -125,7 +125,10 @@ void EventManager::unregisterEventListener(EventListener* eventListener)
 void EventManager::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
 {
     try {
-        DatasetAddedEvent dataEvent(dataset);
+        if (core()->isAboutToBeDestroyed())
+            return;
+
+    	DatasetAddedEvent dataEvent(dataset);
 
         const auto eventListeners = _eventListeners;
 
@@ -145,6 +148,9 @@ void EventManager::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
 void EventManager::notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dataset)
 {
     try {
+        if (core()->isAboutToBeDestroyed())
+            return;
+
         DatasetAboutToBeRemovedEvent dataAboutToBeRemovedEvent(dataset);
 
         const auto eventListeners = _eventListeners;
@@ -165,6 +171,9 @@ void EventManager::notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dat
 void EventManager::notifyDatasetRemoved(const QString& datasetId, const DataType& dataType)
 {
     try {
+        if (core()->isAboutToBeDestroyed())
+            return;
+
         DatasetRemovedEvent dataRemovedEvent(nullptr, datasetId, dataType);
 
         const auto eventListeners = _eventListeners;
@@ -185,6 +194,9 @@ void EventManager::notifyDatasetRemoved(const QString& datasetId, const DataType
 void EventManager::notifyDatasetDataChanged(const Dataset<DatasetImpl>& dataset)
 {
     try {
+        if (core()->isAboutToBeDestroyed())
+            return;
+
         DatasetDataChangedEvent dataEvent(dataset);
 
         const auto eventListeners = _eventListeners;
@@ -205,6 +217,9 @@ void EventManager::notifyDatasetDataChanged(const Dataset<DatasetImpl>& dataset)
 void EventManager::notifyDatasetDataDimensionsChanged(const Dataset<DatasetImpl>& dataset)
 {
     try {
+        if (core()->isAboutToBeDestroyed())
+            return;
+
         DatasetDataDimensionsChangedEvent dataEvent(dataset);
 
         const auto eventListeners = _eventListeners;
@@ -225,6 +240,9 @@ void EventManager::notifyDatasetDataDimensionsChanged(const Dataset<DatasetImpl>
 void EventManager::notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets /*= nullptr*/)
 {
     try {
+        if (core()->isAboutToBeDestroyed())
+            return;
+
 #ifdef EVENT_MANAGER_VERBOSE
         QStringList datasetNotifiedString;
 
@@ -271,6 +289,8 @@ void EventManager::notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>&
 void EventManager::notifyDatasetLocked(const Dataset<DatasetImpl>& dataset)
 {
     try {
+        if (core()->isAboutToBeDestroyed())
+            return;
 
         if (!dataset.isValid())
             throw std::runtime_error("Dataset is invalid");
@@ -295,6 +315,8 @@ void EventManager::notifyDatasetLocked(const Dataset<DatasetImpl>& dataset)
 void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
 {
     try {
+        if (core()->isAboutToBeDestroyed())
+            return;
 
         if (!dataset.isValid())
             throw std::runtime_error("Dataset is invalid");

@@ -132,6 +132,26 @@ void HelpManager::initialize()
 
         _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
         _tutorialsModel.synchronizeWithDsns();
+
+        _tasksFilterModel.setSourceModel(&_tasksModel);
+        _tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
+        _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
+        _tasksFilterModel.getTopLevelTasksOnlyAction().setChecked(true);
+
+        connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+            for (int filterModelRowIndex = first; filterModelRowIndex <= last; filterModelRowIndex++) {
+                const auto sourceModelIndex = _tasksFilterModel.mapToSource(_tasksFilterModel.index(filterModelRowIndex, 0));
+
+            	auto task = _tasksModel.getTask(sourceModelIndex.row());
+
+                // Avoid polluting the toaster with too many task-based notifications; only add task notifications for tasks that are running or running indeterminate after 500ms
+                QTimer::singleShot(500, this, [this, task, sourceModelIndex]() -> void {
+                    if (task->isRunning() || task->isRunningIndeterminate()) {
+                        addNotification(_tasksModel.getTask(sourceModelIndex.row()));
+                    }
+                });
+            }
+        });
     }
     endInitialization();
 }
@@ -177,6 +197,11 @@ LearningCenterVideos HelpManager::getVideos(const QStringList& tags) const
 void HelpManager::addNotification(const QString& title, const QString& description, const QIcon& icon /*= QIcon()*/, const util::Notification::DurationType& durationType /*= util::Notification::DurationType::Calculated*/, std::int32_t delayMs /*= 0*/)
 {
     _notifications.showMessage(title, description, icon, durationType, delayMs);
+}
+
+void HelpManager::addNotification(QPointer<Task> task)
+{
+    _notifications.showTask(task);
 }
 
 void HelpManager::initializeNotifications(QWidget* parentWidget)

@@ -34,7 +34,9 @@ Core::Core() :
     _aboutToBeDestroyed(false)
 {
     connect(Application::current(), &QCoreApplication::aboutToQuit, this, [this]() -> void {
-        _aboutToBeDestroyed = true;
+        emit aboutToBeDestroyed();
+
+    	_aboutToBeDestroyed = true;
 
         for (auto& manager : _managers)
             manager->setCoreIsDestroyed();
