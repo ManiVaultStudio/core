@@ -10,7 +10,7 @@
       "date",
       "summary",
       "fullpost",
-      "url",
+      "project",
       "minimum-version-major",
       "minimum-version-minor"
     ],
