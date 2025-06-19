@@ -44,18 +44,25 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
     connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
         setRowCount(0);
 
+        if (mv::plugins().isInitializing())
+            return;
+
         _future = QtConcurrent::mapped(
             _dsnsAction.getStrings(),
             [this](const QString& dsn) {
                 return downloadProjectsFromDsn(dsn);
-		});
+	    });
 
     	connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
     		for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
                 QJsonParseError jsonParseError;
 
                 const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
-
+                
+                if (jsonDocument.isNull()) {
+                    qWarning() << "Failed to parse JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+                    continue;
+                }
                 if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
                     qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
                     continue;
@@ -75,6 +82,10 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
 
         _watcher.setFuture(_future);
 	});
+
+    connect(core(), &CoreInterface::initialized, this, [this]() -> void {
+        synchronizeWithDsns();
+    });
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
         connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectDatabaseModel::synchronizeWithDsns);
@@ -172,14 +183,17 @@ const ProjectDatabaseProjects& ProjectDatabaseModel::getProjects() const
 
 void ProjectDatabaseModel::synchronizeWithDsns()
 {
-    auto uniqueDsns = _dsnsAction.getStrings();
+    if (!mv::core()->isInitialized())
+        return;
+
+    QStringList uniqueDsns;
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
         uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
     }
 
     uniqueDsns.removeDuplicates();
-
+    
     _dsnsAction.setStrings(uniqueDsns);
 }
 

@@ -141,6 +141,18 @@ namespace mv
         return variantMap;
     }
 
+    BiMap& KeyBasedSelectionGroup::getBiMap(Dataset<DatasetImpl> dataset)
+    {
+        for (size_t i = 0; i < _datasets.size(); i++)
+        {
+            Dataset<DatasetImpl> d = _datasets[i];
+            if (d == dataset)
+            {
+                return _biMaps[i];
+            }
+        }
+    }
+
     void KeyBasedSelectionGroup::addDataset(Dataset<DatasetImpl> dataset, BiMap& bimap)
     {
         _datasets.push_back(dataset);

@@ -48,6 +48,9 @@ ProjectDatabaseProject::ProjectDatabaseProject(const QVariantMap& variantMap) :
             }
         }
     }
+
+    if (!_missingPlugins.isEmpty())
+        qWarning() << "Project" << _title << "is added to the project database but cannot be opened because of missing plugins:" << _missingPlugins.join(", ");
 }
 
 const QString& ProjectDatabaseProject::getTitle() const

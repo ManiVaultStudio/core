@@ -208,7 +208,7 @@ signals:
 private:
     QSize                   _renderSize;                    /** Size of the renderer canvas */
     Navigator2D             _navigator;                     /** 2D navigator */
-    QPointer<Navigator2D>   _customNavigator;               /** Use this one in stead of Renderer2D#_navigator when set */
+    QPointer<Navigator2D>   _customNavigator;               /** Use this one instead of Renderer2D#_navigator when set */
     QRectF                  _dataBounds;                    /** Bounds of the data */
     QRectF                  _worldBounds;                   /** Bounds of the world */
     QMatrix4x4              _modelMatrix;                   /** Model matrix */
