@@ -331,6 +331,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
     	}
 
     	const auto datasetId = dataset->getId();
+        const auto datasetDataType = dataset->getDataType();
     	const auto rawDataName = dataset->getRawDataName();
 
     	dataset->setAboutToBeRemoved();
@@ -381,7 +382,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
             removeRawData(rawDataName);
 
 	    if (!mv::core()->isAboutToBeDestroyed()) {
-		    events().notifyDatasetRemoved(datasetId, dataset->getDataType());
+		    events().notifyDatasetRemoved(datasetId, datasetDataType);
     		emit datasetRemoved(datasetId);
 	    }
     }
