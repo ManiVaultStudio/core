@@ -8,6 +8,9 @@
 
 #include "actions/ScriptTriggerAction.h"
 
+#include "util/Script.h"
+
+
 #include <QObject>
 
 namespace mv {
