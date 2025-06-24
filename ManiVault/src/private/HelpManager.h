@@ -8,6 +8,7 @@
 
 #include <util/FileDownloader.h>
 #include <util/Notification.h>
+#include <util/Notifications.h>
 
 #include <models/TasksListModel.h>
 #include <models/TasksFilterModel.h>

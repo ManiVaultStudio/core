@@ -12,12 +12,14 @@
 #include <ProjectMetaAction.h>
 
 #include <util/StyledIcon.h>
+#include <util/Icon.h>
 
 #include <models/ProjectDatabaseModel.h>
 
 #include <QDebug>
 #include <QPainter>
 #include <QStandardPaths>
+
 
 using namespace mv;
 using namespace mv::util;

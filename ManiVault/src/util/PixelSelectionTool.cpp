@@ -12,6 +12,8 @@
 #include <QPainterPath>
 #include <QtMath>
 
+#include "StyledIcon.h"
+
 namespace mv::util {
 
 PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enabled /*= true*/) :

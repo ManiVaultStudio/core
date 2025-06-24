@@ -4,6 +4,12 @@
 
 #include "Notification.h"
 
+#include "Application.h"
+
+#include "StyledIcon.h"
+
+#include "actions/ColorAction.h"
+
 #include <QLabel>
 #include <QTimer>
 #include <QPropertyAnimation>
@@ -13,9 +19,10 @@
 #include <QMainWindow>
 #include <QStatusBar>
 #include <QPushButton>
+#include <QPainter>
 #include <QPainterPath>
 
-#include "actions/ColorAction.h"
+
 
 namespace mv::util
 {

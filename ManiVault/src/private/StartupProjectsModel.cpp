@@ -7,6 +7,7 @@
 #include <ProjectMetaAction.h>
 
 #include <util/StyledIcon.h>
+#include <util/Icon.h>
 
 #include <QString>
 

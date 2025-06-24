@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QList>
 #include <QString>
+#include <QModelIndex>
 
 #include <functional>
 

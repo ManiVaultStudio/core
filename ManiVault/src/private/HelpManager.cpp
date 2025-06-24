@@ -7,6 +7,8 @@
 #include <models/LearningCenterVideosFilterModel.h>
 #include <models/LearningCenterTutorialsFilterModel.h>
 
+#include <CoreInterface.h>
+
 #include <util/Exception.h>
 
 #include <actions/WatchVideoAction.h>
@@ -18,6 +20,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUrl>
+#include <QMenu>
 
 using namespace mv::gui;
 using namespace mv::util;

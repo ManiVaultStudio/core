@@ -7,6 +7,7 @@
 #include <QHBoxLayout>
 #include <QMenu>
 #include <QResizeEvent>
+#include <QPainter>
 
 namespace mv::gui {
 
