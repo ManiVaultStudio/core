@@ -10,6 +10,8 @@
 #include <QPaintEvent>
 #include <QEvent>
 
+#include "CoreInterface.h"
+
 #ifdef _DEBUG
     //#define NAVIGATOR_2D_VERBOSE
 #endif

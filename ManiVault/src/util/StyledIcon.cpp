@@ -19,8 +19,6 @@
 	#define STYLED_ICON_VERBOSE
 #endif
 
-using namespace mv::gui;
-
 namespace mv::util
 {
 

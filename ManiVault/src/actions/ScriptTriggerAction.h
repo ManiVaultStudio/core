@@ -10,6 +10,11 @@
 
 #include "util/Script.h"
 
+namespace mv::plugin
+{
+    class PluginFactory;
+}
+
 namespace mv::gui {
 
 /**
