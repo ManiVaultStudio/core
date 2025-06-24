@@ -5,6 +5,7 @@
 #pragma once
 
 #include "HorizontalGroupAction.h"
+#include "ColorAction.h"
 
 namespace mv::gui {
 

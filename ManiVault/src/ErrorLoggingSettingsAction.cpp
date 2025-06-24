@@ -4,6 +4,8 @@
 
 #include "ErrorLoggingSettingsAction.h"
 
+#include "CoreInterface.h"
+
 namespace mv::gui
 {
 

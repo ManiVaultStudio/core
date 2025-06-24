@@ -4,6 +4,12 @@
 
 #include "PaletteAction.h"
 
+#include "CoreInterface.h"
+
+#include "AbstractThemeManager.h"
+
+#include <qguiapplication.h>
+
 using namespace mv::util;
 
 namespace mv::gui {

@@ -4,6 +4,9 @@
 
 #include "PageContentWidget.h"
 
+#include "CoreInterface.h"
+
+#include <qguiapplication.h>
 #include <QLabel>
 #include <QString>
 

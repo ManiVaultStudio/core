@@ -4,6 +4,10 @@
 
 #include "ScriptingManager.h"
 
+#include <CoreInterface.h>
+
+#include <util/Miscellaneous.h>
+
 using namespace mv::gui;
 using namespace mv::util;
 

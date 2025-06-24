@@ -4,10 +4,15 @@
 
 #include "StyledIconEngine.h"
 
+#include "util/StyledIcon.h"
+
+#include "Icon.h"
+
 #include <QDebug>
 #include <QPainter>
 #include <QStyleHints>
 #include <QGraphicsPixmapItem>
+#include <qguiapplication.h>
 
 namespace mv::util
 {

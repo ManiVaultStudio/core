@@ -8,6 +8,8 @@
 
 #include "util/ProjectDatabaseProject.h"
 
+#include "actions/StringsAction.h"
+
 #include <QFuture>
 #include <QFutureWatcher>
 

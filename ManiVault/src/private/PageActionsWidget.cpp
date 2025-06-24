@@ -9,6 +9,8 @@
 #include "PageActionsModel.h"
 #include "PageActionDelegate.h"
 
+#include "CoreInterface.h"
+
 #include <Application.h>
 
 #include <QDebug>

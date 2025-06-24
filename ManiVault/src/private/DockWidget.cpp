@@ -11,6 +11,8 @@
 #include <QBoxLayout>
 #include <QToolButton>
 
+#include "CoreInterface.h"
+
 #ifdef _DEBUG
     #define DOCK_WIDGET_VERBOSE
 #endif

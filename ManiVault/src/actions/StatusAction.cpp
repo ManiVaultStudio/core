@@ -4,6 +4,8 @@
 
 #include "StatusAction.h"
 
+#include "util/StyledIcon.h"
+
 #include <QTimer>
 
 using namespace mv::util;

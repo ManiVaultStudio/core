@@ -6,6 +6,8 @@
 
 #include "PageAction.h"
 
+#include "CoreInterface.h"
+
 #include <Application.h>
 #include <QBuffer>
 

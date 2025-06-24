@@ -8,6 +8,8 @@
 
 #include "StandardItemModel.h"
 
+#include "util/Script.h"
+
 #include <QList>
 #include <QStandardItem>
 

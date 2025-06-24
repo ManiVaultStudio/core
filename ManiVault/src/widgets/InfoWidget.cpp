@@ -7,6 +7,8 @@
 #include <QDebug>
 #include <QVBoxLayout>
 
+#include "CoreInterface.h"
+
 #ifdef _DEBUG
     #define INFO_WIDGET_VERBOSE
 #endif

@@ -4,6 +4,8 @@
 
 #include "ProjectDatabaseProject.h"
 
+#include "CoreInterface.h"
+
 namespace mv::util {
 
 ProjectDatabaseProject::ProjectDatabaseProject(const QVariantMap& variantMap) :

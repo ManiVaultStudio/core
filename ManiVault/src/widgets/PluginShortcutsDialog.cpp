@@ -5,6 +5,7 @@
 #include "PluginShortcutsDialog.h"
 
 #include "util/ShortcutMap.h"
+#include "util/StyledIcon.h"
 
 #include <QDebug>
 

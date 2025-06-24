@@ -5,12 +5,15 @@
 #include "ThemeManager.h"
 
 #ifdef Q_OS_MACX
-	#include "util/MacThemeHelper.h"
+	#include <util/MacThemeHelper.h>
 #endif
+
+#include <CoreInterface.h>
 
 #include <models/ColorSchemesFilterModel.h>
 
 #include <QStyleHints>
+#include <QGuiApplication>
 
 using namespace mv::gui;
 using namespace mv::util;
