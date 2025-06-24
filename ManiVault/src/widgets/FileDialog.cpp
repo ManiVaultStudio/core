@@ -4,6 +4,8 @@
 
 #include "FileDialog.h"
 
+#include "util/StyledIcon.h"
+
 #ifdef _DEBUG
     #define FILE_DIALOG_VERBOSE
 #endif

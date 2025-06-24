@@ -10,6 +10,7 @@
 #include <QPainter>
 #include <QStyleHints>
 #include <QGraphicsPixmapItem>
+#include <qguiapplication.h>
 
 namespace mv::util
 {

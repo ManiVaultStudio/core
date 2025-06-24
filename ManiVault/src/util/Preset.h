@@ -8,6 +8,7 @@
 
 #include <QString>
 #include <QMap>
+#include <QIcon>
 
 namespace mv::util {
 
