@@ -4,7 +4,10 @@
 
 #include "Notifications.h"
 
+#include "Application.h"
+
 #include <QMainWindow>
+#include <QEvent>
 
 namespace mv::util
 {

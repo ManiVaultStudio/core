@@ -2,6 +2,8 @@
 
 #include "util/Serialization.h"
 
+#include "Set.h"
+
 #include <QStringList>
 #include <QVector>
 

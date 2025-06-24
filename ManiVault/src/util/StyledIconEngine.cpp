@@ -6,6 +6,8 @@
 
 #include "util/StyledIcon.h"
 
+#include "Icon.h"
+
 #include <QDebug>
 #include <QPainter>
 #include <QStyleHints>

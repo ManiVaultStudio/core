@@ -7,6 +7,7 @@
 #include "Renderer2D.h"
 
 #include <QPainter>
+#include <QPaintEvent>
 
 #ifdef _DEBUG
     //#define NAVIGATOR_2D_VERBOSE

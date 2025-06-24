@@ -4,6 +4,8 @@
 
 #include "ColorSchemeAction.h"
 
+#include "OptionAction.h"
+
 #include "models/ColorSchemesListModel.h"
 
 #ifdef _DEBUG

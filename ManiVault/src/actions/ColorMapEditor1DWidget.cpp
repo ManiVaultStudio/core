@@ -10,6 +10,8 @@
 #include "ColorMapEditor1DAction.h"
 #include "ColorMapAction.h"
 
+#include "CoreInterface.h"
+
 #include <QPainter>
 #include <QStyleOption>
 
