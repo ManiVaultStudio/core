@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "util/Version.h"
+
 #include <QObject>
 #include <QString>
 #include <QStringList>

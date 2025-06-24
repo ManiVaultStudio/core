@@ -5,6 +5,7 @@
 #pragma once
 
 #include "NumericalPointAction.h"
+#include "IntegralAction.h"
 
 namespace mv::gui {
 

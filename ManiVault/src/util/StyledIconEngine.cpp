@@ -4,6 +4,8 @@
 
 #include "StyledIconEngine.h"
 
+#include "util/StyledIcon.h"
+
 #include <QDebug>
 #include <QPainter>
 #include <QStyleHints>

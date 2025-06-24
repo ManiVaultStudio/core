@@ -13,6 +13,7 @@
 #include <QStyleHints>
 #include <QDirIterator>
 #include <QStringList>
+#include <QPainter>
 
 #ifdef _DEBUG
 	#define STYLED_ICON_VERBOSE
