@@ -4,6 +4,8 @@
 
 #include "LearningCenterTutorialsModel.h"
 
+#include "CoreInterface.h"
+
 #include <QtConcurrent>
 
 #ifdef _DEBUG

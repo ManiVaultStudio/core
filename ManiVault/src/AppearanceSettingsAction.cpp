@@ -4,6 +4,7 @@
 
 #include "AppearanceSettingsAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 namespace mv::gui
 {

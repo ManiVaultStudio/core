@@ -8,6 +8,7 @@
 
 #include <QPainter>
 #include <QPaintEvent>
+#include <QEvent>
 
 #ifdef _DEBUG
     //#define NAVIGATOR_2D_VERBOSE

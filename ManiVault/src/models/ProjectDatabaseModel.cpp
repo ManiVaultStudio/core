@@ -4,6 +4,8 @@
 
 #include "ProjectDatabaseModel.h"
 
+#include "CoreInterface.h"
+
 #include "util/FileDownloader.h"
 
 #include <QtConcurrent>
