@@ -55,7 +55,9 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _zoomMarginWorld(.0f),
     _zoomRegionInProgress(false),
     _userHasNavigated(),
-    _navigationAction(this, "Navigation")
+    _navigationAction(this, "Navigation"),
+    _prohibitZoomFactorValueChange(false),
+    _prohibitZoomPercentageValueChange(false)
 {
 }
 
@@ -381,7 +383,13 @@ void Navigator2D::setZoomFactor(float zoomFactor)
 
 	emit zoomFactorChanged(previousZoomFactor, _zoomFactor);
 
-    setZoomPercentage(getZoomPercentage());
+    if (!_prohibitZoomPercentageValueChange) {
+        _prohibitZoomFactorValueChange = true;
+        {
+            setZoomPercentage(getZoomPercentage());
+        }
+        _prohibitZoomFactorValueChange = false;
+    }
 }
 
 float Navigator2D::getZoomPercentage() const
@@ -415,7 +423,14 @@ void Navigator2D::setZoomPercentage(float zoomPercentage)
             const auto zoomFactorX              = static_cast<float>(_renderer.getWorldBounds().width()) / static_cast<float>(_renderer.getRenderSize().width());
             const auto zoomFactorY              = static_cast<float>(_renderer.getWorldBounds().height()) / static_cast<float>(_renderer.getRenderSize().height());
 
-            setZoomFactor(std::max(zoomFactorX, zoomFactorY) / zoomPercentageNormalized);
+            if (!_prohibitZoomFactorValueChange) {
+	            _prohibitZoomPercentageValueChange = true;
+                {
+                    setZoomFactor(std::max(zoomFactorX, zoomFactorY) / zoomPercentageNormalized);
+                }
+                _prohibitZoomPercentageValueChange = false;
+            }
+				
         }
         endChangeZoomRectangleWorld();
     }
