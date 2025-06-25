@@ -11,7 +11,6 @@
 #include "util/Script.h"
 #include "actions/ScriptTriggerAction.h"
 
-
 #include <QObject>
 
 namespace mv {
