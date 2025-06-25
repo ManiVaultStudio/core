@@ -6,6 +6,8 @@
 
 #include "AbstractManager.h"
 
+#include "actions/ScriptTriggerAction.h"
+
 #include "util/Script.h"
 #include "actions/ScriptTriggerAction.h"
 

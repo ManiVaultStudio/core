@@ -330,7 +330,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
-if(${MV_USE_ERROR_LOGGING})
+if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
     target_link_libraries(${MV_EXE} PRIVATE sentry)
     target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
     
@@ -612,7 +612,7 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
-    if(${MV_USE_ERROR_LOGGING})
+    if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
         # Install sentry artifacts
         add_custom_command(TARGET ${MV_EXE}  POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler executable"
