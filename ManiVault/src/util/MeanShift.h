@@ -35,8 +35,6 @@ public:
     Texture2D& getGradientTexture();
     Texture2D& getMeanShiftTexture();
 
-    std::uint32_t getResolution() const;
-
 private:
     const unsigned int RESOLUTION = 256;
 
