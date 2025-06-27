@@ -105,7 +105,7 @@ QRectF getDataBounds(const std::vector<Vector2f>& points)
 void MeanShift::setData(const std::vector<Vector2f>* points)
 {
     QRectF bounds = getDataBounds(*points);
-    //_numPoints = (unsigned int) points->size();
+    
     _points = points;
     _bounds = bounds;
     densityComputation.setData(points);
