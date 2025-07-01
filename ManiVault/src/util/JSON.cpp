@@ -53,13 +53,13 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
         if (!isValidJson(jsonSchemaString))
             throw std::runtime_error("Schema content is not properly JSON formatted");
 
-        nlohmann::json jsonDocument, jsonSchemaDocument;
+        nlohmann::json jsonDocument = nlohmann::json::parse(jsonString), jsonSchemaDocument = nlohmann::json::parse(jsonSchemaString);
 
-        if (!valijson::utils::loadDocument(jsonString, jsonDocument))
-            throw std::runtime_error("Failed to parse JSON content document");
+        //if (!valijson::utils::loadDocument(jsonString, jsonDocument))
+        //    throw std::runtime_error("Failed to parse JSON content document");
 
-        if (!valijson::utils::loadDocument(jsonSchemaString, jsonSchemaDocument))
-            throw std::runtime_error("Failed to parse JSON schema document");
+        //if (!valijson::utils::loadDocument(jsonSchemaString, jsonSchemaDocument))
+        //    throw std::runtime_error("Failed to parse JSON schema document");
 
         valijson::Schema schema;
         valijson::adapters::NlohmannJsonAdapter schemaAdapter(jsonSchemaDocument);
@@ -80,9 +80,22 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
             qCritical() << "JSON document is invalid.";
 
             valijson::ValidationResults::Error error;
+            while (results.popError(error)) {
+                std::cerr << "  - " << error.description;
+                if (!error.context.empty()) {
+                    std::cerr << " [Context:";
+                    for (const auto& ctx : error.context) {
+                        std::cerr << " " << ctx;
+                    }
+                    std::cerr << "]";
+                }
+                std::cerr << std::endl;
+            }
 
-            while (results.popError(error))
-                qCritical() << "  - " << error.description;
+            //valijson::ValidationResults::Error error;
+
+            //while (results.popError(error))
+            //    qCritical() << "  - " << error.description;
         }
     }
     catch (const std::exception& e) {

@@ -2,10 +2,10 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "AbstractProjectDatabaseModel.h"
+#include "AbstractProjectsModel.h"
 
 #ifdef _DEBUG
-    //#define ABSTRACT_PROJECT_DATABASE_MODEL_VERBOSE
+    //#define ABSTRACT_PROJECTS_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -13,7 +13,7 @@ using namespace mv::gui;
 
 namespace mv {
 
-QMap<AbstractProjectDatabaseModel::Column, AbstractProjectDatabaseModel::ColumHeaderInfo> AbstractProjectDatabaseModel::columnInfo = QMap<Column, ColumHeaderInfo>({
+QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> AbstractProjectsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
     { Column::Title, { "Title" , "Title", "Title" } },
     { Column::Tags, { "Tags" , "Tags", "Tags" } },
     { Column::Date, { "Date" , "Date", "Issue date" } },
@@ -25,13 +25,13 @@ QMap<AbstractProjectDatabaseModel::Column, AbstractProjectDatabaseModel::ColumHe
     { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
 });
 
-AbstractProjectDatabaseModel::AbstractProjectDatabaseModel(QObject* parent /*= nullptr*/) :
+AbstractProjectsModel::AbstractProjectsModel(QObject* parent /*= nullptr*/) :
     StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 }
 
-QVariant AbstractProjectDatabaseModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
     switch (static_cast<Column>(section))
     {
@@ -69,12 +69,12 @@ QVariant AbstractProjectDatabaseModel::headerData(int section, Qt::Orientation o
     return {};
 }
 
-QSet<QString> AbstractProjectDatabaseModel::getTagsSet() const
+QSet<QString> AbstractProjectsModel::getTagsSet() const
 {
     return _tags;
 }
 
-void AbstractProjectDatabaseModel::addProject(const ProjectDatabaseProject* project)
+void AbstractProjectsModel::addProject(const ProjectDatabaseProject* project)
 {
     Q_ASSERT(project);
 
@@ -89,7 +89,7 @@ void AbstractProjectDatabaseModel::addProject(const ProjectDatabaseProject* proj
     _projects.push_back(project);
 }
 
-void AbstractProjectDatabaseModel::updateTags()
+void AbstractProjectsModel::updateTags()
 {
     for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
         for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getProject()->getTags())
@@ -98,7 +98,7 @@ void AbstractProjectDatabaseModel::updateTags()
     emit tagsChanged(_tags);
 }
 
-const ProjectDatabaseProject* AbstractProjectDatabaseModel::getProject(const QModelIndex& index) const
+const ProjectDatabaseProject* AbstractProjectsModel::getProject(const QModelIndex& index) const
 {
     Q_ASSERT(index.isValid());
 
@@ -115,22 +115,22 @@ const ProjectDatabaseProject* AbstractProjectDatabaseModel::getProject(const QMo
     return itemAtIndex->getProject();
 }
 
-const ProjectDatabaseProjects& AbstractProjectDatabaseModel::getProjects() const
+const ProjectDatabaseProjects& AbstractProjectsModel::getProjects() const
 {
 	return _projects;
 }
 
-AbstractProjectDatabaseModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
+AbstractProjectsModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
     _project(project)
 {
 }
 
-const ProjectDatabaseProject* AbstractProjectDatabaseModel::Item::getProject() const
+const ProjectDatabaseProject* AbstractProjectsModel::Item::getProject() const
 {
     return _project;
 }
 
-QVariant AbstractProjectDatabaseModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -150,7 +150,7 @@ QVariant AbstractProjectDatabaseModel::TitleItem::data(int role /*= Qt::UserRole
     return Item::data(role);
 }
 
-QVariant AbstractProjectDatabaseModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -169,7 +169,7 @@ QVariant AbstractProjectDatabaseModel::TagsItem::data(int role /*= Qt::UserRole 
     return Item::data(role);
 }
 
-QVariant AbstractProjectDatabaseModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -186,7 +186,7 @@ QVariant AbstractProjectDatabaseModel::DateItem::data(int role /*= Qt::UserRole 
     return Item::data(role);
 }
 
-QVariant AbstractProjectDatabaseModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -203,7 +203,7 @@ QVariant AbstractProjectDatabaseModel::IconNameItem::data(int role /*= Qt::UserR
     return Item::data(role);
 }
 
-QVariant AbstractProjectDatabaseModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -220,7 +220,7 @@ QVariant AbstractProjectDatabaseModel::SummaryItem::data(int role /*= Qt::UserRo
     return Item::data(role);
 }
 
-QVariant AbstractProjectDatabaseModel::UrlItem::data(int role) const
+QVariant AbstractProjectsModel::UrlItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -239,7 +239,7 @@ QVariant AbstractProjectDatabaseModel::UrlItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant AbstractProjectDatabaseModel::MinimumCoreVersionItem::data(int role) const
+QVariant AbstractProjectsModel::MinimumCoreVersionItem::data(int role) const
 {
     switch (role) {
 		case Qt::EditRole:
@@ -258,7 +258,7 @@ QVariant AbstractProjectDatabaseModel::MinimumCoreVersionItem::data(int role) co
 	return Item::data(role);
 }
 
-QVariant AbstractProjectDatabaseModel::RequiredPluginsItem::data(int role) const
+QVariant AbstractProjectsModel::RequiredPluginsItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -277,7 +277,7 @@ QVariant AbstractProjectDatabaseModel::RequiredPluginsItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant AbstractProjectDatabaseModel::MissingPluginsItem::data(int role) const
+QVariant AbstractProjectsModel::MissingPluginsItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:

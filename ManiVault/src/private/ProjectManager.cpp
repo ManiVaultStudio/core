@@ -238,7 +238,7 @@ void ProjectManager::initialize()
 
     beginInitialization();
     {
-        _projectDatabaseModel.synchronizeWithDsns();
+        _projectsTreeModel.synchronizeWithDsns();
     }
     endInitialization();
 }
@@ -1072,9 +1072,9 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
     return {};
 }
 
-const ProjectDatabaseTreeModel& ProjectManager::getProjectDatabaseTreeModel() const
+const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
 {
-    return _projectDatabaseModel;
+    return _projectsTreeModel;
 }
 
 QMenu& ProjectManager::getNewProjectMenu()

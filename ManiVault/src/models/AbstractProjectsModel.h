@@ -13,13 +13,13 @@
 namespace mv {
 
 /**
- * Abstract project database model class
+ * Abstract projects model class
  *
- * Base standard item model for plugins project database.
+ * Base standard item model for projects.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT AbstractProjectDatabaseModel final : public StandardItemModel
+class CORE_EXPORT AbstractProjectsModel : public StandardItemModel
 {
     Q_OBJECT
 
@@ -427,7 +427,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractProjectDatabaseModel(QObject* parent = nullptr);
+    AbstractProjectsModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role

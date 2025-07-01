@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "models/AbstractProjectDatabaseModel.h"
+#include "models/AbstractProjectsModel.h"
 
 #include "util/ProjectDatabaseProject.h"
 
@@ -18,13 +18,13 @@
 namespace mv {
 
 /**
- * Project database tree model class
+ * Projects tree model class
  *
  * Contains grouped project content.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectDatabaseTreeModel final : public AbstractProjectDatabaseModel
+class CORE_EXPORT ProjectsTreeModel final : public AbstractProjectsModel
 {
     Q_OBJECT
 
@@ -34,25 +34,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    ProjectDatabaseTreeModel(QObject* parent = nullptr);
-
-    /**
-     * Get header data for \p section, \p orientation and display \p role
-     * @param section Section
-     * @param orientation Orientation
-     * @param role Data role
-     * @return Header
-     */
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-    /**
-     * Get tags
-     * @return All tags
-     */
-    QSet<QString> getTagsSet() const;
-
-    /** Builds a set of all project tags and emits ProjectDatabaseModel::tagsChanged(...) */
-    void updateTags();
+    ProjectsTreeModel(QObject* parent = nullptr);
 
     /** Synchronize the model with the data source names */
     void synchronizeWithDsns();

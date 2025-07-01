@@ -17,7 +17,7 @@
             "repoName": { "type": "string" },
             "version": { "type": "string" }
           },
-          "required": ["Name", "RepoName", "Version"],
+          "required": ["name", "repoName", "version"],
           "additionalProperties": false
         }
       },
@@ -29,7 +29,7 @@
           "patch": { "type": "integer" },
           "suffix": { "type": "string" }
         },
-        "required": ["Major", "Minor", "Patch", "Suffix"],
+        "required": ["major", "minor", "patch", "suffix"],
         "additionalProperties": false
       },
       "tags": {
@@ -38,7 +38,7 @@
       },
       "date": { "type": "string" }
     },
-    "required": ["Title", "Url", "Summary", "RequiredPlugins", "CoreVersion", "Tags", "Date"],
-    "additionalProperties": false
+    "required": ["title", "url", "summary", "requiredPlugins", "coreVersion", "tags", "date"],
+    "additionalProperties": true
   }
 }

@@ -17,7 +17,7 @@
 #include <QMenu>
 #include <QTemporaryDir>
 
-#include "models/ProjectDatabaseTreeModel.h"
+#include "models/ProjectsTreeModel.h"
 
 namespace mv {
 
@@ -190,10 +190,10 @@ public:
     virtual Project* getCurrentProject() = 0;
 
     /**
-     * Get project database tree model
-     * @return Reference to the project database tree model
+     * Get projects tree model
+     * @return Reference to the projects tree model
      */
-    virtual const ProjectDatabaseTreeModel& getProjectDatabaseTreeModel() const = 0;
+    virtual const ProjectsTreeModel& getProjectsTreeModel() const = 0;
 
 public: // Temporary directories
 

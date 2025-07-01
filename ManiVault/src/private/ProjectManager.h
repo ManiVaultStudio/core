@@ -6,8 +6,8 @@
 
 #include <AbstractProjectManager.h>
 
-#include <models/ProjectDatabaseModel.h>
-#include <models/ProjectDatabaseFilterModel.h>
+#include <models/ProjectsTreeModel.h>
+#include <models/ProjectsFilterModel.h>
 
 #include <QObject>
 
@@ -133,10 +133,10 @@ public:
     QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
 
     /**
-     * Get project database tree model
-     * @return Reference to the project database tree model
+     * Get projects tree model
+     * @return Reference to the projects tree model
      */
-    const ProjectDatabaseTreeModel& getProjectDatabaseTreeModel() const override;
+    const ProjectsTreeModel& getProjectsTreeModel() const override;
 
 public: // Menus
 
@@ -202,7 +202,7 @@ private:
     gui::TriggerAction              _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
     gui::ToggleAction               _showStartPageAction;               /** Action for toggling the start page */
     gui::TriggerAction              _backToProjectAction;               /** Action for going back to the project */
-    ProjectDatabaseModel            _projectDatabaseModel;              /** Project database model */
+    ProjectsTreeModel               _projectsTreeModel;                 /** Projects tree model */
 };
 
 }

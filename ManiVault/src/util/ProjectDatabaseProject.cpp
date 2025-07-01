@@ -9,38 +9,39 @@
 namespace mv::util {
 
 ProjectDatabaseProject::ProjectDatabaseProject(const QVariantMap& variantMap) :
-    _title(variantMap.contains("Title") ? variantMap["Title"].toString() : ""),
-    _tags(variantMap.contains("Tags") ? variantMap["Tags"].toStringList() : QStringList()),
-    _date(variantMap.contains("Date") ? variantMap["Date"].toString() : ""),
+    _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
+    _group(variantMap.contains("group") ? variantMap["group"].toString() : ""),
+    _tags(variantMap.contains("tags") ? variantMap["tags"].toStringList() : QStringList()),
+    _date(variantMap.contains("date") ? variantMap["date"].toString() : ""),
     _iconName(variantMap.contains("icon") ? variantMap["icon"].toString() : ""),
-    _summary(variantMap.contains("Summary") ? variantMap["Summary"].toString() : ""),
-    _url(QUrl(variantMap.contains("Url") ? variantMap["Url"].toString() : ""))
+    _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
+    _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : ""))
     
 {
-    if (variantMap.contains("CoreVersion")) {
-        const auto coreVersionMap = variantMap["CoreVersion"].toMap();
+    if (variantMap.contains("coreVersion")) {
+        const auto coreVersionMap = variantMap["coreVersion"].toMap();
 
-        if (coreVersionMap.contains("Major"))
-			_minimumCoreVersion.setMajor(coreVersionMap["Major"].toInt());
+        if (coreVersionMap.contains("major"))
+			_minimumCoreVersion.setMajor(coreVersionMap["major"].toInt());
 
-        if (coreVersionMap.contains("Minor"))
-            _minimumCoreVersion.setMinor(coreVersionMap["Minor"].toInt());
+        if (coreVersionMap.contains("minor"))
+            _minimumCoreVersion.setMinor(coreVersionMap["minor"].toInt());
 
-        if (coreVersionMap.contains("Patch"))
-            _minimumCoreVersion.setPatch(coreVersionMap["Patch"].toInt());
+        if (coreVersionMap.contains("patch"))
+            _minimumCoreVersion.setPatch(coreVersionMap["patch"].toInt());
 
-        if (coreVersionMap.contains("Suffix"))
-            _minimumCoreVersion.setSuffix(coreVersionMap["Suffix"].toString().toStdString());
+        if (coreVersionMap.contains("suffix"))
+            _minimumCoreVersion.setSuffix(coreVersionMap["suffix"].toString().toStdString());
     }
 
-    if (variantMap.contains("RequiredPlugins")) {
-        const auto requiredPluginsMap = variantMap["RequiredPlugins"].toList();
+    if (variantMap.contains("requiredPlugins")) {
+        const auto requiredPluginsMap = variantMap["requiredPlugins"].toList();
 
         for (const auto& requiredPluginVariant : requiredPluginsMap) {
             const auto requiredPluginMap = requiredPluginVariant.toMap();
 
-            if (requiredPluginMap.contains("Name")) {
-                const auto requiredPluginName = requiredPluginMap["Name"].toString();
+            if (requiredPluginMap.contains("name")) {
+                const auto requiredPluginName = requiredPluginMap["name"].toString();
 
                 _requiredPlugins << requiredPluginName;
 
@@ -58,6 +59,11 @@ ProjectDatabaseProject::ProjectDatabaseProject(const QVariantMap& variantMap) :
 const QString& ProjectDatabaseProject::getTitle() const
 {
     return _title;
+}
+
+const QString& ProjectDatabaseProject::getGroup() const
+{
+    return _group;
 }
 
 const QStringList& ProjectDatabaseProject::getTags() const

@@ -43,6 +43,12 @@ public:
     const QString& getTitle() const;
 
     /**
+     * Get group
+     * @return Project group
+     */
+    const QString& getGroup() const;
+
+    /**
      * Get tags
      * @return Project tags
      */
@@ -98,6 +104,7 @@ public:
     ProjectDatabaseProject& operator=(const ProjectDatabaseProject& rhs)
     {
         _title                  = rhs.getTitle();
+        _group                  = rhs.getTitle();
         _tags                   = rhs.getTags();
         _date                   = rhs.getDate();
         _iconName               = rhs.getIconName();
@@ -112,6 +119,7 @@ public:
 
 private:
     QString         _title;                 /** Title */
+    QString         _group;                 /** Group */
     QStringList     _tags;                  /** Tags */
     QString         _date;                  /** Issue date */
     QString         _iconName;              /** Font Awesome icon name */
