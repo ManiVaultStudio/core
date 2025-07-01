@@ -59,10 +59,10 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
             for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
                 try {
                     const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
-                    const auto fullJson = json::parse(jsonData.constData());
+                    const auto fullJson = json::parse(QString::fromUtf8(jsonData.constData()).toStdString());
 
                     if (fullJson.contains("tutorials")) {
-                        validateJson(fullJson["tutorials"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), ":/JSON/TutorialsSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
+                        validateJson(fullJson["tutorials"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), loadJsonFromResource(":/JSON/TutorialsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
                     }
                     else {
                         throw std::runtime_error("Tutorials key is missing");

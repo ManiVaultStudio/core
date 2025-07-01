@@ -16,11 +16,10 @@
     //#define PROJECT_DATABASE_MODEL_VERBOSE
 #endif
 
-using nlohmann::json;
-using nlohmann::json_schema::json_vlidator;
-
 using namespace mv::util;
 using namespace mv::gui;
+
+using nlohmann::json;
 
 namespace mv {
 
@@ -61,10 +60,10 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
             for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
 	            try {
 					const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
-					const auto fullJson = json::parse(jsonData.constData());
+					const auto fullJson = json::parse(QString::fromUtf8(jsonData.constData()).toStdString());
 
 					if (fullJson.contains("Projects")) {
-						validateJson(fullJson["Projects"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), ":/JSON/ProjectsSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
+						validateJson(fullJson["Projects"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), loadJsonFromResource(":/JSON/ProjectsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
 					}
 					else {
 						throw std::runtime_error("/Projects key is missing");

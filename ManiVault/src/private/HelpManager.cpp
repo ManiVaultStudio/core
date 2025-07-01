@@ -95,10 +95,10 @@ HelpManager::HelpManager(QObject* parent) :
             const auto videosDsn    = "https://www.manivault.studio/api/learning-center.json";
             const auto jsonData     = _fileDownloader.downloadedData();
 
-            json fullJson = json::parse(jsonData.constData());
+            json fullJson = json::parse(QString::fromUtf8(jsonData).toStdString());
 
             if (fullJson.contains("videos")) {
-                validateJson(fullJson["videos"], videosDsn, ":/JSON/VideosSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
+                validateJson(fullJson["videos"].dump(), videosDsn, loadJsonFromResource(":/JSON/VideosSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
             }
             else {
                 throw std::runtime_error("Videos key is missing");

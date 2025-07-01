@@ -20,7 +20,7 @@ CORE_EXPORT bool isValidJson(const std::string& input);
  * @param resourcePath Path to the JSON resource file
  * @return Parsed JSON content as a QString
  */
-CORE_EXPORT QString loadJsonFromResource(const std::string& resourcePath);
+CORE_EXPORT std::string loadJsonFromResource(const std::string& resourcePath);
 
 /**
  * Validate JSON string content against a schema defined in a resource file as a JSON string

@@ -168,8 +168,7 @@ CPMAddPackage(
   NAME valijson
   GITHUB_REPOSITORY tristanpenman/valijson
   GIT_TAG master
-  OPTIONS
-    "VALIJSON_BUILD_TESTS OFF"
+  OPTIONS "VALIJSON_BUILD_TESTS OFF" "VALIJSON_USE_EXCEPTIONS ON"
 )
 
 # Make an interface target for valijson
