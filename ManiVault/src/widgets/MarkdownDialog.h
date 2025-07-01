@@ -22,7 +22,7 @@ namespace mv::util {
  *
  * @author Thomas Kroes
  */
-class MarkdownWebEnginePage : public QWebEnginePage
+class CORE_EXPORT MarkdownWebEnginePage : public QWebEnginePage
 {
 public:
 
@@ -48,7 +48,7 @@ public:
  * 
  * @author Thomas Kroes
  */
-class MarkdownDialog : public QDialog
+class CORE_EXPORT MarkdownDialog : public QDialog
 {
 public:
 

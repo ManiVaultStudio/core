@@ -60,9 +60,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
 
-    if (QFileInfo("StartPage.json").exists()) {
-        _settingsAction.addAction(&_toggleProjectDatabaseAction);
-    }
+	_settingsAction.addAction(&_toggleProjectDatabaseAction);
 
     _settingsAction.addAction(&_toggleRecentProjectsAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);

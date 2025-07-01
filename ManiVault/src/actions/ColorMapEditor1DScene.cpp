@@ -5,6 +5,8 @@
 #include "ColorMapEditor1DScene.h"
 #include "ColorMapEditor1DWidget.h"
 
+#include "CoreInterface.h"
+
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 

@@ -14,6 +14,9 @@
 #include <QGraphicsWidget>
 #include <QGraphicsRectItem>
 #include <QGraphicsLinearLayout>
+#include <QGraphicsOpacityEffect>
+#include <QApplication>
+#include <QPropertyAnimation>
 
 /** Applies fading capabilities to a graphics item*/
 class GraphicsItemFader : public QObject

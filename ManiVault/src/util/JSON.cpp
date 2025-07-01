@@ -4,120 +4,90 @@
 
 #include "JSON.h"
 
-#include <regex>
+#include <nlohmann/json.hpp>
+#include <valijson/adapters/nlohmann_json_adapter.hpp>
+#include <valijson/validator.hpp>
+#include <valijson/schema.hpp>
+#include <valijson/schema_parser.hpp>
+#include <valijson/utils/nlohmann_json_utils.hpp>
+#include <valijson/validation_results.hpp>
 
 #include <QString>
 
 using nlohmann::json;
-using namespace nlohmann::json_schema;
-using nlohmann::json_schema::json_validator;
+
+using valijson::Schema;
+using valijson::SchemaParser;
+using valijson::Validator;
+using valijson::adapters::NlohmannJsonAdapter;
 
 namespace mv::util {
 
-void printIndentedJson(const nlohmann::json& json, std::int32_t indentLevel = 3) {
-    QString prefix(indentLevel * 2, ' ');
-
-    const auto dumped   = json.dump(2);
-	const auto lines    = QString::fromStdString(dumped).split('\n');
-
-    for (const QString& line : lines)
-        qCritical().noquote() << prefix + line;
-}
-
-json JsonSchemaErrorHandler::truncateJsonForLogging(const json& json, size_t maxStringLen /*= 60*/) {
-    if (json.is_object()) {
-        auto result = json::object();
-
-        for (auto it = json.begin(); it != json.end(); ++it)
-            result[it.key()] = truncateJsonForLogging(it.value(), maxStringLen);
-        
-        return result;
-    }
-
-	if (json.is_array()) {
-        auto result = json::array();
-
-        for (const auto& item : json)
-            result.push_back(truncateJsonForLogging(item, maxStringLen));
-        
-        return result;
-    }
-
-	if (json.is_string()) {
-        const auto& str = json.get_ref<const std::string&>();
-
-        if (str.length() > maxStringLen) {
-            return str.substr(0, maxStringLen) + "... (truncated)";
-        }
-        
-        return str;
-    }
-
-	return json;
-}
-
-JsonSchemaErrorHandler::JsonSchemaErrorHandler(const std::string& jsonSchemaLocation, const std::string& publicJsonSchemaLocation, const std::string& jsonLocation) :
-    _jsonSchemaLocation(jsonSchemaLocation),
-    _publicJsonSchemaLocation(publicJsonSchemaLocation),
-    _jsonLocation(jsonLocation)
+bool isValidJson(const std::string& input)
 {
-    qDebug() << "Validating" << _jsonLocation << "against" << _jsonSchemaLocation;
+	return nlohmann::json::accept(input);
 }
 
-JsonSchemaErrorHandler::~JsonSchemaErrorHandler()
-{
-    printErrors();
-}
-
-void JsonSchemaErrorHandler::printErrors() const
-{
-    if (_errors.empty()) {
-        qDebug() << "  " << _jsonLocation << "is valid!";
-    } else {
-        qCritical() << "  JSON file is not valid:";
-
-        for (const auto& error : _errors) {
-            qCritical() << "    Schema error:";
-            qCritical() << "      Schema:" << _publicJsonSchemaLocation;
-            qCritical() << "      Location: " << error._pointer.to_string();
-            qCritical().noquote() << "      Instance:";
-        	printIndentedJson(truncateJsonForLogging(error._instance));
-            qCritical() << "      Message: " << error._message;
-        }
-    }
-}
-
-json loadJsonFromResource(const std::string& resourcePath) {
+std::string loadJsonFromResource(const std::string& resourcePath) {
     QFile file(QString::fromStdString(resourcePath));
 
     if (!file.open(QIODevice::ReadOnly)) {
         throw std::runtime_error("Failed to open resource: " + resourcePath);
     }
 
-    QByteArray data = file.readAll();
-
-    return nlohmann::json::parse(data.constData());
+    return file.readAll().toStdString();
 }
 
-void validateJsonWithResourceSchema(const nlohmann::json& json, const std::string& jsonLocation, const std::string& jsonSchemaResourcePath, const std::string& publicJsonSchemaLocation /*= ""*/)
+void validateJson(const std::string& jsonString, const std::string& jsonLocation, const std::string& jsonSchemaString, const std::string& publicJsonSchemaLocation /*= ""*/)
 {
-    const auto jsonSchema = loadJsonFromResource(jsonSchemaResourcePath);
-
-    json_validator jsonValidator;
-
     try {
-        jsonValidator.set_root_schema(jsonSchema);
+        if (jsonString.empty())
+            throw std::runtime_error("JSON content is empty");
+
+        if (jsonSchemaString.empty())
+            throw std::runtime_error("JSON schema is empty");
+
+        if (!isValidJson(jsonString))
+            throw std::runtime_error("Input content is not properly JSON formatted");
+
+        if (!isValidJson(jsonSchemaString))
+            throw std::runtime_error("Schema content is not properly JSON formatted");
+
+        nlohmann::json jsonDocument, jsonSchemaDocument;
+
+        if (!valijson::utils::loadDocument(jsonString, jsonDocument))
+            throw std::runtime_error("Failed to parse JSON content document");
+
+        if (!valijson::utils::loadDocument(jsonSchemaString, jsonSchemaDocument))
+            throw std::runtime_error("Failed to parse JSON schema document");
+
+        valijson::Schema schema;
+        valijson::adapters::NlohmannJsonAdapter schemaAdapter(jsonSchemaDocument);
+
+        valijson::SchemaParser parser;
+
+        parser.populateSchema(schemaAdapter, schema);
+
+        valijson::Validator validator;
+        valijson::adapters::NlohmannJsonAdapter documentAdapter(jsonDocument);
+
+        valijson::ValidationResults results;
+
+        if (validator.validate(schema, documentAdapter, &results)) {
+            qDebug() << "JSON document is valid!";
+        }
+        else {
+            qCritical() << "JSON document is invalid.";
+
+            valijson::ValidationResults::Error error;
+
+            while (results.popError(error))
+                qCritical() << "  - " << error.description;
+        }
     }
     catch (const std::exception& e) {
-        qCritical() << "Unable to assign JSON validator schema: " << e.what() << "\n";
-        return;
+        qCritical() << "Unable to validate JSON: " << e.what() << "\n";
     }
-
-    jsonValidator.set_root_schema(jsonSchema);
-
-    JsonSchemaErrorHandler jsonSchemaErrorHandler(jsonSchemaResourcePath, publicJsonSchemaLocation, jsonLocation);
-
-    jsonValidator.validate(json, jsonSchemaErrorHandler);
 }
 
 }

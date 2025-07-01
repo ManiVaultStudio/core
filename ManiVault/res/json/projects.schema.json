@@ -4,38 +4,39 @@
   "items": {
     "type": "object",
     "properties": {
-      "Title": { "type": "string" },
-      "Url": { "type": "string" },
-      "Summary": { "type": "string" },
-      "RequiredPlugins": {
+      "title": { "type": "string" },
+	  "group": { "type": "string" },
+      "url": { "type": "string" },
+      "summary": { "type": "string" },
+      "requiredPlugins": {
         "type": "array",
         "items": {
           "type": "object",
           "properties": {
-            "Name": { "type": "string" },
-            "RepoName": { "type": "string" },
-            "Version": { "type": "string" }
+            "name": { "type": "string" },
+            "repoName": { "type": "string" },
+            "version": { "type": "string" }
           },
           "required": ["Name", "RepoName", "Version"],
           "additionalProperties": false
         }
       },
-      "CoreVersion": {
+      "coreVersion": {
         "type": "object",
         "properties": {
-          "Major": { "type": "integer" },
-          "Minor": { "type": "integer" },
-          "Patch": { "type": "integer" },
-          "Suffix": { "type": "string" }
+          "major": { "type": "integer" },
+          "minor": { "type": "integer" },
+          "patch": { "type": "integer" },
+          "suffix": { "type": "string" }
         },
         "required": ["Major", "Minor", "Patch", "Suffix"],
         "additionalProperties": false
       },
-      "Tags": {
+      "tags": {
         "type": "array",
         "items": { "type": "string" }
       },
-      "Date": { "type": "string" }
+      "date": { "type": "string" }
     },
     "required": ["Title", "Url", "Summary", "RequiredPlugins", "CoreVersion", "Tags", "Date"],
     "additionalProperties": false

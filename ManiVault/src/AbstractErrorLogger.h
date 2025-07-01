@@ -4,11 +4,15 @@
 
 #pragma once
 
-
 #include "actions/ToggleAction.h"
 #include "actions/StringAction.h"
+#include "actions/TriggerAction.h"
+
+#include "CoreInterface.h"
 
 #include "util/StyledIcon.h"
+
+#include <QTimer>
 
 namespace mv
 {

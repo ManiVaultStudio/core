@@ -6,6 +6,8 @@
 #include "GroupWidgetTreeItem.h"
 #include "GroupAction.h"
 
+#include "util/StyledIcon.h"
+
 #include <QResizeEvent>
 #include <QOperatingSystemVersion>
 

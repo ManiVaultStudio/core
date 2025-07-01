@@ -5,6 +5,7 @@
 #pragma once
 
 #include "NumericalPointAction.h"
+#include "DecimalAction.h"
 
 namespace mv::gui {
 

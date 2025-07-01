@@ -6,6 +6,9 @@
 
 #include "VerticalGroupAction.h"
 #include "PaletteColorRoleAction.h"
+#include "StringAction.h"
+#include "TriggerAction.h"
+#include "TriggerAction.h"
 
 namespace mv::gui {
 
