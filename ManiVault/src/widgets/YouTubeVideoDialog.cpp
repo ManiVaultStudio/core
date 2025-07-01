@@ -4,6 +4,8 @@
 
 #include "YouTubeVideoDialog.h"
 
+#include "util/StyledIcon.h"
+
 #include <QVBoxLayout>
 #include <QWebEngineView>
 

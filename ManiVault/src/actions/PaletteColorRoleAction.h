@@ -6,6 +6,7 @@
 
 #include "HorizontalGroupAction.h"
 #include "PaletteColorAction.h"
+#include "StringAction.h"
 
 #include <QPalette>
 

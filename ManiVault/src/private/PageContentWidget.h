@@ -6,6 +6,7 @@
 
 #include <QHBoxLayout>
 #include <QWidget>
+#include <QLabel>
 
 /**
  * Page content widget class

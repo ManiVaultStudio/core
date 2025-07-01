@@ -5,7 +5,11 @@
 #include "StartPageWidget.h"
 #include "ManiVaultVersion.h"
 
+#include "CoreInterface.h"
+
 #include <QDebug>
+#include <QEvent>
+#include <QKeyEvent>
 
 using namespace mv;
 using namespace mv::util;

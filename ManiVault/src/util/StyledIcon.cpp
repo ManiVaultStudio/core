@@ -13,12 +13,11 @@
 #include <QStyleHints>
 #include <QDirIterator>
 #include <QStringList>
+#include <QPainter>
 
 #ifdef _DEBUG
 	#define STYLED_ICON_VERBOSE
 #endif
-
-using namespace mv::gui;
 
 namespace mv::util
 {

@@ -12,12 +12,14 @@
 #include <ProjectMetaAction.h>
 
 #include <util/StyledIcon.h>
+#include <util/Icon.h>
 
 #include <models/ProjectDatabaseModel.h>
 
 #include <QDebug>
 #include <QPainter>
 #include <QStandardPaths>
+
 
 using namespace mv;
 using namespace mv::util;
@@ -42,29 +44,27 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     layout->addWidget(&_openCreateProjectWidget);
     layout->addWidget(&_recentProjectsWidget);
 
-    if (QFileInfo("StartPage.json").exists()) {
-        layout->addWidget(&_projectDatabaseWidget);
+    layout->addWidget(&_projectDatabaseWidget);
 
-        _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-        _projectDatabaseSettingsAction.setShowLabels(false);
-        _projectDatabaseSettingsAction.setIconByName("globe");
-        _projectDatabaseSettingsAction.setPopupSizeHint(QSize(550, 100));
+    _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _projectDatabaseSettingsAction.setShowLabels(false);
+    _projectDatabaseSettingsAction.setIconByName("globe");
+    _projectDatabaseSettingsAction.setPopupSizeHint(QSize(550, 100));
 
-        _projectDatabaseSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectDatabaseModel().getDsnsAction()));
+    _projectDatabaseSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectDatabaseModel().getDsnsAction()));
 
-        _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
+    _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
 
-        auto& toolbarAction = _projectDatabaseWidget.getHierarchyWidget().getToolbarAction();
+    auto& toolbarAction = _projectDatabaseWidget.getHierarchyWidget().getToolbarAction();
 
-        toolbarAction.addAction(&_projectDatabaseSettingsAction);
-        toolbarAction.addAction(&_projectDatabaseFilterModel.getFilterGroupAction());
-        toolbarAction.addAction(&_projectDatabaseFilterModel.getTagsFilterAction());
+    toolbarAction.addAction(&_projectDatabaseSettingsAction);
+    toolbarAction.addAction(&_projectDatabaseFilterModel.getFilterGroupAction());
+    toolbarAction.addAction(&_projectDatabaseFilterModel.getTagsFilterAction());
 
-        _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectDatabaseModel*>(&mv::projects().getProjectDatabaseModel()));
+    _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectDatabaseModel*>(&mv::projects().getProjectDatabaseModel()));
 
-        connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
-        connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
-    }
+    connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
+    connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
     
     setLayout(layout);
 
@@ -86,7 +86,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     const auto toggleViews = [this]() -> void {
         _openCreateProjectWidget.setVisible(_startPageContentWidget->getToggleOpenCreateProjectAction().isChecked());
-        _projectDatabaseWidget.setVisible(QFileInfo("StartPage.json").exists() && _startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
+        _projectDatabaseWidget.setVisible(_startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
         _recentProjectsWidget.setVisible(_startPageContentWidget->getToggleRecentProjectsAction().isChecked());
     };
 

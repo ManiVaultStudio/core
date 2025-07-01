@@ -9,7 +9,6 @@
 
 #include <QAbstractTextDocumentLayout>
 
-using namespace mv::util;
 using namespace mv::gui;
 
 /**

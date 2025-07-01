@@ -4,6 +4,12 @@
 
 #include "LearningCenterTutorial.h"
 
+#include "CoreInterface.h"
+
+#include <QVariantMap>
+#include <QVariant>
+#include <QDebug>
+
 namespace mv::util {
 
 LearningCenterTutorial::LearningCenterTutorial(const QVariantMap& variantMap) :

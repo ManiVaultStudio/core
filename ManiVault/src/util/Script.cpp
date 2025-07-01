@@ -4,6 +4,8 @@
 
 #include "Script.h"
 
+#include "util/StyledIcon.h"
+
 #ifdef _DEBUG
 	#define SCRIPT_VERBOSE
 #endif

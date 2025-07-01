@@ -4,6 +4,8 @@
 
 #include "ColorScheme.h"
 
+#include <QMap>
+
 namespace mv::util {
 
 const QMap<ColorScheme::Mode, QString> ColorScheme::modeNames = {
