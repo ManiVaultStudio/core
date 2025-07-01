@@ -962,12 +962,14 @@ set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
 )
 
 set(PUBLIC_PROJECT_DATABASE_MODEL_HEADERS
-    src/models/ProjectDatabaseModel.h
+    src/models/AbstractProjectDatabaseModel.h
+    src/models/ProjectDatabaseTreeModel.h
 	src/models/ProjectDatabaseFilterModel.h
 )
 
 set(PUBLIC_PROJECT_DATABASE_MODEL_SOURCES
-    src/models/ProjectDatabaseModel.cpp
+    src/models/AbstractProjectDatabaseModel.cpp
+    src/models/ProjectDatabaseTreeModel.cpp
 	src/models/ProjectDatabaseFilterModel.cpp
 )
 
