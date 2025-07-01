@@ -87,4 +87,9 @@
         <file alias="Markdown">html/markdown.html</file>
         <file alias="ErrorLoggingConsent">html/ErrorLoggingConsent.html</file>
     </qresource>
+	<qresource prefix="/JSON">
+        <file alias="TutorialsSchema">json/tutorials.schema.json</file>
+		<file alias="ProjectsSchema">json/projects.schema.json</file>
+		<file alias="VideosSchema">json/videos.schema.json</file>
+    </qresource>
 </RCC>

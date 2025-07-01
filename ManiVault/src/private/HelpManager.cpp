@@ -10,10 +10,13 @@
 #include <CoreInterface.h>
 
 #include <util/Exception.h>
+#include <util/JSON.h>
 
 #include <actions/WatchVideoAction.h>
 
 #include <Task.h>
+
+#include <nlohmann/json.hpp>
 
 #include <QDesktopServices>
 #include <QJsonArray>
@@ -24,6 +27,8 @@
 
 using namespace mv::gui;
 using namespace mv::util;
+
+using nlohmann::json;
 
 #ifdef _DEBUG
     //#define HELP_MANAGER_VERBOSE
@@ -90,11 +95,28 @@ HelpManager::HelpManager(QObject* parent) :
     connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
         try
         {
-            const auto jsonDocument = QJsonDocument::fromJson(_fileDownloader.downloadedData());
-            const auto videos       = jsonDocument.object()["videos"].toArray();
-            const auto tutorials    = jsonDocument.object()["tutorials"].toArray();
+            const auto videosDsn    = "https://www.manivault.studio/api/learning-center.json";
+            const auto jsonData     = _fileDownloader.downloadedData();
 
-            for (const auto video : videos) {
+            json fullJson = json::parse(QString::fromUtf8(jsonData).toStdString());
+
+            if (fullJson.contains("videos")) {
+                validateJson(fullJson["videos"].dump(), videosDsn, loadJsonFromResource(":/JSON/VideosSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
+            }
+            else {
+                throw std::runtime_error("Videos key is missing");
+            }
+
+            QJsonParseError jsonParseError;
+
+            const auto jsonDocument = QJsonDocument::fromJson(jsonData, &jsonParseError);
+
+            if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                qCritical() << "Invalid JSON from DSN at index" << videosDsn << ":" << jsonParseError.errorString();
+                return;
+            }
+
+            for (const auto video : jsonDocument.object()["videos"].toArray()) {
                 auto videoMap = video.toVariant().toMap();
 
                 addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
