@@ -6,7 +6,7 @@
 
 #include "util/JSON.h"
 
-#include <nlohmann/json.hpp>
+#include "CoreInterface.h"
 
 #include <QtConcurrent>
 
