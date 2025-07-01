@@ -133,10 +133,10 @@ public:
     QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
 
     /**
-     * Get project database model
-     * @return Reference to the project database model
+     * Get project database tree model
+     * @return Reference to the project database tree model
      */
-    const ProjectDatabaseModel& getProjectDatabaseModel() const override;
+    const ProjectDatabaseTreeModel& getProjectDatabaseTreeModel() const override;
 
 public: // Menus
 

@@ -8,23 +8,18 @@
 
 #include "util/ProjectDatabaseProject.h"
 
-#include "actions/StringsAction.h"
-
-#include <QFuture>
-#include <QFutureWatcher>
-
 #include <QMap>
 
 namespace mv {
 
 /**
- * Project database model class
+ * Abstract project database model class
  *
- * Contains project content for the project database.
+ * Base standard item model for plugins project database.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectDatabaseModel final : public StandardItemModel
+class CORE_EXPORT AbstractProjectDatabaseModel final : public StandardItemModel
 {
     Q_OBJECT
 
@@ -432,7 +427,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    ProjectDatabaseModel(QObject* parent = nullptr);
+    AbstractProjectDatabaseModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -470,24 +465,6 @@ public:
      */
     const util::ProjectDatabaseProjects& getProjects() const;
 
-    /** Synchronize the model with the data source names */
-    void synchronizeWithDsns();
-
-private:
-
-    /**
-     * Download projects from \p dsn
-     * @param dsn Projects Data Source Name (DSN)
-     * @return Downloaded data
-     */
-    static QByteArray downloadProjectsFromDsn(const QString& dsn);
-
-public: // Action getters
-    
-    gui::StringsAction& getDsnsAction() { return _dsnsAction; }
-
-    const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
-
 signals:
 
     /**
@@ -496,15 +473,9 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
-    /** Signals that the model was populated from one or more source DSNs */
-    void populatedFromDsns();
-
 private:
-    util::ProjectDatabaseProjects   _projects;          /** Model projects */
-    QSet<QString>                   _tags;              /** All tags */
-    gui::StringsAction              _dsnsAction;        /** Data source names action */
-    QFuture<QByteArray>             _future;            /** Future for downloading projects */
-    QFutureWatcher<QByteArray>      _watcher;           /** Future watcher for downloading projects */
+    util::ProjectDatabaseProjects   _projects;  /** Model projects */
+    QSet<QString>                   _tags;      /** All tags */
 };
 
 }

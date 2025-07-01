@@ -1072,7 +1072,7 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
     return {};
 }
 
-const ProjectDatabaseModel& ProjectManager::getProjectDatabaseModel() const
+const ProjectDatabaseTreeModel& ProjectManager::getProjectDatabaseTreeModel() const
 {
     return _projectDatabaseModel;
 }

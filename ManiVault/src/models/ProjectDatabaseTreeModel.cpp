@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ProjectDatabaseModel.h"
+#include "ProjectDatabaseTreeModel.h"
 
 #include "CoreInterface.h"
 
@@ -14,7 +14,7 @@
 #include <QtConcurrent>
 
 #ifdef _DEBUG
-    //#define PROJECT_DATABASE_MODEL_VERBOSE
+    //#define PROJECT_DATABASE_TREE_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -24,24 +24,10 @@ using nlohmann::json;
 
 namespace mv {
 
-QMap<ProjectDatabaseModel::Column, ProjectDatabaseModel::ColumHeaderInfo> ProjectDatabaseModel::columnInfo = QMap<Column, ColumHeaderInfo>({
-    { Column::Title, { "Title" , "Title", "Title" } },
-    { Column::Tags, { "Tags" , "Tags", "Tags" } },
-    { Column::Date, { "Date" , "Date", "Issue date" } },
-    { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
-    { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
-    { Column::Url, { "URL" , "URL", "Project URL" } },
-    { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
-    { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
-    { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
-});
-
-ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
-    StandardItemModel(parent),
+ProjectDatabaseTreeModel::ProjectDatabaseTreeModel(QObject* parent /*= nullptr*/) :
+    AbstractProjectDatabaseModel(parent),
     _dsnsAction(this, "Data Source Names")
 {
-    setColumnCount(static_cast<int>(Column::Count));
-
     _dsnsAction.setIconByName("globe");
     _dsnsAction.setToolTip("Projects Data Source Names (DSN)");
     _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
@@ -111,11 +97,11 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
     });
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectDatabaseModel::synchronizeWithDsns);
+        connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectDatabaseTreeModel::synchronizeWithDsns);
     }
 }
 
-QVariant ProjectDatabaseModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant ProjectDatabaseTreeModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
     switch (static_cast<Column>(section))
     {
@@ -153,12 +139,12 @@ QVariant ProjectDatabaseModel::headerData(int section, Qt::Orientation orientati
     return {};
 }
 
-QSet<QString> ProjectDatabaseModel::getTagsSet() const
+QSet<QString> ProjectDatabaseTreeModel::getTagsSet() const
 {
     return _tags;
 }
 
-void ProjectDatabaseModel::addProject(const ProjectDatabaseProject* project)
+void ProjectDatabaseTreeModel::addProject(const ProjectDatabaseProject* project)
 {
     Q_ASSERT(project);
 
@@ -173,7 +159,7 @@ void ProjectDatabaseModel::addProject(const ProjectDatabaseProject* project)
     _projects.push_back(project);
 }
 
-void ProjectDatabaseModel::updateTags()
+void ProjectDatabaseTreeModel::updateTags()
 {
     for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
         for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getProject()->getTags())
@@ -182,7 +168,7 @@ void ProjectDatabaseModel::updateTags()
     emit tagsChanged(_tags);
 }
 
-const ProjectDatabaseProject* ProjectDatabaseModel::getProject(const QModelIndex& index) const
+const ProjectDatabaseProject* ProjectDatabaseTreeModel::getProject(const QModelIndex& index) const
 {
     Q_ASSERT(index.isValid());
 
@@ -199,12 +185,12 @@ const ProjectDatabaseProject* ProjectDatabaseModel::getProject(const QModelIndex
     return itemAtIndex->getProject();
 }
 
-const ProjectDatabaseProjects& ProjectDatabaseModel::getProjects() const
+const ProjectDatabaseProjects& ProjectDatabaseTreeModel::getProjects() const
 {
 	return _projects;
 }
 
-void ProjectDatabaseModel::synchronizeWithDsns()
+void ProjectDatabaseTreeModel::synchronizeWithDsns()
 {
     if (!mv::core()->isInitialized())
         return;
@@ -220,7 +206,7 @@ void ProjectDatabaseModel::synchronizeWithDsns()
     _dsnsAction.setStrings(uniqueDsns);
 }
 
-QByteArray ProjectDatabaseModel::downloadProjectsFromDsn(const QString& dsn)
+QByteArray ProjectDatabaseTreeModel::downloadProjectsFromDsn(const QString& dsn)
 {
     QEventLoop loop;
 
@@ -251,17 +237,17 @@ QByteArray ProjectDatabaseModel::downloadProjectsFromDsn(const QString& dsn)
     return downloadedData;
 }
 
-ProjectDatabaseModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
+ProjectDatabaseTreeModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
     _project(project)
 {
 }
 
-const ProjectDatabaseProject* ProjectDatabaseModel::Item::getProject() const
+const ProjectDatabaseProject* ProjectDatabaseTreeModel::Item::getProject() const
 {
     return _project;
 }
 
-QVariant ProjectDatabaseModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseTreeModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -281,7 +267,7 @@ QVariant ProjectDatabaseModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) 
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseTreeModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -300,7 +286,7 @@ QVariant ProjectDatabaseModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) c
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseTreeModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -317,7 +303,7 @@ QVariant ProjectDatabaseModel::DateItem::data(int role /*= Qt::UserRole + 1*/) c
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseTreeModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -334,7 +320,7 @@ QVariant ProjectDatabaseModel::IconNameItem::data(int role /*= Qt::UserRole + 1*
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant ProjectDatabaseTreeModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -351,7 +337,7 @@ QVariant ProjectDatabaseModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::UrlItem::data(int role) const
+QVariant ProjectDatabaseTreeModel::UrlItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -370,7 +356,7 @@ QVariant ProjectDatabaseModel::UrlItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::MinimumCoreVersionItem::data(int role) const
+QVariant ProjectDatabaseTreeModel::MinimumCoreVersionItem::data(int role) const
 {
     switch (role) {
 		case Qt::EditRole:
@@ -389,7 +375,7 @@ QVariant ProjectDatabaseModel::MinimumCoreVersionItem::data(int role) const
 	return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::RequiredPluginsItem::data(int role) const
+QVariant ProjectDatabaseTreeModel::RequiredPluginsItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -408,7 +394,7 @@ QVariant ProjectDatabaseModel::RequiredPluginsItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::MissingPluginsItem::data(int role) const
+QVariant ProjectDatabaseTreeModel::MissingPluginsItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
