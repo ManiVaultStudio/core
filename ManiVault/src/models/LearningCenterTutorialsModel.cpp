@@ -8,6 +8,8 @@
 
 #include "CoreInterface.h"
 
+#include <nlohmann/json.hpp>
+
 #include <QtConcurrent>
 
 #ifdef _DEBUG

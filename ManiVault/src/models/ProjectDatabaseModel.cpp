@@ -12,7 +12,6 @@
 #include <nlohmann/json.hpp>
 
 #include <QtConcurrent>
-#include <nlohmann/json_fwd.hpp>
 
 #ifdef _DEBUG
     //#define PROJECT_DATABASE_MODEL_VERBOSE
