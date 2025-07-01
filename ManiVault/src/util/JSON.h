@@ -6,24 +6,29 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <nlohmann/json.hpp>
-
 namespace mv::util {
+
+/**
+ * Check if a string is valid JSON
+ * @param input String to check
+ * @return True if the string is valid JSON, false otherwise
+ */
+CORE_EXPORT bool isValidJson(const std::string& input);
 
 /**
  * Load JSON from a resource file
  * @param resourcePath Path to the JSON resource file
- * @return Parsed JSON object
+ * @return Parsed JSON content as a QString
  */
-CORE_EXPORT nlohmann::json loadJsonFromResource(const std::string& resourcePath);
+CORE_EXPORT QString loadJsonFromResource(const std::string& resourcePath);
 
 /**
- * Validate JSON content against a schema defined in a resource file
- * @param json JSON content
+ * Validate JSON string content against a schema defined in a resource file as a JSON string
+ * @param jsonString JSON content string to validate
  * @param jsonLocation Location of the JSON file
- * @param jsonSchemaResourcePath Path to the JSON resource file
+ * @param jsonSchemaString JSON schema content string
  * @param publicJsonSchemaLocation Location of the public JSON schema
  */
-CORE_EXPORT void validateJsonWithResourceSchema(const nlohmann::json& json, const std::string& jsonLocation, const std::string& jsonSchemaResourcePath, const std::string& publicJsonSchemaLocation);
+CORE_EXPORT void validateJson(const std::string& jsonString, const std::string& jsonLocation, const std::string& jsonSchemaString, const std::string& publicJsonSchemaLocation);
 
 }

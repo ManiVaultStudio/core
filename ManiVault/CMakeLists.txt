@@ -163,17 +163,19 @@ CPMAddPackage(
       "JSON_MultipleHeaders=ON"        # shave compile time (optional)
 )
 
-# Serialization: JSON schema validation
+# Serialization: Add valijson as a header-only library
 CPMAddPackage(
-  NAME 				nlohmann_json_schema_validator
-  GITHUB_REPOSITORY pboettch/json-schema-validator
-  GIT_TAG 			2.3.0
+  NAME valijson
+  GITHUB_REPOSITORY tristanpenman/valijson
+  GIT_TAG master
   OPTIONS
-    "JSON_VALIDATOR_BUILD_TESTS OFF"
-    "JSON_VALIDATOR_INSTALL OFF"
-    "JSON_VALIDATOR_SHARED_LIBS OFF"
-	"CMAKE_POSITION_INDEPENDENT_CODE ON"
+    "VALIJSON_BUILD_TESTS OFF"
 )
+
+# Make an interface target for valijson
+add_library(valijson_interface INTERFACE)
+target_include_directories(valijson_interface INTERFACE ${valijson_SOURCE_DIR}/include)
+target_link_libraries(valijson_interface INTERFACE nlohmann_json::nlohmann_json)
 
 # Layout: Qt Advanced docking system
 CPMAddPackage(
@@ -227,7 +229,7 @@ if(${MV_USE_ERROR_LOGGING})
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         # Put targets in the proper source folder
-        set_target_properties(sentry mini_chromium nlohmann_json_schema_validator
+        set_target_properties(sentry mini_chromium
             PROPERTIES
             FOLDER CoreDependencies
         )
@@ -303,8 +305,8 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
-
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE valijson_interface)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
@@ -354,8 +356,8 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
-
-target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json nlohmann_json_schema_validator)
+target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${MV_EXE} PRIVATE valijson_interface)
 
 if(${MV_USE_ERROR_LOGGING})
     target_link_libraries(${MV_EXE} PRIVATE sentry)

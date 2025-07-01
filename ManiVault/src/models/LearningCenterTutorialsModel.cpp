@@ -6,17 +6,18 @@
 
 #include "util/JSON.h"
 
+#include <nlohmann/json.hpp>
+
 #include <QtConcurrent>
 
 #ifdef _DEBUG
     //#define LEARNING_CENTER_TUTORIALS_MODEL_VERBOSE
 #endif
 
-using nlohmann::json;
-using nlohmann::json_schema::json_validator;
-
 using namespace mv::util;
 using namespace mv::gui;
+
+using nlohmann::json;
 
 namespace mv {
 
@@ -58,11 +59,10 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
             for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
                 try {
                     const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
-
-                    json fullJson = json::parse(jsonData.constData());
+                    const auto fullJson = json::parse(jsonData.constData());
 
                     if (fullJson.contains("tutorials")) {
-                        validateJsonWithResourceSchema(fullJson["tutorials"], _dsnsAction.getStrings()[dsnIndex].toStdString(), ":/JSON/TutorialsSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
+                        validateJson(fullJson["tutorials"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), ":/JSON/TutorialsSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
                     }
                     else {
                         throw std::runtime_error("Tutorials key is missing");

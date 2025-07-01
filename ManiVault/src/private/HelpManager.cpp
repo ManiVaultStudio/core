@@ -14,17 +14,18 @@
 
 #include <Task.h>
 
+#include <nlohmann/json.hpp>
+
 #include <QDesktopServices>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUrl>
 
-using nlohmann::json;
-using nlohmann::json_schema::json_validator;
-
 using namespace mv::gui;
 using namespace mv::util;
+
+using nlohmann::json;
 
 #ifdef _DEBUG
     //#define HELP_MANAGER_VERBOSE
@@ -97,7 +98,7 @@ HelpManager::HelpManager(QObject* parent) :
             json fullJson = json::parse(jsonData.constData());
 
             if (fullJson.contains("videos")) {
-                validateJsonWithResourceSchema(fullJson["videos"], videosDsn, ":/JSON/VideosSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
+                validateJson(fullJson["videos"], videosDsn, ":/JSON/VideosSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
             }
             else {
                 throw std::runtime_error("Videos key is missing");

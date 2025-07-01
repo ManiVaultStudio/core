@@ -7,6 +7,8 @@
 #include "util/FileDownloader.h"
 #include "util/JSON.h"
 
+#include <nlohmann/json.hpp>
+
 #include <QtConcurrent>
 #include <nlohmann/json_fwd.hpp>
 
@@ -15,7 +17,7 @@
 #endif
 
 using nlohmann::json;
-using nlohmann::json_schema::json_validator;
+using nlohmann::json_schema::json_vlidator;
 
 using namespace mv::util;
 using namespace mv::gui;
@@ -59,11 +61,10 @@ ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
             for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
 	            try {
 					const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
-
-					json fullJson = json::parse(jsonData.constData());
+					const auto fullJson = json::parse(jsonData.constData());
 
 					if (fullJson.contains("Projects")) {
-						validateJsonWithResourceSchema(fullJson["Projects"], _dsnsAction.getStrings()[dsnIndex].toStdString(), ":/JSON/ProjectsSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
+						validateJson(fullJson["Projects"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), ":/JSON/ProjectsSchema", "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
 					}
 					else {
 						throw std::runtime_error("/Projects key is missing");
