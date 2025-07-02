@@ -31,11 +31,11 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
-    _projectDatabaseWidget(this, "Projects"),
+    _projectsWidget(this, "Projects"),
     _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
     _projectsSettingsAction(this, "Data Source Names")
 {
-    _projectDatabaseWidget.hide();
+    _projectsWidget.hide();
 
     auto layout = new QVBoxLayout();
 
@@ -44,7 +44,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     layout->addWidget(&_openCreateProjectWidget);
     layout->addWidget(&_recentProjectsWidget);
 
-    layout->addWidget(&_projectDatabaseWidget);
+    layout->addWidget(&_projectsWidget);
 
     _projectsSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _projectsSettingsAction.setShowLabels(false);
@@ -53,9 +53,9 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     _projectsSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectsTreeModel().getDsnsAction()));
 
-    _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
+    _projectsWidget.getHierarchyWidget().setItemTypeName("Project");
 
-    auto& toolbarAction = _projectDatabaseWidget.getHierarchyWidget().getToolbarAction();
+    auto& toolbarAction = _projectsWidget.getHierarchyWidget().getToolbarAction();
 
     toolbarAction.addAction(&_projectsSettingsAction);
     toolbarAction.addAction(&_projectsFilterModel.getFilterGroupAction());
@@ -70,7 +70,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
     _recentProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
-    _projectDatabaseWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _projectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
@@ -86,7 +86,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     const auto toggleViews = [this]() -> void {
         _openCreateProjectWidget.setVisible(_startPageContentWidget->getToggleOpenCreateProjectAction().isChecked());
-        _projectDatabaseWidget.setVisible(_startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
+        _projectsWidget.setVisible(_startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
         _recentProjectsWidget.setVisible(_startPageContentWidget->getToggleRecentProjectsAction().isChecked());
     };
 
@@ -239,7 +239,7 @@ void StartPageOpenProjectWidget::updateRecentActions()
 
 void StartPageOpenProjectWidget::updateProjectDatabaseActions()
 {
-    _projectDatabaseWidget.getModel().reset();
+    _projectsWidget.getModel().reset();
     
     const auto& projectCenterModel = mv::projects().getProjectsTreeModel();
 
@@ -288,7 +288,7 @@ void StartPageOpenProjectWidget::updateProjectDatabaseActions()
 
                 recentProjectPageAction.setTags(project->getTags());
 
-            	_projectDatabaseWidget.getModel().add(recentProjectPageAction);
+            	_projectsWidget.getModel().add(recentProjectPageAction);
             }
         }
     }
@@ -314,7 +314,7 @@ void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
 
     _openCreateProjectWidget.fromParentVariantMap(variantMap);
     _recentProjectsWidget.fromParentVariantMap(variantMap);
-    _projectDatabaseWidget.fromParentVariantMap(variantMap);
+    _projectsWidget.fromParentVariantMap(variantMap);
     _projectsFilterModel.fromParentVariantMap(variantMap);
 }
 
@@ -324,7 +324,7 @@ QVariantMap StartPageOpenProjectWidget::toVariantMap() const
 
     _openCreateProjectWidget.insertIntoVariantMap(variantMap);
     _recentProjectsWidget.insertIntoVariantMap(variantMap);
-    _projectDatabaseWidget.insertIntoVariantMap(variantMap);
+    _projectsWidget.insertIntoVariantMap(variantMap);
     _projectsFilterModel.insertIntoVariantMap(variantMap);
 
     return variantMap;

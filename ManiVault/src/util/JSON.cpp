@@ -74,10 +74,10 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
         valijson::ValidationResults results;
 
         if (validator.validate(schema, documentAdapter, &results)) {
-            qDebug() << "JSON document is valid!";
+            qDebug() << "JSON document" << jsonLocation << "is valid";
         }
         else {
-            qCritical() << "JSON document is invalid.";
+            qCritical() << "JSON document" << jsonLocation << "is invalid";
 
             valijson::ValidationResults::Error error;
             while (results.popError(error)) {

@@ -85,7 +85,7 @@ private:
     StartPageContentWidget*         _startPageContentWidget;        /** Non-owning pointer to start page content widget */
     PageActionsWidget               _openCreateProjectWidget;       /** Actions widget for open and create project action */
     PageActionsWidget               _recentProjectsWidget;          /** Actions widget for existing projects action */
-    PageActionsWidget               _projectDatabaseWidget;         /** Actions widget for the project database */
+    PageActionsWidget               _projectsWidget;                /** Actions widget for projects */
     mv::gui::RecentFilesAction      _recentProjectsAction;          /** Action for recent projects */
     QIcon                           _leftAlignedIcon;               /** Icon for left-aligned default project */
     QIcon                           _leftAlignedLoggingIcon;        /** Icon for left-aligned default project with logging */

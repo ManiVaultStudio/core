@@ -73,7 +73,7 @@ ProjectsTreeModel::ProjectsTreeModel(QObject* parent /*= nullptr*/) :
 					for (const auto project : projects) {
 						auto projectMap = project.toVariant().toMap();
 
-						addProject(new ProjectDatabaseProject(projectMap));
+						addProject(new ProjectsModelProject(projectMap), projectMap["group"].toString());
 					}
 
 					emit populatedFromDsns();

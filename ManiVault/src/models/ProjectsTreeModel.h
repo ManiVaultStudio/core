@@ -6,7 +6,7 @@
 
 #include "models/AbstractProjectsModel.h"
 
-#include "util/ProjectDatabaseProject.h"
+#include "util/ProjectsModelProject.h"
 
 #include "actions/StringsAction.h"
 

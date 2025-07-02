@@ -2,13 +2,13 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ProjectDatabaseProject.h"
+#include "ProjectsModelProject.h"
 
 #include "CoreInterface.h"
 
 namespace mv::util {
 
-ProjectDatabaseProject::ProjectDatabaseProject(const QVariantMap& variantMap) :
+ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
     _group(variantMap.contains("group") ? variantMap["group"].toString() : ""),
     _tags(variantMap.contains("tags") ? variantMap["tags"].toStringList() : QStringList()),
@@ -56,52 +56,64 @@ ProjectDatabaseProject::ProjectDatabaseProject(const QVariantMap& variantMap) :
         qWarning() << "Project" << _title << "is added to the project database but cannot be opened because of missing plugins:" << _missingPlugins.join(", ");
 }
 
-const QString& ProjectDatabaseProject::getTitle() const
+ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
+    _title(groupTitle),
+    _group(groupTitle),
+    _isGroup(true)
+{
+}
+
+const QString& ProjectsModelProject::getTitle() const
 {
     return _title;
 }
 
-const QString& ProjectDatabaseProject::getGroup() const
+const bool& ProjectsModelProject::isGroup() const
+{
+    return _isGroup;
+}
+
+const QString& ProjectsModelProject::getGroup() const
 {
     return _group;
 }
 
-const QStringList& ProjectDatabaseProject::getTags() const
+const QStringList& ProjectsModelProject::getTags() const
 {
     return _tags;
 }
 
-const QString& ProjectDatabaseProject::getDate() const
+const QString& ProjectsModelProject::getDate() const
 {
     return _date;
 }
 
-const QString& ProjectDatabaseProject::getIconName() const
+const QString& ProjectsModelProject::getIconName() const
 {
     return _iconName;
 }
 
-const QString& ProjectDatabaseProject::getSummary() const
+const QString& ProjectsModelProject::getSummary() const
 {
     return _summary;
 }
 
-const QUrl& ProjectDatabaseProject::getUrl() const
+const QUrl& ProjectsModelProject::getUrl() const
 {
     return _url;
 }
 
-const Version& ProjectDatabaseProject::getMinimumCoreVersion() const
+const Version& ProjectsModelProject::getMinimumCoreVersion() const
 {
     return _minimumCoreVersion;
 }
 
-const QStringList& ProjectDatabaseProject::getRequiredPlugins() const
+const QStringList& ProjectsModelProject::getRequiredPlugins() const
 {
     return _requiredPlugins;
 }
 
-const QStringList& ProjectDatabaseProject::getMissingPlugins() const
+const QStringList& ProjectsModelProject::getMissingPlugins() const
 {
     return _missingPlugins;
 }

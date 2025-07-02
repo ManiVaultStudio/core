@@ -15,6 +15,8 @@ namespace mv {
 
 QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> AbstractProjectsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
     { Column::Title, { "Title" , "Title", "Title" } },
+    { Column::Group, { "Group" , "Group", "Group" } },
+    { Column::IsGroup, { "IsGroup" , "IsGroup", "IsGroup" } },
     { Column::Tags, { "Tags" , "Tags", "Tags" } },
     { Column::Date, { "Date" , "Date", "Issue date" } },
     { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
@@ -37,6 +39,12 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
     {
         case Column::Title:
             return TitleItem::headerData(orientation, role);
+
+        case Column::Group:
+            return GroupItem::headerData(orientation, role);
+
+        case Column::IsGroup:
+            return IsGroupItem::headerData(orientation, role);
 
         case Column::Tags:
             return TagsItem::headerData(orientation, role);
@@ -74,17 +82,63 @@ QSet<QString> AbstractProjectsModel::getTagsSet() const
     return _tags;
 }
 
-void AbstractProjectsModel::addProject(const ProjectDatabaseProject* project)
+void AbstractProjectsModel::addProjectGroup(const QString& groupTitle)
+{
+    Q_ASSERT(groupTitle.isEmpty());
+
+    if (groupTitle.isEmpty())
+        return;
+
+    auto project = new ProjectsModelProject(groupTitle);
+
+    appendRow(Row(project));
+    updateTags();
+
+    const_cast<ProjectsModelProject*>(project)->setParent(this);
+
+    _projects.push_back(project);
+}
+
+void AbstractProjectsModel::addProject(const ProjectsModelProject* project, const QString& groupTitle)
 {
     Q_ASSERT(project);
 
     if (!project)
         return;
 
-    appendRow(Row(project));
+    const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
+        const auto matches = match(index(0, static_cast<std::int32_t>(Column::Group)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+        if (matches.size() == 1)
+            return matches.first();
+
+        return {};
+    };
+
+    if (!groupTitle.isEmpty()) {
+        const auto existingProjectGroupIndex = findProjectGroupModelIndex();
+
+        if (existingProjectGroupIndex.isValid()) {
+            if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex))
+                existingProjectGroupItem->appendRow(Row(project));
+        } else {
+            addProjectGroup(groupTitle);
+
+            const auto addedProjectGroupIndex = findProjectGroupModelIndex();
+
+            if (addedProjectGroupIndex.isValid())
+                if (auto addedProjectGroupItem = itemFromIndex(addedProjectGroupIndex))
+                    addedProjectGroupItem->appendRow(Row(project));
+        }
+    }
+    else
+    {
+        appendRow(Row(project));
+    }
+    
     updateTags();
 
-    const_cast<ProjectDatabaseProject*>(project)->setParent(this);
+    const_cast<ProjectsModelProject*>(project)->setParent(this);
 
     _projects.push_back(project);
 }
@@ -98,7 +152,7 @@ void AbstractProjectsModel::updateTags()
     emit tagsChanged(_tags);
 }
 
-const ProjectDatabaseProject* AbstractProjectsModel::getProject(const QModelIndex& index) const
+const ProjectsModelProject* AbstractProjectsModel::getProject(const QModelIndex& index) const
 {
     Q_ASSERT(index.isValid());
 
@@ -120,12 +174,12 @@ const ProjectDatabaseProjects& AbstractProjectsModel::getProjects() const
 	return _projects;
 }
 
-AbstractProjectsModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
+AbstractProjectsModel::Item::Item(const mv::util::ProjectsModelProject* project, bool editable /*= false*/) :
     _project(project)
 {
 }
 
-const ProjectDatabaseProject* AbstractProjectsModel::Item::getProject() const
+const ProjectsModelProject* AbstractProjectsModel::Item::getProject() const
 {
     return _project;
 }
@@ -145,6 +199,42 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
 
         default:
             break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::GroupItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getProject()->getGroup();
+
+	    case Qt::ToolTipRole:
+	        return "Group title: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::IsGroupItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+            return getProject()->isGroup();
+
+	    case Qt::DisplayRole:
+	        return getProject()->isGroup() ? "true" : "false";
+
+	    case Qt::ToolTipRole:
+	        return "Is group: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
     }
 
     return Item::data(role);
