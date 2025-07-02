@@ -556,7 +556,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/StyledIconEngine.h
     src/util/Badge.h
     src/util/ColorScheme.h
-    src/util/ProjectDatabaseProject.h
+    src/util/ProjectsModelProject.h
     src/util/JSON.h
     src/util/Script.h
 )
@@ -611,7 +611,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/StyledIconEngine.cpp
     src/util/Badge.cpp
     src/util/ColorScheme.cpp
-    src/util/ProjectDatabaseProject.cpp
+    src/util/ProjectsModelProject.cpp
     src/util/JSON.cpp
     src/util/Script.cpp
 )
@@ -961,19 +961,21 @@ set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
     ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
 )
 
-set(PUBLIC_PROJECT_DATABASE_MODEL_HEADERS
-    src/models/ProjectDatabaseModel.h
-	src/models/ProjectDatabaseFilterModel.h
+set(PUBLIC_PROJECTS_MODEL_HEADERS
+    src/models/AbstractProjectsModel.h
+    src/models/ProjectsTreeModel.h
+	src/models/ProjectsFilterModel.h
 )
 
-set(PUBLIC_PROJECT_DATABASE_MODEL_SOURCES
-    src/models/ProjectDatabaseModel.cpp
-	src/models/ProjectDatabaseFilterModel.cpp
+set(PUBLIC_PROJECTS_MODEL_SOURCES
+    src/models/AbstractProjectsModel.cpp
+    src/models/ProjectsTreeModel.cpp
+	src/models/ProjectsFilterModel.cpp
 )
 
-set(PUBLIC_PROJECT_DATABASE_MODEL_FILES
-    ${PUBLIC_PROJECT_DATABASE_MODEL_HEADERS}
-    ${PUBLIC_PROJECT_DATABASE_MODEL_SOURCES}
+set(PUBLIC_PROJECTS_MODEL_FILES
+    ${PUBLIC_PROJECTS_MODEL_HEADERS}
+    ${PUBLIC_PROJECTS_MODEL_SOURCES}
 )
 
 set(PUBLIC_COLOR_SCHEMES_MODEL_HEADERS
@@ -1129,7 +1131,7 @@ set(PUBLIC_HEADERS
 	${PUBLIC_DATASETS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
-	${PUBLIC_PROJECT_DATABASE_MODEL_HEADERS}
+	${PUBLIC_PROJECTS_MODEL_HEADERS}
     ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
     ${PUBLIC_SCRIPTS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
@@ -1178,7 +1180,7 @@ set(PUBLIC_SOURCES
 	${PUBLIC_DATASETS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
-	${PUBLIC_PROJECT_DATABASE_MODEL_SOURCES}
+	${PUBLIC_PROJECTS_MODEL_SOURCES}
     ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
     ${PUBLIC_SCRIPTS_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
@@ -1240,7 +1242,7 @@ source_group(Models\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_MODEL_FILES})
 source_group(Models\\Datasets FILES ${PUBLIC_DATASETS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Videos FILES ${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES})
 source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES})
-source_group(Models\\ProjectDatabase FILES ${PUBLIC_PROJECT_DATABASE_MODEL_FILES})
+source_group(Models\\Projects FILES ${PUBLIC_PROJECTS_MODEL_FILES})
 source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(Models\\Scripts FILES ${PUBLIC_SCRIPTS_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})

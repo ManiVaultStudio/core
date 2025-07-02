@@ -2,30 +2,21 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ProjectDatabaseModel.h"
-
-#include "CoreInterface.h"
-
-#include "util/FileDownloader.h"
-#include "util/JSON.h"
-
-#include <nlohmann/json.hpp>
-
-#include <QtConcurrent>
+#include "AbstractProjectsModel.h"
 
 #ifdef _DEBUG
-    //#define PROJECT_DATABASE_MODEL_VERBOSE
+    //#define ABSTRACT_PROJECTS_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
 using namespace mv::gui;
 
-using nlohmann::json;
-
 namespace mv {
 
-QMap<ProjectDatabaseModel::Column, ProjectDatabaseModel::ColumHeaderInfo> ProjectDatabaseModel::columnInfo = QMap<Column, ColumHeaderInfo>({
+QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> AbstractProjectsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
     { Column::Title, { "Title" , "Title", "Title" } },
+    { Column::Group, { "Group" , "Group", "Group" } },
+    { Column::IsGroup, { "IsGroup" , "IsGroup", "IsGroup" } },
     { Column::Tags, { "Tags" , "Tags", "Tags" } },
     { Column::Date, { "Date" , "Date", "Issue date" } },
     { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
@@ -36,91 +27,24 @@ QMap<ProjectDatabaseModel::Column, ProjectDatabaseModel::ColumHeaderInfo> Projec
     { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
 });
 
-ProjectDatabaseModel::ProjectDatabaseModel(QObject* parent /*= nullptr*/) :
-    StandardItemModel(parent),
-    _dsnsAction(this, "Data Source Names")
+AbstractProjectsModel::AbstractProjectsModel(QObject* parent /*= nullptr*/) :
+    StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
-
-    _dsnsAction.setIconByName("globe");
-    _dsnsAction.setToolTip("Projects Data Source Names (DSN)");
-    _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
-    _dsnsAction.setPopupSizeHint(QSize(550, 100));
-
-    connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
-        setRowCount(0);
-
-        if (mv::plugins().isInitializing())
-            return;
-
-        _future = QtConcurrent::mapped(
-            _dsnsAction.getStrings(),
-            [this](const QString& dsn) {
-                return downloadProjectsFromDsn(dsn);
-	    });
-
-    	connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
-            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-	            try {
-					const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
-					const auto fullJson = json::parse(QString::fromUtf8(jsonData.constData()).toStdString());
-
-					if (fullJson.contains("Projects")) {
-						validateJson(fullJson["Projects"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), loadJsonFromResource(":/JSON/ProjectsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
-					}
-					else {
-						throw std::runtime_error("/Projects key is missing");
-					}
-
-					QJsonParseError jsonParseError;
-
-					const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
-
-					if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-						qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
-						continue;
-					}
-
-					const auto projects = jsonDocument.object()["Projects"].toArray();
-
-					for (const auto project : projects) {
-						auto projectMap = project.toVariant().toMap();
-
-						addProject(new ProjectDatabaseProject(projectMap));
-					}
-
-					emit populatedFromDsns();
-				}
-				catch (std::exception& e)
-				{
-					qCritical() << "Unable to add projects from DSN:" << e.what();
-				}
-				catch (...)
-				{
-					qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-				}
-            }
-		});
-
-        _watcher.setFuture(_future);
-	});
-
-    connect(core(), &CoreInterface::initialized, this, [this]() -> void {
-        synchronizeWithDsns();
-    });
-
-    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectDatabaseModel::synchronizeWithDsns);
-    }
 }
 
-QVariant ProjectDatabaseModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
     switch (static_cast<Column>(section))
     {
         case Column::Title:
             return TitleItem::headerData(orientation, role);
+
+        case Column::Group:
+            return GroupItem::headerData(orientation, role);
+
+        case Column::IsGroup:
+            return IsGroupItem::headerData(orientation, role);
 
         case Column::Tags:
             return TagsItem::headerData(orientation, role);
@@ -153,27 +77,73 @@ QVariant ProjectDatabaseModel::headerData(int section, Qt::Orientation orientati
     return {};
 }
 
-QSet<QString> ProjectDatabaseModel::getTagsSet() const
+QSet<QString> AbstractProjectsModel::getTagsSet() const
 {
     return _tags;
 }
 
-void ProjectDatabaseModel::addProject(const ProjectDatabaseProject* project)
+void AbstractProjectsModel::addProjectGroup(const QString& groupTitle)
+{
+    Q_ASSERT(groupTitle.isEmpty());
+
+    if (groupTitle.isEmpty())
+        return;
+
+    auto project = new ProjectsModelProject(groupTitle);
+
+    appendRow(Row(project));
+    updateTags();
+
+    const_cast<ProjectsModelProject*>(project)->setParent(this);
+
+    _projects.push_back(project);
+}
+
+void AbstractProjectsModel::addProject(const ProjectsModelProject* project, const QString& groupTitle)
 {
     Q_ASSERT(project);
 
     if (!project)
         return;
 
-    appendRow(Row(project));
+    const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
+        const auto matches = match(index(0, static_cast<std::int32_t>(Column::Group)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+        if (matches.size() == 1)
+            return matches.first();
+
+        return {};
+    };
+
+    if (!groupTitle.isEmpty()) {
+        const auto existingProjectGroupIndex = findProjectGroupModelIndex();
+
+        if (existingProjectGroupIndex.isValid()) {
+            if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex))
+                existingProjectGroupItem->appendRow(Row(project));
+        } else {
+            addProjectGroup(groupTitle);
+
+            const auto addedProjectGroupIndex = findProjectGroupModelIndex();
+
+            if (addedProjectGroupIndex.isValid())
+                if (auto addedProjectGroupItem = itemFromIndex(addedProjectGroupIndex))
+                    addedProjectGroupItem->appendRow(Row(project));
+        }
+    }
+    else
+    {
+        appendRow(Row(project));
+    }
+    
     updateTags();
 
-    const_cast<ProjectDatabaseProject*>(project)->setParent(this);
+    const_cast<ProjectsModelProject*>(project)->setParent(this);
 
     _projects.push_back(project);
 }
 
-void ProjectDatabaseModel::updateTags()
+void AbstractProjectsModel::updateTags()
 {
     for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
         for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getProject()->getTags())
@@ -182,7 +152,7 @@ void ProjectDatabaseModel::updateTags()
     emit tagsChanged(_tags);
 }
 
-const ProjectDatabaseProject* ProjectDatabaseModel::getProject(const QModelIndex& index) const
+const ProjectsModelProject* AbstractProjectsModel::getProject(const QModelIndex& index) const
 {
     Q_ASSERT(index.isValid());
 
@@ -199,69 +169,22 @@ const ProjectDatabaseProject* ProjectDatabaseModel::getProject(const QModelIndex
     return itemAtIndex->getProject();
 }
 
-const ProjectDatabaseProjects& ProjectDatabaseModel::getProjects() const
+const ProjectDatabaseProjects& AbstractProjectsModel::getProjects() const
 {
 	return _projects;
 }
 
-void ProjectDatabaseModel::synchronizeWithDsns()
-{
-    if (!mv::core()->isInitialized())
-        return;
-
-    QStringList uniqueDsns;
-
-    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
-    }
-
-    uniqueDsns.removeDuplicates();
-    
-    _dsnsAction.setStrings(uniqueDsns);
-}
-
-QByteArray ProjectDatabaseModel::downloadProjectsFromDsn(const QString& dsn)
-{
-    QEventLoop loop;
-
-    QByteArray downloadedData;
-
-    FileDownloader fileDownloader;
-
-    connect(&fileDownloader, &FileDownloader::downloaded, [&]() -> void {
-        try
-        {
-            downloadedData = fileDownloader.downloadedData();
-            loop.quit();
-        }
-        catch (std::exception& e)
-        {
-            exceptionMessageBox("Unable to download projects JSON from DSN", e);
-        }
-        catch (...)
-        {
-            exceptionMessageBox("Unable to download projects JSON from DSN");
-        }
-    });
-
-    fileDownloader.download(dsn);
-
-    loop.exec();
-
-    return downloadedData;
-}
-
-ProjectDatabaseModel::Item::Item(const mv::util::ProjectDatabaseProject* project, bool editable /*= false*/) :
+AbstractProjectsModel::Item::Item(const mv::util::ProjectsModelProject* project, bool editable /*= false*/) :
     _project(project)
 {
 }
 
-const ProjectDatabaseProject* ProjectDatabaseModel::Item::getProject() const
+const ProjectsModelProject* AbstractProjectsModel::Item::getProject() const
 {
     return _project;
 }
 
-QVariant ProjectDatabaseModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -281,7 +204,43 @@ QVariant ProjectDatabaseModel::TitleItem::data(int role /*= Qt::UserRole + 1*/) 
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::GroupItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getProject()->getGroup();
+
+	    case Qt::ToolTipRole:
+	        return "Group title: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::IsGroupItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+            return getProject()->isGroup();
+
+	    case Qt::DisplayRole:
+	        return getProject()->isGroup() ? "true" : "false";
+
+	    case Qt::ToolTipRole:
+	        return "Is group: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -300,7 +259,7 @@ QVariant ProjectDatabaseModel::TagsItem::data(int role /*= Qt::UserRole + 1*/) c
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::DateItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -317,7 +276,7 @@ QVariant ProjectDatabaseModel::DateItem::data(int role /*= Qt::UserRole + 1*/) c
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -334,7 +293,7 @@ QVariant ProjectDatabaseModel::IconNameItem::data(int role /*= Qt::UserRole + 1*
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractProjectsModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -351,7 +310,7 @@ QVariant ProjectDatabaseModel::SummaryItem::data(int role /*= Qt::UserRole + 1*/
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::UrlItem::data(int role) const
+QVariant AbstractProjectsModel::UrlItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -370,7 +329,7 @@ QVariant ProjectDatabaseModel::UrlItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::MinimumCoreVersionItem::data(int role) const
+QVariant AbstractProjectsModel::MinimumCoreVersionItem::data(int role) const
 {
     switch (role) {
 		case Qt::EditRole:
@@ -389,7 +348,7 @@ QVariant ProjectDatabaseModel::MinimumCoreVersionItem::data(int role) const
 	return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::RequiredPluginsItem::data(int role) const
+QVariant AbstractProjectsModel::RequiredPluginsItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -408,7 +367,7 @@ QVariant ProjectDatabaseModel::RequiredPluginsItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant ProjectDatabaseModel::MissingPluginsItem::data(int role) const
+QVariant AbstractProjectsModel::MissingPluginsItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
