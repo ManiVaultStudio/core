@@ -167,7 +167,7 @@ CPMAddPackage(
 CPMAddPackage(
   NAME valijson
   GITHUB_REPOSITORY tristanpenman/valijson
-  GIT_TAG master
+  GIT_TAG           v1.0.6 
   OPTIONS "VALIJSON_BUILD_TESTS OFF" "VALIJSON_USE_EXCEPTIONS ON"
 )
 
