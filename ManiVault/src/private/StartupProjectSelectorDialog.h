@@ -7,7 +7,8 @@
 #include "StartupProjectsModel.h"
 #include "StartupProjectsFilterModel.h"
 
-#include <ProjectMetaAction.h>
+#include <models/ProjectsTreeModel.h>
+#include <models/ProjectsFilterModel.h>
 
 #include <widgets/HierarchyWidget.h>
 
@@ -27,11 +28,11 @@ class StartupProjectSelectorDialog : public QDialog
 public:
 
     /**
-     * Construct with \p startupProjectsMetaActions and a pointer to \p parent widget
-     * @param startupProjectsMetaActions Startup projects meta actions
+     * Construct with \p projectsTreeModel and a pointer to \p parent widget
+     * @param projectsTreeModel Model containing the projects to select from
      * @param parent Pointer to parent widget
      */
-    StartupProjectSelectorDialog(const QVector<QPair<QSharedPointer<mv::ProjectMetaAction>, QString>>& startupProjectsMetaActions, QWidget* parent = nullptr);
+    StartupProjectSelectorDialog(mv::ProjectsTreeModel& projectsTreeModel, QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -50,9 +51,9 @@ public:
     std::int32_t getSelectedStartupProjectIndex();
 
 private:
-    StartupProjectsModel        _model;                 /** Plugins tree model (interfaces with a plugin manager) */
-    StartupProjectsFilterModel  _filterModel;           /** Sorting and filtering model for the plugin manager model */
+    mv::ProjectsTreeModel&       _projectsTreeModel;    /** Projects tree model */
+    mv::ProjectsFilterModel     _filterModel;           /** Sorting and filtering model for the projects model */
     mv::gui::HierarchyWidget    _hierarchyWidget;       /** Widget for displaying the loaded plugins */
     mv::gui::TriggerAction      _loadAction;            /** Load the selected project */
-    mv::gui::TriggerAction      _quitAction;          /** Exit the dialog and don't load a project */
+    mv::gui::TriggerAction      _quitAction;            /** Exit the dialog and don't load a project */
 };

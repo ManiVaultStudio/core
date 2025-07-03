@@ -15,15 +15,15 @@ using namespace mv::util;
     #define STARTUP_PROJECT_SELECTOR_DIALOG_VERBOSE
 #endif
 
-StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<QSharedPointer<mv::ProjectMetaAction>, QString>>& startupProjectsMetaActions, QWidget* parent /*= nullptr*/) :
+StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel& projectsTreeModel, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _model(this),
+    _projectsTreeModel(projectsTreeModel),
     _filterModel(this),
-    _hierarchyWidget(this, "Startup project", _model, &_filterModel, false),
+    _hierarchyWidget(this, "Startup project", _projectsTreeModel, &_filterModel, false),
     _loadAction(this, "Load"),
     _quitAction(this, "Quit")
 {
-    _model.initialize(startupProjectsMetaActions);
+    //_model.initialize(startupProjectsMetaActions);
 
     const auto windowIcon = StyledIcon("file-import");
 
@@ -64,6 +64,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<Q
 
     connect(treeView.selectionModel(), &QItemSelectionModel::selectionChanged, this, updateLoadAction);
 
+    /*
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
@@ -84,6 +85,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(const QVector<QPair<Q
     treeViewHeader->setSectionResizeMode(static_cast<int>(StartupProjectsModel::Column::Description), QHeaderView::Stretch);
 
     treeViewHeader->setStretchLastSection(false);
+    */
 
     connect(&_loadAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::accept);
     connect(&_quitAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::reject);

@@ -12,6 +12,8 @@
 #include <ManiVaultVersion.h>
 #include <ProjectMetaAction.h>
 
+#include <models/ProjectsTreeModel.h>
+
 #include <util/Icon.h>
 
 #include <QProxyStyle>
@@ -121,6 +123,8 @@ int main(int argc, char *argv[])
 
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
 
+    ProjectsTreeModel startupProjectsTreeModel;
+
     if (commandLineParser.isSet("project")) {
         QVector<QPair<QSharedPointer<mv::ProjectMetaAction>, QString>> startupProjectsMetaActionsCandidates;
 
@@ -139,29 +143,41 @@ int main(int argc, char *argv[])
         }
 
         if (startupProjectsMetaActionsCandidates.count() >= 2) {
-            StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsMetaActionsCandidates);
+            
+            //}
 
-            const auto dialogResult = startupProjectSelectorDialog.exec();
-
-            if (dialogResult == QDialog::Accepted) {
-                const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
-
-                if (selectedStartupProjectIndex >= 0) {
-                    startupProjectMetaAction    = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].first;
-                    startupProjectFilePath      = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
-                }
-            }
-
-            if (dialogResult == QDialog::Rejected)
-                return 0;
+            //if (dialogResult == QDialog::Rejected)
+            //    return 0;
 
         } else {
-            if (startupProjectsMetaActionsCandidates.count() == 1) {
-                startupProjectMetaAction    = startupProjectsMetaActionsCandidates.first().first;
-                startupProjectFilePath      = startupProjectsMetaActionsCandidates.first().second;
-            }
+            //if (startupProjectsMetaActionsCandidates.count() == 1) {
+            //    startupProjectMetaAction    = startupProjectsMetaActionsCandidates.first().first;
+            //    startupProjectFilePath      = startupProjectsMetaActionsCandidates.first().second;
+            //}
         }
     }
+
+    if (QFileInfo("projects.json").exists()) {
+	    
+    }
+
+    if (startupProjectsTreeModel.rowCount() > 0) {
+        StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel);
+
+        const auto dialogResult = startupProjectSelectorDialog.exec();
+
+        if (dialogResult == QDialog::Accepted) {
+	        /*const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
+
+			if (selectedStartupProjectIndex >= 0) {
+				startupProjectMetaAction = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].first;
+				startupProjectFilePath = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
+			}*/
+        }
+    }
+	/*
+	 
+	 */
 
     Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
