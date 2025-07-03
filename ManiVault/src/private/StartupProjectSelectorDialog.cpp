@@ -45,7 +45,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     //_quitAction.setToolTip("Do not load a project");
 
-    //_hierarchyWidget.setWindowIcon(windowIcon);
+    _hierarchyWidget.setWindowIcon(windowIcon);
     _hierarchyWidget.getTreeView().setRootIsDecorated(false);
 
     auto& treeView = _hierarchyWidget.getTreeView();
@@ -61,29 +61,21 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     updateLoadAction();
 
     connect(treeView.selectionModel(), &QItemSelectionModel::selectionChanged, this, updateLoadAction);
-
-    /*
+    
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
 
-    //treeViewHeader->resizeSection(static_cast<int>(StartupProjectsModel::Column::FileName), 300);
-    //treeViewHeader->resizeSection(static_cast<int>(StartupProjectsModel::Column::Title), 300);
-    //treeViewHeader->resizeSection(static_cast<int>(StartupProjectsModel::Column::Description), 70);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Group), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IsGroup), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IconName), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Url), true);
 
-#ifdef _DEBUG
-    treeViewHeader->setSectionHidden(static_cast<int>(StartupProjectsModel::Column::FileName), false);
-#else
-    treeViewHeader->setSectionHidden(static_cast<int>(StartupProjectsModel::Column::FileName), true);
+#if QT_NO_DEBUG
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::MinimumCoreVersion), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::RequiredPlugins), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::MissingPlugins), true);
 #endif
-    
-
-    treeViewHeader->setSectionResizeMode(static_cast<int>(StartupProjectsModel::Column::FileName), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(StartupProjectsModel::Column::Title), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(StartupProjectsModel::Column::Description), QHeaderView::Stretch);
-
-    treeViewHeader->setStretchLastSection(false);
-    */
 
     connect(&_loadAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::accept);
     connect(&_quitAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::reject);

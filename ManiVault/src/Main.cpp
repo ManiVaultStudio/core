@@ -229,8 +229,6 @@ int main(int argc, char *argv[])
 
     application.initialize();
 
-    
-
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 
     loadGuiTask.setSubtasks({ "Apply styles", "Create main window", "Initializing start page" });
