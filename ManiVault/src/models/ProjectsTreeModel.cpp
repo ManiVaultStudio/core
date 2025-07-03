@@ -49,34 +49,7 @@ ProjectsTreeModel::ProjectsTreeModel(QObject* parent /*= nullptr*/) :
     	connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
             for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
 	            try {
-					const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
-					const auto fullJson = json::parse(QString::fromUtf8(jsonData.constData()).toStdString());
-
-					if (fullJson.contains("projects")) {
-						validateJson(fullJson["projects"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), loadJsonFromResource(":/JSON/ProjectsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
-					}
-					else {
-						throw std::runtime_error("/projects key is missing");
-					}
-
-					QJsonParseError jsonParseError;
-
-					const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
-
-					if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-						qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
-						continue;
-					}
-
-					const auto projects = jsonDocument.object()["projects"].toArray();
-
-					for (const auto project : projects) {
-						auto projectMap = project.toVariant().toMap();
-
-						addProject(new ProjectsModelProject(projectMap), projectMap["group"].toString());
-					}
-
-					emit populatedFromDsns();
+                    populateFromJsonByteArray(_future.resultAt<QByteArray>(dsnIndex), dsnIndex, _dsnsAction.getStrings()[dsnIndex].toStdString());
 				}
 				catch (std::exception& e)
 				{
@@ -87,34 +60,118 @@ ProjectsTreeModel::ProjectsTreeModel(QObject* parent /*= nullptr*/) :
 					qCritical() << "Unable to add projects from DSN due to an unhandled exception";
 				}
             }
+
+            emit populatedFromDsns();
 		});
 
         _watcher.setFuture(_future);
 	});
 
     connect(core(), &CoreInterface::initialized, this, [this]() -> void {
-        synchronizeWithDsns();
+        populateFromPluginDsns();
     });
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectsTreeModel::synchronizeWithDsns);
+        connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectsTreeModel::populateFromPluginDsns);
     }
 }
 
-void ProjectsTreeModel::synchronizeWithDsns()
+void ProjectsTreeModel::populateFromPluginDsns()
 {
-    if (!mv::core()->isInitialized())
-        return;
+    try {
+        if (!mv::core()->isInitialized())
+            return;
 
-    QStringList uniqueDsns;
+        QStringList uniqueDsns;
 
-    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+            uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
+        }
+
+        uniqueDsns.removeDuplicates();
+
+        _dsnsAction.setStrings(uniqueDsns);
+	}
+	catch (std::exception& e)
+	{
+	    qCritical() << "Unable to populate projects tree model from plugins DSNs:" << e.what();
+	}
+	catch (...)
+	{
+	    qCritical() << "Unable to populate projects tree model from plugins DSNs due to an unhandled exception";
+	}
+}
+
+void ProjectsTreeModel::populateFromJsonByteArray(const QByteArray& jsonByteArray, std::int32_t dsnIndex, const QString& jsonLocation)
+{
+    try {
+        if (!mv::core()->isInitialized())
+            return;
+
+        if (jsonByteArray.isEmpty())
+            throw std::runtime_error("JSON byte array is empty");
+
+        const auto fullJson = json::parse(QString::fromUtf8(jsonByteArray.constData()).toStdString());
+
+        if (fullJson.contains("projects")) {
+            validateJson(fullJson["projects"].dump(), jsonLocation.toStdString(), loadJsonFromResource(":/JSON/ProjectsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
+        }
+        else {
+            throw std::runtime_error("/projects key is missing");
+        }
+
+        QJsonParseError jsonParseError;
+
+        const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+
+        if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject())
+            throw std::runtime_error(QString("Invalid JSON from DSN at index %1: %2").arg(QString::number(dsnIndex), jsonParseError.errorString()).toStdString());
+
+        const auto projects = jsonDocument.object()["projects"].toArray();
+
+        for (const auto project : projects) {
+            auto projectMap = project.toVariant().toMap();
+
+            addProject(new ProjectsModelProject(projectMap), projectMap["group"].toString());
+        }
     }
+    catch (std::exception& e)
+    {
+        qCritical() << "Unable to populate projects tree model from JSON content:" << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << "Unable to populate projects tree model from JSON content due to an unhandled exception";
+    }
+}
 
-    uniqueDsns.removeDuplicates();
-    
-    _dsnsAction.setStrings(uniqueDsns);
+void ProjectsTreeModel::populateFromJsonFile(const QString& filePath)
+{
+    try {
+        if (!mv::core()->isInitialized())
+            return;
+
+        if (filePath.isEmpty())
+            throw std::runtime_error("JSON file path is empty");
+
+        QStringList uniqueDsns;
+
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+            uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
+        }
+
+        uniqueDsns.removeDuplicates();
+
+        _dsnsAction.setStrings(uniqueDsns);
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << "Unable to populate projects tree model from JSON file:" << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << "Unable to populate projects tree model from JSON file due to an unhandled exception";
+    }
 }
 
 QByteArray ProjectsTreeModel::downloadProjectsFromDsn(const QString& dsn)
