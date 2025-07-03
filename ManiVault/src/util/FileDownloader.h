@@ -95,6 +95,12 @@ public:
      */
     QPointer<Task> getTask();
 
+    /**
+     * Get the task associated with the file download
+     * @return Pointer to task
+     */
+    QPointer<Task> getTask() const;
+
 signals:
 
     /** Signals that the file is correctly downloaded */

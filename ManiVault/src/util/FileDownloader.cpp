@@ -161,6 +161,11 @@ QPointer<Task> FileDownloader::getTask()
     return _task;
 }
 
+QPointer<Task> FileDownloader::getTask() const
+{
+    return _task;
+}
+
 QByteArray FileDownloader::downloadedData() const {
     return _downloadedData;
 }
