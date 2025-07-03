@@ -43,8 +43,6 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     setLayout(layout);
 
-    //_quitAction.setToolTip("Do not load a project");
-
     _hierarchyWidget.setWindowIcon(windowIcon);
     _hierarchyWidget.getTreeView().setRootIsDecorated(false);
 

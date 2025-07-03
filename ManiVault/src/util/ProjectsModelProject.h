@@ -42,6 +42,9 @@ public:
      */
     explicit ProjectsModelProject(const QString& groupTitle);
 
+    /** Load the project with the project manager */
+    void load();
+
     /**
      * Get title
      * @return Project title

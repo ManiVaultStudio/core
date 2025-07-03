@@ -63,6 +63,15 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
 {
 }
 
+void ProjectsModelProject::load()
+{
+    if (!getUrl().isLocalFile()) {
+        
+    }
+
+    mv::projects().openProject(getUrl());
+}
+
 const QString& ProjectsModelProject::getTitle() const
 {
     return _title;
