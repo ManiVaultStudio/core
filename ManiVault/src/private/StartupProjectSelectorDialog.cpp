@@ -51,6 +51,10 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeView.setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
     treeView.setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 
+    connect(&treeView, &QTreeView::doubleClicked, this, [this](const QModelIndex& index) {
+        _loadAction.trigger();
+    });
+
     const auto updateLoadAction = [this, &treeView]() -> void {
         _loadAction.setText(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load Project");
         _loadAction.setToolTip(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load the selected project");
@@ -75,7 +79,17 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::MissingPlugins), true);
 #endif
 
-    connect(&_loadAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::accept);
+    connect(&_loadAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (_hierarchyWidget.getSelectedRows().isEmpty()) {
+            qDebug() << "No project selected, starting ManiVault...";
+        } else {
+            if (auto projectsModelProject = _projectsTreeModel.getProject(_hierarchyWidget.getSelectedRows().first()))
+                const_cast<util::ProjectsModelProject*>(projectsModelProject)->load();
+        }
+
+        accept();
+    });
+
     connect(&_quitAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::reject);
 }
 
