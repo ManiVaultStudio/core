@@ -1102,9 +1102,12 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
     return _projectsTreeModel;
 }
 
-void ProjectManager::downloadProject(QUrl url, const QString& targetDirectory)
+void ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/, QString* taskId /*= nullptr*/)
 {
     auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
+
+    if (taskId)
+        *taskId = projectDownloader->getTask()->getId();
 
     projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
 
