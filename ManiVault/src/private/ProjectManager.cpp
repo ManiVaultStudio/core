@@ -541,20 +541,24 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
    //     if (hasProject())
 			//saveProjectAs();
 
-        auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
+        if (url.isLocalFile()) {
+            mv::projects().openProject(url.toString());
+        } else {
+            auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
 
-        projectDownloader->setTargetDirectory(targetDirectory);
+            projectDownloader->setTargetDirectory(targetDirectory);
 
-        connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
-            mv::projects().openProject(projectDownloader->getDownloadedFilePath());
-            projectDownloader->deleteLater();
-		});
+            connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
+                mv::projects().openProject(projectDownloader->getDownloadedFilePath());
+                projectDownloader->deleteLater();
+            });
 
-        connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
-            qDebug() << "Download aborted by user";
-		});
+            connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
+                qDebug() << "Download aborted by user";
+            });
 
-        projectDownloader->download(url);
+            projectDownloader->download(url);
+        }
 	}
 	catch (std::exception& e)
 	{
