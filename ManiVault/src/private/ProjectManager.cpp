@@ -544,6 +544,51 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
         if (url.isLocalFile()) {
             mv::projects().openProject(url.toString());
         } else {
+            const auto fileName = QFileInfo(url.toString()).fileName();
+
+            if (!fileName.isEmpty()) {
+                const auto projectAlreadyDownloaded = QFile::exists(getDownloadedProjectsDirPath() + fileName);
+
+
+                const auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+                const auto targetDirectory = basePath + "/projects";
+                const auto projectFilePath = targetDirectory + "/" + fileName;
+
+                if (QDir().mkpath(targetDirectory) && QFile::exists(projectFilePath)) {
+                    QMessageBox downloadAgainMessageBox;
+
+                    downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
+                    downloadAgainMessageBox.setWindowTitle(QString("%1 already exists?").arg(fileName));
+                    downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
+                    downloadAgainMessageBox.setIcon(QMessageBox::Warning);
+
+                    auto yesButton = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+                    auto noButton = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
+
+                    downloadAgainMessageBox.setDefaultButton(noButton);
+
+                    downloadAgainMessageBox.exec();
+
+                    if (downloadAgainMessageBox.clickedButton() == yesButton) {
+                        QFile::remove(targetDirectory);
+                        projects().openProject(project->getUrl(), targetDirectory);
+                    }
+                    else {
+                        projects().openProject(projectFilePath);
+                    }
+                }
+                else {
+                    projects().openProject(project->getUrl(), targetDirectory);
+                }
+            }
+
+
+
+
+
+
+
+
             auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
 
             projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDirPath() : "");
@@ -1081,19 +1126,22 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
     return _projectsTreeModel;
 }
 
-QString ProjectManager::getDownloadedProjectsDirPath() const
+QDir ProjectManager::getDownloadedProjectsDir() const
 {
-	const auto baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    const auto baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
-	QDir dir(baseDir);
+    QDir dir(baseDir);
 
-	QString fullPath = dir.filePath("Downloads/Projects");
+    const auto subPath  = "Downloads/Projects";
+    const auto fullPath = dir.filePath(subPath);
 
-	if (!QDir(fullPath).exists()) {
-		QDir().mkpath(fullPath);  // create the directory if it doesn't exist
-	}
+    QDir resultDir(fullPath);
 
-	return fullPath;
+    if (!resultDir.exists()) {
+        const auto madePath = QDir().mkpath(fullPath);
+    }
+
+    return resultDir;
 }
 
 QMenu& ProjectManager::getNewProjectMenu()

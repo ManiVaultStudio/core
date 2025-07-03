@@ -196,10 +196,10 @@ public:
     virtual const ProjectsTreeModel& getProjectsTreeModel() const = 0;
 
     /**
-     * Get the path to the directory where downloaded projects are stored
-     * @return path to the directory where downloaded projects are stored 
+     * Get the directory where downloaded projects are stored
+     * @return Directory where downloaded projects are stored 
      */
-    virtual QString getDownloadedProjectsDirPath() const = 0;
+    virtual QDir getDownloadedProjectsDir() const = 0;
 
 public: // Temporary directories
 
