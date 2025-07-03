@@ -19,7 +19,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     QDialog(parent),
     _projectsTreeModel(projectsTreeModel),
     _filterModel(this),
-    _hierarchyWidget(this, "Startup project", _projectsTreeModel, &_filterModel, false),
+    _hierarchyWidget(this, "Startup project", _projectsTreeModel, nullptr, true),
     _loadAction(this, "Load"),
     _quitAction(this, "Quit")
 {
@@ -46,21 +46,21 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     //_quitAction.setToolTip("Do not load a project");
 
     //_hierarchyWidget.setWindowIcon(windowIcon);
-    //_hierarchyWidget.getTreeView().setRootIsDecorated(false);
+    _hierarchyWidget.getTreeView().setRootIsDecorated(false);
 
-    //auto& treeView = _hierarchyWidget.getTreeView();
+    auto& treeView = _hierarchyWidget.getTreeView();
 
-    //treeView.setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
-    //treeView.setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    treeView.setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+    treeView.setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 
-    //const auto updateLoadAction = [this, &treeView]() -> void {
-    //    _loadAction.setText(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load Project");
-    //    _loadAction.setToolTip(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load the selected project");
-    //};
+    const auto updateLoadAction = [this, &treeView]() -> void {
+        _loadAction.setText(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load Project");
+        _loadAction.setToolTip(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load the selected project");
+    };
 
-    //updateLoadAction();
+    updateLoadAction();
 
-    //connect(treeView.selectionModel(), &QItemSelectionModel::selectionChanged, this, updateLoadAction);
+    connect(treeView.selectionModel(), &QItemSelectionModel::selectionChanged, this, updateLoadAction);
 
     /*
     auto treeViewHeader = treeView.header();

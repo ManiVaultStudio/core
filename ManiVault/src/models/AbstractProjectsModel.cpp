@@ -177,6 +177,7 @@ const ProjectDatabaseProjects& AbstractProjectsModel::getProjects() const
 AbstractProjectsModel::Item::Item(const mv::util::ProjectsModelProject* project, bool editable /*= false*/) :
     _project(project)
 {
+    setEditable(editable);
 }
 
 const ProjectsModelProject* AbstractProjectsModel::Item::getProject() const

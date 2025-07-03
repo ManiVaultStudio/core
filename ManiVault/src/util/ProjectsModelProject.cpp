@@ -13,7 +13,7 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _group(variantMap.contains("group") ? variantMap["group"].toString() : ""),
     _tags(variantMap.contains("tags") ? variantMap["tags"].toStringList() : QStringList()),
     _date(variantMap.contains("date") ? variantMap["date"].toString() : ""),
-    _iconName(variantMap.contains("icon") ? variantMap["icon"].toString() : ""),
+    _iconName(variantMap.contains("icon") ? variantMap["icon"].toString() : "file"),
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : ""))
     
