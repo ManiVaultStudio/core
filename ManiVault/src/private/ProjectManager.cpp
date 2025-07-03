@@ -1104,23 +1104,17 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
 
 void ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/, QString* taskId /*= nullptr*/)
 {
-    auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
+    getProjectDownloader().setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
 
-    if (taskId)
-        *taskId = projectDownloader->getTask()->getId();
-
-    projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
-
-    connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
-        mv::projects().openProject(projectDownloader->getDownloadedFilePath());
-        projectDownloader->deleteLater();
+    connect(&getProjectDownloader(), &FileDownloader::downloaded, this, [this]() -> void {
+        mv::projects().openProject(getProjectDownloader().getDownloadedFilePath());
     });
 
-    connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
+    connect(&getProjectDownloader(), &FileDownloader::aborted, this, []() -> void {
         qDebug() << "Download aborted by user";
     });
 
-    projectDownloader->download(url);
+    getProjectDownloader().download(url);
 }
 
 QDir ProjectManager::getDownloadedProjectsDir() const

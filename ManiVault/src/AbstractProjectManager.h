@@ -13,11 +13,13 @@
 #include "actions/RecentFilesAction.h"
 #include "actions/ToggleAction.h"
 
+#include "models/ProjectsTreeModel.h"
+
+#include "util/FileDownloader.h"
+
 #include <QObject>
 #include <QMenu>
 #include <QTemporaryDir>
-
-#include "models/ProjectsTreeModel.h"
 
 namespace mv {
 
@@ -112,7 +114,8 @@ public:
     AbstractProjectManager(QObject* parent) :
         AbstractManager(parent, "Project"),
         _state(State::Idle),
-        _projectSerializationTask(this, "Project serialization")
+        _projectSerializationTask(this, "Project serialization"),
+		_projectDownloader(util::FileDownloader::StorageMode::All, Task::GuiScope::Modal)
     {
     }
 
@@ -208,6 +211,20 @@ public:
      * @return Directory where downloaded projects are stored 
      */
     virtual QDir getDownloadedProjectsDir() const = 0;
+
+    /**
+     * Get project downloader
+     * @return Reference to project downloader
+     */
+    const util::FileDownloader& getProjectDownloader() const { return _projectDownloader; }
+
+protected:
+
+    /**
+     * Get project downloader
+     * @return Reference to project downloader
+     */
+    util::FileDownloader& getProjectDownloader() { return _projectDownloader; }
 
 public: // Temporary directories
 
@@ -440,6 +457,7 @@ private:
     State                               _state;                         /** Determines the state of the project manager */
     ProjectSerializationTask            _projectSerializationTask;      /** Task for project serialization */
     QMap<TemporaryDirType, QString>     _temporaryDirPaths;             /** Temporary directories for file open/save etc. */
+    util::FileDownloader                _projectDownloader;             /** File downloader for downloading projects from the internet */
 };
 
 }
