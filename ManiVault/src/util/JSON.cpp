@@ -55,12 +55,6 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
 
         nlohmann::json jsonDocument = nlohmann::json::parse(jsonString), jsonSchemaDocument = nlohmann::json::parse(jsonSchemaString);
 
-        //if (!valijson::utils::loadDocument(jsonString, jsonDocument))
-        //    throw std::runtime_error("Failed to parse JSON content document");
-
-        //if (!valijson::utils::loadDocument(jsonSchemaString, jsonSchemaDocument))
-        //    throw std::runtime_error("Failed to parse JSON schema document");
-
         valijson::Schema schema;
         valijson::adapters::NlohmannJsonAdapter schemaAdapter(jsonSchemaDocument);
 
@@ -91,11 +85,6 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
                 }
                 std::cerr << std::endl;
             }
-
-            //valijson::ValidationResults::Error error;
-
-            //while (results.popError(error))
-            //    qCritical() << "  - " << error.description;
         }
     }
     catch (const std::exception& e) {
