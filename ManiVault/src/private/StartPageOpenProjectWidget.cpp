@@ -241,21 +241,21 @@ void StartPageOpenProjectWidget::updateProjectDatabaseActions()
 {
     _projectsWidget.getModel().reset();
     
-    const auto& projectCenterModel = mv::projects().getProjectsTreeModel();
+    const auto& projectsTreeModel = mv::projects().getProjectsTreeModel();
 
     for (int filterRowIndex = 0; _projectsFilterModel.rowCount() > filterRowIndex; ++filterRowIndex) {
         const auto filterIndex = _projectsFilterModel.index(filterRowIndex, 0);
         const auto sourceIndex = _projectsFilterModel.mapToSource(filterIndex);
 
     	if (sourceIndex.isValid()) {
-            if (const auto project = projectCenterModel.getProject(sourceIndex)) {
-                PageAction recentProjectPageAction(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
+            if (const auto project = projectsTreeModel.getProject(sourceIndex)) {
+                PageAction projectPageAction(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
                     projects().openProject(project->getUrl());
 				});
 
-                recentProjectPageAction.setTags(project->getTags());
+                projectPageAction.setTags(project->getTags());
 
-            	_projectsWidget.getModel().add(recentProjectPageAction);
+            	_projectsWidget.getModel().add(projectPageAction);
             }
         }
     }

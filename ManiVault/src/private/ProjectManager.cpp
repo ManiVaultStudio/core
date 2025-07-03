@@ -541,10 +541,11 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
         if (url.isLocalFile()) {
             mv::projects().openProject(url.toString());
         } else {
-            const auto fileName = QFileInfo(url.toString()).fileName();
+            const auto fileName                     = QFileInfo(url.toString()).fileName();
+            const auto downloadedProjectFilePath    = getDownloadedProjectsDir().filePath(fileName);
 
             if (!fileName.isEmpty()) {
-                const auto projectAlreadyDownloaded = QFile::exists(getDownloadedProjectsDir().filePath(fileName));
+                const auto projectAlreadyDownloaded = QFile::exists(downloadedProjectFilePath);
 
                 auto downloadProject = false;
 
@@ -552,7 +553,7 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                     QMessageBox downloadAgainMessageBox;
 
                     downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
-                    downloadAgainMessageBox.setWindowTitle(QString("%1 already exists?").arg(fileName));
+                    downloadAgainMessageBox.setWindowTitle(QString("%1 already exists...").arg(fileName));
                     downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
                     downloadAgainMessageBox.setIcon(QMessageBox::Warning);
 
@@ -569,16 +570,16 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                         downloadProject = true;
                     }
                     else {
-                        mv::projects().openProject(url.toString());
+                        mv::projects().openProject(downloadedProjectFilePath);
                     }
                 } else {
-	                
+                    downloadProject = true;
                 }
 
                 if (downloadProject) {
                     auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
 
-                    projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir() : "");
+                    projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
 
                     connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
                         mv::projects().openProject(projectDownloader->getDownloadedFilePath());
