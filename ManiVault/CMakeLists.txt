@@ -153,11 +153,11 @@ CPMAddPackage(
 )
 
 # Serialization: JSON
-set(nlohmann_json_VERSION v3.12.0)
 CPMAddPackage(
   NAME              nlohmann_json
   GITHUB_REPOSITORY	nlohmann/json
-  GIT_TAG           ${nlohmann_json_VERSION}    # latest release as of 17/06/25
+  GIT_TAG           v3.12.0
+  DOWNLOAD_ONLY     YES
   OPTIONS
       "JSON_BuildTests=OFF"            # skip upstream tests
       "JSON_MultipleHeaders=ON"        # shave compile time (optional)
@@ -165,16 +165,12 @@ CPMAddPackage(
 
 # Serialization: Add valijson as a header-only library
 CPMAddPackage(
-  NAME valijson
+  NAME              valijson
   GITHUB_REPOSITORY tristanpenman/valijson
-  GIT_TAG master
+  GIT_TAG           v1.0.6 
+  DOWNLOAD_ONLY     YES
   OPTIONS "VALIJSON_BUILD_TESTS OFF" "VALIJSON_USE_EXCEPTIONS ON"
 )
-
-# Make an interface target for valijson
-add_library(valijson_interface INTERFACE)
-target_include_directories(valijson_interface INTERFACE ${valijson_SOURCE_DIR}/include)
-target_link_libraries(valijson_interface INTERFACE nlohmann_json::nlohmann_json)
 
 # Layout: Qt Advanced docking system
 CPMAddPackage(
@@ -293,9 +289,13 @@ target_sources(${MV_PUBLIC_LIB}
 
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/include")
+
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_20)
 
 target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
+target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
 
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Core)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
@@ -304,8 +304,6 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE valijson_interface)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
@@ -345,7 +343,12 @@ target_include_directories(${MV_EXE} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
 )
 
+target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
+target_include_directories(${MV_EXE} PRIVATE "${valijson_SOURCE_DIR}/include")
+
 target_compile_features(${MV_EXE} PRIVATE cxx_std_20)
+
+target_compile_definitions(${MV_EXE} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
 
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
@@ -355,8 +358,6 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
-target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(${MV_EXE} PRIVATE valijson_interface)
 
 if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
     target_link_libraries(${MV_EXE} PRIVATE sentry)
