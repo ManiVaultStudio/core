@@ -19,7 +19,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     QDialog(parent),
     _projectsTreeModel(projectsTreeModel),
     _filterModel(this),
-    _hierarchyWidget(this, "Startup project", _projectsTreeModel, nullptr, true),
+    _hierarchyWidget(this, "Startup project", _projectsTreeModel, nullptr, true, false),
     _loadAction(this, "Load"),
     _quitAction(this, "Quit")
 {
