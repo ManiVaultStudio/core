@@ -65,10 +65,6 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
 
 void ProjectsModelProject::load()
 {
-    if (!getUrl().isLocalFile()) {
-        
-    }
-
     mv::projects().openProject(getUrl());
 }
 

@@ -139,6 +139,13 @@ public:
     const ProjectsTreeModel& getProjectsTreeModel() const override;
 
     /**
+     * Download project from \p url and store it in the default downloaded projects directory
+     * @param url URL of the project to download
+     * @param targetDirectory Directory where the project is stored (default is empty, which means the default downloaded projects directory)
+     */
+    void downloadProject(QUrl url, const QString& targetDirectory = "") override;
+
+    /**
      * Get the directory where downloaded projects are stored
      * @return Directory where downloaded projects are stored
      */

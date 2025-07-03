@@ -576,22 +576,8 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                     downloadProject = true;
                 }
 
-                if (downloadProject) {
-                    auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
-
-                    projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
-
-                    connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
-                        mv::projects().openProject(projectDownloader->getDownloadedFilePath());
-                        projectDownloader->deleteLater();
-                    });
-
-                    connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
-                        qDebug() << "Download aborted by user";
-                    });
-
-                    projectDownloader->download(url);
-                }
+                if (downloadProject)
+                    mv::projects().downloadProject(url, targetDirectory);
             }
         }
 	}
@@ -1114,6 +1100,24 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
 const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
 {
     return _projectsTreeModel;
+}
+
+void ProjectManager::downloadProject(QUrl url, const QString& targetDirectory)
+{
+    auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
+
+    projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
+
+    connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
+        mv::projects().openProject(projectDownloader->getDownloadedFilePath());
+        projectDownloader->deleteLater();
+    });
+
+    connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
+        qDebug() << "Download aborted by user";
+    });
+
+    projectDownloader->download(url);
 }
 
 QDir ProjectManager::getDownloadedProjectsDir() const
