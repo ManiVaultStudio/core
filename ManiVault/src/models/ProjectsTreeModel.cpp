@@ -105,9 +105,6 @@ void ProjectsTreeModel::populateFromPluginDsns()
 void ProjectsTreeModel::populateFromJsonByteArray(const QByteArray& jsonByteArray, std::int32_t dsnIndex, const QString& jsonLocation)
 {
     try {
-        if (!mv::core()->isInitialized())
-            return;
-
         if (jsonByteArray.isEmpty())
             throw std::runtime_error("JSON byte array is empty");
 
@@ -122,7 +119,7 @@ void ProjectsTreeModel::populateFromJsonByteArray(const QByteArray& jsonByteArra
 
         QJsonParseError jsonParseError;
 
-        const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+        const auto jsonDocument = QJsonDocument::fromJson(jsonByteArray, &jsonParseError);
 
         if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject())
             throw std::runtime_error(QString("Invalid JSON from DSN at index %1: %2").arg(QString::number(dsnIndex), jsonParseError.errorString()).toStdString());
@@ -148,9 +145,6 @@ void ProjectsTreeModel::populateFromJsonByteArray(const QByteArray& jsonByteArra
 void ProjectsTreeModel::populateFromJsonFile(const QString& filePath)
 {
     try {
-        if (!mv::core()->isInitialized())
-            return;
-
         if (filePath.isEmpty())
             throw std::runtime_error("JSON file path is empty");
 
