@@ -63,7 +63,7 @@ void HelpMenu::populate()
     sortActions(actions);
 
     if (!actions.isEmpty()) {
-        auto pluginHelpMenu = new QMenu("Plugin");
+        auto pluginHelpMenu = new QMenu("Plugins");
 
         pluginHelpMenu->setToolTip("ManiVault plugin documentation");
         pluginHelpMenu->setIcon(StyledIcon("plug"));
