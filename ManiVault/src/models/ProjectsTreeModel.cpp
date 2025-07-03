@@ -24,8 +24,9 @@ using nlohmann::json;
 
 namespace mv {
 
-ProjectsTreeModel::ProjectsTreeModel(QObject* parent /*= nullptr*/) :
+ProjectsTreeModel::ProjectsTreeModel(const Mode& mode /*= Mode::Automatic*/, QObject* parent /*= nullptr*/) :
     AbstractProjectsModel(parent),
+    _mode(mode),
     _dsnsAction(this, "Data Source Names")
 {
     _dsnsAction.setIconByName("globe");
@@ -34,45 +35,46 @@ ProjectsTreeModel::ProjectsTreeModel(QObject* parent /*= nullptr*/) :
     _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
     _dsnsAction.setPopupSizeHint(QSize(550, 100));
 
-    connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
-        setRowCount(0);
+    if (_mode == Mode::Automatic) {
+        connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
+            setRowCount(0);
 
-        if (mv::plugins().isInitializing())
-            return;
+            if (mv::plugins().isInitializing())
+                return;
 
-        _future = QtConcurrent::mapped(
-            _dsnsAction.getStrings(),
-            [this](const QString& dsn) {
-                return downloadProjectsFromDsn(dsn);
-	    });
+            _future = QtConcurrent::mapped(
+                _dsnsAction.getStrings(),
+                [this](const QString& dsn) {
+                    return downloadProjectsFromDsn(dsn);
+                });
 
-    	connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
-            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-	            try {
-                    populateFromJsonByteArray(_future.resultAt<QByteArray>(dsnIndex), dsnIndex, _dsnsAction.getStrings()[dsnIndex].toStdString());
-				}
-				catch (std::exception& e)
-				{
-					qCritical() << "Unable to add projects from DSN:" << e.what();
-				}
-				catch (...)
-				{
-					qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-				}
-            }
+            connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
+                for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
+                    try {
+                        populateFromJsonByteArray(_future.resultAt<QByteArray>(dsnIndex), dsnIndex, _dsnsAction.getStrings()[dsnIndex]);
+                    }
+                    catch (std::exception& e)
+                    {
+                        qCritical() << "Unable to add projects from DSN:" << e.what();
+                    }
+                    catch (...)
+                    {
+                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
+                    }
+                }
 
-            emit populatedFromDsns();
-		});
+                emit populatedFromDsns();
+            });
 
-        _watcher.setFuture(_future);
-	});
+            _watcher.setFuture(_future);
+        });
 
-    connect(core(), &CoreInterface::initialized, this, [this]() -> void {
-        populateFromPluginDsns();
-    });
+        connect(core(), &CoreInterface::initialized, this, [this]() -> void {
+            populateFromPluginDsns();
+        });
 
-    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-        connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectsTreeModel::populateFromPluginDsns);
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+            connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectsTreeModel::populateFromPluginDsns);
     }
 }
 
@@ -84,9 +86,8 @@ void ProjectsTreeModel::populateFromPluginDsns()
 
         QStringList uniqueDsns;
 
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
             uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
-        }
 
         uniqueDsns.removeDuplicates();
 
@@ -154,15 +155,12 @@ void ProjectsTreeModel::populateFromJsonFile(const QString& filePath)
         if (filePath.isEmpty())
             throw std::runtime_error("JSON file path is empty");
 
-        QStringList uniqueDsns;
+        QFile file(filePath);
 
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-            uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
-        }
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            throw std::runtime_error(QString("Failed to open file: %1").arg(file.errorString()).toStdString());
 
-        uniqueDsns.removeDuplicates();
-
-        _dsnsAction.setStrings(uniqueDsns);
+        populateFromJsonByteArray(file.readAll(), -1, filePath);
     }
     catch (std::exception& e)
     {

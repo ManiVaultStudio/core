@@ -30,11 +30,17 @@ class CORE_EXPORT ProjectsTreeModel final : public AbstractProjectsModel
 
 public:
 
+    enum class Mode
+    {
+		Automatic,  /** Automatically populate the model from the Data Source Names (DSNs) */
+        Manual      /** Manually populate the model from a JSON file or byte array */
+    };
+
     /**
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    ProjectsTreeModel(QObject* parent = nullptr);
+    ProjectsTreeModel(const Mode& mode = Mode::Automatic, QObject* parent = nullptr);
 
     /** Synchronize the model with the content of all plugins Data Source Names */
     void populateFromPluginDsns();
@@ -74,6 +80,7 @@ signals:
     void populatedFromDsns();
 
 private:
+    Mode                            _mode;          /** Mode of the model (automatic/manual) */
     gui::StringsAction              _dsnsAction;    /** Data source names action */
     QFuture<QByteArray>             _future;        /** Future for downloading projects */
     QFutureWatcher<QByteArray>      _watcher;       /** Future watcher for downloading projects */

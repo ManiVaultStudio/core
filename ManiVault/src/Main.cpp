@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
 
-    ProjectsTreeModel startupProjectsTreeModel;
+    ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::Mode::Manual);
 
     if (commandLineParser.isSet("project")) {
         QVector<QPair<QSharedPointer<mv::ProjectMetaAction>, QString>> startupProjectsMetaActionsCandidates;
