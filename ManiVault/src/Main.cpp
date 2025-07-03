@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
 
-    ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::Mode::Manual);
+    ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::PopulationMode::Manual);
 
     if (commandLineParser.isSet("project")) {
         QVector<QPair<QSharedPointer<mv::ProjectMetaAction>, QString>> startupProjectsMetaActionsCandidates;
@@ -157,27 +157,13 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (QFileInfo("projects.json").exists()) {
-	    
+    const auto projectsJsonFilePath = QString("projects.json");
+
+    if (QFileInfo(projectsJsonFilePath).exists()) {
+        startupProjectsTreeModel.populateFromJsonFile(projectsJsonFilePath);
     }
 
-    if (startupProjectsTreeModel.rowCount() > 0) {
-        StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel);
-
-        const auto dialogResult = startupProjectSelectorDialog.exec();
-
-        if (dialogResult == QDialog::Accepted) {
-	        /*const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
-
-			if (selectedStartupProjectIndex >= 0) {
-				startupProjectMetaAction = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].first;
-				startupProjectFilePath = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
-			}*/
-        }
-    }
-	/*
-	 
-	 */
+    const auto userWillSelectProject = startupProjectsTreeModel.rowCount() >= 2;
 
     Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
@@ -212,7 +198,7 @@ int main(int argc, char *argv[])
             }
             else {
                 splashScreenAction.addAlert(SplashScreenAction::Alert::warning(QString("\
-                    Unable to load <b>%1</b> at startup, the file does not exist. \
+                    <b>%1</b> does not exist. \
                     Provide an existing project file path when using <b>-p</b>/<b>--project</b> ManiVault<sup>&copy;</sup> command line parameters. \
                 ").arg(startupProjectFilePath)));
 
@@ -228,8 +214,9 @@ int main(int argc, char *argv[])
             qDebug() << "Unable to load startup project due to an unhandled exception";
         }
     }
-    
-    splashScreenAction.getOpenAction().trigger();
+
+    if (!userWillSelectProject)
+		splashScreenAction.getOpenAction().trigger();
 
     if (settings().getTemporaryDirectoriesSettingsAction().getRemoveStaleTemporaryDirsAtStartupAction().isChecked()) {
         application.getTemporaryDirs().getTask().setParentTask(&application.getStartupTask());
@@ -239,6 +226,21 @@ int main(int argc, char *argv[])
     }
 
     core.initialize();
+
+    if (userWillSelectProject) {
+        StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel);
+
+        const auto dialogResult = startupProjectSelectorDialog.exec();
+
+        if (dialogResult == QDialog::Accepted) {
+            /*const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
+
+            if (selectedStartupProjectIndex >= 0) {
+                startupProjectMetaAction = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].first;
+                startupProjectFilePath = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
+            }*/
+        }
+    }
 
     application.initialize();
 
