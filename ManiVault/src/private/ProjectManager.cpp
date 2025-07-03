@@ -538,23 +538,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= false*/)
 {
     try {
-   //     if (hasProject())
-			//saveProjectAs();
-
         if (url.isLocalFile()) {
             mv::projects().openProject(url.toString());
         } else {
             const auto fileName = QFileInfo(url.toString()).fileName();
 
             if (!fileName.isEmpty()) {
-                const auto projectAlreadyDownloaded = QFile::exists(getDownloadedProjectsDirPath() + fileName);
+                const auto projectAlreadyDownloaded = QFile::exists(getDownloadedProjectsDir().filePath(fileName));
 
+                auto downloadProject = false;
 
-                const auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-                const auto targetDirectory = basePath + "/projects";
-                const auto projectFilePath = targetDirectory + "/" + fileName;
-
-                if (QDir().mkpath(targetDirectory) && QFile::exists(projectFilePath)) {
+                if (projectAlreadyDownloaded) {
                     QMessageBox downloadAgainMessageBox;
 
                     downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
@@ -562,8 +556,8 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                     downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
                     downloadAgainMessageBox.setIcon(QMessageBox::Warning);
 
-                    auto yesButton = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
-                    auto noButton = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
+                    auto yesButton  = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+                    auto noButton   = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
 
                     downloadAgainMessageBox.setDefaultButton(noButton);
 
@@ -571,38 +565,33 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 
                     if (downloadAgainMessageBox.clickedButton() == yesButton) {
                         QFile::remove(targetDirectory);
-                        projects().openProject(project->getUrl(), targetDirectory);
+
+                        downloadProject = true;
                     }
                     else {
-                        projects().openProject(projectFilePath);
+                        mv::projects().openProject(url.toString());
                     }
+                } else {
+	                
                 }
-                else {
-                    projects().openProject(project->getUrl(), targetDirectory);
+
+                if (downloadProject) {
+                    auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
+
+                    projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir() : "");
+
+                    connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
+                        mv::projects().openProject(projectDownloader->getDownloadedFilePath());
+                        projectDownloader->deleteLater();
+                    });
+
+                    connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
+                        qDebug() << "Download aborted by user";
+                    });
+
+                    projectDownloader->download(url);
                 }
             }
-
-
-
-
-
-
-
-
-            auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
-
-            projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDirPath() : "");
-
-            connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
-                mv::projects().openProject(projectDownloader->getDownloadedFilePath());
-                projectDownloader->deleteLater();
-            });
-
-            connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
-                qDebug() << "Download aborted by user";
-            });
-
-            projectDownloader->download(url);
         }
 	}
 	catch (std::exception& e)
