@@ -227,25 +227,9 @@ int main(int argc, char *argv[])
 
     core.initialize();
 
-    if (userWillSelectProject) {
-        StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel);
-
-        const auto dialogResult = startupProjectSelectorDialog.exec();
-
-        if (dialogResult == QDialog::Accepted) {
-            /*const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
-
-            if (selectedStartupProjectIndex >= 0) {
-                startupProjectMetaAction = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].first;
-                startupProjectFilePath = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
-            }*/
-        }
-
-        if (dialogResult == QDialog::Rejected)
-            return 0; // No project selected, exit application
-    }
-
     application.initialize();
+
+    
 
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 
@@ -267,6 +251,24 @@ int main(int argc, char *argv[])
 #endif
 
     loadGuiTask.setSubtaskFinished("Apply styles");
+
+    if (userWillSelectProject) {
+        StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel);
+
+        const auto dialogResult = startupProjectSelectorDialog.exec();
+
+        if (dialogResult == QDialog::Accepted) {
+            /*const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
+
+            if (selectedStartupProjectIndex >= 0) {
+                startupProjectMetaAction = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].first;
+                startupProjectFilePath = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
+            }*/
+        }
+
+        if (dialogResult == QDialog::Rejected)
+            return 0; // No project selected, exit application
+    }
 
     MainWindow mainWindow;
 
