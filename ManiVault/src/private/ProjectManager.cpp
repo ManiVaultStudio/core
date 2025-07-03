@@ -546,7 +546,7 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
         } else {
             auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
 
-            projectDownloader->setTargetDirectory(targetDirectory);
+            projectDownloader->setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDirPath() : "");
 
             connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
                 mv::projects().openProject(projectDownloader->getDownloadedFilePath());
