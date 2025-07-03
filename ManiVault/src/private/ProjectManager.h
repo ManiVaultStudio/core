@@ -138,6 +138,12 @@ public:
      */
     const ProjectsTreeModel& getProjectsTreeModel() const override;
 
+    /**
+     * Get the path to the directory where downloaded projects are stored
+     * @return path to the directory where downloaded projects are stored
+     */
+    QString getDownloadedProjectsDirPath() const override;
+
 public: // Menus
 
     /**

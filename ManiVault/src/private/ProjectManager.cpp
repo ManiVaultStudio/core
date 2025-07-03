@@ -1081,6 +1081,21 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
     return _projectsTreeModel;
 }
 
+QString ProjectManager::getDownloadedProjectsDirPath() const
+{
+	const auto baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+	QDir dir(baseDir);
+
+	QString fullPath = dir.filePath("Downloads/Projects");
+
+	if (!QDir(fullPath).exists()) {
+		QDir().mkpath(fullPath);  // create the directory if it doesn't exist
+	}
+
+	return fullPath;
+}
+
 QMenu& ProjectManager::getNewProjectMenu()
 {
     return _newProjectMenu;
