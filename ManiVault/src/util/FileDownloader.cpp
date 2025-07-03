@@ -156,6 +156,11 @@ void FileDownloader::setTargetDirectory(const QString& targetDirectory)
     _targetDirectory = targetDirectory;
 }
 
+QPointer<Task> FileDownloader::getTask()
+{
+    return _task;
+}
+
 QByteArray FileDownloader::downloadedData() const {
     return _downloadedData;
 }

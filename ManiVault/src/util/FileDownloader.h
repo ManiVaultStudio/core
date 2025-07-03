@@ -89,6 +89,12 @@ public:
      */
     void setTargetDirectory(const QString& targetDirectory);
 
+    /**
+     * Get the task associated with the file download
+     * @return Pointer to task
+     */
+    QPointer<Task> getTask();
+
 signals:
 
     /** Signals that the file is correctly downloaded */
