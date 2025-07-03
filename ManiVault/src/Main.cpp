@@ -240,6 +240,9 @@ int main(int argc, char *argv[])
                 startupProjectFilePath = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
             }*/
         }
+
+        if (dialogResult == QDialog::Rejected)
+            return 0; // No project selected, exit application
     }
 
     application.initialize();

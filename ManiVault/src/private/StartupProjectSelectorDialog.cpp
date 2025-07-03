@@ -23,14 +23,12 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     _loadAction(this, "Load"),
     _quitAction(this, "Quit")
 {
-    //_model.initialize(startupProjectsMetaActions);
+    const auto windowIcon = StyledIcon("file-import");
 
-    //const auto windowIcon = StyledIcon("file-import");
-
-    //setWindowIcon(windowIcon);
-    //setModal(true);
-    //setWindowTitle("Load project");
-    //
+    setWindowIcon(windowIcon);
+    setModal(true);
+    setWindowTitle("Load project");
+    
     auto layout = new QVBoxLayout();
 
     layout->addWidget(&_hierarchyWidget, 1);
@@ -41,9 +39,9 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     bottomLayout->addStretch(1);
     bottomLayout->addWidget(_quitAction.createWidget(this));
 
-    //layout->addLayout(bottomLayout);
+    layout->addLayout(bottomLayout);
 
-    //setLayout(layout);
+    setLayout(layout);
 
     //_quitAction.setToolTip("Do not load a project");
 
