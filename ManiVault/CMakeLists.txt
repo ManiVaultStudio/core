@@ -153,11 +153,10 @@ CPMAddPackage(
 )
 
 # Serialization: JSON
-set(nlohmann_json_VERSION v3.12.0)
 CPMAddPackage(
   NAME              nlohmann_json
   GITHUB_REPOSITORY	nlohmann/json
-  GIT_TAG           ${nlohmann_json_VERSION}    # latest release as of 17/06/25
+  GIT_TAG           v3.12.0
   OPTIONS
       "JSON_BuildTests=OFF"            # skip upstream tests
       "JSON_MultipleHeaders=ON"        # shave compile time (optional)
@@ -165,7 +164,7 @@ CPMAddPackage(
 
 # Serialization: Add valijson as a header-only library
 CPMAddPackage(
-  NAME valijson
+  NAME              valijson
   GITHUB_REPOSITORY tristanpenman/valijson
   GIT_TAG           v1.0.6 
   OPTIONS "VALIJSON_BUILD_TESTS OFF" "VALIJSON_USE_EXCEPTIONS ON"
