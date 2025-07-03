@@ -27,8 +27,8 @@ QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> Abst
     { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
 });
 
-AbstractProjectsModel::AbstractProjectsModel(QObject* parent /*= nullptr*/) :
-    StandardItemModel(parent)
+AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
+    StandardItemModel(parent, "Projects", populationMode)
 {
     setColumnCount(static_cast<int>(Column::Count));
 }

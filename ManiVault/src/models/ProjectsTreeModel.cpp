@@ -24,9 +24,8 @@ using nlohmann::json;
 
 namespace mv {
 
-ProjectsTreeModel::ProjectsTreeModel(const Mode& mode /*= Mode::Automatic*/, QObject* parent /*= nullptr*/) :
-    AbstractProjectsModel(parent),
-    _mode(mode),
+ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mode::Automatic*/, QObject* parent /*= nullptr*/) :
+    AbstractProjectsModel(populationMode, parent),
     _dsnsAction(this, "Data Source Names")
 {
     _dsnsAction.setIconByName("globe");
@@ -35,7 +34,7 @@ ProjectsTreeModel::ProjectsTreeModel(const Mode& mode /*= Mode::Automatic*/, QOb
     _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
     _dsnsAction.setPopupSizeHint(QSize(550, 100));
 
-    if (_mode == Mode::Automatic) {
+    if (getPopulationMode() == PopulationMode::Automatic) {
         connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
             setRowCount(0);
 

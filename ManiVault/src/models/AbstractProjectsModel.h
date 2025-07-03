@@ -501,9 +501,10 @@ public:
 
     /**
      * Construct with pointer to \p parent object
+     * @param populationMode Population mode of the model (automatic/manual)
      * @param parent Pointer to parent object
      */
-    AbstractProjectsModel(QObject* parent = nullptr);
+    AbstractProjectsModel(const PopulationMode& populationMode = PopulationMode::Automatic, QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -557,8 +558,8 @@ signals:
     void tagsChanged(const QSet<QString>& tags);
 
 private:
-    util::ProjectDatabaseProjects   _projects;  /** Model projects */
-    QSet<QString>                   _tags;      /** All tags */
+    util::ProjectDatabaseProjects   _projects;          /** Model projects */
+    QSet<QString>                   _tags;              /** All tags */
 };
 
 }
