@@ -36,7 +36,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(500, 150);
+        return QSize(800, 400);
     }
 
     /** Get minimum size hint*/
@@ -51,7 +51,7 @@ public:
     std::int32_t getSelectedStartupProjectIndex();
 
 private:
-    mv::ProjectsTreeModel&       _projectsTreeModel;    /** Projects tree model */
+    mv::ProjectsTreeModel&      _projectsTreeModel;    /** Projects tree model */
     mv::ProjectsFilterModel     _filterModel;           /** Sorting and filtering model for the projects model */
     mv::gui::HierarchyWidget    _hierarchyWidget;       /** Widget for displaying the loaded plugins */
     mv::gui::TriggerAction      _loadAction;            /** Load the selected project */
