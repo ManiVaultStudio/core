@@ -559,6 +559,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/ProjectsModelProject.h
     src/util/JSON.h
     src/util/Script.h
+	src/util/HardwareSpec.h
+	src/util/HardwareSpecs.h
 )
 
 if(APPLE)
@@ -614,6 +616,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/ProjectsModelProject.cpp
     src/util/JSON.cpp
     src/util/Script.cpp
+	src/util/HardwareSpec.cpp
+	src/util/HardwareSpecs.cpp
 )
 
 if(APPLE)
