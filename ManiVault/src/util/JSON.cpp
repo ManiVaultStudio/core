@@ -88,7 +88,7 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
         }
     }
     catch (const std::exception& e) {
-        qCritical() << "Unable to validate JSON: " << e.what() << "\n";
+        qCritical() << "Unable to validate JSON at: " << jsonLocation << e.what() << "\n";
     }
 }
 
