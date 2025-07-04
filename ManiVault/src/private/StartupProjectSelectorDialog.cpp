@@ -68,6 +68,9 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     treeViewHeader->setStretchLastSection(false);
 
+    treeViewHeader->resizeSection(static_cast<int>(ProjectsTreeModel::Column::Title), 250);
+
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Downloaded), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Group), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IsGroup), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IconName), true);

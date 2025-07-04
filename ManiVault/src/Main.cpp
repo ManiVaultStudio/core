@@ -126,14 +126,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    const auto projectsJsonFilePath = QString("projects.json");
-
-    if (QFileInfo(projectsJsonFilePath).exists()) {
-        startupProjectsTreeModel.populateFromJsonFile(projectsJsonFilePath);
-    }
-
-    const auto userWillSelectProject = startupProjectsTreeModel.rowCount() >= 2;
-
     Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
     Core core;
@@ -152,6 +144,14 @@ int main(int argc, char *argv[])
     core.initialize();
 
     application.initialize();
+
+    const auto projectsJsonFilePath = QString("projects.json");
+
+    if (QFileInfo(projectsJsonFilePath).exists()) {
+        startupProjectsTreeModel.populateFromJsonFile(projectsJsonFilePath);
+    }
+
+    const auto userWillSelectProject = startupProjectsTreeModel.rowCount() >= 2;
 
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 

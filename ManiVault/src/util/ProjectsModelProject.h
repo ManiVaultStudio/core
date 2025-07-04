@@ -43,79 +43,85 @@ public:
     explicit ProjectsModelProject(const QString& groupTitle);
 
     /** Load the project with the project manager */
-    void load();
+    void load() const;
 
     /**
      * Get title
      * @return Project title
      */
-    const QString& getTitle() const;
+    QString getTitle() const;
+
+    /**
+     * Get whether project has been downloaded before
+     * @return Boolean determining whether project has been downloaded before
+     */
+    bool isDownloaded() const;
 
     /**
      * Get whether this is a group
      * @return Boolean determining whether this is a group or a project
      */
-    const bool& isGroup() const;
+    bool isGroup() const;
 
     /**
      * Get group
      * @return Project group
      */
-    const QString& getGroup() const;
+    QString getGroup() const;
 
     /**
      * Get tags
      * @return Project tags
      */
-    const QStringList& getTags() const;
+    QStringList getTags() const;
 
     /**
      * Get date
      * @return Issue date 
      */
-    const QString& getDate() const;
+    QString getDate() const;
 
     /**
      * Get icon name
      * @return Font Awesome icon name
      */
-    const QString& getIconName() const;
+    QString getIconName() const;
 
     /**
      * Get summary
      * @return Project summary (brief description)
      */
-    const QString& getSummary() const;
+    QString getSummary() const;
 
     /**
      * Get URL
      * @return ManiVault website project URL
      */
-    const QUrl& getUrl() const;
+    QUrl getUrl() const;
 
     /**
      * Get minimum supported ManiVault Studio core version
      * @return Minimum supported ManiVault Studio core  version
      */
-    const Version& getMinimumCoreVersion() const;
+    Version getMinimumCoreVersion() const;
 
     /**
      * Get required plugins
      * @return Required plugins
      */
-    const QStringList& getRequiredPlugins() const;
+    QStringList getRequiredPlugins() const;
 
     /**
      * Get missing plugins
      * @return Missing plugins
      */
-    const QStringList& getMissingPlugins() const;
+    QStringList getMissingPlugins() const;
 
     /**
      * Get size
      * @return Project size as a string (e.g., "1.2 MB", "500 KB", etc.)
      */
-    const QString& getSize() const;
+    QString getSize() const;
 
     /**
      * Overload assignment operator

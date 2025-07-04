@@ -59,72 +59,83 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
 
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _title(groupTitle),
-    _group(groupTitle),
-    _isGroup(true)
+    _isGroup(true),
+    _group(groupTitle)
 {
 }
 
-void ProjectsModelProject::load()
+void ProjectsModelProject::load() const
 {
     mv::projects().openProject(getUrl());
 }
 
-const QString& ProjectsModelProject::getTitle() const
+QString ProjectsModelProject::getTitle() const
 {
     return _title;
 }
 
-const bool& ProjectsModelProject::isGroup() const
+bool ProjectsModelProject::isDownloaded() const
+{
+    const auto downloadedProjectFilePath = mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
+
+	QFileInfo fileInfo(downloadedProjectFilePath);
+
+    fileInfo.refresh();
+
+    return fileInfo.exists() && fileInfo.isFile();
+}
+
+bool ProjectsModelProject::isGroup() const
 {
     return _isGroup;
 }
 
-const QString& ProjectsModelProject::getGroup() const
+QString ProjectsModelProject::getGroup() const
 {
     return _group;
 }
 
-const QStringList& ProjectsModelProject::getTags() const
+QStringList ProjectsModelProject::getTags() const
 {
     return _tags;
 }
 
-const QString& ProjectsModelProject::getDate() const
+QString ProjectsModelProject::getDate() const
 {
     return _date;
 }
 
-const QString& ProjectsModelProject::getIconName() const
+QString ProjectsModelProject::getIconName() const
 {
     return _iconName;
 }
 
-const QString& ProjectsModelProject::getSummary() const
+QString ProjectsModelProject::getSummary() const
 {
     return _summary;
 }
 
-const QUrl& ProjectsModelProject::getUrl() const
+QUrl ProjectsModelProject::getUrl() const
 {
     return _url;
 }
 
-const Version& ProjectsModelProject::getMinimumCoreVersion() const
+Version ProjectsModelProject::getMinimumCoreVersion() const
 {
     return _minimumCoreVersion;
 }
 
-const QStringList& ProjectsModelProject::getRequiredPlugins() const
+QStringList ProjectsModelProject::getRequiredPlugins() const
 {
     return _requiredPlugins;
 }
 
-const QStringList& ProjectsModelProject::getMissingPlugins() const
+QStringList ProjectsModelProject::getMissingPlugins() const
 {
     return _missingPlugins;
 }
 
-const QString& ProjectsModelProject::getSize() const
+QString ProjectsModelProject::getSize() const
 {
     return _size;
 }

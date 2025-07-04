@@ -15,6 +15,7 @@ namespace mv {
 
 QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> AbstractProjectsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
     { Column::Title, { "Title" , "Title", "Title" } },
+    { Column::Downloaded, { "Downloaded" , "Downloaded", "Whether the project has been downloaded before" } },
     { Column::Group, { "Group" , "Group", "Group" } },
     { Column::IsGroup, { "IsGroup" , "IsGroup", "IsGroup" } },
     { Column::Tags, { "Tags" , "Tags", "Tags" } },
@@ -40,6 +41,9 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
     {
         case Column::Title:
             return TitleItem::headerData(orientation, role);
+
+        case Column::Downloaded:
+            return DownloadedItem::headerData(orientation, role);
 
         case Column::Group:
             return GroupItem::headerData(orientation, role);
@@ -200,13 +204,40 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
             return "Title: " + data(Qt::DisplayRole).toString();
 
 		case Qt::DecorationRole:
-            return StyledIcon(getProject()->getIconName());
+            return getProject()->isDownloaded() ? StyledIcon(getProject()->getIconName()) : StyledIcon("download");
 
         default:
             break;
     }
 
     return Item::data(role);
+}
+
+AbstractProjectsModel::DownloadedItem::DownloadedItem(const util::ProjectsModelProject* project, bool editable) :
+    Item(project, editable)
+{
+}
+
+QVariant AbstractProjectsModel::DownloadedItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+            return getProject()->isDownloaded();
+
+	    case Qt::DisplayRole:
+	        return "";
+
+	    case Qt::ToolTipRole:
+	        return data(Qt::EditRole).toBool() ? "Project is downloaded before" : "Not downloaded yet";
+
+	    case Qt::DecorationRole:
+	        return data(Qt::EditRole).toBool() ? StyledIcon("file") : StyledIcon("download");
+
+	    default:
+	        break;
+    }
+
+	return Item::data(role);
 }
 
 QVariant AbstractProjectsModel::GroupItem::data(int role) const
