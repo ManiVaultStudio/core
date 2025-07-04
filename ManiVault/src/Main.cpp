@@ -174,51 +174,6 @@ int main(int argc, char *argv[])
 
     core.createManagers();
 
-    SplashScreenAction splashScreenAction(&application, false);
-
-    if (!startupProjectMetaAction.isNull()) {
-        try {
-            const auto startupProjectFileInfo = QFileInfo(startupProjectFilePath);
-
-            if (startupProjectFileInfo.exists()) {
-                qDebug() << "Loading startup project from" << startupProjectFilePath;
-
-                //ModalTask::getGlobalHandler()->setEnabled(false);
-
-                application.setStartupProjectFilePath(startupProjectFilePath);
-                
-                application.getStartupTask().getLoadProjectTask().setEnabled(true, true);
-
-                splashScreenAction.setProjectMetaAction(startupProjectMetaAction.get());
-                splashScreenAction.fromVariantMap(startupProjectMetaAction->getSplashScreenAction().toVariantMap());
-
-                application.setStartupProjectMetaAction(startupProjectMetaAction.get());
-
-                if (startupProjectMetaAction->getReadOnlyAction().isChecked() && startupProjectMetaAction->getApplicationIconAction().getOverrideAction().isChecked())
-                    application.setWindowIcon(startupProjectMetaAction->getApplicationIconAction().getIconPickerAction().getIcon());
-            }
-            else {
-                splashScreenAction.addAlert(SplashScreenAction::Alert::warning(QString("\
-                    <b>%1</b> does not exist. \
-                    Provide an existing project file path when using <b>-p</b>/<b>--project</b> ManiVault<sup>&copy;</sup> command line parameters. \
-                ").arg(startupProjectFilePath)));
-
-                throw std::runtime_error("Project file not found");
-            }
-        }
-        catch (std::exception& e)
-        {
-            qDebug() << "Unable to load startup project:" << e.what();
-        }
-        catch (...)
-        {
-            qDebug() << "Unable to load startup project due to an unhandled exception";
-        }
-    }
-
-    if (!userWillSelectProject)
-		splashScreenAction.getOpenAction().trigger();
-
     if (settings().getTemporaryDirectoriesSettingsAction().getRemoveStaleTemporaryDirsAtStartupAction().isChecked()) {
         application.getTemporaryDirs().getTask().setParentTask(&application.getStartupTask());
         application.getTemporaryDirs().removeStale();
@@ -259,6 +214,12 @@ int main(int argc, char *argv[])
         const auto dialogResult = startupProjectSelectorDialog.exec();
 
         if (dialogResult == QDialog::Accepted) {
+
+            auto startupProjectMetaAction = getStartupProjectMetaAction(startupProjectFilePathCandidate);
+
+            if (startupProjectMetaAction.isNull())
+                continue;
+
             /*const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
 
             if (selectedStartupProjectIndex >= 0) {
@@ -270,6 +231,51 @@ int main(int argc, char *argv[])
         if (dialogResult == QDialog::Rejected)
             return 0; // No project selected, exit application
     }
+
+    SplashScreenAction splashScreenAction(&application, false);
+
+    if (!startupProjectMetaAction.isNull()) {
+        try {
+            const auto startupProjectFileInfo = QFileInfo(startupProjectFilePath);
+
+            if (startupProjectFileInfo.exists()) {
+                qDebug() << "Loading startup project from" << startupProjectFilePath;
+
+                //ModalTask::getGlobalHandler()->setEnabled(false);
+
+                application.setStartupProjectFilePath(startupProjectFilePath);
+
+                application.getStartupTask().getLoadProjectTask().setEnabled(true, true);
+
+                splashScreenAction.setProjectMetaAction(startupProjectMetaAction.get());
+                splashScreenAction.fromVariantMap(startupProjectMetaAction->getSplashScreenAction().toVariantMap());
+
+                application.setStartupProjectMetaAction(startupProjectMetaAction.get());
+
+                if (startupProjectMetaAction->getReadOnlyAction().isChecked() && startupProjectMetaAction->getApplicationIconAction().getOverrideAction().isChecked())
+                    application.setWindowIcon(startupProjectMetaAction->getApplicationIconAction().getIconPickerAction().getIcon());
+            }
+            else {
+                splashScreenAction.addAlert(SplashScreenAction::Alert::warning(QString("\
+                    <b>%1</b> does not exist. \
+                    Provide an existing project file path when using <b>-p</b>/<b>--project</b> ManiVault<sup>&copy;</sup> command line parameters. \
+                ").arg(startupProjectFilePath)));
+
+                throw std::runtime_error("Project file not found");
+            }
+        }
+        catch (std::exception& e)
+        {
+            qDebug() << "Unable to load startup project:" << e.what();
+        }
+        catch (...)
+        {
+            qDebug() << "Unable to load startup project due to an unhandled exception";
+        }
+    }
+
+    if (!userWillSelectProject)
+        splashScreenAction.getOpenAction().trigger();
 
     MainWindow mainWindow;
 
