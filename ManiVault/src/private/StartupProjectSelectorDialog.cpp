@@ -95,10 +95,14 @@ std::int32_t StartupProjectSelectorDialog::getSelectedStartupProjectIndex()
 
 ProjectsModelProject* StartupProjectSelectorDialog::getSelectedStartupProject() const
 {
-    if (_hierarchyWidget.getSelectedRows().isEmpty())
+    const auto selectedRows = _hierarchyWidget.getSelectedRows();
+
+    if (selectedRows.isEmpty())
         return {};
 
-	if (auto projectsModelProject = _projectsTreeModel.getProject(_hierarchyWidget.getSelectedRows().first()))
+    const auto& firstSelectedFilterRow = selectedRows.first();
+
+	if (auto projectsModelProject = _projectsTreeModel.getProject(firstSelectedFilterRow))
 		return const_cast<mv::util::ProjectsModelProject*>(projectsModelProject);
 
 	return {};

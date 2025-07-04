@@ -572,7 +572,7 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                     downloadAgainMessageBox.exec();
 
                     if (downloadAgainMessageBox.clickedButton() == yesButton) {
-                        QFile::remove(targetDirectory);
+                        QFile::remove(downloadedProjectFilePath);
 
                         downloadProject = true;
                     }
@@ -1114,7 +1114,7 @@ void ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*
 {
     getProjectDownloader().setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
 
-    connect(&getProjectDownloader(), &FileDownloader::downloaded, this, [this]() -> void {
+	connect(&getProjectDownloader(), &FileDownloader::downloaded, this, [this]() -> void {
         mv::projects().openProject(getProjectDownloader().getDownloadedFilePath());
     });
 

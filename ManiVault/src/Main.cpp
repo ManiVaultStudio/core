@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
         if (dialogResult == QDialog::Accepted) {
 
             if (auto startupProject = startupProjectSelectorDialog.getSelectedStartupProject())
-                startupProject->load();
+                application.setStartupProjectUrl(startupProject->getUrl());
         }
 
         if (dialogResult == QDialog::Rejected)
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 
                 //ModalTask::getGlobalHandler()->setEnabled(false);
 
-                application.setStartupProjectFilePath(startupProjectFilePath);
+                application.setStartupProjectUrl(startupProjectFilePath);
 
                 application.getStartupTask().getLoadProjectTask().setEnabled(true, true);
 

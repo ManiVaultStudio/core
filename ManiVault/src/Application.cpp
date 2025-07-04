@@ -127,14 +127,14 @@ QString Application::getAbout()
     );
 }
 
-QString Application::getStartupProjectFilePath() const
+QUrl Application::getStartupProjectUrl() const
 {
-    return _startupProjectFilePath;
+    return _startupProjectUrl;
 }
 
-void Application::setStartupProjectFilePath(const QString& startupProjectFilePath)
+void Application::setStartupProjectUrl(const QUrl& startupProjectUrl)
 {
-    _startupProjectFilePath = startupProjectFilePath;
+    _startupProjectUrl = startupProjectUrl;
 }
 
 ProjectMetaAction* Application::getStartupProjectMetaAction()
@@ -149,7 +149,7 @@ void Application::setStartupProjectMetaAction(ProjectMetaAction* projectMetaActi
 
 bool Application::shouldOpenProjectAtStartup() const
 {
-    return !_startupProjectFilePath.isEmpty() && QFileInfo(_startupProjectFilePath).exists();
+    return !_startupProjectUrl.isEmpty() && QFileInfo(_startupProjectUrl).exists();
 }
 
 bool Application::hasSetting(const QString& path) const

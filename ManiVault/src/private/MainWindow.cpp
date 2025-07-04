@@ -200,7 +200,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         loadGuiTask.setFinished();
 
         if (Application::current()->shouldOpenProjectAtStartup())
-            projects().openProject(Application::current()->getStartupProjectFilePath());
+            projects().openProject(Application::current()->getStartupProjectUrl());
 
         projectChanged();
         updateStatusBarVisibility();
