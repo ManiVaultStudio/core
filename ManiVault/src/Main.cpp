@@ -14,6 +14,9 @@
 
 #include <util/Icon.h>
 
+#include <ModalTask.h>
+#include <ModalTaskHandler.h>
+
 #include <QProxyStyle>
 #include <QStyleFactory>
 #include <QSurfaceFormat>
@@ -21,8 +24,6 @@
 #include <QCommandLineParser>
 #include <QTemporaryDir>
 #include <QFileInfo>
-
-#include "private/ErrorLoggingConsentDialog.h"
 
 using namespace mv;
 using namespace mv::util;
@@ -246,6 +247,8 @@ int main(int argc, char *argv[])
 #endif
 
     loadGuiTask.setSubtaskFinished("Apply styles");
+
+    ModalTask::getGlobalHandler()->setEnabled(true);
 
     MainWindow mainWindow;
 
