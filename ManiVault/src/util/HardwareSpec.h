@@ -6,8 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QString>
-
 namespace mv::util
 {
 
