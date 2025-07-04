@@ -57,13 +57,13 @@ void HelpMenu::populate()
     QVector<QPointer<TriggerAction>> actions;
 
     for (auto& pluginFactory : plugins().getPluginFactoriesByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW }))
-        if (pluginFactory->hasHelp() && pluginFactory->getNumberOfInstances() >= 1)
+        if (pluginFactory->hasHelp())
             actions << &pluginFactory->getPluginMetadata().getTriggerHelpAction();
 
     sortActions(actions);
 
     if (!actions.isEmpty()) {
-        auto pluginHelpMenu = new QMenu("Plugin");
+        auto pluginHelpMenu = new QMenu("Plugins");
 
         pluginHelpMenu->setToolTip("ManiVault plugin documentation");
         pluginHelpMenu->setIcon(StyledIcon("plug"));
