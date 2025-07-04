@@ -93,7 +93,7 @@ std::int32_t StartupProjectSelectorDialog::getSelectedStartupProjectIndex()
     return selectedRows.first().row();
 }
 
-mv::util::ProjectsModelProject* StartupProjectSelectorDialog::getSelectedStartupProject() const
+ProjectsModelProject* StartupProjectSelectorDialog::getSelectedStartupProject() const
 {
 	if (auto projectsModelProject = _projectsTreeModel.getProject(_hierarchyWidget.getSelectedRows().first()))
 		return const_cast<mv::util::ProjectsModelProject*>(projectsModelProject);

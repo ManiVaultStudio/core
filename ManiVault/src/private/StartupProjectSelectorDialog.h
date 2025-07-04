@@ -56,12 +56,7 @@ public:
      * Get the selected startup project
      * @return Pointer to the selected startup project, or nullptr if no project is selected
      */
-    mv::util::ProjectsModelProject* getSelectedStartupProject() const {
-        if (auto projectsModelProject = _projectsTreeModel.getProject(_hierarchyWidget.getSelectedRows().first()))
-            return const_cast<mv::util::ProjectsModelProject*>(projectsModelProject);
-
-        return {};
-    }
+    mv::util::ProjectsModelProject* getSelectedStartupProject() const;
 
 private:
     mv::ProjectsTreeModel&      _projectsTreeModel;    /** Projects tree model */

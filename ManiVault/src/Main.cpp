@@ -215,21 +215,12 @@ int main(int argc, char *argv[])
 
         if (dialogResult == QDialog::Accepted) {
 
-            auto startupProjectMetaAction = getStartupProjectMetaAction(startupProjectFilePathCandidate);
-
-            if (startupProjectMetaAction.isNull())
-                continue;
-
-            /*const auto selectedStartupProjectIndex = startupProjectSelectorDialog.getSelectedStartupProjectIndex();
-
-            if (selectedStartupProjectIndex >= 0) {
-                startupProjectMetaAction = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].first;
-                startupProjectFilePath = startupProjectsMetaActionsCandidates[selectedStartupProjectIndex].second;
-            }*/
+            if (auto startupProject = startupProjectSelectorDialog.getSelectedStartupProject())
+                startupProject->load();
         }
 
         if (dialogResult == QDialog::Rejected)
-            return 0; // No project selected, exit application
+            return 0;
     }
 
     SplashScreenAction splashScreenAction(&application, false);
