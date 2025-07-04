@@ -168,6 +168,8 @@ CPMAddPackage(
   NAME              valijson
   GITHUB_REPOSITORY tristanpenman/valijson
   GIT_TAG           v1.0.6 
+  #GIT_SUBMODULES   ""                  # Does not yet work with CPM, see workaround from https://github.com/cpm-cmake/CPM.cmake/pull/461#issuecomment-1665044141
+  GIT_SUBMODULES    "doc"               # list an existing subdir from the repo to not download any submodules
   DOWNLOAD_ONLY     YES
   OPTIONS "VALIJSON_BUILD_TESTS OFF" "VALIJSON_USE_EXCEPTIONS ON"
 )
