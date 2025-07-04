@@ -44,7 +44,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     setLayout(layout);
 
     _hierarchyWidget.setWindowIcon(windowIcon);
-    _hierarchyWidget.getTreeView().setRootIsDecorated(false);
+    _hierarchyWidget.getTreeView().setRootIsDecorated(true);
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -52,6 +52,9 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeView.setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 
     connect(&treeView, &QTreeView::doubleClicked, this, [this](const QModelIndex& index) {
+        if (getSelectedStartupProject()->isGroup())
+            return; // Do not load group items
+
         _loadAction.trigger();
     });
 
@@ -66,7 +69,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     
     auto treeViewHeader = treeView.header();
 
-    treeViewHeader->setStretchLastSection(false);
+    treeViewHeader->setStretchLastSection(true);
 
     treeViewHeader->resizeSection(static_cast<int>(ProjectsTreeModel::Column::Title), 250);
 
@@ -74,6 +77,9 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Group), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IsGroup), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IconName), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Tags), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Date), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Summary), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Url), true);
 
 #if QT_NO_DEBUG

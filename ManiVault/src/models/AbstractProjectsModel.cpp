@@ -115,10 +115,10 @@ void AbstractProjectsModel::addProject(const ProjectsModelProject* project, cons
         return;
 
     const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
-        const auto matches = match(index(0, static_cast<std::int32_t>(Column::Group)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
+        const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
 
         if (matches.size() == 1)
-            return matches.first();
+            return matches.first().siblingAtColumn(static_cast<std::int32_t>(Column::Title));
 
         return {};
     };
@@ -127,8 +127,10 @@ void AbstractProjectsModel::addProject(const ProjectsModelProject* project, cons
         const auto existingProjectGroupIndex = findProjectGroupModelIndex();
 
         if (existingProjectGroupIndex.isValid()) {
-            if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex))
+            if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex)) {
                 existingProjectGroupItem->appendRow(Row(project));
+            qDebug() << existingProjectGroupItem->rowCount() << "projects in group" << groupTitle << "after adding project" << project->getTitle();
+            }
         } else {
             addProjectGroup(groupTitle);
 
@@ -204,6 +206,9 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
             return "Title: " + data(Qt::DisplayRole).toString();
 
 		case Qt::DecorationRole:
+            if (getProject()->isGroup())
+                return StyledIcon("folder");
+
             return getProject()->isDownloaded() ? StyledIcon(getProject()->getIconName()) : StyledIcon("download");
 
         default:

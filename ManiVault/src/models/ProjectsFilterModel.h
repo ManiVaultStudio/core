@@ -53,6 +53,15 @@ public:
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
+private:
+
+    /**
+     * Get whether the parent has accepted children
+     * @param parent Parent model index
+     * @return Boolean indicating whether the parent has accepted children
+     */
+    bool hasAcceptedChildren(const QModelIndex& parent) const;
+
 public: // Serialization
 
     /**

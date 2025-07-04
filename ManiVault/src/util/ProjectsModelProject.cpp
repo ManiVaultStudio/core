@@ -10,6 +10,7 @@ namespace mv::util {
 
 ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
+    _isGroup(false),
     _group(variantMap.contains("group") ? variantMap["group"].toString() : ""),
     _tags(variantMap.contains("tags") ? variantMap["tags"].toStringList() : QStringList()),
     _date(variantMap.contains("date") ? variantMap["date"].toString() : ""),
@@ -17,7 +18,6 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
     _size(variantMap.contains("size") ? variantMap["size"].toString() : "NA")
-    
 {
     if (variantMap.contains("coreVersion")) {
         const auto coreVersionMap = variantMap["coreVersion"].toMap();
@@ -60,7 +60,8 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _title(groupTitle),
     _isGroup(true),
-    _group(groupTitle)
+    _group(groupTitle),
+    _iconName("folder")
 {
 }
 
