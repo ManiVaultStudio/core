@@ -79,17 +79,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::MissingPlugins), true);
 #endif
 
-    connect(&_loadAction, &TriggerAction::triggered, this, [this]() -> void {
-        if (_hierarchyWidget.getSelectedRows().isEmpty()) {
-            qDebug() << "No project selected, starting ManiVault...";
-        } else {
-            if (auto projectsModelProject = _projectsTreeModel.getProject(_hierarchyWidget.getSelectedRows().first()))
-                const_cast<util::ProjectsModelProject*>(projectsModelProject)->load();
-        }
-
-        accept();
-    });
-
+    connect(&_loadAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::accept);
     connect(&_quitAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::reject);
 }
 
@@ -101,4 +91,12 @@ std::int32_t StartupProjectSelectorDialog::getSelectedStartupProjectIndex()
         return -1;
 
     return selectedRows.first().row();
+}
+
+mv::util::ProjectsModelProject* StartupProjectSelectorDialog::getSelectedStartupProject() const
+{
+	if (auto projectsModelProject = _projectsTreeModel.getProject(_hierarchyWidget.getSelectedRows().first()))
+		return const_cast<mv::util::ProjectsModelProject*>(projectsModelProject);
+
+	return {};
 }
