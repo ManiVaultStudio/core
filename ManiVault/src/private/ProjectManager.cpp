@@ -345,10 +345,12 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        auto startupProjectMetaAction = getStartupProjectMetaAction(startupProjectFilePathCandidate);
+        auto startupProjectMetaAction = getProjectMetaAction(filePath);
 
-        if (startupProjectMetaAction.isNull())
-            continue;
+        if (!startupProjectMetaAction.isNull()) {
+            if (startupProjectMetaAction->getSplashScreenAction().getEnabledAction().isChecked())
+                startupProjectMetaAction->getSplashScreenAction().getOpenAction().trigger();
+        }
 
         const auto scopedState = ScopedState(this, State::OpeningProject);
 
@@ -1004,6 +1006,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
 
             currentProject->getOverrideApplicationStatusBarAction().restoreState();
+            currentProject->getProjectMetaAction().getApplicationVersionAction().setVersion(Application::current()->getVersion());
 
 			/* TODO: Fix plugin status bar action visibility
             currentProject->getStatusBarVisibleAction().restoreState();

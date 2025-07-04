@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
             if (!QFileInfo(startupProjectFilePathCandidate).exists())
                 continue;
 
-            auto startupProjectMetaActionCandidate = getStartupProjectMetaAction(startupProjectFilePathCandidate);
+            auto startupProjectMetaActionCandidate = mv::projects().getProjectMetaAction(startupProjectFilePathCandidate);
 
             if (startupProjectMetaActionCandidate.isNull())
                 continue;
