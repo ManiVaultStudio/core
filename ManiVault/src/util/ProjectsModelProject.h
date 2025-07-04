@@ -112,6 +112,12 @@ public:
     const QStringList& getMissingPlugins() const;
 
     /**
+     * Get size
+     * @return Project size as a string (e.g., "1.2 MB", "500 KB", etc.)
+     */
+    const QString& getSize() const;
+
+    /**
      * Overload assignment operator
      * @param rhs Right hand side project
      * @return Assigned project
@@ -129,6 +135,7 @@ public:
         _minimumCoreVersion     = rhs.getMinimumCoreVersion();
         _requiredPlugins        = rhs.getRequiredPlugins();
         _missingPlugins         = rhs.getMissingPlugins();
+        _size                   = rhs.getSize();
 
         return *this;
     }
@@ -145,6 +152,7 @@ private:
     Version         _minimumCoreVersion;    /** Minimum supported ManiVault Studio major version */
     QStringList     _requiredPlugins;       /** Required plugins */
     QStringList     _missingPlugins;        /** Missing plugins */
+    QString         _size;                  /** Size of the ManiVault project */
 };
 
 using ProjectDatabaseProjects = std::vector<const ProjectsModelProject*>;

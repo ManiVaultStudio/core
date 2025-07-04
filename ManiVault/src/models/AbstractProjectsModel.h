@@ -27,19 +27,20 @@ public:
 
     /** Model columns */
     enum class Column {
-    	Title,
-        Group,
-        IsGroup,
-        Tags,
-        Date,
-        IconName,
-        Summary,
-        Url,
-        MinimumCoreVersion,
-        RequiredPlugins,
-        MissingPlugins,
+        Title,                  /** Title of the project */
+        Group,                  /** Group title of the project */
+        IsGroup,                /** Whether the item is a project group */
+        Tags,                   /** Tags of the project */
+        Date,                   /** Date of the project */
+        IconName,               /** Icon name of the project */
+        Summary,                /** Summary of the project */
+        Url,                    /** URL of the project */
+        MinimumCoreVersion,     /** Minimum ManiVault application core version */
+        RequiredPlugins,        /** Required plugins for the project */
+        MissingPlugins,         /** Missing plugins for the project */
+        Size,                   /** Size of the ManiVault project */
 
-        Count
+        Count                   /** Number of columns in the model */
     };
 
     /** Header strings for several data roles */
@@ -471,6 +472,42 @@ protected:
         }
     };
 
+    /** Standard model item class for displaying the project size */
+    class SizeItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Size";
+
+	            case Qt::ToolTipRole:
+	                return "Size of the project";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
     /** Convenience class for combining items in a row */
     class Row final : public QList<QStandardItem*>
     {
@@ -494,6 +531,7 @@ protected:
             append(new MinimumCoreVersionItem(project));
             append(new RequiredPluginsItem(project));
             append(new MissingPluginsItem(project));
+            append(new SizeItem(project));
         }
     };
 

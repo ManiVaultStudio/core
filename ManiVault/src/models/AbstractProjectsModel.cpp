@@ -25,6 +25,7 @@ QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> Abst
     { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
     { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
     { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
+    { Column::Size, { "Size" , "Size", "Project size" } },
 });
 
 AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
@@ -69,6 +70,9 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
 
         case Column::MissingPlugins:
             return MissingPluginsItem::headerData(orientation, role);
+
+        case Column::Size:
+            return SizeItem::headerData(orientation, role);
 
 		case Column::Count:
             break;
@@ -385,6 +389,23 @@ QVariant AbstractProjectsModel::MissingPluginsItem::data(int role) const
     }
 
     return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::SizeItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+            return getProject()->getSize();
+
+	    case Qt::ToolTipRole:
+	        return "Project size: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+	return Item::data(role);
 }
 
 }

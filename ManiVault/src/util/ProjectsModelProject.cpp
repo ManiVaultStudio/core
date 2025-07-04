@@ -15,7 +15,8 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _date(variantMap.contains("date") ? variantMap["date"].toString() : ""),
     _iconName(variantMap.contains("icon") ? variantMap["icon"].toString() : "file"),
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
-    _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : ""))
+    _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
+    _size(variantMap.contains("size") ? variantMap["size"].toString() : "NA")
     
 {
     if (variantMap.contains("coreVersion")) {
@@ -121,6 +122,11 @@ const QStringList& ProjectsModelProject::getRequiredPlugins() const
 const QStringList& ProjectsModelProject::getMissingPlugins() const
 {
     return _missingPlugins;
+}
+
+const QString& ProjectsModelProject::getSize() const
+{
+    return _size;
 }
 
 }
