@@ -345,6 +345,11 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
+        auto startupProjectMetaAction = getStartupProjectMetaAction(startupProjectFilePathCandidate);
+
+        if (startupProjectMetaAction.isNull())
+            continue;
+
         const auto scopedState = ScopedState(this, State::OpeningProject);
 
         if (QFileInfo(filePath).isDir())
@@ -1143,6 +1148,38 @@ QMenu& ProjectManager::getNewProjectMenu()
 QMenu& ProjectManager::getImportDataMenu()
 {
     return _importDataMenu;
+}
+
+QSharedPointer<ProjectMetaAction> ProjectManager::getProjectMetaAction(const QString& projectFilePath)
+{
+	try {
+		const QString metaJsonFilePath("meta.json");
+
+		QFileInfo extractFileInfo(Application::current()->getTemporaryDir().path(), metaJsonFilePath);
+
+		Archiver archiver;
+
+		QString extractedMetaJsonFilePath = "";
+
+		archiver.extractSingleFile(projectFilePath, metaJsonFilePath, extractFileInfo.absoluteFilePath());
+
+		extractedMetaJsonFilePath = extractFileInfo.absoluteFilePath();
+
+		if (!QFileInfo(extractedMetaJsonFilePath).exists())
+			throw std::runtime_error("Unable to extract meta.json");
+
+		return QSharedPointer<ProjectMetaAction>(new ProjectMetaAction(extractedMetaJsonFilePath));
+	}
+	catch (std::exception& e)
+	{
+		qDebug() << "No meta data available, please re-save the project to solve the problem" << e.what();
+	}
+	catch (...)
+	{
+		qDebug() << "No meta data available due to an unhandled problem, please re-save the project to solve the problem";
+	}
+
+	return {};
 }
 
 void ProjectManager::createProject()

@@ -31,38 +31,6 @@ using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;
 
-QSharedPointer<ProjectMetaAction> getStartupProjectMetaAction(const QString& startupProjectFilePath)
-{
-    try {
-        const QString metaJsonFilePath("meta.json");
-
-        QFileInfo extractFileInfo(Application::current()->getTemporaryDir().path(), metaJsonFilePath);
-
-        Archiver archiver;
-
-        QString extractedMetaJsonFilePath = "";
-
-        archiver.extractSingleFile(startupProjectFilePath, metaJsonFilePath, extractFileInfo.absoluteFilePath());
-
-        extractedMetaJsonFilePath = extractFileInfo.absoluteFilePath();
-
-        if (!QFileInfo(extractedMetaJsonFilePath).exists())
-            throw std::runtime_error("Unable to extract meta.json");
-
-        return QSharedPointer<ProjectMetaAction>(new ProjectMetaAction(extractedMetaJsonFilePath));
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "No meta data available, please re-save the project to solve the problem"  << e.what();
-    }
-    catch (...)
-    {
-        qDebug() << "No meta data available due to an unhandled problem, please re-save the project to solve the problem";
-    }
-
-    return nullptr;
-}
-
 int main(int argc, char *argv[])
 {
     // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings

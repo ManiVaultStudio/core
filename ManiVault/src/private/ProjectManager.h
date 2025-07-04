@@ -166,6 +166,15 @@ public: // Menus
      */
     QMenu& getImportDataMenu() override;
 
+public: // Miscellaneous
+
+    /**
+     * Get project meta action for the project with \p projectFilePath
+     * @param projectFilePath File path of the project for which to get the meta action
+     * @return Shared pointer to the project meta action, or nullptr if no action is found
+     */
+    QSharedPointer<ProjectMetaAction> getProjectMetaAction(const QString& projectFilePath) override; ;
+
 private:
 
     /** Resets the manager and creates a new project */
