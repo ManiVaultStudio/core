@@ -130,8 +130,14 @@ void PluginManager::loadPluginFactories()
 
     auto getLibraryName = [](const QString& libFileName) -> QString {
         // Use QFileInfo to get the base name without the suffix (.dll, .so, .dylib)
-        QFileInfo fileInfo(libFileName);
-        QString baseName = fileInfo.baseName();
+        const QFileInfo fileInfo(libFileName);
+
+        QString baseName = fileInfo.baseName();         // all characters in the file up to (but not including) the first '.' character
+
+        const int index = baseName.lastIndexOf("_p");   // plugins are suffixed with _p1.x_c_1.x (plugin and core version)
+        if (index != -1) {
+            baseName = baseName.left(index);
+        }
 
         // Check for common "lib" prefix on UNIX systems and remove it
         if (baseName.startsWith("lib")) {
