@@ -34,7 +34,7 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
 
     connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
         if (Application::current()->shouldOpenProjectAtStartup())
-            setProgressDescription("Loaded " + QFileInfo(Application::current()->getStartupProjectUrl()).fileName());
+            setProgressDescription("Loaded " + Application::current()->getStartupProjectUrl().fileName());
         else
             setProgressDescription("ManiVault Studio loaded...");
 

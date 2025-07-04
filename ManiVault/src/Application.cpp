@@ -149,7 +149,13 @@ void Application::setStartupProjectMetaAction(ProjectMetaAction* projectMetaActi
 
 bool Application::shouldOpenProjectAtStartup() const
 {
-    return !_startupProjectUrl.isEmpty() && QFileInfo(_startupProjectUrl).exists();
+    if (_startupProjectUrl.isEmpty())
+        return false;
+
+    if (_startupProjectUrl.isLocalFile() && !QFileInfo(_startupProjectUrl.toString()).exists())
+        return false;
+
+    return true;
 }
 
 bool Application::hasSetting(const QString& path) const
