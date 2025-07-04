@@ -36,7 +36,40 @@
         "type": "array",
         "items": { "type": "string" }
       },
-      "date": { "type": "string" }
+      "date": { "type": "string" },
+	  "size": {
+		  "type": "integer",
+		  "pattern": "^(\\d+)([KMGTP]i?B)$"
+	  },
+	  "hardwareRequirements": {
+		  "cpu": {
+			  "speed": "integer",
+			  "cores": "integer",
+			  "required": ["speed", "cores"]
+		  }
+		  "ram": {
+			  "type": "integer",
+			  "pattern": "^(\\d+)([KMGTP]i?B)$",
+		  },
+		  "storage": {
+			  "type": "string",
+			  "pattern": "^(\\d+)([KMGTP]i?B)$"
+		  },
+		  "gpu": {
+			  "ram": {
+				  "type": "string",
+				  "pattern": "^(\\d+)([KMGTP]i?B)$"
+			  }
+			  "required": ["ram"]
+		  }
+		  "display": {
+			  "minResolution": {
+				  "horizontal": "integer",
+				  "vertical": "integer"
+			  },
+			  "required": ["horizontal", "vertical"]
+		  }
+		}
     },
     "required": ["title", "url", "summary", "requiredPlugins", "coreVersion", "tags", "date"],
     "additionalProperties": true
