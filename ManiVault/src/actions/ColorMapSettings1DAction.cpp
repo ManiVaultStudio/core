@@ -46,6 +46,7 @@ ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DActi
         actions << &colorMapAction.getSharedDataRangeAction(ColorMapAction::Axis::X);
     
     groupAction->addAction(&colorMapAction.getMirrorAction(ColorMapAction::Axis::X));
+    groupAction->addAction(&colorMapAction.getRangeAction(ColorMapAction::Axis::X));
     groupAction->addAction(&colorMapAction.getDiscretizeAction());
     groupAction->addAction(&colorMapAction.getNumberOfDiscreteStepsAction());
     groupAction->addAction(&colorMapAction.getDiscretizeAlphaAction());
