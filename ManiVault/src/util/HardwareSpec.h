@@ -19,6 +19,9 @@ class CORE_EXPORT HardwareSpec : public Serializable
 {
 public:
 
+    /** Default constructor */
+    HardwareSpec();
+
     /**
      * Load the hardware spec from \p variantMap
      * @param variantMap Variant map containing the hardware spec properties

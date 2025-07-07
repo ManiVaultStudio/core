@@ -53,11 +53,15 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
         }
     }
 
-    if (variantMap.contains("minimumHardwareSpec"))
-        _minimumHardwareSpec.fromVariantMap(variantMap["minimumHardwareSpec"].toMap());
+    if (variantMap.contains("hardwareRequirements")) {
+        const auto hardwareRequirementsMap = variantMap["hardwareRequirements"].toMap();
 
-    if (variantMap.contains("recommendedHardwareSpec"))
-        _recommendedHardwareSpec.fromVariantMap(variantMap["recommendedHardwareSpec"].toMap());
+        if (hardwareRequirementsMap.contains("minimum"))
+            _minimumHardwareSpec.fromVariantMap(variantMap["minimum"].toMap());
+
+        if (hardwareRequirementsMap.contains("recommended"))
+            _recommendedHardwareSpec.fromVariantMap(variantMap["recommended"].toMap());
+    }
     
     if (!_missingPlugins.isEmpty())
         qWarning() << "Project" << _title << "is added to the project database but cannot be opened because of missing plugins:" << _missingPlugins.join(", ");

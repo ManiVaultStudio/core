@@ -4,10 +4,17 @@
 
 #include "HardwareSpec.h"
 
+#include "DisplayComponentSpec.h"
+
 namespace mv::util
 {
 
 HardwareSpec HardwareSpec::systemHardwareSpec;
+
+HardwareSpec::HardwareSpec()
+{
+    _componentSpecs.push_back(std::make_shared<DisplayComponentSpec>());
+}
 
 void HardwareSpec::fromVariantMap(const QVariantMap& variantMap)
 {
