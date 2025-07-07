@@ -556,7 +556,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/StyledIconEngine.h
     src/util/Badge.h
     src/util/ColorScheme.h
-    src/util/ProjectsModelProject.h
     src/util/JSON.h
     src/util/Script.h
 	src/util/HardwareSpec.h
@@ -613,7 +612,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/StyledIconEngine.cpp
     src/util/Badge.cpp
     src/util/ColorScheme.cpp
-    src/util/ProjectsModelProject.cpp
     src/util/JSON.cpp
     src/util/Script.cpp
 	src/util/HardwareSpec.cpp
@@ -969,12 +967,14 @@ set(PUBLIC_PROJECTS_MODEL_HEADERS
     src/models/AbstractProjectsModel.h
     src/models/ProjectsTreeModel.h
 	src/models/ProjectsFilterModel.h
+	src/models/ProjectsModelProject.h
 )
 
 set(PUBLIC_PROJECTS_MODEL_SOURCES
     src/models/AbstractProjectsModel.cpp
     src/models/ProjectsTreeModel.cpp
 	src/models/ProjectsFilterModel.cpp
+	src/models/ProjectsModelProject.cpp
 )
 
 set(PUBLIC_PROJECTS_MODEL_FILES
