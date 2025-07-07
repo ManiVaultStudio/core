@@ -15,6 +15,7 @@
 #include <models/ProjectsTreeModel.h>
 
 #include <util/Icon.h>
+#include <util/HardwareSpec.h>
 
 #include <ModalTask.h>
 #include <ModalTaskHandler.h>
@@ -33,6 +34,8 @@ using namespace mv::gui;
 
 int main(int argc, char *argv[])
 {
+    HardwareSpec::updateSystemHardwareSpecs();
+
     // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings
     auto coreApplication = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
 
