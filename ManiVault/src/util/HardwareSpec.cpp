@@ -10,8 +10,11 @@
 #endif
 
 #ifdef Q_OS_LINUX
-
 	#include <sys/sysinfo.h>
+#endif
+
+#ifdef Q_OS_MAC
+    #include <sys/sysctl.h>
 #endif
 
 #include <QSysInfo>
@@ -42,23 +45,23 @@ void DisplayResolution::fromVariantMap(const QVariantMap& variantMap)
     _vertical   = variantMap.value("vertical", 0).toInt();
 }
 
-AvailableRAM::AvailableRAM() :
+AvailableRam::AvailableRam() :
     HardwareSpec(),
     _numberOfBytes(0)
 {
 }
 
-void AvailableRAM::fromSystem()
+void AvailableRam::fromSystem()
 {
     _numberOfBytes = getTotalSystemRAMBytes();
 }
 
-void AvailableRAM::fromVariantMap(const QVariantMap& variantMap)
+void AvailableRam::fromVariantMap(const QVariantMap& variantMap)
 {
     _numberOfBytes = variantMap.value("numberOfBytes", 0).toULongLong();
 }
 
-std::uint64_t AvailableRAM::getTotalSystemRAMBytes()
+std::uint64_t AvailableRam::getTotalSystemRAMBytes()
 {
 #if defined(Q_OS_WIN)
     MEMORYSTATUSEX status;

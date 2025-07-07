@@ -6,10 +6,12 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "Serializable.h"
+
 namespace mv::util
 {
 
-CORE_EXPORT class HardwareSpec
+CORE_EXPORT class HardwareSpec : public Serializable
 {
 public:
     virtual ~HardwareSpec() = default;
@@ -18,12 +20,6 @@ protected: // Population methods
 
     /** Load the hardware spec from current system */
     virtual void fromSystem() = 0;
-
-    /**
-     * Load the hardware spec from \p variantMap
-     * @param variantMap Variant map containing the hardware spec properties
-     */
-    virtual void fromVariantMap(const QVariantMap& variantMap) = 0;
 };
 
 /** Display resolution hardware spec */
@@ -67,12 +63,12 @@ private:
 };
 
 /** Available RAM hardware spec */
-CORE_EXPORT class AvailableRAM : public HardwareSpec
+CORE_EXPORT class AvailableRam : public HardwareSpec
 {
 public:
 
     /** Default constructor */
-    AvailableRAM();
+    AvailableRam();
 
     /**
      * Get the amount of available RAM in bytes
@@ -86,7 +82,7 @@ public:
      * Get whether the available RAM is smaller than \p other available RAM
      * @return Boolean determining whether the available RAM is smaller than the \p other available RAM
      */
-    bool operator<(const AvailableRAM& other) const {
+    bool operator<(const AvailableRam& other) const {
         return getNumberOfBytes() > other.getNumberOfBytes();
     }
 
@@ -94,7 +90,7 @@ public:
      * Get whether the available RAM is smaller than \p other available RAM
      * @return Boolean determining whether the available RAM is smaller than the \p other available RAM
      */
-    bool operator>(const AvailableRAM& other) const {
+    bool operator>(const AvailableRam& other) const {
         return other < *this;
     }
 
