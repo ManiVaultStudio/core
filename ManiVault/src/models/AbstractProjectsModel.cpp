@@ -27,6 +27,8 @@ QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> Abst
     { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
     { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
     { Column::Size, { "Size" , "Size", "Project size" } },
+    { Column::MinimumHardwareSpec, { "Min. specs" , "Min. specs", "Minimum hardware specification for opening the project" } },
+    { Column::RecommendedHardwareSpec, { "Rec. specs" , "Rec. specs", "Recommended hardware specification for opening the project" } }
 });
 
 AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
@@ -77,6 +79,12 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
 
         case Column::Size:
             return SizeItem::headerData(orientation, role);
+
+        case Column::MinimumHardwareSpec:
+            return MinimumHardwareSpecItem::headerData(orientation, role);
+
+        case Column::RecommendedHardwareSpec:
+            return RecommendedHardwareSpecItem::headerData(orientation, role);
 
 		case Column::Count:
             break;
@@ -444,7 +452,7 @@ QVariant AbstractProjectsModel::SizeItem::data(int role) const
 	return Item::data(role);
 }
 
-QVariant AbstractProjectsModel::MinimumHardwareSpecsItem::data(int role) const
+QVariant AbstractProjectsModel::MinimumHardwareSpecItem::data(int role) const
 {
     switch (role) {
     case Qt::EditRole:
@@ -463,7 +471,7 @@ QVariant AbstractProjectsModel::MinimumHardwareSpecsItem::data(int role) const
 
             const auto meetsMinimumHardwareSpecs = getProject()->getMinimumHardwareSpec() > HardwareSpec::getSystemHardwareSpec();
 
-        	return meetsMinimumHardwareSpecs ? StyledIcon("check") : StyledIcon("exclamation");
+        	return meetsMinimumHardwareSpecs ? StyledIcon("circle-check") : StyledIcon("circle-exclamation");
         }
 
 	    default:
@@ -473,7 +481,7 @@ QVariant AbstractProjectsModel::MinimumHardwareSpecsItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant AbstractProjectsModel::RecommendedHardwareSpecsItem::data(int role) const
+QVariant AbstractProjectsModel::RecommendedHardwareSpecItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
@@ -483,7 +491,20 @@ QVariant AbstractProjectsModel::RecommendedHardwareSpecsItem::data(int role) con
             return "";
 
 	    case Qt::ToolTipRole:
-	        return "Recommended hardware specifications: " + data(Qt::DisplayRole).toString();
+        {
+            if (getProject()->getRecommendedHardwareSpec() < HardwareSpec::getSystemHardwareSpec()) {
+                QString tooltip("<p>System does not have the recommended specification:</p>");
+
+                const auto failingHardwareComponentSpecs = getProject()->getRecommendedHardwareSpec().getFailingHardwareComponentSpecs(HardwareSpec::getSystemHardwareSpec());
+
+                //for (const auto& failingHardwareComponentSpec : failingHardwareComponentSpecs)
+
+
+            }
+
+
+            return "System has the recommended hardware specification";
+		}
 
         case Qt::DecorationRole:
         {
@@ -492,7 +513,7 @@ QVariant AbstractProjectsModel::RecommendedHardwareSpecsItem::data(int role) con
 
             const auto meetsRecommendedHardwareSpecs = getProject()->getRecommendedHardwareSpec() > HardwareSpec::getSystemHardwareSpec();
 
-            return meetsRecommendedHardwareSpecs ? StyledIcon("check") : StyledIcon("exclamation");
+            return meetsRecommendedHardwareSpecs ? StyledIcon("circle-check") : StyledIcon("circle-exclamation");
         }
 
 	    default:

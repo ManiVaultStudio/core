@@ -16,5 +16,5 @@ HardwareComponentSpec::HardwareComponentSpec(const QString& title) :
 void HardwareComponentSpec::fromVariantMap(const QVariantMap& variantMap)
 {
 }
-
+    
 }

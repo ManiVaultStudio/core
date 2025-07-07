@@ -19,6 +19,8 @@ class CORE_EXPORT HardwareComponentSpec
 {
 public:
 
+    using HardwareComponentSpecPtr = std::shared_ptr<HardwareComponentSpec>; /**< Pointer to hardware component specification */
+
 	/**
      * Comnstruct with hardware component specification \p title
 	 * @param title hardware component specification title
@@ -32,6 +34,13 @@ public:
      * @param variantMap Variant map containing the hardware component spec properties
      */
     virtual void fromVariantMap(const QVariantMap& variantMap);
+
+	/**
+     * Compare with \p other hardware component spec and produce a status string (empty if no ok)
+     * @param other Hardware component spec to compare with
+     * @return Status string indicating the status of the hardware component spec compared to \p other
+	 */
+	virtual QString getStatusString(const HardwareComponentSpecPtr& other) const = 0;
 
     /**
      * Get whether the hardware component spec has been initialized

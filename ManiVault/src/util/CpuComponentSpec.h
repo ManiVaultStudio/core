@@ -26,6 +26,13 @@ public:
     CpuComponentSpec();
 
     /**
+     * Compare with \p other hardware component spec and produce a status string (empty if no ok)
+     * @param other Hardware component spec to compare with
+     * @return Status string indicating the status of the hardware component spec compared to \p other
+     */
+    QString getStatusString(const HardwareComponentSpecPtr& other) const override;
+
+    /**
      * Get whether the CPU specification is smaller than the \p other CPU specification
      * @return Boolean determining whether the CPU specification is smaller than the \p other CPU specification
      */

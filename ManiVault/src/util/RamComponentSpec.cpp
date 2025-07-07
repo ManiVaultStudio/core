@@ -28,6 +28,14 @@ RamComponentSpec::RamComponentSpec() :
 {
 }
 
+QString RamComponentSpec::getStatusString(const HardwareComponentSpecPtr& other) const
+{
+    if (*this < dynamic_cast<const RamComponentSpec&>(other))
+        return "Not enough RAM";
+
+    return {};
+}
+
 void RamComponentSpec::fromSystem()
 {
     _numberOfBytes = getTotalSystemRAMBytes();

@@ -39,8 +39,8 @@ public:
         RequiredPlugins,            /** Required plugins for the project */
         MissingPlugins,             /** Missing plugins for the project */
         Size,                       /** Size of the ManiVault project */
-        MinimumHardwareSpecs,       /** Minimum hardware specifications for the project */
-        RecommendedHardwareSpecs,   /** Recommended hardware specifications for the project */
+        MinimumHardwareSpec,       /** Minimum hardware specifications for the project */
+        RecommendedHardwareSpec,   /** Recommended hardware specifications for the project */
 
         Count                       /** Number of columns in the model */
     };
@@ -551,7 +551,7 @@ protected:
     };
 
     /** Standard model item class for displaying the project minimum hardware specifications */
-    class MinimumHardwareSpecsItem final : public Item {
+    class MinimumHardwareSpecItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -573,7 +573,7 @@ protected:
             switch (role) {
             case Qt::DisplayRole:
             case Qt::EditRole:
-                return "Minimum hardware";
+                return "Min. hardware";
 
             case Qt::ToolTipRole:
                 return "Minimum hardware specifications for the project";
@@ -587,7 +587,7 @@ protected:
     };
 
     /** Standard model item class for displaying the project recommended hardware specifications */
-    class RecommendedHardwareSpecsItem final : public Item {
+    class RecommendedHardwareSpecItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -609,7 +609,7 @@ protected:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Recommended hardware";
+	                return "Rec. hardware";
 
 	            case Qt::ToolTipRole:
 	                return "Recommended hardware specifications for the project";
@@ -647,8 +647,8 @@ protected:
             append(new RequiredPluginsItem(project));
             append(new MissingPluginsItem(project));
             append(new SizeItem(project));
-            append(new MinimumHardwareSpecsItem(project));
-            append(new RecommendedHardwareSpecsItem(project));
+            append(new MinimumHardwareSpecItem(project));
+            append(new RecommendedHardwareSpecItem(project));
         }
     };
 

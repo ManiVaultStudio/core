@@ -39,6 +39,40 @@ bool HardwareSpec::isInitialized() const
     return initialized;
 }
 
+QString HardwareSpec::getStatusString(const HardwareSpec& other) const
+{
+    if (*this > other)
+        return "<p>System has the recommended hardware specification.</p>";
+
+    QString status("<p>System does not have the recommended hardware specification:</p>");
+
+    for (std::size_t i = 0; i < _componentSpecs.size() && i < other._componentSpecs.size(); ++i) {
+        const auto& lhs = _componentSpecs[i];
+        const auto& rhs = other._componentSpecs[i];
+
+        if (lhs->isInitialized() && rhs->isInitialized())
+            if (const auto statusString = lhs->getStatusString(rhs)))
+                status.append(QString("<p>%1</p>").arg(statusString));
+    }
+
+	return status;
+}
+
+HardwareComponentSpecs HardwareSpec::getFailingHardwareComponentSpecs(const HardwareSpec& other) const
+{
+    HardwareComponentSpecs failingHardwareComponentSpecs;
+
+    for (std::size_t i = 0; i < _componentSpecs.size() && i < other._componentSpecs.size(); ++i) {
+        const auto& lhs = _componentSpecs[i];
+        const auto& rhs = other._componentSpecs[i];
+
+        if (lhs->isInitialized() && rhs->isInitialized())
+            failingHardwareComponentSpecs.push_back(lhs);
+    }
+
+    return failingHardwareComponentSpecs;
+}
+
 const HardwareSpec& HardwareSpec::getSystemHardwareSpec()
 {
     return systemHardwareSpec;

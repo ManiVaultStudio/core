@@ -26,6 +26,13 @@ public:
     RamComponentSpec();
 
     /**
+     * Compare with \p other hardware component spec and produce a status string (empty if no ok)
+     * @param other Hardware component spec to compare with
+     * @return Status string indicating the status of the hardware component spec compared to \p other
+     */
+    QString getStatusString(const HardwareComponentSpecPtr& other) const override;
+
+    /**
      * Get the amount of available RAM in bytes
      * @return Number of bytes of available RAM
      */

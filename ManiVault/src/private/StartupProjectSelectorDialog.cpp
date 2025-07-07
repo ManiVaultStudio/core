@@ -4,6 +4,7 @@
 
 #include "StartupProjectSelectorDialog.h"
 
+#include <QGroupBox>
 #include <QVBoxLayout>
 #include <QHeaderView>
 
@@ -32,6 +33,16 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     auto layout = new QVBoxLayout();
 
     layout->addWidget(&_hierarchyWidget, 1);
+
+    auto detailsGroupbox = new QGroupBox("Project details", this);
+    auto detailsLayout = new QVBoxLayout(detailsGroupbox);
+    auto detailsLabel = new QLabel("Select a project to see its details here.", detailsGroupbox);
+
+    detailsLayout->addWidget(detailsLabel);
+
+    detailsGroupbox->setLayout(detailsLayout);
+
+    layout->addWidget(detailsGroupbox);
 
 	auto bottomLayout = new QHBoxLayout();
 

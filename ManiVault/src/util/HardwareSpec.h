@@ -38,6 +38,20 @@ public:
     bool isInitialized() const;
 
     /**
+     * Compare with \p other hardware spec and produce a status string (empty if no ok)
+     * @param other Hardware spec to compare with
+     * @return Status string indicating the status of the hardware spec compared to \p other
+     */
+    QString getStatusString(const HardwareSpec& other) const;
+
+    /**
+     * Get the failing hardware component specifications
+     * @param other Other hardware specification to compare with
+     * @return Failing hardware component specifications
+     */
+    HardwareComponentSpecs getFailingHardwareComponentSpecs(const HardwareSpec& other) const;
+
+    /**
      * Get whether the hardware specification is smaller than the \p other hardware specification
      * @return Boolean determining whether the hardware specification is smaller than the \p other hardware specification
      */

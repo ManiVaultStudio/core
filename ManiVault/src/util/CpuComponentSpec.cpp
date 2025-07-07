@@ -12,6 +12,14 @@ CpuComponentSpec::CpuComponentSpec() :
 {
 }
 
+QString CpuComponentSpec::getStatusString(const HardwareComponentSpecPtr& other) const
+{
+    if (*this < dynamic_cast<CpuComponentSpec*>(&other))
+        return "CPU does not meet specification";
+
+    return {};
+}
+
 void CpuComponentSpec::fromSystem()
 {
 }

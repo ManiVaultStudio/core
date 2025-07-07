@@ -12,6 +12,14 @@ DisplayComponentSpec::DisplayComponentSpec() :
 {
 }
 
+QString DisplayComponentSpec::getStatusString(const HardwareComponentSpecPtr& other) const
+{
+    if (*this < dynamic_cast<const DisplayComponentSpec&>(other))
+        return "Display resolution is too low";
+
+    return {};
+}
+
 void DisplayComponentSpec::fromSystem()
 {
     if (auto screen = QGuiApplication::primaryScreen())
