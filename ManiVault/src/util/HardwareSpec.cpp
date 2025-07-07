@@ -14,7 +14,7 @@ void HardwareSpec::fromVariantMap(const QVariantMap& variantMap)
 	Serializable::fromVariantMap(variantMap);
 }
 
-void HardwareSpec::fromSystem()
+void HardwareSpec::fromSystem() const
 {
     for (auto& componentSpec : _componentSpecs)
         componentSpec->fromSystem();

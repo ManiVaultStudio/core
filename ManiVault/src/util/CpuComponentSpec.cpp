@@ -7,7 +7,8 @@
 namespace mv::util
 {
 
-CpuComponentSpec::CpuComponentSpec()
+CpuComponentSpec::CpuComponentSpec() :
+    HardwareComponentSpec("CPU Component Spec")
 {
 }
 

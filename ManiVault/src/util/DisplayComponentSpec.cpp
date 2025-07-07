@@ -8,7 +8,7 @@ namespace mv::util
 {
 
 DisplayComponentSpec::DisplayComponentSpec() :
-    HardwareComponentSpec()
+    HardwareComponentSpec("Display Component Spec")
 {
 }
 
@@ -16,6 +16,8 @@ void DisplayComponentSpec::fromSystem()
 {
     if (auto screen = QGuiApplication::primaryScreen())
         _resolution = { screen->size().width(), screen->size().height() };
+
+    setInitialized();
 }
 
 void DisplayComponentSpec::fromVariantMap(const QVariantMap& variantMap)

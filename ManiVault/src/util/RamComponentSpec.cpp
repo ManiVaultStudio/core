@@ -23,7 +23,7 @@ namespace mv::util
 {
 
 RamComponentSpec::RamComponentSpec() :
-    HardwareComponentSpec(),
+    HardwareComponentSpec("RAM Component Spec"),
     _numberOfBytes(0)
 {
 }
@@ -31,6 +31,8 @@ RamComponentSpec::RamComponentSpec() :
 void RamComponentSpec::fromSystem()
 {
     _numberOfBytes = getTotalSystemRAMBytes();
+
+    setInitialized();
 }
 
 void RamComponentSpec::fromVariantMap(const QVariantMap& variantMap)

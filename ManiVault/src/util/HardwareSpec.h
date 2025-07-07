@@ -26,7 +26,7 @@ public:
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /** Initialize from system hardware specifications */
-    void fromSystem();
+    void fromSystem() const;
 
     /**
      * Get whether the hardware specification is smaller than the \p other hardware specification
@@ -37,10 +37,13 @@ public:
 
         conditions.reserve(_componentSpecs.size());
 
-        std::transform(_componentSpecs.begin(), _componentSpecs.end(), other._componentSpecs.begin(), std::back_inserter(conditions),
-            [](const auto& lhs, const auto& rhs) {
-                return lhs < rhs;
-		});
+        for (std::size_t i = 0; i < _componentSpecs.size() && i < other._componentSpecs.size(); ++i) {
+            const auto& lhs = _componentSpecs[i];
+            const auto& rhs = other._componentSpecs[i];
+
+            if (lhs->isInitialized() && rhs->isInitialized())
+                conditions.push_back(lhs < rhs);
+        }
 
         return std::ranges::all_of(conditions.begin(), conditions.end(), [](bool condition) { return condition; });
     }
