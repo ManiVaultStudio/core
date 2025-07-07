@@ -5,8 +5,7 @@
 #pragma once
 
 #include "models/StandardItemModel.h"
-
-#include "util/ProjectsModelProject.h"
+#include "models/ProjectsModelProject.h"
 
 #include <QMap>
 
@@ -27,21 +26,23 @@ public:
 
     /** Model columns */
     enum class Column {
-        Title,                  /** Title of the project */
-        Downloaded,             /** Whether the project has been downloaded before */
-        Group,                  /** Group title of the project */
-        IsGroup,                /** Whether the item is a project group */
-        Tags,                   /** Tags of the project */
-        Date,                   /** Date of the project */
-        IconName,               /** Icon name of the project */
-        Summary,                /** Summary of the project */
-        Url,                    /** URL of the project */
-        MinimumCoreVersion,     /** Minimum ManiVault application core version */
-        RequiredPlugins,        /** Required plugins for the project */
-        MissingPlugins,         /** Missing plugins for the project */
-        Size,                   /** Size of the ManiVault project */
+        Title,                      /** Title of the project */
+        Downloaded,                 /** Whether the project has been downloaded before */
+        Group,                      /** Group title of the project */
+        IsGroup,                    /** Whether the item is a project group */
+        Tags,                       /** Tags of the project */
+        Date,                       /** Date of the project */
+        IconName,                   /** Icon name of the project */
+        Summary,                    /** Summary of the project */
+        Url,                        /** URL of the project */
+        MinimumCoreVersion,         /** Minimum ManiVault application core version */
+        RequiredPlugins,            /** Required plugins for the project */
+        MissingPlugins,             /** Missing plugins for the project */
+        Size,                       /** Size of the ManiVault project */
+        MinimumHardwareSpecs,       /** Minimum hardware specifications for the project */
+        RecommendedHardwareSpecs,   /** Recommended hardware specifications for the project */
 
-        Count                   /** Number of columns in the model */
+        Count                       /** Number of columns in the model */
     };
 
     /** Header strings for several data roles */
@@ -549,6 +550,78 @@ protected:
         }
     };
 
+    /** Standard model item class for displaying the project minimum hardware specifications */
+    class MinimumHardwareSpecsItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "Minimum hardware";
+
+            case Qt::ToolTipRole:
+                return "Minimum hardware specifications for the project";
+
+            default:
+                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the project recommended hardware specifications */
+    class RecommendedHardwareSpecsItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Recommended hardware";
+
+	            case Qt::ToolTipRole:
+	                return "Recommended hardware specifications for the project";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
     /** Convenience class for combining items in a row */
     class Row final : public QList<QStandardItem*>
     {
@@ -574,6 +647,8 @@ protected:
             append(new RequiredPluginsItem(project));
             append(new MissingPluginsItem(project));
             append(new SizeItem(project));
+            append(new MinimumHardwareSpecsItem(project));
+            append(new RecommendedHardwareSpecsItem(project));
         }
     };
 

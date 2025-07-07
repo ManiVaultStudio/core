@@ -18,7 +18,7 @@ namespace mv::util
  *
  * @author Thomas Kroes
  */
-CORE_EXPORT class RamComponentSpec : public HardwareComponentSpec
+class CORE_EXPORT RamComponentSpec : public HardwareComponentSpec
 {
 public:
 

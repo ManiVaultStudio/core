@@ -25,7 +25,14 @@ namespace mv::util {
 
 bool isValidJson(const std::string& input)
 {
-	return nlohmann::json::accept(input);
+    try {
+        [[maybe_unused]]  const auto result = json::parse(input);
+        return true;
+    }
+    catch (const nlohmann::json::parse_error& e) {
+        qCritical() << "JSON parse error at byte " << e.byte << ": " << e.what();
+        return false;
+    }
 }
 
 std::string loadJsonFromResource(const std::string& resourcePath) {

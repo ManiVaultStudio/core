@@ -35,7 +35,7 @@
 				"display": {
 					"type": "object",
 					"properties": {
-						"minResolution": {
+						"resolution": {
 							"type": "object",
 							"properties": {
 								"horizontal": {
@@ -49,9 +49,7 @@
 					}
 				}
 			},
-			"required": [
-				"ram"
-			]
+			"additionalProperties": false
 		}
 	},
 	"type": "array",
@@ -133,8 +131,8 @@
 			"hardwareRequirements": {
 				"type": "object",
 				"properties": {
-					"minimum": { "$ref": "#/definitions/hardwareSpecs" },,
-					"recommended": { "$ref": "#/definitions/hardwareSpecs" },
+					"minimum": { "$ref": "#/definitions/hardwareSpecs" },
+					"recommended": { "$ref": "#/definitions/hardwareSpecs" }
 				},
 				"additionalProperties": false
 			}

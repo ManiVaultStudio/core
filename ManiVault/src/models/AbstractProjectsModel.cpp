@@ -444,4 +444,55 @@ QVariant AbstractProjectsModel::SizeItem::data(int role) const
 	return Item::data(role);
 }
 
+QVariant AbstractProjectsModel::MinimumHardwareSpecsItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getProject()->getMinimumHardwareSpec().toVariantMap();
+
+	    case Qt::DisplayRole:
+	        return "";
+
+	    case Qt::ToolTipRole:
+	        return "Minimum hardware specifications: " + data(Qt::DisplayRole).toString();
+
+        case Qt::DecorationRole:
+        {
+            const auto meetsMinimumHardwareSpecs = getProject()->getMinimumHardwareSpec() > HardwareSpec::getSystemHardwareSpec();
+
+        	return meetsMinimumHardwareSpecs ? StyledIcon("check") : StyledIcon("exclamation");
+        }
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::RecommendedHardwareSpecsItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+            return getProject()->getRecommendedHardwareSpec().toVariantMap();
+
+	    case Qt::DisplayRole:
+            return "";
+
+	    case Qt::ToolTipRole:
+	        return "Recommended hardware specifications: " + data(Qt::DisplayRole).toString();
+
+        case Qt::DecorationRole:
+        {
+            const auto meetsMinimumHardwareSpecs = getProject()->getRecommendedHardwareSpec() > HardwareSpec::getSystemHardwareSpec();
+
+            return meetsMinimumHardwareSpecs ? StyledIcon("check") : StyledIcon("exclamation");
+        }
+
+	    default:
+	        break;
+    }
+	return Item::data(role);
+}
+
 }

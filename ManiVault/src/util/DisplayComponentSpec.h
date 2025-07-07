@@ -18,7 +18,7 @@ namespace mv::util
  *
  * @author Thomas Kroes
  */
-CORE_EXPORT class DisplayComponentSpec : public HardwareComponentSpec
+class CORE_EXPORT DisplayComponentSpec : public HardwareComponentSpec
 {
 public:
 
