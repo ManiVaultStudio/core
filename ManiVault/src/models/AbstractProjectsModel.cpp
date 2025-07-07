@@ -458,6 +458,9 @@ QVariant AbstractProjectsModel::MinimumHardwareSpecsItem::data(int role) const
 
         case Qt::DecorationRole:
         {
+            if (!getProject()->getMinimumHardwareSpec().isInitialized())
+                break;
+
             const auto meetsMinimumHardwareSpecs = getProject()->getMinimumHardwareSpec() > HardwareSpec::getSystemHardwareSpec();
 
         	return meetsMinimumHardwareSpecs ? StyledIcon("check") : StyledIcon("exclamation");
@@ -484,9 +487,12 @@ QVariant AbstractProjectsModel::RecommendedHardwareSpecsItem::data(int role) con
 
         case Qt::DecorationRole:
         {
-            const auto meetsMinimumHardwareSpecs = getProject()->getRecommendedHardwareSpec() > HardwareSpec::getSystemHardwareSpec();
+            if (!getProject()->getRecommendedHardwareSpec().isInitialized())
+                break;
 
-            return meetsMinimumHardwareSpecs ? StyledIcon("check") : StyledIcon("exclamation");
+            const auto meetsRecommendedHardwareSpecs = getProject()->getRecommendedHardwareSpec() > HardwareSpec::getSystemHardwareSpec();
+
+            return meetsRecommendedHardwareSpecs ? StyledIcon("check") : StyledIcon("exclamation");
         }
 
 	    default:

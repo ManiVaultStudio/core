@@ -29,6 +29,12 @@ public:
     void fromSystem() const;
 
     /**
+     * Get whether the hardware spec has been initialized
+     * @return Boolean determining whether the hardware spec has been initialized
+     */
+    bool isInitialized() const;
+
+    /**
      * Get whether the hardware specification is smaller than the \p other hardware specification
      * @return Boolean determining whether the hardware specification is smaller than the \p other hardware specification
      */
@@ -68,7 +74,7 @@ public: // System hardware specification
     static void updateSystemHardwareSpecs();
 
 private:
-    std::vector<std::shared_ptr<HardwareComponentSpec>>   _componentSpecs;      /** Hardware component specifications */
+    HardwareComponentSpecs  _componentSpecs;    /** Hardware component specifications */
 
     static HardwareSpec systemHardwareSpec; /** System hardware specification */
 };

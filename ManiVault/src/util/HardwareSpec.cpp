@@ -12,12 +12,26 @@ HardwareSpec HardwareSpec::systemHardwareSpec;
 void HardwareSpec::fromVariantMap(const QVariantMap& variantMap)
 {
 	Serializable::fromVariantMap(variantMap);
+
+    for (auto& componentSpec : _componentSpecs)
+        componentSpec->fromVariantMap(variantMap);
 }
 
 void HardwareSpec::fromSystem() const
 {
     for (auto& componentSpec : _componentSpecs)
         componentSpec->fromSystem();
+}
+
+bool HardwareSpec::isInitialized() const
+{
+    auto initialized = false;
+
+    for (auto& componentSpec : _componentSpecs)
+        if (componentSpec->isInitialized())
+            initialized = true;
+
+    return initialized;
 }
 
 const HardwareSpec& HardwareSpec::getSystemHardwareSpec()

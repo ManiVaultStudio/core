@@ -52,4 +52,6 @@ private:
     friend class HardwareSpec; // Allow HardwareSpec to access private members
 };
 
+using HardwareComponentSpecs = std::vector<std::shared_ptr<HardwareComponentSpec>>;
+
 }
