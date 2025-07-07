@@ -6,9 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "Version.h"
-
-#include "HardwareSpecs.h"
+#include "util/HardwareSpec.h"
+#include "util/Version.h"
 
 #include <QObject>
 #include <QString>
@@ -126,16 +125,16 @@ public:
     QString getSize() const;
 
     /**
-     * Get minimum hardware specifications
-     * @return Project minimum hardware specifications
+     * Get minimum hardware specification
+     * @return Project minimum hardware specification
      */
-    HardwareSpecs getMinimumHardwareSpecs() const;
+    HardwareSpec getMinimumHardwareSpec() const;
 
     /**
-     * Get recommended hardware specifications
-     * @return Project recommended hardware specifications
+     * Get recommended hardware specification
+     * @return Project recommended hardware specification
      */
-    HardwareSpecs getRecommendedHardwareSpecs() const;
+    HardwareSpec getRecommendedHardwareSpec() const;
 
     /**
      * Overload assignment operator
@@ -156,8 +155,8 @@ public:
         _requiredPlugins            = rhs.getRequiredPlugins();
         _missingPlugins             = rhs.getMissingPlugins();
         _size                       = rhs.getSize();
-        _minimumHardwareSpecs       = rhs.getMinimumHardwareSpecs();
-        _recommendedHardwareSpecs   = rhs.getRecommendedHardwareSpecs();
+        _minimumHardwareSpec        = rhs.getMinimumHardwareSpec();
+        _recommendedHardwareSpec    = rhs.getRecommendedHardwareSpec();
 
         return *this;
     }
@@ -175,8 +174,8 @@ private:
     QStringList     _requiredPlugins;           /** Required plugins */
     QStringList     _missingPlugins;            /** Missing plugins */
     QString         _size;                      /** Size of the ManiVault project */
-    HardwareSpecs   _minimumHardwareSpecs;      /** Minimum hardware specifications for the project */
-    HardwareSpecs   _recommendedHardwareSpecs;  /** Recommended hardware specifications for the project */
+    HardwareSpec    _minimumHardwareSpec;       /** Minimum hardware specification for the project */
+    HardwareSpec    _recommendedHardwareSpec;   /** Recommended hardware specification for the project */
 };
 
 using ProjectDatabaseProjects = std::vector<const ProjectsModelProject*>;

@@ -5,8 +5,7 @@
 #pragma once
 
 #include "models/AbstractProjectsModel.h"
-
-#include "util/ProjectsModelProject.h"
+#include "models/ProjectsModelProject.h"
 
 #include "actions/StringsAction.h"
 

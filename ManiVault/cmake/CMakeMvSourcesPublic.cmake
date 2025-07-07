@@ -558,8 +558,11 @@ set(PUBLIC_UTIL_HEADERS
     src/util/ColorScheme.h
     src/util/JSON.h
     src/util/Script.h
+	src/util/HardwareComponentSpec.h
+	src/util/DisplayComponentSpec.h
+	src/util/CpuComponentSpec.h
+	src/util/RamComponentSpec.h
 	src/util/HardwareSpec.h
-	src/util/HardwareSpecs.h
 )
 
 if(APPLE)
@@ -614,8 +617,11 @@ set(PUBLIC_UTIL_SOURCES
     src/util/ColorScheme.cpp
     src/util/JSON.cpp
     src/util/Script.cpp
+	src/util/HardwareComponentSpec.cpp
+	src/util/DisplayComponentSpec.cpp
+	src/util/CpuComponentSpec.cpp
+	src/util/RamComponentSpec.cpp
 	src/util/HardwareSpec.cpp
-	src/util/HardwareSpecs.cpp
 )
 
 if(APPLE)

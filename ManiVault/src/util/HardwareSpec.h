@@ -7,49 +7,17 @@
 #include "ManiVaultGlobals.h"
 
 #include "Serializable.h"
+#include "HardwareSpec.h"
+#include "HardwareComponentSpec.h"
+
+#include <QString>
 
 namespace mv::util
 {
 
-CORE_EXPORT class HardwareSpec : public Serializable
+class CORE_EXPORT HardwareSpec : public Serializable
 {
 public:
-    virtual ~HardwareSpec() = default;
-
-protected: // Population methods
-
-    /** Load the hardware spec from current system */
-    virtual void fromSystem() = 0;
-};
-
-/** Display resolution hardware spec */
-CORE_EXPORT class DisplayResolution : public HardwareSpec
-{
-public:
-
-    /** Default constructor */
-    DisplayResolution();
-
-    /**
-     * Get whether the display resolution is smaller than \p other display resolution
-     * @return Boolean determining whether the display resolution is smaller than \p other display resolution
-     */
-    bool operator<(const DisplayResolution& other) const {
-        return _horizontal > other._horizontal && _vertical > other._vertical;
-    }
-
-    /**
-     * Get whether the display resolution is larger than \p other display resolution
-     * @return Boolean determining whether the display resolution is larger than \p other display resolution
-     */
-    bool operator>(const DisplayResolution& other) const {
-        return other < *this;
-    }
-
-protected: // Population methods
-
-    /** Load the hardware spec from current system */
-    void fromSystem() override;
 
     /**
      * Load the hardware spec from \p variantMap
@@ -57,64 +25,49 @@ protected: // Population methods
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
-private:
-    std::int32_t    _horizontal;    /** Horizontal resolution in pixels */
-    std::int32_t    _vertical;      /** Vertical resolution in pixels */
-};
-
-/** Available RAM hardware spec */
-CORE_EXPORT class AvailableRam : public HardwareSpec
-{
-public:
-
-    /** Default constructor */
-    AvailableRam();
+    /** Initialize from system hardware specifications */
+    void fromSystem();
 
     /**
-     * Get the amount of available RAM in bytes
-     * @return Number of bytes of available RAM
+     * Get whether the hardware specification is smaller than the \p other hardware specification
+     * @return Boolean determining whether the hardware specification is smaller than the \p other hardware specification
      */
-    std::uint64_t getNumberOfBytes() const {
-        return _numberOfBytes;
+    bool operator<(const HardwareSpec& other) const {
+        std::vector<bool> conditions;
+
+        conditions.reserve(_componentSpecs.size());
+
+        std::transform(_componentSpecs.begin(), _componentSpecs.end(), other._componentSpecs.begin(), std::back_inserter(conditions),
+            [](const auto& lhs, const auto& rhs) {
+                return lhs < rhs;
+		});
+
+        return std::ranges::all_of(conditions.begin(), conditions.end(), [](bool condition) { return condition; });
     }
 
     /**
-     * Get whether the available RAM is smaller than \p other available RAM
-     * @return Boolean determining whether the available RAM is smaller than the \p other available RAM
+     * Get whether the hardware specification is larger than the \p other hardware specification
+     * @return Boolean determining whether the hardware specification is larger than the \p other hardware specification
      */
-    bool operator<(const AvailableRam& other) const {
-        return getNumberOfBytes() > other.getNumberOfBytes();
-    }
-
-    /**
-     * Get whether the available RAM is smaller than \p other available RAM
-     * @return Boolean determining whether the available RAM is smaller than the \p other available RAM
-     */
-    bool operator>(const AvailableRam& other) const {
+    bool operator>(const HardwareSpec& other) const {
         return other < *this;
     }
 
-protected: // Population methods
+public: // System hardware specification
 
-    /** Load the hardware spec from current system */
-    void fromSystem() override;
-
-    /**
-     * Load the hardware spec from \p variantMap
-     * @param variantMap Variant map containing the hardware spec properties
+	/**
+     * Get system hardware specification
+     * @return System hardware specification
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    static const HardwareSpec& getSystemHardwareSpec();
+
+    /** Updates the system hardware specifications */
+    static void updateSystemHardwareSpecs();
 
 private:
+    std::vector<std::shared_ptr<HardwareComponentSpec>>   _componentSpecs;      /** Hardware component specifications */
 
-    /**
-     * Get the total amount of system RAM in bytes  
-     * @return The total number of system RAM in bytes
-     */
-    static std::uint64_t getTotalSystemRAMBytes();
-
-private:
-    std::uint64_t   _numberOfBytes;     /** Number of bytes of available RAM */
+    static HardwareSpec systemHardwareSpec; /** System hardware specification */
 };
 
 }

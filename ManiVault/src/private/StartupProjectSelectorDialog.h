@@ -9,12 +9,11 @@
 
 #include <models/ProjectsTreeModel.h>
 #include <models/ProjectsFilterModel.h>
+#include <models/ProjectsModelProject.h>
 
 #include <widgets/HierarchyWidget.h>
 
 #include <actions/TriggerAction.h>
-
-#include <util/ProjectsModelProject.h>
 
 #include <QDialog>
 

@@ -2,10 +2,22 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "HardwareSpecs.h"
+#include "CpuComponentSpec.h"
 
 namespace mv::util
 {
 
+CpuComponentSpec::CpuComponentSpec()
+{
+}
+
+void CpuComponentSpec::fromSystem()
+{
+}
+
+void CpuComponentSpec::fromVariantMap(const QVariantMap& variantMap)
+{
+	HardwareComponentSpec::fromVariantMap(variantMap);
+}
 
 }

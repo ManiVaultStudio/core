@@ -4,82 +4,30 @@
 
 #include "HardwareSpec.h"
 
-#ifdef Q_OS_WIN
-	#define _WIN32_WINNT 0x0600
-	#include <windows.h>
-#endif
-
-#ifdef Q_OS_LINUX
-	#include <sys/sysinfo.h>
-#endif
-
-#ifdef Q_OS_MAC
-    #include <sys/sysctl.h>
-#endif
-
-#include <QSysInfo>
-
 namespace mv::util
 {
-DisplayResolution::DisplayResolution() :
-    HardwareSpec(),
-    _horizontal(0),
-    _vertical(0)
+
+HardwareSpec HardwareSpec::systemHardwareSpec;
+
+void HardwareSpec::fromVariantMap(const QVariantMap& variantMap)
 {
+	Serializable::fromVariantMap(variantMap);
 }
 
-void DisplayResolution::fromSystem()
+void HardwareSpec::fromSystem()
 {
-    if (auto screen = QGuiApplication::primaryScreen()) {
-        _horizontal = screen->size().width();
-        _vertical   = screen->size().height();
-    } else {
-        _horizontal = 0;
-        _vertical   = 0;
-    }
+    for (auto& componentSpec : _componentSpecs)
+        componentSpec->fromSystem();
 }
 
-void DisplayResolution::fromVariantMap(const QVariantMap& variantMap)
+const HardwareSpec& HardwareSpec::getSystemHardwareSpec()
 {
-    _horizontal = variantMap.value("horizontal", 0).toInt();
-    _vertical   = variantMap.value("vertical", 0).toInt();
+    return systemHardwareSpec;
 }
 
-AvailableRam::AvailableRam() :
-    HardwareSpec(),
-    _numberOfBytes(0)
+void HardwareSpec::updateSystemHardwareSpecs()
 {
-}
-
-void AvailableRam::fromSystem()
-{
-    _numberOfBytes = getTotalSystemRAMBytes();
-}
-
-void AvailableRam::fromVariantMap(const QVariantMap& variantMap)
-{
-    _numberOfBytes = variantMap.value("numberOfBytes", 0).toULongLong();
-}
-
-std::uint64_t AvailableRam::getTotalSystemRAMBytes()
-{
-#if defined(Q_OS_WIN)
-    MEMORYSTATUSEX status;
-    status.dwLength = sizeof(status);
-    GlobalMemoryStatusEx(&status);
-    return status.ullTotalPhys;
-#elif defined(Q_OS_MAC)
-    int64_t mem;
-    size_t len = sizeof(mem);
-    sysctlbyname("hw.memsize", &mem, &len, nullptr, 0);
-    return mem;
-#elif defined(Q_OS_UNIX)
-    struct sysinfo info;
-    sysinfo(&info);
-    return quint64(info.totalram) * info.mem_unit;
-#else
-    return 0;
-#endif
+    systemHardwareSpec.fromSystem();
 }
 
 }
