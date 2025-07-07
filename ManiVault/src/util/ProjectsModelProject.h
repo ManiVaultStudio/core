@@ -8,6 +8,8 @@
 
 #include "Version.h"
 
+#include "HardwareSpecs.h"
+
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -124,41 +126,57 @@ public:
     QString getSize() const;
 
     /**
+     * Get minimum hardware specifications
+     * @return Project minimum hardware specifications
+     */
+    HardwareSpecs getMinimumHardwareSpecs() const;
+
+    /**
+     * Get recommended hardware specifications
+     * @return Project recommended hardware specifications
+     */
+    HardwareSpecs getRecommendedHardwareSpecs() const;
+
+    /**
      * Overload assignment operator
      * @param rhs Right hand side project
      * @return Assigned project
      */
     ProjectsModelProject& operator=(const ProjectsModelProject& rhs)
     {
-        _title                  = rhs.getTitle();
-        _group                  = rhs.getGroup();
-    	_isGroup                = rhs.isGroup();
-        _tags                   = rhs.getTags();
-        _date                   = rhs.getDate();
-        _iconName               = rhs.getIconName();
-        _summary                = rhs.getSummary();
-        _url                    = rhs.getUrl();
-        _minimumCoreVersion     = rhs.getMinimumCoreVersion();
-        _requiredPlugins        = rhs.getRequiredPlugins();
-        _missingPlugins         = rhs.getMissingPlugins();
-        _size                   = rhs.getSize();
+        _title                      = rhs.getTitle();
+        _group                      = rhs.getGroup();
+    	_isGroup                    = rhs.isGroup();
+        _tags                       = rhs.getTags();
+        _date                       = rhs.getDate();
+        _iconName                   = rhs.getIconName();
+        _summary                    = rhs.getSummary();
+        _url                        = rhs.getUrl();
+        _minimumCoreVersion         = rhs.getMinimumCoreVersion();
+        _requiredPlugins            = rhs.getRequiredPlugins();
+        _missingPlugins             = rhs.getMissingPlugins();
+        _size                       = rhs.getSize();
+        _minimumHardwareSpecs       = rhs.getMinimumHardwareSpecs();
+        _recommendedHardwareSpecs   = rhs.getRecommendedHardwareSpecs();
 
         return *this;
     }
 
 private:
-    QString         _title;                 /** Title */
-    bool            _isGroup;               /** Boolean determining whether this is a group or a project */
-    QString         _group;                 /** Group */
-    QStringList     _tags;                  /** Tags */
-    QString         _date;                  /** Issue date */
-    QString         _iconName;              /** Font Awesome icon name */
-    QString         _summary;               /** Summary (brief description) */
-    QUrl            _url;                   /** Project URL */
-    Version         _minimumCoreVersion;    /** Minimum supported ManiVault Studio major version */
-    QStringList     _requiredPlugins;       /** Required plugins */
-    QStringList     _missingPlugins;        /** Missing plugins */
-    QString         _size;                  /** Size of the ManiVault project */
+    QString         _title;                     /** Title */
+    bool            _isGroup;                   /** Boolean determining whether this is a group or a project */
+    QString         _group;                     /** Group */
+    QStringList     _tags;                      /** Tags */
+    QString         _date;                      /** Issue date */
+    QString         _iconName;                  /** Font Awesome icon name */
+    QString         _summary;                   /** Summary (brief description) */
+    QUrl            _url;                       /** Project URL */
+    Version         _minimumCoreVersion;        /** Minimum supported ManiVault Studio major version */
+    QStringList     _requiredPlugins;           /** Required plugins */
+    QStringList     _missingPlugins;            /** Missing plugins */
+    QString         _size;                      /** Size of the ManiVault project */
+    HardwareSpecs   _minimumHardwareSpecs;      /** Minimum hardware specifications for the project */
+    HardwareSpecs   _recommendedHardwareSpecs;  /** Recommended hardware specifications for the project */
 };
 
 using ProjectDatabaseProjects = std::vector<const ProjectsModelProject*>;

@@ -53,6 +53,15 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
         }
     }
 
+    if (variantMap.contains("recommendedHardwareSpecs")) {
+         = variantMap["recommendedHardwareSpecs"].toMap();
+        if (recommendedHardwareSpecsMap.contains("displayResolution")) {
+            _recommendedHardwareSpecs["displayResolution"] = recommendedHardwareSpecsMap["displayResolution"].toMap();
+        }
+        if (recommendedHardwareSpecsMap.contains("availableRam")) {
+            _recommendedHardwareSpecs["availableRam"] = recommendedHardwareSpecsMap["availableRam"].toMap();
+        }
+    }
     if (!_missingPlugins.isEmpty())
         qWarning() << "Project" << _title << "is added to the project database but cannot be opened because of missing plugins:" << _missingPlugins.join(", ");
 }
@@ -139,6 +148,16 @@ QStringList ProjectsModelProject::getMissingPlugins() const
 QString ProjectsModelProject::getSize() const
 {
     return _size;
+}
+
+HardwareSpecs ProjectsModelProject::getMinimumHardwareSpecs() const
+{
+    return _minimumHardwareSpecs;
+}
+
+HardwareSpecs ProjectsModelProject::getRecommendedHardwareSpecs() const
+{
+    return _recommendedHardwareSpecs;
 }
 
 }
