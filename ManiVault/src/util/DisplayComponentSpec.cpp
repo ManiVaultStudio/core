@@ -22,8 +22,29 @@ void DisplayComponentSpec::fromSystem()
 
 void DisplayComponentSpec::fromVariantMap(const QVariantMap& variantMap)
 {
-    _resolution.first   = variantMap.value("horizontal", 0).toInt();
-    _resolution.second  = variantMap.value("vertical", 0).toInt();
+    try {
+        if (!variantMap.contains("display"))
+            return;
+
+        const auto displayMap = variantMap.value("display").toMap();
+
+        if (displayMap.contains("resolution")) {
+            const auto resolutionMap = displayMap.value("resolution").toMap();
+
+            _resolution.first   = resolutionMap.value("horizontal", 0).toInt();
+            _resolution.second  = resolutionMap.value("vertical", 0).toInt();
+        }
+
+        setInitialized();
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << "Unable read display hardware component properties from variant map:" << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << "Unable read display hardware component properties from variant map";
+    }
 }
 
 }

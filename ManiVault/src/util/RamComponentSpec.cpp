@@ -37,7 +37,22 @@ void RamComponentSpec::fromSystem()
 
 void RamComponentSpec::fromVariantMap(const QVariantMap& variantMap)
 {
-    _numberOfBytes = variantMap.value("numberOfBytes", 0).toULongLong();
+    try {
+        if (!variantMap.contains("numberOfBytes"))
+            throw std::runtime_error("Variant map does not contain 'numberOfBytes' key.");
+
+        _numberOfBytes = variantMap.value("numberOfBytes", 0).toULongLong();
+
+        setInitialized();
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << "Unable read RAM hardware component properties from variant map:" << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << "Unable read RAM hardware component properties from variant map";
+    }
 }
 
 std::uint64_t RamComponentSpec::getTotalSystemRAMBytes()

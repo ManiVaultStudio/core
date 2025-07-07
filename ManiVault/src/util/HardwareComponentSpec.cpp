@@ -8,8 +8,12 @@ namespace mv::util
 {
 
 HardwareComponentSpec::HardwareComponentSpec(const QString& title) :
-    Serializable(title),
-    _initialized(false)
+    _initialized(false),
+    _title(title)
+{
+}
+
+void HardwareComponentSpec::fromVariantMap(const QVariantMap& variantMap)
 {
 }
 

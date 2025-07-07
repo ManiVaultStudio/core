@@ -57,10 +57,10 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
         const auto hardwareRequirementsMap = variantMap["hardwareRequirements"].toMap();
 
         if (hardwareRequirementsMap.contains("minimum"))
-            _minimumHardwareSpec.fromVariantMap(variantMap["minimum"].toMap());
+            _minimumHardwareSpec.fromVariantMap(hardwareRequirementsMap["minimum"].toMap());
 
         if (hardwareRequirementsMap.contains("recommended"))
-            _recommendedHardwareSpec.fromVariantMap(variantMap["recommended"].toMap());
+            _recommendedHardwareSpec.fromVariantMap(hardwareRequirementsMap["recommended"].toMap());
     }
     
     if (!_missingPlugins.isEmpty())

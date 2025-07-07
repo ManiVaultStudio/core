@@ -447,8 +447,8 @@ QVariant AbstractProjectsModel::SizeItem::data(int role) const
 QVariant AbstractProjectsModel::MinimumHardwareSpecsItem::data(int role) const
 {
     switch (role) {
-	    case Qt::EditRole:
-	        return getProject()->getMinimumHardwareSpec().toVariantMap();
+    case Qt::EditRole:
+	        return QVariant::fromValue(getProject()->getMinimumHardwareSpec());
 
 	    case Qt::DisplayRole:
 	        return "";
@@ -477,7 +477,7 @@ QVariant AbstractProjectsModel::RecommendedHardwareSpecsItem::data(int role) con
 {
     switch (role) {
 	    case Qt::EditRole:
-            return getProject()->getRecommendedHardwareSpec().toVariantMap();
+            return QVariant::fromValue(getProject()->getRecommendedHardwareSpec());
 
 	    case Qt::DisplayRole:
             return "";

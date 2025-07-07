@@ -15,7 +15,7 @@
 namespace mv::util
 {
 
-class CORE_EXPORT HardwareSpec : public Serializable
+class CORE_EXPORT HardwareSpec
 {
 public:
 
@@ -26,7 +26,7 @@ public:
      * Load the hardware spec from \p variantMap
      * @param variantMap Variant map containing the hardware spec properties
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    void fromVariantMap(const QVariantMap& variantMap);
 
     /** Initialize from system hardware specifications */
     void fromSystem() const;

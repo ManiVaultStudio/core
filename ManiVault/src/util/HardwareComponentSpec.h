@@ -6,8 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "Serializable.h"
-
 namespace mv::util
 {
 
@@ -17,7 +15,7 @@ namespace mv::util
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT HardwareComponentSpec : public Serializable
+class CORE_EXPORT HardwareComponentSpec
 {
 public:
 
@@ -28,6 +26,12 @@ public:
 	HardwareComponentSpec(const QString& title);
 
     virtual ~HardwareComponentSpec() = default;
+
+    /**
+     * Load the hardware component spec from \p variantMap
+     * @param variantMap Variant map containing the hardware component spec properties
+     */
+    virtual void fromVariantMap(const QVariantMap& variantMap);
 
     /**
      * Get whether the hardware component spec has been initialized
@@ -47,7 +51,8 @@ protected: // Population methods
 	void setInitialized(bool initialized = true) { _initialized = initialized; }
 
 private:
-    bool    _initialized;   /** Whether the hardware spec has been initialized (either from variant map or system) */
+    const QString&  _title;         /** Hardware component specification title */
+    bool            _initialized;   /** Whether the hardware spec has been initialized (either from variant map or system) */
 
     friend class HardwareSpec; // Allow HardwareSpec to access private members
 };
