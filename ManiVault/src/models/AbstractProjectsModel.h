@@ -39,8 +39,9 @@ public:
         RequiredPlugins,            /** Required plugins for the project */
         MissingPlugins,             /** Missing plugins for the project */
         Size,                       /** Size of the ManiVault project */
-        MinimumHardwareSpec,       /** Minimum hardware specifications for the project */
-        RecommendedHardwareSpec,   /** Recommended hardware specifications for the project */
+        MinimumHardwareSpec,        /** Minimum hardware specifications for the project */
+        RecommendedHardwareSpec,    /** Recommended hardware specifications for the project */
+        Startup,                    /** Whether the project can be opened at application startup */
 
         Count                       /** Number of columns in the model */
     };
@@ -616,6 +617,42 @@ protected:
 
 	            default:
 	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying whether the project is a startup project */
+    class StartupItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "Startup";
+
+            case Qt::ToolTipRole:
+                return "Whether the project can be opened at application startup";
+
+            default:
+                break;
             }
 
             return {};

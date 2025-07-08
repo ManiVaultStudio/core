@@ -137,6 +137,12 @@ public:
     HardwareSpec getRecommendedHardwareSpec() const;
 
     /**
+     * Get whether this is a startup project
+     * @return Boolean determining whether this is a startup project
+     */
+    bool isStartup() const;
+
+    /**
      * Overload assignment operator
      * @param rhs Right hand side project
      * @return Assigned project
@@ -157,6 +163,7 @@ public:
         _size                       = rhs.getSize();
         _minimumHardwareSpec        = rhs.getMinimumHardwareSpec();
         _recommendedHardwareSpec    = rhs.getRecommendedHardwareSpec();
+        _startup                  = rhs.isStartup();
 
         return *this;
     }
@@ -176,6 +183,7 @@ private:
     QString         _size;                      /** Size of the ManiVault project */
     HardwareSpec    _minimumHardwareSpec;       /** Minimum hardware specification for the project */
     HardwareSpec    _recommendedHardwareSpec;   /** Recommended hardware specification for the project */
+    bool            _startup;                 /** Boolean determining whether this is a startup project */
 };
 
 using ProjectDatabaseProjects = std::vector<const ProjectsModelProject*>;

@@ -28,7 +28,8 @@ QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> Abst
     { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
     { Column::Size, { "Size" , "Size", "Project size" } },
     { Column::MinimumHardwareSpec, { "Min. specs" , "Min. specs", "Minimum hardware specification for opening the project" } },
-    { Column::RecommendedHardwareSpec, { "Rec. specs" , "Rec. specs", "Recommended hardware specification for opening the project" } }
+    { Column::RecommendedHardwareSpec, { "Rec. specs" , "Rec. specs", "Recommended hardware specification for opening the project" } },
+    { Column::RecommendedHardwareSpec, { "Startup" , "Startup", "Whether the project can be opened at application startup" } },
 });
 
 AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
@@ -85,6 +86,9 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
 
         case Column::RecommendedHardwareSpec:
             return RecommendedHardwareSpecItem::headerData(orientation, role);
+
+        case Column::Startup:
+            return StartupItem::headerData(orientation, role);
 
 		case Column::Count:
             break;
@@ -521,6 +525,25 @@ QVariant AbstractProjectsModel::RecommendedHardwareSpecItem::data(int role) cons
 	    default:
 	        break;
     }
+	return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::StartupItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getProject()->isStartup();
+
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toBool() ? "true" : "false";
+
+	    case Qt::ToolTipRole:
+	        return "Startup project: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
 	return Item::data(role);
 }
 
