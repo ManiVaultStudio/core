@@ -73,8 +73,12 @@ bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
     if (filterRegularExpression().isValid()) {
         const auto key = index.siblingAtColumn(filterKeyColumn()).data(filterRole()).toString();
 
-    	if (!key.contains(filterRegularExpression()))
-            return hasAcceptedChildren(index);  // Check children
+        if (!key.contains(filterRegularExpression())) {
+            if (isGroup && hasAcceptedChildren(index))
+                return true;
+
+            return false;
+        }
     }
 
     if (!isGroup) {
@@ -106,9 +110,9 @@ bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
 
         if (_filterStartupOnlyAction.isChecked() && !isStartup)
             return false;
+    } else {
+        return hasAcceptedChildren(index);
     }
-
-    return true;
 }
 
 void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
