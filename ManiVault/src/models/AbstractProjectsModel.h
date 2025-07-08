@@ -574,7 +574,7 @@ protected:
             switch (role) {
             case Qt::DisplayRole:
             case Qt::EditRole:
-                return "Min. hardware";
+                return "Hardware requirements";
 
             case Qt::ToolTipRole:
                 return "Minimum hardware specifications for the project";
@@ -610,7 +610,7 @@ protected:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Rec. hardware";
+	                return "Recommended hardware";
 
 	            case Qt::ToolTipRole:
 	                return "Recommended hardware specifications for the project";
