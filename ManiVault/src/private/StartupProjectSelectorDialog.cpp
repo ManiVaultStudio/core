@@ -34,15 +34,15 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     layout->addWidget(&_hierarchyWidget, 1);
 
-    auto detailsGroupbox = new QGroupBox("Project details", this);
-    auto detailsLayout = new QVBoxLayout(detailsGroupbox);
-    auto detailsLabel = new QLabel("Select a project to see its details here.", detailsGroupbox);
+    //auto detailsGroupbox = new QGroupBox("Project details", this);
+    //auto detailsLayout = new QVBoxLayout(detailsGroupbox);
+    //auto detailsLabel = new QLabel("Select a project to see its details here.", detailsGroupbox);
 
-    detailsLayout->addWidget(detailsLabel);
+    //detailsLayout->addWidget(detailsLabel);
 
-    detailsGroupbox->setLayout(detailsLayout);
+    //detailsGroupbox->setLayout(detailsLayout);
 
-    layout->addWidget(detailsGroupbox);
+    //layout->addWidget(detailsGroupbox);
 
 	auto bottomLayout = new QHBoxLayout();
 
