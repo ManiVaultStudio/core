@@ -12,12 +12,19 @@ CpuComponentSpec::CpuComponentSpec() :
 {
 }
 
-QString CpuComponentSpec::getStatusString(const HardwareComponentSpecPtr& other) const
+bool CpuComponentSpec::meets(const HardwareComponentSpec& required) const
 {
-    if (*this < dynamic_cast<CpuComponentSpec*>(&other))
-        return "CPU does not meet specification";
+    return *this == dynamic_cast<const CpuComponentSpec&>(required) || *this > dynamic_cast<const CpuComponentSpec&>(required);
+}
 
-    return {};
+QString CpuComponentSpec::getFailureString(const HardwareComponentSpec& required) const
+{
+	if (meets(required))
+		return {};
+
+	const auto& cpuComponentSpec = dynamic_cast<const CpuComponentSpec&>(required);
+
+	return "CPU does not meet requirements";
 }
 
 void CpuComponentSpec::fromSystem()
@@ -28,5 +35,6 @@ void CpuComponentSpec::fromVariantMap(const QVariantMap& variantMap)
 {
 	HardwareComponentSpec::fromVariantMap(variantMap);
 }
+
 
 }

@@ -461,17 +461,25 @@ QVariant AbstractProjectsModel::MinimumHardwareSpecItem::data(int role) const
 	    case Qt::DisplayRole:
 	        return "";
 
-	    case Qt::ToolTipRole:
-	        return "Minimum hardware specifications: " + data(Qt::DisplayRole).toString();
+        case Qt::ToolTipRole:
+        {
+            if (!getProject()->getMinimumHardwareSpec().isInitialized())
+                break;
+
+            if (!HardwareSpec::getSystemHardwareSpec().meets(getProject()->getMinimumHardwareSpec()))
+                return HardwareSpec::getSystemHardwareSpec().getFailureString(getProject()->getMinimumHardwareSpec());
+
+            return "System meets the minimum hardware specification";
+        }
 
         case Qt::DecorationRole:
         {
             if (!getProject()->getMinimumHardwareSpec().isInitialized())
                 break;
 
-            const auto meetsMinimumHardwareSpecs = getProject()->getMinimumHardwareSpec() > HardwareSpec::getSystemHardwareSpec();
+            const auto meets = HardwareSpec::getSystemHardwareSpec().meets(getProject()->getMinimumHardwareSpec());
 
-        	return meetsMinimumHardwareSpecs ? StyledIcon("circle-check") : StyledIcon("circle-exclamation");
+            return meets ? StyledIcon("circle-check") : StyledIcon("circle-exclamation");
         }
 
 	    default:
@@ -492,18 +500,13 @@ QVariant AbstractProjectsModel::RecommendedHardwareSpecItem::data(int role) cons
 
 	    case Qt::ToolTipRole:
         {
-            if (getProject()->getRecommendedHardwareSpec() < HardwareSpec::getSystemHardwareSpec()) {
-                QString tooltip("<p>System does not have the recommended specification:</p>");
+            if (!getProject()->getRecommendedHardwareSpec().isInitialized())
+                break;
 
-                const auto failingHardwareComponentSpecs = getProject()->getRecommendedHardwareSpec().getFailingHardwareComponentSpecs(HardwareSpec::getSystemHardwareSpec());
+            if (!HardwareSpec::getSystemHardwareSpec().meets(getProject()->getRecommendedHardwareSpec()))
+                return HardwareSpec::getSystemHardwareSpec().getFailureString(getProject()->getRecommendedHardwareSpec());
 
-                //for (const auto& failingHardwareComponentSpec : failingHardwareComponentSpecs)
-
-
-            }
-
-
-            return "System has the recommended hardware specification";
+            return "System meets the recommended hardware specification";
 		}
 
         case Qt::DecorationRole:
@@ -511,9 +514,9 @@ QVariant AbstractProjectsModel::RecommendedHardwareSpecItem::data(int role) cons
             if (!getProject()->getRecommendedHardwareSpec().isInitialized())
                 break;
 
-            const auto meetsRecommendedHardwareSpecs = getProject()->getRecommendedHardwareSpec() > HardwareSpec::getSystemHardwareSpec();
+            const auto meets = HardwareSpec::getSystemHardwareSpec().meets(getProject()->getRecommendedHardwareSpec());
 
-            return meetsRecommendedHardwareSpecs ? StyledIcon("circle-check") : StyledIcon("circle-exclamation");
+            return meets ? StyledIcon("circle-check") : StyledIcon("circle-exclamation");
         }
 
 	    default:

@@ -26,11 +26,36 @@ public:
     CpuComponentSpec();
 
     /**
-     * Compare with \p other hardware component spec and produce a status string (empty if no ok)
-     * @param other Hardware component spec to compare with
-     * @return Status string indicating the status of the hardware component spec compared to \p other
+     * Get whether the CPU component specification meets the \p required CPU component specification
+     * @param required CPU component spec that is required
+     * @return Boolean determining whether the CPU component spec meets the required CPU component spec
      */
-    QString getStatusString(const HardwareComponentSpecPtr& other) const override;
+    bool meets(const HardwareComponentSpec& required) const override;
+
+    /**
+     * Get the reason why the CPU component spec does not meet the \p required CPU component spec
+     * @param required CPU component spec that is required
+     * @return String containing the reason why the CPU component spec does not meet the required CPU component spec
+     */
+    QString getFailureString(const HardwareComponentSpec& required) const override;
+
+    /**
+     * Get whether the CPU component specification is equal to the \p other CPU component specification
+     * @param other CPU component specification to compare with
+     * @return Boolean determining whether the CPU component specification is equal to the \p other CPU component specification
+     */
+    bool operator==(const CpuComponentSpec& other) const {
+        return false;
+    }
+
+    /**
+     * Get whether the CPU component specification is not equal to the \p other CPU component specification
+     * @param other CPU component specification to compare with
+     * @return Boolean determining whether the CPU component specification is not equal to the \p other CPU component specification
+     */
+    bool operator!=(const CpuComponentSpec& other) const {
+        return !(*this == other);
+    }
 
     /**
      * Get whether the CPU specification is smaller than the \p other CPU specification

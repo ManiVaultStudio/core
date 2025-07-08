@@ -28,12 +28,19 @@ RamComponentSpec::RamComponentSpec() :
 {
 }
 
-QString RamComponentSpec::getStatusString(const HardwareComponentSpecPtr& other) const
+bool RamComponentSpec::meets(const HardwareComponentSpec& required) const
 {
-    if (*this < dynamic_cast<const RamComponentSpec&>(other))
-        return "Not enough RAM";
+    return *this == dynamic_cast<const RamComponentSpec&>(required) || *this > dynamic_cast<const RamComponentSpec&>(required);
+}
 
-    return {};
+QString RamComponentSpec::getFailureString(const HardwareComponentSpec& required) const
+{
+    if (meets(required))
+        return {};
+
+    const auto& ramComponentSpec = dynamic_cast<const RamComponentSpec&>(required);
+
+    return QString("Not enough RAM (installed: %2, required: %3").arg(QString::number(ramComponentSpec._numberOfBytes), QString::number(ramComponentSpec._numberOfBytes));
 }
 
 void RamComponentSpec::fromSystem()

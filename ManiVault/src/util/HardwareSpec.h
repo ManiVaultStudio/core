@@ -6,7 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "Serializable.h"
 #include "HardwareSpec.h"
 #include "HardwareComponentSpec.h"
 
@@ -38,18 +37,45 @@ public:
     bool isInitialized() const;
 
     /**
-     * Compare with \p other hardware spec and produce a status string (empty if no ok)
-     * @param other Hardware spec to compare with
-     * @return Status string indicating the status of the hardware spec compared to \p other
-     */
-    QString getStatusString(const HardwareSpec& other) const;
-
-    /**
      * Get the failing hardware component specifications
      * @param other Other hardware specification to compare with
      * @return Failing hardware component specifications
      */
     HardwareComponentSpecs getFailingHardwareComponentSpecs(const HardwareSpec& other) const;
+
+public: // Conditional
+
+    /**
+     * Get whether the hardware specification is equal to the \p other hardware specification
+     * @param other Other hardware specification to compare with
+     * @return Boolean determining whether the hardware specification is equal to the \p other hardware specification
+     */
+    bool operator==(const HardwareSpec& other) const {
+        if (_componentSpecs.size() != other._componentSpecs.size())
+            return false;
+
+        for (std::size_t i = 0; i < _componentSpecs.size(); ++i) {
+            const auto& lhs = _componentSpecs[i];
+            const auto& rhs = other._componentSpecs[i];
+
+            if (!lhs->isInitialized() || !rhs->isInitialized())
+                continue;
+
+            if (!lhs->meets(*rhs))
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get whether the hardware specification is not equal to the \p other hardware specification
+     * @param other Other hardware specification to compare with
+     * @return Boolean determining whether the hardware specification is not equal to the \p other hardware specification
+     */
+    bool operator!=(const HardwareSpec& other) const {
+        return !(*this == other);
+    }
 
     /**
      * Get whether the hardware specification is smaller than the \p other hardware specification
@@ -78,6 +104,38 @@ public:
     bool operator>(const HardwareSpec& other) const {
         return other < *this;
     }
+
+    /**
+     * Get whether the hardware specification is equal to or smaller than the \p other hardware specification
+     * @param other Other hardware specification to compare with
+     * @return Boolean determining whether the hardware specification is equal to or smaller than the \p other hardware specification
+     */
+    bool operator<=(const HardwareSpec& other) const {
+        return *this < other || *this == other;
+    }
+
+    /**
+     * Get whether the hardware specification is equal to or larger than the \p other hardware specification
+     * @param other Other hardware specification to compare with
+     * @return Boolean determining whether the hardware specification is equal to or larger than the \p other hardware specification
+     */
+    bool operator>=(const HardwareSpec& other) const {
+        return *this > other || *this == other;
+    }
+
+    /**
+     * Get whether the hardware specification meets the \p required hardware specification
+     * @param required Hardware spec that is required
+     * @return Boolean determining whether the hardware spec meets the required hardware spec
+     */
+    bool meets(const HardwareSpec& required) const;
+
+    /**
+     * Get the reason why the hardware component spec does not meet the \p required hardware component spec
+     * @param required Hardware component spec that is required
+     * @return String containing the reason why the hardware component spec does not meet the required hardware component spec
+     */
+    QString getFailureString(const HardwareSpec& required) const;
 
 public: // System hardware specification
 

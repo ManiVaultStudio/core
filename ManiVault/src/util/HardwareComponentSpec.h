@@ -35,12 +35,19 @@ public:
      */
     virtual void fromVariantMap(const QVariantMap& variantMap);
 
-	/**
-     * Compare with \p other hardware component spec and produce a status string (empty if no ok)
-     * @param other Hardware component spec to compare with
-     * @return Status string indicating the status of the hardware component spec compared to \p other
-	 */
-	virtual QString getStatusString(const HardwareComponentSpecPtr& other) const = 0;
+    /**
+     * Get whether the hardware component specification meets the \p required hardware component specification
+     * @param required hardware component spec that is required
+     * @return Boolean determining whether the hardware component spec meets the required hardware component spec
+     */
+    virtual bool meets(const HardwareComponentSpec& required) const = 0;
+
+    /**
+     * Get the reason why the hardware component spec does not meet the \p required hardware component spec
+     * @param required Hardware component spec that is required
+     * @return String containing the reason why the hardware component spec does not meet the required hardware component spec
+     */
+    virtual QString getFailureString(const HardwareComponentSpec& required) const = 0;
 
     /**
      * Get whether the hardware component spec has been initialized

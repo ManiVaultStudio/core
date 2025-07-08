@@ -26,11 +26,36 @@ public:
     DisplayComponentSpec();
 
     /**
-     * Compare with \p other hardware component spec and produce a status string (empty if no ok)
-     * @param other Hardware component spec to compare with
-     * @return Status string indicating the status of the hardware component spec compared to \p other
+     * Get whether the display component specification meets the \p required display component specification
+     * @param required Display component spec that is required
+     * @return Boolean determining whether the display component spec meets the required display component spec
      */
-    QString getStatusString(const HardwareComponentSpecPtr& other) const override;
+    bool meets(const HardwareComponentSpec& required) const;
+
+    /**
+     * Get the reason why the display component spec does not meet the \p required display component spec
+     * @param required Display component spec that is required
+     * @return String containing the reason why the display component spec does not meet the required display component spec
+     */
+    QString getFailureString(const HardwareComponentSpec& required) const;
+
+    /**
+     * Get whether the display component specification is equal to the \p other display component specification
+     * @param other Display component specification to compare with
+     * @return Boolean determining whether the display component specification is equal to the \p other display component specification
+     */
+    bool operator==(const DisplayComponentSpec& other) const {
+        return _resolution == other._resolution;
+    }
+
+    /**
+     * Get whether the display component specification is not equal to the \p other display component specification
+     * @param other Display component specification to compare with
+     * @return Boolean determining whether the display component specification is not equal to the \p other display component specification
+     */
+    bool operator!=(const DisplayComponentSpec& other) const {
+        return !(*this == other);
+    }
 
     /**
      * Get whether the display component specification is smaller than the \p other display component spec
