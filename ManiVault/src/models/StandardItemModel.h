@@ -31,8 +31,9 @@ public:
     /** Model population modes */
     enum class PopulationMode
     {
-        Automatic,  /** Automatically populate the model from the Data Source Names (DSNs) */
-        Manual      /** Manually populate the model from a JSON file or byte array */
+        Automatic,              /** Automatically populate the model from the Data Source Names (DSNs) */
+        AutomaticSynchronous,   /** Automatically populate the model from the DSNs in a synchronous manner */
+        Manual                  /** Manually populate the model from a JSON file or byte array */
     };
 
     /**
