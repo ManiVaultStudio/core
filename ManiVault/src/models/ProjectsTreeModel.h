@@ -36,7 +36,10 @@ public:
      */
     ProjectsTreeModel(const PopulationMode& mode = PopulationMode::Automatic, QObject* parent = nullptr);
 
-    /** Synchronize the model with the content of all plugins Data Source Names */
+    /** Synchronize the model with the content of all Data Source Names (DSN) */
+    void populateFromDsns();
+
+    /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
     void populateFromPluginDsns();
 
     /**
@@ -56,11 +59,11 @@ public:
 private:
 
     /**
-     * Download projects from \p dsn
+     * Download projects JSON file from \p dsn
      * @param dsn Projects Data Source Name (DSN)
      * @return Downloaded data
      */
-    static QByteArray downloadProjectsFromDsn(const QString& dsn);
+    static QByteArray downloadProjectsJsonFromDsn(const QString& dsn);
 
 public: // Action getters
     

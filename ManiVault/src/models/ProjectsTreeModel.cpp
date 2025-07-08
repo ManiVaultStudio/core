@@ -34,18 +34,36 @@ ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mo
     _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
     _dsnsAction.setPopupSizeHint(QSize(550, 100));
 
-    if (getPopulationMode() == PopulationMode::Automatic) {
-        connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
-            setRowCount(0);
+    if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
+        connect(&_dsnsAction, &StringsAction::stringsChanged, this, &ProjectsTreeModel::populateFromDsns);
 
-            if (mv::plugins().isInitializing())
-                return;
+        connect(core(), &CoreInterface::initialized, this, [this]() -> void {
+            populateFromPluginDsns();
+        });
 
-            _future = QtConcurrent::mapped(
-                _dsnsAction.getStrings(),
-                [this](const QString& dsn) {
-                    return downloadProjectsFromDsn(dsn);
-                });
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+            connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectsTreeModel::populateFromPluginDsns);
+
+        //populateFromPluginDsns();
+    }
+}
+
+void ProjectsTreeModel::populateFromDsns()
+{
+    //auto eventLoop = getPopulationMode() != PopulationMode::AutomaticSynchronous ? new QEventLoop() : nullptr;
+
+
+    setRowCount(0);
+
+    if (mv::plugins().isInitializing())
+        return;
+
+    switch (getPopulationMode()) {
+		case PopulationMode::Automatic:
+		{
+            _future = QtConcurrent::mapped(_dsnsAction.getStrings(), [this](const QString& dsn) {
+                return downloadProjectsJsonFromDsn(dsn);
+            });
 
             connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
                 for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
@@ -66,14 +84,19 @@ ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mo
             });
 
             _watcher.setFuture(_future);
-        });
 
-        connect(core(), &CoreInterface::initialized, this, [this]() -> void {
-            populateFromPluginDsns();
-        });
+            break;
+		}
 
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-            connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectsTreeModel::populateFromPluginDsns);
+        case PopulationMode::AutomaticSynchronous:
+        {
+            for (const auto& dsn : _dsnsAction.getStrings()) {
+                const auto projectsJson = downloadProjectsJsonFromDsn(dsn);
+                populateFromJsonByteArray(projectsJson, _dsnsAction.getStrings().indexOf(dsn), dsn);
+            }
+
+            break;
+        }
     }
 }
 
@@ -165,7 +188,7 @@ void ProjectsTreeModel::populateFromJsonFile(const QString& filePath)
     }
 }
 
-QByteArray ProjectsTreeModel::downloadProjectsFromDsn(const QString& dsn)
+QByteArray ProjectsTreeModel::downloadProjectsJsonFromDsn(const QString& dsn)
 {
     QEventLoop loop;
 
