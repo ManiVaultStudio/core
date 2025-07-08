@@ -16,11 +16,11 @@ using namespace mv::util;
     #define STARTUP_PROJECT_SELECTOR_DIALOG_VERBOSE
 #endif
 
-StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel& projectsTreeModel, QWidget* parent /*= nullptr*/) :
+StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel& projectsTreeModel, mv::ProjectsFilterModel& projectsFilterModel, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _projectsTreeModel(projectsTreeModel),
-    _filterModel(this),
-    _hierarchyWidget(this, "Startup project", _projectsTreeModel, &_filterModel, true),
+    _projectsFilterModel(projectsFilterModel),
+    _hierarchyWidget(this, "Startup project", _projectsTreeModel, &_projectsFilterModel, true),
     _loadAction(this, "Load"),
     _quitAction(this, "Quit")
 {
@@ -54,9 +54,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     setLayout(layout);
 
-    _filterModel.getFilterStartupOnlyAction().setChecked(true);
-
-    _hierarchyWidget.getFilterGroupAction().addAction(&_filterModel.getFilterStartupOnlyAction());
+    _hierarchyWidget.getFilterGroupAction().addAction(&_projectsFilterModel.getFilterStartupOnlyAction());
 
 	_hierarchyWidget.setWindowIcon(windowIcon);
     _hierarchyWidget.getTreeView().setRootIsDecorated(true);
@@ -96,6 +94,8 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Date), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Summary), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Url), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IsStartup), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::RecommendedHardwareSpec), true);
 
 #if QT_NO_DEBUG
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::MinimumCoreVersion), true);

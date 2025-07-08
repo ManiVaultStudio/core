@@ -13,6 +13,7 @@
 #include <ProjectMetaAction.h>
 
 #include <models/ProjectsTreeModel.h>
+#include <models/ProjectsFilterModel.h>
 
 #include <util/Icon.h>
 #include <util/HardwareSpec.h>
@@ -143,12 +144,16 @@ int main(int argc, char *argv[])
     }
 
     ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::PopulationMode::AutomaticSynchronous);
+    ProjectsFilterModel startupProjectsFilterModel(&startupProjectsTreeModel);
+
+    startupProjectsFilterModel.setSourceModel(&startupProjectsTreeModel);
+    startupProjectsFilterModel.getFilterStartupOnlyAction().setChecked(true);
 
     core.initialize();
 
     application.initialize();
 
-    const auto userWillSelectStartupProject = startupProjectsTreeModel.rowCount() >= 2;
+    const auto userWillSelectStartupProject = startupProjectsFilterModel.rowCount() >= 2;
 
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 
@@ -174,7 +179,7 @@ int main(int argc, char *argv[])
 	ModalTask::getGlobalHandler()->setEnabled(true);
 
     if (userWillSelectStartupProject) {
-        StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel);
+        StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel, startupProjectsFilterModel);
 
         const auto dialogResult = startupProjectSelectorDialog.exec();
 
