@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
     application.initialize();
 
-    const auto userWillSelectProject = startupProjectsTreeModel.rowCount() >= 2;
+    const auto userWillSelectStartupProject = startupProjectsTreeModel.rowCount() >= 2;
 
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 	
 	ModalTask::getGlobalHandler()->setEnabled(true);
 
-    if (userWillSelectProject) {
+    if (userWillSelectStartupProject) {
         StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel);
 
         const auto dialogResult = startupProjectSelectorDialog.exec();
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (!userWillSelectProject)
+    if (!userWillSelectStartupProject)
         splashScreenAction.getOpenAction().trigger();
 
     MainWindow mainWindow;
