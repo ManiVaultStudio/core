@@ -137,7 +137,6 @@ void AbstractProjectsModel::addProject(const ProjectsModelProject* project, cons
         if (existingProjectGroupIndex.isValid()) {
             if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex)) {
                 existingProjectGroupItem->appendRow(Row(project));
-            qDebug() << existingProjectGroupItem->rowCount() << "projects in group" << groupTitle << "after adding project" << project->getTitle();
             }
         } else {
             addProjectGroup(groupTitle);
