@@ -18,7 +18,7 @@
 #include <QDialog>
 
 /**
- * Startup project selector dialog class
+ * IsStartup project selector dialog class
  * 
  * Dialog class for selecting a project out of two or more startup projects
  * 

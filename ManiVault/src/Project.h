@@ -111,7 +111,7 @@ public:
 
 private:
 
-    /** Startup initialization */
+    /** IsStartup initialization */
     void initialize();
 
 public: // Project meta action getters facade

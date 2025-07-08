@@ -54,6 +54,10 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     setLayout(layout);
 
+    _filterModel.getFilterGroupAction().addAction(&_filterModel.getFilterStartupOnlyAction());
+
+    _filterModel.getFilterStartupOnlyAction().setChecked(true);
+
     _hierarchyWidget.setWindowIcon(windowIcon);
     _hierarchyWidget.getTreeView().setRootIsDecorated(true);
 

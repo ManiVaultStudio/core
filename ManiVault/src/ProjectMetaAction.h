@@ -66,7 +66,7 @@ public: // Serialization
 
 private:
 
-    /** Startup initialization */
+    /** IsStartup initialization */
     void initialize();
 
 public: // Action getters

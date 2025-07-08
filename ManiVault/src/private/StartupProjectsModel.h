@@ -11,7 +11,7 @@
 #include <QStandardItem>
 
 /**
- * Startup projects model class
+ * IsStartup projects model class
  *
  * Standard item model class for storing startup projects
  *
@@ -50,7 +50,7 @@ public:
                     return "File name";
 
                 case Qt::ToolTipRole:
-                    return "Startup project file name";
+                    return "IsStartup project file name";
             }
 
             return {};
@@ -77,7 +77,7 @@ public:
                     return "Title";
 
                 case Qt::ToolTipRole:
-                    return "Startup project title";
+                    return "IsStartup project title";
             }
 
             return {};
@@ -104,7 +104,7 @@ public:
                     return "Description";
 
                 case Qt::ToolTipRole:
-                    return "Startup project description";
+                    return "IsStartup project description";
             }
 
             return {};

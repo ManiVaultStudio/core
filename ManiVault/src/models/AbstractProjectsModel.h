@@ -41,7 +41,7 @@ public:
         Size,                       /** Size of the ManiVault project */
         MinimumHardwareSpec,        /** Minimum hardware specifications for the project */
         RecommendedHardwareSpec,    /** Recommended hardware specifications for the project */
-        Startup,                    /** Whether the project can be opened at application startup */
+        IsStartup,                  /** Whether the project can be opened at application startup */
 
         Count                       /** Number of columns in the model */
     };
@@ -624,7 +624,7 @@ protected:
     };
 
     /** Standard model item class for displaying whether the project is a startup project */
-    class StartupItem final : public Item {
+    class IsStartupItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -644,15 +644,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-            case Qt::DisplayRole:
-            case Qt::EditRole:
-                return "Startup";
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "IsStartup";
 
-            case Qt::ToolTipRole:
-                return "Whether the project can be opened at application startup";
+	            case Qt::ToolTipRole:
+	                return "Whether the project can be opened at application startup";
 
-            default:
-                break;
+	            default:
+	                break;
             }
 
             return {};
@@ -686,6 +686,7 @@ protected:
             append(new SizeItem(project));
             append(new MinimumHardwareSpecItem(project));
             append(new RecommendedHardwareSpecItem(project));
+            append(new IsStartupItem(project));
         }
     };
 
