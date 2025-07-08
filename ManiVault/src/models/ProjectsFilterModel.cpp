@@ -27,7 +27,7 @@ ProjectsFilterModel::ProjectsFilterModel(QObject* parent /*= nullptr*/) :
     _excludeTagsFilterAction(this, "Exclude tags filter"),
     _targetAppVersionAction(this, "App version"),
     _filterLoadableOnlyAction(this, "Loadable only", true),
-    _filterStartupOnlyAction(this, "IsStartup only", false),
+    _filterStartupOnlyAction(this, "Startup only", false),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
