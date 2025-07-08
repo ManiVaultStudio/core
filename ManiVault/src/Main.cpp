@@ -95,8 +95,6 @@ int main(int argc, char *argv[])
 
     QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
 
-    ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::PopulationMode::Manual);
-
     if (commandLineParser.isSet("project")) {
         QVector<QPair<QSharedPointer<mv::ProjectMetaAction>, QString>> startupProjectsMetaActionsCandidates;
 
@@ -144,15 +142,11 @@ int main(int argc, char *argv[])
         settings().getTemporaryDirectoriesSettingsAction().getScanForStaleTemporaryDirectoriesAction().trigger();
     }
 
+    ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::PopulationMode::AutomaticSynchronous);
+
     core.initialize();
 
     application.initialize();
-
-    const auto projectsJsonFilePath = QString("projects.json");
-
-    if (QFileInfo(projectsJsonFilePath).exists()) {
-        startupProjectsTreeModel.populateFromJsonFile(projectsJsonFilePath);
-    }
 
     const auto userWillSelectProject = startupProjectsTreeModel.rowCount() >= 2;
 
