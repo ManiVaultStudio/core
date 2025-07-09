@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <AbstractErrorLogger.h>
-
 #include <QDialog>
 #include <QPlainTextEdit>
 #include <QPushButton>
@@ -13,13 +11,16 @@
 #include <QLabel>
 
 /**
- * Error logging consent dialog class
+ * App features dialog class
  *
- * Establish whether the user wants to opt in or out of (anonymous) error logging.
+ * Establish which app features the user wants.
+ * - Automated error reporting
+ * - A curated list of tutorials (downloaded from the ManiVault Studio website)
+ * - A curated list of downloadable projects (downloaded from the ManiVault Studio website)
  *
  * @author Thomas Kroes
  */
-class ErrorLoggingConsentDialog : public QDialog
+class AppFeaturesDialog : public QDialog
 {
     Q_OBJECT
 
@@ -29,7 +30,7 @@ public:
      * Construct with pointer to \p parent widget
      * @param parent Pointer to parent widget (maybe nullptr)
      */
-    explicit ErrorLoggingConsentDialog(QWidget* parent = nullptr);
+    explicit AppFeaturesDialog(QWidget* parent = nullptr);
 
 private:
     QVBoxLayout     _layout;                    /** Main layout */

@@ -101,6 +101,8 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
         connect(&pluginFactory->getTutorialsDsnsAction(), &StringsAction::stringsChanged, this, &LearningCenterTutorialsModel::synchronizeWithDsns);
     }
+
+    connect(&mv::settings().getAppFeaturesSettingsAction().getTutorialsAppFeatureAction(), &TutorialsAppFeatureAction::enabledChanged, this, &LearningCenterTutorialsModel::synchronizeWithDsns);
 }
 
 QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -178,6 +180,9 @@ void LearningCenterTutorialsModel::updateTags()
 
 void LearningCenterTutorialsModel::synchronizeWithDsns()
 {
+    if (!mv::settings().getAppFeaturesSettingsAction().getTutorialsAppFeatureAction().getEnabledAction().isChecked())
+        return;
+
     auto uniqueDsns = _dsnsAction.getStrings();
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {

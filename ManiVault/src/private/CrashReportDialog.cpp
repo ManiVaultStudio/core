@@ -71,7 +71,8 @@ CrashReportDialog::CrashReportDialog(QWidget* parent):
 
     _layout.addWidget(&_contactLineEdit);
 
-    _buttonsLayout.addWidget(const_cast<gui::ToggleAction&>(mv::settings().getErrorLoggingSettingsAction().getShowCrashReportDialogAction()).createWidget(this));
+    // TODO
+    // _buttonsLayout.addWidget(const_cast<gui::ToggleAction&>(mv::settings().getErrorLoggingSettingsAction().getShowCrashReportDialogAction()).createWidget(this));
     _buttonsLayout.addStretch(1);
     _buttonsLayout.addWidget(&_sendButton);
     _buttonsLayout.addWidget(&_cancelButton);

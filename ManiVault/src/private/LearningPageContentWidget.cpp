@@ -12,10 +12,10 @@ using namespace mv::gui;
 
 LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr*/) :
     PageContentWidget(Qt::Vertical, parent),
-    _showVideosAction(this, "Show videos", true),
-    _showTutorialsAction(this, "Show tutorials (coming soon)", true),
-    _showExamplesAction(this, "Show examples (coming soon)", false),
-    _showPluginResourcesAction(this, "Show plugin resources", false),
+    _toggleVideosSectionAction(this, "Show videos", true),
+    _toggleTutorialsSectionAction(this, "Show tutorials", true),
+    _toggleExamplesSectionAction(this, "Show examples (coming soon)", false),
+    _togglePluginResourcesSectionAction(this, "Show plugin resources", false),
     _settingsAction(this, "Page settings"),
     _toStartPageAction(this, "To start page"),
     _toolbarAction(this, "Toolbar settings"),
@@ -37,26 +37,33 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     rowsLayout.addWidget(&_examplesWidget);
     rowsLayout.addWidget(&_pluginResourcesWidget);
 
-    _showVideosAction.setSettingsPrefix("LearningPage/ShowVideos");
-    _showTutorialsAction.setSettingsPrefix("LearningPage/ShowTutorials");
-    _showExamplesAction.setSettingsPrefix("LearningPage/ShowExamples");
-    _showPluginResourcesAction.setSettingsPrefix("LearningPage/ShowPluginResources");
+    _toggleVideosSectionAction.setSettingsPrefix("LearningPage/ShowVideos");
+    _toggleTutorialsSectionAction.setSettingsPrefix("LearningPage/ShowTutorials");
+    _toggleExamplesSectionAction.setSettingsPrefix("LearningPage/ShowExamples");
+    _togglePluginResourcesSectionAction.setSettingsPrefix("LearningPage/ShowPluginResources");
 
-    _showExamplesAction.setEnabled(false);
+    _toggleExamplesSectionAction.setEnabled(false);
 
-    const auto toggleSections = [this]() -> void {
-        _videosWidget.setVisible(_showVideosAction.isChecked());
-        _tutorialsWidget.setVisible(_showTutorialsAction.isChecked());
-        _examplesWidget.setVisible(_showExamplesAction.isChecked());
-        _pluginResourcesWidget.setVisible(_showPluginResourcesAction.isChecked());
+    const auto& appFeaturesSettingsAction           = mv::constSettings().getAppFeaturesSettingsAction();
+    const auto& videosAppFeatureEnabledAction       = appFeaturesSettingsAction.getVideosAppFeatureAction().getEnabledAction();
+    const auto& tutorialsAppFeatureEnabledAction    = appFeaturesSettingsAction.getTutorialsAppFeatureAction().getEnabledAction();
+
+    const auto toggleSections = [this, &videosAppFeatureEnabledAction, &tutorialsAppFeatureEnabledAction]() -> void {
+        _videosWidget.setVisible(videosAppFeatureEnabledAction.isChecked() && _toggleVideosSectionAction.isChecked());
+        _tutorialsWidget.setVisible(tutorialsAppFeatureEnabledAction.isChecked() && _toggleTutorialsSectionAction.isChecked());
+        _examplesWidget.setVisible(_toggleExamplesSectionAction.isChecked());
+        _pluginResourcesWidget.setVisible(_togglePluginResourcesSectionAction.isChecked());
     };
 
     toggleSections();
 
-    connect(&_showVideosAction, &ToggleAction::toggled, this, toggleSections);
-    connect(&_showTutorialsAction, &ToggleAction::toggled, this, toggleSections);
-    connect(&_showExamplesAction, &ToggleAction::toggled, this, toggleSections);
-    connect(&_showPluginResourcesAction, &ToggleAction::toggled, this, toggleSections);
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, toggleSections);
+    connect(&videosAppFeatureEnabledAction, &ToggleAction::toggled, this, toggleSections);
+
+    connect(&_toggleVideosSectionAction, &ToggleAction::toggled, this, toggleSections);
+    connect(&_toggleTutorialsSectionAction, &ToggleAction::toggled, this, toggleSections);
+    connect(&_toggleExamplesSectionAction, &ToggleAction::toggled, this, toggleSections);
+    connect(&_togglePluginResourcesSectionAction, &ToggleAction::toggled, this, toggleSections);
 
     _settingsAction.setToolTip("Adjust page settings");
     _settingsAction.setIconByName("gear");
@@ -66,11 +73,12 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
     _toStartPageAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _settingsAction.setPopupSizeHint(QSize(200, 200));
 
-    _settingsAction.addAction(&_showVideosAction);
-    _settingsAction.addAction(&_showTutorialsAction);
-    _settingsAction.addAction(&_showExamplesAction);
-    _settingsAction.addAction(&_showPluginResourcesAction);
+    _settingsAction.addAction(&_toggleVideosSectionAction);
+    _settingsAction.addAction(&_toggleTutorialsSectionAction);
+    _settingsAction.addAction(&_toggleExamplesSectionAction);
+    _settingsAction.addAction(&_togglePluginResourcesSectionAction);
 
     _toolbarAction.setShowLabels(false);
     _toolbarAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
@@ -92,5 +100,25 @@ LearningPageContentWidget::LearningPageContentWidget(QWidget* parent /*= nullptr
         mv::help().getShowLearningCenterPageAction().setChecked(false);
         mv::projects().getShowStartPageAction().setChecked(true);
     });
+
+    const auto updateToggleSectionActionsVisibility = [this, &videosAppFeatureEnabledAction, &tutorialsAppFeatureEnabledAction]() -> void {
+        _toggleVideosSectionAction.setVisible(videosAppFeatureEnabledAction.isChecked());
+        _toggleTutorialsSectionAction.setVisible(tutorialsAppFeatureEnabledAction.isChecked());
+    };
+
+    updateToggleSectionActionsVisibility();
+
+    connect(&videosAppFeatureEnabledAction, &ToggleAction::toggled, this, updateToggleSectionActionsVisibility);
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, updateToggleSectionActionsVisibility);
+
+    connect(&videosAppFeatureEnabledAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        if (toggled)
+            _toggleVideosSectionAction.setChecked(true);
+    });
+
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        if (toggled)
+            _toggleTutorialsSectionAction.setChecked(true);
+	});
 }
 

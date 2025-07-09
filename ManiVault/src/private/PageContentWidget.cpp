@@ -27,7 +27,7 @@ PageContentWidget::PageContentWidget(const Qt::Orientation& orientation, QWidget
             break;
 
         case Qt::Vertical:
-            _mainLayout.addLayout(&_rowsLayout);
+            _mainLayout.addLayout(&_rowsLayout, 1);
             break;
     }
 

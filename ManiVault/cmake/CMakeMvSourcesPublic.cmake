@@ -315,6 +315,27 @@ set(PUBLIC_TASK_ACTIONS_FILES
     ${PUBLIC_TASK_ACTIONS_SOURCES}
 )
 
+set(PUBLIC_APP_FEATURE_ACTIONS_HEADERS
+    src/actions/AppFeatureAction.h
+    src/actions/ErrorLoggingAppFeatureAction.h
+    src/actions/TutorialsAppFeatureAction.h
+    src/actions/ProjectsAppFeatureAction.h
+    src/actions/VideosAppFeatureAction.h
+)
+
+set(PUBLIC_APP_FEATURE_ACTIONS_SOURCES
+    src/actions/AppFeatureAction.cpp
+    src/actions/ErrorLoggingAppFeatureAction.cpp   
+    src/actions/TutorialsAppFeatureAction.cpp
+    src/actions/ProjectsAppFeatureAction.cpp
+    src/actions/VideosAppFeatureAction.cpp
+)
+
+set(PUBLIC_APP_FEATURE_ACTIONS_FILES
+    ${PUBLIC_APP_FEATURE_ACTIONS_HEADERS}    
+    ${PUBLIC_APP_FEATURE_ACTIONS_SOURCES}
+)
+
 set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetAction.h
     src/actions/WidgetActionWidget.h
@@ -1021,7 +1042,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/TasksSettingsAction.h
     src/AppearanceSettingsAction.h
     src/TemporaryDirectoriesSettingsAction.h
-	src/ErrorLoggingSettingsAction.h
+	src/AppFeaturesSettingsAction.h
     src/PluginGlobalSettingsGroupAction.h
 )
 
@@ -1032,7 +1053,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/TasksSettingsAction.cpp
     src/AppearanceSettingsAction.cpp
     src/TemporaryDirectoriesSettingsAction.cpp
-    src/ErrorLoggingSettingsAction.cpp
+    src/AppFeaturesSettingsAction.cpp
     src/PluginGlobalSettingsGroupAction.cpp
 )
 
@@ -1106,6 +1127,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}
     ${PUBLIC_TASK_ACTIONS_HEADERS}
+    ${PUBLIC_APP_FEATURE_ACTIONS_HEADERS}
     ${PUBLIC_ACTIONS_INTERNAL_HEADERS}
     ${PUBLIC_WIDGETS_HEADERS}
     ${PUBLIC_WIDGETS_INTERNAL_HEADERS}
@@ -1155,6 +1177,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
     ${PUBLIC_TASK_ACTIONS_SOURCES}
+    ${PUBLIC_APP_FEATURE_ACTIONS_SOURCES}
     ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
     ${PUBLIC_WIDGETS_SOURCES}
     ${PUBLIC_WIDGETS_INTERNAL_SOURCES}
@@ -1218,6 +1241,7 @@ source_group(Actions\\Toolbar FILES ${PUBLIC_TOOLBAR_ACTIONS_FILES})
 source_group(Actions\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_ACTIONS_FILES})
 source_group(Actions\\Task FILES ${PUBLIC_TASK_ACTIONS_FILES})
 source_group(Actions\\Internal FILES ${PUBLIC_ACTIONS_INTERNAL_FILES})
+source_group(Actions\\AppFeature FILES ${PUBLIC_APP_FEATURE_ACTIONS_FILES})
 source_group(Widgets FILES ${PUBLIC_WIDGETS_FILES})
 source_group(Widgets\\Internal FILES ${PUBLIC_WIDGETS_INTERNAL_FILES})
 source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})

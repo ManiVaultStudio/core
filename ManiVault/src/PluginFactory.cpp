@@ -28,13 +28,17 @@ PluginFactory::PluginFactory(Type type, const QString& title) :
     _allowPluginCreationFromStandardGui(true),
     _pluginMetadata(*this),
     _tutorialsDsnsAction(this, "Tutorials DSNs"),
-    _projectsDsnsAction(this, "Projects DSNs")
+    _projectsDsnsAction(this, "Projects DSNs"),
+    _videosDsnsAction(this, "Videos DSNs")
 {
     _tutorialsDsnsAction.setIconByName("globe");
     _tutorialsDsnsAction.setToolTip(QString("Data Source Names for %1 tutorials").arg(title));
 
     _projectsDsnsAction.setIconByName("globe");
     _projectsDsnsAction.setToolTip(QString("Data Source Names for %1 projects").arg(title));
+
+    _videosDsnsAction.setIconByName("globe");
+    _videosDsnsAction.setToolTip(QString("Data Source Names for %1 videos").arg(title));
 }
 
 QString PluginFactory::getKind() const

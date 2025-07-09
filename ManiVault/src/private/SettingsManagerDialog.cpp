@@ -33,10 +33,7 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
-#ifdef ERROR_LOGGING
-    _groupsAction.addGroupAction(&mv::settings().getErrorLoggingSettingsAction());
-#endif
-
+    _groupsAction.addGroupAction(&const_cast<AppFeaturesSettingsAction&>(mv::settings().getAppFeaturesSettingsAction()));
     _groupsAction.addGroupAction(&mv::settings().getAppearanceSettingsAction());
     _groupsAction.addGroupAction(&mv::settings().getParametersSettings());
     _groupsAction.addGroupAction(&mv::settings().getMiscellaneousSettings());

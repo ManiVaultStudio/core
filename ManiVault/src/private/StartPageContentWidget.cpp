@@ -19,12 +19,12 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     PageContentWidget(Qt::Horizontal, parent),
     Serializable("StartPageContentWidget"),
     _compactViewAction(this, "Compact"),
-    _toggleOpenCreateProjectAction(this, "Open & Create", true),
-    _toggleProjectDatabaseAction(this, "Project Database", true),
-    _toggleRecentProjectsAction(this, "Recent Projects", true),
-	_toggleProjectFromDataAction(this, "Project From Data", true),
-    _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
-    _toggleTutorialsAction(this, "Tutorials", true),
+    _toggleOpenCreateProjectSectionAction(this, "Open & Create", true),
+    _toggleProjectDatabaseSectionAction(this, "Project Database", true),
+    _toggleRecentProjectsSectionAction(this, "Recent Projects", true),
+	_toggleProjectFromDataSectionAction(this, "Project From Data", true),
+    _toggleProjectFromWorkspaceSectionAction(this, "Project From Workspace"),
+    _toggleTutorialsSectionAction(this, "Tutorials", true),
     _settingsAction(this, "Settings"),
     _toLearningCenterAction(this, "Learning center"),
     _toolbarAction(this, "Toolbar settings"),
@@ -33,12 +33,12 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 {
     if (!QFileInfo("StartPage.json").exists()) {
         _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
-        _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
-        _toggleProjectDatabaseAction.setSettingsPrefix("StartPage/ToggleProjectsRepository");
-        _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
-        _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
-        _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
-        _toggleTutorialsAction.setSettingsPrefix("StartPage/ToggleTutorials");
+        _toggleOpenCreateProjectSectionAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
+        _toggleProjectDatabaseSectionAction.setSettingsPrefix("StartPage/ToggleProjectsRepository");
+        _toggleRecentProjectsSectionAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
+        _toggleProjectFromWorkspaceSectionAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
+        _toggleProjectFromDataSectionAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
+        _toggleTutorialsSectionAction.setSettingsPrefix("StartPage/ToggleTutorials");
 
         _getStartedWidget.getTutorialsWidget().getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions({ "GettingStarted" });
     } else {
@@ -46,7 +46,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
         _toLearningCenterAction.setVisible(false);
     }
 
-    _toggleProjectFromWorkspaceAction.setEnabled(false);
+    _toggleProjectFromWorkspaceSectionAction.setEnabled(false);
 
     _settingsAction.setText("Toggle Views");
     _settingsAction.setToolTip("Adjust page settings");
@@ -58,17 +58,15 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
-    _settingsAction.addAction(&_toggleOpenCreateProjectAction);
-
+    _settingsAction.addAction(&_toggleOpenCreateProjectSectionAction);
 	_settingsAction.addAction(&_toggleProjectDatabaseAction);
-
-    _settingsAction.addAction(&_toggleRecentProjectsAction);
-    _settingsAction.addAction(&_toggleProjectFromDataAction);
+    _settingsAction.addAction(&_toggleRecentProjectsSectionAction);
+    _settingsAction.addAction(&_toggleProjectFromDataSectionAction);
 
     // Disable until the project from workspace action is implemented properly
-    //_settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
+    //_settingsAction.addAction(&_toggleProjectFromWorkspaceSectionAction);
 
-    _settingsAction.addAction(&_toggleTutorialsAction);
+    _settingsAction.addAction(&_toggleTutorialsSectionAction);
     _settingsAction.addAction(&_compactViewAction);
 
     getColumnsLayout().addWidget(&_openProjectWidget);
@@ -92,6 +90,21 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     });
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
+
+    const auto& tutorialsAppFeatureEnabledAction = mv::constSettings().getAppFeaturesSettingsAction().getTutorialsAppFeatureAction().getEnabledAction();
+
+    const auto updateTutorialsToggleVisibility = [this, &tutorialsAppFeatureEnabledAction]() -> void {
+        _toggleTutorialsSectionAction.setVisible(tutorialsAppFeatureEnabledAction.isChecked());
+	};
+
+    updateTutorialsToggleVisibility();
+
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, updateTutorialsToggleVisibility);
+
+    connect(&tutorialsAppFeatureEnabledAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        if (toggled)
+            _toggleTutorialsSectionAction.setChecked(true);
+	});
 }
 
 void StartPageContentWidget::updateActions()
@@ -107,12 +120,12 @@ void StartPageContentWidget::fromVariantMap(const QVariantMap& variantMap)
 	Serializable::fromVariantMap(variantMap);
 
     _compactViewAction.fromParentVariantMap(variantMap);
-    _toggleOpenCreateProjectAction.fromParentVariantMap(variantMap);
-    _toggleProjectDatabaseAction.fromParentVariantMap(variantMap);
-    _toggleRecentProjectsAction.fromParentVariantMap(variantMap);
-    _toggleProjectFromDataAction.fromParentVariantMap(variantMap);
-    _toggleProjectFromWorkspaceAction.fromParentVariantMap(variantMap);
-    _toggleTutorialsAction.fromParentVariantMap(variantMap);
+    _toggleOpenCreateProjectSectionAction.fromParentVariantMap(variantMap);
+    _toggleProjectDatabaseSectionAction.fromParentVariantMap(variantMap);
+    _toggleRecentProjectsSectionAction.fromParentVariantMap(variantMap);
+    _toggleProjectFromDataSectionAction.fromParentVariantMap(variantMap);
+    _toggleProjectFromWorkspaceSectionAction.fromParentVariantMap(variantMap);
+    _toggleTutorialsSectionAction.fromParentVariantMap(variantMap);
     _openProjectWidget.fromParentVariantMap(variantMap);
     _getStartedWidget.fromParentVariantMap(variantMap);
 }
@@ -122,12 +135,12 @@ QVariantMap StartPageContentWidget::toVariantMap() const
 	auto variantMap = Serializable::toVariantMap();
 
     _compactViewAction.insertIntoVariantMap(variantMap);
-    _toggleOpenCreateProjectAction.insertIntoVariantMap(variantMap);
-    _toggleProjectDatabaseAction.insertIntoVariantMap(variantMap);
-    _toggleRecentProjectsAction.insertIntoVariantMap(variantMap);
-    _toggleProjectFromDataAction.insertIntoVariantMap(variantMap);
-    _toggleProjectFromWorkspaceAction.insertIntoVariantMap(variantMap);
-    _toggleTutorialsAction.insertIntoVariantMap(variantMap);
+    _toggleOpenCreateProjectSectionAction.insertIntoVariantMap(variantMap);
+    _toggleProjectDatabaseSectionAction.insertIntoVariantMap(variantMap);
+    _toggleRecentProjectsSectionAction.insertIntoVariantMap(variantMap);
+    _toggleProjectFromDataSectionAction.insertIntoVariantMap(variantMap);
+    _toggleProjectFromWorkspaceSectionAction.insertIntoVariantMap(variantMap);
+    _toggleTutorialsSectionAction.insertIntoVariantMap(variantMap);
     _openProjectWidget.insertIntoVariantMap(variantMap);
     _getStartedWidget.insertIntoVariantMap(variantMap);
 
