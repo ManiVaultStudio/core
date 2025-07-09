@@ -4,6 +4,8 @@
 
 #include "ToggleAction.h"
 
+#include "util/StyledIcon.h"
+
 #include <QCheckBox>
 #include <QPushButton>
 #include <QMenu>

@@ -12,7 +12,7 @@ from rules_support import CoreBranchInfo
 import subprocess
 import traceback
 import re
-    
+
 class HdpsCoreConan(ConanFile):
     """Class to package hdps-core using conan
 
@@ -51,7 +51,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/6.8.2@lkeb/stable")
+    requires = ("qt/6.8.3@lkeb/stable")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
@@ -62,6 +62,11 @@ class HdpsCoreConan(ConanFile):
         print(f"git info from {path}")
         return path
 
+    def get_current_branch_name(self):
+        from git import Repo
+        repo = Repo(path=self.__get_git_path())       
+        return repo.active_branch.name
+    
     def export(self):
         print("In export")
         # save the original source path to the directory used to build the package
@@ -150,14 +155,26 @@ class HdpsCoreConan(ConanFile):
         # Give the installation directory to CMake
         tc.variables["MV_INSTALL_DIR"] = self.install_dir
 
-        # Set some build options
-        tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
-        tc.variables["MV_UNITY_BUILD"] = "ON"
+        # Set some default build options
+        MV_USE_ERROR_LOGGING = "ON"
+        MV_PRECOMPILE_HEADERS = "ON"
+        MV_UNITY_BUILD = "ON"
+
+        # Do not use some options on the release builds 
+        current_branch_name = self.get_current_branch_name()
+        
+        if current_branch_name.startswith("release/"):
+            MV_PRECOMPILE_HEADERS = "OFF"
+            MV_UNITY_BUILD = "OFF"
 
         # TEMPORARILY disable sentry on macos, 16/04/25
         if self.settings.os == "Macos":
-            tc.variables["MV_USE_ERROR_LOGGING"] = "OFF"
+            MV_USE_ERROR_LOGGING = "OFF"
 
+        tc.variables["MV_PRECOMPILE_HEADERS"] = MV_PRECOMPILE_HEADERS
+        tc.variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
+        tc.variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
+        
         try:
             tc.generate()
         except KeyError as e:

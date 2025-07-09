@@ -108,6 +108,19 @@ public:
      */
     virtual void initializeNotifications(QWidget* parentWidget) = 0;
 
+protected:
+
+    /**
+     * Add toaster notification for \p task in the main window
+     * @param task Task containing the notification details
+     */
+    virtual void addNotification(QPointer<Task> task) = 0;
+
+signals:
+
+    /** Invoked when the videos model has been successfully populated from the website */
+    void videosModelPopulatedFromWebsite();
+
 public: // Action getters
 
     virtual gui::ToggleAction& getShowLearningCenterPageAction() = 0;

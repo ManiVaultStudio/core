@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include <QObject>
 
 namespace mv::util {
@@ -15,7 +17,7 @@ namespace mv::util {
  * 
  * @author Thomas Kroes
  */
-class MarkdownDocument : public QObject
+class CORE_EXPORT MarkdownDocument : public QObject
 {
     Q_OBJECT
 

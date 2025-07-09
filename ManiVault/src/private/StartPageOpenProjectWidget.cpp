@@ -12,12 +12,14 @@
 #include <ProjectMetaAction.h>
 
 #include <util/StyledIcon.h>
+#include <util/Icon.h>
 
-#include <models/ProjectDatabaseModel.h>
+#include <models/ProjectsTreeModel.h>
 
 #include <QDebug>
 #include <QPainter>
 #include <QStandardPaths>
+
 
 using namespace mv;
 using namespace mv::util;
@@ -29,11 +31,11 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
-    _projectDatabaseWidget(this, "Projects"),
+    _projectsWidget(this, "Projects"),
     _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
-    _projectDatabaseSettingsAction(this, "Data Source Names")
+    _projectsSettingsAction(this, "Data Source Names")
 {
-    _projectDatabaseWidget.hide();
+    _projectsWidget.hide();
 
     auto layout = new QVBoxLayout();
 
@@ -42,35 +44,33 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     layout->addWidget(&_openCreateProjectWidget);
     layout->addWidget(&_recentProjectsWidget);
 
-    if (QFileInfo("StartPage.json").exists()) {
-        layout->addWidget(&_projectDatabaseWidget);
+    layout->addWidget(&_projectsWidget);
 
-        _projectDatabaseSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-        _projectDatabaseSettingsAction.setShowLabels(false);
-        _projectDatabaseSettingsAction.setIconByName("globe");
-        _projectDatabaseSettingsAction.setPopupSizeHint(QSize(550, 100));
+    _projectsSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _projectsSettingsAction.setShowLabels(false);
+    _projectsSettingsAction.setIconByName("globe");
+    _projectsSettingsAction.setPopupSizeHint(QSize(550, 100));
 
-        _projectDatabaseSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectDatabaseModel().getDsnsAction()));
+    _projectsSettingsAction.addAction(const_cast<StringsAction*>(&mv::projects().getProjectsTreeModel().getDsnsAction()));
 
-        _projectDatabaseWidget.getHierarchyWidget().setItemTypeName("Project");
+    _projectsWidget.getHierarchyWidget().setItemTypeName("Project");
 
-        auto& toolbarAction = _projectDatabaseWidget.getHierarchyWidget().getToolbarAction();
+    auto& toolbarAction = _projectsWidget.getHierarchyWidget().getToolbarAction();
 
-        toolbarAction.addAction(&_projectDatabaseSettingsAction);
-        toolbarAction.addAction(&_projectDatabaseFilterModel.getFilterGroupAction());
-        toolbarAction.addAction(&_projectDatabaseFilterModel.getTagsFilterAction());
+    toolbarAction.addAction(&_projectsSettingsAction);
+    toolbarAction.addAction(&_projectsFilterModel.getFilterGroupAction());
+    toolbarAction.addAction(&_projectsFilterModel.getTagsFilterAction());
 
-        _projectDatabaseFilterModel.setSourceModel(const_cast<ProjectDatabaseModel*>(&mv::projects().getProjectDatabaseModel()));
+    _projectsFilterModel.setSourceModel(const_cast<ProjectsTreeModel*>(&mv::projects().getProjectsTreeModel()));
 
-        connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
-        connect(&_projectDatabaseFilterModel, &ProjectDatabaseModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
-    }
+    connect(&_projectsFilterModel, &ProjectsTreeModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
+    connect(&_projectsFilterModel, &ProjectsTreeModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
     
     setLayout(layout);
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
     _recentProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
-    _projectDatabaseWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _projectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
@@ -86,7 +86,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     const auto toggleViews = [this]() -> void {
         _openCreateProjectWidget.setVisible(_startPageContentWidget->getToggleOpenCreateProjectAction().isChecked());
-        _projectDatabaseWidget.setVisible(QFileInfo("StartPage.json").exists() && _startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
+        _projectsWidget.setVisible(_startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
         _recentProjectsWidget.setVisible(_startPageContentWidget->getToggleRecentProjectsAction().isChecked());
     };
 
@@ -239,13 +239,13 @@ void StartPageOpenProjectWidget::updateRecentActions()
 
 void StartPageOpenProjectWidget::updateProjectDatabaseActions()
 {
-    _projectDatabaseWidget.getModel().reset();
+    _projectsWidget.getModel().reset();
     
-    const auto& projectCenterModel = mv::projects().getProjectDatabaseModel();
+    const auto& projectCenterModel = mv::projects().getProjectsTreeModel();
 
-    for (int filterRowIndex = 0; _projectDatabaseFilterModel.rowCount() > filterRowIndex; ++filterRowIndex) {
-        const auto filterIndex = _projectDatabaseFilterModel.index(filterRowIndex, 0);
-        const auto sourceIndex = _projectDatabaseFilterModel.mapToSource(filterIndex);
+    for (int filterRowIndex = 0; _projectsFilterModel.rowCount() > filterRowIndex; ++filterRowIndex) {
+        const auto filterIndex = _projectsFilterModel.index(filterRowIndex, 0);
+        const auto sourceIndex = _projectsFilterModel.mapToSource(filterIndex);
 
     	if (sourceIndex.isValid()) {
             if (const auto project = projectCenterModel.getProject(sourceIndex)) {
@@ -288,7 +288,7 @@ void StartPageOpenProjectWidget::updateProjectDatabaseActions()
 
                 recentProjectPageAction.setTags(project->getTags());
 
-            	_projectDatabaseWidget.getModel().add(recentProjectPageAction);
+            	_projectsWidget.getModel().add(recentProjectPageAction);
             }
         }
     }
@@ -314,8 +314,8 @@ void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
 
     _openCreateProjectWidget.fromParentVariantMap(variantMap);
     _recentProjectsWidget.fromParentVariantMap(variantMap);
-    _projectDatabaseWidget.fromParentVariantMap(variantMap);
-    _projectDatabaseFilterModel.fromParentVariantMap(variantMap);
+    _projectsWidget.fromParentVariantMap(variantMap);
+    _projectsFilterModel.fromParentVariantMap(variantMap);
 }
 
 QVariantMap StartPageOpenProjectWidget::toVariantMap() const
@@ -324,8 +324,8 @@ QVariantMap StartPageOpenProjectWidget::toVariantMap() const
 
     _openCreateProjectWidget.insertIntoVariantMap(variantMap);
     _recentProjectsWidget.insertIntoVariantMap(variantMap);
-    _projectDatabaseWidget.insertIntoVariantMap(variantMap);
-    _projectDatabaseFilterModel.insertIntoVariantMap(variantMap);
+    _projectsWidget.insertIntoVariantMap(variantMap);
+    _projectsFilterModel.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

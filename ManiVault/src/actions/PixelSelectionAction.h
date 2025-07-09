@@ -128,6 +128,7 @@ public: // Action getters
     DecimalAction& getOverlayOpacityAction() { return _overlayOpacityAction; }
     OptionAction& getTypeAction() { return _typeAction; }
     ToggleAction& getRectangleAction() { return _rectangleAction; }
+    ToggleAction& getLineAction() { return _lineAction; }
     ToggleAction& getBrushAction() { return _brushAction; }
     ToggleAction& getLassoAction() { return _lassoAction; }
     ToggleAction& getPolygonAction() { return _polygonAction; }
@@ -142,6 +143,8 @@ public: // Action getters
     TriggerAction& getSelectAllAction() { return _selectAllAction; }
     TriggerAction& getInvertSelectionAction() { return _invertSelectionAction; }
     DecimalAction& getBrushRadiusAction() { return _brushRadiusAction; }
+    DecimalAction& getLineWidthAction() { return _lineWidthAction; }
+    DecimalAction& getLineAngleAction() { return _lineAngleAction; }
     ToggleAction& getNotifyDuringSelectionAction() { return _notifyDuringSelectionAction; }
 
 private:
@@ -154,6 +157,7 @@ private:
     util::PixelSelectionTypeModel   _typeModel;                         /** Selection type model */
     OptionAction                    _typeAction;                        /** Selection type action */
     ToggleAction                    _rectangleAction;                   /** Switch to rectangle selection action */
+    ToggleAction                    _lineAction;                        /** Switch to line selection action */
     ToggleAction                    _brushAction;                       /** Switch to brush selection action */
     ToggleAction                    _lassoAction;                       /** Switch to lasso selection action */
     ToggleAction                    _polygonAction;                     /** Switch to polygon selection action */
@@ -169,6 +173,8 @@ private:
     TriggerAction                   _selectAllAction;                   /** Select all action */
     TriggerAction                   _invertSelectionAction;             /** Invert selection action */
     DecimalAction                   _brushRadiusAction;                 /** Brush radius action */
+    DecimalAction                   _lineWidthAction;                 /** Line width action */
+    DecimalAction                   _lineAngleAction;                 /** Line angle action */
     ToggleAction                    _notifyDuringSelectionAction;       /** Notify during selection action */
 
     friend class AbstractActionsManager;

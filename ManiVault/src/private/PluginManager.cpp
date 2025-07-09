@@ -130,8 +130,14 @@ void PluginManager::loadPluginFactories()
 
     auto getLibraryName = [](const QString& libFileName) -> QString {
         // Use QFileInfo to get the base name without the suffix (.dll, .so, .dylib)
-        QFileInfo fileInfo(libFileName);
-        QString baseName = fileInfo.baseName();
+        const QFileInfo fileInfo(libFileName);
+
+        QString baseName = fileInfo.baseName();         // all characters in the file up to (but not including) the first '.' character
+
+        const int index = baseName.lastIndexOf("_p");   // plugins are suffixed with _p1.x_c_1.x (plugin and core version)
+        if (index != -1) {
+            baseName = baseName.left(index);
+        }
 
         // Check for common "lib" prefix on UNIX systems and remove it
         if (baseName.startsWith("lib")) {
@@ -196,9 +202,22 @@ void PluginManager::loadPluginFactories()
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
         
         // Get metadata about plugin from the accompanying .json file compiled in the shared library
-        QString pluginKind      = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
-        QString menuName        = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
-        QString version         = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
+        const QJsonObject pluginMetaData = pluginLoader.metaData().value("MetaData").toObject();
+        QString pluginKind      = pluginMetaData.value("name").toString();
+
+        // Transition: (OLD) only plugin version, (NEW) nested version object for plugin and core
+        QString version         = "";
+        QJsonValue versionValue = pluginMetaData.value("version");
+        if (versionValue.isString()) {
+            version = versionValue.toString();
+        }
+        else if (versionValue.isObject()) {
+            QJsonObject versionObj  = versionValue.toObject();                  // contains plugin version and list of core versions
+            version                 = versionObj.value("plugin").toString();
+        }
+        else {
+            qDebug() << "Version descriptor is missing in meta data for " << pluginKind;
+        }
 
         // Create an instance of the plugin, i.e. the factory
         auto pluginFactory = dynamic_cast<PluginFactory*>(pluginLoader.instance());

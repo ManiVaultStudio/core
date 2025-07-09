@@ -11,6 +11,7 @@
 
 #include <QDir>
 #include <QStandardPaths>
+#include <QMenu>
 
 using namespace mv::util;
 

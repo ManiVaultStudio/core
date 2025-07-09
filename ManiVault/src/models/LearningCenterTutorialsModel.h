@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "actions/StringsAction.h"
+
 #include "util/LearningCenterTutorial.h"
 
 #include <QMap>

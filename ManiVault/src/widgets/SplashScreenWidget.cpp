@@ -234,7 +234,7 @@ void SplashScreenWidget::createToolbar()
     const auto fixedSize    = 25;
 
     _closeToolButton.setFixedSize(fixedSize, fixedSize);
-    _closeToolButton.setVisible(_splashScreenAction.getMayCloseSplashScreenWidget());
+    //_closeToolButton.setVisible(_splashScreenAction.getMayCloseSplashScreenWidget());
     _closeToolButton.setIcon(StyledIcon("xmark"));
     _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
     _closeToolButton.setAutoRaise(true);
@@ -295,7 +295,9 @@ void SplashScreenWidget::createBody()
 
         auto& versionAction = projectMetaAction->getProjectVersionAction();
         auto title          = projectMetaAction->getTitleAction().getString();
-        auto version        = QString("%1.%2.%3-%4").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), QString::number(versionAction.getPatchAction().getValue()), versionAction.getSuffixAction().getString().toLower());
+        auto version        = QString("%1.%2.%3").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), QString::number(versionAction.getPatchAction().getValue()));
+        if(!versionAction.getSuffixAction().getString().isEmpty())
+            version.append("-" + versionAction.getSuffixAction().getString());
         auto description    = projectMetaAction->getDescriptionAction().getString();
         auto comments       = projectMetaAction->getCommentsAction().getString();
 
@@ -316,7 +318,9 @@ void SplashScreenWidget::createBody()
         projectLogoLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
         const auto applicationVersion   = Application::current()->getVersion();
-        const auto versionString        = QString("%1.%2.%3-%4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), QString(MV_VERSION_SUFFIX.data()));
+        auto versionString              = QString("%1.%2.%3").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor()), QString::number(applicationVersion.getPatch()));
+        if(applicationVersion.getSuffix().size() > 0)
+            versionString.append("-" + applicationVersion.getSuffix());
 
         htmlLabel->setText(QString(" \
             <div> \

@@ -46,7 +46,10 @@
         <file>shaders/DensityCompute.vert</file>
         <file>shaders/DensityCompute.frag</file>
         <file>shaders/GradientCompute.frag</file>
+		<file>shaders/GradientCompute.vert</file>
+        <file>shaders/GradientCompute.frag</file>
         <file>shaders/MeanshiftCompute.frag</file>
+		<file>shaders/MeanshiftCompute.vert</file>
         <file>shaders/DensityDraw.frag</file>
         <file>shaders/GradientDraw.frag</file>
         <file>shaders/Texture.frag</file>
@@ -86,5 +89,10 @@
         <file alias="AppFeatureProjects">html/AppFeatureProjects.html</file>
         <file alias="AppFeatureTutorials">html/AppFeatureTutorials.html</file>
         <file alias="AppFeatureVideos">html/AppFeatureVideos.html</file>
+    </qresource>
+	<qresource prefix="/JSON">
+        <file alias="TutorialsSchema">json/tutorials.schema.json</file>
+		<file alias="ProjectsSchema">json/projects.schema.json</file>
+		<file alias="VideosSchema">json/videos.schema.json</file>
     </qresource>
 </RCC>

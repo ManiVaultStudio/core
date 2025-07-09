@@ -111,11 +111,20 @@ QString Application::getName()
 
 QString Application::getAbout()
 {
-    return QString("<p>%3 is a flexible and extensible visual analytics framework for high-dimensional data.<br>"
-        "For more information, please visit: <a href=\"http://%2/\">%2</a> </p>"
+    return QString("%3 is a flexible and extensible visual analytics framework for high-dimensional data.<br> <br>"
+        "For more information, please visit: <br>"
+        "Webpage: <a href=\"https://%5/\">%5</a> <br>"
+        "Source: <a href=\"https://%2/\">%2</a> <br> <br>"
+        "%3 Core %4 <br> <br>"
         "This software is licensed under the GNU Lesser General Public License v3.0.<br>"
         "Copyright (C) %1 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)"
-    ).arg(QStringLiteral("2023"), QStringLiteral("github.com/ManiVaultStudio"), getName());
+    ).arg(
+        /*1: year*/ QStringLiteral("2023"),
+        /*2: source*/ QStringLiteral("github.com/ManiVaultStudio"),
+        /*3: name*/ getName(),
+        /*4: version*/ QString::fromStdString(Application::current()->getVersion().getVersionString()),
+        /*5: webpage*/ QStringLiteral("manivault.studio")
+    );
 }
 
 QString Application::getStartupProjectFilePath() const

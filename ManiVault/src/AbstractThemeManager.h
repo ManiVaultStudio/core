@@ -15,6 +15,7 @@
 #include "models/ColorSchemesListModel.h"
 
 #include <QObject>
+#include <QApplication>
 
 namespace mv::gui
 {

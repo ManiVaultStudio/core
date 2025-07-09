@@ -69,7 +69,10 @@ void ModalTaskHandler::updateDialogVisibility()
         _modalTasksDialog.close();
 
     if (numberOfModalTasks >= 1 && !_modalTasksDialog.isVisible()) {
-        const auto mainWindowGeometry = Application::getMainWindow()->geometry();
+        auto mainWindow = Application::getMainWindow();
+        auto mainScreen = QGuiApplication::primaryScreen();
+
+        const auto mainWindowGeometry = mainWindow ? mainWindow->geometry() : mainScreen->geometry();
 
         _modalTasksDialog.move(mainWindowGeometry.center() - _modalTasksDialog.rect().center());
         _modalTasksDialog.show();

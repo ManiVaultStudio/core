@@ -13,7 +13,7 @@
 
 namespace mv {
 
-class ProjectDatabaseModel;
+class AbstractProjectsModel;
 
 /**
  * Project database filter model class
@@ -22,7 +22,7 @@ class ProjectDatabaseModel;
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectDatabaseFilterModel : public SortFilterProxyModel
+class CORE_EXPORT ProjectsFilterModel : public SortFilterProxyModel
 {
 public:
 
@@ -30,7 +30,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
     */
-    ProjectDatabaseFilterModel(QObject* parent = nullptr);
+    ProjectsFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether \p row with \p parent is filtered out (false) or in (true)
@@ -76,7 +76,7 @@ public: // Action getters
 	gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
-    ProjectDatabaseModel*       _projectDatabaseModel;          /** Pointer to source model */
+    AbstractProjectsModel*      _projectDatabaseModel;          /** Pointer to source model */
     gui::OptionsAction          _tagsFilterAction;              /** Filter based on tag(s) */
     gui::OptionsAction          _excludeTagsFilterAction;       /** Filter out based on tag(s) */
     gui::VersionAction          _targetAppVersionAction;        /** Target app minimum version filter action */

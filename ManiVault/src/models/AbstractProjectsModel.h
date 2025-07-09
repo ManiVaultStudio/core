@@ -6,23 +6,20 @@
 
 #include "models/StandardItemModel.h"
 
-#include "util/ProjectDatabaseProject.h"
-
-#include <QFuture>
-#include <QFutureWatcher>
+#include "util/ProjectsModelProject.h"
 
 #include <QMap>
 
 namespace mv {
 
 /**
- * Project database model class
+ * Abstract projects model class
  *
- * Contains project content for the project database.
+ * Base standard item model for projects.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectDatabaseModel final : public StandardItemModel
+class CORE_EXPORT AbstractProjectsModel : public StandardItemModel
 {
     Q_OBJECT
 
@@ -31,6 +28,8 @@ public:
     /** Model columns */
     enum class Column {
     	Title,
+        Group,
+        IsGroup,
         Tags,
         Date,
         IconName,
@@ -62,16 +61,16 @@ public:
          * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        Item(const util::ProjectDatabaseProject* project, bool editable = false);
+        Item(const util::ProjectsModelProject* project, bool editable = false);
 
         /**
          * Get project
          * return Pointer to the project
          */
-        const util::ProjectDatabaseProject* getProject() const;
+        const util::ProjectsModelProject* getProject() const;
 
     private:
-        const util::ProjectDatabaseProject*   _project;      /** The project data */
+        const util::ProjectsModelProject*   _project;      /** The project data */
     };
 
 protected:
@@ -106,6 +105,78 @@ protected:
 
                 default:
                     break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the project group title */
+    class GroupItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "Group";
+
+            case Qt::ToolTipRole:
+                return "Group title";
+
+            default:
+                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying whether the item is a project group */
+    class IsGroupItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "Is group";
+
+            case Qt::ToolTipRole:
+                return "Whether the item is a project group";
+
+            default:
+                break;
             }
 
             return {};
@@ -409,10 +480,12 @@ protected:
          * Construct with pointer to \p project object
          * @param project Pointer to project object
          */
-        Row(const util::ProjectDatabaseProject* project) :
+        Row(const util::ProjectsModelProject* project) :
             QList<QStandardItem*>()
         {
         	append(new TitleItem(project));
+        	append(new GroupItem(project));
+        	append(new IsGroupItem(project));
             append(new TagsItem(project));
             append(new DateItem(project));
             append(new IconNameItem(project));
@@ -430,7 +503,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    ProjectDatabaseModel(QObject* parent = nullptr);
+    AbstractProjectsModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -448,10 +521,17 @@ public:
     QSet<QString> getTagsSet() const;
 
     /**
+     * Add project group with \p groupTitle
+     * @param groupTitle Title of the group
+     */
+    void addProjectGroup(const QString& groupTitle = "");
+
+    /**
      * Add \p project
      * @param project Pointer to project to add
+     * @param groupTitle Title of the group to which the project should be added
      */
-    void addProject(const util::ProjectDatabaseProject* project);
+    void addProject(const util::ProjectsModelProject* project, const QString& groupTitle = "");
 
     /** Builds a set of all project tags and emits ProjectDatabaseModel::tagsChanged(...) */
     void updateTags();
@@ -460,31 +540,13 @@ public:
      * Get the project at \p index
      * @return Project at index
      */
-    const util::ProjectDatabaseProject* getProject(const QModelIndex& index) const;
+    const util::ProjectsModelProject* getProject(const QModelIndex& index) const;
 
     /**
      * Get the projects
      * @return Projects
      */
     const util::ProjectDatabaseProjects& getProjects() const;
-
-    /** Synchronize the model with the data source names */
-    void synchronizeWithDsns();
-
-private:
-
-    /**
-     * Download projects from \p dsn
-     * @param dsn Projects Data Source Name (DSN)
-     * @return Downloaded data
-     */
-    static QByteArray downloadProjectsFromDsn(const QString& dsn);
-
-public: // Action getters
-    
-    gui::StringsAction& getDsnsAction() { return _dsnsAction; }
-
-    const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
 
 signals:
 
@@ -494,15 +556,9 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
-    /** Signals that the model was populated from one or more source DSNs */
-    void populatedFromDsns();
-
 private:
-    util::ProjectDatabaseProjects   _projects;          /** Model projects */
-    QSet<QString>                   _tags;              /** All tags */
-    gui::StringsAction              _dsnsAction;        /** Data source names action */
-    QFuture<QByteArray>             _future;            /** Future for downloading projects */
-    QFutureWatcher<QByteArray>      _watcher;           /** Future watcher for downloading projects */
+    util::ProjectDatabaseProjects   _projects;  /** Model projects */
+    QSet<QString>                   _tags;      /** All tags */
 };
 
 }

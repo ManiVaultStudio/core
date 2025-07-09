@@ -6,6 +6,7 @@
 
 #include "HorizontalGroupAction.h"
 #include "TriggerAction.h"
+#include "OptionAction.h"
 #include "EditColorSchemeAction.h"
 
 namespace mv::gui {

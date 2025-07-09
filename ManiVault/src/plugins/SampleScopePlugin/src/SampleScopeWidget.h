@@ -70,15 +70,16 @@ private:
     void updateViewWidgetProxySize() const;
     
 private:
-    SampleScopePlugin*              _sampleScopePlugin;         /** Pointer to parent sample scope plugin */
-    QVBoxLayout                     _mainLayout;                /** Main layout */  
-    QWidget                         _viewsWidget;               /** Widget containing the views */
-    QVBoxLayout                     _viewsWidgetLayout;         /** Layout of the views widget */
-    QWebEngineView                  _htmlView;                  /** Web engine view for displaying HTML content */
-    QGraphicsView                   _widgetView;                /** Graphics view in which the widget is displayed */
-    QGraphicsScene                  _widgetViewScene;           /** Graphics scene in which the widget is displayed */
-    QGraphicsProxyWidget*           _proxyWidget;               /** Proxy widget for the widget */
-    QWidget*                        _currentViewWidget;         /** Pointer to the current view widget */
-    mv::gui::InfoOverlayWidget      _noSamplesOverlayWidget;    /** Overlay widget with a message saying there are no samples available */
-    mv::plugin::ViewPlugin*         _currentViewPlugin;         /** Pointer to the current view plugin */
+    SampleScopePlugin*              _sampleScopePlugin;                 /** Pointer to parent sample scope plugin */
+    QVBoxLayout                     _mainLayout;                        /** Main layout */  
+    QWidget                         _viewsWidget;                       /** Widget containing the views */
+    QVBoxLayout                     _viewsWidgetLayout;                 /** Layout of the views widget */
+    QWebEngineView                  _htmlView;                          /** Web engine view for displaying HTML content */
+    QGraphicsView                   _widgetView;                        /** Graphics view in which the widget is displayed */
+    QGraphicsScene                  _widgetViewScene;                   /** Graphics scene in which the widget is displayed */
+    QGraphicsProxyWidget*           _proxyWidget;                       /** Proxy widget for the widget */
+    QWidget*                        _currentViewWidget;                 /** Pointer to the current view widget */
+    mv::gui::InfoOverlayWidget      _noSamplesOverlayWidget;            /** Overlay widget with a message saying there are no samples available */
+    mv::plugin::ViewPlugin*         _currentViewPlugin;                 /** Pointer to the current view plugin */
+    mv::plugin::ViewPlugin*         _previousViewPlugin = nullptr;      /** Pointer to the previous view plugin */
 };

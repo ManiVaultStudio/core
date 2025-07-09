@@ -4,6 +4,8 @@
 
 #include "PaletteColorAction.h"
 
+#include "PaletteAction.h"
+
 namespace mv::gui {
 
 PaletteColorAction::PaletteColorAction(QObject* parent, const QString& title, const QPalette::ColorGroup& colorGroup /*= QPalette::ColorGroup::Normal*/, const QPalette::ColorRole& colorRole /*= QPalette::ColorRole::Window*/) :

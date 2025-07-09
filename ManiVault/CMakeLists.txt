@@ -37,6 +37,9 @@ include(mv_check_and_set_AVX)
 # Helper function to install runtime dependencies
 include(mv_install_dependencies_utils)
 
+# Helper function to handle plugin meta data
+include(mv_plugin_meta_data)
+
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
 
@@ -149,7 +152,29 @@ CPMAddPackage(
   OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF" "BUILD_SHARED_LIBS OFF"
 )
 
-# Qt Advanced docking system
+# Serialization: JSON
+CPMAddPackage(
+  NAME              nlohmann_json
+  GITHUB_REPOSITORY	nlohmann/json
+  GIT_TAG           v3.12.0
+  DOWNLOAD_ONLY     YES
+  OPTIONS
+      "JSON_BuildTests=OFF"            # skip upstream tests
+      "JSON_MultipleHeaders=ON"        # shave compile time (optional)
+)
+
+# Serialization: Add valijson as a header-only library
+CPMAddPackage(
+  NAME              valijson
+  GITHUB_REPOSITORY tristanpenman/valijson
+  GIT_TAG           v1.0.6 
+  #GIT_SUBMODULES   ""                  # Does not yet work with CPM, see workaround from https://github.com/cpm-cmake/CPM.cmake/pull/461#issuecomment-1665044141
+  GIT_SUBMODULES    "doc"               # list an existing subdir from the repo to not download any submodules
+  DOWNLOAD_ONLY     YES
+  OPTIONS "VALIJSON_BUILD_TESTS OFF" "VALIJSON_USE_EXCEPTIONS ON"
+)
+
+# Layout: Qt Advanced docking system
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
@@ -248,7 +273,7 @@ include(CMakeMvSourcesResources)      # defines RESOURCE_FILES, MAIN_APP_ICON_RE
 # -----------------------------------------------------------------------------
 add_library(${MV_PUBLIC_LIB} SHARED)
 
-add_library(ManiVault::Core ALIAS Core)
+add_library(ManiVault::Core ALIAS ${MV_PUBLIC_LIB})
 
 set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
     POSITION_INDEPENDENT_CODE ON
@@ -266,9 +291,13 @@ target_sources(${MV_PUBLIC_LIB}
 
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/include")
+
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_20)
 
 target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
+target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
 
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Core)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
@@ -316,7 +345,12 @@ target_include_directories(${MV_EXE} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
 )
 
+target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
+target_include_directories(${MV_EXE} PRIVATE "${valijson_SOURCE_DIR}/include")
+
 target_compile_features(${MV_EXE} PRIVATE cxx_std_20)
+
+target_compile_definitions(${MV_EXE} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
 
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
@@ -327,7 +361,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
-if(${MV_USE_ERROR_LOGGING})
+if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
     target_link_libraries(${MV_EXE} PRIVATE sentry)
     target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
     
@@ -487,17 +521,12 @@ install(EXPORT "ManiVaultPublicExport"
         COMPONENT MVPUBLIC_EXPORT
 )
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies_utils.cmake"
-        DESTINATION cmake/mv
-        COMPONENT MVPUBLIC_CMAKE_HELPER
-)
-
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
-        DESTINATION cmake/mv
-        COMPONENT MVPUBLIC_CMAKE_HELPER
-)
-
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
+# Copy cmake helper files
+install(FILES 
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies_utils.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_plugin_meta_data.cmake"
         DESTINATION cmake/mv
         COMPONENT MVPUBLIC_CMAKE_HELPER
 )
@@ -538,6 +567,7 @@ set(ManiVault_INCLUDE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/" CACHE IN
 set(ManiVault_LIB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/" CACHE INTERNAL "")
 set(ManiVault_INSTALL_DIR "${MV_INSTALL_DIR}" CACHE INTERNAL "")
 set(ManiVault_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" CACHE INTERNAL "") # this differs from config
+set(ManiVault_VERSION "${MV_VERSION}" CACHE INTERNAL "")
 
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
@@ -613,7 +643,7 @@ if(NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     )
 
-    if(${MV_USE_ERROR_LOGGING})
+    if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
         # Install sentry artifacts
         add_custom_command(TARGET ${MV_EXE}  POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler executable"

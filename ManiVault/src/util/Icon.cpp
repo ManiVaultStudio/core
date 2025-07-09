@@ -6,6 +6,7 @@
 
 #include <QPainter>
 #include <QPalette>
+#include <QSet>
 
 using namespace mv::util;
 

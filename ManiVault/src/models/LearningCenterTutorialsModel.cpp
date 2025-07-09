@@ -4,6 +4,12 @@
 
 #include "LearningCenterTutorialsModel.h"
 
+#include "util/JSON.h"
+
+#include "CoreInterface.h"
+
+#include <nlohmann/json.hpp>
+
 #include <QtConcurrent>
 
 #ifdef _DEBUG
@@ -12,6 +18,8 @@
 
 using namespace mv::util;
 using namespace mv::gui;
+
+using nlohmann::json;
 
 namespace mv {
 
@@ -51,19 +59,36 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
 
         connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
             for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-                QJsonParseError jsonParseError;
+                try {
+                    const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
+                    const auto fullJson = json::parse(QString::fromUtf8(jsonData.constData()).toStdString());
 
-                const auto jsonDocument = QJsonDocument::fromJson(_future.resultAt<QByteArray>(dsnIndex), &jsonParseError);
+                    if (fullJson.contains("tutorials")) {
+                        validateJson(fullJson["tutorials"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), loadJsonFromResource(":/JSON/TutorialsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
+                    }
+                    else {
+                        throw std::runtime_error("Tutorials key is missing");
+                    }
 
-                if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-                    qWarning() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
-                    continue;
+                    QJsonParseError jsonParseError;
+
+                    const auto jsonDocument = QJsonDocument::fromJson(jsonData, &jsonParseError);
+
+                    if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                        qCritical() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+                        continue;
+                    }
+
+                    for (const auto tutorial : jsonDocument.object()["tutorials"].toArray())
+                        addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
                 }
-
-                const auto tutorials = jsonDocument.object()["tutorials"].toArray();
-
-            	for (const auto tutorial : tutorials) {
-                    addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+                catch (std::exception& e)
+                {
+                    qCritical() << "Unable to add tutorials from DSN:" << e.what();
+                }
+                catch (...)
+                {
+                    qCritical() << "Unable to add tutorials from DSN due to an unhandled exception";
                 }
             }
 
@@ -191,7 +216,7 @@ QByteArray LearningCenterTutorialsModel::downloadTutorialsFromDsn(const QString&
         {
             exceptionMessageBox("Unable to download tutorials JSON from DSN");
         }
-        });
+    });
 
     fileDownloader.download(dsn);
 

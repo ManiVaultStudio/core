@@ -6,6 +6,9 @@
 
 #include "GroupSectionTreeItem.h"
 
+#include "util/StyledIcon.h"
+#include "util/Icon.h"
+
 #ifdef _DEBUG
     //#define NAVIGATION_ACTION_VERBOSE
 #endif

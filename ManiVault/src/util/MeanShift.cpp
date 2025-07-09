@@ -40,12 +40,12 @@ void MeanShift::init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    bool loaded = _shaderGradientCompute.loadShaderFromFile(":shaders/Quad.vert", ":shaders/GradientCompute.frag");
+    bool loaded = _shaderGradientCompute.loadShaderFromFile(":shaders/GradientCompute.vert", ":shaders/GradientCompute.frag");
     if (!loaded) {
         qDebug() << "Failed to load GradientCompute shader";
     }
 
-    loaded = _shaderMeanshiftCompute.loadShaderFromFile(":shaders/Quad.vert", ":shaders/MeanshiftCompute.frag");
+    loaded = _shaderMeanshiftCompute.loadShaderFromFile(":shaders/MeanshiftCompute.vert", ":shaders/MeanshiftCompute.frag");
     if (!loaded) {
         qDebug() << "Failed to load MeanshiftCompute shader";
     }
@@ -105,7 +105,7 @@ QRectF getDataBounds(const std::vector<Vector2f>& points)
 void MeanShift::setData(const std::vector<Vector2f>* points)
 {
     QRectF bounds = getDataBounds(*points);
-    //_numPoints = (unsigned int) points->size();
+    
     _points = points;
     _bounds = bounds;
     densityComputation.setData(points);
@@ -429,6 +429,11 @@ Texture2D& MeanShift::getGradientTexture()
 Texture2D& MeanShift::getMeanShiftTexture()
 {
     return _meanshiftTexture;
+}
+
+std::uint32_t MeanShift::getResolution() const
+{
+    return RESOLUTION;
 }
 
 } // namespace mv

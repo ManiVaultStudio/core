@@ -10,6 +10,8 @@
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 
+#include "ErrorLoggingSettingsAction.h"
+
 #include <QObject>
 
 namespace mv {

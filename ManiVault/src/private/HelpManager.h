@@ -7,8 +7,11 @@
 #include <AbstractHelpManager.h>
 
 #include <util/FileDownloader.h>
-
 #include <util/Notification.h>
+#include <util/Notifications.h>
+
+#include <models/TasksListModel.h>
+#include <models/TasksFilterModel.h>
 
 namespace mv
 {
@@ -101,6 +104,14 @@ public:
      */
     void initializeNotifications(QWidget* parentWidget) override;
 
+protected:
+
+    /**
+     * Add toaster notification for \p task in the main window
+     * @param task Task containing the notification details
+     */
+    void addNotification(QPointer<Task> task) override;
+
 public: // Action getters
 
     gui::ToggleAction& getShowLearningCenterPageAction() override { return _showLearningCenterPageAction; }
@@ -120,6 +131,9 @@ private:
     LearningCenterVideosModel  		_videosModel;                   /** Videos model */
 	LearningCenterTutorialsModel    _tutorialsModel;                /** Tutorials model */
     util::Notifications     		_notifications;                 /** Notifications manager */
+	util::FileDownloader            _fileDownloader;                /** For downloading the learning center JSON file */
+    mv::TasksListModel              _tasksModel;                    /** Tasks list model */
+    mv::TasksFilterModel            _tasksFilterModel;              /** Filter model for the tasks model */
 };
 
 }

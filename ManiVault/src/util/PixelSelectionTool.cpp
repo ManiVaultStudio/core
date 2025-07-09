@@ -12,6 +12,8 @@
 #include <QPainterPath>
 #include <QtMath>
 
+#include "StyledIcon.h"
+
 namespace mv::util {
 
 PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enabled /*= true*/) :
@@ -22,7 +24,11 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _active(false),
     _notifyDuringSelection(true),
     _brushRadius(BRUSH_RADIUS_DEFAULT),
+    _lineWidth(LINE_WIDTH_DEFAULT),
+    _lineAngle(LINE_ANGLE_DEFAULT),
     _fixedBrushRadiusModifier(Qt::NoModifier),
+    _fixedLineWidthModifier(Qt::NoModifier),
+    _fixedLineAngleModifier(Qt::NoModifier),
     _mouseButtons(),
     _preventContextMenu(false),
     _aborted(false)
@@ -107,6 +113,16 @@ float PixelSelectionTool::getBrushRadius() const
     return _brushRadius;
 }
 
+float PixelSelectionTool::getLineWidth() const
+{
+    return _lineWidth;
+}
+
+float PixelSelectionTool::getLineAngle() const
+{
+    return _lineAngle;
+}
+
 void PixelSelectionTool::setBrushRadius(const float& brushRadius)
 {
     if (brushRadius == _brushRadius)
@@ -119,6 +135,30 @@ void PixelSelectionTool::setBrushRadius(const float& brushRadius)
     paint();
 }
 
+void PixelSelectionTool::setLineWidth(const float& lineWidth)
+{
+    if (lineWidth == _lineWidth)
+        return;
+
+    _lineWidth = std::max(std::min(lineWidth, LINE_WIDTH_MAX), LINE_WIDTH_MIN);
+
+    emit lineWidthChanged(_lineWidth);
+
+    paint();
+}
+
+void PixelSelectionTool::setLineAngle(const float& lineAngle)
+{
+    if (lineAngle == _lineAngle)
+        return;
+
+    _lineAngle = std::max(std::min(lineAngle, LINE_ANGLE_MAX), LINE_ANGLE_MIN);
+
+    emit lineAngleChanged(_lineAngle);
+
+    paint();
+}
+
 Qt::KeyboardModifier PixelSelectionTool::getFixedBrushRadiusModifier() const
 {
     return _fixedBrushRadiusModifier;
@@ -127,6 +167,26 @@ Qt::KeyboardModifier PixelSelectionTool::getFixedBrushRadiusModifier() const
 void PixelSelectionTool::setFixedBrushRadiusModifier(Qt::KeyboardModifier fixedBrushRadiusModifier)
 {
     _fixedBrushRadiusModifier = fixedBrushRadiusModifier;
+}
+
+Qt::KeyboardModifier PixelSelectionTool::getFixedLineWidthModifier() const
+{
+    return _fixedLineWidthModifier;
+}
+
+void PixelSelectionTool::setFixedLineWidthModifier(Qt::KeyboardModifier fixedLineWidthModifier)
+{
+    _fixedLineWidthModifier = fixedLineWidthModifier;
+}
+
+Qt::KeyboardModifier PixelSelectionTool::getFixedLineAngleModifier() const
+{
+    return _fixedLineAngleModifier;
+}
+
+void PixelSelectionTool::setFixedLineAngleModifier(Qt::KeyboardModifier fixedLineAngleModifier)
+{
+    _fixedLineAngleModifier = fixedLineAngleModifier;
 }
 
 QColor PixelSelectionTool::getMainColor() const
@@ -151,6 +211,8 @@ void PixelSelectionTool::setChanged()
     emit modifierChanged(_modifier);
     emit notifyDuringSelectionChanged(_notifyDuringSelection);
     emit brushRadiusChanged(_brushRadius);
+    emit lineWidthChanged(_lineWidth);
+    emit lineAngleChanged(_lineAngle);
 }
 
 void PixelSelectionTool::update()
@@ -211,22 +273,28 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::KeyPress:
         {
-            // Get key that was pressed
             auto keyEvent = dynamic_cast<QKeyEvent*>(event);
 
-            // Do not handle repeating keys
             if (!keyEvent->isAutoRepeat()) {
-
                 // Abort selection when the escape key is pressed
                 if (keyEvent->key() == Qt::Key_Escape) {
-
-                    // In polygon or lasso mode
                     if (_type == PixelSelectionType::Polygon || _type == PixelSelectionType::Lasso) {
                         _aborted = true;
-
                         paint();
                         endSelection();
                         paint();
+                    }
+                }
+
+                // Change line width with Up/Down keys in Line mode
+                if (_type == PixelSelectionType::Line) {
+                    if (keyEvent->key() == Qt::Key_Up) {
+                        setLineWidth(_lineWidth + LINE_WIDTH_DELTA);
+                        shouldPaint = true;
+                    }
+                    else if (keyEvent->key() == Qt::Key_Down) {
+                        setLineWidth(_lineWidth - LINE_WIDTH_DELTA);
+                        shouldPaint = true;
                     }
                 }
             }
@@ -260,6 +328,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     switch (_type)
                     {
                         case PixelSelectionType::Rectangle:
+                        case PixelSelectionType::Line:
                         case PixelSelectionType::Brush:
                         case PixelSelectionType::Lasso:
                         case PixelSelectionType::Sample:
@@ -297,6 +366,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             switch (_type)
             {
                 case PixelSelectionType::Rectangle:
+                case PixelSelectionType::Line:
                 case PixelSelectionType::Brush:
                 case PixelSelectionType::Lasso:
                 case PixelSelectionType::Sample:
@@ -362,6 +432,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             switch (_type)
             {
                 case PixelSelectionType::Rectangle:
+                case PixelSelectionType::Line:
                 case PixelSelectionType::Brush:
                 case PixelSelectionType::Lasso:
                 case PixelSelectionType::Sample:
@@ -426,6 +497,28 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                         if (_mousePositions.size() == 1) {
                             _mousePositions << _mousePosition;
                         } else {
+                            if (_mousePositions.isEmpty()) {
+                                _mousePositions << _mousePosition;
+                            }
+                            else {
+                                _mousePositions.last() = _mousePosition;
+                            }
+                        }
+                    }
+
+                    if (isActive())
+                        shouldPaint = true;
+
+                    break;
+                }
+
+                case PixelSelectionType::Line:
+                {
+                    if (mouseEvent->buttons() & Qt::LeftButton) {
+                        if (_mousePositions.size() == 1) {
+                            _mousePositions << _mousePosition;
+                        }
+                        else {
                             if (_mousePositions.isEmpty()) {
                                 _mousePositions << _mousePosition;
                             }
@@ -509,31 +602,41 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
             switch (_type)
             {
-                case PixelSelectionType::Rectangle:
+            case PixelSelectionType::Rectangle:
+                break;
+            case PixelSelectionType::Line:
+            {
+                // Optionally, check for a modifier if you want (like Shift)
+                if (_fixedLineWidthModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedLineWidthModifier)
                     break;
 
-                case PixelSelectionType::Brush:
-                case PixelSelectionType::Sample:
-                {
-                    if (_fixedBrushRadiusModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedBrushRadiusModifier)
-                        break;
+                if (wheelEvent->angleDelta().y() < 0)
+                    setLineWidth(_lineWidth - LINE_WIDTH_DELTA);
+                else
+                    setLineWidth(_lineWidth + LINE_WIDTH_DELTA);
 
-                    if (wheelEvent->angleDelta().y() < 0)
-                        setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
-                    else
-                        setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
-
-                    shouldPaint = true;
-
-                    break;
-                }
-
-                case PixelSelectionType::Lasso:
-                case PixelSelectionType::Polygon:
+                shouldPaint = true;
+                break;
+            }
+            case PixelSelectionType::Brush:
+            case PixelSelectionType::Sample:
+            {
+                if (_fixedBrushRadiusModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedBrushRadiusModifier)
                     break;
 
-                default:
-                    break;
+                if (wheelEvent->angleDelta().y() < 0)
+                    setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
+                else
+                    setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
+
+                shouldPaint = true;
+                break;
+            }
+            case PixelSelectionType::Lasso:
+            case PixelSelectionType::Polygon:
+                break;
+            default:
+                break;
             }
 
             break;
@@ -603,6 +706,55 @@ void PixelSelectionTool::paint()
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
+            break;
+        }
+
+        case PixelSelectionType::Line:
+        {
+            if (noMousePositions != 2)
+                break;
+
+            const auto p1 = _mousePositions.first();
+            const auto p2 = _mousePositions.last();
+
+            // Calculate the angle with respect to the y-axis (in degrees)
+            const auto dx = p2.x() - p1.x();
+            const auto dy = p2.y() - p1.y();
+            const double angleRadians = std::atan2(dx, dy); // dx, dy order for y-axis
+            const double angleDegrees = 180 - (angleRadians * 180.0 / M_PI); // angleDegrees is positive anti-clockwise from the y-axis
+
+            controlPoints << p1 << p2;
+
+            // Draw the outer solid line (outline)
+            shapePainter.setPen(QPen(_mainColor, _lineWidth, Qt::SolidLine, Qt::RoundCap));
+            shapePainter.drawLine(p1, p2);
+
+            // Draw the inner transparent line to "erase" the center
+            if (_lineWidth > 2.0f) {
+                QPen transparentPen(Qt::transparent, _lineWidth - 2.0f, Qt::SolidLine, Qt::RoundCap);
+                shapePainter.setCompositionMode(QPainter::CompositionMode_Clear);
+                shapePainter.setPen(transparentPen);
+                shapePainter.drawLine(p1, p2);
+                shapePainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+            }
+
+            // Draw a semi-transparent area under the line
+            areaPainter.setPen(QPen(_fillColor, _lineWidth, Qt::SolidLine, Qt::RoundCap));
+            areaPainter.drawLine(p1, p2);
+
+            // Only draw the dashed line if the width is greater than 1.0f
+            if (_lineWidth > 1.0f) {
+                QPen dashedPen(_mainColor, 1.0f, Qt::DashLine, Qt::RoundCap);
+                dashedPen.setDashPattern({ 2, 2 });
+                shapePainter.setPen(dashedPen);
+                shapePainter.drawLine(p1, p2);
+            }
+
+            // Draw the modifier icon near the middle of the line
+            const auto size = 2.0f;
+            const auto textCenter = (p1 + p2) / 2 + QPoint(size, -size);
+            textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+            setLineAngle(angleDegrees);
             break;
         }
         
@@ -790,6 +942,7 @@ void PixelSelectionTool::paint()
     switch (_type)
     {
         case PixelSelectionType::Rectangle:
+        case PixelSelectionType::Line:
         case PixelSelectionType::Brush:
         case PixelSelectionType::Lasso:
         case PixelSelectionType::Polygon:

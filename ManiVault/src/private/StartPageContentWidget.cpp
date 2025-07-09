@@ -59,11 +59,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _settingsAction.addAction(&_toggleOpenCreateProjectSectionAction);
-
-    if (QFileInfo("StartPage.json").exists()) {
-        _settingsAction.addAction(&_toggleProjectDatabaseSectionAction);
-    }
-
+	_settingsAction.addAction(&_toggleProjectDatabaseAction);
     _settingsAction.addAction(&_toggleRecentProjectsSectionAction);
     _settingsAction.addAction(&_toggleProjectFromDataSectionAction);
 

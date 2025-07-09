@@ -12,6 +12,7 @@
 #include <QUrl>
 #include <QByteArray>
 #include <QNetworkReply>
+#include <QPointer>
 
 namespace mv::util {
 

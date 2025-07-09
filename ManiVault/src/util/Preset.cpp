@@ -4,6 +4,8 @@
 
 #include "Preset.h"
 
+#include "StyledIcon.h"
+
 namespace mv::util {
 
 Preset::Preset(const QString& name, const QString& description, const PresetType& presetType /*= PresetType::Normal*/) :

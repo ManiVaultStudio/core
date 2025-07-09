@@ -8,6 +8,7 @@
 #include "WidgetAction.h"
 
 #include <QDebug>
+#include <qguiapplication.h>
 #include <QPainter>
 
 namespace mv::gui {

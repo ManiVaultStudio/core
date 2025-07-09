@@ -4,12 +4,13 @@
 
 #include "StringAction.h"
 
+#include "ColorAction.h"
+
 #include <QHBoxLayout>
 #include <QCompleter>
 #include <QToolButton>
 #include <QGraphicsDropShadowEffect>
-
-#include "ColorAction.h"
+#include <QEvent>
 
 using namespace mv::util;
 

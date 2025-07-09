@@ -44,6 +44,12 @@ public:
     void showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs);
 
     /**
+     * Show \p task message
+     * @param task Task containing the notification details
+     */
+    void showTask(QPointer<Task> task);
+
+    /**
      * Set parent widget to \p parentWidget (notification widgets will anchor to this widget)
      * @param parentWidget Pointer to parent widget
      */

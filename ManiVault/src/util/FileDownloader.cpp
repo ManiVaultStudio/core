@@ -41,6 +41,8 @@ void FileDownloader::download(const QUrl& url)
 
     QNetworkRequest request(_url);
 
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
     auto* networkReply = _networkAccessManager.get(request);
 
     const auto fileName = QFileInfo(_url.toString()).fileName();
@@ -90,17 +92,31 @@ void FileDownloader::downloadFinished(QNetworkReply* reply)
     qDebug() << __FUNCTION__ << reply->error();
 #endif
 
+    QString filename = QFileInfo(_url.toString()).fileName();
+
+    QVariant dispositionHeader = reply->rawHeader("Content-Disposition");
+
+    if (dispositionHeader.isValid()) {
+        QRegularExpression re("filename\\*=UTF-8''([^;]+)|filename=\"?([^\";]+)\"?");
+        QRegularExpressionMatch match = re.match(dispositionHeader.toString());
+
+    	if (match.hasMatch()) {
+            filename = QUrl::fromPercentEncoding(match.captured(1).toUtf8());
+
+            if (filename.isEmpty())
+                filename = match.captured(2); // fallback
+        }
+    }
+
     if (_storageMode & StorageMode::File)
     {
-        const auto fileName = QFileInfo(_url.toString()).fileName();
-
         if (_targetDirectory.isEmpty())
-    		_downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(fileName);
+    		_downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(filename);
         else
-            _downloadedFilePath = QDir(_targetDirectory).filePath(fileName);
+            _downloadedFilePath = QDir(_targetDirectory).filePath(filename);
 
 #ifdef FILE_DOWNLOADER_VERBOSE
-        qDebug() << fileName << _downloadedFilePath;
+        qDebug() << filename << ": " << _downloadedFilePath;
 #endif
 
         QFile localFile(_downloadedFilePath);

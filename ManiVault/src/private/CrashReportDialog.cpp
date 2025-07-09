@@ -4,6 +4,8 @@
 
 #include "CrashReportDialog.h"
 
+#include <CoreInterface.h>
+
 #include <Application.h>
 
 #ifdef _DEBUG

@@ -308,83 +308,83 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
 
 void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 {
-    try
-    {
-
+    try {
 #ifdef DATA_MANAGER_VERBOSE
-        qDebug() << "Remove dataset" << dataset->getGuiName() << "from the data manager";
+    	qDebug() << "Remove dataset" << dataset->getGuiName() << "from the data manager";
 #endif
 
-        if (!dataset.isValid())
-            throw std::runtime_error("Dataset smart pointer is invalid");
+    	if (!dataset.isValid())
+    		throw std::runtime_error("Dataset smart pointer is invalid");
 
-        if (dataset->isLocked()) {
+    	if (dataset->isLocked()) {
 
 #ifdef DATA_MANAGER_VERBOSE
-            qDebug() << "Dataset is locked and will be removed as soon as it is un-locked";
+    		qDebug() << "Dataset is locked and will be removed as soon as it is un-locked";
 #endif
 
-            connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this, dataset](bool locked) -> void {
-                disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, nullptr);
+    		connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this, dataset](bool locked) -> void {
+				disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, nullptr);
 
-                if (!locked)
-                    removeDataset(dataset);
-            });
+				if (!locked)
+					removeDataset(dataset);
+				});
+    	}
+
+    	const auto datasetId = dataset->getId();
+        const auto datasetDataType = dataset->getDataType();
+    	const auto rawDataName = dataset->getRawDataName();
+
+    	dataset->setAboutToBeRemoved();
+
+    	for (const auto& underiveDataset : _datasets) {
+    		if (underiveDataset->isDerivedData() && underiveDataset->getNextSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
+    			if (underiveDataset->mayUnderive()) {
+    				underiveDataset->_derived = false;
+    				underiveDataset->setSourceDataset(Dataset<DatasetImpl>());
+    			}
+    			else {
+    				removeDataset(underiveDataset.get());
+    			}
+    		}
+    	}
+
+        if (!mv::core()->isAboutToBeDestroyed()) {
+	        for (const auto dataHierarchyItem : dataset->getDataHierarchyItem().getChildren()) {
+	        	if (!dataHierarchyItem->getDataset()->mayUnderive())
+	        		removeDataset(dataHierarchyItem->getDataset());
+	        	else
+	        		dataHierarchyItem->setParent(nullptr);
+	        }
         }
 
-        const auto datasetId    = dataset->getId();
-        const auto datasetType  = dataset->getDataType();
-        const auto rawDataName  = dataset->getRawDataName();
+    	dataset->setLocked(true);
 
-        dataset->setAboutToBeRemoved();
+    	if (!mv::core()->isAboutToBeDestroyed()) {
+    		events().notifyDatasetAboutToBeRemoved(dataset);
+    		emit datasetAboutToBeRemoved(dataset);
+		}
 
-        for (const auto& underiveDataset : _datasets) {
-            if (underiveDataset->isDerivedData() && underiveDataset->getNextSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
-                if (underiveDataset->mayUnderive()) {
-                    underiveDataset->_derived = false;
-                    underiveDataset->setSourceDataset(Dataset<DatasetImpl>());
-                }
-                else {
-                    removeDataset(underiveDataset.get());
-                }
-            }
-        }
+        const auto it = std::find_if(_datasets.begin(), _datasets.end(), [datasetId](const auto& datasetPtr) -> bool {
+            return datasetId == datasetPtr->getId();
+        });
+    
+        if (it == _datasets.end())
+            throw std::runtime_error(QString("Dataset with id %1 not found in database").arg(dataset->getId()).toStdString());
+    
+        if (auto analysisPlugin = dataset->getAnalysis())
+            analysisPlugin->destroy();
+    
+        const auto shouldRemoveRawData = !mv::core()->isAboutToBeDestroyed() && dataset->isFull();
+    
+        _datasets.erase(it);
+    
+        if (shouldRemoveRawData)
+            removeRawData(rawDataName);
 
-        for (const auto dataHierarchyItem : dataset->getDataHierarchyItem().getChildren()) {
-            if (!dataHierarchyItem->getDataset()->mayUnderive())
-                removeDataset(dataHierarchyItem->getDataset());
-            else
-                dataHierarchyItem->setParent(nullptr);
-        }
-
-        dataset->setLocked(true);
-
-        events().notifyDatasetAboutToBeRemoved(dataset);
-        {
-            emit datasetAboutToBeRemoved(dataset);
-            {
-                const auto it = std::find_if(_datasets.begin(), _datasets.end(), [datasetId](const auto& datasetPtr) -> bool {
-                    return datasetId == datasetPtr->getId();
-                });
-
-                if (it == _datasets.end())
-                    throw std::runtime_error(QString("Dataset with id %1 not found in database").arg(dataset->getId()).toStdString());
-
-                auto analysisPlugin = dataset->getAnalysis();
-
-                if (analysisPlugin)
-                    analysisPlugin->destroy();
-
-                const auto shouldRemoveRawData = dataset->isFull();
-
-                _datasets.erase(it);
-
-                if (shouldRemoveRawData)
-                    removeRawData(rawDataName);
-            }
-            emit datasetRemoved(datasetId);
-        }
-        events().notifyDatasetRemoved(datasetId, datasetType);
+	    if (!mv::core()->isAboutToBeDestroyed()) {
+		    events().notifyDatasetRemoved(datasetId, datasetDataType);
+    		emit datasetRemoved(datasetId);
+	    }
     }
     catch (std::exception& e)
     {

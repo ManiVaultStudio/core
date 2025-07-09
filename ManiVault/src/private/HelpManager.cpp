@@ -7,20 +7,28 @@
 #include <models/LearningCenterVideosFilterModel.h>
 #include <models/LearningCenterTutorialsFilterModel.h>
 
+#include <CoreInterface.h>
+
 #include <util/Exception.h>
+#include <util/JSON.h>
 
 #include <actions/WatchVideoAction.h>
 
 #include <Task.h>
+
+#include <nlohmann/json.hpp>
 
 #include <QDesktopServices>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUrl>
+#include <QMenu>
 
 using namespace mv::gui;
 using namespace mv::util;
+
+using nlohmann::json;
 
 #ifdef _DEBUG
     //#define HELP_MANAGER_VERBOSE
@@ -82,6 +90,48 @@ HelpManager::HelpManager(QObject* parent) :
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, [this]() -> void {
         _showLearningCenterPageAction.setChecked(true);
     });
+
+    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
+        try
+        {
+            const auto videosDsn    = "https://www.manivault.studio/api/learning-center.json";
+            const auto jsonData     = _fileDownloader.downloadedData();
+
+            json fullJson = json::parse(QString::fromUtf8(jsonData).toStdString());
+
+            if (fullJson.contains("videos")) {
+                validateJson(fullJson["videos"].dump(), videosDsn, loadJsonFromResource(":/JSON/VideosSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
+            }
+            else {
+                throw std::runtime_error("Videos key is missing");
+            }
+
+            QJsonParseError jsonParseError;
+
+            const auto jsonDocument = QJsonDocument::fromJson(jsonData, &jsonParseError);
+
+            if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                qCritical() << "Invalid JSON from DSN at index" << videosDsn << ":" << jsonParseError.errorString();
+                return;
+            }
+
+            for (const auto video : jsonDocument.object()["videos"].toArray()) {
+                auto videoMap = video.toVariant().toMap();
+
+                addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
+            }
+
+            emit videosModelPopulatedFromWebsite();
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to process learning center JSON", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to process learning center JSON");
+        }
+	});
 }
 
 HelpManager::~HelpManager()
@@ -107,7 +157,28 @@ void HelpManager::initialize()
 
         _videosModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
         _videosModel.synchronizeWithDsns();
+
+        _tasksFilterModel.setSourceModel(&_tasksModel);
+        _tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
+        _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
+        _tasksFilterModel.getTopLevelTasksOnlyAction().setChecked(true);
+
+        connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+            for (int filterModelRowIndex = first; filterModelRowIndex <= last; filterModelRowIndex++) {
+                const auto sourceModelIndex = _tasksFilterModel.mapToSource(_tasksFilterModel.index(filterModelRowIndex, 0));
+
+            	auto task = _tasksModel.getTask(sourceModelIndex.row());
+
+                // Avoid polluting the toaster with too many task-based notifications; only add task notifications for tasks that are running or running indeterminate after 500ms
+                QTimer::singleShot(500, this, [this, task, sourceModelIndex]() -> void {
+                    if (task->isRunning() || task->isRunningIndeterminate()) {
+                        addNotification(_tasksModel.getTask(sourceModelIndex.row()));
+                    }
+                });
+            }
+        });
     }
+	
     endInitialization();
 }
 
@@ -152,6 +223,11 @@ LearningCenterVideos HelpManager::getVideos(const QStringList& tags) const
 void HelpManager::addNotification(const QString& title, const QString& description, const QIcon& icon /*= QIcon()*/, const util::Notification::DurationType& durationType /*= util::Notification::DurationType::Calculated*/, std::int32_t delayMs /*= 0*/)
 {
     _notifications.showMessage(title, description, icon, durationType, delayMs);
+}
+
+void HelpManager::addNotification(QPointer<Task> task)
+{
+    _notifications.showTask(task);
 }
 
 void HelpManager::initializeNotifications(QWidget* parentWidget)

@@ -18,13 +18,13 @@
 namespace mv::util {
 
 /**
- * Project center project class
+ * Projects model project class
  *
- * Contains project information which is used in the project center
+ * Contains project information which is used in the project models
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectDatabaseProject : public QObject
+class CORE_EXPORT ProjectsModelProject : public QObject
 {
     Q_OBJECT
 
@@ -34,13 +34,31 @@ public:
      * Construct project from \p variantMap
      * @param variantMap Variant map containing the project properties
      */
-    explicit ProjectDatabaseProject(const QVariantMap& variantMap);
+    explicit ProjectsModelProject(const QVariantMap& variantMap);
+
+    /**
+     * Construct project group from \p groupTitle
+     * @param groupTitle Project group title
+     */
+    explicit ProjectsModelProject(const QString& groupTitle);
 
     /**
      * Get title
      * @return Project title
      */
     const QString& getTitle() const;
+
+    /**
+     * Get whether this is a group
+     * @return Boolean determining whether this is a group or a project
+     */
+    const bool& isGroup() const;
+
+    /**
+     * Get group
+     * @return Project group
+     */
+    const QString& getGroup() const;
 
     /**
      * Get tags
@@ -95,9 +113,11 @@ public:
      * @param rhs Right hand side project
      * @return Assigned project
      */
-    ProjectDatabaseProject& operator=(const ProjectDatabaseProject& rhs)
+    ProjectsModelProject& operator=(const ProjectsModelProject& rhs)
     {
         _title                  = rhs.getTitle();
+        _group                  = rhs.getGroup();
+    	_isGroup                = rhs.isGroup();
         _tags                   = rhs.getTags();
         _date                   = rhs.getDate();
         _iconName               = rhs.getIconName();
@@ -112,6 +132,8 @@ public:
 
 private:
     QString         _title;                 /** Title */
+    bool            _isGroup;               /** Boolean determining whether this is a group or a project */
+    QString         _group;                 /** Group */
     QStringList     _tags;                  /** Tags */
     QString         _date;                  /** Issue date */
     QString         _iconName;              /** Font Awesome icon name */
@@ -122,6 +144,6 @@ private:
     QStringList     _missingPlugins;        /** Missing plugins */
 };
 
-using ProjectDatabaseProjects = std::vector<const ProjectDatabaseProject*>;
+using ProjectDatabaseProjects = std::vector<const ProjectsModelProject*>;
 
 }

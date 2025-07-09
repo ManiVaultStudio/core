@@ -5,6 +5,7 @@
 #include "FlowLayout.h"
 
 #include <QtGui>
+#include <QWidget>
 
 namespace mv::gui
 {

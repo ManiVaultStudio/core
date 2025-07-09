@@ -4,7 +4,10 @@
 
 #include "Notifications.h"
 
+#include "Application.h"
+
 #include <QMainWindow>
+#include <QEvent>
 
 namespace mv::util
 {
@@ -39,6 +42,23 @@ void Notifications::showMessage(const QString& title, const QString& description
         QTimer::singleShot(delayMs, addNotification);
     else
         addNotification();
+}
+
+void Notifications::showTask(QPointer<Task> task)
+{
+    if (!_parentWidget)
+        return;
+
+    auto notification = new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), _parentWidget);
+
+    notification->show();
+
+    _notifications.append(notification);
+
+    connect(notification, &Notification::finished, this, [this, notification]() {
+        _notifications.removeOne(notification);
+        notification->deleteLater();
+	});
 }
 
 void Notifications::setParentWidget(QWidget* parentWidget)

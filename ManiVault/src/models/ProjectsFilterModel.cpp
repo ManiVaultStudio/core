@@ -2,8 +2,8 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ProjectDatabaseFilterModel.h"
-#include "ProjectDatabaseModel.h"
+#include "ProjectsFilterModel.h"
+#include "AbstractProjectsModel.h"
 
 #include "util/Version.h"
 
@@ -12,7 +12,7 @@
 #include <QDebug>
 
 #ifdef _DEBUG
-    #define PROJECT_DATABASE_FILTER_MODEL_VERBOSE
+    #define PROJECTS_FILTER_MODEL_VERBOSE
 #endif
 
 using namespace mv::gui;
@@ -20,8 +20,8 @@ using namespace mv::util;
 
 namespace mv {
 
-ProjectDatabaseFilterModel::ProjectDatabaseFilterModel(QObject* parent /*= nullptr*/) :
-    SortFilterProxyModel(parent, "ProjectDatabaseFilterModel"),
+ProjectsFilterModel::ProjectsFilterModel(QObject* parent /*= nullptr*/) :
+    SortFilterProxyModel(parent, "ProjectsFilterModel"),
     _projectDatabaseModel(nullptr),
     _tagsFilterAction(this, "Tags filter"),
     _excludeTagsFilterAction(this, "Exclude tags filter"),
@@ -46,10 +46,10 @@ ProjectDatabaseFilterModel::ProjectDatabaseFilterModel(QObject* parent /*= nullp
     _filterGroupAction.setIconByName("filter");
     _filterGroupAction.setPopupSizeHint({ 400, 0 });
 
-    connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &ProjectDatabaseFilterModel::invalidate);
-    connect(&_excludeTagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &ProjectDatabaseFilterModel::invalidate);
-    connect(&_targetAppVersionAction, &VersionAction::versionChanged, this, &ProjectDatabaseFilterModel::invalidate);
-    connect(&_filterLoadableOnlyAction, &ToggleAction::toggled, this, &ProjectDatabaseFilterModel::invalidate);
+    connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &ProjectsFilterModel::invalidate);
+    connect(&_excludeTagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &ProjectsFilterModel::invalidate);
+    connect(&_targetAppVersionAction, &VersionAction::versionChanged, this, &ProjectsFilterModel::invalidate);
+    connect(&_filterLoadableOnlyAction, &ToggleAction::toggled, this, &ProjectsFilterModel::invalidate);
 
     _filterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
@@ -59,7 +59,7 @@ ProjectDatabaseFilterModel::ProjectDatabaseFilterModel(QObject* parent /*= nullp
     _filterGroupAction.addAction(&getTargetAppVersionAction());
 }
 
-bool ProjectDatabaseFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
     const auto index = sourceModel()->index(row, 0, parent);
 
@@ -73,7 +73,7 @@ bool ProjectDatabaseFilterModel::filterAcceptsRow(int row, const QModelIndex& pa
             return false;
     }
 
-    const auto tagsList         = index.siblingAtColumn(static_cast<int>(ProjectDatabaseModel::Column::Tags)).data(Qt::EditRole).toStringList();
+    const auto tagsList         = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::Tags)).data(Qt::EditRole).toStringList();
     const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
 
     if (_tagsFilterAction.hasOptions()) {
@@ -92,14 +92,14 @@ bool ProjectDatabaseFilterModel::filterAcceptsRow(int row, const QModelIndex& pa
             return false;
     }
 
-    const auto projectMinimumCoreVersion  = index.siblingAtColumn(static_cast<int>(ProjectDatabaseModel::Column::MinimumCoreVersion)).data(Qt::EditRole).value<Version>();
+    const auto projectMinimumCoreVersion  = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MinimumCoreVersion)).data(Qt::EditRole).value<Version>();
 
     const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0) ;
 
     if (targetAppVersion > projectMinimumCoreVersion)
         return false;
 
-    const auto missingPlugins = index.siblingAtColumn(static_cast<int>(ProjectDatabaseModel::Column::MissingPlugins)).data(Qt::EditRole).toStringList();
+    const auto missingPlugins = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MissingPlugins)).data(Qt::EditRole).toStringList();
 
     if (_filterLoadableOnlyAction.isChecked() && !missingPlugins.isEmpty())
         return false;
@@ -107,11 +107,11 @@ bool ProjectDatabaseFilterModel::filterAcceptsRow(int row, const QModelIndex& pa
     return true;
 }
 
-void ProjectDatabaseFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
+void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
 {
     SortFilterProxyModel::setSourceModel(sourceModel);
 
-    _projectDatabaseModel = dynamic_cast<ProjectDatabaseModel*>(sourceModel);
+    _projectDatabaseModel = dynamic_cast<AbstractProjectsModel*>(sourceModel);
 
     const auto updateTags = [this]() -> void {
         const auto uniqueTags = QStringList(_projectDatabaseModel->getTagsSet().begin(), _projectDatabaseModel->getTagsSet().end());
@@ -123,17 +123,17 @@ void ProjectDatabaseFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
     	_tagsFilterAction.setSelectedOptions(_tagsFilterAction.hasSelectedOptions() ? _tagsFilterAction.getSelectedOptions() : uniqueTags);
     };
 
-    connect(_projectDatabaseModel, &ProjectDatabaseModel::tagsChanged, this, updateTags);
+    connect(_projectDatabaseModel, &AbstractProjectsModel::tagsChanged, this, updateTags);
 
     updateTags();
 }
 
-bool ProjectDatabaseFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
+bool ProjectsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     return lhs.data().toString() < rhs.data().toString();
 }
 
-void ProjectDatabaseFilterModel::fromVariantMap(const QVariantMap& variantMap)
+void ProjectsFilterModel::fromVariantMap(const QVariantMap& variantMap)
 {
 	SortFilterProxyModel::fromVariantMap(variantMap);
 
@@ -143,7 +143,7 @@ void ProjectDatabaseFilterModel::fromVariantMap(const QVariantMap& variantMap)
     _filterLoadableOnlyAction.fromParentVariantMap(variantMap);
 }
 
-QVariantMap ProjectDatabaseFilterModel::toVariantMap() const
+QVariantMap ProjectsFilterModel::toVariantMap() const
 {
 	auto variantMap = SortFilterProxyModel::toVariantMap();
 

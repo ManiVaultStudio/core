@@ -22,6 +22,7 @@
 #include "AbstractSettingsManager.h"
 #include "AbstractHelpManager.h"
 #include "AbstractErrorManager.h"
+#include "AbstractScriptingManager.h"
 
 #include <QString>
 #include <QObject>
@@ -71,6 +72,7 @@ public:
         Projects,           /** Manager for loading/saving projects */
         Settings,           /** Manager for managing global settings */
         Help,               /** Manager for getting help */
+        Scripting,          /** Manager for al things scripting */
 
         Count
     };
@@ -128,11 +130,15 @@ public: // Managers
     virtual AbstractProjectManager& getProjectManager() = 0;
     virtual AbstractSettingsManager& getSettingsManager() = 0;
     virtual AbstractHelpManager& getHelpManager() = 0;
+    virtual AbstractScriptingManager& getScriptingManager() = 0;
 
 signals:
 
     /** Invoked when the core is about to be initialized */
     void aboutToBeInitialized();
+
+    /** Invoked when the core is about to be destroyed */
+    void aboutToBeDestroyed();
 
     /** Invoked when the core has been initialized */
     void initialized();
@@ -255,6 +261,14 @@ CORE_EXPORT inline const AbstractSettingsManager& constSettings() {
  */
 CORE_EXPORT inline AbstractHelpManager& help() {
     return core()->getHelpManager();
+}
+
+/**
+* Convenience function to obtain access to the scripting manager in the core
+* @return Reference to abstract scripting manager
+*/
+CORE_EXPORT inline AbstractScriptingManager& scripting() {
+    return core()->getScriptingManager();
 }
 
 }
