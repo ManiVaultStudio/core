@@ -23,53 +23,14 @@ class CORE_EXPORT AbstractHardwareSpecModel : public StandardItemModel
 
 public:
 
-    ///** Model columns */
-    //enum class Column {
-    //	Title,
-    //    Group,
-    //    IsGroup,
-    //    Tags,
-    //    Date,
-    //    IconName,
-    //    Summary,
-    //    Url,
-    //    MinimumCoreVersion,
-    //    RequiredPlugins,
-    //    MissingPlugins,
+    /** Model columns */
+    enum class Column {
+        Title,          /** Title of the hardware component (parameter) item */
+        SystemValue,    /** System value of the hardware component (parameter) item */
+        RequiredValue,  /** Required value of the hardware component (parameter) item */
 
-    //    Count
-    //};
-
-    ///** Header strings for several data roles */
-    //struct ColumHeaderInfo {
-    //    QString     _display;   /** Header string for display role */
-    //    QString     _edit;      /** Header string for edit role */
-    //    QString     _tooltip;   /** Header string for tooltip role */
-    //};
-
-    ///** Column name and tooltip */
-    //static QMap<Column, ColumHeaderInfo> columnInfo;
-
-    /** Base standard model item class for project */
-    //class CORE_EXPORT Item : public QStandardItem {
-    //public:
-
-    //    /**
-    //     * Construct with pointer \p project
-    //     * @param project Const pointer to project
-    //     * @param editable Boolean determining whether the item is editable or not
-    //     */
-    //    Item(const util::ProjectsModelProject* project, bool editable = false);
-
-    //    /**
-    //     * Get project
-    //     * return Pointer to the project
-    //     */
-    //    const util::ProjectsModelProject* getProject() const;
-
-    //private:
-    //    const util::ProjectsModelProject*   _project;      /** The project data */
-    //};
+        Count           /** Number of columns in the model */
+    };
 
 public:
 
@@ -80,8 +41,6 @@ public:
     AbstractHardwareSpecModel(QObject* parent = nullptr);
 
 private:
-    //util::ProjectDatabaseProjects   _projects;  /** Model projects */
-    //QSet<QString>                   _tags;      /** All tags */
 };
 
 }

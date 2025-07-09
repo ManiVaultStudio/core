@@ -19,10 +19,8 @@ class CORE_EXPORT HardwareComponentSpec
 {
 public:
 
-    using HardwareComponentSpecPtr = std::shared_ptr<HardwareComponentSpec>; /**< Pointer to hardware component specification */
-
 	/**
-     * Comnstruct with hardware component specification \p title
+     * Construct with hardware component specification \p title
 	 * @param title hardware component specification title
 	 */
 	HardwareComponentSpec(const QString& title);
@@ -30,6 +28,12 @@ public:
     virtual ~HardwareComponentSpec() = default;
 
     /**
+     * Get the title of the hardware component specification
+     * @return String containing the title of the hardware component specification
+     */
+    QString getTitle() const { return _title; }
+
+	/**
      * Load the hardware component spec from \p variantMap
      * @param variantMap Variant map containing the hardware component spec properties
      */
@@ -55,6 +59,29 @@ public:
      */
     bool isInitialized() const { return _initialized; }
 
+    /**
+     * Get whether the hardware component specification is smaller than the \p other hardware component specification
+     * @param other Hardware component specification to compare with
+     * @return Boolean determining whether the hardware component specification is smaller than the \p other hardware component specification
+     */
+    virtual bool lessThan(const HardwareComponentSpec& other) const = 0;
+
+    /**
+     * Get standard item
+     * @return Pointer to standard item representing the hardware component spec
+     */
+    virtual QStandardItem* getStandardItem() const;
+
+    /**
+     * Get row representing the hardware component spec parameter
+     * @param parameterName Name of the parameter
+     * @param systemValue String containing the system value of the parameter
+     * @param requiredValue String containing the required value of the parameter
+     * @param valid Boolean determining whether the parameter condition is valid
+     * @return List of pointers to standard items representing the parameter
+     */
+    static QList<QStandardItem*> getParameterRow(const QString& parameterName, const QString& systemValue = "", const QString& requiredValue = "", bool valid = true);
+
 protected: // Population methods
 
     /** Load the hardware spec from current system */
@@ -67,12 +94,16 @@ protected: // Population methods
 	void setInitialized(bool initialized = true) { _initialized = initialized; }
 
 private:
-    const QString&  _title;         /** Hardware component specification title */
+    const QString   _title;         /** Hardware component specification title */
     bool            _initialized;   /** Whether the hardware spec has been initialized (either from variant map or system) */
 
     friend class HardwareSpec; // Allow HardwareSpec to access private members
 };
 
-using HardwareComponentSpecs = std::vector<std::shared_ptr<HardwareComponentSpec>>;
+/** Shared pointer to hardware component specification */
+using HardwareComponentSpecPtr = std::shared_ptr<HardwareComponentSpec>;
+
+/** Shared pointers to hardware component specification */
+using HardwareComponentSpecs = std::vector<std::shared_ptr<HardwareComponentSpec>>;     
 
 }

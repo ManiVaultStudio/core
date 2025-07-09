@@ -18,6 +18,15 @@ namespace mv {
 HardwareSpecTreeModel::HardwareSpecTreeModel(QObject* parent /*= nullptr*/) :
     AbstractHardwareSpecModel(parent)
 {
+    setColumnCount(static_cast<int>(Column::Count));
+}
+
+void HardwareSpecTreeModel::setHardwareSpec(const util::HardwareSpec& hardwareSpec)
+{
+    setRowCount(0);
+
+    for (const auto& hardwareComponentSpec : hardwareSpec.getHardwareComponentSpecs())
+    	appendRow(hardwareComponentSpec->getStandardItem());
 }
 
 }

@@ -27,6 +27,15 @@ QString CpuComponentSpec::getFailureString(const HardwareComponentSpec& required
 	return "CPU does not meet requirements";
 }
 
+QStandardItem* CpuComponentSpec::getStandardItem() const
+{
+	auto item = HardwareComponentSpec::getStandardItem();
+
+    item->setIcon(StyledIcon("microchip"));
+
+    return item;
+}
+
 void CpuComponentSpec::fromSystem()
 {
 }

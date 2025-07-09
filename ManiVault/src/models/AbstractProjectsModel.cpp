@@ -104,7 +104,7 @@ QSet<QString> AbstractProjectsModel::getTagsSet() const
 
 void AbstractProjectsModel::addProjectGroup(const QString& groupTitle)
 {
-    Q_ASSERT(groupTitle.isEmpty());
+    Q_ASSERT(!groupTitle.isEmpty());
 
     if (groupTitle.isEmpty())
         return;

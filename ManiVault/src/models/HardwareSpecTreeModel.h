@@ -29,6 +29,12 @@ public:
      */
     HardwareSpecTreeModel(QObject* parent = nullptr);
 
+    /**
+     * Set the hardware specification to be displayed in the model
+     * @param hardwareSpec The hardware specification to set
+     */
+    void setHardwareSpec(const util::HardwareSpec& hardwareSpec);
+
 private:
 };
 

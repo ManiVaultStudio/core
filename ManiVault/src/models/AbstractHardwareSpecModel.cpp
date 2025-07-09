@@ -16,7 +16,7 @@ namespace mv {
 AbstractHardwareSpecModel::AbstractHardwareSpecModel(QObject* parent /*= nullptr*/) :
     StandardItemModel(parent)
 {
-    //setColumnCount(static_cast<int>(Column::Count));
+    setColumnCount(static_cast<int>(Column::Count));
 }
 
 }

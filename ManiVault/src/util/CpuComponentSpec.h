@@ -73,6 +73,21 @@ public:
         return true;
     }
 
+    /**
+     * Get whether the hardware component specification is smaller than the \p other hardware component specification
+     * @param other Hardware component specification to compare with
+     * @return Boolean determining whether the hardware component specification is smaller than the \p other hardware component specification
+     */
+    bool lessThan(const HardwareComponentSpec& other) const override {
+        return *this < dynamic_cast<const CpuComponentSpec&>(other);
+    }
+
+    /**
+     * Get standard item
+     * @return Pointer to standard item representing the hardware component spec
+     */
+    QStandardItem* getStandardItem() const override;
+
 protected: // Population methods
 
     /** Load the hardware spec from current system */

@@ -13,18 +13,20 @@ HardwareSpec HardwareSpec::systemHardwareSpec;
 
 HardwareSpec::HardwareSpec()
 {
-    _componentSpecs.push_back(std::make_shared<DisplayComponentSpec>());
+    _hardwareComponentSpecs.push_back(std::make_shared<DisplayComponentSpec>());
+    _hardwareComponentSpecs.push_back(std::make_shared<CpuComponentSpec>());
+    _hardwareComponentSpecs.push_back(std::make_shared<RamComponentSpec>());
 }
 
 void HardwareSpec::fromVariantMap(const QVariantMap& variantMap)
 {
-    for (auto& componentSpec : _componentSpecs)
+    for (auto& componentSpec : _hardwareComponentSpecs)
         componentSpec->fromVariantMap(variantMap);
 }
 
 void HardwareSpec::fromSystem() const
 {
-    for (auto& componentSpec : _componentSpecs)
+    for (auto& componentSpec : _hardwareComponentSpecs)
         componentSpec->fromSystem();
 }
 
@@ -32,11 +34,25 @@ bool HardwareSpec::isInitialized() const
 {
     auto initialized = false;
 
-    for (auto& componentSpec : _componentSpecs)
+    for (auto& componentSpec : _hardwareComponentSpecs)
         if (componentSpec->isInitialized())
             initialized = true;
 
     return initialized;
+}
+
+HardwareComponentSpecs HardwareSpec::getHardwareComponentSpecs(bool initializedOnly /*= true*/) const
+{
+    if (!initializedOnly)
+        return _hardwareComponentSpecs;
+
+	HardwareComponentSpecs initializedHardwareComponentSpecs;
+
+	for (const auto& candidateHardwareComponentSpec : _hardwareComponentSpecs)
+        if (candidateHardwareComponentSpec->isInitialized())
+            initializedHardwareComponentSpecs.push_back(candidateHardwareComponentSpec);
+
+    return initializedHardwareComponentSpecs;
 }
 
 bool HardwareSpec::meets(const HardwareSpec& required) const
@@ -51,30 +67,15 @@ QString HardwareSpec::getFailureString(const HardwareSpec& required) const
 
     QString status("<p>System does not have the recommended hardware specification:</p>");
 
-    for (std::size_t i = 0; i < _componentSpecs.size() && i < required._componentSpecs.size(); ++i) {
-        const auto lhs = _componentSpecs[i];
-        const auto rhs = required._componentSpecs[i];
+    for (std::size_t i = 0; i < _hardwareComponentSpecs.size() && i < required._hardwareComponentSpecs.size(); ++i) {
+        const auto lhs = _hardwareComponentSpecs[i];
+        const auto rhs = required._hardwareComponentSpecs[i];
 
         if (lhs->isInitialized() && rhs->isInitialized() && !lhs->meets(*rhs))
         	status.append(QString("<p>%1</p>").arg(lhs->getFailureString(*rhs)));
     }
 
 	return status;
-}
-
-HardwareComponentSpecs HardwareSpec::getFailingHardwareComponentSpecs(const HardwareSpec& other) const
-{
-    HardwareComponentSpecs failingHardwareComponentSpecs;
-
-    for (std::size_t i = 0; i < _componentSpecs.size() && i < other._componentSpecs.size(); ++i) {
-        const auto& lhs = _componentSpecs[i];
-        const auto& rhs = other._componentSpecs[i];
-
-        if (lhs->isInitialized() && rhs->isInitialized())
-            failingHardwareComponentSpecs.push_back(lhs);
-    }
-
-    return failingHardwareComponentSpecs;
 }
 
 const HardwareSpec& HardwareSpec::getSystemHardwareSpec()

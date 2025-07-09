@@ -36,12 +36,30 @@ public:
      */
     bool isInitialized() const;
 
+
     /**
-     * Get the failing hardware component specifications
-     * @param other Other hardware specification to compare with
-     * @return Failing hardware component specifications
+     * Get the hardware component specification by \p name
+     * @param name Name of the hardware component specification
+     * @return Hardware component specification with the given name
      */
-    HardwareComponentSpecs getFailingHardwareComponentSpecs(const HardwareSpec& other) const;
+    template<class HardwareComponentSpecType>
+    std::shared_ptr<HardwareComponentSpecType> getHardwareComponentSpec(const QString& name) const {
+        static_assert(std::is_base_of_v<HardwareComponentSpec, HardwareComponentSpecType>, "HardwareComponentSpecType must derive from HardwareComponentSpec");
+
+        for (const auto& hardwareComponentSpec : _hardwareComponentSpecs) {
+            if (hardwareComponentSpec->getTitle() == name)
+                return std::dynamic_pointer_cast<HardwareComponentSpecType>(hardwareComponentSpec);
+        }
+
+        return {};
+    }
+
+    /**
+     * Get the hardware component specifications
+     * @param initializedOnly Whether to only return initialized hardware component specifications
+     * @return Hardware component specifications
+     */
+    HardwareComponentSpecs getHardwareComponentSpecs(bool initializedOnly = true) const;
 
 public: // Conditional
 
@@ -51,12 +69,12 @@ public: // Conditional
      * @return Boolean determining whether the hardware specification is equal to the \p other hardware specification
      */
     bool operator==(const HardwareSpec& other) const {
-        if (_componentSpecs.size() != other._componentSpecs.size())
+        if (_hardwareComponentSpecs.size() != other._hardwareComponentSpecs.size())
             return false;
 
-        for (std::size_t i = 0; i < _componentSpecs.size(); ++i) {
-            const auto& lhs = _componentSpecs[i];
-            const auto& rhs = other._componentSpecs[i];
+        for (std::size_t i = 0; i < _hardwareComponentSpecs.size(); ++i) {
+            const auto& lhs = _hardwareComponentSpecs[i];
+            const auto& rhs = other._hardwareComponentSpecs[i];
 
             if (!lhs->isInitialized() || !rhs->isInitialized())
                 continue;
@@ -84,14 +102,14 @@ public: // Conditional
     bool operator<(const HardwareSpec& other) const {
         std::vector<bool> conditions;
 
-        conditions.reserve(_componentSpecs.size());
+        conditions.reserve(_hardwareComponentSpecs.size());
 
-        for (std::size_t i = 0; i < _componentSpecs.size() && i < other._componentSpecs.size(); ++i) {
-            const auto& lhs = _componentSpecs[i];
-            const auto& rhs = other._componentSpecs[i];
+        for (std::size_t i = 0; i < _hardwareComponentSpecs.size() && i < other._hardwareComponentSpecs.size(); ++i) {
+            const auto& lhs = _hardwareComponentSpecs[i];
+            const auto& rhs = other._hardwareComponentSpecs[i];
 
             if (lhs->isInitialized() && rhs->isInitialized())
-                conditions.push_back(lhs < rhs);
+                conditions.push_back(lhs->lessThan(*rhs));
         }
 
         return std::ranges::all_of(conditions.begin(), conditions.end(), [](bool condition) { return condition; });
@@ -149,7 +167,7 @@ public: // System hardware specification
     static void updateSystemHardwareSpecs();
 
 private:
-    HardwareComponentSpecs  _componentSpecs;    /** Hardware component specifications */
+    HardwareComponentSpecs  _hardwareComponentSpecs;    /** Hardware component specifications */
 
     static HardwareSpec systemHardwareSpec; /** System hardware specification */
 };
