@@ -53,7 +53,7 @@ DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
     });
     getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 
-    getProjectsDsnsAction().addString("https://api.github.com/repos/ManiVaultStudio/TestFixturesBasalGangliaBICAN/contents/projects.json");
+    getProjectsDsnsAction().addString("https://raw.githubusercontent.com/ManiVaultStudio/TestFixturesBasalGangliaBICAN/main/projects.json");
 }
 
 void DataHierarchyPluginFactory::initialize()
