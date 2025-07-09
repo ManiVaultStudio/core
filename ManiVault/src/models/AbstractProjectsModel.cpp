@@ -195,6 +195,22 @@ const ProjectDatabaseProjects& AbstractProjectsModel::getProjects() const
 	return _projects;
 }
 
+AbstractProjectsModel::HardwareSpecTooltipPopup::HardwareSpecTooltipPopup(QWidget* parent): QFrame(parent, Qt::ToolTip)
+{
+	setWindowFlags(Qt::ToolTip);
+	setFrameShape(QFrame::Box);
+	setStyleSheet("background: white; border: 1px solid gray;");
+
+	auto* layout = new QVBoxLayout(this);
+	_label       = new QLabel("Details here...");
+	layout->addWidget(_label);
+}
+
+void AbstractProjectsModel::HardwareSpecTooltipPopup::setText(const QString& text)
+{
+	_label->setText(text);
+}
+
 AbstractProjectsModel::Item::Item(const mv::util::ProjectsModelProject* project, bool editable /*= false*/) :
     _project(project)
 {
