@@ -79,15 +79,6 @@ public:
      */
     AbstractHardwareSpecModel(QObject* parent = nullptr);
 
-    /**
-     * Get header data for \p section, \p orientation and display \p role
-     * @param section Section
-     * @param orientation Orientation
-     * @param role Data role
-     * @return Header
-     */
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
 private:
     //util::ProjectDatabaseProjects   _projects;  /** Model projects */
     //QSet<QString>                   _tags;      /** All tags */
