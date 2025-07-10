@@ -42,18 +42,16 @@ QString getIntegerCountHumanReadable(const double& count)
 
 QString getNoBytesHumanReadable(double noBytes)
 {
-    QStringList list{ "KB", "MB", "GB", "TB" };
+    QStringList units{ "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
 
-    QStringListIterator it(list);
-    QString unit("bytes");
+    int i = 0;
 
-    while (noBytes >= 1024.0 && it.hasNext())
-    {
-        unit = it.next();
+    while (noBytes >= 1024.0 && i < units.size() - 1) {
         noBytes /= 1024.0;
+        ++i;
     }
 
-    return QString::number(noBytes, 'f', 2) + " " + unit;
+    return QString::number(noBytes, 'f', 2) + " " + units[i];
 }
 
 QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex)

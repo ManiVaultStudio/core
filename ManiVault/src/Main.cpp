@@ -182,18 +182,7 @@ int main(int argc, char *argv[])
     if (userWillSelectStartupProject) {
         StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel, startupProjectsFilterModel);
 
-        const auto dialogResult = startupProjectSelectorDialog.exec();
-
-        if (dialogResult == QDialog::Accepted) {
-
-            if (auto startupProject = startupProjectSelectorDialog.getSelectedStartupProject()) {
-                application.setStartupProjectUrl(startupProject->getUrl());
-
-                //auto startupProjectMetaActionCandidate = mv::projects().getProjectMetaAction(startupProject->getUrl());
-            }
-        }
-
-        if (dialogResult == QDialog::Rejected)
+        if (startupProjectSelectorDialog.exec() == QDialog::Rejected)
             return 0;
     }
 

@@ -4,6 +4,8 @@
 
 #include "ProjectsModelProject.h"
 
+#include <QTextBrowser>
+
 #include "CoreInterface.h"
 
 namespace mv::util {
@@ -81,9 +83,54 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
 {
 }
 
-void ProjectsModelProject::load() const
+bool ProjectsModelProject::load() const
 {
-    mv::projects().openProject(getUrl());
+    const auto systemCompatibility = HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec());
+
+    if (systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Incompatible){
+
+        QDialog projectIncompatibleWithSystemDialog;
+
+        projectIncompatibleWithSystemDialog.setWindowIcon(StyledIcon("triangle-exclamation"));
+        projectIncompatibleWithSystemDialog.setWindowTitle("Incompatible System");
+        projectIncompatibleWithSystemDialog.setMinimumWidth(350);
+        projectIncompatibleWithSystemDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+
+        auto layout         = new QVBoxLayout(&projectIncompatibleWithSystemDialog);
+        auto textBrowser    = new QTextBrowser();
+
+        QPalette textBrowserPalette = textBrowser->palette();
+
+    	textBrowserPalette.setColor(QPalette::Base, textBrowser->palette().color(QPalette::Window));
+
+    	textBrowser->setPalette(textBrowserPalette);
+        textBrowser->setFrameStyle(QFrame::NoFrame);
+
+        QString htmlMessage;
+
+        htmlMessage += systemCompatibility._failureString;
+        htmlMessage += "<p>Do you want to continue anyway?</p>";
+
+        textBrowser->setHtml(htmlMessage);
+
+        layout->addWidget(textBrowser);
+
+        auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Yes | QDialogButtonBox::Abort);
+
+        connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Yes), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::accept);
+        connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Abort), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::reject);
+
+        layout->addWidget(dialogButtonBox);
+
+        projectIncompatibleWithSystemDialog.setLayout(layout);
+
+        if (projectIncompatibleWithSystemDialog.exec() == QDialog::Rejected)
+            return false;
+    }
+
+    Application::current()->setStartupProjectUrl(getUrl());
+
+    return true;
 }
 
 QString ProjectsModelProject::getTitle() const

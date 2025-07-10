@@ -17,18 +17,18 @@
 				},
 				"ram": {
 					"type": "string",
-					"pattern": "^(\\d+)([KMGTP]i?B)$"
+					"pattern": "^\\s*\\d+(\\.\\d+)?\\s*(B|[KMGTP]iB)\\s*$"
 				},
 				"storage": {
 					"type": "string",
-					"pattern": "^(\\d+)([KMGTP]i?B)$"
+					"pattern": "^\\s*\\d+(\\.\\d+)?\\s*(B|[KMGTP]iB)\\s*$"
 				},
 				"gpu": {
 					"type": "object",
 					"properties": {
 						"ram": {
 							"type": "string",
-							"pattern": "^(\\d+)([KMGTP]i?B)$"
+							"pattern": "^\\s*\\d+(\\.\\d+)?\\s*(B|[KMGTP]iB)\\s*$"
 						}
 					}
 				},
@@ -129,7 +129,7 @@
 			},
 			"size": {
 				"type": "string",
-				"pattern": "^(\\d+)([KMGTP]i?B)$"
+				"pattern": "^\\s*\\d+(\\.\\d+)?\\s*(B|[KMGTP]iB)\\s*$"
 			},
 			"hardwareRequirements": {
 				"type": "object",

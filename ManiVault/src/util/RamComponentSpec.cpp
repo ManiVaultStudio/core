@@ -23,38 +23,33 @@ namespace mv::util
 {
 
 quint64 parseByteSize(const QString& input) {
-    static const QRegularExpression regex(R"(^(\d+)([KMGTP]i?B)$)", QRegularExpression::CaseInsensitiveOption);
-    static const QHash<QString, quint64> multipliers = {
-        { "B",     1ull },
-        { "KB",    1000ull },
-        { "MB",    1000ull * 1000 },
-        { "GB",    1000ull * 1000 * 1000 },
-        { "TB",    1000ull * 1000 * 1000 * 1000 },
-        { "PB",    1000ull * 1000 * 1000 * 1000 * 1000 },
+    static const QRegularExpression regex(R"(^\s*(\d+)\s*([KMGTPE]?i?B)?\s*$)", QRegularExpression::CaseInsensitiveOption);
 
+    static const QHash<QString, quint64> multipliers = {
+        { "",      1ull },
+        { "B",     1ull },
         { "KIB",   1024ull },
         { "MIB",   1024ull * 1024 },
         { "GIB",   1024ull * 1024 * 1024 },
         { "TIB",   1024ull * 1024 * 1024 * 1024 },
-        { "PIB",   1024ull * 1024 * 1024 * 1024 * 1024 }
+        { "PIB",   1024ull * 1024 * 1024 * 1024 * 1024 },
+        { "EIB",   1024ull * 1024 * 1024 * 1024 * 1024 * 1024 }
     };
 
-    QRegularExpressionMatch match = regex.match(input.trimmed());
-    if (!match.hasMatch()) {
+    QRegularExpressionMatch match = regex.match(input);
+    if (!match.hasMatch())
         throw std::invalid_argument(QString("Invalid size format: %1").arg(input).toStdString());
-    }
 
     bool ok = false;
     quint64 number = match.captured(1).toULongLong(&ok);
-    if (!ok) {
+    if (!ok)
         throw std::runtime_error("Failed to convert number to integer");
-    }
 
     QString unit = match.captured(2).toUpper();
     quint64 multiplier = multipliers.value(unit, 0);
-    if (multiplier == 0) {
-        throw std::runtime_error("Unknown unit suffix");
-    }
+
+    if (multiplier == 0)
+        throw std::runtime_error(QString("Unknown unit suffix: %1").arg(unit).toStdString());
 
     return number * multiplier;
 }
@@ -77,7 +72,7 @@ QString RamComponentSpec::getFailureString(const HardwareComponentSpec& required
 
     const auto& ramComponentSpec = dynamic_cast<const RamComponentSpec&>(required);
 
-    return QString("Insufficient RAM: %2 &lt; %3").arg(QString::number(_numberOfBytes), QString::number(ramComponentSpec._numberOfBytes));
+    return QString("Insufficient RAM: %2 &lt; %3").arg(getNoBytesHumanReadable(_numberOfBytes), getNoBytesHumanReadable(ramComponentSpec._numberOfBytes));
 }
 
 QStandardItem* RamComponentSpec::getStandardItem() const

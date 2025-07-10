@@ -43,8 +43,11 @@ public:
      */
     explicit ProjectsModelProject(const QString& groupTitle);
 
-    /** Load the project with the project manager */
-    void load() const;
+    /**
+     * Sets the application startup project URL
+     * @return Boolean determining whether the application startup project URL has been set
+     */
+    bool load() const;
 
     /**
      * Get title
@@ -183,7 +186,7 @@ private:
     QString         _size;                      /** Size of the ManiVault project */
     HardwareSpec    _minimumHardwareSpec;       /** Minimum hardware specification for the project */
     HardwareSpec    _recommendedHardwareSpec;   /** Recommended hardware specification for the project */
-    bool            _startup;                 /** Boolean determining whether this is a startup project */
+    bool            _startup;                   /** Boolean determining whether this is a startup project */
 };
 
 using ProjectDatabaseProjects = std::vector<const ProjectsModelProject*>;

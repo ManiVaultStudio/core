@@ -194,7 +194,12 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::MissingPlugins), true);
 #endif
 
-    connect(&_loadAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::accept);
+    connect(&_loadAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (auto selectedStartupProject = getSelectedStartupProject())
+            if (selectedStartupProject->load())
+                accept();
+    });
+
     connect(&_quitAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::reject);
 }
 
