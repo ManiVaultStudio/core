@@ -470,15 +470,26 @@ QVariant AbstractProjectsModel::SizeItem::data(int role) const
 QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
 {
     switch (role) {
-    case Qt::EditRole:
+		case Qt::EditRole:
 	        return QVariant::fromValue(HardwareSpec::getSystemCompatibility(getProject()->getMinimumHardwareSpec(), getProject()->getRecommendedHardwareSpec()));
 
 	    case Qt::DisplayRole:
         {
-            if (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility == HardwareSpec::SystemCompatibility::Unknown)
-                return "Not available";
+            switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
+	            case HardwareSpec::SystemCompatibility::Incompatible:
+	                return "Minimum hardware requirements not met";
 
-            return "";
+	            case HardwareSpec::SystemCompatibility::Minimum:
+	                return "Recommended hardware requirements not met";
+
+	            case HardwareSpec::SystemCompatibility::Compatible:
+	                return "System is compatible";
+
+	            case HardwareSpec::SystemCompatibility::Unknown:
+                    return "No hardware compatibility information available";
+            }
+
+            break;
         }
 
         case Qt::ToolTipRole:
@@ -488,16 +499,16 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
         {
 	        switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
 				case HardwareSpec::SystemCompatibility::Incompatible:
-                    return StyledIcon("circle-xmark").withColor(Qt::darkRed);
+                    return StyledIcon("circle-xmark");
 
                 case HardwareSpec::SystemCompatibility::Minimum:
-                    return StyledIcon("circle-exclamation").withColor(Qt::darkYellow);
+                    return StyledIcon("circle-exclamation");
 
                 case HardwareSpec::SystemCompatibility::Compatible:
                     return StyledIcon("circle-check");
 
 		        case HardwareSpec::SystemCompatibility::Unknown:
-                    break;
+                    return StyledIcon("circle-question");
 	        }
 
             break;

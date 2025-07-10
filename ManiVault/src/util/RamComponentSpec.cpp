@@ -22,38 +22,6 @@
 namespace mv::util
 {
 
-quint64 parseByteSize(const QString& input) {
-    static const QRegularExpression regex(R"(^\s*(\d+)\s*([KMGTPE]?i?B)?\s*$)", QRegularExpression::CaseInsensitiveOption);
-
-    static const QHash<QString, quint64> multipliers = {
-        { "",      1ull },
-        { "B",     1ull },
-        { "KIB",   1024ull },
-        { "MIB",   1024ull * 1024 },
-        { "GIB",   1024ull * 1024 * 1024 },
-        { "TIB",   1024ull * 1024 * 1024 * 1024 },
-        { "PIB",   1024ull * 1024 * 1024 * 1024 * 1024 },
-        { "EIB",   1024ull * 1024 * 1024 * 1024 * 1024 * 1024 }
-    };
-
-    QRegularExpressionMatch match = regex.match(input);
-    if (!match.hasMatch())
-        throw std::invalid_argument(QString("Invalid size format: %1").arg(input).toStdString());
-
-    bool ok = false;
-    quint64 number = match.captured(1).toULongLong(&ok);
-    if (!ok)
-        throw std::runtime_error("Failed to convert number to integer");
-
-    QString unit = match.captured(2).toUpper();
-    quint64 multiplier = multipliers.value(unit, 0);
-
-    if (multiplier == 0)
-        throw std::runtime_error(QString("Unknown unit suffix: %1").arg(unit).toStdString());
-
-    return number * multiplier;
-}
-
 RamComponentSpec::RamComponentSpec() :
     HardwareComponentSpec("RAM"),
     _numberOfBytes(0)
@@ -72,6 +40,7 @@ QString RamComponentSpec::getFailureString(const HardwareComponentSpec& required
 
     const auto& ramComponentSpec = dynamic_cast<const RamComponentSpec&>(required);
 
+    //return QString("Insufficient RAM: %2 &lt; %3").arg(QString::number(_numberOfBytes), QString::number(ramComponentSpec._numberOfBytes));
     return QString("Insufficient RAM: %2 &lt; %3").arg(getNoBytesHumanReadable(_numberOfBytes), getNoBytesHumanReadable(ramComponentSpec._numberOfBytes));
 }
 
@@ -83,7 +52,7 @@ QStandardItem* RamComponentSpec::getStandardItem() const
 
     auto systemRamComponentSpec = HardwareSpec::getSystemHardwareSpec().getHardwareComponentSpec<RamComponentSpec>("RAM");
 
-    item->appendRow(getParameterRow("Installed", getNoBytesHumanReadable(systemRamComponentSpec->getNumberOfBytes()), getNoBytesHumanReadable(_numberOfBytes), systemRamComponentSpec->getNumberOfBytes() >= _numberOfBytes));
+    item->appendRow(getParameterRow("Installed", getNoBytesHumanReadable(systemRamComponentSpec->getNumberOfBytes(), false), getNoBytesHumanReadable(_numberOfBytes), systemRamComponentSpec->getNumberOfBytes() >= _numberOfBytes));
 
     return item;
 }
