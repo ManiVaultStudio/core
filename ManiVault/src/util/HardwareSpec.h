@@ -18,6 +18,14 @@ class CORE_EXPORT HardwareSpec
 {
 public:
 
+    /** Enum for system hardware spec compatibility with other specifications */
+    enum class SystemCompatibility {
+        Incompatible,   /** Incompatible with the minimum and recommended hardware specification */
+        Minimum,        /** Compatible with the minimum hardware specification only */
+        Compatible,     /** Compatible with the minimum and recommended hardware specification */
+        Unknown         /** Unknown compatibility */
+    };
+
     /** Default constructor */
     HardwareSpec();
 
