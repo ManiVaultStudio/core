@@ -76,7 +76,7 @@ std::uint64_t parseByteSize(const QString& input)
     throw std::invalid_argument("Unknown byte unit: " + unit.toStdString());
 }
 
-QString getNoBytesHumanReadable(std::uint64_t byteCount, bool useIEC = true)
+QString getNoBytesHumanReadable(std::uint64_t byteCount, bool useIEC /*= true*/)
 {
     // Units for IEC (base 1024)
     const QStringList iecUnits{ "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
