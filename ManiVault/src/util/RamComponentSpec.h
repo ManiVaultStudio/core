@@ -63,7 +63,7 @@ public:
      * @return Boolean determining whether the RAM component specification is smaller than the \p other RAM component specification
      */
     bool operator<(const RamComponentSpec& other) const {
-        return getNumberOfBytes() > other.getNumberOfBytes();
+        return getNumberOfBytes() < other.getNumberOfBytes();
     }
 
     /**

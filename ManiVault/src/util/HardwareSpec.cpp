@@ -90,21 +90,27 @@ void HardwareSpec::updateSystemHardwareSpecs()
     systemHardwareSpec.fromSystem();
 }
 
-HardwareSpec::SystemCompatibility HardwareSpec::getSystemCompatibility(const HardwareSpec& minimumHardwareSpec, const HardwareSpec& recommendedHardwareSpec)
+HardwareSpec::SystemCompatibilityInfo HardwareSpec::getSystemCompatibility(const HardwareSpec& minimumHardwareSpec, const HardwareSpec& recommendedHardwareSpec)
 {
 	if (!systemHardwareSpec.isInitialized() || !minimumHardwareSpec.isInitialized() || !recommendedHardwareSpec.isInitialized())
-        return SystemCompatibility::Unknown;
-
-    if (!systemHardwareSpec.meets(minimumHardwareSpec))
-        return SystemCompatibility::Incompatible;
-
-    if (systemHardwareSpec.meets(minimumHardwareSpec) && !systemHardwareSpec.meets(recommendedHardwareSpec))
-        return SystemCompatibility::Minimum;
+        return { SystemCompatibility::Unknown, QStringList() };
 
     if (systemHardwareSpec.meets(minimumHardwareSpec) && systemHardwareSpec.meets(recommendedHardwareSpec))
-        return SystemCompatibility::Compatible;
+        return { SystemCompatibility::Compatible, QStringList() };
 
-    return SystemCompatibility::Unknown;
+    if (!systemHardwareSpec.meets(minimumHardwareSpec)) {
+        QStringList systemIncompatibilityReasons;
+
+        return { SystemCompatibility::Incompatible, systemIncompatibilityReasons };
+    }
+
+    if (systemHardwareSpec.meets(minimumHardwareSpec) && !systemHardwareSpec.meets(recommendedHardwareSpec)) {
+        QStringList systemIncompatibilityReasons;
+
+        return { SystemCompatibility::Minimum, systemIncompatibilityReasons };
+    }
+
+    return { SystemCompatibility::Unknown, QStringList() };
 }
 
 }

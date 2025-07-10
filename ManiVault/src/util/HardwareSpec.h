@@ -33,6 +33,12 @@ public:
         Unknown         /** Unknown compatibility */
     };
 
+    /** System compatibility information */
+    struct SystemCompatibilityInfo {
+        SystemCompatibility     _compatibility;             /** System compatibility */
+        QStringList             _incompatibilityReasons;    /** Reason(s) for the incompatibility */
+    };
+
     /**
      * Construct with hardware specification \p type
      * @param type Hardware specification type
@@ -53,7 +59,6 @@ public:
      * @return Boolean determining whether the hardware spec has been initialized
      */
     bool isInitialized() const;
-
 
     /**
      * Get the hardware component specification by \p name
@@ -97,7 +102,7 @@ public: // Conditional
             if (!lhs->isInitialized() || !rhs->isInitialized())
                 return false;
 
-            if (!lhs->meets(*rhs))
+            if (!lhs->equals(*rhs))
                 return false;
         }
 
@@ -188,9 +193,9 @@ public: // System hardware specification
      * Get system compatibility with the minimum and recommended hardware specifications
      * @param minimumHardwareSpec Minimum hardware specification
      * @param recommendedHardwareSpec Recommended hardware specification
-     * @return System compatibility with the minimum and recommended hardware specifications
+     * @return System compatibility info with the minimum and recommended hardware specifications
      */
-    static SystemCompatibility getSystemCompatibility(const HardwareSpec& minimumHardwareSpec, const HardwareSpec& recommendedHardwareSpec);
+    static SystemCompatibilityInfo getSystemCompatibility(const HardwareSpec& minimumHardwareSpec, const HardwareSpec& recommendedHardwareSpec);
 
 private:
     Type                    _type;                      /** Hardware specification type */

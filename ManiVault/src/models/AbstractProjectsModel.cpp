@@ -475,7 +475,7 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
 
 	    case Qt::DisplayRole:
         {
-            if (data(Qt::EditRole).value<HardwareSpec::SystemCompatibility>() == HardwareSpec::SystemCompatibility::Unknown)
+            if (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility == HardwareSpec::SystemCompatibility::Unknown)
                 return "Not available";
 
             return "";
@@ -483,7 +483,7 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
 
         case Qt::ToolTipRole:
         {
-            switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibility>()) {
+            switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
 	            case HardwareSpec::SystemCompatibility::Incompatible:
 	                return "Your system is not suitable (the project is not guaranteed to run without problems)";
 
@@ -502,12 +502,12 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
 
         case Qt::DecorationRole:
         {
-	        switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibility>()) {
+	        switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
 				case HardwareSpec::SystemCompatibility::Incompatible:
                     return StyledIcon("circle-xmark").withColor(Qt::darkRed);
 
                 case HardwareSpec::SystemCompatibility::Minimum:
-                    return StyledIcon("circle-exclamation").withColor(Qt::darkRed);
+                    return StyledIcon("circle-exclamation").withColor(Qt::darkYellow);
 
                 case HardwareSpec::SystemCompatibility::Compatible:
                     return StyledIcon("circle-check");
