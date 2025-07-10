@@ -157,7 +157,7 @@ protected:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "";
+	                return "Downloaded";
 
 	            case Qt::ToolTipRole:
 	                return "Whether the project has been downloaded before";
