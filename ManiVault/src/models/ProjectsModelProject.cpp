@@ -18,7 +18,10 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
     _size(variantMap.contains("size") ? variantMap["size"].toString() : "NA"),
-    _startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false)
+    _minimumHardwareSpec(HardwareSpec::Type::Minimum),
+    _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
+	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false)
+
 {
     if (variantMap.contains("coreVersion")) {
         const auto coreVersionMap = variantMap["coreVersion"].toMap();
@@ -72,7 +75,9 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _title(groupTitle),
     _isGroup(true),
     _group(groupTitle),
-    _iconName("folder")
+    _iconName("folder"),
+    _minimumHardwareSpec(HardwareSpec::Type::Minimum),
+    _recommendedHardwareSpec(HardwareSpec::Type::Recommended)
 {
 }
 
