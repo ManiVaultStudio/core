@@ -13,24 +13,23 @@ using namespace mv::gui;
 
 namespace mv {
 
-QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> AbstractProjectsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
-    { Column::Title, { "Title" , "Title", "Title" } },
-    { Column::Downloaded, { "Downloaded" , "Downloaded", "Whether the project has been downloaded before" } },
-    { Column::Group, { "Group" , "Group", "Group" } },
-    { Column::IsGroup, { "IsGroup" , "IsGroup", "IsGroup" } },
-    { Column::Tags, { "Tags" , "Tags", "Tags" } },
-    { Column::Date, { "Date" , "Date", "Issue date" } },
-    { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
-    { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
-    { Column::Url, { "URL" , "URL", "Project URL" } },
-    { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
-    { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
-    { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
-    { Column::Size, { "Size" , "Size", "Project size" } },
-    { Column::MinimumHardwareSpec, { "Min. specs" , "Min. specs", "Minimum hardware specification for opening the project" } },
-    { Column::RecommendedHardwareSpec, { "Rec. specs" , "Rec. specs", "Recommended hardware specification for opening the project" } },
-    { Column::RecommendedHardwareSpec, { "IsStartup" , "IsStartup", "Whether the project can be opened at application startup" } },
-});
+//QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> AbstractProjectsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
+//    { Column::Title, { "Title" , "Title", "Title" } },
+//    { Column::Downloaded, { "Downloaded" , "Downloaded", "Whether the project has been downloaded before" } },
+//    { Column::Group, { "Group" , "Group", "Group" } },
+//    { Column::IsGroup, { "IsGroup" , "IsGroup", "IsGroup" } },
+//    { Column::Tags, { "Tags" , "Tags", "Tags" } },
+//    { Column::Date, { "Date" , "Date", "Issue date" } },
+//    { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
+//    { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
+//    { Column::Url, { "URL" , "URL", "Project URL" } },
+//    { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
+//    { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
+//    { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
+//    { Column::Size, { "Size" , "Size", "Project size" } },
+//    { Column::SystemCompatibility, { "SystemCompatibility" , "SystemCompatibility", "Minimum hardware specification for opening the project" } },
+//    { Column::IsStartup, { "Startup" , "Startup", "Whether this is a startup project" } }
+//});
 
 AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
     StandardItemModel(parent, "Projects", populationMode)
@@ -81,11 +80,8 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::Size:
             return SizeItem::headerData(orientation, role);
 
-        case Column::MinimumHardwareSpec:
-            return MinimumHardwareSpecItem::headerData(orientation, role);
-
-        case Column::RecommendedHardwareSpec:
-            return RecommendedHardwareSpecItem::headerData(orientation, role);
+        case Column::SystemCompatibility:
+            return SystemCompatibilityItem::headerData(orientation, role);
 
         case Column::IsStartup:
             return IsStartupItem::headerData(orientation, role);
@@ -471,7 +467,7 @@ QVariant AbstractProjectsModel::SizeItem::data(int role) const
 	return Item::data(role);
 }
 
-QVariant AbstractProjectsModel::MinimumHardwareSpecItem::data(int role) const
+QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
 {
     switch (role) {
     case Qt::EditRole:
@@ -496,9 +492,13 @@ QVariant AbstractProjectsModel::MinimumHardwareSpecItem::data(int role) const
             if (!getProject()->getMinimumHardwareSpec().isInitialized())
                 break;
 
-            const auto meets = HardwareSpec::getSystemHardwareSpec().meets(getProject()->getMinimumHardwareSpec());
+            if (!HardwareSpec::getSystemHardwareSpec().meets(getProject()->getMinimumHardwareSpec()))
+                return StyledIcon("circle-xmark").withColor(Qt::darkRed);
 
-            return meets ? StyledIcon("circle-check") : StyledIcon("circle-exclamation");
+            if (!HardwareSpec::getSystemHardwareSpec().meets(getProject()->getRecommendedHardwareSpec()))
+                return StyledIcon("circle-exclamation").withColor(Qt::yellow);
+
+            return StyledIcon("circle-check");
         }
 
 	    default:
@@ -506,42 +506,6 @@ QVariant AbstractProjectsModel::MinimumHardwareSpecItem::data(int role) const
     }
 
     return Item::data(role);
-}
-
-QVariant AbstractProjectsModel::RecommendedHardwareSpecItem::data(int role) const
-{
-    switch (role) {
-	    case Qt::EditRole:
-            return QVariant::fromValue(getProject()->getRecommendedHardwareSpec());
-
-	    case Qt::DisplayRole:
-            return "";
-
-	    case Qt::ToolTipRole:
-        {
-            if (!getProject()->getRecommendedHardwareSpec().isInitialized())
-                break;
-
-            if (!HardwareSpec::getSystemHardwareSpec().meets(getProject()->getRecommendedHardwareSpec()))
-                return HardwareSpec::getSystemHardwareSpec().getFailureString(getProject()->getRecommendedHardwareSpec());
-
-            return "System meets the recommended hardware specification";
-		}
-
-        case Qt::DecorationRole:
-        {
-            if (!getProject()->getRecommendedHardwareSpec().isInitialized())
-                break;
-
-            const auto meets = HardwareSpec::getSystemHardwareSpec().meets(getProject()->getRecommendedHardwareSpec());
-
-            return meets ? StyledIcon("circle-check") : StyledIcon("circle-exclamation");
-        }
-
-	    default:
-	        break;
-    }
-	return Item::data(role);
 }
 
 QVariant AbstractProjectsModel::IsStartupItem::data(int role) const

@@ -42,35 +42,34 @@ public:
 
     /** Model columns */
     enum class Column {
-        Title,                      /** Title of the project */
-        Downloaded,                 /** Whether the project has been downloaded before */
-        Group,                      /** Group title of the project */
-        IsGroup,                    /** Whether the item is a project group */
-        Tags,                       /** Tags of the project */
-        Date,                       /** Date of the project */
-        IconName,                   /** Icon name of the project */
-        Summary,                    /** Summary of the project */
-        Url,                        /** URL of the project */
-        MinimumCoreVersion,         /** Minimum ManiVault application core version */
-        RequiredPlugins,            /** Required plugins for the project */
-        MissingPlugins,             /** Missing plugins for the project */
-        Size,                       /** Size of the ManiVault project */
-        MinimumHardwareSpec,        /** Minimum hardware specifications for the project */
-        RecommendedHardwareSpec,    /** Recommended hardware specifications for the project */
-        IsStartup,                  /** Whether the project can be opened at application startup */
+        Title,                  /** Title of the project */
+        Downloaded,             /** Whether the project has been downloaded before */
+        Group,                  /** Group title of the project */
+        IsGroup,                /** Whether the item is a project group */
+        Tags,                   /** Tags of the project */
+        Date,                   /** Date of the project */
+        IconName,               /** Icon name of the project */
+        Summary,                /** Summary of the project */
+        Url,                    /** URL of the project */
+        MinimumCoreVersion,     /** Minimum ManiVault application core version */
+        RequiredPlugins,        /** Required plugins for the project */
+        MissingPlugins,         /** Missing plugins for the project */
+        Size,                   /** Size of the ManiVault project */
+        SystemCompatibility,    /** System compatibility of the project */
+        IsStartup,              /** Whether the project can be opened at application startup */
 
-        Count                       /** Number of columns in the model */
+        Count                   /** Number of columns in the model */
     };
 
-    /** Header strings for several data roles */
-    struct ColumHeaderInfo {
-        QString     _display;   /** Header string for display role */
-        QString     _edit;      /** Header string for edit role */
-        QString     _tooltip;   /** Header string for tooltip role */
-    };
+    ///** Header strings for several data roles */
+    //struct ColumHeaderInfo {
+    //    QString     _display;   /** Header string for display role */
+    //    QString     _edit;      /** Header string for edit role */
+    //    QString     _tooltip;   /** Header string for tooltip role */
+    //};
 
-    /** Column name and tooltip */
-    static QMap<Column, ColumHeaderInfo> columnInfo;
+    ///** Column name and tooltip */
+    //static QMap<Column, ColumHeaderInfo> columnInfo;
 
     /** Base standard model item class for project */
     class CORE_EXPORT Item : public QStandardItem {
@@ -567,8 +566,8 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the project minimum hardware specifications */
-    class MinimumHardwareSpecItem final : public Item {
+    /** Standard model item class for displaying the system compatibility with the project */
+    class SystemCompatibilityItem final : public Item {
     public:
 
         /** No need for custom constructor */
@@ -590,49 +589,13 @@ protected:
             switch (role) {
             case Qt::DisplayRole:
             case Qt::EditRole:
-                return "Hardware requirements";
+                return "System compatibility";
 
             case Qt::ToolTipRole:
-                return "Minimum hardware specifications for the project";
+                return "System compatibility with the project";
 
             default:
                 break;
-            }
-
-            return {};
-        }
-    };
-
-    /** Standard model item class for displaying the project recommended hardware specifications */
-    class RecommendedHardwareSpecItem final : public Item {
-    public:
-
-        /** No need for custom constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Recommended hardware";
-
-	            case Qt::ToolTipRole:
-	                return "Recommended hardware specifications for the project";
-
-	            default:
-	                break;
             }
 
             return {};
@@ -700,8 +663,7 @@ protected:
             append(new RequiredPluginsItem(project));
             append(new MissingPluginsItem(project));
             append(new SizeItem(project));
-            append(new MinimumHardwareSpecItem(project));
-            append(new RecommendedHardwareSpecItem(project));
+            append(new SystemCompatibilityItem(project));
             append(new IsStartupItem(project));
         }
     };
