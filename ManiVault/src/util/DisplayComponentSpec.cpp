@@ -14,7 +14,7 @@ DisplayComponentSpec::DisplayComponentSpec() :
 
 bool DisplayComponentSpec::meets(const HardwareComponentSpec& required) const
 {
-    return *this == dynamic_cast<const DisplayComponentSpec&>(required) || *this > dynamic_cast<const DisplayComponentSpec&>(required);
+    return !(*this < dynamic_cast<const DisplayComponentSpec&>(required));
 }
 
 QString DisplayComponentSpec::getFailureString(const HardwareComponentSpec& required) const
@@ -24,7 +24,7 @@ QString DisplayComponentSpec::getFailureString(const HardwareComponentSpec& requ
 
     const auto& displayComponentSpec = dynamic_cast<const DisplayComponentSpec&>(required);
 
-    return QString("Display resolution is too low. Required: %1x%2").arg(QString::number(displayComponentSpec._resolution.first), QString::number(displayComponentSpec._resolution.second));
+    return QString("Insufficient display resolution: %1x%2 &lt; <b>%3x%4</b>").arg(QString::number(_resolution.first), QString::number(_resolution.second), QString::number(displayComponentSpec._resolution.first), QString::number(displayComponentSpec._resolution.second));
 }
 
 DisplayComponentSpec::Resolution DisplayComponentSpec::getResolution() const

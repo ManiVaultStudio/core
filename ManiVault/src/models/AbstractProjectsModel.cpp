@@ -482,23 +482,7 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
         }
 
         case Qt::ToolTipRole:
-        {
-            switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
-	            case HardwareSpec::SystemCompatibility::Incompatible:
-	                return "Your system is not suitable (the project is not guaranteed to run without problems)";
-
-	            case HardwareSpec::SystemCompatibility::Minimum:
-	                return "Your system meets the minimal requirements (but not recommended to run the project)";
-
-	            case HardwareSpec::SystemCompatibility::Compatible:
-                    return "Your system is fully equipped to run the project";
-
-	            case HardwareSpec::SystemCompatibility::Unknown:
-                    return "There is no information about system compatibility";
-            }
-
-            return "";
-        }
+            return QString("<div style='width: 600px;'>%1</div>").arg(data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._failureString);
 
         case Qt::DecorationRole:
         {

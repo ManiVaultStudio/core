@@ -64,10 +64,7 @@ bool HardwareSpec::meets(const HardwareSpec& required) const
 
 QString HardwareSpec::getFailureString(const HardwareSpec& required) const
 {
-    if (meets(required))
-        return "<p>System has the recommended hardware specification.</p>";
-
-    QString status("<p>System does not have the recommended hardware specification:</p>");
+    QString status;
 
     for (std::size_t i = 0; i < _hardwareComponentSpecs.size() && i < required._hardwareComponentSpecs.size(); ++i) {
         const auto lhs = _hardwareComponentSpecs[i];
@@ -93,24 +90,35 @@ void HardwareSpec::updateSystemHardwareSpecs()
 HardwareSpec::SystemCompatibilityInfo HardwareSpec::getSystemCompatibility(const HardwareSpec& minimumHardwareSpec, const HardwareSpec& recommendedHardwareSpec)
 {
 	if (!systemHardwareSpec.isInitialized() || !minimumHardwareSpec.isInitialized() || !recommendedHardwareSpec.isInitialized())
-        return { SystemCompatibility::Unknown, QStringList() };
+        return {
+        	SystemCompatibility::Unknown,
+        	"<p>There is no information about system compatibility</p>"
+        };
 
     if (systemHardwareSpec.meets(minimumHardwareSpec) && systemHardwareSpec.meets(recommendedHardwareSpec))
-        return { SystemCompatibility::Compatible, QStringList() };
+        return {
+        	SystemCompatibility::Compatible,
+        	"<p>Your system is fully equipped to run the project</p>"
+        };
 
     if (!systemHardwareSpec.meets(minimumHardwareSpec)) {
-        QStringList systemIncompatibilityReasons;
-
-        return { SystemCompatibility::Incompatible, systemIncompatibilityReasons };
+        return {
+        	SystemCompatibility::Incompatible,
+            QString("<p>Your system is not suitable (the project is not guaranteed to run without problems):</p><p>%1</p>").arg(systemHardwareSpec.getFailureString(minimumHardwareSpec))
+        };
     }
 
     if (systemHardwareSpec.meets(minimumHardwareSpec) && !systemHardwareSpec.meets(recommendedHardwareSpec)) {
-        QStringList systemIncompatibilityReasons;
-
-        return { SystemCompatibility::Minimum, systemIncompatibilityReasons };
+        return {
+            SystemCompatibility::Minimum,
+            QString("<p>Your system meets the minimum requirements, but the experience might sub-optimal:</p><p>%1</p>").arg(systemHardwareSpec.getFailureString(recommendedHardwareSpec))
+        };
     }
 
-    return { SystemCompatibility::Unknown, QStringList() };
+    return {
+    	SystemCompatibility::Unknown,
+    	"<p>There is no information about system compatibility</p>"
+    };
 }
 
 }

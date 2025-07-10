@@ -77,7 +77,7 @@ QString RamComponentSpec::getFailureString(const HardwareComponentSpec& required
 
     const auto& ramComponentSpec = dynamic_cast<const RamComponentSpec&>(required);
 
-    return QString("Not enough RAM (installed: %2, required: %3").arg(QString::number(ramComponentSpec._numberOfBytes), QString::number(ramComponentSpec._numberOfBytes));
+    return QString("Insufficient RAM: %2 &lt; %3").arg(QString::number(_numberOfBytes), QString::number(ramComponentSpec._numberOfBytes));
 }
 
 QStandardItem* RamComponentSpec::getStandardItem() const

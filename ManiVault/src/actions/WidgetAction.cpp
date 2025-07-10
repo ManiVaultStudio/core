@@ -73,6 +73,9 @@ WidgetAction::~WidgetAction()
     if (!core() || !core()->isInitialized())
         return;
 
+    if (!core()->getManager(CoreInterface::ManagerType::Actions))
+        return;
+
     if (!core()->isAboutToBeDestroyed())
 		actions().removeAction(this);
 }

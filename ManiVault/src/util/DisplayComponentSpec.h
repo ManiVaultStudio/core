@@ -46,7 +46,7 @@ public:
      * @return Boolean determining whether the display component specification is equal to the \p other display component specification
      */
     bool operator==(const DisplayComponentSpec& other) const {
-        return _resolution == other._resolution;
+        return _resolution.first == other._resolution.first && _resolution.second == other._resolution.second;
     }
 
     /**
@@ -63,7 +63,7 @@ public:
      * @return Boolean determining whether the display component specification is smaller than the \p other display component spec
      */
     bool operator<(const DisplayComponentSpec& other) const {
-        return _resolution.first < other._resolution.first && _resolution.second < other._resolution.second;
+        return _resolution.first < other._resolution.first || _resolution.second < other._resolution.second;
     }
 
     /**
