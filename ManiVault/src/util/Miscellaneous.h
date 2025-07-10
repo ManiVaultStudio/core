@@ -28,11 +28,18 @@ namespace mv::util
 CORE_EXPORT QString getIntegerCountHumanReadable(const double& count);
 
 /**
+ * Convert a byte size string to a number of bytes
+ * @return Number of bytes
+ */
+CORE_EXPORT std::uint64_t parseByteSize(const QString& input);
+
+/**
  * Returns a human readable string of a byte count
  * @param noBytes Number of bytes
+ * @param useIEC Whether to use IEC (base 1024) or SI (base 1000) units
  * @return Human readable string of a byte count
  */
-CORE_EXPORT QString getNoBytesHumanReadable(double noBytes);
+CORE_EXPORT QString getNoBytesHumanReadable(double noBytes, bool useIEC = true);
 
 /**
  * Sort action based on their text

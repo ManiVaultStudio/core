@@ -40,14 +40,57 @@ QString getIntegerCountHumanReadable(const double& count)
     return "";
 }
 
-QString getNoBytesHumanReadable(double noBytes)
+std::uint64_t parseByteSize(const QString& input)
 {
-    QStringList units{ "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
+    QString normalized = input.trimmed().toUpper();
+
+    QRegularExpression regex(R"(^(\d+(?:\.\d+)?)\s*([KMGTPE]?I?B)$)");
+    QRegularExpressionMatch match = regex.match(normalized);
+
+    if (!match.hasMatch())
+        throw std::invalid_argument("Invalid byte size format");
+
+    double number = match.captured(1).toDouble();
+    QString unit = match.captured(2);
+
+    // Normalize all units to IEC (treat KB as KiB, MB as MiB, etc.)
+    static const QHash<QString, std::uint64_t> binaryMultipliers{
+        { "B",    1ULL },
+        { "KB",   1024ULL },
+        { "KIB",  1024ULL },
+        { "MB",   1024ULL * 1024 },
+        { "MIB",  1024ULL * 1024 },
+        { "GB",   1024ULL * 1024 * 1024 },
+        { "GIB",  1024ULL * 1024 * 1024 },
+        { "TB",   1024ULL * 1024 * 1024 * 1024 },
+        { "TIB",  1024ULL * 1024 * 1024 * 1024 },
+        { "PB",   1024ULL * 1024 * 1024 * 1024 * 1024 },
+        { "PIB",  1024ULL * 1024 * 1024 * 1024 * 1024 },
+        { "EB",   1024ULL * 1024 * 1024 * 1024 * 1024 * 1024 },
+        { "EIB",  1024ULL * 1024 * 1024 * 1024 * 1024 * 1024 }
+    };
+
+    if (binaryMultipliers.contains(unit))
+        return static_cast<std::uint64_t>(number * binaryMultipliers[unit]);
+
+    throw std::invalid_argument("Unknown byte unit: " + unit.toStdString());
+}
+
+QString getNoBytesHumanReadable(double noBytes, bool useIEC /*= true*/)
+{
+    // Units for IEC (base 1024)
+    const QStringList iecUnits{ "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
+
+    // Units for SI (base 1000)
+    const QStringList siUnits{ "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+
+    const QStringList& units = useIEC ? iecUnits : siUnits;
+    const double base = useIEC ? 1024.0 : 1000.0;
 
     int i = 0;
 
-    while (noBytes >= 1024.0 && i < units.size() - 1) {
-        noBytes /= 1024.0;
+    while (noBytes >= base && i < units.size() - 1) {
+        noBytes /= base;
         ++i;
     }
 
