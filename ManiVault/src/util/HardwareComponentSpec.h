@@ -40,13 +40,6 @@ public:
     virtual void fromVariantMap(const QVariantMap& variantMap);
 
     /**
-     * Get whether the hardware component specification meets the \p required hardware component specification
-     * @param required hardware component spec that is required
-     * @return Boolean determining whether the hardware component spec meets the required hardware component spec
-     */
-    virtual bool meets(const HardwareComponentSpec& required) const = 0;
-
-    /**
      * Get the reason why the hardware component spec does not meet the \p required hardware component spec
      * @param required Hardware component spec that is required
      * @return String containing the reason why the hardware component spec does not meet the required hardware component spec
@@ -65,6 +58,20 @@ public:
      * @return Boolean determining whether the hardware component specification is smaller than the \p other hardware component specification
      */
     virtual bool lessThan(const HardwareComponentSpec& other) const = 0;
+
+    /**
+     * Get whether the hardware component specification is equal to the \p other hardware component specification
+     * @param other Hardware component specification to compare with
+     * @return Boolean determining whether the hardware component specification is equal to the \p other hardware component specification
+     */
+    virtual bool equals(const HardwareComponentSpec& other) const = 0;
+
+    /**
+     * Get whether the hardware component specification meets the \p required hardware component specification
+     * @param required Hardware component specification that is required
+     * @return Boolean determining whether the hardware component spec meets the required hardware component spec
+     */
+    virtual bool meets(const HardwareComponentSpec& required) const = 0;
 
     /**
      * Get standard item

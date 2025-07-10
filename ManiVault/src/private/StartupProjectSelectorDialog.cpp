@@ -119,7 +119,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     setModal(true);
     setWindowTitle("Load project");
 
-    new ItemViewTooltipInterceptor(&_projectsTreeModel, &_projectsFilterModel, &_hierarchyWidget.getTreeView());
+    //new ItemViewTooltipInterceptor(&_projectsTreeModel, &_projectsFilterModel, &_hierarchyWidget.getTreeView());
 
     auto layout = new QVBoxLayout();
 

@@ -95,7 +95,7 @@ public: // Conditional
             const auto& rhs = other._hardwareComponentSpecs[i];
 
             if (!lhs->isInitialized() || !rhs->isInitialized())
-                continue;
+                return false;
 
             if (!lhs->meets(*rhs))
                 return false;

@@ -28,13 +28,6 @@ public:
     DisplayComponentSpec();
 
     /**
-     * Get whether the display component specification meets the \p required display component specification
-     * @param required Display component spec that is required
-     * @return Boolean determining whether the display component spec meets the required display component spec
-     */
-    bool meets(const HardwareComponentSpec& required) const override;
-
-    /**
      * Get the reason why the display component spec does not meet the \p required display component spec
      * @param required Display component spec that is required
      * @return String containing the reason why the display component spec does not meet the required display component spec
@@ -70,7 +63,7 @@ public:
      * @return Boolean determining whether the display component specification is smaller than the \p other display component spec
      */
     bool operator<(const DisplayComponentSpec& other) const {
-        return _resolution.first > other._resolution.first && _resolution.second > other._resolution.second;
+        return _resolution.first < other._resolution.first && _resolution.second < other._resolution.second;
     }
 
     /**
@@ -89,6 +82,22 @@ public:
     bool lessThan(const HardwareComponentSpec& other) const override {
         return *this < dynamic_cast<const DisplayComponentSpec&>(other);
     }
+
+    /**
+     * Get whether the hardware component specification is equal to the \p other hardware component specification
+     * @param other Hardware component specification to compare with
+     * @return Boolean determining whether the hardware component specification is equal to the \p other hardware component specification
+     */
+    bool equals(const HardwareComponentSpec& other) const override {
+        return *this == dynamic_cast<const DisplayComponentSpec&>(other);
+    }
+
+    /**
+     * Get whether the display component specification meets the \p required display component specification
+     * @param required Display component spec that is required
+     * @return Boolean determining whether the display component spec meets the required display component spec
+     */
+    bool meets(const HardwareComponentSpec& required) const override;
 
     /**
      * Get standard item

@@ -95,7 +95,7 @@ HardwareSpec::SystemCompatibility HardwareSpec::getSystemCompatibility(const Har
 	if (!systemHardwareSpec.isInitialized() || !minimumHardwareSpec.isInitialized() || !recommendedHardwareSpec.isInitialized())
         return SystemCompatibility::Unknown;
 
-    if (!systemHardwareSpec.meets(minimumHardwareSpec) || !systemHardwareSpec.meets(recommendedHardwareSpec))
+    if (!systemHardwareSpec.meets(minimumHardwareSpec))
         return SystemCompatibility::Incompatible;
 
     if (systemHardwareSpec.meets(minimumHardwareSpec) && !systemHardwareSpec.meets(recommendedHardwareSpec))

@@ -485,7 +485,7 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
         {
             switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibility>()) {
 	            case HardwareSpec::SystemCompatibility::Incompatible:
-	                return "Your system is not suitable to run the project";
+	                return "Your system is not suitable (the project is not guaranteed to run without problems)";
 
 	            case HardwareSpec::SystemCompatibility::Minimum:
 	                return "Your system meets the minimal requirements (but not recommended to run the project)";

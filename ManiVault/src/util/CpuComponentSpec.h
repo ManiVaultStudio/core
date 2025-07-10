@@ -26,13 +26,6 @@ public:
     CpuComponentSpec();
 
     /**
-     * Get whether the CPU component specification meets the \p required CPU component specification
-     * @param required CPU component spec that is required
-     * @return Boolean determining whether the CPU component spec meets the required CPU component spec
-     */
-    bool meets(const HardwareComponentSpec& required) const override;
-
-    /**
      * Get the reason why the CPU component spec does not meet the \p required CPU component spec
      * @param required CPU component spec that is required
      * @return String containing the reason why the CPU component spec does not meet the required CPU component spec
@@ -81,6 +74,22 @@ public:
     bool lessThan(const HardwareComponentSpec& other) const override {
         return *this < dynamic_cast<const CpuComponentSpec&>(other);
     }
+
+    /**
+     * Get whether the hardware component specification is equal to the \p other hardware component specification
+     * @param other Hardware component specification to compare with
+     * @return Boolean determining whether the hardware component specification is equal to the \p other hardware component specification
+     */
+    bool equals(const HardwareComponentSpec& other) const override {
+        return *this == dynamic_cast<const CpuComponentSpec&>(other);
+    }
+
+    /**
+     * Get whether the CPU component specification meets the \p required CPU component specification
+     * @param required CPU component spec that is required
+     * @return Boolean determining whether the CPU component spec meets the required CPU component spec
+     */
+    bool meets(const HardwareComponentSpec& required) const override;
 
     /**
      * Get standard item
