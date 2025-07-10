@@ -3,9 +3,11 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "HardwareSpec.h"
-#include "HardwareSpec.h"
 
 #include "DisplayComponentSpec.h"
+#include "CpuComponentSpec.h"
+#include "RamComponentSpec.h"
+#include "StorageComponentSpec.h"
 
 namespace mv::util
 {
@@ -18,6 +20,7 @@ HardwareSpec::HardwareSpec(const Type& type) :
     _hardwareComponentSpecs.push_back(std::make_shared<DisplayComponentSpec>());
     _hardwareComponentSpecs.push_back(std::make_shared<CpuComponentSpec>());
     _hardwareComponentSpecs.push_back(std::make_shared<RamComponentSpec>());
+    _hardwareComponentSpecs.push_back(std::make_shared<StorageComponentSpec>());
 }
 
 void HardwareSpec::fromVariantMap(const QVariantMap& variantMap)
@@ -111,7 +114,7 @@ HardwareSpec::SystemCompatibilityInfo HardwareSpec::getSystemCompatibility(const
     if (systemHardwareSpec.meets(minimumHardwareSpec) && !systemHardwareSpec.meets(recommendedHardwareSpec)) {
         return {
             SystemCompatibility::Minimum,
-            QString("<p>Your system meets the minimum requirements, but the experience might sub-optimal:</p><p>%1</p>").arg(systemHardwareSpec.getFailureString(recommendedHardwareSpec))
+            QString("<p>Your system meets the minimum requirements, but the experience might sub-optimal:</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(recommendedHardwareSpec))
         };
     }
 
