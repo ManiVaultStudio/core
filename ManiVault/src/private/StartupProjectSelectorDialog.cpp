@@ -83,11 +83,8 @@ protected:
             const auto projectItem      = dynamic_cast<ProjectsTreeModel::Item*>(_projectsTreeModel->itemFromIndex(index));
 
         	if (index.isValid() && projectItem) {
-                if (column == ProjectsTreeModel::Column::MinimumHardwareSpec)
+                if (column == ProjectsTreeModel::Column::SystemCompatibility)
 					_popup->setHardwareSpec(projectItem->getProject()->getMinimumHardwareSpec());
-
-                if (column == ProjectsTreeModel::Column::RecommendedHardwareSpec)
-                    _popup->setHardwareSpec(projectItem->getProject()->getRecommendedHardwareSpec());
 
 				_popup->move(helpEvent->globalPos() + QPoint(10, 20));
                 _popup->show();
