@@ -35,7 +35,6 @@ using namespace mv::gui;
 
 int main(int argc, char *argv[])
 {
-    HardwareSpec::updateSystemHardwareSpecs();
 
     // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings
     auto coreApplication = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
@@ -153,7 +152,9 @@ int main(int argc, char *argv[])
 
     application.initialize();
 
-    const auto userWillSelectStartupProject = startupProjectsFilterModel.rowCount() >= 2;
+    HardwareSpec::updateSystemHardwareSpecs();
+
+    const auto userWillSelectStartupProject = startupProjectsFilterModel.rowCount() >= 1;
 
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 
@@ -185,8 +186,11 @@ int main(int argc, char *argv[])
 
         if (dialogResult == QDialog::Accepted) {
 
-            if (auto startupProject = startupProjectSelectorDialog.getSelectedStartupProject())
+            if (auto startupProject = startupProjectSelectorDialog.getSelectedStartupProject()) {
                 application.setStartupProjectUrl(startupProject->getUrl());
+
+                //auto startupProjectMetaActionCandidate = mv::projects().getProjectMetaAction(startupProject->getUrl());
+            }
         }
 
         if (dialogResult == QDialog::Rejected)
