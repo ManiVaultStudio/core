@@ -75,18 +75,18 @@ public:
     }
 
     /**
-     * Get whether the hardware component specification is smaller than the \p other hardware component specification
-     * @param other Hardware component specification to compare with
-     * @return Boolean determining whether the hardware component specification is smaller than the \p other hardware component specification
+     * Get whether the display component specification is smaller than the \p other display component specification
+     * @param other Display component specification to compare with
+     * @return Boolean determining whether the display component specification is smaller than the \p other display component specification
      */
     bool lessThan(const HardwareComponentSpec& other) const override {
         return *this < dynamic_cast<const DisplayComponentSpec&>(other);
     }
 
     /**
-     * Get whether the hardware component specification is equal to the \p other hardware component specification
-     * @param other Hardware component specification to compare with
-     * @return Boolean determining whether the hardware component specification is equal to the \p other hardware component specification
+     * Get whether the display component specification is equal to the \p other display component specification
+     * @param other Display component specification to compare with
+     * @return Boolean determining whether the display component specification is equal to the \p other display component specification
      */
     bool equals(const HardwareComponentSpec& other) const override {
         return *this == dynamic_cast<const DisplayComponentSpec&>(other);

@@ -34,12 +34,12 @@ CORE_EXPORT QString getIntegerCountHumanReadable(const double& count);
 CORE_EXPORT std::uint64_t parseByteSize(const QString& input);
 
 /**
- * Returns a human readable string of a byte count
+ * Returns a human-readable string of a byte count
  * @param noBytes Number of bytes
  * @param useIEC Whether to use IEC (base 1024) or SI (base 1000) units
- * @return Human readable string of a byte count
+ * @return Human-readable string of a byte count
  */
-CORE_EXPORT QString getNoBytesHumanReadable(double noBytes, bool useIEC = true);
+CORE_EXPORT QString getNoBytesHumanReadable(std::uint64_t noBytes, bool useIEC = true);
 
 /**
  * Sort action based on their text

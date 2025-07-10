@@ -558,11 +558,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/ColorScheme.h
     src/util/JSON.h
     src/util/Script.h
-	src/util/HardwareComponentSpec.h
-	src/util/DisplayComponentSpec.h
-	src/util/CpuComponentSpec.h
-	src/util/RamComponentSpec.h
-	src/util/HardwareSpec.h
 )
 
 if(APPLE)
@@ -617,11 +612,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/ColorScheme.cpp
     src/util/JSON.cpp
     src/util/Script.cpp
-	src/util/HardwareComponentSpec.cpp
-	src/util/DisplayComponentSpec.cpp
-	src/util/CpuComponentSpec.cpp
-	src/util/RamComponentSpec.cpp
-	src/util/HardwareSpec.cpp
 )
 
 if(APPLE)
@@ -634,6 +624,29 @@ endif()
 set(PUBLIC_UTIL_FILES
     ${PUBLIC_UTIL_HEADERS}    
     ${PUBLIC_UTIL_SOURCES}
+)
+
+set(PUBLIC_HARDWARE_SPEC_UTIL_HEADERS
+	src/util/HardwareComponentSpec.h
+	src/util/DisplayComponentSpec.h
+	src/util/CpuComponentSpec.h
+	src/util/RamComponentSpec.h
+	src/util/StorageComponentSpec.h
+	src/util/HardwareSpec.h
+)
+
+set(PUBLIC_HARDWARE_SPEC_UTIL_SOURCES
+	src/util/HardwareComponentSpec.cpp
+	src/util/DisplayComponentSpec.cpp
+	src/util/CpuComponentSpec.cpp
+	src/util/RamComponentSpec.cpp
+	src/util/StorageComponentSpec.cpp
+	src/util/HardwareSpec.cpp
+)
+
+set(PUBLIC_HARDWARE_SPEC_UTIL_FILES
+    ${PUBLIC_HARDWARE_SPEC_UTIL_HEADERS}    
+    ${PUBLIC_HARDWARE_SPEC_UTIL_SOURCES}
 )
 
 set(PUBLIC_APPLICATION_HEADERS
@@ -1139,6 +1152,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_RENDERERS_HEADERS}
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
+    ${PUBLIC_HARDWARE_SPEC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
     ${PUBLIC_PROJECT_HEADERS}
     ${PUBLIC_WORKSPACE_HEADERS}
@@ -1189,6 +1203,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_RENDERERS_SOURCES}
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
+    ${PUBLIC_HARDWARE_SPEC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
     ${PUBLIC_PROJECT_SOURCES}
     ${PUBLIC_WORKSPACE_SOURCES}
@@ -1252,6 +1267,7 @@ source_group(Widgets\\Internal FILES ${PUBLIC_WIDGETS_INTERNAL_FILES})
 source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})
+source_group(Util\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_UTIL_FILES})
 source_group(Application FILES ${PUBLIC_APPLICATION_FILES} ${PUBLIC_GLOBALS_HEADERS} ${PUBLIC_VERSION_HEADERS})
 source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})

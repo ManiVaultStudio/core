@@ -67,18 +67,18 @@ public:
     }
 
     /**
-     * Get whether the hardware component specification is smaller than the \p other hardware component specification
-     * @param other Hardware component specification to compare with
-     * @return Boolean determining whether the hardware component specification is smaller than the \p other hardware component specification
+     * Get whether the CPU component specification is smaller than the \p other CPU component specification
+     * @param other CPU component specification to compare with
+     * @return Boolean determining whether the CPU component specification is smaller than the \p other CPU component specification
      */
     bool lessThan(const HardwareComponentSpec& other) const override {
         return *this < dynamic_cast<const CpuComponentSpec&>(other);
     }
 
     /**
-     * Get whether the hardware component specification is equal to the \p other hardware component specification
-     * @param other Hardware component specification to compare with
-     * @return Boolean determining whether the hardware component specification is equal to the \p other hardware component specification
+     * Get whether the CPU component specification is equal to the \p other CPU component specification
+     * @param other CPU component specification to compare with
+     * @return Boolean determining whether the CPU component specification is equal to the \p other CPU component specification
      */
     bool equals(const HardwareComponentSpec& other) const override {
         return *this == dynamic_cast<const CpuComponentSpec&>(other);

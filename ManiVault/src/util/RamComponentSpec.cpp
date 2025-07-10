@@ -40,7 +40,6 @@ QString RamComponentSpec::getFailureString(const HardwareComponentSpec& required
 
     const auto& ramComponentSpec = dynamic_cast<const RamComponentSpec&>(required);
 
-    //return QString("Insufficient RAM: %2 &lt; %3").arg(QString::number(_numberOfBytes), QString::number(ramComponentSpec._numberOfBytes));
     return QString("Insufficient RAM: %2 &lt; %3").arg(getNoBytesHumanReadable(_numberOfBytes), getNoBytesHumanReadable(ramComponentSpec._numberOfBytes));
 }
 
