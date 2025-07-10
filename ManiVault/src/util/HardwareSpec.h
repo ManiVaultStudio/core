@@ -18,6 +18,13 @@ class CORE_EXPORT HardwareSpec
 {
 public:
 
+    /** Hardware specification type */
+    enum class Type {
+        System,         /** System hardware specification */
+        Minimum,        /** Minimum hardware specification */
+        Recommended     /** Recommended hardware specification */
+    };
+
     /** Enum for system hardware spec compatibility with other specifications */
     enum class SystemCompatibility {
         Incompatible,   /** Incompatible with the minimum and recommended hardware specification */
@@ -26,8 +33,11 @@ public:
         Unknown         /** Unknown compatibility */
     };
 
-    /** Default constructor */
-    HardwareSpec();
+    /**
+     * Construct with hardware specification \p type
+     * @param type Hardware specification type
+     */
+    HardwareSpec(const Type& type);
 
     /**
      * Load the hardware spec from \p variantMap
@@ -152,7 +162,7 @@ public: // Conditional
     /**
      * Get whether the hardware specification meets the \p required hardware specification
      * @param required Hardware spec that is required
-     * @return Boolean determining whether the hardware spec meets the required hardware spec
+     * @return Boolean determining whether the hardware specification meets the \p required hardware specification
      */
     bool meets(const HardwareSpec& required) const;
 
@@ -174,7 +184,16 @@ public: // System hardware specification
     /** Updates the system hardware specifications */
     static void updateSystemHardwareSpecs();
 
+    /**
+     * Get system compatibility with the minimum and recommended hardware specifications
+     * @param minimumHardwareSpec Minimum hardware specification
+     * @param recommendedHardwareSpec Recommended hardware specification
+     * @return System compatibility with the minimum and recommended hardware specifications
+     */
+    static SystemCompatibility getSystemCompatibility(const HardwareSpec& minimumHardwareSpec, const HardwareSpec& recommendedHardwareSpec);
+
 private:
+    Type                    _type;                      /** Hardware specification type */
     HardwareComponentSpecs  _hardwareComponentSpecs;    /** Hardware component specifications */
 
     static HardwareSpec systemHardwareSpec; /** System hardware specification */

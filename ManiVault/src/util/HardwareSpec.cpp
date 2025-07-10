@@ -3,15 +3,17 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "HardwareSpec.h"
+#include "HardwareSpec.h"
 
 #include "DisplayComponentSpec.h"
 
 namespace mv::util
 {
 
-HardwareSpec HardwareSpec::systemHardwareSpec;
+HardwareSpec HardwareSpec::systemHardwareSpec = HardwareSpec(HardwareSpec::Type::System);
 
-HardwareSpec::HardwareSpec()
+HardwareSpec::HardwareSpec(const Type& type) :
+    _type(type)
 {
     _hardwareComponentSpecs.push_back(std::make_shared<DisplayComponentSpec>());
     _hardwareComponentSpecs.push_back(std::make_shared<CpuComponentSpec>());
@@ -86,6 +88,23 @@ const HardwareSpec& HardwareSpec::getSystemHardwareSpec()
 void HardwareSpec::updateSystemHardwareSpecs()
 {
     systemHardwareSpec.fromSystem();
+}
+
+HardwareSpec::SystemCompatibility HardwareSpec::getSystemCompatibility(const HardwareSpec& minimumHardwareSpec, const HardwareSpec& recommendedHardwareSpec)
+{
+	if (!systemHardwareSpec.isInitialized() || !minimumHardwareSpec.isInitialized() || !recommendedHardwareSpec.isInitialized())
+        return SystemCompatibility::Unknown;
+
+    if (!systemHardwareSpec.meets(minimumHardwareSpec) || !systemHardwareSpec.meets(recommendedHardwareSpec))
+        return SystemCompatibility::Incompatible;
+
+    if (systemHardwareSpec.meets(minimumHardwareSpec) && !systemHardwareSpec.meets(recommendedHardwareSpec))
+        return SystemCompatibility::Minimum;
+
+    if (systemHardwareSpec.meets(minimumHardwareSpec) && systemHardwareSpec.meets(recommendedHardwareSpec))
+        return SystemCompatibility::Compatible;
+
+    return SystemCompatibility::Unknown;
 }
 
 }
