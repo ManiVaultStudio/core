@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include "StartupProjectsModel.h"
-#include "StartupProjectsFilterModel.h"
-
 #include <models/ProjectsTreeModel.h>
 #include <models/ProjectsFilterModel.h>
 #include <models/ProjectsModelProject.h>
