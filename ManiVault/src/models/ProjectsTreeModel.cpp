@@ -50,9 +50,6 @@ ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mo
 
 void ProjectsTreeModel::populateFromDsns()
 {
-    //auto eventLoop = getPopulationMode() != PopulationMode::AutomaticSynchronous ? new QEventLoop() : nullptr;
-
-
     setRowCount(0);
 
     if (mv::plugins().isInitializing())

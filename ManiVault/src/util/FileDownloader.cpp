@@ -203,40 +203,44 @@ QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
 QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
 {
     QPromise<QDateTime> promise;
-    QFuture<QDateTime> future = promise.future();
 
-    auto manager    = new QNetworkAccessManager();
-    auto reply      = manager->head(QNetworkRequest(url));
+    auto promisePtr = std::make_shared<QPromise<QDateTime>>(std::move(promise));
 
-    QNetworkRequest request(url);
+    QMetaObject::invokeMethod(qApp, [url, promisePtr]() mutable {
+        auto manager = new QNetworkAccessManager();
 
-	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        QNetworkRequest request(url);
 
-    connect(reply, &QNetworkReply::finished, [reply, manager, promise = std::move(promise)]() mutable {
-        reply->deleteLater();
-        manager->deleteLater();
+    	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-        if (reply->error() != QNetworkReply::NoError) {
-            const auto error = reply->errorString();
+        QNetworkReply* reply = manager->head(request);
 
-            promise.setException(std::make_exception_ptr(std::runtime_error(QString("HEAD request failed: %1").arg(error).toStdString())));
-            promise.finish();
-            return;
-        }
+        connect(reply, &QNetworkReply::finished, [url, reply, manager, promisePtr]() mutable {
+            if (reply->error() != QNetworkReply::NoError) {
+                promisePtr->setException(std::make_exception_ptr(
+                    std::runtime_error("HEAD request failed: " + reply->errorString().toStdString())
+                ));
+            }
+            else {
+                const auto lastModified = reply->header(QNetworkRequest::LastModifiedHeader);
 
-        const auto lastModifiedVar = reply->header(QNetworkRequest::LastModifiedHeader);
+                if (!lastModified.isValid()) {
+                    promisePtr->setException(std::make_exception_ptr(
+                        std::runtime_error("Last-Modified header not found")
+                    ));
+                }
+                else {
+                    promisePtr->addResult(lastModified.toDateTime());
+                }
+            }
 
-        if (!lastModifiedVar.isValid()) {
-            promise.setException(std::make_exception_ptr(std::runtime_error("Last-Modified header not found")));
-            promise.finish();
-            return;
-        }
-
-        promise.addResult(lastModifiedVar.toDateTime());
-        promise.finish();
+            reply->deleteLater();
+            manager->deleteLater();
+            promisePtr->finish();
+        });
     });
 
-    return future;
+    return promisePtr->future();
 }
 
 QByteArray FileDownloader::downloadedData() const {

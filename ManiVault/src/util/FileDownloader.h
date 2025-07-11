@@ -32,7 +32,7 @@ public:
     /** Describes the storage modes */
     enum StorageMode {
         File        = 0x00001,      /** Stored as a file */
-        ByteArray    = 0x00002,     /** Stored as a byte array */
+        ByteArray   = 0x00002,      /** Stored as a byte array */
 
         All = File | ByteArray
     };
@@ -124,7 +124,7 @@ public:
      * @param url URL of the file to check
      * @return Last modified date of the file, QDateTime() if it cannot be determined
      */
-    static QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url);
+    static QFuture<QDateTime> getLastModifiedAsync(const QUrl& url);
 
 signals:
 
