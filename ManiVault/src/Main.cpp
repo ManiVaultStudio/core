@@ -104,12 +104,18 @@ int main(int argc, char *argv[])
         settings().getTemporaryDirectoriesSettingsAction().getScanForStaleTemporaryDirectoriesAction().trigger();
     }
 
+    const QString projectsJsonFileName{ "projects.json" };
 
-    ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::PopulationMode::AutomaticSynchronous);
+    const auto hasProjectsJsonInAppDir = QFileInfo(QCoreApplication::applicationDirPath(), projectsJsonFileName).exists();
+
+	ProjectsTreeModel startupProjectsTreeModel(hasProjectsJsonInAppDir ? ProjectsTreeModel::PopulationMode::Manual : ProjectsTreeModel::PopulationMode::AutomaticSynchronous);
     ProjectsFilterModel startupProjectsFilterModel(&startupProjectsTreeModel);
 
     startupProjectsFilterModel.setSourceModel(&startupProjectsTreeModel);
     startupProjectsFilterModel.getFilterStartupOnlyAction().setChecked(true);
+
+    if (hasProjectsJsonInAppDir)
+        startupProjectsTreeModel.populateFromJsonFile(projectsJsonFileName);
 
     core.initialize();
 
