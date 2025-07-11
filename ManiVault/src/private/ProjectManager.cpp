@@ -583,8 +583,10 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                     downloadProject = true;
                 }
 
-                if (downloadProject)
+                if (downloadProject) {
                     mv::projects().downloadProject(url, targetDirectory);
+					mv::projects().openProject(getProjectDownloader().getDownloadedFilePath());
+                }
             }
         }
 	}
@@ -1110,19 +1112,21 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
     return _projectsTreeModel;
 }
 
-void ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/, QString* taskId /*= nullptr*/)
+QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/, QString* taskId /*= nullptr*/)
 {
-    getProjectDownloader().setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
+    QEventLoop loop;
 
-	connect(&getProjectDownloader(), &FileDownloader::downloaded, this, [this]() -> void {
-        mv::projects().openProject(getProjectDownloader().getDownloadedFilePath());
-    });
+    getProjectDownloader().setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
 
     connect(&getProjectDownloader(), &FileDownloader::aborted, this, []() -> void {
         qDebug() << "Download aborted by user";
     });
 
     getProjectDownloader().download(url);
+
+    loop.exec();
+
+    return getProjectDownloader().getDownloadedFilePath();
 }
 
 QDir ProjectManager::getDownloadedProjectsDir() const
