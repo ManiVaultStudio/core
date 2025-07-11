@@ -22,7 +22,18 @@ class CORE_EXPORT DisplayComponentSpec : public HardwareComponentSpec
 {
 public:
 
-    using Resolution = std::pair<int, int>;  /** Type alias for resolution as a pair of integers (width, height) */
+    struct Resolution {
+        int _width   = 0;
+        int _height  = 0;
+
+        bool operator==(const Resolution& other) const {
+            return _width == other._width && _height == other._height;
+        }
+
+        bool operator<(const Resolution& other) const {
+            return std::tie(_width, _height) < std::tie(other._width, other._height);
+        }
+    };
 
     /** Default constructor */
     DisplayComponentSpec();
@@ -46,7 +57,7 @@ public:
      * @return Boolean determining whether the display component specification is equal to the \p other display component specification
      */
     bool operator==(const DisplayComponentSpec& other) const {
-        return _resolution.first == other._resolution.first && _resolution.second == other._resolution.second;
+        return _resolution._width == other._resolution._width && _resolution._height == other._resolution._height;
     }
 
     /**
@@ -63,7 +74,8 @@ public:
      * @return Boolean determining whether the display component specification is smaller than the \p other display component spec
      */
     bool operator<(const DisplayComponentSpec& other) const {
-        return _resolution.first < other._resolution.first || _resolution.second < other._resolution.second;
+        //return std::tie(_resolution.first, _resolution.second) < std::tie(other._resolution.first, other._resolution.second);
+        return _resolution < other._resolution;
     }
 
     /**
@@ -80,7 +92,10 @@ public:
      * @return Boolean determining whether the display component specification is smaller than the \p other display component specification
      */
     bool lessThan(const HardwareComponentSpec& other) const override {
-        return *this < dynamic_cast<const DisplayComponentSpec&>(other);
+        if (auto otherDisplayComponentSpec = dynamic_cast<const DisplayComponentSpec*>(&other))
+			return *this < *otherDisplayComponentSpec;
+
+            return false;
     }
 
     /**
@@ -89,7 +104,10 @@ public:
      * @return Boolean determining whether the display component specification is equal to the \p other display component specification
      */
     bool equals(const HardwareComponentSpec& other) const override {
-        return *this == dynamic_cast<const DisplayComponentSpec&>(other);
+        if (auto otherDisplayComponentSpec = dynamic_cast<const DisplayComponentSpec*>(&other))
+			return *this == *otherDisplayComponentSpec;
+
+        return false;
     }
 
     /**
@@ -117,7 +135,7 @@ protected: // Population methods
     void fromVariantMap(const QVariantMap& variantMap) override;
 
 private:
-    Resolution  _resolution;    /** Display resolution */
+    Resolution  _resolution{ 0, 0 };    /** Display resolution */
 };
 
 }
