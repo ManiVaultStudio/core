@@ -1082,34 +1082,78 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
 
 QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/)
 {
-    const auto fileName                             = QFileInfo(url.toString()).fileName();
-    const auto previouslyDownloadedProjectFilePath  = getDownloadedProjectsDir().filePath(fileName);
+    const auto fileName                 = QFileInfo(url.toString()).fileName();
+    const auto existingProjectFilePath  = getDownloadedProjectsDir().filePath(fileName);
 
     if (!fileName.isEmpty()) {
-        const auto projectAlreadyDownloaded = QFile::exists(previouslyDownloadedProjectFilePath);
+        const auto projectAlreadyDownloaded = QFile::exists(existingProjectFilePath);
 
         auto shouldDownloadProject = false;
 
         if (projectAlreadyDownloaded) {
-            QMessageBox downloadAgainMessageBox;
 
-            downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
-            downloadAgainMessageBox.setWindowTitle(QString("%1 already exists...").arg(fileName));
-            downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
-            downloadAgainMessageBox.setIcon(QMessageBox::Warning);
+            QEventLoop eventLoop;
 
-            auto yesButton  = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
-            auto noButton   = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
+            FileDownloader::getLastModifiedAsync(url).then(this, [&](const QDateTime& serverLastModified) {
 
-            downloadAgainMessageBox.setDefaultButton(noButton);
+                QFileInfo existingProjectFile(existingProjectFilePath);
 
-            downloadAgainMessageBox.exec();
+                if (existingProjectFile.exists()) {
+                    const auto localModified = existingProjectFile.lastModified();
 
-            if (downloadAgainMessageBox.clickedButton() == yesButton) {
-                QFile::remove(previouslyDownloadedProjectFilePath);
+                    if (serverLastModified > localModified) {
+                        QMessageBox downloadNewerMessageBox;
 
-                shouldDownloadProject = true;
-            }
+                        downloadNewerMessageBox.setWindowIcon(StyledIcon("download"));
+                        downloadNewerMessageBox.setWindowTitle(QString("Newer project available...").arg(fileName));
+                        downloadNewerMessageBox.setText(QString("A newer version of %1 is available on the server. Do you want to download it?").arg(fileName));
+                        downloadNewerMessageBox.setIcon(QMessageBox::Warning);
+
+                        auto yesButton = downloadNewerMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+                        auto noButton = downloadNewerMessageBox.addButton("No", QMessageBox::RejectRole);
+
+                        downloadNewerMessageBox.setDefaultButton(noButton);
+                        downloadNewerMessageBox.exec();
+
+                        if (downloadNewerMessageBox.clickedButton() == yesButton) {
+                            QFile::remove(existingProjectFilePath);
+
+                            shouldDownloadProject = true;
+                        }
+                    }
+                    //else {
+                    //    QMessageBox downloadAgainMessageBox;
+
+                    //    downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
+                    //    downloadAgainMessageBox.setWindowTitle(QString("%1 already exists...").arg(fileName));
+                    //    downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
+                    //    downloadAgainMessageBox.setIcon(QMessageBox::Warning);
+
+                    //    auto yesButton = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+                    //    auto noButton = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
+
+                    //    downloadAgainMessageBox.setDefaultButton(noButton);
+                    //    downloadAgainMessageBox.exec();
+
+                    //    if (downloadAgainMessageBox.clickedButton() == yesButton) {
+                    //        QFile::remove(existingProjectFilePath);
+
+                    //        shouldDownloadProject = true;
+                    //    }
+                    //}
+                }
+                else {
+                    shouldDownloadProject = true;
+                }
+
+                eventLoop.quit();
+            }).onFailed(this, [&](const QException& e) {
+				qWarning().noquote() << QString("Unable to determine last modified for %1: %2").arg(url.toString(), e.what());
+
+                eventLoop.quit();
+            });
+
+            eventLoop.exec();
         }
         else {
             shouldDownloadProject = true;
@@ -1130,7 +1174,7 @@ QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory
             return getProjectDownloader().getDownloadedFilePath();
         }
 
-    	return previouslyDownloadedProjectFilePath;
+    	return existingProjectFilePath;
     }
 
     return {};

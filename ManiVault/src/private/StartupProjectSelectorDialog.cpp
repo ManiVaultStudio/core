@@ -107,7 +107,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeViewHeader->setStretchLastSection(true);
 
     treeViewHeader->resizeSection(static_cast<int>(ProjectsTreeModel::Column::Title), 250);
-
+    
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Downloaded), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Group), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IsGroup), true);
@@ -120,6 +120,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     //treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::RecommendedHardwareSpec), true);
 
 #if QT_NO_DEBUG
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::LastModified), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::MinimumCoreVersion), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::RequiredPlugins), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::MissingPlugins), true);
