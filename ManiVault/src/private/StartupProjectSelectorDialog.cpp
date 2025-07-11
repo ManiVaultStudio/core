@@ -202,8 +202,10 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     });
 
     const auto updateLoadAction = [this, &treeView]() -> void {
-        _loadAction.setText(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load Project");
-        _loadAction.setToolTip(treeView.selectionModel()->selectedRows().isEmpty() ? "Start ManiVault" : "Load the selected project");
+        const auto canLoad = treeView.selectionModel()->selectedRows().isEmpty();
+
+        _loadAction.setText(canLoad ? "Start ManiVault" : "Load Project");
+        _loadAction.setToolTip(canLoad ? "Start ManiVault" : "Load the selected project");
     };
 
     updateLoadAction();
@@ -234,9 +236,13 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 #endif
 
     connect(&_loadAction, &TriggerAction::triggered, this, [this]() -> void {
-        if (auto selectedStartupProject = getSelectedStartupProject())
-            if (selectedStartupProject->load())
-                accept();
+        if (auto selectedStartupProject = getSelectedStartupProject()) {
+	        if (selectedStartupProject->load()) {
+                mv::projects().downloadProject(Application::current()->getStartupProjectUrl());
+
+				accept();
+			}
+        }
     });
 
     connect(&_quitAction, &TriggerAction::triggered, this, &StartupProjectSelectorDialog::reject);
