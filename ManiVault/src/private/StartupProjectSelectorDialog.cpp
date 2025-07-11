@@ -88,11 +88,14 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     });
 
     const auto updateLoadAction = [this, &treeView]() -> void {
-        const auto canLoad = !treeView.selectionModel()->selectedRows().isEmpty();
+        auto mayLoad = false;
 
-        _loadAction.setEnabled(canLoad);
-        _loadAction.setText(canLoad ? "Load Project" : "Select Project");
-        _loadAction.setToolTip(canLoad ? "Click to load the project" : "Select a project to load");
+        if (const auto selectedStartupProject   = getSelectedStartupProject()) {
+            mayLoad = !selectedStartupProject->isGroup();
+        }
+        _loadAction.setEnabled(mayLoad);
+        _loadAction.setText(mayLoad ? "Load Project" : "Select Project");
+        _loadAction.setToolTip(mayLoad ? "Click to load the project" : "Select a project to load");
     };
 
     updateLoadAction();
