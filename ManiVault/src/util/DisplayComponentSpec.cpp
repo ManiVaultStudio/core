@@ -24,7 +24,7 @@ QString DisplayComponentSpec::getFailureString(const HardwareComponentSpec& requ
 
     const auto& displayComponentSpec = dynamic_cast<const DisplayComponentSpec&>(required);
 
-    return QString("Insufficient display resolution: %1x%2 &lt; <b>%3x%4</b>").arg(QString::number(_resolution.first), QString::number(_resolution.second), QString::number(displayComponentSpec._resolution.first), QString::number(displayComponentSpec._resolution.second));
+    return QString("Insufficient display resolution: %1x%2 &lt; <b>%3x%4</b>").arg(QString::number(_resolution.width), QString::number(_resolution.height), QString::number(displayComponentSpec._resolution.width), QString::number(displayComponentSpec._resolution.height));
 }
 
 DisplayComponentSpec::Resolution DisplayComponentSpec::getResolution() const
@@ -47,8 +47,8 @@ QStandardItem* DisplayComponentSpec::getStandardItem() const
     if (systemDisplayComponentSpec && systemDisplayComponentSpec->isInitialized()) {
         const auto systemResolution = systemDisplayComponentSpec->getResolution();
 
-    	resolutionRow.first()->appendRow(getParameterRow("Horizontal", QString::number(systemResolution.first), QString::number(_resolution.first)));
-        resolutionRow.first()->appendRow(getParameterRow("Vertical", QString::number(systemResolution.second), QString::number(_resolution.second)));
+    	resolutionRow.first()->appendRow(getParameterRow("Horizontal", QString::number(systemResolution.width), QString::number(_resolution.width)));
+        resolutionRow.first()->appendRow(getParameterRow("Vertical", QString::number(systemResolution.height), QString::number(_resolution.height)));
     } else {
         resolutionRow.first()->appendRow(getParameterRow("Horizontal", "Unknown"));
         resolutionRow.first()->appendRow(getParameterRow("Vertical", "Unknown"));
@@ -76,8 +76,8 @@ void DisplayComponentSpec::fromVariantMap(const QVariantMap& variantMap)
         if (displayMap.contains("resolution")) {
             const auto resolutionMap = displayMap.value("resolution").toMap();
 
-            _resolution.first   = resolutionMap.value("horizontal", 0).toInt();
-            _resolution.second  = resolutionMap.value("vertical", 0).toInt();
+            _resolution.width   = resolutionMap.value("horizontal", 0).toInt();
+            _resolution.height  = resolutionMap.value("vertical", 0).toInt();
         }
 
         setInitialized();
