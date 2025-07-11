@@ -119,6 +119,13 @@ public:
      */
     static QFuture<std::uint64_t> getDownloadSizeAsync(const QUrl& url);
 
+    /** 
+     * Get the last modified date of the file at \p url
+     * @param url URL of the file to check
+     * @return Last modified date of the file, QDateTime() if it cannot be determined
+     */
+    static QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url);
+
 signals:
 
     /** Signals that the file is correctly downloaded */

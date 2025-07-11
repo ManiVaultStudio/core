@@ -200,6 +200,39 @@ QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
     return future;
 }
 
+QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
+{
+    return QtFuture::run([url]() -> QDateTime {
+        QNetworkAccessManager manager;
+        QNetworkRequest request(url);
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+        QEventLoop loop;
+        QNetworkReply* reply = manager.head(request);
+
+        QObject::connect(reply, &QNetworkReply::finished, [&]() {
+            loop.quit();
+            });
+
+        loop.exec();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            const QString error = reply->errorString();
+            reply->deleteLater();
+            throw std::runtime_error(QString("HEAD request failed: %1").arg(error).toStdString());
+        }
+
+        const QVariant lastModifiedVar = reply->header(QNetworkRequest::LastModifiedHeader);
+        reply->deleteLater();
+
+        if (!lastModifiedVar.isValid()) {
+            throw std::runtime_error("Last-Modified header not found");
+        }
+
+        return lastModifiedVar.toDateTime();
+        });
+}
+
 QByteArray FileDownloader::downloadedData() const {
     return _downloadedData;
 }
