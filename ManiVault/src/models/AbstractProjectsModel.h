@@ -38,7 +38,7 @@ public:
         MinimumCoreVersion,     /** Minimum ManiVault application core version */
         RequiredPlugins,        /** Required plugins for the project */
         MissingPlugins,         /** Missing plugins for the project */
-        Size,                   /** Size of the ManiVault project */
+        DownloadSize,           /** Download size of the ManiVault project */
         SystemCompatibility,    /** System compatibility of the project */
         IsStartup,              /** Whether the project can be opened at application startup */
 
@@ -46,7 +46,7 @@ public:
     };
 
     /** Base standard model item class for project */
-    class CORE_EXPORT Item : public QStandardItem {
+    class CORE_EXPORT Item : public QStandardItem, public QObject {
     public:
 
         /**
@@ -504,12 +504,16 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the project size */
-    class SizeItem final : public Item {
+    /** Standard model item class for displaying the download size */
+    class DownloadSizeItem final : public Item {
     public:
 
-        /** No need for custom constructor */
-        using Item::Item;
+        /**
+         * Construct with pointer \p project
+         * @param project Const pointer to project
+         * @param editable Boolean determining whether the item is editable or not
+         */
+        DownloadSizeItem(const util::ProjectsModelProject* project, bool editable = false);
 
         /**
          * Get model data for \p role
@@ -527,10 +531,10 @@ protected:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Size";
+	                return "Download Size";
 
 	            case Qt::ToolTipRole:
-	                return "Size of the project";
+	                return "Download Size of the project";
 
 	            default:
 	                break;
@@ -636,7 +640,7 @@ protected:
             append(new MinimumCoreVersionItem(project));
             append(new RequiredPluginsItem(project));
             append(new MissingPluginsItem(project));
-            append(new SizeItem(project));
+            append(new DownloadSizeItem(project));
             append(new SystemCompatibilityItem(project));
             append(new IsStartupItem(project));
         }

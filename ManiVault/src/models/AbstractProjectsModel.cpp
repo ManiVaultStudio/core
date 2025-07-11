@@ -13,24 +13,6 @@ using namespace mv::gui;
 
 namespace mv {
 
-//QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> AbstractProjectsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
-//    { Column::Title, { "Title" , "Title", "Title" } },
-//    { Column::Downloaded, { "Downloaded" , "Downloaded", "Whether the project has been downloaded before" } },
-//    { Column::Group, { "Group" , "Group", "Group" } },
-//    { Column::IsGroup, { "IsGroup" , "IsGroup", "IsGroup" } },
-//    { Column::Tags, { "Tags" , "Tags", "Tags" } },
-//    { Column::Date, { "Date" , "Date", "Issue date" } },
-//    { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
-//    { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
-//    { Column::Url, { "URL" , "URL", "Project URL" } },
-//    { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
-//    { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
-//    { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
-//    { Column::Size, { "Size" , "Size", "Project size" } },
-//    { Column::SystemCompatibility, { "SystemCompatibility" , "SystemCompatibility", "Minimum hardware specification for opening the project" } },
-//    { Column::IsStartup, { "Startup" , "Startup", "Whether this is a startup project" } }
-//});
-
 AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
     StandardItemModel(parent, "Projects", populationMode)
 {
@@ -77,8 +59,8 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::MissingPlugins:
             return MissingPluginsItem::headerData(orientation, role);
 
-        case Column::Size:
-            return SizeItem::headerData(orientation, role);
+        case Column::DownloadSize:
+            return DownloadSizeItem::headerData(orientation, role);
 
         case Column::SystemCompatibility:
             return SystemCompatibilityItem::headerData(orientation, role);
@@ -121,6 +103,8 @@ void AbstractProjectsModel::addProject(const ProjectsModelProject* project, cons
 
     if (!project)
         return;
+
+    const_cast<ProjectsModelProject*>(project)->initialize();
 
     const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
         const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
@@ -434,15 +418,29 @@ QVariant AbstractProjectsModel::MissingPluginsItem::data(int role) const
     return Item::data(role);
 }
 
-QVariant AbstractProjectsModel::SizeItem::data(int role) const
+AbstractProjectsModel::DownloadSizeItem::DownloadSizeItem(const util::ProjectsModelProject* project, bool editable) :
+    Item(project, editable)
+{
+    Q_ASSERT(project);
+
+    if (project) {
+	    connect(project, &ProjectsModelProject::downloadSizeDetermined, this, [this](std::uint64_t size) {
+            emitDataChanged();
+        });
+    }
+}
+
+QVariant AbstractProjectsModel::DownloadSizeItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
-	    case Qt::DisplayRole:
-            return getProject()->getSize();
+            return getProject()->getDownloadSize();
+
+    case Qt::DisplayRole:
+            return getNoBytesHumanReadable(data(Qt::EditRole).toULongLong());
 
 	    case Qt::ToolTipRole:
-	        return "Project size: " + data(Qt::DisplayRole).toString();
+	        return "Download size: " + data(Qt::DisplayRole).toString();
 
 	    default:
 	        break;
