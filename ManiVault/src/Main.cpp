@@ -134,16 +134,6 @@ int main(int argc, char *argv[])
 
     application.setStyle(new NoProxyRectanglesFusionStyle);
 
-#ifdef _WIN32
-    //QFile styleSheetFile(":/styles/default.qss");
-
-    //styleSheetFile.open(QFile::ReadOnly);
-
-    //QString styleSheet = QLatin1String(styleSheetFile.readAll());
-
-    //application.setStyleSheet(styleSheet);
-#endif
-
     loadGuiTask.setSubtaskFinished("Apply styles");
 	
 	ModalTask::getGlobalHandler()->setEnabled(true);
