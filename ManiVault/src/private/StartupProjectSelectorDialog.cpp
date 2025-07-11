@@ -30,7 +30,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     setWindowIcon(windowIcon);
     setModal(true);
-    setWindowTitle("Load project");
+    setWindowTitle("Select a project to load");
 
     auto layout = new QVBoxLayout();
 
@@ -92,7 +92,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
         _loadAction.setEnabled(canLoad);
         _loadAction.setText(canLoad ? "Load Project" : "Select Project");
-        _loadAction.setToolTip(canLoad ? "Load the selected project" : "Select a project to load");
+        _loadAction.setToolTip(canLoad ? "Click to load the project" : "Select a project to load");
     };
 
     updateLoadAction();
