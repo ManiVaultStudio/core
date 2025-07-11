@@ -115,7 +115,7 @@ public:
         AbstractManager(parent, "Project"),
         _state(State::Idle),
         _projectSerializationTask(this, "Project serialization"),
-		_projectDownloader(util::FileDownloader::StorageMode::All, Task::GuiScope::Modal)
+		_projectDownloader(util::FileDownloader::StorageMode::All, Task::GuiScope::None)
     {
     }
 

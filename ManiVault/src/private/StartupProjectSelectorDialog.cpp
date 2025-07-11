@@ -36,6 +36,30 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     layout->addWidget(&_hierarchyWidget, 1);
 
+    auto taskAction = new TaskAction(this, "Loading project...");
+
+    auto projectDownloaderTask = static_cast<const AbstractProjectManager&>(mv::projects()).getProjectDownloader().getTask();
+
+    taskAction->setTask(projectDownloaderTask);
+
+    auto downloadTaskWidget = taskAction->createWidget(this);
+
+    auto sizePolicy = downloadTaskWidget->sizePolicy();
+
+    sizePolicy.setRetainSizeWhenHidden(true);
+
+    downloadTaskWidget->setSizePolicy(sizePolicy);
+
+	const auto updateDownloadTaskWidgetVisibility = [downloadTaskWidget, projectDownloaderTask]() -> void {
+        downloadTaskWidget->setVisible(projectDownloaderTask->isRunning());
+    };
+
+    updateDownloadTaskWidgetVisibility();
+
+    connect(projectDownloaderTask, &Task::statusChanged, this, updateDownloadTaskWidgetVisibility);
+
+    layout->addWidget(downloadTaskWidget);
+
 	auto bottomLayout = new QHBoxLayout();
 
     bottomLayout->addWidget(_loadAction.createWidget(this));
@@ -64,10 +88,11 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     });
 
     const auto updateLoadAction = [this, &treeView]() -> void {
-        const auto canLoad = treeView.selectionModel()->selectedRows().isEmpty();
+        const auto canLoad = !treeView.selectionModel()->selectedRows().isEmpty();
 
-        _loadAction.setText(canLoad ? "Start ManiVault" : "Load Project");
-        _loadAction.setToolTip(canLoad ? "Start ManiVault" : "Load the selected project");
+        _loadAction.setEnabled(canLoad);
+        _loadAction.setText(canLoad ? "Load Project" : "Select Project");
+        _loadAction.setToolTip(canLoad ? "Load the selected project" : "Select a project to load");
     };
 
     updateLoadAction();
