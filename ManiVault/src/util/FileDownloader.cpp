@@ -21,8 +21,6 @@ FileDownloader::FileDownloader(const StorageMode& mode, const Task::GuiScope& ta
     _isDownloading(false),
     _task(QThread::currentThread() == QCoreApplication::instance()->thread() ? new Task(this, "Downloading", { taskGuiScope }, Task::Status::Undefined, true) : nullptr)
 {
-    connect(&_networkAccessManager, &QNetworkAccessManager::finished, this, &FileDownloader::downloadFinished);
-
     if (_task)
 		_task->setEnabled(taskGuiScope != Task::GuiScope::None);
 }
@@ -39,13 +37,15 @@ void FileDownloader::download(const QUrl& url)
     _url            = url;
     _isDownloading  = true;
 
-    getDownloadSize(_url);
-
 	QNetworkRequest request(_url);
 
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-    auto* networkReply = _networkAccessManager.get(request);
+    auto* networkReply = sharedManager().get(request);
+
+    connect(networkReply, &QNetworkReply::finished, this, [this, networkReply]() -> void {
+        downloadFinished(networkReply);
+    });
 
     const auto fileName = QFileInfo(_url.toString()).fileName();
 
@@ -168,52 +168,36 @@ QPointer<Task> FileDownloader::getTask() const
     return _task;
 }
 
-std::uint64_t FileDownloader::getDownloadSize(const QUrl& url)
+QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
 {
-    try
-    {
-        QEventLoop loop;
+    QPromise<std::uint64_t> promise;
+    QFuture<std::uint64_t> future = promise.future();
 
-        QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-        QNetworkRequest request(url);
+    QNetworkReply* reply = sharedManager().head(request);
 
-        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    connect(reply, &QNetworkReply::finished, reply, [reply, p = std::move(promise)]() mutable {
+        reply->deleteLater();
 
-        auto reply = manager.head(request);
-
-        connect(reply, &QNetworkReply::finished, [&]() {
-            if (reply->error() == QNetworkReply::NoError) {
-                const auto lengthHeader = reply->header(QNetworkRequest::ContentLengthHeader);
-
-            	if (lengthHeader.isValid()) {
-                    return lengthHeader.toLongLong();
-                }
-
-                reply->deleteLater();
-                loop.quit();
-                
-                throw std::runtime_error("Content-Length header not present");
+        if (reply->error() == QNetworkReply::NoError) {
+            auto lengthHeader = reply->header(QNetworkRequest::ContentLengthHeader);
+            if (lengthHeader.isValid()) {
+                p.addResult(lengthHeader.toULongLong());
+                p.finish();
+                return;
             }
+            else {
+                p.setException(std::make_exception_ptr(std::runtime_error("Content-Length header not present")));
+                return;
+            }
+        }
 
-            reply->deleteLater();
-            loop.quit();
+        p.setException(std::make_exception_ptr(std::runtime_error(reply->errorString().toStdString())));
+    });
 
-            throw std::runtime_error(QString("Error: %1").arg(reply->errorString()).toStdString());
-		});
-
-        loop.exec();
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox(QString("Unable to determine the size of the download (%1):").arg(url.toString()), e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox(QString("Unable to determine the size of the download (%1)").arg(url.toString()));
-    }
-
-    return {};
+    return future;
 }
 
 QByteArray FileDownloader::downloadedData() const {

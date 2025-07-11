@@ -6,13 +6,14 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "ModalTask.h"
+#include "Task.h"
 
 #include <QObject>
 #include <QUrl>
 #include <QByteArray>
 #include <QNetworkReply>
 #include <QPointer>
+#include <QFuture>
 
 namespace mv::util {
 
@@ -102,11 +103,21 @@ public:
     QPointer<Task> getTask() const;
 
     /**
+     * Get the shared network access manager instance
+     * @return Reference to the shared QNetworkAccessManager instance
+     */
+	static QNetworkAccessManager& sharedManager()
+    {
+        static QNetworkAccessManager instance;
+        return instance;
+    }
+
+	/**
      * Get the size of the file to be downloaded
      * @param url URL of the file to be downloaded
      * @return Size of the file to be downloaded in bytes, 0 if size cannot be determined
      */
-    static std::uint64_t getDownloadSize(const QUrl& url);
+    static QFuture<std::uint64_t> getDownloadSizeAsync(const QUrl& url);
 
 signals:
 
@@ -124,7 +135,6 @@ signals:
 
 private:
     const StorageMode       _storageMode;               /** Download mode */
-    QNetworkAccessManager   _networkAccessManager;      /** For network access */
     QUrl                    _url;                       /** URL being downloaded */
     bool                    _isDownloading;             /** Boolean determining whether a download is taking place */
     QByteArray              _downloadedData;            /** Downloaded data as byte array */
