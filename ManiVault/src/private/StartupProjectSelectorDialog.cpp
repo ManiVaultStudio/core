@@ -9,6 +9,8 @@
 #include <QGroupBox>
 #include <QVBoxLayout>
 #include <QHeaderView>
+#include <QTextBrowser>
+#include <QToolTip>
 #include <QTreeView>
 
 using namespace mv;
@@ -19,48 +21,79 @@ using namespace mv::util;
     #define STARTUP_PROJECT_SELECTOR_DIALOG_VERBOSE
 #endif
 
-class CustomTooltipPopup : public QFrame {
+class CustomTooltipPopup : public QWidget {
 public:
     explicit CustomTooltipPopup(QWidget* parent = nullptr)
-        : QFrame(parent, Qt::ToolTip)
+        : QWidget(nullptr, Qt::ToolTip)
     {
+        setAttribute(Qt::WA_ShowWithoutActivating);
+        setAttribute(Qt::WA_TransparentForMouseEvents);
         setWindowFlags(Qt::ToolTip);
-        setFrameShape(QFrame::Box);
+        setFocusPolicy(Qt::NoFocus);
+        setFont(QToolTip::font());
+        setPalette(QToolTip::palette());
+        setForegroundRole(QPalette::ToolTipText);
 
-        _hardwareSpecTreeModel.setHeaderData(0, Qt::Horizontal, "Name");
-        _hardwareSpecTreeModel.setHeaderData(1, Qt::Horizontal, "System");
-        _hardwareSpecTreeModel.setHeaderData(2, Qt::Horizontal, "Minimum");
+        // Make the background fully transparent
+        _messageBrowser.setAttribute(Qt::WA_TranslucentBackground);
+        _messageBrowser.setStyleSheet("background: transparent;");
 
-        _hardwareSpecTreeView.setModel(&_hardwareSpecTreeModel);
-        //_hardwareSpecTreeView.setHeaderHidden(true);
-        _hardwareSpecTreeView.setRootIsDecorated(false);
-        _hardwareSpecTreeView.setIconSize(QSize(12, 12));
-        _hardwareSpecTreeView.setMinimumWidth(400);
-
-    	auto header = _hardwareSpecTreeView.header();
-
-        header->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+        // Optional: Remove border, padding, etc.
+        _messageBrowser.setFrameStyle(QFrame::NoFrame);
+        _messageBrowser.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        _messageBrowser.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        _messageBrowser.setStyleSheet("background: transparent; color: black;");
+        _messageBrowser.setMinimumHeight(10);
+        _messageBrowser.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
         auto layout = new QVBoxLayout(this);
-        
-        layout->addWidget(&_hardwareSpecTreeView);
 
-        setLayout(layout);
+        static const int margin = 2; // Set a margin for the tooltip
+
+        layout->setContentsMargins(margin, margin, margin, margin);
+
+        layout->addWidget(&_messageBrowser);
+
+    	setLayout(layout);
+
+        //setMargin(1);
+        //setAlignment(Qt::AlignLeft | Qt::AlignTop);
+        //setWordWrap(true);
+        //setTextFormat(Qt::RichText);
+
+
     }
 
-    void setHardwareSpec(const HardwareSpec& hardwareSpec) {
-        _hardwareSpecTreeModel.setHardwareSpec(hardwareSpec);
-        _hardwareSpecTreeView.expandAll();
+    void setHtml(const QString& html, int maxWidth = 1200) {
+        _messageBrowser.setText(html);
+        _messageBrowser.adjustSize();
+        //setFixedWidth(600);
+        adjustSize();
+        //resize(sizeHint());
     }
 
-    //QSize sizeHint() const override {
-    //    return _hardwareSpecTreeView.sizeHint();
-    //}
+protected:
+    void paintEvent(QPaintEvent* event) override {
+        QStyleOptionFrame opt;
+        opt.initFrom(this);
+        opt.rect = rect();
+        opt.lineWidth = style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, nullptr, this);
+        opt.midLineWidth = 0;
+        opt.state |= QStyle::State_Sunken;
+        opt.features = QStyleOptionFrame::None;
+        opt.frameShape = QFrame::Box;
+
+        QPainter p(this);
+        style()->drawPrimitive(QStyle::PE_PanelTipLabel, &opt, &p, this);
+
+        // Call QLabel's paintEvent to draw the text
+        QWidget::paintEvent(event);
+    }
 
 private:
-    HardwareSpecTreeModel   _hardwareSpecTreeModel;     /** Model for the hardware specification */
-    QTreeView               _hardwareSpecTreeView;      /** Visualization of the hardware specification */
+    QTextBrowser    _messageBrowser;    /** Text browser for displaying the tooltip message */
 };
+
 
 class ItemViewTooltipInterceptor : public QObject {
 public:
@@ -69,32 +102,38 @@ public:
         _projectsTreeModel(projectsTreeModel),
         _projectsFilterModel(projectsFilterModel),
 		_projectsView(view),
-		_popup(new CustomTooltipPopup(view))
+		_popup()
     {
         _projectsView->viewport()->installEventFilter(this);
     }
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override {
-        if (event->type() == QEvent::ToolTip) {
-            const auto helpEvent        = dynamic_cast<QHelpEvent*>(event);
-            const auto index            = _projectsFilterModel->mapToSource(_projectsView->indexAt(helpEvent->pos()));
-            const auto column           = static_cast<mv::ProjectsTreeModel::Column>(index.column());
-            const auto projectItem      = dynamic_cast<ProjectsTreeModel::Item*>(_projectsTreeModel->itemFromIndex(index));
-
-        	if (index.isValid() && projectItem) {
-                if (column == ProjectsTreeModel::Column::SystemCompatibility)
-					_popup->setHardwareSpec(projectItem->getProject()->getMinimumHardwareSpec());
-
-				_popup->move(helpEvent->globalPos() + QPoint(10, 20));
-                _popup->show();
-
-                return true; // block default tooltip
-            }
+        if (event->type() == QEvent::Leave) {
+            _popup.hide();
         }
-        else if (event->type() == QEvent::Leave) {
-            _popup->hide();
+
+        const auto helpEvent = dynamic_cast<QHelpEvent*>(event);
+
+        if (!helpEvent)
+            return QObject::eventFilter(watched, event);
+
+        const auto index    = _projectsFilterModel->mapToSource(_projectsView->indexAt(helpEvent->pos()));
+        const auto column   = static_cast<mv::ProjectsTreeModel::Column>(index.column());
+
+        if (event->type() == QEvent::ToolTip && column == ProjectsTreeModel::Column::SystemCompatibility && _popup.isHidden()) {
+            const auto projectItem = dynamic_cast<ProjectsTreeModel::Item*>(_projectsTreeModel->itemFromIndex(index));
+
+            const auto systemCompatibility = HardwareSpec::getSystemCompatibility(projectItem->getProject()->getMinimumHardwareSpec(), projectItem->getProject()->getRecommendedHardwareSpec());
+
+			_popup.setHtml(systemCompatibility._failureString);
+			_popup.move(helpEvent->globalPos() + QPoint(10, 20));
+            _popup.show();
+
+            return true; // block default tooltip
         }
+
+    	
         return QObject::eventFilter(watched, event);
     }
 
@@ -102,7 +141,7 @@ private:
     ProjectsTreeModel*      _projectsTreeModel;     /** Pointer to the projects tree model */
     ProjectsFilterModel*    _projectsFilterModel;   /** Pointer to the projects filter model */
     QAbstractItemView*      _projectsView;          /** Pointer to the projects view */
-    CustomTooltipPopup*     _popup;                 /** Custom tooltip popup for displaying hardware specifications */
+    CustomTooltipPopup      _popup;                 /** Custom tooltip popup for displaying hardware specifications */
 };
 
 StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel& projectsTreeModel, mv::ProjectsFilterModel& projectsFilterModel, QWidget* parent /*= nullptr*/) :
