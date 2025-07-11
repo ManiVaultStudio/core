@@ -101,6 +101,13 @@ public:
      */
     QPointer<Task> getTask() const;
 
+    /**
+     * Get the size of the file to be downloaded
+     * @param url URL of the file to be downloaded
+     * @return Size of the file to be downloaded in bytes, 0 if size cannot be determined
+     */
+    static std::uint64_t getDownloadSize(const QUrl& url);
+
 signals:
 
     /** Signals that the file is correctly downloaded */

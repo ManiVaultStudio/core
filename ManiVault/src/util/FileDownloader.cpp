@@ -39,7 +39,9 @@ void FileDownloader::download(const QUrl& url)
     _url            = url;
     _isDownloading  = true;
 
-    QNetworkRequest request(_url);
+    getDownloadSize(_url);
+
+	QNetworkRequest request(_url);
 
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
@@ -164,6 +166,54 @@ QPointer<Task> FileDownloader::getTask()
 QPointer<Task> FileDownloader::getTask() const
 {
     return _task;
+}
+
+std::uint64_t FileDownloader::getDownloadSize(const QUrl& url)
+{
+    try
+    {
+        QEventLoop loop;
+
+        QNetworkAccessManager manager;
+
+        QNetworkRequest request(url);
+
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+        auto reply = manager.head(request);
+
+        connect(reply, &QNetworkReply::finished, [&]() {
+            if (reply->error() == QNetworkReply::NoError) {
+                const auto lengthHeader = reply->header(QNetworkRequest::ContentLengthHeader);
+
+            	if (lengthHeader.isValid()) {
+                    return lengthHeader.toLongLong();
+                }
+
+                reply->deleteLater();
+                loop.quit();
+                
+                throw std::runtime_error("Content-Length header not present");
+            }
+
+            reply->deleteLater();
+            loop.quit();
+
+            throw std::runtime_error(QString("Error: %1").arg(reply->errorString()).toStdString());
+		});
+
+        loop.exec();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to determine the size of the download (%1):").arg(url.toString()), e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox(QString("Unable to determine the size of the download (%1)").arg(url.toString()));
+    }
+
+    return {};
 }
 
 QByteArray FileDownloader::downloadedData() const {
