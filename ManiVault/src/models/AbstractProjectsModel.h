@@ -27,6 +27,7 @@ public:
     /** Model columns */
     enum class Column {
         Title,                  /** Title of the project */
+        LastModified,           /** Last modified date of the project */
         Downloaded,             /** Whether the project has been downloaded before */
         Group,                  /** Group title of the project */
         IsGroup,                /** Whether the item is a project group */
@@ -98,6 +99,46 @@ protected:
 
                 default:
                     break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the download size */
+    class LastModifiedItem final : public Item {
+    public:
+
+        /**
+         * Construct with pointer \p project
+         * @param project Const pointer to project
+         * @param editable Boolean determining whether the item is editable or not
+         */
+        LastModifiedItem(const util::ProjectsModelProject* project, bool editable = false);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Last Modified";
+
+	            case Qt::ToolTipRole:
+	                return "Date and time when the project was last modified";
+
+	            default:
+	                break;
             }
 
             return {};
@@ -629,6 +670,7 @@ protected:
             QList<QStandardItem*>()
         {
         	append(new TitleItem(project));
+        	append(new LastModifiedItem(project));
         	append(new DownloadedItem(project));
         	append(new GroupItem(project));
         	append(new IsGroupItem(project));
