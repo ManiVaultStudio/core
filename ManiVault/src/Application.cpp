@@ -152,7 +152,7 @@ bool Application::shouldOpenProjectAtStartup() const
     if (_startupProjectUrl.isEmpty())
         return false;
 
-    if (_startupProjectUrl.isLocalFile() && !QFileInfo(_startupProjectUrl.toString()).exists())
+    if (_startupProjectUrl.isLocalFile() && !QFileInfo(_startupProjectUrl.toLocalFile()).exists())
         return false;
 
     return true;
