@@ -26,7 +26,7 @@
 #include <exception>
 
 #ifdef _DEBUG
-    //#define PROJECT_MANAGER_VERBOSE
+    #define PROJECT_MANAGER_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -544,50 +544,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
 void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= false*/)
 {
+#ifdef PROJECT_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << url << targetDirectory << importDataOnly << loadWorkspace;
+#endif
+
     try {
         if (url.isLocalFile()) {
-            mv::projects().openProject(url.toString());
+            mv::projects().openProject(url.toLocalFile());
         } else {
-            const auto fileName                     = QFileInfo(url.toString()).fileName();
-            const auto downloadedProjectFilePath    = getDownloadedProjectsDir().filePath(fileName);
+            const auto downloadedProjectFilePath = mv::projects().downloadProject(url, targetDirectory);
 
-            if (!fileName.isEmpty()) {
-                const auto projectAlreadyDownloaded = QFile::exists(downloadedProjectFilePath);
-
-                auto downloadProject = false;
-
-                if (projectAlreadyDownloaded) {
-                    QMessageBox downloadAgainMessageBox;
-
-                    downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
-                    downloadAgainMessageBox.setWindowTitle(QString("%1 already exists...").arg(fileName));
-                    downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
-                    downloadAgainMessageBox.setIcon(QMessageBox::Warning);
-
-                    auto yesButton  = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
-                    auto noButton   = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
-
-                    downloadAgainMessageBox.setDefaultButton(noButton);
-
-                    downloadAgainMessageBox.exec();
-
-                    if (downloadAgainMessageBox.clickedButton() == yesButton) {
-                        QFile::remove(downloadedProjectFilePath);
-
-                        downloadProject = true;
-                    }
-                    else {
-                        mv::projects().openProject(downloadedProjectFilePath);
-                    }
-                } else {
-                    downloadProject = true;
-                }
-
-                if (downloadProject) {
-                    mv::projects().downloadProject(url, targetDirectory);
-					mv::projects().openProject(getProjectDownloader().getDownloadedFilePath());
-                }
-            }
+            mv::projects().openProject(downloadedProjectFilePath);
         }
 	}
 	catch (std::exception& e)
@@ -1114,19 +1081,61 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
 
 QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/)
 {
-    QEventLoop loop;
+    const auto fileName                             = QFileInfo(url.toString()).fileName();
+    const auto previouslyDownloadedProjectFilePath  = getDownloadedProjectsDir().filePath(fileName);
 
-    getProjectDownloader().setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
+    if (!fileName.isEmpty()) {
+        const auto projectAlreadyDownloaded = QFile::exists(previouslyDownloadedProjectFilePath);
 
-    connect(&getProjectDownloader(), &FileDownloader::aborted, this, []() -> void {
-        qDebug() << "Download aborted by user";
-    });
+        auto shouldDownloadProject = false;
 
-    getProjectDownloader().download(url);
+        if (projectAlreadyDownloaded) {
+            QMessageBox downloadAgainMessageBox;
 
-    loop.exec();
+            downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
+            downloadAgainMessageBox.setWindowTitle(QString("%1 already exists...").arg(fileName));
+            downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
+            downloadAgainMessageBox.setIcon(QMessageBox::Warning);
 
-    return getProjectDownloader().getDownloadedFilePath();
+            auto yesButton  = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+            auto noButton   = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
+
+            downloadAgainMessageBox.setDefaultButton(noButton);
+
+            downloadAgainMessageBox.exec();
+
+            if (downloadAgainMessageBox.clickedButton() == yesButton) {
+                QFile::remove(previouslyDownloadedProjectFilePath);
+
+                shouldDownloadProject = true;
+            }
+            else {
+                mv::projects().openProject(previouslyDownloadedProjectFilePath);
+            }
+        }
+        else {
+            shouldDownloadProject = true;
+        }
+
+        if (shouldDownloadProject) {
+            QEventLoop eventLoop;
+
+            getProjectDownloader().setTargetDirectory(targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "");
+
+            connect(&getProjectDownloader(), &FileDownloader::downloaded, &eventLoop, &QEventLoop::quit);
+            connect(&getProjectDownloader(), &FileDownloader::aborted, &eventLoop, &QEventLoop::quit);
+
+            getProjectDownloader().download(url);
+
+            eventLoop.exec();
+
+            return getProjectDownloader().getDownloadedFilePath();
+        }
+
+    	return previouslyDownloadedProjectFilePath;
+    }
+
+    return {};
 }
 
 QDir ProjectManager::getDownloadedProjectsDir() const
