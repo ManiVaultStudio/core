@@ -209,6 +209,37 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
+AbstractProjectsModel::LastModifiedItem::LastModifiedItem(const util::ProjectsModelProject* project, bool editable) :
+    Item(project, editable)
+{
+    Q_ASSERT(project);
+
+    if (project) {
+        connect(project, &ProjectsModelProject::lastModifiedDetermined, this, [this](const QDateTime& lastModified) {
+            emitDataChanged();
+        });
+    }
+}
+
+QVariant AbstractProjectsModel::LastModifiedItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getProject()->getLastModified();
+
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toDateTime().toString();
+
+	    case Qt::ToolTipRole:
+	        return "Last modified: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
 AbstractProjectsModel::DownloadedItem::DownloadedItem(const util::ProjectsModelProject* project, bool editable) :
     Item(project, editable)
 {
