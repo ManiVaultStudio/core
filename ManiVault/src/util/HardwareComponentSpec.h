@@ -39,6 +39,12 @@ public:
      */
     virtual void fromVariantMap(const QVariantMap& variantMap);
 
+	/**
+     * Convert the hardware component spec to a variant map
+     * @return Variant map containing the hardware component spec properties
+	 */
+	virtual QVariantMap toVariantMap() const;
+
     /**
      * Get the reason why the hardware component spec does not meet the \p required hardware component spec
      * @param required Hardware component spec that is required
@@ -91,7 +97,7 @@ public:
 
 protected: // Population methods
 
-    /** Load the hardware spec from current system */
+    /** Load the hardware component spec from current system */
     virtual void fromSystem() = 0;
 
 	/**

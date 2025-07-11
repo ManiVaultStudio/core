@@ -17,6 +17,11 @@ void HardwareComponentSpec::fromVariantMap(const QVariantMap& variantMap)
 {
 }
 
+QVariantMap HardwareComponentSpec::toVariantMap() const
+{
+    return {};
+}
+
 QStandardItem* HardwareComponentSpec::getStandardItem() const
 {
     return new QStandardItem(_title);
