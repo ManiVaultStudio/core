@@ -87,7 +87,7 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
 void ProjectsModelProject::initialize()
 {
     determineDownloadSize();
-
+    determineLastModified();
 }
 
 bool ProjectsModelProject::load() const
@@ -143,6 +143,11 @@ bool ProjectsModelProject::load() const
 QString ProjectsModelProject::getTitle() const
 {
     return _title;
+}
+
+QDateTime ProjectsModelProject::getLastModified() const
+{
+    return _lastModified;
 }
 
 bool ProjectsModelProject::isDownloaded() const
@@ -228,14 +233,23 @@ bool ProjectsModelProject::isStartup() const
 
 void ProjectsModelProject::determineDownloadSize()
 {
-    auto future = FileDownloader::getDownloadSizeAsync(getUrl());
-
     FileDownloader::getDownloadSizeAsync(getUrl()).then(this, [this](std::uint64_t size) {
         _downloadSize = size;
 
         emit downloadSizeDetermined(size);
     }).onFailed(this, [this](const QException& e) {
         qWarning().noquote() << QString("Unable to determine download size for %1: %2").arg(getUrl().toString(), e.what());
+    });
+}
+
+void ProjectsModelProject::determineLastModified()
+{
+    FileDownloader::getLastModifiedAsync(getUrl()).then(this, [this](const QDateTime& lastModified) {
+        _lastModified = lastModified;
+
+        emit lastModifiedDetermined(lastModified);
+        }).onFailed(this, [this](const QException& e) {
+            qWarning().noquote() << QString("Unable to determine last modified for %1: %2").arg(getUrl().toString(), e.what());
     });
 }
 

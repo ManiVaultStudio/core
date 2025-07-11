@@ -59,6 +59,12 @@ public:
     QString getTitle() const;
 
     /**
+     * Get last modified date
+     * @return Last modified date
+     */
+    QDateTime getLastModified() const;
+
+    /**
      * Get whether project has been downloaded before
      * @return Boolean determining whether project has been downloaded before
      */
@@ -157,6 +163,7 @@ public:
     ProjectsModelProject& operator=(const ProjectsModelProject& rhs)
     {
         _title                      = rhs.getTitle();
+        _lastModified               = rhs.getLastModified();
         _group                      = rhs.getGroup();
     	_isGroup                    = rhs.isGroup();
         _tags                       = rhs.getTags();
@@ -170,7 +177,7 @@ public:
         _downloadSize               = rhs.getDownloadSize();
         _minimumHardwareSpec        = rhs.getMinimumHardwareSpec();
         _recommendedHardwareSpec    = rhs.getRecommendedHardwareSpec();
-        _startup                  = rhs.isStartup();
+        _startup                    = rhs.isStartup();
 
         return *this;
     }
@@ -180,6 +187,9 @@ private:
     /** Determines the download size of the project */
     void determineDownloadSize();
 
+    /** Determines the last modified date of the project */
+    void determineLastModified();
+
 signals:
 
     /**
@@ -188,8 +198,15 @@ signals:
      */
     void downloadSizeDetermined(std::uint64_t size);
 
+    /**
+     * Signals that the last modified date has been determined
+     * @param lastModified Last modified date in milliseconds since epoch
+     */
+    void lastModifiedDetermined(const QDateTime& lastModified);
+
 private:
     QString         _title;                     /** Title */
+    QDateTime       _lastModified;              /** Last modified date */
     bool            _isGroup;                   /** Boolean determining whether this is a group or a project */
     QString         _group;                     /** Group */
     QStringList     _tags;                      /** Tags */
