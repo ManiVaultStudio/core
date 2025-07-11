@@ -38,6 +38,8 @@ public:
      * @return Boolean determining whether the CPU component specification is equal to the \p other CPU component specification
      */
     bool operator==(const CpuComponentSpec& other) const {
+
+        // FIXME: Implement actual comparison logic for CpuComponentSpec
         return false;
     }
 
@@ -47,6 +49,8 @@ public:
      * @return Boolean determining whether the CPU component specification is not equal to the \p other CPU component specification
      */
     bool operator!=(const CpuComponentSpec& other) const {
+
+        // FIXME: Implement actual comparison logic for CpuComponentSpec
         return !(*this == other);
     }
 
@@ -72,7 +76,10 @@ public:
      * @return Boolean determining whether the CPU component specification is smaller than the \p other CPU component specification
      */
     bool lessThan(const HardwareComponentSpec& other) const override {
-        return *this < dynamic_cast<const CpuComponentSpec&>(other);
+        if (auto otherCpuComponentSpec = dynamic_cast<const CpuComponentSpec*>(&other))
+            return *this < *otherCpuComponentSpec;
+
+        return false;
     }
 
     /**
@@ -81,7 +88,10 @@ public:
      * @return Boolean determining whether the CPU component specification is equal to the \p other CPU component specification
      */
     bool equals(const HardwareComponentSpec& other) const override {
-        return *this == dynamic_cast<const CpuComponentSpec&>(other);
+        if (auto otherCpuComponentSpec = dynamic_cast<const CpuComponentSpec*>(&other))
+            return *this == *otherCpuComponentSpec;
+
+        return false;
     }
 
     /**
