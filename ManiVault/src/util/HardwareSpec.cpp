@@ -29,7 +29,7 @@ void HardwareSpec::fromVariantMap(const QVariantMap& variantMap)
         componentSpec->fromVariantMap(variantMap);
 }
 
-void HardwareSpec::fromSystem() const
+void HardwareSpec::fromSystem()
 {
     for (auto& componentSpec : _hardwareComponentSpecs)
         componentSpec->fromSystem();

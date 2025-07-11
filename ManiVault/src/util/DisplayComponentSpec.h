@@ -23,15 +23,15 @@ class CORE_EXPORT DisplayComponentSpec : public HardwareComponentSpec
 public:
 
     struct Resolution {
-        int _width   = 0;
-        int _height  = 0;
+        int width   = 0;
+        int height  = 0;
 
         bool operator==(const Resolution& other) const {
-            return _width == other._width && _height == other._height;
+            return width == other.width && height == other.height;
         }
 
         bool operator<(const Resolution& other) const {
-            return std::tie(_width, _height) < std::tie(other._width, other._height);
+            return std::tie(width, height) < std::tie(other.width, other.height);
         }
     };
 
@@ -57,7 +57,7 @@ public:
      * @return Boolean determining whether the display component specification is equal to the \p other display component specification
      */
     bool operator==(const DisplayComponentSpec& other) const {
-        return _resolution._width == other._resolution._width && _resolution._height == other._resolution._height;
+        return _resolution.width == other._resolution.width && _resolution.height == other._resolution.height;
     }
 
     /**

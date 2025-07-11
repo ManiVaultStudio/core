@@ -14,7 +14,7 @@
 namespace mv::util
 {
 
-class CORE_EXPORT HardwareSpec
+class CORE_EXPORT HardwareSpec final
 {
 public:
 
@@ -52,7 +52,7 @@ public:
     void fromVariantMap(const QVariantMap& variantMap);
 
     /** Initialize from system hardware specifications */
-    void fromSystem() const;
+    void fromSystem();
 
     /**
      * Get whether the hardware spec has been initialized
@@ -74,7 +74,7 @@ public:
                 return std::dynamic_pointer_cast<HardwareComponentSpecType>(hardwareComponentSpec);
         }
 
-        return {};
+        return nullptr;
     }
 
     /**
