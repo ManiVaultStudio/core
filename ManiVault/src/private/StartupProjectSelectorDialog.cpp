@@ -126,7 +126,7 @@ protected:
 
             const auto systemCompatibility = HardwareSpec::getSystemCompatibility(projectItem->getProject()->getMinimumHardwareSpec(), projectItem->getProject()->getRecommendedHardwareSpec());
 
-			_popup.setHtml(systemCompatibility._failureString);
+			_popup.setHtml(systemCompatibility._message);
 			_popup.move(helpEvent->globalPos() + QPoint(10, 20));
             _popup.show();
 

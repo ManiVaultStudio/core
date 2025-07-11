@@ -330,14 +330,10 @@ set(PRIVATE_APPLICATION_FILES
 )
 
 set(PRIVATE_STARTUP_PROJECT_HEADERS
-	src/private/StartupProjectsModel.h
-	src/private/StartupProjectsFilterModel.h
     src/private/StartupProjectSelectorDialog.h
 )
 
 set(PRIVATE_STARTUP_PROJECT_SOURCES
-src/private/StartupProjectsModel.cpp
-	src/private/StartupProjectsFilterModel.cpp
     src/private/StartupProjectSelectorDialog.cpp
 )
 

@@ -108,7 +108,7 @@ bool ProjectsModelProject::load() const
 
         QString htmlMessage;
 
-        htmlMessage += systemCompatibility._failureString;
+        htmlMessage += systemCompatibility._message;
         htmlMessage += "<p>Do you want to continue anyway?</p>";
 
         textBrowser->setHtml(htmlMessage);

@@ -36,7 +36,7 @@ public:
     /** System compatibility information */
     struct SystemCompatibilityInfo {
         SystemCompatibility     _compatibility;     /** System compatibility */
-        QString                 _failureString;     /** Reason(s) for the incompatibility */
+        QString                 _message;           /** Compatibility/incompatibility message */
     };
 
     /**

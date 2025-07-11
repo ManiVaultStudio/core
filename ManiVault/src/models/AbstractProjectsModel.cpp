@@ -493,7 +493,7 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
         }
 
         case Qt::ToolTipRole:
-            return QString("<div style='min-width: 400px;'>%1</div>").arg(data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._failureString);
+            return QString("<div style='min-width: 400px;'>%1</div>").arg(data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._message);
 
         case Qt::DecorationRole:
         {
