@@ -80,6 +80,8 @@ public:
     /** Destructor */
     ~SplashScreenWidget();
 
+    void showEvent(QShowEvent* event) override;
+
     /**
      * Invoked when the dialog is painted (used to draw the background)
      * @param paintEvent Pointer to paint event
@@ -110,6 +112,7 @@ private: // Splash screen content
     static QString getCopyrightNoticeTooltip();
 
 private:
+    bool                        _initialized{ false };  /** Whether the widget has been initialized */
     SplashScreenAction&         _splashScreenAction;    /** Reference to owning splashScreenAction */
     QPixmap                     _logoImage;             /** Logo image */
     QPixmap                     _backgroundImage;       /** Background image */

@@ -104,7 +104,6 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 	        if (!downloadedProjectFilePath.isEmpty()) {
                 Application::current()->setStartupProjectUrl(QUrl(QString("file:///%1").arg(downloadedProjectFilePath)));
 
-                qDebug() << Application::current()->getStartupProjectUrl();
 	        	accept();
 			}
         }

@@ -345,12 +345,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        auto startupProjectMetaAction = getProjectMetaAction(filePath);
+        // FIXME: This is a workaround for the splash screen action to be able to open the project
+        //auto startupProjectMetaAction = getProjectMetaAction(filePath);
 
-        if (!startupProjectMetaAction.isNull()) {
-            if (startupProjectMetaAction->getSplashScreenAction().getEnabledAction().isChecked())
-                startupProjectMetaAction->getSplashScreenAction().getOpenAction().trigger();
-        }
+        //if (!startupProjectMetaAction.isNull()) {
+        //    if (startupProjectMetaAction->getSplashScreenAction().getEnabledAction().isChecked())
+        //        startupProjectMetaAction->getSplashScreenAction().getOpenAction().trigger();
+        //}
 
         const auto scopedState = ScopedState(this, State::OpeningProject);
 
@@ -1108,9 +1109,6 @@ QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory
                 QFile::remove(previouslyDownloadedProjectFilePath);
 
                 shouldDownloadProject = true;
-            }
-            else {
-                mv::projects().openProject(previouslyDownloadedProjectFilePath);
             }
         }
         else {
