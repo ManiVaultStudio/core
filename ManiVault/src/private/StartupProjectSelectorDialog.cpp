@@ -4,9 +4,6 @@
 
 #include "StartupProjectSelectorDialog.h"
 
-#include <models/HardwareSpecTreeModel.h>
-
-#include <QGroupBox>
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QTextBrowser>
@@ -20,129 +17,6 @@ using namespace mv::util;
 #ifdef _DEBUG
     #define STARTUP_PROJECT_SELECTOR_DIALOG_VERBOSE
 #endif
-
-class CustomTooltipPopup : public QWidget {
-public:
-    explicit CustomTooltipPopup(QWidget* parent = nullptr)
-        : QWidget(nullptr, Qt::ToolTip)
-    {
-        setAttribute(Qt::WA_ShowWithoutActivating);
-        setAttribute(Qt::WA_TransparentForMouseEvents);
-        setWindowFlags(Qt::ToolTip);
-        setFocusPolicy(Qt::NoFocus);
-        setFont(QToolTip::font());
-        setPalette(QToolTip::palette());
-        setForegroundRole(QPalette::ToolTipText);
-
-        // Make the background fully transparent
-        _messageBrowser.setAttribute(Qt::WA_TranslucentBackground);
-        _messageBrowser.setStyleSheet("background: transparent;");
-
-        // Optional: Remove border, padding, etc.
-        _messageBrowser.setFrameStyle(QFrame::NoFrame);
-        _messageBrowser.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        _messageBrowser.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        _messageBrowser.setStyleSheet("background: transparent; color: black;");
-        _messageBrowser.setMinimumHeight(10);
-        _messageBrowser.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-
-        auto layout = new QVBoxLayout(this);
-
-        static const int margin = 2; // Set a margin for the tooltip
-
-        layout->setContentsMargins(margin, margin, margin, margin);
-
-        layout->addWidget(&_messageBrowser);
-
-    	setLayout(layout);
-
-        //setMargin(1);
-        //setAlignment(Qt::AlignLeft | Qt::AlignTop);
-        //setWordWrap(true);
-        //setTextFormat(Qt::RichText);
-
-
-    }
-
-    void setHtml(const QString& html, int maxWidth = 1200) {
-        _messageBrowser.setText(html);
-        _messageBrowser.adjustSize();
-        //setFixedWidth(600);
-        adjustSize();
-        //resize(sizeHint());
-    }
-
-protected:
-    void paintEvent(QPaintEvent* event) override {
-        QStyleOptionFrame opt;
-        opt.initFrom(this);
-        opt.rect = rect();
-        opt.lineWidth = style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, nullptr, this);
-        opt.midLineWidth = 0;
-        opt.state |= QStyle::State_Sunken;
-        opt.features = QStyleOptionFrame::None;
-        opt.frameShape = QFrame::Box;
-
-        QPainter p(this);
-        style()->drawPrimitive(QStyle::PE_PanelTipLabel, &opt, &p, this);
-
-        // Call QLabel's paintEvent to draw the text
-        QWidget::paintEvent(event);
-    }
-
-private:
-    QTextBrowser    _messageBrowser;    /** Text browser for displaying the tooltip message */
-};
-
-
-class ItemViewTooltipInterceptor : public QObject {
-public:
-    ItemViewTooltipInterceptor(ProjectsTreeModel* projectsTreeModel, ProjectsFilterModel* projectsFilterModel, QAbstractItemView* view) :
-		QObject(view),
-        _projectsTreeModel(projectsTreeModel),
-        _projectsFilterModel(projectsFilterModel),
-		_projectsView(view),
-		_popup()
-    {
-        _projectsView->viewport()->installEventFilter(this);
-    }
-
-protected:
-    bool eventFilter(QObject* watched, QEvent* event) override {
-        if (event->type() == QEvent::Leave) {
-            _popup.hide();
-        }
-
-        const auto helpEvent = dynamic_cast<QHelpEvent*>(event);
-
-        if (!helpEvent)
-            return QObject::eventFilter(watched, event);
-
-        const auto index    = _projectsFilterModel->mapToSource(_projectsView->indexAt(helpEvent->pos()));
-        const auto column   = static_cast<mv::ProjectsTreeModel::Column>(index.column());
-
-        if (event->type() == QEvent::ToolTip && column == ProjectsTreeModel::Column::SystemCompatibility && _popup.isHidden()) {
-            const auto projectItem = dynamic_cast<ProjectsTreeModel::Item*>(_projectsTreeModel->itemFromIndex(index));
-
-            const auto systemCompatibility = HardwareSpec::getSystemCompatibility(projectItem->getProject()->getMinimumHardwareSpec(), projectItem->getProject()->getRecommendedHardwareSpec());
-
-			_popup.setHtml(systemCompatibility._message);
-			_popup.move(helpEvent->globalPos() + QPoint(10, 20));
-            _popup.show();
-
-            return true; // block default tooltip
-        }
-
-    	
-        return QObject::eventFilter(watched, event);
-    }
-
-private:
-    ProjectsTreeModel*      _projectsTreeModel;     /** Pointer to the projects tree model */
-    ProjectsFilterModel*    _projectsFilterModel;   /** Pointer to the projects filter model */
-    QAbstractItemView*      _projectsView;          /** Pointer to the projects view */
-    CustomTooltipPopup      _popup;                 /** Custom tooltip popup for displaying hardware specifications */
-};
 
 StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel& projectsTreeModel, mv::ProjectsFilterModel& projectsFilterModel, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
@@ -158,21 +32,9 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     setModal(true);
     setWindowTitle("Load project");
 
-    //new ItemViewTooltipInterceptor(&_projectsTreeModel, &_projectsFilterModel, &_hierarchyWidget.getTreeView());
-
     auto layout = new QVBoxLayout();
 
     layout->addWidget(&_hierarchyWidget, 1);
-
-    //auto detailsGroupbox = new QGroupBox("Project details", this);
-    //auto detailsLayout = new QVBoxLayout(detailsGroupbox);
-    //auto detailsLabel = new QLabel("Select a project to see its details here.", detailsGroupbox);
-
-    //detailsLayout->addWidget(detailsLabel);
-
-    //detailsGroupbox->setLayout(detailsLayout);
-
-    //layout->addWidget(detailsGroupbox);
 
 	auto bottomLayout = new QHBoxLayout();
 
@@ -237,10 +99,13 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     connect(&_loadAction, &TriggerAction::triggered, this, [this]() -> void {
         if (auto selectedStartupProject = getSelectedStartupProject()) {
-	        if (selectedStartupProject->load()) {
-                mv::projects().downloadProject(Application::current()->getStartupProjectUrl());
+            const auto downloadedProjectFilePath = mv::projects().downloadProject(selectedStartupProject->getUrl());
 
-				accept();
+	        if (!downloadedProjectFilePath.isEmpty()) {
+                Application::current()->setStartupProjectUrl(QUrl(QString("file:///%1").arg(downloadedProjectFilePath)));
+
+                qDebug() << Application::current()->getStartupProjectUrl();
+	        	accept();
 			}
         }
     });
