@@ -79,7 +79,7 @@ public:
         if (auto otherCpuComponentSpec = dynamic_cast<const CpuComponentSpec*>(&other))
             return *this < *otherCpuComponentSpec;
 
-        return false;
+        return false; // Cannot compare with non-CPU component spec
     }
 
     /**
@@ -91,7 +91,7 @@ public:
         if (auto otherCpuComponentSpec = dynamic_cast<const CpuComponentSpec*>(&other))
             return *this == *otherCpuComponentSpec;
 
-        return false;
+        return false; // Cannot compare with non-CPU component spec
     }
 
     /**

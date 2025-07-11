@@ -80,7 +80,10 @@ public:
      * @return Boolean determining whether the RAM component specification is smaller than the \p other RAM component specification
      */
     bool lessThan(const HardwareComponentSpec& other) const override {
-        return *this < dynamic_cast<const RamComponentSpec&>(other);
+        if (auto otherRamComponentSpec = dynamic_cast<const RamComponentSpec*>(&other))
+			return *this < *otherRamComponentSpec;
+
+        return false; // Cannot compare with non-RAM component spec
     }
 
     /**
@@ -89,7 +92,10 @@ public:
      * @return Boolean determining whether the RAM component specification is equal to the \p other RAM component specification
      */
     bool equals(const HardwareComponentSpec& other) const override {
-        return *this == dynamic_cast<const RamComponentSpec&>(other);
+        if (auto otherRamComponentSpec = dynamic_cast<const RamComponentSpec*>(&other))
+			return *this == *otherRamComponentSpec;
+
+        return false; // Cannot compare with non-RAM component spec
     }
 
     /**

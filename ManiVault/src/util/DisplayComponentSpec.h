@@ -95,7 +95,7 @@ public:
         if (auto otherDisplayComponentSpec = dynamic_cast<const DisplayComponentSpec*>(&other))
 			return *this < *otherDisplayComponentSpec;
 
-            return false;
+    	return false; // Cannot compare with non-display component spec
     }
 
     /**
@@ -107,7 +107,7 @@ public:
         if (auto otherDisplayComponentSpec = dynamic_cast<const DisplayComponentSpec*>(&other))
 			return *this == *otherDisplayComponentSpec;
 
-        return false;
+        return false; // Cannot compare with non-display component spec
     }
 
     /**
