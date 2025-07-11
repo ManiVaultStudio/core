@@ -80,7 +80,10 @@ public:
      * @return Boolean determining whether the hardware component specification is smaller than the \p other hardware component specification
      */
     bool lessThan(const HardwareComponentSpec& other) const override {
-        return *this < dynamic_cast<const StorageComponentSpec&>(other);
+        if (auto otherStorageComponentSpec = dynamic_cast<const StorageComponentSpec*>(&other))
+            return *this < *otherStorageComponentSpec;
+
+        return false; // Cannot compare with non-storage component spec
     }
 
     /**
@@ -89,7 +92,10 @@ public:
      * @return Boolean determining whether the storage component specification is equal to the \p other storage component specification
      */
     bool equals(const HardwareComponentSpec& other) const override {
-        return *this == dynamic_cast<const StorageComponentSpec&>(other);
+        if (auto otherStorageComponentSpec = dynamic_cast<const StorageComponentSpec*>(&other))
+			return *this == *otherStorageComponentSpec;
+
+        return false; // Cannot compare with non-storage component spec
     }
 
     /**
