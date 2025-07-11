@@ -1112,7 +1112,7 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
     return _projectsTreeModel;
 }
 
-QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/, QString* taskId /*= nullptr*/)
+QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/)
 {
     QEventLoop loop;
 
