@@ -24,22 +24,6 @@ class CORE_EXPORT AbstractProjectsModel : public StandardItemModel
 
 public:
 
-    /** Shown when hovering over the minimum and recommended hardware specs */
-    class HardwareSpecTooltipPopup : public QFrame {
-    public:
-
-	    /**
-         * Construct with pointer to \p parent object
-         * @param parent Pointer to parent object
-	     */
-	    explicit HardwareSpecTooltipPopup(QWidget* parent = nullptr);
-
-        void setText(const QString& text);
-
-    private:
-        QLabel* _label;
-    };
-
     /** Model columns */
     enum class Column {
         Title,                  /** Title of the project */
@@ -60,16 +44,6 @@ public:
 
         Count                   /** Number of columns in the model */
     };
-
-    ///** Header strings for several data roles */
-    //struct ColumHeaderInfo {
-    //    QString     _display;   /** Header string for display role */
-    //    QString     _edit;      /** Header string for edit role */
-    //    QString     _tooltip;   /** Header string for tooltip role */
-    //};
-
-    ///** Column name and tooltip */
-    //static QMap<Column, ColumHeaderInfo> columnInfo;
 
     /** Base standard model item class for project */
     class CORE_EXPORT Item : public QStandardItem {
