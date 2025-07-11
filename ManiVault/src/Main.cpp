@@ -45,12 +45,10 @@ int main(int argc, char *argv[])
     commandLineParser.addHelpOption();
     commandLineParser.addVersionOption();
 
-    QCommandLineOption projectOption({ "p", "project" }, "File path of the project to load upon startup", "project");
     QCommandLineOption organizationNameOption({ "org_name", "organization_name" }, "Name of the organization", "organization_name", "BioVault");
     QCommandLineOption organizationDomainOption({ "org_dom", "organization_domain" }, "Domain of the organization", "organization_domain", "LUMC (LKEB) & TU Delft (CGV)");
     QCommandLineOption applicationNameOption({ "app_name", "application_name" }, "Name of the application", "application_name", "ManiVault");
 
-    commandLineParser.addOption(projectOption);
     commandLineParser.addOption(organizationNameOption);
     commandLineParser.addOption(organizationDomainOption);
     commandLineParser.addOption(applicationNameOption);
@@ -91,42 +89,6 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
-    QString startupProjectFilePath;
-
-    QSharedPointer<ProjectMetaAction> startupProjectMetaAction;
-
-    if (commandLineParser.isSet("project")) {
-        QVector<QPair<QSharedPointer<mv::ProjectMetaAction>, QString>> startupProjectsMetaActionsCandidates;
-
-        auto startupProjectsFilePathsCandidates = commandLineParser.value("project").split(",");
-
-        for (const auto& startupProjectFilePathCandidate : QSet(startupProjectsFilePathsCandidates.begin(), startupProjectsFilePathsCandidates.end())) {
-            if (!QFileInfo(startupProjectFilePathCandidate).exists())
-                continue;
-
-            auto startupProjectMetaActionCandidate = mv::projects().getProjectMetaAction(startupProjectFilePathCandidate);
-
-            if (startupProjectMetaActionCandidate.isNull())
-                continue;
-
-            startupProjectsMetaActionsCandidates << QPair<QSharedPointer<mv::ProjectMetaAction>, QString>(startupProjectMetaActionCandidate, startupProjectFilePathCandidate);
-        }
-
-        if (startupProjectsMetaActionsCandidates.count() >= 2) {
-            
-            //}
-
-            //if (dialogResult == QDialog::Rejected)
-            //    return 0;
-
-        } else {
-            //if (startupProjectsMetaActionsCandidates.count() == 1) {
-            //    startupProjectMetaAction    = startupProjectsMetaActionsCandidates.first().first;
-            //    startupProjectFilePath      = startupProjectsMetaActionsCandidates.first().second;
-            //}
-        }
-    }
-
     Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
     Core core;
@@ -141,6 +103,7 @@ int main(int argc, char *argv[])
         
         settings().getTemporaryDirectoriesSettingsAction().getScanForStaleTemporaryDirectoriesAction().trigger();
     }
+
 
     ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::PopulationMode::AutomaticSynchronous);
     ProjectsFilterModel startupProjectsFilterModel(&startupProjectsTreeModel);
@@ -188,6 +151,7 @@ int main(int argc, char *argv[])
 
     SplashScreenAction splashScreenAction(&application, false);
 
+    /*
     if (!startupProjectMetaAction.isNull()) {
         try {
             const auto startupProjectFileInfo = QFileInfo(startupProjectFilePath);
@@ -227,6 +191,7 @@ int main(int argc, char *argv[])
             qDebug() << "Unable to load startup project due to an unhandled exception";
         }
     }
+    */
 
     if (!userWillSelectStartupProject)
         splashScreenAction.getOpenAction().trigger();
