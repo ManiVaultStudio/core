@@ -43,6 +43,9 @@ public:
      */
     explicit ProjectsModelProject(const QString& groupTitle);
 
+    /** Performs startup initialization */
+    void initialize();
+
     /**
      * Sets the application startup project URL
      * @return Boolean determining whether the application startup project URL has been set
@@ -122,10 +125,10 @@ public:
     QStringList getMissingPlugins() const;
 
     /**
-     * Get size
-     * @return Project size as a string (e.g., "1.2 MB", "500 KB", etc.)
+     * Get download size
+     * @return Download size of the ManiVault project in bytes
      */
-    QString getSize() const;
+    std::uint64_t getDownloadSize() const;
 
     /**
      * Get minimum hardware specification
@@ -145,6 +148,7 @@ public:
      */
     bool isStartup() const;
 
+
     /**
      * Overload assignment operator
      * @param rhs Right hand side project
@@ -163,13 +167,26 @@ public:
         _minimumCoreVersion         = rhs.getMinimumCoreVersion();
         _requiredPlugins            = rhs.getRequiredPlugins();
         _missingPlugins             = rhs.getMissingPlugins();
-        _size                       = rhs.getSize();
+        _downloadSize               = rhs.getDownloadSize();
         _minimumHardwareSpec        = rhs.getMinimumHardwareSpec();
         _recommendedHardwareSpec    = rhs.getRecommendedHardwareSpec();
         _startup                  = rhs.isStartup();
 
         return *this;
     }
+
+private:
+
+    /** Determines the download size of the project */
+    void determineDownloadSize();
+
+signals:
+
+    /**
+     * Signals that the download size has been determined
+     * @param size Download size in bytes
+     */
+    void downloadSizeDetermined(std::uint64_t size);
 
 private:
     QString         _title;                     /** Title */
@@ -183,7 +200,7 @@ private:
     Version         _minimumCoreVersion;        /** Minimum supported ManiVault Studio major version */
     QStringList     _requiredPlugins;           /** Required plugins */
     QStringList     _missingPlugins;            /** Missing plugins */
-    QString         _size;                      /** Size of the ManiVault project */
+    std::uint64_t   _downloadSize;              /** Download size of the ManiVault project */
     HardwareSpec    _minimumHardwareSpec;       /** Minimum hardware specification for the project */
     HardwareSpec    _recommendedHardwareSpec;   /** Recommended hardware specification for the project */
     bool            _startup;                   /** Boolean determining whether this is a startup project */

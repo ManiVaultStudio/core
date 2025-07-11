@@ -4,9 +4,11 @@
 
 #include "ProjectsModelProject.h"
 
-#include <QTextBrowser>
-
 #include "CoreInterface.h"
+
+#include <QTextBrowser>
+#include <QtConcurrent>
+#include <QFuture>
 
 namespace mv::util {
 
@@ -19,7 +21,6 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _iconName(variantMap.contains("icon") ? variantMap["icon"].toString() : "database"),
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
-    _size(variantMap.contains("size") ? variantMap["size"].toString() : "NA"),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
 	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false)
@@ -81,6 +82,12 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended)
 {
+}
+
+void ProjectsModelProject::initialize()
+{
+    determineDownloadSize();
+
 }
 
 bool ProjectsModelProject::load() const
@@ -199,9 +206,9 @@ QStringList ProjectsModelProject::getMissingPlugins() const
     return _missingPlugins;
 }
 
-QString ProjectsModelProject::getSize() const
+std::uint64_t ProjectsModelProject::getDownloadSize() const
 {
-    return _size;
+    return _downloadSize;
 }
 
 HardwareSpec ProjectsModelProject::getMinimumHardwareSpec() const
@@ -217,6 +224,19 @@ HardwareSpec ProjectsModelProject::getRecommendedHardwareSpec() const
 bool ProjectsModelProject::isStartup() const
 {
 	return _startup;
+}
+
+void ProjectsModelProject::determineDownloadSize()
+{
+    auto future = FileDownloader::getDownloadSizeAsync(getUrl());
+
+    FileDownloader::getDownloadSizeAsync(getUrl()).then(this, [this](std::uint64_t size) {
+        _downloadSize = size;
+
+        emit downloadSizeDetermined(size);
+    }).onFailed(this, [this](const QException& e) {
+        qWarning().noquote() << QString("Unable to determine download size for %1: %2").arg(getUrl().toString(), e.what());
+    });
 }
 
 }
