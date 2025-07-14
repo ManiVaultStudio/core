@@ -148,6 +148,11 @@ public:
      */
     bool isStartup() const;
 
+    /**
+     * Get SHA-256 hash of the project (for comparison purposes)
+     * @return SHA-256 hash of the project
+     */
+    QString getSha() const;
 
     /**
      * Overload assignment operator
@@ -176,6 +181,15 @@ public:
         return *this;
     }
 
+    /**
+    * Get whether the project is equal to the \p other project
+    * @param other Project to compare with
+    * @return Boolean determining whether the project is equal to the \p other project
+    */
+    bool operator==(const ProjectsModelProject& other) const {
+        return _sha == other.getSha();
+    }
+
 private:
 
     /** Determines the download size of the project */
@@ -183,6 +197,9 @@ private:
 
     /** Determines the last modified date of the project */
     void determineLastModified();
+
+    /** Compute cryptographic hash (for comparison purposes) */
+    void computeSha();
 
 signals:
 
@@ -215,8 +232,10 @@ private:
     HardwareSpec    _minimumHardwareSpec;       /** Minimum hardware specification for the project */
     HardwareSpec    _recommendedHardwareSpec;   /** Recommended hardware specification for the project */
     bool            _startup;                   /** Boolean determining whether this is a startup project */
+    QString         _sha;                       /** SHA-256 hash of the project (for comparison purposes) */
 };
 
-using ProjectDatabaseProjects = std::vector<const ProjectsModelProject*>;
+using ProjectsModelProjectPtr = std::shared_ptr<ProjectsModelProject>;
+using ProjectDatabaseProjects = std::vector<ProjectsModelProjectPtr>;
 
 }

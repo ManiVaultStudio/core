@@ -42,6 +42,7 @@ public:
         DownloadSize,           /** Download size of the ManiVault project */
         SystemCompatibility,    /** System compatibility of the project */
         IsStartup,              /** Whether the project can be opened at application startup */
+        Sha,                    /** SHA-256 cryptographic hash of the project */
 
         Count                   /** Number of columns in the model */
     };
@@ -657,6 +658,42 @@ protected:
         }
     };
 
+    /** Standard model item class for displaying the project SHA */
+    class ShaItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "SHA";
+
+	            case Qt::ToolTipRole:
+	                return "SHA-256 hash of the project";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
     /** Convenience class for combining items in a row */
     class Row final : public QList<QStandardItem*>
     {
@@ -685,6 +722,7 @@ protected:
             append(new DownloadSizeItem(project));
             append(new SystemCompatibilityItem(project));
             append(new IsStartupItem(project));
+            append(new ShaItem(project));
         }
     };
 
@@ -720,10 +758,10 @@ public:
 
     /**
      * Add \p project
-     * @param project Pointer to project to add
+     * @param project Shared pointer to project to add
      * @param groupTitle Title of the group to which the project should be added
      */
-    void addProject(const util::ProjectsModelProject* project, const QString& groupTitle = "");
+    void addProject(util::ProjectsModelProjectPtr project, const QString& groupTitle = "");
 
     /** Builds a set of all project tags and emits ProjectDatabaseModel::tagsChanged(...) */
     void updateTags();

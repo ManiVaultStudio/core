@@ -68,6 +68,9 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::IsStartup:
             return IsStartupItem::headerData(orientation, role);
 
+        case Column::Sha:
+            return ShaItem::headerData(orientation, role);
+
 		case Column::Count:
             break;
     }
@@ -87,61 +90,68 @@ void AbstractProjectsModel::addProjectGroup(const QString& groupTitle)
     if (groupTitle.isEmpty())
         return;
 
-    auto project = new ProjectsModelProject(groupTitle);
+    auto project = std::make_shared<ProjectsModelProject>(groupTitle);
 
-    appendRow(Row(project));
+    appendRow(Row(project.get()));
     updateTags();
 
-    const_cast<ProjectsModelProject*>(project)->setParent(this);
+    project->setParent(this);
 
     _projects.push_back(project);
 }
 
-void AbstractProjectsModel::addProject(const ProjectsModelProject* project, const QString& groupTitle)
+void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QString& groupTitle)
 {
     Q_ASSERT(project);
 
     if (!project)
         return;
 
-    const_cast<ProjectsModelProject*>(project)->initialize();
+    project->initialize();
 
-    const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
-        const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
+    const auto duplicateMatches = match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::DisplayRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
-        if (matches.size() == 1)
-            return matches.first().siblingAtColumn(static_cast<std::int32_t>(Column::Title));
+    if (duplicateMatches.empty()) {
+        const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
+            const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
 
-        return {};
-    };
+            if (matches.size() == 1)
+                return matches.first().siblingAtColumn(static_cast<std::int32_t>(Column::Title));
 
-    if (!groupTitle.isEmpty()) {
-        const auto existingProjectGroupIndex = findProjectGroupModelIndex();
+            return {};
+            };
 
-        if (existingProjectGroupIndex.isValid()) {
-            if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex)) {
-                existingProjectGroupItem->appendRow(Row(project));
+        if (!groupTitle.isEmpty()) {
+            const auto existingProjectGroupIndex = findProjectGroupModelIndex();
+
+            if (existingProjectGroupIndex.isValid()) {
+                if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex)) {
+                    existingProjectGroupItem->appendRow(Row(project.get()));
+                }
             }
-        } else {
-            addProjectGroup(groupTitle);
+            else {
+                addProjectGroup(groupTitle);
 
-            const auto addedProjectGroupIndex = findProjectGroupModelIndex();
+                const auto addedProjectGroupIndex = findProjectGroupModelIndex();
 
-            if (addedProjectGroupIndex.isValid())
-                if (auto addedProjectGroupItem = itemFromIndex(addedProjectGroupIndex))
-                    addedProjectGroupItem->appendRow(Row(project));
+                if (addedProjectGroupIndex.isValid())
+                    if (auto addedProjectGroupItem = itemFromIndex(addedProjectGroupIndex))
+                        addedProjectGroupItem->appendRow(Row(project.get()));
+            }
         }
-    }
-    else
-    {
-        appendRow(Row(project));
-    }
-    
-    updateTags();
+        else
+        {
+            appendRow(Row(project.get()));
+        }
 
-    const_cast<ProjectsModelProject*>(project)->setParent(this);
+        updateTags();
 
-    _projects.push_back(project);
+        project->setParent(this);
+
+        _projects.push_back(project);
+    } else {
+        qWarning() << "Skipping" << project->getTitle() << "because it already exists";
+    }
 }
 
 void AbstractProjectsModel::updateTags()
@@ -551,6 +561,25 @@ QVariant AbstractProjectsModel::IsStartupItem::data(int role) const
     }
 
 	return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::ShaItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+            return getProject()->getSha();
+
+    case Qt::DisplayRole:
+            return getProject()->getSha();
+
+	    case Qt::ToolTipRole:
+	        return "SHA: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
 }
 
 }

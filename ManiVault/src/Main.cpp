@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
     const auto hasProjectsJsonInAppDir = QFileInfo(QCoreApplication::applicationDirPath(), projectsJsonFileName).exists();
 
-	ProjectsTreeModel startupProjectsTreeModel(hasProjectsJsonInAppDir ? ProjectsTreeModel::PopulationMode::Manual : ProjectsTreeModel::PopulationMode::AutomaticSynchronous);
+	ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::PopulationMode::AutomaticSynchronous);
     ProjectsFilterModel startupProjectsFilterModel(&startupProjectsTreeModel);
 
     startupProjectsFilterModel.setSourceModel(&startupProjectsTreeModel);

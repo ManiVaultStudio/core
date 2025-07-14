@@ -72,6 +72,8 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     
     if (!_missingPlugins.isEmpty())
         qWarning() << "Project" << _title << "is added to the project database but cannot be opened because of missing plugins:" << _missingPlugins.join(", ");
+
+    computeSha();
 }
 
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
@@ -181,6 +183,11 @@ bool ProjectsModelProject::isStartup() const
 	return _startup;
 }
 
+QString ProjectsModelProject::getSha() const
+{
+	return _sha;
+}
+
 void ProjectsModelProject::determineDownloadSize()
 {
     FileDownloader::getDownloadSizeAsync(getUrl()).then(this, [this](std::uint64_t size) {
@@ -201,6 +208,22 @@ void ProjectsModelProject::determineLastModified()
         }).onFailed(this, [this](const QException& e) {
             qWarning().noquote() << QString("Unable to determine last modified for %1: %2").arg(getUrl().toString(), e.what());
     });
+}
+
+void ProjectsModelProject::computeSha()
+{
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+
+    hash.addData(_title.toUtf8());
+    hash.addData(_lastModified.toString().toUtf8());
+    hash.addData(_tags.join(",").toUtf8());
+    hash.addData(_date.toUtf8());
+    hash.addData(_iconName.toUtf8());
+    hash.addData(_summary.toUtf8());
+    hash.addData(_url.toString().toUtf8());
+    hash.addData(_requiredPlugins.join(",").toUtf8());
+
+    _sha = hash.result().toHex();
 }
 
 }

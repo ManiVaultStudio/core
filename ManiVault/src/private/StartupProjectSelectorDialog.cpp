@@ -117,6 +117,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Summary), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Url), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IsStartup), true);
+    treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Sha), true);
     //treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::RecommendedHardwareSpec), true);
 
 #if QT_NO_DEBUG

@@ -149,7 +149,7 @@ void ProjectsTreeModel::populateFromJsonByteArray(const QByteArray& jsonByteArra
         for (const auto project : projects) {
             auto projectMap = project.toVariant().toMap();
 
-            addProject(new ProjectsModelProject(projectMap), projectMap["group"].toString());
+            addProject(std::make_shared<ProjectsModelProject>(projectMap), projectMap["group"].toString());
         }
     }
     catch (std::exception& e)
