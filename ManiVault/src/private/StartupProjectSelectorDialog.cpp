@@ -128,9 +128,54 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     connect(&_loadAction, &TriggerAction::triggered, this, [this]() -> void {
         if (auto selectedStartupProject = getSelectedStartupProject()) {
+            bool loadStartupProject = true;
+
             const auto downloadedProjectFilePath = mv::projects().downloadProject(selectedStartupProject->getUrl());
 
-	        if (!downloadedProjectFilePath.isEmpty()) {
+            const auto systemCompatibility = HardwareSpec::getSystemCompatibility(selectedStartupProject->getMinimumHardwareSpec(), selectedStartupProject->getRecommendedHardwareSpec());
+
+            if (systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Incompatible) {
+
+                QDialog projectIncompatibleWithSystemDialog;
+
+                projectIncompatibleWithSystemDialog.setWindowIcon(StyledIcon("triangle-exclamation"));
+                projectIncompatibleWithSystemDialog.setWindowTitle("Incompatible System");
+                projectIncompatibleWithSystemDialog.setMinimumWidth(350);
+                projectIncompatibleWithSystemDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+
+                auto layout = new QVBoxLayout(&projectIncompatibleWithSystemDialog);
+                auto textBrowser = new QTextBrowser();
+
+                QPalette textBrowserPalette = textBrowser->palette();
+
+                textBrowserPalette.setColor(QPalette::Base, textBrowser->palette().color(QPalette::Window));
+
+                textBrowser->setPalette(textBrowserPalette);
+                textBrowser->setFrameStyle(QFrame::NoFrame);
+
+                QString htmlMessage;
+
+                htmlMessage += systemCompatibility._message;
+                htmlMessage += "<p>Do you want to continue anyway?</p>";
+
+                textBrowser->setHtml(htmlMessage);
+
+                layout->addWidget(textBrowser);
+
+                auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Yes | QDialogButtonBox::Abort);
+
+                connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Yes), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::accept);
+                connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Abort), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::reject);
+
+                layout->addWidget(dialogButtonBox);
+
+                projectIncompatibleWithSystemDialog.setLayout(layout);
+
+                if (projectIncompatibleWithSystemDialog.exec() == QDialog::Rejected)
+                    loadStartupProject = false;
+            }
+
+	        if (loadStartupProject && !downloadedProjectFilePath.isEmpty()) {
                 Application::current()->setStartupProjectUrl(QUrl(QString("file:///%1").arg(downloadedProjectFilePath)));
 
 	        	accept();
