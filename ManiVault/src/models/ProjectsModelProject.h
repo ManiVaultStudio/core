@@ -47,12 +47,6 @@ public:
     void initialize();
 
     /**
-     * Sets the application startup project URL
-     * @return Boolean determining whether the application startup project URL has been set
-     */
-    bool load() const;
-
-    /**
      * Get title
      * @return Project title
      */
