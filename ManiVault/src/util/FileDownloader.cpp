@@ -25,7 +25,7 @@ FileDownloader::FileDownloader(const StorageMode& mode, const Task::GuiScope& ta
 		_task->setEnabled(taskGuiScope != Task::GuiScope::None);
 }
 
-void FileDownloader::download(const QUrl& url)
+void FileDownloader::download(const QUrl& url, bool synchronous)
 {
     if (_isDownloading)
         return;
@@ -34,10 +34,10 @@ void FileDownloader::download(const QUrl& url)
     qDebug() << __FUNCTION__ << url.toString();
 #endif
 
-    _url            = url;
-    _isDownloading  = true;
+    _url = url;
+    _isDownloading = true;
 
-	QNetworkRequest request(_url);
+    QNetworkRequest request(_url);
 
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
@@ -45,7 +45,7 @@ void FileDownloader::download(const QUrl& url)
 
     connect(networkReply, &QNetworkReply::finished, this, [this, networkReply]() -> void {
         downloadFinished(networkReply);
-    });
+        });
 
     const auto fileName = QFileInfo(_url.toString()).fileName();
 
@@ -62,20 +62,20 @@ void FileDownloader::download(const QUrl& url)
             _task->setAborted();
 
             emit aborted();
-		});
+            });
     }
 
     connect(networkReply, &QNetworkReply::downloadProgress, this, [&](qint64 downloaded, qint64 total) -> void {
         if (_task && _task->isAborting())
             return;
-			
+
         const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
 
         if (_task)
-			_task->setProgress(progress);
+            _task->setProgress(progress);
 
         emit downloadProgress(progress);
-    });
+        });
 }
 
 bool FileDownloader::isDownloading() const
@@ -158,10 +158,10 @@ void FileDownloader::setTargetDirectory(const QString& targetDirectory)
     _targetDirectory = targetDirectory;
 }
 
-QPointer<Task> FileDownloader::getTask()
-{
-    return _task;
-}
+//QPointer<Task> FileDownloader::getTask()
+//{
+//    return _task;
+//}
 
 QPointer<Task> FileDownloader::getTask() const
 {
@@ -234,6 +234,56 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
 	});
 
     return future;
+}
+
+QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url)
+{
+    QPromise<QByteArray> promise;
+    QFuture<QByteArray> future = promise.future();
+
+    // Ensure this code runs in the main thread
+    QMetaObject::invokeMethod(qApp, [url, promise = std::move(promise)]() mutable {
+        QNetworkRequest request(url);
+        QNetworkReply* reply = sharedManager().get(request);
+
+        QObject::connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise)]() mutable {
+            if (reply->error() != QNetworkReply::NoError) {
+                promise.setException(std::make_exception_ptr(std::runtime_error(reply->errorString().toStdString())));
+            }
+            else {
+                promise.addResult(reply->readAll());
+            }
+            reply->deleteLater();
+            promise.finish(); // MUST call
+		});
+    });
+
+    return future;
+}
+
+QByteArray FileDownloader::downloadToByteArraySync(const QUrl& url)
+{
+	QEventLoop loop;
+	QByteArray downloadedData;
+	std::optional<std::exception_ptr> error;
+
+	auto future = FileDownloader::downloadToByteArrayAsync(url);
+
+	future.then([&](const QByteArray& result) {
+		downloadedData = result;
+		loop.quit();
+		}).onFailed([&](const QException& e) {
+			error = std::make_exception_ptr(std::runtime_error(e.what()));
+			loop.quit();
+	});
+
+	loop.exec(); // Block until either then or onFailed is called
+
+	if (error.has_value()) {
+		std::rethrow_exception(error.value());
+	}
+
+	return downloadedData;
 }
 
 QByteArray FileDownloader::downloadedData() const {

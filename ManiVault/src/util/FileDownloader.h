@@ -51,8 +51,9 @@ public:
     /**
      * Download file with \p url
      * @param url URL of the file to download
+     * @param synchronous Boolean determining whether the download should be synchronous or not
      */
-    void download(const QUrl& url);
+    void download(const QUrl& url, bool synchronous = false);
 
     /**
      * Get whether a download is taking place
@@ -94,7 +95,7 @@ public:
      * Get the task associated with the file download
      * @return Pointer to task
      */
-    QPointer<Task> getTask();
+    //QPointer<Task> getTask();
 
     /**
      * Get the task associated with the file download
@@ -125,6 +126,20 @@ public:
      * @return Last modified date of the file, QDateTime() if it cannot be determined
      */
     static QFuture<QDateTime> getLastModifiedAsync(const QUrl& url);
+
+    /** 
+     * Download file to byte array asynchronously
+     * @param url URL of the file to download
+     * @return Future containing the downloaded data as byte array
+     */
+    static QFuture<QByteArray> downloadToByteArrayAsync(const QUrl& url);
+
+    /** 
+     * Download file to byte array synchronously
+     * @param url URL of the file to download
+     * @return Downloaded data as byte array
+     */
+    static QByteArray downloadToByteArraySync(const QUrl& url);
 
 signals:
 
