@@ -109,6 +109,7 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QS
 
     project->initialize();
 
+    qDebug() << project->getSha() << "is being added to the projects model";
     const auto duplicateMatches = match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::DisplayRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
     if (duplicateMatches.empty()) {
@@ -119,7 +120,7 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QS
                 return matches.first().siblingAtColumn(static_cast<std::int32_t>(Column::Title));
 
             return {};
-            };
+        };
 
         if (!groupTitle.isEmpty()) {
             const auto existingProjectGroupIndex = findProjectGroupModelIndex();

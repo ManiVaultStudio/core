@@ -185,6 +185,8 @@ bool ProjectsModelProject::isStartup() const
 
 QString ProjectsModelProject::getSha() const
 {
+    const_cast<ProjectsModelProject*>(this)->computeSha();
+
 	return _sha;
 }
 

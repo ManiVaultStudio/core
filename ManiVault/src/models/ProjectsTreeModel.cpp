@@ -50,7 +50,7 @@ ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mo
 
 void ProjectsTreeModel::populateFromDsns()
 {
-    setRowCount(0);
+    //setRowCount(0);
 
     if (mv::plugins().isInitializing())
         return;

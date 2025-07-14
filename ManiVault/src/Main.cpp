@@ -114,8 +114,12 @@ int main(int argc, char *argv[])
     startupProjectsFilterModel.setSourceModel(&startupProjectsTreeModel);
     startupProjectsFilterModel.getFilterStartupOnlyAction().setChecked(true);
 
+	qDebug() << startupProjectsFilterModel.rowCount();
+
     if (hasProjectsJsonInAppDir)
         startupProjectsTreeModel.populateFromJsonFile(projectsJsonFileName);
+
+    qDebug() << startupProjectsFilterModel.rowCount();
 
     core.initialize();
 
