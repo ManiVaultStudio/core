@@ -537,15 +537,6 @@ public:
     /** Synchronize the model with the data source names */
     void synchronizeWithDsns();
 
-private:
-
-    /**
-     * Download tutorials from \p dsn
-     * @param dsn Tutorials Data Source Name (DSN)
-     * @return Downloaded data
-     */
-    static QByteArray downloadTutorialsFromDsn(const QString& dsn);
-
 public: // Action getters
 
     gui::StringsAction& getDsnsAction() { return _dsnsAction; }
