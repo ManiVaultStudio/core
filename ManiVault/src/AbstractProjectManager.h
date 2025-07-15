@@ -115,7 +115,7 @@ public:
         AbstractManager(parent, "Project"),
         _state(State::Idle),
         _projectSerializationTask(this, "Project serialization"),
-		_projectDownloader(util::FileDownloader::StorageMode::All, Task::GuiScope::None)
+		_projectDownloadTask(this, "Project Download")
     {
     }
 
@@ -202,29 +202,16 @@ public:
      * Download project from \p url and store it in the default downloaded projects directory
      * @param url URL of the project to download
      * @param targetDirectory Directory where the project is stored (default is empty, which means the default downloaded projects directory)
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
      * @return File path of the downloaded project, empty string if download failed
      */
-    virtual QString downloadProject(QUrl url, const QString& targetDirectory = "") = 0;
+    virtual QString downloadProject(QUrl url, const QString& targetDirectory = "", Task* task = nullptr) = 0;
 
     /**
      * Get the directory where downloaded projects are stored
      * @return Directory where downloaded projects are stored 
      */
     virtual QDir getDownloadedProjectsDir() const = 0;
-
-    /**
-     * Get project downloader
-     * @return Reference to project downloader
-     */
-    const util::FileDownloader& getProjectDownloader() const { return _projectDownloader; }
-
-protected:
-
-    /**
-     * Get project downloader
-     * @return Reference to project downloader
-     */
-    util::FileDownloader& getProjectDownloader() { return _projectDownloader; }
 
 public: // Temporary directories
 
@@ -370,6 +357,24 @@ public: // Miscellaneous
      */
     virtual QSharedPointer<ProjectMetaAction> getProjectMetaAction(const QString& projectFilePath) = 0;
 
+    /**
+     * Get the task for project download
+     * @return Reference to the project download task
+     */
+    const Task& getProjectDownloadTask() const {
+        return _projectDownloadTask;
+    }
+
+protected:
+
+    /**
+     * Get the task for project download
+     * @return Reference to the project download task
+     */
+    Task& getProjectDownloadTask() {
+        return _projectDownloadTask;
+    }
+
 public: // Action getters
 
     virtual gui::TriggerAction& getNewBlankProjectAction() = 0;
@@ -465,8 +470,8 @@ signals:
 private:
     State                               _state;                         /** Determines the state of the project manager */
     ProjectSerializationTask            _projectSerializationTask;      /** Task for project serialization */
+    Task                                _projectDownloadTask;           /** Progress reporting project downloading */
     QMap<TemporaryDirType, QString>     _temporaryDirPaths;             /** Temporary directories for file open/save etc. */
-    util::FileDownloader                _projectDownloader;             /** File downloader for downloading projects from the internet */
 };
 
 }
