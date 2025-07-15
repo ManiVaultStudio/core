@@ -148,7 +148,6 @@ private:
     QString         _date;                      /** Date and time */
     QString         _summary;                   /** Summary */
     QString         _resource;                  /** Video resource */
-    FileDownloader  _thumbnailDownloader;       /** File downloader for downloading the YouTube thumbnail image */
     QImage          _thumbnailImage;            /** Cached thumbnail image */
 };
 
