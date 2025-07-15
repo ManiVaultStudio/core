@@ -73,7 +73,6 @@ private:
     QUrl                        _markdownUrl;           /** Location of the markdown file */
     QWebEngineView              _webEngineView;         /** Browser to show the markdown in */
     MarkdownWebEnginePage       _markdownPage;          /** Browser page to show the markdown in */
-    mv::util::FileDownloader    _fileDownloader;        /** For downloading the markdown file */
     MarkdownDocument            _markdownDocument;      /** Document for synchronizing the Markdown text with the browser */
 };
 
