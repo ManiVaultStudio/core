@@ -156,34 +156,46 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
                 layout->addWidget(message);
 
-                auto requirementsLayout                 = new QHBoxLayout();
-                auto minimumRequirementsModel           = new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog);
-                auto recommendedRequirementsModel       = new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog);
-                auto minimumRequirementsTreeView        = new QTreeView();
-                auto recommendedRequirementsTreeView    = new QTreeView();
+                auto requirementsLayout     = new QVBoxLayout();
+                auto models                 = QList<HardwareSpecTreeModel*>({ new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog), new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog) });
+                auto treeViews              = QList<QTreeView*>({ new QTreeView(), new QTreeView() });
+                auto recommendedCheckBox    = new QCheckBox("Show recommended");
 
-                minimumRequirementsModel->setHardwareSpec(selectedStartupProject->getMinimumHardwareSpec());
-                minimumRequirementsModel->setHorizontalHeaderLabels({ "Component", "System", "Minimum" });
+                requirementsLayout->setSpacing(5);
 
-                recommendedRequirementsModel->setHardwareSpec(selectedStartupProject->getRecommendedHardwareSpec());
+                models.first()->setHardwareSpec(selectedStartupProject->getMinimumHardwareSpec());
+                models.first()->setHorizontalHeaderLabels({ "Component", "System", "Minimum" });
 
-                minimumRequirementsTreeView->setIconSize(QSize(13, 13));
-                minimumRequirementsTreeView->setModel(minimumRequirementsModel);
-                minimumRequirementsTreeView->expandAll();
+                models.last()->setHardwareSpec(selectedStartupProject->getRecommendedHardwareSpec());
+                models.last()->setHorizontalHeaderLabels({ "Component", "System", "Recommended" });
 
-                minimumRequirementsTreeView->header()->setStretchLastSection(false);
-                minimumRequirementsTreeView->header()->setSectionResizeMode(QHeaderView::Interactive);
-                minimumRequirementsTreeView->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Stretch);
-                minimumRequirementsTreeView->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Fixed);
-                minimumRequirementsTreeView->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::Fixed);
+                for (auto treeView : treeViews) {
+                    treeView->setIconSize(QSize(13, 13));
+                    treeView->setModel(models[treeViews.indexOf(treeView)]);
+                    treeView->expandAll();
 
-                minimumRequirementsTreeView->header()->resizeSection(1, 100);
-                minimumRequirementsTreeView->header()->resizeSection(2, 100);
+                    treeView->header()->setStretchLastSection(false);
+                    treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
+                    treeView->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Stretch);
+                    treeView->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Fixed);
+                    treeView->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::Fixed);
 
-                recommendedRequirementsTreeView->setModel(recommendedRequirementsModel);
+                    treeView->header()->resizeSection(1, 100);
+                    treeView->header()->resizeSection(2, 100);
 
-                requirementsLayout->addWidget(minimumRequirementsTreeView);
-                //requirementsLayout->addWidget(recommendedRequirementsTreeView);
+                    requirementsLayout->addWidget(treeView);
+                }
+
+                const auto updateTreeViewVisibility = [treeViews, recommendedCheckBox]() -> void {
+                    treeViews.first()->setVisible(!recommendedCheckBox->isChecked());
+                    treeViews.last()->setVisible(recommendedCheckBox->isChecked());
+                };
+
+                updateTreeViewVisibility();
+
+                connect(recommendedCheckBox, &QCheckBox::toggled, this, updateTreeViewVisibility);
+
+                requirementsLayout->addWidget(recommendedCheckBox);
 
                 layout->addLayout(requirementsLayout, 1);
                 layout->addWidget(new QLabel("<p>Do you want to continue anyway?</p>"));
