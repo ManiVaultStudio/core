@@ -44,8 +44,7 @@ HelpManager::HelpManager(QObject* parent) :
     _toWebsiteAction(this, "Website"),
     _toWikiAction(this, "Wiki"),
     _toRepositoryAction(this, "Repository"),
-    _toLearningCenterAction(this, "Go to learning center"),
-    _fileDownloader(FileDownloader::StorageMode::File, Task::GuiScope::Background)
+    _toLearningCenterAction(this, "Go to learning center")
 {
     _showLearningCenterPageAction.setIconByName("chalkboard-user");
     _showLearningCenterPageAction.setToolTip("Go to the learning center");
@@ -91,48 +90,6 @@ HelpManager::HelpManager(QObject* parent) :
     connect(&_toLearningCenterAction, &TriggerAction::triggered, this, [this]() -> void {
         _showLearningCenterPageAction.setChecked(true);
     });
-
-    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-        try
-        {
-            const auto videosDsn    = "https://www.manivault.studio/api/learning-center.json";
-            const auto jsonData     = _fileDownloader.downloadedData();
-
-            json fullJson = json::parse(QString::fromUtf8(jsonData).toStdString());
-
-            if (fullJson.contains("videos")) {
-                validateJson(fullJson["videos"].dump(), videosDsn, loadJsonFromResource(":/JSON/VideosSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
-            }
-            else {
-                throw std::runtime_error("Videos key is missing");
-            }
-
-            QJsonParseError jsonParseError;
-
-            const auto jsonDocument = QJsonDocument::fromJson(jsonData, &jsonParseError);
-
-            if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-                qCritical() << "Invalid JSON from DSN at index" << videosDsn << ":" << jsonParseError.errorString();
-                return;
-            }
-
-            for (const auto video : jsonDocument.object()["videos"].toArray()) {
-                auto videoMap = video.toVariant().toMap();
-
-                addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
-            }
-
-            emit videosModelPopulatedFromWebsite();
-        }
-        catch (std::exception& e)
-        {
-            exceptionMessageBox("Unable to process learning center JSON", e);
-        }
-        catch (...)
-        {
-            exceptionMessageBox("Unable to process learning center JSON");
-        }
-	});
 }
 
 HelpManager::~HelpManager()
@@ -153,7 +110,48 @@ void HelpManager::initialize()
 
     beginInitialization();
     {
-        _fileDownloader.download(QUrl("https://www.manivault.studio/api/learning-center.json"));
+        FileDownloader::downloadToByteArrayAsync(QUrl("https://www.manivault.studio/api/learning-center.json"))
+            .then(this, [this](const QByteArray& data) {
+	            try {
+                    const auto videosDsn = "https://www.manivault.studio/api/learning-center.json";
+
+                    json fullJson = json::parse(QString::fromUtf8(data).toStdString());
+
+                    if (fullJson.contains("videos")) {
+                        validateJson(fullJson["videos"].dump(), videosDsn, loadJsonFromResource(":/JSON/VideosSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
+                    }
+                    else {
+                        throw std::runtime_error("Videos key is missing");
+                    }
+
+                    QJsonParseError jsonParseError;
+
+                    const auto jsonDocument = QJsonDocument::fromJson(data, &jsonParseError);
+
+                    if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                        qCritical() << "Invalid JSON from DSN at index" << videosDsn << ":" << jsonParseError.errorString();
+                        return;
+                    }
+
+                    for (const auto video : jsonDocument.object()["videos"].toArray()) {
+                        auto videoMap = video.toVariant().toMap();
+
+                        addVideo(new LearningCenterVideo(LearningCenterVideo::Type::YouTube, videoMap["title"].toString(), videoMap["tags"].toStringList(), videoMap["date"].toString().chopped(15), videoMap["summary"].toString(), videoMap["youtube-id"].toString()));
+                    }
+
+                    emit videosModelPopulatedFromWebsite();
+	            }
+	            catch (std::exception& e)
+	            {
+	                qCritical() << "Unable to display markdown:" << e.what();
+	            }
+	            catch (...)
+	            {
+	                qCritical() << "Unable to display markdown:";
+	            }
+			}).onFailed(this, [this](const QException& e) {
+				qWarning().noquote() << "Unable to download videos JSON file" << e.what();
+            });
 
         _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
         _tutorialsModel.synchronizeWithDsns();
