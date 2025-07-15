@@ -478,8 +478,8 @@ AbstractProjectsModel::DownloadSizeItem::DownloadSizeItem(const util::ProjectsMo
 QVariant AbstractProjectsModel::DownloadSizeItem::data(int role) const
 {
     switch (role) {
-	    case Qt::EditRole:
-            return getProject()->getDownloadSize();
+    case Qt::EditRole:
+            return QVariant::fromValue(getProject()->getDownloadSize());
 
 		case Qt::DisplayRole:
             return getNoBytesHumanReadable(data(Qt::EditRole).toULongLong());
