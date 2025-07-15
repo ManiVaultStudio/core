@@ -42,16 +42,18 @@ public:
     /** 
      * Download file to byte array asynchronously
      * @param url URL of the file to download
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
      * @return Future containing the downloaded data as byte array
      */
-    static QFuture<QByteArray> downloadToByteArrayAsync(const QUrl& url);
+    static QFuture<QByteArray> downloadToByteArrayAsync(const QUrl& url, Task* task = nullptr);
 
     /** 
      * Download file to byte array synchronously
      * @param url URL of the file to download
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
      * @return Downloaded data as byte array
      */
-    static QByteArray downloadToByteArraySync(const QUrl& url);
+    static QByteArray downloadToByteArraySync(const QUrl& url, Task* task = nullptr);
 
     /**
      * Download file from \p url to \p targetDirectory asynchronously

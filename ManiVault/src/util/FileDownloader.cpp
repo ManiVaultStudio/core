@@ -75,20 +75,23 @@ namespace mv::util {
 //    }
 //}
 
-QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url)
+QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Task* task /*= nullptr*/)
 {
     QPromise<QByteArray> promise;
     QFuture<QByteArray> future = promise.future();
 
     // Ensure this code runs in the main thread
-    QMetaObject::invokeMethod(qApp, [url, promise = std::move(promise)]() mutable {
+    QMetaObject::invokeMethod(qApp, [url, promise = std::move(promise), task]() mutable {
+        if (task)
+            task->setRunning();
+
         QNetworkRequest request(url);
 
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
         QNetworkReply* reply = sharedManager().get(request);
 
-        QObject::connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise)]() mutable {
+        QObject::connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise), task]() mutable {
             if (reply->error() != QNetworkReply::NoError) {
                 promise.setException(std::make_exception_ptr(std::runtime_error(reply->errorString().toStdString())));
             }
@@ -99,19 +102,32 @@ QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url)
             reply->deleteLater();
 
         	promise.finish();
+
+            if (task)
+                task->setFinished();
+		});
+
+        connect(reply, &QNetworkReply::downloadProgress, [task](qint64 downloaded, qint64 total) -> void {
+            if (task && task->isAborting())
+                return;
+
+            const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
+
+            if (task)
+                task->setProgress(progress);
 		});
     });
 
     return future;
 }
 
-QByteArray FileDownloader::downloadToByteArraySync(const QUrl& url)
+QByteArray FileDownloader::downloadToByteArraySync(const QUrl& url, Task* task /*= nullptr*/)
 {
 	QEventLoop loop;
 	QByteArray downloadedData;
 	std::optional<std::exception_ptr> error;
 
-	auto future = FileDownloader::downloadToByteArrayAsync(url);
+	auto future = FileDownloader::downloadToByteArrayAsync(url, task);
 
 	future.then([&](const QByteArray& result) {
 			downloadedData = result;
@@ -121,7 +137,7 @@ QByteArray FileDownloader::downloadToByteArraySync(const QUrl& url)
 			loop.quit();
 	});
 
-	loop.exec(); // Block until either then or onFailed is called
+	loop.exec();
 
 	if (error.has_value()) {
 		std::rethrow_exception(error.value());
@@ -137,6 +153,9 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
 
     // Ensure this code runs in the main thread
     QMetaObject::invokeMethod(qApp, [promise = std::move(promise), url, targetDirectory, task]() mutable {
+        if (task)
+            task->setRunning();
+
         QNetworkRequest request(url);
 
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
@@ -152,6 +171,21 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
 
                 QString filename = QFileInfo(url.toString()).fileName();
 
+                QVariant dispositionHeader = reply->rawHeader("Content-Disposition");
+
+                // Handle Content-Disposition header to extract filename
+                if (dispositionHeader.isValid()) {
+                    QRegularExpression re("filename\\*=UTF-8''([^;]+)|filename=\"?([^\";]+)\"?");
+                    QRegularExpressionMatch match = re.match(dispositionHeader.toString());
+            
+                    if (match.hasMatch()) {
+                        filename = QUrl::fromPercentEncoding(match.captured(1).toUtf8());
+            
+                        if (filename.isEmpty())
+                            filename = match.captured(2);
+                    }
+                }
+
                 if (targetDirectory.isEmpty())
                     downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(filename);
                 else
@@ -166,6 +200,9 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
                 localFile.close();
 
                 promise.addResult(downloadedFilePath);
+
+                if (task)
+                    task->setFinished();
             }
 
             reply->deleteLater();
