@@ -108,22 +108,21 @@ int main(int argc, char *argv[])
 
     const auto hasProjectsJsonInAppDir = QFileInfo(QCoreApplication::applicationDirPath(), projectsJsonFileName).exists();
 
-	ProjectsTreeModel startupProjectsTreeModel(ProjectsTreeModel::PopulationMode::AutomaticSynchronous);
-    ProjectsFilterModel startupProjectsFilterModel(&startupProjectsTreeModel);
+    auto& projectsTreeModel = const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel());
 
-    startupProjectsFilterModel.setSourceModel(&startupProjectsTreeModel);
+    ProjectsFilterModel startupProjectsFilterModel(&projectsTreeModel);
+
+    startupProjectsFilterModel.setSourceModel(&projectsTreeModel);
     startupProjectsFilterModel.getFilterStartupOnlyAction().setChecked(true);
 
-	qDebug() << startupProjectsFilterModel.rowCount();
-
     if (hasProjectsJsonInAppDir)
-        startupProjectsTreeModel.populateFromJsonFile(projectsJsonFileName);
-
-    qDebug() << startupProjectsFilterModel.rowCount();
+        projectsTreeModel.populateFromJsonFile(projectsJsonFileName);
 
     core.initialize();
 
     application.initialize();
+
+    projectsTreeModel.setPopulationMode(StandardItemModel::PopulationMode::Automatic);
 
     HardwareSpec::updateSystemHardwareSpecs();
 
@@ -145,7 +144,7 @@ int main(int argc, char *argv[])
     auto shouldShowSplashScreen = true;
 
     if (userWillSelectStartupProject) {
-        StartupProjectSelectorDialog startupProjectSelectorDialog(startupProjectsTreeModel, startupProjectsFilterModel);
+        StartupProjectSelectorDialog startupProjectSelectorDialog(projectsTreeModel, startupProjectsFilterModel);
 
         if (startupProjectSelectorDialog.exec() == QDialog::Rejected)
             return 0;

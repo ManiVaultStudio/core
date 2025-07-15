@@ -9,11 +9,6 @@
 
 #include "actions/StringsAction.h"
 
-#include <QFuture>
-#include <QFutureWatcher>
-
-#include <QMap>
-
 namespace mv {
 
 /**
@@ -45,8 +40,8 @@ public:
     /**
      * Populate the model from \p jsonByteArray
      * @param jsonByteArray JSON content as a byte array containing the projects data
-     * @param dsnIndex
-     * @param jsonLocation
+     * @param dsnIndex Index of the Data Source Name (DSN) from which the JSON content was downloaded
+     * @param jsonLocation Location of the JSON content, e.g., URL or file path
      */
     void populateFromJsonByteArray(const QByteArray& jsonByteArray, std::int32_t dsnIndex, const QString& jsonLocation);
 
@@ -56,30 +51,14 @@ public:
      */
     void populateFromJsonFile(const QString& filePath);
 
-private:
-
-    /**
-     * Download projects JSON file from \p dsn
-     * @param dsn Projects Data Source Name (DSN)
-     * @return Downloaded data
-     */
-    static QByteArray downloadProjectsJsonFromDsn(const QString& dsn);
-
 public: // Action getters
     
     gui::StringsAction& getDsnsAction() { return _dsnsAction; }
 
     const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
 
-signals:
-
-    /** Signals that the model was populated from one or more source DSNs */
-    void populatedFromDsns();
-
 private:
-    gui::StringsAction              _dsnsAction;    /** Data source names action */
-    QFuture<QByteArray>             _future;        /** Future for downloading projects */
-    QFutureWatcher<QByteArray>      _watcher;       /** Future watcher for downloading projects */
+    gui::StringsAction      _dsnsAction;    /** Data source names action */
 };
 
 }

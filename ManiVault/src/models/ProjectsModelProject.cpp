@@ -10,6 +10,12 @@
 #include <QtConcurrent>
 #include <QFuture>
 
+#ifdef _DEBUG
+	#define PROJECTS_MODEL_PROJECT_VERBOSE
+#endif
+
+#define PROJECTS_MODEL_PROJECT_VERBOSE
+
 namespace mv::util {
 
 ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
@@ -74,6 +80,7 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
         qWarning() << "Project" << _title << "is added to the project database but cannot be opened because of missing plugins:" << _missingPlugins.join(", ");
 
     computeSha();
+    determineDownloadSize();
 }
 
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
@@ -86,12 +93,6 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
 {
 }
 
-void ProjectsModelProject::initialize()
-{
-    determineDownloadSize();
-    determineLastModified();
-}
-
 QString ProjectsModelProject::getTitle() const
 {
     return _title;
@@ -99,6 +100,9 @@ QString ProjectsModelProject::getTitle() const
 
 QDateTime ProjectsModelProject::getLastModified() const
 {
+    if (!_lastModified.isValid())
+        const_cast<ProjectsModelProject*>(this)->determineLastModified();
+
     return _lastModified;
 }
 
@@ -165,6 +169,16 @@ QStringList ProjectsModelProject::getMissingPlugins() const
 
 std::uint64_t ProjectsModelProject::getDownloadSize() const
 {
+    if (getUrl().isEmpty())
+        return 0;
+
+//#ifdef PROJECTS_MODEL_PROJECT_VERBOSE
+//    qDebug() << __FUNCTION__ << getUrl().toString();
+//#endif
+
+    //if (_downloadSize == 0)
+	const_cast<ProjectsModelProject*>(this)->determineDownloadSize();
+
     return _downloadSize;
 }
 
@@ -192,23 +206,33 @@ QString ProjectsModelProject::getSha() const
 
 void ProjectsModelProject::determineDownloadSize()
 {
+    if (getUrl().isEmpty())
+        return;
+
+#ifdef PROJECTS_MODEL_PROJECT_VERBOSE
+    qDebug() << __FUNCTION__ << getUrl().toString();
+#endif
+
     FileDownloader::getDownloadSizeAsync(getUrl()).then(this, [this](std::uint64_t size) {
         _downloadSize = size;
-
-        emit downloadSizeDetermined(size);
     }).onFailed(this, [this](const QException& e) {
         qWarning().noquote() << QString("Unable to determine download size for %1: %2").arg(getUrl().toString(), e.what());
-    });
+	});
 }
 
 void ProjectsModelProject::determineLastModified()
 {
+    if (getUrl().isEmpty())
+        return;
+
+#ifdef PROJECTS_MODEL_PROJECT_VERBOSE
+    qDebug() << __FUNCTION__ << getUrl().toString();
+#endif
+
     FileDownloader::getLastModifiedAsync(getUrl()).then(this, [this](const QDateTime& lastModified) {
         _lastModified = lastModified;
-
-        emit lastModifiedDetermined(lastModified);
-        }).onFailed(this, [this](const QException& e) {
-            qWarning().noquote() << QString("Unable to determine last modified for %1: %2").arg(getUrl().toString(), e.what());
+    }).onFailed(this, [this](const QException& e) {
+		qWarning().noquote() << QString("Unable to determine the last modified date for %1: %2").arg(getUrl().toString(), e.what());
     });
 }
 
@@ -217,9 +241,7 @@ void ProjectsModelProject::computeSha()
     QCryptographicHash hash(QCryptographicHash::Sha256);
 
     hash.addData(_title.toUtf8());
-    hash.addData(_lastModified.toString().toUtf8());
     hash.addData(_tags.join(",").toUtf8());
-    hash.addData(_date.toUtf8());
     hash.addData(_iconName.toUtf8());
     hash.addData(_summary.toUtf8());
     hash.addData(_url.toString().toUtf8());

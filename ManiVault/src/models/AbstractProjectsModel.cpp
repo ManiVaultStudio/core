@@ -107,9 +107,6 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QS
     if (!project)
         return;
 
-    project->initialize();
-
-    qDebug() << project->getSha() << "is being added to the projects model";
     const auto duplicateMatches = match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::DisplayRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
     if (duplicateMatches.empty()) {
@@ -151,7 +148,9 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QS
 
         _projects.push_back(project);
     } else {
+#ifdef _DEBUG
         qWarning() << "Skipping" << project->getTitle() << "because it already exists";
+#endif
     }
 }
 
@@ -465,11 +464,11 @@ AbstractProjectsModel::DownloadSizeItem::DownloadSizeItem(const util::ProjectsMo
 {
     Q_ASSERT(project);
 
-    if (project) {
-	    connect(project, &ProjectsModelProject::downloadSizeDetermined, this, [this](std::uint64_t size) {
-            emitDataChanged();
-        });
-    }
+    //if (project) {
+	   // connect(project, &ProjectsModelProject::downloadSizeDetermined, this, [this](std::uint64_t size) {
+    //        emitDataChanged();
+    //    });
+    //}
 }
 
 QVariant AbstractProjectsModel::DownloadSizeItem::data(int role) const
@@ -478,7 +477,7 @@ QVariant AbstractProjectsModel::DownloadSizeItem::data(int role) const
 	    case Qt::EditRole:
             return getProject()->getDownloadSize();
 
-    case Qt::DisplayRole:
+		case Qt::DisplayRole:
             return getNoBytesHumanReadable(data(Qt::EditRole).toULongLong());
 
 	    case Qt::ToolTipRole:

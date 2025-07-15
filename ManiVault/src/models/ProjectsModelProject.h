@@ -43,9 +43,6 @@ public:
      */
     explicit ProjectsModelProject(const QString& groupTitle);
 
-    /** Performs startup initialization */
-    void initialize();
-
     /**
      * Get title
      * @return Project title
@@ -201,20 +198,6 @@ private:
     /** Compute cryptographic hash (for comparison purposes) */
     void computeSha();
 
-signals:
-
-    /**
-     * Signals that the download size has been determined
-     * @param size Download size in bytes
-     */
-    void downloadSizeDetermined(std::uint64_t size);
-
-    /**
-     * Signals that the last modified date has been determined
-     * @param lastModified Last modified date in milliseconds since epoch
-     */
-    void lastModifiedDetermined(const QDateTime& lastModified);
-
 private:
     QString         _title;                     /** Title */
     QDateTime       _lastModified;              /** Last modified date */
@@ -233,6 +216,7 @@ private:
     HardwareSpec    _recommendedHardwareSpec;   /** Recommended hardware specification for the project */
     bool            _startup;                   /** Boolean determining whether this is a startup project */
     QString         _sha;                       /** SHA-256 hash of the project (for comparison purposes) */
+
 };
 
 using ProjectsModelProjectPtr = std::shared_ptr<ProjectsModelProject>;

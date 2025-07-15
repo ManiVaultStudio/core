@@ -50,6 +50,12 @@ public:
      */
     PopulationMode getPopulationMode() const;
 
+    /**
+     * Set the population mode of the model to \p populationMode
+     * @param populationMode Population mode (automatic/manual) of the model
+     */
+    void setPopulationMode(const PopulationMode& populationMode);
+
 public: // Serialization
 
     /**
@@ -69,6 +75,14 @@ public: // Action getters
     gui::NumberOfRowsAction& getNumberOfRowsAction() { return _numberOfRowsAction; }
     
     const gui::NumberOfRowsAction& getNumberOfRowsAction() const { return _numberOfRowsAction; }
+
+signals:
+
+    /**
+     * Signals that the population mode changed to \p populationMode
+     * @param populationMode New population mode of the model
+     */
+    void populationModeChanged(const PopulationMode& populationMode);
 
 private:
     PopulationMode              _populationMode;        /** Population mode of the model */

@@ -43,44 +43,39 @@ ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mo
 
         for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
             connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectsTreeModel::populateFromPluginDsns);
-
-        //populateFromPluginDsns();
     }
 }
 
 void ProjectsTreeModel::populateFromDsns()
 {
-    //setRowCount(0);
-
     if (mv::plugins().isInitializing())
         return;
 
+    qDebug() << "Populating projects tree model from DSNs (before):" << rowCount() << _dsnsAction.getStrings().join(",");
     switch (getPopulationMode()) {
 		case PopulationMode::Automatic:
 		{
-            _future = QtConcurrent::mapped(_dsnsAction.getStrings(), [this](const QString& dsn) {
-                return downloadProjectsJsonFromDsn(dsn);
-            });
+            for (const auto& dsn : _dsnsAction.getStrings()) {
+                const auto dsnIndex = _dsnsAction.getStrings().indexOf(dsn);
 
-            connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
-                for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-                    try {
-                        populateFromJsonByteArray(_future.resultAt<QByteArray>(dsnIndex), dsnIndex, _dsnsAction.getStrings()[dsnIndex]);
-                    }
-                    catch (std::exception& e)
-                    {
-                        qCritical() << "Unable to add projects from DSN:" << e.what();
-                    }
-                    catch (...)
-                    {
-                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-                    }
-                }
-
-                emit populatedFromDsns();
-            });
-
-            _watcher.setFuture(_future);
+                FileDownloader::downloadToByteArrayAsync(dsn)
+                    .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
+	                    try {
+                            populateFromJsonByteArray(data, dsnIndex, dsn);
+	                    }
+	                    catch (std::exception& e)
+	                    {
+	                        qCritical() << "Unable to add projects from DSN:" << e.what();
+	                    }
+	                    catch (...)
+	                    {
+	                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
+	                    }
+					})
+                    .onFailed(this, [this, dsn, dsnIndex](const QException& e) {
+						qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
+					});
+            }
 
             break;
 		}
@@ -88,13 +83,29 @@ void ProjectsTreeModel::populateFromDsns()
         case PopulationMode::AutomaticSynchronous:
         {
             for (const auto& dsn : _dsnsAction.getStrings()) {
-                const auto projectsJson = downloadProjectsJsonFromDsn(dsn);
-                populateFromJsonByteArray(projectsJson, _dsnsAction.getStrings().indexOf(dsn), dsn);
+                try {
+                    const auto data = FileDownloader::downloadToByteArraySync(dsn);
+
+                    populateFromJsonByteArray(data, _dsnsAction.getStrings().indexOf(dsn), dsn);
+                }
+                catch (std::exception& e)
+                {
+                    qCritical() << "Unable to add projects from DSN:" << e.what();
+                }
+                catch (...)
+                {
+                    qCritical() << "Unable to add projects from DSN due to an unhandled exception";
+                }
             }
 
             break;
         }
+
+        case PopulationMode::Manual:
+            break;
     }
+
+    qDebug() << "Populating projects tree model from DSNs (after):" << rowCount() << _dsnsAction.getStrings().join(",");
 }
 
 void ProjectsTreeModel::populateFromPluginDsns()
@@ -183,37 +194,6 @@ void ProjectsTreeModel::populateFromJsonFile(const QString& filePath)
     {
         qCritical() << "Unable to populate projects tree model from JSON file due to an unhandled exception";
     }
-}
-
-QByteArray ProjectsTreeModel::downloadProjectsJsonFromDsn(const QString& dsn)
-{
-    QEventLoop loop;
-
-    QByteArray downloadedData;
-
-    FileDownloader fileDownloader;
-
-    connect(&fileDownloader, &FileDownloader::downloaded, [&]() -> void {
-        try
-        {
-            downloadedData = fileDownloader.downloadedData();
-            loop.quit();
-        }
-        catch (std::exception& e)
-        {
-            exceptionMessageBox("Unable to download projects JSON from DSN", e);
-        }
-        catch (...)
-        {
-            exceptionMessageBox("Unable to download projects JSON from DSN");
-        }
-    });
-
-    fileDownloader.download(dsn);
-
-    loop.exec();
-
-    return downloadedData;
 }
 
 }

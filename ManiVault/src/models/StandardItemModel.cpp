@@ -24,7 +24,19 @@ StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/, const QStrin
 }
 
 StandardItemModel::PopulationMode StandardItemModel::getPopulationMode() const
-{ return _populationMode; }
+{
+	return _populationMode;
+}
+
+void StandardItemModel::setPopulationMode(const PopulationMode& populationMode)
+{
+    if (_populationMode == populationMode)
+        return;
+
+    _populationMode = populationMode;
+
+    emit populationModeChanged(_populationMode);
+}
 
 void StandardItemModel::fromVariantMap(const QVariantMap& variantMap)
 {
