@@ -468,17 +468,17 @@ AbstractProjectsModel::DownloadSizeItem::DownloadSizeItem(const util::ProjectsMo
 {
     Q_ASSERT(project);
 
-    //if (project) {
-	   // connect(project, &ProjectsModelProject::downloadSizeDetermined, this, [this](std::uint64_t size) {
-    //        emitDataChanged();
-    //    });
-    //}
+    if (project) {
+	    connect(project, &ProjectsModelProject::downloadSizeDetermined, this, [this](std::uint64_t size) {
+            emitDataChanged();
+        });
+    }
 }
 
 QVariant AbstractProjectsModel::DownloadSizeItem::data(int role) const
 {
     switch (role) {
-    case Qt::EditRole:
+		case Qt::EditRole:
             return QVariant::fromValue(getProject()->getDownloadSize());
 
 		case Qt::DisplayRole:
@@ -571,9 +571,7 @@ QVariant AbstractProjectsModel::ShaItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
-            return getProject()->getSha();
-
-    case Qt::DisplayRole:
+		case Qt::DisplayRole:
             return getProject()->getSha();
 
 	    case Qt::ToolTipRole:

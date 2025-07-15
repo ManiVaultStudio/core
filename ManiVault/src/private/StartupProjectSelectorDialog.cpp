@@ -45,11 +45,11 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     auto downloadTaskWidget = taskAction->createWidget(this);
 
-    auto sizePolicy = downloadTaskWidget->sizePolicy();
+    //auto sizePolicy = downloadTaskWidget->sizePolicy();
 
-    sizePolicy.setRetainSizeWhenHidden(true);
+    //sizePolicy.setRetainSizeWhenHidden(true);
 
-    downloadTaskWidget->setSizePolicy(sizePolicy);
+    //downloadTaskWidget->setSizePolicy(sizePolicy);
 
 	const auto updateDownloadTaskWidgetVisibility = [this, downloadTaskWidget]() -> void {
         downloadTaskWidget->setVisible(_projectDownloadTask.isRunning());
