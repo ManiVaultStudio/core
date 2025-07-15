@@ -49,13 +49,13 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     downloadTaskWidget->setSizePolicy(sizePolicy);
 
-	//const auto updateDownloadTaskWidgetVisibility = [downloadTaskWidget, projectDownloaderTask]() -> void {
- //       downloadTaskWidget->setVisible(projectDownloaderTask->isRunning());
- //   };
+	const auto updateDownloadTaskWidgetVisibility = [this, downloadTaskWidget]() -> void {
+        downloadTaskWidget->setVisible(_projectDownloadTask.isRunning());
+    };
 
-    //updateDownloadTaskWidgetVisibility();
+    updateDownloadTaskWidgetVisibility();
 
-    //connect(projectDownloaderTask, &Task::statusChanged, this, updateDownloadTaskWidgetVisibility);
+    connect(&_projectDownloadTask, &Task::statusChanged, this, updateDownloadTaskWidgetVisibility);
 
     layout->addWidget(downloadTaskWidget);
 
@@ -129,6 +129,8 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     connect(&_loadAction, &TriggerAction::triggered, this, [this]() -> void {
         if (auto selectedStartupProject = getSelectedStartupProject()) {
             bool loadStartupProject = true;
+
+            _projectDownloadTask.setName(QString("Downloading %1").arg(selectedStartupProject->getTitle()));
 
             const auto downloadedProjectFilePath = mv::projects().downloadProject(selectedStartupProject->getUrl(), "", &_projectDownloadTask);
 
