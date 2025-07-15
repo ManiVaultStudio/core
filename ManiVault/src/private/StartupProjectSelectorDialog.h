@@ -12,6 +12,8 @@
 
 #include <actions/TriggerAction.h>
 
+#include <Task.h>
+
 #include <QDialog>
 
 /**
@@ -59,6 +61,7 @@ private:
     mv::ProjectsTreeModel&      _projectsTreeModel;     /** Projects tree model */
     mv::ProjectsFilterModel&    _projectsFilterModel;   /** Sorting and filtering model for the projects model */
     mv::gui::HierarchyWidget    _hierarchyWidget;       /** Widget for displaying the loaded plugins */
+    mv::Task                    _projectDownloadTask;   /** Task for tracking project download progress */
     mv::gui::TriggerAction      _loadAction;            /** Load the selected project */
     mv::gui::TriggerAction      _quitAction;            /** Exit the dialog and don't load a project */
 };

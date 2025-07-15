@@ -23,6 +23,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     _projectsTreeModel(projectsTreeModel),
     _projectsFilterModel(projectsFilterModel),
     _hierarchyWidget(this, "Startup project", _projectsTreeModel, &_projectsFilterModel, true),
+    _projectDownloadTask(this, "Project download"),
     _loadAction(this, "Load"),
     _quitAction(this, "Quit")
 {
@@ -38,9 +39,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     auto taskAction = new TaskAction(this, "Loading project...");
 
-    auto projectDownloaderTask = static_cast<const AbstractProjectManager&>(mv::projects()).getProjectDownloader().getTask();
-
-    taskAction->setTask(projectDownloaderTask);
+    taskAction->setTask(&_projectDownloadTask);
 
     auto downloadTaskWidget = taskAction->createWidget(this);
 
@@ -50,13 +49,13 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
     downloadTaskWidget->setSizePolicy(sizePolicy);
 
-	const auto updateDownloadTaskWidgetVisibility = [downloadTaskWidget, projectDownloaderTask]() -> void {
-        downloadTaskWidget->setVisible(projectDownloaderTask->isRunning());
-    };
+	//const auto updateDownloadTaskWidgetVisibility = [downloadTaskWidget, projectDownloaderTask]() -> void {
+ //       downloadTaskWidget->setVisible(projectDownloaderTask->isRunning());
+ //   };
 
-    updateDownloadTaskWidgetVisibility();
+    //updateDownloadTaskWidgetVisibility();
 
-    connect(projectDownloaderTask, &Task::statusChanged, this, updateDownloadTaskWidgetVisibility);
+    //connect(projectDownloaderTask, &Task::statusChanged, this, updateDownloadTaskWidgetVisibility);
 
     layout->addWidget(downloadTaskWidget);
 
@@ -131,7 +130,7 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
         if (auto selectedStartupProject = getSelectedStartupProject()) {
             bool loadStartupProject = true;
 
-            const auto downloadedProjectFilePath = mv::projects().downloadProject(selectedStartupProject->getUrl());
+            const auto downloadedProjectFilePath = mv::projects().downloadProject(selectedStartupProject->getUrl(), "", &_projectDownloadTask);
 
             const auto systemCompatibility = HardwareSpec::getSystemCompatibility(selectedStartupProject->getMinimumHardwareSpec(), selectedStartupProject->getRecommendedHardwareSpec());
 
