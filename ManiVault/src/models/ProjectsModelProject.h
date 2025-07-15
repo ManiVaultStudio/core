@@ -151,6 +151,9 @@ public:
      */
     QString getSha() const;
 
+    /** Determines project meta data like last modified date and download size */
+    void updateMetadata();
+
     /**
      * Overload assignment operator
      * @param rhs Right hand side project
@@ -197,6 +200,20 @@ private:
 
     /** Compute cryptographic hash (for comparison purposes) */
     void computeSha();
+
+signals:
+
+    /**
+     * Signals that the download size has been determined
+     * @param size Download size in bytes
+     */
+    void downloadSizeDetermined(std::uint64_t size);
+
+    /**
+     * Signals that the last modified date has been determined
+     * @param lastModified Last modified date in milliseconds since epoch
+     */
+    void lastModifiedDetermined(const QDateTime& lastModified);
 
 private:
     QString         _title;                     /** Title */

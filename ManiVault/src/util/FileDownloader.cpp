@@ -215,7 +215,6 @@ QString FileDownloader::downloadToFileSync(const QUrl& url, const QString& targe
 
 QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
 {
-    qDebug() << "Getting download size for" << url.toString();
     QPromise<std::uint64_t> promise;
     QFuture<std::uint64_t> future = promise.future();
 

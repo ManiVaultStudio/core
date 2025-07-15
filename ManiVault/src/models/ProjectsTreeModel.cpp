@@ -51,7 +51,6 @@ void ProjectsTreeModel::populateFromDsns()
     if (mv::plugins().isInitializing())
         return;
 
-    qDebug() << "Populating projects tree model from DSNs (before):" << rowCount() << _dsnsAction.getStrings().join(",");
     switch (getPopulationMode()) {
 		case PopulationMode::Automatic:
 		{
@@ -104,8 +103,6 @@ void ProjectsTreeModel::populateFromDsns()
         case PopulationMode::Manual:
             break;
     }
-
-    qDebug() << "Populating projects tree model from DSNs (after):" << rowCount() << _dsnsAction.getStrings().join(",");
 }
 
 void ProjectsTreeModel::populateFromPluginDsns()

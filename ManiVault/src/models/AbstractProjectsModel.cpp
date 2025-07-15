@@ -26,6 +26,9 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::Title:
             return TitleItem::headerData(orientation, role);
 
+        case Column::LastModified:
+            return LastModifiedItem::headerData(orientation, role);
+
         case Column::Downloaded:
             return DownloadedItem::headerData(orientation, role);
 
@@ -145,6 +148,7 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QS
         updateTags();
 
         project->setParent(this);
+        project->updateMetadata();
 
         _projects.push_back(project);
     } else {
