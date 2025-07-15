@@ -14,8 +14,6 @@
 	#define PROJECTS_MODEL_PROJECT_VERBOSE
 #endif
 
-#define PROJECTS_MODEL_PROJECT_VERBOSE
-
 namespace mv::util {
 
 ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
