@@ -142,9 +142,10 @@ public:
      * Download project from \p url and store it in the default downloaded projects directory
      * @param url URL of the project to download
      * @param targetDirectory Directory where the project is stored (default is empty, which means the default downloaded projects directory)
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
      * @return File path of the downloaded project, empty string if download failed
      */
-    QString downloadProject(QUrl url, const QString& targetDirectory = "") override;
+    QString downloadProject(QUrl url, const QString& targetDirectory = "", Task* task = nullptr) override;
 
     /**
      * Get the directory where downloaded projects are stored
