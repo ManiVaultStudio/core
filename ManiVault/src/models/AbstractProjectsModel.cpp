@@ -432,10 +432,10 @@ QVariant AbstractProjectsModel::RequiredPluginsItem::data(int role) const
 	        return getProject()->getRequiredPlugins();
 
 	    case Qt::DisplayRole:
-	        return data(Qt::EditRole).toStringList();
+	        return data(Qt::EditRole).toStringList().join(", ");
 
 	    case Qt::ToolTipRole:
-	        return "Required plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+	        return "Required plugins: " + data(Qt::DisplayRole).toString();
 
 	    default:
 	        break;
@@ -451,10 +451,10 @@ QVariant AbstractProjectsModel::MissingPluginsItem::data(int role) const
 	        return getProject()->getMissingPlugins();
 
 	    case Qt::DisplayRole:
-	        return data(Qt::EditRole).toStringList();
+	        return data(Qt::EditRole).toStringList().join(", ");
 
 	    case Qt::ToolTipRole:
-	        return "Missing plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+	        return "Missing plugins: " + data(Qt::DisplayRole).toString();
 
 	    default:
 	        break;

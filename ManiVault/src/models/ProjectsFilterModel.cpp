@@ -63,7 +63,6 @@ ProjectsFilterModel::ProjectsFilterModel(QObject* parent /*= nullptr*/) :
 
 bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
-    return SortFilterProxyModel::filterAcceptsRow(row, parent);
     const auto index = sourceModel()->index(row, 0, parent);
 
 	if (!index.isValid())
