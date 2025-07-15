@@ -15,226 +15,65 @@
 
 namespace mv::util {
 
-FileDownloader::FileDownloader(const StorageMode& mode, const Task::GuiScope& taskGuiScope, QObject* parent) :
-    QObject(parent),
-    _storageMode(mode),
-    _isDownloading(false),
-    _task(QThread::currentThread() == QCoreApplication::instance()->thread() ? new Task(this, "Downloading", { taskGuiScope }, Task::Status::Undefined, true) : nullptr)
-{
-    if (_task)
-		_task->setEnabled(taskGuiScope != Task::GuiScope::None);
-}
-
-void FileDownloader::download(const QUrl& url, bool synchronous)
-{
-    if (_isDownloading)
-        return;
-
-#ifdef FILE_DOWNLOADER_VERBOSE
-    qDebug() << __FUNCTION__ << url.toString();
-#endif
-
-    _url = url;
-    _isDownloading = true;
-
-    QNetworkRequest request(_url);
-
-    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-
-    auto* networkReply = sharedManager().get(request);
-
-    connect(networkReply, &QNetworkReply::finished, this, [this, networkReply]() -> void {
-        downloadFinished(networkReply);
-        });
-
-    const auto fileName = QFileInfo(_url.toString()).fileName();
-
-    if (_task) {
-        _task->setName(QString("Download %1").arg(fileName));
-        _task->setIcon(StyledIcon("download"));
-        _task->setRunning();
-
-        disconnect(_task, &Task::requestAbort, this, nullptr);
-
-        connect(_task, &Task::requestAbort, this, [this, networkReply]() -> void {
-            networkReply->abort();
-
-            _task->setAborted();
-
-            emit aborted();
-            });
-    }
-
-    connect(networkReply, &QNetworkReply::downloadProgress, this, [&](qint64 downloaded, qint64 total) -> void {
-        if (_task && _task->isAborting())
-            return;
-
-        const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
-
-        if (_task)
-            _task->setProgress(progress);
-
-        emit downloadProgress(progress);
-        });
-}
-
-bool FileDownloader::isDownloading() const
-{
-    return _isDownloading;
-}
-
-QString FileDownloader::getDownloadedFilePath() const
-{
-    return _downloadedFilePath;
-}
-
-void FileDownloader::downloadFinished(QNetworkReply* reply)
-{
-#ifdef FILE_DOWNLOADER_VERBOSE
-    qDebug() << __FUNCTION__ << reply->error();
-#endif
-
-    QString filename = QFileInfo(_url.toString()).fileName();
-
-    QVariant dispositionHeader = reply->rawHeader("Content-Disposition");
-
-    if (dispositionHeader.isValid()) {
-        QRegularExpression re("filename\\*=UTF-8''([^;]+)|filename=\"?([^\";]+)\"?");
-        QRegularExpressionMatch match = re.match(dispositionHeader.toString());
-
-    	if (match.hasMatch()) {
-            filename = QUrl::fromPercentEncoding(match.captured(1).toUtf8());
-
-            if (filename.isEmpty())
-                filename = match.captured(2); // fallback
-        }
-    }
-
-    if (_storageMode & StorageMode::File)
-    {
-        if (_targetDirectory.isEmpty())
-    		_downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(filename);
-        else
-            _downloadedFilePath = QDir(_targetDirectory).filePath(filename);
-
-#ifdef FILE_DOWNLOADER_VERBOSE
-        qDebug() << filename << ": " << _downloadedFilePath;
-#endif
-
-        QFile localFile(_downloadedFilePath);
-
-        if (!localFile.open(QIODevice::WriteOnly))
-            return;
-
-        _downloadedData = reply->readAll();
-
-        localFile.write(_downloadedData);
-    	localFile.close();
-    }
-
-    if (_storageMode == StorageMode::ByteArray) {
-        _downloadedData = reply->readAll();
-    }
-
-    reply->deleteLater();
-
-    _isDownloading = false;
-
-    if (reply->error() == QNetworkReply::NoError) {
-        if (_task)
-            _task->setFinished();
-
-		emit downloaded();
-    }
-}
-
-const QString& FileDownloader::getTargetDirectory() const
-{
-    return _targetDirectory;
-}
-
-void FileDownloader::setTargetDirectory(const QString& targetDirectory)
-{
-    _targetDirectory = targetDirectory;
-}
-
-//QPointer<Task> FileDownloader::getTask()
+//void FileDownloader::downloadFinished(QNetworkReply* reply)
 //{
-//    return _task;
+//#ifdef FILE_DOWNLOADER_VERBOSE
+//    qDebug() << __FUNCTION__ << reply->error();
+//#endif
+//
+//    QString filename = QFileInfo(_url.toString()).fileName();
+//
+//    QVariant dispositionHeader = reply->rawHeader("Content-Disposition");
+//
+//    if (dispositionHeader.isValid()) {
+//        QRegularExpression re("filename\\*=UTF-8''([^;]+)|filename=\"?([^\";]+)\"?");
+//        QRegularExpressionMatch match = re.match(dispositionHeader.toString());
+//
+//    	if (match.hasMatch()) {
+//            filename = QUrl::fromPercentEncoding(match.captured(1).toUtf8());
+//
+//            if (filename.isEmpty())
+//                filename = match.captured(2); // fallback
+//        }
+//    }
+//
+//    if (_storageMode & StorageMode::File)
+//    {
+//        if (_targetDirectory.isEmpty())
+//    		_downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(filename);
+//        else
+//            _downloadedFilePath = QDir(_targetDirectory).filePath(filename);
+//
+//#ifdef FILE_DOWNLOADER_VERBOSE
+//        qDebug() << filename << ": " << _downloadedFilePath;
+//#endif
+//
+//        QFile localFile(_downloadedFilePath);
+//
+//        if (!localFile.open(QIODevice::WriteOnly))
+//            return;
+//
+//        _downloadedData = reply->readAll();
+//
+//        localFile.write(_downloadedData);
+//    	localFile.close();
+//    }
+//
+//    if (_storageMode == StorageMode::ByteArray) {
+//        _downloadedData = reply->readAll();
+//    }
+//
+//    reply->deleteLater();
+//
+//    _isDownloading = false;
+//
+//    if (reply->error() == QNetworkReply::NoError) {
+//        if (_task)
+//            _task->setFinished();
+//
+//		emit downloaded();
+//    }
 //}
-
-QPointer<Task> FileDownloader::getTask() const
-{
-    return _task;
-}
-
-QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
-{
-    QPromise<std::uint64_t> promise;
-    QFuture<std::uint64_t> future = promise.future();
-
-    QNetworkRequest request(url);
-    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-
-    QNetworkReply* reply = sharedManager().head(request);
-
-    connect(reply, &QNetworkReply::finished, reply, [reply, p = std::move(promise)]() mutable {
-        reply->deleteLater();
-
-        if (reply->error() == QNetworkReply::NoError) {
-            auto lengthHeader = reply->header(QNetworkRequest::ContentLengthHeader);
-            if (lengthHeader.isValid()) {
-                p.addResult(lengthHeader.toULongLong());
-                p.finish();
-                return;
-            }
-            else {
-                p.setException(std::make_exception_ptr(std::runtime_error("Content-Length header not present")));
-                return;
-            }
-        }
-
-        p.setException(std::make_exception_ptr(std::runtime_error(reply->errorString().toStdString())));
-    });
-
-    return future;
-}
-
-QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
-{
-    QPromise<QDateTime> promise;
-    QFuture<QDateTime> future = promise.future();
-
-    QNetworkRequest request(url);
-    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-
-    QNetworkReply* reply = sharedManager().head(request);
-
-    connect(reply, &QNetworkReply::finished, reply, [reply, p = std::move(promise)]() mutable {
-        if (reply->error() != QNetworkReply::NoError) {
-            p.setException(std::make_exception_ptr(
-                std::runtime_error("HEAD request failed: " + reply->errorString().toStdString())
-            ));
-        }
-        else {
-            const auto lastModified = reply->header(QNetworkRequest::LastModifiedHeader);
-
-            if (!lastModified.isValid()) {
-                p.setException(std::make_exception_ptr(
-                    std::runtime_error("Last-Modified header not found")
-                ));
-            }
-            else {
-                p.addResult(lastModified.toDateTime());
-            }
-        }
-
-        reply->deleteLater();
-        p.finish();
-	});
-
-    return future;
-}
 
 QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url)
 {
@@ -244,6 +83,9 @@ QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url)
     // Ensure this code runs in the main thread
     QMetaObject::invokeMethod(qApp, [url, promise = std::move(promise)]() mutable {
         QNetworkRequest request(url);
+
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
         QNetworkReply* reply = sharedManager().get(request);
 
         QObject::connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise)]() mutable {
@@ -253,8 +95,10 @@ QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url)
             else {
                 promise.addResult(reply->readAll());
             }
+
             reply->deleteLater();
-            promise.finish(); // MUST call
+
+        	promise.finish();
 		});
     });
 
@@ -270,8 +114,8 @@ QByteArray FileDownloader::downloadToByteArraySync(const QUrl& url)
 	auto future = FileDownloader::downloadToByteArrayAsync(url);
 
 	future.then([&](const QByteArray& result) {
-		downloadedData = result;
-		loop.quit();
+			downloadedData = result;
+			loop.quit();
 		}).onFailed([&](const QException& e) {
 			error = std::make_exception_ptr(std::runtime_error(e.what()));
 			loop.quit();
@@ -286,8 +130,230 @@ QByteArray FileDownloader::downloadToByteArraySync(const QUrl& url)
 	return downloadedData;
 }
 
-QByteArray FileDownloader::downloadedData() const {
-    return _downloadedData;
+QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QString& targetDirectory /*= ""*/, Task* task /*= nullptr*/)
+{
+    QPromise<QString> promise;
+    QFuture<QString> future = promise.future();
+
+    // Ensure this code runs in the main thread
+    QMetaObject::invokeMethod(qApp, [promise = std::move(promise), url, targetDirectory, task]() mutable {
+        QNetworkRequest request(url);
+
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+        QNetworkReply* reply = sharedManager().get(request);
+
+        connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise), url, targetDirectory, task]() mutable {
+            if (reply->error() != QNetworkReply::NoError) {
+                promise.setException(std::make_exception_ptr(std::runtime_error(reply->errorString().toStdString())));
+            }
+            else {
+                QString downloadedFilePath;
+
+                QString filename = QFileInfo(url.toString()).fileName();
+
+                if (targetDirectory.isEmpty())
+                    downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(filename);
+                else
+                    downloadedFilePath = QDir(targetDirectory).filePath(filename);
+
+                QFile localFile(downloadedFilePath);
+
+                if (!localFile.open(QIODevice::WriteOnly))
+                    return;
+
+                localFile.write(reply->readAll());
+                localFile.close();
+
+                promise.addResult(downloadedFilePath);
+            }
+
+            reply->deleteLater();
+
+            promise.finish();
+        });
+
+        connect(reply, &QNetworkReply::downloadProgress, [task](qint64 downloaded, qint64 total) -> void {
+	        if (task && task->isAborting())
+				return;
+
+	        const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
+
+	        if (task)
+                task->setProgress(progress);
+        });
+    });
+
+    return future;
+}
+
+QString FileDownloader::downloadToFileSync(const QUrl& url, const QString& targetDirectory /*= ""*/, Task* task /*= nullptr*/)
+{
+    QEventLoop loop;
+    std::optional<std::exception_ptr> error;
+
+    QString downloadedFilePath;
+
+	auto future = FileDownloader::downloadToFileAsync(url, targetDirectory, task);
+
+    future.then([&](const QString& result) {
+        downloadedFilePath = result;
+        loop.quit();
+    }).onFailed([&](const QException& e) {
+        error = std::make_exception_ptr(std::runtime_error(e.what()));
+        loop.quit();
+    });
+
+    loop.exec(); // Block until either then or onFailed is called
+
+    if (error.has_value()) {
+        std::rethrow_exception(error.value());
+    }
+
+    return downloadedFilePath;
+}
+
+QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
+{
+    qDebug() << "Getting download size for" << url.toString();
+    QPromise<std::uint64_t> promise;
+    QFuture<std::uint64_t> future = promise.future();
+
+    // Ensure this code runs in the main thread
+    QMetaObject::invokeMethod(qApp, [promise = std::move(promise), url]() mutable {
+        QNetworkRequest request(url);
+
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+        QNetworkReply* reply = sharedManager().head(request);
+
+        connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise), url]() mutable {
+            reply->deleteLater();
+
+            if (reply->error() == QNetworkReply::NoError) {
+                auto lengthHeader = reply->header(QNetworkRequest::ContentLengthHeader);
+
+                if (lengthHeader.isValid()) {
+                    //qDebug() << "Content-Length for" << url.toString() << "is" << lengthHeader.toULongLong();
+                    promise.addResult(lengthHeader.toULongLong());
+                    promise.finish();
+                    return;
+                }
+                else {
+                    promise.setException(std::make_exception_ptr(std::runtime_error("Content-Length header not present")));
+                    return;
+                }
+            }
+
+            promise.setException(std::make_exception_ptr(std::runtime_error(reply->errorString().toStdString())));
+        });
+    });
+
+    return future;
+}
+
+std::uint64_t FileDownloader::getDownloadSizeSync(const QUrl& url)
+{
+    QNetworkRequest request(url);
+
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    QNetworkReply* reply = sharedManager().get(request);
+
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        auto errorMsg = reply->errorString();
+        reply->deleteLater();
+        throw std::runtime_error("HEAD request failed: " + errorMsg.toStdString());
+    }
+
+    auto lengthHeader = reply->header(QNetworkRequest::ContentLengthHeader);
+
+    if (!lengthHeader.isValid()) {
+        reply->deleteLater();
+        throw std::runtime_error("Length header not found");
+    }
+
+    const auto result = lengthHeader.toULongLong();
+
+    reply->deleteLater();
+
+    return result;
+}
+
+QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
+{
+    QPromise<QDateTime> promise;
+    QFuture<QDateTime> future = promise.future();
+
+    // Ensure this code runs in the main thread
+    QMetaObject::invokeMethod(qApp, [promise = std::move(promise), url]() mutable {
+        QNetworkRequest request(url);
+
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+        QNetworkReply* reply = sharedManager().head(request);
+
+        connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise), url]() mutable {
+            if (reply->error() != QNetworkReply::NoError) {
+                promise.setException(std::make_exception_ptr(
+                    std::runtime_error("HEAD request failed: " + reply->errorString().toStdString())
+                ));
+            }
+            else {
+                const auto lastModified = reply->header(QNetworkRequest::LastModifiedHeader);
+
+                if (!lastModified.isValid()) {
+                    promise.setException(std::make_exception_ptr(
+                        std::runtime_error("Last-Modified header not found")
+                    ));
+                }
+                else {
+                    promise.addResult(lastModified.toDateTime());
+                }
+            }
+
+            reply->deleteLater();
+            promise.finish();
+        });
+    });
+
+    return future;
+}
+
+QDateTime FileDownloader::getLastModifiedSync(const QUrl& url)
+{
+    QNetworkRequest request(url);
+
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    QNetworkReply* reply = sharedManager().head(request);
+
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        auto errorMsg = reply->errorString();
+        reply->deleteLater();
+        throw std::runtime_error("HEAD request failed: " + errorMsg.toStdString());
+    }
+
+    QVariant lastModifiedHeader = reply->header(QNetworkRequest::LastModifiedHeader);
+
+    if (!lastModifiedHeader.isValid()) {
+        reply->deleteLater();
+        throw std::runtime_error("Last-Modified header not found");
+    }
+
+    const auto result = lastModifiedHeader.toDateTime();
+
+    reply->deleteLater();
+
+	return result;
 }
 
 }

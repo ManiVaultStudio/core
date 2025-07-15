@@ -29,80 +29,6 @@ class CORE_EXPORT FileDownloader : public QObject
 
 public:
 
-    /** Describes the storage modes */
-    enum StorageMode {
-        File        = 0x00001,      /** Stored as a file */
-        ByteArray   = 0x00002,      /** Stored as a byte array */
-
-        All = File | ByteArray
-    };
-
-    /**
-     * Construct with \p mode and pointer to \p parent object
-     * @param mode Download mode
-     * @param taskGuiScope Type of GUI task reporting
-     * @param parent Pointer to parent object
-     */
-    explicit FileDownloader(const StorageMode& mode = StorageMode::All, const Task::GuiScope& taskGuiScope = Task::GuiScope::None, QObject* parent = nullptr);
-
-    /** No need for custom destructor */
-    ~FileDownloader() override = default;
-
-    /**
-     * Download file with \p url
-     * @param url URL of the file to download
-     * @param synchronous Boolean determining whether the download should be synchronous or not
-     */
-    void download(const QUrl& url, bool synchronous = false);
-
-    /**
-     * Get whether a download is taking place
-     * @return Boolean determining whether a download is taking place
-     */
-	bool isDownloading() const;
-
-    /**
-     * Get downloaded file path
-     * @return Downloaded file path
-     */
-    QString getDownloadedFilePath() const;
-
-    /**
-     * Get downloaded data
-     * @return Downloaded data as byte array
-     */
-    QByteArray downloadedData() const;
-
-    /**
-     * Invoked when the file is downloaded
-     * @param reply Pointer to the network reply
-     */
-    void downloadFinished(QNetworkReply* reply);
-
-    /**
-     * Get the target directory
-     * @return Target directory
-     */
-    const QString& getTargetDirectory() const;
-
-    /**
-     * Set the target directory to \p targetDirectory
-     * @param targetDirectory Target directory
-     */
-    void setTargetDirectory(const QString& targetDirectory);
-
-    /**
-     * Get the task associated with the file download
-     * @return Pointer to task
-     */
-    //QPointer<Task> getTask();
-
-    /**
-     * Get the task associated with the file download
-     * @return Pointer to task
-     */
-    QPointer<Task> getTask() const;
-
     /**
      * Get the shared network access manager instance
      * @return Reference to the shared QNetworkAccessManager instance
@@ -112,20 +38,6 @@ public:
         static QNetworkAccessManager instance;
         return instance;
     }
-
-	/**
-     * Get the size of the file to be downloaded
-     * @param url URL of the file to be downloaded
-     * @return Size of the file to be downloaded in bytes, 0 if size cannot be determined
-     */
-    static QFuture<std::uint64_t> getDownloadSizeAsync(const QUrl& url);
-
-    /** 
-     * Get the last modified date of the file at \p url
-     * @param url URL of the file to check
-     * @return Last modified date of the file, QDateTime() if it cannot be determined
-     */
-    static QFuture<QDateTime> getLastModifiedAsync(const QUrl& url);
 
     /** 
      * Download file to byte array asynchronously
@@ -141,28 +53,51 @@ public:
      */
     static QByteArray downloadToByteArraySync(const QUrl& url);
 
-signals:
-
-    /** Signals that the file is correctly downloaded */
-    void downloaded();
-
-    /** Signals that the file download process was aborted (by the user) */
-    void aborted();
+    /**
+     * Download file from \p url to \p targetDirectory asynchronously
+     * @param url URL of the file to download
+     * @param targetDirectory Directory where the file should be saved (OS temporary dir when empty)
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
+     * @return Future containing the path to the downloaded file
+     */
+    static QFuture<QString> downloadToFileAsync(const QUrl& url, const QString& targetDirectory = "", Task* task = nullptr);
 
     /**
-     * Invoked when there is download progress update
-     * @param progress Progress [0, 1]
+     * Download file from \p url to \p targetDirectory synchronously
+     * @param url URL of the file to download
+     * @param targetDirectory Directory where the file should be saved (OS temporary dir when empty)
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
+     * @return File path of the downloaded file
      */
-    void downloadProgress(float progress);
+    static QString downloadToFileSync(const QUrl& url, const QString& targetDirectory = "", Task* task = nullptr);
 
-private:
-    const StorageMode       _storageMode;               /** Download mode */
-    QUrl                    _url;                       /** URL being downloaded */
-    bool                    _isDownloading;             /** Boolean determining whether a download is taking place */
-    QByteArray              _downloadedData;            /** Downloaded data as byte array */
-    QString                 _downloadedFilePath;        /** Location where the downloaded file is stored */
-    QPointer<Task>          _task;                      /** Task for reporting progress */
-    QString                 _targetDirectory;           /** Directory where the file is downloaded to (when FileDownloader#_storageMode is StorageMode#File) */  
+    /**
+     * Get the size of the file to be downloaded asynchronously
+     * @param url URL of the file to be downloaded
+     * @return Size of the file to be downloaded in bytes, 0 if size cannot be determined
+     */
+    static QFuture<std::uint64_t> getDownloadSizeAsync(const QUrl& url);
+
+    /**
+     * Get the size of the file to be downloaded synchronously
+     * @param url URL of the file to be downloaded
+     * @return Size of the file to be downloaded in bytes, 0 if size cannot be determined
+     */
+    static std::uint64_t getDownloadSizeSync(const QUrl& url);
+
+    /**
+     * Get the last modified date of the file at \p url asynchronously
+     * @param url URL of the file to check
+     * @return Last modified date of the file, QDateTime() if it cannot be determined
+     */
+    static QFuture<QDateTime> getLastModifiedAsync(const QUrl& url);
+
+    /**
+     * Get the last modified date of the file at \p url synchronously
+     * @param url URL of the file to check
+     * @return Last modified date of the file, QDateTime() if it cannot be determined
+     */
+    static QDateTime getLastModifiedSync(const QUrl& url);
 };
 
 }
