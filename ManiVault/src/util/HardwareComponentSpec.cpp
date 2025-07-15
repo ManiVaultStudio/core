@@ -8,8 +8,8 @@ namespace mv::util
 {
 
 HardwareComponentSpec::HardwareComponentSpec(const QString& title) :
-    _initialized(false),
-    _title(title)
+    _title(title),
+    _initialized(false)
 {
 }
 
@@ -29,11 +29,16 @@ QStandardItem* HardwareComponentSpec::getStandardItem() const
 
 QList<QStandardItem*> HardwareComponentSpec::getParameterRow(const QString& parameterName, const QString& systemValue /*= ""*/, const QString& requiredValue /*= ""*/, bool valid /*= true*/)
 {
-    return {
+    auto row = QList<QStandardItem*>{
         new QStandardItem(valid ? StyledIcon("check-circle") : StyledIcon("exclamation-circle"), parameterName),
         new QStandardItem(systemValue),
         new QStandardItem(requiredValue),
     };
+
+    if (!valid)
+        row[1]->setForeground(QBrush(QColor(255, 70, 70)));
+
+    return row;
 }
 
 }

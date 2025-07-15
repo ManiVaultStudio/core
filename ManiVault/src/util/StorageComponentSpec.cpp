@@ -27,6 +27,10 @@ QStandardItem* StorageComponentSpec::getStandardItem() const
 
     item->setIcon(StyledIcon("hard-drive"));
 
+    auto storageComponentSpec = HardwareSpec::getSystemHardwareSpec().getHardwareComponentSpec<StorageComponentSpec>("Storage");
+
+    item->appendRow(getParameterRow("App data free space", getNoBytesHumanReadable(storageComponentSpec->getNumberOfBytesAvailableInAppData(), false), getNoBytesHumanReadable(getNumberOfBytesAvailableInAppData()), storageComponentSpec->getNumberOfBytesAvailableInAppData() >= getNumberOfBytesAvailableInAppData()));
+
     return item;
 }
 

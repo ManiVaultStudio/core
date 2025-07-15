@@ -34,8 +34,6 @@ public:
      * @param hardwareSpec The hardware specification to set
      */
     void setHardwareSpec(const util::HardwareSpec& hardwareSpec);
-
-private:
 };
 
 }

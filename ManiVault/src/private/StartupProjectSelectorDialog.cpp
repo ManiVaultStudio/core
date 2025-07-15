@@ -10,6 +10,8 @@
 #include <QToolTip>
 #include <QTreeView>
 
+#include "models/HardwareSpecTreeModel.h"
+
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
@@ -117,7 +119,6 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Url), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::IsStartup), true);
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::Sha), true);
-    //treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::RecommendedHardwareSpec), true);
 
 #if QT_NO_DEBUG
     treeViewHeader->setSectionHidden(static_cast<int>(ProjectsTreeModel::Column::LastModified), true);
@@ -142,29 +143,52 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
                 projectIncompatibleWithSystemDialog.setWindowIcon(StyledIcon("triangle-exclamation"));
                 projectIncompatibleWithSystemDialog.setWindowTitle("Incompatible System");
-                projectIncompatibleWithSystemDialog.setMinimumWidth(350);
-                projectIncompatibleWithSystemDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+                projectIncompatibleWithSystemDialog.setMinimumWidth(500);
+                projectIncompatibleWithSystemDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-                auto layout = new QVBoxLayout(&projectIncompatibleWithSystemDialog);
-                auto textBrowser = new QTextBrowser();
+                auto layout     = new QVBoxLayout(&projectIncompatibleWithSystemDialog);
+                auto message    = new QLabel();
 
-                QPalette textBrowserPalette = textBrowser->palette();
+                layout->setSpacing(10);
 
-                textBrowserPalette.setColor(QPalette::Base, textBrowser->palette().color(QPalette::Window));
+                message->setWordWrap(true);
+                message->setText("<p>Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!</p>");
 
-                textBrowser->setPalette(textBrowserPalette);
-                textBrowser->setFrameStyle(QFrame::NoFrame);
+                layout->addWidget(message);
 
-                QString htmlMessage;
+                auto requirementsLayout                 = new QHBoxLayout();
+                auto minimumRequirementsModel           = new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog);
+                auto recommendedRequirementsModel       = new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog);
+                auto minimumRequirementsTreeView        = new QTreeView();
+                auto recommendedRequirementsTreeView    = new QTreeView();
 
-                htmlMessage += systemCompatibility._message;
-                htmlMessage += "<p>Do you want to continue anyway?</p>";
+                minimumRequirementsModel->setHardwareSpec(selectedStartupProject->getMinimumHardwareSpec());
+                minimumRequirementsModel->setHorizontalHeaderLabels({ "Component", "System", "Minimum" });
 
-                textBrowser->setHtml(htmlMessage);
+                recommendedRequirementsModel->setHardwareSpec(selectedStartupProject->getRecommendedHardwareSpec());
 
-                layout->addWidget(textBrowser);
+                minimumRequirementsTreeView->setIconSize(QSize(13, 13));
+                minimumRequirementsTreeView->setModel(minimumRequirementsModel);
+                minimumRequirementsTreeView->expandAll();
 
-                auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Yes | QDialogButtonBox::Abort);
+                minimumRequirementsTreeView->header()->setStretchLastSection(false);
+                minimumRequirementsTreeView->header()->setSectionResizeMode(QHeaderView::Interactive);
+                minimumRequirementsTreeView->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Stretch);
+                minimumRequirementsTreeView->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Fixed);
+                minimumRequirementsTreeView->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::Fixed);
+
+                minimumRequirementsTreeView->header()->resizeSection(1, 100);
+                minimumRequirementsTreeView->header()->resizeSection(2, 100);
+
+                recommendedRequirementsTreeView->setModel(recommendedRequirementsModel);
+
+                requirementsLayout->addWidget(minimumRequirementsTreeView);
+                //requirementsLayout->addWidget(recommendedRequirementsTreeView);
+
+                layout->addLayout(requirementsLayout, 1);
+                layout->addWidget(new QLabel("<p>Do you want to continue anyway?</p>"));
+
+            	auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Yes | QDialogButtonBox::Abort);
 
                 connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Yes), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::accept);
                 connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Abort), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::reject);
