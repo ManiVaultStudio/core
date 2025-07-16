@@ -153,16 +153,14 @@ int main(int argc, char *argv[])
     SplashScreenAction splashScreenAction(&application, true);
 
     if (application.shouldOpenProjectAtStartup()) {
-        auto startupProjectMetaAction = mv::projects().getProjectMetaAction(application.getStartupProjectUrl().toLocalFile());
-
-        if (!startupProjectMetaAction.isNull()) {
+        if (auto startupProjectMetaAction = mv::projects().getProjectMetaAction(application.getStartupProjectUrl().toLocalFile())) {
             try {
                 application.getStartupTask().getLoadProjectTask().setEnabled(true, true);
 
-                splashScreenAction.setProjectMetaAction(startupProjectMetaAction.get());
+                splashScreenAction.setProjectMetaAction(startupProjectMetaAction);
                 splashScreenAction.fromVariantMap(startupProjectMetaAction->getSplashScreenAction().toVariantMap());
 
-                application.setStartupProjectMetaAction(startupProjectMetaAction.get());
+                application.setStartupProjectMetaAction(startupProjectMetaAction);
 
                 if (startupProjectMetaAction->getReadOnlyAction().isChecked() && startupProjectMetaAction->getApplicationIconAction().getOverrideAction().isChecked())
                     application.setWindowIcon(startupProjectMetaAction->getApplicationIconAction().getIconPickerAction().getIcon());

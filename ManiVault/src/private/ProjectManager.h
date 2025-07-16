@@ -172,9 +172,9 @@ public: // Miscellaneous
     /**
      * Get project meta action for the project with \p projectFilePath
      * @param projectFilePath File path of the project for which to get the meta action
-     * @return Shared pointer to the project meta action, or nullptr if no action is found
+     * @return Pointer to the project meta action, or nullptr if no action is found
      */
-    QSharedPointer<ProjectMetaAction> getProjectMetaAction(const QString& projectFilePath) override; ;
+    ProjectMetaAction* getProjectMetaAction(const QString& projectFilePath) override;
 
 private:
 

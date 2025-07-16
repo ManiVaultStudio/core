@@ -46,9 +46,7 @@ ProjectMetaAction::ProjectMetaAction(const QString& filePath, QObject* parent /*
 
         QByteArray ProjectMetaActionByteArray = ProjectMetaActionJsonFile.readAll();
 
-        QJsonDocument jsonDocument;
-
-        jsonDocument = QJsonDocument::fromJson(ProjectMetaActionByteArray);
+        const auto jsonDocument = QJsonDocument::fromJson(ProjectMetaActionByteArray);
 
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");

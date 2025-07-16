@@ -295,33 +295,33 @@ void SplashScreenWidget::createBody()
     const auto bodyColor = qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Dark).name();
 
     if (shouldDisplayProjectInfo()) {
-        //auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
-        ////auto& splashScreenAction = _splashScreenAction.getProjectMetaAction()->getSplashScreenAction();
+        auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
+        //auto& splashScreenAction = _splashScreenAction.getProjectMetaAction()->getSplashScreenAction();
 
-        //const auto projectLogoPixmap = QPixmap::fromImage(_splashScreenAction.getProjectImageAction().getImage());
+        const auto projectLogoPixmap = QPixmap::fromImage(_splashScreenAction.getProjectImageAction().getImage());
 
-        //if (!projectLogoPixmap.isNull())
-        //    projectLogoLabel->setPixmap(projectLogoPixmap.scaledToHeight(SplashScreenWidget::logoSize, Qt::SmoothTransformation));
+        if (!projectLogoPixmap.isNull())
+            projectLogoLabel->setPixmap(projectLogoPixmap.scaledToHeight(SplashScreenWidget::logoSize, Qt::SmoothTransformation));
 
-        //auto& versionAction = projectMetaAction->getProjectVersionAction();
-        //auto title          = projectMetaAction->getTitleAction().getString();
-        //auto version        = QString("%1.%2.%3").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), QString::number(versionAction.getPatchAction().getValue()));
-        //if(!versionAction.getSuffixAction().getString().isEmpty())
-        //    version.append("-" + versionAction.getSuffixAction().getString());
-        //auto description    = projectMetaAction->getDescriptionAction().getString();
-        //auto comments       = projectMetaAction->getCommentsAction().getString();
+        auto& versionAction = projectMetaAction->getProjectVersionAction();
+        auto title          = projectMetaAction->getTitleAction().getString();
+        auto version        = QString("%1.%2.%3").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), QString::number(versionAction.getPatchAction().getValue()));
+        if(!versionAction.getSuffixAction().getString().isEmpty())
+            version.append("-" + versionAction.getSuffixAction().getString());
+        auto description    = projectMetaAction->getDescriptionAction().getString();
+        auto comments       = projectMetaAction->getCommentsAction().getString();
 
-        //if (title.isEmpty())
-        //    title = projects().hasProject() ? QFileInfo(projects().getCurrentProject()->getFilePath()).fileName() : "Untitled";
+        if (title.isEmpty())
+            title = projects().hasProject() ? QFileInfo(projects().getCurrentProject()->getFilePath()).fileName() : "Untitled";
 
-        //htmlLabel->setText(QString(" \
-        //    <div style='color: %5;'> \
-        //        <p style='font-size: 20pt; font-weight: bold; color: rgb(25, 25, 25);'><span>%1</span></p> \
-        //        <p style='font-weight: bold;'>Version: %2</p> \
-        //        <p>%3</p> \
-        //        <p>%4</p> \
-        //    </div> \
-        //").arg(title, version, description, comments, bodyColor));
+        htmlLabel->setText(QString(" \
+            <div style='color: %5;'> \
+                <p style='font-size: 20pt; font-weight: bold; color: rgb(25, 25, 25);'><span>%1</span></p> \
+                <p style='font-weight: bold;'>Version: %2</p> \
+                <p>%3</p> \
+                <p>%4</p> \
+            </div> \
+        ").arg(title, version, description, comments, bodyColor));
     }
     else {
         projectLogoLabel->setPixmap(_logoImage);
@@ -383,54 +383,54 @@ void SplashScreenWidget::createBody()
 void SplashScreenWidget::createFooter()
 {
     if (shouldDisplayProjectInfo()) {
-        //auto imagesLayout = new QHBoxLayout();
+        auto imagesLayout = new QHBoxLayout();
 
-        //imagesLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin / 2, SplashScreenWidget::margin, 30);
+        imagesLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin / 2, SplashScreenWidget::margin, 30);
 
-        //auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
+        auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
 
-        //auto& splashScreenAction = projectMetaAction->getSplashScreenAction();
+        auto& splashScreenAction = projectMetaAction->getSplashScreenAction();
 
-        //auto affiliateLogosImageLabel = new QLabel();
+        auto affiliateLogosImageLabel = new QLabel();
 
-        //const auto affiliatesLogosPixmap = QPixmap::fromImage(splashScreenAction.getAffiliateLogosImageAction().getImage());
+        const auto affiliatesLogosPixmap = QPixmap::fromImage(splashScreenAction.getAffiliateLogosImageAction().getImage());
 
-        //if (!affiliatesLogosPixmap.isNull())
-        //    affiliateLogosImageLabel->setPixmap(affiliatesLogosPixmap.scaledToHeight(SplashScreenWidget::footerImagesHeight, Qt::SmoothTransformation));
+        if (!affiliatesLogosPixmap.isNull())
+            affiliateLogosImageLabel->setPixmap(affiliatesLogosPixmap.scaledToHeight(SplashScreenWidget::footerImagesHeight, Qt::SmoothTransformation));
 
-        //auto builtWithWidget        = new QWidget();
-        //auto builtWithWidgetLayout  = new QHBoxLayout();
-        //
-        //auto logoLabel      = new QLabel();
-        //auto builtWithLabel = new QLabel();
+        auto builtWithWidget        = new QWidget();
+        auto builtWithWidgetLayout  = new QHBoxLayout();
+        
+        auto logoLabel      = new QLabel();
+        auto builtWithLabel = new QLabel();
 
-        //logoLabel->setFixedSize(SplashScreenWidget::footerImagesHeight, SplashScreenWidget::footerImagesHeight);
-        //logoLabel->setScaledContents(true);
-        //logoLabel->setPixmap(_logoImage);
+        logoLabel->setFixedSize(SplashScreenWidget::footerImagesHeight, SplashScreenWidget::footerImagesHeight);
+        logoLabel->setScaledContents(true);
+        logoLabel->setPixmap(_logoImage);
 
-        //const auto& applicationVersionAction = projectMetaAction->getApplicationVersionAction();
+        const auto& applicationVersionAction = projectMetaAction->getApplicationVersionAction();
 
-        //builtWithLabel->setTextFormat(Qt::RichText);
-        //builtWithLabel->setText(QString(" \
-        //    <div style='margin-left: 10px; font-family: --bs-font-sans-serif'> \
-        //        <span style='font-size: 10pt; font-weight: bold; color: rgb(162, 141, 208);'>Built with</span> \
-        //        <br> \
-        //        <span style='font-size: 12pt; font-weight: bold; color: rgb(102, 159, 178); padding: 0px;'>ManiVault Studio v%1<sup>&copy;</sup></span> \
-        //    </div> \
-        //").arg(applicationVersionAction.getVersionStringAction().getString()));
+        builtWithLabel->setTextFormat(Qt::RichText);
+        builtWithLabel->setText(QString(" \
+            <div style='margin-left: 10px; font-family: --bs-font-sans-serif'> \
+                <span style='font-size: 10pt; font-weight: bold; color: rgb(162, 141, 208);'>Built with</span> \
+                <br> \
+                <span style='font-size: 12pt; font-weight: bold; color: rgb(102, 159, 178); padding: 0px;'>ManiVault Studio v%1<sup>&copy;</sup></span> \
+            </div> \
+        ").arg(applicationVersionAction.getVersionStringAction().getString()));
 
-        //builtWithWidgetLayout->setContentsMargins(0, 0, 0, 0);
-        //builtWithWidgetLayout->addWidget(logoLabel);
-        //builtWithWidgetLayout->addWidget(builtWithLabel);
+        builtWithWidgetLayout->setContentsMargins(0, 0, 0, 0);
+        builtWithWidgetLayout->addWidget(logoLabel);
+        builtWithWidgetLayout->addWidget(builtWithLabel);
 
-        //builtWithWidget->setLayout(builtWithWidgetLayout);
-        //builtWithWidget->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
+        builtWithWidget->setLayout(builtWithWidgetLayout);
+        builtWithWidget->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
-        //imagesLayout->addWidget(affiliateLogosImageLabel);
-        //imagesLayout->addStretch(1);
-        //imagesLayout->addWidget(builtWithWidget);
+        imagesLayout->addWidget(affiliateLogosImageLabel);
+        imagesLayout->addStretch(1);
+        imagesLayout->addWidget(builtWithWidget);
 
-        //_roundedFrameLayout.addLayout(imagesLayout);
+        _roundedFrameLayout.addLayout(imagesLayout);
     }
 
     if (Application::current()->getStartupTask().getEnabled()) {

@@ -5,7 +5,6 @@
 #include "SplashScreenAction.h"
 
 #include "Application.h"
-#include "ProjectMetaAction.h"
 
 #include "widgets/SplashScreenWidget.h"
 
