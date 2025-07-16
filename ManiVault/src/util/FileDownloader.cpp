@@ -15,66 +15,6 @@
 
 namespace mv::util {
 
-//void FileDownloader::downloadFinished(QNetworkReply* reply)
-//{
-//#ifdef FILE_DOWNLOADER_VERBOSE
-//    qDebug() << __FUNCTION__ << reply->error();
-//#endif
-//
-//    QString filename = QFileInfo(_url.toString()).fileName();
-//
-//    QVariant dispositionHeader = reply->rawHeader("Content-Disposition");
-//
-//    if (dispositionHeader.isValid()) {
-//        QRegularExpression re("filename\\*=UTF-8''([^;]+)|filename=\"?([^\";]+)\"?");
-//        QRegularExpressionMatch match = re.match(dispositionHeader.toString());
-//
-//    	if (match.hasMatch()) {
-//            filename = QUrl::fromPercentEncoding(match.captured(1).toUtf8());
-//
-//            if (filename.isEmpty())
-//                filename = match.captured(2); // fallback
-//        }
-//    }
-//
-//    if (_storageMode & StorageMode::File)
-//    {
-//        if (_targetDirectory.isEmpty())
-//    		_downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(filename);
-//        else
-//            _downloadedFilePath = QDir(_targetDirectory).filePath(filename);
-//
-//#ifdef FILE_DOWNLOADER_VERBOSE
-//        qDebug() << filename << ": " << _downloadedFilePath;
-//#endif
-//
-//        QFile localFile(_downloadedFilePath);
-//
-//        if (!localFile.open(QIODevice::WriteOnly))
-//            return;
-//
-//        _downloadedData = reply->readAll();
-//
-//        localFile.write(_downloadedData);
-//    	localFile.close();
-//    }
-//
-//    if (_storageMode == StorageMode::ByteArray) {
-//        _downloadedData = reply->readAll();
-//    }
-//
-//    reply->deleteLater();
-//
-//    _isDownloading = false;
-//
-//    if (reply->error() == QNetworkReply::NoError) {
-//        if (_task)
-//            _task->setFinished();
-//
-//		emit downloaded();
-//    }
-//}
-
 QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Task* task /*= nullptr*/)
 {
     QPromise<QByteArray> promise;
