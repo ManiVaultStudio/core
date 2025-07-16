@@ -7,7 +7,7 @@
 namespace
 {
     /** Return the format necessary for rendering with PointRenderer class */
-    QSurfaceFormat getNecessarySurfaceFormat()
+    QSurfaceFormat getNecessarySurfaceFormat(int glMajorVersion, int glMinorVersion)
     {
         QSurfaceFormat surfaceFormat;
         surfaceFormat.setRenderableType(QSurfaceFormat::OpenGL);
@@ -18,8 +18,8 @@ namespace
         surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
         surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 #else
-        // Ask for an OpenGL 4.3 Core Context as the default
-        surfaceFormat.setVersion(4, 3);
+        // Ask for an OpenGL Core Context as the default
+        surfaceFormat.setVersion(glMajorVersion, glMinorVersion);
         surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
         surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 #endif
@@ -37,10 +37,15 @@ namespace gui
 {
 
 OpenGLWidget::OpenGLWidget() :
-    _pixelRatio(1.0f)
+    OpenGLWidget(3, 3)
+{}
+
+OpenGLWidget::OpenGLWidget(int glMajorVersion, int glMinorVersion) :
+    _pixelRatio(1.0f),
+    _isInitialized(false)
 {
     // Set the QOpenGLWidget surface format, such that we can render on it
-    setFormat(getNecessarySurfaceFormat());
+    setFormat(getNecessarySurfaceFormat(glMajorVersion, glMinorVersion));
 }
 
 OpenGLWidget::~OpenGLWidget()
@@ -61,6 +66,10 @@ void OpenGLWidget::initializeGL()
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &OpenGLWidget::cleanup);
 
     onWidgetInitialized();
+
+    _isInitialized = true;
+
+    emit widgetInitialized();
 }
 
 /** Function called by QOpenGLWidget when the widget has been resized. */
