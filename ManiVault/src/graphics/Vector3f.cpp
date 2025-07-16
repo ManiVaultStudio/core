@@ -4,6 +4,8 @@
 
 #include "Vector3f.h"
 
+#include <QVariantMap>
+
 #include <cmath>
 
 namespace mv

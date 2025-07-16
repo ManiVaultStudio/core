@@ -9,6 +9,13 @@
 #include <string>
 #include <iostream>
 
+// Forward declarations
+class QString;
+class QVariant;
+template <typename Key, typename T> class QMap;
+
+typedef QMap<QString, QVariant> QVariantMap;
+
 namespace mv
 {
     class CORE_EXPORT Vector3f
