@@ -6,6 +6,7 @@
 #include "Application.h"
 
 #include <QMainWindow>
+#include <QScreen>
 
 #ifdef _DEBUG
     //#define MODAL_TASK_HANDLER_VERBOSE

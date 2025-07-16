@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <string>
+
 namespace mv::util {
 
 /**

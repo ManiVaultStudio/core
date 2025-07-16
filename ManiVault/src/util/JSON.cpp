@@ -13,6 +13,9 @@
 #include <valijson/validation_results.hpp>
 
 #include <QString>
+#include <QFile>
+#include <QIODevice>
+#include <QDebug>
 
 using nlohmann::json;
 
