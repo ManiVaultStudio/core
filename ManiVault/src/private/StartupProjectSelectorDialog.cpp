@@ -4,13 +4,18 @@
 
 #include "StartupProjectSelectorDialog.h"
 
+#include <models/HardwareSpecTreeModel.h>
+
+#include <actions/TaskAction.h>
+
+#include <CoreInterface.h>
+
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QTextBrowser>
 #include <QToolTip>
 #include <QTreeView>
-
-#include "models/HardwareSpecTreeModel.h"
+#include <QDialogButtonBox>
 
 using namespace mv;
 using namespace mv::gui;

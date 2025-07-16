@@ -10,8 +10,6 @@
 #include "actions/TriggerAction.h"
 #include "actions/VerticalGroupAction.h"
 
-#include "ProjectMetaAction.h"
-
 namespace mv {
     class ProjectMetaAction;
 }

@@ -3,6 +3,10 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DisplayComponentSpec.h"
+#include "HardwareSpec.h"
+
+#include <QGuiApplication>
+#include <QScreen>
 
 namespace mv::util
 {

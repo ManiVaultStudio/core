@@ -4,6 +4,8 @@
 
 #include "AbstractProjectsModel.h"
 
+#include "util/Miscellaneous.h"
+
 #ifdef _DEBUG
     //#define ABSTRACT_PROJECTS_MODEL_VERBOSE
 #endif
