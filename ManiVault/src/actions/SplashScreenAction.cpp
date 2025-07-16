@@ -8,6 +8,8 @@
 
 #include "widgets/SplashScreenWidget.h"
 
+#include "CoreInterface.h"
+
 using namespace mv::util;
 
 namespace mv::gui {

@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "RamComponentSpec.h"
+#include "HardwareSpec.h"
 
 #ifdef Q_OS_WIN
 	#define _WIN32_WINNT 0x0600

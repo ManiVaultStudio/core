@@ -6,6 +6,13 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "util/Miscellaneous.h"
+
+#include "StyledIcon.h"
+
+#include <QStandardItem>
+#include <QString>
+
 namespace mv::util
 {
 
