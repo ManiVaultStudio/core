@@ -10,7 +10,7 @@
 #include "actions/TriggerAction.h"
 #include "actions/VerticalGroupAction.h"
 
-#include <QPointer>
+#include "ProjectMetaAction.h"
 
 namespace mv {
     class ProjectMetaAction;
@@ -206,17 +206,17 @@ public: // Action getters
     TaskAction& getTaskAction() { return _taskAction; }
 
 private:
-    bool                            _mayCloseSplashScreenWidget;    /** Whether the user can close the splash screen widget with a close tool button */
-    ProjectMetaAction*              _projectMetaAction;             /** Pointer to project meta action (used by the splash screen widget to display project information) */
-    ToggleAction                    _enabledAction;                 /** Action to setEnabled the splash screen on/off */
-    ImageAction                     _projectImageAction;            /** Image action for the project image */
-    ImageAction                     _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
-    VerticalGroupAction             _editAction;                    /** Vertical group action for editing the splash screen */
-    TriggerAction                   _openAction;                    /** Trigger action to show the splash screen */
-    TriggerAction                   _closeAction;                   /** Trigger action to manually close the splash screen */
-    TaskAction                      _taskAction;                    /** Task action for showing load progress */
-    QPointer<SplashScreenWidget>    _splashScreenWidget;            /** Splash screen dialog */
-    Alerts                          _alerts;                        /** Alerts that will be displayed on the splash screen widget */
+    bool                                _mayCloseSplashScreenWidget;    /** Whether the user can close the splash screen widget with a close tool button */
+    ProjectMetaAction*                  _projectMetaAction;             /** Shared pointer to project meta action (used by the splash screen widget to display project information) */
+    ToggleAction                        _enabledAction;                 /** Action to setEnabled the splash screen on/off */
+    ImageAction                         _projectImageAction;            /** Image action for the project image */
+    ImageAction                         _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
+    VerticalGroupAction                 _editAction;                    /** Vertical group action for editing the splash screen */
+    TriggerAction                       _openAction;                    /** Trigger action to show the splash screen */
+    TriggerAction                       _closeAction;                   /** Trigger action to manually close the splash screen */
+    TaskAction                          _taskAction;                    /** Task action for showing load progress */
+    QPointer<SplashScreenWidget>        _splashScreenWidget;            /** Splash screen dialog */
+    Alerts                              _alerts;                        /** Alerts that will be displayed on the splash screen widget */
 };
 
 }

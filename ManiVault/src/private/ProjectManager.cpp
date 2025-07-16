@@ -1191,7 +1191,7 @@ QMenu& ProjectManager::getImportDataMenu()
     return _importDataMenu;
 }
 
-QSharedPointer<ProjectMetaAction> ProjectManager::getProjectMetaAction(const QString& projectFilePath)
+ProjectMetaAction* ProjectManager::getProjectMetaAction(const QString& projectFilePath)
 {
 	try {
 		const QString metaJsonFilePath("meta.json");
@@ -1209,7 +1209,7 @@ QSharedPointer<ProjectMetaAction> ProjectManager::getProjectMetaAction(const QSt
 		if (!QFileInfo(extractedMetaJsonFilePath).exists())
 			throw std::runtime_error("Unable to extract meta.json");
 
-		return QSharedPointer<ProjectMetaAction>(new ProjectMetaAction(extractedMetaJsonFilePath));
+		return new ProjectMetaAction(extractedMetaJsonFilePath, Application::current());
 	}
 	catch (std::exception& e)
 	{
