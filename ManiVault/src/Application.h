@@ -124,16 +124,16 @@ public: // Miscellaneous
     static QString getAbout();
 
     /**
-     * Get file path of the project to automatically open upon startup (if set)
-     * @return Startup project file path
+     * Get the startup project file URL
+     * @return Startup project URL (can be empty, in which case no project is opened at startup)
      */
-    QString getStartupProjectFilePath() const;
+    QUrl getStartupProjectUrl() const;
 
     /**
-     * Set file path of the project to automatically open upon startup (if set)
-     * @param startupProjectFilePath Startup project file path
+     * Set startup project file URL to \p startupProjectUrl
+     * @param startupProjectUrl Startup project file URL (can be empty, in which case no project is opened at startup)
      */
-    void setStartupProjectFilePath(const QString& startupProjectFilePath);
+    void setStartupProjectUrl(const QUrl& startupProjectUrl);
 
     /**
      * Get startup project meta action
@@ -242,20 +242,20 @@ signals:
     void coreManagersCreated(CoreInterface* core);
 
 protected:
-    QString                 _id;                              /** Globally unique identifier of the application instance */
-    CoreInterface*          _core;                            /** Pointer to the ManiVault core */
-    const util::Version     _version;                         /** Application version */
-    QSettings               _settings;                        /** Settings */
-    QString                 _serializationTemporaryDirectory; /** Temporary directory for serialization */
-    bool                    _serializationAborted;            /** Whether serialization was aborted */
-    util::Logger            _logger;                          /** Logger instance */
-    gui::TriggerAction*     _exitAction;                      /** Action for exiting the application */
-    QString                 _startupProjectFilePath;          /** File path of the project to automatically open upon startup (if set) */
-    ProjectMetaAction*      _startupProjectMetaAction;        /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    ApplicationStartupTask* _startupTask;                     /** Application startup task */
-    QTemporaryDir           _temporaryDir;                    /** Directory where application temporary files reside */
-    TemporaryDirs           _temporaryDirs;                   /** ManiVault application temporary directories manager */
-    QLockFile               _lockFile;                        /** Lock file is used for fail-safe purging of the temporary directory */
+    QString                     _id;                                /** Globally unique identifier of the application instance */
+    CoreInterface*              _core;                              /** Pointer to the ManiVault core */
+    const util::Version         _version;                           /** Application version */
+    QSettings                   _settings;                          /** Settings */
+    QString                     _serializationTemporaryDirectory;   /** Temporary directory for serialization */
+    bool                        _serializationAborted;              /** Whether serialization was aborted */
+    util::Logger                _logger;                            /** Logger instance */
+    gui::TriggerAction*         _exitAction;                        /** Action for exiting the application */
+    QUrl                        _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
+    ProjectMetaAction*          _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    ApplicationStartupTask*     _startupTask;                       /** Application startup task */
+    QTemporaryDir               _temporaryDir;                      /** Directory where application temporary files reside */
+    TemporaryDirs               _temporaryDirs;                     /** ManiVault application temporary directories manager */
+    QLockFile                   _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
 };
 
 }

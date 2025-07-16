@@ -51,51 +51,45 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
     connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
         setRowCount(0);
 
-        _future = QtConcurrent::mapped(
-            _dsnsAction.getStrings(),
-            [this](const QString& dsn) {
-                return downloadTutorialsFromDsn(dsn);
-		});
+        for (const auto& dsn : _dsnsAction.getStrings()) {
+            const auto dsnIndex = _dsnsAction.getStrings().indexOf(dsn);
 
-        connect(&_watcher, &QFutureWatcher<QByteArray>::finished, [&]() {
-            for (int dsnIndex = 0; dsnIndex < _dsnsAction.getStrings().size(); ++dsnIndex) {
-                try {
-                    const auto jsonData = _future.resultAt<QByteArray>(dsnIndex);
-                    const auto fullJson = json::parse(QString::fromUtf8(jsonData.constData()).toStdString());
+            FileDownloader::downloadToByteArrayAsync(dsn)
+                .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
+	                try {
+	                    const auto fullJson = json::parse(QString::fromUtf8(data).toStdString());
 
-                    if (fullJson.contains("tutorials")) {
-                        validateJson(fullJson["tutorials"].dump(), _dsnsAction.getStrings()[dsnIndex].toStdString(), loadJsonFromResource(":/JSON/TutorialsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
-                    }
-                    else {
-                        throw std::runtime_error("Tutorials key is missing");
-                    }
+	                    if (fullJson.contains("tutorials")) {
+	                        validateJson(fullJson["tutorials"].dump(), dsn.toStdString(), loadJsonFromResource(":/JSON/TutorialsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
+	                    }
+	                    else {
+	                        throw std::runtime_error("Tutorials key is missing");
+	                    }
 
-                    QJsonParseError jsonParseError;
+	                    QJsonParseError jsonParseError;
 
-                    const auto jsonDocument = QJsonDocument::fromJson(jsonData, &jsonParseError);
+	                    const auto jsonDocument = QJsonDocument::fromJson(data, &jsonParseError);
 
-                    if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-                        qCritical() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
-                        continue;
-                    }
+	                    if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+	                        qCritical() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+	                    }
 
-                    for (const auto tutorial : jsonDocument.object()["tutorials"].toArray())
-                        addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
-                }
-                catch (std::exception& e)
-                {
-                    qCritical() << "Unable to add tutorials from DSN:" << e.what();
-                }
-                catch (...)
-                {
-                    qCritical() << "Unable to add tutorials from DSN due to an unhandled exception";
-                }
-            }
-
-            emit populatedFromDsns();
-        });
-
-        _watcher.setFuture(_future);
+	                    for (const auto tutorial : jsonDocument.object()["tutorials"].toArray())
+	                        addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+	                }
+	                catch (std::exception& e)
+	                {
+	                    qCritical() << "Unable to add tutorials from DSN:" << e.what();
+	                }
+	                catch (...)
+	                {
+	                    qCritical() << "Unable to add tutorials from DSN due to an unhandled exception";
+	                }
+				})
+                .onFailed(this, [this, dsn, dsnIndex](const QException& e) {
+					qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
+				});
+        }
 	});
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
@@ -187,37 +181,6 @@ void LearningCenterTutorialsModel::synchronizeWithDsns()
     uniqueDsns.removeDuplicates();
 
     _dsnsAction.setStrings(uniqueDsns);
-}
-
-QByteArray LearningCenterTutorialsModel::downloadTutorialsFromDsn(const QString& dsn)
-{
-    QEventLoop loop;
-
-    QByteArray downloadedData;
-
-    FileDownloader fileDownloader;
-
-    connect(&fileDownloader, &FileDownloader::downloaded, [&]() -> void {
-        try
-        {
-            downloadedData = fileDownloader.downloadedData();
-            loop.quit();
-        }
-        catch (std::exception& e)
-        {
-            exceptionMessageBox("Unable to download tutorials JSON from DSN", e);
-        }
-        catch (...)
-        {
-            exceptionMessageBox("Unable to download tutorials JSON from DSN");
-        }
-    });
-
-    fileDownloader.download(dsn);
-
-    loop.exec();
-
-    return downloadedData;
 }
 
 LearningCenterTutorialsModel::Item::Item(const mv::util::LearningCenterTutorial* tutorial, bool editable /*= false*/) :

@@ -33,24 +33,34 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
     _markdownPage.setWebChannel(channel);
 
     connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this]() -> void {
-        _fileDownloader.download(_markdownUrl);
+        FileDownloader::downloadToByteArrayAsync(_markdownUrl)
+            .then(this, [this](const QByteArray& data) {
+	            try {
+#ifdef MARKDOWN_DIALOG_VERBOSE
+                    qDebug() << _markdownUrl.toString() << "downloaded (" << markdown.size() << "bytes)";
+#endif
+
+                    if (!data.isEmpty())
+                        _markdownDocument.setText(data);
+                    else
+                        _markdownDocument.setText(QString("# Unable to display markdown file\n*%1* not found").arg(_markdownUrl.toString()));
+	            }
+	            catch (std::exception& e)
+	            {
+	                qCritical() << "Unable to display markdown:" << e.what();
+	            }
+	            catch (...)
+	            {
+	                qCritical() << "Unable to display markdown:";
+	            }
+			})
+            .onFailed(this, [this](const QException& e) {
+				qWarning().noquote() << "Download failed for" << _markdownUrl << ":" << e.what();
+			});
     });
 
     _webEngineView.setPage(&_markdownPage);
     _webEngineView.load(QUrl("qrc:/HTML/Markdown"));
-
-    connect(&_fileDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-        const auto markdown = QString(_fileDownloader.downloadedData());
-
-#ifdef MARKDOWN_DIALOG_VERBOSE
-        qDebug() << _markdownUrl.toString() << "downloaded (" << markdown .size() << "bytes)";
-#endif
-
-        if (!markdown.isEmpty())
-            _markdownDocument.setText(markdown);
-        else
-            _markdownDocument.setText(QString("# Unable to display markdown file\n*%1* not found").arg(_markdownUrl.toString()));
-    });
 
     auto layout = new QVBoxLayout();
 

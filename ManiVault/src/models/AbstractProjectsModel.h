@@ -5,8 +5,7 @@
 #pragma once
 
 #include "models/StandardItemModel.h"
-
-#include "util/ProjectsModelProject.h"
+#include "models/ProjectsModelProject.h"
 
 #include <QMap>
 
@@ -27,33 +26,29 @@ public:
 
     /** Model columns */
     enum class Column {
-    	Title,
-        Group,
-        IsGroup,
-        Tags,
-        Date,
-        IconName,
-        Summary,
-        Url,
-        MinimumCoreVersion,
-        RequiredPlugins,
-        MissingPlugins,
+        Title,                  /** Title of the project */
+        LastModified,           /** Last modified date of the project */
+        Downloaded,             /** Whether the project has been downloaded before */
+        Group,                  /** Group title of the project */
+        IsGroup,                /** Whether the item is a project group */
+        Tags,                   /** Tags of the project */
+        Date,                   /** Date of the project */
+        IconName,               /** Icon name of the project */
+        Summary,                /** Summary of the project */
+        Url,                    /** URL of the project */
+        MinimumCoreVersion,     /** Minimum ManiVault application core version */
+        RequiredPlugins,        /** Required plugins for the project */
+        MissingPlugins,         /** Missing plugins for the project */
+        DownloadSize,           /** Download size of the ManiVault project */
+        SystemCompatibility,    /** System compatibility of the project */
+        IsStartup,              /** Whether the project can be opened at application startup */
+        Sha,                    /** SHA-256 cryptographic hash of the project */
 
-        Count
+        Count                   /** Number of columns in the model */
     };
-
-    /** Header strings for several data roles */
-    struct ColumHeaderInfo {
-        QString     _display;   /** Header string for display role */
-        QString     _edit;      /** Header string for edit role */
-        QString     _tooltip;   /** Header string for tooltip role */
-    };
-
-    /** Column name and tooltip */
-    static QMap<Column, ColumHeaderInfo> columnInfo;
 
     /** Base standard model item class for project */
-    class CORE_EXPORT Item : public QStandardItem {
+    class CORE_EXPORT Item : public QStandardItem, public QObject {
     public:
 
         /**
@@ -105,6 +100,86 @@ protected:
 
                 default:
                     break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the download size */
+    class LastModifiedItem final : public Item {
+    public:
+
+        /**
+         * Construct with pointer \p project
+         * @param project Const pointer to project
+         * @param editable Boolean determining whether the item is editable or not
+         */
+        LastModifiedItem(const util::ProjectsModelProject* project, bool editable = false);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Last Modified";
+
+	            case Qt::ToolTipRole:
+	                return "Date and time when the project was last modified";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying whether the project has been downloaded before */
+    class DownloadedItem final : public Item {
+    public:
+
+        /**
+         * Construct with pointer \p project
+         * @param project Const pointer to project
+         * @param editable Boolean determining whether the item is editable or not
+         */
+        DownloadedItem(const util::ProjectsModelProject* project, bool editable = false);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Downloaded";
+
+	            case Qt::ToolTipRole:
+	                return "Whether the project has been downloaded before";
+
+	            default:
+	                break;
             }
 
             return {};
@@ -471,6 +546,154 @@ protected:
         }
     };
 
+    /** Standard model item class for displaying the download size */
+    class DownloadSizeItem final : public Item {
+    public:
+
+        /**
+         * Construct with pointer \p project
+         * @param project Const pointer to project
+         * @param editable Boolean determining whether the item is editable or not
+         */
+        DownloadSizeItem(const util::ProjectsModelProject* project, bool editable = false);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Download Size";
+
+	            case Qt::ToolTipRole:
+	                return "Download Size of the project";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the system compatibility with the project */
+    class SystemCompatibilityItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "System compatibility";
+
+            case Qt::ToolTipRole:
+                return "System compatibility with the project";
+
+            default:
+                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying whether the project is a startup project */
+    class IsStartupItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "IsStartup";
+
+	            case Qt::ToolTipRole:
+	                return "Whether the project can be opened at application startup";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the project SHA */
+    class ShaItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "SHA";
+
+	            case Qt::ToolTipRole:
+	                return "SHA-256 hash of the project";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
     /** Convenience class for combining items in a row */
     class Row final : public QList<QStandardItem*>
     {
@@ -484,6 +707,8 @@ protected:
             QList<QStandardItem*>()
         {
         	append(new TitleItem(project));
+        	append(new LastModifiedItem(project));
+        	append(new DownloadedItem(project));
         	append(new GroupItem(project));
         	append(new IsGroupItem(project));
             append(new TagsItem(project));
@@ -494,6 +719,10 @@ protected:
             append(new MinimumCoreVersionItem(project));
             append(new RequiredPluginsItem(project));
             append(new MissingPluginsItem(project));
+            append(new DownloadSizeItem(project));
+            append(new SystemCompatibilityItem(project));
+            append(new IsStartupItem(project));
+            append(new ShaItem(project));
         }
     };
 
@@ -501,9 +730,10 @@ public:
 
     /**
      * Construct with pointer to \p parent object
+     * @param populationMode Population mode of the model (automatic/manual)
      * @param parent Pointer to parent object
      */
-    AbstractProjectsModel(QObject* parent = nullptr);
+    AbstractProjectsModel(const PopulationMode& populationMode = PopulationMode::Automatic, QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -528,10 +758,10 @@ public:
 
     /**
      * Add \p project
-     * @param project Pointer to project to add
+     * @param project Shared pointer to project to add
      * @param groupTitle Title of the group to which the project should be added
      */
-    void addProject(const util::ProjectsModelProject* project, const QString& groupTitle = "");
+    void addProject(util::ProjectsModelProjectPtr project, const QString& groupTitle = "");
 
     /** Builds a set of all project tags and emits ProjectDatabaseModel::tagsChanged(...) */
     void updateTags();
@@ -557,8 +787,8 @@ signals:
     void tagsChanged(const QSet<QString>& tags);
 
 private:
-    util::ProjectDatabaseProjects   _projects;  /** Model projects */
-    QSet<QString>                   _tags;      /** All tags */
+    util::ProjectDatabaseProjects   _projects;          /** Model projects */
+    QSet<QString>                   _tags;              /** All tags */
 };
 
 }

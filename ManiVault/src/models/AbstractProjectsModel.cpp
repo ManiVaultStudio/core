@@ -13,22 +13,8 @@ using namespace mv::gui;
 
 namespace mv {
 
-QMap<AbstractProjectsModel::Column, AbstractProjectsModel::ColumHeaderInfo> AbstractProjectsModel::columnInfo = QMap<Column, ColumHeaderInfo>({
-    { Column::Title, { "Title" , "Title", "Title" } },
-    { Column::Group, { "Group" , "Group", "Group" } },
-    { Column::IsGroup, { "IsGroup" , "IsGroup", "IsGroup" } },
-    { Column::Tags, { "Tags" , "Tags", "Tags" } },
-    { Column::Date, { "Date" , "Date", "Issue date" } },
-    { Column::IconName, { "Icon Name" , "Icon Name", "Font Awesome icon name" } },
-    { Column::Summary, { "Summary" , "Summary", "Summary (brief description)" } },
-    { Column::Url, { "URL" , "URL", "Project URL" } },
-    { Column::MinimumCoreVersion, { "Min. app core version" , "Min. app core version", "Minimum ManiVault Studio application core version" } },
-    { Column::RequiredPlugins, { "Required plugins" , "Required plugins", "Plugins required to open the project" } },
-    { Column::MissingPlugins, { "Missing plugins" , "Missing plugins", "List of plugins which are missing" } },
-});
-
-AbstractProjectsModel::AbstractProjectsModel(QObject* parent /*= nullptr*/) :
-    StandardItemModel(parent)
+AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
+    StandardItemModel(parent, "Projects", populationMode)
 {
     setColumnCount(static_cast<int>(Column::Count));
 }
@@ -39,6 +25,12 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
     {
         case Column::Title:
             return TitleItem::headerData(orientation, role);
+
+        case Column::LastModified:
+            return LastModifiedItem::headerData(orientation, role);
+
+        case Column::Downloaded:
+            return DownloadedItem::headerData(orientation, role);
 
         case Column::Group:
             return GroupItem::headerData(orientation, role);
@@ -70,6 +62,18 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::MissingPlugins:
             return MissingPluginsItem::headerData(orientation, role);
 
+        case Column::DownloadSize:
+            return DownloadSizeItem::headerData(orientation, role);
+
+        case Column::SystemCompatibility:
+            return SystemCompatibilityItem::headerData(orientation, role);
+
+        case Column::IsStartup:
+            return IsStartupItem::headerData(orientation, role);
+
+        case Column::Sha:
+            return ShaItem::headerData(orientation, role);
+
 		case Column::Count:
             break;
     }
@@ -84,63 +88,74 @@ QSet<QString> AbstractProjectsModel::getTagsSet() const
 
 void AbstractProjectsModel::addProjectGroup(const QString& groupTitle)
 {
-    Q_ASSERT(groupTitle.isEmpty());
+    Q_ASSERT(!groupTitle.isEmpty());
 
     if (groupTitle.isEmpty())
         return;
 
-    auto project = new ProjectsModelProject(groupTitle);
+    auto project = std::make_shared<ProjectsModelProject>(groupTitle);
 
-    appendRow(Row(project));
+    appendRow(Row(project.get()));
     updateTags();
 
-    const_cast<ProjectsModelProject*>(project)->setParent(this);
+    project->setParent(this);
 
     _projects.push_back(project);
 }
 
-void AbstractProjectsModel::addProject(const ProjectsModelProject* project, const QString& groupTitle)
+void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QString& groupTitle)
 {
     Q_ASSERT(project);
 
     if (!project)
         return;
 
-    const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
-        const auto matches = match(index(0, static_cast<std::int32_t>(Column::Group)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
+    const auto duplicateMatches = match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::DisplayRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
-        if (matches.size() == 1)
-            return matches.first();
+    if (duplicateMatches.empty()) {
+        const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
+            const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
 
-        return {};
-    };
+            if (matches.size() == 1)
+                return matches.first().siblingAtColumn(static_cast<std::int32_t>(Column::Title));
 
-    if (!groupTitle.isEmpty()) {
-        const auto existingProjectGroupIndex = findProjectGroupModelIndex();
+            return {};
+        };
 
-        if (existingProjectGroupIndex.isValid()) {
-            if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex))
-                existingProjectGroupItem->appendRow(Row(project));
-        } else {
-            addProjectGroup(groupTitle);
+        if (!groupTitle.isEmpty()) {
+            const auto existingProjectGroupIndex = findProjectGroupModelIndex();
 
-            const auto addedProjectGroupIndex = findProjectGroupModelIndex();
+            if (existingProjectGroupIndex.isValid()) {
+                if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex)) {
+                    existingProjectGroupItem->appendRow(Row(project.get()));
+                }
+            }
+            else {
+                addProjectGroup(groupTitle);
 
-            if (addedProjectGroupIndex.isValid())
-                if (auto addedProjectGroupItem = itemFromIndex(addedProjectGroupIndex))
-                    addedProjectGroupItem->appendRow(Row(project));
+                const auto addedProjectGroupIndex = findProjectGroupModelIndex();
+
+                if (addedProjectGroupIndex.isValid())
+                    if (auto addedProjectGroupItem = itemFromIndex(addedProjectGroupIndex))
+                        addedProjectGroupItem->appendRow(Row(project.get()));
+            }
         }
-    }
-    else
-    {
-        appendRow(Row(project));
-    }
-    
-    updateTags();
+        else
+        {
+            appendRow(Row(project.get()));
+        }
 
-    const_cast<ProjectsModelProject*>(project)->setParent(this);
+        updateTags();
 
-    _projects.push_back(project);
+        project->setParent(this);
+        project->updateMetadata();
+
+        _projects.push_back(project);
+    } else {
+#ifdef _DEBUG
+        qWarning() << "Skipping" << project->getTitle() << "because it already exists";
+#endif
+    }
 }
 
 void AbstractProjectsModel::updateTags()
@@ -177,6 +192,7 @@ const ProjectDatabaseProjects& AbstractProjectsModel::getProjects() const
 AbstractProjectsModel::Item::Item(const mv::util::ProjectsModelProject* project, bool editable /*= false*/) :
     _project(project)
 {
+    setEditable(editable);
 }
 
 const ProjectsModelProject* AbstractProjectsModel::Item::getProject() const
@@ -192,16 +208,77 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
             return getProject()->getTitle();
 
         case Qt::ToolTipRole:
-            return "Title: " + data(Qt::DisplayRole).toString();
+            return QString("%1 (double-click to load)").arg(data(Qt::DisplayRole).toString());
 
 		case Qt::DecorationRole:
-            return StyledIcon(getProject()->getIconName());
+            if (getProject()->isGroup())
+                return StyledIcon("folder");
+
+            return getProject()->isDownloaded() ? StyledIcon(getProject()->getIconName()) : StyledIcon("download");
 
         default:
             break;
     }
 
     return Item::data(role);
+}
+
+AbstractProjectsModel::LastModifiedItem::LastModifiedItem(const util::ProjectsModelProject* project, bool editable) :
+    Item(project, editable)
+{
+    Q_ASSERT(project);
+
+    if (project) {
+        connect(project, &ProjectsModelProject::lastModifiedDetermined, this, [this](const QDateTime& lastModified) {
+            emitDataChanged();
+        });
+    }
+}
+
+QVariant AbstractProjectsModel::LastModifiedItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getProject()->getLastModified();
+
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toDateTime().toString();
+
+	    case Qt::ToolTipRole:
+	        return "Last modified: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+AbstractProjectsModel::DownloadedItem::DownloadedItem(const util::ProjectsModelProject* project, bool editable) :
+    Item(project, editable)
+{
+}
+
+QVariant AbstractProjectsModel::DownloadedItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+            return getProject()->isDownloaded();
+
+	    case Qt::DisplayRole:
+	        return "";
+
+	    case Qt::ToolTipRole:
+	        return data(Qt::EditRole).toBool() ? "Project is downloaded before" : "Not downloaded yet";
+
+	    case Qt::DecorationRole:
+	        return data(Qt::EditRole).toBool() ? StyledIcon("file") : StyledIcon("download");
+
+	    default:
+	        break;
+    }
+
+	return Item::data(role);
 }
 
 QVariant AbstractProjectsModel::GroupItem::data(int role) const
@@ -355,10 +432,10 @@ QVariant AbstractProjectsModel::RequiredPluginsItem::data(int role) const
 	        return getProject()->getRequiredPlugins();
 
 	    case Qt::DisplayRole:
-	        return data(Qt::EditRole).toStringList();
+	        return data(Qt::EditRole).toStringList().join(", ");
 
 	    case Qt::ToolTipRole:
-	        return "Required plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+	        return "Required plugins: " + data(Qt::DisplayRole).toString();
 
 	    default:
 	        break;
@@ -374,10 +451,131 @@ QVariant AbstractProjectsModel::MissingPluginsItem::data(int role) const
 	        return getProject()->getMissingPlugins();
 
 	    case Qt::DisplayRole:
-	        return data(Qt::EditRole).toStringList();
+	        return data(Qt::EditRole).toStringList().join(", ");
 
 	    case Qt::ToolTipRole:
-	        return "Missing plugins: " + data(Qt::DisplayRole).toStringList().join(", ");
+	        return "Missing plugins: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+AbstractProjectsModel::DownloadSizeItem::DownloadSizeItem(const util::ProjectsModelProject* project, bool editable) :
+    Item(project, editable)
+{
+    Q_ASSERT(project);
+
+    if (project) {
+	    connect(project, &ProjectsModelProject::downloadSizeDetermined, this, [this](std::uint64_t size) {
+            emitDataChanged();
+        });
+    }
+}
+
+QVariant AbstractProjectsModel::DownloadSizeItem::data(int role) const
+{
+    switch (role) {
+		case Qt::EditRole:
+            return QVariant::fromValue(getProject()->getDownloadSize());
+
+		case Qt::DisplayRole:
+            return getNoBytesHumanReadable(data(Qt::EditRole).toULongLong());
+
+	    case Qt::ToolTipRole:
+	        return "Download size: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+	return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
+{
+    switch (role) {
+		case Qt::EditRole:
+	        return QVariant::fromValue(HardwareSpec::getSystemCompatibility(getProject()->getMinimumHardwareSpec(), getProject()->getRecommendedHardwareSpec()));
+
+	    case Qt::DisplayRole:
+        {
+            switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
+	            case HardwareSpec::SystemCompatibility::Incompatible:
+	                return "Minimum hardware requirements not met";
+
+	            case HardwareSpec::SystemCompatibility::Minimum:
+	                return "Recommended hardware requirements not met";
+
+	            case HardwareSpec::SystemCompatibility::Compatible:
+	                return "System is compatible";
+
+	            case HardwareSpec::SystemCompatibility::Unknown:
+                    return "No hardware compatibility information available";
+            }
+
+            break;
+        }
+
+        case Qt::ToolTipRole:
+            return QString("<div style='min-width: 400px;'>%1</div>").arg(data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._message);
+
+        case Qt::DecorationRole:
+        {
+	        switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
+				case HardwareSpec::SystemCompatibility::Incompatible:
+                    return StyledIcon("circle-xmark");
+
+                case HardwareSpec::SystemCompatibility::Minimum:
+                    return StyledIcon("circle-exclamation");
+
+                case HardwareSpec::SystemCompatibility::Compatible:
+                    return StyledIcon("circle-check");
+
+		        case HardwareSpec::SystemCompatibility::Unknown:
+                    return StyledIcon("circle-question");
+	        }
+
+            break;
+        }
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::IsStartupItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getProject()->isStartup();
+
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toBool() ? "true" : "false";
+
+	    case Qt::ToolTipRole:
+	        return "IsStartup project: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+	return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::ShaItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+		case Qt::DisplayRole:
+            return getProject()->getSha();
+
+	    case Qt::ToolTipRole:
+	        return "SHA: " + data(Qt::DisplayRole).toString();
 
 	    default:
 	        break;

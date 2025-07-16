@@ -26,7 +26,7 @@
 #include <exception>
 
 #ifdef _DEBUG
-    //#define PROJECT_MANAGER_VERBOSE
+    #define PROJECT_MANAGER_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -48,7 +48,8 @@ ProjectManager::ProjectManager(QObject* parent) :
     _publishAction(nullptr, "Publish"),
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
-    _backToProjectAction(nullptr, "Back to project")
+    _backToProjectAction(nullptr, "Back to project"),
+    _projectsTreeModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -238,7 +239,7 @@ void ProjectManager::initialize()
 
     beginInitialization();
     {
-        _projectsTreeModel.synchronizeWithDsns();
+        _projectsTreeModel.populateFromPluginDsns();
     }
     endInitialization();
 }
@@ -344,6 +345,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
+
+        // FIXME: This is a workaround for the splash screen action to be able to open the project
+        //auto startupProjectMetaAction = getProjectMetaAction(filePath);
+
+        //if (!startupProjectMetaAction.isNull()) {
+        //    if (startupProjectMetaAction->getSplashScreenAction().getEnabledAction().isChecked())
+        //        startupProjectMetaAction->getSplashScreenAction().getOpenAction().trigger();
+        //}
 
         const auto scopedState = ScopedState(this, State::OpeningProject);
 
@@ -537,24 +546,18 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
 void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= false*/)
 {
+#ifdef PROJECT_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << url << targetDirectory << importDataOnly << loadWorkspace;
+#endif
+
     try {
-   //     if (hasProject())
-			//saveProjectAs();
+        if (url.isLocalFile()) {
+            mv::projects().openProject(url.toLocalFile());
+        } else {
+            const auto downloadedProjectFilePath = mv::projects().downloadProject(url, targetDirectory);
 
-        auto* projectDownloader = new FileDownloader(FileDownloader::StorageMode::All, Task::GuiScope::Modal);
-
-        projectDownloader->setTargetDirectory(targetDirectory);
-
-        connect(projectDownloader, &FileDownloader::downloaded, this, [projectDownloader]() -> void {
-            mv::projects().openProject(projectDownloader->getDownloadedFilePath());
-            projectDownloader->deleteLater();
-		});
-
-        connect(projectDownloader, &FileDownloader::aborted, this, [projectDownloader]() -> void {
-            qDebug() << "Download aborted by user";
-		});
-
-        projectDownloader->download(url);
+            mv::projects().openProject(downloadedProjectFilePath);
+        }
 	}
 	catch (std::exception& e)
 	{
@@ -974,6 +977,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
 
             currentProject->getOverrideApplicationStatusBarAction().restoreState();
+            currentProject->getProjectMetaAction().getApplicationVersionAction().setVersion(Application::current()->getVersion());
 
 			/* TODO: Fix plugin status bar action visibility
             currentProject->getStatusBarVisibleAction().restoreState();
@@ -1077,6 +1081,106 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
     return _projectsTreeModel;
 }
 
+QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/, Task* task /*= nullptr*/)
+{
+    try {
+	    const auto fileName                 = QFileInfo(url.toString()).fileName();
+	    const auto existingProjectFilePath  = getDownloadedProjectsDir().filePath(fileName);
+
+        auto shouldDownloadProject = false;
+
+        if (!fileName.isEmpty() && QFile::exists(existingProjectFilePath)) {
+            const auto serverLastModified = FileDownloader::getLastModifiedSync(url);
+
+            QFileInfo existingProjectFile(existingProjectFilePath);
+
+            if (existingProjectFile.exists()) {
+            	const auto localModified = existingProjectFile.lastModified();
+
+            	if (serverLastModified > localModified) {
+            		QMessageBox downloadNewerMessageBox;
+
+            		downloadNewerMessageBox.setWindowIcon(StyledIcon("download"));
+            		downloadNewerMessageBox.setWindowTitle(QString("Newer project available...").arg(fileName));
+            		downloadNewerMessageBox.setText(QString("A newer version of %1 is available on the server. Do you want to download it?").arg(fileName));
+            		downloadNewerMessageBox.setIcon(QMessageBox::Warning);
+
+            		auto yesButton = downloadNewerMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+            		auto noButton = downloadNewerMessageBox.addButton("No", QMessageBox::RejectRole);
+
+            		downloadNewerMessageBox.setDefaultButton(noButton);
+            		downloadNewerMessageBox.exec();
+
+            		if (downloadNewerMessageBox.clickedButton() == yesButton) {
+            			QFile::remove(existingProjectFilePath);
+
+            			shouldDownloadProject = true;
+            		}
+            	}
+            	//else {
+            	//    QMessageBox downloadAgainMessageBox;
+
+            	//    downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
+            	//    downloadAgainMessageBox.setWindowTitle(QString("%1 already exists...").arg(fileName));
+            	//    downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
+            	//    downloadAgainMessageBox.setIcon(QMessageBox::Warning);
+
+            	//    auto yesButton = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+            	//    auto noButton = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
+
+            	//    downloadAgainMessageBox.setDefaultButton(noButton);
+            	//    downloadAgainMessageBox.exec();
+
+            	//    if (downloadAgainMessageBox.clickedButton() == yesButton) {
+            	//        QFile::remove(existingProjectFilePath);
+
+            	//        shouldDownloadProject = true;
+            	//    }
+            	//}
+            }
+            else {
+            	shouldDownloadProject = true;
+            }
+        }
+        else {
+            shouldDownloadProject = true;
+        }
+
+        if (shouldDownloadProject)
+            return FileDownloader::downloadToFileSync(url, targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "", task);
+
+    	return existingProjectFilePath;
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "Unable to download project:" << e.what();
+    }
+    catch (...)
+    {
+        qDebug() << "Unable to download project due to an unhandled exception";
+    }
+
+    return {};
+}
+
+QDir ProjectManager::getDownloadedProjectsDir() const
+{
+    const auto baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+    QDir dir(baseDir);
+
+    const auto subPath  = "Downloads/Projects";
+    const auto fullPath = dir.filePath(subPath);
+
+    QDir resultDir(fullPath);
+
+    if (!resultDir.exists()) {
+        const auto madePath = QDir().mkpath(fullPath);
+    }
+
+    return resultDir;
+}
+
 QMenu& ProjectManager::getNewProjectMenu()
 {
     return _newProjectMenu;
@@ -1085,6 +1189,38 @@ QMenu& ProjectManager::getNewProjectMenu()
 QMenu& ProjectManager::getImportDataMenu()
 {
     return _importDataMenu;
+}
+
+QSharedPointer<ProjectMetaAction> ProjectManager::getProjectMetaAction(const QString& projectFilePath)
+{
+	try {
+		const QString metaJsonFilePath("meta.json");
+
+		QFileInfo extractFileInfo(Application::current()->getTemporaryDir().path(), metaJsonFilePath);
+
+		Archiver archiver;
+
+		QString extractedMetaJsonFilePath = "";
+
+		archiver.extractSingleFile(projectFilePath, metaJsonFilePath, extractFileInfo.absoluteFilePath());
+
+		extractedMetaJsonFilePath = extractFileInfo.absoluteFilePath();
+
+		if (!QFileInfo(extractedMetaJsonFilePath).exists())
+			throw std::runtime_error("Unable to extract meta.json");
+
+		return QSharedPointer<ProjectMetaAction>(new ProjectMetaAction(extractedMetaJsonFilePath));
+	}
+	catch (std::exception& e)
+	{
+		qDebug() << "No meta data available, please re-save the project to solve the problem" << e.what();
+	}
+	catch (...)
+	{
+		qDebug() << "No meta data available due to an unhandled problem, please re-save the project to solve the problem";
+	}
+
+	return {};
 }
 
 void ProjectManager::createProject()

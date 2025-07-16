@@ -131,7 +131,6 @@ private:
     LearningCenterVideosModel  		_videosModel;                   /** Videos model */
 	LearningCenterTutorialsModel    _tutorialsModel;                /** Tutorials model */
     util::Notifications     		_notifications;                 /** Notifications manager */
-	util::FileDownloader            _fileDownloader;                /** For downloading the learning center JSON file */
     mv::TasksListModel              _tasksModel;                    /** Tasks list model */
     mv::TasksFilterModel            _tasksFilterModel;              /** Filter model for the tasks model */
 };

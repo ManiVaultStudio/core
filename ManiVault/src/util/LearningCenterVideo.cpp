@@ -19,13 +19,25 @@ LearningCenterVideo::LearningCenterVideo(const Type& type, const QString& title,
     switch (_type) {
 	    case Type::YouTube:
 	    {
-	        connect(&_thumbnailDownloader, &FileDownloader::downloaded, this, [this]() -> void {
-                setThumbnailImage(QImage::fromData(_thumbnailDownloader.downloadedData()));
-			});
+            const auto thumbnailUrl = getYouTubeThumbnailUrl(_resource);
 
-	        const auto youTubeThumbnailUrl = getYouTubeThumbnailUrl(_resource);
-
-	        _thumbnailDownloader.download(QUrl(youTubeThumbnailUrl));
+            FileDownloader::downloadToByteArrayAsync(thumbnailUrl)
+                .then(this, [this](const QByteArray& data) {
+                try {
+                    setThumbnailImage(QImage::fromData(data));
+                }
+                catch (std::exception& e)
+                {
+                    qCritical() << "Unable to download video thumbnail image:" << e.what();
+                }
+                catch (...)
+                {
+                    qCritical() << "Unable to download video thumbnail image:";
+                }
+                    })
+                .onFailed(this, [this, thumbnailUrl](const QException& e) {
+					qWarning().noquote() << "Download failed for" << thumbnailUrl << ":" << e.what();
+            });
 
 	        break;
 	    }

@@ -95,7 +95,7 @@ QString Project::getFilePath() const
 void Project::setFilePath(const QString& filePath)
 {
     _filePath       = filePath;
-    _startupProject = filePath == Application::current()->getStartupProjectFilePath();
+    _startupProject = filePath == Application::current()->getStartupProjectUrl();
 
     emit filePathChanged(_filePath);
 }

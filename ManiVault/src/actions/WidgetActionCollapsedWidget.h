@@ -58,7 +58,7 @@ public:
 private:
 
     /**
-     * Startup initialization
+     * IsStartup initialization
      * @param action Action to display as a popup widget of a tool button
      */
     void initialize(WidgetAction* action);

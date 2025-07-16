@@ -25,7 +25,14 @@ namespace mv::util {
 
 bool isValidJson(const std::string& input)
 {
-	return nlohmann::json::accept(input);
+    try {
+        [[maybe_unused]]  const auto result = json::parse(input);
+        return true;
+    }
+    catch (const nlohmann::json::parse_error& e) {
+        qCritical() << "JSON parse error at byte " << e.byte << ": " << e.what();
+        return false;
+    }
 }
 
 std::string loadJsonFromResource(const std::string& resourcePath) {
@@ -54,12 +61,6 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
             throw std::runtime_error("Schema content is not properly JSON formatted");
 
         nlohmann::json jsonDocument = nlohmann::json::parse(jsonString), jsonSchemaDocument = nlohmann::json::parse(jsonSchemaString);
-
-        //if (!valijson::utils::loadDocument(jsonString, jsonDocument))
-        //    throw std::runtime_error("Failed to parse JSON content document");
-
-        //if (!valijson::utils::loadDocument(jsonSchemaString, jsonSchemaDocument))
-        //    throw std::runtime_error("Failed to parse JSON schema document");
 
         valijson::Schema schema;
         valijson::adapters::NlohmannJsonAdapter schemaAdapter(jsonSchemaDocument);
@@ -91,15 +92,10 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
                 }
                 std::cerr << std::endl;
             }
-
-            //valijson::ValidationResults::Error error;
-
-            //while (results.popError(error))
-            //    qCritical() << "  - " << error.description;
         }
     }
     catch (const std::exception& e) {
-        qCritical() << "Unable to validate JSON: " << e.what() << "\n";
+        qCritical() << "Unable to validate JSON at: " << jsonLocation << e.what() << "\n";
     }
 }
 

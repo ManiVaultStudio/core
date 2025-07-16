@@ -28,12 +28,33 @@ class CORE_EXPORT StandardItemModel : public QStandardItemModel, public util::Se
 
 public:
 
+    /** Model population modes */
+    enum class PopulationMode
+    {
+        Automatic,              /** Automatically populate the model from the Data Source Names (DSNs) */
+        AutomaticSynchronous,   /** Automatically populate the model from the DSNs in a synchronous manner */
+        Manual                  /** Manually populate the model from a JSON file or byte array */
+    };
+
     /**
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      * @param title Title of the model
+     * @param populationMode Population mode of the model (automatic/manual)
      */
-    StandardItemModel(QObject* parent = nullptr, const QString& title = "StandardItemModel");
+    StandardItemModel(QObject* parent = nullptr, const QString& title = "StandardItemModel", const PopulationMode& populationMode = PopulationMode::Automatic);
+
+    /**
+     * Get the population mode of the model
+     * @return Population mode (automatic/manual) of the model
+     */
+    PopulationMode getPopulationMode() const;
+
+    /**
+     * Set the population mode of the model to \p populationMode
+     * @param populationMode Population mode (automatic/manual) of the model
+     */
+    void setPopulationMode(const PopulationMode& populationMode);
 
 public: // Serialization
 
@@ -55,7 +76,16 @@ public: // Action getters
     
     const gui::NumberOfRowsAction& getNumberOfRowsAction() const { return _numberOfRowsAction; }
 
+signals:
+
+    /**
+     * Signals that the population mode changed to \p populationMode
+     * @param populationMode New population mode of the model
+     */
+    void populationModeChanged(const PopulationMode& populationMode);
+
 private:
+    PopulationMode              _populationMode;        /** Population mode of the model */
     gui::NumberOfRowsAction     _numberOfRowsAction;    /** String action for displaying the number of rows */
 };
 

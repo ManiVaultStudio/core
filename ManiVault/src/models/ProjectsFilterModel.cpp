@@ -27,6 +27,7 @@ ProjectsFilterModel::ProjectsFilterModel(QObject* parent /*= nullptr*/) :
     _excludeTagsFilterAction(this, "Exclude tags filter"),
     _targetAppVersionAction(this, "App version"),
     _filterLoadableOnlyAction(this, "Loadable only", true),
+    _filterStartupOnlyAction(this, "Startup only", false),
     _filterGroupAction(this, "Filter group")
 {
     setDynamicSortFilter(true);
@@ -50,6 +51,7 @@ ProjectsFilterModel::ProjectsFilterModel(QObject* parent /*= nullptr*/) :
     connect(&_excludeTagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &ProjectsFilterModel::invalidate);
     connect(&_targetAppVersionAction, &VersionAction::versionChanged, this, &ProjectsFilterModel::invalidate);
     connect(&_filterLoadableOnlyAction, &ToggleAction::toggled, this, &ProjectsFilterModel::invalidate);
+    connect(&_filterStartupOnlyAction, &ToggleAction::toggled, this, &ProjectsFilterModel::invalidate);
 
     _filterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
@@ -63,48 +65,54 @@ bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
 {
     const auto index = sourceModel()->index(row, 0, parent);
 
-    if (!index.isValid())
-        return true;
+	if (!index.isValid())
+        return false;
+
+    const auto isGroup = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::IsGroup)).data(Qt::EditRole).toBool();
 
     if (filterRegularExpression().isValid()) {
-        const auto key = sourceModel()->data(index.siblingAtColumn(filterKeyColumn()), filterRole()).toString();
+        const auto key = index.siblingAtColumn(filterKeyColumn()).data(filterRole()).toString();
 
-        if (!key.contains(filterRegularExpression()))
+        if (!key.contains(filterRegularExpression())) {
+            if (isGroup && hasAcceptedChildren(index))
+                return true;
+
             return false;
+        }
     }
 
-    const auto tagsList         = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::Tags)).data(Qt::EditRole).toStringList();
-    const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
+    if (!isGroup) {
+        const auto tagsList         = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::Tags)).data(Qt::EditRole).toStringList();
+        const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
 
-    if (_tagsFilterAction.hasOptions()) {
-        auto matchTags = false;
+        if (_tagsFilterAction.hasOptions()) {
+            bool matchTags = std::any_of(tagsList.begin(), tagsList.end(), [&](const QString& tag) {
+                return filterTagsList.contains(tag);
+            });
 
-        for (const auto& tag : tagsList) {
-            if (!filterTagsList.contains(tag))
-                continue;
-
-            matchTags = true;
-
-            break;
+            if (!matchTags)
+                return false;
         }
 
-        if (!matchTags)
+        const auto projectMinimumCoreVersion = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MinimumCoreVersion)).data(Qt::EditRole).value<Version>();
+
+    	const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0);
+
+    	if (targetAppVersion > projectMinimumCoreVersion)
             return false;
+
+        const auto missingPlugins = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MissingPlugins)).data(Qt::EditRole).toStringList();
+
+        if (_filterLoadableOnlyAction.isChecked() && !missingPlugins.isEmpty())
+            return false;
+
+        const auto isStartup = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::IsStartup)).data(Qt::EditRole).toBool();
+
+        if (_filterStartupOnlyAction.isChecked() && !isStartup)
+            return false;
+    } else {
+        return hasAcceptedChildren(index);
     }
-
-    const auto projectMinimumCoreVersion  = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MinimumCoreVersion)).data(Qt::EditRole).value<Version>();
-
-    const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0) ;
-
-    if (targetAppVersion > projectMinimumCoreVersion)
-        return false;
-
-    const auto missingPlugins = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MissingPlugins)).data(Qt::EditRole).toStringList();
-
-    if (_filterLoadableOnlyAction.isChecked() && !missingPlugins.isEmpty())
-        return false;
-
-    return true;
 }
 
 void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
@@ -131,6 +139,21 @@ void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
 bool ProjectsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     return lhs.data().toString() < rhs.data().toString();
+}
+
+bool ProjectsFilterModel::hasAcceptedChildren(const QModelIndex& parent) const
+{
+    const auto model    = sourceModel();
+    const auto rowCount = model->rowCount(parent);
+
+    for (int i = 0; i < rowCount; ++i) {
+        const auto child = model->index(i, 0, parent);
+
+        if (filterAcceptsRow(i, parent) || hasAcceptedChildren(child))
+            return true;
+    }
+
+    return false;
 }
 
 void ProjectsFilterModel::fromVariantMap(const QVariantMap& variantMap)

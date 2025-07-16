@@ -556,7 +556,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/StyledIconEngine.h
     src/util/Badge.h
     src/util/ColorScheme.h
-    src/util/ProjectsModelProject.h
     src/util/JSON.h
     src/util/Script.h
 )
@@ -611,7 +610,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/StyledIconEngine.cpp
     src/util/Badge.cpp
     src/util/ColorScheme.cpp
-    src/util/ProjectsModelProject.cpp
     src/util/JSON.cpp
     src/util/Script.cpp
 )
@@ -626,6 +624,29 @@ endif()
 set(PUBLIC_UTIL_FILES
     ${PUBLIC_UTIL_HEADERS}    
     ${PUBLIC_UTIL_SOURCES}
+)
+
+set(PUBLIC_HARDWARE_SPEC_UTIL_HEADERS
+	src/util/HardwareComponentSpec.h
+	src/util/DisplayComponentSpec.h
+	src/util/CpuComponentSpec.h
+	src/util/RamComponentSpec.h
+	src/util/StorageComponentSpec.h
+	src/util/HardwareSpec.h
+)
+
+set(PUBLIC_HARDWARE_SPEC_UTIL_SOURCES
+	src/util/HardwareComponentSpec.cpp
+	src/util/DisplayComponentSpec.cpp
+	src/util/CpuComponentSpec.cpp
+	src/util/RamComponentSpec.cpp
+	src/util/StorageComponentSpec.cpp
+	src/util/HardwareSpec.cpp
+)
+
+set(PUBLIC_HARDWARE_SPEC_UTIL_FILES
+    ${PUBLIC_HARDWARE_SPEC_UTIL_HEADERS}    
+    ${PUBLIC_HARDWARE_SPEC_UTIL_SOURCES}
 )
 
 set(PUBLIC_APPLICATION_HEADERS
@@ -965,17 +986,36 @@ set(PUBLIC_PROJECTS_MODEL_HEADERS
     src/models/AbstractProjectsModel.h
     src/models/ProjectsTreeModel.h
 	src/models/ProjectsFilterModel.h
+	src/models/ProjectsModelProject.h
 )
 
 set(PUBLIC_PROJECTS_MODEL_SOURCES
     src/models/AbstractProjectsModel.cpp
     src/models/ProjectsTreeModel.cpp
 	src/models/ProjectsFilterModel.cpp
+	src/models/ProjectsModelProject.cpp
 )
 
 set(PUBLIC_PROJECTS_MODEL_FILES
     ${PUBLIC_PROJECTS_MODEL_HEADERS}
     ${PUBLIC_PROJECTS_MODEL_SOURCES}
+)
+
+set(PUBLIC_HARDWARE_SPEC_MODEL_HEADERS
+    src/models/AbstractHardwareSpecModel.h
+    src/models/HardwareSpecTreeModel.h
+	src/models/HardwareSpecFilterModel.h
+)
+
+set(PUBLIC_HARDWARE_SPEC_MODEL_SOURCES
+    src/models/AbstractHardwareSpecModel.cpp
+    src/models/HardwareSpecTreeModel.cpp
+	src/models/HardwareSpecFilterModel.cpp
+)
+
+set(PUBLIC_HARDWARE_SPEC_MODEL_FILES
+    ${PUBLIC_HARDWARE_SPEC_MODEL_HEADERS}
+    ${PUBLIC_HARDWARE_SPEC_MODEL_SOURCES}
 )
 
 set(PUBLIC_COLOR_SCHEMES_MODEL_HEADERS
@@ -1112,6 +1152,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_RENDERERS_HEADERS}
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
+    ${PUBLIC_HARDWARE_SPEC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
     ${PUBLIC_PROJECT_HEADERS}
     ${PUBLIC_WORKSPACE_HEADERS}
@@ -1132,6 +1173,7 @@ set(PUBLIC_HEADERS
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS}
 	${PUBLIC_PROJECTS_MODEL_HEADERS}
+	${PUBLIC_HARDWARE_SPEC_MODEL_HEADERS}
     ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
     ${PUBLIC_SCRIPTS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
@@ -1161,6 +1203,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_RENDERERS_SOURCES}
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
+    ${PUBLIC_HARDWARE_SPEC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
     ${PUBLIC_PROJECT_SOURCES}
     ${PUBLIC_WORKSPACE_SOURCES}
@@ -1181,6 +1224,7 @@ set(PUBLIC_SOURCES
 	${PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES}
 	${PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES}
 	${PUBLIC_PROJECTS_MODEL_SOURCES}
+	${PUBLIC_HARDWARE_SPEC_MODEL_SOURCES}
     ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
     ${PUBLIC_SCRIPTS_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
@@ -1223,6 +1267,7 @@ source_group(Widgets\\Internal FILES ${PUBLIC_WIDGETS_INTERNAL_FILES})
 source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})
+source_group(Util\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_UTIL_FILES})
 source_group(Application FILES ${PUBLIC_APPLICATION_FILES} ${PUBLIC_GLOBALS_HEADERS} ${PUBLIC_VERSION_HEADERS})
 source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})
@@ -1245,6 +1290,7 @@ source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TU
 source_group(Models\\Projects FILES ${PUBLIC_PROJECTS_MODEL_FILES})
 source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(Models\\Scripts FILES ${PUBLIC_SCRIPTS_MODEL_FILES})
+source_group(Models\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})

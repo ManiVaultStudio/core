@@ -1,44 +1,154 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "title": { "type": "string" },
-	  "group": { "type": "string" },
-      "url": { "type": "string" },
-      "summary": { "type": "string" },
-      "requiredPlugins": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "name": { "type": "string" },
-            "repoName": { "type": "string" },
-            "version": { "type": "string" }
-          },
-          "required": ["name", "repoName", "version"],
-          "additionalProperties": false
-        }
-      },
-      "coreVersion": {
-        "type": "object",
-        "properties": {
-          "major": { "type": "integer" },
-          "minor": { "type": "integer" },
-          "patch": { "type": "integer" },
-          "suffix": { "type": "string" }
-        },
-        "required": ["major", "minor", "patch", "suffix"],
-        "additionalProperties": false
-      },
-      "tags": {
-        "type": "array",
-        "items": { "type": "string" }
-      },
-      "date": { "type": "string" }
-    },
-    "required": ["title", "url", "summary", "requiredPlugins", "coreVersion", "tags", "date"],
-    "additionalProperties": true
-  }
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"definitions": {
+		"hardwareSpecs": {
+			"type": "object",
+			"properties": {
+				"cpu": {
+					"type": "object",
+					"properties": {
+						"speed": {
+							"type": "integer"
+						},
+						"cores": {
+							"type": "integer"
+						}
+					}
+				},
+				"ram": {
+					"type": "string",
+					"pattern": "^(\\d+)([KMGTP]i?B)$"
+				},
+				"storage": {
+					"type": "string",
+					"pattern": "^(\\d+)([KMGTP]i?B)$"
+				},
+				"gpu": {
+					"type": "object",
+					"properties": {
+						"ram": {
+							"type": "string",
+							"pattern": "^(\\d+)([KMGTP]i?B)$"
+						}
+					}
+				},
+				"display": {
+					"type": "object",
+					"properties": {
+						"resolution": {
+							"type": "object",
+							"properties": {
+								"horizontal": {
+									"type": "integer"
+								},
+								"vertical": {
+									"type": "integer"
+								}
+							}
+						}
+					}
+				}
+			},
+			"additionalProperties": false
+		}
+	},
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"title": {
+				"type": "string"
+			},
+			"group": {
+				"type": "string"
+			},
+			"startup": {
+				"type": "boolean"
+			},
+			"url": {
+				"type": "string"
+			},
+			"summary": {
+				"type": "string"
+			},
+			"requiredPlugins": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"repoName": {
+							"type": "string"
+						},
+						"version": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"name",
+						"repoName",
+						"version"
+					],
+					"additionalProperties": false
+				}
+			},
+			"coreVersion": {
+				"type": "object",
+				"properties": {
+					"major": {
+						"type": "integer"
+					},
+					"minor": {
+						"type": "integer"
+					},
+					"patch": {
+						"type": "integer"
+					},
+					"suffix": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"major",
+					"minor",
+					"patch",
+					"suffix"
+				],
+				"additionalProperties": false
+			},
+			"tags": {
+				"type": "array",
+				"items": {
+					"type": "string"
+				}
+			},
+			"date": {
+				"type": "string"
+			},
+			"size": {
+				"type": "string",
+				"pattern": "^(\\d+)([KMGTP]i?B)$"
+			},
+			"hardwareRequirements": {
+				"type": "object",
+				"properties": {
+					"minimum": { "$ref": "#/definitions/hardwareSpecs" },
+					"recommended": { "$ref": "#/definitions/hardwareSpecs" }
+				},
+				"additionalProperties": false
+			}
+		},
+		"required": [
+			"title",
+			"url",
+			"summary",
+			"requiredPlugins",
+			"coreVersion",
+			"tags",
+			"date"
+		],
+		"additionalProperties": true
+	}
 }

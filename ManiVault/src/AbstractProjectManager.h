@@ -13,11 +13,13 @@
 #include "actions/RecentFilesAction.h"
 #include "actions/ToggleAction.h"
 
+#include "models/ProjectsTreeModel.h"
+
+#include "util/FileDownloader.h"
+
 #include <QObject>
 #include <QMenu>
 #include <QTemporaryDir>
-
-#include "models/ProjectsTreeModel.h"
 
 namespace mv {
 
@@ -112,7 +114,8 @@ public:
     AbstractProjectManager(QObject* parent) :
         AbstractManager(parent, "Project"),
         _state(State::Idle),
-        _projectSerializationTask(this, "Project serialization")
+        _projectSerializationTask(this, "Project serialization"),
+		_projectDownloadTask(this, "Project Download")
     {
     }
 
@@ -194,6 +197,21 @@ public:
      * @return Reference to the projects tree model
      */
     virtual const ProjectsTreeModel& getProjectsTreeModel() const = 0;
+
+    /**
+     * Download project from \p url and store it in the default downloaded projects directory
+     * @param url URL of the project to download
+     * @param targetDirectory Directory where the project is stored (default is empty, which means the default downloaded projects directory)
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
+     * @return File path of the downloaded project, empty string if download failed
+     */
+    virtual QString downloadProject(QUrl url, const QString& targetDirectory = "", Task* task = nullptr) = 0;
+
+    /**
+     * Get the directory where downloaded projects are stored
+     * @return Directory where downloaded projects are stored 
+     */
+    virtual QDir getDownloadedProjectsDir() const = 0;
 
 public: // Temporary directories
 
@@ -330,6 +348,33 @@ public: // State
         return _state == State::PublishingProject;
     }
 
+public: // Miscellaneous
+
+    /**
+     * Get project meta action for the project with \p projectFilePath
+     * @param projectFilePath File path of the project for which to get the meta action
+     * @return Shared pointer to the project meta action, or nullptr if no action is found
+     */
+    virtual QSharedPointer<ProjectMetaAction> getProjectMetaAction(const QString& projectFilePath) = 0;
+
+    /**
+     * Get the task for project download
+     * @return Reference to the project download task
+     */
+    const Task& getProjectDownloadTask() const {
+        return _projectDownloadTask;
+    }
+
+protected:
+
+    /**
+     * Get the task for project download
+     * @return Reference to the project download task
+     */
+    Task& getProjectDownloadTask() {
+        return _projectDownloadTask;
+    }
+
 public: // Action getters
 
     virtual gui::TriggerAction& getNewBlankProjectAction() = 0;
@@ -425,6 +470,7 @@ signals:
 private:
     State                               _state;                         /** Determines the state of the project manager */
     ProjectSerializationTask            _projectSerializationTask;      /** Task for project serialization */
+    Task                                _projectDownloadTask;           /** Progress reporting project downloading */
     QMap<TemporaryDirType, QString>     _temporaryDirPaths;             /** Temporary directories for file open/save etc. */
 };
 

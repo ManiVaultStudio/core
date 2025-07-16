@@ -14,12 +14,28 @@ namespace mv
 using namespace util;
 using namespace gui;
 
-StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/, const QString& title /*= "StandardItemModel"*/) :
+StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/, const QString& title /*= "StandardItemModel"*/, const PopulationMode& populationMode /*= PopulationMode::Automatic*/) :
     QStandardItemModel(parent),
     Serializable(title),
+    _populationMode(populationMode),
     _numberOfRowsAction(nullptr, "Number of rows")
 {
     _numberOfRowsAction.initialize(this);
+}
+
+StandardItemModel::PopulationMode StandardItemModel::getPopulationMode() const
+{
+	return _populationMode;
+}
+
+void StandardItemModel::setPopulationMode(const PopulationMode& populationMode)
+{
+    if (_populationMode == populationMode)
+        return;
+
+    _populationMode = populationMode;
+
+    emit populationModeChanged(_populationMode);
 }
 
 void StandardItemModel::fromVariantMap(const QVariantMap& variantMap)

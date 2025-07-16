@@ -138,6 +138,21 @@ public:
      */
     const ProjectsTreeModel& getProjectsTreeModel() const override;
 
+    /**
+     * Download project from \p url and store it in the default downloaded projects directory
+     * @param url URL of the project to download
+     * @param targetDirectory Directory where the project is stored (default is empty, which means the default downloaded projects directory)
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
+     * @return File path of the downloaded project, empty string if download failed
+     */
+    QString downloadProject(QUrl url, const QString& targetDirectory = "", Task* task = nullptr) override;
+
+    /**
+     * Get the directory where downloaded projects are stored
+     * @return Directory where downloaded projects are stored
+     */
+    QDir getDownloadedProjectsDir() const override;
+
 public: // Menus
 
     /**
@@ -151,6 +166,15 @@ public: // Menus
      * @return Pointer to import data menu
      */
     QMenu& getImportDataMenu() override;
+
+public: // Miscellaneous
+
+    /**
+     * Get project meta action for the project with \p projectFilePath
+     * @param projectFilePath File path of the project for which to get the meta action
+     * @return Shared pointer to the project meta action, or nullptr if no action is found
+     */
+    QSharedPointer<ProjectMetaAction> getProjectMetaAction(const QString& projectFilePath) override; ;
 
 private:
 

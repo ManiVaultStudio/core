@@ -5,15 +5,9 @@
 #pragma once
 
 #include "models/AbstractProjectsModel.h"
-
-#include "util/ProjectsModelProject.h"
+#include "models/ProjectsModelProject.h"
 
 #include "actions/StringsAction.h"
-
-#include <QFuture>
-#include <QFutureWatcher>
-
-#include <QMap>
 
 namespace mv {
 
@@ -32,21 +26,30 @@ public:
 
     /**
      * Construct with pointer to \p parent object
+     * @param mode Mode of the model (automatic/manual)
      * @param parent Pointer to parent object
      */
-    ProjectsTreeModel(QObject* parent = nullptr);
+    ProjectsTreeModel(const PopulationMode& mode = PopulationMode::Automatic, QObject* parent = nullptr);
 
-    /** Synchronize the model with the data source names */
-    void synchronizeWithDsns();
+    /** Synchronize the model with the content of all Data Source Names (DSN) */
+    void populateFromDsns();
 
-private:
+    /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
+    void populateFromPluginDsns();
 
     /**
-     * Download projects from \p dsn
-     * @param dsn Projects Data Source Name (DSN)
-     * @return Downloaded data
+     * Populate the model from \p jsonByteArray
+     * @param jsonByteArray JSON content as a byte array containing the projects data
+     * @param dsnIndex Index of the Data Source Name (DSN) from which the JSON content was downloaded
+     * @param jsonLocation Location of the JSON content, e.g., URL or file path
      */
-    static QByteArray downloadProjectsFromDsn(const QString& dsn);
+    void populateFromJsonByteArray(const QByteArray& jsonByteArray, std::int32_t dsnIndex, const QString& jsonLocation);
+
+    /**
+     * Populate the model from a JSON file at \p filePath
+     * @param filePath Path to the JSON file containing the projects data
+     */
+    void populateFromJsonFile(const QString& filePath);
 
 public: // Action getters
     
@@ -54,15 +57,8 @@ public: // Action getters
 
     const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
 
-signals:
-
-    /** Signals that the model was populated from one or more source DSNs */
-    void populatedFromDsns();
-
 private:
-    gui::StringsAction              _dsnsAction;    /** Data source names action */
-    QFuture<QByteArray>             _future;        /** Future for downloading projects */
-    QFutureWatcher<QByteArray>      _watcher;       /** Future watcher for downloading projects */
+    gui::StringsAction      _dsnsAction;    /** Data source names action */
 };
 
 }

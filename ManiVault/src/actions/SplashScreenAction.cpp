@@ -132,8 +132,18 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
 
     connect(&Application::current()->getStartupTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+        if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
+            return;
+
         if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
             closeSplashScreenWidget();
+    });
+
+    connect(&mv::projects().getProjectSerializationTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+        if (previousStatus == Task::Status::Running && status == Task::Status::Finished)
+            QTimer::singleShot(2500, parentWidget(), [this]() -> void {
+	            closeSplashScreenWidget();
+        });
     });
 }
 

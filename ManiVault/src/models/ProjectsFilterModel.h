@@ -53,6 +53,15 @@ public:
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
+private:
+
+    /**
+     * Get whether the parent has accepted children
+     * @param parent Parent model index
+     * @return Boolean indicating whether the parent has accepted children
+     */
+    bool hasAcceptedChildren(const QModelIndex& parent) const;
+
 public: // Serialization
 
     /**
@@ -73,6 +82,7 @@ public: // Action getters
     gui::OptionsAction& getExcludeTagsFilterAction() { return _excludeTagsFilterAction; }
     gui::VersionAction& getTargetAppVersionAction() { return _targetAppVersionAction; }
 	gui::ToggleAction& getFilterLoadableOnlyAction() { return _filterLoadableOnlyAction; }
+	gui::ToggleAction& getFilterStartupOnlyAction() { return _filterStartupOnlyAction; }
 	gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
@@ -81,6 +91,7 @@ private:
     gui::OptionsAction          _excludeTagsFilterAction;       /** Filter out based on tag(s) */
     gui::VersionAction          _targetAppVersionAction;        /** Target app minimum version filter action */
     gui::ToggleAction           _filterLoadableOnlyAction;      /** Filter out projects that are not loadable */
+    gui::ToggleAction           _filterStartupOnlyAction;       /** Filter out projects that are not startup projects */
     gui::VerticalGroupAction    _filterGroupAction;             /** Groups the filter text, filter settings and minimum version settings */
 };
 
