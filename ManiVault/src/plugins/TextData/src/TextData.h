@@ -139,46 +139,32 @@ public:
         return text;
     }
 
+public: // Data accession
+
+    size_t getNumRows() const;
+    size_t getNumColumns() const;
+
     /**
      * Determine if a column exists with the given header name
      * @return Whether a column with the given header name exists
      */
-    bool hasColumn(QString columnName) const
-    {
-        return getRawData<TextData>()->hasColumn(columnName);
-    }
+    bool hasColumn(QString columnName) const;
 
     /**
      * Get a column by the name of its header
      * @return The column of text data associated with the given header name
      */
-    const std::vector<QString>& getColumn(QString columnName) const
-    {
-        return getRawData<TextData>()->getColumn(columnName);
-    }
+    const std::vector<QString>& getColumn(QString columnName) const;
 
     /**
      * Add a column with a given header name to the dataset
      */
-    void addColumn(QString columnName, std::vector<QString>& columnData)
-    {
-        getRawData<TextData>()->addColumn(columnName, columnData);
-    }
+    void addColumn(QString columnName, std::vector<QString>& columnData);
 
-    size_t getNumRows() const
-    {
-        return getRawData<TextData>()->getNumRows();
-    }
 
-    size_t getNumColumns() const
-    {
-        return getRawData<TextData>()->getNumColumns();
-    }
+    const std::vector<QString>& getColumnNames() const;
 
-    const std::vector<QString>& getColumnNames() const
-    {
-        return getRawData<TextData>()->getColumnNames();
-    }
+public: // Subsetting
 
     /**
      * Create subset from the current selection and specify where the subset will be placed in the data hierarchy

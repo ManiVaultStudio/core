@@ -75,6 +75,44 @@ void Text::init()
     _infoAction = new InfoAction(this, *this);
 }
 
+/* -------------------------------------------------------------------------- */
+/*                               Data Accession                               */
+/* -------------------------------------------------------------------------- */
+
+size_t Text::getNumRows() const
+{
+    return getRawData<TextData>()->getNumRows();
+}
+
+size_t Text::getNumColumns() const
+{
+    return getRawData<TextData>()->getNumColumns();
+}
+
+bool Text::hasColumn(QString columnName) const
+{
+    return getRawData<TextData>()->hasColumn(columnName);
+}
+
+const std::vector<QString>& Text::getColumn(QString columnName) const
+{
+    return getRawData<TextData>()->getColumn(columnName);
+}
+
+void Text::addColumn(QString columnName, std::vector<QString>& columnData)
+{
+    getRawData<TextData>()->addColumn(columnName, columnData);
+}
+
+const std::vector<QString>& Text::getColumnNames() const
+{
+    return getRawData<TextData>()->getColumnNames();
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 Selection                                  */
+/* -------------------------------------------------------------------------- */
+
 std::vector<std::uint32_t>& Text::getSelectionIndices()
 {
     return getSelection<Text>()->indices;
@@ -116,6 +154,10 @@ void Text::selectNone()
 void Text::selectInvert()
 {
 }
+
+/* -------------------------------------------------------------------------- */
+/*                               Serialization                                */
+/* -------------------------------------------------------------------------- */
 
 void Text::fromVariantMap(const QVariantMap& variantMap)
 {
