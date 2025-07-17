@@ -37,7 +37,7 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
             .then(this, [this](const QByteArray& data) {
 	            try {
 #ifdef MARKDOWN_DIALOG_VERBOSE
-                    qDebug() << _markdownUrl.toString() << "downloaded (" << markdown.size() << "bytes)";
+                    qDebug() << _markdownUrl.toString() << "downloaded (" << data.size() << "bytes)";
 #endif
 
                     if (!data.isEmpty())
