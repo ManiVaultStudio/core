@@ -39,29 +39,40 @@ void ProjectsMenu::populate()
 {
     clear();
 
+    const auto addProject = [this](QMenu* menu, const ProjectsModelProject* project) -> void {
+        auto loadProjectAction = new TriggerAction(this, project->getTitle());
+
+        connect(loadProjectAction, &TriggerAction::triggered, this, [project]() {
+            mv::projects().openProject(project->getUrl());
+        });
+
+        menu->addAction(loadProjectAction);
+    };
+
     for (int rowIndex = 0; rowIndex < _projectsFilterModel.rowCount(); rowIndex++) {
-        const auto sourceModelIndex = _projectsFilterModel.mapToSource(_projectsFilterModel.index(rowIndex, 0));
+        const auto filterModelIndex = _projectsFilterModel.index(rowIndex, 0);
+        const auto sourceModelIndex = _projectsFilterModel.mapToSource(filterModelIndex);
 
         if (const auto project = mv::projects().getProjectsTreeModel().getProject(sourceModelIndex)) {
             if (mv::projects().hasProject()) {
                 if (QFileInfo(mv::projects().getCurrentProject()->getFilePath()).completeBaseName() == project->getTitle())
-				continue;
+					continue;
             }
 
             if (project->isGroup()) {
                 auto projectGroupMenu = new QMenu(project->getTitle());
 
+                for (int childRowIndex = 0; childRowIndex < mv::projects().getProjectsTreeModel().rowCount(sourceModelIndex); childRowIndex++) {
+                    const auto childModelIndex = mv::projects().getProjectsTreeModel().index(childRowIndex, 0, sourceModelIndex);
+
+                    if (const auto childProject = mv::projects().getProjectsTreeModel().getProject(childModelIndex))
+						addProject(projectGroupMenu, childProject);
+                }
+
                 addMenu(projectGroupMenu);
             } else {
-                auto groupAction = new TriggerAction(this, project->getTitle());
-
-                connect(groupAction, &TriggerAction::triggered, this, [project]() {
-                    mv::projects().openProject(project->getUrl());
-                });
-
-                addAction(groupAction);
+                addProject(this, project);
             }
-
         }
     }
 }

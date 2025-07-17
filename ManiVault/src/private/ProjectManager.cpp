@@ -25,6 +25,8 @@
 
 #include <exception>
 
+#include "Task.h"
+
 #ifdef _DEBUG
     #define PROJECT_MANAGER_VERBOSE
 #endif
@@ -1147,7 +1149,7 @@ QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory
         }
 
         if (shouldDownloadProject)
-            return FileDownloader::downloadToFileSync(url, targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "", task);
+            return FileDownloader::downloadToFileSync(url, targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "", task ? task : &getProjectDownloadTask());
 
     	return existingProjectFilePath;
     }
