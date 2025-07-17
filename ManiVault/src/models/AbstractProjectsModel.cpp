@@ -502,6 +502,9 @@ QVariant AbstractProjectsModel::DownloadSizeItem::data(int role) const
 
 QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
 {
+    static constexpr auto notCompatibleColor    = QColor(255, 70, 70);
+    static constexpr auto notRecommendedColor   = QColor(255, 127, 39);
+
     switch (role) {
 		case Qt::EditRole:
 	        return QVariant::fromValue(HardwareSpec::getSystemCompatibility(getProject()->getMinimumHardwareSpec(), getProject()->getRecommendedHardwareSpec()));
@@ -510,16 +513,16 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
         {
             switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
 	            case HardwareSpec::SystemCompatibility::Incompatible:
-	                return "Minimum hardware requirements not met";
+	                return "Unsupported hardware";
 
 	            case HardwareSpec::SystemCompatibility::Minimum:
-	                return "Recommended hardware requirements not met";
+	                return "Not recommended";
 
 	            case HardwareSpec::SystemCompatibility::Compatible:
-	                return "System is compatible";
+	                return "Compatible";
 
 	            case HardwareSpec::SystemCompatibility::Unknown:
-                    return "No hardware compatibility information available";
+                    return "Unknown";
             }
 
             break;
@@ -530,12 +533,16 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
 
         case Qt::DecorationRole:
         {
+            const auto systemCompatibility  = HardwareSpec::getSystemCompatibility(getProject()->getMinimumHardwareSpec(), getProject()->getRecommendedHardwareSpec());
+            const auto notCompatible        = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Incompatible;
+            const auto notRecommended       = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Minimum;
+
 	        switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
 				case HardwareSpec::SystemCompatibility::Incompatible:
-                    return StyledIcon("circle-xmark");
+                    return StyledIcon("circle-xmark").withColor(notCompatibleColor);
 
                 case HardwareSpec::SystemCompatibility::Minimum:
-                    return StyledIcon("circle-exclamation");
+                    return StyledIcon("circle-exclamation").withColor(notRecommendedColor);
 
                 case HardwareSpec::SystemCompatibility::Compatible:
                     return StyledIcon("circle-check");
@@ -546,6 +553,21 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
 
             break;
         }
+
+		case Qt::ForegroundRole:
+	    {
+            const auto systemCompatibility  = HardwareSpec::getSystemCompatibility(getProject()->getMinimumHardwareSpec(), getProject()->getRecommendedHardwareSpec());
+            const auto notCompatible        = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Incompatible;
+            const auto notRecommended       = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Minimum;
+
+            if (notCompatible)
+                return notCompatibleColor;
+
+            if (notRecommended)
+                return QBrush(notRecommendedColor);
+
+			break;
+	    }
 
 	    default:
 	        break;
