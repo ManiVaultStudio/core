@@ -3,6 +3,8 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StorageComponentSpec.h"
+#include "HardwareSpec.h"
+#include "Miscellaneous.h"
 
 #include <QStorageInfo>
 #include <QStandardPaths>

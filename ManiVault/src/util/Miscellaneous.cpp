@@ -20,6 +20,7 @@
 #include <QTcpSocket>
 #include <QUrl>
 #include <QVariant>
+#include <QRegularExpression>
 
 #include <exception>
 

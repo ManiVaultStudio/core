@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "HardwareComponentSpec.h"
+#include "StyledIcon.h"
 
 namespace mv::util
 {
