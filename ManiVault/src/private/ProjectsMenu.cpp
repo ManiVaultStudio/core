@@ -22,6 +22,8 @@ ProjectsMenu::ProjectsMenu(QWidget* parent /*= nullptr*/) :
     setTitle("Projects");
     setToolTip("Projects");
 
+    _projectsFilterModel.setSourceModel(const_cast<ProjectsTreeModel*>(&mv::projects().getProjectsTreeModel()));
+
     populate();
 }
 
@@ -36,7 +38,30 @@ void ProjectsMenu::showEvent(QShowEvent* event)
 void ProjectsMenu::populate()
 {
     clear();
-    
-    addAction(&mv::help().getShowLearningCenterPageAction());
-    
+
+    for (int rowIndex = 0; rowIndex < _projectsFilterModel.rowCount(); rowIndex++) {
+        const auto sourceModelIndex = _projectsFilterModel.mapToSource(_projectsFilterModel.index(rowIndex, 0));
+
+        if (const auto project = mv::projects().getProjectsTreeModel().getProject(sourceModelIndex)) {
+            if (mv::projects().hasProject()) {
+                if (QFileInfo(mv::projects().getCurrentProject()->getFilePath()).completeBaseName() == project->getTitle())
+				continue;
+            }
+
+            if (project->isGroup()) {
+                auto projectGroupMenu = new QMenu(project->getTitle());
+
+                addMenu(projectGroupMenu);
+            } else {
+                auto groupAction = new TriggerAction(this, project->getTitle());
+
+                connect(groupAction, &TriggerAction::triggered, this, [project]() {
+                    mv::projects().openProject(project->getUrl());
+                });
+
+                addAction(groupAction);
+            }
+
+        }
+    }
 }

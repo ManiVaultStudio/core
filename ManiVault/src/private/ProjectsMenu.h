@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <models/ProjectsFilterModel.h>
+
 #include <QMenu>
 
 /**
@@ -33,4 +35,7 @@ private:
     
     /** Populate the menu */
     void populate ();
+
+private:
+    mv::ProjectsFilterModel     _projectsFilterModel;   /** Projects filter model for filtering projects */
 };
