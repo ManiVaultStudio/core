@@ -21,6 +21,8 @@
 #include <QMenu>
 #include <QTemporaryDir>
 
+#include "Task.h"
+
 namespace mv {
 
 class ProjectCenterModel;
@@ -115,7 +117,7 @@ public:
         AbstractManager(parent, "Project"),
         _state(State::Idle),
         _projectSerializationTask(this, "Project serialization"),
-		_projectDownloadTask(this, "Project Download")
+		_projectDownloadTask(this, "Project Download", { Task::GuiScope::Modal })
     {
     }
 

@@ -9,6 +9,7 @@
 #include "ProjectWidget.h"
 #include "FileMenu.h"
 #include "ViewMenu.h"
+#include "ProjectsMenu.h"
 #include "HelpMenu.h"
 
 #include <Application.h>
@@ -81,9 +82,10 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     if (centralWidget() == nullptr) {
         auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
 
-        auto fileMenuAction = menuBar()->addMenu(new FileMenu());
-        auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
-        auto helpMenuAction = menuBar()->addMenu(new HelpMenu());
+        auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
+        auto viewMenuAction     = menuBar()->addMenu(new ViewMenu());
+        auto projectsMenuAction = menuBar()->addMenu(new ProjectsMenu());
+        auto helpMenuAction     = menuBar()->addMenu(new HelpMenu());
 
         loadGuiTask.setSubtaskStarted("Initializing start page");
 
