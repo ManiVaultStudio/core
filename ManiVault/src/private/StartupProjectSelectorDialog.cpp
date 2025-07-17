@@ -136,9 +136,11 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
 
             const auto downloadedProjectFilePath = mv::projects().downloadProject(selectedStartupProject->getUrl(), "", &_projectDownloadTask);
 
-            const auto systemCompatibility = HardwareSpec::getSystemCompatibility(selectedStartupProject->getMinimumHardwareSpec(), selectedStartupProject->getRecommendedHardwareSpec());
+            const auto systemCompatibility  = HardwareSpec::getSystemCompatibility(selectedStartupProject->getMinimumHardwareSpec(), selectedStartupProject->getRecommendedHardwareSpec());
+            const auto notCompatible        = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Incompatible;
+            const auto notRecommended       = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Minimum;
 
-            if (systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Incompatible) {
+            if (notCompatible || notRecommended) {
 
                 QDialog projectIncompatibleWithSystemDialog;
 
@@ -153,7 +155,12 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
                 layout->setSpacing(10);
 
                 message->setWordWrap(true);
-                message->setText("<p>Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!</p>");
+
+                if (notCompatible)
+                    message->setText("<p>Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!</p>");
+
+                if (notRecommended)
+                    message->setText("<p>Your system does not meet the recommended requirements for this project, the interactivity might not be optimal!</p>");
 
                 layout->addWidget(message);
 
@@ -161,6 +168,8 @@ StartupProjectSelectorDialog::StartupProjectSelectorDialog(mv::ProjectsTreeModel
                 auto models                 = QList<HardwareSpecTreeModel*>({ new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog), new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog) });
                 auto treeViews              = QList<QTreeView*>({ new QTreeView(), new QTreeView() });
                 auto recommendedCheckBox    = new QCheckBox("Show recommended");
+
+                recommendedCheckBox->setChecked(notRecommended);
 
                 requirementsLayout->setSpacing(5);
 
