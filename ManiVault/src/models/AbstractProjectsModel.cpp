@@ -154,9 +154,10 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QS
 
         _projects.push_back(project);
     } else {
-#ifdef _DEBUG
-        qWarning() << "Skipping" << project->getTitle() << "because it already exists";
-#endif
+        const auto duplicateIndex = duplicateMatches.first();
+
+        removeRow(duplicateIndex.row(), duplicateIndex.parent());
+        addProject(project, groupTitle);
     }
 }
 
