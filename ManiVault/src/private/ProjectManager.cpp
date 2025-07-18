@@ -907,6 +907,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
                     settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
                     settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
+                    settingsGroupAction.addAction(&currentProject->getAllowedPlugins());
 
                     /* TODO: Fix plugin status bar action visibility
                     settingsGroupAction.addAction(&currentProject->getStatusBarOptionsAction());
