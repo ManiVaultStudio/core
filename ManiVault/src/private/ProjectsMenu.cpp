@@ -75,4 +75,13 @@ void ProjectsMenu::populate()
             }
         }
     }
+
+    if (!actions().isEmpty())
+        addSeparator();
+
+    auto editDsnsAction = new TriggerAction(this, "Edit Data Source Names");
+
+    editDsnsAction->setIconByName("gear");
+
+    addAction(editDsnsAction);
 }
