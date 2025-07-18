@@ -148,10 +148,17 @@ public: // Plugin getters
 
     /**
      * Get loaded plugin kinds by \p pluginType
-     * @param pluginType Plugin type(s), all plugin types if empty
+     * @param pluginTypes Plugin type(s), all plugin types if empty
      * @return List of loaded plugin kinds
      */
-    QStringList getLoadedPluginKinds(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const;
+    QStringList getLoadedPluginKinds(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const override;
+
+    /**
+     * Get used plugin kinds by \p pluginType
+     * @param pluginTypes Plugin type(s), all plugin types if empty
+     * @return List of used plugin kinds
+     */
+    QStringList getUsedPluginKinds(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const override;
 
 public: // Plugin trigger actions
 

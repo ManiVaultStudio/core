@@ -730,6 +730,25 @@ QStringList PluginManager::getLoadedPluginKinds(const plugin::Types& pluginTypes
     return getPluginKindsByPluginTypes(pluginTypes);
 }
 
+QStringList PluginManager::getUsedPluginKinds(const plugin::Types& pluginTypes) const
+{
+    QStringList pluginKinds;
+
+    if (pluginTypes.isEmpty()) {
+        for (const auto& pluginFactory : _pluginFactories)
+            if (pluginFactory->getNumberOfInstances() >= 1)
+                pluginKinds << pluginFactory->getKind();
+    }
+    else {
+        for (const auto& pluginType : pluginTypes)
+            for (auto pluginFactory : _pluginFactories)
+                if (pluginFactory->getType() == pluginType && pluginFactory->getNumberOfInstances() >= 1)
+                    pluginKinds << pluginFactory->getKind();
+    }
+
+    return pluginKinds;
+}
+
 mv::gui::PluginTriggerActions PluginManager::getPluginTriggerActions(const plugin::Type& pluginType) const
 {
     PluginTriggerActions pluginProducerActions;

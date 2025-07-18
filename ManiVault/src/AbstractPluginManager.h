@@ -182,6 +182,13 @@ public: // Plugin getters
      */
     virtual QStringList getLoadedPluginKinds(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
 
+    /**
+     * Get used plugin kinds by \p pluginType
+     * @param pluginTypes Plugin type(s), all plugin types if empty
+     * @return List of used plugin kinds
+     */
+    virtual QStringList getUsedPluginKinds(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
+
 public: // Plugin trigger actions
 
     /**
