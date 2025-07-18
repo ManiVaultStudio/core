@@ -80,7 +80,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _studioModeAction.fromParentVariantMap(variantMap);
     _applicationIconAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
-    _allowedPlugins.fromParentVariantMap(variantMap);
+    _allowedPlugins.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap ProjectMetaAction::toVariantMap() const
