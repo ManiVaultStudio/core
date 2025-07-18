@@ -28,7 +28,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _studioModeAction(this, "Studio Mode"),
     _applicationIconAction(this, "Application icon"),
     _compressionAction(this),
-    _allowedPlugins(this, "Allowed Plugins")
+    _allowedPluginsAction(this, "Allowed Plugins")
 {
     _splashScreenAction.setProjectMetaAction(this);
 }
@@ -80,7 +80,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _studioModeAction.fromParentVariantMap(variantMap);
     _applicationIconAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
-    _allowedPlugins.fromParentVariantMap(variantMap, true);
+    _allowedPluginsAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap ProjectMetaAction::toVariantMap() const
@@ -99,7 +99,7 @@ QVariantMap ProjectMetaAction::toVariantMap() const
     _studioModeAction.insertIntoVariantMap(variantMap);
     _applicationIconAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
-    _allowedPlugins.insertIntoVariantMap(variantMap);
+    _allowedPluginsAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
@@ -130,6 +130,15 @@ void ProjectMetaAction::initialize()
     _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
 
     _applicationIconAction.setToolTip("Application icon settings");
+
+    _allowedPluginsAction.setCategory("Plugin name");
+
+    _allowedPluginsCompleter.setCompletionMode(QCompleter::PopupCompletion);
+    _allowedPluginsCompleter.setCaseSensitivity(Qt::CaseInsensitive);
+    _allowedPluginsCompleter.setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+    _allowedPluginsCompleter.setModel(new QStringListModel(mv::plugins().getLoadedPluginKinds()));
+
+    _allowedPluginsAction.getNameAction().setCompleter(&_allowedPluginsCompleter);
 }
 
 Project* ProjectMetaAction::getProject() const
