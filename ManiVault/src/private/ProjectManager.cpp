@@ -179,7 +179,8 @@ ProjectManager::ProjectManager(QObject* parent) :
         _importDataMenu.clear();
 
         for (auto& pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::LOADER))
-            _importDataMenu.addAction(pluginTriggerAction);
+            if (pluginTriggerAction->getPluginFactory()->getAllowPluginCreationFromStandardGui())
+				_importDataMenu.addAction(pluginTriggerAction);
 
         _importDataMenu.setEnabled(!_importDataMenu.actions().isEmpty());
     });
