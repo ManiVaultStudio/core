@@ -125,6 +125,7 @@ public: // Project meta action getters facade
     const gui::StringAction& getCommentsAction() const { return _projectMetaAction.getCommentsAction(); }
     const gui::StringsAction& getContributorsAction() const { return _projectMetaAction.getContributorsAction(); }
     const ProjectCompressionAction& getCompressionAction() const { return _projectMetaAction.getCompressionAction(); }
+    const gui::ToggleAction& getAllowProjectSwitchingAction() const { return _projectMetaAction.getAllowProjectSwitchingAction(); }
     const gui::ToggleAction& getAllowedPluginsOnlyAction() const { return _projectMetaAction.getAllowedPluginsOnlyAction(); }
     const gui::StringsAction& getAllowedPluginsAction() const { return _projectMetaAction.getAllowedPluginsAction(); }
     const gui::SplashScreenAction& getSplashScreenAction() const { return _projectMetaAction.getSplashScreenAction(); }
@@ -144,6 +145,7 @@ public: // Project meta action getters facade
     gui::StringAction& getCommentsAction() { return _projectMetaAction.getCommentsAction(); }
     gui::StringsAction& getContributorsAction() { return _projectMetaAction.getContributorsAction(); }
     ProjectCompressionAction& getCompressionAction() { return _projectMetaAction.getCompressionAction(); }
+    gui::ToggleAction& getAllowProjectSwitchingAction() { return _projectMetaAction.getAllowProjectSwitchingAction(); }
     gui::ToggleAction& getAllowedPluginsOnlyAction() { return _projectMetaAction.getAllowedPluginsOnlyAction(); }
     gui::StringsAction& getAllowedPluginsAction() { return _projectMetaAction.getAllowedPluginsAction(); }
     gui::SplashScreenAction& getSplashScreenAction() { return _projectMetaAction.getSplashScreenAction(); }
@@ -163,14 +165,14 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
-    QString                     _filePath;                              /** Location on disk where the project resides */
-    bool                        _startupProject;                        /** Boolean determining whether this project is loaded at startup of ManiVault */
-    util::Version               _applicationVersion;                    /** Version of the application with which the project is created */
-    ProjectMetaAction           _projectMetaAction;                     /** Project meta info action (i.e. title and version) */
-    gui::ToggleAction           _selectionGroupingAction;               /** Action for toggling whether dataset selection grouping is enabled or not */
-    gui::ToggleAction           _overrideApplicationStatusBarAction;    /** Action for toggling whether the project inherits the status bar settings from the application or not */
-    gui::ToggleAction           _statusBarVisibleAction;                /** Action for toggling the status bar visibility */
-    gui::OptionsAction          _statusBarOptionsAction;                /** Options action for toggling status bar items on/off */
+    QString                 _filePath;                              /** Location on disk where the project resides */
+    bool                    _startupProject;                        /** Boolean determining whether this project is loaded at startup of ManiVault */
+    util::Version           _applicationVersion;                    /** Version of the application with which the project is created */
+    ProjectMetaAction       _projectMetaAction;                     /** Project meta info action (i.e. title and version) */
+    gui::ToggleAction       _selectionGroupingAction;               /** Action for toggling whether dataset selection grouping is enabled or not */
+    gui::ToggleAction       _overrideApplicationStatusBarAction;    /** Action for toggling whether the project inherits the status bar settings from the application or not */
+    gui::ToggleAction       _statusBarVisibleAction;                /** Action for toggling the status bar visibility */
+    gui::OptionsAction      _statusBarOptionsAction;                /** Options action for toggling status bar items on/off */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
