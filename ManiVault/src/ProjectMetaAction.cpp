@@ -4,8 +4,10 @@
 
 #include "ProjectMetaAction.h"
 
+#include "CoreInterface.h"
 #include "Application.h"
 #include "Project.h"
+
 #include "util/Serialization.h"
 
 using namespace mv::gui;
