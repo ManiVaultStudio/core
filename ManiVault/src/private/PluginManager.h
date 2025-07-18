@@ -47,7 +47,8 @@ public: // Plugin creation/destruction
     /**
      * Create a plugin of \p kind with input \p datasets
      * @param kind Kind of plugin (name of the plugin)
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @param inputDatasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @param outputDatasets Zero or more datasets that the plugin produces (e.g. analysis plugin)
      * @return Pointer to created plugin, nullptr if creation failed
      */
     plugin::Plugin* requestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets()) override;
@@ -139,11 +140,18 @@ public: // Plugin getters
     std::vector<plugin::Plugin*> getPluginsByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const override;
 
     /**
-     * Get plugin kinds by plugin type(s)
-     * @param pluginTypes Plugin type(s)
-     * @return Plugin kinds
+     * Get plugin kinds by \p pluginType
+     * @param pluginTypes Plugin type(s), all plugin types if empty
+     * @return List of plugin kinds
      */
-    QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const;
+    QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const;
+
+    /**
+     * Get loaded plugin kinds by \p pluginType
+     * @param pluginType Plugin type(s), all plugin types if empty
+     * @return List of loaded plugin kinds
+     */
+    QStringList getLoadedPluginKinds(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const;
 
 public: // Plugin trigger actions
 

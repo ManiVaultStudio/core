@@ -708,16 +708,26 @@ std::vector<plugin::Plugin*> PluginManager::getPluginsByTypes(const plugin::Type
     return pluginsByType;
 }
 
-QStringList PluginManager::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const
+QStringList PluginManager::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes /*= plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }*/) const
 {
     QStringList pluginKinds;
 
-    for (const auto& pluginType : pluginTypes)
-        for (auto pluginFactory : _pluginFactories)
-            if (pluginFactory->getType() == pluginType)
-                pluginKinds << pluginFactory->getKind();
-
+    if (pluginTypes.isEmpty()) {
+        for (const auto& pluginFactory : _pluginFactories)
+        	pluginKinds << pluginFactory->getKind();
+    } else {
+        for (const auto& pluginType : pluginTypes)
+            for (auto pluginFactory : _pluginFactories)
+                if (pluginFactory->getType() == pluginType)
+                    pluginKinds << pluginFactory->getKind();
+    }
+    
     return pluginKinds;
+}
+
+QStringList PluginManager::getLoadedPluginKinds(const plugin::Types& pluginTypes /*= plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }*/) const
+{
+    return getPluginKindsByPluginTypes(pluginTypes);
 }
 
 mv::gui::PluginTriggerActions PluginManager::getPluginTriggerActions(const plugin::Type& pluginType) const
