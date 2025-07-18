@@ -27,7 +27,6 @@ namespace mv {
 ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mode::Automatic*/, QObject* parent /*= nullptr*/) :
     AbstractProjectsModel(populationMode, parent)
 {
-    
 }
 
 void ProjectsTreeModel::populateFromDsns()
@@ -38,6 +37,8 @@ void ProjectsTreeModel::populateFromDsns()
     switch (getPopulationMode()) {
 		case PopulationMode::Automatic:
 		{
+            setRowCount(0);
+
             for (const auto& dsn : getDsnsAction().getStrings()) {
                 const auto dsnIndex = getDsnsAction().getStrings().indexOf(dsn);
 
@@ -55,7 +56,7 @@ void ProjectsTreeModel::populateFromDsns()
 	                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
 	                    }
 					})
-                    .onFailed(this, [this, dsn, dsnIndex](const QException& e) {
+                    .onFailed(this, [this, dsn](const QException& e) {
 						qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
 					});
             }
@@ -103,6 +104,7 @@ void ProjectsTreeModel::populateFromPluginDsns()
         uniqueDsns.removeDuplicates();
 
         getDsnsAction().setStrings(uniqueDsns);
+        getDsnsAction().setLockedStrings(uniqueDsns);
 	}
 	catch (std::exception& e)
 	{

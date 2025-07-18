@@ -79,9 +79,5 @@ void ProjectsMenu::populate()
     if (!actions().isEmpty())
         addSeparator();
 
-    auto editDsnsAction = new TriggerAction(this, "Edit Data Source Names");
-
-    editDsnsAction->setIconByName("gear");
-
-    addAction(editDsnsAction);
+    addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getEditDsnsAction());
 }

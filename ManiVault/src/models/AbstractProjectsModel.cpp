@@ -18,7 +18,7 @@ namespace mv {
 AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
     StandardItemModel(parent, "Projects", populationMode),
     _dsnsAction(this, "Data Source Names"),
-    _editDsnsAction(this, "Edit project Data Source Names")
+    _editDsnsAction(this, "Edit projects sources...")
 {
     setColumnCount(static_cast<int>(Column::Count));
 
@@ -27,6 +27,8 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
     _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
     _dsnsAction.setPopupSizeHint(QSize(550, 100));
+    _dsnsAction.setDefaultWidgetFlag(StringsAction::WidgetFlag::MayEdit);
+    _dsnsAction.setCategory("Projects DSN");
 
     if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
         connect(&getDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::populateFromDsns);
@@ -38,6 +40,32 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
         for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
             connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::populateFromPluginDsns);
     }
+
+    _editDsnsAction.setIconByName("gear");
+
+    connect(&_editDsnsAction, &TriggerAction::triggered, this, [this]() {
+        QDialog editDsnsDialog;
+
+        editDsnsDialog.setWindowIcon(StyledIcon("gear"));
+        editDsnsDialog.setWindowTitle("Edit projects sources");
+        editDsnsDialog.setMinimumWidth(800);
+        editDsnsDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+        auto layout = new QVBoxLayout(&editDsnsDialog);
+
+        layout->setSpacing(10);
+
+        layout->addWidget(_dsnsAction.createWidget(&editDsnsDialog));
+
+        auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
+
+        connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Ok), &QPushButton::clicked, &editDsnsDialog, &QDialog::accept);
+
+        layout->addWidget(dialogButtonBox);
+
+        editDsnsDialog.setLayout(layout);
+        editDsnsDialog.exec();
+    });
 }
 
 QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
