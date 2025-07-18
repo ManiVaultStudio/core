@@ -824,6 +824,9 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
             auto currentProject = getCurrentProject();
 
+            currentProject->getAllowedPluginsAction().setStrings(mv::plugins().getUsedPluginKinds());
+            currentProject->getAllowedPluginsAction().setLockedStrings(mv::plugins().getUsedPluginKinds());
+
             currentProject->getOverrideApplicationStatusBarAction().cacheState();
 
             /* TODO: Fix plugin status bar action visibility
@@ -907,7 +910,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
                     settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
                     settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
-                    settingsGroupAction.addAction(&currentProject->getAllowedPlugins());
+                    settingsGroupAction.addAction(&currentProject->getAllowedPluginsOnlyAction());
+                    settingsGroupAction.addAction(&currentProject->getAllowedPluginsAction());
 
                     /* TODO: Fix plugin status bar action visibility
                     settingsGroupAction.addAction(&currentProject->getStatusBarOptionsAction());
