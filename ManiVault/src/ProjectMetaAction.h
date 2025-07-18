@@ -83,6 +83,7 @@ public: // Action getters
     const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
     const gui::ApplicationIconAction& getApplicationIconAction() const { return _applicationIconAction; }
     const ProjectCompressionAction& getCompressionAction() const { return _compressionAction; }
+    const gui::StringsAction& getAllowedPlugins() const { return _allowedPlugins; }
 
     gui::VersionAction& getApplicationVersionAction() { return _applicationVersionAction; }
     gui::VersionAction& getProjectVersionAction() { return _projectVersionAction; }
@@ -96,6 +97,7 @@ public: // Action getters
     gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
     gui::ApplicationIconAction& getApplicationIconAction() { return _applicationIconAction; }
     ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
+    gui::StringsAction& getAllowedPlugins() { return _allowedPlugins; }
 
 private:
     Project*                        _project;                           /** Pointer to source project to get the meta data from */
@@ -111,6 +113,7 @@ private:
     gui::ToggleAction               _studioModeAction;                  /** Toggle between view- and studio mode action */
     gui::ApplicationIconAction      _applicationIconAction;             /** Application icon action (only used in application mode) */
     ProjectCompressionAction        _compressionAction;                 /** Project compression action */
+    gui::StringsAction              _allowedPlugins;                    /** Allowed plugins action (only used in application mode) */
 };
 
 }
