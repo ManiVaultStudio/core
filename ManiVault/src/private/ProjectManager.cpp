@@ -912,6 +912,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
                     settingsGroupAction.addAction(&currentProject->getAllowedPluginsOnlyAction());
                     settingsGroupAction.addAction(&currentProject->getAllowedPluginsAction());
+                    settingsGroupAction.addAction(&currentProject->getAllowProjectSwitchingAction());
 
                     /* TODO: Fix plugin status bar action visibility
                     settingsGroupAction.addAction(&currentProject->getStatusBarOptionsAction());
