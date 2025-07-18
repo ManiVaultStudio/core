@@ -16,9 +16,28 @@ using namespace mv::gui;
 namespace mv {
 
 AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
-    StandardItemModel(parent, "Projects", populationMode)
+    StandardItemModel(parent, "Projects", populationMode),
+    _dsnsAction(this, "Data Source Names"),
+    _editDsnsAction(this, "Edit project Data Source Names")
 {
     setColumnCount(static_cast<int>(Column::Count));
+
+    _dsnsAction.setIconByName("globe");
+    _dsnsAction.setToolTip("Projects Data Source Names (DSN)");
+    _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
+    _dsnsAction.setPopupSizeHint(QSize(550, 100));
+
+    if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
+        connect(&getDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::populateFromDsns);
+
+        connect(core(), &CoreInterface::initialized, this, [this]() -> void {
+            populateFromPluginDsns();
+        });
+
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+            connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::populateFromPluginDsns);
+    }
 }
 
 QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const

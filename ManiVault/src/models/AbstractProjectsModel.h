@@ -744,6 +744,12 @@ public:
      */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+    /** Synchronize the model with the content of all Data Source Names (DSN) */
+    virtual void populateFromDsns() = 0;
+
+    /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
+    virtual void populateFromPluginDsns() = 0;
+
     /**
      * Get tags
      * @return All tags
@@ -778,6 +784,14 @@ public:
      */
     const util::ProjectDatabaseProjects& getProjects() const;
 
+public: // Action getters
+
+    gui::StringsAction& getDsnsAction() { return _dsnsAction; }
+    gui::TriggerAction& getEditDsnsAction() { return _editDsnsAction; }
+
+    const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
+    const gui::TriggerAction& getEditDsnsAction() const { return _editDsnsAction; }
+
 signals:
 
     /**
@@ -789,6 +803,8 @@ signals:
 private:
     util::ProjectDatabaseProjects   _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
+    gui::StringsAction              _dsnsAction;        /** Data source names action */
+    gui::TriggerAction              _editDsnsAction;    /** Edit data source names action */
 };
 
 }

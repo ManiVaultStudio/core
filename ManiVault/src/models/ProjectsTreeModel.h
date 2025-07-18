@@ -32,10 +32,10 @@ public:
     ProjectsTreeModel(const PopulationMode& mode = PopulationMode::Automatic, QObject* parent = nullptr);
 
     /** Synchronize the model with the content of all Data Source Names (DSN) */
-    void populateFromDsns();
+    void populateFromDsns() override;
 
     /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
-    void populateFromPluginDsns();
+    void populateFromPluginDsns() override;
 
     /**
      * Populate the model from \p jsonByteArray
@@ -50,15 +50,6 @@ public:
      * @param filePath Path to the JSON file containing the projects data
      */
     void populateFromJsonFile(const QString& filePath);
-
-public: // Action getters
-    
-    gui::StringsAction& getDsnsAction() { return _dsnsAction; }
-
-    const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
-
-private:
-    gui::StringsAction      _dsnsAction;    /** Data source names action */
 };
 
 }
