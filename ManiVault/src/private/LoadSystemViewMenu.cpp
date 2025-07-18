@@ -91,6 +91,9 @@ QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(m
         if (!viewPluginFactory->producesSystemViewPlugins())
             continue;
 
+        if (!viewPluginFactory->getAllowPluginCreationFromStandardGui())
+            continue;
+
         auto action = new TriggerAction(this, viewPluginFactory->getKind());
 
         action->setIcon(pluginTriggerAction->icon());
@@ -106,9 +109,7 @@ QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(m
         if (_dockAreaWidget && _dockAreaWidget->dockWidgetsCount() >= 1) {
             auto dockWidgets = _dockAreaWidget->dockWidgets();
 
-            auto firstViewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(_dockAreaWidget->dockWidgets().first());
-
-            if (firstViewPluginDockWidget)
+            if (auto firstViewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(_dockAreaWidget->dockWidgets().first()))
                 dockToViewPlugin = firstViewPluginDockWidget->getViewPlugin();
         }
 

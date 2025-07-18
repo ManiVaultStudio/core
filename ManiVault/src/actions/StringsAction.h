@@ -105,10 +105,29 @@ public:
     void setStrings(const QStringList& strings);
 
     /**
+     * Get locked strings
+     * @return Locked strings as string list
+     */
+    QStringList getLockedStrings() const;
+
+    /**
+     * Set locked strings to \p lockedStrings
+     * @param lockedStrings Locked strings
+     */
+    void setLockedStrings(const QStringList& lockedStrings);
+
+    /**
      * Add string
      * @param string String to add
      */
     void addString(const QString& string);
+
+    /**
+     * Add /p strings
+     * @param strings Strings to add
+     * @param allowDuplication Whether to allow duplication of strings, defaults to false
+     */
+    void addStrings(const QStringList& strings, bool allowDuplication = false);
 
     /**
      * Remove string
@@ -141,7 +160,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant
-     * @param Variant representation of the widget action
+     * @param variantMap Variant representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -173,6 +192,12 @@ signals:
     void stringsAdded(const QStringList& strings);
 
     /**
+     * Signals that locked string changed to \p lockedStrings
+     * @param lockedStrings Locked strings
+     */
+    void lockedStringsChanged(const QStringList& lockedStrings);
+
+    /**
      * Signals that \p strings were removed
      * @param strings Removed strings
      */
@@ -181,10 +206,12 @@ signals:
 protected:
     QString                 _category;          /** Type of string */
     QStringList             _strings;           /** Current strings */
+    QStringList             _lockedStrings;     /** Strings that are locked and cannot be removed or renamed */
     HorizontalGroupAction   _toolbarAction;     /** Toolbar action */
     StringAction            _nameAction;        /** String name action */
     TriggerAction           _addAction;         /** Add string action */
     TriggerAction           _removeAction;      /** Remove string action */
+    QCompleter*             _completer;         /** Pointer to completer for auto-completion, maybe nullptr */
 
     friend class AbstractActionsManager;
 };

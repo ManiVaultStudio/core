@@ -188,11 +188,11 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             }
         });
 
-        const auto updateMenuVisibility = [fileMenuAction, viewMenuAction]() -> void {
+        const auto updateMenuVisibility = [fileMenuAction, projectsMenuAction]() -> void {
             const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
 
             fileMenuAction->setVisible(!projectIsReadOnly);
-            viewMenuAction->setVisible(!projectIsReadOnly);
+            projectsMenuAction->setVisible(projectIsReadOnly ? projects().getCurrentProject()->getAllowProjectSwitchingAction().isChecked() : true);
         };
 
         connect(&projects(), &AbstractProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {

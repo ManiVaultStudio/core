@@ -169,11 +169,25 @@ public: // Plugin getters
     virtual std::vector<plugin::Plugin*> getPluginsByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
 
     /**
-     * Get plugin kinds by plugin type(s)
-     * @param pluginTypes Plugin type(s)
-     * @return Plugin kinds
+     * Get plugin kinds by \p pluginType
+     * @param pluginTypes Plugin type(s), all plugin types if empty
+     * @return List of plugin kinds
      */
-    virtual QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const = 0;
+    virtual QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
+
+    /**
+     * Get loaded plugin kinds by \p pluginType
+     * @param pluginTypes Plugin type(s), all plugin types if empty
+     * @return List of loaded plugin kinds
+     */
+    virtual QStringList getLoadedPluginKinds(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
+
+    /**
+     * Get used plugin kinds by \p pluginType
+     * @param pluginTypes Plugin type(s), all plugin types if empty
+     * @return List of used plugin kinds
+     */
+    virtual QStringList getUsedPluginKinds(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
 
 public: // Plugin trigger actions
 

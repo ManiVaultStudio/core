@@ -81,8 +81,9 @@ public:
     /**
      * Load from variant map located in \p parentVariantMap at the serialization name
      * @param parentVariantMap Parent variant map
+     * @param ignoreLoadingErrors Whether to ignore loading errors (default: false)
      */
-    virtual void fromParentVariantMap(const QVariantMap& parentVariantMap);
+    virtual void fromParentVariantMap(const QVariantMap& parentVariantMap, bool ignoreLoadingErrors = false);
 
     /**
      * Save to variant map

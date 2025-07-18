@@ -179,7 +179,8 @@ ProjectManager::ProjectManager(QObject* parent) :
         _importDataMenu.clear();
 
         for (auto& pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::LOADER))
-            _importDataMenu.addAction(pluginTriggerAction);
+            if (pluginTriggerAction->getPluginFactory()->getAllowPluginCreationFromStandardGui())
+				_importDataMenu.addAction(pluginTriggerAction);
 
         _importDataMenu.setEnabled(!_importDataMenu.actions().isEmpty());
     });
@@ -824,6 +825,9 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
             auto currentProject = getCurrentProject();
 
+            currentProject->getAllowedPluginsAction().addStrings(mv::plugins().getUsedPluginKinds());
+            //currentProject->getAllowedPluginsAction().setLockedStrings(mv::plugins().getUsedPluginKinds());
+
             currentProject->getOverrideApplicationStatusBarAction().cacheState();
 
             /* TODO: Fix plugin status bar action visibility
@@ -905,8 +909,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getTagsAction());
                     settingsGroupAction.addAction(&currentProject->getCommentsAction());
                     settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
-                    settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
-                    settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
+                    //settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
+                    //settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
+                    settingsGroupAction.addAction(&currentProject->getAllowedPluginsOnlyAction());
+                    settingsGroupAction.addAction(&currentProject->getAllowedPluginsAction());
+                    settingsGroupAction.addAction(&currentProject->getAllowProjectSwitchingAction());
 
                     /* TODO: Fix plugin status bar action visibility
                     settingsGroupAction.addAction(&currentProject->getStatusBarOptionsAction());

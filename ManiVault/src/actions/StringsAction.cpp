@@ -26,7 +26,12 @@ StringsAction::StringsAction(QObject* parent, const QString& title, const QStrin
 
     _toolbarAction.setShowLabels(false);
 
+    _nameAction.setEnabled(false);
     _nameAction.setStretch(1);
+
+    _addAction.setEnabled(false);
+
+    _removeAction.setEnabled(false);
 
     _toolbarAction.addAction(&_nameAction);
     _toolbarAction.addAction(&_addAction);
@@ -65,6 +70,21 @@ void StringsAction::setStrings(const QStringList& strings)
 
     if (!removedStrings.isEmpty())
         emit stringsRemoved(removedStrings);
+}
+
+QStringList StringsAction::getLockedStrings() const
+{
+    return _lockedStrings;
+}
+
+void StringsAction::setLockedStrings(const QStringList& lockedStrings)
+{
+    if (lockedStrings == _lockedStrings)
+        return;
+
+    _lockedStrings = lockedStrings;
+
+    emit lockedStringsChanged(_lockedStrings);
 }
 
 void StringsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -140,6 +160,36 @@ void StringsAction::addString(const QString& string)
     emit stringsAdded({ string });
 }
 
+void StringsAction::addStrings(const QStringList& strings, bool allowDuplication /*= false*/)
+{
+    const auto& existingStrings = _strings;
+
+    _strings << strings;
+
+	if (!allowDuplication) {
+		_strings.removeDuplicates();
+    }
+	    
+    emit stringsChanged(_strings);
+
+    saveToSettings();
+
+    auto removedStrings = existingStrings;
+    auto addedStrings   = _strings;
+
+    for (const auto& string : strings)
+        removedStrings.removeAll(string);
+
+    for (const QString& existingString : existingStrings)
+        addedStrings.removeAll(existingString);
+
+    if (!addedStrings.isEmpty())
+        emit stringsAdded(addedStrings);
+
+    if (!removedStrings.isEmpty())
+        emit stringsRemoved(removedStrings);
+}
+
 void StringsAction::removeString(const QString& string)
 {
     _strings.removeOne(string);
@@ -211,37 +261,63 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
 
     setLayout(layout);
 
-    const auto updateActions = [this, stringsAction]() -> void {
+    const auto isStringLocked = [stringsAction](const QString& string) -> bool {
+        return stringsAction->getLockedStrings().contains(string);
+    };
+
+    const auto updateActions = [this, stringsAction, isStringLocked]() -> void {
         const auto selectedRows = _hierarchyWidget.getSelectionModel().selectedRows();
 
-        stringsAction->getNameAction().setEnabled(selectedRows.count() <= 1);
+        if (selectedRows.isEmpty()) {
+            stringsAction->getNameAction().setEnabled(true);
+            stringsAction->getAddAction().setEnabled(!stringsAction->getNameAction().getString().isEmpty());
+            stringsAction->getRemoveAction().setEnabled(false);
+        }
 
-        if (selectedRows.count() == 1)
+        if (selectedRows.count() == 1) {
+            const auto stringIsLocked = isStringLocked(selectedRows.first().data(Qt::DisplayRole).toString());
+
+            stringsAction->getNameAction().setEnabled(!stringIsLocked);
             stringsAction->getNameAction().setString(selectedRows.first().data(Qt::DisplayRole).toString());
+            stringsAction->getAddAction().setEnabled(!stringIsLocked);
+            stringsAction->getRemoveAction().setEnabled(true);
+        }
 
         if (selectedRows.count() >= 2) {
             QStringList selected;
 
-            for (const auto& selectedRow : selectedRows)
+            bool mayRemove = false;
+
+        	for (const auto& selectedRow : selectedRows) {
                 selected << selectedRow.data(Qt::DisplayRole).toString();
 
-            stringsAction->getNameAction().setString(selected.join(", "));
-        }
+                if (!isStringLocked(selectedRow.data().toString()))
+                    mayRemove = true;
+        	}
 
-        stringsAction->getAddAction().setEnabled(selectedRows.isEmpty() && !stringsAction->getNameAction().getString().isEmpty());
-        stringsAction->getRemoveAction().setEnabled(!selectedRows.isEmpty());
+            stringsAction->getNameAction().setEnabled(false);
+            stringsAction->getNameAction().setString("");
+            stringsAction->getAddAction().setEnabled(false);
+            stringsAction->getRemoveAction().setEnabled(mayRemove);
+        }
     };
 
-    const auto updateModel = [this, stringsAction, updateActions](const QStringList& strings) -> void {
+    const auto updateModel = [this, stringsAction, updateActions, isStringLocked](const QStringList& strings) -> void {
         _model.removeRows(0, _model.rowCount());
 
-        for (const auto& string : strings)
-            _model.appendRow(new QStandardItem(string));
+        for (const auto& string : strings) {
+            auto item = new QStandardItem(string);
+
+            item->setEnabled(!isStringLocked(string));
+
+            _model.appendRow(item);
+        }
 
         updateActions();
     };
 
     connect(stringsAction, &StringsAction::stringsChanged, this, updateModel);
+    connect(stringsAction, &StringsAction::lockedStringsChanged, this, updateModel);
     connect(&stringsAction->getNameAction(), &StringAction::stringChanged, this, updateActions);
 
     connect(&stringsAction->getAddAction(), &TriggerAction::triggered, this, [this, stringsAction]() -> void {

@@ -120,6 +120,9 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     _projectMetaAction.getCommentsAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getContributorsAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getCompressionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getAllowProjectSwitchingAction().fromParentVariantMap(variantMap, true);
+    _projectMetaAction.getAllowedPluginsOnlyAction().fromParentVariantMap(variantMap, true);
+    _projectMetaAction.getAllowedPluginsAction().fromParentVariantMap(variantMap, true);
     _projectMetaAction.getSplashScreenAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getStudioModeAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getApplicationIconAction().fromParentVariantMap(variantMap);
@@ -137,6 +140,13 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     actions().fromParentVariantMap(variantMap);
     plugins().fromParentVariantMap(variantMap);
     events().fromParentVariantMap(variantMap);
+
+    if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+            pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
+
+        qDebug() << _projectMetaAction.getAllowedPluginsAction().getStrings();
+    }
 }
 
 QVariantMap Project::toVariantMap() const
@@ -154,6 +164,9 @@ QVariantMap Project::toVariantMap() const
     _projectMetaAction.getCommentsAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getContributorsAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getCompressionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getAllowProjectSwitchingAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getAllowedPluginsOnlyAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getAllowedPluginsAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getSplashScreenAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getStudioModeAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getApplicationIconAction().insertIntoVariantMap(variantMap);

@@ -193,7 +193,6 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param string String
-     * @param defaultString Default string
      */
     Q_INVOKABLE explicit StringAction(QObject* parent, const QString& title, const QString& string = "");
 
