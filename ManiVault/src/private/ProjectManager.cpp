@@ -824,7 +824,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
             auto currentProject = getCurrentProject();
 
-            currentProject->getAllowedPluginsAction().setStrings(mv::plugins().getUsedPluginKinds());
+            currentProject->getAllowedPluginsAction().addStrings(mv::plugins().getUsedPluginKinds());
             //currentProject->getAllowedPluginsAction().setLockedStrings(mv::plugins().getUsedPluginKinds());
 
             currentProject->getOverrideApplicationStatusBarAction().cacheState();
@@ -908,8 +908,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getTagsAction());
                     settingsGroupAction.addAction(&currentProject->getCommentsAction());
                     settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
-                    settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
-                    settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
+                    //settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
+                    //settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
                     settingsGroupAction.addAction(&currentProject->getAllowedPluginsOnlyAction());
                     settingsGroupAction.addAction(&currentProject->getAllowedPluginsAction());
                     settingsGroupAction.addAction(&currentProject->getAllowProjectSwitchingAction());
