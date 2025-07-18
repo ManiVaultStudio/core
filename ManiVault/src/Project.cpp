@@ -120,6 +120,8 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     _projectMetaAction.getCommentsAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getContributorsAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getCompressionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getAllowedPluginsOnlyAction().fromParentVariantMap(variantMap, true);
+    _projectMetaAction.getAllowedPluginsAction().fromParentVariantMap(variantMap, true);
     _projectMetaAction.getSplashScreenAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getStudioModeAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getApplicationIconAction().fromParentVariantMap(variantMap);
@@ -154,6 +156,8 @@ QVariantMap Project::toVariantMap() const
     _projectMetaAction.getCommentsAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getContributorsAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getCompressionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getAllowedPluginsOnlyAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getAllowedPluginsAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getSplashScreenAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getStudioModeAction().insertIntoVariantMap(variantMap);
     _projectMetaAction.getApplicationIconAction().insertIntoVariantMap(variantMap);

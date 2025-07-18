@@ -245,9 +245,11 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
         }
 
         if (selectedRows.count() == 1) {
-            stringsAction->getNameAction().setEnabled(!isStringLocked(selectedRows.first().data().toString()));
+            const auto stringIsLocked = isStringLocked(selectedRows.first().data(Qt::DisplayRole).toString());
+
+            stringsAction->getNameAction().setEnabled(!stringIsLocked);
             stringsAction->getNameAction().setString(selectedRows.first().data(Qt::DisplayRole).toString());
-            stringsAction->getAddAction().setEnabled(false);
+            stringsAction->getAddAction().setEnabled(!stringIsLocked);
             stringsAction->getRemoveAction().setEnabled(true);
         }
 
