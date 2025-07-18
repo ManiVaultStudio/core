@@ -4,6 +4,8 @@
 
 #include "Vector3f.h"
 
+#include <QVariantMap>
+
 #include <cmath>
 
 namespace mv
@@ -37,6 +39,22 @@ namespace mv
     std::string Vector3f::str() const
     {
         return std::string("(" + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(z) + ")");
+    }
+
+    QVariantMap Vector3f::toVariantMap() const
+    {
+        QVariantMap map;
+        map["x"] = x;
+        map["y"] = y;
+        map["z"] = z;
+        return map;
+    }
+
+    void Vector3f::fromVariantMap(const QVariantMap& map)
+    {
+        x = map["x"].toFloat();
+        y = map["y"].toFloat();
+        z = map["z"].toFloat();
     }
 
     /* Operator overloads */
@@ -85,6 +103,16 @@ namespace mv
     {
         os << '(' << v.x << ", " << v.y << ", " << v.z << ')';
         return os;
+    }
+
+    mv::Vector3f min(mv::Vector3f a, mv::Vector3f b)
+    {
+        return Vector3f(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z));
+    }
+
+    mv::Vector3f max(mv::Vector3f a, mv::Vector3f b)
+    {
+        return Vector3f(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
     }
 
     static_assert(Vector3f{}.x == 0.0f, "Compile-time unit test");

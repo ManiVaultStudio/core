@@ -17,7 +17,10 @@ class CORE_EXPORT OpenGLWidget : public QOpenGLWidget, protected QOpenGLFunction
     Q_OBJECT
 public:
     OpenGLWidget();
+    OpenGLWidget(int glMajorVersion, int glMinorVersion);
     ~OpenGLWidget();
+
+    bool isWidgetInitialized() { return _isInitialized; }
 
 protected:
     void initializeGL()         Q_DECL_OVERRIDE;
@@ -34,11 +37,15 @@ protected:
 private:
     void showEvent(QShowEvent* showEvent) Q_DECL_OVERRIDE;
 
+signals:
+    void widgetInitialized();
+
 private slots:
     void updatePixelRatio();
 
 private:
     float   _pixelRatio;        /** Pixel ratio of the screen the widget is displayed on */
+    bool    _isInitialized;     /** Whether the widget is ready for OpenGL operations */
 };
 
 } // namespace gui

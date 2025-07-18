@@ -112,7 +112,7 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QS
     if (!project)
         return;
 
-    const auto duplicateMatches = match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::DisplayRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+    const auto duplicateMatches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
     if (duplicateMatches.empty()) {
         const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {

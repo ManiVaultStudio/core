@@ -9,6 +9,13 @@
 #include <string>
 #include <iostream>
 
+// Forward declarations
+class QString;
+class QVariant;
+template <typename Key, typename T> class QMap;
+
+typedef QMap<QString, QVariant> QVariantMap;
+
 namespace mv
 {
     class CORE_EXPORT Vector3f
@@ -69,7 +76,11 @@ namespace mv
         */
         std::string str() const;
 
-        /* Operator overloads */
+    public: /* Serialization */
+        QVariantMap toVariantMap() const;
+        void fromVariantMap(const QVariantMap& map);
+
+    public: /* Operator overloads */
         constexpr bool operator==(const Vector3f& v) const
         {
             return x == v.x && y == v.y && z == v.z;
@@ -120,5 +131,8 @@ namespace mv
     };
 
     CORE_EXPORT std::ostream& operator<<(std::ostream& os, const Vector3f& v);
+
+    CORE_EXPORT Vector3f min(Vector3f a, Vector3f b);
+    CORE_EXPORT Vector3f max(Vector3f a, Vector3f b);
 
 } // namespace mv

@@ -91,6 +91,28 @@ namespace mv
             if (auto it = _kvMap.find(keys[i]); it != _kvMap.end()) {
                 values.push_back(it->second);
             }
+            else
+            {
+                qDebug() << "This key wasn't found: " << keys[i];
+            }
+        }
+
+        return values;
+    }
+
+    std::vector<int> BiMap::getValuesByKeysWithMissingValue(const std::vector<QString>& keys, int missingValue) const
+    {
+        std::vector<int> values;
+
+        for (size_t i = 0; i < keys.size(); i++)
+        {
+            if (auto it = _kvMap.find(keys[i]); it != _kvMap.end()) {
+                values.push_back(it->second);
+            }
+            else
+            {
+                values.push_back(missingValue);
+            }
         }
 
         return values;
