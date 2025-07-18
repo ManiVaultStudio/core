@@ -141,7 +141,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant
-     * @param Variant representation of the widget action
+     * @param variantMap Variant representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -185,6 +185,7 @@ protected:
     StringAction            _nameAction;        /** String name action */
     TriggerAction           _addAction;         /** Add string action */
     TriggerAction           _removeAction;      /** Remove string action */
+    QCompleter*             _completer;         /** Pointer to completer for auto-completion, maybe nullptr */
 
     friend class AbstractActionsManager;
 };
