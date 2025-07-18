@@ -160,6 +160,36 @@ void StringsAction::addString(const QString& string)
     emit stringsAdded({ string });
 }
 
+void StringsAction::addStrings(const QStringList& strings, bool allowDuplication /*= false*/)
+{
+    const auto& existingStrings = _strings;
+
+    _strings << strings;
+
+	if (!allowDuplication) {
+		_strings.removeDuplicates();
+    }
+	    
+    emit stringsChanged(_strings);
+
+    saveToSettings();
+
+    auto removedStrings = existingStrings;
+    auto addedStrings   = _strings;
+
+    for (const auto& string : strings)
+        removedStrings.removeAll(string);
+
+    for (const QString& existingString : existingStrings)
+        addedStrings.removeAll(existingString);
+
+    if (!addedStrings.isEmpty())
+        emit stringsAdded(addedStrings);
+
+    if (!removedStrings.isEmpty())
+        emit stringsRemoved(removedStrings);
+}
+
 void StringsAction::removeString(const QString& string)
 {
     _strings.removeOne(string);

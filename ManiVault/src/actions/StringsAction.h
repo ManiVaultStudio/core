@@ -123,6 +123,13 @@ public:
     void addString(const QString& string);
 
     /**
+     * Add /p strings
+     * @param strings Strings to add
+     * @param allowDuplication Whether to allow duplication of strings, defaults to false
+     */
+    void addStrings(const QStringList& strings, bool allowDuplication = false);
+
+    /**
      * Remove string
      * @param string String to remove
      */
