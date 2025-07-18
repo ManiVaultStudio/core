@@ -14,6 +14,7 @@
 #include "ProjectCompressionAction.h"
 
 #include <QCompleter>
+#include <QStringListModel>
 
 namespace mv {
 
@@ -85,7 +86,8 @@ public: // Action getters
     const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
     const gui::ApplicationIconAction& getApplicationIconAction() const { return _applicationIconAction; }
     const ProjectCompressionAction& getCompressionAction() const { return _compressionAction; }
-    const gui::StringsAction& getAllowedPlugins() const { return _allowedPluginsAction; }
+    const gui::ToggleAction& getAllowedPluginsOnlyAction() const { return _allowedPluginsOnlyAction; }
+    const gui::StringsAction& getAllowedPluginsAction() const { return _allowedPluginsAction; }
 
     gui::VersionAction& getApplicationVersionAction() { return _applicationVersionAction; }
     gui::VersionAction& getProjectVersionAction() { return _projectVersionAction; }
@@ -99,7 +101,8 @@ public: // Action getters
     gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
     gui::ApplicationIconAction& getApplicationIconAction() { return _applicationIconAction; }
     ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
-    gui::StringsAction& getAllowedPlugins() { return _allowedPluginsAction; }
+    gui::ToggleAction& getAllowedPluginsOnlyAction() { return _allowedPluginsOnlyAction; }
+    gui::StringsAction& getAllowedPluginsAction() { return _allowedPluginsAction; }
 
 private:
     Project*                        _project;                           /** Pointer to source project to get the meta data from */
@@ -115,8 +118,10 @@ private:
     gui::ToggleAction               _studioModeAction;                  /** Toggle between view- and studio mode action */
     gui::ApplicationIconAction      _applicationIconAction;             /** Application icon action (only used in application mode) */
     ProjectCompressionAction        _compressionAction;                 /** Project compression action */
+    gui::ToggleAction               _allowedPluginsOnlyAction;          /** Restrict to allowed plugins only action (only used in application mode) */
     gui::StringsAction              _allowedPluginsAction;              /** Allowed plugins action (only used in application mode) */
     QCompleter                      _allowedPluginsCompleter;           /** Completer for allowed plugins action */
+    QStringListModel                _allowedPluginsModel;               /** Model for allowed plugins action */
 };
 
 }

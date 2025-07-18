@@ -28,9 +28,37 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _studioModeAction(this, "Studio Mode"),
     _applicationIconAction(this, "Application icon"),
     _compressionAction(this),
+    _allowedPluginsOnlyAction(this, "Limit use of plugins"),
     _allowedPluginsAction(this, "Allowed Plugins")
 {
     _splashScreenAction.setProjectMetaAction(this);
+
+    _allowedPluginsAction.setCategory("Plugin name");
+
+    _allowedPluginsCompleter.setCompletionMode(QCompleter::PopupCompletion);
+    _allowedPluginsCompleter.setCaseSensitivity(Qt::CaseInsensitive);
+    _allowedPluginsCompleter.setModel(&_allowedPluginsModel);
+
+    _allowedPluginsAction.getNameAction().setCompleter(&_allowedPluginsCompleter);
+
+    const auto updateAllowedPluginsModel = [this]() -> void {
+        const auto loadedPlugins = mv::plugins().getLoadedPluginKinds();
+        const auto lockedPlugins = _allowedPluginsAction.getLockedStrings();
+
+    	_allowedPluginsModel.setStringList(QSet<QString>(loadedPlugins.begin(), loadedPlugins.end()).subtract(QSet<QString>(lockedPlugins.begin(), lockedPlugins.end())).values());
+    };
+
+    updateAllowedPluginsModel();
+
+    connect(&_allowedPluginsAction, &StringsAction::lockedStringsChanged, this, updateAllowedPluginsModel);
+
+    const auto updateAllowedPluginsAction = [this]() -> void {
+		_allowedPluginsAction.setEnabled(_allowedPluginsOnlyAction.isChecked());
+    };
+
+    updateAllowedPluginsAction();
+
+    connect(&_allowedPluginsOnlyAction, &ToggleAction::toggled, this, updateAllowedPluginsAction);
 }
 
 ProjectMetaAction::ProjectMetaAction(const QString& filePath, QObject* parent /*= nullptr*/) :
@@ -80,6 +108,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _studioModeAction.fromParentVariantMap(variantMap);
     _applicationIconAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
+    _allowedPluginsOnlyAction.fromParentVariantMap(variantMap, true);
     _allowedPluginsAction.fromParentVariantMap(variantMap, true);
 }
 
@@ -99,6 +128,7 @@ QVariantMap ProjectMetaAction::toVariantMap() const
     _studioModeAction.insertIntoVariantMap(variantMap);
     _applicationIconAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
+    _allowedPluginsOnlyAction.insertIntoVariantMap(variantMap);
     _allowedPluginsAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
@@ -131,14 +161,8 @@ void ProjectMetaAction::initialize()
 
     _applicationIconAction.setToolTip("Application icon settings");
 
-    _allowedPluginsAction.setCategory("Plugin name");
-
-    _allowedPluginsCompleter.setCompletionMode(QCompleter::PopupCompletion);
-    _allowedPluginsCompleter.setCaseSensitivity(Qt::CaseInsensitive);
-    _allowedPluginsCompleter.setModelSorting(QCompleter::CaseInsensitivelySortedModel);
-    _allowedPluginsCompleter.setModel(new QStringListModel(mv::plugins().getLoadedPluginKinds()));
-
-    _allowedPluginsAction.getNameAction().setCompleter(&_allowedPluginsCompleter);
+    _allowedPluginsOnlyAction.setToolTip("Only plugins in the allowed list may be created from the UI.");
+    _allowedPluginsAction.setToolTip("Only plugins in this list may be created from the UI.");
 }
 
 Project* ProjectMetaAction::getProject() const
