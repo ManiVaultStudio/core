@@ -118,6 +118,9 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
     for (const auto& pluginTriggerAction : mv::plugins().getPluginTriggerActions(pluginType, _selectedDatasets)) {
         const auto titleSegments = pluginTriggerAction->getMenuLocation().split("/");
 
+        if (!pluginTriggerAction->getPluginFactory()->getAllowPluginCreationFromStandardGui())
+            continue; // Skip plugins that do not allow creation from the standard GUI
+
         QString menuPath, previousMenuPath = titleSegments.first();
 
         for (const auto& titleSegment : titleSegments) {

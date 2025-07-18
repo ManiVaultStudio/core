@@ -825,7 +825,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             auto currentProject = getCurrentProject();
 
             currentProject->getAllowedPluginsAction().setStrings(mv::plugins().getUsedPluginKinds());
-            currentProject->getAllowedPluginsAction().setLockedStrings(mv::plugins().getUsedPluginKinds());
+            //currentProject->getAllowedPluginsAction().setLockedStrings(mv::plugins().getUsedPluginKinds());
 
             currentProject->getOverrideApplicationStatusBarAction().cacheState();
 
