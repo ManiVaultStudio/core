@@ -139,6 +139,13 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     actions().fromParentVariantMap(variantMap);
     plugins().fromParentVariantMap(variantMap);
     events().fromParentVariantMap(variantMap);
+
+    if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+            pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
+
+        qDebug() << _projectMetaAction.getAllowedPluginsAction().getStrings();
+    }
 }
 
 QVariantMap Project::toVariantMap() const
