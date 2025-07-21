@@ -157,6 +157,12 @@ public:
      */
     QUrl getProjectsJsonDsn() const;
 
+    /**
+     * Set project DSN to \p projectsJsonDsn
+     * @param projectsJsonDsn Projects JSON Data Source Name (DSN) URL
+     */
+    void setProjectsJsonDsn(const QUrl& projectsJsonDsn);
+
     /** Determines project metadata like last modified date and download size */
     void updateMetadata();
 

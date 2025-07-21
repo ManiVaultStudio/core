@@ -199,6 +199,11 @@ QUrl ProjectsModelProject::getProjectsJsonDsn() const
     return _projectsJsonDsn;
 }
 
+void ProjectsModelProject::setProjectsJsonDsn(const QUrl& projectsJsonDsn)
+{
+	_projectsJsonDsn = projectsJsonDsn;
+}
+
 void ProjectsModelProject::updateMetadata()
 {
     determineDownloadSize();
