@@ -523,13 +523,13 @@ signals:
 
     /**
      * Signals that \p publicAction is added to the manager
-     * @param action Pointer to public action that is added to the manager
+     * @param publicAction Pointer to public action that is added to the manager
      */
     void publicActionAdded(gui::WidgetAction* publicAction);
 
     /**
      * Signals that \p publicAction is about to be removed from the manager
-     * @param action Pointer to public action that is about to be removed from the manager
+     * @param publicAction Pointer to public action that is about to be removed from the manager
      */
     void publicActionAboutToBeRemoved(gui::WidgetAction* publicAction);
 
