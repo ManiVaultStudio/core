@@ -194,9 +194,9 @@ QString ProjectsModelProject::getSha() const
 	return _sha;
 }
 
-QUrl ProjectsModelProject::getDsn() const
+QUrl ProjectsModelProject::getProjectsJsonDsn() const
 {
-    return _dsn;
+    return _projectsJsonDsn;
 }
 
 void ProjectsModelProject::updateMetadata()

@@ -152,10 +152,10 @@ public:
     QString getSha() const;
 
     /**
-     * Get url of the project (Data Source Name)
-     * @return Data Source Name (DSN) URL of the project, used for loading the project
+     * Get url of the projects JSON file DSN
+     * @return Data Source Name (DSN) of the projects JSON file, used for loading the project
      */
-    QUrl getDsn() const;
+    QUrl getProjectsJsonDsn() const;
 
     /** Determines project metadata like last modified date and download size */
     void updateMetadata();
@@ -184,7 +184,7 @@ public:
         _recommendedHardwareSpec    = rhs.getRecommendedHardwareSpec();
         _startup                    = rhs.isStartup();
         _sha                        = rhs.getSha();
-        _dsn                        = rhs.getDsn();
+        _projectsJsonDsn            = rhs.getProjectsJsonDsn();
 
         return *this;
     }
@@ -241,7 +241,7 @@ private:
     HardwareSpec    _recommendedHardwareSpec;   /** Recommended hardware specification for the project */
     bool            _startup;                   /** Boolean determining whether this is a startup project */
     QString         _sha;                       /** SHA-256 hash of the project (for comparison purposes) */
-    QUrl            _dsn;                       /** Data Source Name (DSN) of the project, used for loading the project */ 
+    QUrl            _projectsJsonDsn;           /** Data Source Name (DSN) of the projects JSON file, used for loading the project */ 
 };
 
 using ProjectsModelProjectPtr = std::shared_ptr<ProjectsModelProject>;
