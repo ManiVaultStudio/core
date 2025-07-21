@@ -818,7 +818,7 @@ public:
      * Get the projects
      * @return Projects
      */
-    const util::ProjectDatabaseProjects& getProjects() const;
+    const util::ProjectsModelProjectPtrs& getProjects() const;
 
 protected:
 
@@ -848,7 +848,7 @@ signals:
     void tagsChanged(const QSet<QString>& tags);
 
 private:
-    util::ProjectDatabaseProjects   _projects;          /** Model projects */
+    util::ProjectsModelProjectPtrs  _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
     gui::StringsAction              _dsnsAction;        /** Data source names action */
     gui::TriggerAction              _editDsnsAction;    /** Edit data source names action */

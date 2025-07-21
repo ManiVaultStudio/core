@@ -355,6 +355,7 @@ set(PRIVATE_PAGES_COMMON_HEADERS
     src/private/PageActionDelegate.h
     src/private/PageActionDelegateEditorWidget.h
     src/private/PageAction.h
+    src/private/PageSubAction.h
 	src/private/PageTutorialsWidget.h
 )
 
@@ -369,6 +370,7 @@ set(PRIVATE_PAGES_COMMON_SOURCES
     src/private/PageActionDelegate.cpp
     src/private/PageActionDelegateEditorWidget.cpp
     src/private/PageAction.cpp
+    src/private/PageSubAction.cpp
 	src/private/PageTutorialsWidget.cpp
 )
 

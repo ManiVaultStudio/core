@@ -12,6 +12,8 @@
 
 #include <functional>
 
+#include "PageSubAction.h"
+
 /**
  * Page action
  *
@@ -82,6 +84,23 @@ public: // Getters and setters
     ClickedCallback getClickedCallback() const { return _clickedCallback; }
     void setClickedCallback(const ClickedCallback& clickedCallback) { _clickedCallback = clickedCallback; }
 
+public: // Sub-actions
+
+    /**
+     * Add \p subAction
+     * @param subAction Shared pointer to sub-action
+     */
+    void addSubAction(const PageSubActionPtr& subAction);
+
+    /**
+     * Remove \p subAction
+     * @param subAction Shared pointer to sub-action
+     */
+    void removeSubAction(const PageSubActionPtr& subAction);
+
+    /** Remove all sub-actions */
+    void clearSubActions();
+
 private:
     
     /**
@@ -117,6 +136,7 @@ protected:
     QStringList         _contributors;      /** List of contributors */
     QStringList         _downloadUrls;      /** Action download URLs */
     ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
+    PageSubActionPtrs   _subActions;        /** Sub-actions that are shown when hovering the action */
 
     static bool compactView;
 };

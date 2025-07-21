@@ -250,7 +250,7 @@ private:
     QUrl            _projectsJsonDsn;           /** Data Source Name (DSN) of the projects JSON file, used for loading the project */ 
 };
 
-using ProjectsModelProjectPtr = std::shared_ptr<ProjectsModelProject>;
-using ProjectDatabaseProjects = std::vector<ProjectsModelProjectPtr>;
+using ProjectsModelProjectPtr   = std::shared_ptr<ProjectsModelProject>;
+using ProjectsModelProjectPtrs  = std::vector<ProjectsModelProjectPtr>;
 
 }

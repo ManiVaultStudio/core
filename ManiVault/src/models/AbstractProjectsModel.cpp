@@ -234,7 +234,7 @@ const ProjectsModelProject* AbstractProjectsModel::getProject(const QModelIndex&
     return itemAtIndex->getProject();
 }
 
-const ProjectDatabaseProjects& AbstractProjectsModel::getProjects() const
+const ProjectsModelProjectPtrs& AbstractProjectsModel::getProjects() const
 {
 	return _projects;
 }

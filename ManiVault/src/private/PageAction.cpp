@@ -22,6 +22,21 @@ PageAction::PageAction(const QModelIndex& index)
     setEditorData(index);
 }
 
+void PageAction::addSubAction(const PageSubActionPtr& subAction)
+{
+	_subActions.push_back(subAction);
+}
+
+void PageAction::removeSubAction(const PageSubActionPtr& subAction)
+{
+    _subActions.erase(std::ranges::remove(_subActions, subAction).begin(), _subActions.end());
+}
+
+void PageAction::clearSubActions()
+{
+	_subActions.clear();
+}
+
 void PageAction::setEditorData(const QModelIndex& index)
 {
     setIcon(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Icon)).data(Qt::UserRole + 1).value<QIcon>());
