@@ -194,6 +194,11 @@ QString ProjectsModelProject::getSha() const
 	return _sha;
 }
 
+QUrl ProjectsModelProject::getDsn() const
+{
+    return _dsn;
+}
+
 void ProjectsModelProject::updateMetadata()
 {
     determineDownloadSize();
