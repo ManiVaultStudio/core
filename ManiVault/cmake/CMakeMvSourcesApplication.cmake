@@ -350,7 +350,8 @@ set(PRIVATE_PAGES_COMMON_HEADERS
     src/private/PageContentWidget.h
     src/private/LogoWidget.h
 	src/private/PageActionsWidget.h
-    src/private/PageActionsModel.h
+    src/private/AbstractPageActionsModel.h
+    src/private/PageActionsTreeModel.h
     src/private/PageActionsFilterModel.h
     src/private/PageActionDelegate.h
     src/private/PageActionDelegateEditorWidget.h
@@ -365,7 +366,8 @@ set(PRIVATE_PAGES_COMMON_SOURCES
     src/private/PageContentWidget.cpp
     src/private/LogoWidget.cpp
 	src/private/PageActionsWidget.cpp
-    src/private/PageActionsModel.cpp
+    src/private/AbstractPageActionsModel.cpp
+    src/private/PageActionsTreeModel.cpp
     src/private/PageActionsFilterModel.cpp
     src/private/PageActionDelegate.cpp
     src/private/PageActionDelegateEditorWidget.cpp

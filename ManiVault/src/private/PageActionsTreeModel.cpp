@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "PageActionsModel.h"
+#include "PageActionsTreeModel.h"
 
 #include "PageAction.h"
 
@@ -10,43 +10,16 @@
 #include <QStandardItem>
 
 #ifdef _DEBUG
-    //#define PAGE_ACTIONS_MODEL_VERBOSE
+    //#define PAGE_ACTIONS_TREE_MODEL_VERBOSE
 #endif
 
-QMap<PageActionsModel::Column, QPair<QString, QString>> PageActionsModel::columns = QMap<Column, QPair<QString, QString>>({
-    { Column::Icon, { "Icon", "Icon" }},
-    { Column::Title, { "Title", "Title" }},
-    { Column::Description, { "Description", "Description" }},
-    { Column::Comments, { "Comments", "Comments" }},
-    { Column::Tags, { "Tags", "Tags" }},
-    { Column::MetaData, { "Meta Data", "Meta Data" }},
-    { Column::PreviewImage, { "Preview", "Preview image" }},
-    { Column::Tooltip, { "Tooltip", "Tooltip" }},
-    { Column::DownloadUrls, { "Download URLs", "Download URLs" }},
-    { Column::Contributors, { "Contributors", "Contributors" }},
-    { Column::ClickedCallback, { "Clicked Callback", "Callback which is called when the action is clicked" }},
-    { Column::SummaryDelegate, { "Summary", "Delegate item with title and subtitle" }}
-});
-
-PageActionsModel::PageActionsModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+void PageActionsTreeModel::add(const PageActionSharedPtr& pageAction)
 {
-    for (const auto& column : columns.keys()) {
-        auto columnItem = new QStandardItem(columns[column].first);
-        
-        columnItem->setToolTip(columns[column].second);
-
-        setHorizontalHeaderItem(static_cast<int>(column), columnItem);
-    }
-}
-
-void PageActionsModel::add(const PageAction& pageAction)
-{
-#ifdef PAGE_ACTIONS_MODEL_VERBOSE
+#ifdef PAGE_ACTIONS_TREE_MODEL_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    QList<QStandardItem*> pageActionRow = {
+    /*QList<QStandardItem*> pageActionRow = {
         new QStandardItem(),
         new QStandardItem(pageAction.getTitle()),
         new QStandardItem(pageAction.getDescription()),
@@ -72,12 +45,10 @@ void PageActionsModel::add(const PageAction& pageAction)
     for (auto item : pageActionRow)
         item->setEditable(false);
 
-    appendRow(pageActionRow);
+    appendRow(pageActionRow);*/
 }
 
-void PageActionsModel::reset()
+void PageActionsTreeModel::remove(const PageActionSharedPtr& pageAction)
 {
-    removeRows(0, rowCount());
 
-    emit layoutChanged();
 }

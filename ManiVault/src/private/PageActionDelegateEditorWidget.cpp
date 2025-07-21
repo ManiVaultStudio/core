@@ -86,6 +86,8 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
         _infoLayout.addWidget(&_tagsIconLabel);
         _infoLayout.addWidget(&_downloadUrls);
         _infoLayout.addWidget(&_contributorsIconLabel);
+
+        //for (auto& subAction : _)
         _infoLayout.addStretch(1);
 
         _infoWidget.setLayout(&_infoLayout);

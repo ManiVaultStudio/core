@@ -6,7 +6,6 @@
 
 #include "PageAction.h"
 #include "PageContentWidget.h"
-#include "PageActionsModel.h"
 #include "PageActionDelegate.h"
 
 #include "CoreInterface.h"
@@ -40,7 +39,7 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
 
     setLayout(&_layout);
 
-    _filterModel.setFilterKeyColumn(static_cast<int>(PageActionsModel::Column::Title));
+    _filterModel.setFilterKeyColumn(static_cast<int>(AbstractPageActionsModel::Column::Title));
 
     _hierarchyWidget.getFilterGroupAction().setVisible(false);
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
@@ -54,42 +53,27 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setRootIsDecorated(false);
-    treeView.setItemDelegateForColumn(static_cast<int>(PageActionsModel::Column::SummaryDelegate), new PageActionDelegate());
+    //treeView.setItemDelegateForColumn(static_cast<int>(AbstractPageActionsModel::Column::Title), new PageActionDelegate());
     treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
     treeView.setMouseTracking(true);
     treeView.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Icon), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Title), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Description), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Comments), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Tags), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Subtitle), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::MetaData), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::PreviewImage), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Tooltip), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::DownloadUrls), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::Contributors), true);
-    treeView.setColumnHidden(static_cast<int>(PageActionsModel::Column::ClickedCallback), true);
-
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
-
-    treeViewHeader->setSectionResizeMode(static_cast<int>(PageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
 
     updateCustomStyle();
 
     connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, this, &PageActionsWidget::updateCustomStyle);
 
-    connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
-        auto callback = index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<PageAction::ClickedCallback>();
-        callback();
+    //connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
+    //    auto callback = index.siblingAtColumn(static_cast<int>(AbstractPageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<PageAction::ClickedCallback>();
+    //    callback();
 
-        _hierarchyWidget.getSelectionModel().clear();
-    });
+    //    _hierarchyWidget.getSelectionModel().clear();
+    //});
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
@@ -109,7 +93,7 @@ QVBoxLayout& PageActionsWidget::getLayout()
     return _layout;
 }
 
-PageActionsModel& PageActionsWidget::getModel()
+PageActionsTreeModel& PageActionsWidget::getModel()
 {
     return _model;
 }
@@ -126,7 +110,7 @@ HierarchyWidget& PageActionsWidget::getHierarchyWidget()
 
 void PageActionsWidget::openPersistentEditor(int rowIndex)
 {
-    const auto index = _filterModel.index(rowIndex, static_cast<int>(PageActionsModel::Column::SummaryDelegate));
+    const auto index = _filterModel.index(rowIndex, static_cast<int>(PageActionsTreeModel::Column::Title));
 
     if (_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
         return;
@@ -142,7 +126,7 @@ void PageActionsWidget::openPersistentEditor(int rowIndex)
 
 void PageActionsWidget::closePersistentEditor(int rowIndex)
 {
-    const auto index = _filterModel.index(rowIndex, static_cast<int>(PageActionsModel::Column::SummaryDelegate));
+    const auto index = _filterModel.index(rowIndex, static_cast<int>(PageActionsTreeModel::Column::Title));
 
     if (!_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
         return;

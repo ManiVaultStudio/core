@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "PageActionsModel.h"
+#include "PageActionsTreeModel.h"
 #include "PageActionsFilterModel.h"
 
 #include <util/Serializable.h>
@@ -42,7 +42,7 @@ public:
      * Get model
      * @return Reference to model
      */
-    PageActionsModel& getModel();
+    PageActionsTreeModel& getModel();
 
     /**
      * Get filter model
@@ -89,7 +89,7 @@ public: // Serialization
 
 private:
     QVBoxLayout                 _layout;            /** Main layout */
-    PageActionsModel            _model;             /** Model which contains start page actions */
+    PageActionsTreeModel        _model;             /** Model which contains start page actions */
     PageActionsFilterModel      _filterModel;       /** Model for filtering and sorting start page actions */
     mv::gui::HierarchyWidget    _hierarchyWidget;   /** Widget for displaying the actions */
     bool                        _restyle;           /** Remember whether the restyle flag was set upon creation */

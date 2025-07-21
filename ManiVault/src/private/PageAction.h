@@ -87,10 +87,18 @@ public: // Getters and setters
 public: // Sub-actions
 
     /**
-     * Add \p subAction
-     * @param subAction Shared pointer to sub-action
+     * Create subAction of \p SubActionType with arguments \p args and add it to the sub-actions list
+     * @param args Arguments to pass to the sub-action constructor
      */
-    void addSubAction(const PageSubActionPtr& subAction);
+    template<typename SubActionType, typename... Args>
+    std::shared_ptr<SubActionType> createSubAction(Args&&... args)
+    {
+        auto sharedSubAction = std::make_shared<SubActionType>(std::forward<Args>(args)...);
+
+        _subActions.push_back(sharedSubAction);
+
+        return sharedSubAction;
+    }
 
     /**
      * Remove \p subAction
@@ -141,4 +149,5 @@ protected:
     static bool compactView;
 };
 
-using PageActions = QList<PageAction>;
+using PageActionSharedPtr     = std::shared_ptr<PageAction>;
+using PageActionSharedPtrs    = std::vector<PageActionSharedPtr>;
