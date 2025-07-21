@@ -5,21 +5,30 @@
 #include "AbstractProjectsModel.h"
 
 #include "util/Miscellaneous.h"
+#include "util/JSON.h"
+
+#include <nlohmann/json.hpp>
+
+#include <QJsonObject>
+#include <QJsonArray>
 
 #ifdef _DEBUG
     //#define ABSTRACT_PROJECTS_MODEL_VERBOSE
 #endif
 
+#define ABSTRACT_PROJECTS_MODEL_VERBOSE
+
 using namespace mv::util;
 using namespace mv::gui;
+
+using nlohmann::json;
 
 namespace mv {
 
 AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
     StandardItemModel(parent, "Projects", populationMode),
     _dsnsAction(this, "Data Source Names"),
-    _editDsnsAction(this, "Edit projects sources..."),
-    _isPopulating(false)
+    _editDsnsAction(this, "Edit projects sources...")
 {
     setColumnCount(static_cast<int>(Column::Count));
 
@@ -33,14 +42,22 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
     _dsnsAction.setSettingsPrefix("Models/Projects/DSNs");
 
     if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
-        connect(&getDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::requestPopulateFromDsns);
 
-        connect(core(), &CoreInterface::initialized, this, [this]() -> void {
-            populateFromPluginDsns();
+        connect(&getDsnsAction(), &StringsAction::stringsAdded, this, [this](const QStringList& addedStrings) -> void {
+            for (const auto& addedString : addedStrings)
+                addDsn(addedString);
         });
 
+        connect(&getDsnsAction(), &StringsAction::stringsRemoved, this, [this](const QStringList& removedStrings) -> void {
+            for (const auto& removedString : removedStrings)
+                removeDsn(removedString);
+        });
+
+        /*connect(&getDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::requestPopulateFromDsns);
+        connect(core(), &CoreInterface::initialized, this, &AbstractProjectsModel::requestPopulateFromDsns);
+
         for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-            connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::populateFromPluginDsns);
+            connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::requestPopulateFromDsns);*/
     }
 
     _editDsnsAction.setIconByName("gear");
@@ -132,87 +149,292 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
     return {};
 }
 
-void AbstractProjectsModel::requestPopulateFromDsns()
+void AbstractProjectsModel::addProjectGroup(const QString& groupTitle, const QUrl& projectsJsonDsn)
 {
-    if (beginPopulateFromDsns())
-		populateFromDsns();
-}
+    try {
+#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
+        qDebug() << __FUNCTION__ << groupTitle;
+#endif
 
-QSet<QString> AbstractProjectsModel::getTagsSet() const
-{
-    return _tags;
-}
+        Q_ASSERT(!groupTitle.isEmpty());
 
-void AbstractProjectsModel::addProjectGroup(const QString& groupTitle)
-{
-    Q_ASSERT(!groupTitle.isEmpty());
+        if (groupTitle.isEmpty())
+            return;
 
-    if (groupTitle.isEmpty())
-        return;
+        auto project = std::make_shared<ProjectsModelProject>(groupTitle);
 
-    auto project = std::make_shared<ProjectsModelProject>(groupTitle);
+        project->setProjectsJsonDsn(projectsJsonDsn);
+        project->setParent(this);
 
-    project->setParent(this);
+        _projects.push_back(project);
 
-    _projects.push_back(project);
+        appendRow(Row(project.get()));
+        updateTags();
 
-    appendRow(Row(project.get()));
-    updateTags();
+        emit populated();
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << QString("Unable to add %1 to the projects tree model:").arg(groupTitle) << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << QString("Unable to add %1 to the projects tree model due to an unhandled exception").arg(groupTitle);
+    }
 }
 
 void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QString& groupTitle)
 {
-    Q_ASSERT(project);
+    try {
+        Q_ASSERT(project);
 
-    if (!project)
-        return;
+        if (!project)
+            return;
 
-    const auto duplicateMatches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
+        qDebug() << __FUNCTION__ << project->getTitle() << groupTitle;
+#endif
 
-    if (duplicateMatches.empty()) {
-        const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
-            const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
+        const auto duplicateMatches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
-            if (matches.size() == 1)
-                return matches.first().siblingAtColumn(static_cast<std::int32_t>(Column::Title));
+        if (duplicateMatches.empty()) {
+//#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
+//            qDebug() << "No duplicates for" << project->getTitle();
+//#endif
 
-            return {};
-        };
+            const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
+                const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
 
-        if (!groupTitle.isEmpty()) {
-            const auto existingProjectGroupIndex = findProjectGroupModelIndex();
+                if (matches.size() == 1)
+                    return matches.first().siblingAtColumn(static_cast<std::int32_t>(Column::Title));
 
-            if (existingProjectGroupIndex.isValid()) {
-                if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex)) {
-                    existingProjectGroupItem->appendRow(Row(project.get()));
+                return {};
+			};
+
+            if (!groupTitle.isEmpty()) {
+                const auto existingProjectGroupIndex = findProjectGroupModelIndex();
+
+                if (existingProjectGroupIndex.isValid()) {
+                    if (auto existingProjectGroupItem = itemFromIndex(existingProjectGroupIndex)) {
+                        existingProjectGroupItem->appendRow(Row(project.get()));
+                    }
+                }
+                else {
+                    addProjectGroup(groupTitle, project->getProjectsJsonDsn());
+
+                    const auto addedProjectGroupIndex = findProjectGroupModelIndex();
+
+                    if (addedProjectGroupIndex.isValid())
+                        if (auto addedProjectGroupItem = itemFromIndex(addedProjectGroupIndex))
+                            addedProjectGroupItem->appendRow(Row(project.get()));
                 }
             }
-            else {
-                addProjectGroup(groupTitle);
+            else
+            {
+                appendRow(Row(project.get()));
 
-                const auto addedProjectGroupIndex = findProjectGroupModelIndex();
+#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
+                qDebug() << "Appended row for" << project->getTitle() << "number of rows is now" << rowCount();
+#endif
+            }
 
-                if (addedProjectGroupIndex.isValid())
-                    if (auto addedProjectGroupItem = itemFromIndex(addedProjectGroupIndex))
-                        addedProjectGroupItem->appendRow(Row(project.get()));
+            updateTags();
+
+            project->setParent(this);
+            project->updateMetadata();
+
+            _projects.push_back(project);
+        }
+        else {
+//#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
+//            qDebug() << "Found duplicates for" << project->getTitle();
+//#endif
+
+            const auto duplicateIndex = duplicateMatches.first();
+
+            removeRow(duplicateIndex.row(), duplicateIndex.parent());
+            addProject(project, groupTitle);
+        }
+
+        emit populated();
+
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << QString("Unable to add %1 to the projects tree model:").arg(groupTitle) << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << QString("Unable to add %1 to the projects tree model due to an unhandled exception").arg(groupTitle);
+    }
+}
+
+void AbstractProjectsModel::removeProject(const util::ProjectsModelProjectPtr& project)
+{
+    try {
+#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
+        qDebug() << __FUNCTION__ << project->getTitle();
+#endif
+
+        const auto modelIndices = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+        for (const auto& modelIndex : modelIndices)
+            removeRow(modelIndex.siblingAtColumn(0).row(), modelIndex.parent());
+
+        emit populated();
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << QString("Unable to remove %1 from the projects tree model:").arg(project->getTitle()) << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << QString("Unable to remove %1 from the projects tree model due to an unhandled exception").arg(project->getTitle());
+    }
+}
+
+void AbstractProjectsModel::addDsn(const QUrl& dsn)
+{
+    try {
+#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
+        qDebug() << __FUNCTION__ << dsn;
+#endif
+
+        if (getPopulationMode() == PopulationMode::Automatic) {
+            for (const auto& dsn : getDsnsAction().getStrings()) {
+                const auto dsnIndex = getDsnsAction().getStrings().indexOf(dsn);
+
+                FileDownloader::downloadToByteArrayAsync(dsn)
+                    .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
+	                    try {
+	                        populateFromJsonByteArray(data, dsnIndex, dsn);
+	                    }
+	                    catch (std::exception& e)
+	                    {
+	                        qCritical() << "Unable to add projects from DSN:" << e.what();
+	                    }
+	                    catch (...)
+	                    {
+	                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
+	                    }
+					})
+                    .onFailed(this, [this, dsn](const QException& e) {
+						qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
+					});
             }
         }
-        else
-        {
-            appendRow(Row(project.get()));
+
+        if (getPopulationMode() == PopulationMode::AutomaticSynchronous) {
+            for (const auto& dsn : getDsnsAction().getStrings()) {
+                try {
+                    const auto data = FileDownloader::downloadToByteArraySync(dsn);
+
+                    populateFromJsonByteArray(data, getDsnsAction().getStrings().indexOf(dsn), dsn);
+                }
+                catch (std::exception& e)
+                {
+                    qCritical() << "Unable to add projects from DSN:" << e.what();
+                }
+                catch (...)
+                {
+                    qCritical() << "Unable to add projects from DSN due to an unhandled exception";
+                }
+            }
+        }
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << QString("Unable to add %1 to the projects tree model:").arg(dsn.toDisplayString()) << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << QString("Unable to add %1 to the projects tree model due to an unhandled exception").arg(dsn.toDisplayString());
+    }
+}
+
+void AbstractProjectsModel::removeDsn(const QUrl& dsn)
+{
+    try {
+#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
+    qDebug() << __FUNCTION__ << dsn;
+#endif
+
+	    for (const auto& project : _projects)
+	        if (project->getProjectsJsonDsn() == dsn)
+	            removeProject(project);
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << QString("Unable to add %1 to the projects tree model:").arg(dsn.toDisplayString()) << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << QString("Unable to add %1 to the projects tree model due to an unhandled exception").arg(dsn.toDisplayString());
+    }
+}
+
+void AbstractProjectsModel::populateFromJsonByteArray(const QByteArray& jsonByteArray, std::int32_t dsnIndex, const QString& jsonLocation)
+{
+    try {
+        if (jsonByteArray.isEmpty())
+            throw std::runtime_error("JSON byte array is empty");
+
+        const auto fullJson = json::parse(QString::fromUtf8(jsonByteArray.constData()).toStdString());
+
+        if (fullJson.contains("projects")) {
+            validateJson(fullJson["projects"].dump(), jsonLocation.toStdString(), loadJsonFromResource(":/JSON/ProjectsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
+        }
+        else {
+            throw std::runtime_error("/projects key is missing");
         }
 
-        updateTags();
+        QJsonParseError jsonParseError;
 
-        project->setParent(this);
-        project->updateMetadata();
+        const auto jsonDocument = QJsonDocument::fromJson(jsonByteArray, &jsonParseError);
 
-        _projects.push_back(project);
-    } else {
-        const auto duplicateIndex = duplicateMatches.first();
+        if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject())
+            throw std::runtime_error(QString("Invalid JSON from DSN at index %1: %2").arg(QString::number(dsnIndex), jsonParseError.errorString()).toStdString());
 
-        removeRow(duplicateIndex.row(), duplicateIndex.parent());
-        addProject(project, groupTitle);
+        const auto projects = jsonDocument.object()["projects"].toArray();
+
+        for (const auto project : projects) {
+            auto projectMap = project.toVariant().toMap();
+
+            projectMap["projectsJsonDsn"] = QUrl(jsonLocation);
+
+            addProject(std::make_shared<ProjectsModelProject>(projectMap), projectMap["group"].toString());
+        }
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << "Unable to populate projects model from JSON content:" << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << "Unable to populate projects model from JSON content due to an unhandled exception";
+    }
+}
+
+void AbstractProjectsModel::populateFromJsonFile(const QString& filePath)
+{
+    try {
+        if (filePath.isEmpty())
+            throw std::runtime_error("JSON file path is empty");
+
+        QFile file(filePath);
+
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            throw std::runtime_error(QString("Failed to open file: %1").arg(file.errorString()).toStdString());
+
+        populateFromJsonByteArray(file.readAll(), -1, filePath);
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << "Unable to populate projects tree model from JSON file:" << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << "Unable to populate projects tree model from JSON file due to an unhandled exception";
     }
 }
 
@@ -223,6 +445,11 @@ void AbstractProjectsModel::updateTags()
             _tags.insert(tag);
 
     emit tagsChanged(_tags);
+}
+
+QSet<QString> AbstractProjectsModel::getTagsSet() const
+{
+    return _tags;
 }
 
 const ProjectsModelProject* AbstractProjectsModel::getProject(const QModelIndex& index) const
@@ -244,46 +471,7 @@ const ProjectsModelProject* AbstractProjectsModel::getProject(const QModelIndex&
 
 const ProjectsModelProjectPtrs& AbstractProjectsModel::getProjects() const
 {
-	return _projects;
-}
-
-void AbstractProjectsModel::purgeRedundantRows()
-{
-    for (const auto& project : _projects)
-        if (!_dsnsAction.getStrings().contains(project->getProjectsJsonDsn()))
-            removeProject(project);
-}
-
-void AbstractProjectsModel::removeProject(const util::ProjectsModelProjectPtr& project)
-{
-	const auto modelIndices = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
-
-    for (const auto& modelIndex : modelIndices)
-    	removeRow(modelIndex.siblingAtColumn(0).row(), modelIndex.parent());
-}
-
-bool AbstractProjectsModel::beginPopulateFromDsns()
-{
-    if (_isPopulating)
-        return false;
-
-	emit aboutToPopulateFromDsns();
-
-	_isPopulating = true;
-
-    return true;
-}
-
-bool AbstractProjectsModel::endPopulateFromDsns()
-{
-    if (!_isPopulating)
-        return false;
-
-    emit populatedFromDsns();
-
-    _isPopulating = false;
-
-    return true;
+    return _projects;
 }
 
 AbstractProjectsModel::Item::Item(const mv::util::ProjectsModelProject* project, bool editable /*= false*/) :

@@ -780,20 +780,14 @@ public:
      */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    /** Request population from Data Source Names */
-    void requestPopulateFromDsns();
-
-    /**
-     * Get tags
-     * @return All tags
-     */
-    QSet<QString> getTagsSet() const;
+public: // Add/remove projects
 
     /**
      * Add project group with \p groupTitle
      * @param groupTitle Title of the group
+     * @param projectsJsonDsn Data Source Name (DSN) of the projects JSON file to populate from
      */
-    void addProjectGroup(const QString& groupTitle = "");
+    void addProjectGroup(const QString& groupTitle, const QUrl& projectsJsonDsn);
 
     /**
      * Add \p project
@@ -802,10 +796,56 @@ public:
      */
     void addProject(util::ProjectsModelProjectPtr project, const QString& groupTitle = "");
 
+    /**
+     * Remove \p project from the model
+     * @param project Project to remove
+     */
+    void removeProject(const util::ProjectsModelProjectPtr& project);
+
+private: // Add/remove DSNs
+
+    /**
+     * Add \dsn to the model
+     * @param dsn Data Source Name (DSN) to add
+     */
+    void addDsn(const QUrl& dsn);
+
+    /**
+     * Remove \dsn from the model
+     * @param dsn Data Source Name (DSN) to remove
+     */
+    void removeDsn(const QUrl& dsn);
+
+public: // Population
+
+    /**
+     * Populate the model from the Data Source Names (DSN)
+     * @param jsonByteArray Byte array containing the JSON data to populate from
+     * @param dsnIndex Index of the DSN to populate from
+     * @param jsonLocation Location of the JSON file
+     */
+    void populateFromJsonByteArray(const QByteArray& jsonByteArray, std::int32_t dsnIndex, const QString& jsonLocation);
+
+    /**
+     * Populate the model from a JSON file at \p filePath
+     * @param filePath Path to the JSON file containing the projects data
+     */
+    void populateFromJsonFile(const QString& filePath);
+
+public: // Tags
+
     /** Builds a set of all project tags and emits ProjectDatabaseModel::tagsChanged(...) */
     void updateTags();
 
     /**
+     * Get tags
+     * @return All tags
+     */
+    QSet<QString> getTagsSet() const;
+
+public: // Project getters
+
+	/**
      * Get the project at \p index
      * @return Project at index
      */
@@ -819,26 +859,8 @@ public:
 
 protected:
 
-    /** Remove redundant rows from the model (of which the projects DSN is not in AbstractProjectsModel#_dsnsAction anymore) */
-    void purgeRedundantRows();
-
-    /**
-     * Remove \p project from the model
-     * @param project Project to remove
-     */
-    void removeProject(const util::ProjectsModelProjectPtr& project);
-
-    /** Begin populate from Data Source Names */
-    bool beginPopulateFromDsns();
-
-    /** End populate from Data Source Names */
-    bool endPopulateFromDsns();
-
     /** Synchronize the model with the content of all Data Source Names (DSN) */
     virtual void populateFromDsns() = 0;
-
-    /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
-    virtual void populateFromPluginDsns() = 0;
 
 public: // Action getters
 
@@ -859,15 +881,14 @@ signals:
     /** Signals that the model is about to be populated from DSNs */
     void aboutToPopulateFromDsns();
 
-    /** Signals that the model has bee populated from DSNs */
-    void populatedFromDsns();
+    /** Signals that the model has been re-populated */
+    void populated();
 
 private:
     util::ProjectsModelProjectPtrs  _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
     gui::StringsAction              _dsnsAction;        /** Data source names action */
     gui::TriggerAction              _editDsnsAction;    /** Edit data source names action */
-    bool                            _isPopulating;      /** Whether the model is currently populating its content from the Data Source Names (DSN) or not */
 };
 
 }
