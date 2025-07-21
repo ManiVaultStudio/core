@@ -780,11 +780,8 @@ public:
      */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    /** Synchronize the model with the content of all Data Source Names (DSN) */
-    virtual void populateFromDsns() = 0;
-
-    /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
-    virtual void populateFromPluginDsns() = 0;
+    /** Request population from Data Source Names */
+    void requestPopulateFromDsns();
 
     /**
      * Get tags
@@ -831,6 +828,18 @@ protected:
      */
     void removeProject(const util::ProjectsModelProjectPtr& project);
 
+    /** Begin populate from Data Source Names */
+    bool beginPopulateFromDsns();
+
+    /** End populate from Data Source Names */
+    bool endPopulateFromDsns();
+
+    /** Synchronize the model with the content of all Data Source Names (DSN) */
+    virtual void populateFromDsns() = 0;
+
+    /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
+    virtual void populateFromPluginDsns() = 0;
+
 public: // Action getters
 
     gui::StringsAction& getDsnsAction() { return _dsnsAction; }
@@ -847,11 +856,18 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
+    /** Signals that the model is about to be populated from DSNs */
+    void aboutToPopulateFromDsns();
+
+    /** Signals that the model has bee populated from DSNs */
+    void populatedFromDsns();
+
 private:
     util::ProjectsModelProjectPtrs  _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
     gui::StringsAction              _dsnsAction;        /** Data source names action */
     gui::TriggerAction              _editDsnsAction;    /** Edit data source names action */
+    bool                            _isPopulating;      /** Whether the model is currently populating its content from the Data Source Names (DSN) or not */
 };
 
 }

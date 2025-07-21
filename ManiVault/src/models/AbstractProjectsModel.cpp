@@ -18,7 +18,8 @@ namespace mv {
 AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMode /*= PopulationMode::Automatic*/, QObject* parent /*= nullptr*/) :
     StandardItemModel(parent, "Projects", populationMode),
     _dsnsAction(this, "Data Source Names"),
-    _editDsnsAction(this, "Edit projects sources...")
+    _editDsnsAction(this, "Edit projects sources..."),
+    _isPopulating(false)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
@@ -32,7 +33,7 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
     _dsnsAction.setSettingsPrefix("Models/Projects/DSNs");
 
     if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
-        connect(&getDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::populateFromDsns);
+        connect(&getDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::requestPopulateFromDsns);
 
         connect(core(), &CoreInterface::initialized, this, [this]() -> void {
             populateFromPluginDsns();
@@ -129,6 +130,12 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
     }
 
     return {};
+}
+
+void AbstractProjectsModel::requestPopulateFromDsns()
+{
+    if (beginPopulateFromDsns())
+		populateFromDsns();
 }
 
 QSet<QString> AbstractProjectsModel::getTagsSet() const
@@ -253,6 +260,30 @@ void AbstractProjectsModel::removeProject(const util::ProjectsModelProjectPtr& p
 
     for (const auto& modelIndex : modelIndices)
     	removeRow(modelIndex.siblingAtColumn(0).row(), modelIndex.parent());
+}
+
+bool AbstractProjectsModel::beginPopulateFromDsns()
+{
+    if (_isPopulating)
+        return false;
+
+	emit aboutToPopulateFromDsns();
+
+	_isPopulating = true;
+
+    return true;
+}
+
+bool AbstractProjectsModel::endPopulateFromDsns()
+{
+    if (!_isPopulating)
+        return false;
+
+    emit populatedFromDsns();
+
+    _isPopulating = false;
+
+    return true;
 }
 
 AbstractProjectsModel::Item::Item(const mv::util::ProjectsModelProject* project, bool editable /*= false*/) :
