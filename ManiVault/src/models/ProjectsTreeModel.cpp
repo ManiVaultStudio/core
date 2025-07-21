@@ -53,9 +53,13 @@ void ProjectsTreeModel::populateFromDsns()
 	                    {
 	                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
 	                    }
+
+                        endPopulateFromDsns();
 					})
                     .onFailed(this, [this, dsn](const QException& e) {
 						qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
+
+                        endPopulateFromDsns();
 					});
             }
 
@@ -69,6 +73,8 @@ void ProjectsTreeModel::populateFromDsns()
                     const auto data = FileDownloader::downloadToByteArraySync(dsn);
 
                     populateFromJsonByteArray(data, getDsnsAction().getStrings().indexOf(dsn), dsn);
+
+                    endPopulateFromDsns();
                 }
                 catch (std::exception& e)
                 {

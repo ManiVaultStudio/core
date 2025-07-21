@@ -132,6 +132,7 @@ void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
     };
 
     connect(_projectDatabaseModel, &AbstractProjectsModel::tagsChanged, this, updateTags);
+    connect(_projectDatabaseModel, &AbstractProjectsModel::populatedFromDsns, this, &SortFilterProxyModel::invalidate);
 
     updateTags();
 }
