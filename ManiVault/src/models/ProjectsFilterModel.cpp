@@ -113,6 +113,8 @@ bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
     } else {
         return hasAcceptedChildren(index);
     }
+
+    return true;
 }
 
 void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
@@ -132,7 +134,9 @@ void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
     };
 
     connect(_projectDatabaseModel, &AbstractProjectsModel::tagsChanged, this, updateTags);
-    connect(_projectDatabaseModel, &AbstractProjectsModel::populatedFromDsns, this, &SortFilterProxyModel::invalidate);
+    connect(_projectDatabaseModel, &AbstractProjectsModel::populated, this, &SortFilterProxyModel::invalidate);
+    //connect(_projectDatabaseModel, &AbstractProjectsModel::rowsRemoved, this, &SortFilterProxyModel::invalidate);
+    //connect(_projectDatabaseModel, &AbstractProjectsModel::rowsInserted, this, &SortFilterProxyModel::invalidate);
 
     updateTags();
 }
