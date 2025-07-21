@@ -242,7 +242,6 @@ void ProjectManager::initialize()
 
     beginInitialization();
     {
-        _projectsTreeModel.populateFromPluginDsns();
     }
     endInitialization();
 }
