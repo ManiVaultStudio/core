@@ -25,25 +25,8 @@ using nlohmann::json;
 namespace mv {
 
 ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mode::Automatic*/, QObject* parent /*= nullptr*/) :
-    AbstractProjectsModel(populationMode, parent),
-    _dsnsAction(this, "Data Source Names")
+    AbstractProjectsModel(populationMode, parent)
 {
-    _dsnsAction.setIconByName("globe");
-    _dsnsAction.setToolTip("Projects Data Source Names (DSN)");
-    _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
-    _dsnsAction.setPopupSizeHint(QSize(550, 100));
-
-    if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
-        connect(&_dsnsAction, &StringsAction::stringsChanged, this, &ProjectsTreeModel::populateFromDsns);
-
-        connect(core(), &CoreInterface::initialized, this, [this]() -> void {
-            populateFromPluginDsns();
-        });
-
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-            connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &ProjectsTreeModel::populateFromPluginDsns);
-    }
 }
 
 void ProjectsTreeModel::populateFromDsns()
@@ -54,8 +37,8 @@ void ProjectsTreeModel::populateFromDsns()
     switch (getPopulationMode()) {
 		case PopulationMode::Automatic:
 		{
-            for (const auto& dsn : _dsnsAction.getStrings()) {
-                const auto dsnIndex = _dsnsAction.getStrings().indexOf(dsn);
+            for (const auto& dsn : getDsnsAction().getStrings()) {
+                const auto dsnIndex = getDsnsAction().getStrings().indexOf(dsn);
 
                 FileDownloader::downloadToByteArrayAsync(dsn)
                     .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
@@ -71,7 +54,7 @@ void ProjectsTreeModel::populateFromDsns()
 	                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
 	                    }
 					})
-                    .onFailed(this, [this, dsn, dsnIndex](const QException& e) {
+                    .onFailed(this, [this, dsn](const QException& e) {
 						qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
 					});
             }
@@ -81,11 +64,11 @@ void ProjectsTreeModel::populateFromDsns()
 
         case PopulationMode::AutomaticSynchronous:
         {
-            for (const auto& dsn : _dsnsAction.getStrings()) {
+            for (const auto& dsn : getDsnsAction().getStrings()) {
                 try {
                     const auto data = FileDownloader::downloadToByteArraySync(dsn);
 
-                    populateFromJsonByteArray(data, _dsnsAction.getStrings().indexOf(dsn), dsn);
+                    populateFromJsonByteArray(data, getDsnsAction().getStrings().indexOf(dsn), dsn);
                 }
                 catch (std::exception& e)
                 {
@@ -103,6 +86,8 @@ void ProjectsTreeModel::populateFromDsns()
         case PopulationMode::Manual:
             break;
     }
+
+    purgeRedundantRows();
 }
 
 void ProjectsTreeModel::populateFromPluginDsns()
@@ -118,7 +103,8 @@ void ProjectsTreeModel::populateFromPluginDsns()
 
         uniqueDsns.removeDuplicates();
 
-        _dsnsAction.setStrings(uniqueDsns);
+        getDsnsAction().setStrings(uniqueDsns);
+        getDsnsAction().setLockedStrings(uniqueDsns);
 	}
 	catch (std::exception& e)
 	{
@@ -156,6 +142,8 @@ void ProjectsTreeModel::populateFromJsonByteArray(const QByteArray& jsonByteArra
 
         for (const auto project : projects) {
             auto projectMap = project.toVariant().toMap();
+
+            projectMap["projectsJsonDsn"] = QUrl(jsonLocation);
 
             addProject(std::make_shared<ProjectsModelProject>(projectMap), projectMap["group"].toString());
         }

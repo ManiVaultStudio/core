@@ -27,8 +27,8 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
-	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false)
-
+	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false),
+	_projectsJsonDsn(variantMap.contains("projectsJsonDsn") ? variantMap["projectsJsonDsn"].toUrl() : QUrl())
 {
     if (variantMap.contains("coreVersion")) {
         const auto coreVersionMap = variantMap["coreVersion"].toMap();
@@ -192,6 +192,16 @@ QString ProjectsModelProject::getSha() const
     const_cast<ProjectsModelProject*>(this)->computeSha();
 
 	return _sha;
+}
+
+QUrl ProjectsModelProject::getProjectsJsonDsn() const
+{
+    return _projectsJsonDsn;
+}
+
+void ProjectsModelProject::setProjectsJsonDsn(const QUrl& projectsJsonDsn)
+{
+	_projectsJsonDsn = projectsJsonDsn;
 }
 
 void ProjectsModelProject::updateMetadata()

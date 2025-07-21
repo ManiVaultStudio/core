@@ -75,4 +75,9 @@ void ProjectsMenu::populate()
             }
         }
     }
+
+    if (!actions().isEmpty())
+        addSeparator();
+
+    addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getEditDsnsAction());
 }

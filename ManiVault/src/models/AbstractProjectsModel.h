@@ -694,6 +694,42 @@ protected:
         }
     };
 
+    /** Standard model item class for displaying to which projects JSON DSN a row belongs */
+    class ProjectsJsonDsnItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Projects DSN";
+
+	            case Qt::ToolTipRole:
+	                return "Projects Data Source Name";
+
+	            default:
+	                break;
+            }
+
+            return {};
+        }
+    };
+
     /** Convenience class for combining items in a row */
     class Row final : public QList<QStandardItem*>
     {
@@ -744,6 +780,12 @@ public:
      */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+    /** Synchronize the model with the content of all Data Source Names (DSN) */
+    virtual void populateFromDsns() = 0;
+
+    /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
+    virtual void populateFromPluginDsns() = 0;
+
     /**
      * Get tags
      * @return All tags
@@ -778,6 +820,25 @@ public:
      */
     const util::ProjectDatabaseProjects& getProjects() const;
 
+protected:
+
+    /** Remove redundant rows from the model (of which the projects DSN is not in AbstractProjectsModel#_dsnsAction anymore) */
+    void purgeRedundantRows();
+
+    /**
+     * Remove \p project from the model
+     * @param project Project to remove
+     */
+    void removeProject(const util::ProjectsModelProjectPtr& project);
+
+public: // Action getters
+
+    gui::StringsAction& getDsnsAction() { return _dsnsAction; }
+    gui::TriggerAction& getEditDsnsAction() { return _editDsnsAction; }
+
+    const gui::StringsAction& getDsnsAction() const { return _dsnsAction; }
+    const gui::TriggerAction& getEditDsnsAction() const { return _editDsnsAction; }
+
 signals:
 
     /**
@@ -789,6 +850,8 @@ signals:
 private:
     util::ProjectDatabaseProjects   _projects;          /** Model projects */
     QSet<QString>                   _tags;              /** All tags */
+    gui::StringsAction              _dsnsAction;        /** Data source names action */
+    gui::TriggerAction              _editDsnsAction;    /** Edit data source names action */
 };
 
 }

@@ -241,7 +241,7 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
     filterGroupAction.setPopupSizeHint(QSize(350, 0));
 
     stringsAction->getNameAction().setClearable(true);
-    stringsAction->getNameAction().setPlaceHolderString(QString("Enter %1 name here...").arg(stringsAction->getCategory().toLower()));
+    stringsAction->getNameAction().setPlaceHolderString(QString("Enter %1 here...").arg(stringsAction->getCategory().toLower()));
 
     stringsAction->getAddAction().setIconByName("plus");
     stringsAction->getAddAction().setToolTip(QString("Add entered %1").arg(stringsAction->getCategory().toLower()));
