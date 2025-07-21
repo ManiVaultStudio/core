@@ -64,6 +64,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _projectsFilterModel.setSourceModel(const_cast<ProjectsTreeModel*>(&mv::projects().getProjectsTreeModel()));
 
     connect(&_projectsFilterModel, &ProjectsTreeModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
+    connect(&_projectsFilterModel, &ProjectsTreeModel::rowsRemoved, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
     connect(&_projectsFilterModel, &ProjectsTreeModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
     
     setLayout(layout);

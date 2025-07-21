@@ -86,6 +86,8 @@ void ProjectsTreeModel::populateFromDsns()
         case PopulationMode::Manual:
             break;
     }
+
+    purgeRedundantRows();
 }
 
 void ProjectsTreeModel::populateFromPluginDsns()
@@ -145,8 +147,6 @@ void ProjectsTreeModel::populateFromJsonByteArray(const QByteArray& jsonByteArra
 
             addProject(std::make_shared<ProjectsModelProject>(projectMap), projectMap["group"].toString());
         }
-
-        purgeRedundantRows();
     }
     catch (std::exception& e)
     {
