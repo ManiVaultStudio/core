@@ -143,12 +143,12 @@ int main(int argc, char *argv[])
 
     auto shouldShowSplashScreen = true;
 
-    if (userWillSelectStartupProject) {
-        StartupProjectSelectorDialog startupProjectSelectorDialog(projectsTreeModel, startupProjectsFilterModel);
+    //if (userWillSelectStartupProject) {
+    //    StartupProjectSelectorDialog startupProjectSelectorDialog(projectsTreeModel, startupProjectsFilterModel);
 
-        if (startupProjectSelectorDialog.exec() == QDialog::Rejected)
-            return 0;
-    }
+    //    if (startupProjectSelectorDialog.exec() == QDialog::Rejected)
+    //        return 0;
+    //}
 
     SplashScreenAction splashScreenAction(&application, true);
 

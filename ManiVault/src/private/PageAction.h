@@ -57,6 +57,9 @@ public: // Getters and setters
     QString getDescription() const { return _description.isEmpty() ? "NA" : _description; }
     void setDescription(const QString& description) { _description = description; }
 
+    QString getParentTitle() const { return _parentTitle; }
+    void setParentTitle(const QString& parentTitle) { _parentTitle = parentTitle; }
+
     QString getComments() const { return _comments.isEmpty() ? "NA" : _comments; }
     void setComments(const QString& comments) { _comments = comments; }
 
@@ -135,6 +138,7 @@ protected:
     QIcon               _icon;              /** Action icon (shown on the left) */
     QString             _title;             /** Title is shown next to the icon */
     QString             _description;       /** Description is in the second row */
+    QString             _parentTitle;       /** Parent action title (if any) */
     QString             _comments;          /** Comments are show on the top right */
     QStringList         _tags;              /** Tags (might be empty) */
     QString             _subtitle;          /** Subtitle */

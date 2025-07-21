@@ -29,6 +29,7 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
     _dsnsAction.setPopupSizeHint(QSize(550, 100));
     _dsnsAction.setDefaultWidgetFlag(StringsAction::WidgetFlag::MayEdit);
     _dsnsAction.setCategory("Projects DSN");
+    _dsnsAction.setSettingsPrefix("Models/Projects/DSNs");
 
     if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
         connect(&getDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::populateFromDsns);
@@ -144,12 +145,12 @@ void AbstractProjectsModel::addProjectGroup(const QString& groupTitle)
 
     auto project = std::make_shared<ProjectsModelProject>(groupTitle);
 
-    appendRow(Row(project.get()));
-    updateTags();
-
     project->setParent(this);
 
     _projects.push_back(project);
+
+    appendRow(Row(project.get()));
+    updateTags();
 }
 
 void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QString& groupTitle)

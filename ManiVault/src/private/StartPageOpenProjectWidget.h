@@ -59,7 +59,7 @@ private:
     /** Update actions for opening recent projects */
     void updateRecentActions();
 
-    void updateProjectDatabaseActions();
+    void setupProjectsModelSynchronization();
 
     /** Create the custom drawn icons  */
     void createCustomIcons();
@@ -82,17 +82,18 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    StartPageContentWidget*         _startPageContentWidget;        /** Non-owning pointer to start page content widget */
-    PageActionsWidget               _openCreateProjectWidget;       /** Actions widget for open and create project action */
-    PageActionsWidget               _recentProjectsWidget;          /** Actions widget for existing projects action */
-    PageActionsWidget               _projectsWidget;                /** Actions widget for projects */
-    mv::gui::RecentFilesAction      _recentProjectsAction;          /** Action for recent projects */
-    QIcon                           _leftAlignedIcon;               /** Icon for left-aligned default project */
-    QIcon                           _leftAlignedLoggingIcon;        /** Icon for left-aligned default project with logging */
-    QIcon                           _rightAlignedIcon;              /** Icon for right-aligned default project */
-    QIcon                           _rightAlignedLoggingIcon;       /** Icon for right-aligned default project with logging */
-    mv::ProjectsFilterModel         _projectsFilterModel;           /** Filter model for project database */
-    mv::gui::VerticalGroupAction    _projectsSettingsAction;        /** Action for project database settings */
+    StartPageContentWidget*             _startPageContentWidget;        /** Non-owning pointer to start page content widget */
+    PageActionsWidget                   _openCreateProjectWidget;       /** Actions widget for open and create project action */
+    PageActionsWidget                   _recentProjectsWidget;          /** Actions widget for existing projects action */
+    PageActionsWidget                   _projectsWidget;                /** Actions widget for projects */
+    mv::gui::RecentFilesAction          _recentProjectsAction;          /** Action for recent projects */
+    QIcon                               _leftAlignedIcon;               /** Icon for left-aligned default project */
+    QIcon                               _leftAlignedLoggingIcon;        /** Icon for left-aligned default project with logging */
+    QIcon                               _rightAlignedIcon;              /** Icon for right-aligned default project */
+    QIcon                               _rightAlignedLoggingIcon;       /** Icon for right-aligned default project with logging */
+    mv::util::ProjectsModelProjectPtrs  _projects;                      /** Projects in the project database */
+    mv::ProjectsFilterModel             _projectsFilterModel;           /** Filter model for project database */
+    mv::gui::VerticalGroupAction        _projectsSettingsAction;        /** Action for project database settings */
 
     friend class StartPageContentWidget;
 };

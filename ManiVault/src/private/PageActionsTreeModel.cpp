@@ -19,33 +19,29 @@ void PageActionsTreeModel::add(const PageActionSharedPtr& pageAction)
     qDebug() << __FUNCTION__;
 #endif
 
-    /*QList<QStandardItem*> pageActionRow = {
-        new QStandardItem(),
-        new QStandardItem(pageAction.getTitle()),
-        new QStandardItem(pageAction.getDescription()),
-        new QStandardItem(pageAction.getComments()),
-        new QStandardItem(),
-        new QStandardItem(pageAction.getSubtitle()),
-        new QStandardItem(pageAction.getMetaData()),
-        new QStandardItem(),
-        new QStandardItem(pageAction.getTooltip()),
-        new QStandardItem(pageAction.getDownloadUrls().join(", ")),
-        new QStandardItem(),
-        new QStandardItem(),
-        new QStandardItem()
-    };
+    try {
+        if (!pageAction)
+            throw std::runtime_error("Page action is nullptr");
 
-    pageActionRow[static_cast<int>(Column::Icon)]->setData(QVariant::fromValue(pageAction.getIcon()));
-    pageActionRow[static_cast<int>(Column::Tags)]->setData(QVariant::fromValue(pageAction.getTags()), Qt::EditRole);
-    pageActionRow[static_cast<int>(Column::PreviewImage)]->setData(QVariant::fromValue(pageAction.getPreviewImage()));
-    pageActionRow[static_cast<int>(Column::Contributors)]->setData(QVariant::fromValue(pageAction.getContributors()));
-    pageActionRow[static_cast<int>(Column::DownloadUrls)]->setData(QVariant::fromValue(pageAction.getDownloadUrls()), Qt::EditRole);
-    pageActionRow[static_cast<int>(Column::ClickedCallback)]->setData(QVariant::fromValue(pageAction.getClickedCallback()));
+        if (pageAction->getParentTitle().isEmpty()) {
+            appendRow(new Item(pageAction));
+        } else {
+            const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, pageAction->getParentTitle(), 1, Qt::MatchExactly | Qt::MatchRecursive);
 
-    for (auto item : pageActionRow)
-        item->setEditable(false);
+            if (matches.isEmpty())
+                throw std::runtime_error(QString("Parent page action %1 not found").arg(pageAction->getParentTitle()).toStdString());
 
-    appendRow(pageActionRow);*/
+            itemFromIndex(matches.first())->appendRow(new Item(pageAction));
+        }
+    }
+    catch (std::exception& e)
+    {
+        qCritical() << QString("Unable to add %1 to the tree model:").arg(pageAction->getTitle()) << e.what();
+    }
+    catch (...)
+    {
+        qCritical() << QString("Unable to add %1 to the tree model due to an unhandled exception").arg(pageAction->getTitle());
+    }
 }
 
 void PageActionsTreeModel::remove(const PageActionSharedPtr& pageAction)

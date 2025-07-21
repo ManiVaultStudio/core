@@ -13,6 +13,19 @@
 using namespace mv;
 using namespace mv::gui;
 
+AbstractPageActionsModel::Item::Item(const PageActionSharedPtr& pageAction, bool editable) :
+	_pageAction(pageAction)
+{
+    setEditable(editable);
+    setIcon(pageAction->getIcon());
+    setText(pageAction->getTitle());
+}
+
+PageActionSharedPtr AbstractPageActionsModel::Item::getPageAction() const
+{
+    return _pageAction;
+}
+
 AbstractPageActionsModel::AbstractPageActionsModel(QObject* parent /*= nullptr*/) :
     StandardItemModel(parent)
 {

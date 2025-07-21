@@ -63,9 +63,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     _projectsFilterModel.setSourceModel(const_cast<ProjectsTreeModel*>(&mv::projects().getProjectsTreeModel()));
 
-    connect(&_projectsFilterModel, &ProjectsTreeModel::rowsInserted, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
-    connect(&_projectsFilterModel, &ProjectsTreeModel::rowsRemoved, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
-    connect(&_projectsFilterModel, &ProjectsTreeModel::layoutChanged, this, &StartPageOpenProjectWidget::updateProjectDatabaseActions);
+    setupProjectsModelSynchronization();
     
     setLayout(layout);
 
@@ -238,30 +236,57 @@ void StartPageOpenProjectWidget::updateRecentActions()
     }
 }
 
-void StartPageOpenProjectWidget::updateProjectDatabaseActions()
+void StartPageOpenProjectWidget::setupProjectsModelSynchronization()
 {
     _projectsWidget.getModel().reset();
-    
-    const auto& projectsTreeModel = mv::projects().getProjectsTreeModel();
 
-    for (int filterRowIndex = 0; _projectsFilterModel.rowCount() > filterRowIndex; ++filterRowIndex) {
-        const auto filterIndex = _projectsFilterModel.index(filterRowIndex, 0);
-        const auto sourceIndex = _projectsFilterModel.mapToSource(filterIndex);
+    auto& projectsTreeModel     = mv::projects().getProjectsTreeModel();
+    auto& projectsPageTreeModel = _projectsWidget.getModel();
 
-    	if (sourceIndex.isValid()) {
+    connect(&_projectsFilterModel, &QAbstractItemModel::layoutChanged, this, [this, &projectsTreeModel, &projectsPageTreeModel]() -> void {
+        projectsPageTreeModel.removeRows(0, projectsPageTreeModel.rowCount());
+
+        for (int filterRowIndex = 0; filterRowIndex <= _projectsFilterModel.rowCount(); ++filterRowIndex) {
+            const auto filterIndex = _projectsFilterModel.index(filterRowIndex, 0);
+	        const auto sourceIndex = _projectsFilterModel.mapToSource(filterIndex);
+
+        	if (!sourceIndex.isValid())
+                continue;
+            
             if (const auto project = projectsTreeModel.getProject(sourceIndex)) {
                 auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
                     projects().openProject(project->getUrl());
-				});
+                });
 
+                projectPageAction->setParentTitle(project->getGroup());
                 projectPageAction->setTags(project->getTags());
-
                 projectPageAction->createSubAction<PageCommentsSubAction>(sourceIndex);
 
-            	_projectsWidget.getModel().add(projectPageAction);
+                projectsPageTreeModel.add(projectPageAction);
+            }
+
+            const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex);
+
+            if (numberOfChildren >= 1) {
+                for (int childFilterRowIndex = 0; childFilterRowIndex <= numberOfChildren; ++childFilterRowIndex) {
+                    const auto childFilterIndex = _projectsFilterModel.index(childFilterRowIndex, 0, filterIndex);
+                    const auto childSourceIndex = _projectsFilterModel.mapToSource(childFilterIndex);
+
+                    if (const auto project = projectsTreeModel.getProject(childSourceIndex)) {
+                        auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
+                            projects().openProject(project->getUrl());
+                        });
+
+                        projectPageAction->setParentTitle(project->getGroup());
+                        projectPageAction->setTags(project->getTags());
+                        projectPageAction->createSubAction<PageCommentsSubAction>(sourceIndex);
+
+                        projectsPageTreeModel.add(projectPageAction);
+                    }
+                }
             }
         }
-    }
+    });
 }
 
 void StartPageOpenProjectWidget::createCustomIcons()

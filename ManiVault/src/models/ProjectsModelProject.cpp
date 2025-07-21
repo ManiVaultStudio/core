@@ -83,7 +83,7 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _title(groupTitle),
     _isGroup(true),
-    _group(groupTitle),
+    _group(),
     _iconName("folder"),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended)

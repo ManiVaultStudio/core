@@ -52,7 +52,7 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
     
     auto& treeView = _hierarchyWidget.getTreeView();
 
-    treeView.setRootIsDecorated(false);
+    //treeView.setRootIsDecorated(false);
     //treeView.setItemDelegateForColumn(static_cast<int>(AbstractPageActionsModel::Column::Title), new PageActionDelegate());
     treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
@@ -62,11 +62,11 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
 
     auto treeViewHeader = treeView.header();
 
-    treeViewHeader->setStretchLastSection(false);
+    treeViewHeader->setStretchLastSection(true);
 
-    updateCustomStyle();
+    //updateCustomStyle();
 
-    connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, this, &PageActionsWidget::updateCustomStyle);
+    //connect(&mv::theme(), &mv::AbstractThemeManager::colorSchemeChanged, this, &PageActionsWidget::updateCustomStyle);
 
     //connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
     //    auto callback = index.siblingAtColumn(static_cast<int>(AbstractPageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<PageAction::ClickedCallback>();

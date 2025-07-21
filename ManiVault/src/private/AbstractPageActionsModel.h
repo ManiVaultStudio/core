@@ -30,7 +30,7 @@ public:
     };
 
     /** Base standard model item class for page action */
-    class Item final : public QStandardItem, public QObject {
+    class Item final : public QStandardItem {
     public:
 
         /**
