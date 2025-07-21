@@ -39,7 +39,7 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
     _dsnsAction.setPopupSizeHint(QSize(550, 100));
     _dsnsAction.setDefaultWidgetFlag(StringsAction::WidgetFlag::MayEdit);
     _dsnsAction.setCategory("Projects DSN");
-    _dsnsAction.setSettingsPrefix("Models/Projects/DSNs");
+    //_dsnsAction.setSettingsPrefix("Models/Projects/DSNs");
 
     if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
 
@@ -53,11 +53,21 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
                 removeDsn(removedString);
         });
 
-        /*connect(&getDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::requestPopulateFromDsns);
-        connect(core(), &CoreInterface::initialized, this, &AbstractProjectsModel::requestPopulateFromDsns);
+        connect(core(), &CoreInterface::initialized, this, [this]() -> void {
+            for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+                qDebug() << pluginFactory->getKind() << pluginFactory->getProjectsDsnsAction().getStrings();
 
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-            connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsChanged, this, &AbstractProjectsModel::requestPopulateFromDsns);*/
+                getDsnsAction().addStrings(pluginFactory->getProjectsDsnsAction().getStrings());
+
+                connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsAdded, this, [this](const QStringList& addedStrings) -> void {
+                    getDsnsAction().addStrings(addedStrings);
+                });
+
+                connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsRemoved, this, [this](const QStringList& removedStrings) -> void {
+                    getDsnsAction().removeStrings(removedStrings);
+                });
+            }
+		});
     }
 
     _editDsnsAction.setIconByName("gear");
@@ -362,6 +372,8 @@ void AbstractProjectsModel::removeDsn(const QUrl& dsn)
 	    for (const auto& project : _projects)
 	        if (project->getProjectsJsonDsn() == dsn)
 	            removeProject(project);
+
+        getDsnsAction().removeString(dsn.toString());
     }
     catch (std::exception& e)
     {
