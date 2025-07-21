@@ -239,6 +239,21 @@ const ProjectDatabaseProjects& AbstractProjectsModel::getProjects() const
 	return _projects;
 }
 
+void AbstractProjectsModel::purgeRedundantRows()
+{
+    for (const auto& project : _projects)
+        if (!_dsnsAction.getStrings().contains(project->getProjectsJsonDsn()))
+            removeProject(project);
+}
+
+void AbstractProjectsModel::removeProject(const util::ProjectsModelProjectPtr& project)
+{
+	const auto modelIndices = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+    for (const auto& modelIndex : modelIndices)
+    	removeRow(modelIndex.siblingAtColumn(0).row(), modelIndex.parent());
+}
+
 AbstractProjectsModel::Item::Item(const mv::util::ProjectsModelProject* project, bool editable /*= false*/) :
     _project(project)
 {
@@ -577,9 +592,7 @@ QVariant AbstractProjectsModel::SystemCompatibilityItem::data(int role) const
 
         case Qt::DecorationRole:
         {
-            const auto systemCompatibility  = HardwareSpec::getSystemCompatibility(getProject()->getMinimumHardwareSpec(), getProject()->getRecommendedHardwareSpec());
-            const auto notCompatible        = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Incompatible;
-            const auto notRecommended       = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Minimum;
+            const auto systemCompatibility = HardwareSpec::getSystemCompatibility(getProject()->getMinimumHardwareSpec(), getProject()->getRecommendedHardwareSpec());
 
 	        switch (data(Qt::EditRole).value<HardwareSpec::SystemCompatibilityInfo>()._compatibility) {
 				case HardwareSpec::SystemCompatibility::Incompatible:
@@ -648,6 +661,25 @@ QVariant AbstractProjectsModel::ShaItem::data(int role) const
 
 	    case Qt::ToolTipRole:
 	        return "SHA: " + data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::ProjectsJsonDsnItem::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getProject()->getProjectsJsonDsn();
+
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toString();
+
+	    case Qt::ToolTipRole:
+	        return "Projects JSON file DSN: " + data(Qt::DisplayRole).toString();
 
 	    default:
 	        break;
