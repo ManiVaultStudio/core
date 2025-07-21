@@ -17,6 +17,8 @@
     //#define PROJECTS_TREE_MODEL_VERBOSE
 #endif
 
+#define PROJECTS_TREE_MODEL_VERBOSE
+
 using namespace mv::util;
 using namespace mv::gui;
 
@@ -34,157 +36,35 @@ void ProjectsTreeModel::populateFromDsns()
     if (mv::plugins().isInitializing())
         return;
 
-    switch (getPopulationMode()) {
-		case PopulationMode::Automatic:
-		{
-            for (const auto& dsn : getDsnsAction().getStrings()) {
-                const auto dsnIndex = getDsnsAction().getStrings().indexOf(dsn);
+    if (!mv::core()->isInitialized())
+        return;
 
-                FileDownloader::downloadToByteArrayAsync(dsn)
-                    .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
-	                    try {
-                            populateFromJsonByteArray(data, dsnIndex, dsn);
-	                    }
-	                    catch (std::exception& e)
-	                    {
-	                        qCritical() << "Unable to add projects from DSN:" << e.what();
-	                    }
-	                    catch (...)
-	                    {
-	                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-	                    }
+//    QStringList pluginDsns;
+//
+//    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+//        pluginDsns << pluginFactory->getProjectsDsnsAction().getStrings();
+//
+//    pluginDsns.removeDuplicates();
+//
+//    auto nonPluginDsns = getDsnsAction().getStrings();
+//
+//    for (const auto& pluginDsn : pluginDsns)
+//        nonPluginDsns.removeAll(pluginDsn);
+//
+//#ifdef PROJECTS_TREE_MODEL_VERBOSE
+//    qDebug() << QString("Populating projects tree model from plugin DSNs (plugin DSNs:%1, non-plugin DSNs: %2)").arg(pluginDsns.join(", "), nonPluginDsns.join(", "));
+//#endif
+//
+//    getDsnsAction().setStrings(pluginDsns + nonPluginDsns);
+//    getDsnsAction().setLockedStrings(pluginDsns);
+//
+//#ifdef PROJECTS_TREE_MODEL_VERBOSE
+//    qDebug() << "Populating projects tree model from DSNs";
+//#endif
 
-                        endPopulateFromDsns();
-					})
-                    .onFailed(this, [this, dsn](const QException& e) {
-						qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
-
-                        endPopulateFromDsns();
-					});
-            }
-
-            break;
-		}
-
-        case PopulationMode::AutomaticSynchronous:
-        {
-            for (const auto& dsn : getDsnsAction().getStrings()) {
-                try {
-                    const auto data = FileDownloader::downloadToByteArraySync(dsn);
-
-                    populateFromJsonByteArray(data, getDsnsAction().getStrings().indexOf(dsn), dsn);
-
-                    endPopulateFromDsns();
-                }
-                catch (std::exception& e)
-                {
-                    qCritical() << "Unable to add projects from DSN:" << e.what();
-                }
-                catch (...)
-                {
-                    qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-                }
-            }
-
-            break;
-        }
-
-        case PopulationMode::Manual:
-            break;
-    }
-
-    purgeRedundantRows();
+    
 }
 
-void ProjectsTreeModel::populateFromPluginDsns()
-{
-    try {
-        if (!mv::core()->isInitialized())
-            return;
 
-        QStringList uniqueDsns;
-
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-            uniqueDsns << pluginFactory->getProjectsDsnsAction().getStrings();
-
-        uniqueDsns.removeDuplicates();
-
-        getDsnsAction().setStrings(uniqueDsns);
-        getDsnsAction().setLockedStrings(uniqueDsns);
-	}
-	catch (std::exception& e)
-	{
-	    qCritical() << "Unable to populate projects tree model from plugins DSNs:" << e.what();
-	}
-	catch (...)
-	{
-	    qCritical() << "Unable to populate projects tree model from plugins DSNs due to an unhandled exception";
-	}
-}
-
-void ProjectsTreeModel::populateFromJsonByteArray(const QByteArray& jsonByteArray, std::int32_t dsnIndex, const QString& jsonLocation)
-{
-    try {
-        if (jsonByteArray.isEmpty())
-            throw std::runtime_error("JSON byte array is empty");
-
-        const auto fullJson = json::parse(QString::fromUtf8(jsonByteArray.constData()).toStdString());
-
-        if (fullJson.contains("projects")) {
-            validateJson(fullJson["projects"].dump(), jsonLocation.toStdString(), loadJsonFromResource(":/JSON/ProjectsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
-        }
-        else {
-            throw std::runtime_error("/projects key is missing");
-        }
-
-        QJsonParseError jsonParseError;
-
-        const auto jsonDocument = QJsonDocument::fromJson(jsonByteArray, &jsonParseError);
-
-        if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject())
-            throw std::runtime_error(QString("Invalid JSON from DSN at index %1: %2").arg(QString::number(dsnIndex), jsonParseError.errorString()).toStdString());
-
-        const auto projects = jsonDocument.object()["projects"].toArray();
-
-        for (const auto project : projects) {
-            auto projectMap = project.toVariant().toMap();
-
-            projectMap["projectsJsonDsn"] = QUrl(jsonLocation);
-
-            addProject(std::make_shared<ProjectsModelProject>(projectMap), projectMap["group"].toString());
-        }
-    }
-    catch (std::exception& e)
-    {
-        qCritical() << "Unable to populate projects tree model from JSON content:" << e.what();
-    }
-    catch (...)
-    {
-        qCritical() << "Unable to populate projects tree model from JSON content due to an unhandled exception";
-    }
-}
-
-void ProjectsTreeModel::populateFromJsonFile(const QString& filePath)
-{
-    try {
-        if (filePath.isEmpty())
-            throw std::runtime_error("JSON file path is empty");
-
-        QFile file(filePath);
-
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-            throw std::runtime_error(QString("Failed to open file: %1").arg(file.errorString()).toStdString());
-
-        populateFromJsonByteArray(file.readAll(), -1, filePath);
-    }
-    catch (std::exception& e)
-    {
-        qCritical() << "Unable to populate projects tree model from JSON file:" << e.what();
-    }
-    catch (...)
-    {
-        qCritical() << "Unable to populate projects tree model from JSON file due to an unhandled exception";
-    }
-}
 
 }

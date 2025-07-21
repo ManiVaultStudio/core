@@ -7,7 +7,6 @@
 #include "models/AbstractProjectsModel.h"
 #include "models/ProjectsModelProject.h"
 
-#include "actions/StringsAction.h"
 
 namespace mv {
 
@@ -33,23 +32,6 @@ public:
 
     /** Synchronize the model with the content of all Data Source Names (DSN) */
     void populateFromDsns() override;
-
-    /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
-    void populateFromPluginDsns() override;
-
-    /**
-     * Populate the model from \p jsonByteArray
-     * @param jsonByteArray JSON content as a byte array containing the projects data
-     * @param dsnIndex Index of the Data Source Name (DSN) from which the JSON content was downloaded
-     * @param jsonLocation Location of the JSON content, e.g., URL or file path
-     */
-    void populateFromJsonByteArray(const QByteArray& jsonByteArray, std::int32_t dsnIndex, const QString& jsonLocation);
-
-    /**
-     * Populate the model from a JSON file at \p filePath
-     * @param filePath Path to the JSON file containing the projects data
-     */
-    void populateFromJsonFile(const QString& filePath);
 };
 
 }
