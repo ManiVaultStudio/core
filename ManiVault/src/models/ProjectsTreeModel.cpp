@@ -37,8 +37,6 @@ void ProjectsTreeModel::populateFromDsns()
     switch (getPopulationMode()) {
 		case PopulationMode::Automatic:
 		{
-            setRowCount(0);
-
             for (const auto& dsn : getDsnsAction().getStrings()) {
                 const auto dsnIndex = getDsnsAction().getStrings().indexOf(dsn);
 
@@ -143,8 +141,12 @@ void ProjectsTreeModel::populateFromJsonByteArray(const QByteArray& jsonByteArra
         for (const auto project : projects) {
             auto projectMap = project.toVariant().toMap();
 
+            projectMap["projectsJsonDsn"] = QUrl(jsonLocation);
+
             addProject(std::make_shared<ProjectsModelProject>(projectMap), projectMap["group"].toString());
         }
+
+        purgeRedundantRows();
     }
     catch (std::exception& e)
     {

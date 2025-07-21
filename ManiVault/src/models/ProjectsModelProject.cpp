@@ -27,8 +27,8 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
-	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false)
-
+	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false),
+	_projectsJsonDsn(variantMap.contains("projectsJsonDsn") ? variantMap["projectsJsonDsn"].toUrl() : QUrl())
 {
     if (variantMap.contains("coreVersion")) {
         const auto coreVersionMap = variantMap["coreVersion"].toMap();
