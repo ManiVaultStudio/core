@@ -135,8 +135,6 @@ void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
 
     connect(_projectDatabaseModel, &AbstractProjectsModel::tagsChanged, this, updateTags);
     connect(_projectDatabaseModel, &AbstractProjectsModel::populated, this, &SortFilterProxyModel::invalidate);
-    //connect(_projectDatabaseModel, &AbstractProjectsModel::rowsRemoved, this, &SortFilterProxyModel::invalidate);
-    //connect(_projectDatabaseModel, &AbstractProjectsModel::rowsInserted, this, &SortFilterProxyModel::invalidate);
 
     updateTags();
 }
