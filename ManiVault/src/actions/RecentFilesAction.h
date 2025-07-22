@@ -171,9 +171,10 @@ public:
         }
 
     private:
-        HierarchyWidget  _hierarchyWidget;      /** Widget for displaying the loaded plugins */
-        TriggerAction    _removeAction;         /** Action for removing one, or more, recent file paths */
-        TriggerAction    _okAction;             /** Action for exiting the dialog */
+        HierarchyWidget     _hierarchyWidget;   /** Widget for displaying the loaded plugins */
+        TriggerAction       _removeAction;      /** Action for removing one, or more, recent file paths */
+        TriggerAction       _okAction;          /** Action for exiting the dialog */
+        FilterModel         _filterModel;       /** Filter model for filtering the recent file paths */
 
         friend class RecentFilesAction;
     };

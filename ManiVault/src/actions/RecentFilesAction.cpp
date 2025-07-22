@@ -296,8 +296,8 @@ RecentFilesAction::Dialog::Dialog(RecentFilesAction* recentFilePathsAction) :
     };
 
     connect(_hierarchyWidget.getTreeView().selectionModel(), &QItemSelectionModel::selectionChanged, this, updateRemoveReadOnly);
-    connect(&recentFilePathsAction->getFilterModel(), &QAbstractItemModel::rowsInserted, this, updateRemoveReadOnly);
-    connect(&recentFilePathsAction->getFilterModel(), &QAbstractItemModel::rowsRemoved, this, updateRemoveReadOnly);
+    connect(&_filterModel, &QAbstractItemModel::rowsInserted, this, updateRemoveReadOnly);
+    connect(&_filterModel, &QAbstractItemModel::rowsRemoved, this, updateRemoveReadOnly);
 
     connect(&_removeAction, &TriggerAction::triggered, this, [this, recentFilePathsAction]() -> void {
         const auto selectedRows = _hierarchyWidget.getTreeView().selectionModel()->selectedRows();
