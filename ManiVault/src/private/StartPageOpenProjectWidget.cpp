@@ -32,7 +32,6 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
     _projectsWidget(this, "Projects"),
-    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
     _projectsSettingsAction(this, "Data Source Names")
 {
     _projectsWidget.hide();
@@ -63,23 +62,17 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     _projectsFilterModel.setSourceModel(const_cast<ProjectsTreeModel*>(&mv::projects().getProjectsTreeModel()));
 
-    setupProjectsModelSynchronization();
+    setupProjectsModelSection();
     
     setLayout(layout);
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
-    _recentProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
-    _projectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    
+    
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
-    _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
-
-    connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
 
     createCustomIcons();
 
@@ -107,7 +100,7 @@ bool StartPageOpenProjectWidget::event(QEvent* event)
 void StartPageOpenProjectWidget::updateActions()
 {
     updateOpenCreateActions();
-    updateRecentActions();
+    setupRecentProjectsSection();
 }
 
 void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment& alignment, QIcon& icon, bool logging /*= false*/)
@@ -195,55 +188,87 @@ void StartPageOpenProjectWidget::updateOpenCreateActions()
     _openCreateProjectWidget.getModel().add(leftAlignedLoggingProjectPageAction);
 }
 
-void StartPageOpenProjectWidget::updateRecentActions()
+void StartPageOpenProjectWidget::setupRecentProjectsSection()
 {
-    _recentProjectsWidget.getModel().reset();
+    auto& recentProjectsAction      = mv::projects().getRecentProjectsAction();
+    auto& recentProjectsActionModel = static_cast<const RecentFilesAction&>(recentProjectsAction).getModel();
+    auto& hierarchyWidget           = _recentProjectsWidget.getHierarchyWidget();
 
-    auto clockIcon = StyledIcon("clock");
+	hierarchyWidget.getFilterColumnAction().setCurrentText("FilePath");
+	hierarchyWidget.setItemTypeName("Recent Project");
+	hierarchyWidget.getToolbarAction().addAction(&recentProjectsAction);
+	hierarchyWidget.setWindowIcon(StyledIcon("clock"));
 
-    const auto recentFiles = _recentProjectsAction.getRecentFiles();
+    auto& toolbarAction = hierarchyWidget.getToolbarAction();
 
-    if(!recentFiles.isEmpty())
-        qDebug() << "Looking for recent projects...";
+    toolbarAction.removeAllActions();
+    toolbarAction.addAction(&_recentProjectsFilterModel.getTextFilterAction());
+    toolbarAction.addAction(&recentProjectsAction.getEditAction());
 
-    for (const auto& recentFile : recentFiles) {
-        const auto recentFilePath = recentFile.getFilePath();
+	_recentProjectsFilterModel.setSourceModel(const_cast<RecentFilesListModel*>(&recentProjectsActionModel));
 
-        const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
+    const auto populateModel = [this, &recentProjectsAction, &recentProjectsActionModel]() -> void {
+        _recentProjectsWidget.getModel().removeRows(0, _recentProjectsWidget.getModel().rowCount());
 
-        if (projectMetaAction.isNull()) {
-            auto recentProjectPageAction = std::make_shared<PageAction>(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
+        auto clockIcon = StyledIcon("clock");
+
+        for (int filterRowIndex = 0; filterRowIndex < _recentProjectsFilterModel.rowCount(); ++filterRowIndex) {
+            const auto sourceIndex      = _recentProjectsFilterModel.mapToSource(_recentProjectsFilterModel.index(filterRowIndex, 0));
+            const auto recentFile       = recentProjectsActionModel.getRecentFileFromIndex(sourceIndex);
+            const auto recentFilePath   = recentFile.getFilePath();
+
+            auto recentProjectPageAction = std::make_shared<PageAction>(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, "", "", [recentFilePath]() -> void {
                 projects().openProject(recentFilePath);
             });
 
-            _recentProjectsWidget.getModel().add(recentProjectPageAction);
-        }
-        else {
-            qDebug() << "Found project: " << QFileInfo(recentFilePath).baseName();
-
-            auto recentProjectPageAction = std::make_shared<PageAction>(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, projectMetaAction->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
-                projects().openProject(recentFilePath);
-            });
-
-            recentProjectPageAction->setComments(projectMetaAction->getCommentsAction().getString());
-            recentProjectPageAction->setTags(projectMetaAction->getTagsAction().getStrings());
             recentProjectPageAction->setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
             recentProjectPageAction->setPreviewImage(projects().getWorkspacePreview(recentFilePath));
-            recentProjectPageAction->setContributors(projectMetaAction->getContributorsAction().getStrings());
 
             _recentProjectsWidget.getModel().add(recentProjectPageAction);
+
+            /*{
+                recentProjectPageAction->setComments(projectMetaAction->getCommentsAction().getString());
+                recentProjectPageAction->setTags(projectMetaAction->getTagsAction().getStrings());
+                recentProjectPageAction->setContributors(projectMetaAction->getContributorsAction().getStrings());
+                projectMetaAction->getDescriptionAction().getString()
+
+
+
+                const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
+
+                if (projectMetaAction.isNull()) {
+                    auto recentProjectPageAction = std::make_shared<PageAction>(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
+                        projects().openProject(recentFilePath);
+                        });
+
+                    _recentProjectsWidget.getModel().add(recentProjectPageAction);
+                }
+                else {
+                    qDebug() << "Found project: " << QFileInfo(recentFilePath).baseName();
+
+
+                */
         }
-    }
+    };
+
+    populateModel();
+
+    connect(&_recentProjectsFilterModel, &RecentFilesFilterModel::layoutChanged, this, populateModel);
 }
 
-void StartPageOpenProjectWidget::setupProjectsModelSynchronization()
+void StartPageOpenProjectWidget::setupProjectsModelSection()
 {
-    _projectsWidget.getModel().reset();
+    auto& hierarchyWidget = _projectsWidget.getHierarchyWidget();
+
+	hierarchyWidget.getFilterColumnAction().setCurrentText("Title");
+    hierarchyWidget.setItemTypeName("Project");
+    hierarchyWidget.setWindowIcon(StyledIcon("file"));
+    hierarchyWidget.getFilterColumnAction().setCurrentText("Title");
 
     auto& projectsTreeModel     = mv::projects().getProjectsTreeModel();
     auto& projectsPageTreeModel = _projectsWidget.getModel();
 
-    connect(&_projectsFilterModel, &QAbstractItemModel::layoutChanged, this, [this, &projectsTreeModel, &projectsPageTreeModel]() -> void {
+    const auto populateModel = [this, &projectsTreeModel, &projectsPageTreeModel]() -> void {
         projectsPageTreeModel.removeRows(0, projectsPageTreeModel.rowCount());
 
         for (int filterRowIndex = 0; filterRowIndex <= _projectsFilterModel.rowCount(); ++filterRowIndex) {
@@ -286,7 +311,11 @@ void StartPageOpenProjectWidget::setupProjectsModelSynchronization()
                 }
             }
         }
-    });
+    };
+
+    populateModel();
+
+    connect(&_projectsFilterModel, &ProjectsFilterModel::layoutChanged, this, populateModel);
 }
 
 void StartPageOpenProjectWidget::createCustomIcons()
