@@ -46,7 +46,11 @@ QMenu* RecentFilesAction::getMenu(QWidget* parent)
     menu->setIcon(StyledIcon("clock"));
     menu->setEnabled(_listModel.rowCount() >= 1);
 
-    for (const auto& recentFile : _listModel.getRecentFiles()) {
+    auto recentFiles = _listModel.getRecentFiles();
+
+    std::ranges::reverse(recentFiles.begin(), recentFiles.end());
+
+    for (const auto& recentFile : recentFiles) {
 	    auto openRecentFileAction = new TriggerAction(this, recentFile.getFilePath());
     	openRecentFileAction->setIcon(StyledIcon("clock"));
     	openRecentFileAction->setToolTip(QString("Open %1").arg(recentFile.getFilePath()));
