@@ -110,7 +110,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectionGroupAction.addAction(&_selectAllAction);
     _selectionGroupAction.addAction(&_selectNoneAction);
 
-    _columnsGroupAction.setText("table-columns");
+    _columnsGroupAction.setText("Columns");
     _columnsGroupAction.setToolTip(QString("Edit which %1 columns should be visible").arg(_itemTypeName.toLower()));
     _columnsGroupAction.setIconByName("table-columns");
     _columnsGroupAction.setShowLabels(false);
