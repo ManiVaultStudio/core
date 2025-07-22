@@ -57,6 +57,9 @@ public:
      * @return List of recent file objects
      */
     util::RecentFiles getRecentFiles() const override;
+
+private:
+    static constexpr int maxRecentFiles = 25;
 };
 
 }
