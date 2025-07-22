@@ -20,7 +20,6 @@ namespace mv::gui {
 RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
     WidgetAction(parent, "Recent Files"),
     _model(this),
-    _filterModel(this),
     _editAction(this, "Edit...")
 {
     Q_ASSERT(!settingsKey.isEmpty());
@@ -98,11 +97,6 @@ TriggerAction& RecentFilesAction::getEditAction()
 RecentFilesAction::Model& RecentFilesAction::getModel()
 {
     return _model;
-}
-
-const RecentFilesAction::FilterModel& RecentFilesAction::getFilterModel() const
-{
-    return _filterModel;
 }
 
 QStringList RecentFilesAction::getRecentFilePaths() const

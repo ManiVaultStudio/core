@@ -277,7 +277,6 @@ private:
     QString         _fileType;          /** Recent file type */
     QString         _shortcutPrefix;    /** Shortcut prefix (if empty, no shortcut is created) */
     Model           _model;             /** Model for storing recent file paths */
-    FilterModel     _filterModel;       /** Sort/filter model */
     TriggerAction   _editAction;        /** Action which triggers a dialog in which the recent file paths can be edited */
 };
 
