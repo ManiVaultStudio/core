@@ -619,7 +619,7 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->addSeparator();
     menu->addAction(&_editWorkspaceSettingsAction);
     menu->addSeparator();
-    menu->addMenu(_recentWorkspacesAction.getMenu());
+    menu->addMenu(_recentWorkspacesAction.getMenu(menu));
 
     return menu;
 }
