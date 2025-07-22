@@ -9,49 +9,12 @@
 
 #include "widgets/HierarchyWidget.h"
 
-#include <QStandardItemModel>
-#include <QSortFilterProxyModel>
+#include "models/RecentFilesListModel.h"
+#include "models/RecentFilesFilterModel.h"
+
 #include <QDialog>
 
 namespace mv::gui {
-
-/** Recent file utility class (contains file path and date time) */
-class CORE_EXPORT RecentFile final {
-public:
-
-    /**
-     * Construct with \p filePath and \p dateTime
-     * @param filePath File path of the recent file
-     * @param dateTime Date and time the recent file was last opened
-     */
-    RecentFile(const QString filePath, const QDateTime dateTime) :
-        _filePath(filePath),
-        _dateTime(dateTime)
-    {
-    }
-
-    /**
-     * Get file path
-     * @return File path of the recent file
-     */
-    QString getFilePath() const {
-        return _filePath;
-    }
-
-    /**
-     * Get date and time
-     * @return Date and time the recent file was last opened
-     */
-    QDateTime getDateTime() const {
-        return _dateTime;
-    }
-
-private:
-    QString       _filePath;  /** File path of the recent file */
-    QDateTime     _dateTime;  /** Date and time the recent file was last opened */
-};
-
-using RecentFiles = QList<RecentFile>;
 
 /**
  * Recent files action class
@@ -68,87 +31,6 @@ class CORE_EXPORT RecentFilesAction : public WidgetAction
 
 public:
 
-    /** Standard item model loading and manipulating the recent file paths */
-    class CORE_EXPORT Model final : public QStandardItemModel {
-    public:
-
-        /** Model columns */
-        enum class Column {
-            FilePath,       /** Location of the recent file */
-            DateTime        /** Date and time when the file was opened */
-        };
-
-        /** Column name and tooltip */
-        static QMap<Column, QPair<QString, QString>> columnInfo;
-
-    protected:
-
-        /**
-         * Constructor
-         * @param recentFilePathsAction Pointer to owning recent file paths action
-         */
-        Model(RecentFilesAction* recentFilePathsAction);
-
-        /** Load recent file paths from settings */
-        void loadFromSettings();
-
-        /**
-         * Add recent \p filePath
-         * @param filePath Recent file path to add
-         */
-        void addRecentFilePath(const QString& filePath);
-
-        /**
-         * Remove recent \p filePath
-         * @param filePath Recent file path to remove
-         */
-        void removeRecentFilePath(const QString& filePath);
-
-        /**
-         * Get trigger actions for triggering the recent file path
-         * @return List of trigger actions for triggering the recent file path
-         */
-        QList<TriggerAction*> getActions();
-
-        /**
-         * Get recent file paths
-         * @return File paths as string list
-         */
-        QStringList getRecentFilePaths() const;
-
-    private:
-        RecentFilesAction*      _recentFilesAction; /** Pointer to owning recent file paths action */
-        QList<TriggerAction*>   _actions;           /** Menu trigger actions */
-
-        friend class RecentFilesAction;
-    };
-
-    class CORE_EXPORT FilterModel : public QSortFilterProxyModel
-    {
-    public:
-
-        /**
-         * Construct the filter model with \p parent
-         * @param parent Pointer to parent object
-        */
-        FilterModel(QObject* parent = nullptr);
-
-        /**
-         * Returns whether \p row with \p parent is filtered out (false) or in (true)
-         * @param row Row index
-         * @param parent Parent index
-         * @return Boolean indicating whether the item is filtered in or out
-         */
-        bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
-
-        /**
-         * Compares two model indices plugin \p lhs with \p rhs
-         * @param lhs Left-hand model index
-         * @param rhs Right-hand model index
-         */
-        bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
-    };
-
     /** Dialog for editing recent file paths */
     class CORE_EXPORT Dialog : public QDialog
     {
@@ -156,9 +38,9 @@ public:
 
         /**
          * Construct a dialog with owning \p recentFilePathsAction
-         * @param recentFilePathsAction Pointer to recent file paths action
+         * @param recentFilesAction Pointer to recent file paths action
          */
-        Dialog(RecentFilesAction* recentFilePathsAction);
+        Dialog(RecentFilesAction* recentFilesAction);
 
         /** Get preferred size */
         QSize sizeHint() const override {
@@ -171,11 +53,11 @@ public:
         }
 
     private:
-        HierarchyWidget     _hierarchyWidget;   /** Widget for displaying the loaded plugins */
-        TriggerAction       _removeAction;      /** Action for removing one, or more, recent file paths */
-        TriggerAction       _okAction;          /** Action for exiting the dialog */
-        FilterModel         _filterModel;       /** Filter model for filtering the recent file paths */
-
+        RecentFilesFilterModel  _filterModel;       /** Filter model for filtering the recent file paths */
+        HierarchyWidget         _hierarchyWidget;   /** Widget for displaying the loaded plugins */
+        TriggerAction           _removeAction;      /** Action for removing one, or more, recent file paths */
+        TriggerAction           _okAction;          /** Action for exiting the dialog */
+        
         friend class RecentFilesAction;
     };
 
@@ -224,16 +106,10 @@ public:
     QString getShortcutPrefix() const;
 
     /**
-     * Get model
-     * @return Reference to model
+     * Get list model
+     * @return Const reference to list model
      */
-    Model& getModel();
-
-    /**
-     * Get filter model
-     * @return Reference to filter model
-     */
-    const FilterModel& getFilterModel() const;
+    const RecentFilesListModel& getModel() const;
 
     /**
      * Get edit action
@@ -243,9 +119,10 @@ public:
 
     /**
      * Get recent file paths menu
+     * @param parent Parent widget for the menu
      * @return Pointer to menu
      */
-    QMenu* getMenu();
+    QMenu* getMenu(QWidget* parent);
 
     /** Grab latest recent file paths from settings and update model */
     void updateRecentFilePaths();
@@ -258,27 +135,29 @@ public:
 
     /**
      * Get recent files
-     * @return Recent files list
+     * @return List of recent file objects
      */
-    RecentFiles getRecentFiles() const;
-    
+    util::RecentFiles getRecentFiles() const;
+
 signals:
 
-    /** Signals that recent \p filePath is triggered */
+	/** Signals that recent \p filePath is triggered */
     void triggered(const QString& filePath);
 
+protected:
+
     /**
-     * Signals that recent files changed
-     * @param recentFiles Recent files which changed
+     * Get list model
+     * @return Reference to list model
      */
-    void recentFilesChanged(const RecentFiles& recentFiles);
+    RecentFilesListModel& getModel();
 
 private:
-    QString         _settingsKey;       /** Settings key where the recent file paths will be stored */
-    QString         _fileType;          /** Recent file type */
-    QString         _shortcutPrefix;    /** Shortcut prefix (if empty, no shortcut is created) */
-    Model           _model;             /** Model for storing recent file paths */
-    TriggerAction   _editAction;        /** Action which triggers a dialog in which the recent file paths can be edited */
+    QString                 _settingsKey;       /** Settings key where the recent file paths will be stored */
+    QString                 _fileType;          /** Recent file type */
+    QString                 _shortcutPrefix;    /** Shortcut prefix (if empty, no shortcut is created) */
+    RecentFilesListModel    _listModel;         /** Model for storing recent file paths in list format */
+    TriggerAction           _editAction;        /** Action which triggers a dialog in which the recent file paths can be edited */
 };
 
 }
