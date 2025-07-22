@@ -19,7 +19,10 @@
 #include <QDebug>
 #include <QPainter>
 #include <QStandardPaths>
-
+#include <QPromise>
+#include <QFuture>
+#include <QFutureWatcher>
+#include <QtConcurrent>
 
 using namespace mv;
 using namespace mv::util;
@@ -67,8 +70,6 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     setLayout(layout);
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
-    
-    
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
@@ -226,28 +227,26 @@ void StartPageOpenProjectWidget::setupRecentProjectsSection()
 
             _recentProjectsWidget.getModel().add(recentProjectPageAction);
 
-            /*{
-                recentProjectPageAction->setComments(projectMetaAction->getCommentsAction().getString());
-                recentProjectPageAction->setTags(projectMetaAction->getTagsAction().getStrings());
-                recentProjectPageAction->setContributors(projectMetaAction->getContributorsAction().getStrings());
-                projectMetaAction->getDescriptionAction().getString()
+            auto future = QtConcurrent::run([recentFilePath]() -> QSharedPointer<ProjectMetaAction> {
+                return Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
+			});
 
+            auto* watcher = new QFutureWatcher<QSharedPointer<ProjectMetaAction>>();
 
+            QObject::connect(watcher, &QFutureWatcher<QSharedPointer<ProjectMetaAction>>::finished, [watcher, recentProjectPageAction]() {
+                const auto result = watcher->future().result();
 
-                const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
-
-                if (projectMetaAction.isNull()) {
-                    auto recentProjectPageAction = std::make_shared<PageAction>(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
-                        projects().openProject(recentFilePath);
-                        });
-
-                    _recentProjectsWidget.getModel().add(recentProjectPageAction);
+                if (const auto projectMetaAction = watcher->future().result()) {
+                    recentProjectPageAction->setDescription(projectMetaAction->getDescriptionAction().getString());
+                    recentProjectPageAction->setComments(projectMetaAction->getCommentsAction().getString());
+                    recentProjectPageAction->setTags(projectMetaAction->getTagsAction().getStrings());
+                    recentProjectPageAction->setContributors(projectMetaAction->getContributorsAction().getStrings());
                 }
-                else {
-                    qDebug() << "Found project: " << QFileInfo(recentFilePath).baseName();
 
+                watcher->deleteLater();  // clean up
+			});
 
-                */
+            watcher->setFuture(future);
         }
     };
 
