@@ -162,7 +162,10 @@ void StringsAction::addString(const QString& string)
 
 void StringsAction::addStrings(const QStringList& strings, bool allowDuplication /*= false*/)
 {
-    const auto& existingStrings = _strings;
+    if (strings.isEmpty())
+        return;
+
+    const auto existingStrings = _strings;
 
     _strings << strings;
 
