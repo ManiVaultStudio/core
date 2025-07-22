@@ -55,8 +55,6 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
 
         connect(core(), &CoreInterface::initialized, this, [this]() -> void {
             for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-                qDebug() << pluginFactory->getKind() << pluginFactory->getProjectsDsnsAction().getStrings();
-
                 getDsnsAction().addStrings(pluginFactory->getProjectsDsnsAction().getStrings());
 
                 connect(&pluginFactory->getProjectsDsnsAction(), &StringsAction::stringsAdded, this, [this](const QStringList& addedStrings) -> void {
@@ -208,10 +206,6 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QS
         const auto duplicateMatches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
         if (duplicateMatches.empty()) {
-//#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
-//            qDebug() << "No duplicates for" << project->getTitle();
-//#endif
-
             const auto findProjectGroupModelIndex = [this, &groupTitle]() -> QModelIndex {
                 const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, groupTitle, -1, Qt::MatchExactly | Qt::MatchRecursive);
 
@@ -256,10 +250,6 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectPtr project, const QS
             _projects.push_back(project);
         }
         else {
-//#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
-//            qDebug() << "Found duplicates for" << project->getTitle();
-//#endif
-
             const auto duplicateIndex = duplicateMatches.first();
 
             removeRow(duplicateIndex.row(), duplicateIndex.parent());
@@ -340,6 +330,8 @@ void AbstractProjectsModel::addDsn(const QUrl& dsn)
                     const auto data = FileDownloader::downloadToByteArraySync(dsn);
 
                     populateFromJsonByteArray(data, getDsnsAction().getStrings().indexOf(dsn), dsn);
+
+                    emit populated();
                 }
                 catch (std::exception& e)
                 {
@@ -372,8 +364,6 @@ void AbstractProjectsModel::removeDsn(const QUrl& dsn)
 	    for (const auto& project : _projects)
 	        if (project->getProjectsJsonDsn() == dsn)
 	            removeProject(project);
-
-        getDsnsAction().removeString(dsn.toString());
     }
     catch (std::exception& e)
     {
