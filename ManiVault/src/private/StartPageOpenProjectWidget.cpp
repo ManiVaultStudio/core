@@ -243,7 +243,7 @@ void StartPageOpenProjectWidget::setupRecentProjectsSection()
                     recentProjectPageAction->setContributors(projectMetaAction->getContributorsAction().getStrings());
                 }
 
-                watcher->deleteLater();  // clean up
+                watcher->deleteLater();
 			});
 
             watcher->setFuture(future);
