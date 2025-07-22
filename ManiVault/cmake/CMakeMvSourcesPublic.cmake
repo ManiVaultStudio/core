@@ -558,6 +558,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/ColorScheme.h
     src/util/JSON.h
     src/util/Script.h
+    src/util/RecentFile.h
 )
 
 if(APPLE)
@@ -612,6 +613,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/ColorScheme.cpp
     src/util/JSON.cpp
     src/util/Script.cpp
+    src/util/RecentFile.cpp
 )
 
 if(APPLE)
@@ -1054,6 +1056,23 @@ set(PUBLIC_SCRIPTS_MODEL_FILES
     ${PUBLIC_SCRIPTS_MODEL_SOURCES}
 )
 
+set(PUBLIC_RECENT_FILES_MODEL_HEADERS
+    src/models/AbstractRecentFilesModel.h
+    src/models/RecentFilesListModel.h
+    src/models/RecentFilesFilterModel.h
+)
+
+set(PUBLIC_RECENT_FILES_MODEL_SOURCES
+	src/models/AbstractRecentFilesModel.cpp
+    src/models/RecentFilesListModel.cpp
+    src/models/RecentFilesFilterModel.cpp
+)
+
+set(PUBLIC_RECENT_FILES_MODEL_FILES
+    ${PUBLIC_RECENT_FILES_MODEL_HEADERS}
+    ${PUBLIC_RECENT_FILES_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -1176,6 +1195,7 @@ set(PUBLIC_HEADERS
 	${PUBLIC_HARDWARE_SPEC_MODEL_HEADERS}
     ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
     ${PUBLIC_SCRIPTS_MODEL_HEADERS}
+    ${PUBLIC_RECENT_FILES_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_NOTIFICATIONS_HEADERS}
@@ -1227,6 +1247,7 @@ set(PUBLIC_SOURCES
 	${PUBLIC_HARDWARE_SPEC_MODEL_SOURCES}
     ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
     ${PUBLIC_SCRIPTS_MODEL_SOURCES}
+    ${PUBLIC_RECENT_FILES_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_NOTIFICATIONS_SOURCES}
@@ -1291,6 +1312,7 @@ source_group(Models\\Projects FILES ${PUBLIC_PROJECTS_MODEL_FILES})
 source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(Models\\Scripts FILES ${PUBLIC_SCRIPTS_MODEL_FILES})
 source_group(Models\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_MODEL_FILES})
+source_group(Models\\RecentFiles FILES ${PUBLIC_RECENT_FILES_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})
