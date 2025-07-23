@@ -95,22 +95,30 @@ void WebWidget::onJsBridgeIsAvailable()
     _communicationAvailable = true;
 
     emit communicationBridgeReady();
-    if (_webPageLoaded)
-        emit webPageFullyLoaded();
+
+    if (_communicationAvailable && _webPageLoaded) {
+        emit fullyInitialized();
+    }
 }
 
 void WebWidget::onWebPageLoaded(bool ok)
 {
-    if (ok)
+    _webPageLoaded = ok;
+
+    if (_webPageLoaded)
     {
         qDebug() << "WebWidget: Web page finished loading.";
-        _webPageLoaded = true;
 
         if (_communicationAvailable)
             emit webPageFullyLoaded();
     }
-    else
+    else {
         qWarning() << "WebWidget: Web page failed to load properly.";
+    }
+
+    if (_communicationAvailable && _webPageLoaded) {
+        emit fullyInitialized();
+    }
 }
 
 } // namespace gui

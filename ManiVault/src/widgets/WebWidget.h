@@ -57,10 +57,14 @@ public:
 
     bool isCommunicationAvailable() const { return _communicationAvailable; }
     bool isWebPageLoaded() const { return _webPageLoaded; }
+    bool isInitialized() const {
+        return isWebPageLoaded() && isCommunicationAvailable();
+    };
 
 signals:
     void communicationBridgeReady();
     void webPageFullyLoaded();
+    void fullyInitialized();
 
 protected:
     void registerFunctions();
