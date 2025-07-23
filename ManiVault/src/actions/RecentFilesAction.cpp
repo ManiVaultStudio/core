@@ -17,14 +17,12 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
+RecentFilesAction::RecentFilesAction(QObject* parent, const QString& fileType, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
     WidgetAction(parent, "Recent Files"),
     _listModel(this, fileType),
     _editAction(this, "Edit...")
 {
-    Q_ASSERT(!settingsKey.isEmpty());
-
-    initialize(settingsKey, fileType, shortcutPrefix);
+    initialize(fileType, shortcutPrefix);
     setIconByName("clock");
 
     _editAction.setIconByName("gear");
@@ -72,11 +70,6 @@ QMenu* RecentFilesAction::getMenu(QWidget* parent)
     return menu;
 }
 
-QString RecentFilesAction::getSettingsKey() const
-{
-    return _settingsKey;
-}
-
 QString RecentFilesAction::getFileType() const
 {
     return _fileType;
@@ -96,9 +89,8 @@ void RecentFilesAction::addRecentFilePath(const QString& filePath)
     _listModel.addRecentFilePath(filePath);
 }
 
-void RecentFilesAction::initialize(const QString& settingsKey, const QString& fileType, const QString& shortcutPrefix)
+void RecentFilesAction::initialize(const QString& fileType, const QString& shortcutPrefix)
 {
-    _settingsKey    = settingsKey;
     _fileType       = fileType;
     _shortcutPrefix = shortcutPrefix;
 

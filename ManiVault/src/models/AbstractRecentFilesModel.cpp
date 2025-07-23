@@ -53,7 +53,7 @@ QVariant AbstractRecentFilesModel::DateTimeItem::data(int role) const {
 }
 
 AbstractRecentFilesModel::AbstractRecentFilesModel(QObject* parent, const QString& recentFileType) :
-	StandardItemModel(parent),
+	StandardItemModel(parent, "RecentFiles"),
     _recentFileType(recentFileType)
 {
 }

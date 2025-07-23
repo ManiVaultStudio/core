@@ -66,32 +66,24 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param settingsKey Settings key where the recent file paths are stored
      * @param fileType Type of file e.g. project or workspace
      * @param shortcutPrefix Prefix of the shortcut
      * @param icon Icon in menu
      */
-    Q_INVOKABLE RecentFilesAction(QObject* parent, const QString& settingsKey = "", const QString& fileType = "", const QString& shortcutPrefix = "", const QIcon& icon = QIcon());
+    Q_INVOKABLE RecentFilesAction(QObject* parent, const QString& fileType, const QString& shortcutPrefix = "", const QIcon& icon = QIcon());
 
     /**
      * Initializes the action
-     * @param settingsKey Settings key where the recent file paths are stored
      * @param fileType Type of file e.g. project or workspace
      * @param shortcutPrefix Prefix of the shortcut
      */
-    void initialize(const QString& settingsKey, const QString& fileType, const QString& shortcutPrefix);
+    void initialize(const QString& fileType, const QString& shortcutPrefix);
 
     /**
      * Add recent \p filePath
      * @param filePath Recent file path
      */
     void addRecentFilePath(const QString& filePath);
-
-    /**
-     * Get settings key
-     * @return Settings key where the recent file paths will be stored
-     */
-    QString getSettingsKey() const;
 
     /**
      * Get file type
@@ -153,7 +145,6 @@ protected:
     RecentFilesListModel& getModel();
 
 private:
-    QString                 _settingsKey;       /** Settings key where the recent file paths will be stored */
     QString                 _fileType;          /** Recent file type */
     QString                 _shortcutPrefix;    /** Shortcut prefix (if empty, no shortcut is created) */
     RecentFilesListModel    _listModel;         /** Model for storing recent file paths in list format */
