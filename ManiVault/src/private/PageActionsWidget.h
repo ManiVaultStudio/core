@@ -60,15 +60,15 @@ private:
 
     /**
      * Open persistent editor for \p rowIndex
-     * @param rowIndex Index of the row for which to open the persistent editor
+     * @param index Index of the row for which to open the persistent editor
      */
-    void openPersistentEditor(int rowIndex);
+    void openPersistentEditor(const QModelIndex& index);
 
     /**
      * Close persistent editor for \p rowIndex
-     * @param rowIndex Index of the row for which to close the persistent editor
+     * @param index Index of the row for which to close the persistent editor
      */
-    void closePersistentEditor(int rowIndex);
+    void closePersistentEditor(const QModelIndex& index);
     
     /** Update all  custom style elements */
     void updateCustomStyle();

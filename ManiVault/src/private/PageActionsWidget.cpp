@@ -92,15 +92,15 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
 
         _hierarchyWidget.getSelectionModel().clear();
     });
-
+    
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            openPersistentEditor(rowIndex);
+            openPersistentEditor(_filterModel.index(rowIndex, 0, parent));
     });
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            closePersistentEditor(rowIndex);
+            closePersistentEditor(_filterModel.index(rowIndex, 0, parent));
     });
 
     treeView.setBackgroundRole(QPalette::Window);
@@ -126,10 +126,8 @@ HierarchyWidget& PageActionsWidget::getHierarchyWidget()
     return _hierarchyWidget;
 }
 
-void PageActionsWidget::openPersistentEditor(int rowIndex)
+void PageActionsWidget::openPersistentEditor(const QModelIndex& index)
 {
-    const auto index = _filterModel.index(rowIndex, static_cast<int>(PageActionsTreeModel::Column::Title));
-
     if (_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
         return;
 
@@ -142,10 +140,8 @@ void PageActionsWidget::openPersistentEditor(int rowIndex)
     }
 }
 
-void PageActionsWidget::closePersistentEditor(int rowIndex)
+void PageActionsWidget::closePersistentEditor(const QModelIndex& index)
 {
-    const auto index = _filterModel.index(rowIndex, static_cast<int>(PageActionsTreeModel::Column::Title));
-
     if (!_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
         return;
 
