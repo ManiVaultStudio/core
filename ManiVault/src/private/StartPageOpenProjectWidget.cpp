@@ -271,9 +271,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
     auto& projectsTreeModel     = mv::projects().getProjectsTreeModel();
     auto& projectsPageTreeModel = _projectsWidget.getModel();
 
-    const auto addProjectPageAction = [&](const ProjectsModelProject* project) -> void {
-        qDebug() << project->getTitle() << project->getGroup();
-
+    const auto addProjectPageAction = [this, &projectsPageTreeModel](ProjectsModelProjectSharedPtr project) -> PageActionSharedPtr {
     	auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
             projects().openProject(project->getUrl());
         });
@@ -290,7 +288,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
             projectPageAction->createSubAction<PageCompatibilitySubAction>(HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec()));
 
             if (project->getDownloadSize() == 0) {
-                connect(project, &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), [projectPageAction, project](std::uint64_t size) {
+                connect(project.get(), &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), [projectPageAction, project](std::uint64_t size) {
                     projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(size)));
                 });
             }
@@ -302,9 +300,11 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         }
 
         projectsPageTreeModel.add(projectPageAction);
+
+        return projectPageAction;
     };
 
-    const auto populateModel = [&]() -> void {
+    const auto populateModel = [this, &projectsTreeModel, &projectsPageTreeModel, addProjectPageAction]() -> void {
         projectsPageTreeModel.removeRows(0, projectsPageTreeModel.rowCount());
 
         for (int filterRowIndex = 0; filterRowIndex <= _projectsFilterModel.rowCount(); ++filterRowIndex) {
@@ -314,17 +314,26 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         	if (!sourceIndex.isValid())
                 continue;
             
-            if (const auto project = projectsTreeModel.getProject(sourceIndex))
-                addProjectPageAction(project);
+            if (const auto project = projectsTreeModel.getProject(sourceIndex)) {
+                auto projectPageAction = addProjectPageAction(project);
 
-            if (const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex); numberOfChildren >= 1) {
-                for (int childFilterRowIndex = 0; childFilterRowIndex <= numberOfChildren; ++childFilterRowIndex) {
-                    const auto childFilterIndex = _projectsFilterModel.index(childFilterRowIndex, 0, filterIndex);
-                    const auto childSourceIndex = _projectsFilterModel.mapToSource(childFilterIndex);
 
-                    if (const auto project = projectsTreeModel.getProject(childSourceIndex))
-                        addProjectPageAction(project);
-                }
+	            if (const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex); numberOfChildren >= 1) {
+                    QStringList childProjectNames;
+
+	                for (int childFilterRowIndex = 0; childFilterRowIndex <= numberOfChildren; ++childFilterRowIndex) {
+	                    const auto childFilterIndex = _projectsFilterModel.index(childFilterRowIndex, 0, filterIndex);
+	                    const auto childSourceIndex = _projectsFilterModel.mapToSource(childFilterIndex);
+
+	                    if (const auto childProject = projectsTreeModel.getProject(childSourceIndex)) {
+                            addProjectPageAction(childProject);
+
+                            childProjectNames << childProject->getTitle();
+	                    }
+	                }
+
+                    projectPageAction->setSubtitle(childProjectNames.join(", "));
+				}
             }
         }
     };
