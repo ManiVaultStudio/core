@@ -43,6 +43,7 @@ public:
         SystemCompatibility,    /** System compatibility of the project */
         IsStartup,              /** Whether the project can be opened at application startup */
         Sha,                    /** SHA-256 cryptographic hash of the project */
+        ProjectsJsonDsn,        /** Data Source Name (DSN) of the projects JSON file, used for loading the project */
 
         Count                   /** Number of columns in the model */
     };
@@ -52,20 +53,20 @@ public:
     public:
 
         /**
-         * Construct with pointer \p project
-         * @param project Const pointer to project
+         * Construct with shared pointer \p project
+         * @param project Shared pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        Item(const util::ProjectsModelProject* project, bool editable = false);
+        Item(util::ProjectsModelProjectSharedPtr project, bool editable = false);
 
         /**
          * Get project
-         * return Pointer to the project
+         * return Shared pointer to the project
          */
-        const util::ProjectsModelProject* getProject() const;
+        util::ProjectsModelProjectSharedPtr getProject() const;
 
     private:
-        const util::ProjectsModelProject*   _project;      /** The project data */
+        util::ProjectsModelProjectSharedPtr   _project;      /** Shared pointer to the project */
     };
 
 protected:
@@ -115,7 +116,7 @@ protected:
          * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        LastModifiedItem(const util::ProjectsModelProject* project, bool editable = false);
+        LastModifiedItem(util::ProjectsModelProjectSharedPtr project, bool editable = false);
 
         /**
          * Get model data for \p role
@@ -155,7 +156,7 @@ protected:
          * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        DownloadedItem(const util::ProjectsModelProject* project, bool editable = false);
+        DownloadedItem(util::ProjectsModelProjectSharedPtr project, bool editable = false);
 
         /**
          * Get model data for \p role
@@ -555,7 +556,7 @@ protected:
          * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        DownloadSizeItem(const util::ProjectsModelProject* project, bool editable = false);
+        DownloadSizeItem(util::ProjectsModelProjectSharedPtr project, bool editable = false);
 
         /**
          * Get model data for \p role
@@ -739,7 +740,7 @@ protected:
          * Construct with pointer to \p project object
          * @param project Pointer to project object
          */
-        Row(const util::ProjectsModelProject* project) :
+        Row(util::ProjectsModelProjectSharedPtr project) :
             QList<QStandardItem*>()
         {
         	append(new TitleItem(project));
@@ -759,6 +760,7 @@ protected:
             append(new SystemCompatibilityItem(project));
             append(new IsStartupItem(project));
             append(new ShaItem(project));
+            append(new ProjectsJsonDsnItem(project));
         }
     };
 
@@ -825,15 +827,9 @@ public: // Project getters
 
 	/**
      * Get the project at \p index
-     * @return Project at index
+     * @return Shared pointer to project at index
      */
-    const util::ProjectsModelProject* getProject(const QModelIndex& index) const;
-
-    /**
-     * Get the projects
-     * @return Projects
-     */
-    const util::ProjectsModelProjectPtrs& getProjects() const;
+    util::ProjectsModelProjectSharedPtr getProject(const QModelIndex& index) const;
 
 protected:
 
@@ -842,9 +838,9 @@ protected:
 
     /**
      * Populate the model with the given projects
-     * @param projects Projects to populate the model with
+     * @param projects Shared pointers to projects to populate the model with
      */
-    virtual void populate(const util::ProjectsModelProjectPtrs& projects);
+    virtual void populate(util::ProjectsModelProjectSharedPtrs projects);
 
     /** End the population of the model */
     void endPopulate();
@@ -856,13 +852,13 @@ public: // Add/remove projects
      * @param project Shared pointer to project to add
      * @param parentIndex Parent index to add the project to (defaults to root)
      */
-    void addProject(const util::ProjectsModelProjectPtr& project, const QModelIndex& parentIndex = QModelIndex());
+    void addProject(util::ProjectsModelProjectSharedPtr project, const QModelIndex& parentIndex = QModelIndex());
 
     /**
-     * Remove \p project from the model
-     * @param project Project to remove
+     * Remove project with \p index from the model
+     * @param index Index of the project to remove
      */
-    void removeProject(const util::ProjectsModelProjectPtr& project);
+    void removeProject(const QModelIndex& index);
 
 public: // Action getters
 
@@ -887,11 +883,10 @@ signals:
     void populated();
 
 private:
-    util::ProjectsModelProjectPtrs  _projects;              /** Model projects */
-    QSet<QString>                   _tags;                  /** All tags */
-    gui::StringsAction              _dsnsAction;            /** Data source names action */
-    gui::TriggerAction              _editDsnsAction;        /** Edit data source names action */
-    std::int32_t                    _numberOfPopulators;    /** Number of populators currently populating the model */
+    QSet<QString>           _tags;                  /** All tags */
+    gui::StringsAction      _dsnsAction;            /** Data source names action */
+    gui::TriggerAction      _editDsnsAction;        /** Edit data source names action */
+    std::int32_t            _numberOfPopulators;    /** Number of populators currently populating the model */
 };
 
 }

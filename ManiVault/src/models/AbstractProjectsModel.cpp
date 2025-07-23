@@ -16,7 +16,7 @@
     //#define ABSTRACT_PROJECTS_MODEL_VERBOSE
 #endif
 
-#define ABSTRACT_PROJECTS_MODEL_VERBOSE
+//#define ABSTRACT_PROJECTS_MODEL_VERBOSE
 
 using namespace mv::util;
 using namespace mv::gui;
@@ -150,6 +150,9 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::Sha:
             return ShaItem::headerData(orientation, role);
 
+        case Column::ProjectsJsonDsn:
+            return ProjectsJsonDsnItem::headerData(orientation, role);
+
 		case Column::Count:
             break;
     }
@@ -157,7 +160,7 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
     return {};
 }
 
-void AbstractProjectsModel::addProject(const ProjectsModelProjectPtr& project, const QModelIndex& parentIndex /*= QModelIndex()*/)
+void AbstractProjectsModel::addProject(ProjectsModelProjectSharedPtr project, const QModelIndex& parentIndex /*= QModelIndex()*/)
 {
     try {
         Q_ASSERT(project);
@@ -170,21 +173,25 @@ void AbstractProjectsModel::addProject(const ProjectsModelProjectPtr& project, c
 #endif
         beginPopulate();
 	    {
+            //const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::EditRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+            //for (const auto& match : matches) {
+            //    removeProject(match);
+            //}
+
 		    updateTags();
 
         	project->setParent(this);
         	project->updateMetadata();
 
-        	_projects.push_back(project);
-
         	if (parentIndex.isValid()) {
         		if (auto parentItem = dynamic_cast<Item*>(itemFromIndex(parentIndex)))
-        			parentItem->appendRow(Row(project.get()));
+        			parentItem->appendRow(Row(project));
         		else
         			throw std::runtime_error("Parent index is not a valid item");
         	}
         	else {
-        		appendRow(Row(project.get()));
+        		appendRow(Row(project));
         	}
 	    }
         endPopulate();
@@ -199,31 +206,26 @@ void AbstractProjectsModel::addProject(const ProjectsModelProjectPtr& project, c
     }
 }
 
-void AbstractProjectsModel::removeProject(const util::ProjectsModelProjectPtr& project)
+void AbstractProjectsModel::removeProject(const QModelIndex& index)
 {
     try {
 #ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
-        qDebug() << __FUNCTION__ << project->getTitle();
+        qDebug() << __FUNCTION__ << index;
 #endif
 
         beginPopulate();
         {
-			const auto modelIndices = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
-
-			for (const auto& modelIndex : modelIndices)
-				removeRow(modelIndex.siblingAtColumn(0).row(), modelIndex.parent());
-
-			std::erase(_projects, project);
+            removeRow(index.row(), index.parent());
         }
         endPopulate();
     }
     catch (std::exception& e)
     {
-        qCritical() << QString("Unable to remove %1 from the projects tree model:").arg(project->getTitle()) << e.what();
+        qCritical() << "Unable to remove project from the projects model:" << e.what();
     }
     catch (...)
     {
-        qCritical() << QString("Unable to remove %1 from the projects tree model due to an unhandled exception").arg(project->getTitle());
+        qCritical() << "Unable to remove project from the projects model";
     }
 }
 
@@ -241,9 +243,11 @@ void AbstractProjectsModel::addDsn(const QUrl& dsn)
                 FileDownloader::downloadToByteArrayAsync(dsn)
                     .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
 	                    try {
-                            for (const auto& project : _projects)
-                                if (project->getProjectsJsonDsn() == dsn)
-                                    removeProject(project);
+                            const auto matches = match(index(0, static_cast<std::int32_t>(Column::ProjectsJsonDsn)), Qt::EditRole, dsn, -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+                            for (const auto& match : matches) {
+								removeProject(match);
+                            }
 
 	                        populateFromJsonByteArray(data, dsnIndex, dsn);
 	                    }
@@ -299,9 +303,10 @@ void AbstractProjectsModel::removeDsn(const QUrl& dsn)
 
 		beginPopulate();
 	    {
-		    for (const auto& project : _projects)
-		    	if (project->getProjectsJsonDsn() == dsn)
-		    		removeProject(project);
+            const auto matches = match(index(0, static_cast<std::int32_t>(Column::ProjectsJsonDsn)), Qt::EditRole, dsn, -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+            for (const auto& match : matches)
+                removeProject(match);
 	    }
         endPopulate();
     }
@@ -337,7 +342,7 @@ void AbstractProjectsModel::populateFromJsonByteArray(const QByteArray& jsonByte
         if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject())
             throw std::runtime_error(QString("Invalid JSON from DSN at index %1: %2").arg(QString::number(dsnIndex), jsonParseError.errorString()).toStdString());
 
-        ProjectsModelProjectPtrs projects;
+        ProjectsModelProjectSharedPtrs projects;
 
         for (const auto project : jsonDocument.object()["projects"].toArray()) {
             auto projectMap = project.toVariant().toMap();
@@ -400,7 +405,7 @@ QSet<QString> AbstractProjectsModel::getTagsSet() const
     return _tags;
 }
 
-const ProjectsModelProject* AbstractProjectsModel::getProject(const QModelIndex& index) const
+ProjectsModelProjectSharedPtr AbstractProjectsModel::getProject(const QModelIndex& index) const
 {
     Q_ASSERT(index.isValid());
 
@@ -417,11 +422,6 @@ const ProjectsModelProject* AbstractProjectsModel::getProject(const QModelIndex&
     return itemAtIndex->getProject();
 }
 
-const ProjectsModelProjectPtrs& AbstractProjectsModel::getProjects() const
-{
-    return _projects;
-}
-
 void AbstractProjectsModel::beginPopulate()
 {
     _numberOfPopulators++;
@@ -429,9 +429,9 @@ void AbstractProjectsModel::beginPopulate()
     emit aboutToBePopulated();
 }
 
-void AbstractProjectsModel::populate(const util::ProjectsModelProjectPtrs& projects)
+void AbstractProjectsModel::populate(util::ProjectsModelProjectSharedPtrs projects)
 {
-    removeRows(0, rowCount());
+    //removeRows(0, rowCount());
 }
 
 void AbstractProjectsModel::endPopulate()
@@ -442,13 +442,13 @@ void AbstractProjectsModel::endPopulate()
 		emit populated();
 }
 
-AbstractProjectsModel::Item::Item(const mv::util::ProjectsModelProject* project, bool editable /*= false*/) :
+AbstractProjectsModel::Item::Item(ProjectsModelProjectSharedPtr project, bool editable /*= false*/) :
     _project(project)
 {
     setEditable(editable);
 }
 
-const ProjectsModelProject* AbstractProjectsModel::Item::getProject() const
+ProjectsModelProjectSharedPtr AbstractProjectsModel::Item::getProject() const
 {
     return _project;
 }
@@ -476,13 +476,13 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
-AbstractProjectsModel::LastModifiedItem::LastModifiedItem(const util::ProjectsModelProject* project, bool editable) :
+AbstractProjectsModel::LastModifiedItem::LastModifiedItem(ProjectsModelProjectSharedPtr project, bool editable) :
     Item(project, editable)
 {
     Q_ASSERT(project);
 
     if (project) {
-        connect(project, &ProjectsModelProject::lastModifiedDetermined, this, [this](const QDateTime& lastModified) {
+        connect(project.get(), &ProjectsModelProject::lastModifiedDetermined, this, [this](const QDateTime& lastModified) {
             emitDataChanged();
         });
     }
@@ -507,7 +507,7 @@ QVariant AbstractProjectsModel::LastModifiedItem::data(int role) const
     return Item::data(role);
 }
 
-AbstractProjectsModel::DownloadedItem::DownloadedItem(const util::ProjectsModelProject* project, bool editable) :
+AbstractProjectsModel::DownloadedItem::DownloadedItem(ProjectsModelProjectSharedPtr project, bool editable) :
     Item(project, editable)
 {
 }
@@ -716,13 +716,13 @@ QVariant AbstractProjectsModel::MissingPluginsItem::data(int role) const
     return Item::data(role);
 }
 
-AbstractProjectsModel::DownloadSizeItem::DownloadSizeItem(const util::ProjectsModelProject* project, bool editable) :
+AbstractProjectsModel::DownloadSizeItem::DownloadSizeItem(ProjectsModelProjectSharedPtr project, bool editable) :
     Item(project, editable)
 {
     Q_ASSERT(project);
 
     if (project) {
-	    connect(project, &ProjectsModelProject::downloadSizeDetermined, this, [this](std::uint64_t size) {
+	    connect(project.get(), &ProjectsModelProject::downloadSizeDetermined, this, [this](std::uint64_t size) {
             emitDataChanged();
         });
     }
