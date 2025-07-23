@@ -765,7 +765,7 @@ protected:
 public:
 
     /**
-     * Construct with pointer to \p parent object
+     * Construct with population \p mode and pointer to \p parent object
      * @param populationMode Population mode of the model (automatic/manual)
      * @param parent Pointer to parent object
      */
@@ -779,28 +779,6 @@ public:
      * @return Header
      */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-public: // Add/remove projects
-
-    /**
-     * Add project group with \p groupTitle
-     * @param groupTitle Title of the group
-     * @param projectsJsonDsn Data Source Name (DSN) of the projects JSON file to populate from
-     */
-    void addProjectGroup(const QString& groupTitle, const QUrl& projectsJsonDsn);
-
-    /**
-     * Add \p project
-     * @param project Shared pointer to project to add
-     * @param groupTitle Title of the group to which the project should be added
-     */
-    void addProject(util::ProjectsModelProjectPtr project, const QString& groupTitle = "");
-
-    /**
-     * Remove \p project from the model
-     * @param project Project to remove
-     */
-    void removeProject(const util::ProjectsModelProjectPtr& project);
 
 private: // Add/remove DSNs
 
@@ -859,8 +837,32 @@ public: // Project getters
 
 protected:
 
-    /** Synchronize the model with the content of all Data Source Names (DSN) */
-    virtual void populateFromDsns() = 0;
+    /** Begin the population of the model */
+    void beginPopulate();
+
+    /**
+     * Populate the model with the given projects
+     * @param projects Projects to populate the model with
+     */
+    virtual void populate(const util::ProjectsModelProjectPtrs& projects);
+
+    /** End the population of the model */
+    void endPopulate();
+
+public: // Add/remove projects
+
+    /**
+     * Add \p project
+     * @param project Shared pointer to project to add
+     * @param parentIndex Parent index to add the project to (defaults to root)
+     */
+    void addProject(const util::ProjectsModelProjectPtr& project, const QModelIndex& parentIndex = QModelIndex());
+
+    /**
+     * Remove \p project from the model
+     * @param project Project to remove
+     */
+    void removeProject(const util::ProjectsModelProjectPtr& project);
 
 public: // Action getters
 
@@ -878,17 +880,18 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
-    /** Signals that the model is about to be populated from DSNs */
-    void aboutToPopulateFromDsns();
+    /** Signals that the model is about to be populated */
+    void aboutToBePopulated();
 
     /** Signals that the model has been re-populated */
     void populated();
 
 private:
-    util::ProjectsModelProjectPtrs  _projects;          /** Model projects */
-    QSet<QString>                   _tags;              /** All tags */
-    gui::StringsAction              _dsnsAction;        /** Data source names action */
-    gui::TriggerAction              _editDsnsAction;    /** Edit data source names action */
+    util::ProjectsModelProjectPtrs  _projects;              /** Model projects */
+    QSet<QString>                   _tags;                  /** All tags */
+    gui::StringsAction              _dsnsAction;            /** Data source names action */
+    gui::TriggerAction              _editDsnsAction;        /** Edit data source names action */
+    std::int32_t                    _numberOfPopulators;    /** Number of populators currently populating the model */
 };
 
 }

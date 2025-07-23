@@ -4,25 +4,12 @@
 
 #include "ProjectsTreeModel.h"
 
-#include "CoreInterface.h"
-
-#include "util/FileDownloader.h"
-#include "util/JSON.h"
-
-#include <nlohmann/json.hpp>
-
-#include <QtConcurrent>
-
 #ifdef _DEBUG
     //#define PROJECTS_TREE_MODEL_VERBOSE
 #endif
 
-#define PROJECTS_TREE_MODEL_VERBOSE
-
 using namespace mv::util;
 using namespace mv::gui;
-
-using nlohmann::json;
 
 namespace mv {
 
@@ -31,40 +18,24 @@ ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mo
 {
 }
 
-void ProjectsTreeModel::populateFromDsns()
+void ProjectsTreeModel::populate(const util::ProjectsModelProjectPtrs& projects)
 {
-    if (mv::plugins().isInitializing())
-        return;
+	for (const auto& project : projects) {
+		if (project) {
 
-    if (!mv::core()->isInitialized())
-        return;
+			if (!project->getGroup().isEmpty()) {
+				auto projectGroup = std::make_shared<ProjectsModelProject>(project->getGroup());
 
-//    QStringList pluginDsns;
-//
-//    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-//        pluginDsns << pluginFactory->getProjectsDsnsAction().getStrings();
-//
-//    pluginDsns.removeDuplicates();
-//
-//    auto nonPluginDsns = getDsnsAction().getStrings();
-//
-//    for (const auto& pluginDsn : pluginDsns)
-//        nonPluginDsns.removeAll(pluginDsn);
-//
-//#ifdef PROJECTS_TREE_MODEL_VERBOSE
-//    qDebug() << QString("Populating projects tree model from plugin DSNs (plugin DSNs:%1, non-plugin DSNs: %2)").arg(pluginDsns.join(", "), nonPluginDsns.join(", "));
-//#endif
-//
-//    getDsnsAction().setStrings(pluginDsns + nonPluginDsns);
-//    getDsnsAction().setLockedStrings(pluginDsns);
-//
-//#ifdef PROJECTS_TREE_MODEL_VERBOSE
-//    qDebug() << "Populating projects tree model from DSNs";
-//#endif
+				projectGroup->setProjectsJsonDsn(project->getProjectsJsonDsn());
 
-    
+				addProject(projectGroup);
+			}
+
+			const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getGroup(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+			addProject(project, matches.isEmpty() ? QModelIndex() : matches.first());
+		}
+	}
 }
-
-
 
 }
