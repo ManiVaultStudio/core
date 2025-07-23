@@ -61,10 +61,13 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
             QDialog::accept();
         });
 
-        fromWorkspaceStartPageAction->setComments(workspace.getCommentsAction().getString());
-        fromWorkspaceStartPageAction->setTags(workspace.getTagsAction().getStrings());
-        fromWorkspaceStartPageAction->setMetaData(workspaceLocation.getTypeName());
-        fromWorkspaceStartPageAction->setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
+        if (const auto comments = workspace.getCommentsAction().getString(); !comments.isEmpty())
+            fromWorkspaceStartPageAction->createSubAction<CommentsPageSubAction>(comments);
+
+        if (const auto tags = workspace.getTagsAction().getStrings(); !tags.isEmpty())
+            fromWorkspaceStartPageAction->createSubAction<TagsPageSubAction>(tags);
+
+        //fromWorkspaceStartPageAction->setMetaData(workspaceLocation.getTypeName());
 
         _workspacesWidget.getModel().add(fromWorkspaceStartPageAction);
     }
