@@ -26,7 +26,7 @@ void PageActionsTreeModel::add(const PageActionSharedPtr& pageAction)
         if (pageAction->getParentTitle().isEmpty()) {
             appendRow(new Item(pageAction));
         } else {
-            const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, pageAction->getParentTitle(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+            const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::EditRole, pageAction->getParentTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
             if (matches.isEmpty())
                 throw std::runtime_error(QString("Parent page action %1 not found").arg(pageAction->getParentTitle()).toStdString());
