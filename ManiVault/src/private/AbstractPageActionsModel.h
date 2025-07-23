@@ -40,6 +40,8 @@ public:
          */
         Item(const PageActionSharedPtr& pageAction, bool editable = false);
 
+        QVariant data(int role) const override;
+
         /**
          * Get page action
          * return Shared pointer to the page action
