@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <util/HardwareSpec.h>
+
 #include <QIcon>
 
 /**
@@ -21,23 +23,27 @@ public:
     using TooltipCallback = std::function<QString()>;   /** Invoked to retrieve the sub-action tooltip */
 
     /**
-     * Construct with \p index and \p icon
-     * @param index Model index
+     * Construct with \p index, \p icon, \p tooltipCallback and \p clickedCallback
      * @param icon Action icon
-     */
-    PageSubAction(const QModelIndex& index, const QIcon& icon);
-
-    /**
-     * Construct with \p index, \p icon, \p clickedCallback and \p tooltipCallback
-     * @param index Model index
-     * @param icon Action icon
-     * @param clickedCallback ClickedCallback that is called when the sub-action is clicked
      * @param tooltipCallback TooltipCallback that is invoked to retrieve the sub-action tooltip
+     * @param clickedCallback ClickedCallback that is called when the sub-action is clicked
      */
-    PageSubAction(const QModelIndex& index, const QIcon& icon, const ClickedCallback& clickedCallback, const TooltipCallback& tooltipCallback);
+    PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback = {}, const ClickedCallback& clickedCallback = {});
 
     /** Add default virtual destructor */
     virtual ~PageSubAction() = default;
+
+    /**
+     * Get icon
+     * @return Icon
+     */
+    QIcon getIcon() const { return _icon; }
+
+    /**
+     * Set the icon to \p icon
+     * @param icon Icon to set
+     */
+    void setIcon(const QIcon& icon) { _icon = icon; }
 
 	/**
      * Get the sub-action tooltip
@@ -73,7 +79,6 @@ public: // Callbacks
 
 protected:
     QIcon                   _icon;              /** Action icon (shown on the left) */
-    QPersistentModelIndex   _index;             /** Model index of the parent action */
     ClickedCallback         _clickedCallback;   /** Callback function that is called when the sub-action is clicked */
     TooltipCallback         _tooltipCallback;   /** Callback function that is invoked to retrieve the sub-action tooltip */
 
@@ -81,15 +86,74 @@ protected:
 };
 
 /** For displaying comments */
-class PageCommentsSubAction : public PageSubAction
+class CommentsPageSubAction : public PageSubAction
 {
 public:
 
 	/**
-     * Construct with \p index
-	 * @param index 
+     * Construct with \p comments
+	 * @param comments Comments to display
 	 */
-	PageCommentsSubAction(const QModelIndex& index);
+	CommentsPageSubAction(const QString& comments);
+};
+
+/** For displaying tags */
+class TagsPageSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p tags
+     * @param tags List of tags
+     */
+    TagsPageSubAction(const QStringList& tags);
+};
+
+/** For displaying download size */
+class PageDownloadSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p downloadSize
+     * @param downloadSize Download size to display
+     */
+    PageDownloadSubAction(const QString& downloadSize);
+};
+
+/** For displaying hardware compatibility information */
+class PageCompatibilitySubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p downloadSize
+     * @param systemCompatibilityInfo System compatibility information to display
+     */
+    PageCompatibilitySubAction(const mv::util::HardwareSpec::SystemCompatibilityInfo& systemCompatibilityInfo);
+};
+
+/** For displaying the project preview */
+class ProjectPreviewPageSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p 
+     */
+    ProjectPreviewPageSubAction();
+};
+
+/** For displaying the project contributors */
+class ContributorsPageSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p contributors
+     * @param contributors List of contributors to display
+     */
+    ContributorsPageSubAction(const QStringList& contributors);
 };
 
 using PageSubActionPtr  = std::shared_ptr<PageSubAction>;
