@@ -51,7 +51,7 @@ ProjectManager::ProjectManager(QObject* parent) :
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
     _backToProjectAction(nullptr, "Back to project"),
-    _projectsTreeModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
+    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -208,7 +208,7 @@ ProjectManager::ProjectManager(QObject* parent) :
 
     updateActionsReadOnly();
 
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
+    _recentProjectsAction.initialize("Project", "Ctrl");
 
     connect(&_recentProjectsAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         openProject(filePath);
@@ -1082,6 +1082,11 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
     }
 
     return {};
+}
+
+const ProjectsListModel& ProjectManager::getProjectsListModel() const
+{
+    return _projectsListModel;
 }
 
 const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
