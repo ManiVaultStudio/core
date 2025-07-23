@@ -103,8 +103,15 @@ void PageTutorialsWidget::updateActions()
 	        }
 		});
 
-        tutorialAction->setComments(tutorial->hasProject() ? QString("A tutorial project will be downloaded from: %1.").arg(tutorial->getProjectUrl().toString()) : "Creates a project with a tutorial plugin.");
-        tutorialAction->setTags(tutorial->getTags());
+        const auto comments = tutorial->hasProject() ? QString("A tutorial project will be downloaded from: %1.").arg(tutorial->getProjectUrl().toString()) : "Creates a project with a tutorial plugin.";
+
+        if (!comments.isEmpty())
+            tutorialAction->createSubAction<CommentsPageSubAction>(comments);
+
+        const auto tags = tutorial->getTags();
+
+        if (!tags.isEmpty())
+    		tutorialAction->createSubAction<TagsPageSubAction>(tags);
 
         if (tutorial->hasProject())
 			tutorialAction->setDownloadUrls({ tutorial->getProjectUrl().toString() });
