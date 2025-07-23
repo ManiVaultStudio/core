@@ -13,9 +13,8 @@
 #include "actions/RecentFilesAction.h"
 #include "actions/ToggleAction.h"
 
+#include "models/ProjectsListModel.h"
 #include "models/ProjectsTreeModel.h"
-
-#include "util/FileDownloader.h"
 
 #include <QObject>
 #include <QMenu>
@@ -24,8 +23,6 @@
 #include "Task.h"
 
 namespace mv {
-
-class ProjectCenterModel;
 
 /**
  * Abstract project manager class
@@ -193,6 +190,12 @@ public:
      * @return Pointer to current project (nullptr if no project is loaded)
      */
     virtual Project* getCurrentProject() = 0;
+
+    /**
+     * Get projects list model
+     * @return Reference to the projects list model
+     */
+    virtual const ProjectsListModel& getProjectsListModel() const = 0;
 
     /**
      * Get projects tree model
