@@ -39,11 +39,11 @@ void ProjectsMenu::populate()
 {
     clear();
 
-    const auto addProject = [this](QMenu* menu, const ProjectsModelProject* project) -> void {
+    const auto addProject = [this](QMenu* menu, ProjectsModelProjectSharedPtr project) -> void {
         auto loadProjectAction = new TriggerAction(this, project->getTitle());
 
         connect(loadProjectAction, &TriggerAction::triggered, this, [project]() {
-            mv::projects().openProject(project->getUrl());
+            mv::projects().openProject(project->getUrl());  
         });
 
         menu->addAction(loadProjectAction);
