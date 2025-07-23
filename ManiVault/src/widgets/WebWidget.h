@@ -66,7 +66,7 @@ public slots:
     void js_debug(QString text);
 
 protected slots:
-    /** DEPRECATED, please connect to the communicationBridgeReady() signal instead. */
+    [[deprecated("Will be removed in 2.0. Connect to the communicationBridgeReady() signal instead.")]]
     virtual void initWebPage() {}
 
 private slots:

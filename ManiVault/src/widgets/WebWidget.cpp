@@ -39,7 +39,8 @@ void WebWidget::init(WebCommunicationObject* communicationObject)
 {
     _webCommunicationObject = communicationObject;
     connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::onJsBridgeIsAvailable);
-    // DEPRECATED, to be removed in any release after 1.0
+
+    // DEPRECATED, to be removed in any release after 2.0
     connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::initWebPage);
 
     _webView = new QWebEngineView();
