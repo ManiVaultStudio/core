@@ -5,7 +5,6 @@
 #include "private/MainWindow.h"
 #include "private/Archiver.h"
 #include "private/Core.h"
-#include "private/StartupProjectSelectorDialog.h"
 #include "private/NoProxyRectanglesFusionStyle.h"
 
 #include <Application.h>
@@ -13,7 +12,6 @@
 #include <ProjectMetaAction.h>
 
 #include <models/ProjectsTreeModel.h>
-#include <models/ProjectsFilterModel.h>
 
 #include <util/Icon.h>
 #include <util/HardwareSpec.h>
@@ -110,11 +108,6 @@ int main(int argc, char *argv[])
 
     auto& projectsTreeModel = const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel());
 
-    ProjectsFilterModel startupProjectsFilterModel(&projectsTreeModel);
-
-    startupProjectsFilterModel.setSourceModel(&projectsTreeModel);
-    startupProjectsFilterModel.getFilterStartupOnlyAction().setChecked(true);
-
     if (hasProjectsJsonInAppDir)
         projectsTreeModel.populateFromJsonFile(projectsJsonFileName);
 
@@ -122,11 +115,7 @@ int main(int argc, char *argv[])
 
     application.initialize();
 
-    projectsTreeModel.setPopulationMode(StandardItemModel::PopulationMode::Automatic);
-
     HardwareSpec::updateSystemHardwareSpecs();
-
-    const auto userWillSelectStartupProject = startupProjectsFilterModel.rowCount() >= 1;
 
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 
@@ -142,13 +131,6 @@ int main(int argc, char *argv[])
 	ModalTask::getGlobalHandler()->setEnabled(true);
 
     auto shouldShowSplashScreen = true;
-
-    //if (userWillSelectStartupProject) {
-    //    StartupProjectSelectorDialog startupProjectSelectorDialog(projectsTreeModel, startupProjectsFilterModel);
-
-    //    if (startupProjectSelectorDialog.exec() == QDialog::Rejected)
-    //        return 0;
-    //}
 
     SplashScreenAction splashScreenAction(&application, true);
 
