@@ -8,8 +8,8 @@
 
 #include <QWidget>
 
+#include <QString>
 #include <QObject>
-#include <QDebug>
 
 class QWebEngineView;
 class QWebEnginePage;
@@ -24,17 +24,11 @@ class CORE_EXPORT WebCommunicationObject : public QObject
 {
     Q_OBJECT
 
-public:
-
-
 signals:
     void notifyJsBridgeIsAvailable();
 
 public slots:
-    void js_debug(QString message)
-    {
-        qDebug() << "Javascript Debug Info: " << message;
-    }
+    void js_debug(const QString& message);
 
     void js_available()
     {
@@ -46,14 +40,13 @@ class CORE_EXPORT WebWidget : public QWidget
 {
     Q_OBJECT
 public:
-    WebWidget();
-    ~WebWidget() override;
 
     void init(WebCommunicationObject* communicationObject);
 
+    void setPage(QString htmlPath, QString basePath);
+
     QWebEngineView* getView();
     QWebEnginePage* getPage();
-    void setPage(QString htmlPath, QString basePath);
 
     bool isCommunicationAvailable() const { return _communicationAvailable; }
     bool isWebPageLoaded() const { return _webPageLoaded; }
@@ -69,11 +62,8 @@ signals:
 protected:
     void registerFunctions();
 
-public slots:
-    void js_debug(QString text);
-
 protected slots:
-    [[deprecated("Will be removed in 2.0. Connect to the communicationBridgeReady() signal instead.")]]
+    [[deprecated("Will be removed in 2.0. Connect to the communicationBridgeReady() or fullyInitialized() signal instead.")]]
     virtual void initWebPage() {}
 
 private slots:
@@ -81,15 +71,12 @@ private slots:
     void onWebPageLoaded(bool ok);
 
 private:
-    QWebEngineView* _webView;
-    QWebChannel* _communicationChannel;
-
-    WebCommunicationObject* _webCommunicationObject;
-
-    QString _css;
-
-    bool _communicationAvailable;
-    bool _webPageLoaded;
+    QWebEngineView*         _webView = nullptr;
+    QWebChannel*            _communicationChannel = nullptr;
+    WebCommunicationObject* _webCommunicationObject = nullptr;
+    QString                 _css = {};
+    bool                    _communicationAvailable = false;
+    bool                    _webPageLoaded = false;
 };
 
 } // namespace gui

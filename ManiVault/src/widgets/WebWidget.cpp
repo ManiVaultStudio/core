@@ -9,7 +9,7 @@
 #include <QWebEngineView>
 #include <QWebEnginePage>
 #include <QWebChannel>
-
+#include <QDebug>
 #include <QVBoxLayout>
 
 #include <cassert>
@@ -19,20 +19,9 @@ namespace mv
 namespace gui
 {
 
-WebWidget::WebWidget() :
-    _webView(nullptr),
-    _communicationChannel(nullptr),
-    _webCommunicationObject(nullptr),
-    _css(),
-    _communicationAvailable(false),
-    _webPageLoaded(false)
+void WebCommunicationObject::js_debug(const QString& text)
 {
-
-}
-
-WebWidget::~WebWidget()
-{
-
+    qDebug() << "WebWidget Debug Info: " << text;
 }
 
 void WebWidget::init(WebCommunicationObject* communicationObject)
@@ -82,11 +71,6 @@ void WebWidget::setPage(QString htmlPath, QString basePath)
 void WebWidget::registerFunctions()
 {
     _communicationChannel->registerObject("QtBridge", _webCommunicationObject);
-}
-
-void WebWidget::js_debug(QString text)
-{
-    qDebug() << "WebWidget Debug Info: " << text;
 }
 
 void WebWidget::onJsBridgeIsAvailable()
