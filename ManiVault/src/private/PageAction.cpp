@@ -41,7 +41,7 @@ void PageAction::setIcon(const QIcon& icon)
 
 void PageAction::setExpanded(bool expanded)
 {
-    setIcon(expanded ? StyledIcon("minus") : StyledIcon("plus"));
+    setIcon(expanded ? StyledIcon("caret-down") : StyledIcon("caret-right"));
 }
 
 QString PageAction::getTitle() const
