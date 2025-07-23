@@ -22,7 +22,7 @@ RecentFilesListModel::RecentFilesListModel(QObject* parent, const QString& recen
 
 void RecentFilesListModel::load()
 {
-    setRowCount(0);
+    removeRows(0, rowCount());
 
     const auto recentFiles = Application::current()->getSetting(getSettingsKey(), QVariantList()).toList();
 
@@ -100,7 +100,7 @@ RecentFiles RecentFilesListModel::getRecentFiles() const
 
     for (int rowIndex = 0; rowIndex < rowCount(); rowIndex++) {
         const auto filePath = data(index(rowIndex, static_cast<int>(Column::FilePath))).toString();
-        const auto dateTime = data(index(rowIndex, static_cast<int>(Column::DateTime))).toDateTime();
+        const auto dateTime = data(index(rowIndex, static_cast<int>(Column::DateTime)), Qt::EditRole).toDateTime();
 
     	if (!filePath.isEmpty())
             recentFiles.emplace_back(RecentFile(filePath, dateTime));
