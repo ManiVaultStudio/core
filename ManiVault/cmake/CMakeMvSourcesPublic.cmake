@@ -986,6 +986,7 @@ set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
 
 set(PUBLIC_PROJECTS_MODEL_HEADERS
     src/models/AbstractProjectsModel.h
+    src/models/ProjectsListModel.h
     src/models/ProjectsTreeModel.h
 	src/models/ProjectsFilterModel.h
 	src/models/ProjectsModelProject.h
@@ -993,6 +994,7 @@ set(PUBLIC_PROJECTS_MODEL_HEADERS
 
 set(PUBLIC_PROJECTS_MODEL_SOURCES
     src/models/AbstractProjectsModel.cpp
+    src/models/ProjectsListModel.cpp
     src/models/ProjectsTreeModel.cpp
 	src/models/ProjectsFilterModel.cpp
 	src/models/ProjectsModelProject.cpp
