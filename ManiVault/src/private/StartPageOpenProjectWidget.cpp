@@ -222,8 +222,8 @@ void StartPageOpenProjectWidget::setupRecentProjectsSection()
                 projects().openProject(recentFilePath);
             });
 
-            recentProjectPageAction->setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
-            recentProjectPageAction->setPreviewImage(projects().getWorkspacePreview(recentFilePath));
+            recentProjectPageAction->setMetaData(recentFile.getDateTime().toString());
+            //recentProjectPageAction->setPreviewImage(projects().getWorkspacePreview(recentFilePath));
 
             _recentProjectsWidget.getModel().add(recentProjectPageAction);
 
@@ -231,16 +231,20 @@ void StartPageOpenProjectWidget::setupRecentProjectsSection()
                 return Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
 			});
 
-            auto* watcher = new QFutureWatcher<QSharedPointer<ProjectMetaAction>>();
+            auto watcher = new QFutureWatcher<QSharedPointer<ProjectMetaAction>>();
 
-            QObject::connect(watcher, &QFutureWatcher<QSharedPointer<ProjectMetaAction>>::finished, [watcher, recentProjectPageAction]() {
+            connect(watcher, &QFutureWatcher<QSharedPointer<ProjectMetaAction>>::finished, [this, watcher, recentProjectPageAction]() {
                 const auto result = watcher->future().result();
 
                 if (const auto projectMetaAction = watcher->future().result()) {
-                    recentProjectPageAction->setDescription(projectMetaAction->getDescriptionAction().getString());
-                    recentProjectPageAction->setComments(projectMetaAction->getCommentsAction().getString());
-                    recentProjectPageAction->setTags(projectMetaAction->getTagsAction().getStrings());
-                    recentProjectPageAction->setContributors(projectMetaAction->getContributorsAction().getStrings());
+		            if (const auto description = projectMetaAction->getDescriptionAction().getString(); !description.isEmpty())
+                        recentProjectPageAction->createSubAction<CommentsPageSubAction>(description);
+
+                    if (const auto contributors = projectMetaAction->getContributorsAction().getStrings(); !contributors.isEmpty())
+                        recentProjectPageAction->createSubAction<ContributorsPageSubAction>(contributors);
+
+                    if (const auto tags = projectMetaAction->getTagsAction().getStrings(); !tags.isEmpty())
+                        recentProjectPageAction->createSubAction<TagsPageSubAction>(tags);
                 }
 
                 watcher->deleteLater();
@@ -267,7 +271,40 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
     auto& projectsTreeModel     = mv::projects().getProjectsTreeModel();
     auto& projectsPageTreeModel = _projectsWidget.getModel();
 
-    const auto populateModel = [this, &projectsTreeModel, &projectsPageTreeModel]() -> void {
+    const auto addProjectPageAction = [&](const ProjectsModelProject* project) -> void {
+        qDebug() << project->getTitle() << project->getGroup();
+
+    	auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
+            projects().openProject(project->getUrl());
+        });
+
+        projectPageAction->setParentTitle(project->getGroup());
+
+        if (!project->getTags().isEmpty())
+            projectPageAction->createSubAction<TagsPageSubAction>(project->getTags());
+
+        if (!project->isGroup())
+            projectPageAction->createSubAction<PageDownloadSubAction>(getNoBytesHumanReadable(project->getDownloadSize()));
+
+        if (!project->isGroup()) {
+            projectPageAction->createSubAction<PageCompatibilitySubAction>(HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec()));
+
+            if (project->getDownloadSize() == 0) {
+                connect(project, &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), [projectPageAction, project](std::uint64_t size) {
+                    projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(size)));
+                });
+            }
+            else {
+                projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(project->getDownloadSize())));
+            }
+        } else {
+            projectPageAction->setExpanded(false);
+        }
+
+        projectsPageTreeModel.add(projectPageAction);
+    };
+
+    const auto populateModel = [&]() -> void {
         projectsPageTreeModel.removeRows(0, projectsPageTreeModel.rowCount());
 
         for (int filterRowIndex = 0; filterRowIndex <= _projectsFilterModel.rowCount(); ++filterRowIndex) {
@@ -277,36 +314,16 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         	if (!sourceIndex.isValid())
                 continue;
             
-            if (const auto project = projectsTreeModel.getProject(sourceIndex)) {
-                auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
-                    projects().openProject(project->getUrl());
-                });
+            if (const auto project = projectsTreeModel.getProject(sourceIndex))
+                addProjectPageAction(project);
 
-                projectPageAction->setParentTitle(project->getGroup());
-                projectPageAction->setTags(project->getTags());
-                projectPageAction->createSubAction<PageCommentsSubAction>(sourceIndex);
-
-                projectsPageTreeModel.add(projectPageAction);
-            }
-
-            const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex);
-
-            if (numberOfChildren >= 1) {
+            if (const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex); numberOfChildren >= 1) {
                 for (int childFilterRowIndex = 0; childFilterRowIndex <= numberOfChildren; ++childFilterRowIndex) {
                     const auto childFilterIndex = _projectsFilterModel.index(childFilterRowIndex, 0, filterIndex);
                     const auto childSourceIndex = _projectsFilterModel.mapToSource(childFilterIndex);
 
-                    if (const auto project = projectsTreeModel.getProject(childSourceIndex)) {
-                        auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
-                            projects().openProject(project->getUrl());
-                        });
-
-                        projectPageAction->setParentTitle(project->getGroup());
-                        projectPageAction->setTags(project->getTags());
-                        projectPageAction->createSubAction<PageCommentsSubAction>(sourceIndex);
-
-                        projectsPageTreeModel.add(projectPageAction);
-                    }
+                    if (const auto project = projectsTreeModel.getProject(childSourceIndex))
+                        addProjectPageAction(project);
                 }
             }
         }
