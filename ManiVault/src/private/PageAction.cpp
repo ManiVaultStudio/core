@@ -3,7 +3,10 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PageAction.h"
-#include "PageActionsTreeModel.h"
+
+#include <util/StyledIcon.h>
+
+using namespace mv::util;
 
 bool PageAction::compactView = false;
 
@@ -15,6 +18,8 @@ PageAction::PageAction(const QIcon& icon, const QString& title, const QString& s
     _tooltip(tooltip),
     _clickedCallback(clickedCallback)
 {
+    if (!description.isEmpty())
+		createSubAction<CommentsPageSubAction>(description);
 }
 
 PageAction::PageAction(const QModelIndex& index)
@@ -22,28 +27,71 @@ PageAction::PageAction(const QModelIndex& index)
     setEditorData(index);
 }
 
+QIcon PageAction::getIcon() const
+{
+	return _icon;
+}
+
+void PageAction::setIcon(const QIcon& icon)
+{
+	_icon = icon;
+
+	emit iconChanged();
+}
+
+void PageAction::setExpanded(bool expanded)
+{
+    setIcon(expanded ? StyledIcon("minus") : StyledIcon("plus"));
+}
+
+QString PageAction::getTitle() const
+{
+	return _title.isEmpty() ? "NA" : _title;
+}
+
+void PageAction::setTitle(const QString& title)
+{
+	_title = title;
+}
+
+QString PageAction::getParentTitle() const
+{
+	return _parentTitle;
+}
+
+void PageAction::setParentTitle(const QString& parentTitle)
+{
+	_parentTitle = parentTitle;
+}
+
+QString PageAction::getMetaData() const
+{
+	return _metaData;
+}
+
+void PageAction::setMetaData(const QString& metaData)
+{
+	_metaData = metaData;
+
+	emit metadataChanged();
+}
+
 void PageAction::removeSubAction(const PageSubActionPtr& subAction)
 {
     _subActions.erase(std::ranges::remove(_subActions, subAction).begin(), _subActions.end());
+
+    emit subActionsChanged();
 }
 
 void PageAction::clearSubActions()
 {
 	_subActions.clear();
+
+    emit subActionsChanged();
 }
 
 void PageAction::setEditorData(const QModelIndex& index)
 {
-    //setIcon(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Icon)).data(Qt::UserRole + 1).value<QIcon>());
-    //setTitle(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Title)).data(Qt::EditRole).toString());
-    //setDescription(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Description)).data(Qt::EditRole).toString());
-    //setComments(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Comments)).data(Qt::EditRole).toString());
-    //setTags(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Tags)).data(Qt::EditRole).toStringList());
-    //setSubtitle(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Subtitle)).data(Qt::EditRole).toString());
-    //setMetaData(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::MetaData)).data(Qt::EditRole).toString());
-    //setPreviewImage(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::PreviewImage)).data(Qt::UserRole + 1).value<QImage>());
-    //setDownloadUrls(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::DownloadUrls)).data(Qt::EditRole).toStringList());
-    //setContributors(index.siblingAtColumn(static_cast<int>(PageActionsModel::Column::Contributors)).data(Qt::UserRole + 1).toStringList());
 }
 
 bool PageAction::isCompactView()

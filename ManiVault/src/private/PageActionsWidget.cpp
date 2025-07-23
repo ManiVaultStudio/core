@@ -77,10 +77,17 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
                     clickedCallback();
             }
         } else {
-            if (treeView.isExpanded(filterIndex))
-				treeView.collapse(filterIndex);
-            else
+            const auto isExpanded = treeView.isExpanded(filterIndex);
+
+            if (isExpanded) {
+                treeView.collapse(filterIndex);
+            } else {
                 treeView.expand(filterIndex);
+            }
+
+            if (auto pageActionItem = dynamic_cast<AbstractPageActionsModel::Item*>(_model.itemFromIndex(sourceIndex))) {
+                pageActionItem->getPageAction()->setExpanded(isExpanded);
+            }
         }
 
         _hierarchyWidget.getSelectionModel().clear();
