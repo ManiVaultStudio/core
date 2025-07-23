@@ -4,6 +4,7 @@
 
 #include "PageActionDelegateEditorWidget.h"
 
+#include "AbstractPageActionsModel.h"
 #include "PageAction.h"
 
 #include "CoreInterface.h"
@@ -19,12 +20,7 @@ using namespace mv;
 using namespace mv::util;
 
 PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _previewIconLabel(util::StyledIcon("image")),
-    _metaDataIconLabel(util::StyledIcon("file")),
-    _tagsIconLabel(util::StyledIcon("tags")),
-    _downloadUrls(util::StyledIcon("download")),
-    _contributorsIconLabel(util::StyledIcon("user"))
+    QWidget(parent)
 {
     setObjectName("PageActionDelegateEditorWidget");
     setMouseTracking(true);
@@ -43,8 +39,8 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
     _textLayout.setAlignment(Qt::AlignTop);
     _textLayout.setSpacing(3);
 
-    _infoLayout.setContentsMargins(0, 0, 0, 0);
-    _infoLayout.setSpacing(5);
+    _subActionsLayout.setContentsMargins(0, 0, 0, 0);
+    _subActionsLayout.setSpacing(5);
 
     _iconLabel.setStyleSheet("padding-top: 3px;");
     _titleLabel.setStyleSheet("font-weight: bold;");
@@ -57,18 +53,11 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
 
         _primaryTextLayout.addWidget(&_titleLabel, 1);
         _primaryTextLayout.addWidget(&_metaDataLabel);
-        _primaryTextLayout.addWidget(&_infoWidget);
+        _primaryTextLayout.addWidget(&_subActionsWidget);
 
         _subtitleLabel.hide();
         
-        _infoLayout.addWidget(&_previewIconLabel);
-        _infoLayout.addWidget(&_metaDataIconLabel);
-        _infoLayout.addWidget(&_tagsIconLabel);
-        _infoLayout.addWidget(&_downloadUrls);
-        _infoLayout.addWidget(&_contributorsIconLabel);
-        _infoLayout.addStretch(1);
-
-        _infoWidget.setLayout(&_infoLayout);
+        _subActionsWidget.setLayout(&_subActionsLayout);
     }
     else {
         _textLayout.addLayout(&_primaryTextLayout);
@@ -79,130 +68,10 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
         _primaryTextLayout.addWidget(&_metaDataLabel);
 
         _secondaryTextLayout.addWidget(&_subtitleLabel, 1);
-        _secondaryTextLayout.addWidget(&_infoWidget);
+        _secondaryTextLayout.addWidget(&_subActionsWidget);
 
-        _infoLayout.addWidget(&_previewIconLabel);
-        _infoLayout.addWidget(&_metaDataIconLabel);
-        _infoLayout.addWidget(&_tagsIconLabel);
-        _infoLayout.addWidget(&_downloadUrls);
-        _infoLayout.addWidget(&_contributorsIconLabel);
-
-        //for (auto& subAction : _)
-        _infoLayout.addStretch(1);
-
-        _infoWidget.setLayout(&_infoLayout);
+        _subActionsWidget.setLayout(&_subActionsLayout);
     }
-
-    const auto getTooltipHtml = [](const QString& tooltipTextHtml) -> QString {
-        return QString(" \
-            <html> \
-                <head> \
-                    <style> \
-                        body { \
-                        } \
-                    </style> \
-                </head> \
-                <body> \
-                    <div style='width: 300px;'>%1</div> \
-                </body> \
-            </html> \
-        ").arg(tooltipTextHtml);
-    };
-
-    _previewIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
-        if (!_index.isValid())
-            return {};
-
-        PageAction pageAction(_index);
-
-        QString tooltipTextHtml;
-
-        const auto previewImage = pageAction.getPreviewImage();
-
-        if (!previewImage.isNull()) {
-            QBuffer buffer;
-
-            buffer.open(QIODevice::WriteOnly);
-
-            QPixmap::fromImage(previewImage).save(&buffer, "JPG");
-
-            auto image = buffer.data().toBase64();
-
-            tooltipTextHtml = QString("<img style='padding: 100px;'src='data:image/jpg;base64,%1'></p>").arg(image);
-        }
-
-        return getTooltipHtml(tooltipTextHtml);
-    });
-
-    _metaDataIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
-        if (!_index.isValid())
-            return {};
-
-        PageAction pageAction(_index);
-
-        auto metaDataHtml = QString(" \
-            <table> \
-                <tr> \
-                    <td><b>Title:&nbsp;</b></td> \
-                    <td>%1</td> \
-                </tr> \
-                <tr> \
-                    <td><b>Description:&nbsp;</b></td> \
-                    <td>%2</td> \
-                </tr> \
-                <tr> \
-                    <td><b>Comments:&nbsp;</b></td> \
-                    <td>%3</td> \
-                </tr> \
-            </table> \
-        ").arg(pageAction.getTitle(), pageAction.getDescription(), pageAction.getComments());
-
-        return getTooltipHtml(metaDataHtml);
-    });
-
-    _tagsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
-        if (!_index.isValid())
-            return {};
-
-        PageAction pageAction(_index);
-
-        auto tagsHtml = QString("<p><b>Tags:</b>&nbsp;%1</p>").arg(pageAction.getTags().join(", "));
-
-        return getTooltipHtml(tagsHtml);
-    });
-
-    _downloadUrls.setTooltipCallback([this, getTooltipHtml]() -> QString {
-        if (!_index.isValid())
-            return {};
-
-        PageAction pageAction(_index);
-
-        const auto downloadUrls = pageAction.getDownloadUrls();
-
-        QStringList downloads;
-
-        for (const auto& downloadUrl : downloadUrls)
-            downloads << QString("<p>%1</p>").arg(downloadUrl);
-
-        if (downloadUrls.size() == 1)
-            return getTooltipHtml(QString("<p><b>One download from: </b></p>%1").arg(downloads.first()));
-
-        if (downloadUrls.size() > 1)
-            return getTooltipHtml(QString("<p><b>%1 downloads from: </b></p>%2").arg(QString::number(downloadUrls.size()), downloadUrls.join("</br>")));
-            
-        return {};
-    });
-
-    _contributorsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
-        if (!_index.isValid())
-            return {};
-
-        PageAction pageAction(_index);
-
-        auto tagsHtml = QString("<p><b>Contributors:</b>&nbsp;%1</p>").arg(pageAction.getContributors().join(", "));
-
-        return getTooltipHtml(tagsHtml);
-    });
 
     setLayout(&_mainLayout);
 
@@ -212,7 +81,7 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
     
     updateCustomStyle();
 
-    updateInfoWidgetVisibility();
+    updateOverlayWidgetVisibility();
 
     connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &PageActionDelegateEditorWidget::updateCustomStyle);
 }
@@ -221,14 +90,23 @@ void PageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
 {
     _index = index;
 
-    PageAction pageAction(_index);
+    
+    if (auto proxyModel = dynamic_cast<const QSortFilterProxyModel*>(_index.model())) {
+        if (auto pageActionsModel = dynamic_cast<const QStandardItemModel*>(proxyModel->sourceModel())) {
+            if (auto item = dynamic_cast<AbstractPageActionsModel::Item*>(pageActionsModel->itemFromIndex(proxyModel->mapToSource(_index)))) {
+                _pageAction = item->getPageAction();
 
-    updateTextLabels();
+                connect(_pageAction.get(), &PageAction::subActionsChanged, this, &PageActionDelegateEditorWidget::updateSubActions);
+                connect(_pageAction.get(), &PageAction::iconChanged, this, &PageActionDelegateEditorWidget::updateIcon);
+                connect(_pageAction.get(), &PageAction::metadataChanged, this, &PageActionDelegateEditorWidget::updateMetadata);
 
-    _previewIconLabel.setVisible(!pageAction.getPreviewImage().isNull());
-    _tagsIconLabel.setVisible(!pageAction.getTags().isEmpty());
-    _downloadUrls.setVisible(!pageAction.getDownloadUrls().isEmpty());
-    _contributorsIconLabel.setVisible(!pageAction.getContributors().isEmpty());
+                updateTextLabels();
+                updateIcon();
+                updateMetadata();
+                updateSubActions();
+            }
+        }
+    }
 }
 
 bool PageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* event)
@@ -250,46 +128,73 @@ void PageActionDelegateEditorWidget::enterEvent(QEnterEvent* enterEvent)
 {
     QWidget::enterEvent(enterEvent);
 
-    updateInfoWidgetVisibility();
+    updateOverlayWidgetVisibility();
 }
 
 void PageActionDelegateEditorWidget::leaveEvent(QEvent* event)
 {
     QWidget::leaveEvent(event);
 
-    updateInfoWidgetVisibility();
+    updateOverlayWidgetVisibility();
 }
 
 void PageActionDelegateEditorWidget::updateTextLabels()
 {
-    PageAction pageAction(_index);
+    if (_pageAction) {
+        QFontMetrics titleMetrics(_titleLabel.font()), descriptionMetrics(_subtitleLabel.font());
 
-    QFontMetrics titleMetrics(_titleLabel.font()), descriptionMetrics(_subtitleLabel.font());
-
-    _titleLabel.setText(titleMetrics.elidedText(pageAction.getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
-    _subtitleLabel.setText(descriptionMetrics.elidedText(pageAction.getSubtitle(), Qt::ElideMiddle, _subtitleLabel.width() - 2));
-    _metaDataLabel.setText(pageAction.getMetaData());
+        _titleLabel.setText(titleMetrics.elidedText(_pageAction->getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
+        _subtitleLabel.setText(descriptionMetrics.elidedText(_pageAction->getSubtitle(), Qt::ElideMiddle, _subtitleLabel.width() - 2));
+        
+    }
 
     updateCustomStyle();
 }
 
-void PageActionDelegateEditorWidget::updateInfoWidgetVisibility()
+void PageActionDelegateEditorWidget::updateIcon()
+{
+    _iconLabel.setPixmap(_pageAction->getIcon().pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
+
+    updateCustomStyle();
+}
+
+void PageActionDelegateEditorWidget::updateMetadata()
+{
+    _metaDataLabel.setText(_pageAction->getMetaData());
+
+    updateCustomStyle();
+}
+
+void PageActionDelegateEditorWidget::updateSubActions()
+{
+    clearLayout(&_subActionsLayout, true);
+
+    if (_pageAction) {
+        for (auto& subAction : _pageAction->getSubActions()) {
+            auto subActionIconLabel = new gui::IconLabel(subAction->getIcon());
+
+            subActionIconLabel->setToolTip(subAction->getTooltip());
+
+            _subActionsLayout.addWidget(subActionIconLabel);
+        }
+    }
+
+    updateCustomStyle();
+}
+
+void PageActionDelegateEditorWidget::updateOverlayWidgetVisibility()
 {
     if (PageAction::isCompactView())
         _metaDataLabel.setVisible(!QWidget::underMouse());
 
-    _infoWidget.setVisible(QWidget::underMouse());
+    _subActionsWidget.setVisible(QWidget::underMouse());
 }
 
 void PageActionDelegateEditorWidget::updateCustomStyle()
 {
-    //_metaDataLabel.setStyleSheet(stylesheet);
-
-    PageAction pageAction(_index);
-
-    const auto styledIcon = StyledIcon(pageAction.getIcon());
-
-    _iconLabel.setPixmap(QIcon(styledIcon).pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
-    _titleLabel.setStyleSheet(QString("color: %1; font-weight: bold;").arg(qApp->palette().text().color().name()));
-    _subtitleLabel.setStyleSheet(QString("color: %1; font-size: 7pt;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
+    if (_pageAction) {
+        _titleLabel.setStyleSheet(QString("color: %1; font-weight: bold;").arg(qApp->palette().text().color().name()));
+        _subtitleLabel.setStyleSheet(QString("color: %1; font-size: 7pt;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
+    }
+    
 }

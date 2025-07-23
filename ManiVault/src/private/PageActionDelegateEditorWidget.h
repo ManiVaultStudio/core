@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "PageAction.h"
+
 #include <widgets/IconLabel.h>
 
 #include <QHBoxLayout>
@@ -60,29 +62,34 @@ private:
 
     /** Update all text labels and takes care of elidation */
     void updateTextLabels();
-    
+
+    /** Updates the icon UI */
+    void updateIcon();
+
+    /** Updates the meta data UI */
+    void updateMetadata();
+
+    /** Update the sub-actions UI */
+    void updateSubActions();
+
     /** Show the info widget when mouse hovered */
-    void updateInfoWidgetVisibility();
+    void updateOverlayWidgetVisibility();
     
     /** update custom styles */
     void updateCustomStyle();
 
 private:
-    QPersistentModelIndex       _index;                     /** Editor model index */
-    QHBoxLayout                 _mainLayout;                /** Main editor layout */
-    QVBoxLayout                 _iconLayout;                /** Left icon layout */
-    QLabel                      _iconLabel;                 /** Left icon label */
-    QVBoxLayout                 _textLayout;                /** Right text layout */
-    QHBoxLayout                 _primaryTextLayout;         /** Primary layout with title and comments labels */
-    QLabel                      _titleLabel;                /** Title label */
-    QLabel                      _metaDataLabel;             /** Label with metadata (maybe empty) */
-    QHBoxLayout                 _secondaryTextLayout;       /** Secondary layout with subtitle and info labels */
-    QLabel                      _subtitleLabel;             /** Subtitle label */
-    QWidget                     _infoWidget;                /** Widget for info labels */
-    QHBoxLayout                 _infoLayout;                /** Layout for preview, tags and meta info popups */
-    mv::gui::IconLabel          _previewIconLabel;          /** Icon label for preview image */
-    mv::gui::IconLabel          _metaDataIconLabel;         /** Icon label for meta data */
-    mv::gui::IconLabel          _tagsIconLabel;             /** Icon label for tags */
-    mv::gui::IconLabel          _downloadUrls;     /** Icon label for requires download */
-    mv::gui::IconLabel          _contributorsIconLabel;     /** Icon label for contributors */
+    PageActionSharedPtr     _pageAction;                /** Shared pointer to page action */    
+    QPersistentModelIndex   _index;                     /** Editor model index */
+    QHBoxLayout             _mainLayout;                /** Main editor layout */
+    QVBoxLayout             _iconLayout;                /** Left icon layout */
+    QLabel                  _iconLabel;                 /** Left icon label */
+    QVBoxLayout             _textLayout;                /** Right text layout */
+    QHBoxLayout             _primaryTextLayout;         /** Primary layout with title and comments labels */
+    QLabel                  _titleLabel;                /** Title label */
+    QLabel                  _metaDataLabel;             /** Label with metadata (maybe empty) */
+    QHBoxLayout             _secondaryTextLayout;       /** Secondary layout with subtitle and sub-actions */
+    QLabel                  _subtitleLabel;             /** Subtitle label */
+    QWidget                 _subActionsWidget;          /** Widget for sub-actions */
+    QHBoxLayout             _subActionsLayout;          /** Layout for sub-actions */
 };
