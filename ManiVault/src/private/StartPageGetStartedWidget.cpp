@@ -64,8 +64,8 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getToolbarAction().addAction(&_workspaceLocationTypeAction);
 
-    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt");
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
+    _recentWorkspacesAction.initialize("Workspace", "Ctrl+Alt");
+    _recentProjectsAction.initialize("Project", "Ctrl");
 
     const auto toggleViews = [this]() -> void {
         _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());
@@ -107,10 +107,14 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                     projects().newProject(workspaceLocation.getFilePath());
                 });
 
-                fromWorkspacePageAction->setComments(workspace.getCommentsAction().getString());
-                fromWorkspacePageAction->setTags(workspace.getTagsAction().getStrings());
+                if (const auto comments = workspace.getCommentsAction().getString(); !comments.isEmpty())
+                    fromWorkspacePageAction->createSubAction<CommentsPageSubAction>(comments);
+
+                if (const auto tags = workspace.getTagsAction().getStrings(); !tags.isEmpty())
+                    fromWorkspacePageAction->createSubAction<TagsPageSubAction>(tags);
+
                 fromWorkspacePageAction->setMetaData(workspaceLocation.getTypeName());
-                fromWorkspacePageAction->setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
+                //fromWorkspacePageAction->setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
 
                 _createProjectFromWorkspaceWidget.getModel().add(fromWorkspacePageAction);
             }
@@ -129,8 +133,12 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                     projects().newProject(recentFilePath);
                 });
 
-                recentWorkspacePageAction->setComments(workspace.getCommentsAction().getString());
-                recentWorkspacePageAction->setTags(workspace.getTagsAction().getStrings());
+                if (const auto comments = workspace.getCommentsAction().getString(); !comments.isEmpty())
+                    recentWorkspacePageAction->createSubAction<CommentsPageSubAction>(comments);
+
+                if (const auto tags = workspace.getTagsAction().getStrings(); !tags.isEmpty())
+                    recentWorkspacePageAction->createSubAction<TagsPageSubAction>(tags);
+
                 recentWorkspacePageAction->setMetaData(recentWorkspace.getDateTime().toString("dd/MM/yyyy hh:mm"));
                 //recentWorkspacePageAction->setPreviewImage(workspace.getPreviewImage(recentFilePath));
 
@@ -159,12 +167,18 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                         projects().newBlankProject();
                         workspaces().importWorkspaceFromProjectFile(recentFilePath);
                     });
-                
-                    recentProjectPageAction->setComments(projectMeta->getCommentsAction().getString());
-                    recentProjectPageAction->setTags(projectMeta->getTagsAction().getStrings());
+
+                    if (const auto comments = projectMeta->getCommentsAction().getString(); !comments.isEmpty())
+                        recentProjectPageAction->createSubAction<CommentsPageSubAction>(comments);
+
+                    if (const auto tags = projectMeta->getTagsAction().getStrings(); !tags.isEmpty())
+                        recentProjectPageAction->createSubAction<TagsPageSubAction>(tags);
+
+                    if (const auto contributors = projectMeta->getContributorsAction().getStrings(); !contributors.isEmpty())
+                        recentProjectPageAction->createSubAction<ContributorsPageSubAction>(contributors);
+
                     recentProjectPageAction->setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
-                    recentProjectPageAction->setPreviewImage(projects().getWorkspacePreview(recentFilePath));
-                    recentProjectPageAction->setContributors(projectMeta->getContributorsAction().getStrings());
+                    //recentProjectPageAction->setPreviewImage(projects().getWorkspacePreview(recentFilePath));
                 
                     _createProjectFromWorkspaceWidget.getModel().add(recentProjectPageAction);
                 }
