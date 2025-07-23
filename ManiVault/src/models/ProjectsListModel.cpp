@@ -18,7 +18,7 @@ ProjectsListModel::ProjectsListModel(const PopulationMode& populationMode /*= Mo
 {
 }
 
-void ProjectsListModel::populate(const util::ProjectsModelProjectPtrs& projects)
+void ProjectsListModel::populate(ProjectsModelProjectSharedPtrs projects)
 {
     for (const auto& project : projects)
         if (project)

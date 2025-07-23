@@ -18,7 +18,7 @@ ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mo
 {
 }
 
-void ProjectsTreeModel::populate(const util::ProjectsModelProjectPtrs& projects)
+void ProjectsTreeModel::populate(ProjectsModelProjectSharedPtrs projects)
 {
 	for (const auto& project : projects) {
 		if (project) {

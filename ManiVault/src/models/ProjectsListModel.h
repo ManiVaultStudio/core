@@ -34,9 +34,9 @@ protected:
 
     /**
      * Populate the model with the given projects
-     * @param projects Projects to populate the model with
+     * @param projects Shared pointers to projects to populate the model with
      */
-    void populate(const util::ProjectsModelProjectPtrs& projects) override;
+    void populate(util::ProjectsModelProjectSharedPtrs projects) override;
 };
 
 }
