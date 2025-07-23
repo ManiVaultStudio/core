@@ -294,7 +294,6 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadedViewsMenu.h
     src/private/ProjectsMenu.h
     src/private/HelpMenu.h
-    src/private/StartupProjectSelectorDialog.h
     src/private/NoProxyRectanglesFusionStyle.h
 )
 
@@ -314,7 +313,6 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadedViewsMenu.cpp
     src/private/ProjectsMenu.cpp
     src/private/HelpMenu.cpp
-    src/private/StartupProjectSelectorDialog.cpp
     src/private/NoProxyRectanglesFusionStyle.cpp
 )
 
