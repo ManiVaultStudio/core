@@ -17,8 +17,22 @@ AbstractPageActionsModel::Item::Item(const PageActionSharedPtr& pageAction, bool
 	_pageAction(pageAction)
 {
     setEditable(editable);
-    setIcon(pageAction->getIcon());
-    setText(pageAction->getTitle());
+}
+
+QVariant AbstractPageActionsModel::Item::data(int role) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return QVariant::fromValue(getPageAction()->getTitle());
+
+	    case Qt::DisplayRole:
+	        return "";
+
+	    default:
+	        break;
+    }
+
+	return QStandardItem::data(role);
 }
 
 PageActionSharedPtr AbstractPageActionsModel::Item::getPageAction() const
