@@ -55,6 +55,9 @@ public:
     QWebEnginePage* getPage();
     void setPage(QString htmlPath, QString basePath);
 
+    bool isCommunicationAvailable() const { return _communicationAvailable; }
+    bool isWebPageLoaded() const { return _webPageLoaded; }
+
 signals:
     void communicationBridgeReady();
     void webPageFullyLoaded();
