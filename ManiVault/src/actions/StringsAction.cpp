@@ -317,6 +317,7 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
 
     _hierarchyWidget.getTreeView().setRootIsDecorated(false);
     _hierarchyWidget.getTreeView().setAnimated(true);
+    _hierarchyWidget.getTreeView().setItemDelegate(&_textElideDelegate);
     _hierarchyWidget.setWindowIcon(stringsAction->icon());
     _hierarchyWidget.setHeaderHidden(true);
     

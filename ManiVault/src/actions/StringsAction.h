@@ -10,6 +10,8 @@
 
 #include "widgets/HierarchyWidget.h"
 
+#include "util/View.h"
+
 #include <QStringListModel>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
@@ -54,11 +56,12 @@ public:
         ListWidget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags);
 
     private:
-        StringsAction*          _stringsAction;     /** Pointer to owning strings action */
-        QSortFilterProxyModel   _filterModel;       /** Strings filter model */
-        HierarchyWidget         _hierarchyWidget;   /** Hierarchy widget for show the strings */
-        QModelIndexList         _selectedRows;      /** Selected rows in the hierarchy widget */
-        QStringList             _strings;           /** Cached string values */
+        StringsAction*              _stringsAction;         /** Pointer to owning strings action */
+        QSortFilterProxyModel       _filterModel;           /** Strings filter model */
+        HierarchyWidget             _hierarchyWidget;       /** Hierarchy widget for show the strings */
+        QModelIndexList             _selectedRows;          /** Selected rows in the hierarchy widget */
+        QStringList                 _strings;               /** Cached string values */
+        util::TextElideDelegate     _textElideDelegate;     /** Text elide delegate for the hierarchy widget */
 
         friend class StringsAction;
     };
