@@ -200,6 +200,7 @@ void StartPageOpenProjectWidget::updateOpenCreateActions()
 void StartPageOpenProjectWidget::updateRecentActions()
 {
     _recentProjectsWidget.getModel().reset();
+    
 
     auto clockIcon = StyledIcon("clock");
 
