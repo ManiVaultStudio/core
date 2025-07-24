@@ -156,6 +156,30 @@ public:
     ContributorsPageSubAction(const QStringList& contributors);
 };
 
+/** For displaying the project JSON URL */
+class ProjectsJsonUrlPageSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p projectJsonUrl
+     * @param projectJsonUrl Project JSON URL to display
+     */
+    ProjectsJsonUrlPageSubAction(const QUrl& projectJsonUrl);
+};
+
+/** For displaying the project plugins */
+class ProjectPluginsPageSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p plugins
+     * @param plugins Project plugins to display
+     */
+    ProjectPluginsPageSubAction(const QStringList& plugins);
+};
+
 using PageSubActionPtr  = std::shared_ptr<PageSubAction>;
 using PageSubActionPtrs = std::vector<PageSubActionPtr>;
 

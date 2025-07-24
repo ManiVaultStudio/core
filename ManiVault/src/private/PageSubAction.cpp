@@ -51,7 +51,7 @@ PageCompatibilitySubAction::PageCompatibilitySubAction(const HardwareSpec::Syste
 	switch (systemCompatibilityInfo._compatibility) {
 		case HardwareSpec::SystemCompatibility::Incompatible:
 		{
-			setIcon(StyledIcon("circle-xmark"));
+			setIcon(StyledIcon("circle-exclamation").withColor(QColor::fromHsl(0, 100, 100)));
 			setTooltipCallback([this]() -> QString {
 				return "Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!";
 			});
@@ -61,7 +61,7 @@ PageCompatibilitySubAction::PageCompatibilitySubAction(const HardwareSpec::Syste
 
         case HardwareSpec::SystemCompatibility::Minimum:
         {
-            setIcon(StyledIcon("circle-exclamation"));
+            setIcon(StyledIcon("circle-exclamation").withColor(QColor::fromHsl(40, 100, 100)));
             setTooltipCallback([this]() -> QString {
                 return "Your system does not meet the recommended requirements for this project, the interactivity might not be optimal!";
             });
@@ -71,7 +71,7 @@ PageCompatibilitySubAction::PageCompatibilitySubAction(const HardwareSpec::Syste
 
         case HardwareSpec::SystemCompatibility::Compatible:
         {
-            setIcon(StyledIcon("circle-check"));
+            setIcon(StyledIcon("check"));
             setTooltipCallback([this]() -> QString {
                 return "Your system meets the minimum requirements for this project!";
             });
@@ -92,15 +92,30 @@ PageCompatibilitySubAction::PageCompatibilitySubAction(const HardwareSpec::Syste
 }
 
 ProjectPreviewPageSubAction::ProjectPreviewPageSubAction() :
-    PageSubAction(mv::util::StyledIcon("image"))
+    PageSubAction(StyledIcon("image"))
 {
 }
 
 ContributorsPageSubAction::ContributorsPageSubAction(const QStringList& contributors) :
-    PageSubAction(mv::util::StyledIcon("user"))
+    PageSubAction(StyledIcon("user"))
 {
     setTooltipCallback([this, contributors]() -> QString {
         return QString("Contributor(s): %1").arg(contributors.join(", "));
 	});
 }
 
+ProjectsJsonUrlPageSubAction::ProjectsJsonUrlPageSubAction(const QUrl& projectJsonUrl) :
+    PageSubAction(StyledIcon("globe"))
+{
+    setTooltipCallback([this, projectJsonUrl]() -> QString {
+        return QString("Projects JSON: %1").arg(projectJsonUrl.toString());
+	});
+}
+
+ProjectPluginsPageSubAction::ProjectPluginsPageSubAction(const QStringList& plugins) :
+    PageSubAction(StyledIcon("plug"))
+{
+    setTooltipCallback([this, plugins]() -> QString {
+        return QString("Plugin(s): %1").arg(plugins.isEmpty() ? "none" : plugins.join(", "));
+	});
+}
