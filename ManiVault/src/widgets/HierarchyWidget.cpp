@@ -501,7 +501,6 @@ void HierarchyWidget::updateOverlayWidget()
     auto& widgetFader = _infoOverlayWidget->getWidgetFader();
 
     if (_filterModel == nullptr) {
-        qDebug() << "Updating overlay widget for hierarchy widget";
         if (_model.rowCount() == 0) {
             _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
             widgetFader.fadeIn();
