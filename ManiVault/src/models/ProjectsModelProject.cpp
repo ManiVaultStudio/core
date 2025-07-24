@@ -25,6 +25,7 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _iconName(variantMap.contains("icon") ? variantMap["icon"].toString() : "database"),
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
+    _downloadSize(0),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
 	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false),
@@ -83,8 +84,8 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _title(groupTitle),
     _isGroup(true),
-    _group(),
     _iconName("folder"),
+    _downloadSize(0),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended)
 {
@@ -216,7 +217,7 @@ void ProjectsModelProject::determineDownloadSize()
         return;
 
 #ifdef PROJECTS_MODEL_PROJECT_VERBOSE
-    qDebug() << __FUNCTION__ << getTitle();
+    //qDebug() << __FUNCTION__ << getTitle();
 #endif
 
     FileDownloader::getDownloadSizeAsync(getUrl()).then(this, [this](std::uint64_t size) {
@@ -234,7 +235,7 @@ void ProjectsModelProject::determineLastModified()
         return;
 
 #ifdef PROJECTS_MODEL_PROJECT_VERBOSE
-    qDebug() << __FUNCTION__ << getTitle();
+    //qDebug() << __FUNCTION__ << getTitle();
 #endif
 
     FileDownloader::getLastModifiedAsync(getUrl()).then(this, [this](const QDateTime& lastModified) {
