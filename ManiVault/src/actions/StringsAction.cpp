@@ -489,6 +489,14 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
         updateRemoveAction();
     });
 
+    const auto updateTextElisionDelegate = [this]() -> void {
+        _textElideDelegate.setTextElideMode(_stringsAction->getTextElideMode());
+    };
+
+    updateTextElisionDelegate();
+
+    connect(_stringsAction, &StringsAction::textElideModeChanged, this, updateTextElisionDelegate);
+
     updateNameAction();
     updateAddAction();
     updateRemoveAction();
