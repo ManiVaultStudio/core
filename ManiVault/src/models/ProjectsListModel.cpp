@@ -20,6 +20,10 @@ ProjectsListModel::ProjectsListModel(const PopulationMode& populationMode /*= Mo
 
 void ProjectsListModel::populate(ProjectsModelProjectSharedPtrs projects)
 {
+#ifdef PROJECTS_LIST_MODEL_VERBOSE
+    qDebug() << __FUNCTION__ << "Populating projects tree model with" << projects.size() << "projects";
+#endif
+
     for (const auto& project : projects)
         if (project)
             addProject(project);
