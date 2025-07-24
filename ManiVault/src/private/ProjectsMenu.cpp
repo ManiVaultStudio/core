@@ -42,6 +42,8 @@ void ProjectsMenu::populate()
     const auto addProject = [this](QMenu* menu, ProjectsModelProjectSharedPtr project) -> void {
         auto loadProjectAction = new TriggerAction(this, project->getTitle());
 
+        loadProjectAction->setIcon(project->getIcon());
+
         connect(loadProjectAction, &TriggerAction::triggered, this, [project]() {
             mv::projects().openProject(project->getUrl());  
         });
