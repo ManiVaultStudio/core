@@ -19,7 +19,8 @@ StringsAction::StringsAction(QObject* parent, const QString& title, const QStrin
     _nameAction(&_toolbarAction, "Name"),
     _addAction(&_toolbarAction, "Add"),
     _removeAction(&_toolbarAction, "Remove"),
-    _allowDuplicates(true)
+    _allowDuplicates(true),
+    _textElideMode(Qt::ElideRight)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -101,6 +102,23 @@ void StringsAction::setAllowDuplicates(bool allowDuplicates)
     _allowDuplicates = allowDuplicates;
 
     emit allowDuplicatesChanged(_allowDuplicates);
+}
+
+Qt::TextElideMode StringsAction::getTextElideMode() const
+{
+    return _textElideMode;
+}
+
+void StringsAction::setTextElideMode(const Qt::TextElideMode& textElideMode)
+{
+    if (textElideMode == _textElideMode)
+        return;
+
+    const auto oldTextElideMode = _textElideMode;
+
+    _textElideMode = textElideMode;
+
+    emit textElideModeChanged(oldTextElideMode, _textElideMode);
 }
 
 bool StringsAction::mayAddString(const QString& string) const

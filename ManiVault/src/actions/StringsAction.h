@@ -130,6 +130,18 @@ public:
     void setAllowDuplicates(bool allowDuplicates);
 
     /**
+     * Get text elide mode
+     * @return Text elide mode
+     */
+    Qt::TextElideMode getTextElideMode() const;
+
+    /**
+     * Set text elide mode to \p textElideMode
+     * @param textElideMode Text elide mode
+     */
+    void setTextElideMode(const Qt::TextElideMode& textElideMode);
+
+	/**
      * Check whether \p string may be added
      * @param string String to check
      * @return True if the string may be added, false otherwise
@@ -257,6 +269,13 @@ signals:
      */
     void stringUpdated(const QString& oldString, const QString& newString);
 
+    /**
+     * Signals that the text elide mode changed from \p oldTextElideMode to \p newTextElideMode
+     * @param oldTextElideMode Old text elide mode
+     * @param newTextElideMode New text elide mode
+     */
+    void textElideModeChanged(const Qt::TextElideMode& oldTextElideMode, const Qt::TextElideMode& newTextElideMode);
+
 protected:
     QString                 _category;          /** Type of string */
     QStringListModel        _stringsModel;      /** Model for the strings */
@@ -267,6 +286,7 @@ protected:
     TriggerAction           _removeAction;      /** Remove string action */
     QCompleter*             _completer;         /** Pointer to completer for auto-completion, maybe nullptr */
     bool                    _allowDuplicates;   /** Whether to allow string duplicates */
+    Qt::TextElideMode       _textElideMode;     /** Text elide mode for the strings */
 
     friend class AbstractActionsManager;
 };
