@@ -28,6 +28,9 @@ QVariant AbstractPageActionsModel::Item::data(int role) const
 	    case Qt::DisplayRole:
 	        return "";
 
+        case Qt::ToolTipRole:
+            return getPageAction()->getTooltip();
+
 	    default:
 	        break;
     }
