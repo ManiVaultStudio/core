@@ -50,20 +50,16 @@ public:
 
     bool isCommunicationAvailable() const { return _communicationAvailable; }
     bool isWebPageLoaded() const { return _webPageLoaded; }
-    bool isInitialized() const {
-        return isWebPageLoaded() && isCommunicationAvailable();
-    };
 
 signals:
     void communicationBridgeReady();
     void webPageFullyLoaded();
-    void fullyInitialized();
 
 protected:
     void registerFunctions();
 
 protected slots:
-    [[deprecated("Will be removed in 2.0. Connect to the communicationBridgeReady() or fullyInitialized() signal instead.")]]
+    [[deprecated("Will be removed in 2.0. Connect to the communicationBridgeReady() signal instead.")]]
     virtual void initWebPage() {}
 
 private slots:
