@@ -6,6 +6,7 @@
 
 #include "util/Miscellaneous.h"
 #include "util/JSON.h"
+#include "util/Model.h"
 
 #include <nlohmann/json.hpp>
 
@@ -15,8 +16,6 @@
 #ifdef _DEBUG
     //#define ABSTRACT_PROJECTS_MODEL_VERBOSE
 #endif
-
-//#define ABSTRACT_PROJECTS_MODEL_VERBOSE
 
 using namespace mv::util;
 using namespace mv::gui;
@@ -37,9 +36,10 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
     _dsnsAction.setToolTip("Projects Data Source Names (DSN)");
     _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
-    _dsnsAction.setPopupSizeHint(QSize(550, 100));
+    _dsnsAction.setPopupSizeHint(QSize(550, 150));
     _dsnsAction.setDefaultWidgetFlag(StringsAction::WidgetFlag::MayEdit);
     _dsnsAction.setCategory("Projects DSN");
+    _dsnsAction.setAllowDuplicates(false);
 
     if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
 
@@ -51,6 +51,12 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
         connect(&getDsnsAction(), &StringsAction::stringsRemoved, this, [this](const QStringList& removedStrings) -> void {
             for (const auto& removedString : removedStrings)
                 removeDsn(removedString);
+        });
+
+        connect(&getDsnsAction(), &StringsAction::stringUpdated, this, [this](const QString& oldString, const QString& newString) -> void {
+            qDebug() << "Updating DSN from" << oldString << "to" << newString;
+            removeDsn(oldString);
+            addDsn(newString);
         });
 
         connect(core(), &CoreInterface::initialized, this, [this]() -> void {
@@ -173,11 +179,11 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectSharedPtr project, co
 #endif
         beginPopulate();
 	    {
-            //const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::EditRole, project->getTitle(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+            const auto matches = match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::EditRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
-            //for (const auto& match : matches) {
-            //    removeProject(match);
-            //}
+            for (const auto& match : matches) {
+                removeProject(match.siblingAtColumn(0));
+            }
 
 		    updateTags();
 
@@ -195,6 +201,10 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectSharedPtr project, co
         	}
 	    }
         endPopulate();
+
+        //for (const auto& modelIndex : getAllPersistentModelIndexesAtColumn(this, static_cast<std::int32_t>(Column::ProjectsJsonDsn))) {
+        //    qDebug() << " - Project with DSN" << modelIndex.siblingAtColumn(static_cast<std::int32_t>(Column::Title)).data(Qt::EditRole).toString();
+        //}
     }
     catch (std::exception& e)
     {
@@ -215,7 +225,8 @@ void AbstractProjectsModel::removeProject(const QModelIndex& index)
 
         beginPopulate();
         {
-            removeRow(index.row(), index.parent());
+            if (!removeRow(index.row(), index.parent()))
+                throw std::runtime_error(QString("Unable to remove project at index %1").arg(index.row()).toStdString());
         }
         endPopulate();
     }
@@ -229,6 +240,23 @@ void AbstractProjectsModel::removeProject(const QModelIndex& index)
     }
 }
 
+void AbstractProjectsModel::purge()
+{
+    const auto allPersistentModelIndexes = getAllPersistentModelIndexesAtColumn(this, static_cast<std::int32_t>(Column::ProjectsJsonDsn));
+
+#ifdef ABSTRACT_PROJECTS_MODEL_VERBOSE
+    qDebug() << __FUNCTION__ << "Purging projects model with" << allPersistentModelIndexes.size() << "projects DSN(s)";
+#endif
+
+    for (const auto& persistentModelIndex : allPersistentModelIndexes) {
+        qDebug() << "Purging project with DSN" << persistentModelIndex.sibling(persistentModelIndex.row(), static_cast<std::int32_t>(Column::Title)).data(Qt::EditRole).toString();
+	    const auto projectsDsn = persistentModelIndex.data(Qt::EditRole).toUrl();
+
+    	if (!getDsnsAction().getStrings().contains(projectsDsn))
+                removeProject(persistentModelIndex.sibling(persistentModelIndex.row(), 0));
+    }
+}
+
 void AbstractProjectsModel::addDsn(const QUrl& dsn)
 {
     try {
@@ -237,60 +265,51 @@ void AbstractProjectsModel::addDsn(const QUrl& dsn)
 #endif
 
         if (getPopulationMode() == PopulationMode::Automatic) {
-            for (const auto& dsn : getDsnsAction().getStrings()) {
-                const auto dsnIndex = getDsnsAction().getStrings().indexOf(dsn);
+            const auto dsnIndex = getDsnsAction().getStrings().indexOf(dsn);
 
-                FileDownloader::downloadToByteArrayAsync(dsn)
-                    .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
-	                    try {
-                            const auto matches = match(index(0, static_cast<std::int32_t>(Column::ProjectsJsonDsn)), Qt::EditRole, dsn, -1, Qt::MatchExactly | Qt::MatchRecursive);
-
-                            for (const auto& match : matches) {
-								removeProject(match);
-                            }
-
-	                        populateFromJsonByteArray(data, dsnIndex, dsn);
-	                    }
-	                    catch (std::exception& e)
-	                    {
-	                        qCritical() << "Unable to add projects from DSN:" << e.what();
-	                    }
-	                    catch (...)
-	                    {
-	                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-	                    }
-					})
-                    .onFailed(this, [this, dsn](const QException& e) {
-						qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
-					});
-            }
+            FileDownloader::downloadToByteArrayAsync(dsn)
+                .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
+                    try {
+                        purge();
+                        populateFromJsonByteArray(data, dsnIndex, dsn.toString());
+                    }
+                    catch (std::exception& e)
+                    {
+                        qCritical() << "Unable to add projects from DSN:" << e.what();
+                    }
+                    catch (...)
+                    {
+                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
+                    }
+				})
+                .onFailed(this, [this, dsn](const QException& e) {
+					qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
+				});
         }
 
         if (getPopulationMode() == PopulationMode::AutomaticSynchronous) {
-            for (const auto& dsn : getDsnsAction().getStrings()) {
-                try {
-                    const auto data = FileDownloader::downloadToByteArraySync(dsn);
+            try {
+                const auto data = FileDownloader::downloadToByteArraySync(dsn);
 
-                    populateFromJsonByteArray(data, getDsnsAction().getStrings().indexOf(dsn), dsn);
-                }
-                catch (std::exception& e)
-                {
-                    qCritical() << "Unable to add projects from DSN:" << e.what();
-                }
-                catch (...)
-                {
-                    qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-                }
+                populateFromJsonByteArray(data, getDsnsAction().getStrings().indexOf(dsn), dsn.toString());
+            }
+            catch (std::exception& e)
+            {
+                qCritical() << "Unable to add projects from DSN:" << e.what();
+            }
+            catch (...)
+            {
+                qCritical() << "Unable to add projects from DSN due to an unhandled exception";
             }
         }
     }
     catch (std::exception& e)
     {
-        qCritical() << QString("Unable to add %1 to the projects tree model:").arg(dsn.toDisplayString()) << e.what();
+        qCritical() << QString("Unable to add DSN %1 to the projects model:").arg(dsn.toString()) << e.what();
     }
     catch (...)
     {
-        qCritical() << QString("Unable to add %1 to the projects tree model due to an unhandled exception").arg(dsn.toDisplayString());
+        qCritical() << QString("Unable to add DSN %1 to the projects model due to an unhandled exception").arg(dsn.toString());
     }
 }
 
@@ -303,20 +322,17 @@ void AbstractProjectsModel::removeDsn(const QUrl& dsn)
 
 		beginPopulate();
 	    {
-            const auto matches = match(index(0, static_cast<std::int32_t>(Column::ProjectsJsonDsn)), Qt::EditRole, dsn, -1, Qt::MatchExactly | Qt::MatchRecursive);
-
-            for (const auto& match : matches)
-                removeProject(match);
+            purge();
 	    }
         endPopulate();
     }
     catch (std::exception& e)
     {
-        qCritical() << QString("Unable to add %1 to the projects tree model:").arg(dsn.toDisplayString()) << e.what();
+        qCritical() << QString("Unable to remove projects DSN %1 from the projects model:").arg(dsn.toString()) << e.what();
     }
     catch (...)
     {
-        qCritical() << QString("Unable to add %1 to the projects tree model due to an unhandled exception").arg(dsn.toDisplayString());
+        qCritical() << QString("Unable to remove projects DSN %1 from the projects model due to an unhandled exception").arg(dsn.toString());
     }
 }
 

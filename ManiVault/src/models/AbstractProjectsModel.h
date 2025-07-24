@@ -860,6 +860,11 @@ public: // Add/remove projects
      */
     void removeProject(const QModelIndex& index);
 
+private:
+
+    /** Get rid of orphaned projects (project for which the projects DSN is not in the list anymore) */
+    void purge();
+
 public: // Action getters
 
     gui::StringsAction& getDsnsAction() { return _dsnsAction; }
