@@ -322,7 +322,6 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
 
     auto layout = new QVBoxLayout();
 
-    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(&_hierarchyWidget, 1);
 
     if (widgetFlags & StringsAction::WidgetFlag::MayEdit)
