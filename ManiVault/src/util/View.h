@@ -12,15 +12,15 @@ namespace mv::util
 {
 
 /**
- * Middle elide delegate class
+ * Text elide delegate class
  *
- * To set middle elision (i.e. "MyVery...ongText.txt") in a QTreeView, you need to apply it
- * via the item delegate, because Qt's item views (like QTreeView) do not support
- * mid-elision natively — they only do end-elision by default.
+ * To override the default right middle elision QTreeView, you need to apply it
+ * via the item delegate, because Qt's item views (like QTreeView) does not support
+ * other text elisions natively.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT MiddleElideDelegate : public QStyledItemDelegate
+class CORE_EXPORT TextElideDelegate : public QStyledItemDelegate
 {
 public:
 
@@ -33,6 +33,21 @@ public:
      * @param index Model index
      */
     void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
+
+    /**
+     * Get the text elide mode
+     * @return Text elide mode
+     */
+    Qt::TextElideMode getTextElideMode() const;
+
+    /**
+     * Set the text elide mode to \p textElideMode
+     * @param textElideMode Text elide mode to set
+     */
+    void setTextElideMode(const Qt::TextElideMode& textElideMode);
+
+private:
+    Qt::TextElideMode _textElideMode = Qt::ElideRight;  /** Text elide mode to use */
 };
 
 

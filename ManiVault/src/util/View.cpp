@@ -7,11 +7,21 @@
 namespace mv::util
 {
 
-void MiddleElideDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
+void TextElideDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
 {
 	QStyledItemDelegate::initStyleOption(option, index);
 
-	option->textElideMode = Qt::ElideMiddle;
+	option->textElideMode = _textElideMode;
+}
+
+Qt::TextElideMode TextElideDelegate::getTextElideMode() const
+{
+	return _textElideMode;
+}
+
+void TextElideDelegate::setTextElideMode(const Qt::TextElideMode& textElideMode)
+{
+	_textElideMode = textElideMode;
 }
 
 }
