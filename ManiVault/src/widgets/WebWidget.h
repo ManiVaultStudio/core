@@ -44,8 +44,10 @@ public:
 
     void init(WebCommunicationObject* communicationObject);
 
+public: // setter
     void setPage(QString htmlPath, QString basePath);
 
+public: // getter
     QWebEngineView* getView();
     QWebEnginePage* getPage();
 
