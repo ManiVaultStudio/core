@@ -5,7 +5,7 @@
 #include "ProjectsTreeModel.h"
 
 #ifdef _DEBUG
-    //#define PROJECTS_TREE_MODEL_VERBOSE
+    #define PROJECTS_TREE_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -20,21 +20,29 @@ ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mo
 
 void ProjectsTreeModel::populate(ProjectsModelProjectSharedPtrs projects)
 {
+#ifdef PROJECTS_TREE_MODEL_VERBOSE
+    qDebug() << __FUNCTION__ << "Populating projects tree model with" << projects.size() << "projects";
+#endif
+
 	for (const auto& project : projects) {
-		if (project) {
+        if (!project)
+            return;
 
-			if (!project->getGroup().isEmpty()) {
-				auto projectGroup = std::make_shared<ProjectsModelProject>(project->getGroup());
+		if (!project->getGroup().isEmpty()) {
+            const auto groupTitleMatches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getGroup(), 1, Qt::MatchExactly | Qt::MatchRecursive);
 
-				projectGroup->setProjectsJsonDsn(project->getProjectsJsonDsn());
+            if (groupTitleMatches.isEmpty()) {
+                auto projectGroup = std::make_shared<ProjectsModelProject>(project->getGroup());
 
-				addProject(projectGroup);
-			}
+                projectGroup->setProjectsJsonDsn(project->getProjectsJsonDsn());
 
-			const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getGroup(), -1, Qt::MatchExactly | Qt::MatchRecursive);
-
-			addProject(project, matches.isEmpty() ? QModelIndex() : matches.first());
+                addProject(projectGroup);
+            }
 		}
+
+		const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getGroup(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+		addProject(project, matches.isEmpty() ? QModelIndex() : matches.first());
 	}
 }
 
