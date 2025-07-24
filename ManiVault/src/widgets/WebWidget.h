@@ -49,7 +49,6 @@ public:
     QWebEngineView* getView();
     QWebEnginePage* getPage();
 
-    bool isCommunicationAvailable() const { return _communicationAvailable; }
     bool isWebPageLoaded() const { return _webPageLoaded; }
 
 signals:
