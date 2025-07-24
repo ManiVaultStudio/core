@@ -285,18 +285,22 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
     const auto addProjectPageAction = [this, &projectsPageTreeModel](ProjectsModelProjectSharedPtr project) -> PageActionSharedPtr {
     	auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
             projects().openProject(project->getUrl());
+
+            project->setDownloaded();
         });
 
         projectPageAction->setParentTitle(project->getGroup());
-
+        
         if (!project->getTags().isEmpty())
             projectPageAction->createSubAction<TagsPageSubAction>(project->getTags());
 
         if (!project->isGroup())
             projectPageAction->createSubAction<PageDownloadSubAction>(getNoBytesHumanReadable(project->getDownloadSize()));
 
+        const auto systemCompatibility = HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec());
+
         if (!project->isGroup()) {
-            projectPageAction->createSubAction<PageCompatibilitySubAction>(HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec()));
+            //projectPageAction->createSubAction<PageCompatibilitySubAction>(systemCompatibility);
 
             if (project->getDownloadSize() == 0) {
                 connect(project.get(), &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), [projectPageAction, project](std::uint64_t size) {
@@ -309,6 +313,17 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         } else {
             projectPageAction->setExpanded(false);
         }
+        
+        const auto updateIcon       = [projectPageAction, project]() -> void { projectPageAction->setIcon(project->getIcon()); };
+        const auto updateTooltip    = [projectPageAction, project]() -> void { projectPageAction->setTooltip(project->getTooltip()); };
+
+        updateIcon();
+        updateTooltip();
+
+        connect(project.get(), &ProjectsModelProject::iconChanged, projectPageAction.get(), updateIcon);
+        connect(project.get(), &ProjectsModelProject::tooltipChanged, projectPageAction.get(), updateTooltip);
+
+        connect(projectPageAction.get(), &PageAction::expandedChanged, project.get(), &ProjectsModelProject::setExpanded);
 
         if (!project->isGroup())
             projectPageAction->createSubAction<ProjectPluginsPageSubAction>(project->getRequiredPlugins());
