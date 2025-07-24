@@ -54,9 +54,11 @@ public:
         ListWidget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags);
 
     private:
-        QStandardItemModel      _model;             /** Strings model */
+        StringsAction*          _stringsAction;     /** Pointer to owning strings action */
         QSortFilterProxyModel   _filterModel;       /** Strings filter model */
         HierarchyWidget         _hierarchyWidget;   /** Hierarchy widget for show the strings */
+        QModelIndexList         _selectedRows;      /** Selected rows in the hierarchy widget */
+        QStringList             _strings;           /** Cached string values */
 
         friend class StringsAction;
     };
@@ -103,7 +105,6 @@ public:
      * @param strings Strings
      */
     void setStrings(const QStringList& strings);
-
     /**
      * Get locked strings
      * @return Locked strings as string list
@@ -115,6 +116,25 @@ public:
      * @param lockedStrings Locked strings
      */
     void setLockedStrings(const QStringList& lockedStrings);
+
+    /**
+     * Check whether this action allows duplicates
+     * @return True if duplicates are allowed, false otherwise
+     */
+    bool allowsDuplicates() const;
+
+    /**
+     * Set whether this action allows duplicates to \p allowDuplicates
+     * @param allowDuplicates True to allow duplicates, false otherwise
+     */
+    void setAllowDuplicates(bool allowDuplicates);
+
+    /**
+     * Check whether \p string may be added
+     * @param string String to check
+     * @return True if the string may be added, false otherwise
+     */
+    bool mayAddString(const QString& string) const;
 
     /**
      * Add string
@@ -140,6 +160,27 @@ public:
      * @param strings Strings to remove
      */
     void removeStrings(const QStringList& strings);
+
+    /**
+     * Update string \p oldString to \p newString
+     * @param oldString Old string
+     * @param newString New string
+     */
+    void updateString(const QString& oldString, const QString& newString);
+
+    /**
+     * Get model for the strings
+     * @return Reference to the string list model containing the strings
+     */
+    const QStringListModel& getStringsModel() const { return _stringsModel; }
+
+protected:
+
+    /**
+     * Get model for the strings
+     * @return Reference to the string list model containing the strings
+     */
+    QStringListModel& getStringsModel() { return _stringsModel; };
 
 protected: // Linking
 
@@ -203,15 +244,29 @@ signals:
      */
     void stringsRemoved(const QStringList& strings);
 
+    /**
+     * Signals that the allow duplicates setting changed to \p allowDuplicates
+     * @param allowDuplicates Whether duplicates are allowed
+     */
+    void allowDuplicatesChanged(bool allowDuplicates);
+
+    /**
+     * Signals that a string was updated from \p oldString to \p newString
+     * @param oldString Old string
+     * @param newString New string
+     */
+    void stringUpdated(const QString& oldString, const QString& newString);
+
 protected:
     QString                 _category;          /** Type of string */
-    QStringList             _strings;           /** Current strings */
+    QStringListModel        _stringsModel;      /** Model for the strings */
     QStringList             _lockedStrings;     /** Strings that are locked and cannot be removed or renamed */
     HorizontalGroupAction   _toolbarAction;     /** Toolbar action */
     StringAction            _nameAction;        /** String name action */
     TriggerAction           _addAction;         /** Add string action */
     TriggerAction           _removeAction;      /** Remove string action */
     QCompleter*             _completer;         /** Pointer to completer for auto-completion, maybe nullptr */
+    bool                    _allowDuplicates;   /** Whether to allow string duplicates */
 
     friend class AbstractActionsManager;
 };
