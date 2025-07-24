@@ -163,8 +163,26 @@ public:
      */
     void setProjectsJsonDsn(const QUrl& projectsJsonDsn);
 
+    /**
+     * Get whether the project is expanded in the model
+     * @return Boolean determining whether the project is expanded in the model
+     */
+    bool isExpanded() const;
+
+    /**
+     * Set whether the project is expanded in the model to \p expanded
+     * @param expanded Boolean determining whether the project is expanded in the model
+     */
+    void setExpanded(bool expanded);
+
     /** Determines project metadata like last modified date and download size */
     void updateMetadata();
+
+    /**
+     * Get icon for the project
+     * @return Icon for the project
+     */
+    QIcon getIcon() const;
 
     /**
      * Overload assignment operator
@@ -247,7 +265,8 @@ private:
     HardwareSpec    _recommendedHardwareSpec;   /** Recommended hardware specification for the project */
     bool            _startup;                   /** Boolean determining whether this is a startup project */
     QString         _sha;                       /** SHA-256 hash of the project (for comparison purposes) */
-    QUrl            _projectsJsonDsn;           /** Data Source Name (DSN) of the projects JSON file, used for loading the project */ 
+    QUrl            _projectsJsonDsn;           /** Data Source Name (DSN) of the projects JSON file, used for loading the project */
+    bool            _expanded;                  /** Boolean determining whether the project is expanded in the model */
 };
 
 using ProjectsModelProjectSharedPtr   = std::shared_ptr<ProjectsModelProject>;

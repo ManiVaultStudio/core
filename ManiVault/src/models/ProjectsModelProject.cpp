@@ -205,10 +205,47 @@ void ProjectsModelProject::setProjectsJsonDsn(const QUrl& projectsJsonDsn)
 	_projectsJsonDsn = projectsJsonDsn;
 }
 
+bool ProjectsModelProject::isExpanded() const
+{
+	return _expanded;
+}
+
+void ProjectsModelProject::setExpanded(bool expanded)
+{
+	_expanded = expanded;
+}
+
 void ProjectsModelProject::updateMetadata()
 {
     determineDownloadSize();
     determineLastModified();
+}
+
+QIcon ProjectsModelProject::getIcon() const
+{
+    if (isGroup())
+        return isExpanded() ?  StyledIcon("folder-open") : StyledIcon("folder");
+
+    if (isDownloaded()) {
+        switch (HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec())._compatibility) {
+	        case HardwareSpec::SystemCompatibility::Incompatible:
+	            return StyledIcon("file-circle-xmark");
+
+	        case HardwareSpec::SystemCompatibility::Minimum:
+                return StyledIcon("file-circle-exclamation");
+
+	        case HardwareSpec::SystemCompatibility::Compatible:
+                return StyledIcon("file-circle-check");
+
+	        case HardwareSpec::SystemCompatibility::Unknown:
+                return StyledIcon("file-circle-question");
+        }
+    }
+    else {
+        return StyledIcon("download");
+    }
+
+    return {};
 }
 
 void ProjectsModelProject::determineDownloadSize()
