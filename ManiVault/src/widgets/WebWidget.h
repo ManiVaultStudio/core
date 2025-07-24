@@ -60,7 +60,7 @@ protected:
     void registerFunctions();
 
 protected slots:
-    [[deprecated("Will be removed in 2.0. Connect to the communicationBridgeReady() signal instead.")]]
+    [[deprecated("Will be removed in 2.0. Connect to the communicationBridgeReady() or webPageFullyLoaded() signals instead.")]]
     virtual void initWebPage() {}
 
 private slots:
