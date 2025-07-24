@@ -40,6 +40,7 @@ class CORE_EXPORT WebWidget : public QWidget
 {
     Q_OBJECT
 public:
+    WebWidget();
 
     void init(WebCommunicationObject* communicationObject);
 
@@ -67,12 +68,15 @@ private slots:
     void onWebPageLoaded(bool ok);
 
 private:
-    QWebEngineView*         _webView = nullptr;
-    QWebChannel*            _communicationChannel = nullptr;
-    WebCommunicationObject* _webCommunicationObject = nullptr;
-    QString                 _css = {};
-    bool                    _communicationAvailable = false;
-    bool                    _webPageLoaded = false;
+    QWebEngineView* _webView;
+    QWebChannel* _communicationChannel;
+
+    WebCommunicationObject* _webCommunicationObject;
+
+    QString _css;
+
+    bool _communicationAvailable;
+    bool _webPageLoaded;
 };
 
 } // namespace gui

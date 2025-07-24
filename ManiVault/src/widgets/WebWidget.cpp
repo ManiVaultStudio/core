@@ -24,6 +24,17 @@ void WebCommunicationObject::js_debug(const QString& text)
     qDebug() << "WebWidget Debug Info: " << text;
 }
 
+WebWidget::WebWidget() :
+    _webView(nullptr),
+    _communicationChannel(nullptr),
+    _webCommunicationObject(nullptr),
+    _css(),
+    _communicationAvailable(false),
+    _webPageLoaded(false)
+{
+
+}
+
 void WebWidget::init(WebCommunicationObject* communicationObject)
 {
     _webCommunicationObject = communicationObject;
