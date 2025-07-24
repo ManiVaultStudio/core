@@ -41,7 +41,7 @@ void PageAction::setIcon(const QIcon& icon)
 
 void PageAction::setExpanded(bool expanded)
 {
-    setIcon(expanded ? StyledIcon("caret-down") : StyledIcon("caret-right"));
+    emit expandedChanged(expanded);
 }
 
 QString PageAction::getTitle() const

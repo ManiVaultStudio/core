@@ -152,6 +152,12 @@ signals:
     void metadataChanged();
     void subActionsChanged();
 
+    /**
+     * Signal that is emitted when the action row is clicked
+     * @param expanded Boolean determining whether the action row is expanded
+     */
+    void expandedChanged(bool expanded);
+
 private:
     QIcon                               _icon;              /** Action icon (shown on the left) */
     QString                             _title;             /** Title is shown next to the icon */
