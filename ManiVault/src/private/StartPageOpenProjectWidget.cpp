@@ -227,30 +227,30 @@ void StartPageOpenProjectWidget::setupRecentProjectsSection()
 
             _recentProjectsWidget.getModel().add(recentProjectPageAction);
 
-            auto future = QtConcurrent::run([recentFilePath]() -> QSharedPointer<ProjectMetaAction> {
-                return Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
-			});
+   //         auto future = QtConcurrent::run([recentFilePath]() -> QSharedPointer<ProjectMetaAction> {
+   //             return Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
+			//});
 
-            auto watcher = new QFutureWatcher<QSharedPointer<ProjectMetaAction>>();
+   //         auto watcher = new QFutureWatcher<QSharedPointer<ProjectMetaAction>>();
 
-            connect(watcher, &QFutureWatcher<QSharedPointer<ProjectMetaAction>>::finished, [this, watcher, recentProjectPageAction]() {
-                const auto result = watcher->future().result();
+   //         connect(watcher, &QFutureWatcher<QSharedPointer<ProjectMetaAction>>::finished, [this, watcher, recentProjectPageAction]() {
+   //             const auto result = watcher->future().result();
 
-                if (const auto projectMetaAction = watcher->future().result()) {
-		            if (const auto description = projectMetaAction->getDescriptionAction().getString(); !description.isEmpty())
-                        recentProjectPageAction->createSubAction<CommentsPageSubAction>(description);
+   //             if (const auto projectMetaAction = watcher->future().result()) {
+		 //           if (const auto description = projectMetaAction->getDescriptionAction().getString(); !description.isEmpty())
+   //                     recentProjectPageAction->createSubAction<CommentsPageSubAction>(description);
 
-                    if (const auto contributors = projectMetaAction->getContributorsAction().getStrings(); !contributors.isEmpty())
-                        recentProjectPageAction->createSubAction<ContributorsPageSubAction>(contributors);
+   //                 if (const auto contributors = projectMetaAction->getContributorsAction().getStrings(); !contributors.isEmpty())
+   //                     recentProjectPageAction->createSubAction<ContributorsPageSubAction>(contributors);
 
-                    if (const auto tags = projectMetaAction->getTagsAction().getStrings(); !tags.isEmpty())
-                        recentProjectPageAction->createSubAction<TagsPageSubAction>(tags);
-                }
+   //                 if (const auto tags = projectMetaAction->getTagsAction().getStrings(); !tags.isEmpty())
+   //                     recentProjectPageAction->createSubAction<TagsPageSubAction>(tags);
+   //             }
 
-                watcher->deleteLater();
-			});
+   //             watcher->deleteLater();
+			//});
 
-            watcher->setFuture(future);
+   //         watcher->setFuture(future);
         }
     };
 
@@ -267,9 +267,20 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
     hierarchyWidget.setItemTypeName("Project");
     hierarchyWidget.setWindowIcon(StyledIcon("file"));
     hierarchyWidget.getFilterColumnAction().setCurrentText("Title");
+    hierarchyWidget.getTreeView().setAnimated(true);
 
-    auto& projectsTreeModel     = mv::projects().getProjectsTreeModel();
+    auto& projectsTreeModel     = const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel());
     auto& projectsPageTreeModel = _projectsWidget.getModel();
+
+    auto& toolbarAction = hierarchyWidget.getToolbarAction();
+
+    toolbarAction.removeAllActions();
+    toolbarAction.addAction(&_projectsFilterModel.getTextFilterAction());
+    toolbarAction.addAction(&hierarchyWidget.getExpandAllAction());
+    toolbarAction.addAction(&hierarchyWidget.getCollapseAllAction());
+    toolbarAction.addAction(&_projectsFilterModel.getFilterGroupAction());
+    toolbarAction.addAction(&_projectsFilterModel.getTagsFilterAction());
+    toolbarAction.addAction(&projectsTreeModel.getDsnsAction());
 
     const auto addProjectPageAction = [this, &projectsPageTreeModel](ProjectsModelProjectSharedPtr project) -> PageActionSharedPtr {
     	auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
@@ -299,6 +310,11 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
             projectPageAction->setExpanded(false);
         }
 
+        if (!project->isGroup())
+            projectPageAction->createSubAction<ProjectPluginsPageSubAction>(project->getRequiredPlugins());
+
+        projectPageAction->createSubAction<ProjectsJsonUrlPageSubAction>(project->getProjectsJsonDsn());
+
         projectsPageTreeModel.add(projectPageAction);
 
         return projectPageAction;
@@ -317,11 +333,12 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
             if (const auto project = projectsTreeModel.getProject(sourceIndex)) {
                 auto projectPageAction = addProjectPageAction(project);
 
+                //qDebug() << "Adding project page action for" << project->getTitle() << "at filter row index" << filterRowIndex;
 
 	            if (const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex); numberOfChildren >= 1) {
                     QStringList childProjectNames;
 
-	                for (int childFilterRowIndex = 0; childFilterRowIndex <= numberOfChildren; ++childFilterRowIndex) {
+	                for (int childFilterRowIndex = 0; childFilterRowIndex < numberOfChildren; ++childFilterRowIndex) {
 	                    const auto childFilterIndex = _projectsFilterModel.index(childFilterRowIndex, 0, filterIndex);
 	                    const auto childSourceIndex = _projectsFilterModel.mapToSource(childFilterIndex);
 
