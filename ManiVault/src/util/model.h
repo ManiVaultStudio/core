@@ -15,7 +15,7 @@ namespace mv::util
  * @param columnIndex Index of the column to retrieve model indexes from
  * @return List of persistent model indexes at the specified column index
  */
-QList<QPersistentModelIndex> getAllPersistentModelIndexesAtColumn(const QAbstractItemModel* model, std::int32_t columnIndex);
+CORE_EXPORT QList<QPersistentModelIndex> getAllPersistentModelIndexesAtColumn(const QAbstractItemModel* model, std::int32_t columnIndex);
 
 /**
  * Get all items at \p columnIndex from \p model
