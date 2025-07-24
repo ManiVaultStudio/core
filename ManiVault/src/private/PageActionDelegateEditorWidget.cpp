@@ -193,6 +193,7 @@ void PageActionDelegateEditorWidget::updateOverlayWidgetVisibility()
 void PageActionDelegateEditorWidget::updateCustomStyle()
 {
     if (_pageAction) {
+        _metaDataLabel.setStyleSheet(QString("color: %1; font-weight: bold;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
         _titleLabel.setStyleSheet(QString("color: %1; font-weight: bold;").arg(qApp->palette().text().color().name()));
         _subtitleLabel.setStyleSheet(QString("color: %1; font-size: 7pt;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
     }
