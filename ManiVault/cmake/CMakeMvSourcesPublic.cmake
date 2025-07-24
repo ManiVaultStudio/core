@@ -560,6 +560,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Script.h
     src/util/RecentFile.h
     src/util/Model.h
+    src/util/View.h
 )
 
 if(APPLE)
@@ -616,6 +617,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Script.cpp
     src/util/RecentFile.cpp
 	src/util/Model.cpp
+	src/util/View.cpp
 )
 
 if(APPLE)
