@@ -53,8 +53,8 @@ public:
     bool isWebPageLoaded() const { return _webPageLoaded; }
 
 signals:
-    void communicationBridgeReady();
-    void webPageFullyLoaded();
+    void communicationBridgeReady();    // emitted when the communication bridge is ready; the webpage is not necessarily loaded at this point
+    void webPageFullyLoaded();          // emitted after both the communication bridge is ready and the webpage is fully loaded
 
 protected:
     void registerFunctions();
