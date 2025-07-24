@@ -36,7 +36,7 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
     _dsnsAction.setToolTip("Projects Data Source Names (DSN)");
     _dsnsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _dsnsAction.setDefaultWidgetFlags(StringsAction::WidgetFlag::ListView);
-    _dsnsAction.setPopupSizeHint(QSize(550, 150));
+    _dsnsAction.setPopupSizeHint(QSize(550, 250));
     _dsnsAction.setDefaultWidgetFlag(StringsAction::WidgetFlag::MayEdit);
     _dsnsAction.setCategory("Projects DSN");
     _dsnsAction.setAllowDuplicates(false);
@@ -54,7 +54,6 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
         });
 
         connect(&getDsnsAction(), &StringsAction::stringUpdated, this, [this](const QString& oldString, const QString& newString) -> void {
-            qDebug() << "Updating DSN from" << oldString << "to" << newString;
             removeDsn(oldString);
             addDsn(newString);
         });
@@ -86,11 +85,15 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
 
         auto layout = new QVBoxLayout(&editDsnsDialog);
 
-        layout->setSpacing(10);
+        layout->setContentsMargins(0, 0, 0, 0);
 
-        layout->addWidget(_dsnsAction.createWidget(&editDsnsDialog));
+        auto dsnsWidget = _dsnsAction.createWidget(&editDsnsDialog);
+
+        layout->addWidget(dsnsWidget);
 
         auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
+
+        dialogButtonBox->layout()->setContentsMargins(0, 0, 9, 9);
 
         connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Ok), &QPushButton::clicked, &editDsnsDialog, &QDialog::accept);
 
@@ -201,10 +204,6 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectSharedPtr project, co
         	}
 	    }
         endPopulate();
-
-        //for (const auto& modelIndex : getAllPersistentModelIndexesAtColumn(this, static_cast<std::int32_t>(Column::ProjectsJsonDsn))) {
-        //    qDebug() << " - Project with DSN" << modelIndex.siblingAtColumn(static_cast<std::int32_t>(Column::Title)).data(Qt::EditRole).toString();
-        //}
     }
     catch (std::exception& e)
     {
@@ -249,7 +248,6 @@ void AbstractProjectsModel::purge()
 #endif
 
     for (const auto& persistentModelIndex : allPersistentModelIndexes) {
-        qDebug() << "Purging project with DSN" << persistentModelIndex.sibling(persistentModelIndex.row(), static_cast<std::int32_t>(Column::Title)).data(Qt::EditRole).toString();
 	    const auto projectsDsn = persistentModelIndex.data(Qt::EditRole).toUrl();
 
     	if (!getDsnsAction().getStrings().contains(projectsDsn))
