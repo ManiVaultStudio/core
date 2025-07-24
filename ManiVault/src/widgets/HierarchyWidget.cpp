@@ -285,25 +285,26 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     });
 
     if (_filterModel) {
-        //connect(_filterModel, &QSortFilterProxyModel::layoutChanged, this, filterModelRowsChanged);
-        //connect(_filterModel, &QSortFilterProxyModel::layoutChanged, this, &HierarchyWidget::updateHeaderVisibility);
-
         connect(_filterModel, &QSortFilterProxyModel::rowsInserted, this, filterModelRowsChanged);
         connect(_filterModel, &QSortFilterProxyModel::rowsRemoved, this, filterModelRowsChanged);
 
         connect(_filterModel, &QSortFilterProxyModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
         connect(_filterModel, &QSortFilterProxyModel::rowsRemoved, this, &HierarchyWidget::updateHeaderVisibility);
+
+        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateOverlayWidget);
+        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateOverlayWidget);
+        connect(_filterModel, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateOverlayWidget);
+        connect(_filterModel, &QAbstractItemModel::modelReset, this, &HierarchyWidget::updateOverlayWidget);
     }
     else {
-        connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateFilterModel);
-        connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateFilterModel);
-        connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
+    	connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
         connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateHeaderVisibility);
-    }
 
-    connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateOverlayWidget);
-    connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateOverlayWidget);
-    connect(&_model, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateOverlayWidget);
+        connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateOverlayWidget);
+        connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateOverlayWidget);
+        connect(&_model, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateOverlayWidget);
+        connect(&_model, &QAbstractItemModel::modelReset, this, &HierarchyWidget::updateOverlayWidget);
+    }
 
     connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
     connect(&_treeView, &QTreeView::collapsed, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -363,6 +364,13 @@ QModelIndex HierarchyWidget::toSourceModelIndex(const QModelIndex& modelIndex) c
         return _filterModel->mapToSource(modelIndex);
 
     return modelIndex;
+}
+
+void HierarchyWidget::showEvent(QShowEvent* event)
+{
+	QWidget::showEvent(event);
+
+    updateOverlayWidget();
 }
 
 QModelIndexList HierarchyWidget::getSelectedRows() const
@@ -489,9 +497,11 @@ void HierarchyWidget::updateOverlayWidget()
     if (_infoOverlayWidget.isNull())
         return;
 
+    
     auto& widgetFader = _infoOverlayWidget->getWidgetFader();
 
     if (_filterModel == nullptr) {
+        qDebug() << "Updating overlay widget for hierarchy widget";
         if (_model.rowCount() == 0) {
             _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
             widgetFader.fadeIn();
