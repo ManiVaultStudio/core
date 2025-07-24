@@ -50,6 +50,12 @@ public:
     QString getTitle() const;
 
     /**
+     * Get tooltip
+     * @return Tooltip containing the title and summary
+     */
+    QString getTooltip() const;
+
+    /**
      * Get last modified date
      * @return Last modified date
      */
@@ -60,6 +66,9 @@ public:
      * @return Boolean determining whether project has been downloaded before
      */
     bool isDownloaded() const;
+
+    /** Flag the project as downloaded */
+    void setDownloaded();
 
     /**
      * Get whether this is a group
@@ -233,6 +242,12 @@ private:
     /** Compute cryptographic hash (for comparison purposes) */
     void computeSha();
 
+    /** Update project icon */
+    void updateIcon();
+
+    /** Update project tooltip */
+    void updateTooltip();
+
 signals:
 
     /**
@@ -246,6 +261,18 @@ signals:
      * @param lastModified Last modified date in milliseconds since epoch
      */
     void lastModifiedDetermined(const QDateTime& lastModified);
+
+    /**
+     * Signals that the project icon has changed
+     * @param icon New project icon
+     */
+    void iconChanged(const QIcon& icon);
+
+    /**
+     *  Signals that the project tooltip has changed to \p tooltip
+     * @param tooltip New project tooltip
+     */
+    void tooltipChanged(const QString& tooltip);
 
 private:
     QString         _title;                     /** Title */
@@ -267,6 +294,8 @@ private:
     QString         _sha;                       /** SHA-256 hash of the project (for comparison purposes) */
     QUrl            _projectsJsonDsn;           /** Data Source Name (DSN) of the projects JSON file, used for loading the project */
     bool            _expanded;                  /** Boolean determining whether the project is expanded in the model */
+    QIcon           _icon;                      /** Icon for the project (group) */
+    QString         _tooltip;                   /** Tooltip for the project (group) */
 };
 
 using ProjectsModelProjectSharedPtr   = std::shared_ptr<ProjectsModelProject>;

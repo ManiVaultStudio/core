@@ -29,7 +29,8 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
 	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false),
-	_projectsJsonDsn(variantMap.contains("projectsJsonDsn") ? variantMap["projectsJsonDsn"].toUrl() : QUrl())
+	_projectsJsonDsn(variantMap.contains("projectsJsonDsn") ? variantMap["projectsJsonDsn"].toUrl() : QUrl()),
+    _expanded(false)
 {
     if (variantMap.contains("coreVersion")) {
         const auto coreVersionMap = variantMap["coreVersion"].toMap();
@@ -79,6 +80,7 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
         qWarning() << "Project" << _title << "is added to the project database but cannot be opened because of missing plugins:" << _missingPlugins.join(", ");
 
     computeSha();
+    updateIcon();
 }
 
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
@@ -87,13 +89,21 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _iconName("folder"),
     _downloadSize(0),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
-    _recommendedHardwareSpec(HardwareSpec::Type::Recommended)
+    _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
+    _expanded(false)
 {
+    computeSha();
+    updateIcon();
 }
 
 QString ProjectsModelProject::getTitle() const
 {
     return _title;
+}
+
+QString ProjectsModelProject::getTooltip() const
+{
+    return _tooltip;
 }
 
 QDateTime ProjectsModelProject::getLastModified() const
@@ -113,6 +123,12 @@ bool ProjectsModelProject::isDownloaded() const
     fileInfo.refresh();
 
     return fileInfo.exists() && fileInfo.isFile();
+}
+
+void ProjectsModelProject::setDownloaded()
+{
+    updateIcon();
+    updateTooltip();
 }
 
 bool ProjectsModelProject::isGroup() const
@@ -212,7 +228,13 @@ bool ProjectsModelProject::isExpanded() const
 
 void ProjectsModelProject::setExpanded(bool expanded)
 {
+    if (expanded == _expanded)
+        return;
+
 	_expanded = expanded;
+
+    updateIcon();
+    updateTooltip();
 }
 
 void ProjectsModelProject::updateMetadata()
@@ -223,29 +245,7 @@ void ProjectsModelProject::updateMetadata()
 
 QIcon ProjectsModelProject::getIcon() const
 {
-    if (isGroup())
-        return isExpanded() ?  StyledIcon("folder-open") : StyledIcon("folder");
-
-    if (isDownloaded()) {
-        switch (HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec())._compatibility) {
-	        case HardwareSpec::SystemCompatibility::Incompatible:
-	            return StyledIcon("file-circle-xmark");
-
-	        case HardwareSpec::SystemCompatibility::Minimum:
-                return StyledIcon("file-circle-exclamation");
-
-	        case HardwareSpec::SystemCompatibility::Compatible:
-                return StyledIcon("file-circle-check");
-
-	        case HardwareSpec::SystemCompatibility::Unknown:
-                return StyledIcon("file-circle-question");
-        }
-    }
-    else {
-        return StyledIcon("download");
-    }
-
-    return {};
+    return _icon;
 }
 
 void ProjectsModelProject::determineDownloadSize()
@@ -296,6 +296,67 @@ void ProjectsModelProject::computeSha()
     hash.addData(_requiredPlugins.join(",").toUtf8());
 
     _sha = hash.result().toHex();
+}
+
+void ProjectsModelProject::updateIcon()
+{
+    if (isGroup()) {
+        _icon = isExpanded() ? StyledIcon("folder-open") : StyledIcon("folder");
+    } else {
+        if (isDownloaded()) {
+            switch (HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec())._compatibility) {
+	            case HardwareSpec::SystemCompatibility::Incompatible:
+                    _icon = StyledIcon("file-circle-xmark");
+                    break;
+
+	            case HardwareSpec::SystemCompatibility::Minimum:
+                    _icon = StyledIcon("file-circle-exclamation");
+                    break;
+
+	            case HardwareSpec::SystemCompatibility::Compatible:
+                    _icon = StyledIcon("file-circle-check");
+                    break;
+
+	            case HardwareSpec::SystemCompatibility::Unknown:
+                    _icon = StyledIcon("file-circle-question");
+                    break;
+            }
+        }
+        else {
+            _icon = StyledIcon("download");
+        }
+    }
+
+    emit iconChanged(_icon);
+}
+
+void ProjectsModelProject::updateTooltip()
+{
+    if (isGroup()) {
+        _tooltip =  isExpanded() ? "<b>Click to close the group</b>" : "<b>Click to open the group</b>";
+    }
+    else {
+        if (isDownloaded()) {
+            const auto systemCompatibility = HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec());
+
+            switch (systemCompatibility._compatibility) {
+	            case HardwareSpec::SystemCompatibility::Incompatible:
+	            case HardwareSpec::SystemCompatibility::Minimum:
+	            case HardwareSpec::SystemCompatibility::Compatible:
+	            case HardwareSpec::SystemCompatibility::Unknown:
+	            {
+                    _tooltip = QString("<p><b>Click to open the project</b></p><p>%1</p>").arg(systemCompatibility._message);
+					break;
+	            }
+
+            }
+        }
+        else {
+            _tooltip = "<b>Click to download and open the project</b>";
+        }
+    }
+
+    emit tooltipChanged(_tooltip);
 }
 
 }
