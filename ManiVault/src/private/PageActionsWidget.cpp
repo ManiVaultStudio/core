@@ -83,9 +83,8 @@ PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool
                 treeView.expand(filterIndex);
             }
 
-            if (auto pageActionItem = dynamic_cast<AbstractPageActionsModel::Item*>(_model.itemFromIndex(sourceIndex))) {
+            if (auto pageActionItem = dynamic_cast<AbstractPageActionsModel::Item*>(_model.itemFromIndex(sourceIndex)))
                 pageActionItem->getPageAction()->setExpanded(treeView.isExpanded(filterIndex));
-            }
         }
 
         _hierarchyWidget.getSelectionModel().clear();
