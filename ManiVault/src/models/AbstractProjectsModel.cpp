@@ -40,6 +40,7 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
     _dsnsAction.setDefaultWidgetFlag(StringsAction::WidgetFlag::MayEdit);
     _dsnsAction.setCategory("Projects DSN");
     _dsnsAction.setAllowDuplicates(false);
+    _dsnsAction.setTextElideMode(Qt::TextElideMode::ElideMiddle);
 
     if (getPopulationMode() == PopulationMode::Automatic || getPopulationMode() == PopulationMode::AutomaticSynchronous) {
 
