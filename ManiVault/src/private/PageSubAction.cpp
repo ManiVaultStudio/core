@@ -65,7 +65,7 @@ PageDownloadSubAction::PageDownloadSubAction(const QString& downloadSize) :
     });
 }
 
-PageCompatibilitySubAction::PageCompatibilitySubAction(const HardwareSpec::SystemCompatibilityInfo& systemCompatibilityInfo) :
+ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const HardwareSpec::SystemCompatibilityInfo& systemCompatibilityInfo) :
     PageSubAction({})
 {
 	switch (systemCompatibilityInfo._compatibility) {

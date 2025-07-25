@@ -130,7 +130,7 @@ public:
 };
 
 /** For displaying hardware compatibility information */
-class PageCompatibilitySubAction : public PageSubAction
+class ProjectCompatibilityPageSubAction : public PageSubAction
 {
 public:
 
@@ -138,7 +138,7 @@ public:
      * Construct with \p downloadSize
      * @param systemCompatibilityInfo System compatibility information to display
      */
-    PageCompatibilitySubAction(const mv::util::HardwareSpec::SystemCompatibilityInfo& systemCompatibilityInfo);
+    ProjectCompatibilityPageSubAction(const mv::util::HardwareSpec::SystemCompatibilityInfo& systemCompatibilityInfo);
 };
 
 /** For displaying the project preview */
