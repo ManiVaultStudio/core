@@ -139,7 +139,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     dataHierarchy().fromParentVariantMap(variantMap);
     actions().fromParentVariantMap(variantMap);
     plugins().fromParentVariantMap(variantMap);
-    events().fromParentVariantMap(variantMap);
+    events().fromParentVariantMap(variantMap, true);
 
     if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
         for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())

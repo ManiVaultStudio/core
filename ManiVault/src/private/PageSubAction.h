@@ -86,9 +86,9 @@ public: // Callbacks
     void setTooltipCallback(const TooltipCallback& tooltipCallback) { _tooltipCallback = tooltipCallback; }
 
 protected:
-    ClickedCallback         _clickedCallback;   /** Callback function that is called when the sub-action is clicked */
-    TooltipCallback         _tooltipCallback;   /** Callback function that is invoked to retrieve the sub-action tooltip */
-    mv::gui::IconLabel*     _iconLabel;         /** Icon label representing the sub-action */
+    ClickedCallback                 _clickedCallback;   /** Callback function that is called when the sub-action is clicked */
+    TooltipCallback                 _tooltipCallback;   /** Callback function that is invoked to retrieve the sub-action tooltip */
+    QPointer<mv::gui::IconLabel>    _iconLabel;         /** Icon label representing the sub-action */
 
     static bool compactView;
 };
