@@ -71,7 +71,7 @@ ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const Hardw
 	switch (systemCompatibilityInfo._compatibility) {
 		case HardwareSpec::SystemCompatibility::Incompatible:
 		{
-			setIcon(StyledIcon("circle-exclamation").withColor(QColor::fromHsl(0, 100, 100)));
+			setIcon(StyledIcon("circle-exclamation"));
 			setTooltipCallback([this]() -> QString {
 				return "Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!";
 			});
@@ -81,7 +81,7 @@ ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const Hardw
 
         case HardwareSpec::SystemCompatibility::Minimum:
         {
-            setIcon(StyledIcon("circle-exclamation").withColor(QColor::fromHsl(40, 100, 100)));
+            setIcon(StyledIcon("circle-exclamation"));
             setTooltipCallback([this]() -> QString {
                 return "Your system does not meet the recommended requirements for this project, the interactivity might not be optimal!";
             });
