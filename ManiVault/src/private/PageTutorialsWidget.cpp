@@ -71,7 +71,7 @@ void PageTutorialsWidget::updateActions()
 
         auto tutorial = dynamic_cast<LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceRowIndex))->getTutorial();
 
-        auto tutorialAction = std::make_shared<PageAction>(StyledIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
+        auto tutorialAction = std::make_shared<PageAction>(StyledIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
                     mv::projects().openProject(tutorial->getProjectUrl());
@@ -112,9 +112,6 @@ void PageTutorialsWidget::updateActions()
 
         if (!tags.isEmpty())
     		tutorialAction->createSubAction<TagsPageSubAction>(tags);
-
-        if (tutorial->hasProject())
-			tutorialAction->setDownloadUrls({ tutorial->getProjectUrl().toString() });
 
         getModel().add(tutorialAction);
     }

@@ -8,16 +8,13 @@ using namespace mv::util;
 
 bool PageAction::compactView = false;
 
-PageAction::PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& comments, const QString& tooltip, const ClickedCallback& clickedCallback) :
+PageAction::PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& tooltip, const ClickedCallback& clickedCallback) :
     _icon(icon),
     _title(title),
     _subtitle(subtitle),
-    _comments(comments),
     _tooltip(tooltip),
 	_clickedCallback(clickedCallback)
 {
-    if (!comments.isEmpty())
-		createSubAction<CommentsPageSubAction>(comments);
 }
 
 PageAction::PageAction(const QModelIndex& index)
@@ -62,20 +59,6 @@ void PageAction::setSubtitle(const QString& subtitle)
 	    _subtitle = subtitle;
 
     	emit subtitleChanged(_subtitle);
-    }
-}
-
-QString PageAction::getComments() const
-{
-    return _comments.isEmpty() ? "NA" : _comments;
-}
-
-void PageAction::setComments(const QString& comments)
-{
-    if (comments != _comments) {
-	    _comments = comments;
-
-    	emit commentsChanged(_comments);
     }
 }
 

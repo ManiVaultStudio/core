@@ -34,11 +34,10 @@ public:
      * @param icon Action icon
      * @param title Action title
      * @param subtitle Action subtitle
-     * @param comments Action description
      * @param tooltip Action tooltip
      * @param clickedCallback Callback function that is called when the action row is clicked
      */
-    PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& comments, const QString& tooltip, const ClickedCallback& clickedCallback);
+    PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& tooltip, const ClickedCallback& clickedCallback);
 
     /**
      * Construct from model \p index
@@ -83,18 +82,6 @@ public: // Getters and setters
      * @param subtitle Action subtitle
      */
     void setSubtitle(const QString& subtitle);
-
-    /**
-     * Get comments
-     * @return Action comments
-     */
-    QString getComments() const;
-
-    /**
-     * Set action comments to \p comments
-     * @param comments Action comments
-     */
-    void setComments(const QString& comments);
 
     /**
      * Get action tooltip
@@ -234,12 +221,6 @@ signals:
     void subtitleChanged(const QString& subtitle);
 
     /**
-     * Signals that the comments changed to \p comments
-     * @param comments New action comments
-     */
-    void commentsChanged(const QString& comments);
-
-    /**
      * Signals that the tooltip changed to \p tooltip
      * @param tooltip New action tooltip
      */
@@ -273,7 +254,6 @@ private:
     QIcon               _icon;              /** Action icon (shown on the left) */
     QString             _title;             /** Title is shown next to the icon */
     QString             _subtitle;          /** Subtitle */
-    QString             _comments;          /** Comments are show on the top right */
     QString             _tooltip;           /** Tooltip (might be empty) */
     ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
     QStringList         _tags;              /** Tags (might be empty) */

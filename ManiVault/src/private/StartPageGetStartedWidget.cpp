@@ -103,7 +103,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
             for (const auto workspaceLocation : workspaces().getWorkspaceLocations(WorkspaceLocation::Types(WorkspaceLocation::Type::BuiltIn))) {
                 Workspace workspace(workspaceLocation.getFilePath());
 
-                auto fromWorkspacePageAction = std::make_shared<PageAction>(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), workspaceLocation.getFilePath(), [workspaceLocation]() -> void {
+                auto fromWorkspacePageAction = std::make_shared<PageAction>(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), [workspaceLocation]() -> void {
                     projects().newProject(workspaceLocation.getFilePath());
                 });
 
@@ -129,7 +129,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
 
                 Workspace workspace(recentWorkspace.getFilePath());
 
-                auto recentWorkspacePageAction = std::make_shared<PageAction>(workspaces().getIcon(), QFileInfo(recentFilePath).baseName(), QString("Create project from %1.json").arg(QFileInfo(recentFilePath).baseName()), workspace.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                auto recentWorkspacePageAction = std::make_shared<PageAction>(workspaces().getIcon(), QFileInfo(recentFilePath).baseName(), QString("Create project from %1.json").arg(QFileInfo(recentFilePath).baseName()), workspace.getDescriptionAction().getString(), [recentFilePath]() -> void {
                     projects().newProject(recentFilePath);
                 });
 
@@ -156,14 +156,14 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                 const auto projectMeta = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
                 
                 if (projectMeta.isNull()) {
-                    auto recentProjectPageAction = std::make_shared<PageAction>(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, "", [recentFilePath]() -> void {
+                    auto recentProjectPageAction = std::make_shared<PageAction>(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, [recentFilePath]() -> void {
                         projects().newBlankProject();
                         workspaces().importWorkspaceFromProjectFile(recentFilePath);
                     });
                 
                     _createProjectFromWorkspaceWidget.getModel().add(recentProjectPageAction);
                 } else {
-                    auto recentProjectPageAction = std::make_shared<PageAction>(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), projectMeta->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                    auto recentProjectPageAction = std::make_shared<PageAction>(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), projectMeta->getDescriptionAction().getString(), [recentFilePath]() -> void {
                         projects().newBlankProject();
                         workspaces().importWorkspaceFromProjectFile(recentFilePath);
                     });
@@ -196,13 +196,13 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
     for (auto viewPluginFactory : plugins().getPluginFactoriesByType(plugin::Type::LOADER)) {
         const auto subtitle = QString("Import data into new project with %1").arg(viewPluginFactory->getKind());
 
-        auto fromDataPageAction = std::make_shared<PageAction>(StyledIcon(viewPluginFactory->icon()), viewPluginFactory->getKind(), subtitle, subtitle, "", [viewPluginFactory]() -> void {
+        auto fromDataPageAction = std::make_shared<PageAction>(StyledIcon(viewPluginFactory->icon()), viewPluginFactory->getKind(), subtitle, "", [viewPluginFactory]() -> void {
             projects().newProject(Qt::AlignRight);
             plugins().requestPlugin(viewPluginFactory->getKind());
         });
 
         fromDataPageAction->setSubtitle(subtitle);
-        fromDataPageAction->setComments(QString("Create a new project and import data into it with the %1").arg(viewPluginFactory->getKind()));
+        fromDataPageAction->createSubAction<CommentsPageSubAction>(QString("Create a new project and import data into it with the %1").arg(viewPluginFactory->getKind()));
 
         _createProjectFromDatasetWidget.getModel().add(fromDataPageAction);
     }

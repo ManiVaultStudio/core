@@ -55,7 +55,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     for (const auto workspaceLocation : workspaces().getWorkspaceLocations(WorkspaceLocation::Types(WorkspaceLocation::Type::BuiltIn))) {
         Workspace workspace(workspaceLocation.getFilePath());
 
-        auto fromWorkspaceStartPageAction = std::make_shared<PageAction>(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), workspaceLocation.getFilePath(), [this, workspaceLocation]() -> void {
+        auto fromWorkspaceStartPageAction = std::make_shared<PageAction>(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), [this, workspaceLocation]() -> void {
             projects().newProject(workspaceLocation.getFilePath());
 
             QDialog::accept();

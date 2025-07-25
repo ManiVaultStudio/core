@@ -148,31 +148,31 @@ void StartPageOpenProjectWidget::updateOpenCreateActions()
 {
     _openCreateProjectWidget.getModel().reset();
 
-    auto openProjectPageAction = std::make_shared<PageAction>(StyledIcon("folder-open"), "Open project", "Open an existing project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
+    auto openProjectPageAction = std::make_shared<PageAction>(StyledIcon("folder-open"), "Open project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
 
-    openProjectPageAction->setComments("Use the file browser to navigate to the project and open it");
+    openProjectPageAction->createSubAction<CommentsPageSubAction>("Use the file browser to navigate to the project and open it");
 
     _openCreateProjectWidget.getModel().add(openProjectPageAction);
 
-    auto blankProjectPageAction = std::make_shared<PageAction>(StyledIcon("file"), "Blank", "Create project without plugins", "Create project without any plugins", "", []() -> void {
+    auto blankProjectPageAction = std::make_shared<PageAction>(StyledIcon("file"), "Blank", "Create project without plugins", "", []() -> void {
         projects().newProject();
     });
 
-    auto rightAlignedProjectPageAction = std::make_shared<PageAction>(_rightAlignedIcon, "Right-aligned", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", "", []() -> void {
+    auto rightAlignedProjectPageAction = std::make_shared<PageAction>(_rightAlignedIcon, "Right-aligned", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", []() -> void {
         projects().newProject(Qt::AlignRight);
     });
 
-    auto rightAlignedLoggingProjectPageAction = std::make_shared<PageAction>(_rightAlignedLoggingIcon, "Right-aligned with logging", "Create project with standard plugins on the right and logging at the bottom", "Create project with data hierarchy and data properties plugins on the right and a logging plugin at the bottom", "", []() -> void {
+    auto rightAlignedLoggingProjectPageAction = std::make_shared<PageAction>(_rightAlignedLoggingIcon, "Right-aligned with logging", "Create project with standard plugins on the right and logging at the bottom", "Create project with data hierarchy and data properties plugins on the right and a logging plugin at the bottom", []() -> void {
         projects().newProject(Qt::AlignRight, true);
     });
 
-    auto leftAlignedProjectPageAction = std::make_shared<PageAction>(_leftAlignedIcon, "Left-aligned", "Create project with standard plugins on the left", "Create project with data hierarchy and data properties plugins on the left", "", []() -> void {
+    auto leftAlignedProjectPageAction = std::make_shared<PageAction>(_leftAlignedIcon, "Left-aligned", "Create project with standard plugins on the left", "Create project with data hierarchy and data properties plugins on the left", []() -> void {
         projects().newProject(Qt::AlignLeft);
     });
 
-    auto leftAlignedLoggingProjectPageAction = std::make_shared<PageAction>(_leftAlignedLoggingIcon, "Left-aligned with logging", "Create project with standard plugins on the left and logging at the bottom", "Create project with data hierarchy and data properties plugins on the left and a logging plugin at the bottom", "", []() -> void {
+    auto leftAlignedLoggingProjectPageAction = std::make_shared<PageAction>(_leftAlignedLoggingIcon, "Left-aligned with logging", "Create project with standard plugins on the left and logging at the bottom", "Create project with data hierarchy and data properties plugins on the left and a logging plugin at the bottom", []() -> void {
         projects().newProject(Qt::AlignLeft, true);
     });
 
@@ -218,7 +218,7 @@ void StartPageOpenProjectWidget::setupRecentProjectsSection()
             const auto recentFile       = recentProjectsActionModel.getRecentFileFromIndex(sourceIndex);
             const auto recentFilePath   = recentFile.getFilePath();
 
-            auto recentProjectPageAction = std::make_shared<PageAction>(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, "", "", [recentFilePath]() -> void {
+            auto recentProjectPageAction = std::make_shared<PageAction>(clockIcon, QFileInfo(recentFilePath).baseName(), recentFilePath, "", [recentFilePath]() -> void {
                 projects().openProject(recentFilePath);
             });
 
@@ -283,7 +283,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
     toolbarAction.addAction(&projectsTreeModel.getDsnsAction());
 
     const auto addProjectPageAction = [this, &projectsPageTreeModel](ProjectsModelProjectSharedPtr project) -> PageActionSharedPtr {
-    	auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), "", [project]() -> void {
+    	auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), [project]() -> void {
             projects().openProject(project->getUrl());
 
             project->setDownloaded();
