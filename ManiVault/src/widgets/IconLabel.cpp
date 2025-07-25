@@ -5,6 +5,7 @@
 #include "IconLabel.h"
 
 #include <QDebug>
+#include <QToolTip>
 
 #ifdef _DEBUG
     #define ICON_LABEL_VERBOSE
@@ -47,6 +48,19 @@ void IconLabel::leaveEvent(QEvent* event)
     QLabel::leaveEvent(event);
 
     updateOpacityEffect();
+}
+
+bool IconLabel::event(QEvent* event)
+{
+	if (event->type() == QEvent::ToolTip) {
+		if (auto helpEvent = dynamic_cast<QHelpEvent*>(event)) {
+			QToolTip::showText(helpEvent->globalPos(), _tooltipCallback ? _tooltipCallback() : "", this);
+
+			return true;
+		}
+	}
+
+    return QLabel::event(event);
 }
 
 void IconLabel::updateOpacityEffect()

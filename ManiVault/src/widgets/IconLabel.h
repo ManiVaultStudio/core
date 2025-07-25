@@ -63,6 +63,13 @@ public:
      */
     void leaveEvent(QEvent* event) override;
 
+    /**
+     * Handle events
+     * @param event Pointer to event
+     * @return True if the event was handled, false otherwise
+     */
+    bool event(QEvent* event) override;
+
 private:
 
     /** Updates the label opacity depending on whether the mouse is hovering over the label */
