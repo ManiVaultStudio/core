@@ -591,7 +591,7 @@ void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, co
         if (notCompatible || notRecommended) {
             QDialog projectIncompatibleWithSystemDialog;
 
-            projectIncompatibleWithSystemDialog.setWindowIcon(StyledIcon("triangle-exclamation"));
+        	projectIncompatibleWithSystemDialog.setWindowIcon(systemCompatibility._icon);
             projectIncompatibleWithSystemDialog.setWindowTitle("Incompatible System");
             projectIncompatibleWithSystemDialog.setMinimumWidth(500);
             projectIncompatibleWithSystemDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);

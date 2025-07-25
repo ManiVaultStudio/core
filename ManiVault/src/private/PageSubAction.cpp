@@ -8,12 +8,15 @@ using namespace mv::util;
 using namespace mv::gui;
 
 PageSubAction::PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback /*= {}*/, const ClickedCallback& clickedCallback /*= {}*/) :
-    _icon(icon),
     _clickedCallback(clickedCallback),
 	_tooltipCallback(tooltipCallback),
-    _iconLabel(nullptr)
+    _iconLabel(new IconLabel(icon))
 {
-    setIcon(icon);
+    _iconLabel->hide();
+
+    _iconLabel->setTooltipCallback([this]() -> QString {
+        return getTooltip();
+    });
 }
 
 PageSubAction::~PageSubAction()
@@ -24,8 +27,7 @@ PageSubAction::~PageSubAction()
 
 void PageSubAction::setIcon(const QIcon& icon)
 {
-    if (_iconLabel)
-		_iconLabel->setIcon(icon);
+	_iconLabel->setIcon(icon);
 }
 
 QString PageSubAction::getTooltip() const
@@ -38,20 +40,11 @@ QString PageSubAction::getTooltip() const
 
 void PageSubAction::setVisible(bool visible)
 {
-    if (_iconLabel)
-		_iconLabel->setVisible(visible);
+	_iconLabel->setVisible(visible);
 }
 
 IconLabel* PageSubAction::getIconLabel()
 {
-    if (!_iconLabel) {
-	    _iconLabel = new IconLabel(_icon);
-
-    	_iconLabel->setTooltipCallback([this]() -> QString {
-			return getTooltip();
-    	});
-    }
-
     return _iconLabel;
 }
 
@@ -82,10 +75,11 @@ PageDownloadSubAction::PageDownloadSubAction(const QString& downloadSize) :
 ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const HardwareSpec::SystemCompatibilityInfo& systemCompatibilityInfo) :
     PageSubAction({})
 {
+    setIcon(systemCompatibilityInfo._icon);
+
 	switch (systemCompatibilityInfo._compatibility) {
 		case HardwareSpec::SystemCompatibility::Incompatible:
 		{
-			setIcon(StyledIcon("circle-exclamation"));
 			setTooltipCallback([this]() -> QString {
 				return "Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!";
 			});
@@ -95,7 +89,6 @@ ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const Hardw
 
         case HardwareSpec::SystemCompatibility::Minimum:
         {
-            setIcon(StyledIcon("circle-exclamation"));
             setTooltipCallback([this]() -> QString {
                 return "Your system does not meet the recommended requirements for this project, the interactivity might not be optimal!";
             });
@@ -105,7 +98,6 @@ ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const Hardw
 
         case HardwareSpec::SystemCompatibility::Compatible:
         {
-            setIcon(StyledIcon("check"));
             setTooltipCallback([this]() -> QString {
                 return "Your system meets the minimum requirements for this project!";
             });
@@ -115,7 +107,6 @@ ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const Hardw
 
         case HardwareSpec::SystemCompatibility::Unknown:
         {
-            setIcon(StyledIcon("circle-question"));
             setTooltipCallback([this]() -> QString {
                 return "Your system compatibility is unknown, the project does not specify hardware requirements!";
             });
@@ -152,4 +143,17 @@ ProjectPluginsPageSubAction::ProjectPluginsPageSubAction(const QStringList& plug
     setTooltipCallback([this, plugins]() -> QString {
         return QString("Plugin(s): %1").arg(plugins.isEmpty() ? "none" : plugins.join(", "));
 	});
+}
+
+ProjectLastUpdatedPageSubAction::ProjectLastUpdatedPageSubAction(const QDateTime& lastUpdated) :
+    PageSubAction(StyledIcon("clock"))
+{
+    setTooltipCallback([this]() -> QString {
+        return QString("Last server update: %1").arg(_projectLastUpdated.isValid() ? _projectLastUpdated.toString() : "unknown");
+    });
+}
+
+void ProjectLastUpdatedPageSubAction::setProjectLastUpdated(const QDateTime& projectLastUpdated)
+{
+    _projectLastUpdated = projectLastUpdated;
 }

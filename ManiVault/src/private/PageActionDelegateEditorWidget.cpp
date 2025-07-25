@@ -25,7 +25,7 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
     setObjectName("PageActionDelegateEditorWidget");
     setMouseTracking(true);
 
-    _mainLayout.setContentsMargins(1, 1, 1, 1);
+    _mainLayout.setContentsMargins(1, 1, 4, 1);
     _mainLayout.setSpacing(0);
 
     _mainLayout.addLayout(&_iconLayout);
@@ -186,8 +186,11 @@ void PageActionDelegateEditorWidget::updateSubActions()
     clearLayout(&_subActionsLayout, true);
 
     if (_pageAction) {
-        for (auto& subAction : _pageAction->getSubActions())
+        for (auto& subAction : _pageAction->getSubActions()) {
             _subActionsLayout.addWidget(subAction->getIconLabel());
+
+            subAction->getIconLabel()->show();
+        }
 
         updateCustomStyle();
     }
@@ -195,7 +198,7 @@ void PageActionDelegateEditorWidget::updateSubActions()
 
 void PageActionDelegateEditorWidget::updateOverlayWidgetVisibility()
 {
-    if (PageAction::isCompactView())
+    if (!PageAction::isCompactView())
         _metaDataLabel.setVisible(!QWidget::underMouse());
 
     _subActionsWidget.setVisible(QWidget::underMouse());
@@ -204,9 +207,9 @@ void PageActionDelegateEditorWidget::updateOverlayWidgetVisibility()
 void PageActionDelegateEditorWidget::updateCustomStyle()
 {
     if (_pageAction) {
-        _metaDataLabel.setStyleSheet(QString("color: %1; font-weight: bold;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
+        _metaDataLabel.setStyleSheet(QString("color: %1; font-weight: bold; font-size: 8pt;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
         _titleLabel.setStyleSheet(QString("color: %1; font-weight: bold;").arg(qApp->palette().text().color().name()));
-        _subtitleLabel.setStyleSheet(QString("color: %1; font-size: 7pt;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
+        _subtitleLabel.setStyleSheet(QString("color: %1; font-size: 8pt;").arg(qApp->palette().color(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Text).name()));
     }
     
 }

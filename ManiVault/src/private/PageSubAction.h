@@ -86,7 +86,6 @@ public: // Callbacks
     void setTooltipCallback(const TooltipCallback& tooltipCallback) { _tooltipCallback = tooltipCallback; }
 
 protected:
-    QIcon                   _icon;              /** Icon representing the sub-action */
     ClickedCallback         _clickedCallback;   /** Callback function that is called when the sub-action is clicked */
     TooltipCallback         _tooltipCallback;   /** Callback function that is invoked to retrieve the sub-action tooltip */
     mv::gui::IconLabel*     _iconLabel;         /** Icon label representing the sub-action */
@@ -187,6 +186,27 @@ public:
      * @param plugins Project plugins to display
      */
     ProjectPluginsPageSubAction(const QStringList& plugins);
+};
+
+/** For displaying when the project was last updated on the server */
+class ProjectLastUpdatedPageSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p projectLastUpdated
+     * @param projectLastUpdated When the project was last updated on the server
+     */
+    ProjectLastUpdatedPageSubAction(const QDateTime& projectLastUpdated = QDateTime());
+
+    /**
+     * Set the project last updated to \p projectLastUpdated
+     * @param projectLastUpdated When the project was last updated on the server
+     */
+    void setProjectLastUpdated(const QDateTime& projectLastUpdated);
+
+private:
+    QDateTime   _projectLastUpdated;    /** When the project was last updated on the server */
 };
 
 using PageSubActionPtr  = std::shared_ptr<PageSubAction>;

@@ -265,24 +265,9 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         });
 
         projectPageAction->setParentTitle(project->getGroup());
-        projectPageAction->setParentTitle(project->getGroup());
         
         if (!project->getTags().isEmpty())
             projectPageAction->createSubAction<TagsPageSubAction>(project->getTags());
-
-        if (!project->isGroup()) {
-            const auto pageDownloadSubAction = projectPageAction->createSubAction<PageDownloadSubAction>(getNoBytesHumanReadable(project->getDownloadSize()));
-
-            const auto updateDownloadPageSubAction = [project, pageDownloadSubAction]() -> void {
-                pageDownloadSubAction->setVisible(!project->isDownloaded());
-            };
-
-            updateDownloadPageSubAction();
-
-            connect(project.get(), &ProjectsModelProject::downloaded, projectPageAction.get(), updateDownloadPageSubAction);
-
-            projectPageAction->createSubAction<ProjectCompatibilityPageSubAction>(HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec()));
-        }
 
         projectPageAction->setTooltipCallback([project]() -> QString {
             if (project->isGroup()) {
@@ -299,6 +284,17 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         });
 
         if (!project->isGroup()) {
+            if (const auto& summary = project->getSummary(); !summary.isEmpty())
+				projectPageAction->createSubAction<CommentsPageSubAction>(project->getSummary());
+
+            projectPageAction->createSubAction<ProjectCompatibilityPageSubAction>(HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec()));
+
+        	auto lastUpdatedPageSubAction = projectPageAction->createSubAction<ProjectLastUpdatedPageSubAction>();
+
+            connect(project.get(), &ProjectsModelProject::lastModifiedDetermined, projectPageAction.get(), [project, lastUpdatedPageSubAction](const QDateTime& lastModified) {
+                lastUpdatedPageSubAction->setProjectLastUpdated(lastModified);
+            });
+
             if (project->getDownloadSize() == 0) {
                 connect(project.get(), &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), [projectPageAction, project](std::uint64_t size) {
                     projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(size)));

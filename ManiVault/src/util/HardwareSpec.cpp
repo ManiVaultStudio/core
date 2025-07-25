@@ -95,32 +95,37 @@ HardwareSpec::SystemCompatibilityInfo HardwareSpec::getSystemCompatibility(const
 	if (!systemHardwareSpec.isInitialized() || !minimumHardwareSpec.isInitialized() || !recommendedHardwareSpec.isInitialized())
         return {
         	SystemCompatibility::Unknown,
-        	"<p>There is no information about system compatibility</p>"
+        	"<p>There is no information about system compatibility</p>",
+            StyledIcon("circle-question")
         };
 
     if (systemHardwareSpec.meets(minimumHardwareSpec) && systemHardwareSpec.meets(recommendedHardwareSpec))
         return {
         	SystemCompatibility::Compatible,
-        	"<p>Your system is fully equipped to run the project</p>"
+        	"<p>Your system is fully equipped to run the project</p>",
+            StyledIcon("circle-check")
         };
 
     if (!systemHardwareSpec.meets(minimumHardwareSpec)) {
         return {
         	SystemCompatibility::Incompatible,
-            QString("<p>Your system does not meet the minimum hardware requirements for this project, there might be problems with opening it, its stability and performance</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(minimumHardwareSpec))
+            QString("<p>Your system does not meet the minimum hardware requirements for this project, there might be problems with opening it, its stability and performance</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(minimumHardwareSpec)),
+            StyledIcon("triangle-exclamation")
         };
     }
 
     if (systemHardwareSpec.meets(minimumHardwareSpec) && !systemHardwareSpec.meets(recommendedHardwareSpec)) {
         return {
             SystemCompatibility::Minimum,
-            QString("<p>Your system meets the minimum hardware requirements, but the experience might sub-optimal:</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(recommendedHardwareSpec))
+            QString("<p>Your system meets the minimum hardware requirements, but the experience might sub-optimal:</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(recommendedHardwareSpec)),
+            StyledIcon("triangle-exclamation")
         };
     }
 
     return {
-    	SystemCompatibility::Unknown,
-    	"<p>There is no information about system compatibility</p>"
+        SystemCompatibility::Unknown,
+        "<p>There is no information about system compatibility</p>",
+        StyledIcon("circle-question")
     };
 }
 

@@ -308,7 +308,7 @@ void ProjectsModelProject::updateIcon()
         if (isDownloaded()) {
             switch (HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec())._compatibility) {
 	            case HardwareSpec::SystemCompatibility::Incompatible:
-                    _icon = StyledIcon("file-circle-xmark");
+                    _icon = StyledIcon("file-circle-exclamation");
                     break;
 
 	            case HardwareSpec::SystemCompatibility::Minimum:
