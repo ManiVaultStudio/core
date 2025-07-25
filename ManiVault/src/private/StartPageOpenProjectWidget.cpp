@@ -294,14 +294,21 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         if (!project->getTags().isEmpty())
             projectPageAction->createSubAction<TagsPageSubAction>(project->getTags());
 
-        if (!project->isGroup())
-            projectPageAction->createSubAction<PageDownloadSubAction>(getNoBytesHumanReadable(project->getDownloadSize()));
+        if (!project->isGroup()) {
+            const auto pageDownloadSubAction = projectPageAction->createSubAction<PageDownloadSubAction>(getNoBytesHumanReadable(project->getDownloadSize()));
+
+            const auto updateDownloadPageSubAction = [project, pageDownloadSubAction]() -> void {
+                pageDownloadSubAction->setVisible(!project->isDownloaded());
+            };
+
+            updateDownloadPageSubAction();
+
+            connect(project.get(), &ProjectsModelProject::downloaded, projectPageAction.get(), updateDownloadPageSubAction);
+        }
 
         const auto systemCompatibility = HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec());
 
         if (!project->isGroup()) {
-            //projectPageAction->createSubAction<PageCompatibilitySubAction>(systemCompatibility);
-
             if (project->getDownloadSize() == 0) {
                 connect(project.get(), &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), [projectPageAction, project](std::uint64_t size) {
                     projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(size)));
