@@ -4,22 +4,20 @@
 
 #include "PageAction.h"
 
-#include <util/StyledIcon.h>
-
 using namespace mv::util;
 
 bool PageAction::compactView = false;
 
-PageAction::PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& description, const QString& tooltip, const ClickedCallback& clickedCallback) :
+PageAction::PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& comments, const QString& tooltip, const ClickedCallback& clickedCallback) :
     _icon(icon),
     _title(title),
     _subtitle(subtitle),
-    _description(description),
+    _comments(comments),
     _tooltip(tooltip),
-    _clickedCallback(clickedCallback)
+	_clickedCallback(clickedCallback)
 {
-    if (!description.isEmpty())
-		createSubAction<CommentsPageSubAction>(description);
+    if (!comments.isEmpty())
+		createSubAction<CommentsPageSubAction>(comments);
 }
 
 PageAction::PageAction(const QModelIndex& index)
@@ -36,12 +34,7 @@ void PageAction::setIcon(const QIcon& icon)
 {
 	_icon = icon;
 
-	emit iconChanged();
-}
-
-void PageAction::setExpanded(bool expanded)
-{
-    emit expandedChanged(expanded);
+	emit iconChanged(_icon);
 }
 
 QString PageAction::getTitle() const
@@ -51,17 +44,63 @@ QString PageAction::getTitle() const
 
 void PageAction::setTitle(const QString& title)
 {
-	_title = title;
+    if (title != _title) {
+	    _title = title;
+
+    	emit titleChanged(_title);
+    }
 }
 
-QString PageAction::getParentTitle() const
+QString PageAction::getSubtitle() const
 {
-	return _parentTitle;
+    return _subtitle.isEmpty() ? "NA" : _subtitle;
 }
 
-void PageAction::setParentTitle(const QString& parentTitle)
+void PageAction::setSubtitle(const QString& subtitle)
 {
-	_parentTitle = parentTitle;
+    if (subtitle != _subtitle) {
+	    _subtitle = subtitle;
+
+    	emit subtitleChanged(_subtitle);
+    }
+}
+
+QString PageAction::getComments() const
+{
+    return _comments.isEmpty() ? "NA" : _comments;
+}
+
+void PageAction::setComments(const QString& comments)
+{
+    if (comments != _comments) {
+	    _comments = comments;
+
+    	emit commentsChanged(_comments);
+    }
+}
+
+QString PageAction::getTooltip() const
+{
+    return _tooltip;
+}
+
+void PageAction::setTooltip(const QString& tooltip)
+{
+    if (tooltip != _tooltip) {
+    	_tooltip = tooltip;
+
+    	emit tooltipChanged(_tooltip);
+    }
+}
+
+PageAction::ClickedCallback PageAction::getClickedCallback() const
+{
+    return _clickedCallback;
+}
+
+void PageAction::setClickedCallback(const ClickedCallback& clickedCallback)
+{
+    _clickedCallback = clickedCallback;
 }
 
 QString PageAction::getMetaData() const
@@ -71,23 +110,44 @@ QString PageAction::getMetaData() const
 
 void PageAction::setMetaData(const QString& metaData)
 {
-	_metaData = metaData;
+    if (metaData != _metaData) {
+	    _metaData = metaData;
 
-	emit metadataChanged();
+    	emit metadataChanged(_metaData);
+    }
+}
+
+QString PageAction::getParentTitle() const
+{
+    return _parentTitle;
+}
+
+void PageAction::setParentTitle(const QString& parentTitle)
+{
+    if (parentTitle != _parentTitle) {
+	    _parentTitle = parentTitle;
+
+    	emit parentTitleChanged(_parentTitle);
+    }
 }
 
 void PageAction::removeSubAction(const PageSubActionPtr& subAction)
 {
     _subActions.erase(std::ranges::remove(_subActions, subAction).begin(), _subActions.end());
 
-    emit subActionsChanged();
+    emit subActionsChanged(_subActions);
 }
 
 void PageAction::clearSubActions()
 {
 	_subActions.clear();
 
-    emit subActionsChanged();
+    emit subActionsChanged(_subActions);
+}
+
+void PageAction::setExpanded(bool expanded)
+{
+    emit expandedChanged(expanded);
 }
 
 void PageAction::setEditorData(const QModelIndex& index)

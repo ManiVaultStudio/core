@@ -98,6 +98,7 @@ void PageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
 
                 connect(_pageAction.get(), &PageAction::subActionsChanged, this, &PageActionDelegateEditorWidget::updateSubActions);
                 connect(_pageAction.get(), &PageAction::iconChanged, this, &PageActionDelegateEditorWidget::updateIcon);
+                connect(_pageAction.get(), &PageAction::tooltip, this, &PageActionDelegateEditorWidget::updateIcon);
                 connect(_pageAction.get(), &PageAction::metadataChanged, this, &PageActionDelegateEditorWidget::updateMetadata);
 
                 updateTextLabels();

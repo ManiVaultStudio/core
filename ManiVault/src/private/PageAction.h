@@ -8,7 +8,6 @@
 #include <QImage>
 #include <QList>
 #include <QString>
-#include <QModelIndex>
 
 #include <functional>
 
@@ -27,20 +26,19 @@ class PageAction final : public QObject
 
 public:
 
-    using ClickedCallback = std::function<void()>;    /** Callback function that is called when the action row is clicked */
-
-public:
+    /** Callback function that is called when the action row is clicked */
+    using ClickedCallback = std::function<void()>;
 
     /**
      * Construct with \p icon, \p title, \p description and \p clickedCallback
      * @param icon Action icon
      * @param title Action title
      * @param subtitle Action subtitle
-     * @param description Action description
+     * @param comments Action description
      * @param tooltip Action tooltip
      * @param clickedCallback Callback function that is called when the action row is clicked
      */
-    PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& description, const QString& tooltip, const ClickedCallback& clickedCallback);
+    PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& comments, const QString& tooltip, const ClickedCallback& clickedCallback);
 
     /**
      * Construct from model \p index
@@ -49,39 +47,108 @@ public:
     PageAction(const QModelIndex& index);
 
 public: // Getters and setters
-    
+
+    /**
+     * Get action icon
+     * @return Action icon
+     */
     QIcon getIcon() const;
 
-    void  setIcon(const QIcon& icon);
+    /**
+     * Set action icon to \p icon
+     * @param icon Action icon
+     */
+    void setIcon(const QIcon& icon);
 
-    void setExpanded(bool expanded);
-
+    /**
+     * Get action title
+     * @return Action title
+     */
     QString getTitle() const;
 
-    void    setTitle(const QString& title);
+    /**
+     * Set action title to \p title
+     * @param title Action title
+     */
+    void setTitle(const QString& title);
 
-    QString getParentTitle() const;
+    /**
+     * Get subtitle
+     * @return Action subtitle
+     */
+    QString getSubtitle() const;
 
-    void    setParentTitle(const QString& parentTitle);
+    /**
+     * Set action subtitle to \p subtitle
+     * @param subtitle Action subtitle
+     */
+    void setSubtitle(const QString& subtitle);
 
-    QString getComments() const { return _comments.isEmpty() ? "NA" : _comments; }
-    void setComments(const QString& comments) { _comments = comments; }
+    /**
+     * Get comments
+     * @return Action comments
+     */
+    QString getComments() const;
 
-    QString getSubtitle() const { return _subtitle.isEmpty() ? "NA" : _subtitle; }
-    void setSubtitle(const QString& subtitle) { _subtitle = subtitle; }
+    /**
+     * Set action comments to \p comments
+     * @param comments Action comments
+     */
+    void setComments(const QString& comments);
 
+    /**
+     * Get action tooltip
+     * @return Action tooltip
+     */
+    QString getTooltip() const;
+
+    /**
+     * Set action tooltip to \p tooltip
+     * @param tooltip Action tooltip
+     */
+    void setTooltip(const QString& tooltip);
+
+    /**
+     * Get action clicked callback
+     * @return Action clicked callback
+     */
+    ClickedCallback getClickedCallback() const;
+
+    /**
+     * Set action clicked callback to \p clickedCallback
+     * @param clickedCallback Action clicked callback
+     */
+    void setClickedCallback(const ClickedCallback& clickedCallback);
+
+    /**
+     * Get action metadata
+     * @return Action metadata
+     */
     QString getMetaData() const;
 
+    /**
+     * Set action metadata to \p metaData
+     * @param metaData Action metadata
+     */
     void setMetaData(const QString& metaData);
 
-    QString getTooltip() const { return _tooltip; }
-    void setTooltip(const QString& tooltip) { _tooltip = tooltip; }
+    /**
+     * Get parent action title
+     * @return Parent action title
+     */
+    QString getParentTitle() const;
 
-    QStringList getDownloadUrls() const { return _downloadUrls; }
-    void setDownloadUrls(const QStringList& downloadUrls) { _downloadUrls = downloadUrls; }
+    /**
+     * Set parent action title to \p parentTitle
+     * @param parentTitle Parent action title
+     */
+    void setParentTitle(const QString& parentTitle);
 
-    ClickedCallback getClickedCallback() const { return _clickedCallback; }
-    void setClickedCallback(const ClickedCallback& clickedCallback) { _clickedCallback = clickedCallback; }
+    /**
+     * Set whether the action row is expanded
+     * @param expanded Boolean determining whether the action row is expanded
+     */
+    void setExpanded(bool expanded);
 
 public: // Sub-actions
 
@@ -96,7 +163,7 @@ public: // Sub-actions
 
         _subActions.push_back(sharedSubAction);
 
-        emit subActionsChanged();
+        emit subActionsChanged(_subActions);
 
         return sharedSubAction;
     }
@@ -148,9 +215,53 @@ public:
 
 signals:
 
-    void iconChanged();
-    void metadataChanged();
-    void subActionsChanged();
+    /**
+     * Signals that the icon changed to \p icon
+     * @param icon New action icon
+     */
+    void iconChanged(const QIcon& icon);
+
+    /**
+     * Signals that the title changed to \p title
+     * @param title New action title
+     */
+    void titleChanged(const QString& title);
+
+    /**
+     * Signals that the subtitle changed to \p subtitle
+     * @param subtitle New action subtitle
+     */
+    void subtitleChanged(const QString& subtitle);
+
+    /**
+     * Signals that the comments changed to \p comments
+     * @param comments New action comments
+     */
+    void commentsChanged(const QString& comments);
+
+    /**
+     * Signals that the tooltip changed to \p tooltip
+     * @param tooltip New action tooltip
+     */
+    void tooltipChanged(const QString& tooltip);
+
+    /**
+     * Signals that the metadata changed to \p metadata
+     * @param metadata New action metadata
+     */
+    void metadataChanged(const QString& metadata);
+
+    /**
+     * Signals that the parentTitle changed to \p parentTitle
+     * @param parentTitle New action parentTitle
+     */
+    void parentTitleChanged(const QString& parentTitle);
+
+    /**
+     * Signals that the sub-actions list changed to \p subActions
+     * @param subActions New list of sub-actions
+     */
+    void subActionsChanged(const PageSubActionPtrs& subActions);
 
     /**
      * Signal that is emitted when the action row is clicked
@@ -159,20 +270,19 @@ signals:
     void expandedChanged(bool expanded);
 
 private:
-    QIcon                               _icon;              /** Action icon (shown on the left) */
-    QString                             _title;             /** Title is shown next to the icon */
-    QString                             _description;       /** Description is in the second row */
-    QString                             _parentTitle;       /** Parent action title (if any) */
-    QString                             _comments;          /** Comments are show on the top right */
-    QStringList                         _tags;              /** Tags (might be empty) */
-    QString                             _subtitle;          /** Subtitle */
-    QString                             _metaData;          /** Metadata (might be empty) */
-    QImage                              _previewImage;      /** Preview image (might be empty) */
-    QString                             _tooltip;           /** Tooltip (might be empty) */
-    QStringList                         _contributors;      /** List of contributors */
-    QStringList                         _downloadUrls;      /** Action download URLs */
-    ClickedCallback                     _clickedCallback;   /** Callback function that is called when the action row is clicked */
-    PageSubActionPtrs                   _subActions;        /** Sub-actions that are shown when hovering the action */
+    QIcon               _icon;              /** Action icon (shown on the left) */
+    QString             _title;             /** Title is shown next to the icon */
+    QString             _subtitle;          /** Subtitle */
+    QString             _comments;          /** Comments are show on the top right */
+    QString             _tooltip;           /** Tooltip (might be empty) */
+    ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
+    QStringList         _tags;              /** Tags (might be empty) */
+    QString             _metaData;          /** Metadata (might be empty) */
+    QImage              _previewImage;      /** Preview image (might be empty) */
+    QStringList         _contributors;      /** List of contributors */
+    QStringList         _downloadUrls;      /** Action download URLs */
+    PageSubActionPtrs   _subActions;        /** Sub-actions that are shown when hovering the action */
+    QString             _parentTitle;       /** Parent action title (if any) */
 
     static bool compactView;
 
