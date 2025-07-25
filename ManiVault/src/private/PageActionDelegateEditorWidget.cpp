@@ -96,13 +96,17 @@ void PageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
             if (auto item = dynamic_cast<AbstractPageActionsModel::Item*>(pageActionsModel->itemFromIndex(proxyModel->mapToSource(_index)))) {
                 _pageAction = item->getPageAction();
 
-                connect(_pageAction.get(), &PageAction::subActionsChanged, this, &PageActionDelegateEditorWidget::updateSubActions);
                 connect(_pageAction.get(), &PageAction::iconChanged, this, &PageActionDelegateEditorWidget::updateIcon);
-                connect(_pageAction.get(), &PageAction::tooltip, this, &PageActionDelegateEditorWidget::updateIcon);
+                connect(_pageAction.get(), &PageAction::titleChanged, this, &PageActionDelegateEditorWidget::updateTitle);
+                connect(_pageAction.get(), &PageAction::subtitleChanged, this, &PageActionDelegateEditorWidget::updateSubtitle);
+                connect(_pageAction.get(), &PageAction::tooltipChanged, this, &PageActionDelegateEditorWidget::updateTooltip);
                 connect(_pageAction.get(), &PageAction::metadataChanged, this, &PageActionDelegateEditorWidget::updateMetadata);
+                connect(_pageAction.get(), &PageAction::subActionsChanged, this, &PageActionDelegateEditorWidget::updateSubActions);
 
-                updateTextLabels();
                 updateIcon();
+                updateTitle();
+                updateSubtitle();
+                updateTooltip();
                 updateMetadata();
                 updateSubActions();
             }
@@ -112,14 +116,9 @@ void PageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
 
 bool PageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* event)
 {
-    switch (event->type())
-    {
-        case QEvent::Resize:
-            updateTextLabels();
-            break;
-
-        default:
-            break;
+    if (event->type() == QEvent::Resize) {
+        updateTitle();
+        updateSubtitle();
     }
 
     return QWidget::eventFilter(target, event);
@@ -139,19 +138,6 @@ void PageActionDelegateEditorWidget::leaveEvent(QEvent* event)
     updateOverlayWidgetVisibility();
 }
 
-void PageActionDelegateEditorWidget::updateTextLabels()
-{
-    if (_pageAction) {
-        QFontMetrics titleMetrics(_titleLabel.font()), descriptionMetrics(_subtitleLabel.font());
-
-        _titleLabel.setText(titleMetrics.elidedText(_pageAction->getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
-        _subtitleLabel.setText(descriptionMetrics.elidedText(_pageAction->getSubtitle(), Qt::ElideMiddle, _subtitleLabel.width() - 2));
-        
-    }
-
-    updateCustomStyle();
-}
-
 void PageActionDelegateEditorWidget::updateIcon()
 {
     _iconLabel.setPixmap(_pageAction->getIcon().pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
@@ -159,8 +145,39 @@ void PageActionDelegateEditorWidget::updateIcon()
     updateCustomStyle();
 }
 
+void PageActionDelegateEditorWidget::updateTitle()
+{
+    if (!_pageAction)
+        return;
+
+    _titleLabel.setText(QFontMetrics(_titleLabel.font()).elidedText(_pageAction->getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
+
+    updateCustomStyle();
+}
+
+void PageActionDelegateEditorWidget::updateSubtitle()
+{
+    if (!_pageAction)
+        return;
+
+    _subtitleLabel.setText(QFontMetrics(_subtitleLabel.font()).elidedText(_pageAction->getSubtitle(), Qt::ElideMiddle, _subtitleLabel.width() - 2));
+
+    updateCustomStyle();
+}
+
+void PageActionDelegateEditorWidget::updateTooltip()
+{
+    if (!_pageAction)
+        return;
+
+	setToolTip(_pageAction->getTooltip());
+}
+
 void PageActionDelegateEditorWidget::updateMetadata()
 {
+    if (!_pageAction)
+        return;
+
     _metaDataLabel.setText(_pageAction->getMetaData());
 
     updateCustomStyle();

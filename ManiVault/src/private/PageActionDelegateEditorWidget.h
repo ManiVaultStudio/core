@@ -60,23 +60,14 @@ public:
 
 private:
 
-    /** Update all text labels and takes care of elidation */
-    void updateTextLabels();
-
-    /** Updates the icon UI */
-    void updateIcon();
-
-    /** Updates the meta data UI */
-    void updateMetadata();
-
-    /** Update the sub-actions UI */
-    void updateSubActions();
-
-    /** Show the info widget when mouse hovered */
-    void updateOverlayWidgetVisibility();
-    
-    /** update custom styles */
-    void updateCustomStyle();
+    void updateIcon();                      /** Updates the icon label pixmap */
+    void updateTitle();                     /** Updates the title label text */
+    void updateSubtitle();                  /** Updates the subtitle label text */
+    void updateTooltip();                   /** Updates the tooltip */
+    void updateMetadata();                  /** Updates the meta data label text */
+    void updateSubActions();                /** Update the sub-actions section */
+    void updateOverlayWidgetVisibility();   /** Update the visibility of the info widget (dependent on the mouse position) */
+    void updateCustomStyle();               /** Update custom styles */
 
 private:
     PageActionSharedPtr     _pageAction;                /** Shared pointer to page action */    
