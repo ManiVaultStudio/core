@@ -8,8 +8,8 @@
 
 #include <QWidget>
 
+#include <QString>
 #include <QObject>
-#include <QDebug>
 
 class QWebEngineView;
 class QWebEnginePage;
@@ -24,17 +24,11 @@ class CORE_EXPORT WebCommunicationObject : public QObject
 {
     Q_OBJECT
 
-public:
-
-
 signals:
     void notifyJsBridgeIsAvailable();
 
 public slots:
-    void js_debug(QString message)
-    {
-        qDebug() << "Javascript Debug Info: " << message;
-    }
+    void js_debug(const QString& message);
 
     void js_available()
     {
@@ -47,26 +41,27 @@ class CORE_EXPORT WebWidget : public QWidget
     Q_OBJECT
 public:
     WebWidget();
-    ~WebWidget() override;
 
     void init(WebCommunicationObject* communicationObject);
 
-    QWebEngineView* getView();
-    QWebEnginePage* getPage();
+public: // setter
     void setPage(QString htmlPath, QString basePath);
 
+public: // getter
+    QWebEngineView* getView();
+    QWebEnginePage* getPage();
+
+    bool isWebPageLoaded() const { return _webPageLoaded; }
+
 signals:
-    void communicationBridgeReady();
-    void webPageFullyLoaded();
+    void communicationBridgeReady();    // emitted when the communication bridge is ready; the webpage is not necessarily loaded at this point
+    void webPageFullyLoaded();          // emitted after both the communication bridge is ready and the webpage is fully loaded
 
 protected:
     void registerFunctions();
 
-public slots:
-    void js_debug(QString text);
-
 protected slots:
-    /** DEPRECATED, please connect to the communicationBridgeReady() signal instead. */
+    [[deprecated("Will be removed in 2.0. Connect to the communicationBridgeReady() or webPageFullyLoaded() signals instead.")]]
     virtual void initWebPage() {}
 
 private slots:
