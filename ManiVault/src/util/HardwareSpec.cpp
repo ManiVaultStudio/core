@@ -107,14 +107,14 @@ HardwareSpec::SystemCompatibilityInfo HardwareSpec::getSystemCompatibility(const
     if (!systemHardwareSpec.meets(minimumHardwareSpec)) {
         return {
         	SystemCompatibility::Incompatible,
-            QString("<p>Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(minimumHardwareSpec))
+            QString("<p>Your system does not meet the minimum hardware requirements for this project, there might be problems with opening it, its stability and performance</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(minimumHardwareSpec))
         };
     }
 
     if (systemHardwareSpec.meets(minimumHardwareSpec) && !systemHardwareSpec.meets(recommendedHardwareSpec)) {
         return {
             SystemCompatibility::Minimum,
-            QString("<p>Your system meets the minimum requirements, but the experience might sub-optimal:</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(recommendedHardwareSpec))
+            QString("<p>Your system meets the minimum hardware requirements, but the experience might sub-optimal:</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(recommendedHardwareSpec))
         };
     }
 

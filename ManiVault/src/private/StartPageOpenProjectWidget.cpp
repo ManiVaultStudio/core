@@ -280,13 +280,11 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
             updateDownloadPageSubAction();
 
             connect(project.get(), &ProjectsModelProject::downloaded, projectPageAction.get(), updateDownloadPageSubAction);
+
+            projectPageAction->createSubAction<ProjectCompatibilityPageSubAction>(HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec()));
         }
 
-        const auto systemCompatibility = HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec());
-
-        projectPageAction->createSubAction<ProjectCompatibilityPageSubAction>(systemCompatibility);
-
-        projectPageAction->setTooltipCallback([project, systemCompatibility]() -> QString {
+        projectPageAction->setTooltipCallback([project]() -> QString {
             if (project->isGroup()) {
                 if (project->isExpanded())
                     return "Click to collapse this project group";
@@ -295,7 +293,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
             }
 
             if (project->isDownloaded())
-                return systemCompatibility._message;
+                return HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec())._message;
 
             return QString("Click to download + open %1").arg(project->getTitle());
         });
@@ -324,10 +322,10 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
 
         connect(projectPageAction.get(), &PageAction::expandedChanged, project.get(), &ProjectsModelProject::setExpanded);
 
-        if (!project->isGroup())
-            projectPageAction->createSubAction<ProjectPluginsPageSubAction>(project->getRequiredPlugins());
-
-        projectPageAction->createSubAction<ProjectsJsonUrlPageSubAction>(project->getProjectsJsonDsn());
+        if (!project->isGroup()) {
+	        projectPageAction->createSubAction<ProjectPluginsPageSubAction>(project->getRequiredPlugins());
+        	projectPageAction->createSubAction<ProjectsJsonUrlPageSubAction>(project->getProjectsJsonDsn());
+        }
 
         projectsPageTreeModel.add(projectPageAction);
 
