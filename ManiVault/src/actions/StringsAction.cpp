@@ -472,7 +472,7 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
     connect(&_stringsAction->getRemoveAction(), &TriggerAction::triggered, this, [this, clearSelection]() -> void {
         QStringList stringsToRemove;
 
-        for (const auto& selectedRow : _hierarchyWidget.getSelectionModel().selectedRows())
+        for (const auto& selectedRow : _selectedRows)
             stringsToRemove << selectedRow.data(Qt::DisplayRole).toString();
 
         clearSelection();
