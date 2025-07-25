@@ -9,6 +9,7 @@
 #include <widgets/IconLabel.h>
 
 #include <QIcon>
+#include <QImage>
 
 /**
  * Page sub-action class
@@ -141,17 +142,6 @@ public:
     ProjectCompatibilityPageSubAction(const mv::util::HardwareSpec::SystemCompatibilityInfo& systemCompatibilityInfo);
 };
 
-/** For displaying the project preview */
-class ProjectPreviewPageSubAction : public PageSubAction
-{
-public:
-
-    /**
-     * Construct with \p 
-     */
-    ProjectPreviewPageSubAction();
-};
-
 /** For displaying the project contributors */
 class ContributorsPageSubAction : public PageSubAction
 {
@@ -207,6 +197,40 @@ public:
 
 private:
     QDateTime   _projectLastUpdated;    /** When the project was last updated on the server */
+};
+
+/** For displaying project preview */
+class ProjectPreviewPageSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p previewImage
+     * @param previewImage Project preview image to display
+     */
+    ProjectPreviewPageSubAction(const QImage& previewImage);
+
+    /**
+     * Set the project preview image to \p previewImage
+     * @param previewImage Project preview image to display
+     */
+    void setPreviewImage(const QImage& previewImage);
+
+private:
+    QImage   _previewImage;    /** Preview image */
+};
+
+/** For displaying project info through proxy */
+class ProxyPageSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct with \p tooltipCallback
+     * @param icon Icon for the sub-action
+     * @param tooltipCallback Callback function that is invoked to retrieve the sub-action tooltip
+     */
+    ProxyPageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback);
 };
 
 using PageSubActionPtr  = std::shared_ptr<PageSubAction>;

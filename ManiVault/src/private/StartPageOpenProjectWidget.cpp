@@ -25,6 +25,8 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QtConcurrent>
+#include <QBuffer>
+#include <QPixmap>
 
 using namespace mv;
 using namespace mv::util;
@@ -225,7 +227,24 @@ void StartPageOpenProjectWidget::setupRecentProjectsSection()
             });
 
             recentProjectPageAction->setMetaData(recentFile.getDateTime().toString());
-           //recentProjectPageAction->setPreviewImage(projects().getWorkspacePreview(recentFilePath));
+
+            recentProjectPageAction->createSubAction<ProxyPageSubAction>(StyledIcon("image"), [this, recentFilePath]() -> QString {
+                const auto previewImage = projects().getWorkspacePreview(recentFilePath);
+
+                if (!previewImage.isNull()) {
+                    QBuffer buffer;
+
+                    buffer.open(QIODevice::WriteOnly);
+
+                    QPixmap::fromImage(previewImage).save(&buffer, "JPG");
+
+                    auto image = buffer.data().toBase64();
+
+                    return QString("<img style='padding: 100px;'src='data:image/jpg;base64,%1'></p>").arg(image);
+                }
+
+                return {};
+            });
 
             _recentProjectsWidget.getModel().add(recentProjectPageAction);
         }

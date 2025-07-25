@@ -4,6 +4,8 @@
 
 #include "PageSubAction.h"
 
+#include <QBuffer>
+
 using namespace mv::util;
 using namespace mv::gui;
 
@@ -116,11 +118,6 @@ ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const Hardw
 	}
 }
 
-ProjectPreviewPageSubAction::ProjectPreviewPageSubAction() :
-    PageSubAction(StyledIcon("image"))
-{
-}
-
 ContributorsPageSubAction::ContributorsPageSubAction(const QStringList& contributors) :
     PageSubAction(StyledIcon("user"))
 {
@@ -156,4 +153,35 @@ ProjectLastUpdatedPageSubAction::ProjectLastUpdatedPageSubAction(const QDateTime
 void ProjectLastUpdatedPageSubAction::setProjectLastUpdated(const QDateTime& projectLastUpdated)
 {
     _projectLastUpdated = projectLastUpdated;
+}
+
+ProjectPreviewPageSubAction::ProjectPreviewPageSubAction(const QImage& previewImage) :
+    PageSubAction(StyledIcon("image"))
+{
+    setTooltipCallback([this]() -> QString {
+        if (!_previewImage.isNull()) {
+            QBuffer buffer;
+
+            buffer.open(QIODevice::WriteOnly);
+
+            QPixmap::fromImage(_previewImage).save(&buffer, "JPG");
+
+            auto image = buffer.data().toBase64();
+
+            return QString("<img style='padding: 100px;'src='data:image/jpg;base64,%1'></p>").arg(image);
+        }
+
+        return {};
+    });
+}
+
+void ProjectPreviewPageSubAction::setPreviewImage(const QImage& previewImage)
+{
+	_previewImage = previewImage;
+}
+
+ProxyPageSubAction::ProxyPageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback) :
+    PageSubAction(icon)
+{
+    setTooltipCallback(tooltipCallback);
 }
