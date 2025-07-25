@@ -33,7 +33,7 @@ public:
     PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback = {}, const ClickedCallback& clickedCallback = {});
 
     /** Add default virtual destructor */
-    virtual ~PageSubAction() = default;
+    virtual ~PageSubAction();
 
     /**
      * Set the icon to \p icon
@@ -57,7 +57,7 @@ public:
      * Get the sub-action icon label
      * @return Sub-action icon label
      */
-    mv::gui::IconLabel& getIconLabel();
+    mv::gui::IconLabel* getIconLabel();
 
 public: // Callbacks
 
@@ -88,7 +88,7 @@ public: // Callbacks
 protected:
     ClickedCallback         _clickedCallback;   /** Callback function that is called when the sub-action is clicked */
     TooltipCallback         _tooltipCallback;   /** Callback function that is invoked to retrieve the sub-action tooltip */
-    mv::gui::IconLabel      _iconLabel;         /** Icon label representing the sub-action */
+    mv::gui::IconLabel*     _iconLabel;         /** Icon label representing the sub-action */
 
     static bool compactView;
 };

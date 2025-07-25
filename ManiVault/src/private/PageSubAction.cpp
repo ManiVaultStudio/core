@@ -5,22 +5,29 @@
 #include "PageSubAction.h"
 
 using namespace mv::util;
+using namespace mv::gui;
 
 PageSubAction::PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback /*= {}*/, const ClickedCallback& clickedCallback /*= {}*/) :
     _clickedCallback(clickedCallback),
 	_tooltipCallback(tooltipCallback),
-    _iconLabel(icon)
+    _iconLabel(new IconLabel(icon))
 {
     setIcon(icon);
 
-    _iconLabel.setTooltipCallback([this]() -> QString {
+    _iconLabel->setTooltipCallback([this]() -> QString {
         return getTooltip();
     });
 }
 
+PageSubAction::~PageSubAction()
+{
+    if (_iconLabel && !_iconLabel->parent())
+        delete _iconLabel;
+}
+
 void PageSubAction::setIcon(const QIcon& icon)
 {
-    _iconLabel.setIcon(icon);
+    _iconLabel->setIcon(icon);
 }
 
 QString PageSubAction::getTooltip() const
@@ -33,10 +40,10 @@ QString PageSubAction::getTooltip() const
 
 void PageSubAction::setVisible(bool visible)
 {
-	_iconLabel.setVisible(visible);
+	_iconLabel->setVisible(visible);
 }
 
-mv::gui::IconLabel& PageSubAction::getIconLabel()
+IconLabel* PageSubAction::getIconLabel()
 {
     return _iconLabel;
 }

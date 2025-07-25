@@ -187,7 +187,7 @@ void PageActionDelegateEditorWidget::updateSubActions()
 
     if (_pageAction) {
         for (auto& subAction : _pageAction->getSubActions())
-            _subActionsLayout.addWidget(&subAction->getIconLabel());
+            _subActionsLayout.addWidget(subAction->getIconLabel());
 
         updateCustomStyle();
     }
