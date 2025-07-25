@@ -8,15 +8,12 @@ using namespace mv::util;
 using namespace mv::gui;
 
 PageSubAction::PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback /*= {}*/, const ClickedCallback& clickedCallback /*= {}*/) :
+    _icon(icon),
     _clickedCallback(clickedCallback),
 	_tooltipCallback(tooltipCallback),
-    _iconLabel(new IconLabel(icon))
+    _iconLabel(nullptr)
 {
     setIcon(icon);
-
-    _iconLabel->setTooltipCallback([this]() -> QString {
-        return getTooltip();
-    });
 }
 
 PageSubAction::~PageSubAction()
@@ -27,7 +24,8 @@ PageSubAction::~PageSubAction()
 
 void PageSubAction::setIcon(const QIcon& icon)
 {
-    _iconLabel->setIcon(icon);
+    if (_iconLabel)
+		_iconLabel->setIcon(icon);
 }
 
 QString PageSubAction::getTooltip() const
@@ -40,11 +38,20 @@ QString PageSubAction::getTooltip() const
 
 void PageSubAction::setVisible(bool visible)
 {
-	_iconLabel->setVisible(visible);
+    if (_iconLabel)
+		_iconLabel->setVisible(visible);
 }
 
 IconLabel* PageSubAction::getIconLabel()
 {
+    if (!_iconLabel) {
+	    _iconLabel = new IconLabel(_icon);
+
+    	_iconLabel->setTooltipCallback([this]() -> QString {
+			return getTooltip();
+    	});
+    }
+
     return _iconLabel;
 }
 
