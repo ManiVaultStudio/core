@@ -51,7 +51,7 @@ AbstractPageActionsModel::AbstractPageActionsModel(QObject* parent /*= nullptr*/
 
 void AbstractPageActionsModel::reset()
 {
-    //removeRows(0, rowCount());
+    removeRows(0, rowCount());
 
-    //emit layoutChanged();
+    emit layoutChanged();
 }
