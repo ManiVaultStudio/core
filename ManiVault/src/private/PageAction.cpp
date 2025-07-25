@@ -64,6 +64,9 @@ void PageAction::setSubtitle(const QString& subtitle)
 
 QString PageAction::getTooltip() const
 {
+    if (_tooltipCallback)
+        return _tooltipCallback();
+
     return _tooltip;
 }
 
@@ -84,6 +87,16 @@ PageAction::ClickedCallback PageAction::getClickedCallback() const
 void PageAction::setClickedCallback(const ClickedCallback& clickedCallback)
 {
     _clickedCallback = clickedCallback;
+}
+
+PageAction::TooltipCallback PageAction::getTooltipCallback() const
+{
+    return _tooltipCallback;
+}
+
+void PageAction::setTooltipCallback(const TooltipCallback& tooltipCallback)
+{
+    _tooltipCallback = tooltipCallback;
 }
 
 QString PageAction::getMetaData() const

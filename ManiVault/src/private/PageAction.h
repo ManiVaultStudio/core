@@ -26,8 +26,8 @@ class PageAction final : public QObject
 
 public:
 
-    /** Callback function that is called when the action row is clicked */
-    using ClickedCallback = std::function<void()>;
+    using ClickedCallback = std::function<void()>;      /** Callback function that is called when the action row is clicked */
+    using TooltipCallback = std::function<QString()>;   /** Callback function that is called when a tooltip is required */
 
     /**
      * Construct with \p icon, \p title, \p description and \p clickedCallback
@@ -106,6 +106,18 @@ public: // Getters and setters
      * @param clickedCallback Action clicked callback
      */
     void setClickedCallback(const ClickedCallback& clickedCallback);
+
+    /**
+     * Get action tooltip callback
+     * @return Action tooltip callback
+     */
+    TooltipCallback getTooltipCallback() const;
+
+    /**
+     * Set the tooltip callback
+     * @param tooltipCallback Callback function that is called when a tooltip is required
+     */
+    void setTooltipCallback(const TooltipCallback& tooltipCallback);
 
     /**
      * Get action metadata
@@ -256,6 +268,7 @@ private:
     QString             _subtitle;          /** Subtitle */
     QString             _tooltip;           /** Tooltip (might be empty) */
     ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
+    TooltipCallback     _tooltipCallback;   /** Callback function that is called when a tooltip is required */
     QStringList         _tags;              /** Tags (might be empty) */
     QString             _metaData;          /** Metadata (might be empty) */
     QImage              _previewImage;      /** Preview image (might be empty) */
