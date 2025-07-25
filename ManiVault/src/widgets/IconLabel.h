@@ -40,6 +40,12 @@ public:
     IconLabel(const QIcon& icon, QWidget* parent = nullptr);
 
     /**
+     * Set the icon to \p icon
+     * @param icon Icon to set
+     */
+    void setIcon(const QIcon& icon);
+
+    /**
      * Set the tooltip callback
      * @param tooltipCallback Callback function that is called when a tooltip is required
      */
@@ -56,6 +62,13 @@ public:
      * @param event Pointer to event
      */
     void leaveEvent(QEvent* event) override;
+
+    /**
+     * Handle events
+     * @param event Pointer to event
+     * @return True if the event was handled, false otherwise
+     */
+    bool event(QEvent* event) override;
 
 private:
 

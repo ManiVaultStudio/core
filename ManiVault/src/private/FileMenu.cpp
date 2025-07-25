@@ -56,7 +56,7 @@ void FileMenu::populate()
     addAction(&projects().getSaveProjectAsAction());
     addAction(&projects().getEditProjectSettingsAction());
     addAction(&projects().getPublishAction());
-    addMenu(projects().getRecentProjectsAction().getMenu());
+    addMenu(projects().getRecentProjectsAction().getMenu(this));
     //addSeparator();
     //addMenu(Application::core()->getWorkspaceManager().getMenu());
     addSeparator();

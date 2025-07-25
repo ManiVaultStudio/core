@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <widgets/IconLabel.h>
+#include "PageAction.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -58,31 +58,27 @@ public:
 
 private:
 
-    /** Update all text labels and takes care of elidation */
-    void updateTextLabels();
-    
-    /** Show the info widget when mouse hovered */
-    void updateInfoWidgetVisibility();
-    
-    /** update custom styles */
-    void updateCustomStyle();
+    void updateIcon();                      /** Updates the icon label pixmap */
+    void updateTitle();                     /** Updates the title label text */
+    void updateSubtitle();                  /** Updates the subtitle label text */
+    void updateTooltip();                   /** Updates the tooltip */
+    void updateMetadata();                  /** Updates the meta data label text */
+    void updateSubActions();                /** Update the sub-actions section */
+    void updateOverlayWidgetVisibility();   /** Update the visibility of the info widget (dependent on the mouse position) */
+    void updateCustomStyle();               /** Update custom styles */
 
 private:
-    QPersistentModelIndex       _index;                     /** Editor model index */
-    QHBoxLayout                 _mainLayout;                /** Main editor layout */
-    QVBoxLayout                 _iconLayout;                /** Left icon layout */
-    QLabel                      _iconLabel;                 /** Left icon label */
-    QVBoxLayout                 _textLayout;                /** Right text layout */
-    QHBoxLayout                 _primaryTextLayout;         /** Primary layout with title and comments labels */
-    QLabel                      _titleLabel;                /** Title label */
-    QLabel                      _metaDataLabel;             /** Label with metadata (maybe empty) */
-    QHBoxLayout                 _secondaryTextLayout;       /** Secondary layout with subtitle and info labels */
-    QLabel                      _subtitleLabel;             /** Subtitle label */
-    QWidget                     _infoWidget;                /** Widget for info labels */
-    QHBoxLayout                 _infoLayout;                /** Layout for preview, tags and meta info popups */
-    mv::gui::IconLabel          _previewIconLabel;          /** Icon label for preview image */
-    mv::gui::IconLabel          _metaDataIconLabel;         /** Icon label for meta data */
-    mv::gui::IconLabel          _tagsIconLabel;             /** Icon label for tags */
-    mv::gui::IconLabel          _downloadUrls;     /** Icon label for requires download */
-    mv::gui::IconLabel          _contributorsIconLabel;     /** Icon label for contributors */
+    PageActionSharedPtr     _pageAction;                /** Shared pointer to page action */    
+    QPersistentModelIndex   _index;                     /** Editor model index */
+    QHBoxLayout             _mainLayout;                /** Main editor layout */
+    QVBoxLayout             _iconLayout;                /** Left icon layout */
+    QLabel                  _iconLabel;                 /** Left icon label */
+    QVBoxLayout             _textLayout;                /** Right text layout */
+    QHBoxLayout             _primaryTextLayout;         /** Primary layout with title and comments labels */
+    QLabel                  _titleLabel;                /** Title label */
+    QLabel                  _metaDataLabel;             /** Label with metadata (maybe empty) */
+    QHBoxLayout             _secondaryTextLayout;       /** Secondary layout with subtitle and sub-actions */
+    QLabel                  _subtitleLabel;             /** Subtitle label */
+    QWidget                 _subActionsWidget;          /** Widget for sub-actions */
+    QHBoxLayout             _subActionsLayout;          /** Layout for sub-actions */
 };

@@ -116,7 +116,7 @@ WorkspaceManager::WorkspaceManager(QObject* parent) :
 
     createIcon();
 
-    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt");
+    _recentWorkspacesAction.initialize("Workspace", "Ctrl+Alt");
 
     connect(&_recentWorkspacesAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         loadWorkspace(filePath);
@@ -619,7 +619,7 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->addSeparator();
     menu->addAction(&_editWorkspaceSettingsAction);
     menu->addSeparator();
-    menu->addMenu(_recentWorkspacesAction.getMenu());
+    menu->addMenu(_recentWorkspacesAction.getMenu(menu));
 
     return menu;
 }

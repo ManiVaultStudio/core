@@ -8,9 +8,10 @@
 #include <QImage>
 #include <QList>
 #include <QString>
-#include <QModelIndex>
 
 #include <functional>
+
+#include "PageSubAction.h"
 
 /**
  * Page action
@@ -19,24 +20,24 @@
  *
  * @author Thomas Kroes
  */
-class PageAction final
+class PageAction final : public QObject
 {
-public:
-
-    using ClickedCallback = std::function<void()>;    /** Callback function that is called when the action row is clicked */
+    Q_OBJECT
 
 public:
+
+    using ClickedCallback = std::function<void()>;      /** Callback function that is called when the action row is clicked */
+    using TooltipCallback = std::function<QString()>;   /** Callback function that is called when a tooltip is required */
 
     /**
      * Construct with \p icon, \p title, \p description and \p clickedCallback
      * @param icon Action icon
      * @param title Action title
      * @param subtitle Action subtitle
-     * @param description Action description
      * @param tooltip Action tooltip
      * @param clickedCallback Callback function that is called when the action row is clicked
      */
-    PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& description, const QString& tooltip, const ClickedCallback& clickedCallback);
+    PageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& tooltip, const ClickedCallback& clickedCallback);
 
     /**
      * Construct from model \p index
@@ -45,42 +46,149 @@ public:
     PageAction(const QModelIndex& index);
 
 public: // Getters and setters
-    
-    QIcon getIcon() const { return _icon; }
-    void setIcon(const QIcon& icon) { _icon = icon; }
 
-    QString getTitle() const { return _title.isEmpty() ? "NA" : _title; }
-    void setTitle(const QString& title) { _title = title; }
+    /**
+     * Get action icon
+     * @return Action icon
+     */
+    QIcon getIcon() const;
 
-    QString getDescription() const { return _description.isEmpty() ? "NA" : _description; }
-    void setDescription(const QString& description) { _description = description; }
+    /**
+     * Set action icon to \p icon
+     * @param icon Action icon
+     */
+    void setIcon(const QIcon& icon);
 
-    QString getComments() const { return _comments.isEmpty() ? "NA" : _comments; }
-    void setComments(const QString& comments) { _comments = comments; }
+    /**
+     * Get action title
+     * @return Action title
+     */
+    QString getTitle() const;
 
-    QStringList getTags() const { return _tags; }
-    void setTags(const QStringList& tags) { _tags = tags; }
+    /**
+     * Set action title to \p title
+     * @param title Action title
+     */
+    void setTitle(const QString& title);
 
-    QString getSubtitle() const { return _subtitle.isEmpty() ? "NA" : _subtitle; }
-    void setSubtitle(const QString& subtitle) { _subtitle = subtitle; }
+    /**
+     * Get subtitle
+     * @return Action subtitle
+     */
+    QString getSubtitle() const;
 
-    QString getMetaData() const { return _metaData; }
-    void setMetaData(const QString& metaData) { _metaData = metaData; }
+    /**
+     * Set action subtitle to \p subtitle
+     * @param subtitle Action subtitle
+     */
+    void setSubtitle(const QString& subtitle);
 
-    QImage getPreviewImage() const { return _previewImage; }
-    void setPreviewImage(const QImage& previewImage) { _previewImage = previewImage; }
+    /**
+     * Get action tooltip
+     * @return Action tooltip
+     */
+    QString getTooltip() const;
 
-    QString getTooltip() const { return _tooltip; }
-    void setTooltip(const QString& tooltip) { _tooltip = tooltip; }
+    /**
+     * Set action tooltip to \p tooltip
+     * @param tooltip Action tooltip
+     */
+    void setTooltip(const QString& tooltip);
 
-    QStringList getContributors() const { return _contributors; }
-    void setContributors(const QStringList& contributors) { _contributors = contributors; }
+    /**
+     * Get action clicked callback
+     * @return Action clicked callback
+     */
+    ClickedCallback getClickedCallback() const;
 
-    QStringList getDownloadUrls() const { return _downloadUrls; }
-    void setDownloadUrls(const QStringList& downloadUrls) { _downloadUrls = downloadUrls; }
+    /**
+     * Set action clicked callback to \p clickedCallback
+     * @param clickedCallback Action clicked callback
+     */
+    void setClickedCallback(const ClickedCallback& clickedCallback);
 
-    ClickedCallback getClickedCallback() const { return _clickedCallback; }
-    void setClickedCallback(const ClickedCallback& clickedCallback) { _clickedCallback = clickedCallback; }
+    /**
+     * Get action tooltip callback
+     * @return Action tooltip callback
+     */
+    TooltipCallback getTooltipCallback() const;
+
+    /**
+     * Set the tooltip callback
+     * @param tooltipCallback Callback function that is called when a tooltip is required
+     */
+    void setTooltipCallback(const TooltipCallback& tooltipCallback);
+
+    /**
+     * Get action metadata
+     * @return Action metadata
+     */
+    QString getMetaData() const;
+
+    /**
+     * Set action metadata to \p metaData
+     * @param metaData Action metadata
+     */
+    void setMetaData(const QString& metaData);
+
+    /**
+     * Get parent action title
+     * @return Parent action title
+     */
+    QString getParentTitle() const;
+
+    /**
+     * Set parent action title to \p parentTitle
+     * @param parentTitle Parent action title
+     */
+    void setParentTitle(const QString& parentTitle);
+
+    /**
+     * Set whether the action row is expanded
+     * @param expanded Boolean determining whether the action row is expanded
+     */
+    void setExpanded(bool expanded);
+
+public: // Sub-actions
+
+    /**
+     * Create subAction of \p SubActionType with arguments \p args and add it to the sub-actions list
+     * @param args Arguments to pass to the sub-action constructor
+     */
+    template<typename SubActionType, typename... Args>
+    std::shared_ptr<SubActionType> createSubAction(Args&&... args)
+    {
+        auto sharedSubAction = std::make_shared<SubActionType>(std::forward<Args>(args)...);
+
+        _subActions.push_back(sharedSubAction);
+
+        emit subActionsChanged(_subActions);
+
+        return sharedSubAction;
+    }
+
+    /**
+     * Remove \p subAction
+     * @param subAction Shared pointer to sub-action
+     */
+    void removeSubAction(const PageSubActionPtr& subAction);
+
+    /** Remove all sub-actions */
+    void clearSubActions();
+
+protected: // Sub-actions
+
+    /**
+     * Get sub-actions
+     * @return List of sub-actions
+     */
+    const PageSubActionPtrs& getSubActions() const { return _subActions; }
+
+	/**
+     * Get sub-actions
+     * @return List of sub-actions
+     */
+    PageSubActionPtrs& getSubActions() { return _subActions; }
 
 private:
     
@@ -104,21 +212,75 @@ public:
      */
     static void setCompactView(bool compactView);
 
-protected:
+signals:
+
+    /**
+     * Signals that the icon changed to \p icon
+     * @param icon New action icon
+     */
+    void iconChanged(const QIcon& icon);
+
+    /**
+     * Signals that the title changed to \p title
+     * @param title New action title
+     */
+    void titleChanged(const QString& title);
+
+    /**
+     * Signals that the subtitle changed to \p subtitle
+     * @param subtitle New action subtitle
+     */
+    void subtitleChanged(const QString& subtitle);
+
+    /**
+     * Signals that the tooltip changed to \p tooltip
+     * @param tooltip New action tooltip
+     */
+    void tooltipChanged(const QString& tooltip);
+
+    /**
+     * Signals that the metadata changed to \p metadata
+     * @param metadata New action metadata
+     */
+    void metadataChanged(const QString& metadata);
+
+    /**
+     * Signals that the parentTitle changed to \p parentTitle
+     * @param parentTitle New action parentTitle
+     */
+    void parentTitleChanged(const QString& parentTitle);
+
+    /**
+     * Signals that the sub-actions list changed to \p subActions
+     * @param subActions New list of sub-actions
+     */
+    void subActionsChanged(const PageSubActionPtrs& subActions);
+
+    /**
+     * Signal that is emitted when the action row is clicked
+     * @param expanded Boolean determining whether the action row is expanded
+     */
+    void expandedChanged(bool expanded);
+
+private:
     QIcon               _icon;              /** Action icon (shown on the left) */
     QString             _title;             /** Title is shown next to the icon */
-    QString             _description;       /** Description is in the second row */
-    QString             _comments;          /** Comments are show on the top right */
-    QStringList         _tags;              /** Tags (might be empty) */
     QString             _subtitle;          /** Subtitle */
+    QString             _tooltip;           /** Tooltip (might be empty) */
+    ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
+    TooltipCallback     _tooltipCallback;   /** Callback function that is called when a tooltip is required */
+    QStringList         _tags;              /** Tags (might be empty) */
     QString             _metaData;          /** Metadata (might be empty) */
     QImage              _previewImage;      /** Preview image (might be empty) */
-    QString             _tooltip;           /** Tooltip (might be empty) */
     QStringList         _contributors;      /** List of contributors */
     QStringList         _downloadUrls;      /** Action download URLs */
-    ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
+    PageSubActionPtrs   _subActions;        /** Sub-actions that are shown when hovering the action */
+    QString             _parentTitle;       /** Parent action title (if any) */
 
     static bool compactView;
+
+    friend class PageActionDelegateEditorWidget;  /** Friend class for accessing private members */
 };
 
-using PageActions = QList<PageAction>;
+using PageActionSharedPtr     = std::shared_ptr<PageAction>;
+using PageActionSharedPtrs    = std::vector<PageActionSharedPtr>;

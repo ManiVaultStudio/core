@@ -6,8 +6,8 @@
 
 #include <AbstractProjectManager.h>
 
+#include <models/ProjectsListModel.h>
 #include <models/ProjectsTreeModel.h>
-#include <models/ProjectsFilterModel.h>
 
 #include <QObject>
 
@@ -76,6 +76,15 @@ public:
     void openProject(QUrl url, const QString& targetDirectory = "", bool importDataOnly = false, bool loadWorkspace = true) override;
 
     /**
+     * Download project from \p project model, store it in \p targetDir and open it
+     * @param project Shared pointer to the project model project
+     * @param targetDirectory Directory where the project is stored (temporary directory when empty)
+     * @param importDataOnly Whether to only import the data from the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied by the project
+     */
+    void openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory = "", bool importDataOnly = false, bool loadWorkspace = true) override;
+
+    /**
      * Import project from \p filePath (only import the data)
      * @param filePath File path of the project (choose file path when empty)
      */
@@ -131,6 +140,12 @@ public:
      * @return Preview image
      */
     QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
+
+    /**
+     * Get projects list model
+     * @return Reference to the projects list model
+     */
+    const ProjectsListModel& getProjectsListModel() const override;
 
     /**
      * Get projects tree model
@@ -226,6 +241,7 @@ private:
     gui::TriggerAction              _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
     gui::ToggleAction               _showStartPageAction;               /** Action for toggling the start page */
     gui::TriggerAction              _backToProjectAction;               /** Action for going back to the project */
+    ProjectsListModel               _projectsListModel;                 /** Projects list model */
     ProjectsTreeModel               _projectsTreeModel;                 /** Projects tree model */
 };
 

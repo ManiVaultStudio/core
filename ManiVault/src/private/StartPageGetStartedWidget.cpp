@@ -64,8 +64,8 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getToolbarAction().addAction(&_workspaceLocationTypeAction);
 
-    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt");
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
+    _recentWorkspacesAction.initialize("Workspace", "Ctrl+Alt");
+    _recentProjectsAction.initialize("Project", "Ctrl");
 
     const auto toggleViews = [this]() -> void {
         _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());
@@ -103,14 +103,18 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
             for (const auto workspaceLocation : workspaces().getWorkspaceLocations(WorkspaceLocation::Types(WorkspaceLocation::Type::BuiltIn))) {
                 Workspace workspace(workspaceLocation.getFilePath());
 
-                PageAction fromWorkspacePageAction(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), workspaceLocation.getFilePath(), [workspaceLocation]() -> void {
+                auto fromWorkspacePageAction = std::make_shared<PageAction>(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), [workspaceLocation]() -> void {
                     projects().newProject(workspaceLocation.getFilePath());
                 });
 
-                fromWorkspacePageAction.setComments(workspace.getCommentsAction().getString());
-                fromWorkspacePageAction.setTags(workspace.getTagsAction().getStrings());
-                fromWorkspacePageAction.setMetaData(workspaceLocation.getTypeName());
-                fromWorkspacePageAction.setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
+                if (const auto comments = workspace.getCommentsAction().getString(); !comments.isEmpty())
+                    fromWorkspacePageAction->createSubAction<CommentsPageSubAction>(comments);
+
+                if (const auto tags = workspace.getTagsAction().getStrings(); !tags.isEmpty())
+                    fromWorkspacePageAction->createSubAction<TagsPageSubAction>(tags);
+
+                fromWorkspacePageAction->setMetaData(workspaceLocation.getTypeName());
+                //fromWorkspacePageAction->setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
 
                 _createProjectFromWorkspaceWidget.getModel().add(fromWorkspacePageAction);
             }
@@ -125,14 +129,18 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
 
                 Workspace workspace(recentWorkspace.getFilePath());
 
-                PageAction recentWorkspacePageAction(workspaces().getIcon(), QFileInfo(recentFilePath).baseName(), QString("Create project from %1.json").arg(QFileInfo(recentFilePath).baseName()), workspace.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                auto recentWorkspacePageAction = std::make_shared<PageAction>(workspaces().getIcon(), QFileInfo(recentFilePath).baseName(), QString("Create project from %1.json").arg(QFileInfo(recentFilePath).baseName()), workspace.getDescriptionAction().getString(), [recentFilePath]() -> void {
                     projects().newProject(recentFilePath);
                 });
 
-                recentWorkspacePageAction.setComments(workspace.getCommentsAction().getString());
-                recentWorkspacePageAction.setTags(workspace.getTagsAction().getStrings());
-                recentWorkspacePageAction.setMetaData(recentWorkspace.getDateTime().toString("dd/MM/yyyy hh:mm"));
-                //recentWorkspacePageAction.setPreviewImage(workspace.getPreviewImage(recentFilePath));
+                if (const auto comments = workspace.getCommentsAction().getString(); !comments.isEmpty())
+                    recentWorkspacePageAction->createSubAction<CommentsPageSubAction>(comments);
+
+                if (const auto tags = workspace.getTagsAction().getStrings(); !tags.isEmpty())
+                    recentWorkspacePageAction->createSubAction<TagsPageSubAction>(tags);
+
+                recentWorkspacePageAction->setMetaData(recentWorkspace.getDateTime().toString("dd/MM/yyyy hh:mm"));
+                //recentWorkspacePageAction->setPreviewImage(workspace.getPreviewImage(recentFilePath));
 
                 _createProjectFromWorkspaceWidget.getModel().add(recentWorkspacePageAction);
             }
@@ -148,23 +156,29 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                 const auto projectMeta = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
                 
                 if (projectMeta.isNull()) {
-                    PageAction recentProjectPageAction(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, "", [recentFilePath]() -> void {
+                    auto recentProjectPageAction = std::make_shared<PageAction>(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, [recentFilePath]() -> void {
                         projects().newBlankProject();
                         workspaces().importWorkspaceFromProjectFile(recentFilePath);
                     });
                 
                     _createProjectFromWorkspaceWidget.getModel().add(recentProjectPageAction);
                 } else {
-                    PageAction recentProjectPageAction(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), projectMeta->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                    auto recentProjectPageAction = std::make_shared<PageAction>(StyledIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), projectMeta->getDescriptionAction().getString(), [recentFilePath]() -> void {
                         projects().newBlankProject();
                         workspaces().importWorkspaceFromProjectFile(recentFilePath);
                     });
-                
-                    recentProjectPageAction.setComments(projectMeta->getCommentsAction().getString());
-                    recentProjectPageAction.setTags(projectMeta->getTagsAction().getStrings());
-                    recentProjectPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
-                    recentProjectPageAction.setPreviewImage(projects().getWorkspacePreview(recentFilePath));
-                    recentProjectPageAction.setContributors(projectMeta->getContributorsAction().getStrings());
+
+                    if (const auto comments = projectMeta->getCommentsAction().getString(); !comments.isEmpty())
+                        recentProjectPageAction->createSubAction<CommentsPageSubAction>(comments);
+
+                    if (const auto tags = projectMeta->getTagsAction().getStrings(); !tags.isEmpty())
+                        recentProjectPageAction->createSubAction<TagsPageSubAction>(tags);
+
+                    if (const auto contributors = projectMeta->getContributorsAction().getStrings(); !contributors.isEmpty())
+                        recentProjectPageAction->createSubAction<ContributorsPageSubAction>(contributors);
+
+                    recentProjectPageAction->setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
+                    //recentProjectPageAction->setPreviewImage(projects().getWorkspacePreview(recentFilePath));
                 
                     _createProjectFromWorkspaceWidget.getModel().add(recentProjectPageAction);
                 }
@@ -182,13 +196,13 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
     for (auto viewPluginFactory : plugins().getPluginFactoriesByType(plugin::Type::LOADER)) {
         const auto subtitle = QString("Import data into new project with %1").arg(viewPluginFactory->getKind());
 
-        PageAction fromDataPageAction(StyledIcon(viewPluginFactory->icon()), viewPluginFactory->getKind(), subtitle, subtitle, "", [viewPluginFactory]() -> void {
+        auto fromDataPageAction = std::make_shared<PageAction>(StyledIcon(viewPluginFactory->icon()), viewPluginFactory->getKind(), subtitle, "", [viewPluginFactory]() -> void {
             projects().newProject(Qt::AlignRight);
             plugins().requestPlugin(viewPluginFactory->getKind());
         });
 
-        fromDataPageAction.setSubtitle(subtitle);
-        fromDataPageAction.setComments(QString("Create a new project and import data into it with the %1").arg(viewPluginFactory->getKind()));
+        fromDataPageAction->setSubtitle(subtitle);
+        fromDataPageAction->createSubAction<CommentsPageSubAction>(QString("Create a new project and import data into it with the %1").arg(viewPluginFactory->getKind()));
 
         _createProjectFromDatasetWidget.getModel().add(fromDataPageAction);
     }

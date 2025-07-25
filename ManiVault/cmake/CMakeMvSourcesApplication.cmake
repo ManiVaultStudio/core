@@ -294,7 +294,6 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadedViewsMenu.h
     src/private/ProjectsMenu.h
     src/private/HelpMenu.h
-    src/private/StartupProjectSelectorDialog.h
     src/private/NoProxyRectanglesFusionStyle.h
 )
 
@@ -314,7 +313,6 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadedViewsMenu.cpp
     src/private/ProjectsMenu.cpp
     src/private/HelpMenu.cpp
-    src/private/StartupProjectSelectorDialog.cpp
     src/private/NoProxyRectanglesFusionStyle.cpp
 )
 
@@ -331,30 +329,19 @@ set(PRIVATE_APPLICATION_FILES
     ${PRIVATE_APPLICATION_SOURCES}
 )
 
-set(PRIVATE_STARTUP_PROJECT_HEADERS
-    src/private/StartupProjectSelectorDialog.h
-)
-
-set(PRIVATE_STARTUP_PROJECT_SOURCES
-    src/private/StartupProjectSelectorDialog.cpp
-)
-
-set(PRIVATE_STARTUP_PROJECT_FILES
-    ${PRIVATE_STARTUP_PROJECT_HEADERS}
-    ${PRIVATE_STARTUP_PROJECT_SOURCES}
-)
-
 set(PRIVATE_PAGES_COMMON_HEADERS
     src/private/PageWidget.h
     src/private/PageHeaderWidget.h
     src/private/PageContentWidget.h
     src/private/LogoWidget.h
 	src/private/PageActionsWidget.h
-    src/private/PageActionsModel.h
+    src/private/AbstractPageActionsModel.h
+    src/private/PageActionsTreeModel.h
     src/private/PageActionsFilterModel.h
     src/private/PageActionDelegate.h
     src/private/PageActionDelegateEditorWidget.h
     src/private/PageAction.h
+    src/private/PageSubAction.h
 	src/private/PageTutorialsWidget.h
 )
 
@@ -364,11 +351,13 @@ set(PRIVATE_PAGES_COMMON_SOURCES
     src/private/PageContentWidget.cpp
     src/private/LogoWidget.cpp
 	src/private/PageActionsWidget.cpp
-    src/private/PageActionsModel.cpp
+    src/private/AbstractPageActionsModel.cpp
+    src/private/PageActionsTreeModel.cpp
     src/private/PageActionsFilterModel.cpp
     src/private/PageActionDelegate.cpp
     src/private/PageActionDelegateEditorWidget.cpp
     src/private/PageAction.cpp
+    src/private/PageSubAction.cpp
 	src/private/PageTutorialsWidget.cpp
 )
 
@@ -445,7 +434,6 @@ set(PRIVATE_HEADERS
 	${PRIVATE_LEARNING_PAGE_HEADERS}
     ${PRIVATE_MISCELLANEOUS_HEADERS}
     ${PRIVATE_ACTIONS_HEADERS}
-    ${PRIVATE_STARTUP_PROJECT_HEADERS}
 )
 
 set(PRIVATE_SOURCES
@@ -457,7 +445,6 @@ set(PRIVATE_SOURCES
 	${PRIVATE_LEARNING_PAGE_SOURCES}
     ${PRIVATE_MISCELLANEOUS_SOURCES}
     ${PRIVATE_ACTIONS_SOURCES}
-    ${PRIVATE_STARTUP_PROJECT_SOURCES}
     ${PRIVATE_HEADERS}
 )
 
@@ -467,7 +454,6 @@ list(REMOVE_DUPLICATES PRIVATE_SOURCES)
 source_group(Core FILES ${PRIVATE_CORE_FILES})
 source_group(Actions FILES ${PRIVATE_ACTION_FILES})
 source_group(Application FILES ${PRIVATE_APPLICATION_FILES} ${MAIN_SOURCES})
-source_group(StartupProject FILES ${PRIVATE_STARTUP_PROJECT_FILES})
 source_group(Managers\\Layout FILES ${PRIVATE_LAYOUT_MANAGER_FILES})
 source_group(Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
 source_group(Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})

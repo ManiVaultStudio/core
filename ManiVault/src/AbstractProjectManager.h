@@ -13,9 +13,9 @@
 #include "actions/RecentFilesAction.h"
 #include "actions/ToggleAction.h"
 
+#include "models/ProjectsListModel.h"
 #include "models/ProjectsTreeModel.h"
-
-#include "util/FileDownloader.h"
+#include "models/ProjectsModelProject.h"
 
 #include <QObject>
 #include <QMenu>
@@ -24,8 +24,6 @@
 #include "Task.h"
 
 namespace mv {
-
-class ProjectCenterModel;
 
 /**
  * Abstract project manager class
@@ -155,6 +153,15 @@ public:
     virtual void openProject(QUrl url, const QString& targetDirectory = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
 
     /**
+     * Download project from \p project model, store it in \p targetDir and open it
+     * @param project Shared pointer to the project model project
+     * @param targetDirectory Directory where the project is stored (temporary directory when empty)
+     * @param importDataOnly Whether to only import the data from the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied by the project
+     */
+    virtual void openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
+
+    /**
      * Import project from \p filePath (only import the data)
      * @param filePath File path of the project (choose file path when empty)
      */
@@ -193,6 +200,12 @@ public:
      * @return Pointer to current project (nullptr if no project is loaded)
      */
     virtual Project* getCurrentProject() = 0;
+
+    /**
+     * Get projects list model
+     * @return Reference to the projects list model
+     */
+    virtual const ProjectsListModel& getProjectsListModel() const = 0;
 
     /**
      * Get projects tree model

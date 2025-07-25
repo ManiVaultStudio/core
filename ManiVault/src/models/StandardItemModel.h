@@ -56,6 +56,14 @@ public:
      */
     void setPopulationMode(const PopulationMode& populationMode);
 
+public: // Settings
+
+    /**
+     * Get settings prefix (Models/<serialization_name>)
+     * @return Settings prefix for the model, used for saving/loading settings
+     */
+    virtual QString getSettingsPrefix() const { return QString("Models/%1").arg(getSerializationName()); }
+
 public: // Serialization
 
     /**

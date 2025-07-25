@@ -280,6 +280,7 @@ public:
      */
     QModelIndex toSourceModelIndex(const QModelIndex& modelIndex) const;
 
+    void showEvent(QShowEvent* event) override;
 public:
 
     /**

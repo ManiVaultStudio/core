@@ -7,6 +7,9 @@
 #include "models/StandardItemModel.h"
 #include "models/ProjectsModelProject.h"
 
+#include "actions/StringsAction.h"
+#include "actions/TriggerAction.h"
+
 #include <QMap>
 
 namespace mv {
@@ -43,6 +46,7 @@ public:
         SystemCompatibility,    /** System compatibility of the project */
         IsStartup,              /** Whether the project can be opened at application startup */
         Sha,                    /** SHA-256 cryptographic hash of the project */
+        ProjectsJsonDsn,        /** Data Source Name (DSN) of the projects JSON file, used for loading the project */
 
         Count                   /** Number of columns in the model */
     };
@@ -52,20 +56,20 @@ public:
     public:
 
         /**
-         * Construct with pointer \p project
-         * @param project Const pointer to project
+         * Construct with shared pointer \p project
+         * @param project Shared pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        Item(const util::ProjectsModelProject* project, bool editable = false);
+        Item(util::ProjectsModelProjectSharedPtr project, bool editable = false);
 
         /**
          * Get project
-         * return Pointer to the project
+         * return Shared pointer to the project
          */
-        const util::ProjectsModelProject* getProject() const;
+        util::ProjectsModelProjectSharedPtr getProject() const;
 
     private:
-        const util::ProjectsModelProject*   _project;      /** The project data */
+        util::ProjectsModelProjectSharedPtr   _project;      /** Shared pointer to the project */
     };
 
 protected:
@@ -115,7 +119,7 @@ protected:
          * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        LastModifiedItem(const util::ProjectsModelProject* project, bool editable = false);
+        LastModifiedItem(util::ProjectsModelProjectSharedPtr project, bool editable = false);
 
         /**
          * Get model data for \p role
@@ -155,7 +159,7 @@ protected:
          * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        DownloadedItem(const util::ProjectsModelProject* project, bool editable = false);
+        DownloadedItem(util::ProjectsModelProjectSharedPtr project, bool editable = false);
 
         /**
          * Get model data for \p role
@@ -555,7 +559,7 @@ protected:
          * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        DownloadSizeItem(const util::ProjectsModelProject* project, bool editable = false);
+        DownloadSizeItem(util::ProjectsModelProjectSharedPtr project, bool editable = false);
 
         /**
          * Get model data for \p role
@@ -739,7 +743,7 @@ protected:
          * Construct with pointer to \p project object
          * @param project Pointer to project object
          */
-        Row(const util::ProjectsModelProject* project) :
+        Row(util::ProjectsModelProjectSharedPtr project) :
             QList<QStandardItem*>()
         {
         	append(new TitleItem(project));
@@ -759,13 +763,14 @@ protected:
             append(new SystemCompatibilityItem(project));
             append(new IsStartupItem(project));
             append(new ShaItem(project));
+            append(new ProjectsJsonDsnItem(project));
         }
     };
 
 public:
 
     /**
-     * Construct with pointer to \p parent object
+     * Construct with population \p mode and pointer to \p parent object
      * @param populationMode Population mode of the model (automatic/manual)
      * @param parent Pointer to parent object
      */
@@ -780,11 +785,40 @@ public:
      */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    /** Synchronize the model with the content of all Data Source Names (DSN) */
-    virtual void populateFromDsns() = 0;
+private: // Add/remove DSNs
 
-    /** Synchronize the model with the content of all plugins Data Source Names (DSN) */
-    virtual void populateFromPluginDsns() = 0;
+    /**
+     * Add \dsn to the model
+     * @param dsn Data Source Name (DSN) to add
+     */
+    void addDsn(const QUrl& dsn);
+
+    /**
+     * Remove \dsn from the model
+     * @param dsn Data Source Name (DSN) to remove
+     */
+    void removeDsn(const QUrl& dsn);
+
+public: // Population
+
+    /**
+     * Populate the model from the Data Source Names (DSN)
+     * @param jsonByteArray Byte array containing the JSON data to populate from
+     * @param dsnIndex Index of the DSN to populate from
+     * @param jsonLocation Location of the JSON file
+     */
+    void populateFromJsonByteArray(const QByteArray& jsonByteArray, std::int32_t dsnIndex, const QString& jsonLocation);
+
+    /**
+     * Populate the model from a JSON file at \p filePath
+     * @param filePath Path to the JSON file containing the projects data
+     */
+    void populateFromJsonFile(const QString& filePath);
+
+public: // Tags
+
+    /** Builds a set of all project tags and emits ProjectDatabaseModel::tagsChanged(...) */
+    void updateTags();
 
     /**
      * Get tags
@@ -792,44 +826,47 @@ public:
      */
     QSet<QString> getTagsSet() const;
 
-    /**
-     * Add project group with \p groupTitle
-     * @param groupTitle Title of the group
+public: // Project getters
+
+	/**
+     * Get the project at \p index
+     * @return Shared pointer to project at index
      */
-    void addProjectGroup(const QString& groupTitle = "");
+    util::ProjectsModelProjectSharedPtr getProject(const QModelIndex& index) const;
+
+protected:
+
+    /** Begin the population of the model */
+    void beginPopulate();
+
+    /**
+     * Populate the model with the given projects
+     * @param projects Shared pointers to projects to populate the model with
+     */
+    virtual void populate(util::ProjectsModelProjectSharedPtrs projects);
+
+    /** End the population of the model */
+    void endPopulate();
+
+public: // Add/remove projects
 
     /**
      * Add \p project
      * @param project Shared pointer to project to add
-     * @param groupTitle Title of the group to which the project should be added
+     * @param parentIndex Parent index to add the project to (defaults to root)
      */
-    void addProject(util::ProjectsModelProjectPtr project, const QString& groupTitle = "");
-
-    /** Builds a set of all project tags and emits ProjectDatabaseModel::tagsChanged(...) */
-    void updateTags();
+    void addProject(util::ProjectsModelProjectSharedPtr project, const QModelIndex& parentIndex = QModelIndex());
 
     /**
-     * Get the project at \p index
-     * @return Project at index
+     * Remove project with \p index from the model
+     * @param index Index of the project to remove
      */
-    const util::ProjectsModelProject* getProject(const QModelIndex& index) const;
+    void removeProject(const QModelIndex& index);
 
-    /**
-     * Get the projects
-     * @return Projects
-     */
-    const util::ProjectDatabaseProjects& getProjects() const;
+private:
 
-protected:
-
-    /** Remove redundant rows from the model (of which the projects DSN is not in AbstractProjectsModel#_dsnsAction anymore) */
-    void purgeRedundantRows();
-
-    /**
-     * Remove \p project from the model
-     * @param project Project to remove
-     */
-    void removeProject(const util::ProjectsModelProjectPtr& project);
+    /** Get rid of orphaned projects (project for which the projects DSN is not in the list anymore) */
+    void purge();
 
 public: // Action getters
 
@@ -847,11 +884,17 @@ signals:
      */
     void tagsChanged(const QSet<QString>& tags);
 
+    /** Signals that the model is about to be populated */
+    void aboutToBePopulated();
+
+    /** Signals that the model has been re-populated */
+    void populated();
+
 private:
-    util::ProjectDatabaseProjects   _projects;          /** Model projects */
-    QSet<QString>                   _tags;              /** All tags */
-    gui::StringsAction              _dsnsAction;        /** Data source names action */
-    gui::TriggerAction              _editDsnsAction;    /** Edit data source names action */
+    QSet<QString>           _tags;                  /** All tags */
+    gui::StringsAction      _dsnsAction;            /** Data source names action */
+    gui::TriggerAction      _editDsnsAction;        /** Edit data source names action */
+    std::int32_t            _numberOfPopulators;    /** Number of populators currently populating the model */
 };
 
 }

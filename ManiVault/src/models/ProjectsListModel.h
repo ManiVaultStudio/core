@@ -11,13 +11,13 @@
 namespace mv {
 
 /**
- * Projects tree model class
+ * Projects list model class
  *
- * Contains projects in a tree.
+ * Contains projects in a list.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectsTreeModel final : public AbstractProjectsModel
+class CORE_EXPORT ProjectsListModel final : public AbstractProjectsModel
 {
     Q_OBJECT
 
@@ -28,7 +28,7 @@ public:
      * @param mode Mode of the model (automatic/manual)
      * @param parent Pointer to parent object
      */
-    ProjectsTreeModel(const PopulationMode& mode = PopulationMode::Automatic, QObject* parent = nullptr);
+    ProjectsListModel(const PopulationMode& mode = PopulationMode::Automatic, QObject* parent = nullptr);
 
 protected:
 

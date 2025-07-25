@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "PageActionsModel.h"
+#include "PageActionsTreeModel.h"
 #include "PageActionsFilterModel.h"
 
 #include <util/Serializable.h>
@@ -42,7 +42,7 @@ public:
      * Get model
      * @return Reference to model
      */
-    PageActionsModel& getModel();
+    PageActionsTreeModel& getModel();
 
     /**
      * Get filter model
@@ -60,15 +60,15 @@ private:
 
     /**
      * Open persistent editor for \p rowIndex
-     * @param rowIndex Index of the row for which to open the persistent editor
+     * @param index Index of the row for which to open the persistent editor
      */
-    void openPersistentEditor(int rowIndex);
+    void openPersistentEditor(const QModelIndex& index);
 
     /**
      * Close persistent editor for \p rowIndex
-     * @param rowIndex Index of the row for which to close the persistent editor
+     * @param index Index of the row for which to close the persistent editor
      */
-    void closePersistentEditor(int rowIndex);
+    void closePersistentEditor(const QModelIndex& index);
     
     /** Update all  custom style elements */
     void updateCustomStyle();
@@ -89,7 +89,7 @@ public: // Serialization
 
 private:
     QVBoxLayout                 _layout;            /** Main layout */
-    PageActionsModel            _model;             /** Model which contains start page actions */
+    PageActionsTreeModel        _model;             /** Model which contains start page actions */
     PageActionsFilterModel      _filterModel;       /** Model for filtering and sorting start page actions */
     mv::gui::HierarchyWidget    _hierarchyWidget;   /** Widget for displaying the actions */
     bool                        _restyle;           /** Remember whether the restyle flag was set upon creation */

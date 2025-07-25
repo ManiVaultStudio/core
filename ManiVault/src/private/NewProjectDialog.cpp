@@ -55,16 +55,19 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     for (const auto workspaceLocation : workspaces().getWorkspaceLocations(WorkspaceLocation::Types(WorkspaceLocation::Type::BuiltIn))) {
         Workspace workspace(workspaceLocation.getFilePath());
 
-        PageAction fromWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), workspaceLocation.getFilePath(), [this, workspaceLocation]() -> void {
+        auto fromWorkspaceStartPageAction = std::make_shared<PageAction>(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), [this, workspaceLocation]() -> void {
             projects().newProject(workspaceLocation.getFilePath());
 
             QDialog::accept();
         });
 
-        fromWorkspaceStartPageAction.setComments(workspace.getCommentsAction().getString());
-        fromWorkspaceStartPageAction.setTags(workspace.getTagsAction().getStrings());
-        fromWorkspaceStartPageAction.setMetaData(workspaceLocation.getTypeName());
-        fromWorkspaceStartPageAction.setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
+        if (const auto comments = workspace.getCommentsAction().getString(); !comments.isEmpty())
+            fromWorkspaceStartPageAction->createSubAction<CommentsPageSubAction>(comments);
+
+        if (const auto tags = workspace.getTagsAction().getStrings(); !tags.isEmpty())
+            fromWorkspaceStartPageAction->createSubAction<TagsPageSubAction>(tags);
+
+        //fromWorkspaceStartPageAction->setMetaData(workspaceLocation.getTypeName());
 
         _workspacesWidget.getModel().add(fromWorkspaceStartPageAction);
     }

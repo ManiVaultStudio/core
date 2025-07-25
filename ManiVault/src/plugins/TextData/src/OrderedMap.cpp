@@ -168,7 +168,7 @@ namespace mv
 
         variantMapMustContain(variantMap, "NumRows");
         variantMapMustContain(variantMap, "ColumnHeaders");
-        variantMapMustContain(variantMap, "table-columns");
+        variantMapMustContain(variantMap, "Columns");
 
         _numRows = variantMap["NumRows"].value<size_t>();
 
@@ -180,7 +180,7 @@ namespace mv
             _columnHeaders.push_back(header);
         }
 
-        stdFromVariantMap(variantMap["table-columns"].toMap(), _columns);
+        stdFromVariantMap(variantMap["Columns"].toMap(), _columns);
     }
 
     QVariantMap OrderedMap::toVariantMap() const
@@ -198,7 +198,7 @@ namespace mv
         variantMap.insert({
             { "NumRows", QVariant::fromValue(_numRows) },
             { "ColumnHeaders", QVariant::fromValue(storeOnDisk(columnHeaders)) },
-            { "table-columns", QVariant::fromValue(columnsMap) }
+            { "Columns", QVariant::fromValue(columnsMap) }
         });
 
         return variantMap;

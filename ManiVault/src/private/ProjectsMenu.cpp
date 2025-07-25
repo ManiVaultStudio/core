@@ -39,11 +39,13 @@ void ProjectsMenu::populate()
 {
     clear();
 
-    const auto addProject = [this](QMenu* menu, const ProjectsModelProject* project) -> void {
+    const auto addProject = [this](QMenu* menu, ProjectsModelProjectSharedPtr project) -> void {
         auto loadProjectAction = new TriggerAction(this, project->getTitle());
 
+        loadProjectAction->setIcon(project->getIcon());
+
         connect(loadProjectAction, &TriggerAction::triggered, this, [project]() {
-            mv::projects().openProject(project->getUrl());
+            mv::projects().openProject(project);  
         });
 
         menu->addAction(loadProjectAction);
@@ -54,13 +56,10 @@ void ProjectsMenu::populate()
         const auto sourceModelIndex = _projectsFilterModel.mapToSource(filterModelIndex);
 
         if (const auto project = mv::projects().getProjectsTreeModel().getProject(sourceModelIndex)) {
-            if (mv::projects().hasProject()) {
-                if (QFileInfo(mv::projects().getCurrentProject()->getFilePath()).completeBaseName() == project->getTitle())
-					continue;
-            }
-
             if (project->isGroup()) {
                 auto projectGroupMenu = new QMenu(project->getTitle());
+
+                projectGroupMenu->setIcon(StyledIcon("folder"));
 
                 for (int childRowIndex = 0; childRowIndex < mv::projects().getProjectsTreeModel().rowCount(sourceModelIndex); childRowIndex++) {
                     const auto childModelIndex = mv::projects().getProjectsTreeModel().index(childRowIndex, 0, sourceModelIndex);

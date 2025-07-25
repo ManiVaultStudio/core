@@ -14,7 +14,7 @@ namespace mv
 using namespace util;
 using namespace gui;
 
-StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/, const QString& title /*= "StandardItemModel"*/, const PopulationMode& populationMode /*= PopulationMode::Automatic*/) :
+StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/, const QString& title /*= ""*/, const PopulationMode& populationMode /*= PopulationMode::Automatic*/) :
     QStandardItemModel(parent),
     Serializable(title),
     _populationMode(populationMode),

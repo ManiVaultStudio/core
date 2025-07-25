@@ -14,6 +14,8 @@
 #include <ModalTask.h>
 #include <ModalTaskHandler.h>
 
+#include <models/HardwareSpecTreeModel.h>
+
 #include <util/Exception.h>
 #include <util/Serialization.h>
 
@@ -22,6 +24,7 @@
 #include <QStandardPaths>
 #include <QGridLayout>
 #include <QEventLoop>
+#include <QHeaderView>
 
 #include <exception>
 
@@ -51,7 +54,7 @@ ProjectManager::ProjectManager(QObject* parent) :
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
     _backToProjectAction(nullptr, "Back to project"),
-    _projectsTreeModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
+    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -208,7 +211,7 @@ ProjectManager::ProjectManager(QObject* parent) :
 
     updateActionsReadOnly();
 
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl");
+    _recentProjectsAction.initialize("Project", "Ctrl");
 
     connect(&_recentProjectsAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         openProject(filePath);
@@ -242,7 +245,6 @@ void ProjectManager::initialize()
 
     beginInitialization();
     {
-        _projectsTreeModel.populateFromPluginDsns();
     }
     endInitialization();
 }
@@ -564,12 +566,123 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 	}
 	catch (std::exception& e)
 	{
-	    exceptionMessageBox("Unable to load ManiVault project", e);
+	    exceptionMessageBox("Unable to open ManiVault project", e);
 	}
 	catch (...)
 	{
-	    exceptionMessageBox("Unable to load ManiVault project");
+	    exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
 	}
+}
+
+void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory, bool importDataOnly, bool loadWorkspace)
+{
+#ifdef PROJECT_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << project->getTitle() << targetDirectory << importDataOnly << loadWorkspace;
+#endif
+
+    try {
+        if (!project)
+            throw std::runtime_error("Project is null");
+
+        const auto systemCompatibility  = HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec());
+        const auto notCompatible        = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Incompatible;
+        const auto notRecommended       = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Minimum;
+
+        if (notCompatible || notRecommended) {
+            QDialog projectIncompatibleWithSystemDialog;
+
+        	projectIncompatibleWithSystemDialog.setWindowIcon(systemCompatibility._icon);
+            projectIncompatibleWithSystemDialog.setWindowTitle("Incompatible System");
+            projectIncompatibleWithSystemDialog.setMinimumWidth(500);
+            projectIncompatibleWithSystemDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+            auto layout = new QVBoxLayout(&projectIncompatibleWithSystemDialog);
+            auto message = new QLabel();
+
+            layout->setSpacing(10);
+
+            message->setWordWrap(true);
+
+            if (notCompatible)
+                message->setText("<p>Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!</p>");
+
+            if (notRecommended)
+                message->setText("<p>Your system does not meet the recommended requirements for this project, the interactivity might not be optimal!</p>");
+
+            layout->addWidget(message);
+
+            auto requirementsLayout = new QVBoxLayout();
+            auto models = QList<HardwareSpecTreeModel*>({ new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog), new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog) });
+            auto treeViews = QList<QTreeView*>({ new QTreeView(), new QTreeView() });
+            auto recommendedCheckBox = new QCheckBox("Show recommended");
+
+            recommendedCheckBox->setChecked(notRecommended);
+
+            requirementsLayout->setSpacing(5);
+
+            models.first()->setHardwareSpec(project->getMinimumHardwareSpec());
+            models.first()->setHorizontalHeaderLabels({ "Component", "System", "Minimum" });
+
+            models.last()->setHardwareSpec(project->getRecommendedHardwareSpec());
+            models.last()->setHorizontalHeaderLabels({ "Component", "System", "Recommended" });
+
+            for (auto treeView : treeViews) {
+                treeView->setIconSize(QSize(13, 13));
+                treeView->setModel(models[treeViews.indexOf(treeView)]);
+                treeView->expandAll();
+
+                treeView->header()->setStretchLastSection(false);
+                treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
+                treeView->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Stretch);
+                treeView->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Fixed);
+                treeView->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::Fixed);
+
+                treeView->header()->resizeSection(1, 100);
+                treeView->header()->resizeSection(2, 100);
+
+                requirementsLayout->addWidget(treeView);
+            }
+
+            const auto updateTreeViewVisibility = [treeViews, recommendedCheckBox]() -> void {
+                treeViews.first()->setVisible(!recommendedCheckBox->isChecked());
+                treeViews.last()->setVisible(recommendedCheckBox->isChecked());
+                };
+
+            updateTreeViewVisibility();
+
+            connect(recommendedCheckBox, &QCheckBox::toggled, this, updateTreeViewVisibility);
+
+            requirementsLayout->addWidget(recommendedCheckBox);
+
+            layout->addLayout(requirementsLayout, 1);
+            layout->addWidget(new QLabel("<p>Do you want to continue anyway?</p>"));
+
+            auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Yes | QDialogButtonBox::Abort);
+
+            connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Yes), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::accept);
+            connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Abort), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::reject);
+
+            layout->addWidget(dialogButtonBox);
+
+            projectIncompatibleWithSystemDialog.setLayout(layout);
+
+            if (projectIncompatibleWithSystemDialog.exec() == QDialog::Accepted) {
+                projects().openProject(project->getUrl());
+
+                project->setDownloaded();
+            }
+        } else {
+            openProject(project->getUrl(), targetDirectory, importDataOnly, loadWorkspace);
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to open ManiVault project", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
+    }
 }
 
 void ProjectManager::importProject(QString filePath /*= ""*/)
@@ -1083,6 +1196,11 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
     }
 
     return {};
+}
+
+const ProjectsListModel& ProjectManager::getProjectsListModel() const
+{
+    return _projectsListModel;
 }
 
 const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const

@@ -71,7 +71,7 @@ void PageTutorialsWidget::updateActions()
 
         auto tutorial = dynamic_cast<LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceRowIndex))->getTutorial();
 
-        PageAction tutorialAction(StyledIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", "", [this, tutorial]() -> void {
+        auto tutorialAction = std::make_shared<PageAction>(StyledIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", [this, tutorial]() -> void {
 			try {
                 if (tutorial->hasProject()) {
                     mv::projects().openProject(tutorial->getProjectUrl());
@@ -103,11 +103,15 @@ void PageTutorialsWidget::updateActions()
 	        }
 		});
 
-        tutorialAction.setComments(tutorial->hasProject() ? QString("A tutorial project will be downloaded from: %1.").arg(tutorial->getProjectUrl().toString()) : "Creates a project with a tutorial plugin.");
-        tutorialAction.setTags(tutorial->getTags());
+        const auto comments = tutorial->hasProject() ? QString("A tutorial project will be downloaded from: %1.").arg(tutorial->getProjectUrl().toString()) : "Creates a project with a tutorial plugin.";
 
-        if (tutorial->hasProject())
-			tutorialAction.setDownloadUrls({ tutorial->getProjectUrl().toString() });
+        if (!comments.isEmpty())
+            tutorialAction->createSubAction<CommentsPageSubAction>(comments);
+
+        const auto tags = tutorial->getTags();
+
+        if (!tags.isEmpty())
+    		tutorialAction->createSubAction<TagsPageSubAction>(tags);
 
         getModel().add(tutorialAction);
     }
