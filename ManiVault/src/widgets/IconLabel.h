@@ -40,6 +40,12 @@ public:
     IconLabel(const QIcon& icon, QWidget* parent = nullptr);
 
     /**
+     * Set the icon to \p icon
+     * @param icon Icon to set
+     */
+    void setIcon(const QIcon& icon);
+
+    /**
      * Set the tooltip callback
      * @param tooltipCallback Callback function that is called when a tooltip is required
      */
