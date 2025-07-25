@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "RecentFilesListModel.h"
+#include "Application.h"
 
 #ifdef _DEBUG
     #define RECENT_FILES_LIST_MODEL_VERBOSE

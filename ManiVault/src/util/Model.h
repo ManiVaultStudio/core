@@ -6,6 +6,11 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <QPersistentModelIndex>
+
+class QStandardItem;
+class QStandardItemModel;
+
 namespace mv::util
 {
 

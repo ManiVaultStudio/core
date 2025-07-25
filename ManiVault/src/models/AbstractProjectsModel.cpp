@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "AbstractProjectsModel.h"
+#include "CoreInterface.h"
 
 #include "util/Miscellaneous.h"
 #include "util/JSON.h"

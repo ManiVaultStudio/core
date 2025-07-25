@@ -4,6 +4,8 @@
 
 #include "Model.h"
 
+#include <QStandardItemModel>
+
 namespace mv::util
 {
 

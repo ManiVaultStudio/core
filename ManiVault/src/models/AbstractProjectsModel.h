@@ -7,6 +7,9 @@
 #include "models/StandardItemModel.h"
 #include "models/ProjectsModelProject.h"
 
+#include "actions/StringsAction.h"
+#include "actions/TriggerAction.h"
+
 #include <QMap>
 
 namespace mv {

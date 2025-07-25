@@ -4,6 +4,7 @@
 
 #include "RecentFilesAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -57,7 +58,7 @@ QMenu* RecentFilesAction::getMenu(QWidget* parent)
 			emit triggered(recentFile.getFilePath());
 
 			mv::projects().openProject(recentFile.getFilePath());
-			});
+		});
 
     	menu->addAction(openRecentFileAction);
     }

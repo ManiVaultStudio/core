@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QToolTip>
+#include <QHelpEvent>
 
 #ifdef _DEBUG
     #define ICON_LABEL_VERBOSE
