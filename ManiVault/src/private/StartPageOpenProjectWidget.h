@@ -67,12 +67,6 @@ private:
     /** Update all  custom style elements */
     void updateCustomStyle();
 
-    /**
-     * Open project with \p url
-     * @param project URL of the project to open
-     */
-    void openProject(const mv::util::ProjectsModelProjectSharedPtr& project);
-
 public: // Serialization
 
     /**

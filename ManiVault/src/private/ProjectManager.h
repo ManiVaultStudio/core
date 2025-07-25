@@ -76,6 +76,15 @@ public:
     void openProject(QUrl url, const QString& targetDirectory = "", bool importDataOnly = false, bool loadWorkspace = true) override;
 
     /**
+     * Download project from \p project model, store it in \p targetDir and open it
+     * @param project Shared pointer to the project model project
+     * @param targetDirectory Directory where the project is stored (temporary directory when empty)
+     * @param importDataOnly Whether to only import the data from the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied by the project
+     */
+    void openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory = "", bool importDataOnly = false, bool loadWorkspace = true) override;
+
+    /**
      * Import project from \p filePath (only import the data)
      * @param filePath File path of the project (choose file path when empty)
      */

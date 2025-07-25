@@ -261,7 +261,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
 
     const auto addProjectPageAction = [this, &projectsPageTreeModel](ProjectsModelProjectSharedPtr project) -> PageActionSharedPtr {
     	auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), [this, project]() -> void {
-            openProject(project);
+            mv::projects().openProject(project);
         });
 
         projectPageAction->setParentTitle(project->getGroup());
@@ -384,96 +384,6 @@ void StartPageOpenProjectWidget::updateCustomStyle()
 {
     createCustomIcons();
     updateActions();
-}
-
-void StartPageOpenProjectWidget::openProject(const ProjectsModelProjectSharedPtr& project)
-{
-    QDialog projectIncompatibleWithSystemDialog;
-
-    projectIncompatibleWithSystemDialog.setWindowIcon(StyledIcon("triangle-exclamation"));
-    projectIncompatibleWithSystemDialog.setWindowTitle("Incompatible System");
-    projectIncompatibleWithSystemDialog.setMinimumWidth(500);
-    projectIncompatibleWithSystemDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-
-    auto layout = new QVBoxLayout(&projectIncompatibleWithSystemDialog);
-    auto message = new QLabel();
-
-    layout->setSpacing(10);
-
-    message->setWordWrap(true);
-
-    const auto systemCompatibility  = HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec());
-    const auto notCompatible        = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Incompatible;
-    const auto notRecommended       = systemCompatibility._compatibility == HardwareSpec::SystemCompatibility::Minimum;
-
-    if (notCompatible)
-        message->setText("<p>Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!</p>");
-
-    if (notRecommended)
-        message->setText("<p>Your system does not meet the recommended requirements for this project, the interactivity might not be optimal!</p>");
-
-    layout->addWidget(message);
-
-    auto requirementsLayout     = new QVBoxLayout();
-    auto models                 = QList<HardwareSpecTreeModel*>({ new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog), new HardwareSpecTreeModel(&projectIncompatibleWithSystemDialog) });
-    auto treeViews              = QList<QTreeView*>({ new QTreeView(), new QTreeView() });
-    auto recommendedCheckBox    = new QCheckBox("Show recommended");
-
-    recommendedCheckBox->setChecked(notRecommended);
-
-    requirementsLayout->setSpacing(5);
-
-    models.first()->setHardwareSpec(project->getMinimumHardwareSpec());
-    models.first()->setHorizontalHeaderLabels({ "Component", "System", "Minimum" });
-
-    models.last()->setHardwareSpec(project->getRecommendedHardwareSpec());
-    models.last()->setHorizontalHeaderLabels({ "Component", "System", "Recommended" });
-
-    for (auto treeView : treeViews) {
-        treeView->setIconSize(QSize(13, 13));
-        treeView->setModel(models[treeViews.indexOf(treeView)]);
-        treeView->expandAll();
-
-        treeView->header()->setStretchLastSection(false);
-        treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
-        treeView->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Stretch);
-        treeView->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Fixed);
-        treeView->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::Fixed);
-
-        treeView->header()->resizeSection(1, 100);
-        treeView->header()->resizeSection(2, 100);
-
-        requirementsLayout->addWidget(treeView);
-    }
-
-    const auto updateTreeViewVisibility = [treeViews, recommendedCheckBox]() -> void {
-        treeViews.first()->setVisible(!recommendedCheckBox->isChecked());
-        treeViews.last()->setVisible(recommendedCheckBox->isChecked());
-	};
-
-    updateTreeViewVisibility();
-
-    connect(recommendedCheckBox, &QCheckBox::toggled, this, updateTreeViewVisibility);
-
-    requirementsLayout->addWidget(recommendedCheckBox);
-
-    layout->addLayout(requirementsLayout, 1);
-    layout->addWidget(new QLabel("<p>Do you want to continue anyway?</p>"));
-
-    auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Yes | QDialogButtonBox::Abort);
-
-    connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Yes), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::accept);
-    connect(dialogButtonBox->button(QDialogButtonBox::StandardButton::Abort), &QPushButton::clicked, &projectIncompatibleWithSystemDialog, &QDialog::reject);
-
-    layout->addWidget(dialogButtonBox);
-
-    projectIncompatibleWithSystemDialog.setLayout(layout);
-
-    if (projectIncompatibleWithSystemDialog.exec() == QDialog::Accepted) {
-        projects().openProject(project->getUrl());
-
-        project->setDownloaded();
-    }
 }
 
 void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)

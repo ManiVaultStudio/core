@@ -15,6 +15,7 @@
 
 #include "models/ProjectsListModel.h"
 #include "models/ProjectsTreeModel.h"
+#include "models/ProjectsModelProject.h"
 
 #include <QObject>
 #include <QMenu>
@@ -150,6 +151,15 @@ public:
      * @param loadWorkspace Whether to load the workspace which is accompanied by the project
      */
     virtual void openProject(QUrl url, const QString& targetDirectory = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
+
+    /**
+     * Download project from \p project model, store it in \p targetDir and open it
+     * @param project Shared pointer to the project model project
+     * @param targetDirectory Directory where the project is stored (temporary directory when empty)
+     * @param importDataOnly Whether to only import the data from the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied by the project
+     */
+    virtual void openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
 
     /**
      * Import project from \p filePath (only import the data)
