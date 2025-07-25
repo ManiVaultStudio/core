@@ -82,7 +82,7 @@ AbstractProjectsModel::AbstractProjectsModel(const PopulationMode& populationMod
 
         editDsnsDialog.setWindowIcon(StyledIcon("gear"));
         editDsnsDialog.setWindowTitle("Edit projects sources");
-        editDsnsDialog.setMinimumWidth(800);
+        editDsnsDialog.setMinimumWidth(600);
         editDsnsDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
         auto layout = new QVBoxLayout(&editDsnsDialog);
