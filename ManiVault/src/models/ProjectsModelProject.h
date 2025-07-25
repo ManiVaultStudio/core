@@ -262,6 +262,9 @@ signals:
      */
     void lastModifiedDetermined(const QDateTime& lastModified);
 
+    /** Signals that the project has been downloaded */
+    void downloaded();
+
     /**
      * Signals that the project icon has changed
      * @param icon New project icon

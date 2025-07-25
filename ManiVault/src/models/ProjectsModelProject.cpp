@@ -129,6 +129,8 @@ void ProjectsModelProject::setDownloaded()
 {
     updateIcon();
     updateTooltip();
+
+    emit downloaded();
 }
 
 bool ProjectsModelProject::isGroup() const
