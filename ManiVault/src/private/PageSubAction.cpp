@@ -11,6 +11,11 @@ PageSubAction::PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCa
 	_tooltipCallback(tooltipCallback),
     _iconLabel(icon)
 {
+    setIcon(icon);
+
+    _iconLabel.setTooltipCallback([this]() -> QString {
+        return getTooltip();
+    });
 }
 
 void PageSubAction::setIcon(const QIcon& icon)
