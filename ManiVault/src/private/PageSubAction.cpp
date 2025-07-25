@@ -7,10 +7,15 @@
 using namespace mv::util;
 
 PageSubAction::PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback /*= {}*/, const ClickedCallback& clickedCallback /*= {}*/) :
-    _icon(icon),
     _clickedCallback(clickedCallback),
-	_tooltipCallback(tooltipCallback)
+	_tooltipCallback(tooltipCallback),
+    _iconLabel(icon)
 {
+}
+
+void PageSubAction::setIcon(const QIcon& icon)
+{
+    _iconLabel.setIcon(icon);
 }
 
 QString PageSubAction::getTooltip() const
@@ -19,6 +24,16 @@ QString PageSubAction::getTooltip() const
         return _tooltipCallback();
 
     return {};
+}
+
+void PageSubAction::setVisible(bool visible)
+{
+	_iconLabel.setVisible(visible);
+}
+
+mv::gui::IconLabel& PageSubAction::getIconLabel()
+{
+    return _iconLabel;
 }
 
 CommentsPageSubAction::CommentsPageSubAction(const QString& comments) :

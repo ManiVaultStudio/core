@@ -6,6 +6,8 @@
 
 #include <util/HardwareSpec.h>
 
+#include <widgets/IconLabel.h>
+
 #include <QIcon>
 
 /**
@@ -34,22 +36,28 @@ public:
     virtual ~PageSubAction() = default;
 
     /**
-     * Get icon
-     * @return Icon
-     */
-    QIcon getIcon() const { return _icon; }
-
-    /**
      * Set the icon to \p icon
      * @param icon Icon to set
      */
-    void setIcon(const QIcon& icon) { _icon = icon; }
+    void setIcon(const QIcon& icon);
 
-	/**
+    /**
      * Get the sub-action tooltip
      * @return Tooltip
      */
     QString getTooltip() const;
+
+    /**
+     * Set the sub-action visibility to \p visible
+     * @param visible Sub-action visibility
+     */
+    void setVisible(bool visible);
+
+    /**
+     * Get the sub-action icon label
+     * @return Sub-action icon label
+     */
+    mv::gui::IconLabel& getIconLabel();
 
 public: // Callbacks
 
@@ -78,9 +86,9 @@ public: // Callbacks
     void setTooltipCallback(const TooltipCallback& tooltipCallback) { _tooltipCallback = tooltipCallback; }
 
 protected:
-    QIcon                   _icon;              /** Action icon (shown on the left) */
     ClickedCallback         _clickedCallback;   /** Callback function that is called when the sub-action is clicked */
     TooltipCallback         _tooltipCallback;   /** Callback function that is invoked to retrieve the sub-action tooltip */
+    mv::gui::IconLabel      _iconLabel;         /** Icon label representing the sub-action */
 
     static bool compactView;
 };
