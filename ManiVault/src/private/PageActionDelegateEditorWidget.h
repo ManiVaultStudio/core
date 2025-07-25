@@ -6,8 +6,6 @@
 
 #include "PageAction.h"
 
-#include <widgets/IconLabel.h>
-
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPersistentModelIndex>

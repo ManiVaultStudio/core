@@ -188,16 +188,11 @@ void PageActionDelegateEditorWidget::updateSubActions()
     clearLayout(&_subActionsLayout, true);
 
     if (_pageAction) {
-        for (auto& subAction : _pageAction->getSubActions()) {
-            auto subActionIconLabel = new gui::IconLabel(subAction->getIcon());
+        for (auto& subAction : _pageAction->getSubActions())
+            _subActionsLayout.addWidget(&subAction->getIconLabel());
 
-            subActionIconLabel->setToolTip(subAction->getTooltip());
-
-            _subActionsLayout.addWidget(subActionIconLabel);
-        }
+        updateCustomStyle();
     }
-
-    updateCustomStyle();
 }
 
 void PageActionDelegateEditorWidget::updateOverlayWidgetVisibility()
