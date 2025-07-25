@@ -167,20 +167,18 @@ void PageActionDelegateEditorWidget::updateSubtitle()
 
 void PageActionDelegateEditorWidget::updateTooltip()
 {
-    if (!_pageAction)
-        return;
-
-	setToolTip(_pageAction->getTooltip());
+    if (_pageAction) {
+        _iconLabel.setToolTip(_pageAction->getTooltip());//_pageAction->getTooltip());
+    }
 }
 
 void PageActionDelegateEditorWidget::updateMetadata()
 {
-    if (!_pageAction)
-        return;
+    if (_pageAction) {
+    	_metaDataLabel.setText(_pageAction->getMetaData());
 
-    _metaDataLabel.setText(_pageAction->getMetaData());
-
-    updateCustomStyle();
+    	updateCustomStyle();
+    }
 }
 
 void PageActionDelegateEditorWidget::updateSubActions()
