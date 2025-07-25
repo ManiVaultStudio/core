@@ -290,6 +290,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         });
 
         projectPageAction->setParentTitle(project->getGroup());
+        projectPageAction->setParentTitle(project->getGroup());
         
         if (!project->getTags().isEmpty())
             projectPageAction->createSubAction<TagsPageSubAction>(project->getTags());
@@ -307,6 +308,22 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         }
 
         const auto systemCompatibility = HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec());
+
+        projectPageAction->createSubAction<ProjectCompatibilityPageSubAction>(systemCompatibility);
+
+        projectPageAction->setTooltipCallback([project, systemCompatibility]() -> QString {
+            if (project->isGroup()) {
+                if (project->isExpanded())
+                    return "Click to collapse this project group";
+                
+                return "Click to expand this project group";
+            }
+
+            if (project->isDownloaded())
+                return systemCompatibility._message;
+
+            return QString("Click to download + open %1").arg(project->getTitle());
+        });
 
         if (!project->isGroup()) {
             if (project->getDownloadSize() == 0) {
