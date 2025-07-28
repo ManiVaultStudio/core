@@ -51,7 +51,9 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _isPanning(false),
     _isZooming(false),
     _zoomFactor(1.0f),
+    _zoomMarginType(ZoomMarginType::RelativeToData),
     _zoomMarginScreen(100.f),
+    _zoomMarginData(10.f),
     _zoomRegionInProgress(false),
     _userHasNavigated(),
     _navigationAction(this, "Navigation"),
@@ -342,6 +344,27 @@ void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 	emit zoomRectangleWorldChanged(previousZoomRectangleWorld, getZoomRectangleWorld());
 }
 
+Navigator2D::ZoomMarginType Navigator2D::getZoomMarginType() const
+{
+    return _zoomMarginType;
+}
+
+void Navigator2D::setZoomMarginType(ZoomMarginType zoomMarginType)
+{
+    if (zoomMarginType == _zoomMarginType)
+        return;
+
+    beginZooming();
+    {
+        beginChangeZoomRectangleWorld();
+        {
+            _zoomMarginType = zoomMarginType;
+        }
+        endChangeZoomRectangleWorld();
+    }
+    endZooming();
+}
+
 float Navigator2D::getZoomMarginScreen() const
 {
     return _zoomMarginScreen;
@@ -349,7 +372,7 @@ float Navigator2D::getZoomMarginScreen() const
 
 void Navigator2D::setZoomMarginScreen(float zoomMarginScreen)
 {
-    if (zoomMarginScreen == _zoomMarginScreen)
+    if (zoomMarginScreen == _zoomMarginScreen || _zoomMarginType != ZoomMarginType::AbsoluteScreen)
         return;
 
     beginZooming();
@@ -357,6 +380,27 @@ void Navigator2D::setZoomMarginScreen(float zoomMarginScreen)
         beginChangeZoomRectangleWorld();
         {
             _zoomMarginScreen = zoomMarginScreen;
+        }
+        endChangeZoomRectangleWorld();
+    }
+    endZooming();
+}
+
+float Navigator2D::getZoomMarginData() const
+{
+    return _zoomMarginData;
+}
+
+void Navigator2D::setZoomMarginData(float zoomMarginData)
+{
+    if (zoomMarginData == _zoomMarginData || _zoomMarginType != ZoomMarginType::RelativeToData)
+        return;
+
+    beginZooming();
+    {
+        beginChangeZoomRectangleWorld();
+        {
+            _zoomMarginData = zoomMarginData;
         }
         endChangeZoomRectangleWorld();
     }
