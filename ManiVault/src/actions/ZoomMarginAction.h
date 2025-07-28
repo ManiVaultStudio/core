@@ -60,6 +60,8 @@ private:
     OptionAction    _marginTypeAction;          /** For setting the zoom margin type */
     DecimalAction   _zoomMarginScreenAction;    /** Zoom margin relative to widget (in screen pixels) */
     DecimalAction   _zoomMarginDataAction;      /** Zoom margin relative to data bounds (in percentages) */
+
+    static const QStringList marginTypeOptions; /** Options for the margin type action */
 };
 
 }

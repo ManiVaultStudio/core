@@ -20,22 +20,24 @@ using namespace mv::util;
 namespace mv::gui
 {
 
+const QStringList ZoomMarginAction::marginTypeOptions = { "Absolute screen", "Relative to data" };
+
 ZoomMarginAction::ZoomMarginAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
-    _marginTypeAction(this, "Margin type"),
-    _zoomMarginScreenAction(this, "Zoom margin screen"),
-    _zoomMarginDataAction(this, "Zoom margin data")
+    _marginTypeAction(this, "Margin type", marginTypeOptions, marginTypeOptions.first()),
+    _zoomMarginScreenAction(this, "Screen"),
+    _zoomMarginDataAction(this, "Data")
 {
-    setShowLabels(false);
+    setIconByName("arrows-up-to-line");
     setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
+    setPopupSizeHint(QSize(300, 0));
 
 	addAction(&_marginTypeAction);
 	addAction(&_zoomMarginScreenAction);
 	addAction(&_zoomMarginDataAction);
 
     _marginTypeAction.setToolTip("Zoom margin type");
-    _marginTypeAction.setOptions({ "Absolute screen", "Relative to data" });
-    
+
     _zoomMarginScreenAction.setToolTip("Zoom margin in absolute widget pixels");
     _zoomMarginScreenAction.setSuffix("px");
     _zoomMarginScreenAction.setUpdateDuringDrag(true);
