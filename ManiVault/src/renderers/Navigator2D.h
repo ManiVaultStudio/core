@@ -50,6 +50,13 @@ public:
         Navigator2D&    _navigator;    /** Reference to the navigator */
     };
 
+    /** Type of zoom margin */
+    enum class ZoomMarginType
+    {
+        AbsoluteScreen,  /** Absolute screen pixels */
+        RelativeToData   /** Relative to data percentage */
+    };
+
 public:
 
 	/**
@@ -94,6 +101,18 @@ public:
 	void setZoomRectangleWorld(const QRectF& zoomRectangleWorld);
 
 	/**
+     * Get the zoom rectangle margin type
+     * @return Zoom rectangle margin type
+	 */
+	ZoomMarginType getZoomMarginType() const;
+
+	/**
+     * Set the zoom rectangle margin type to \p zoomMarginType
+     * @param zoomMarginType Zoom rectangle margin type
+	 */
+	void setZoomMarginType(ZoomMarginType zoomMarginType);
+
+	/**
 	 * Get the zoom rectangle margin
 	 * @return Zoom rectangle margin in screen coordinates 
 	 */
@@ -104,6 +123,18 @@ public:
      * @param zoomMarginScreen Zoom margin in screen coordinates
      */
     void setZoomMarginScreen(float zoomMarginScreen);
+
+    /**
+     * Get the zoom rectangle margin
+     * @return Zoom rectangle margin in data coordinates
+     */
+    float getZoomMarginData() const;
+
+    /**
+     * Set the zoom margin in data coordinates to \p zoomMarginData
+     * @param zoomMarginData Zoom margin in data coordinates
+     */
+    void setZoomMarginData(float zoomMarginData);
 
 	/**
 	 * Get the zoom factor
@@ -272,6 +303,12 @@ protected: // Navigation
     /** End zooming to a region */
     void endZoomToRegion();
 
+    /** Begin zoom margin change */
+    void beginChangeZoomMargin();
+
+    /** End zoom margin change */
+    void endChangeZoomMargin();
+
 protected: // Cursor
 
 	/**
@@ -348,6 +385,12 @@ signals:
      */
     void zoomFactorChanged(float previousZoomFactor, float currentZoomFactor);
 
+    /** Signals that the zoom margin is about to chang */
+    void aboutToChangeZoomMargin();
+
+    /** Signals that the zoom margin has changed */
+    void zoomMarginChanged();
+
 private:
 	QPointer<QWidget>               _sourceWidget;                          /** Source widget for panning and zooming */
 	Renderer2D&                     _renderer;                              /** Reference to parent renderer */
@@ -359,8 +402,9 @@ private:
 	bool                            _isZooming;                             /** Zooming flag */
 	float                           _zoomFactor;                            /** Zoom factor */
 	QPointF                         _zoomCenterWorld;                       /** Zoom rectangle top-left in world coordinates */
-    float                           _zoomMarginScreen;                      /** Zoom margin in screen coordinates */
-    float                           _zoomMarginWorld;                       /** Zoom margin in world coordinates */
+    ZoomMarginType                  _zoomMarginType;                        /** Zoom margin type */
+    float                           _zoomMarginScreen;                      /** Zoom margin in screen space (pixels) */
+    float                           _zoomMarginData;                        /** Zoom margin in relative data space (percentage) */
     QVector<QPoint>                 _zoomRegionPoints;                      /** Zoom region points */
     QRect                           _zoomRegionRectangle;                   /** Zoom region rectangle */
     bool                            _zoomRegionInProgress;                  /** Zoom region in progress flag */

@@ -17,6 +17,9 @@ Renderer2D::Renderer2D(QObject* parent) :
     Renderer(parent),
     _navigator(*this)
 {
+    connect(&getNavigator(), &Navigator2D::zoomMarginChanged, this, [this]() -> void {
+        setWorldBounds(computeWorldBounds());
+    });
 }
 
 void Renderer2D::resize(QSize renderSize)

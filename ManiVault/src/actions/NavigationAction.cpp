@@ -31,7 +31,8 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _freezeNavigation(this, "Freeze Navigation"),
     _zoomRectangleAction(this, "Zoom Rectangle"),
     _zoomCenterAction(this, "Zoom Center"),
-    _zoomFactorAction(this, "Zoom Factor")
+    _zoomFactorAction(this, "Zoom Factor"),
+    _zoomMarginAction(this, "Zoom margin")
 {
     setShowLabels(false);
 
@@ -77,6 +78,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
 	addAction(&_zoomSelectionAction, gui::TriggerAction::Icon);
 	addAction(&_zoomRegionAction, gui::TriggerAction::Icon);
 	addAction(&_freezeNavigation, gui::ToggleAction::WidgetFlag::CheckBox);
+	addAction(&_zoomMarginAction);
 
     const auto updateReadOnly = [this]() -> void {
         const auto notFrozen = _freezeNavigation.isChecked();
@@ -110,6 +112,7 @@ void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
 
     _zoomCenterAction.fromParentVariantMap(variantMap);
     _zoomFactorAction.fromParentVariantMap(variantMap);
+    _zoomMarginAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap NavigationAction::toVariantMap() const
@@ -118,6 +121,7 @@ QVariantMap NavigationAction::toVariantMap() const
 
     _zoomCenterAction.insertIntoVariantMap(variantMap);
     _zoomFactorAction.insertIntoVariantMap(variantMap);
+    _zoomMarginAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
