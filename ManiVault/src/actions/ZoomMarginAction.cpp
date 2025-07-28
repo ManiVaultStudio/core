@@ -25,8 +25,8 @@ const QStringList ZoomMarginAction::marginTypeOptions = { "Absolute screen", "Re
 ZoomMarginAction::ZoomMarginAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
     _marginTypeAction(this, "Margin type", marginTypeOptions, marginTypeOptions.first()),
-    _zoomMarginScreenAction(this, "Screen"),
-    _zoomMarginDataAction(this, "Data")
+    _zoomMarginScreenAction(this, "Screen", .0f, 100.f, 25.f),
+    _zoomMarginDataAction(this, "Data", .0f, 100.f, 10.f)
 {
     setIconByName("arrows-up-to-line");
     setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
