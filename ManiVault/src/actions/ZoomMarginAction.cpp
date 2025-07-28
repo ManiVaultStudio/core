@@ -27,6 +27,7 @@ ZoomMarginAction::ZoomMarginAction(QObject* parent, const QString& title) :
     _zoomMarginDataAction(this, "Zoom margin data")
 {
     setShowLabels(false);
+    setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
 
 	addAction(&_marginTypeAction);
 	addAction(&_zoomMarginScreenAction);
