@@ -4,13 +4,15 @@
 
 #pragma once
 
-#include <actions/HorizontalToolbarAction.h>
-#include <actions/TriggerAction.h>
-#include <actions/ToggleAction.h>
-#include <actions/DecimalAction.h>
-#include <actions/HorizontalGroupAction.h>
-#include <actions/DecimalRectangleAction.h>
-#include <actions/DecimalPointAction.h>
+#include "actions/HorizontalToolbarAction.h"
+#include "actions/TriggerAction.h"
+#include "actions/ToggleAction.h"
+#include "actions/DecimalAction.h"
+#include "actions/HorizontalGroupAction.h"
+#include "actions/DecimalRectangleAction.h"
+#include "actions/DecimalPointAction.h"
+#include "actions/VerticalGroupAction.h"
+#include "actions/ZoomMarginAction.h"
 
 #include <QObject>
 
@@ -73,6 +75,7 @@ public: // Action getters
     DecimalRectangleAction& getZoomRectangleAction() { return _zoomRectangleAction; }
     DecimalPointAction& getZoomCenterAction() { return _zoomCenterAction; }
     DecimalAction& getZoomFactorAction() { return _zoomFactorAction; }
+    ZoomMarginAction& getZoomMarginAction() { return _zoomMarginAction; }
 
 private:
     TriggerAction           _zoomOutAction;             /** Zoom out action */
@@ -85,6 +88,7 @@ private:
     DecimalRectangleAction  _zoomRectangleAction;       /** Rectangle action for setting the current zoom bounds */
     DecimalPointAction      _zoomCenterAction;          /** Zoom center action */
     DecimalAction           _zoomFactorAction;          /** Zoom factor action */
+    ZoomMarginAction        _zoomMarginAction;          /** Zoom margin settings */
 };
 
 }
