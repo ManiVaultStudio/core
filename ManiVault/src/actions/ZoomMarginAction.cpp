@@ -20,11 +20,11 @@ using namespace mv::util;
 namespace mv::gui
 {
 
-const QStringList ZoomMarginAction::marginTypeOptions = { "Absolute screen", "Relative to data" };
+const QStringList ZoomMarginAction::marginTypeOptions = { "Screen", "Data" };
 
 ZoomMarginAction::ZoomMarginAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
-    _marginTypeAction(this, "Margin type", marginTypeOptions, marginTypeOptions.first()),
+    _marginTypeAction(this, "Margin type", marginTypeOptions, marginTypeOptions.last()),
     _zoomMarginScreenAction(this, "Screen", .0f, 100.f, 25.f),
     _zoomMarginDataAction(this, "Data", .0f, 100.f, 10.f)
 {

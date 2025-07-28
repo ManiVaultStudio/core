@@ -52,7 +52,7 @@ public: // Serialization
 
 public: // Action getters
 
-    OptionAction& getMarginTypeAction() { return _marginTypeAction; }
+    OptionAction& getZoomMarginTypeAction() { return _marginTypeAction; }
     DecimalAction& getZoomMarginScreenAction() { return _zoomMarginScreenAction; }
     DecimalAction& getZoomMarginDataAction() { return _zoomMarginDataAction; }
 
