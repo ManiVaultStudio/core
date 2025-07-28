@@ -52,7 +52,6 @@ Navigator2D::Navigator2D(Renderer2D& renderer, QObject* parent) :
     _isZooming(false),
     _zoomFactor(1.0f),
     _zoomMarginScreen(100.f),
-    _zoomMarginWorld(.0f),
     _zoomRegionInProgress(false),
     _userHasNavigated(),
     _navigationAction(this, "Navigation"),

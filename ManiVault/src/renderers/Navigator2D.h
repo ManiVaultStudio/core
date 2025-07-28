@@ -360,7 +360,6 @@ private:
 	float                           _zoomFactor;                            /** Zoom factor */
 	QPointF                         _zoomCenterWorld;                       /** Zoom rectangle top-left in world coordinates */
     float                           _zoomMarginScreen;                      /** Zoom margin in screen coordinates */
-    float                           _zoomMarginWorld;                       /** Zoom margin in world coordinates */
     QVector<QPoint>                 _zoomRegionPoints;                      /** Zoom region points */
     QRect                           _zoomRegionRectangle;                   /** Zoom region rectangle */
     bool                            _zoomRegionInProgress;                  /** Zoom region in progress flag */
