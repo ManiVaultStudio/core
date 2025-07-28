@@ -303,6 +303,12 @@ protected: // Navigation
     /** End zooming to a region */
     void endZoomToRegion();
 
+    /** Begin zoom margin change */
+    void beginChangeZoomMargin();
+
+    /** End zoom margin change */
+    void endChangeZoomMargin();
+
 protected: // Cursor
 
 	/**
@@ -378,6 +384,12 @@ signals:
      * @param currentZoomFactor Current zoom factor
      */
     void zoomFactorChanged(float previousZoomFactor, float currentZoomFactor);
+
+    /** Signals that the zoom margin is about to chang */
+    void aboutToChangeZoomMargin();
+
+    /** Signals that the zoom margin has changed */
+    void zoomMarginChanged();
 
 private:
 	QPointer<QWidget>               _sourceWidget;                          /** Source widget for panning and zooming */
