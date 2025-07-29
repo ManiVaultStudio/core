@@ -246,12 +246,10 @@ void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
+    variantMapMustContain(variantMap, "Options");
     variantMapMustContain(variantMap, "Value");
-    variantMapMustContain(variantMap, "IsPublic");
 
-    if (variantMap["IsPublic"].toBool())
-        setOptions(variantMap["Options"].toStringList());
-
+    setOptions(variantMap["Options"].toStringList());
     setSelectedOptions(variantMap["Value"].toStringList());
 }
 
@@ -260,14 +258,13 @@ QVariantMap OptionsAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Value", getSelectedOptions() }
+        { "Options", getOptions() }
     });
 
-    if (isPublic()) {
-        variantMap.insert({
-            { "Options", getOptions() }
-        });
-    }
+
+    variantMap.insert({
+        { "Value", getSelectedOptions() }
+    });
 
     return variantMap;
 }
