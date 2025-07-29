@@ -405,6 +405,18 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+    /**
+     * By default only the selected options are serialized
+     * Settings this option to true will additionally serialize all options
+     */
+    void setSerializeAllOptions(bool b);
+
+    /**
+     * By default only the selected options are serialized
+     * @return Bool whether all options should be serialized
+     */
+    bool getSerializeAllOptions() const;
+
 public: // Action getters
 
     FileAction& getFileAction() { return _fileAction; }
@@ -429,6 +441,9 @@ protected:
 
     friend class AbstractActionsManager;
     friend class ComboBox;
+
+private:
+    bool    _serializeAllOptions;                   /** Whether all options should be serialzied, be default false */
 };
 
 }   

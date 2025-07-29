@@ -25,7 +25,8 @@ namespace mv::gui {
 OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
     WidgetAction(parent, title),
     _optionsModel({}),
-    _fileAction(*this)
+    _fileAction(*this),
+    _serializeAllOptions(false)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -242,14 +243,25 @@ void OptionsAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
+void OptionsAction::setSerializeAllOptions(bool b) {
+    _serializeAllOptions = b;
+}
+
+bool OptionsAction::getSerializeAllOptions() const {
+    return _serializeAllOptions;
+}
+
 void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Value");
     variantMapMustContain(variantMap, "IsPublic");
+    variantMapMustContain(variantMap, "SerializeAllOptions");
 
-    if (variantMap["IsPublic"].toBool())
+    setSerializeAllOptions(variantMap["SerializeAllOptions"].toBool());
+
+    if (variantMap["IsPublic"].toBool() || getSerializeAllOptions())
         setOptions(variantMap["Options"].toStringList());
 
     setSelectedOptions(variantMap["Value"].toStringList());
@@ -260,10 +272,14 @@ QVariantMap OptionsAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
+        { "SerializeAllOptions", getSerializeAllOptions() }
+        });
+
+    variantMap.insert({
         { "Value", getSelectedOptions() }
     });
 
-    if (isPublic()) {
+    if (isPublic() || getSerializeAllOptions()) {
         variantMap.insert({
             { "Options", getOptions() }
         });
