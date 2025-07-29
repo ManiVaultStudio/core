@@ -407,7 +407,7 @@ public: // Serialization
 
     /**
      * By default only the selected options are serialized
-     * Settings this option to true will additionally serialize all options
+     * Setting this option to true will additionally serialize all options
      */
     void setSerializeAllOptions(bool b);
 
@@ -443,7 +443,7 @@ protected:
     friend class ComboBox;
 
 private:
-    bool    _serializeAllOptions;                   /** Whether all options should be serialzied, be default false */
+    bool    _serializeAllOptions;                   /** Whether all options should be serialzied, by default false */
 };
 
 }   
