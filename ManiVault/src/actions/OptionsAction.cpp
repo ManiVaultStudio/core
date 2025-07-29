@@ -257,11 +257,14 @@ void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
 
     variantMapMustContain(variantMap, "Value");
     variantMapMustContain(variantMap, "IsPublic");
-    variantMapMustContain(variantMap, "SerializeAllOptions");
 
-    setSerializeAllOptions(variantMap["SerializeAllOptions"].toBool());
+    bool serializeAllOptions = false;
+    if (variantMap.contains("SerializeAllOptions")) { // backwards compatible with projects saved with core version <= 1.3
+        setSerializeAllOptions(variantMap["SerializeAllOptions"].toBool());
+        serializeAllOptions = getSerializeAllOptions();
+    }
 
-    if (variantMap["IsPublic"].toBool() || getSerializeAllOptions())
+    if (variantMap["IsPublic"].toBool() || serializeAllOptions)
         setOptions(variantMap["Options"].toStringList());
 
     setSelectedOptions(variantMap["Value"].toStringList());
