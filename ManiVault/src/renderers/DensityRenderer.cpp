@@ -42,9 +42,33 @@ QRectF DensityRenderer::computeWorldBounds() const
 {
     const auto squareSize       = std::max(getDataBounds().width(), getDataBounds().height());
     const auto squareDataBounds = QRectF(getDataBounds().center() - QPointF(squareSize / 2.f, squareSize / 2.f), QSizeF(squareSize, squareSize));
-    const auto marginX          = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().height() - 2.f * getNavigator().getZoomMarginScreen()));
-    const auto marginY          = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().width() - 2.f * getNavigator().getZoomMarginScreen()));
-    const auto margin           = std::max(marginX, marginY);
+
+    float marginX = 0.f;
+    float marginY = 0.f;
+
+    switch (getNavigator().getZoomMarginType()) {
+	    case Navigator2D::ZoomMarginType::AbsoluteScreen:
+	    {
+	        const auto zoomMarginScreen = getNavigator().getZoomMarginScreen();
+
+	        marginX = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height() - 2.f * zoomMarginScreen));
+	        marginY = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width() - 2.f * zoomMarginScreen));
+
+	        break;
+	    }
+
+	    case Navigator2D::ZoomMarginType::RelativeToData:
+	    {
+	        const auto zoomMarginData = 0.01f * getNavigator().getZoomMarginData();
+
+	        marginX = zoomMarginData * static_cast<float>(getDataBounds().height());
+	        marginY = zoomMarginData * static_cast<float>(getDataBounds().width());
+
+	        break;
+	    }
+    }
+
+	const auto margin           = std::max(marginX, marginY);
     const auto margins          = QMarginsF(margin, margin, margin, margin);
 
     return squareDataBounds.marginsAdded(margins);

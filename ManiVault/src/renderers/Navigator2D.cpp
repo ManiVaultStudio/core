@@ -132,7 +132,7 @@ void Navigator2D::initialize(QWidget* sourceWidget)
 	});
 
     connect(&_renderer, &Renderer2D::worldBoundsChanged, this, [this](const QRectF& worldBounds) -> void {
-        resetView();
+        resetView(true);
 
         if (!hasUserNavigated())
             resetView();
