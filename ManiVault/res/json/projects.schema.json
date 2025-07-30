@@ -62,9 +62,6 @@
 			"group": {
 				"type": "string"
 			},
-			"startup": {
-				"type": "boolean"
-			},
 			"url": {
 				"type": "string"
 			},
@@ -126,10 +123,6 @@
 			},
 			"date": {
 				"type": "string"
-			},
-			"size": {
-				"type": "string",
-				"pattern": "^(\\d+)([KMGTP]i?B)$"
 			},
 			"hardwareRequirements": {
 				"type": "object",
