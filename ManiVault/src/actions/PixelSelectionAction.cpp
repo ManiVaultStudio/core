@@ -157,37 +157,37 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
 
     connect(&_rectangleAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
-            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Rectangle));
+            _typeAction.setCurrentText(util::getPixelSelectionTypeName(PixelSelectionType::Rectangle));
     });
 
     connect(&_lineAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
-            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Line));
+            _typeAction.setCurrentText(util::getPixelSelectionTypeName(PixelSelectionType::Line));
     });
 
     connect(&_brushAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
-            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Brush));
+            _typeAction.setCurrentText(util::getPixelSelectionTypeName(PixelSelectionType::Brush));
     });
 
     connect(&_lassoAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
-            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Lasso));
+            _typeAction.setCurrentText(util::getPixelSelectionTypeName(PixelSelectionType::Lasso));
     });
 
     connect(&_polygonAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
-            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Polygon));
+            _typeAction.setCurrentText(util::getPixelSelectionTypeName(PixelSelectionType::Polygon));
     });
 
     connect(&_sampleAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
-            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Sample));
+            _typeAction.setCurrentText(util::getPixelSelectionTypeName(PixelSelectionType::Sample));
     });
 
     connect(&_roiAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
-            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::ROI));
+            _typeAction.setCurrentText(util::getPixelSelectionTypeName(PixelSelectionType::ROI));
     });
 
     const auto updateType = [this]() {
@@ -297,7 +297,7 @@ void PixelSelectionAction::initType()
     const auto updateType = [this]() {
         const auto type = _pixelSelectionTool->getType();
 
-        _typeAction.setCurrentText(util::pixelSelectionTypes.value(type));
+        _typeAction.setCurrentText(util::getPixelSelectionTypeName(type));
 
         _rectangleAction.setChecked(type == PixelSelectionType::Rectangle);
         _lineAction.setChecked(type == PixelSelectionType::Line);
