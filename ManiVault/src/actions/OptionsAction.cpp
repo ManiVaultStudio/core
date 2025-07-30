@@ -243,11 +243,13 @@ void OptionsAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-void OptionsAction::setSerializeAllOptions(bool b) {
-    _serializeAllOptions = b;
+void OptionsAction::setSerializeAllOptions(bool serializeAllOptions)
+{
+    _serializeAllOptions = serializeAllOptions;
 }
 
-bool OptionsAction::getSerializeAllOptions() const {
+bool OptionsAction::getSerializeAllOptions() const
+{
     return _serializeAllOptions;
 }
 
@@ -259,6 +261,7 @@ void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "IsPublic");
 
     bool serializeAllOptions = false;
+
     if (variantMap.contains("SerializeAllOptions")) { // backwards compatible with projects saved with core version <= 1.3
         setSerializeAllOptions(variantMap["SerializeAllOptions"].toBool());
         serializeAllOptions = getSerializeAllOptions();
@@ -276,7 +279,7 @@ QVariantMap OptionsAction::toVariantMap() const
 
     variantMap.insert({
         { "SerializeAllOptions", getSerializeAllOptions() }
-        });
+    });
 
     variantMap.insert({
         { "Value", getSelectedOptions() }

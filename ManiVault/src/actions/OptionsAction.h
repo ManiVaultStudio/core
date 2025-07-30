@@ -395,7 +395,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant map
-     * @param Variant map representation of the widget action
+     * @param variantMap Variant map representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -406,14 +406,15 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
     /**
-     * By default only the selected options are serialized
+     * Set whether all options should be serialized to \p serializeAllOptions
+     * By default, only the selected options are serialized
      * Setting this option to true will additionally serialize all options
      */
-    void setSerializeAllOptions(bool b);
+    void setSerializeAllOptions(bool serializeAllOptions);
 
     /**
-     * By default only the selected options are serialized
-     * @return Bool whether all options should be serialized
+     * By default, only the selected options are serialized
+     * @return Boolean determining whether all options should be serialized
      */
     bool getSerializeAllOptions() const;
 
