@@ -141,10 +141,14 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     });
 
     connect(&mv::projects().getProjectSerializationTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-        if (previousStatus == Task::Status::Running && status == Task::Status::Finished)
-            QTimer::singleShot(2500, parentWidget(), [this]() -> void {
-	            closeSplashScreenWidget();
-        });
+        if (previousStatus == Task::Status::Running && status == Task::Status::Finished) {
+            QPointer<SplashScreenAction> splashScreenAction(this);
+
+            QTimer::singleShot(2500, parentWidget(), [this, splashScreenAction]() -> void {
+                if (!splashScreenAction.isNull())
+					closeSplashScreenWidget();
+			});
+        }
     });
 }
 

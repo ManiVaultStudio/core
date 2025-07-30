@@ -136,7 +136,7 @@ public: // Conditional
                 conditions.push_back(lhs->lessThan(*rhs));
         }
 
-        return std::ranges::all_of(conditions.begin(), conditions.end(), [](bool condition) { return condition; });
+        return std::all_of(conditions.begin(), conditions.end(), [](bool condition) { return condition; });
     }
 
     /**
