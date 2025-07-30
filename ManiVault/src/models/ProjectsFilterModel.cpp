@@ -35,9 +35,8 @@ ProjectsFilterModel::ProjectsFilterModel(QObject* parent /*= nullptr*/) :
     setRowTypeName("Project");
 
     _tagsFilterAction.setIconByName("tag");
-    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::WidgetFlag::Tags | OptionsAction::WidgetFlag::Selection);
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _tagsFilterAction.setPopupSizeHint(QSize(400, 100));
+    _tagsFilterAction.setPopupSizeHint(QSize(400, 0));
 
     const auto applicationVersion = Application::current()->getVersion();
 
@@ -85,7 +84,7 @@ bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
         const auto tagsList         = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::Tags)).data(Qt::EditRole).toStringList();
         const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
 
-        if (_tagsFilterAction.hasOptions()) {
+        if (_tagsFilterAction.hasSelectedOptions()) {
             bool matchTags = std::any_of(tagsList.begin(), tagsList.end(), [&](const QString& tag) {
                 return filterTagsList.contains(tag);
             });
@@ -128,6 +127,8 @@ void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
 
         if (uniqueTags == _tagsFilterAction.getOptions())
             return;
+
+        const auto firstTime = _tagsFilterAction.getOptions().isEmpty();
 
         _tagsFilterAction.setOptions(uniqueTags);
     	_tagsFilterAction.setSelectedOptions(_tagsFilterAction.hasSelectedOptions() ? _tagsFilterAction.getSelectedOptions() : uniqueTags);
