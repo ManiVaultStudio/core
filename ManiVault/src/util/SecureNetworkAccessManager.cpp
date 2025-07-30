@@ -13,7 +13,7 @@ QNetworkReply* SecureNetworkAccessManager::createRequest(Operation op, const QNe
 	const auto url = request.url();
 
     if (url.scheme() != "https") {
-        mv::help().addNotification("Network error", QString("For your safety, the network access manager blocked a non-HTTPS request: %1").arg(url.toString()));
+        mv::help().addNotification("Network error", QString("For your safety, the network access manager blocked a non-HTTPS request: %1").arg(url.toString()), StyledIcon("shield-halved"));
 
         return new HttpsErrorReply(request, this);
     }
