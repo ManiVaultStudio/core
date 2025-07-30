@@ -563,6 +563,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/RecentFile.h
     src/util/Model.h
     src/util/View.h
+    src/util/SecureNetworkAccessManager.h
+    src/util/HttpsErrorReply.h
 )
 
 if(APPLE)
@@ -620,6 +622,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/RecentFile.cpp
 	src/util/Model.cpp
 	src/util/View.cpp
+	src/util/SecureNetworkAccessManager.cpp
+	src/util/HttpsErrorReply.cpp
 )
 
 if(APPLE)

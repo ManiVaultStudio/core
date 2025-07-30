@@ -17,6 +17,8 @@
 
 namespace mv::util {
 
+class SecureNetworkAccessManager;
+
 /**
  * File downloader class
  * Help class for simplifying file download
@@ -33,11 +35,7 @@ public:
      * Get the shared network access manager instance
      * @return Reference to the shared QNetworkAccessManager instance
      */
-	static QNetworkAccessManager& sharedManager()
-    {
-        static QNetworkAccessManager instance;
-        return instance;
-    }
+	static SecureNetworkAccessManager& sharedManager();
 
     /** 
      * Download file to byte array asynchronously

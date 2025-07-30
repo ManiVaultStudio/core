@@ -3,9 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "FileDownloader.h"
-
-#include "Task.h"
+#include "SecureNetworkAccessManager.h"
 #include "Application.h"
+#include "Task.h"
 
 #include <QThread>
 
@@ -14,6 +14,12 @@
 #endif
 
 namespace mv::util {
+
+SecureNetworkAccessManager& FileDownloader::sharedManager()
+{
+	static SecureNetworkAccessManager instance;
+	return instance;
+}
 
 QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Task* task /*= nullptr*/)
 {
