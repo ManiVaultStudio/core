@@ -414,8 +414,7 @@ public: // Serialization
     void setSerializeAllOptions(bool serializeAllOptions);
 
     /**
-     * By default, only the selected options are serialized
-     * @return Boolean determining whether all options should be serialized
+     * @return Boolean determining whether all options should be serialized (by default, only the selected options are serialized)
      */
     bool getSerializeAllOptions() const;
 
