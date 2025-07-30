@@ -2,26 +2,23 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "View.h"
+#include "SecureNetworkAccessManager.h"
+#include "HttpsErrorReply.h"
 
 namespace mv::util
 {
 
-void TextElideDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
+QNetworkReply* SecureNetworkAccessManager::createRequest(Operation op, const QNetworkRequest& request, QIODevice* outgoingData)
 {
-	QStyledItemDelegate::initStyleOption(option, index);
+	const auto url = request.url();
 
-	option->textElideMode = _textElideMode;
-}
+    if (url.scheme() != "https") {
+        mv::help().addNotification("Network error", QString("For your safety, the network access manager blocked a non-HTTPS request: %1").arg(url.toString()));
 
-Qt::TextElideMode TextElideDelegate::getTextElideMode() const
-{
-	return _textElideMode;
-}
+        return new HttpsErrorReply(request, this);
+    }
 
-void TextElideDelegate::setTextElideMode(const Qt::TextElideMode& textElideMode)
-{
-	_textElideMode = textElideMode;
+	return QNetworkAccessManager::createRequest(op, request, outgoingData);
 }
 
 }

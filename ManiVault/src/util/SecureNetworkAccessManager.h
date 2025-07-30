@@ -6,49 +6,41 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QStyledItemDelegate>
+#include "CoreInterface.h"
+
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
 namespace mv::util
 {
 
 /**
- * Text elide delegate class
+ * Secure network access manager class
  *
- * To override the default right middle elision QTreeView, you need to apply it
- * via the item delegate, because Qt's item views (like QTreeView) does not support
- * other text elisions natively.
+ * For secure, HTTPS-based, network access management.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT TextElideDelegate : public QStyledItemDelegate
-{
+class SecureNetworkAccessManager : public QNetworkAccessManager {
+
+	Q_OBJECT
+
 public:
 
-    /** No need for custom constructor*/
-    using QStyledItemDelegate::QStyledItemDelegate;
+    /** No need for custom constructor */
+    using QNetworkAccessManager::QNetworkAccessManager;
+
+protected:
 
     /**
-     * Re-implement the initStyleOption method to set the text elide mode to Qt::ElideMiddle
-     * @param option Style option to initialize
-     * @param index Model index
+     * Create a network request, but block non-HTTPS requests
+     * @param op Operation to perform
+     * @param request Network request to create
+     * @param outgoingData Optional data to send with the request
+     * @return Pointer to the created network reply, or nullptr if the request is blocked
      */
-    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
-
-    /**
-     * Get the text elide mode
-     * @return Text elide mode
-     */
-    Qt::TextElideMode getTextElideMode() const;
-
-    /**
-     * Set the text elide mode to \p textElideMode
-     * @param textElideMode Text elide mode to set
-     */
-    void setTextElideMode(const Qt::TextElideMode& textElideMode);
-
-private:
-    Qt::TextElideMode _textElideMode = Qt::ElideRight;  /** Text elide mode to use */
+    QNetworkReply* createRequest(Operation op, const QNetworkRequest& request, QIODevice* outgoingData = nullptr) override;
 };
-
 
 }
