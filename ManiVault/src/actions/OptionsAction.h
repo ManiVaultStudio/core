@@ -395,7 +395,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant map
-     * @param Variant map representation of the widget action
+     * @param variantMap Variant map representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -404,6 +404,20 @@ public: // Serialization
      * @return Variant map representation of the widget action
      */
     QVariantMap toVariantMap() const override;
+
+    /**
+     * Set whether all options should be serialized to \p serializeAllOptions
+     * By default, only the selected options are serialized
+     * Setting this option to true will additionally serialize all options
+     * @param serializeAllOptions Boolean determining whether all options should be serialized
+     */
+    void setSerializeAllOptions(bool serializeAllOptions);
+
+    /**
+     * Get whether all options should be serialized
+     * @return Boolean determining whether all options should be serialized (by default, only the selected options are serialized)
+     */
+    bool getSerializeAllOptions() const;
 
 public: // Action getters
 
@@ -429,6 +443,9 @@ protected:
 
     friend class AbstractActionsManager;
     friend class ComboBox;
+
+private:
+    bool    _serializeAllOptions;                   /** Whether all options should be serialzied, by default false */
 };
 
 }   
