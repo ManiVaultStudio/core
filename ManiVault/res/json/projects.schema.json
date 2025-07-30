@@ -62,6 +62,9 @@
 			"group": {
 				"type": "string"
 			},
+			"startup": {
+				"type": "boolean"
+			},
 			"url": {
 				"type": "string"
 			},
