@@ -56,8 +56,6 @@ QMenu* RecentFilesAction::getMenu(QWidget* parent)
 
     	connect(openRecentFileAction, &TriggerAction::triggered, this, [this, recentFile]() -> void {
 			emit triggered(recentFile.getFilePath());
-
-			mv::projects().openProject(recentFile.getFilePath());
 		});
 
     	menu->addAction(openRecentFileAction);
