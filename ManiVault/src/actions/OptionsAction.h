@@ -409,6 +409,7 @@ public: // Serialization
      * Set whether all options should be serialized to \p serializeAllOptions
      * By default, only the selected options are serialized
      * Setting this option to true will additionally serialize all options
+     * @param serializeAllOptions Boolean determining whether all options should be serialized
      */
     void setSerializeAllOptions(bool serializeAllOptions);
 
