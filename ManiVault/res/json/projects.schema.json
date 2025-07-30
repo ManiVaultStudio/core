@@ -127,10 +127,6 @@
 			"date": {
 				"type": "string"
 			},
-			"size": {
-				"type": "string",
-				"pattern": "^(\\d+)([KMGTP]i?B)$"
-			},
 			"hardwareRequirements": {
 				"type": "object",
 				"properties": {
