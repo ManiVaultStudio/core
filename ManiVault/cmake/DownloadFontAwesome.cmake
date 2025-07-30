@@ -5,6 +5,7 @@ set(FONT_AWESOME_VERSIONS
     6.4.0
     6.5.0
     6.7.2
+	7.0.0
 )
 
 set(TEMP_DIR "${CMAKE_BINARY_DIR}/Font-Awesome-Resources")
