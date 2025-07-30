@@ -25,7 +25,8 @@ namespace mv::gui {
 OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
     WidgetAction(parent, title),
     _optionsModel({}),
-    _fileAction(*this)
+    _fileAction(*this),
+    _serializeAllOptions(false)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -242,6 +243,16 @@ void OptionsAction::disconnectFromPublicAction(bool recursive)
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 
+void OptionsAction::setSerializeAllOptions(bool serializeAllOptions)
+{
+    _serializeAllOptions = serializeAllOptions;
+}
+
+bool OptionsAction::getSerializeAllOptions() const
+{
+    return _serializeAllOptions;
+}
+
 void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
@@ -249,7 +260,14 @@ void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Value");
     variantMapMustContain(variantMap, "IsPublic");
 
-    if (variantMap["IsPublic"].toBool())
+    bool serializeAllOptions = false;
+
+    if (variantMap.contains("SerializeAllOptions")) { // backwards compatible with projects saved with core version <= 1.3
+        setSerializeAllOptions(variantMap["SerializeAllOptions"].toBool());
+        serializeAllOptions = getSerializeAllOptions();
+    }
+
+    if (variantMap["IsPublic"].toBool() || serializeAllOptions)
         setOptions(variantMap["Options"].toStringList());
 
     setSelectedOptions(variantMap["Value"].toStringList());
@@ -260,10 +278,14 @@ QVariantMap OptionsAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
+        { "SerializeAllOptions", getSerializeAllOptions() }
+    });
+
+    variantMap.insert({
         { "Value", getSelectedOptions() }
     });
 
-    if (isPublic()) {
+    if (isPublic() || getSerializeAllOptions()) {
         variantMap.insert({
             { "Options", getOptions() }
         });
