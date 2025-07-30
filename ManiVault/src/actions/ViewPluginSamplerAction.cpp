@@ -406,6 +406,12 @@ void ViewPluginSamplerAction::moveToolTipLabel()
 {
     auto parentWidget   = &_viewPlugin->getWidget();
     auto targetWidget   = _pixelSelectionAction->getTargetWidget();
+
+    Q_ASSERT(targetWidget);
+
+    if (!targetWidget)
+        return;
+
     auto globalPosition = _viewPlugin->getWidget().mapFromGlobal(QCursor::pos()) + QPoint(12, 12);
 
     if (globalPosition.x() + _toolTipLabel.width() > targetWidget->width())
