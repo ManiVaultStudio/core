@@ -44,7 +44,7 @@ public:
 
     /**
      * Copy construct from \p other styled icon
-     * @param icon 
+     * @param other Icon to copy from
      */
     explicit StyledIcon(const QIcon& other);
 
