@@ -268,6 +268,8 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
     auto& projectsTreeModel     = const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel());
     auto& projectsPageTreeModel = _projectsWidget.getModel();
 
+    _projectsFilterModel.getFilterGroupAction().addAction(&_projectsFilterModel.getTagsFilterAction());
+
     auto& toolbarAction = hierarchyWidget.getToolbarAction();
 
     toolbarAction.removeAllActions();
@@ -275,7 +277,6 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
     toolbarAction.addAction(&hierarchyWidget.getExpandAllAction());
     toolbarAction.addAction(&hierarchyWidget.getCollapseAllAction());
     toolbarAction.addAction(&_projectsFilterModel.getFilterGroupAction());
-    toolbarAction.addAction(&_projectsFilterModel.getTagsFilterAction());
     toolbarAction.addAction(&projectsTreeModel.getDsnsAction());
 
     const auto addProjectPageAction = [this, &projectsPageTreeModel](ProjectsModelProjectSharedPtr project) -> PageActionSharedPtr {
