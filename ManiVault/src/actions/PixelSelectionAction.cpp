@@ -18,7 +18,6 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _initialized(false),
     _targetWidget(nullptr),
     _pixelSelectionTool(nullptr),
-    _pixelSelectionTypes(),
     _overlayColorAction(this, "Overlay color", QColor(255, 0, 0)),
     _overlayOpacityAction(this, "Overlay opacity", 0.0f, 100.0f, 75.0f, 1),
     _typeModel(this),
@@ -191,10 +190,10 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     });
 
     const auto updateType = [this]() {
-        _brushRadiusAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Brush) ||_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Sample));
+        _brushRadiusAction.setEnabled(_typeAction.getCurrentText() == util::getPixelSelectionTypeName(PixelSelectionType::Brush) || _typeAction.getCurrentText() == util::getPixelSelectionTypeName(PixelSelectionType::Sample));
 
-        _lineWidthAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Line));
-        _lineAngleAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Line));
+        _lineWidthAction.setEnabled(_typeAction.getCurrentText() == util::getPixelSelectionTypeName(PixelSelectionType::Line));
+        _lineAngleAction.setEnabled(_typeAction.getCurrentText() == util::getPixelSelectionTypeName(PixelSelectionType::Line));
     };
 
     updateType();
