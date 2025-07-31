@@ -26,8 +26,8 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
 
     _toolbarAction.addAction(&_tutorialsFilterModel.getTextFilterAction());
     _toolbarAction.addAction(const_cast<StringsAction*>(&mv::help().getTutorialsModel().getDsnsAction()));
-    _toolbarAction.addAction(&_tutorialsFilterModel.getFilterGroupAction());
-    _toolbarAction.addAction(&_tutorialsFilterModel.getTagsFilterAction());
+
+	_tutorialsFilterModel.getFilterGroupAction().addAction(&_tutorialsFilterModel.getTagsFilterAction());
 
     getHierarchyWidget().getToolbarAction().setVisible(false);
     getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
