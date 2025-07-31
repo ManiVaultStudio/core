@@ -35,7 +35,6 @@ LearningCenterTutorialsFilterModel::LearningCenterTutorialsFilterModel(QObject* 
 
     _tagsFilterAction.setIconByName("tag");
     _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _tagsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags | OptionsAction::Selection);
     _tagsFilterAction.setPopupSizeHint(QSize(500, 350));
 
     const auto applicationVersion = Application::current()->getVersion();
