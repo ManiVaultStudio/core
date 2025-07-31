@@ -50,19 +50,22 @@ void StringsAction::setStrings(const QStringList& strings)
     if (strings == getStrings())
         return;
 
-    _stringsModel.setStringList(strings);
+    const auto previousStrings = getStrings();
+
+	_stringsModel.setStringList(strings);
 
     emit stringsChanged(getStrings());
 
-    auto removedStrings = getStrings();
-    auto addedStrings   = strings;
+	QStringList addedStrings, removedStrings;
 
-    for (const auto& item : strings) {
-        removedStrings.removeAll(item);
+    for (const QString& string : strings) {
+        if (!previousStrings.contains(string))
+			addedStrings.push_back(string);
     }
 
-    for (const QString& item : getStrings()) {
-        addedStrings.removeAll(item);
+    for (const auto& previousString : previousStrings) {
+        if (!strings.contains(previousString))
+			removedStrings.push_back(previousString);
     }
 
     if (!addedStrings.isEmpty())

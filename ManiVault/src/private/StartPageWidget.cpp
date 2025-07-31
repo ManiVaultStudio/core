@@ -42,6 +42,7 @@ StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
     _configurationAction.addAction(&_fileAction);
     _configurationAction.addAction(&getLogoAction());
     _configurationAction.addAction(&getTitleAction());
+    _configurationAction.addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction());
 
     _loadAction.setIconByName("folder-open");
     _loadAction.setToolTip("Open configuration");

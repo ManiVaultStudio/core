@@ -104,6 +104,9 @@ void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
 
         QByteArray data = jsonFile.readAll();
 
+        if (data.isEmpty())
+            throw std::runtime_error("No data read");
+
         auto jsonDocument = QJsonDocument::fromJson(data);
 
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
@@ -113,10 +116,10 @@ void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to load data from JSON file", e);
+        qCritical() << "Unable to load data from JSON file: " << e.what();
     }
     catch (...) {
-        exceptionMessageBox("Unable to load data from JSON file");
+        qCritical() << "Unable to load data from JSON file due to an unhandled exception";
     }
 }
 

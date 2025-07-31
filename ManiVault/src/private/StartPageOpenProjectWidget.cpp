@@ -405,10 +405,12 @@ void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
 {
 	Serializable::fromVariantMap(variantMap);
 
-    _openCreateProjectWidget.fromParentVariantMap(variantMap);
-    _recentProjectsWidget.fromParentVariantMap(variantMap);
-    _projectsWidget.fromParentVariantMap(variantMap);
-    _projectsFilterModel.fromParentVariantMap(variantMap);
+    _openCreateProjectWidget.fromParentVariantMap(variantMap, true);
+    _recentProjectsWidget.fromParentVariantMap(variantMap, true);
+    _projectsWidget.fromParentVariantMap(variantMap, true);
+    _projectsFilterModel.fromParentVariantMap(variantMap, true);
+
+    const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction().fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap StartPageOpenProjectWidget::toVariantMap() const
@@ -419,6 +421,8 @@ QVariantMap StartPageOpenProjectWidget::toVariantMap() const
     _recentProjectsWidget.insertIntoVariantMap(variantMap);
     _projectsWidget.insertIntoVariantMap(variantMap);
     _projectsFilterModel.insertIntoVariantMap(variantMap);
+
+    mv::projects().getProjectsTreeModel().getDsnsAction().insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
