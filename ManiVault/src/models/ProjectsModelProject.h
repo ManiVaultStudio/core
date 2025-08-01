@@ -56,16 +56,52 @@ public:
     QString getTooltip() const;
 
     /**
-     * Get last modified date
-     * @return Last modified date
+     * Get server last modified date
+     * @return Server last modified date
      */
-    QDateTime getLastModified() const;
+    QDateTime getServerLastModified() const;
+
+    /**
+     * Get server download size
+     * @return Server download size of the project in bytes
+     */
+    std::int64_t getServerDownloadSize() const;
+
+    /**
+     * Get user-specified download size (as specified in the JSON file)
+     * @return User-specified download size of the project in bytes
+     */
+    std::int64_t getUserSpecifiedDownloadSize() const;
+
+    /**
+     * Get download size (returns user-specified download size if available and server download size otherwise)
+     * @return Download size of the project in bytes
+     */
+    std::int64_t getDownloadSize() const;
+
+    /**
+     * Get human-readable download size
+     * @return Human-readable download size of the project in bytes
+     */
+    QString getDownloadSizeHumanReadable() const;
 
     /**
      * Get whether project has been downloaded before
      * @return Boolean determining whether project has been downloaded before
      */
     bool isDownloaded() const;
+
+    /**
+     * Get whether the downloaded project is stale (if there is any)
+     * @return Boolean determining whether the downloaded project is stale
+     */
+    bool isDownloadedProjectStale() const;
+
+    /**
+     * Get whether the project requires download
+     * @return Boolean determining whether the project requires download
+     */
+    bool requiresDownload() const;
 
     /** Flag the project as downloaded */
     void setDownloaded();
@@ -129,12 +165,6 @@ public:
      * @return Missing plugins
      */
     QStringList getMissingPlugins() const;
-
-    /**
-     * Get download size
-     * @return Download size of the ManiVault project in bytes
-     */
-    std::uint64_t getDownloadSize() const;
 
     /**
      * Get minimum hardware specification
@@ -201,7 +231,9 @@ public:
     ProjectsModelProject& operator=(const ProjectsModelProject& rhs)
     {
         _title                      = rhs.getTitle();
-        _lastModified               = rhs.getLastModified();
+        _serverLastModified         = rhs.getServerLastModified();
+        _serverDownloadSize         = rhs.getServerDownloadSize();
+        _userSpecifiedDownloadSize  = rhs.getUserSpecifiedDownloadSize();
         _group                      = rhs.getGroup();
     	_isGroup                    = rhs.isGroup();
         _tags                       = rhs.getTags();
@@ -212,7 +244,6 @@ public:
         _minimumCoreVersion         = rhs.getMinimumCoreVersion();
         _requiredPlugins            = rhs.getRequiredPlugins();
         _missingPlugins             = rhs.getMissingPlugins();
-        _downloadSize               = rhs.getDownloadSize();
         _minimumHardwareSpec        = rhs.getMinimumHardwareSpec();
         _recommendedHardwareSpec    = rhs.getRecommendedHardwareSpec();
         _startup                    = rhs.isStartup();
@@ -248,6 +279,24 @@ private:
     /** Update project tooltip */
     void updateTooltip();
 
+    /**
+     * Get the file path where the project has been downloaded to
+     * @return File path of the downloaded project file
+     */
+    QString getDownloadedProjectFilePath() const;
+
+    /**
+     * Get the size of the downloaded project file
+     * @return Size of the downloaded project file in bytes
+     */
+    std::uint64_t getDownloadedProjectFileSize() const;
+
+    /**
+     * Get the date and time when the downloaded project was last modified
+     * @return Last modified date and time of the downloaded project
+     */
+    QDateTime getDownloadedProjectLastModified() const;
+
 signals:
 
     /**
@@ -278,27 +327,28 @@ signals:
     void tooltipChanged(const QString& tooltip);
 
 private:
-    QString         _title;                     /** Title */
-    QDateTime       _lastModified;              /** Last modified date */
-    bool            _isGroup;                   /** Boolean determining whether this is a group or a project */
-    QString         _group;                     /** Group */
-    QStringList     _tags;                      /** Tags */
-    QString         _date;                      /** Issue date */
-    QString         _iconName;                  /** Font Awesome icon name */
-    QString         _summary;                   /** Summary (brief description) */
-    QUrl            _url;                       /** Project URL */
-    Version         _minimumCoreVersion;        /** Minimum supported ManiVault Studio major version */
-    QStringList     _requiredPlugins;           /** Required plugins */
-    QStringList     _missingPlugins;            /** Missing plugins */
-    std::uint64_t   _downloadSize;              /** Download size of the ManiVault project */
-    HardwareSpec    _minimumHardwareSpec;       /** Minimum hardware specification for the project */
-    HardwareSpec    _recommendedHardwareSpec;   /** Recommended hardware specification for the project */
-    bool            _startup;                   /** Boolean determining whether this is a startup project */
-    QString         _sha;                       /** SHA-256 hash of the project (for comparison purposes) */
-    QUrl            _projectsJsonDsn;           /** Data Source Name (DSN) of the projects JSON file, used for loading the project */
-    bool            _expanded;                  /** Boolean determining whether the project is expanded in the model */
-    QIcon           _icon;                      /** Icon for the project (group) */
-    QString         _tooltip;                   /** Tooltip for the project (group) */
+    QString         _title;                         /** Title */
+    QDateTime       _serverLastModified;            /** Last modified date of the project file on the server */
+    std::int64_t    _serverDownloadSize;            /** Download size of the project file on the server */
+    std::int64_t    _userSpecifiedDownloadSize;     /** Download size of the project file as specified in the projects JSON file */
+    bool            _isGroup;                       /** Boolean determining whether this is a group or a project */
+    QString         _group;                         /** Group */
+    QStringList     _tags;                          /** Tags */
+    QString         _date;                          /** Issue date */
+    QString         _iconName;                      /** Font Awesome icon name */
+    QString         _summary;                       /** Summary (brief description) */
+    QUrl            _url;                           /** Project URL */
+    Version         _minimumCoreVersion;            /** Minimum supported ManiVault Studio major version */
+    QStringList     _requiredPlugins;               /** Required plugins */
+    QStringList     _missingPlugins;                /** Missing plugins */
+    HardwareSpec    _minimumHardwareSpec;           /** Minimum hardware specification for the project */
+    HardwareSpec    _recommendedHardwareSpec;       /** Recommended hardware specification for the project */
+    bool            _startup;                       /** Boolean determining whether this is a startup project */
+    QString         _sha;                           /** SHA-256 hash of the project (for comparison purposes) */
+    QUrl            _projectsJsonDsn;               /** Data Source Name (DSN) of the projects JSON file, used for loading the project */
+    bool            _expanded;                      /** Boolean determining whether the project is expanded in the model */
+    QIcon           _icon;                          /** Icon for the project (group) */
+    QString         _tooltip;                       /** Tooltip for the project (group) */
 };
 
 using ProjectsModelProjectSharedPtr   = std::shared_ptr<ProjectsModelProject>;

@@ -646,7 +646,7 @@ void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, co
             const auto updateTreeViewVisibility = [treeViews, recommendedCheckBox]() -> void {
                 treeViews.first()->setVisible(!recommendedCheckBox->isChecked());
                 treeViews.last()->setVisible(recommendedCheckBox->isChecked());
-                };
+            };
 
             updateTreeViewVisibility();
 
@@ -668,12 +668,13 @@ void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, co
 
             if (projectIncompatibleWithSystemDialog.exec() == QDialog::Accepted) {
                 projects().openProject(project->getUrl());
-
-                project->setDownloaded();
             }
         } else {
             openProject(project->getUrl(), targetDirectory, importDataOnly, loadWorkspace);
         }
+
+        if (!project->getUrl().isLocalFile())
+            project->setDownloaded();
     }
     catch (std::exception& e)
     {
@@ -1211,59 +1212,42 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
 QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/, Task* task /*= nullptr*/)
 {
     try {
-	    const auto fileName                 = QFileInfo(url.toString()).fileName();
-	    const auto existingProjectFilePath  = getDownloadedProjectsDir().filePath(fileName);
-
+	    const auto fileName                         = url.fileName();
+	    const auto downloadedProjectFilePath        = getDownloadedProjectsDir().filePath(fileName);
+        const auto downloadedProjectFileInfo        = QFileInfo(downloadedProjectFilePath);
+    	const auto downloadedProjectLastModified    = downloadedProjectFileInfo.lastModified();
+	    const auto downloadedProjectSize            = static_cast<std::uint64_t>(downloadedProjectFileInfo.size());
+        
         auto shouldDownloadProject = false;
 
-        if (!fileName.isEmpty() && QFile::exists(existingProjectFilePath)) {
-            const auto serverLastModified = FileDownloader::getLastModifiedSync(url);
+        if (downloadedProjectFileInfo.exists()) {
+            const auto serverLastModified   = FileDownloader::getLastModifiedSync(url);
+            const auto serverDownloadSize   = FileDownloader::getDownloadSizeSync(url);
 
-            QFileInfo existingProjectFile(existingProjectFilePath);
+            if (downloadedProjectFileInfo.exists()) {
+                const auto serverHasNewerProjectFile    = serverLastModified.isValid() && serverLastModified > downloadedProjectLastModified;
+                const auto serverProjectFileSizeDiffers = serverDownloadSize > 0 && serverDownloadSize != downloadedProjectSize;
 
-            if (existingProjectFile.exists()) {
-            	const auto localModified = existingProjectFile.lastModified();
+            	if (serverHasNewerProjectFile || serverProjectFileSizeDiffers) {
+            		QMessageBox downloadQuestionMessageBox;
 
-            	if (serverLastModified > localModified) {
-            		QMessageBox downloadNewerMessageBox;
+            		downloadQuestionMessageBox.setWindowIcon(StyledIcon("download"));
+            		downloadQuestionMessageBox.setWindowTitle(QString("Updated project available...").arg(fileName));
+            		downloadQuestionMessageBox.setText(QString("An updated version of %1 is available on the server. Do you want to download it?").arg(fileName));
+            		downloadQuestionMessageBox.setIcon(QMessageBox::Warning);
 
-            		downloadNewerMessageBox.setWindowIcon(StyledIcon("download"));
-            		downloadNewerMessageBox.setWindowTitle(QString("Newer project available...").arg(fileName));
-            		downloadNewerMessageBox.setText(QString("A newer version of %1 is available on the server. Do you want to download it?").arg(fileName));
-            		downloadNewerMessageBox.setIcon(QMessageBox::Warning);
+            		auto yesButton = downloadQuestionMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+            		auto noButton = downloadQuestionMessageBox.addButton("No", QMessageBox::RejectRole);
 
-            		auto yesButton = downloadNewerMessageBox.addButton("Yes", QMessageBox::AcceptRole);
-            		auto noButton = downloadNewerMessageBox.addButton("No", QMessageBox::RejectRole);
+            		downloadQuestionMessageBox.setDefaultButton(noButton);
+            		downloadQuestionMessageBox.exec();
 
-            		downloadNewerMessageBox.setDefaultButton(noButton);
-            		downloadNewerMessageBox.exec();
-
-            		if (downloadNewerMessageBox.clickedButton() == yesButton) {
-            			QFile::remove(existingProjectFilePath);
+            		if (downloadQuestionMessageBox.clickedButton() == yesButton) {
+            			QFile::remove(downloadedProjectFilePath);
 
             			shouldDownloadProject = true;
             		}
             	}
-            	//else {
-            	//    QMessageBox downloadAgainMessageBox;
-
-            	//    downloadAgainMessageBox.setWindowIcon(StyledIcon("download"));
-            	//    downloadAgainMessageBox.setWindowTitle(QString("%1 already exists...").arg(fileName));
-            	//    downloadAgainMessageBox.setText(QString("%1 was downloaded before. Do you want to download it again?").arg(fileName));
-            	//    downloadAgainMessageBox.setIcon(QMessageBox::Warning);
-
-            	//    auto yesButton = downloadAgainMessageBox.addButton("Yes", QMessageBox::AcceptRole);
-            	//    auto noButton = downloadAgainMessageBox.addButton("No", QMessageBox::RejectRole);
-
-            	//    downloadAgainMessageBox.setDefaultButton(noButton);
-            	//    downloadAgainMessageBox.exec();
-
-            	//    if (downloadAgainMessageBox.clickedButton() == yesButton) {
-            	//        QFile::remove(existingProjectFilePath);
-
-            	//        shouldDownloadProject = true;
-            	//    }
-            	//}
             }
             else {
             	shouldDownloadProject = true;
@@ -1276,7 +1260,7 @@ QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory
         if (shouldDownloadProject)
             return FileDownloader::downloadToFileSync(url, targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "", task ? task : &getProjectDownloadTask());
 
-    	return existingProjectFilePath;
+    	return downloadedProjectFilePath;
     }
     catch (std::exception& e)
     {

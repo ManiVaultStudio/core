@@ -127,6 +127,10 @@
 			"date": {
 				"type": "string"
 			},
+			"downloadSize": {
+				"type": "string",
+				"pattern": "^(\\d+)([KMGTP]i?B)$"
+			},
 			"hardwareRequirements": {
 				"type": "object",
 				"properties": {

@@ -308,20 +308,28 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
 
             projectPageAction->createSubAction<ProjectCompatibilityPageSubAction>(HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec()));
 
+            const auto updateMetadata = [projectPageAction, project]() -> void {
+                projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(project->getDownloadSizeHumanReadable()));
+            };
+
+            updateMetadata();
+
         	auto lastUpdatedPageSubAction = projectPageAction->createSubAction<ProjectLastUpdatedPageSubAction>();
 
-            connect(project.get(), &ProjectsModelProject::lastModifiedDetermined, projectPageAction.get(), [project, lastUpdatedPageSubAction](const QDateTime& lastModified) {
-                lastUpdatedPageSubAction->setProjectLastUpdated(lastModified);
+            if (!project->getServerLastModified().isValid()) {
+                connect(project.get(), &ProjectsModelProject::lastModifiedDetermined, projectPageAction.get(), [project, lastUpdatedPageSubAction](const QDateTime& lastModified) {
+                    lastUpdatedPageSubAction->setProjectLastUpdated(lastModified);
+				});
+            }
+
+            if (project->getServerDownloadSize() == 0) {
+                connect(project.get(), &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), updateMetadata);
+            }
+
+            connect(project.get(), &ProjectsModelProject::downloaded, projectPageAction.get(), [updateMetadata]() -> void {
+                updateMetadata();
             });
 
-            if (project->getDownloadSize() == 0) {
-                connect(project.get(), &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), [projectPageAction, project](std::uint64_t size) {
-                    projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(size)));
-                });
-            }
-            else {
-                projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(project->getDownloadSize())));
-            }
         } else {
             projectPageAction->setExpanded(false);
         }

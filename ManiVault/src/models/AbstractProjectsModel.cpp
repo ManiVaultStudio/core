@@ -508,7 +508,7 @@ QVariant AbstractProjectsModel::LastModifiedItem::data(int role) const
 {
     switch (role) {
 	    case Qt::EditRole:
-	        return getProject()->getLastModified();
+	        return getProject()->getServerLastModified();
 
 	    case Qt::DisplayRole:
 	        return data(Qt::EditRole).toDateTime().toString();
@@ -748,7 +748,7 @@ QVariant AbstractProjectsModel::DownloadSizeItem::data(int role) const
 {
     switch (role) {
 		case Qt::EditRole:
-            return QVariant::fromValue(getProject()->getDownloadSize());
+            return QVariant::fromValue(getProject()->getServerDownloadSize());
 
 		case Qt::DisplayRole:
             return getNoBytesHumanReadable(data(Qt::EditRole).toULongLong());

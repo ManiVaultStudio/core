@@ -18,6 +18,8 @@ namespace mv::util {
 
 ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
+    _serverDownloadSize(0),
+    _userSpecifiedDownloadSize(variantMap.contains("downloadSize") ? parseByteSize(variantMap["downloadSize"].toString()) : 0),
     _isGroup(false),
     _group(variantMap.contains("group") ? variantMap["group"].toString() : ""),
     _tags(variantMap.contains("tags") ? variantMap["tags"].toStringList() : QStringList()),
@@ -25,7 +27,6 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _iconName(variantMap.contains("icon") ? variantMap["icon"].toString() : "database"),
     _summary(variantMap.contains("summary") ? variantMap["summary"].toString() : ""),
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
-    _downloadSize(0),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
 	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false),
@@ -85,9 +86,9 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
 
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _title(groupTitle),
-    _isGroup(true),
+    _serverDownloadSize(0),
+	_isGroup(true),
     _iconName("folder"),
-    _downloadSize(0),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
     _expanded(false)
@@ -106,23 +107,75 @@ QString ProjectsModelProject::getTooltip() const
     return _tooltip;
 }
 
-QDateTime ProjectsModelProject::getLastModified() const
+QDateTime ProjectsModelProject::getServerLastModified() const
 {
     if (getUrl().isEmpty())
         return {};
 
-    return _lastModified;
+    return _serverLastModified;
+}
+
+std::int64_t ProjectsModelProject::getServerDownloadSize() const
+{
+    if (getUrl().isEmpty())
+        return 0;
+
+    return _serverDownloadSize;
+}
+
+std::int64_t ProjectsModelProject::getUserSpecifiedDownloadSize() const
+{
+    return _userSpecifiedDownloadSize;
+}
+
+std::int64_t ProjectsModelProject::getDownloadSize() const
+{
+    if (const auto userSpecifiedDownloadSize = getUserSpecifiedDownloadSize(); userSpecifiedDownloadSize > 0)
+        return userSpecifiedDownloadSize;
+
+    return getServerDownloadSize();
+}
+
+QString ProjectsModelProject::getDownloadSizeHumanReadable() const
+{
+    if (getDownloadSize() <= 0)
+        return "Unknown size";
+
+    return getNoBytesHumanReadable(getDownloadSize());
 }
 
 bool ProjectsModelProject::isDownloaded() const
 {
-    const auto downloadedProjectFilePath = mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
-
-	QFileInfo fileInfo(downloadedProjectFilePath);
+	QFileInfo fileInfo(getDownloadedProjectFilePath());
 
     fileInfo.refresh();
 
     return fileInfo.exists() && fileInfo.isFile();
+}
+
+bool ProjectsModelProject::isDownloadedProjectStale() const
+{
+    if (!isDownloaded())
+        return false;
+
+    if (getServerDownloadSize() > 0 && getServerDownloadSize() != getDownloadedProjectFileSize())
+        return true;
+
+    if (getServerLastModified().isValid() && getServerLastModified() > getDownloadedProjectLastModified())
+        return true;
+
+    return false;
+}
+
+bool ProjectsModelProject::requiresDownload() const
+{
+    if (!isDownloaded())
+        return true;
+
+    if (isDownloaded() && isDownloadedProjectStale())
+        return true;
+
+    return false;
 }
 
 void ProjectsModelProject::setDownloaded()
@@ -181,14 +234,6 @@ QStringList ProjectsModelProject::getRequiredPlugins() const
 QStringList ProjectsModelProject::getMissingPlugins() const
 {
     return _missingPlugins;
-}
-
-std::uint64_t ProjectsModelProject::getDownloadSize() const
-{
-    if (getUrl().isEmpty())
-        return 0;
-
-    return _downloadSize;
 }
 
 HardwareSpec ProjectsModelProject::getMinimumHardwareSpec() const
@@ -260,10 +305,12 @@ void ProjectsModelProject::determineDownloadSize()
 #endif
 
     FileDownloader::getDownloadSizeAsync(getUrl()).then(this, [this](std::uint64_t size) {
-        _downloadSize = size;
+        _serverDownloadSize = size;
 
-        emit downloadSizeDetermined(_downloadSize);
+        emit downloadSizeDetermined(_serverDownloadSize);
     }).onFailed(this, [this](const QException& e) {
+        emit downloadSizeDetermined(0);
+
         qWarning().noquote() << QString("Unable to determine download size for %1: %2").arg(getUrl().toString(), e.what());
 	});
 }
@@ -278,10 +325,12 @@ void ProjectsModelProject::determineLastModified()
 #endif
 
     FileDownloader::getLastModifiedAsync(getUrl()).then(this, [this](const QDateTime& lastModified) {
-        _lastModified = lastModified;
+        _serverLastModified = lastModified;
 
-        emit lastModifiedDetermined(_lastModified);
+        emit lastModifiedDetermined(_serverLastModified);
     }).onFailed(this, [this](const QException& e) {
+        emit lastModifiedDetermined({});
+
 		qWarning().noquote() << QString("Unable to determine the last modified date for %1: %2").arg(getUrl().toString(), e.what());
     });
 }
@@ -308,9 +357,6 @@ void ProjectsModelProject::updateIcon()
         if (isDownloaded()) {
             switch (HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec())._compatibility) {
 	            case HardwareSpec::SystemCompatibility::Incompatible:
-                    _icon = StyledIcon("file-circle-exclamation");
-                    break;
-
 	            case HardwareSpec::SystemCompatibility::Minimum:
                     _icon = StyledIcon("file-circle-exclamation");
                     break;
@@ -359,6 +405,28 @@ void ProjectsModelProject::updateTooltip()
     }
 
     emit tooltipChanged(_tooltip);
+}
+
+QString ProjectsModelProject::getDownloadedProjectFilePath() const
+{
+    return mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
+}
+
+std::uint64_t ProjectsModelProject::getDownloadedProjectFileSize() const
+{
+    if (const auto downloadedProjectFilePath = getDownloadedProjectFilePath(); !downloadedProjectFilePath.isEmpty()) {
+        QFileInfo fileInfo(downloadedProjectFilePath);
+
+    	if (fileInfo.exists() && fileInfo.isFile())
+            return fileInfo.size();
+    }
+
+    return 0;
+}
+
+QDateTime ProjectsModelProject::getDownloadedProjectLastModified() const
+{
+    return QFileInfo(getDownloadedProjectFilePath()).lastModified();
 }
 
 }
