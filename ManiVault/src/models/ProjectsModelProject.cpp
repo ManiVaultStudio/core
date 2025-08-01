@@ -19,6 +19,7 @@ namespace mv::util {
 ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
     _serverDownloadSize(0),
+    _userSpecifiedDownloadSize(variantMap.contains("downloadSize") ? parseByteSize(variantMap["downloadSize"].toString()) : 0),
     _isGroup(false),
     _group(variantMap.contains("group") ? variantMap["group"].toString() : ""),
     _tags(variantMap.contains("tags") ? variantMap["tags"].toStringList() : QStringList()),
@@ -120,6 +121,19 @@ std::uint64_t ProjectsModelProject::getServerDownloadSize() const
         return 0;
 
     return _serverDownloadSize;
+}
+
+std::uint64_t ProjectsModelProject::getUserSpecifiedDownloadSize() const
+{
+    return _userSpecifiedDownloadSize;
+}
+
+std::uint64_t ProjectsModelProject::getDownloadSize() const
+{
+    if (const auto userSpecifiedDownloadSize = getUserSpecifiedDownloadSize(); userSpecifiedDownloadSize > 0)
+        return userSpecifiedDownloadSize;
+
+    return getServerDownloadSize();
 }
 
 bool ProjectsModelProject::isDownloaded() const
@@ -287,6 +301,8 @@ void ProjectsModelProject::determineDownloadSize()
 
         emit downloadSizeDetermined(_serverDownloadSize);
     }).onFailed(this, [this](const QException& e) {
+        emit downloadSizeDetermined(0);
+
         qWarning().noquote() << QString("Unable to determine download size for %1: %2").arg(getUrl().toString(), e.what());
 	});
 }
@@ -305,6 +321,8 @@ void ProjectsModelProject::determineLastModified()
 
         emit lastModifiedDetermined(_serverLastModified);
     }).onFailed(this, [this](const QException& e) {
+        emit lastModifiedDetermined({});
+
 		qWarning().noquote() << QString("Unable to determine the last modified date for %1: %2").arg(getUrl().toString(), e.what());
     });
 }
@@ -331,9 +349,6 @@ void ProjectsModelProject::updateIcon()
         if (isDownloaded()) {
             switch (HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec())._compatibility) {
 	            case HardwareSpec::SystemCompatibility::Incompatible:
-                    _icon = StyledIcon("file-circle-exclamation");
-                    break;
-
 	            case HardwareSpec::SystemCompatibility::Minimum:
                     _icon = StyledIcon("file-circle-exclamation");
                     break;
