@@ -65,19 +65,19 @@ public:
      * Get server download size
      * @return Server download size of the project in bytes
      */
-    std::uint64_t getServerDownloadSize() const;
+    std::int64_t getServerDownloadSize() const;
 
     /**
      * Get user-specified download size (as specified in the JSON file)
      * @return User-specified download size of the project in bytes
      */
-    std::uint64_t getUserSpecifiedDownloadSize() const;
+    std::int64_t getUserSpecifiedDownloadSize() const;
 
     /**
      * Get download size (returns user-specified download size if available and server download size otherwise)
      * @return Download size of the project in bytes
      */
-    std::uint64_t getDownloadSize() const;
+    std::int64_t getDownloadSize() const;
 
     /**
      * Get whether project has been downloaded before

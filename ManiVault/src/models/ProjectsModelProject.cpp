@@ -115,7 +115,7 @@ QDateTime ProjectsModelProject::getServerLastModified() const
     return _serverLastModified;
 }
 
-std::uint64_t ProjectsModelProject::getServerDownloadSize() const
+std::int64_t ProjectsModelProject::getServerDownloadSize() const
 {
     if (getUrl().isEmpty())
         return 0;
@@ -123,12 +123,12 @@ std::uint64_t ProjectsModelProject::getServerDownloadSize() const
     return _serverDownloadSize;
 }
 
-std::uint64_t ProjectsModelProject::getUserSpecifiedDownloadSize() const
+std::int64_t ProjectsModelProject::getUserSpecifiedDownloadSize() const
 {
     return _userSpecifiedDownloadSize;
 }
 
-std::uint64_t ProjectsModelProject::getDownloadSize() const
+std::int64_t ProjectsModelProject::getDownloadSize() const
 {
     if (const auto userSpecifiedDownloadSize = getUserSpecifiedDownloadSize(); userSpecifiedDownloadSize > 0)
         return userSpecifiedDownloadSize;
