@@ -277,7 +277,7 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
 
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-        QNetworkReply* reply = sharedManager().head(request);
+        auto reply = sharedManager().get(request);
 
         connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise), url]() mutable {
             if (reply->error() != QNetworkReply::NoError) {
