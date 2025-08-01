@@ -314,13 +314,13 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
                 lastUpdatedPageSubAction->setProjectLastUpdated(lastModified);
             });
 
-            if (project->getDownloadSize() == 0) {
+            if (project->getServerDownloadSize() == 0) {
                 connect(project.get(), &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), [projectPageAction, project](std::uint64_t size) {
                     projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(size)));
                 });
             }
             else {
-                projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(project->getDownloadSize())));
+                projectPageAction->setMetaData(project->isDownloaded() ? "Downloaded" : QString("%1 download").arg(getNoBytesHumanReadable(project->getServerDownloadSize())));
             }
         } else {
             projectPageAction->setExpanded(false);
