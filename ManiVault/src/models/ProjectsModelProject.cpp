@@ -136,6 +136,14 @@ std::int64_t ProjectsModelProject::getDownloadSize() const
     return getServerDownloadSize();
 }
 
+QString ProjectsModelProject::getDownloadSizeHumanReadable() const
+{
+    if (getDownloadSize() <= 0)
+        return "Unknown size";
+
+    return getNoBytesHumanReadable(getDownloadSize());
+}
+
 bool ProjectsModelProject::isDownloaded() const
 {
 	QFileInfo fileInfo(getDownloadedProjectFilePath());

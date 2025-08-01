@@ -80,6 +80,12 @@ public:
     std::int64_t getDownloadSize() const;
 
     /**
+     * Get human-readable download size
+     * @return Human-readable download size of the project in bytes
+     */
+    QString getDownloadSizeHumanReadable() const;
+
+    /**
      * Get whether project has been downloaded before
      * @return Boolean determining whether project has been downloaded before
      */
@@ -323,8 +329,8 @@ signals:
 private:
     QString         _title;                         /** Title */
     QDateTime       _serverLastModified;            /** Last modified date of the project file on the server */
-    std::uint64_t   _serverDownloadSize;            /** Download size of the project file on the server */
-    std::uint64_t   _userSpecifiedDownloadSize;     /** Download size of the project file as specified in the projects JSON file */
+    std::int64_t    _serverDownloadSize;            /** Download size of the project file on the server */
+    std::int64_t    _userSpecifiedDownloadSize;     /** Download size of the project file as specified in the projects JSON file */
     bool            _isGroup;                       /** Boolean determining whether this is a group or a project */
     QString         _group;                         /** Group */
     QStringList     _tags;                          /** Tags */
