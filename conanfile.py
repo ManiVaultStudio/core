@@ -163,9 +163,9 @@ class HdpsCoreConan(ConanFile):
         # Do not use some options on the release builds 
         current_branch_name = self.get_current_branch_name()
         
-        if current_branch_name.startswith("release/"):
-            MV_PRECOMPILE_HEADERS = "OFF"
-            MV_UNITY_BUILD = "OFF"
+        # if current_branch_name.startswith("release/"):
+            # MV_PRECOMPILE_HEADERS = "OFF"
+            # MV_UNITY_BUILD = "OFF"
 
         # TEMPORARILY disable sentry on macos, 16/04/25
         if self.settings.os == "Macos":
