@@ -308,34 +308,50 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
 
 QDateTime FileDownloader::getLastModifiedSync(const QUrl& url)
 {
-    QNetworkRequest request(url);
+    try {
+        QNetworkRequest request(url);
 
-    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-    QNetworkReply* reply = sharedManager().head(request);
+        auto reply = sharedManager().get(request);
 
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
+        QEventLoop loop;
 
-    if (reply->error() != QNetworkReply::NoError) {
-        auto errorMsg = reply->errorString();
+    	connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+
+    	loop.exec();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            auto errorMsg = reply->errorString();
+
+        	reply->deleteLater();
+
+        	throw std::runtime_error("HEAD request failed: " + errorMsg.toStdString());
+        }
+
+        QVariant lastModifiedHeader = reply->header(QNetworkRequest::LastModifiedHeader);
+
+        if (!lastModifiedHeader.isValid()) {
+            reply->deleteLater();
+
+            throw std::runtime_error("Last-Modified header not found");
+        }
+
+        const auto result = lastModifiedHeader.toDateTime();
+
         reply->deleteLater();
-        throw std::runtime_error("HEAD request failed: " + errorMsg.toStdString());
+
+        return result;
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << QString("Unable to establish last modified for %1 due to an unhandled exception:").arg(url.toString()) << e.what();
+    }
+    catch (...) {
+	    qDebug() << QString("Unable to establish last modified for %1 due to an unhandled exception").arg(url.toString());
     }
 
-    QVariant lastModifiedHeader = reply->header(QNetworkRequest::LastModifiedHeader);
-
-    if (!lastModifiedHeader.isValid()) {
-        reply->deleteLater();
-        throw std::runtime_error("Last-Modified header not found");
-    }
-
-    const auto result = lastModifiedHeader.toDateTime();
-
-    reply->deleteLater();
-
-	return result;
+    return {};
 }
 
 }
