@@ -668,12 +668,13 @@ void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, co
 
             if (projectIncompatibleWithSystemDialog.exec() == QDialog::Accepted) {
                 projects().openProject(project->getUrl());
-
-                project->setDownloaded();
             }
         } else {
             openProject(project->getUrl(), targetDirectory, importDataOnly, loadWorkspace);
         }
+
+        if (!project->getUrl().isLocalFile())
+            project->setDownloaded();
     }
     catch (std::exception& e)
     {
