@@ -106,16 +106,21 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
 
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-        QNetworkReply* reply = sharedManager().get(request);
+        auto reply = sharedManager().get(request);
 
         connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise), url, targetDirectory, task]() mutable {
             if (reply->error() != QNetworkReply::NoError) {
+                mv::help().addNotification("Unable to download file", reply->errorString(), StyledIcon("globe"));
+
+                reply->deleteLater();
+
                 promise.setException(std::make_exception_ptr(std::runtime_error(reply->errorString().toStdString())));
+                promise.finish();
             }
             else {
                 QString downloadedFilePath;
 
-                QString filename = QFileInfo(url.toString()).fileName();
+                QString filename = url.fileName();
 
                 QVariant dispositionHeader = reply->rawHeader("Content-Disposition");
 
