@@ -236,34 +236,50 @@ QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
 
 std::uint64_t FileDownloader::getDownloadSizeSync(const QUrl& url)
 {
-    QNetworkRequest request(url);
+    try {
+	    QNetworkRequest request(url);
 
-    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+	    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-    QNetworkReply* reply = sharedManager().get(request);
+	    auto reply = sharedManager().head(request);
 
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
+	    QEventLoop loop;
 
-    if (reply->error() != QNetworkReply::NoError) {
-        auto errorMsg = reply->errorString();
-        reply->deleteLater();
-        throw std::runtime_error("HEAD request failed: " + errorMsg.toStdString());
-    }
+    	connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 
-    auto lengthHeader = reply->header(QNetworkRequest::ContentLengthHeader);
+    	loop.exec();
 
-    if (!lengthHeader.isValid()) {
-        reply->deleteLater();
-        throw std::runtime_error("Length header not found");
-    }
+	    if (reply->error() != QNetworkReply::NoError) {
+	        auto errorMessage = reply->errorString();
 
-    const auto result = lengthHeader.toULongLong();
+	    	reply->deleteLater();
 
-    reply->deleteLater();
+	        throw std::runtime_error("HEAD request failed: " + errorMessage.toStdString());
+	    }
 
-    return result;
+	    const auto lengthHeader = reply->header(QNetworkRequest::ContentLengthHeader);
+
+	    if (!lengthHeader.isValid()) {
+	        reply->deleteLater();
+
+	    	throw std::runtime_error("Length header not found");
+	    }
+
+	    const auto result = lengthHeader.toULongLong();
+
+	    reply->deleteLater();
+
+	    return result;
+	}
+	catch (std::exception& e)
+	{
+	    qDebug() << QString("Unable to establish download size for %1 due to an unhandled exception:").arg(url.toString()) << e.what();
+	}
+	catch (...) {
+	    qDebug() << QString("Unable to establish download size for %1 due to an unhandled exception").arg(url.toString());
+	}
+
+    return {};
 }
 
 QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
@@ -313,7 +329,7 @@ QDateTime FileDownloader::getLastModifiedSync(const QUrl& url)
 
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-        auto reply = sharedManager().get(request);
+        auto reply = sharedManager().head(request);
 
         QEventLoop loop;
 
@@ -329,7 +345,7 @@ QDateTime FileDownloader::getLastModifiedSync(const QUrl& url)
         	throw std::runtime_error("HEAD request failed: " + errorMsg.toStdString());
         }
 
-        QVariant lastModifiedHeader = reply->header(QNetworkRequest::LastModifiedHeader);
+        const auto lastModifiedHeader = reply->header(QNetworkRequest::LastModifiedHeader);
 
         if (!lastModifiedHeader.isValid()) {
             reply->deleteLater();
