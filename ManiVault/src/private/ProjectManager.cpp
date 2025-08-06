@@ -758,8 +758,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 
                 fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 
-                //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
-                //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
+                fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
+                fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
 
                 auto& titleAction = _project->getTitleAction();
 
@@ -784,13 +784,13 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
 
-                //const auto updatePassword = [&]() -> void {
-                //    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
-                //};
+                const auto updatePassword = [&]() -> void {
+                    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
+                };
 
-                //connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
+                connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
 
-                //updatePassword();
+                updatePassword();
 
                 connect(&saveFileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
