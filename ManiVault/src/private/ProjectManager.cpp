@@ -359,6 +359,16 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         //        startupProjectMetaAction->getSplashScreenAction().getOpenAction().trigger();
         //}
 
+        if (isImportingProject()) {
+            qCritical() << "Cannot open project while importing another project";
+            return;
+        }
+
+        if (isOpeningProject()) {
+            qCritical() << "Cannot open project while another project is being opened";
+            return;
+        }
+
         const auto scopedState = ScopedState(this, State::OpeningProject);
 
         if (QFileInfo(filePath).isDir())
