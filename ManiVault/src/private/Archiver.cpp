@@ -33,8 +33,9 @@ void Archiver::compressDirectory(const QString& sourceDirectory, const QString& 
     // Compressed file
     QuaZip zip(compressedFilePath);
 
-    //// Create the destination file
-    QDir().mkpath(QFileInfo(compressedFilePath).absolutePath());
+    // Create the destination file
+    if (!QDir().mkpath(QFileInfo(compressedFilePath).absolutePath()))
+        except(QString("Unable to make path %1").arg(QFileInfo(compressedFilePath).absolutePath()));
 
     // Except if not created
     if (!zip.open(QuaZip::mdCreate))
@@ -44,7 +45,7 @@ void Archiver::compressDirectory(const QString& sourceDirectory, const QString& 
     if (zip.getZipError() != 0)
         except("Zip error(s) occurred");
 
-    // Compress the sub directory
+    // Compress the subdirectory
     Archiver::compressSubDirectory(&zip, sourceDirectory, sourceDirectory, recursive, compressionLevel, password, filters);
 
     // Notify others that directory compression started
@@ -212,10 +213,10 @@ void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory,
         dirZipFile.close();
     }
 
-    // Compress sub directories if needed
+    // Compress subdirectories if needed
     if (recursive) {
 
-        // Get a list of sub directories to compress
+        // Get a list of subdirectories to compress
         QFileInfoList files = QDir(directory).entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot | filters);
 
         // Compress all sub directories
@@ -225,7 +226,7 @@ void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory,
             if (!file.isDir())
                 continue;
 
-            // Compress sub directory
+            // Compress subdirectory
             compressSubDirectory(parentZip, file.absoluteFilePath(), parentDirectory, recursive, compressionLevel, password, filters);
         }
     }
