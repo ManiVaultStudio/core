@@ -359,6 +359,11 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         //        startupProjectMetaAction->getSplashScreenAction().getOpenAction().trigger();
         //}
 
+        if (hasProject() && getCurrentProject()->getFilePath() == filePath) {
+            qCritical() << "Project is already open";
+            return;
+        }
+
         if (isImportingProject()) {
             qCritical() << "Cannot open project while importing another project";
             return;
