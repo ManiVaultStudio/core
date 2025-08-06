@@ -37,6 +37,15 @@ QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Ta
 
         QNetworkReply* reply = sharedManager().get(request);
 
+        if (task) {
+            connect(task, &Task::requestAbort, reply, [reply]() {
+                qDebug() << "Aborting download for URL:" << reply->url().toString();
+                if (reply->isRunning()) {
+                    reply->abort();
+                }
+			});
+        }
+
         QObject::connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise), task]() mutable {
             if (reply->error() != QNetworkReply::NoError) {
                 promise.setException(std::make_exception_ptr(std::runtime_error(reply->errorString().toStdString())));

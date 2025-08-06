@@ -223,8 +223,11 @@ ProjectManager::ProjectManager(QObject* parent) :
 
     connect(&_backToProjectAction, &TriggerAction::triggered, this, [this]() -> void {
         mv::help().getShowLearningCenterPageAction().setChecked(false);
+
         getShowStartPageAction().setChecked(false);
     });
+
+    getProjectDownloadTask().setMayKill(true);
 }
 
 ProjectManager::~ProjectManager()
