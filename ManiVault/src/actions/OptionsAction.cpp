@@ -146,6 +146,16 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
     saveToSettings();
 }
 
+void OptionsAction::setSelectedOptions(const CheckableStringListModel::CheckedIndicesSet& selectedOptions) 
+{
+    if (selectedOptions == _optionsModel.getCheckedIndicesSet())
+        return;
+
+    _optionsModel.setCheckedIndicesSet(selectedOptions);
+
+    saveToSettings();
+}
+
 void OptionsAction::selectAll()
 {
     setSelectedOptions(getOptions());

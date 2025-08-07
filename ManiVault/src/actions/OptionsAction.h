@@ -367,6 +367,12 @@ public:
      */
     void setSelectedOptions(const QStringList& selectedOptions);
 
+    /**
+     * Set the selected options
+     * @param selectedOptions Selected option indices
+     */
+    void setSelectedOptions(const CheckableStringListModel::CheckedIndicesSet& selectedOptions);
+
     /** Selects all options */
     void selectAll();
 
