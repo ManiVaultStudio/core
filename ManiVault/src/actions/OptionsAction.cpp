@@ -136,12 +136,8 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
     if (selectedOptions == getSelectedOptions())
         return;
 
-    auto previousSelectedOptions = getSelectedOptions();
-
+    // triggers selectedOptionsChanged via connection to _optionsModel::dataChanged
     _optionsModel.setCheckedIndicesFromStrings(selectedOptions);
-
-    if (getSelectedOptions() != previousSelectedOptions)
-        emit selectedOptionsChanged(getSelectedOptions());
 
     saveToSettings();
 }
