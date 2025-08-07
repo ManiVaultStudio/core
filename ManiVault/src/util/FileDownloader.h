@@ -27,9 +27,20 @@ class SecureNetworkAccessManager;
  */
 class CORE_EXPORT FileDownloader : public QObject
 {
-    Q_OBJECT
-
 public:
+
+    /** Exception class for file downloader issues */
+    class Exception : public QException {
+    public:
+
+        explicit Exception(const QString& msg) : message(msg) {}
+
+        void raise() const override { throw* this; }
+        QException* clone() const override { return new Exception(*this); }
+        const char* what() const noexcept override { return message.toUtf8().constData(); }
+
+        QString message;
+    };
 
     /**
      * Get the shared network access manager instance
@@ -45,14 +56,6 @@ public:
      */
     static QFuture<QByteArray> downloadToByteArrayAsync(const QUrl& url, Task* task = nullptr);
 
-    /** 
-     * Download file to byte array synchronously
-     * @param url URL of the file to download
-     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
-     * @return Downloaded data as byte array
-     */
-    static QByteArray downloadToByteArraySync(const QUrl& url, Task* task = nullptr);
-
     /**
      * Download file from \p url to \p targetDirectory asynchronously
      * @param url URL of the file to download
@@ -63,27 +66,11 @@ public:
     static QFuture<QString> downloadToFileAsync(const QUrl& url, const QString& targetDirectory = "", Task* task = nullptr);
 
     /**
-     * Download file from \p url to \p targetDirectory synchronously
-     * @param url URL of the file to download
-     * @param targetDirectory Directory where the file should be saved (OS temporary dir when empty)
-     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
-     * @return File path of the downloaded file
-     */
-    static QString downloadToFileSync(const QUrl& url, const QString& targetDirectory = "", Task* task = nullptr);
-
-    /**
      * Get the size of the file to be downloaded asynchronously
      * @param url URL of the file to be downloaded
      * @return Size of the file to be downloaded in bytes, 0 if size cannot be determined
      */
     static QFuture<std::uint64_t> getDownloadSizeAsync(const QUrl& url);
-
-    /**
-     * Get the size of the file to be downloaded synchronously
-     * @param url URL of the file to be downloaded
-     * @return Size of the file to be downloaded in bytes, 0 if size cannot be determined
-     */
-    static std::uint64_t getDownloadSizeSync(const QUrl& url);
 
     /**
      * Get the last modified date of the file at \p url asynchronously
@@ -92,12 +79,14 @@ public:
      */
     static QFuture<QDateTime> getLastModifiedAsync(const QUrl& url);
 
+private:
+
     /**
-     * Get the last modified date of the file at \p url synchronously
-     * @param url URL of the file to check
-     * @return Last modified date of the file, QDateTime() if it cannot be determined
+     * Takes care of gracefully aborting the download if the user wants the download task to be aborted
+     * @param task Pointer to the Task that is associated with the download operation (may not be nullptr)
+     * @param reply Pointer to the QNetworkReply that is performing the download operation (may not be nullptr)
      */
-    static QDateTime getLastModifiedSync(const QUrl& url);
+    static void handleAbortion(Task* task, QNetworkReply* reply);
 };
 
 }
