@@ -163,7 +163,7 @@ void OptionsAction::selectAll()
 
 void OptionsAction::selectNone()
 {
-    setSelectedOptions({});
+    setSelectedOptions(QStringList{});
 }
 
 void OptionsAction::selectInvert()
