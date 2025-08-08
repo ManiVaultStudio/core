@@ -67,6 +67,7 @@ Notification::Notification(const QString& title, const QString& description, con
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setAttribute(Qt::WA_ShowWithoutActivating);
+    hide();
 
     if (_previousNotification)
         _previousNotification->_nextNotification = this;

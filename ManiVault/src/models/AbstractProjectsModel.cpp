@@ -282,25 +282,21 @@ void AbstractProjectsModel::addDsn(const QUrl& dsn)
                         qCritical() << "Unable to add projects from DSN due to an unhandled exception";
                     }
 				})
-                .onFailed(this, [this, dsn](const QException& e) {
-					qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
+                .onFailed(this, [this, dsn](const std::exception_ptr& exception_ptr) {
+                    try {
+                        if (exception_ptr)
+                            std::rethrow_exception(exception_ptr);
+                    }
+                    catch (const BaseException& exception) {
+                        qCritical() << "Download failed for" << dsn << ":" << exception.what();
+                    }
+                    catch (const std::exception& exception) {
+                        qCritical() << "Download failed for" << dsn << ":" << exception.what();
+                    }
+                    catch (...) {
+                        qCritical() << "Download failed for" << dsn << ":" << ", an unknown exception occurred";
+                    }
 				});
-        }
-
-        if (getPopulationMode() == PopulationMode::AutomaticSynchronous) {
-            try {
-                const auto data = FileDownloader::downloadToByteArraySync(dsn);
-
-                populateFromJsonByteArray(data, getDsnsAction().getStrings().indexOf(dsn), dsn.toString());
-            }
-            catch (std::exception& e)
-            {
-                qCritical() << "Unable to add projects from DSN:" << e.what();
-            }
-            catch (...)
-            {
-                qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-            }
         }
     }
     catch (std::exception& e)

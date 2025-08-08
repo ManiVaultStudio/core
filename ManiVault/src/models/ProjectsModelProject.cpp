@@ -308,10 +308,23 @@ void ProjectsModelProject::determineDownloadSize()
         _serverDownloadSize = size;
 
         emit downloadSizeDetermined(_serverDownloadSize);
-    }).onFailed(this, [this](const QException& e) {
-        emit downloadSizeDetermined(0);
+    }).onFailed(this, [this](const std::exception_ptr& exception_ptr) {
 
-        qWarning().noquote() << QString("Unable to determine download size for %1: %2").arg(getUrl().toString(), e.what());
+        try {
+            if (exception_ptr)
+                std::rethrow_exception(exception_ptr);
+        }
+        catch (const BaseException& exception) {
+            qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
+        }
+        catch (const std::exception& exception) {
+            qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
+        }
+        catch (...) {
+            qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
+        }
+
+    	emit downloadSizeDetermined(0);
 	});
 }
 
@@ -328,10 +341,22 @@ void ProjectsModelProject::determineLastModified()
         _serverLastModified = lastModified;
 
         emit lastModifiedDetermined(_serverLastModified);
-    }).onFailed(this, [this](const QException& e) {
-        emit lastModifiedDetermined({});
+    }).onFailed(this, [this](const std::exception_ptr& exception_ptr) {
+        try {
+            if (exception_ptr)
+                std::rethrow_exception(exception_ptr);
+        }
+        catch (const BaseException& exception) {
+            qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << exception.what();
+        }
+        catch (const std::exception& exception) {
+            qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << exception.what();
+        }
+        catch (...) {
+            qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
+        }
 
-		qWarning().noquote() << QString("Unable to determine the last modified date for %1: %2").arg(getUrl().toString(), e.what());
+        emit lastModifiedDetermined({});
     });
 }
 

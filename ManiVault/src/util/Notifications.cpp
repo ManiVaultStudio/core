@@ -28,6 +28,7 @@ void Notifications::showMessage(const QString& title, const QString& description
     const auto addNotification = [this, title, description, icon, durationType]() -> void {
         auto notification = new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, _parentWidget);
 
+        notification->updatePosition();
         notification->show();
 
         _notifications.append(notification);
