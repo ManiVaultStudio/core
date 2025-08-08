@@ -761,6 +761,8 @@ void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, co
 
 void ProjectManager::importProject(QString filePath /*= ""*/)
 {
+    Application::requestOverrideCursor(Qt::WaitCursor);
+
     try
     {
 #ifdef PROJECT_MANAGER_VERBOSE
@@ -783,10 +785,14 @@ void ProjectManager::importProject(QString filePath /*= ""*/)
     {
         exceptionMessageBox("Unable to import project");
     }
+
+    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& password /*= ""*/)
 {
+    Application::requestOverrideCursor(Qt::WaitCursor);
+
     try
     {
 #ifdef PROJECT_MANAGER_VERBOSE
@@ -968,6 +974,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
         projects().getProjectSerializationTask().setFinished();
     }
+
+    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectManager::saveProjectAs()
@@ -1001,6 +1009,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
         emit projectAboutToBePublished(*_project);
         {
+            Application::requestOverrideCursor(Qt::WaitCursor);
+
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
@@ -1180,6 +1190,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             currentProject->getStatusBarOptionsAction().restoreState();
             */
             unsetTemporaryDirPath(TemporaryDirType::Publish);
+
+            Application::requestRemoveOverrideCursor(Qt::WaitCursor);
         }
         emit projectPublished(*_project);
     }
@@ -1188,12 +1200,16 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
         exceptionMessageBox("Unable to publish ManiVault project", e);
 
         projects().getProjectSerializationTask().setFinished();
+
+        Application::requestRemoveOverrideCursor(Qt::WaitCursor);
     }
     catch (...)
     {
         exceptionMessageBox("Unable to publish ManiVault project");
 
         projects().getProjectSerializationTask().setFinished();
+
+        Application::requestRemoveOverrideCursor(Qt::WaitCursor);
     }
 }
 
