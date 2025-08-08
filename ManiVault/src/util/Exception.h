@@ -22,7 +22,7 @@ namespace mv::util {
  *
  * @author Thomas Kroes
  */
-class BaseException : public QException, public std::exception
+class BaseException : public QException
 {
 public:
 
