@@ -86,7 +86,7 @@ private:
      * @param task Pointer to the Task that is associated with the download operation (may not be nullptr)
      * @param reply Pointer to the QNetworkReply that is performing the download operation (may not be nullptr)
      */
-    static void handleAbortion(Task* task, QNetworkReply* reply);
+    static void handleAbort(Task* task, QNetworkReply* reply);
 };
 
 }

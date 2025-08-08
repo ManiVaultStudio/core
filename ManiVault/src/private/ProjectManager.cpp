@@ -564,16 +564,26 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
     qDebug() << __FUNCTION__ << url << targetDirectory << importDataOnly << loadWorkspace;
 #endif
 
-    Application::requestOverrideCursor(Qt::WaitCursor);
-
     try {
         const auto downloadAndOpenProject = [url, targetDirectory]() -> void {
             auto future = mv::projects().downloadProjectAsync(url, targetDirectory);
 
             future.then([&](const QString& projectFilePath) {
                 mv::projects().openProject(projectFilePath);
-			}).onFailed([&](const QException& exception) {
-				qCritical() << "Failed to download project from" << url.toString() << ":" << exception.what();
+			}).onFailed([&](const std::exception_ptr& exception_ptr) {
+                try {
+                    if (exception_ptr)
+                        std::rethrow_exception(exception_ptr);
+                }
+                catch (const BaseException& exception) {
+                    qCritical() << "Failed to download project from" << url.toString() << ":" << exception.what();
+                }
+                catch (const std::exception& exception) {
+                    qCritical() << "Failed to download project from" << url.toString() << ":" << exception.what();
+                }
+                catch (...) {
+                    qCritical() << "Failed to download project from" << url.toString() << ":" << ", an unknown exception occurred";
+                }
 			});
 		};
 
@@ -620,8 +630,20 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 
                         mv::projects().openProject(downloadedProjectFilePath);
 	                }
-                }).onFailed([downloadedProjectFilePath](const QException& e) {
-                    qWarning() << "Unable to establish whether the project is stale:" << e.what();
+                }).onFailed([downloadedProjectFilePath](const std::exception_ptr& exception_ptr) {
+                    try {
+                        if (exception_ptr)
+                            std::rethrow_exception(exception_ptr);
+                    }
+                    catch (const BaseException& exception) {
+                        qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
+                    }
+                    catch (const std::exception& exception) {
+                        qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
+                    }
+                    catch (...) {
+                        qWarning() << "Unable to establish whether the project is stale, an unknown exception occurred";
+                    }
 
                     mv::projects().openProject(downloadedProjectFilePath);
 				});
@@ -639,8 +661,6 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 	{
 	    exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
 	}
-
-    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory, bool importDataOnly, bool loadWorkspace)

@@ -43,7 +43,7 @@ QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Ta
         QNetworkReply* reply = sharedManager().get(request);
 
         if (task)
-            handleAbortion(task, reply);
+            handleAbort(task, reply);
 
         connect(reply, &QNetworkReply::finished, [url, reply, promise = std::move(promise), task]() mutable {
             if (reply->error() != QNetworkReply::NoError) {
@@ -100,14 +100,11 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
         auto reply = sharedManager().get(request);
 
         if (task)
-            handleAbortion(task, reply);
+            handleAbort(task, reply);
 
         connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise), url, targetDirectory, task]() mutable {
             if (reply->error() != QNetworkReply::NoError) {
-                reply->deleteLater();
-
-                promise.setException(std::make_exception_ptr(Exception(reply->errorString())));
-                promise.finish();
+                
 
                 const auto url          = reply->url().toDisplayString();
                 const auto errorString  = reply->errorString();
@@ -116,6 +113,11 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
                     qCritical() << QString("Download problem: %1 not downloaded: %2").arg(url, errorString);
                     mv::help().addNotification("Download problem", QString("<i>%1<i> not downloaded: %2").arg(url, errorString), StyledIcon("circle-exclamation"));
 				});
+
+                promise.setException(std::make_exception_ptr(Exception(reply->errorString())));
+                promise.finish();
+
+                reply->deleteLater();
             }
             else {
                 QString downloadedFilePath;
@@ -242,7 +244,7 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
     return future;
 }
 
-void FileDownloader::handleAbortion(Task* task, QNetworkReply* reply)
+void FileDownloader::handleAbort(Task* task, QNetworkReply* reply)
 {
     Q_ASSERT(task && reply);
 

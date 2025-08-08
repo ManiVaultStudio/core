@@ -35,9 +35,21 @@ LearningCenterVideo::LearningCenterVideo(const Type& type, const QString& title,
                     qCritical() << "Unable to download video thumbnail image:";
                 }
                     })
-                .onFailed(this, [this, thumbnailUrl](const QException& e) {
-					qWarning().noquote() << "Download failed for" << thumbnailUrl << ":" << e.what();
-            });
+                .onFailed(this, [this, thumbnailUrl](const std::exception_ptr& exception_ptr) {
+	                try {
+	                    if (exception_ptr)
+	                        std::rethrow_exception(exception_ptr);
+	                }
+	                catch (const BaseException& exception) {
+	                    qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << ":" << exception.what();
+	                }
+	                catch (const std::exception& exception) {
+	                    qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << ":" << exception.what();
+	                }
+	                catch (...) {
+	                    qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << "an unknown exception occurred";
+	                }
+				});
 
 	        break;
 	    }

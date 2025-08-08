@@ -149,8 +149,20 @@ void HelpManager::initialize()
 	            {
 	                qCritical() << "Unable to display markdown:";
 	            }
-			}).onFailed(this, [this](const QException& e) {
-				qWarning().noquote() << "Unable to download videos JSON file" << e.what();
+			}).onFailed(this, [this](const std::exception_ptr& exception_ptr) {
+                try {
+                    if (exception_ptr)
+                        std::rethrow_exception(exception_ptr);
+                }
+                catch (const BaseException& exception) {
+                    qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
+                }
+                catch (const std::exception& exception) {
+                    qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
+                }
+                catch (...) {
+                    qCritical() << "Unable to download videos JSON file, an unknown exception occurred";
+                }
             });
 
         _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
