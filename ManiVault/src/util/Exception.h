@@ -11,8 +11,6 @@
 #include <QException>
 #include <QIcon>
 
-#include <stdexcept>
-
 namespace mv::util {
 
 /**
