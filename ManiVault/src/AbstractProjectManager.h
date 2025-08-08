@@ -106,16 +106,13 @@ public:
     };
 
     /** Exception class for file project download issue */
-    class ProjectDownloadException : public QException {
+    class ProjectDownloadException : public util::BaseException {
     public:
 
-        explicit ProjectDownloadException(const QString& message) : _message(message) {}
+        explicit ProjectDownloadException(const QString& message) :
+            BaseException(message, util::StyledIcon("download")) {}
 
-        void raise() const override { throw* this; }
-        QException* clone() const override { return new ProjectDownloadException(*this); }
-        const char* what() const noexcept override { return _message.toUtf8().constData(); }
-
-        QString _message;
+        BaseException* clone() const override { return new ProjectDownloadException(*this); }
     };
 
 public:

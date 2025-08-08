@@ -20,7 +20,7 @@ namespace mv::util {
  *
  * @author Thomas Kroes
  */
-class BaseException : public QException
+class CORE_EXPORT BaseException : public QException
 {
 public:
 

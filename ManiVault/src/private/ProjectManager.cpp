@@ -632,6 +632,8 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 	                }
                 }).onFailed([downloadedProjectFilePath](const std::exception_ptr& exception_ptr) {
                     try {
+                        mv::projects().openProject(downloadedProjectFilePath);
+
                         if (exception_ptr)
                             std::rethrow_exception(exception_ptr);
                     }
@@ -644,8 +646,6 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                     catch (...) {
                         qWarning() << "Unable to establish whether the project is stale, an unknown exception occurred";
                     }
-
-                    mv::projects().openProject(downloadedProjectFilePath);
 				});
             }
             else {
