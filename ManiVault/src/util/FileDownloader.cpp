@@ -15,6 +15,11 @@
 
 namespace mv::util {
 
+FileDownloader::Exception::Exception(const QString& message) :
+    BaseException(message, StyledIcon("download"))
+{
+}
+
 SecureNetworkAccessManager& FileDownloader::sharedManager()
 {
 	static SecureNetworkAccessManager instance;

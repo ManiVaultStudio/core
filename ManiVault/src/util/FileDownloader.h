@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "util/Exception.h"
+
 #include "Task.h"
 
 #include <QObject>
@@ -30,16 +32,14 @@ class CORE_EXPORT FileDownloader : public QObject
 public:
 
     /** Exception class for file downloader issues */
-    class Exception : public QException {
+    class Exception : public mv::util::BaseException {
     public:
 
-        explicit Exception(const QString& msg) : message(msg) {}
-
-        void raise() const override { throw* this; }
-        QException* clone() const override { return new Exception(*this); }
-        const char* what() const noexcept override { return message.toUtf8().constData(); }
-
-        QString message;
+        /**
+         * Construct with \p message
+         * @param message Message describing the download issue
+         */
+        explicit Exception(const QString& message);
     };
 
     /**

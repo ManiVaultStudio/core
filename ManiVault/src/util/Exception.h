@@ -8,10 +8,57 @@
 
 #include <QMessageBox>
 #include <QDebug>
+#include <QException>
+#include <QIcon>
 
 #include <stdexcept>
 
 namespace mv::util {
+
+/**
+ * Exception class for ManiVault
+ *
+ * Base class for exceptions in ManiVault.
+ *
+ * @author Thomas Kroes
+ */
+class BaseException : public QException
+{
+public:
+
+	/**
+     * Construct with \p message and \p icon
+     * @param message Exception message
+     * @param icon Icon to display in message box (default is empty)
+	 */
+	BaseException(const QString& message, const QIcon& icon = QIcon()) :
+		_message(message),
+		_icon(icon)
+	{
+    }
+
+    /** Raises an exception, required by QException for rethrowing */
+    void raise() const override { throw* this; }
+
+    /** Clones an exception, required by QException for rethrowing */
+    BaseException* clone() const override { return new BaseException(*this); }
+
+    /**
+     * Get the exception message
+     * @return Exception message
+     */
+    QString getMessage() const { return _message; }
+
+    /**
+     * Get the icon to display in message box
+     * @return Exception icon
+     */
+    QIcon getIcon() const { return _icon; }
+
+private:
+    QString _message;   /** The exception message */
+    QIcon   _icon;      /** Icon to display in message box */
+};
 
 /**
  * Create an exception message box using a title and reason
