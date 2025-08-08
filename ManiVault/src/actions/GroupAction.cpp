@@ -171,6 +171,8 @@ void GroupAction::removeAction(WidgetAction* action)
 
     disconnect(action, &WidgetAction::configurationFlagToggled, this, nullptr);
     disconnect(action, &WidgetAction::sortIndexChanged, this, nullptr);
+
+    emit actionsChanged(getActions());
 }
 
 WidgetActions GroupAction::getActions()
