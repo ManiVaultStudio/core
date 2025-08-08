@@ -363,20 +363,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         //        startupProjectMetaAction->getSplashScreenAction().getOpenAction().trigger();
         //}
 
-        if (hasProject() && getCurrentProject()->getFilePath() == filePath) {
-            qCritical() << "Project is already open";
-            return;
-        }
+        if (hasProject() && getCurrentProject()->getFilePath() == filePath)
+            throw std::runtime_error("Project is already open");
 
-        if (isImportingProject()) {
-            qCritical() << "Cannot open project while importing another project";
-            return;
-        }
+        if (isImportingProject())
+            throw std::runtime_error("Cannot open project while importing another project");
 
-        if (isOpeningProject()) {
-            qCritical() << "Cannot open project while another project is being opened";
-            return;
-        }
+        if (isOpeningProject())
+            throw std::runtime_error("Cannot open project while another project is being opened");
 
         const auto scopedState = ScopedState(this, State::OpeningProject);
 
