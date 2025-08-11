@@ -169,16 +169,16 @@ public:
     bool hasCustomModel() const;
 
     /**
-     * Get the completion model filter index
-     * @return Filter index on the completion model (defaults to 0)
+     * Get the completion column
+     * @return Completion column (defaults to 0)
      */
-    std::int32_t getCompletionModelFilterIndex() const;
+    std::int32_t getCompletionColumn() const;
 
     /**
-     * Set the completion model filter index on the custom model to \p completion completionModelFilterIndex
-     * @param completionModelFilterIndex Filter index on the completion model (defaults to 0)
+     * Set the completion column to \p completionColumn
+     * @param completionColumn Completion column (defaults to 0)
      */
-    void setCompletionModelFilterIndex(const std::int32_t& completionModelFilterIndex);
+    void setCompletionColumn(const std::int32_t& completionColumn);
 
     /**
      * Get the completion match mode
@@ -288,11 +288,11 @@ signals:
     void placeholderStringChanged(const QString& placeholderString);
 
     /**
-     * Signals that the filter index changed from \p previousFilterIndex to \p currentFilterIndex
-     * @param previousFilterIndex Previous filter index
-     * @param currentFilterIndex Current filter index
+     * Signals that the completion column changed from \p previousCompletionColumn to \p currentCompletionColumn
+     * @param previousCompletionColumn Previous completion column
+     * @param currentCompletionColumn Current completion column
      */
-    void filterIndexChanged(std::int32_t previousFilterIndex, std::int32_t currentFilterIndex);
+    void completionColumnChanged(std::int32_t previousCompletionColumn, std::int32_t currentCompletionColumn);
 
     /**
      * Signals that the filter index changed from \p previousMatchMode to \p currentMatchMode
@@ -302,12 +302,12 @@ signals:
     void completionMatchModeChanged(const Qt::MatchFlag& previousMatchMode, const Qt::MatchFlag& currentMatchMode);
 
 protected:
-    QStringListModel        _defaultModel;                  /** Default simple string list model */
-    QAbstractItemModel*     _customModel;                   /** Custom item model for enriched (combobox) ui */
-    std::int32_t            _currentIndex;                  /** Currently selected index */
-    QString                 _placeholderString;             /** Place holder string */
-    std::int32_t            _completionModelFilterIndex;    /** Filter index on the custom model (if it exists, defaults to 0) */
-    Qt::MatchFlag           _completionMatchMode;           /** Match mode for the completer (defaults to Qt::MatchExactly) */
+    QStringListModel        _defaultModel;              /** Default simple string list model */
+    QAbstractItemModel*     _customModel;               /** Custom item model for enriched (combobox) ui */
+    std::int32_t            _currentIndex;              /** Currently selected index */
+    QString                 _placeholderString;         /** Place holder string */
+    std::int32_t            _completionColumn;          /** Filter index on the custom model (if it exists, defaults to 0) */
+    Qt::MatchFlag           _completionMatchMode;       /** Match mode for the completer (defaults to Qt::MatchExactly) */
 
     friend class AbstractActionsManager;
 };

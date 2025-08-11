@@ -244,21 +244,21 @@ bool OptionAction::hasCustomModel() const
     return _customModel != nullptr;
 }
 
-std::int32_t OptionAction::getCompletionModelFilterIndex() const
+std::int32_t OptionAction::getCompletionColumn() const
 {
-	return _completionModelFilterIndex;
+	return _completionColumn;
 }
 
-void OptionAction::setCompletionModelFilterIndex(const std::int32_t& completionModelFilterIndex)
+void OptionAction::setCompletionColumn(const std::int32_t& completionColumn)
 {
-    if (completionModelFilterIndex == _completionModelFilterIndex)
+    if (completionColumn == _completionColumn)
         return;
 
-    const auto previousFilterIndex = completionModelFilterIndex;
+    const auto previousCompletionColumn = completionColumn;
 
-	_completionModelFilterIndex = completionModelFilterIndex;
+	_completionColumn = completionColumn;
 
-    emit filterIndexChanged(previousFilterIndex, _completionModelFilterIndex);
+    emit completionColumnChanged(previousCompletionColumn, _completionColumn);
 }
 
 Qt::MatchFlag OptionAction::getCompletionMatchMode() const
@@ -457,13 +457,10 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     setCompleter(&_completer);
 
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
-    //_completer.setFilterMode(Qt::MatchContains);
-    _completer.setFilterMode(Qt::MatchStartsWith);
-    _completer.setCompletionColumn(optionAction->getCompletionModelFilterIndex());
     _completer.setCompletionRole(Qt::DisplayRole);
     _completer.setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     _completer.setModelSorting(QCompleter::ModelSorting::CaseInsensitivelySortedModel);
-    _completer.setMaxVisibleItems(1000);
+    _completer.setMaxVisibleItems(10);
 
     if (auto completerPopupView = qobject_cast<QListView*>(_completer.popup())) {
         completerPopupView->setUniformItemSizes(true);
@@ -482,12 +479,28 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
 
     connect(optionAction, &OptionAction::modelChanged, this, updateCompleterModel);
 
+    const auto updateCompletionColumn = [this, optionAction]() {
+        _completer.setCompletionColumn(optionAction->getCompletionColumn());
+	};
+
+    updateCompletionColumn();
+
+    connect(optionAction, &OptionAction::completionColumnChanged, this, updateCompletionColumn);
+
+    const auto updateCompleterMatchMode = [this, optionAction]() {
+        _completer.setFilterMode(optionAction->getCompletionMatchMode());
+    };
+
+    updateCompleterMatchMode();
+
+    connect(optionAction, &OptionAction::completionMatchModeChanged, this, updateCompleterMatchMode);
+
     const auto updateText = [this, optionAction]() -> void {
         QSignalBlocker lineEditBlocker(this);
 
         setText(optionAction->getCurrentText());
     };
-
+    
     connect(optionAction, &OptionAction::currentTextChanged, this, updateText);
 
     connect(this, &QLineEdit::editingFinished, this, [this, optionAction]() {
