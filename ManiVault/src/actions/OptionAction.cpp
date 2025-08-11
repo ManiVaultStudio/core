@@ -338,7 +338,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     setMinimumWidth(200);
-    setModel(&_textOnlyProxyModel);
+    
 
     const auto updateToolTip = [this, optionAction]() -> void {
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
@@ -362,7 +362,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
             disconnect(model(), &QAbstractItemModel::rowsRemoved, this, nullptr);
         }
 
-        _textOnlyProxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+        setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
 
         connect(model(), &QAbstractItemModel::layoutChanged, this, updateReadOnlyAndSelection);
         connect(model(), &QAbstractItemModel::rowsInserted, this, updateReadOnlyAndSelection);
@@ -441,16 +441,24 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
 
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
     _completer.setFilterMode(Qt::MatchContains);
-    _completer.setCompletionColumn(0);
+    _completer.setCompletionColumn(optionAction->getFilterIndex());
+    _completer.setCompletionRole(Qt::DisplayRole);
     _completer.setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     _completer.setModelSorting(QCompleter::ModelSorting::CaseInsensitivelySortedModel);
+
+    if (auto completerPopupView = qobject_cast<QListView*>(_completer.popup())) {
+        completerPopupView->setUniformItemSizes(true);
+        completerPopupView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+        completerPopupView->setWordWrap(false);
+    }
 
 	_proxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
     _proxyModel.setDynamicSortFilter(true);
     _proxyModel.sort(0);
 
     const auto updateCompleterModel = [this, optionAction]() {
-        _completer.setModel(&_proxyModel);
+        _textOnlyProxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+        _completer.setModel(&_textOnlyProxyModel);
     };
 
     connect(optionAction, &OptionAction::modelChanged, this, updateCompleterModel);
