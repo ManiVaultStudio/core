@@ -244,6 +244,23 @@ bool OptionAction::hasCustomModel() const
     return _customModel != nullptr;
 }
 
+std::int32_t OptionAction::getFilterIndex() const
+{
+	return _filterIndex;
+}
+
+void OptionAction::setFilterIndex(const std::int32_t& filterIndex)
+{
+    if (filterIndex == _filterIndex)
+        return;
+
+    const auto previousFilterIndex = filterIndex;
+
+	_filterIndex = filterIndex;
+
+    emit filterIndexChanged(previousFilterIndex, _filterIndex);
+}
+
 std::int32_t OptionAction::getCurrentIndex() const
 {
     return _currentIndex;

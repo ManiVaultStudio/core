@@ -165,6 +165,18 @@ public:
     /** Determines whether the option action has a custom item model */
     bool hasCustomModel() const;
 
+    /**
+     * Get the filter index
+     * @return Filter index on the custom model (if it exists, defaults to 0)
+     */
+    std::int32_t getFilterIndex() const;
+
+    /**
+     * Set the filter index on the custom model to \p filterIndex
+     * @param filterIndex Filter index on the custom model (if it exists, defaults to 0)
+     */
+    void setFilterIndex(const std::int32_t& filterIndex);
+
     /** Get the current option index */
     std::int32_t getCurrentIndex() const;
 
@@ -260,11 +272,18 @@ signals:
      */
     void placeholderStringChanged(const QString& placeholderString);
 
+    /** Signals that the filter index changed from \p previousFilterIndex to \p currentFilterIndex
+     * @param previousFilterIndex Previous filter index
+     * @param currentFilterIndex Current filter index
+     */
+    void filterIndexChanged(std::int32_t previousFilterIndex, std::int32_t currentFilterIndex);
+
 protected:
     QStringListModel        _defaultModel;          /** Default simple string list model */
     QAbstractItemModel*     _customModel;           /** Custom item model for enriched (combobox) ui */
     std::int32_t            _currentIndex;          /** Currently selected index */
     QString                 _placeholderString;     /** Place holder string */
+    std::int32_t            _filterIndex = 0;       /** Filter index on the custom model (if it exists, defaults to 0) */
 
     friend class AbstractActionsManager;
 };
