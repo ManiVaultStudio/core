@@ -83,7 +83,7 @@ public: // Widgets
     protected:
         OptionAction*           _optionAction;          /** Pointer to owning option action */
         QCompleter              _completer;             /** Completer for searching and filtering */
-        QSortFilterProxyModel   _proxyModel;            /** Proxy model for sorting the options */
+        //QSortFilterProxyModel   _proxyModel;            /** Proxy model for sorting the options */
         TextOnlyProxyModel      _textOnlyProxyModel;    /** Proxy model for only using the display role and the specified filter column in the (custom) model */
 
         friend class OptionAction;

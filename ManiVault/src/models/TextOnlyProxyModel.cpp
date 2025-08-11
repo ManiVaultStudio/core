@@ -12,7 +12,7 @@ namespace mv
 QVariant TextOnlyProxyModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::DisplayRole && index.column() == _completionColumn)
-		return QIdentityProxyModel::data(index, role);
+		return QStringLiteral("%1").arg(QIdentityProxyModel::data(index, role).toString());
 
 	// Hide everything else from the completer (decorations, tooltips, etc.)
 	if (role == Qt::DecorationRole || role == Qt::SizeHintRole || role == Qt::ToolTipRole)
