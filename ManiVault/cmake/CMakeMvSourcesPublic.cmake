@@ -781,12 +781,14 @@ set(PUBLIC_COMMON_MODEL_HEADERS
     src/models/StandardItemModel.h
     src/models/SortFilterProxyModel.h
     src/models/NumberOfRowsAction.h
+    src/models/TextOnlyProxyModel.h
 )
 
 set(PUBLIC_COMMON_MODEL_SOURCES
     src/models/StandardItemModel.cpp
     src/models/SortFilterProxyModel.cpp
     src/models/NumberOfRowsAction.cpp
+    src/models/TextOnlyProxyModel.cpp
 )
 
 set(PUBLIC_COMMON_MODEL_FILES
