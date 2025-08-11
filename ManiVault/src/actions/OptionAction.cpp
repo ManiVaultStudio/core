@@ -244,21 +244,38 @@ bool OptionAction::hasCustomModel() const
     return _customModel != nullptr;
 }
 
-std::int32_t OptionAction::getFilterIndex() const
+std::int32_t OptionAction::getCompletionModelFilterIndex() const
 {
-	return _filterIndex;
+	return _completionModelFilterIndex;
 }
 
-void OptionAction::setFilterIndex(const std::int32_t& filterIndex)
+void OptionAction::setCompletionModelFilterIndex(const std::int32_t& completionModelFilterIndex)
 {
-    if (filterIndex == _filterIndex)
+    if (completionModelFilterIndex == _completionModelFilterIndex)
         return;
 
-    const auto previousFilterIndex = filterIndex;
+    const auto previousFilterIndex = completionModelFilterIndex;
 
-	_filterIndex = filterIndex;
+	_completionModelFilterIndex = completionModelFilterIndex;
 
-    emit filterIndexChanged(previousFilterIndex, _filterIndex);
+    emit filterIndexChanged(previousFilterIndex, _completionModelFilterIndex);
+}
+
+Qt::MatchFlag OptionAction::getCompletionMatchMode() const
+{
+    return _completionMatchMode;
+}
+
+void OptionAction::setCompletionMatchMode(const Qt::MatchFlag& completionMatchMode)
+{
+    if (completionMatchMode == _completionMatchMode)
+        return;
+
+    const auto previousCompletionMatchMode = _completionMatchMode;
+
+	_completionMatchMode = completionMatchMode;
+
+    emit completionMatchModeChanged(previousCompletionMatchMode, _completionMatchMode);
 }
 
 std::int32_t OptionAction::getCurrentIndex() const
@@ -440,11 +457,13 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     setCompleter(&_completer);
 
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
-    _completer.setFilterMode(Qt::MatchContains);
-    _completer.setCompletionColumn(optionAction->getFilterIndex());
+    //_completer.setFilterMode(Qt::MatchContains);
+    _completer.setFilterMode(Qt::MatchStartsWith);
+    _completer.setCompletionColumn(optionAction->getCompletionModelFilterIndex());
     _completer.setCompletionRole(Qt::DisplayRole);
     _completer.setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     _completer.setModelSorting(QCompleter::ModelSorting::CaseInsensitivelySortedModel);
+    _completer.setMaxVisibleItems(1000);
 
     if (auto completerPopupView = qobject_cast<QListView*>(_completer.popup())) {
         completerPopupView->setUniformItemSizes(true);
@@ -482,6 +501,20 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     connect(&_completer, QOverload<const QString&>::of(&QCompleter::highlighted), [this, optionAction](const QString& text) {
         optionAction->setCurrentText(text);
     });
+
+    auto timer = new QTimer(this);
+
+	timer->setSingleShot(true);
+    timer->setInterval(150);
+
+    connect(this, &QLineEdit::textEdited, this, [timer] {
+        timer->start();
+	});
+
+    connect(timer, &QTimer::timeout, this, [this] {
+        _completer.setCompletionPrefix(text());
+        _completer.complete();
+	});
 
     updateCompleterModel();
     updateText();

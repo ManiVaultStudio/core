@@ -169,16 +169,28 @@ public:
     bool hasCustomModel() const;
 
     /**
-     * Get the filter index
-     * @return Filter index on the custom model (if it exists, defaults to 0)
+     * Get the completion model filter index
+     * @return Filter index on the completion model (defaults to 0)
      */
-    std::int32_t getFilterIndex() const;
+    std::int32_t getCompletionModelFilterIndex() const;
 
     /**
-     * Set the filter index on the custom model to \p filterIndex
-     * @param filterIndex Filter index on the custom model (if it exists, defaults to 0)
+     * Set the completion model filter index on the custom model to \p completion completionModelFilterIndex
+     * @param completionModelFilterIndex Filter index on the completion model (defaults to 0)
      */
-    void setFilterIndex(const std::int32_t& filterIndex);
+    void setCompletionModelFilterIndex(const std::int32_t& completionModelFilterIndex);
+
+    /**
+     * Get the completion match mode
+     * @return Match mode for the completer (defaults to Qt::MatchExactly)
+     */
+    Qt::MatchFlag getCompletionMatchMode() const;
+
+    /**
+     * Set the completion match mode for the completer to \p completionMatchMode
+     * @param completionMatchMode Match mode for the completer (defaults to Qt::MatchExactly)
+     */
+    void setCompletionMatchMode(const Qt::MatchFlag& completionMatchMode);
 
     /** Get the current option index */
     std::int32_t getCurrentIndex() const;
@@ -275,18 +287,27 @@ signals:
      */
     void placeholderStringChanged(const QString& placeholderString);
 
-    /** Signals that the filter index changed from \p previousFilterIndex to \p currentFilterIndex
+    /**
+     * Signals that the filter index changed from \p previousFilterIndex to \p currentFilterIndex
      * @param previousFilterIndex Previous filter index
      * @param currentFilterIndex Current filter index
      */
     void filterIndexChanged(std::int32_t previousFilterIndex, std::int32_t currentFilterIndex);
 
+    /**
+     * Signals that the filter index changed from \p previousMatchMode to \p currentMatchMode
+     * @param previousMatchMode Previous match mode
+     * @param currentMatchMode Current match mode
+     */
+    void completionMatchModeChanged(const Qt::MatchFlag& previousMatchMode, const Qt::MatchFlag& currentMatchMode);
+
 protected:
-    QStringListModel        _defaultModel;          /** Default simple string list model */
-    QAbstractItemModel*     _customModel;           /** Custom item model for enriched (combobox) ui */
-    std::int32_t            _currentIndex;          /** Currently selected index */
-    QString                 _placeholderString;     /** Place holder string */
-    std::int32_t            _filterIndex = 0;       /** Filter index on the custom model (if it exists, defaults to 0) */
+    QStringListModel        _defaultModel;                  /** Default simple string list model */
+    QAbstractItemModel*     _customModel;                   /** Custom item model for enriched (combobox) ui */
+    std::int32_t            _currentIndex;                  /** Currently selected index */
+    QString                 _placeholderString;             /** Place holder string */
+    std::int32_t            _completionModelFilterIndex;    /** Filter index on the custom model (if it exists, defaults to 0) */
+    Qt::MatchFlag           _completionMatchMode;           /** Match mode for the completer (defaults to Qt::MatchExactly) */
 
     friend class AbstractActionsManager;
 };
