@@ -6,6 +6,8 @@
 
 #include "WidgetAction.h"
 
+#include "models/TextOnlyProxyModel.h"
+
 #include <QComboBox>
 #include <QLineEdit>
 #include <QCompleter>
@@ -62,7 +64,8 @@ public: // Widgets
         void paintEvent(QPaintEvent* paintEvent) override;
 
     protected:
-        OptionAction*   _optionAction;  /** Pointer to owning option action */
+        OptionAction*       _optionAction;          /** Pointer to owning option action */
+        TextOnlyProxyModel  _textOnlyProxyModel;    /** Proxy model for only using the display role and the specified filter column in the (custom) model */
 
         friend class OptionAction;
     };

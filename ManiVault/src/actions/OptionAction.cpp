@@ -338,6 +338,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     setMinimumWidth(200);
+    setModel(&_textOnlyProxyModel);
 
     const auto updateToolTip = [this, optionAction]() -> void {
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
@@ -361,7 +362,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
             disconnect(model(), &QAbstractItemModel::rowsRemoved, this, nullptr);
         }
 
-        setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+        _textOnlyProxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
 
         connect(model(), &QAbstractItemModel::layoutChanged, this, updateReadOnlyAndSelection);
         connect(model(), &QAbstractItemModel::rowsInserted, this, updateReadOnlyAndSelection);
