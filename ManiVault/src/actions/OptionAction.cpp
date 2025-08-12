@@ -557,10 +557,8 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     auto* timer = new QTimer(this);
 
     timer->setSingleShot(true);
-    QObject::connect(this, &QLineEdit::textChanged, this, [=](const QString& s) {
-        timer->start(120); // debounce
-    });
-    QObject::connect(timer, &QTimer::timeout, this, [this, stringsFilterModel, lazyIndicesModel, optionAction] {
+
+    const auto updateSuggestions = [this, stringsFilterModel, lazyIndicesModel, optionAction]() -> void {
         // Update your proxy's filter (fast)
         stringsFilterModel->_textFilter = text();
         stringsFilterModel->invalidate();
@@ -581,7 +579,9 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
         // Avoid width scans, then show
         //_completer.popup()->setFixedWidth(lineEdit->width());
         _completer.complete();
-        });
+        };
+
+	QObject::connect(this, &QLineEdit::textChanged, this, updateSuggestions);
 
 
     const auto updateCompleterModel = [this, optionAction]() {
