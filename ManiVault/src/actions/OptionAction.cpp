@@ -449,6 +449,75 @@ void OptionAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     painter->drawControl(QStyle::CE_ComboBoxLabel, styleOptionComboBox);
 }
 
+/**
+* Scripts filter model class
+*
+* Sorting and filtering model for scripts
+*
+* @author Thomas Kroes
+*/
+class CORE_EXPORT StringsFilterModel : public SortFilterProxyModel
+{
+public:
+
+    using SortFilterProxyModel::SortFilterProxyModel;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
+    {
+        if (sourceRow < 0 || sourceRow >= sourceModel()->rowCount(sourceParent))
+            return false;
+
+        const auto index = sourceModel()->index(sourceRow, 0, sourceParent);
+        const auto data = index.data(Qt::DisplayRole).toString();
+
+    	return data.startsWith(_textFilter);
+    }
+
+    QString _textFilter;
+};
+
+
+class LazyIndicesModel : public QAbstractListModel {
+public:
+    explicit LazyIndicesModel(QObject* parent = nullptr) : QAbstractListModel(parent) {}
+
+    void setSourceAndMatches(QAbstractItemModel* src, QVector<int> matches) {
+        beginResetModel();
+        m_src = src;
+        m_all = std::move(matches);
+        m_loaded = 0;
+        endResetModel();
+    }
+
+    int rowCount(const QModelIndex& p = {}) const override {
+        return p.isValid() ? 0 : m_loaded;
+    }
+
+    QVariant data(const QModelIndex& idx, int role) const override {
+        if (!idx.isValid() || role != Qt::DisplayRole || !m_src) return {};
+        const int srcRow = m_all[idx.row()];
+        return m_src->index(srcRow, 0).data(Qt::DisplayRole); // no string copies stored
+    }
+
+    bool canFetchMore(const QModelIndex& p) const override {
+        return !p.isValid() && m_loaded < m_all.size();
+    }
+
+    void fetchMore(const QModelIndex& p) override {
+        if (p.isValid()) return;
+        const int chunk = 50; // tune
+        int add = qMin(chunk, m_all.size() - m_loaded);
+        if (add <= 0) return;
+        beginInsertRows({}, m_loaded, m_loaded + add - 1);
+        m_loaded += add;
+        endInsertRows();
+    }
+
+private:
+    QAbstractItemModel* m_src = nullptr; // usually your *source* model (not the proxy)
+    QVector<int> m_all;                  // source row indices that matched
+    int m_loaded = 0;
+};
+
 OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* optionAction) :
     QLineEdit(parent),
     _optionAction(optionAction)
@@ -456,11 +525,17 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     setObjectName("LineEdit");
     setCompleter(&_completer);
 
+    auto stringsFilterModel = new StringsFilterModel(this);
+    auto lazyIndicesModel   = new LazyIndicesModel(this);
+
+    stringsFilterModel->setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
     _completer.setCompletionRole(Qt::DisplayRole);
     _completer.setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     _completer.setModelSorting(QCompleter::ModelSorting::CaseInsensitivelySortedModel);
     _completer.setMaxVisibleItems(10);
+    _completer.setModel(lazyIndicesModel);
 
     if (auto completerPopupView = qobject_cast<QListView*>(_completer.popup())) {
         completerPopupView->setUniformItemSizes(true);
@@ -468,13 +543,50 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
         completerPopupView->setWordWrap(false);
     }
 
-	_proxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
-    _proxyModel.setDynamicSortFilter(true);
-    _proxyModel.sort(0);
+    //auto stringsFilterModel = new StringsFilterModel(this);
+
+    
+
+	//_proxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+ //   _proxyModel.setDynamicSortFilter(true);
+ //   _proxyModel.sort(0);
+ //   _proxyModel.setSourceModel(stringsFilterModel);
+
+    
+
+    auto* timer = new QTimer(this);
+
+    timer->setSingleShot(true);
+    QObject::connect(this, &QLineEdit::textChanged, this, [=](const QString& s) {
+        timer->start(120); // debounce
+    });
+    QObject::connect(timer, &QTimer::timeout, this, [this, stringsFilterModel, lazyIndicesModel, optionAction] {
+        // Update your proxy's filter (fast)
+        stringsFilterModel->_textFilter = text();
+        stringsFilterModel->invalidate();
+
+        // Collect only indices (no QStrings) — cap to avoid huge lists
+        static constexpr int K = 5000;
+        QVector<int> srcRows; srcRows.reserve(K);
+        const int n = qMin(K, stringsFilterModel->rowCount());
+        for (int r = 0; r < n; ++r) {
+            const QModelIndex proxyIdx = stringsFilterModel->index(r, 0);
+            const int srcRow = stringsFilterModel->mapToSource(proxyIdx).row();
+            srcRows.push_back(srcRow);
+        }
+
+        // Point the lazy model at the *source* and the matching source rows
+        lazyIndicesModel->setSourceAndMatches(const_cast<QAbstractItemModel*>(optionAction->getModel()), std::move(srcRows));
+
+        // Avoid width scans, then show
+        //_completer.popup()->setFixedWidth(lineEdit->width());
+        _completer.complete();
+        });
+
 
     const auto updateCompleterModel = [this, optionAction]() {
-        _textOnlyProxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
-        _completer.setModel(&_textOnlyProxyModel);
+        //_textOnlyProxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+        //_completer.setModel(&_textOnlyProxyModel);
     };
 
     connect(optionAction, &OptionAction::modelChanged, this, updateCompleterModel);
@@ -515,19 +627,19 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
         optionAction->setCurrentText(text);
     });
 
-    auto timer = new QTimer(this);
+ //   auto timer = new QTimer(this);
 
-	timer->setSingleShot(true);
-    timer->setInterval(150);
+	//timer->setSingleShot(true);
+ //   timer->setInterval(150);
 
-    connect(this, &QLineEdit::textEdited, this, [timer] {
-        timer->start();
-	});
+ //   connect(this, &QLineEdit::textEdited, this, [timer] {
+ //       timer->start();
+	//});
 
-    connect(timer, &QTimer::timeout, this, [this] {
-        _completer.setCompletionPrefix(text());
-        _completer.complete();
-	});
+ //   connect(timer, &QTimer::timeout, this, [this] {
+ //       _completer.setCompletionPrefix(text());
+ //       _completer.complete();
+	//});
 
     updateCompleterModel();
     updateText();
