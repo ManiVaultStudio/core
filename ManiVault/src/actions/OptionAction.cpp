@@ -620,12 +620,13 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     });
 
     connect(&_completer, QOverload<const QString&>::of(&QCompleter::activated), [this, optionAction](const QString& text) {
-        optionAction->setCurrentText(text);
+        setText(text);
+        _completer.popup()->clearSelection();
     });
 
-    //connect(&_completer, QOverload<const QString&>::of(&QCompleter::highlighted), [this, optionAction](const QString& text) {
-    //    optionAction->setCurrentText(text);
-    //});
+    connect(&_completer, QOverload<const QString&>::of(&QCompleter::highlighted), [this, optionAction](const QString& text) {
+        _completer.popup()->clearSelection();
+    });
 
  //   auto timer = new QTimer(this);
 
