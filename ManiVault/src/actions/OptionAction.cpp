@@ -623,9 +623,9 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
         optionAction->setCurrentText(text);
     });
 
-    connect(&_completer, QOverload<const QString&>::of(&QCompleter::highlighted), [this, optionAction](const QString& text) {
-        optionAction->setCurrentText(text);
-    });
+    //connect(&_completer, QOverload<const QString&>::of(&QCompleter::highlighted), [this, optionAction](const QString& text) {
+    //    optionAction->setCurrentText(text);
+    //});
 
  //   auto timer = new QTimer(this);
 
