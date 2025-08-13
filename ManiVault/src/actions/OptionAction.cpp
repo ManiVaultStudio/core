@@ -455,23 +455,20 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
 {
     setObjectName("LineEdit");
 
-    auto stringsFilterModel = new StringsFilterModel(this);
-    auto lazyIndicesModel   = new LazyIndicesModel(this);
-
-    stringsFilterModel->setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+    _stringsFilterModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
 
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
     _completer.setCompletionRole(Qt::DisplayRole);
     _completer.setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     _completer.setModelSorting(QCompleter::ModelSorting::UnsortedModel);
     _completer.setMaxVisibleItems(10);
-    _completer.setModel(lazyIndicesModel);
+    _completer.setModel(&_lazyIndicesModel);
 
     setCompleter(&_completer);
 
     //auto stringsFilterModel = new StringsFilterModel(this);
 
-    QObject::connect(&_completer,
+    connect(&_completer,
         QOverload<const QModelIndex&>::of(&QCompleter::activated), this, [this](const QModelIndex& idx) {
             const auto text = _completer.completionModel()->data(idx, Qt::DisplayRole).toString();
             setText(text);
@@ -479,69 +476,26 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
         });
 
     // Update suggestions on typing
-    connect(this, &QLineEdit::textEdited, this, [this, stringsFilterModel, lazyIndicesModel](const QString& s) {
-		// Recompute candidates *your way* (filtering, ranking, capping K, etc.)
-		stringsFilterModel->setTextFilter(s);  // your API
+    connect(this, &QLineEdit::textEdited, this, [this](const QString& s) {
+		_stringsFilterModel.setTextFilter(s);
 
 		static constexpr int K = 5000;
-		QVector<int> srcRows; srcRows.reserve(K);
-		const int n = qMin(K, stringsFilterModel->rowCount());
+
+    	QVector<int> srcRows; srcRows.reserve(K);
+
+    	const int n = qMin(K, _stringsFilterModel.rowCount());
+
 		for (int r = 0; r < n; ++r) {
-		   const QModelIndex proxyIdx = stringsFilterModel->index(r, 0);
-		   const int srcRow = stringsFilterModel->mapToSource(proxyIdx).row();
+		   const QModelIndex proxyIdx = _stringsFilterModel.index(r, 0);
+		   const int srcRow = _stringsFilterModel.mapToSource(proxyIdx).row();
 		   srcRows.push_back(srcRow);
 		}
 
 		// Point the lazy model at the *source* and the matching source rows
-		lazyIndicesModel->setSourceAndMatches(const_cast<QAbstractItemModel*>(_optionAction->getModel()), std::move(srcRows));
+        _lazyIndicesModel.setSourceAndMatches(const_cast<QAbstractItemModel*>(_optionAction->getModel()), std::move(srcRows));
 
 		_completer.complete(); // refresh popup (position over the line edit)
     });
-
-	//_proxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
- //   _proxyModel.setDynamicSortFilter(true);
- //   _proxyModel.sort(0);
- //   _proxyModel.setSourceModel(stringsFilterModel);
-
-    
-
- //   auto* timer = new QTimer(this);
-
- //   timer->setSingleShot(true);
-
- //   const auto updateSuggestions = [this, stringsFilterModel, lazyIndicesModel, optionAction]() -> void {
- //       // Update your proxy's filter (fast)
- //       stringsFilterModel->_textFilter = text();
- //       stringsFilterModel->invalidate();
-
- //       
-
- //       // Avoid width scans, then show
- //       //_completer.popup()->setFixedWidth(lineEdit->width());
- //       //_completer.complete();
-
- //       /*if (auto completerPopupView = qobject_cast<QListView*>(_completer.popup())) {
- //           completerPopupView->setUniformItemSizes(true);
- //           completerPopupView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
- //           completerPopupView->setWordWrap(false);
-
- //           connect(completerPopupView, &QAbstractItemView::clicked, this, [this, optionAction](const QModelIndex& index) {
- //               const auto text = _completer.completionModel()->data(index, Qt::DisplayRole).toString();
- //               setText(text);
- //               qDebug() << "Completer clicked:" << text;
- //               emit editingFinished();
- //               });
-
- //           
- //       }*/
-	//};
-
-    //connect(&_completer, QOverload<const QString&>::of(&QCompleter::activated), this, [this, optionAction](const QString& current) {
-    //    qDebug() << "Completer activated:" << current;
-    //    });
-
-	//QObject::connect(this, &QLineEdit::textChanged, this, updateSuggestions);
-
 
     const auto updateCompleterModel = [this, optionAction]() {
         //_textOnlyProxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
@@ -567,7 +521,6 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     connect(optionAction, &OptionAction::completionMatchModeChanged, this, updateCompleterMatchMode);
 
     const auto updateText = [this, optionAction]() -> void {
-        qDebug() << "Updating text for LineEditWidget with current text:" << optionAction->getCurrentText();
         QSignalBlocker lineEditBlocker(this);
 
         setText(optionAction->getCurrentText());
@@ -576,38 +529,8 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     connect(optionAction, &OptionAction::currentTextChanged, this, updateText);
 
     connect(this, &QLineEdit::editingFinished, this, [this, optionAction]() {
-        qDebug() << "Editing finished, setting current text:" << displayText();
         optionAction->setCurrentText(displayText());
     });
-
-    //connect(&_completer, QOverload<const QString&>::of(&QCompleter::activated), [this, optionAction](const QString& text) {
-    //    qDebug() << "Completer activated:" << text;
-    //    setText(text);
-    //});
-
-    //connect(&_completer, QOverload<const QString&>::of(&QCompleter::highlighted), [this, optionAction](const QString& text) {
-    //    _completer.popup()->clearSelection();
-    //});
-
-    QAbstractItemView* popup = _completer.popup();
-
-    
-
-
-
- //   auto timer = new QTimer(this);
-
-	//timer->setSingleShot(true);
- //   timer->setInterval(150);
-
- //   connect(this, &QLineEdit::textEdited, this, [timer] {
- //       timer->start();
-	//});
-
- //   connect(timer, &QTimer::timeout, this, [this] {
- //       _completer.setCompletionPrefix(text());
- //       _completer.complete();
-	//});
 
     updateCompleterModel();
     updateText();
