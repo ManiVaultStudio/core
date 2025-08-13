@@ -23,7 +23,8 @@ namespace mv::gui {
 OptionAction::OptionAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/) :
     WidgetAction(parent, title),
     _customModel(nullptr),
-    _currentIndex(-1)
+    _currentIndex(-1),
+    _completerPopupFixedWidth(0)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -102,6 +103,23 @@ const QAbstractItemModel* OptionAction::getModel() const
         return _customModel;
 
     return &_defaultModel;
+}
+
+std::int32_t OptionAction::getCompleterPopupFixedWidth() const
+{
+    return _completerPopupFixedWidth;
+}
+
+void OptionAction::setCompleterPopupFixedWidth(const std::int32_t& completerPopupFixedWidth)
+{
+    if (completerPopupFixedWidth == _completerPopupFixedWidth)
+        return;
+
+    const auto previousCompleterPopupFixedWidth = _completerPopupFixedWidth;
+
+    _completerPopupFixedWidth = completerPopupFixedWidth;
+
+    emit completerPopupFixedWidthChanged(previousCompleterPopupFixedWidth, _completerPopupFixedWidth);
 }
 
 void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -244,6 +262,40 @@ bool OptionAction::hasCustomModel() const
     return _customModel != nullptr;
 }
 
+std::int32_t OptionAction::getCompletionColumn() const
+{
+	return _completionColumn;
+}
+
+void OptionAction::setCompletionColumn(const std::int32_t& completionColumn)
+{
+    if (completionColumn == _completionColumn)
+        return;
+
+    const auto previousCompletionColumn = completionColumn;
+
+	_completionColumn = completionColumn;
+
+    emit completionColumnChanged(previousCompletionColumn, _completionColumn);
+}
+
+Qt::MatchFlag OptionAction::getCompletionMatchMode() const
+{
+    return _completionMatchMode;
+}
+
+void OptionAction::setCompletionMatchMode(const Qt::MatchFlag& completionMatchMode)
+{
+    if (completionMatchMode == _completionMatchMode)
+        return;
+
+    const auto previousCompletionMatchMode = _completionMatchMode;
+
+	_completionMatchMode = completionMatchMode;
+
+    emit completionMatchModeChanged(previousCompletionMatchMode, _completionMatchMode);
+}
+
 std::int32_t OptionAction::getCurrentIndex() const
 {
     return _currentIndex;
@@ -321,6 +373,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     setMinimumWidth(200);
+    
 
     const auto updateToolTip = [this, optionAction]() -> void {
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
@@ -419,45 +472,79 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     _optionAction(optionAction)
 {
     setObjectName("LineEdit");
-    setCompleter(&_completer);
+
+    _stringsFilterModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
 
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
-    _completer.setFilterMode(Qt::MatchContains);
-    _completer.setCompletionColumn(0);
+    _completer.setCompletionRole(Qt::DisplayRole);
     _completer.setCompletionMode(QCompleter::UnfilteredPopupCompletion);
-    _completer.setModelSorting(QCompleter::ModelSorting::CaseInsensitivelySortedModel);
+    _completer.setModelSorting(QCompleter::ModelSorting::UnsortedModel);
+    _completer.setMaxVisibleItems(10);
+    _completer.setModel(&_lazyIndicesModel);
 
-	_proxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
-    _proxyModel.setDynamicSortFilter(true);
-    _proxyModel.sort(0);
+    setCompleter(&_completer);
 
-    const auto updateCompleterModel = [this, optionAction]() {
-        _completer.setModel(&_proxyModel);
+    connect(&_completer,
+        QOverload<const QModelIndex&>::of(&QCompleter::activated), this, [this](const QModelIndex& idx) {
+            const auto text = _completer.completionModel()->data(idx, Qt::DisplayRole).toString();
+            setText(text);
+            emit editingFinished();
+    });
+
+    connect(this, &QLineEdit::textEdited, this, [this](const QString& s) {
+		_stringsFilterModel.setTextFilter(s);
+
+		static constexpr int maxNumberOfItems = 5000;
+
+    	QVector<int> srcRows; srcRows.reserve(maxNumberOfItems);
+
+    	const int numberOfItems = qMin(maxNumberOfItems, _stringsFilterModel.rowCount());
+
+		for (int rowIndex = 0; rowIndex < numberOfItems; ++rowIndex) {
+		   const auto proxyIdx  = _stringsFilterModel.index(rowIndex, 0);
+		   const auto srcRow    = _stringsFilterModel.mapToSource(proxyIdx).row();
+
+		   srcRows.push_back(srcRow);
+		}
+
+        _lazyIndicesModel.setSourceAndMatches(const_cast<QAbstractItemModel*>(_optionAction->getModel()), std::move(srcRows));
+
+        _completer.popup()->setAlternatingRowColors(true);
+
+        if (_optionAction->getCompleterPopupFixedWidth() > 0)
+			_completer.popup()->setFixedWidth(_optionAction->getCompleterPopupFixedWidth());
+
+		_completer.complete();
+    });
+
+    const auto updateCompletionColumn = [this, optionAction]() {
+        _completer.setCompletionColumn(optionAction->getCompletionColumn());
+	};
+
+    updateCompletionColumn();
+
+    connect(optionAction, &OptionAction::completionColumnChanged, this, updateCompletionColumn);
+
+    const auto updateCompleterMatchMode = [this, optionAction]() {
+        _completer.setFilterMode(optionAction->getCompletionMatchMode());
     };
 
-    connect(optionAction, &OptionAction::modelChanged, this, updateCompleterModel);
+    updateCompleterMatchMode();
+
+    connect(optionAction, &OptionAction::completionMatchModeChanged, this, updateCompleterMatchMode);
 
     const auto updateText = [this, optionAction]() -> void {
         QSignalBlocker lineEditBlocker(this);
 
         setText(optionAction->getCurrentText());
     };
-
+    
     connect(optionAction, &OptionAction::currentTextChanged, this, updateText);
 
     connect(this, &QLineEdit::editingFinished, this, [this, optionAction]() {
-        optionAction->setCurrentText(text());
+        optionAction->setCurrentText(displayText());
     });
 
-    connect(&_completer, QOverload<const QString&>::of(&QCompleter::activated), [this, optionAction](const QString& text) {
-        optionAction->setCurrentText(text);
-    });
-
-    connect(&_completer, QOverload<const QString&>::of(&QCompleter::highlighted), [this, optionAction](const QString& text) {
-        optionAction->setCurrentText(text);
-    });
-
-    updateCompleterModel();
     updateText();
 }
 
@@ -530,6 +617,83 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
     updateLayout();
 
     connect(optionAction, &OptionAction::modelChanged, this, updateLayout);
+}
+
+bool OptionAction::StringsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
+	if (sourceRow < 0 || sourceRow >= sourceModel()->rowCount(sourceParent))
+		return false;
+
+	const auto index = sourceModel()->index(sourceRow, 0, sourceParent);
+	const auto data  = index.data(Qt::DisplayRole).toString();
+
+	return data.startsWith(_textFilter);
+}
+
+QString OptionAction::StringsFilterModel::getTextFilter() const
+{ return _textFilter; }
+
+void OptionAction::StringsFilterModel::setTextFilter(const QString& textFilter)
+{
+	if (_textFilter == textFilter)
+		return;
+
+	_textFilter = textFilter;
+
+	invalidateFilter(); // Reapply the filter
+}
+
+OptionAction::LazyIndicesModel::LazyIndicesModel(QObject* parent): QAbstractListModel(parent)
+{}
+
+void OptionAction::LazyIndicesModel::setSourceAndMatches(QAbstractItemModel* sourceModel, const QVector<int>& matches)
+{
+	beginResetModel();
+	{
+		_sourceModel = sourceModel;
+		_all         = std::move(matches);
+		_loaded      = 0;
+	}
+	endResetModel();
+}
+
+int OptionAction::LazyIndicesModel::rowCount(const QModelIndex& index) const
+{
+	return index.isValid() ? 0 : _loaded;
+}
+
+QVariant OptionAction::LazyIndicesModel::data(const QModelIndex& index, int role) const
+{
+	if (!index.isValid() || role != Qt::DisplayRole || !_sourceModel)
+		return {};
+
+	const auto srcRow = _all[index.row()];
+
+	return _sourceModel->index(srcRow, 0).data(Qt::DisplayRole); // No string copies stored
+}
+
+bool OptionAction::LazyIndicesModel::canFetchMore(const QModelIndex& index) const
+{
+	return !index.isValid() && _loaded < _all.size();
+}
+
+void OptionAction::LazyIndicesModel::fetchMore(const QModelIndex& index)
+{
+	if (index.isValid())
+		return;
+
+	static constexpr int chunk = 50;
+
+	const auto add = qMin(chunk, _all.size() - _loaded);
+
+	if (add <= 0)
+		return;
+
+	beginInsertRows({}, _loaded, _loaded + add - 1);
+	{
+		_loaded += add;
+	}
+	endInsertRows();
 }
 
 QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
