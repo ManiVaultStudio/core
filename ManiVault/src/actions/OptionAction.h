@@ -6,6 +6,8 @@
 
 #include "WidgetAction.h"
 
+#include "models/TextOnlyProxyModel.h"
+
 #include <QComboBox>
 #include <QLineEdit>
 #include <QCompleter>
@@ -42,6 +44,91 @@ public:
         Default = ComboBox
     };
 
+public: // Model utility classes
+
+    /** Performance oriented strings filter model class (does not use regex's etc.) */
+    class CORE_EXPORT StringsFilterModel : public QSortFilterProxyModel
+    {
+    public:
+
+        /** No need for custom constructor */
+        using QSortFilterProxyModel::QSortFilterProxyModel;
+
+        /**
+         * Determines whether the row at \p sourceRow in \p sourceParent should be accepted
+         * @param sourceRow Row in the source model to check
+         * @param sourceParent Parent index in the source model to check
+         * @return True if the row should be accepted, false otherwise
+         */
+        bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+
+        /**
+         * Get the text filter
+         * @return Text filter
+         */
+        QString getTextFilter() const;
+
+        /**
+         * Set the text filter to \p textFilter
+         * @param textFilter Text filter to apply to the source model
+         */
+        void setTextFilter(const QString& textFilter);
+
+    private:
+        QString     _textFilter;    /** Text filter to apply to the source model */
+    };
+
+    /** Performance oriented last model which avoids unnecessary creation and clones of huge string lists */
+    class LazyIndicesModel : public QAbstractListModel {
+    public:
+
+        /**
+         * Construct with pointer to \p parent object (maybe nullptr)
+         * @param parent Pointer to parent object (maybe nullptr)
+         */
+        explicit LazyIndicesModel(QObject* parent = nullptr);
+
+        /**
+         * Set the source model and the matches
+         * @param sourceModel Pointer to source model
+         * @param matches Vector of indices in the source model that matched
+         */
+        void setSourceAndMatches(QAbstractItemModel* sourceModel, const QVector<int>& matches);
+
+        /**
+         * Reimplemented to return the number of rows for \p index in the model
+         * @param index Index in the model to check (defaults to invalid index)
+         * @return
+         */
+        int rowCount(const QModelIndex& index = QModelIndex()) const override;
+
+        /**
+         * Get data at \p idx for the specified \p role
+         * @param index Index in the model to get data for
+         * @param role Role of the data to get (defaults to Qt::DisplayRole)
+         * @return Data for the specified index and role, or an invalid QVariant if the index is invalid or the role is not Qt::DisplayRole
+         */
+        QVariant data(const QModelIndex& index, int role) const override;
+
+        /**
+         * Reimplemented to return the index for the specified \p row and \p column
+         * @param index Parent index in the model (defaults to invalid index)
+         * @return Boolean indicating whether more data can be fetched for the specified \p index
+         */
+        bool canFetchMore(const QModelIndex& index) const override;
+
+        /**
+         * Fetch more data for the specified \p index
+         * @param index Index in the model to fetch more data for (defaults to invalid index)
+         */
+        void fetchMore(const QModelIndex& index) override;
+
+    private:
+        QAbstractItemModel* _sourceModel = nullptr;     /** Pointer to source model */
+        QVector<int>            _all;                       /** source row indices that matched */
+        int                     _loaded = 0;                /** number of rows loaded so far */
+    };
+
 public: // Widgets
 
     /** Combobox widget class for option action */
@@ -62,7 +149,7 @@ public: // Widgets
         void paintEvent(QPaintEvent* paintEvent) override;
 
     protected:
-        OptionAction*   _optionAction;  /** Pointer to owning option action */
+        OptionAction*       _optionAction;          /** Pointer to owning option action */
 
         friend class OptionAction;
     };
@@ -79,9 +166,10 @@ public: // Widgets
         LineEditWidget(QWidget* parent, OptionAction* optionAction);
 
     protected:
-        OptionAction*           _optionAction;  /** Pointer to owning option action */
-        QCompleter              _completer;     /** Completer for searching and filtering */
-        QSortFilterProxyModel   _proxyModel;    /** Proxy model for sorting the options */
+        OptionAction*           _optionAction;          /** Pointer to owning option action */
+        QCompleter              _completer;             /** Completer for searching and filtering */
+        StringsFilterModel      _stringsFilterModel;    /** Strings filter model for optimized filtering of the source model */
+        LazyIndicesModel        _lazyIndicesModel;      /** Lazy indices model for optimized lazy loading of the source model */
 
         friend class OptionAction;
     };
@@ -97,8 +185,6 @@ public: // Widgets
          * @param orientation Orientation of the buttons widget (horizontal/vertical)
          */
         ButtonsWidget(QWidget* parent, OptionAction* optionAction, const Qt::Orientation& orientation);
-
-    protected:
 
         friend class OptionAction;
     };
@@ -165,6 +251,30 @@ public:
     /** Determines whether the option action has a custom item model */
     bool hasCustomModel() const;
 
+    /**
+     * Get the completion column
+     * @return Completion column (defaults to 0)
+     */
+    std::int32_t getCompletionColumn() const;
+
+    /**
+     * Set the completion column to \p completionColumn
+     * @param completionColumn Completion column (defaults to 0)
+     */
+    void setCompletionColumn(const std::int32_t& completionColumn);
+
+    /**
+     * Get the completion match mode
+     * @return Match mode for the completer (defaults to Qt::MatchExactly)
+     */
+    Qt::MatchFlag getCompletionMatchMode() const;
+
+    /**
+     * Set the completion match mode for the completer to \p completionMatchMode
+     * @param completionMatchMode Match mode for the completer (defaults to Qt::MatchExactly)
+     */
+    void setCompletionMatchMode(const Qt::MatchFlag& completionMatchMode);
+
     /** Get the current option index */
     std::int32_t getCurrentIndex() const;
 
@@ -198,6 +308,18 @@ public:
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
+    /**
+     * Get the fixed width of the completer popup
+     * @return Fixed width of the completer popup (0 means no fixed width, defaults to 0)
+     */
+    std::int32_t getCompleterPopupFixedWidth() const;
+
+    /**
+     * Set the fixed width of the completer popup to \p completerPopupFixedWidth
+     * @param completerPopupFixedWidth Fixed width of the completer popup (0 means no fixed width, defaults to 0)
+     */
+    void setCompleterPopupFixedWidth(const std::int32_t& completerPopupFixedWidth);
+
 protected: // Linking
 
     /**
@@ -217,7 +339,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant map
-     * @param Variant map representation of the widget action
+     * @param variantMap Variant map representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -260,11 +382,35 @@ signals:
      */
     void placeholderStringChanged(const QString& placeholderString);
 
+    /**
+     * Signals that the completion column changed from \p previousCompletionColumn to \p currentCompletionColumn
+     * @param previousCompletionColumn Previous completion column
+     * @param currentCompletionColumn Current completion column
+     */
+    void completionColumnChanged(std::int32_t previousCompletionColumn, std::int32_t currentCompletionColumn);
+
+    /**
+     * Signals that the filter index changed from \p previousMatchMode to \p currentMatchMode
+     * @param previousMatchMode Previous match mode
+     * @param currentMatchMode Current match mode
+     */
+    void completionMatchModeChanged(const Qt::MatchFlag& previousMatchMode, const Qt::MatchFlag& currentMatchMode);
+
+    /**
+     * Signals that the completer popup fixed width changed from \p previousCompleterPopupFixedWidth to \p currentCompleterPopupFixedWidth
+     * @param previousCompleterPopupFixedWidth Previous completer popup fixed width
+     * @param currentCompleterPopupFixedWidth Current completer popup fixed width
+     */
+    void completerPopupFixedWidthChanged(std::int32_t previousCompleterPopupFixedWidth, std::int32_t currentCompleterPopupFixedWidth);
+
 protected:
-    QStringListModel        _defaultModel;          /** Default simple string list model */
-    QAbstractItemModel*     _customModel;           /** Custom item model for enriched (combobox) ui */
-    std::int32_t            _currentIndex;          /** Currently selected index */
-    QString                 _placeholderString;     /** Place holder string */
+    QStringListModel        _defaultModel;              /** Default simple string list model */
+    QAbstractItemModel*     _customModel;               /** Custom item model for enriched (combobox) ui */
+    std::int32_t            _currentIndex;              /** Currently selected index */
+    QString                 _placeholderString;         /** Place holder string */
+    std::int32_t            _completionColumn;          /** Filter index on the custom model (if it exists, defaults to 0) */
+    Qt::MatchFlag           _completionMatchMode;       /** Match mode for the completer (defaults to Qt::MatchExactly) */
+    std::int32_t            _completerPopupFixedWidth;  /** If non-zero, fixes the width of the auto-completion popup (this can speed up the display considerably, but is not necessary for small number of options) */
 
     friend class AbstractActionsManager;
 };
