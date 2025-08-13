@@ -23,7 +23,8 @@ namespace mv::gui {
 OptionAction::OptionAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/) :
     WidgetAction(parent, title),
     _customModel(nullptr),
-    _currentIndex(-1)
+    _currentIndex(-1),
+    _completerPopupFixedWidth(0)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -102,6 +103,23 @@ const QAbstractItemModel* OptionAction::getModel() const
         return _customModel;
 
     return &_defaultModel;
+}
+
+std::int32_t OptionAction::getCompleterPopupFixedWidth() const
+{
+    return _completerPopupFixedWidth;
+}
+
+void OptionAction::setCompleterPopupFixedWidth(const std::int32_t& completerPopupFixedWidth)
+{
+    if (completerPopupFixedWidth == _completerPopupFixedWidth)
+        return;
+
+    const auto previousCompleterPopupFixedWidth = _completerPopupFixedWidth;
+
+    _completerPopupFixedWidth = completerPopupFixedWidth;
+
+    emit completerPopupFixedWidthChanged(previousCompleterPopupFixedWidth, _completerPopupFixedWidth);
 }
 
 void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -466,43 +484,38 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
 
     setCompleter(&_completer);
 
-    //auto stringsFilterModel = new StringsFilterModel(this);
-
     connect(&_completer,
         QOverload<const QModelIndex&>::of(&QCompleter::activated), this, [this](const QModelIndex& idx) {
             const auto text = _completer.completionModel()->data(idx, Qt::DisplayRole).toString();
             setText(text);
             emit editingFinished();
-        });
+    });
 
-    // Update suggestions on typing
     connect(this, &QLineEdit::textEdited, this, [this](const QString& s) {
 		_stringsFilterModel.setTextFilter(s);
 
-		static constexpr int K = 5000;
+		static constexpr int maxNumberOfItems = 5000;
 
-    	QVector<int> srcRows; srcRows.reserve(K);
+    	QVector<int> srcRows; srcRows.reserve(maxNumberOfItems);
 
-    	const int n = qMin(K, _stringsFilterModel.rowCount());
+    	const int numberOfItems = qMin(maxNumberOfItems, _stringsFilterModel.rowCount());
 
-		for (int r = 0; r < n; ++r) {
-		   const QModelIndex proxyIdx = _stringsFilterModel.index(r, 0);
-		   const int srcRow = _stringsFilterModel.mapToSource(proxyIdx).row();
+		for (int rowIndex = 0; rowIndex < numberOfItems; ++rowIndex) {
+		   const auto proxyIdx  = _stringsFilterModel.index(rowIndex, 0);
+		   const auto srcRow    = _stringsFilterModel.mapToSource(proxyIdx).row();
+
 		   srcRows.push_back(srcRow);
 		}
 
-		// Point the lazy model at the *source* and the matching source rows
         _lazyIndicesModel.setSourceAndMatches(const_cast<QAbstractItemModel*>(_optionAction->getModel()), std::move(srcRows));
 
-		_completer.complete(); // refresh popup (position over the line edit)
+        _completer.popup()->setAlternatingRowColors(true);
+
+        if (_optionAction->getCompleterPopupFixedWidth() > 0)
+			_completer.popup()->setFixedWidth(_optionAction->getCompleterPopupFixedWidth());
+
+		_completer.complete();
     });
-
-    const auto updateCompleterModel = [this, optionAction]() {
-        //_textOnlyProxyModel.setSourceModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
-        //_completer.setModel(&_textOnlyProxyModel);
-    };
-
-    connect(optionAction, &OptionAction::modelChanged, this, updateCompleterModel);
 
     const auto updateCompletionColumn = [this, optionAction]() {
         _completer.setCompletionColumn(optionAction->getCompletionColumn());
@@ -532,7 +545,6 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
         optionAction->setCurrentText(displayText());
     });
 
-    updateCompleterModel();
     updateText();
 }
 

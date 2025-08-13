@@ -308,6 +308,18 @@ public:
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
+    /**
+     * Get the fixed width of the completer popup
+     * @return Fixed width of the completer popup (0 means no fixed width, defaults to 0)
+     */
+    std::int32_t getCompleterPopupFixedWidth() const;
+
+    /**
+     * Set the fixed width of the completer popup to \p completerPopupFixedWidth
+     * @param completerPopupFixedWidth Fixed width of the completer popup (0 means no fixed width, defaults to 0)
+     */
+    void setCompleterPopupFixedWidth(const std::int32_t& completerPopupFixedWidth);
+
 protected: // Linking
 
     /**
@@ -327,7 +339,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant map
-     * @param Variant map representation of the widget action
+     * @param variantMap Variant map representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -384,6 +396,13 @@ signals:
      */
     void completionMatchModeChanged(const Qt::MatchFlag& previousMatchMode, const Qt::MatchFlag& currentMatchMode);
 
+    /**
+     * Signals that the completer popup fixed width changed from \p previousCompleterPopupFixedWidth to \p currentCompleterPopupFixedWidth
+     * @param previousCompleterPopupFixedWidth Previous completer popup fixed width
+     * @param currentCompleterPopupFixedWidth Current completer popup fixed width
+     */
+    void completerPopupFixedWidthChanged(std::int32_t previousCompleterPopupFixedWidth, std::int32_t currentCompleterPopupFixedWidth);
+
 protected:
     QStringListModel        _defaultModel;              /** Default simple string list model */
     QAbstractItemModel*     _customModel;               /** Custom item model for enriched (combobox) ui */
@@ -391,6 +410,7 @@ protected:
     QString                 _placeholderString;         /** Place holder string */
     std::int32_t            _completionColumn;          /** Filter index on the custom model (if it exists, defaults to 0) */
     Qt::MatchFlag           _completionMatchMode;       /** Match mode for the completer (defaults to Qt::MatchExactly) */
+    std::int32_t            _completerPopupFixedWidth;  /** If non-zero, fixes the width of the auto-completion popup (this can speed up the display considerably, but is not necessary for small number of options) */
 
     friend class AbstractActionsManager;
 };
