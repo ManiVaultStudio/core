@@ -449,75 +449,6 @@ void OptionAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     painter->drawControl(QStyle::CE_ComboBoxLabel, styleOptionComboBox);
 }
 
-/**
-* Scripts filter model class
-*
-* Sorting and filtering model for scripts
-*
-* @author Thomas Kroes
-*/
-class CORE_EXPORT StringsFilterModel : public SortFilterProxyModel
-{
-public:
-
-    using SortFilterProxyModel::SortFilterProxyModel;
-    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
-    {
-        if (sourceRow < 0 || sourceRow >= sourceModel()->rowCount(sourceParent))
-            return false;
-
-        const auto index = sourceModel()->index(sourceRow, 0, sourceParent);
-        const auto data = index.data(Qt::DisplayRole).toString();
-
-    	return data.startsWith(_textFilter);
-    }
-
-    QString _textFilter;
-};
-
-
-class LazyIndicesModel : public QAbstractListModel {
-public:
-    explicit LazyIndicesModel(QObject* parent = nullptr) : QAbstractListModel(parent) {}
-
-    void setSourceAndMatches(QAbstractItemModel* src, QVector<int> matches) {
-        beginResetModel();
-        m_src = src;
-        m_all = std::move(matches);
-        m_loaded = 0;
-        endResetModel();
-    }
-
-    int rowCount(const QModelIndex& p = {}) const override {
-        return p.isValid() ? 0 : m_loaded;
-    }
-
-    QVariant data(const QModelIndex& idx, int role) const override {
-        if (!idx.isValid() || role != Qt::DisplayRole || !m_src) return {};
-        const int srcRow = m_all[idx.row()];
-        return m_src->index(srcRow, 0).data(Qt::DisplayRole); // no string copies stored
-    }
-
-    bool canFetchMore(const QModelIndex& p) const override {
-        return !p.isValid() && m_loaded < m_all.size();
-    }
-
-    void fetchMore(const QModelIndex& p) override {
-        if (p.isValid()) return;
-        const int chunk = 50; // tune
-        int add = qMin(chunk, m_all.size() - m_loaded);
-        if (add <= 0) return;
-        beginInsertRows({}, m_loaded, m_loaded + add - 1);
-        m_loaded += add;
-        endInsertRows();
-    }
-
-private:
-    QAbstractItemModel* m_src = nullptr; // usually your *source* model (not the proxy)
-    QVector<int> m_all;                  // source row indices that matched
-    int m_loaded = 0;
-};
-
 OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* optionAction) :
     QLineEdit(parent),
     _optionAction(optionAction)
@@ -550,8 +481,7 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     // Update suggestions on typing
     connect(this, &QLineEdit::textEdited, this, [this, stringsFilterModel, lazyIndicesModel](const QString& s) {
 		// Recompute candidates *your way* (filtering, ranking, capping K, etc.)
-		stringsFilterModel->_textFilter = s;  // your API
-		stringsFilterModel->invalidate();
+		stringsFilterModel->setTextFilter(s);  // your API
 
 		static constexpr int K = 5000;
 		QVector<int> srcRows; srcRows.reserve(K);
@@ -752,6 +682,83 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
     updateLayout();
 
     connect(optionAction, &OptionAction::modelChanged, this, updateLayout);
+}
+
+bool OptionAction::StringsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
+	if (sourceRow < 0 || sourceRow >= sourceModel()->rowCount(sourceParent))
+		return false;
+
+	const auto index = sourceModel()->index(sourceRow, 0, sourceParent);
+	const auto data  = index.data(Qt::DisplayRole).toString();
+
+	return data.startsWith(_textFilter);
+}
+
+QString OptionAction::StringsFilterModel::getTextFilter() const
+{ return _textFilter; }
+
+void OptionAction::StringsFilterModel::setTextFilter(const QString& textFilter)
+{
+	if (_textFilter == textFilter)
+		return;
+
+	_textFilter = textFilter;
+
+	invalidateFilter(); // Reapply the filter
+}
+
+OptionAction::LazyIndicesModel::LazyIndicesModel(QObject* parent): QAbstractListModel(parent)
+{}
+
+void OptionAction::LazyIndicesModel::setSourceAndMatches(QAbstractItemModel* sourceModel, const QVector<int>& matches)
+{
+	beginResetModel();
+	{
+		_sourceModel = sourceModel;
+		_all         = std::move(matches);
+		_loaded      = 0;
+	}
+	endResetModel();
+}
+
+int OptionAction::LazyIndicesModel::rowCount(const QModelIndex& index) const
+{
+	return index.isValid() ? 0 : _loaded;
+}
+
+QVariant OptionAction::LazyIndicesModel::data(const QModelIndex& index, int role) const
+{
+	if (!index.isValid() || role != Qt::DisplayRole || !_sourceModel)
+		return {};
+
+	const auto srcRow = _all[index.row()];
+
+	return _sourceModel->index(srcRow, 0).data(Qt::DisplayRole); // No string copies stored
+}
+
+bool OptionAction::LazyIndicesModel::canFetchMore(const QModelIndex& index) const
+{
+	return !index.isValid() && _loaded < _all.size();
+}
+
+void OptionAction::LazyIndicesModel::fetchMore(const QModelIndex& index)
+{
+	if (index.isValid())
+		return;
+
+	static constexpr int chunk = 50;
+
+	const auto add = qMin(chunk, _all.size() - _loaded);
+
+	if (add <= 0)
+		return;
+
+	beginInsertRows({}, _loaded, _loaded + add - 1);
+	{
+		_loaded += add;
+	}
+	endInsertRows();
 }
 
 QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

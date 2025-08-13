@@ -106,6 +106,89 @@ public: // Widgets
         friend class OptionAction;
     };
 
+    /** Performance oriented strings filter model class (does not use regex's etc.) */
+    class CORE_EXPORT StringsFilterModel : public QSortFilterProxyModel
+    {
+    public:
+
+        /** No need for custom constructor */
+        using QSortFilterProxyModel::QSortFilterProxyModel;
+
+        /**
+         * Determines whether the row at \p sourceRow in \p sourceParent should be accepted
+         * @param sourceRow Row in the source model to check
+         * @param sourceParent Parent index in the source model to check
+         * @return True if the row should be accepted, false otherwise
+         */
+        bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+
+        /**
+         * Get the text filter
+         * @return Text filter
+         */
+        QString getTextFilter() const;
+
+        /**
+         * Set the text filter to \p textFilter
+         * @param textFilter Text filter to apply to the source model
+         */
+        void setTextFilter(const QString& textFilter);
+
+    private:
+        QString     _textFilter;    /** Text filter to apply to the source model */
+    };
+
+    /** Performance oriented last model which avoids unnecessary creation and clones of huge string lists */
+    class LazyIndicesModel : public QAbstractListModel {
+    public:
+
+	    /**
+         * Construct with pointer to \p parent object (maybe nullptr)
+         * @param parent Pointer to parent object (maybe nullptr)
+	     */
+	    explicit LazyIndicesModel(QObject* parent = nullptr);
+
+        /**
+         * Set the source model and the matches
+         * @param sourceModel Pointer to source model
+         * @param matches Vector of indices in the source model that matched
+         */
+        void setSourceAndMatches(QAbstractItemModel* sourceModel, const QVector<int>& matches);
+
+	    /**
+         * Reimplemented to return the number of rows for \p index in the model
+         * @param index Index in the model to check (defaults to invalid index)
+	     * @return 
+	     */
+	    int rowCount(const QModelIndex& index = QModelIndex()) const override;
+
+	    /**
+         * Get data at \p idx for the specified \p role
+         * @param index Index in the model to get data for
+         * @param role Role of the data to get (defaults to Qt::DisplayRole)
+         * @return Data for the specified index and role, or an invalid QVariant if the index is invalid or the role is not Qt::DisplayRole
+	     */
+	    QVariant data(const QModelIndex& index, int role) const override;
+
+	    /**
+	     * Reimplemented to return the index for the specified \p row and \p column
+         * @param index Parent index in the model (defaults to invalid index)
+	     * @return Boolean indicating whether more data can be fetched for the specified \p index
+	     */
+	    bool canFetchMore(const QModelIndex& index) const override;
+
+	    /**
+         * Fetch more data for the specified \p index
+         * @param index Index in the model to fetch more data for (defaults to invalid index)
+         */
+        void fetchMore(const QModelIndex& index) override;
+
+    private:
+        QAbstractItemModel*     _sourceModel = nullptr;     /** Pointer to source model */
+        QVector<int>            _all;                       /** source row indices that matched */
+        int                     _loaded = 0;                /** number of rows loaded so far */
+    };
+
 protected:
 
     /**
