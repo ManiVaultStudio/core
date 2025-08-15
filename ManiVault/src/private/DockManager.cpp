@@ -166,14 +166,30 @@ QWidget* DockManager::getWidget()
 
 void DockManager::warmupNativeWidgets()
 {
-    auto* dock = new ads::CDockWidget("GL");
-    dock->setWidget(new QOpenGLWidget());
+    try {
+        auto centerDockWidget = new CDockWidget(this, "Warmup OpenGL Dock Widget");
 
-    // add BEFORE show()
-    addDockWidget(ads::CenterDockWidgetArea, dock);
+        centerDockWidget->setWidget(new QOpenGLWidget());
 
-    // If you don't want it visible at start:
-    dock->setVisible(false); // don't delete on close; just hide/show later
+        addDockWidget(CenterDockWidgetArea, centerDockWidget);
+
+        centerDockWidget->setVisible(false);
+
+        _hasWarmedUpNativeWidgets = true;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to warmup native widgets to avoid app flicker", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to warmup native widgets to avoid app flicker");
+    }
+}
+
+bool DockManager::hasWarmedUpNativeWidgets() const
+{
+	return _hasWarmedUpNativeWidgets;
 }
 
 void DockManager::fromVariantMap(const QVariantMap& variantMap)

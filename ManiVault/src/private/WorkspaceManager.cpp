@@ -712,6 +712,14 @@ void WorkspaceManager::setViewPluginDockWidgetPermissionsGlobally(const util::Do
     }
 }
 
+bool WorkspaceManager::hasWarmedUpNativeWidgets() const
+{
+    if (!_mainDockManager)
+        return false;
+
+    return _mainDockManager->hasWarmedUpNativeWidgets();
+}
+
 bool WorkspaceManager::mayLock() const
 {
     for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW))

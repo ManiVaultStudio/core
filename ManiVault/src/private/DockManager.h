@@ -100,7 +100,16 @@ public:
     /** get as QWidget pointer*/
     QWidget* getWidget();
 
+public: // For prevent app flickering (minimizing and maximizing in sequence when native widgets are docked)
+
+    /** If no native widgets are created yet, this will create native widget that cause app flickering */
     void warmupNativeWidgets();
+
+    /**
+     * Get whether the native widgets have been warmed up already, to prevent multiple warmups
+     * @return Boolean indicating whether the native widgets have been warmed up already
+     */
+    bool hasWarmedUpNativeWidgets() const;
 
 public: // Serialization task
 
@@ -134,4 +143,5 @@ private:
     QString     _name;                      /** Dock manager name */
     mv::Task*   _serializationTask;         /** For reporting serialization progress */
     mv::Task    _layoutTask;                /** For reporting layout progress */
+    bool        _hasWarmedUpNativeWidgets;  /** Whether the native widgets have been warmed up already, to prevent multiple warmups */
 };
