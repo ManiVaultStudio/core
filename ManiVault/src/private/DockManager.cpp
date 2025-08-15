@@ -15,6 +15,7 @@
 
 #include <DockAreaWidget.h> 
 #include <QLoggingCategory> 
+#include <QOpenGLWidget> 
 
 #ifdef _DEBUG
     #define DOCK_MANAGER_VERBOSE
@@ -161,6 +162,18 @@ void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDoc
 QWidget* DockManager::getWidget()
 {
     return this;
+}
+
+void DockManager::warmupNativeWidgets()
+{
+    auto* dock = new ads::CDockWidget("GL");
+    dock->setWidget(new QOpenGLWidget());
+
+    // add BEFORE show()
+    addDockWidget(ads::CenterDockWidgetArea, dock);
+
+    // If you don't want it visible at start:
+    dock->setVisible(false); // don't delete on close; just hide/show later
 }
 
 void DockManager::fromVariantMap(const QVariantMap& variantMap)

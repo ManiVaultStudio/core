@@ -100,6 +100,8 @@ public:
     /** get as QWidget pointer*/
     QWidget* getWidget();
 
+    void warmupNativeWidgets();
+
 public: // Serialization task
 
     /** Get task for reporting serialization progress */

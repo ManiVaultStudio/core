@@ -189,6 +189,8 @@ void WorkspaceManager::initialize()
 
         viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
+        _mainDockManager->warmupNativeWidgets();
+
         connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
             const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
