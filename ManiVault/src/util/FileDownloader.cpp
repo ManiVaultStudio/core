@@ -68,7 +68,7 @@ QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Ta
                 const auto urlDisplayString = reply->url().toDisplayString().toHtmlEscaped();
                 const auto errorString      = reply->errorString();
 
-                QTimer::singleShot(250, [url, urlDisplayString, errorString]() -> void {
+                QTimer::singleShot(250, [urlDisplayString, errorString]() -> void {
                     qCritical() << QString("Download problem: %1 not downloaded: %2").arg(urlDisplayString, errorString);
                     mv::help().addNotification("Download problem", QString("<i>%1<i> not downloaded: %2").arg(urlDisplayString, errorString), StyledIcon("circle-exclamation"));
 				});
@@ -256,6 +256,10 @@ QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
                 qCritical() << QString("Get download size HEAD request failed for %1: %2").arg(url.toDisplayString(), reply->errorString());
 
                 promise.setException(std::make_exception_ptr(Exception(reply->errorString())));
+
+                qCritical() << QString("Get download size: Content-Length absent for %1").arg(url.toDisplayString());
+
+                promise.addResult(0);
             }
 
             reply->deleteLater();
