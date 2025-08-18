@@ -70,13 +70,13 @@ QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Ta
 		});
 
         connect(reply, &QNetworkReply::downloadProgress, [task](qint64 downloaded, qint64 total) -> void {
-            if (task && task->isAborting())
+            if (!task)
                 return;
 
-            const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
+            if (task->isAborting())
+                return;
 
-            if (task)
-                task->setProgress(progress);
+            task->setProgress(total > 0 ? static_cast<float>(downloaded) / static_cast<float>(total) : .0f);
 		});
     });
 
@@ -164,13 +164,13 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
         });
 
         connect(reply, &QNetworkReply::downloadProgress, [task](qint64 downloaded, qint64 total) -> void {
-	        if (task && task->isAborting())
-				return;
+            if (!task)
+                return;
 
-	        const auto progress = static_cast<float>(downloaded) / static_cast<float>(total);
+            if (task->isAborting())
+                return;
 
-	        if (task)
-                task->setProgress(progress);
+            task->setProgress(total > 0 ? static_cast<float>(downloaded) / static_cast<float>(total) : .0f);
         });
     });
 
