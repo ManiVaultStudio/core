@@ -17,6 +17,7 @@
 #include <QPointer>
 #include <QFuture>
 
+
 namespace mv::util {
 
 class SecureNetworkAccessManager;
@@ -87,6 +88,8 @@ private:
      * @param reply Pointer to the QNetworkReply that is performing the download operation (may not be nullptr)
      */
     static void handleAbort(Task* task, QNetworkReply* reply);
+
+    static constexpr std::int32_t maximumNumberOfRedirectsAllowed = 10; /** Puts a cap on the number of redirects. Malicious URLs could loop indefinitely */
 };
 
 }

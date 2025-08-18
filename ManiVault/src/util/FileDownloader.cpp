@@ -48,8 +48,9 @@ QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Ta
         QNetworkRequest request(url);
 
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
 
-        QNetworkReply* reply = sharedManager().get(request);
+        auto reply = sharedManager().get(request);
 
         if (task)
             handleAbort(task, reply);
@@ -105,6 +106,7 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
         QNetworkRequest request(url);
 
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
 
         auto reply = sharedManager().get(request);
 
@@ -195,6 +197,7 @@ QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
         QNetworkRequest request(url);
 
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
 
         auto reply = sharedManager().head(request);
 
@@ -229,16 +232,11 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
     QPromise<QDateTime> promise;
     QFuture<QDateTime> future = promise.future();
 
-    QNetworkRequest request(url);
-
-	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-
-    auto reply = sharedManager().head(request);
-
     QMetaObject::invokeMethod(qApp, [promise = std::move(promise), url]() mutable {
         QNetworkRequest request(url);
 
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
 
         auto reply = sharedManager().head(request);
 
