@@ -190,8 +190,6 @@ QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
         auto reply = sharedManager().head(request);
 
         connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise), url]() mutable {
-            reply->deleteLater();
-
             if (reply->error() == QNetworkReply::NoError) {
                 auto lengthHeader = reply->header(QNetworkRequest::ContentLengthHeader);
 
@@ -207,6 +205,10 @@ QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
 
                 promise.setException(std::make_exception_ptr(Exception(reply->errorString())));
             }
+
+            reply->deleteLater();
+
+            promise.finish();
         });
     });
 
