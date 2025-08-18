@@ -248,12 +248,12 @@ QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
                 if (lengthHeader.isValid()) {
                     promise.addResult(lengthHeader.toULongLong());
                 } else {
-                    qCritical() << QString("Get download size HEAD request for %1 failed: Content-Length header not present").arg(url.toDisplayString());
+                    qCritical() << QString("Get download size: Content-Length absent for %1").arg(url.toDisplayString());
 
-	                promise.setException(std::make_exception_ptr(Exception("Content-Length header not present")));
+                    promise.addResult(0);
                 }
             } else {
-                qCritical() << QString("Get download size: Content-Length absent for %1").arg(url.toDisplayString());
+                qCritical() << QString("Get download size HEAD request failed for %1: %2").arg(url.toDisplayString(), reply->errorString());
 
                 promise.addResult(0);
             }
