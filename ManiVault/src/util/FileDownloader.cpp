@@ -14,6 +14,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QPromise>
+#include <QSaveFile>
 
 #ifdef _DEBUG
 	#define FILE_DOWNLOADER_VERBOSE
@@ -137,8 +138,6 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
                 reply->deleteLater();
             }
             else {
-                QString downloadedFilePath;
-
                 QString filename = url.fileName();
 
                 QVariant dispositionHeader = reply->rawHeader("Content-Disposition");
@@ -156,14 +155,14 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
                     }
                 }
 
-                if (targetDirectory.isEmpty())
-                    downloadedFilePath = QDir(Application::current()->getTemporaryDir().path()).filePath(filename);
-                else
-                    downloadedFilePath = QDir(targetDirectory).filePath(filename);
+                // Sanitize to base name only (avoid traversal / separators)
+                const QString safeName = QFileInfo(filename).fileName();
+                
+                // Now construct the final path
+                const auto baseDir = targetDirectory.isEmpty() ? Application::current()->getTemporaryDir().path() : targetDirectory;
+                QString downloadedFilePath = QDir(baseDir).filePath(safeName);
 
-                // Sanitize filename to base name only (avoid path traversal / separators)
-                filename = QFileInfo(filename).fileName();
-                downloadedFilePath = QFileInfo(QDir(downloadedFilePath).filePath(filename)).absoluteFilePath();
+                downloadedFilePath = QFileInfo(downloadedFilePath).absoluteFilePath();
                 
                 // Ensure target directory exists
                 const auto targetDirectoryPath = QFileInfo(downloadedFilePath).absolutePath();
@@ -178,7 +177,7 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
                     return;
                 }
 
-                QFile localFile(downloadedFilePath);
+                QSaveFile localFile(downloadedFilePath);
 
                 if (!localFile.open(QIODevice::WriteOnly)) {
                     promise.setException(std::make_exception_ptr(Exception(QString("Failed to open %1 for writing").arg(downloadedFilePath))));
@@ -192,7 +191,8 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
                 const auto data = reply->readAll();
 
                 if (localFile.write(data) != data.size()) {
-                    localFile.close();
+                    localFile.cancelWriting();
+
                     promise.setException(std::make_exception_ptr(Exception(QString("Short write to %1").arg(downloadedFilePath))));
 
                     reply->deleteLater();
@@ -201,7 +201,14 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
                     return;
                 }
 
-                localFile.close();
+                if (!localFile.commit()) {
+                    promise.setException(std::make_exception_ptr(Exception(QString("Failed to commit save file: %1").arg(downloadedFilePath))));
+
+                    reply->deleteLater();
+                    promise.finish();
+
+                    return;
+                }
 
                 promise.addResult(downloadedFilePath);
 
