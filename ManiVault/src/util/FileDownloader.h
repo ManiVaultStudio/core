@@ -17,7 +17,6 @@
 #include <QPointer>
 #include <QFuture>
 
-
 namespace mv::util {
 
 class SecureNetworkAccessManager;

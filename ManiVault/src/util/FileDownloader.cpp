@@ -8,6 +8,12 @@
 #include "Task.h"
 
 #include <QThread>
+#include <QTimer>
+#include <QRegularExpression>
+#include <QFile>
+#include <QFileInfo>
+#include <QDir>
+#include <QPromise>
 
 #ifdef _DEBUG
 	#define FILE_DOWNLOADER_VERBOSE
