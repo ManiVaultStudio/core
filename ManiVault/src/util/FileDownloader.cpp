@@ -106,12 +106,12 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
             if (reply->error() != QNetworkReply::NoError) {
                 
 
-                const auto url          = reply->url().toDisplayString();
-                const auto errorString  = reply->errorString();
+                const auto urlDisplayString = reply->url().toDisplayString();
+                const auto errorString      = reply->errorString();
 
-                QTimer::singleShot(250, [url, errorString]() -> void {
-                    qCritical() << QString("Download problem: %1 not downloaded: %2").arg(url, errorString);
-                    mv::help().addNotification("Download problem", QString("<i>%1<i> not downloaded: %2").arg(url, errorString), StyledIcon("circle-exclamation"));
+                QTimer::singleShot(250, [urlDisplayString, errorString]() -> void {
+                    qCritical() << QString("Download problem: %1 not downloaded: %2").arg(urlDisplayString, errorString);
+                    mv::help().addNotification("Download problem", QString("<i>%1<i> not downloaded: %2").arg(urlDisplayString, errorString), StyledIcon("circle-exclamation"));
 				});
 
                 promise.setException(std::make_exception_ptr(Exception(reply->errorString())));
