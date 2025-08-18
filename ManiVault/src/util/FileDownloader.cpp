@@ -161,12 +161,46 @@ QFuture<QString> FileDownloader::downloadToFileAsync(const QUrl& url, const QStr
                 else
                     downloadedFilePath = QDir(targetDirectory).filePath(filename);
 
+                // Sanitize filename to base name only (avoid path traversal / separators)
+                filename = QFileInfo(filename).fileName();
+                downloadedFilePath = QFileInfo(QDir(downloadedFilePath).filePath(filename)).absoluteFilePath();
+                
+                // Ensure target directory exists
+                const auto targetDirectoryPath = QFileInfo(downloadedFilePath).absolutePath();
+
+                if (!QDir().mkpath(targetDirectoryPath))
+                {
+                    promise.setException(std::make_exception_ptr(Exception(QString("Unable to create %1").arg(targetDirectoryPath))));
+
+                    reply->deleteLater();
+                    promise.finish();
+
+                    return;
+                }
+
                 QFile localFile(downloadedFilePath);
 
-                if (!localFile.open(QIODevice::WriteOnly))
-                    return;
+                if (!localFile.open(QIODevice::WriteOnly)) {
+                    promise.setException(std::make_exception_ptr(Exception(QString("Failed to open %1 for writing").arg(downloadedFilePath))));
 
-                localFile.write(reply->readAll());
+                    reply->deleteLater();
+                    promise.finish();
+
+                    return;
+                }
+
+                const auto data = reply->readAll();
+
+                if (localFile.write(data) != data.size()) {
+                    localFile.close();
+                    promise.setException(std::make_exception_ptr(Exception(QString("Short write to %1").arg(downloadedFilePath))));
+
+                    reply->deleteLater();
+                    promise.finish();
+
+                    return;
+                }
+
                 localFile.close();
 
                 promise.addResult(downloadedFilePath);
