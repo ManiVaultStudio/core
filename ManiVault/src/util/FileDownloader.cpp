@@ -226,21 +226,29 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
 
     auto reply = sharedManager().head(request);
 
-    connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise)]() mutable {
-        if (reply->error() != QNetworkReply::NoError) {
-            qCritical() << QString("Get last modified HEAD request failed: %1").arg(reply->errorString());
+    QMetaObject::invokeMethod(qApp, [promise = std::move(promise), url]() mutable {
+        QNetworkRequest request(url);
 
-            promise.setException(std::make_exception_ptr(Exception(QString("HEAD request failed: %1").arg(reply->errorString()))));
-        }
-        else {
-            const auto lastModified = reply->header(QNetworkRequest::LastModifiedHeader);
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-        	promise.addResult(lastModified.isValid() ? lastModified.toDateTime() : QDateTime{});
-        }
+        auto reply = sharedManager().head(request);
 
-        reply->deleteLater();
+        connect(reply, &QNetworkReply::finished, [reply, promise = std::move(promise)]() mutable {
+            if (reply->error() != QNetworkReply::NoError) {
+                qCritical() << QString("Get last modified HEAD request failed: %1").arg(reply->errorString());
 
-    	promise.finish();
+                promise.setException(std::make_exception_ptr(Exception(QString("HEAD request failed: %1").arg(reply->errorString()))));
+            }
+            else {
+                const auto lastModified = reply->header(QNetworkRequest::LastModifiedHeader);
+
+                promise.addResult(lastModified.isValid() ? lastModified.toDateTime() : QDateTime{});
+            }
+
+            reply->deleteLater();
+
+            promise.finish();
+        });
     });
 
     return future;
