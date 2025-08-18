@@ -32,7 +32,7 @@ class CORE_EXPORT FileDownloader : public QObject
 public:
 
     /** Exception class for file downloader issues */
-    class Exception : public mv::util::BaseException {
+    class Exception : public BaseException {
     public:
 
         /**
