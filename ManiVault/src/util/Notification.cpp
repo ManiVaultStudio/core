@@ -57,9 +57,9 @@ QSize Notification::NotificationWidget::sizeHint() const
 
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
 	QWidget(parent),
-    _title(title),
     _icon(icon),
-    _description(description),
+    _title(title),
+	_description(description),
     _previousNotification(previousNotification),
     _closing(false),
     _taskAction(nullptr, "Task")
@@ -91,8 +91,10 @@ Notification::Notification(const QString& title, const QString& description, con
 
     _iconLabel.setStyleSheet("padding: 3px;");
 
+    _messageLabel.setWordWrap(false);
+    _messageLabel.setTextFormat(Qt::PlainText);
+
     _messageLabel.setWordWrap(true);
-    _messageLabel.setTextFormat(Qt::RichText);
     _messageLabel.setMinimumHeight(10);
     _messageLabel.setOpenExternalLinks(true);
 
@@ -102,6 +104,7 @@ Notification::Notification(const QString& title, const QString& description, con
 
     _messageLayout.setSpacing(4);
 
+    _messageLayout.addWidget(&_titleLabel);
     _messageLayout.addWidget(&_messageLabel);
 
     _messageLayout.setAlignment(&_messageLabel, Qt::AlignTop);
@@ -250,11 +253,10 @@ void Notification::updateIconLabel()
 
 void Notification::updateMessageLabel()
 {
-    if (_task.isNull())
-		_messageLabel.setText(QString("<b>%1</b><br>%2").arg(_title, _task.isNull() ? _description : ""));
-    else
-        _messageLabel.setText(QString("<b>%1</b>").arg(_title));
+    _titleLabel.setText(QString("<b>%1</b>").arg(_title));
 
+	_messageLabel.setText(_description);
+    _messageLabel.setTextFormat(Qt::mightBeRichText(_description) ? Qt::RichText : Qt::PlainText);
     _messageLabel.adjustSize();
 }
 

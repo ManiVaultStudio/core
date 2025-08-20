@@ -1329,57 +1329,60 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
     QPromise<bool> promise;
     QFuture<bool> future = promise.future();
 
-    auto modifiedWatcher    = new QFutureWatcher<QDateTime>(const_cast<ProjectManager*>(this));
-    auto sizeWatcher        = new QFutureWatcher<quint64>(const_cast<ProjectManager*>(this));
+    QMetaObject::invokeMethod(qApp, [this, promise = std::move(promise), url]() mutable {
+        auto modifiedWatcher    = new QFutureWatcher<QDateTime>(const_cast<ProjectManager*>(this));
+        auto sizeWatcher        = new QFutureWatcher<quint64>(const_cast<ProjectManager*>(this));
 
-    QFuture<QDateTime> modifiedFuture = FileDownloader::getLastModifiedAsync(url);
-    QFuture<quint64>   sizeFuture = FileDownloader::getDownloadSizeAsync(url);
+        QFuture<QDateTime> modifiedFuture   = FileDownloader::getLastModifiedAsync(url);
+        QFuture<quint64>   sizeFuture       = FileDownloader::getDownloadSizeAsync(url);
 
-    modifiedWatcher->setFuture(modifiedFuture);
-    sizeWatcher->setFuture(sizeFuture);
+        modifiedWatcher->setFuture(modifiedFuture);
+        sizeWatcher->setFuture(sizeFuture);
 
-    auto sharedPromise = std::shared_ptr<QPromise<bool>>(&promise, [](QPromise<bool>*) {});
+        auto sharedPromise = std::shared_ptr<QPromise<bool>>(&promise, [](QPromise<bool>*) {});
 
-    auto checkBothFinished = [=]() mutable {
-        if (!modifiedWatcher->isFinished() || !sizeWatcher->isFinished())
-            return;
+        auto checkBothFinished = [=]() mutable {
+            if (!modifiedWatcher->isFinished() || !sizeWatcher->isFinished())
+                return;
 
-        try {
-            if (modifiedFuture.resultCount() > 0 && sizeFuture.resultCount() > 0) {
-                const auto serverLastModified   = modifiedFuture.result();
-                const auto serverDownloadSize   = sizeFuture.result();
-                const auto fileName             = url.fileName();
-                const auto downloadedPath       = getDownloadedProjectsDir().filePath(fileName);
-                const auto localInfo            = QFileInfo(downloadedPath);
-                const auto localModified        = localInfo.lastModified();
-                const auto localSize            = static_cast<quint64>(localInfo.size());
-                const bool hasNewerTimestamp    = serverLastModified.isValid() && serverLastModified > localModified;
-                const bool sizeMismatch         = serverDownloadSize > 0 && serverDownloadSize != localSize;
+            try {
+                if (modifiedFuture.resultCount() > 0 && sizeFuture.resultCount() > 0) {
+                    const auto serverLastModified   = modifiedFuture.result();
+                    const auto serverDownloadSize   = sizeFuture.result();
+                    const auto fileName             = url.fileName();
+                    const auto downloadedPath       = getDownloadedProjectsDir().filePath(fileName);
+                    const auto localInfo            = QFileInfo(downloadedPath);
+                    const auto localModified        = localInfo.lastModified();
+                    const auto localSize            = static_cast<quint64>(localInfo.size());
+                    const bool hasNewerTimestamp    = serverLastModified.isValid() && serverLastModified > localModified;
+                    const bool sizeMismatch         = serverDownloadSize > 0 && serverDownloadSize != localSize;
 
-                sharedPromise->addResult(hasNewerTimestamp || sizeMismatch);
-            } else {
-                if (modifiedFuture.resultCount() == 0)
-                    throw BaseException("Failed to get last modified date and time headers from server");
+                    sharedPromise->addResult(hasNewerTimestamp || sizeMismatch);
+                }
+                else {
+                    if (modifiedFuture.resultCount() == 0)
+                        throw BaseException("Failed to get last modified date and time headers from server");
 
-                if (sizeFuture.resultCount() == 0)
-                    throw BaseException("Failed to get size headers from server");
+                    if (sizeFuture.resultCount() == 0)
+                        throw BaseException("Failed to get size headers from server");
+                }
             }
-        }
-        catch (const QException& e) {
-            sharedPromise->setException(std::make_exception_ptr(BaseException(QString("Failed to compare download state: %1").arg(e.what()))));
-        }
-        catch (...) {
-            sharedPromise->setException(std::make_exception_ptr(BaseException("Unknown failure in stale check")));
-        }
+            catch (const QException& e) {
+                sharedPromise->setException(std::make_exception_ptr(BaseException(QString("Failed to compare download state: %1").arg(e.what()))));
+            }
+            catch (...) {
+                sharedPromise->setException(std::make_exception_ptr(BaseException("Unknown failure in stale check")));
+            }
 
-        sharedPromise->finish();
+            sharedPromise->finish();
 
-        modifiedWatcher->deleteLater();
-        sizeWatcher->deleteLater();
-	};
+            modifiedWatcher->deleteLater();
+            sizeWatcher->deleteLater();
+        };
 
-    connect(modifiedWatcher, &QFutureWatcherBase::finished, checkBothFinished);
-    connect(sizeWatcher, &QFutureWatcherBase::finished, checkBothFinished);
+        connect(modifiedWatcher, &QFutureWatcherBase::finished, checkBothFinished);
+        connect(sizeWatcher, &QFutureWatcherBase::finished, checkBothFinished);
+    });
 
     return future;
 }

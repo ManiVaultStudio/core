@@ -50,8 +50,8 @@ namespace
         if (!match.hasMatch())
             return {};
 
-        const auto charset = match.captured(1);
-        const auto pct = QByteArray::fromPercentEncoding(match.captured(2).toUtf8());
+        const auto charset  = match.captured(1);
+        const auto pct      = QByteArray::fromPercentEncoding(match.captured(2).toUtf8());
 
         if (charset.isEmpty() || charset.compare("UTF-8", Qt::CaseInsensitive) == 0)
             return QString::fromUtf8(pct);
@@ -100,84 +100,105 @@ namespace
     }
 }
 
-bool FileDownloader::FileSink::open(QNetworkReply* reply, const QUrl& url, const QString& targetDirectory,
-    bool overwriteAllowed, QString* error)
+bool FileDownloader::FileSink::open(QNetworkReply* reply, const QUrl& url, const QString& targetDirectory, bool overwriteAllowed, QString* error)
 {
-    const QString baseDir = targetDirectory.isEmpty()
-                                ? Application::current()->getTemporaryDir().path()
-                                : targetDirectory;
+    const QString baseDir   = targetDirectory.isEmpty() ? Application::current()->getTemporaryDir().path() : targetDirectory;
+    const QString safeName  = chooseSafeFilenameFromHeaders(reply, url);
 
-    const QString safeName = chooseSafeFilenameFromHeaders(reply, url);
     _finalPath = QFileInfo(QDir(baseDir).filePath(safeName)).absoluteFilePath();
 
     if (!overwriteAllowed && QFileInfo::exists(_finalPath)) {
-        if (error) *error = QStringLiteral("File exists and overwrite is disabled: %1").arg(_finalPath);
-        return false;
+        if (error)
+            *error = QStringLiteral("File exists and overwrite is disabled: %1").arg(_finalPath);
+
+    	return false;
     }
-    const QString dirPath = QFileInfo(_finalPath).absolutePath();
-    if (!QDir().mkpath(dirPath)) {
-        if (error) *error = QStringLiteral("Unable to create directory: %1").arg(dirPath);
+
+	const QString dirPath = QFileInfo(_finalPath).absolutePath();
+
+	if (!QDir().mkpath(dirPath)) {
+        if (error)
+            *error = QStringLiteral("Unable to create directory: %1").arg(dirPath);
+
+		return false;
+    }
+
+    if (!_saveFile.open(QIODevice::WriteOnly)) {
+        if (error)
+            *error = QStringLiteral("Failed to open %1 for writing").arg(_finalPath);
+
+    	_saveFile.reset();
+
         return false;
     }
 
-    _save.reset(new QSaveFile(_finalPath, reply)); // parent to reply for cleanup
-    if (!_save->open(QIODevice::WriteOnly)) {
-        if (error) *error = QStringLiteral("Failed to open %1 for writing").arg(_finalPath);
-        _save.reset();
-        return false;
-    }
-    return true;
+	return true;
 }
 
 bool FileDownloader::FileSink::write(const QByteArray& chunk, QString* error)
 {
-    if (!_save) { if (error) *error = QStringLiteral("Sink not opened"); return false; }
-    const qint64 written = _save->write(chunk);
-    if (written != chunk.size()) {
-        if (error) *error = QStringLiteral("Short write to %1").arg(_finalPath);
+    const auto numberOfBytesWritten = _saveFile.write(chunk);
+
+	if (numberOfBytesWritten != chunk.size()) {
+        if (error)
+            *error = QStringLiteral("Short write to %1").arg(_finalPath);
+
         return false;
     }
-    return true;
+
+	return true;
 }
 
 bool FileDownloader::FileSink::commit(QString* error)
 {
-    if (!_save) { if (error) *error = QStringLiteral("Sink not opened"); return false; }
-    if (!_save->commit()) {
-        if (error) *error = QStringLiteral("Failed to commit save file: %1").arg(_finalPath);
+    if (!_saveFile.commit()) {
+        if (error)
+            *error = QStringLiteral("Failed to commit save file: %1").arg(_finalPath);
+
         return false;
     }
+
     return true;
 }
 
 void FileDownloader::FileSink::cancel() noexcept
 {
-    if (_save) _save->cancelWriting();
+    _saveFile.cancelWriting();
 }
 
 QString FileDownloader::FileSink::result() const
-{ return _finalPath; }
+{
+	return _finalPath;
+}
 
 bool FileDownloader::ByteArraySink::open(QNetworkReply*, const QUrl&, const QString&, bool, QString*)
 {
     _data.clear();
+
     return true;
 }
 
 bool FileDownloader::ByteArraySink::write(const QByteArray& chunk, QString*)
 {
     _data.append(chunk);
-    return true;
+
+	return true;
 }
 
 bool FileDownloader::ByteArraySink::commit(QString*)
-{ return true; }
+{
+	return true;
+}
 
 void FileDownloader::ByteArraySink::cancel() noexcept
-{ _data.clear(); }
+{
+	_data.clear();
+}
 
 QByteArray FileDownloader::ByteArraySink::result() const
-{ return _data; }
+{
+	return _data;
+}
 
 FileDownloader::Exception::Exception(const QString& message) :
     BaseException(message, StyledIcon("download"))
@@ -282,20 +303,11 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
     return future;
 }
 
-void FileDownloader::handleAbort(Task* task, QNetworkReply* reply)
+void FileDownloader::notifyError(const QString& urlDisplayString, const QString& errorString)
 {
-    Q_ASSERT(task && reply);
+	qCritical() << QStringLiteral("Download problem: %1 not downloaded: %2").arg(urlDisplayString, errorString.toHtmlEscaped());
 
-    if (!task || !reply)
-        return;
-
-    connect(task, &Task::requestAbort, reply, [task, reply]() {
-        if (reply->isRunning()) {
-            reply->abort();
-
-            task->setAborted();
-        }
-	});
+	mv::help().addNotification("Download problem", QStringLiteral("<i>%1</i> not downloaded: %2").arg(urlDisplayString, errorString), StyledIcon("circle-exclamation"));
 }
 
 }

@@ -5,7 +5,6 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-#include "CoreInterface.h"
 
 #include "util/Exception.h"
 
@@ -17,8 +16,8 @@
 #include <QNetworkReply>
 #include <QPointer>
 #include <QFuture>
-#include <QFuture>
 #include <QSaveFile>
+#include <QCoreApplication>
 
 namespace mv::util {
 
@@ -117,8 +116,8 @@ protected:
         QString result() const override;
 
     private:
-        QString                     _finalPath;     /** Final download path */
-        std::unique_ptr<QSaveFile>  _save;          /** For saving the file atomically */
+        QString     _finalPath;     /** Final download path */
+        QSaveFile   _saveFile;          /** For saving the file atomically */
     };
 
     /** Saves the download to a byte array */
@@ -222,10 +221,10 @@ private:
     {
         using ResultT = typename SinkT::Result;
 
-        QPromise<ResultT> promise;
-        auto future = promise.future();
+        auto promise    = std::make_shared<QPromise<ResultT>>();
+        auto future     = promise->future();
 
-        QMetaObject::invokeMethod(qApp, [promise = std::move(promise), url, targetDirectory, task, overwriteAllowed]() mutable {
+        QMetaObject::invokeMethod(qApp, [promise, url, targetDirectory, task, overwriteAllowed]() mutable {
             if (task) {
                 task->setName(QStringLiteral("Download %1").arg(url.fileName()));
                 task->setIcon(StyledIcon("download"));
@@ -244,36 +243,47 @@ private:
 
             // Shared transfer state
             struct State {
-                std::shared_ptr<SinkT> sink = std::make_shared<SinkT>();
-                bool opened     = false;
-                bool finished   = false;
-                bool aborted    = false;
+                std::shared_ptr<SinkT> sink;
+                bool opened = false;
+                bool finished = false;
+                bool aborted = false;
+
+                State() : sink(std::make_shared<SinkT>()) {}
             };
+
             const auto state = std::make_shared<State>();
 
-            auto finishOnce = [state, &promise](const std::function<void()>& finishFunction) mutable {
-                if (state->finished)
-                    return;
-
+            auto finishOnce = [state, promise](auto&& fn) {
+                if (state->finished) return;
                 state->finished = true;
+                std::forward<decltype(fn)>(fn)();
+                promise->finish();
+			};
 
-                if (finishFunction)
-                    finishFunction();
-
-                promise.finish();
-            };
-
-            // Abort handling
+            // Abort handling (user clicks on cancel in the UI, task->abort() is called)
             if (task) {
                 connect(task, &Task::requestAbort, reply, [reply, state, task]() {
+
+                	// Guard network reply access
+                    auto safeReply = std::shared_ptr<QNetworkReply>(reply);
+
+                    // Abort the download if we have a valid reply
+                    if (!safeReply || !safeReply->isRunning())
+                        return;
+
                     state->aborted = true;
-                    reply->abort();              // triggers finished()
-                    if (task) task->setAborted();
+
+                    safeReply->abort();
+
+                    // Also abort te task
+                	if (task)
+                        task->setAborted();
                 });
             }
 
             // Progress
-            connect(reply, &QNetworkReply::downloadProgress, [task](qint64 done, qint64 total) {
+            connect(reply, &QNetworkReply::downloadProgress, reply, [task](qint64 done, qint64 total) {
+
                 if (task && task->isAborting())
                     return;
                 
@@ -282,19 +292,23 @@ private:
             });
 
             // Lazy open (on first data)
-            auto openIfNeeded = [state, reply, &promise, &finishOnce, &url, &targetDirectory, overwriteAllowed]() -> bool {
+            auto openIfNeeded = [state, promise, finishOnce, url, targetDirectory, overwriteAllowed](QPointer<QNetworkReply> safeReply) -> bool {
+
+                if (!safeReply)
+                    return false;
+
                 if (state->opened)
                     return true;
 
                 QString errorString;
 
-                if (!state->sink->open(reply, url, targetDirectory, overwriteAllowed, &errorString)) {
-                    reply->abort();
+                if (!state->sink->open(safeReply, url, targetDirectory, overwriteAllowed, &errorString)) {
+                    safeReply->abort();
 
-                    promise.setException(std::make_exception_ptr(Exception(errorString)));
+                    promise->setException(std::make_exception_ptr(Exception(errorString)));
 
-                    finishOnce([reply]() {
-                        reply->deleteLater();
+                    finishOnce([safeReply]() {
+                        safeReply->deleteLater();
                     });
 
                     return false;
@@ -306,12 +320,16 @@ private:
             };
 
             // Stream data
-            connect(reply, &QNetworkReply::readyRead, [reply, state, &promise, &finishOnce, &openIfNeeded]() mutable {
-                if (!openIfNeeded())
+            connect(reply, &QNetworkReply::readyRead, reply, [reply, state, promise, finishOnce, openIfNeeded]() mutable {
+
+                // Guard network reply access
+                auto safeReply = QPointer<QNetworkReply>(reply);
+
+            	if (!openIfNeeded(safeReply))
                     return;
 
                 while (reply->bytesAvailable() > 0) {
-                    const auto  chunk = reply->read(64 * 1024);
+                    const auto  chunk = safeReply->read(64 * 1024);
 
                     if (chunk.isEmpty())
                         break;
@@ -321,13 +339,13 @@ private:
                     if (!state->sink->write(chunk, &errorString)) {
                         state->sink->cancel();
 
-                        promise.setException(std::make_exception_ptr(Exception(errorString)));
+                        promise->setException(std::make_exception_ptr(Exception(errorString)));
 
-                        finishOnce([reply]() {
-                            reply->deleteLater();
+                        finishOnce([safeReply]() {
+                            safeReply->deleteLater();
                         });
 
-                        reply->abort();
+                        safeReply->abort();
 
                         return;
                     }
@@ -335,27 +353,31 @@ private:
             });
 
             // Complete
-            connect(reply, &QNetworkReply::finished, [reply, state, task, &promise, &finishOnce, &openIfNeeded]() mutable {
-                if (!openIfNeeded())
-                    return; // zero-byte case handled inside
+            connect(reply, &QNetworkReply::finished, reply, [reply, state, task, promise, finishOnce, openIfNeeded]() mutable {
 
-                if (reply->error() == QNetworkReply::NoError) {
+                // Guard network reply access
+                auto safeReply = QPointer<QNetworkReply>(reply);
+
+                if (!openIfNeeded(safeReply))
+                    return;
+
+                if (safeReply->error() == QNetworkReply::NoError) {
                     QString errorString;
 
                     if (!state->sink->commit(&errorString)) {
-                        promise.setException(std::make_exception_ptr(Exception(errorString)));
+                        promise->setException(std::make_exception_ptr(Exception(errorString)));
 
-                        finishOnce([reply]() {
-                            reply->deleteLater();
+                        finishOnce([safeReply]() {
+                            safeReply->deleteLater();
                         });
 
                         return;
                     }
 
-                    promise.addResult(state->sink->result());
+                    promise->addResult(state->sink->result());
 
-                    finishOnce([reply, task]() {
-                        reply->deleteLater();
+                    finishOnce([safeReply, task]() {
+                        safeReply->deleteLater();
 
                         if (task && !task->isAborting())
                             task->setFinished();
@@ -364,18 +386,15 @@ private:
                 else {
                     state->sink->cancel();
 
-                    const auto errorString      = (reply->error() == QNetworkReply::OperationCanceledError) ? QStringLiteral("Download aborted by user") : reply->errorString();
+                    const auto errorString      = (safeReply->error() == QNetworkReply::OperationCanceledError) ? QStringLiteral("Download aborted by user") : safeReply->errorString();
                     const auto urlDisplayString = reply->url().toDisplayString().toHtmlEscaped();
 
-                    //QTimer::singleShot(250, [urlDisplayString, errorString]() {
-                    //    qCritical() << QStringLiteral("Download problem: %1 not downloaded: %2").arg(urlDisplayString, errorString);
-                    //    mv::help().addNotification("Download problem", QStringLiteral("<i>%1</i> not downloaded: %2").arg(urlDisplayString, errorString), StyledIcon("circle-exclamation"));
-                    //});
+                    notifyError(urlDisplayString, errorString);
 
-                    promise.setException(std::make_exception_ptr(Exception(errorString)));
+                    promise->setException(std::make_exception_ptr(Exception(errorString)));
 
-                    finishOnce([reply]() {
-                        reply->deleteLater();
+                    finishOnce([safeReply]() {
+                        safeReply->deleteLater();
                     });
                 }
             });
@@ -386,12 +405,13 @@ private:
 
 private:
 
-    /**
-     * Takes care of gracefully aborting the download if the user wants the download task to be aborted
-     * @param task Pointer to the Task that is associated with the download operation (may not be nullptr)
-     * @param reply Pointer to the QNetworkReply that is performing the download operation (may not be nullptr)
+    /** 
+     * Notifies the user about a download error with the given \p urlDisplayString and \p errorString
+     * @param urlDisplayString Display string of the URL that was attempted to be downloaded
+     * @param errorString Error string describing the download issue
+     * 
      */
-    static void handleAbort(Task* task, QNetworkReply* reply);
+    static void notifyError(const QString& urlDisplayString, const QString& errorString);
 
     static constexpr std::int32_t maximumNumberOfRedirectsAllowed = 10; /** Puts a cap on the number of redirects. Malicious URLs could loop indefinitely */
 };
