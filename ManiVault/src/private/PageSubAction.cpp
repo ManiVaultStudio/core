@@ -50,6 +50,11 @@ IconLabel* PageSubAction::getIconLabel()
     return _iconLabel;
 }
 
+ProjectPurgePageSubAction::ProjectPurgePageSubAction() :
+    PageSubAction(mv::util::StyledIcon("trash"))
+{
+}
+
 CommentsPageSubAction::CommentsPageSubAction(const QString& comments) :
 	PageSubAction(mv::util::StyledIcon("scroll"))
 {

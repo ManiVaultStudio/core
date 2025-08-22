@@ -94,6 +94,15 @@ protected:
     static bool compactView;
 };
 
+/** For purging a downloaded project */
+class ProjectPurgePageSubAction : public PageSubAction
+{
+public:
+
+    /** Default construct */
+    ProjectPurgePageSubAction();
+};
+
 /** For displaying comments */
 class CommentsPageSubAction : public PageSubAction
 {
