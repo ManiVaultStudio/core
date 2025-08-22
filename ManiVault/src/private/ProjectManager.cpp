@@ -1326,10 +1326,11 @@ QFuture<QString> ProjectManager::downloadProjectAsync(QUrl url, const QString& t
 
 QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
 {
-    QPromise<bool> promise;
-    QFuture<bool> future = promise.future();
+    auto promise = std::make_shared<QPromise<bool>>();
 
-    QMetaObject::invokeMethod(qApp, [this, promise = std::move(promise), url]() mutable {
+	QFuture<bool> future = promise->future();
+
+    QMetaObject::invokeMethod(qApp, [this, promise, url]() mutable {
         auto modifiedWatcher    = new QFutureWatcher<QDateTime>(const_cast<ProjectManager*>(this));
         auto sizeWatcher        = new QFutureWatcher<quint64>(const_cast<ProjectManager*>(this));
 
@@ -1339,9 +1340,7 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
         modifiedWatcher->setFuture(modifiedFuture);
         sizeWatcher->setFuture(sizeFuture);
 
-        auto sharedPromise = std::shared_ptr<QPromise<bool>>(&promise, [](QPromise<bool>*) {});
-
-        auto checkBothFinished = [=]() mutable {
+        auto checkBothFinished = [this, promise, url, modifiedWatcher, sizeWatcher, modifiedFuture, sizeFuture]() mutable {
             if (!modifiedWatcher->isFinished() || !sizeWatcher->isFinished())
                 return;
 
@@ -1357,7 +1356,7 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
                     const bool hasNewerTimestamp    = serverLastModified.isValid() && serverLastModified > localModified;
                     const bool sizeMismatch         = serverDownloadSize > 0 && serverDownloadSize != localSize;
 
-                    sharedPromise->addResult(hasNewerTimestamp || sizeMismatch);
+                    promise->addResult(hasNewerTimestamp || sizeMismatch);
                 }
                 else {
                     if (modifiedFuture.resultCount() == 0)
@@ -1368,13 +1367,13 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
                 }
             }
             catch (const QException& e) {
-                sharedPromise->setException(std::make_exception_ptr(BaseException(QString("Failed to compare download state: %1").arg(e.what()))));
+                promise->setException(std::make_exception_ptr(BaseException(QString("Failed to compare download state: %1").arg(e.what()))));
             }
             catch (...) {
-                sharedPromise->setException(std::make_exception_ptr(BaseException("Unknown failure in stale check")));
+                promise->setException(std::make_exception_ptr(BaseException("Unknown failure in stale check")));
             }
 
-            sharedPromise->finish();
+            promise->finish();
 
             modifiedWatcher->deleteLater();
             sizeWatcher->deleteLater();
