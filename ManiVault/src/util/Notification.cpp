@@ -22,8 +22,6 @@
 #include <QPainter>
 #include <QPainterPath>
 
-
-
 namespace mv::util
 {
 
