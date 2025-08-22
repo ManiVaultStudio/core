@@ -123,7 +123,7 @@ bool FileDownloader::FileSink::open(QNetworkReply* reply, const QUrl& url, const
 		return false;
     }
 
-    //_saveFile.setFileName(_finalPath);
+    _saveFile.setFileName(_finalPath);
 
     if (!_saveFile.open(QIODevice::WriteOnly)) {
         if (error)
