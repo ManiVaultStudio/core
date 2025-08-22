@@ -6,6 +6,8 @@
 
 #include "util/Exception.h"
 
+#include <algorithm>
+
 #include <QDebug>
 
 #ifdef _DEBUG
@@ -97,12 +99,17 @@ CheckableStringListModel::CheckedIndicesSet CheckableStringListModel::getChecked
 
 void CheckableStringListModel::setCheckedIndicesSet(const CheckedIndicesSet& checkedIndicesSet)
 {
+    const auto checkStatesList = _checkStatesList;
+
     std::fill(_checkStatesList.begin(), _checkStatesList.end(), false);
 
     for (const auto& checkedIndex : checkedIndicesSet)
         _checkStatesList[checkedIndex] = true;
 
-    emit dataChanged(index(0, 0), index(rowCount() - 1));
+    _checkedStrings = getCheckedStrings();
+
+    if (checkStatesList != _checkStatesList)
+        emit dataChanged(index(0, 0), index(rowCount() - 1));
 }
 
 void CheckableStringListModel::setCheckedIndicesFromStrings(const QStringList& checkedStrings)

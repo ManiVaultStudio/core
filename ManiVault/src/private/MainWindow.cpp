@@ -79,7 +79,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 {
     QMainWindow::showEvent(showEvent);
 
-    if (centralWidget() == nullptr) {
+    if (mv::workspaces().hasWarmedUpNativeWidgets() && centralWidget() == nullptr) {
         auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
 
         auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
