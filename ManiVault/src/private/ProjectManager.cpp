@@ -564,6 +564,8 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
     qDebug() << __FUNCTION__ << url << targetDirectory << importDataOnly << loadWorkspace;
 #endif
 
+    Application::requestOverrideCursor(Qt::WaitCursor);
+
     try {
         const auto downloadAndOpenProject = [url, targetDirectory]() -> void {
             auto future = mv::projects().downloadProjectAsync(url, targetDirectory);
@@ -662,6 +664,8 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 	{
 	    exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
 	}
+
+    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory, bool importDataOnly, bool loadWorkspace)
