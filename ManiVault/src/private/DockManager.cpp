@@ -173,7 +173,7 @@ void DockManager::warmupNativeWidgets()
 
         addDockWidget(CenterDockWidgetArea, centerDockWidget);
 
-        centerDockWidget->setVisible(false);
+        centerDockWidget->toggleView(false);
 
         _hasWarmedUpNativeWidgets = true;
     }
