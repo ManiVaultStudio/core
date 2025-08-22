@@ -434,7 +434,7 @@ void ProjectsModelProject::updateTooltip()
 
 QString ProjectsModelProject::getDownloadedProjectFilePath() const
 {
-    return mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
+	return mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
 }
 
 std::uint64_t ProjectsModelProject::getDownloadedProjectFileSize() const
