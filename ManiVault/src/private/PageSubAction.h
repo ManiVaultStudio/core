@@ -7,6 +7,7 @@
 #include <util/HardwareSpec.h>
 
 #include <widgets/IconLabel.h>
+#include <models/ProjectsModelProject.h>
 
 #include <QIcon>
 #include <QImage>
@@ -98,13 +99,13 @@ class ProjectPurgePageSubAction : public PageSubAction
 public:
 
     /**
-     * Construct with \p filePath
-     * @param filePath File path of the project to purge
+     * Construct shared pointer to the \p project to purge
+     * @param project Shared pointer to the project to purge
      */
-    ProjectPurgePageSubAction(const QString& filePath);
+    ProjectPurgePageSubAction(mv::util::ProjectsModelProjectSharedPtr project);
 
 private:
-    QString     _filePath;  /** File path of the project to purge */
+    mv::util::ProjectsModelProjectSharedPtr     _project;   /** Shared pointer to the project to purge */
 };
 
 /** For displaying comments */

@@ -4,6 +4,8 @@
 
 #include "PageSubAction.h"
 
+#include "util/Exception.h"
+
 #include <QBuffer>
 
 using namespace mv::util;
@@ -70,21 +72,53 @@ void PageSubAction::setTooltipCallback(const TooltipCallback& tooltipCallback)
 	_iconLabel->setTooltipCallback(tooltipCallback);
 }
 
-ProjectPurgePageSubAction::ProjectPurgePageSubAction(const QString& filePath) :
-    PageSubAction(mv::util::StyledIcon("trash")),
-	_filePath(filePath)
+ProjectPurgePageSubAction::ProjectPurgePageSubAction(ProjectsModelProjectSharedPtr project) :
+    PageSubAction(StyledIcon("trash")),
+    _project(project)
 {
     setTooltipCallback([]() -> QString {
-        return "Purge downloaded project";
-});
+        return "Remove downloaded project";
+	});
 
     setClickedCallback([this]() -> void {
-        qDebug() << "Purge downloaded project clicked" << _filePath;
+        
+        try {
+            if (!_project)
+                throw BaseException("Project is null");
+
+            const auto downloadedProjectFilePath = _project->getDownloadedProjectFilePath();
+
+            if (downloadedProjectFilePath.isEmpty())
+                throw BaseException("File path is empty");
+
+            qDebug() << "Purging downloaded project" << downloadedProjectFilePath;
+
+            const auto fileInfo = QFileInfo(downloadedProjectFilePath);
+
+        	if (!fileInfo.exists())
+                throw BaseException("File does not exist");
+
+        	if (!QFile::remove(downloadedProjectFilePath))
+                throw BaseException("Unable to remove file");
+
+            _project->setDownloaded();
+
+        	qDebug() << "Purged downloaded project at" << downloadedProjectFilePath;
+
+            mv::help().addNotification("Project removed", QString("%1 has been removed from the system.").arg(_project->getTitle()), StyledIcon("trash"));
+
+        	setVisible(false);
+        }
+        catch (const std::exception& e) {
+            qWarning() << "Unable to purge downloaded project:" << e.what();
+
+            mv::help().addNotification("Problem purging project", QString("Unable to purge the project: %1").arg(e.what()), StyledIcon("trash"));
+        }
     });
 }
 
 CommentsPageSubAction::CommentsPageSubAction(const QString& comments) :
-	PageSubAction(mv::util::StyledIcon("scroll"))
+	PageSubAction(StyledIcon("scroll"))
 {
     setTooltipCallback([this, comments]() -> QString {
         return comments;
