@@ -361,10 +361,19 @@ private:
                 if (!openIfNeeded(safeReply))
                     return;
 
+                const auto urlDisplayString = reply->url().toDisplayString().toHtmlEscaped();
+
                 if (safeReply->error() == QNetworkReply::NoError) {
                     QString errorString;
 
                     if (!state->sink->commit(&errorString)) {
+
+                        if (task) {
+                            task->setAborted();
+                        }
+
+                        notifyError(urlDisplayString, errorString);
+
                         promise->setException(std::make_exception_ptr(Exception(errorString)));
 
                         finishOnce([safeReply]() {
@@ -386,10 +395,13 @@ private:
                 else {
                     state->sink->cancel();
 
-                    const auto errorString      = (safeReply->error() == QNetworkReply::OperationCanceledError) ? QStringLiteral("Download aborted by user") : safeReply->errorString();
-                    const auto urlDisplayString = reply->url().toDisplayString().toHtmlEscaped();
+                    const auto errorString = (safeReply->error() == QNetworkReply::OperationCanceledError) ? QStringLiteral("Download aborted by user") : safeReply->errorString();
 
-                    notifyError(urlDisplayString, errorString);
+                    if (task) {
+                        task->setAborted();
+                    }
+
+                	notifyError(urlDisplayString, errorString);
 
                     promise->setException(std::make_exception_ptr(Exception(errorString)));
 

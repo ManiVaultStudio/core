@@ -123,6 +123,8 @@ bool FileDownloader::FileSink::open(QNetworkReply* reply, const QUrl& url, const
 		return false;
     }
 
+    //_saveFile.setFileName(_finalPath);
+
     if (!_saveFile.open(QIODevice::WriteOnly)) {
         if (error)
             *error = QStringLiteral("Failed to open %1 for writing").arg(_finalPath);
