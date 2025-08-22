@@ -10,8 +10,6 @@ using namespace mv::util;
 using namespace mv::gui;
 
 PageSubAction::PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback /*= {}*/, const ClickedCallback& clickedCallback /*= {}*/) :
-    _clickedCallback(clickedCallback),
-	_tooltipCallback(tooltipCallback),
     _iconLabel(new IconLabel(icon))
 {
     _iconLabel->hide();
@@ -19,6 +17,8 @@ PageSubAction::PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCa
     _iconLabel->setTooltipCallback([this]() -> QString {
         return getTooltip();
     });
+
+    _iconLabel->setClickedCallback(clickedCallback);
 }
 
 PageSubAction::~PageSubAction()
@@ -34,8 +34,8 @@ void PageSubAction::setIcon(const QIcon& icon)
 
 QString PageSubAction::getTooltip() const
 {
-    if (_tooltipCallback)
-        return _tooltipCallback();
+    if (_iconLabel->getTooltipCallback())
+        return _iconLabel->getTooltipCallback()();
 
     return {};
 }
@@ -50,9 +50,37 @@ IconLabel* PageSubAction::getIconLabel()
     return _iconLabel;
 }
 
-ProjectPurgePageSubAction::ProjectPurgePageSubAction() :
-    PageSubAction(mv::util::StyledIcon("trash"))
+PageSubAction::ClickedCallback PageSubAction::getClickedCallback() const
 {
+	return _iconLabel->getClickedCallback();
+}
+
+void PageSubAction::setClickedCallback(const ClickedCallback& clickedCallback)
+{
+	_iconLabel->setClickedCallback(clickedCallback);
+}
+
+PageSubAction::TooltipCallback PageSubAction::getTooltipCallback() const
+{
+	return _iconLabel->getTooltipCallback();
+}
+
+void PageSubAction::setTooltipCallback(const TooltipCallback& tooltipCallback)
+{
+	_iconLabel->setTooltipCallback(tooltipCallback);
+}
+
+ProjectPurgePageSubAction::ProjectPurgePageSubAction(const QString& filePath) :
+    PageSubAction(mv::util::StyledIcon("trash")),
+	_filePath(filePath)
+{
+    setTooltipCallback([]() -> QString {
+        return "Purge downloaded project";
+});
+
+    setClickedCallback([this]() -> void {
+        qDebug() << "Purge downloaded project clicked" << _filePath;
+    });
 }
 
 CommentsPageSubAction::CommentsPageSubAction(const QString& comments) :
