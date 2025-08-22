@@ -286,7 +286,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         projectPageAction->setParentTitle(project->getGroup());
 
         if (!project->isGroup() && project->isDownloaded())
-        	projectPageAction->createSubAction<ProjectPurgePageSubAction>();
+        	projectPageAction->createSubAction<ProjectPurgePageSubAction>(project->getDownloadedProjectFilePath());
 
         if (!project->getTags().isEmpty())
             projectPageAction->createSubAction<TagsPageSubAction>(project->getTags());
