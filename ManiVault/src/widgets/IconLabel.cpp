@@ -29,9 +29,24 @@ void IconLabel::setIcon(const QIcon& icon)
     setPixmap(icon.pixmap(QSize(14, 14)));
 }
 
+IconLabel::TooltipCallback IconLabel::getTooltipCallback() const
+{
+    return _tooltipCallback;
+}
+
+IconLabel::ClickedCallback IconLabel::getClickedCallback() const
+{
+    return _clickedCallback;
+}
+
 void IconLabel::setTooltipCallback(const TooltipCallback& tooltipCallback)
 {
     _tooltipCallback = tooltipCallback;
+}
+
+void IconLabel::setClickedCallback(const ClickedCallback& clickedCallback)
+{
+    _clickedCallback = clickedCallback;
 }
 
 void IconLabel::enterEvent(QEnterEvent* enterEvent)
@@ -60,6 +75,14 @@ bool IconLabel::event(QEvent* event)
 			return true;
 		}
 	}
+
+    if (event->type() == QEvent::MouseButtonRelease) {
+        if (_clickedCallback) {
+            _clickedCallback();
+
+            return true;
+        }
+    }
 
     return QLabel::event(event);
 }

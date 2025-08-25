@@ -86,8 +86,20 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
 	                    qCritical() << "Unable to add tutorials from DSN due to an unhandled exception";
 	                }
 				})
-                .onFailed(this, [this, dsn, dsnIndex](const QException& e) {
-					qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
+                .onFailed(this, [this, dsn, dsnIndex](const std::exception_ptr& exception_ptr) {
+                    try {
+                        if (exception_ptr)
+                            std::rethrow_exception(exception_ptr);
+                    }
+                    catch (const BaseException& exception) {
+                        qCritical() << "Download failed for" << dsn << ":" << exception.what();
+                    }
+                    catch (const std::exception& exception) {
+                        qCritical() << "Download failed for" << dsn << ":" << exception.what();
+                    }
+                    catch (...) {
+                        qCritical() << "Download failed for" << dsn << ":" << ", an unknown exception occurred";
+                    }
 				});
         }
 	});

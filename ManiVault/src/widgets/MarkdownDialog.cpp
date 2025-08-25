@@ -54,8 +54,20 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
 	                qCritical() << "Unable to display markdown:";
 	            }
 			})
-            .onFailed(this, [this](const QException& e) {
-				qWarning().noquote() << "Download failed for" << _markdownUrl << ":" << e.what();
+            .onFailed(this, [this](const std::exception_ptr& exception_ptr) {
+                try {
+                    if (exception_ptr)
+                        std::rethrow_exception(exception_ptr);
+                }
+                catch (const BaseException& exception) {
+                    qWarning() << "Download markdown failed for" << _markdownUrl << ":" << exception.what();
+                }
+                catch (const std::exception& exception) {
+                    qWarning() << "Download markdown failed for" << _markdownUrl << ":" << exception.what();
+                }
+                catch (...) {
+                    qWarning() << "Download markdown failed for" << _markdownUrl << "an unknown exception occurred";
+                }
 			});
     });
 

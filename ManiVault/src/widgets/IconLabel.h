@@ -28,7 +28,8 @@ class CORE_EXPORT IconLabel : public QLabel
 {
 public:
 
-    using TooltipCallback = std::function<QString()>;    /** Callback function that is called when a tooltip is required */
+    using TooltipCallback = std::function<QString()>;   /** Callback function that is called when a tooltip is required */
+    using ClickedCallback = std::function<void()>;      /** Callback function that is called when the icon label is clicked (used by non-QObject derived classes) */
 
 public:
 
@@ -46,10 +47,28 @@ public:
     void setIcon(const QIcon& icon);
 
     /**
-     * Set the tooltip callback
+     * Get the tooltip callback
+     * @return TooltipCallback that is called when the sub-action is hovered
+     */
+    TooltipCallback getTooltipCallback() const;
+
+    /**
+     * Set the tooltip callback to \p tooltipCallback
      * @param tooltipCallback Callback function that is called when a tooltip is required
      */
     void setTooltipCallback(const TooltipCallback& tooltipCallback);
+
+    /**
+     * Get the clicked callback
+     * @return ClickedCallback that is called when the sub-action is clicked
+     */
+    ClickedCallback getClickedCallback() const;
+
+    /**
+     * Set the clicked callback to \p clickedCallback
+     * @param clickedCallback Callback function that is called when the icon label is clicked (used by non-QObject derived classes)
+     */
+    void setClickedCallback(const ClickedCallback& clickedCallback);
 
     /**
      * Triggered on mouse hover
@@ -78,6 +97,7 @@ private:
 private:
     QGraphicsOpacityEffect  _opacityEffect;         /** Effect for modulating label opacity */
     TooltipCallback         _tooltipCallback;       /** Callback function that is called when a tooltip is required */
+    ClickedCallback         _clickedCallback;       /** Callback function that is called when the icon label is clicked (used by non-QObject derived classes) */
 };
 
 }

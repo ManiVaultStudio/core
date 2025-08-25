@@ -968,7 +968,7 @@ private:
     Status                  _deferredStatus;                                /** Task status which is set after a delay */
     bool                    _deferredStatusRecursive;                       /** Whether to set the task status deferred recursively */
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
-    bool                    _alwaysProcessEvents;                           /** Whether the task envokes Qt's processEvents on updates, e.g. for task before the main event loop started. Default: false */
+    bool                    _alwaysProcessEvents;                           /** Whether the task invokes Qt's processEvents on updates, e.g. for task before the main event loop started. Default: false */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
     GuiScopes               _guiScopes;                                     /** The gui scope(s) in which the task will present itself to the user */
@@ -985,7 +985,7 @@ private:
 
 private:
     static constexpr std::uint32_t EMIT_CHANGED_TIMER_INTERVAL      = 100;      /** Single shot task progress and description timer interval */
-    static constexpr std::uint32_t DEFERRED_TASK_STATUS_INTERVAL    = 1500;     /** Delay after which the deferred task status is set */
+    static constexpr std::uint32_t DEFERRED_TASK_STATUS_INTERVAL    = 250;      /** Delay after which the deferred task status is set */
 };
 
 }

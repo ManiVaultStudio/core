@@ -177,6 +177,7 @@ int main(int argc, char *argv[])
     loadGuiTask.setSubtaskStarted("Create main window");
 
     mainWindow.show();
+    mainWindow.initialize();
 
     loadGuiTask.setSubtaskFinished("Create main window");
 

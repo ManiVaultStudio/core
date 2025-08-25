@@ -105,6 +105,16 @@ public:
         ProjectWorkspaceSerialization
     };
 
+    /** Exception class for file project download issue */
+    class ProjectDownloadException : public util::BaseException {
+    public:
+
+        explicit ProjectDownloadException(const QString& message) :
+            BaseException(message, util::StyledIcon("download")) {}
+
+        BaseException* clone() const override { return new ProjectDownloadException(*this); }
+    };
+
 public:
 
     /**
@@ -213,14 +223,22 @@ public:
      */
     virtual const ProjectsTreeModel& getProjectsTreeModel() const = 0;
 
+public: // Project download
+
     /**
      * Download project from \p url and store it in the default downloaded projects directory
      * @param url URL of the project to download
      * @param targetDirectory Directory where the project is stored (default is empty, which means the default downloaded projects directory)
      * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
-     * @return File path of the downloaded project, empty string if download failed
+     * @return Future containing the path to the downloaded project file
      */
-    virtual QString downloadProject(QUrl url, const QString& targetDirectory = "", Task* task = nullptr) = 0;
+    virtual QFuture<QString> downloadProjectAsync(QUrl url, const QString& targetDirectory = "", Task* task = nullptr) = 0;
+
+    /**
+     * Establish asynchronously whether the project at \p url is updated with respect to the last downloaded version
+     * @return Future containing a boolean determining whether the project is stale (true) or not (false)
+     */
+    virtual QFuture<bool> isDownloadedProjectStaleAsync(QUrl url) const = 0;
 
     /**
      * Get the directory where downloaded projects are stored
