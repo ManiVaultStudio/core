@@ -28,12 +28,19 @@ using namespace mv::plugin;
 using namespace mv::gui;
 using namespace mv::util;
 
+class OpenGLWarmupWidget : public QOpenGLWidget
+{
+public:
+    using QOpenGLWidget::QOpenGLWidget;
+};
+
 DockManager::DockManager(const QString& name, QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
     _name(name),
     _serializationTask(nullptr),
-    _layoutTask(this, "Load " + _name.toLower() + " layout")
+    _layoutTask(this, "Load " + _name.toLower() + " layout"),
+    _hasWarmedUpNativeWidgets(false)
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -167,15 +174,14 @@ QWidget* DockManager::getWidget()
 void DockManager::warmupNativeWidgets()
 {
     try {
-        auto centerDockWidget = new CDockWidget(this, "Warmup OpenGL Dock Widget");
+        auto centerDockWidget   = new CDockWidget(this, "Warmup OpenGL Dock Widget");
+        auto warmupWidget       = new OpenGLWarmupWidget(centerDockWidget);
 
-        centerDockWidget->setWidget(new QOpenGLWidget());
+        centerDockWidget->setWidget(warmupWidget);
 
         addDockWidget(CenterDockWidgetArea, centerDockWidget);
 
         centerDockWidget->toggleView(false);
-
-        _hasWarmedUpNativeWidgets = true;
     }
     catch (std::exception& e)
     {

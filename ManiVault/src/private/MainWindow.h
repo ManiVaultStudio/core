@@ -18,12 +18,6 @@ public:
      */
     MainWindow(QWidget* parent = nullptr);
 
-    /**
-     * Invoked when the window is shown
-     * @param showEvent Show event that occurred
-     */
-    void showEvent(QShowEvent* showEvent) override;
-
 private: // Window geometry persistence
 
     /**
@@ -55,4 +49,6 @@ public: // Miscellaneous
     /** Does a graphics requirements check (used at startup of the application) */
     void checkGraphicsCapabilities();
 
+    /** Performs initialization of the UI */
+    void initialize();
 };

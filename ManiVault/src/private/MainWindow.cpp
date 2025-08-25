@@ -75,144 +75,6 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     restoreWindowGeometryFromSettings();
 }
 
-void MainWindow::showEvent(QShowEvent* showEvent)
-{
-    QMainWindow::showEvent(showEvent);
-
-    if (mv::workspaces().hasWarmedUpNativeWidgets() && centralWidget() == nullptr) {
-        auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
-
-        auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
-        auto viewMenuAction     = menuBar()->addMenu(new ViewMenu());
-        auto projectsMenuAction = menuBar()->addMenu(new ProjectsMenu());
-        auto helpMenuAction     = menuBar()->addMenu(new HelpMenu());
-
-        loadGuiTask.setSubtaskStarted("Initializing start page");
-
-        auto stackedWidget      = new StackedWidget();
-        auto projectWidget      = new ProjectWidget();
-        auto startPageWidget    = new StartPageWidget(projectWidget);
-        auto learningPageWidget = new LearningPageWidget();
-
-        stackedWidget->addWidget(startPageWidget);
-        stackedWidget->addWidget(projectWidget);
-        stackedWidget->addWidget(learningPageWidget);
-
-        setCentralWidget(stackedWidget);
-
-        loadGuiTask.setSubtaskFinished("Initializing start page");
-
-        statusBar()->setSizeGripEnabled(false);
-
-        auto startPageStatusBarAction       = new FrontPagesStatusBarAction(this, "Start Page");
-        auto versionStatusBarAction         = new ManiVaultVersionStatusBarAction(this, "Version");
-        auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
-        auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
-        auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
-        auto settingsTasksStatusBarAction   = new SettingsStatusBarAction(this, "Settings");
-        auto workspaceStatusBarAction       = new WorkspaceStatusBarAction(this, "Workspace");
-
-        statusBar()->insertPermanentWidget(0, startPageStatusBarAction->createWidget(this));
-        statusBar()->insertPermanentWidget(1, versionStatusBarAction->createWidget(this));
-        statusBar()->insertPermanentWidget(2, pluginsStatusBarAction->createWidget(this));
-        statusBar()->insertPermanentWidget(3, workspaceStatusBarAction->createWidget(this));
-        statusBar()->insertPermanentWidget(4, loggingStatusBarAction->createWidget(this), 4);
-        statusBar()->insertPermanentWidget(5, backgroundTasksStatusBarAction->createWidget(this), 1);
-        statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
-
-        const auto updateStatusBarVisibility = [this]() -> void {
-            statusBar()->setVisible(mv::projects().hasProject() && mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction().isChecked());
-        };
-
-        const auto getNumberOfPermanentWidgets = [this]() -> std::int32_t {
-            return statusBar()->findChildren<QWidget*>(Qt::FindDirectChildrenOnly).count();
-        };
-
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
-            if (auto statusBarAction = pluginFactory->getStatusBarAction()) {
-                const auto index = statusBarAction->getIndex();
-
-                if (index == 0)
-                    statusBar()->addPermanentWidget(statusBarAction->createWidget(this), statusBarAction->getStretch());
-
-                if (index <= -1)
-                    statusBar()->insertPermanentWidget(std::max(0, getNumberOfPermanentWidgets() + index), statusBarAction->createWidget(this), statusBarAction->getStretch());
-
-                if (index >= 1)
-                    statusBar()->insertPermanentWidget(index - 1, statusBarAction->createWidget(this), statusBarAction->getStretch());
-            }
-        }
-
-        const auto projectChanged = [this, updateStatusBarVisibility]() -> void {
-            if (!projects().hasProject()) {
-                setWindowTitle("ManiVault");
-            }
-            else {
-                if (projects().getCurrentProject()->getReadOnlyAction().isChecked()) {
-                    setWindowTitle(projects().getCurrentProject()->getTitleAction().getString());
-                } else {
-                    const auto projectFilePath = projects().getCurrentProject()->getFilePath();
-
-                    if (projectFilePath.isEmpty())
-                        setWindowTitle("Unsaved - ManiVault");
-                    else
-                        setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
-                }
-            }
-
-            updateStatusBarVisibility();
-        };
-
-        connect(&projects(), &AbstractProjectManager::projectCreated, this, projectChanged);
-        connect(&projects(), &AbstractProjectManager::projectDestroyed, this, projectChanged);
-        connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
-        connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
-
-        const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
-            if (toggled)
-                stackedWidget->setCurrentWidget(startPageWidget);
-            else
-                stackedWidget->setCurrentWidget(projectWidget);
-        };
-
-        connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
-
-        connect(&help().getShowLearningCenterPageAction(), &ToggleAction::toggled, this, [stackedWidget, startPageWidget, projectWidget, learningPageWidget](bool toggled) -> void {
-            if (toggled)
-                stackedWidget->setCurrentWidget(learningPageWidget);
-            else {
-                if (projects().hasProject())
-                    stackedWidget->setCurrentWidget(projectWidget);
-                else
-                    stackedWidget->setCurrentWidget(startPageWidget);
-            }
-        });
-
-        const auto updateMenuVisibility = [fileMenuAction, projectsMenuAction]() -> void {
-            const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
-
-            fileMenuAction->setVisible(!projectIsReadOnly);
-            projectsMenuAction->setVisible(projectIsReadOnly ? projects().getCurrentProject()->getAllowProjectSwitchingAction().isChecked() : true);
-        };
-
-        connect(&projects(), &AbstractProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {
-            connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
-        });
-
-        loadGuiTask.setFinished();
-
-        if (Application::current()->shouldOpenProjectAtStartup())
-            projects().openProject(Application::current()->getStartupProjectUrl());
-
-        projectChanged();
-        updateStatusBarVisibility();
-
-        connect(&mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction(), &ToggleAction::toggled, this, updateStatusBarVisibility);
-
-        mv::help().initializeNotifications(this);
-    }
-}
-
 void MainWindow::moveEvent(QMoveEvent* moveEvent)
 {
     saveWindowGeometryToSettings();
@@ -292,4 +154,141 @@ void MainWindow::checkGraphicsCapabilities()
 
     ctx.doneCurrent();
     
+}
+
+void MainWindow::initialize()
+{
+    if (_numberOfShowEvents >= 1 && centralWidget() == nullptr) {
+        auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
+
+        auto fileMenuAction = menuBar()->addMenu(new FileMenu());
+        auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
+        auto projectsMenuAction = menuBar()->addMenu(new ProjectsMenu());
+        auto helpMenuAction = menuBar()->addMenu(new HelpMenu());
+
+        loadGuiTask.setSubtaskStarted("Initializing start page");
+
+        auto stackedWidget = new StackedWidget();
+        auto projectWidget = new ProjectWidget();
+        auto startPageWidget = new StartPageWidget(projectWidget);
+        auto learningPageWidget = new LearningPageWidget();
+
+        stackedWidget->addWidget(startPageWidget);
+        stackedWidget->addWidget(projectWidget);
+        stackedWidget->addWidget(learningPageWidget);
+
+        setCentralWidget(stackedWidget);
+
+        loadGuiTask.setSubtaskFinished("Initializing start page");
+
+        statusBar()->setSizeGripEnabled(false);
+
+        auto startPageStatusBarAction = new FrontPagesStatusBarAction(this, "Start Page");
+        auto versionStatusBarAction = new ManiVaultVersionStatusBarAction(this, "Version");
+        auto pluginsStatusBarAction = new PluginsStatusBarAction(this, "Plugins");
+        auto loggingStatusBarAction = new LoggingStatusBarAction(this, "Logging");
+        auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
+        auto settingsTasksStatusBarAction = new SettingsStatusBarAction(this, "Settings");
+        auto workspaceStatusBarAction = new WorkspaceStatusBarAction(this, "Workspace");
+
+        statusBar()->insertPermanentWidget(0, startPageStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(1, versionStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(2, pluginsStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(3, workspaceStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(4, loggingStatusBarAction->createWidget(this), 4);
+        statusBar()->insertPermanentWidget(5, backgroundTasksStatusBarAction->createWidget(this), 1);
+        statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
+
+        const auto updateStatusBarVisibility = [this]() -> void {
+            statusBar()->setVisible(mv::projects().hasProject() && mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction().isChecked());
+            };
+
+        const auto getNumberOfPermanentWidgets = [this]() -> std::int32_t {
+            return statusBar()->findChildren<QWidget*>(Qt::FindDirectChildrenOnly).count();
+            };
+
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+            if (auto statusBarAction = pluginFactory->getStatusBarAction()) {
+                const auto index = statusBarAction->getIndex();
+
+                if (index == 0)
+                    statusBar()->addPermanentWidget(statusBarAction->createWidget(this), statusBarAction->getStretch());
+
+                if (index <= -1)
+                    statusBar()->insertPermanentWidget(std::max(0, getNumberOfPermanentWidgets() + index), statusBarAction->createWidget(this), statusBarAction->getStretch());
+
+                if (index >= 1)
+                    statusBar()->insertPermanentWidget(index - 1, statusBarAction->createWidget(this), statusBarAction->getStretch());
+            }
+        }
+
+        const auto projectChanged = [this, updateStatusBarVisibility]() -> void {
+            if (!projects().hasProject()) {
+                setWindowTitle("ManiVault");
+            }
+            else {
+                if (projects().getCurrentProject()->getReadOnlyAction().isChecked()) {
+                    setWindowTitle(projects().getCurrentProject()->getTitleAction().getString());
+                }
+                else {
+                    const auto projectFilePath = projects().getCurrentProject()->getFilePath();
+
+                    if (projectFilePath.isEmpty())
+                        setWindowTitle("Unsaved - ManiVault");
+                    else
+                        setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
+                }
+            }
+
+            updateStatusBarVisibility();
+            };
+
+        connect(&projects(), &AbstractProjectManager::projectCreated, this, projectChanged);
+        connect(&projects(), &AbstractProjectManager::projectDestroyed, this, projectChanged);
+        connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
+        connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
+
+        const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
+            if (toggled)
+                stackedWidget->setCurrentWidget(startPageWidget);
+            else
+                stackedWidget->setCurrentWidget(projectWidget);
+            };
+
+        connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+
+        connect(&help().getShowLearningCenterPageAction(), &ToggleAction::toggled, this, [stackedWidget, startPageWidget, projectWidget, learningPageWidget](bool toggled) -> void {
+            if (toggled)
+                stackedWidget->setCurrentWidget(learningPageWidget);
+            else {
+                if (projects().hasProject())
+                    stackedWidget->setCurrentWidget(projectWidget);
+                else
+                    stackedWidget->setCurrentWidget(startPageWidget);
+            }
+            });
+
+        const auto updateMenuVisibility = [fileMenuAction, projectsMenuAction]() -> void {
+            const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
+
+            fileMenuAction->setVisible(!projectIsReadOnly);
+            projectsMenuAction->setVisible(projectIsReadOnly ? projects().getCurrentProject()->getAllowProjectSwitchingAction().isChecked() : true);
+            };
+
+        connect(&projects(), &AbstractProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {
+            connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
+            });
+
+        loadGuiTask.setFinished();
+
+        if (Application::current()->shouldOpenProjectAtStartup())
+            projects().openProject(Application::current()->getStartupProjectUrl());
+
+        projectChanged();
+        updateStatusBarVisibility();
+
+        connect(&mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction(), &ToggleAction::toggled, this, updateStatusBarVisibility);
+
+        mv::help().initializeNotifications(this);
+    }
 }
