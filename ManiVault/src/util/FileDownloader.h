@@ -254,10 +254,14 @@ private:
             const auto state = std::make_shared<State>();
 
             auto finishOnce = [state, promise](auto&& fn) {
-                if (state->finished) return;
+                if (state->finished)
+                    return;
+
                 state->finished = true;
-                std::forward<decltype(fn)>(fn)();
-                promise->finish();
+
+            	std::forward<decltype(fn)>(fn)();
+
+            	promise->finish();
 			};
 
             // Abort handling (user clicks on cancel in the UI, task->abort() is called)
@@ -265,7 +269,7 @@ private:
                 connect(task, &Task::requestAbort, reply, [reply, state, task]() {
 
                 	// Guard network reply access
-                    auto safeReply = std::shared_ptr<QNetworkReply>(reply);
+                    QPointer<QNetworkReply> safeReply = reply;
 
                     // Abort the download if we have a valid reply
                     if (!safeReply || !safeReply->isRunning())
