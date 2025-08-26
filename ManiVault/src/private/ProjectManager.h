@@ -202,6 +202,13 @@ private:
     /** Resets the manager and creates a new project */
     void createProject();
 
+    /**
+     * Download project from \p url, store it in \p targetDir and open it
+     * @param url URL of the project
+     * @param targetDirectory Directory where the project is stored (temporary directory when empty)
+     */
+    void downloadAndOpenProject(QUrl url, const QString& targetDirectory) const;
+
 public: // Serialization
 
     /**

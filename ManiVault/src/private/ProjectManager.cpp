@@ -25,6 +25,9 @@
 #include <QGridLayout>
 #include <QEventLoop>
 #include <QHeaderView>
+#include <QFuture>
+#include <QFutureWatcher>
+#include <QMetaObject>
 #include <QtConcurrent>
 
 #include <exception>
@@ -554,8 +557,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         projects().getProjectSerializationTask().setFinished();
     }
-
-    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= false*/)
@@ -567,28 +568,6 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
     Application::requestOverrideCursor(Qt::WaitCursor);
 
     try {
-        const auto downloadAndOpenProject = [url, targetDirectory]() -> void {
-            auto future = mv::projects().downloadProjectAsync(url, targetDirectory);
-
-            future.then([&](const QString& projectFilePath) {
-                mv::projects().openProject(projectFilePath);
-			}).onFailed([&](const std::exception_ptr& exception_ptr) {
-                try {
-                    if (exception_ptr)
-                        std::rethrow_exception(exception_ptr);
-                }
-                catch (const BaseException& exception) {
-                    qCritical() << "Failed to download project from" << url.toString() << ":" << exception.what();
-                }
-                catch (const std::exception& exception) {
-                    qCritical() << "Failed to download project from" << url.toString() << ":" << exception.what();
-                }
-                catch (...) {
-                    qCritical() << "Failed to download project from" << url.toString() << ":" << ", an unknown exception occurred";
-                }
-			});
-		};
-
         if (url.isLocalFile()) {
             mv::projects().openProject(url.toLocalFile());
         } else {
@@ -600,11 +579,11 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
             if (downloadedProjectFileInfo.exists()) {
                 QFuture<bool> isDownloadProjectStaleFuture = isDownloadedProjectStaleAsync(url);
 
-                isDownloadProjectStaleFuture.then([url, fileName, downloadedProjectFilePath, downloadAndOpenProject](bool isStale) {
+                isDownloadProjectStaleFuture.then([this, url, targetDirectory, fileName, downloadedProjectFilePath](bool isStale) {
 	                if (isStale) {
                         qDebug() << "Project is stale, prompting to download again from" << url.toDisplayString();
 
-                        QMetaObject::invokeMethod(qApp, [=]() {
+                        QMetaObject::invokeMethod(qApp, [this, fileName, downloadedProjectFilePath, url, targetDirectory]() {
 	                        QMessageBox downloadQuestionMessageBox;
 
 	                        downloadQuestionMessageBox.setWindowIcon(StyledIcon("download"));
@@ -621,7 +600,7 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 	                        if (downloadQuestionMessageBox.clickedButton() == yesButton) {
 	                            QFile::remove(downloadedProjectFilePath);
 
-	                            downloadAndOpenProject();
+	                            downloadAndOpenProject(url, targetDirectory);
 	                        }
 	                        else {
 	                            mv::projects().openProject(downloadedProjectFilePath);
@@ -634,7 +613,10 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 	                }
                 }).onFailed([downloadedProjectFilePath](const std::exception_ptr& exception_ptr) {
                     qDebug() << "Failed to check if project is stale at" << downloadedProjectFilePath;
-                    try {
+
+                    Application::restoreOverrideCursor();
+
+                	try {
                         mv::projects().openProject(downloadedProjectFilePath);
 
                         if (exception_ptr)
@@ -652,7 +634,7 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 				});
             }
             else {
-                downloadAndOpenProject();
+                downloadAndOpenProject(url, targetDirectory);
             }
         }
 	}
@@ -665,8 +647,37 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 	    exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
 	}
 
-    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
+    Application::current()->restoreOverrideCursor();
 }
+
+void ProjectManager::downloadAndOpenProject(QUrl url, const QString& targetDirectory) const
+{
+    QFuture<QString> future = mv::projects().downloadProjectAsync(url, targetDirectory);
+
+	auto watcher = new QFutureWatcher<QString>(const_cast<ProjectManager*>(this));
+
+    connect(watcher, &QFutureWatcher<QString>::finished, [watcher, url]() {
+        try {
+            Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
+
+            if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                return;
+
+            QString projectFilePath = watcher->future().result();
+
+            QMetaObject::invokeMethod(qApp, [projectFilePath]() {
+                mv::projects().openProject(projectFilePath);
+			});
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Failed to download project from" << url.toString() << ":" << e.what();
+        }
+
+        watcher->deleteLater();
+    });
+
+    watcher->setFuture(future);
+};
 
 void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory, bool importDataOnly, bool loadWorkspace)
 {
@@ -780,14 +791,10 @@ void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, co
     {
         exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
     }
-
-    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectManager::importProject(QString filePath /*= ""*/)
 {
-    Application::requestOverrideCursor(Qt::WaitCursor);
-
     try
     {
 #ifdef PROJECT_MANAGER_VERBOSE
@@ -810,8 +817,6 @@ void ProjectManager::importProject(QString filePath /*= ""*/)
     {
         exceptionMessageBox("Unable to import project");
     }
-
-    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& password /*= ""*/)
@@ -1000,7 +1005,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
         projects().getProjectSerializationTask().setFinished();
     }
 
-    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
+    Application::current()->restoreOverrideCursor();
 }
 
 void ProjectManager::saveProjectAs()
@@ -1216,7 +1221,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             */
             unsetTemporaryDirPath(TemporaryDirType::Publish);
 
-            Application::requestRemoveOverrideCursor(Qt::WaitCursor);
+            Application::current()->restoreOverrideCursor();
         }
         emit projectPublished(*_project);
     }
@@ -1226,7 +1231,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
         projects().getProjectSerializationTask().setFinished();
 
-        Application::requestRemoveOverrideCursor(Qt::WaitCursor);
+        Application::current()->restoreOverrideCursor();
     }
     catch (...)
     {
@@ -1234,7 +1239,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
         projects().getProjectSerializationTask().setFinished();
 
-        Application::requestRemoveOverrideCursor(Qt::WaitCursor);
+        Application::current()->restoreOverrideCursor();
     }
 }
 
