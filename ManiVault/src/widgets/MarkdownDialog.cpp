@@ -34,9 +34,8 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
     _markdownPage.setWebChannel(channel);
 
     connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this](bool ok) -> void {
-        auto future = FileDownloader::downloadToByteArrayAsync(_markdownUrl);
-
-        auto watcher = new QFutureWatcher<QByteArray>(this);
+        auto future     = FileDownloader::downloadToByteArrayAsync(_markdownUrl);
+        auto watcher    = new QFutureWatcher<QByteArray>(this);
 
         connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher]() {
             try {
