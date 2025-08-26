@@ -253,22 +253,8 @@ void Notification::updateMessageLabel()
 {
     _titleLabel.setText(QString("<b>%1</b>").arg(_title));
 
-
-    //if (_description.contains("http")) {
-    //    // Make the URL clickable
-    //    QString html = QString("<a href=\"%1\">%1</a>").arg(_description.toHtmlEscaped());
-    //    _messageLabel.setText(html);
-    //    _messageLabel.setTextFormat(Qt::RichText);
-    //    _messageLabel.setTextInteractionFlags(Qt::TextBrowserInteraction);
-    //    _messageLabel.setOpenExternalLinks(true);
-    //}
-    //else {
-    //    _messageLabel.setText(_description);
-    //    _messageLabel.setTextFormat(Qt::PlainText);
-    //}
-
-    _messageLabel.setText(_description.toHtmlEscaped());//Qt::mightBeRichText(_description) ? : _description);
-    _messageLabel.setTextFormat(Qt::RichText);//Qt::mightBeRichText(_description) ? Qt::RichText : Qt::PlainText);
+    _messageLabel.setText(_description.toHtmlEscaped());
+    _messageLabel.setTextFormat(Qt::RichText);
     _messageLabel.adjustSize();
 }
 
