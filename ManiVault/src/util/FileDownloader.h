@@ -365,7 +365,33 @@ private:
                 if (!openIfNeeded(safeReply))
                     return;
 
+                const QVariant statusVar = safeReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
                 const auto urlDisplayString = reply->url().toDisplayString().toHtmlEscaped();
+
+				if (statusVar.isValid()) {
+                    const int status = statusVar.toInt();
+
+                    if (status < 200 || status >= 300) {
+                        state->sink->cancel();
+
+                        const QString reason =
+                            safeReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+                        const QString errorString = QStringLiteral("HTTP %1 %2").arg(status).arg(reason);
+
+                        if (task) task->setAborted();
+
+                        notifyError(urlDisplayString, errorString);
+
+                        promise->setException(std::make_exception_ptr(Exception(errorString)));
+
+                        finishOnce([safeReply]() {
+                            safeReply->deleteLater();
+						});
+
+                        return;
+					}
+                }
 
                 if (safeReply->error() == QNetworkReply::NoError) {
                     QString errorString;
