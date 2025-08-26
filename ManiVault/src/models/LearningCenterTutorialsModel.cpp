@@ -54,41 +54,52 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
         for (const auto& dsn : _dsnsAction.getStrings()) {
             const auto dsnIndex = _dsnsAction.getStrings().indexOf(dsn);
 
-            FileDownloader::downloadToByteArrayAsync(dsn)
-                .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
-	                try {
-	                    const auto fullJson = json::parse(QString::fromUtf8(data).toStdString());
+            auto future     = FileDownloader::downloadToByteArrayAsync(dsn);
+            auto watcher    = new QFutureWatcher<QByteArray>(this);
 
-	                    if (fullJson.contains("tutorials")) {
-	                        validateJson(fullJson["tutorials"].dump(), dsn.toStdString(), loadJsonFromResource(":/JSON/TutorialsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
-	                    }
-	                    else {
-	                        throw std::runtime_error("Tutorials key is missing");
-	                    }
+            connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher, dsn, dsnIndex]() {
+                try {
+                    if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                        throw std::runtime_error("Future is cancelled or did not finish");
 
-	                    QJsonParseError jsonParseError;
+                    QMetaObject::invokeMethod(qApp, [this, future, dsn, dsnIndex]() {
+                        const auto& data = future.result();
 
-	                    const auto jsonDocument = QJsonDocument::fromJson(data, &jsonParseError);
+                        const auto fullJson = json::parse(QString::fromUtf8(data).toStdString());
 
-	                    if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-	                        qCritical() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
-	                    }
+                        if (fullJson.contains("tutorials")) {
+                            validateJson(fullJson["tutorials"].dump(), dsn.toStdString(), loadJsonFromResource(":/JSON/TutorialsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
+                        }
+                        else {
+                            throw std::runtime_error("Tutorials key is missing");
+                        }
 
-	                    for (const auto tutorial : jsonDocument.object()["tutorials"].toArray())
-	                        addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
-	                }
-	                catch (std::exception& e)
-	                {
-	                    qCritical() << "Unable to add tutorials from DSN:" << e.what();
-	                }
-	                catch (...)
-	                {
-	                    qCritical() << "Unable to add tutorials from DSN due to an unhandled exception";
-	                }
-				})
-                .onFailed(this, [this, dsn, dsnIndex](const QException& e) {
-					qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
-				});
+                        QJsonParseError jsonParseError;
+
+                        const auto jsonDocument = QJsonDocument::fromJson(data, &jsonParseError);
+
+                        if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                            qCritical() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+                        } else {
+                            for (const auto tutorial : jsonDocument.object()["tutorials"].toArray())
+                                addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+                        }
+					});
+                }
+                catch (const BaseException& exception) {
+                    qCritical() << "Download failed for" << dsn << ":" << exception.what();
+                }
+                catch (const std::exception& exception) {
+                    qCritical() << "Download failed for" << dsn << ":" << exception.what();
+                }
+                catch (...) {
+                    qCritical() << "Download failed for" << dsn << ":" << ", an unknown exception occurred";
+                }
+
+                watcher->deleteLater();
+            });
+
+            watcher->setFuture(future);
         }
 	});
 

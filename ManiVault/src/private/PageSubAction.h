@@ -7,6 +7,7 @@
 #include <util/HardwareSpec.h>
 
 #include <widgets/IconLabel.h>
+#include <models/ProjectsModelProject.h>
 
 #include <QIcon>
 #include <QImage>
@@ -66,32 +67,45 @@ public: // Callbacks
      * Get the clicked callback
      * @return ClickedCallback that is called when the sub-action is clicked
      */
-    ClickedCallback getClickedCallback() const { return _clickedCallback; }
+    ClickedCallback getClickedCallback() const;
 
     /**
      * Set the clicked callback to \p clickedCallback
      * @param clickedCallback ClickedCallback that is called when the sub-action is clicked
      */
-	void setClickedCallback(const ClickedCallback& clickedCallback) { _clickedCallback = clickedCallback; }
+	void setClickedCallback(const ClickedCallback& clickedCallback);
 
     /**
      * Get the tooltip callback
      * @return TooltipCallback that is called when the sub-action is hovered
      */
-    TooltipCallback getTooltipCallback() const { return _tooltipCallback; }
+    TooltipCallback getTooltipCallback() const;
 
     /**
      * Set the tooltip callback to \p tooltipCallback
      * @param tooltipCallback Callback function that is invoked to retrieve the sub-action tooltip
      */
-    void setTooltipCallback(const TooltipCallback& tooltipCallback) { _tooltipCallback = tooltipCallback; }
+    void setTooltipCallback(const TooltipCallback& tooltipCallback);
 
 protected:
-    ClickedCallback                 _clickedCallback;   /** Callback function that is called when the sub-action is clicked */
-    TooltipCallback                 _tooltipCallback;   /** Callback function that is invoked to retrieve the sub-action tooltip */
     QPointer<mv::gui::IconLabel>    _iconLabel;         /** Icon label representing the sub-action */
 
     static bool compactView;
+};
+
+/** For purging a downloaded project */
+class ProjectPurgePageSubAction : public PageSubAction
+{
+public:
+
+    /**
+     * Construct shared pointer to the \p project to purge
+     * @param project Shared pointer to the project to purge
+     */
+    ProjectPurgePageSubAction(mv::util::ProjectsModelProjectSharedPtr project);
+
+private:
+    mv::util::ProjectsModelProjectSharedPtr     _project;   /** Shared pointer to the project to purge */
 };
 
 /** For displaying comments */

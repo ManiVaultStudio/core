@@ -304,15 +304,40 @@ void ProjectsModelProject::determineDownloadSize()
     //qDebug() << __FUNCTION__ << getTitle();
 #endif
 
-    FileDownloader::getDownloadSizeAsync(getUrl()).then(this, [this](std::uint64_t size) {
-        _serverDownloadSize = size;
+    auto future     = FileDownloader::getDownloadSizeAsync(getUrl());
+    auto watcher    = new QFutureWatcher<std::uint64_t>(this);
 
-        emit downloadSizeDetermined(_serverDownloadSize);
-    }).onFailed(this, [this](const QException& e) {
-        emit downloadSizeDetermined(0);
+    connect(watcher, &QFutureWatcher<std::uint64_t>::finished, watcher, [this, future, watcher]() {
+        try {
+            if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                throw std::runtime_error("Future is cancelled or did not finish");
 
-        qWarning().noquote() << QString("Unable to determine download size for %1: %2").arg(getUrl().toString(), e.what());
+            QMetaObject::invokeMethod(qApp, [this, future]() {
+                _serverDownloadSize = future.result();
+
+                emit downloadSizeDetermined(_serverDownloadSize);
+			});
+        }
+        catch (const BaseException& exception) {
+            emit downloadSizeDetermined(0);
+
+            qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
+        }
+        catch (const std::exception& exception) {
+            emit downloadSizeDetermined(0);
+
+        	qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
+        }
+        catch (...) {
+            emit downloadSizeDetermined(0);
+
+        	qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
+        }
+
+        watcher->deleteLater();
 	});
+
+    watcher->setFuture(future);
 }
 
 void ProjectsModelProject::determineLastModified()
@@ -324,15 +349,40 @@ void ProjectsModelProject::determineLastModified()
     //qDebug() << __FUNCTION__ << getTitle();
 #endif
 
-    FileDownloader::getLastModifiedAsync(getUrl()).then(this, [this](const QDateTime& lastModified) {
-        _serverLastModified = lastModified;
+    auto future     = FileDownloader::getLastModifiedAsync(getUrl());
+    auto watcher    = new QFutureWatcher<QDateTime>(this);
 
-        emit lastModifiedDetermined(_serverLastModified);
-    }).onFailed(this, [this](const QException& e) {
-        emit lastModifiedDetermined({});
+    connect(watcher, &QFutureWatcher<QDateTime>::finished, watcher, [this, future, watcher]() {
+        try {
+            if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                throw std::runtime_error("Future is cancelled or did not finish");
 
-		qWarning().noquote() << QString("Unable to determine the last modified date for %1: %2").arg(getUrl().toString(), e.what());
+            QMetaObject::invokeMethod(qApp, [this, future]() {
+                _serverLastModified = future.result();
+
+                emit lastModifiedDetermined(_serverLastModified);
+			});
+        }
+        catch (const BaseException& exception) {
+            emit lastModifiedDetermined({});
+
+            qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << exception.what();
+        }
+        catch (const std::exception& exception) {
+            emit lastModifiedDetermined({});
+
+        	qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << exception.what();
+        }
+        catch (...) {
+            emit lastModifiedDetermined({});
+
+        	qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
+        }
+
+        watcher->deleteLater();
     });
+
+    watcher->setFuture(future);
 }
 
 void ProjectsModelProject::computeSha()
@@ -409,7 +459,7 @@ void ProjectsModelProject::updateTooltip()
 
 QString ProjectsModelProject::getDownloadedProjectFilePath() const
 {
-    return mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
+	return mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
 }
 
 std::uint64_t ProjectsModelProject::getDownloadedProjectFileSize() const

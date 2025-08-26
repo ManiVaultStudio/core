@@ -13,6 +13,7 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QFutureWatcher>
 
 #ifdef _DEBUG
     //#define ABSTRACT_PROJECTS_MODEL_VERBOSE
@@ -267,45 +268,39 @@ void AbstractProjectsModel::addDsn(const QUrl& dsn)
         if (getPopulationMode() == PopulationMode::Automatic) {
             const auto dsnIndex = getDsnsAction().getStrings().indexOf(dsn);
 
-            FileDownloader::downloadToByteArrayAsync(dsn)
-                .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
-                    try {
+            auto future     = FileDownloader::downloadToByteArrayAsync(dsn);
+            auto watcher    = new QFutureWatcher<QByteArray>(this);
+
+            connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher, dsnIndex, dsn]() {
+                try {
+                    const auto& data = future.result();
+
+                    if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                        throw std::runtime_error("Future is cancelled or did not finish");
+
+                    QMetaObject::invokeMethod(qApp, [this, future, data, dsnIndex, dsn]() {
                         purge();
                         populateFromJsonByteArray(data, dsnIndex, dsn.toString());
-                    }
-                    catch (std::exception& e)
-                    {
-                        qCritical() << "Unable to add projects from DSN:" << e.what();
-                    }
-                    catch (...)
-                    {
-                        qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-                    }
-				})
-                .onFailed(this, [this, dsn](const QException& e) {
-					qWarning().noquote() << "Download failed for" << dsn << ":" << e.what();
-				});
-        }
+                    });
+                }
+                catch (std::exception& e)
+                {
+                    qCritical() << "Unable to add projects from DSN:" << e.what();
+                }
+                catch (...)
+                {
+                    qCritical() << "Unable to add projects from DSN due to an unhandled exception";
+                }
 
-        if (getPopulationMode() == PopulationMode::AutomaticSynchronous) {
-            try {
-                const auto data = FileDownloader::downloadToByteArraySync(dsn);
+                watcher->deleteLater();
+                });
 
-                populateFromJsonByteArray(data, getDsnsAction().getStrings().indexOf(dsn), dsn.toString());
-            }
-            catch (std::exception& e)
-            {
-                qCritical() << "Unable to add projects from DSN:" << e.what();
-            }
-            catch (...)
-            {
-                qCritical() << "Unable to add projects from DSN due to an unhandled exception";
-            }
+            watcher->setFuture(future);
         }
     }
-    catch (std::exception& e)
+    catch (std::exception& exception)
     {
-        qCritical() << QString("Unable to add DSN %1 to the projects model:").arg(dsn.toString()) << e.what();
+        qCritical() << QString("Unable to add DSN %1 to the projects model:").arg(dsn.toString()) << exception.what();
     }
     catch (...)
     {

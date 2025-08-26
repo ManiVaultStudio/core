@@ -224,6 +224,12 @@ public:
     QIcon getIcon() const;
 
     /**
+     * Get the file path where the project has been downloaded to
+     * @return File path of the downloaded project file
+     */
+    QString getDownloadedProjectFilePath() const;
+
+    /**
      * Overload assignment operator
      * @param rhs Right hand side project
      * @return Assigned project
@@ -278,12 +284,6 @@ private:
 
     /** Update project tooltip */
     void updateTooltip();
-
-    /**
-     * Get the file path where the project has been downloaded to
-     * @return File path of the downloaded project file
-     */
-    QString getDownloadedProjectFilePath() const;
 
     /**
      * Get the size of the downloaded project file

@@ -4,14 +4,14 @@
 
 #include "PageSubAction.h"
 
+#include "util/Exception.h"
+
 #include <QBuffer>
 
 using namespace mv::util;
 using namespace mv::gui;
 
 PageSubAction::PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback /*= {}*/, const ClickedCallback& clickedCallback /*= {}*/) :
-    _clickedCallback(clickedCallback),
-	_tooltipCallback(tooltipCallback),
     _iconLabel(new IconLabel(icon))
 {
     _iconLabel->hide();
@@ -19,6 +19,8 @@ PageSubAction::PageSubAction(const QIcon& icon, const TooltipCallback& tooltipCa
     _iconLabel->setTooltipCallback([this]() -> QString {
         return getTooltip();
     });
+
+    _iconLabel->setClickedCallback(clickedCallback);
 }
 
 PageSubAction::~PageSubAction()
@@ -34,8 +36,8 @@ void PageSubAction::setIcon(const QIcon& icon)
 
 QString PageSubAction::getTooltip() const
 {
-    if (_tooltipCallback)
-        return _tooltipCallback();
+    if (_iconLabel->getTooltipCallback())
+        return _iconLabel->getTooltipCallback()();
 
     return {};
 }
@@ -50,8 +52,73 @@ IconLabel* PageSubAction::getIconLabel()
     return _iconLabel;
 }
 
+PageSubAction::ClickedCallback PageSubAction::getClickedCallback() const
+{
+	return _iconLabel->getClickedCallback();
+}
+
+void PageSubAction::setClickedCallback(const ClickedCallback& clickedCallback)
+{
+	_iconLabel->setClickedCallback(clickedCallback);
+}
+
+PageSubAction::TooltipCallback PageSubAction::getTooltipCallback() const
+{
+	return _iconLabel->getTooltipCallback();
+}
+
+void PageSubAction::setTooltipCallback(const TooltipCallback& tooltipCallback)
+{
+	_iconLabel->setTooltipCallback(tooltipCallback);
+}
+
+ProjectPurgePageSubAction::ProjectPurgePageSubAction(ProjectsModelProjectSharedPtr project) :
+    PageSubAction(StyledIcon("trash")),
+    _project(project)
+{
+    setTooltipCallback([]() -> QString {
+        return "Remove downloaded project";
+	});
+
+    setClickedCallback([this]() -> void {
+        
+        try {
+            if (!_project)
+                throw BaseException("Project is null");
+
+            const auto downloadedProjectFilePath = _project->getDownloadedProjectFilePath();
+
+            if (downloadedProjectFilePath.isEmpty())
+                throw BaseException("File path is empty");
+
+            qDebug() << "Purging downloaded project" << downloadedProjectFilePath;
+
+            const auto fileInfo = QFileInfo(downloadedProjectFilePath);
+
+        	if (!fileInfo.exists())
+                throw BaseException("File does not exist");
+
+        	if (!QFile::remove(downloadedProjectFilePath))
+                throw BaseException("Unable to remove file");
+
+            _project->setDownloaded();
+
+        	qDebug() << "Purged downloaded project at" << downloadedProjectFilePath;
+
+            mv::help().addNotification("Project removed", QString("%1 has been removed from the system.").arg(_project->getTitle()), StyledIcon("trash"));
+
+        	setVisible(false);
+        }
+        catch (const std::exception& e) {
+            qWarning() << "Unable to purge downloaded project:" << e.what();
+
+            mv::help().addNotification("Problem purging project", QString("Unable to purge the project: %1").arg(e.what()), StyledIcon("trash"));
+        }
+    });
+}
+
 CommentsPageSubAction::CommentsPageSubAction(const QString& comments) :
-	PageSubAction(mv::util::StyledIcon("scroll"))
+	PageSubAction(StyledIcon("scroll"))
 {
     setTooltipCallback([this, comments]() -> QString {
         return comments;

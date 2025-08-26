@@ -154,13 +154,19 @@ public:
     const ProjectsTreeModel& getProjectsTreeModel() const override;
 
     /**
-     * Download project from \p url and store it in the default downloaded projects directory
+     * Download project asynchronously from \p url and store it in the default downloaded projects directory
      * @param url URL of the project to download
      * @param targetDirectory Directory where the project is stored (default is empty, which means the default downloaded projects directory)
      * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
-     * @return File path of the downloaded project, empty string if download failed
+     * @return Future containing the path to the downloaded project file
      */
-    QString downloadProject(QUrl url, const QString& targetDirectory = "", Task* task = nullptr) override;
+    QFuture<QString> downloadProjectAsync(QUrl url, const QString& targetDirectory = "", Task* task = nullptr) override;
+
+    /**
+     * Establish asynchronously whether the project at \p url is updated with respect to the last downloaded version
+     * @return Future containing a boolean determining whether the project is stale (true) or not (false)
+     */
+    QFuture<bool> isDownloadedProjectStaleAsync(QUrl url) const override;
 
     /**
      * Get the directory where downloaded projects are stored
@@ -195,6 +201,13 @@ private:
 
     /** Resets the manager and creates a new project */
     void createProject();
+
+    /**
+     * Download project from \p url, store it in \p targetDir and open it
+     * @param url URL of the project
+     * @param targetDirectory Directory where the project is stored (temporary directory when empty)
+     */
+    void downloadAndOpenProject(QUrl url, const QString& targetDirectory) const;
 
 public: // Serialization
 

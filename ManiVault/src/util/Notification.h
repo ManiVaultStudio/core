@@ -209,6 +209,7 @@ private:
     QHBoxLayout             _notificationWidgetLayout;      /** Layout of the notification widget */
     QVBoxLayout             _messageLayout;                 /** Message layout of the notification */
     QLabel                  _iconLabel;                     /** Label for the icon (maybe empty) */
+    QLabel                  _titleLabel;                    /** Label for the title text */
     QLabel                  _messageLabel;                  /** Label for the message text */
     gui::TaskAction         _taskAction;                    /** Task action for the task associated with this notification */
 

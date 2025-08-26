@@ -6,8 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "CoreInterface.h"
-
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>

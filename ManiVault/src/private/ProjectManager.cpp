@@ -25,6 +25,10 @@
 #include <QGridLayout>
 #include <QEventLoop>
 #include <QHeaderView>
+#include <QFuture>
+#include <QFutureWatcher>
+#include <QMetaObject>
+#include <QtConcurrent>
 
 #include <exception>
 
@@ -223,8 +227,11 @@ ProjectManager::ProjectManager(QObject* parent) :
 
     connect(&_backToProjectAction, &TriggerAction::triggered, this, [this]() -> void {
         mv::help().getShowLearningCenterPageAction().setChecked(false);
+
         getShowStartPageAction().setChecked(false);
     });
+
+    getProjectDownloadTask().setMayKill(true);
 }
 
 ProjectManager::~ProjectManager()
@@ -345,34 +352,22 @@ void ProjectManager::newBlankProject()
 
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
 {
+    Application::requestOverrideCursor(Qt::WaitCursor);
+
     try
     {
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        // FIXME: This is a workaround for the splash screen action to be able to open the project
-        //auto startupProjectMetaAction = getProjectMetaAction(filePath);
+        if (hasProject() && getCurrentProject()->getFilePath() == filePath)
+            throw std::runtime_error("Project is already open");
 
-        //if (!startupProjectMetaAction.isNull()) {
-        //    if (startupProjectMetaAction->getSplashScreenAction().getEnabledAction().isChecked())
-        //        startupProjectMetaAction->getSplashScreenAction().getOpenAction().trigger();
-        //}
+        if (isImportingProject())
+            throw std::runtime_error("Cannot open project while importing another project");
 
-        if (hasProject() && getCurrentProject()->getFilePath() == filePath) {
-            qCritical() << "Project is already open";
-            return;
-        }
-
-        if (isImportingProject()) {
-            qCritical() << "Cannot open project while importing another project";
-            return;
-        }
-
-        if (isOpeningProject()) {
-            qCritical() << "Cannot open project while another project is being opened";
-            return;
-        }
+        if (isOpeningProject())
+            throw std::runtime_error("Cannot open project while another project is being opened");
 
         const auto scopedState = ScopedState(this, State::OpeningProject);
 
@@ -546,6 +541,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             unsetTemporaryDirPath(TemporaryDirType::Open);
 
+            Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
+
             qDebug().noquote() << filePath << "loaded successfully";
         }
         emit projectOpened(*_project);
@@ -570,13 +567,88 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
     qDebug() << __FUNCTION__ << url << targetDirectory << importDataOnly << loadWorkspace;
 #endif
 
+    Application::requestOverrideCursor(Qt::WaitCursor);
+
     try {
         if (url.isLocalFile()) {
             mv::projects().openProject(url.toLocalFile());
         } else {
-            const auto downloadedProjectFilePath = mv::projects().downloadProject(url, targetDirectory);
+            const auto fileName                         = url.fileName();
+            const auto downloadedProjectFilePath        = getDownloadedProjectsDir().filePath(fileName);
+            const auto downloadedProjectFileInfo        = QFileInfo(downloadedProjectFilePath);
+            const auto downloadedProjectLastModified    = downloadedProjectFileInfo.lastModified();
 
-            mv::projects().openProject(downloadedProjectFilePath);
+            if (downloadedProjectFileInfo.exists()) {
+                QFuture<bool> isDownloadProjectStaleFuture = isDownloadedProjectStaleAsync(url);
+
+                auto watcher = new QFutureWatcher<bool>(this);
+
+                connect(watcher, &QFutureWatcher<QString>::finished, [this, watcher, url, isDownloadProjectStaleFuture, fileName, downloadedProjectFilePath, targetDirectory]() {
+                    try {
+                        Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
+
+                        if (watcher->future().isCanceled() || !watcher->future().isFinished()) {
+                            qDebug() << "Failed to check if project is stale at" << downloadedProjectFilePath;
+
+                            try {
+                                mv::projects().openProject(downloadedProjectFilePath);
+                            }
+                            catch (const BaseException& exception) {
+                                qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
+                            }
+                            catch (const std::exception& exception) {
+                                qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
+                            }
+                            catch (...) {
+                                qWarning() << "Unable to establish whether the project is stale, an unknown exception occurred";
+                            }
+                        }
+
+                        if (isDownloadProjectStaleFuture.result<bool>()) {
+                            qDebug() << "Project is stale, prompting to download again from" << url.toDisplayString();
+
+                            QMetaObject::invokeMethod(qApp, [this, fileName, downloadedProjectFilePath, url, targetDirectory]() {
+                                QMessageBox downloadQuestionMessageBox;
+
+                                downloadQuestionMessageBox.setWindowIcon(StyledIcon("download"));
+                                downloadQuestionMessageBox.setWindowTitle(QString("Updated project available...").arg(fileName));
+                                downloadQuestionMessageBox.setText(QString("An updated version of %1 is available on the server. Do you want to download it?").arg(fileName));
+                                downloadQuestionMessageBox.setIcon(QMessageBox::Warning);
+
+                                auto yesButton = downloadQuestionMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+                                auto noButton = downloadQuestionMessageBox.addButton("No", QMessageBox::RejectRole);
+
+                                downloadQuestionMessageBox.setDefaultButton(noButton);
+                                downloadQuestionMessageBox.exec();
+
+                                if (downloadQuestionMessageBox.clickedButton() == yesButton) {
+                                    QFile::remove(downloadedProjectFilePath);
+
+                                    downloadAndOpenProject(url, targetDirectory);
+                                }
+                                else {
+                                    mv::projects().openProject(downloadedProjectFilePath);
+                                }
+							});
+                        }
+                        else {
+                            qDebug() << "Project is not stale, opening from" << downloadedProjectFilePath;
+
+                            mv::projects().openProject(downloadedProjectFilePath);
+                        }
+                    }
+                    catch (const std::exception& e) {
+                        qCritical() << "Failed to download project from" << url.toString() << ":" << e.what();
+                    }
+
+                    watcher->deleteLater();
+				});
+
+                watcher->setFuture(isDownloadProjectStaleFuture);
+            }
+            else {
+                downloadAndOpenProject(url, targetDirectory);
+            }
         }
 	}
 	catch (std::exception& e)
@@ -587,13 +659,46 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 	{
 	    exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
 	}
+
+    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
+
+void ProjectManager::downloadAndOpenProject(QUrl url, const QString& targetDirectory) const
+{
+    QFuture<QString> future = mv::projects().downloadProjectAsync(url, targetDirectory);
+
+	auto watcher = new QFutureWatcher<QString>(const_cast<ProjectManager*>(this));
+
+    connect(watcher, &QFutureWatcher<QString>::finished, watcher, [watcher, url]() {
+        try {
+            Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
+
+            if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                throw std::runtime_error("Future is cancelled or did not finish");
+
+            QString projectFilePath = watcher->future().result();
+
+            QMetaObject::invokeMethod(qApp, [projectFilePath]() {
+                mv::projects().openProject(projectFilePath);
+			});
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Failed to download project from" << url.toString() << ":" << e.what();
+        }
+
+        watcher->deleteLater();
+    });
+
+    watcher->setFuture(future);
+};
 
 void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory, bool importDataOnly, bool loadWorkspace)
 {
 #ifdef PROJECT_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << project->getTitle() << targetDirectory << importDataOnly << loadWorkspace;
 #endif
+
+    Application::requestOverrideCursor(Qt::WaitCursor);
 
     try {
         if (!project)
@@ -729,6 +834,8 @@ void ProjectManager::importProject(QString filePath /*= ""*/)
 
 void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& password /*= ""*/)
 {
+    Application::requestOverrideCursor(Qt::WaitCursor);
+
     try
     {
 #ifdef PROJECT_MANAGER_VERBOSE
@@ -910,6 +1017,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
         projects().getProjectSerializationTask().setFinished();
     }
+
+    Application::current()->restoreOverrideCursor();
 }
 
 void ProjectManager::saveProjectAs()
@@ -943,6 +1052,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
         emit projectAboutToBePublished(*_project);
         {
+            Application::requestOverrideCursor(Qt::WaitCursor);
+
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
@@ -1122,6 +1233,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             currentProject->getStatusBarOptionsAction().restoreState();
             */
             unsetTemporaryDirPath(TemporaryDirType::Publish);
+
+            Application::current()->restoreOverrideCursor();
         }
         emit projectPublished(*_project);
     }
@@ -1130,12 +1243,16 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
         exceptionMessageBox("Unable to publish ManiVault project", e);
 
         projects().getProjectSerializationTask().setFinished();
+
+        Application::current()->restoreOverrideCursor();
     }
     catch (...)
     {
         exceptionMessageBox("Unable to publish ManiVault project");
 
         projects().getProjectSerializationTask().setFinished();
+
+        Application::current()->restoreOverrideCursor();
     }
 }
 
@@ -1224,69 +1341,71 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
     return _projectsTreeModel;
 }
 
-QString ProjectManager::downloadProject(QUrl url, const QString& targetDirectory /*= ""*/, Task* task /*= nullptr*/)
+QFuture<QString> ProjectManager::downloadProjectAsync(QUrl url, const QString& targetDirectory /*= ""*/, Task* task /*= nullptr*/)
 {
-    try {
-	    const auto fileName                         = url.fileName();
-	    const auto downloadedProjectFilePath        = getDownloadedProjectsDir().filePath(fileName);
-        const auto downloadedProjectFileInfo        = QFileInfo(downloadedProjectFilePath);
-    	const auto downloadedProjectLastModified    = downloadedProjectFileInfo.lastModified();
-	    const auto downloadedProjectSize            = static_cast<std::uint64_t>(downloadedProjectFileInfo.size());
-        
-        auto shouldDownloadProject = false;
+	return FileDownloader::downloadToFileAsync(url, targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : targetDirectory, task ? task : &getProjectDownloadTask());
+}
 
-        if (downloadedProjectFileInfo.exists()) {
-            const auto serverLastModified   = FileDownloader::getLastModifiedSync(url);
-            const auto serverDownloadSize   = FileDownloader::getDownloadSizeSync(url);
+QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
+{
+    auto promise = std::make_shared<QPromise<bool>>();
 
-            if (downloadedProjectFileInfo.exists()) {
-                const auto serverHasNewerProjectFile    = serverLastModified.isValid() && serverLastModified > downloadedProjectLastModified;
-                const auto serverProjectFileSizeDiffers = serverDownloadSize > 0 && serverDownloadSize != downloadedProjectSize;
+	QFuture<bool> future = promise->future();
 
-            	if (serverHasNewerProjectFile || serverProjectFileSizeDiffers) {
-            		QMessageBox downloadQuestionMessageBox;
+    QMetaObject::invokeMethod(qApp, [this, promise, url]() mutable {
+        auto modifiedWatcher    = new QFutureWatcher<QDateTime>(const_cast<ProjectManager*>(this));
+        auto sizeWatcher        = new QFutureWatcher<std::uint64_t>(const_cast<ProjectManager*>(this));
 
-            		downloadQuestionMessageBox.setWindowIcon(StyledIcon("download"));
-            		downloadQuestionMessageBox.setWindowTitle(QString("Updated project available...").arg(fileName));
-            		downloadQuestionMessageBox.setText(QString("An updated version of %1 is available on the server. Do you want to download it?").arg(fileName));
-            		downloadQuestionMessageBox.setIcon(QMessageBox::Warning);
+        auto modifiedFuture   = FileDownloader::getLastModifiedAsync(url);
+        auto sizeFuture       = FileDownloader::getDownloadSizeAsync(url);
 
-            		auto yesButton = downloadQuestionMessageBox.addButton("Yes", QMessageBox::AcceptRole);
-            		auto noButton = downloadQuestionMessageBox.addButton("No", QMessageBox::RejectRole);
+        modifiedWatcher->setFuture(modifiedFuture);
+        sizeWatcher->setFuture(sizeFuture);
 
-            		downloadQuestionMessageBox.setDefaultButton(noButton);
-            		downloadQuestionMessageBox.exec();
+        auto checkBothFinished = [this, promise, url, modifiedWatcher, sizeWatcher, modifiedFuture, sizeFuture]() mutable {
+            if (!modifiedWatcher->isFinished() || !sizeWatcher->isFinished())
+                return;
 
-            		if (downloadQuestionMessageBox.clickedButton() == yesButton) {
-            			QFile::remove(downloadedProjectFilePath);
+            try {
+                if (modifiedFuture.resultCount() > 0 && sizeFuture.resultCount() > 0) {
+                    const auto serverLastModified   = modifiedFuture.result();
+                    const auto serverDownloadSize   = sizeFuture.result();
+                    const auto fileName             = url.fileName();
+                    const auto downloadedPath       = getDownloadedProjectsDir().filePath(fileName);
+                    const auto localInfo            = QFileInfo(downloadedPath);
+                    const auto localModified        = localInfo.lastModified();
+                    const auto localSize            = static_cast<quint64>(localInfo.size());
+                    const bool hasNewerTimestamp    = serverLastModified.isValid() && serverLastModified > localModified;
+                    const bool sizeMismatch         = serverDownloadSize > 0 && serverDownloadSize != localSize;
 
-            			shouldDownloadProject = true;
-            		}
-            	}
+                    promise->addResult(hasNewerTimestamp || sizeMismatch);
+                }
+                else {
+                    if (modifiedFuture.resultCount() == 0)
+                        throw BaseException("Failed to get last modified date and time headers from server");
+
+                    if (sizeFuture.resultCount() == 0)
+                        throw BaseException("Failed to get size headers from server");
+                }
             }
-            else {
-            	shouldDownloadProject = true;
+            catch (const QException& e) {
+                promise->setException(std::make_exception_ptr(BaseException(QString("Failed to compare download state: %1").arg(e.what()))));
             }
-        }
-        else {
-            shouldDownloadProject = true;
-        }
+            catch (...) {
+                promise->setException(std::make_exception_ptr(BaseException("Unknown failure in stale check")));
+            }
 
-        if (shouldDownloadProject)
-            return FileDownloader::downloadToFileSync(url, targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : "", task ? task : &getProjectDownloadTask());
+            promise->finish();
 
-    	return downloadedProjectFilePath;
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "Unable to download project:" << e.what();
-    }
-    catch (...)
-    {
-        qDebug() << "Unable to download project due to an unhandled exception";
-    }
+            modifiedWatcher->deleteLater();
+            sizeWatcher->deleteLater();
+        };
 
-    return {};
+        connect(modifiedWatcher, &QFutureWatcherBase::finished, checkBothFinished);
+        connect(sizeWatcher, &QFutureWatcherBase::finished, checkBothFinished);
+    });
+
+    return future;
 }
 
 QDir ProjectManager::getDownloadedProjectsDir() const

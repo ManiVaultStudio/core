@@ -18,6 +18,7 @@
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QLockFile>
+#include <QMap>
 
 class QMainWindow;
 
@@ -36,6 +37,12 @@ class CORE_EXPORT Application final : public QApplication
     Q_OBJECT
 
 public:
+
+    struct CursorShapeCount
+    {
+        Qt::CursorShape     shape;
+        std::int32_t        count;
+    };
 
     /** Class for managing ManiVault application temporary directories */
     class CORE_EXPORT TemporaryDirs final : public QObject {
@@ -217,6 +224,34 @@ public: // Serialization
      */
     TemporaryDirs& getTemporaryDirs();
 
+public: // Cursor overrides
+
+    /**
+     * Request a cursor override with the specified shape.
+     *
+     * If the cursor shape \p cursorShape is already registered, its reference count is incremented,
+     * but the actual cursor shape does not change.
+     * If it is not registered, the current cursor shape is changed to \p cursorShape, and the override is registered.
+     * If the cursor is overridden with a different shape, the previous override is restored before applying the new one.
+     *
+     * @param cursorShape The cursor shape to override.
+     * @return The number of active overrides for \p cursorShape after this call.
+     */
+    static std::int32_t requestOverrideCursor(Qt::CursorShape cursorShape);
+
+    /**
+     * Remove a previously requested cursor override.
+     *
+     * If the cursor shape \p cursorShape is registered, its reference count is decremented.
+     * If the count reaches zero, the override is removed and the previous cursor override (if any)
+     * or the default cursor is restored.
+     *
+     * @param cursorShape The cursor shape to remove.
+     * @param all If true, removes all overrides for \p cursorShape regardless of the current count.
+     * @return The number of remaining overrides for \p cursorShape after this call.
+     */
+    static std::int32_t requestRemoveOverrideCursor(Qt::CursorShape cursorShape, bool all = false);
+
 public: // Statics
 
     static QMainWindow* getMainWindow();
@@ -256,6 +291,9 @@ protected:
     QTemporaryDir               _temporaryDir;                      /** Directory where application temporary files reside */
     TemporaryDirs               _temporaryDirs;                     /** ManiVault application temporary directories manager */
     QLockFile                   _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
+
+    /** Count of cursor overrides for each cursor shape */
+	static QList<CursorShapeCount> cursorOverridesCount;
 };
 
 }
