@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "SecureNetworkAccessManager.h"
 
 #include "util/Exception.h"
 

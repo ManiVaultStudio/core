@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "FileDownloader.h"
-#include "SecureNetworkAccessManager.h"
 #include "Application.h"
 #include "Task.h"
 
