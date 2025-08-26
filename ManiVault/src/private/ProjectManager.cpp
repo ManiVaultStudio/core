@@ -1354,7 +1354,7 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
 
     QMetaObject::invokeMethod(qApp, [this, promise, url]() mutable {
         auto modifiedWatcher    = new QFutureWatcher<QDateTime>(const_cast<ProjectManager*>(this));
-        auto sizeWatcher        = new QFutureWatcher<quint64>(const_cast<ProjectManager*>(this));
+        auto sizeWatcher        = new QFutureWatcher<std::uint64_t>(const_cast<ProjectManager*>(this));
 
         auto modifiedFuture   = FileDownloader::getLastModifiedAsync(url);
         auto sizeFuture       = FileDownloader::getDownloadSizeAsync(url);
