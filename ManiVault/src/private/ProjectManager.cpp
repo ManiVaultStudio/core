@@ -669,7 +669,7 @@ void ProjectManager::downloadAndOpenProject(QUrl url, const QString& targetDirec
 
 	auto watcher = new QFutureWatcher<QString>(const_cast<ProjectManager*>(this));
 
-    connect(watcher, &QFutureWatcher<QString>::finished, [watcher, url]() {
+    connect(watcher, &QFutureWatcher<QString>::finished, watcher, [watcher, url]() {
         try {
             Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
