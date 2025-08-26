@@ -40,11 +40,11 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
 
         connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher]() {
             try {
+                const auto& data = future.result();
+
 #ifdef MARKDOWN_DIALOG_VERBOSE
                 qDebug() << _markdownUrl.toString() << "downloaded (" << data.size() << "bytes)";
 #endif
-                
-            	const auto& data = future.result();
 
             	if (!data.isEmpty())
                     _markdownDocument.setText(data);

@@ -57,12 +57,12 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
             auto future     = FileDownloader::downloadToByteArrayAsync(dsn);
             auto watcher    = new QFutureWatcher<QByteArray>(this);
 
-            connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher, thumbnailUrl]() {
+            connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher, dsn, dsnIndex]() {
                 try {
                     if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
                         throw std::runtime_error("Future is cancelled or did not finish");
 
-                    QMetaObject::invokeMethod(qApp, [this, future, dsn]() {
+                    QMetaObject::invokeMethod(qApp, [this, future, dsn, dsnIndex]() {
                         const auto& data = future.result();
 
                         const auto fullJson = json::parse(QString::fromUtf8(data).toStdString());
@@ -99,32 +99,7 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
                 watcher->deleteLater();
             });
 
-
-
-
-
-
-            
-                .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
-	                try {
-	                    
-	                }
-	                catch (std::exception& e)
-	                {
-	                    qCritical() << "Unable to add tutorials from DSN:" << e.what();
-	                }
-	                catch (...)
-	                {
-	                    qCritical() << "Unable to add tutorials from DSN due to an unhandled exception";
-	                }
-				})
-                .onFailed(this, [this, dsn, dsnIndex](const std::exception_ptr& exception_ptr) {
-                    try {
-                        if (exception_ptr)
-                            std::rethrow_exception(exception_ptr);
-                    }
-                    
-				});
+            watcher->setFuture(future);
         }
 	});
 
