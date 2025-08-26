@@ -304,28 +304,40 @@ void ProjectsModelProject::determineDownloadSize()
     //qDebug() << __FUNCTION__ << getTitle();
 #endif
 
-    FileDownloader::getDownloadSizeAsync(getUrl()).then(this, [this](std::uint64_t size) {
-        _serverDownloadSize = size;
+    auto future     = FileDownloader::getDownloadSizeAsync(getUrl());
+    auto watcher    = new QFutureWatcher<std::uint64_t>(this);
 
-        emit downloadSizeDetermined(_serverDownloadSize);
-    }).onFailed(this, [this](const std::exception_ptr& exception_ptr) {
-
+    connect(watcher, &QFutureWatcher<std::uint64_t>::finished, watcher, [this, future, watcher]() {
         try {
-            if (exception_ptr)
-                std::rethrow_exception(exception_ptr);
+            if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                throw std::runtime_error("Future is cancelled or did not finish");
+
+            QMetaObject::invokeMethod(qApp, [this, future]() {
+                _serverDownloadSize = future.result();
+
+                emit downloadSizeDetermined(_serverDownloadSize);
+			});
         }
         catch (const BaseException& exception) {
+            emit downloadSizeDetermined(0);
+
             qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
         }
         catch (const std::exception& exception) {
-            qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
+            emit downloadSizeDetermined(0);
+
+        	qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
         }
         catch (...) {
-            qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
+            emit downloadSizeDetermined(0);
+
+        	qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
         }
 
-    	emit downloadSizeDetermined(0);
+        watcher->deleteLater();
 	});
+
+    watcher->setFuture(future);
 }
 
 void ProjectsModelProject::determineLastModified()
