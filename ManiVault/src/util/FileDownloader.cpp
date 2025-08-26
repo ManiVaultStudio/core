@@ -307,9 +307,9 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
 
 void FileDownloader::notifyError(const QString& urlDisplayString, const QString& errorString)
 {
-	qCritical() << QStringLiteral("Download problem: %1 not downloaded: %2").arg(urlDisplayString, errorString.toHtmlEscaped());
+	qCritical() << QStringLiteral("Download problem: <a>%1</a> not downloaded: %2").arg(urlDisplayString, errorString.toHtmlEscaped());
 
-	mv::help().addNotification("Download problem", QStringLiteral("<i>%1</i> not downloaded: %2").arg(urlDisplayString, errorString), StyledIcon("circle-exclamation"));
+	mv::help().addNotification("Download problem", QStringLiteral("Project not downloaded: %1").arg(errorString), StyledIcon("circle-exclamation"));
 }
 
 }

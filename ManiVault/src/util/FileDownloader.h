@@ -375,11 +375,11 @@ private:
                     if (status < 200 || status >= 300) {
                         state->sink->cancel();
 
-                        const QString reason =
-                            safeReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
-                        const QString errorString = QStringLiteral("HTTP %1 %2").arg(status).arg(reason);
+                        const auto reason       = safeReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+                        const auto errorString  = QStringLiteral("HTTP %1 %2").arg(status).arg(reason);
 
-                        if (task) task->setAborted();
+                        if (task)
+                            task->setAborted();
 
                         notifyError(urlDisplayString, errorString);
 
