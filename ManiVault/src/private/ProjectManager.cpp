@@ -579,59 +579,70 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
             if (downloadedProjectFileInfo.exists()) {
                 QFuture<bool> isDownloadProjectStaleFuture = isDownloadedProjectStaleAsync(url);
 
-                isDownloadProjectStaleFuture.then([this, url, targetDirectory, fileName, downloadedProjectFilePath](bool isStale) {
-	                if (isStale) {
-                        qDebug() << "Project is stale, prompting to download again from" << url.toDisplayString();
+                auto watcher = new QFutureWatcher<bool>(this);
 
-                        QMetaObject::invokeMethod(qApp, [this, fileName, downloadedProjectFilePath, url, targetDirectory]() {
-	                        QMessageBox downloadQuestionMessageBox;
+                connect(watcher, &QFutureWatcher<QString>::finished, [this, watcher, url, isDownloadProjectStaleFuture, fileName, downloadedProjectFilePath, targetDirectory]() {
+                    try {
+                        Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
-	                        downloadQuestionMessageBox.setWindowIcon(StyledIcon("download"));
-	                        downloadQuestionMessageBox.setWindowTitle(QString("Updated project available...").arg(fileName));
-	                        downloadQuestionMessageBox.setText(QString("An updated version of %1 is available on the server. Do you want to download it?").arg(fileName));
-	                        downloadQuestionMessageBox.setIcon(QMessageBox::Warning);
+                        if (watcher->future().isCanceled() || !watcher->future().isFinished()) {
+                            qDebug() << "Failed to check if project is stale at" << downloadedProjectFilePath;
 
-	                        auto yesButton  = downloadQuestionMessageBox.addButton("Yes", QMessageBox::AcceptRole);
-	                        auto noButton   = downloadQuestionMessageBox.addButton("No", QMessageBox::RejectRole);
+                            try {
+                                mv::projects().openProject(downloadedProjectFilePath);
+                            }
+                            catch (const BaseException& exception) {
+                                qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
+                            }
+                            catch (const std::exception& exception) {
+                                qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
+                            }
+                            catch (...) {
+                                qWarning() << "Unable to establish whether the project is stale, an unknown exception occurred";
+                            }
+                        }
 
-	                        downloadQuestionMessageBox.setDefaultButton(noButton);
-	                        downloadQuestionMessageBox.exec();
+                        if (isDownloadProjectStaleFuture.result<bool>()) {
+                            qDebug() << "Project is stale, prompting to download again from" << url.toDisplayString();
 
-	                        if (downloadQuestionMessageBox.clickedButton() == yesButton) {
-	                            QFile::remove(downloadedProjectFilePath);
+                            QMetaObject::invokeMethod(qApp, [this, fileName, downloadedProjectFilePath, url, targetDirectory]() {
+                                QMessageBox downloadQuestionMessageBox;
 
-	                            downloadAndOpenProject(url, targetDirectory);
-	                        }
-	                        else {
-	                            mv::projects().openProject(downloadedProjectFilePath);
-	                        }
-                        });
-	                } else {
-                        qDebug() << "Project is not stale, opening from" << downloadedProjectFilePath;
+                                downloadQuestionMessageBox.setWindowIcon(StyledIcon("download"));
+                                downloadQuestionMessageBox.setWindowTitle(QString("Updated project available...").arg(fileName));
+                                downloadQuestionMessageBox.setText(QString("An updated version of %1 is available on the server. Do you want to download it?").arg(fileName));
+                                downloadQuestionMessageBox.setIcon(QMessageBox::Warning);
 
-                        mv::projects().openProject(downloadedProjectFilePath);
-	                }
-                }).onFailed([downloadedProjectFilePath](const std::exception_ptr& exception_ptr) {
-                    qDebug() << "Failed to check if project is stale at" << downloadedProjectFilePath;
+                                auto yesButton = downloadQuestionMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+                                auto noButton = downloadQuestionMessageBox.addButton("No", QMessageBox::RejectRole);
 
-                    Application::restoreOverrideCursor();
+                                downloadQuestionMessageBox.setDefaultButton(noButton);
+                                downloadQuestionMessageBox.exec();
 
-                	try {
-                        mv::projects().openProject(downloadedProjectFilePath);
+                                if (downloadQuestionMessageBox.clickedButton() == yesButton) {
+                                    QFile::remove(downloadedProjectFilePath);
 
-                        if (exception_ptr)
-                            std::rethrow_exception(exception_ptr);
+                                    downloadAndOpenProject(url, targetDirectory);
+                                }
+                                else {
+                                    mv::projects().openProject(downloadedProjectFilePath);
+                                }
+							});
+                        }
+                        else {
+                            qDebug() << "Project is not stale, opening from" << downloadedProjectFilePath;
+
+                            mv::projects().openProject(downloadedProjectFilePath);
+                        }
                     }
-                    catch (const BaseException& exception) {
-                        qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
+                    catch (const std::exception& e) {
+                        qCritical() << "Failed to download project from" << url.toString() << ":" << e.what();
                     }
-                    catch (const std::exception& exception) {
-                        qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
-                    }
-                    catch (...) {
-                        qWarning() << "Unable to establish whether the project is stale, an unknown exception occurred";
-                    }
+
+                    watcher->deleteLater();
 				});
+
+                watcher->setFuture(isDownloadProjectStaleFuture);
             }
             else {
                 downloadAndOpenProject(url, targetDirectory);
@@ -647,7 +658,7 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
 	    exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
 	}
 
-    Application::current()->restoreOverrideCursor();
+    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectManager::downloadAndOpenProject(QUrl url, const QString& targetDirectory) const
