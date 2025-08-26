@@ -541,6 +541,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             unsetTemporaryDirPath(TemporaryDirType::Open);
 
+            Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
+
             qDebug().noquote() << filePath << "loaded successfully";
         }
         emit projectOpened(*_project);
