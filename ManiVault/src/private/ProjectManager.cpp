@@ -674,7 +674,7 @@ void ProjectManager::downloadAndOpenProject(QUrl url, const QString& targetDirec
             Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
             if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
-                return;
+                throw std::runtime_error("Future is cancelled or did not finish");
 
             QString projectFilePath = watcher->future().result();
 

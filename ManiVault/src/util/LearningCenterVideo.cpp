@@ -5,6 +5,7 @@
 #include "LearningCenterVideo.h"
 
 #include <QMovie>
+#include <QFutureWatcher>
 
 namespace mv::util {
 
@@ -21,35 +22,33 @@ LearningCenterVideo::LearningCenterVideo(const Type& type, const QString& title,
 	    {
             const auto thumbnailUrl = getYouTubeThumbnailUrl(_resource);
 
-            FileDownloader::downloadToByteArrayAsync(thumbnailUrl)
-                .then(this, [this](const QByteArray& data) {
+            auto future = FileDownloader::downloadToByteArrayAsync(thumbnailUrl);
+
+            auto watcher = new QFutureWatcher<QByteArray>(this);
+
+            connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher, thumbnailUrl]() {
                 try {
-                    setThumbnailImage(QImage::fromData(data));
+                    if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                        throw std::runtime_error("Future is cancelled or did not finish");
+
+                    QMetaObject::invokeMethod(qApp, [this, future]() {
+                        setThumbnailImage(QImage::fromData(future.result()));
+					});
                 }
-                catch (std::exception& e)
-                {
-                    qCritical() << "Unable to download video thumbnail image:" << e.what();
+                catch (const BaseException& exception) {
+                    qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << ":" << exception.what();
                 }
-                catch (...)
-                {
-                    qCritical() << "Unable to download video thumbnail image:";
+                catch (const std::exception& exception) {
+                    qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << ":" << exception.what();
                 }
-                    })
-                .onFailed(this, [this, thumbnailUrl](const std::exception_ptr& exception_ptr) {
-	                try {
-	                    if (exception_ptr)
-	                        std::rethrow_exception(exception_ptr);
-	                }
-	                catch (const BaseException& exception) {
-	                    qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << ":" << exception.what();
-	                }
-	                catch (const std::exception& exception) {
-	                    qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << ":" << exception.what();
-	                }
-	                catch (...) {
-	                    qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << "an unknown exception occurred";
-	                }
-				});
+                catch (...) {
+                    qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << "an unknown exception occurred";
+                }
+
+                watcher->deleteLater();
+			});
+
+            watcher->setFuture(future);
 
 	        break;
 	    }
