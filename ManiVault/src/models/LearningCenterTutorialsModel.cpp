@@ -54,28 +54,60 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
         for (const auto& dsn : _dsnsAction.getStrings()) {
             const auto dsnIndex = _dsnsAction.getStrings().indexOf(dsn);
 
-            FileDownloader::downloadToByteArrayAsync(dsn)
+            auto future     = FileDownloader::downloadToByteArrayAsync(dsn);
+            auto watcher    = new QFutureWatcher<QByteArray>(this);
+
+            connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher, thumbnailUrl]() {
+                try {
+                    if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                        throw std::runtime_error("Future is cancelled or did not finish");
+
+                    QMetaObject::invokeMethod(qApp, [this, future, dsn]() {
+                        const auto& data = future.result();
+
+                        const auto fullJson = json::parse(QString::fromUtf8(data).toStdString());
+
+                        if (fullJson.contains("tutorials")) {
+                            validateJson(fullJson["tutorials"].dump(), dsn.toStdString(), loadJsonFromResource(":/JSON/TutorialsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
+                        }
+                        else {
+                            throw std::runtime_error("Tutorials key is missing");
+                        }
+
+                        QJsonParseError jsonParseError;
+
+                        const auto jsonDocument = QJsonDocument::fromJson(data, &jsonParseError);
+
+                        if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+                            qCritical() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
+                        } else {
+                            for (const auto tutorial : jsonDocument.object()["tutorials"].toArray())
+                                addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+                        }
+					});
+                }
+                catch (const BaseException& exception) {
+                    qCritical() << "Download failed for" << dsn << ":" << exception.what();
+                }
+                catch (const std::exception& exception) {
+                    qCritical() << "Download failed for" << dsn << ":" << exception.what();
+                }
+                catch (...) {
+                    qCritical() << "Download failed for" << dsn << ":" << ", an unknown exception occurred";
+                }
+
+                watcher->deleteLater();
+            });
+
+
+
+
+
+
+            
                 .then(this, [this, dsn, dsnIndex](const QByteArray& data) {
 	                try {
-	                    const auto fullJson = json::parse(QString::fromUtf8(data).toStdString());
-
-	                    if (fullJson.contains("tutorials")) {
-	                        validateJson(fullJson["tutorials"].dump(), dsn.toStdString(), loadJsonFromResource(":/JSON/TutorialsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/TutorialsSchema.json");
-	                    }
-	                    else {
-	                        throw std::runtime_error("Tutorials key is missing");
-	                    }
-
-	                    QJsonParseError jsonParseError;
-
-	                    const auto jsonDocument = QJsonDocument::fromJson(data, &jsonParseError);
-
-	                    if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
-	                        qCritical() << "Invalid JSON from DSN at index" << dsnIndex << ":" << jsonParseError.errorString();
-	                    }
-
-	                    for (const auto tutorial : jsonDocument.object()["tutorials"].toArray())
-	                        addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
+	                    
 	                }
 	                catch (std::exception& e)
 	                {
@@ -91,15 +123,7 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
                         if (exception_ptr)
                             std::rethrow_exception(exception_ptr);
                     }
-                    catch (const BaseException& exception) {
-                        qCritical() << "Download failed for" << dsn << ":" << exception.what();
-                    }
-                    catch (const std::exception& exception) {
-                        qCritical() << "Download failed for" << dsn << ":" << exception.what();
-                    }
-                    catch (...) {
-                        qCritical() << "Download failed for" << dsn << ":" << ", an unknown exception occurred";
-                    }
+                    
 				});
         }
 	});
