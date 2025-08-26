@@ -247,9 +247,10 @@ public: // Cursor overrides
      * or the default cursor is restored.
      *
      * @param cursorShape The cursor shape to remove.
+     * @param all If true, removes all overrides for \p cursorShape regardless of the current count.
      * @return The number of remaining overrides for \p cursorShape after this call.
      */
-    static std::int32_t requestRemoveOverrideCursor(Qt::CursorShape cursorShape);
+    static std::int32_t requestRemoveOverrideCursor(Qt::CursorShape cursorShape, bool all = false);
 
 public: // Statics
 

@@ -226,11 +226,6 @@ Application::TemporaryDirs& Application::getTemporaryDirs()
 
 std::int32_t Application::requestOverrideCursor(Qt::CursorShape cursorShape)
 {
-    if (!current()) {
-	    qWarning() << "Application::requestOverrideCursor failed: No current application instance";
-    	return 0;
-    }
-
     auto it = std::find_if(cursorOverridesCount.begin(), cursorOverridesCount.end(), [&cursorShape](const CursorShapeCount& cursorShapeCount) {
 	    return cursorShapeCount.shape == cursorShape;
     });
@@ -247,12 +242,13 @@ std::int32_t Application::requestOverrideCursor(Qt::CursorShape cursorShape)
     	return cursorShapeCountRhs.count > cursorShapeCountLhs.count;
     });
 
-    QApplication::setOverrideCursor(cursorOverridesCount.first().shape);
+    setOverrideCursor(cursorOverridesCount.first().shape);
+    processEvents();
 
     return cursorOverridesCount.first().count;
 }
 
-std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShape)
+std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShape, bool all)
 {
     if (!current()) {
         qWarning() << "Application::requestRemoveOverrideCursor failed: No current application instance";
@@ -264,13 +260,23 @@ std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShap
 	});
 
     if (it != cursorOverridesCount.end()) {
-        it->count--;
+        if (all)
+            it->count = 0;
+        else
+            it->count--;
 
         if (it->count <= 0)
             cursorOverridesCount.erase(it);
     } else {
         qWarning() << "Application::requestRemoveOverrideCursor failed: shape is not overriden";
-        return 0;
+
+        if (cursorOverridesCount.empty()) {
+
+        	while (QApplication::overrideCursor())
+                QApplication::restoreOverrideCursor();
+
+            return 0;
+        }
     }
 
     std::sort(cursorOverridesCount.begin(), cursorOverridesCount.end(), [](auto& cursorShapeCountLhs, auto& cursorShapeCountRhs) -> bool {
@@ -278,11 +284,15 @@ std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShap
     });
 
     if (cursorOverridesCount.empty()) {
-        QApplication::restoreOverrideCursor();
+
+    	while (QApplication::overrideCursor())
+            QApplication::restoreOverrideCursor();
+
         return 0;
     }
 
-	QApplication::setOverrideCursor(cursorOverridesCount.first().shape);
+	setOverrideCursor(cursorOverridesCount.first().shape);
+    processEvents();
 
     return cursorOverridesCount.first().count;
 }
