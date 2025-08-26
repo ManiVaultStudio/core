@@ -24,6 +24,7 @@
 #include <QJsonObject>
 #include <QUrl>
 #include <QMenu>
+#include <QFutureWatcher>
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -110,12 +111,20 @@ void HelpManager::initialize()
 
     beginInitialization();
     {
-        FileDownloader::downloadToByteArrayAsync(QUrl("https://www.manivault.studio/api/learning-center.json"))
-            .then(this, [this](const QByteArray& data) {
-	            try {
+        auto future     = FileDownloader::downloadToByteArrayAsync(QUrl("https://www.manivault.studio/api/learning-center.json"));
+        auto watcher    = new QFutureWatcher<QByteArray>(this);
+
+        connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher]() {
+            try {
+                if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                    throw std::runtime_error("Future is cancelled or did not finish");
+
+                QMetaObject::invokeMethod(qApp, [this, future]() {
                     const auto videosDsn = "https://www.manivault.studio/api/learning-center.json";
 
-                    json fullJson = json::parse(QString::fromUtf8(data).toStdString());
+                    const auto& data = future.result();
+
+                	json fullJson = json::parse(QString::fromUtf8(data).toStdString());
 
                     if (fullJson.contains("videos")) {
                         validateJson(fullJson["videos"].dump(), videosDsn, loadJsonFromResource(":/JSON/VideosSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
@@ -140,30 +149,22 @@ void HelpManager::initialize()
                     }
 
                     emit videosModelPopulatedFromWebsite();
-	            }
-	            catch (std::exception& e)
-	            {
-	                qCritical() << "Unable to display markdown:" << e.what();
-	            }
-	            catch (...)
-	            {
-	                qCritical() << "Unable to display markdown:";
-	            }
-			}).onFailed(this, [this](const std::exception_ptr& exception_ptr) {
-                try {
-                    if (exception_ptr)
-                        std::rethrow_exception(exception_ptr);
-                }
-                catch (const BaseException& exception) {
-                    qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
-                }
-                catch (const std::exception& exception) {
-                    qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
-                }
-                catch (...) {
-                    qCritical() << "Unable to download videos JSON file, an unknown exception occurred";
-                }
-            });
+				});
+            }
+            catch (const BaseException& exception) {
+                qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
+            }
+            catch (const std::exception& exception) {
+                qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
+            }
+            catch (...) {
+                qCritical() << "Unable to download videos JSON file, an unknown exception occurred";
+            }
+
+            watcher->deleteLater();
+		});
+
+        watcher->setFuture(future);
 
         _tutorialsModel.getDsnsAction().addString("https://www.manivault.studio/api/learning-center.json");
         _tutorialsModel.synchronizeWithDsns();
