@@ -358,6 +358,9 @@ void AbstractProjectsModel::populateFromJsonByteArray(const QByteArray& jsonByte
         for (const auto project : jsonDocument.object()["projects"].toArray()) {
             auto projectMap = project.toVariant().toMap();
 
+            if (projectMap.contains("ignore") && projectMap["ignore"].toBool())
+                continue;
+
             projectMap["projectsJsonDsn"] = QUrl(jsonLocation);
 
             projects.push_back(std::make_shared<ProjectsModelProject>(projectMap));
