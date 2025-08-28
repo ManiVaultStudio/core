@@ -7,6 +7,7 @@
 #include "WidgetAction.h"
 
 #include <QWidget>
+#include <QLabel>
 
 namespace mv::gui {
 
@@ -37,9 +38,16 @@ protected:
          */
         HeadsUpDisplayWidget(QWidget* parent, ViewPluginHeadsUpDisplayAction* viewPluginHeadsUpDisplayAction, const std::int32_t& widgetFlags);
 
+        /**
+         * Get minimum size hint for the widget
+         * @return Minimum size hint for the widget
+         */
+        QSize minimumSizeHint() const override;
+
     protected:
         ViewPluginHeadsUpDisplayAction* _viewPluginHeadsUpDisplayAction;    /** Pointer to view plugin heads up display action */
         std::int32_t                    _widgetFlags;                       /** Widget flags */
+        QLabel                          _contentLabel;                      /** Content label */
 
         friend class ViewPluginHeadsUpDisplayAction;
     };
@@ -60,6 +68,18 @@ public:
      */
     Q_INVOKABLE ViewPluginHeadsUpDisplayAction(QObject* parent, const QString& title);
 
+    /**
+     * Set string content of the HUD action to \p content
+     * @param content String content of the HUD action
+     */
+    void setContent(const QString& content);
+
+    /**
+     * Get string content of the HUD action
+     * @return String content of the HUD action
+     */
+    QString getContent() const;
+
 public: // Serialization
 
     /**
@@ -73,6 +93,18 @@ public: // Serialization
      * @return Variant map representation of the image action
      */
     QVariantMap toVariantMap() const override;
+
+signals:
+
+    /**
+     * Signals that the content changed from \p previousContent to \p currentContent
+     * @param previousContent Previous string content of the HUD action
+     * @param currentContent Current string content of the HUD action
+     */
+    void contentChanged(const QString& previousContent, const QString& currentContent);
+
+private:
+    QString     _content;   /** String content of the HUD action */
 };
 
 }

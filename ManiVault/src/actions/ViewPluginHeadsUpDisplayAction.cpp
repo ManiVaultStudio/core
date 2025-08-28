@@ -4,6 +4,8 @@
 
 #include "ViewPluginHeadsUpDisplayAction.h"
 
+#include <QVBoxLayout>
+
 using namespace mv::util;
 
 namespace mv::gui {
@@ -13,11 +15,41 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     _viewPluginHeadsUpDisplayAction(viewPluginHeadsUpDisplayAction),
     _widgetFlags(widgetFlags)
 {
-    auto layout = new QHBoxLayout();
+    Q_ASSERT(_viewPluginHeadsUpDisplayAction);
 
-    layout->addWidget(new QPushButton("====="));
+    if (!_viewPluginHeadsUpDisplayAction)
+        return;
+
+    setStyleSheet("background-color: red;");
+
+	auto layout = new QVBoxLayout();
+
+    _contentLabel.setStyleSheet("color: black;");
+
+    layout->addWidget(&_contentLabel);
 
     setLayout(layout);
+
+    const auto updateLabel = [this]() -> void {
+        qDebug() << "Updating HUD content label (before)" << _contentLabel.size();
+        _contentLabel.setText(_viewPluginHeadsUpDisplayAction->getContent());
+        _contentLabel.adjustSize();
+
+        adjustSize();
+
+        qDebug() << "Updating HUD content label (after)" << _contentLabel.size();
+	};
+
+    updateLabel();
+
+    connect(_viewPluginHeadsUpDisplayAction, &ViewPluginHeadsUpDisplayAction::contentChanged, this, updateLabel);
+
+    //setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+}
+
+QSize ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::minimumSizeHint() const
+{
+	return _contentLabel.minimumSizeHint();
 }
 
 QWidget* ViewPluginHeadsUpDisplayAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -42,6 +74,23 @@ QWidget* ViewPluginHeadsUpDisplayAction::getWidget(QWidget* parent, const std::i
 ViewPluginHeadsUpDisplayAction::ViewPluginHeadsUpDisplayAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title)
 {
+}
+
+void ViewPluginHeadsUpDisplayAction::setContent(const QString& content)
+{
+    if (content == getContent())
+        return;
+
+    const auto previousContent = getContent();
+
+    _content = content;
+
+    emit contentChanged(previousContent, content);
+}
+
+QString ViewPluginHeadsUpDisplayAction::getContent() const
+{
+    return _content;
 }
 
 void ViewPluginHeadsUpDisplayAction::fromVariantMap(const QVariantMap& variantMap)
