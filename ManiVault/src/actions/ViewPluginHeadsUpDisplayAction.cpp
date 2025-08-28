@@ -13,6 +13,11 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     _viewPluginHeadsUpDisplayAction(viewPluginHeadsUpDisplayAction),
     _widgetFlags(widgetFlags)
 {
+    auto layout = new QHBoxLayout();
+
+    layout->addWidget(new QPushButton("====="));
+
+    setLayout(layout);
 }
 
 QWidget* ViewPluginHeadsUpDisplayAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
