@@ -59,6 +59,9 @@
 			"title": {
 				"type": "string"
 			},
+			"ignore": {
+				"type": "boolean"
+			},
 			"group": {
 				"type": "string"
 			},
