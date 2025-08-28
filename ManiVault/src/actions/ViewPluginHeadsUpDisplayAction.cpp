@@ -20,24 +20,36 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     if (!_viewPluginHeadsUpDisplayAction)
         return;
 
-    setStyleSheet("background-color: red;");
+    //setStyleSheet("background-color: red;");
 
 	auto layout = new QVBoxLayout();
 
     _contentLabel.setStyleSheet("color: black;");
+    //_contentLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    _contentLabel.setWordWrap(true);
+
+    //layout->setSizeConstraint(QLayout::SetMaximumSize);
 
     layout->addWidget(&_contentLabel);
 
     setLayout(layout);
 
-    const auto updateLabel = [this]() -> void {
-        qDebug() << "Updating HUD content label (before)" << _contentLabel.size();
+    const auto updateLabel = [this, layout]() -> void {
+        qDebug() << "Updating HUD content label (before)" << size() << _contentLabel.size();
         _contentLabel.setText(_viewPluginHeadsUpDisplayAction->getContent());
-        _contentLabel.adjustSize();
 
-        adjustSize();
+        QTimer::singleShot(10, [this]() -> void {
+            _contentLabel.updateGeometry();
+            _contentLabel.adjustSize();
 
-        qDebug() << "Updating HUD content label (after)" << _contentLabel.size();
+            adjustSize();
+        });
+        
+
+        //layout->activate();
+        //adjustSize();
+
+        qDebug() << "Updating HUD content label (after)" << size() << _contentLabel.size();
 	};
 
     updateLabel();
@@ -47,10 +59,10 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     //setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 }
 
-QSize ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::minimumSizeHint() const
-{
-	return _contentLabel.minimumSizeHint();
-}
+//QSize ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::minimumSizeHint() const
+//{
+//	return _contentLabel.sizeHint();
+//}
 
 QWidget* ViewPluginHeadsUpDisplayAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {

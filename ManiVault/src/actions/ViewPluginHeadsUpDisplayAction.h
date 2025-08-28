@@ -42,7 +42,7 @@ protected:
          * Get minimum size hint for the widget
          * @return Minimum size hint for the widget
          */
-        QSize minimumSizeHint() const override;
+        //QSize minimumSizeHint() const override;
 
     protected:
         ViewPluginHeadsUpDisplayAction* _viewPluginHeadsUpDisplayAction;    /** Pointer to view plugin heads up display action */
