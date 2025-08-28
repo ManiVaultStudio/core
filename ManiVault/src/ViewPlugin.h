@@ -20,6 +20,7 @@
 namespace mv::gui {
     class ViewPluginTriggerAction;
     class ToolbarAction;
+    class ActionOverlayWidget;
 }
 
 namespace mv::plugin
@@ -31,7 +32,7 @@ class CORE_EXPORT ViewPlugin : public Plugin
 
 public:
 
-    using ActionWidgetPair = std::pair<QPointer<WidgetAction>, QPointer<QWidget>>;
+    using ActionWidgetPair = std::pair<QPointer<WidgetAction>, QPointer<gui::ActionOverlayWidget>>;
 
     /**
      * Constructor
@@ -135,6 +136,12 @@ public: // Overlay actions
      */
     gui::WidgetActions getOverlayActions() const;
 
+    /**
+     * Set target widget for overlay actions to \p targetWidget (default is the view plugin widget)
+     * @param targetWidget Pointer to target widget (may not be nullptr)
+     */
+    void setOverlayActionsTargetWidget(QWidget* targetWidget);
+
 public: // Progress
 
     /**
@@ -176,6 +183,7 @@ public: // Action getters
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
     gui::PresetsAction& getPresetsAction() { return _presetsAction; }
     gui::ViewPluginSamplerAction& getSamplerAction() { return _samplerAction; }
+    gui::ViewPluginHeadsUpDisplayAction& getHeadsUpDisplayAction() { return _headsUpDisplayAction; }
 
 signals:
 
@@ -192,24 +200,24 @@ signals:
     void dockingActionAdded(gui::WidgetAction* action);
 
 private:
-    QWidget                                 _widget;                            /** Widget representation of the plugin */
-    gui::TriggerAction                      _editorAction;                      /** Trigger action to start the view plugin editor */
-    gui::TriggerAction                      _screenshotAction;                  /** Trigger action to create a screenshot */
-    gui::ToggleAction                       _isolateAction;                     /** Toggle action to setEnabled view isolation (when toggled, all other view plugins are temporarily closed) */
-    gui::ToggleAction                       _mayCloseAction;                    /** Action for toggling whether the view plugin may be closed */
-    gui::ToggleAction                       _mayFloatAction;                    /** Action for toggling whether the view plugin may float */
-    gui::ToggleAction                       _mayMoveAction;                     /** Action for toggling whether the view plugin may be moved */
-    gui::OptionsAction                      _dockingOptionsAction;              /** Action for toggling docking options */
-    gui::LockingAction                      _lockingAction;                     /** Action for toggling whether the view plugin is locked */
-    gui::ToggleAction                       _visibleAction;                     /** Action which determines whether the view plugin is visible or not */
-    gui::PresetsAction                      _presetsAction;                     /** Action for managing presets */
-    gui::ViewPluginSamplerAction            _samplerAction;                     /** Action for displaying a tooltip for sampled elements */
-    QKeySequence                            _triggerShortcut;                   /** Shortcut for triggering the plugin */
-    gui::WidgetActions                      _titleBarMenuActions;               /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
-    gui::WidgetActions                      _settingsActions;                   /** Settings actions which are displayed as docking widgets in the interface */
-    Task*                                   _progressTask;                      /** When set and running, a thin progress bar will be displayed on top of the view plugin dock widget */
-    std::vector<ActionWidgetPair>           _actionsWidgets;                    /** Pairs of overlay actions and their corresponding overlay widgets */
-    gui::ViewPluginHeadsUpDisplayAction     _viewPluginHeadsUpDisplayAction;    /** Heads-up display action for displaying information as an overlay in the view plugin */
+    QWidget                                 _widget;                        /** Widget representation of the plugin */
+    gui::TriggerAction                      _editorAction;                  /** Trigger action to start the view plugin editor */
+    gui::TriggerAction                      _screenshotAction;              /** Trigger action to create a screenshot */
+    gui::ToggleAction                       _isolateAction;                 /** Toggle action to setEnabled view isolation (when toggled, all other view plugins are temporarily closed) */
+    gui::ToggleAction                       _mayCloseAction;                /** Action for toggling whether the view plugin may be closed */
+    gui::ToggleAction                       _mayFloatAction;                /** Action for toggling whether the view plugin may float */
+    gui::ToggleAction                       _mayMoveAction;                 /** Action for toggling whether the view plugin may be moved */
+    gui::OptionsAction                      _dockingOptionsAction;          /** Action for toggling docking options */
+    gui::LockingAction                      _lockingAction;                 /** Action for toggling whether the view plugin is locked */
+    gui::ToggleAction                       _visibleAction;                 /** Action which determines whether the view plugin is visible or not */
+    gui::PresetsAction                      _presetsAction;                 /** Action for managing presets */
+    gui::ViewPluginSamplerAction            _samplerAction;                 /** Action for displaying a tooltip for sampled elements */
+    QKeySequence                            _triggerShortcut;               /** Shortcut for triggering the plugin */
+    gui::WidgetActions                      _titleBarMenuActions;           /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
+    gui::WidgetActions                      _settingsActions;               /** Settings actions which are displayed as docking widgets in the interface */
+    Task*                                   _progressTask;                  /** When set and running, a thin progress bar will be displayed on top of the view plugin dock widget */
+    std::vector<ActionWidgetPair>           _actionsWidgets;                /** Pairs of overlay actions and their corresponding overlay widgets */
+    gui::ViewPluginHeadsUpDisplayAction     _headsUpDisplayAction;          /** Heads-up display action for displaying information as an overlay in the view plugin */
 };
 
 class CORE_EXPORT ViewPluginFactory : public PluginFactory

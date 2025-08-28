@@ -10,6 +10,7 @@
 #include "widgets/ViewPluginEditorDialog.h"
 #include "widgets/FileDialog.h"
 #include "widgets/ActionOverlayWidget.h"
+#include "widgets/ViewPluginOverlayWidget.h"
 
 #include <QWidget>
 
@@ -39,7 +40,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), StyledIcon(factory->icon())),
     _samplerAction(this, "Sampler"),
     _progressTask(nullptr),
-    _viewPluginHeadsUpDisplayAction(this, "HUD")
+    _headsUpDisplayAction(this, "HUD")
 {
     setText(isSystemViewPlugin() ? getKind() : getGuiName());
 
@@ -182,7 +183,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     getLearningCenterAction().createViewPluginOverlayWidget();
 
     addTitleBarMenuAction(&getLearningCenterAction());
-    addOverlayAction(&_viewPluginHeadsUpDisplayAction);
+    addOverlayAction(&_headsUpDisplayAction);
 }
 
 void ViewPlugin::init()
@@ -359,6 +360,17 @@ WidgetActions ViewPlugin::getOverlayActions() const
         overlayActions << action;
 
 	return overlayActions;
+}
+
+void ViewPlugin::setOverlayActionsTargetWidget(QWidget* targetWidget)
+{
+    Q_ASSERT(targetWidget);
+
+    if (targetWidget == nullptr)
+        return;
+
+    for (const auto& actionWidgetPair : _actionsWidgets)
+        actionWidgetPair.second->setTargetWidget(targetWidget);
 }
 
 mv::Task* ViewPlugin::getProgressTask()
