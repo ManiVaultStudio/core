@@ -19,6 +19,18 @@ ActionOverlayWidget::ActionOverlayWidget(QWidget* target, const QPointer<WidgetA
     OverlayWidget(target),
     _action(action)
 {
+    auto layout = new QVBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setAlignment(alignment);
+
+	auto actionWidget = action->createWidget(this);
+
+    addMouseEventReceiverWidget(actionWidget);
+
+    layout->addWidget(actionWidget);
+
+	setLayout(layout);
 }
 
 }
