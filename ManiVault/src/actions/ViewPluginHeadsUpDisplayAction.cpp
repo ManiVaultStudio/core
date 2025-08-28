@@ -8,6 +8,32 @@ using namespace mv::util;
 
 namespace mv::gui {
 
+ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidget* parent, ViewPluginHeadsUpDisplayAction* viewPluginHeadsUpDisplayAction, const std::int32_t& widgetFlags) :
+    QWidget(parent),
+    _viewPluginHeadsUpDisplayAction(viewPluginHeadsUpDisplayAction),
+    _widgetFlags(widgetFlags)
+{
+}
+
+QWidget* ViewPluginHeadsUpDisplayAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    if (dynamic_cast<QMenu*>(parent))
+        return QWidgetAction::createWidget(parent);
+
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    widget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    layout->addWidget(new HeadsUpDisplayWidget(parent, this, widgetFlags));
+
+    widget->setLayout(layout);
+
+    return widget;
+}
+
 ViewPluginHeadsUpDisplayAction::ViewPluginHeadsUpDisplayAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title)
 {

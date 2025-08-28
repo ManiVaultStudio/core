@@ -6,6 +6,8 @@
 
 #include "WidgetAction.h"
 
+#include <QWidget>
+
 namespace mv::gui {
 
 /**
@@ -20,7 +22,35 @@ namespace mv::gui {
 class CORE_EXPORT ViewPluginHeadsUpDisplayAction : public WidgetAction
 {
     Q_OBJECT
-    
+
+protected:
+
+    /** Widget class for displaying HUD entries */
+    class CORE_EXPORT HeadsUpDisplayWidget : public QWidget {
+    protected:
+
+        /**
+         * Construct with pointer to \p parent widget, \p viewPluginHeadsUpDisplayAction and \p widgetFlags
+         * @param parent Pointer to parent widget
+         * @param viewPluginHeadsUpDisplayAction Pointer to view plugin heads up display action
+         * @param widgetFlags Widget flags
+         */
+        HeadsUpDisplayWidget(QWidget* parent, ViewPluginHeadsUpDisplayAction* viewPluginHeadsUpDisplayAction, const std::int32_t& widgetFlags);
+
+    protected:
+        ViewPluginHeadsUpDisplayAction* _viewPluginHeadsUpDisplayAction;    /** Pointer to view plugin heads up display action */
+        std::int32_t                    _widgetFlags;                       /** Widget flags */
+
+        friend class ViewPluginHeadsUpDisplayAction;
+    };
+
+    /**
+     * Get widget representation of the action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     */
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
+
 public:
 
     /**
