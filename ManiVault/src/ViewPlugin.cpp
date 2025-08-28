@@ -38,7 +38,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction(this, "Visible", true),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), StyledIcon(factory->icon())),
     _samplerAction(this, "Sampler"),
-    _progressTask(nullptr)
+    _progressTask(nullptr),
+    _viewPluginHeadsUpDisplayAction(this, "HUD")
 {
     setText(isSystemViewPlugin() ? getKind() : getGuiName());
 
@@ -181,6 +182,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     getLearningCenterAction().createViewPluginOverlayWidget();
 
     addTitleBarMenuAction(&getLearningCenterAction());
+    addOverlayAction(&_viewPluginHeadsUpDisplayAction);
 }
 
 void ViewPlugin::init()
@@ -341,7 +343,7 @@ void ViewPlugin::removeOverlayAction(WidgetAction* overlayAction)
 	});
 
     if (it != _actionsWidgets.end()) {
-        delete it->second;
+        it->second->deleteLater();
 
     	_actionsWidgets.erase(it);
     }
