@@ -6,73 +6,32 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "util/WidgetOverlayer.h"
-
-#include <QWidget>
-
-class QMouseMoveEvent;
+#include "OverlayWidget.h"
 
 namespace mv::gui
 {
 
 /**
- * Overlay widget class
+ * Action overlay widget class
  *
- * Overlays the target widget with an overlay widget and keeps its geometry in sync with the target widget.
- *
- * By default, the overlay widget and its children are immune to mouse events (similar to the Qt widget
- * attribute Qt::WA_TransparentForMouseEvents). To enable/disable child widget mouse events, call
- * OverlayWidget::addMouseEventReceiverWidget(...) or OverlayWidget::removeMouseEventReceiverWidget(...)
- * respectively.
- *
- * For more information, refer to the mv::util::WidgetOverlayer class.
+ * Overlays the target widget with the action widget in a chosen location (alignment).
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT OverlayWidget : public QWidget
+class CORE_EXPORT ActionOverlayWidget : public OverlayWidget
 {
 public:
 
     /**
      * Construct with pointer to \p target widget and initial opacity
-     * @param target Pointer to target widget (used to synchronize the geometry with)
-     * @param initialOpacity Opacity at initialization
+     * @param target Pointer to target widget (used to synchronize the geometry with, may not be nullptr)
+     * @param action Pointer to action (may not be nullptr)
+     * @param alignment Alignment of the overlay action in the target widget
      */
-    OverlayWidget(QWidget* target, float initialOpacity = 1.0f);
-
-    /**
-     * Get the utility class for overlaying the widget
-     * @return Widget overlayer
-     */
-    mv::util::WidgetOverlayer& getWidgetOverlayer();
-
-    /**
-     * Add \p mouseEventReceiverWidget
-     * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be added
-     */
-    virtual void addMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget) final;
-
-    /**
-     * Remove \p mouseEventReceiverWidget
-     * @param mouseEventReceiverWidget Pointer to mouse event receiver widget that should be removed
-     */
-    virtual void removeMouseEventReceiverWidget(QWidget* mouseEventReceiverWidget) final;
-
-protected:
-
-    /**
-     * Update the mask region when the overlay widget changes size
-     * @param event Pointer to resize event that occurred
-     */
-    void resizeEvent(QResizeEvent* event) override;
-
-public:
-
-    /** Update widget mask to selectively process mouse events */
-    void updateMask();
+    ActionOverlayWidget(QWidget* target, const QPointer<WidgetAction>& action, const Qt::Alignment& alignment = Qt::AlignTop | Qt::AlignLeft);
 
 private:
-    mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */
+    QPointer<WidgetAction>  _action;    /** Pointer to action (may not be nullptr) */
 };
 
 }
