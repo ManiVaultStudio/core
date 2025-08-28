@@ -30,6 +30,8 @@ class CORE_EXPORT ViewPlugin : public Plugin
 
 public:
 
+    using ActionWidgetPair = std::pair<QPointer<WidgetAction>, QPointer<QWidget>>;
+
     /**
      * Constructor
      * @param factory Pointer to plugin factory
@@ -111,6 +113,23 @@ public: // Settings actions
     /** Get vector of pointers to docking actions */
     gui::WidgetActions getDockingActions() const;
 
+public: // Overlay actions
+
+	/**
+     * Add \p overlayAction to the view (the action widget will be overlaid on top of the view)
+     * @param overlayAction Pointer to overlay action to add (may not be nullptr)
+     * @param alignment Alignment of the overlay action in the view
+     */
+    void addOverlayAction(WidgetAction* overlayAction, const Qt::Alignment& alignment = Qt::AlignTop | Qt::AlignLeft);
+
+    void removeOverlayAction(WidgetAction* overlayAction);
+
+	/**
+     * Get all overlay actions
+     * @return List of pointers to overlay actions
+     */
+    gui::WidgetActions getOverlayActions() const;
+
 public: // Progress
 
     /**
@@ -129,7 +148,7 @@ public: // Serialization
 
     /**
      * Load view plugin from variant
-     * @param Variant representation of the view plugin
+     * @param variantMap Variant map representation of the view plugin
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -161,6 +180,10 @@ signals:
      */
     void progressTaskChanged(Task* progressTask);
 
+    /**
+     * Signals that \p action was added as a docking action
+     * @param action Pointer to the added docking action
+     */
     void dockingActionAdded(gui::WidgetAction* action);
 
 private:
@@ -180,6 +203,7 @@ private:
     gui::WidgetActions              _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
     gui::WidgetActions              _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
     Task*                           _progressTask;              /** When set and running, a thin progress bar will be displayed on top of the view plugin dock widget */
+    std::vector<ActionWidgetPair>   _actionsWidgets;            /** Pairs of overlay actions and their corresponding overlay widgets */
 };
 
 class CORE_EXPORT ViewPluginFactory : public PluginFactory
