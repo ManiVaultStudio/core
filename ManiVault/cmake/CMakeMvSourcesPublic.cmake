@@ -429,6 +429,7 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
     src/widgets/HierarchyWidget.h
     src/widgets/InfoOverlayWidget.h
     src/widgets/OverlayWidget.h
+    src/widgets/ActionOverlayWidget.h
     src/widgets/InfoWidget.h
     src/widgets/ViewPluginEditorDialog.h
     src/widgets/ActionsWidget.h
@@ -449,6 +450,7 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
     src/widgets/HierarchyWidget.cpp
     src/widgets/InfoOverlayWidget.cpp
     src/widgets/OverlayWidget.cpp
+    src/widgets/ActionOverlayWidget.cpp
     src/widgets/InfoWidget.cpp
     src/widgets/ViewPluginEditorDialog.cpp
     src/widgets/ActionsWidget.cpp
