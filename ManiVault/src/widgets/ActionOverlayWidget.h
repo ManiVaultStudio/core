@@ -30,6 +30,12 @@ public:
      */
     ActionOverlayWidget(QWidget* target, const QPointer<WidgetAction>& action, const Qt::Alignment& alignment = Qt::AlignTop | Qt::AlignLeft);
 
+    /**
+     * Set target widget for overlay action to \p targetWidget
+     * @param targetWidget Pointer to target widget (may not be nullptr)
+     */
+    void setTargetWidget(QWidget* targetWidget);
+
 private:
     QPointer<WidgetAction>  _action;    /** Pointer to action (may not be nullptr) */
 };

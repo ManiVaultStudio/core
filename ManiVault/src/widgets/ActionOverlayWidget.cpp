@@ -33,4 +33,16 @@ ActionOverlayWidget::ActionOverlayWidget(QWidget* target, const QPointer<WidgetA
 	setLayout(layout);
 }
 
+void ActionOverlayWidget::setTargetWidget(QWidget* targetWidget)
+{
+    Q_ASSERT(targetWidget);
+
+    if (targetWidget == nullptr)
+        return;
+
+    setParent(targetWidget);
+
+    getWidgetOverlayer().setTargetWidget(targetWidget);
+}
+
 }
