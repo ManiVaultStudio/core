@@ -29,14 +29,21 @@ class CORE_EXPORT HeadsUpDisplayItem final : public QObject
 public:
 
     /**
-     * Construct with \p title, \p value, \p description and optional \p parentId
+     * Construct with \p title, \p value, \p description and \p parent
      * @param title Title
      * @param value Value
      * @param description Description
-     * @param sharedParent Shared pointer to parent item (default: nullptr)
+     * @param parent Shared pointer to parent item (default: nullptr)
      */
-    HeadsUpDisplayItem(const QString& title, const QString& value, const QString& description, HeadsUpDisplayItemSharedPtr sharedParent = nullptr);
+    HeadsUpDisplayItem(const QString& title, const QString& value, const QString& description, const HeadsUpDisplayItemSharedPtr& parent = nullptr);
 
+protected:
+
+    /**
+     * Set persistent model \p index of the item
+     * @param index Persistent model index of the item
+     */
+    void setIndex(const QPersistentModelIndex& index);
 
 public: // Getters
 
@@ -44,18 +51,18 @@ public: // Getters
     QString getTitle() const { return _title; }
     QString getValue() const { return _value; }
     QString getDescription() const { return _description; }
-    HeadsUpDisplayItemSharedPtr getSharedParent() const { return _sharedParent; }
-    QPersistentModelIndex getParentIndex() const { return _parentIndex; }
+    HeadsUpDisplayItemSharedPtr getParent() const { return _parent; }
+    QPersistentModelIndex getIndex() const { return _index; }
 
 private:
     const QString                   _id;            /** Globally unique identifier of the serializable object */
     QString                         _title;         /** Title */
     QString                         _value;         /** Value */
     QString                         _description;   /** Description */
-    HeadsUpDisplayItemSharedPtr     _sharedParent;  /** Shared pointer to parent item (maybe nullptr) */
-    QPersistentModelIndex           _parentIndex;   /** Persistent model index of parent item (if any) */
+    HeadsUpDisplayItemSharedPtr     _parent;        /** Shared pointer to parent item (maybe nullptr) */
+    QPersistentModelIndex           _index;         /** Persistent model index of the item */
+
+    friend class AbstractHeadsUpDisplayModel;
 };
-
-
 
 }

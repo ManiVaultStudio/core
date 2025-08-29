@@ -8,13 +8,18 @@
 namespace mv::util
 {
 
-HeadsUpDisplayItem::HeadsUpDisplayItem(const QString& title, const QString& value, const QString& description, HeadsUpDisplayItemSharedPtr sharedParent /*= nullptr*/) :
+HeadsUpDisplayItem::HeadsUpDisplayItem(const QString& title, const QString& value, const QString& description, const HeadsUpDisplayItemSharedPtr& parent /*= nullptr*/) :
     _id(Serializable::createId()),
     _title(title),
     _value(value),
     _description(description),
-    _sharedParent(sharedParent)
+    _parent(parent)
 {
+}
+
+void HeadsUpDisplayItem::setIndex(const QPersistentModelIndex& index)
+{
+	_index = index;
 }
 
 }
