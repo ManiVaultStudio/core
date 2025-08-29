@@ -2,73 +2,60 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "AbstractScriptsModel.h"
+#include "AbstractHeadsUpDisplayModel.h"
 
 using namespace mv;
 
 #ifdef _DEBUG
-    #define SCRIPTS_MODEL_VERBOSE
+    #define HEADS_UP_DISPLAY_MODEL_VERBOSE
 #endif
 
 using namespace mv::util;
 
 namespace mv {
 
-AbstractScriptsModel::Item::Item(const QString& type, Script* script) :
-    _script(script)
+AbstractHeadsUpDisplayModel::Item::Item(const HeadsUpDisplayItemSharedPtr& headsUpDisplayItem) :
+    _headsUpDisplayItem(headsUpDisplayItem)
 {
-    setEditable(false);
 }
 
-Script* AbstractScriptsModel::Item::getScript() const
+HeadsUpDisplayItemSharedPtr AbstractHeadsUpDisplayModel::Item::getHeadsupDisplayItem() const
 {
-    return _script;
+    return _headsUpDisplayItem;
 }
 
-QVariant AbstractScriptsModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractHeadsUpDisplayModel::IdItem::data(int role) const
 {
-    switch (role) {
-		case Qt::EditRole:
-            return static_cast<std::int32_t>(getScript()->getType());
+    if (!getHeadsupDisplayItem())
+        return Item::data(role);
 
-		case Qt::DisplayRole:
-            return Script::getTypeName(getScript()->getType());
-
-        case Qt::ToolTipRole:
-            return QString("%1").arg(data(Qt::DisplayRole).toString());
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
-QVariant AbstractScriptsModel::LanguageItem::data(int role /*= Qt::UserRole + 1*/) const
-{
     switch (role) {
 	    case Qt::EditRole:
-	        return static_cast<std::int32_t>(getScript()->getLanguage());
-
-	    case Qt::DisplayRole:
-	        return Script::getLanguageName(getScript()->getLanguage());
+        case Qt::DisplayRole:
+	        return getHeadsupDisplayItem()->getId();
 
 	    case Qt::ToolTipRole:
-	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+	        return QString("Global unique identifier: %1").arg(data(Qt::DisplayRole).toString());
 
-	    case Qt::DecorationRole:
-        {
-            switch (getScript()->getLanguage()) {
-	            case Script::Language::Python:
-	                return StyledIcon("python");
+	    default:
+	        break;
+    }
 
-	            case Script::Language::R:
-                    return StyledIcon("r");
+	return Item::data(role);
+}
 
-	            default:
-	                return QIcon();
-            }
-		}
+QVariant AbstractHeadsUpDisplayModel::TitleItem::data(int role) const
+{
+    if (!getHeadsupDisplayItem())
+        return Item::data(role);
+
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getHeadsupDisplayItem()->getTitle();
+
+	    case Qt::ToolTipRole:
+	        return QString("Title: %1").arg(data(Qt::DisplayRole).toString());
 
 	    default:
 	        break;
@@ -77,15 +64,18 @@ QVariant AbstractScriptsModel::LanguageItem::data(int role /*= Qt::UserRole + 1*
     return Item::data(role);
 }
 
-QVariant AbstractScriptsModel::LocationItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractHeadsUpDisplayModel::ValueItem::data(int role) const
 {
+    if (!getHeadsupDisplayItem())
+        return Item::data(role);
+
     switch (role) {
 	    case Qt::EditRole:
 	    case Qt::DisplayRole:
-	        return getScript()->getLocation();
+	        return getHeadsupDisplayItem()->getValue();
 
 	    case Qt::ToolTipRole:
-	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+	        return QString("Value: %1").arg(data(Qt::DisplayRole).toString());
 
 	    default:
 	        break;
@@ -94,30 +84,105 @@ QVariant AbstractScriptsModel::LocationItem::data(int role /*= Qt::UserRole + 1*
     return Item::data(role);
 }
 
-AbstractScriptsModel::AbstractScriptsModel(QObject* parent) :
+QVariant AbstractHeadsUpDisplayModel::DescriptionItem::data(int role) const
+{
+    if (!getHeadsupDisplayItem())
+        return Item::data(role);
+
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getHeadsupDisplayItem()->getDescription();
+
+	    case Qt::ToolTipRole:
+	        return QString("Description: %1").arg(data(Qt::DisplayRole).toString());
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+AbstractHeadsUpDisplayModel::AbstractHeadsUpDisplayModel(QObject* parent) :
     StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 }
 
-QVariant AbstractScriptsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant AbstractHeadsUpDisplayModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     switch (static_cast<Column>(section))
     {
-	    case Column::Type:
-	        return TypeItem::headerData(orientation, role);
+	    case Column::Id:
+	        return IdItem::headerData(orientation, role);
 
-	    case Column::Language:
-	        return LanguageItem::headerData(orientation, role);
+	    case Column::Title:
+	        return TitleItem::headerData(orientation, role);
 
-	    case Column::Location:
-	        return LocationItem::headerData(orientation, role);
+	    case Column::Value:
+	        return ValueItem::headerData(orientation, role);
 
-	    default:
-	        break;
+        case Column::Description:
+            return DescriptionItem::headerData(orientation, role);
+
+		case Column::Count:
+            break;
     }
 
     return {};
+}
+
+void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem, const QModelIndex& parentIndex)
+{
+    try {
+        Q_ASSERT(headsUpDisplayItem);
+
+        if (!headsUpDisplayItem)
+            throw std::runtime_error("Heads-up display item shared pointer not valid");
+
+#ifdef HEADS_UP_DISPLAY_MODEL_VERBOSE
+        qDebug() << __FUNCTION__ << headsUpDisplayItem->getTitle() << parentIndex;
+#endif
+
+        if (parentIndex.isValid()) {
+            if (auto parentItem = dynamic_cast<Item*>(itemFromIndex(parentIndex)))
+                parentItem->appendRow(Row(headsUpDisplayItem));
+            else
+                throw std::runtime_error("Parent index is not a valid item");
+        }
+        else {
+            appendRow(Row(headsUpDisplayItem));
+        }
+    }
+    catch (std::exception& exception)
+    {
+        qCritical() << QString("Unable to add %1 to the heads-up display item model:").arg(headsUpDisplayItem ? headsUpDisplayItem->getTitle() : "untitled") << exception.what();
+    }
+    catch (...)
+    {
+        qCritical() << QString("Unable to add %1 to the heads-up display item model due to an unhandled exception").arg(headsUpDisplayItem ? headsUpDisplayItem->getTitle() : "untitled");
+    }
+}
+
+void AbstractHeadsUpDisplayModel::removeHeadsUpDisplayItem(const QModelIndex& index)
+{
+    try {
+#ifdef HEADS_UP_DISPLAY_MODEL_VERBOSE
+        qDebug() << __FUNCTION__ << index;
+#endif
+
+        if (!removeRow(index.row(), index.parent()))
+            throw std::runtime_error(QString("Unable to remove heads-up display item at index %1").arg(index.row()).toStdString());
+    }
+    catch (std::exception& exception)
+    {
+        qCritical() << "Unable to remove heads-up display item from the heads-up display item model:" << exception.what();
+    }
+    catch (...)
+    {
+        qCritical() << "Unable to remove heads-up display item from the heads-up display item model";
+    }
 }
 
 }

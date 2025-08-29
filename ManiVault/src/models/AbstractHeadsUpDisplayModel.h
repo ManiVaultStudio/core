@@ -8,56 +8,53 @@
 
 #include "StandardItemModel.h"
 
-#include "util/Script.h"
-
-#include <QList>
-#include <QStandardItem>
+#include "util/HeadsUpDisplayItem.h"
 
 namespace mv {
 
 /**
- * Scripts model class
+ * Heads-up display model class
  *
- * Base standard item model for scripts
+ * Contains information that is displayed in the heads-up display
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT AbstractScriptsModel : public StandardItemModel
+class CORE_EXPORT AbstractHeadsUpDisplayModel : public StandardItemModel
 {
 public:
 
     /** Model columns */
     enum class Column {
-        Type,       /** Script type item */
-        Language,   /** Script language item */
-        Location,   /** Script location item */
+        Id,             /** Item global unique identifier */  
+        Title,          /** Item title */
+        Value,          /** Item value */
+        Description,    /** Item description */
 
         Count
     };
 
-    /** Base standard model item class for script item  */
+    /** Base standard model item class for heads-up display item  */
     class CORE_EXPORT Item : public QStandardItem {
     public:
 
         /**
-         * Construct with \p type and pointer to \p script
-         * @param type View type
-         * @param script Pointer to script
+         * Construct with shared pointer to \p headsUpDisplayItem
+         * @param headsUpDisplayItem Shared pointer to heads-up display item
          */
-        Item(const QString& type, util::Script* script);
+        Item(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
 
         /**
-         * Get script
-         * return Pointer to script
+         * Get heads-up display item
+         * return Shared pointer to heads-up display item
          */
-        util::Script* getScript() const;
+        util::HeadsUpDisplayItemSharedPtr getHeadsupDisplayItem() const;
 
     private:
-        util::Script*   _script;  /** Pointer to script */
+        util::HeadsUpDisplayItemSharedPtr   _headsUpDisplayItem;  /** Pointer to heads-up display item */
     };
 
-    /** Item class for displaying the script type */
-    class CORE_EXPORT TypeItem final : public Item {
+    /** Item class for displaying the item ID */
+    class CORE_EXPORT IdItem final : public Item {
     public:
 
         /** No need for specialized constructor */
@@ -79,18 +76,18 @@ public:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "Type";
+                    return "ID";
 
                 case Qt::ToolTipRole:
-                    return "Script type";
+                    return "Globally unique identifier";
             }
 
             return {};
         }
     };
 
-    /** Item class for displaying the script language */
-    class CORE_EXPORT LanguageItem final : public Item {
+    /** Item class for displaying the title */
+    class CORE_EXPORT TitleItem final : public Item {
     public:
 
         /** No need for specialized constructor */
@@ -112,18 +109,18 @@ public:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Language";
+	                return "Title";
 
 	            case Qt::ToolTipRole:
-	                return "Script language";
+	                return "Item title";
             }
 
             return {};
         }
     };
 
-    /** Item class for displaying the script location */
-    class CORE_EXPORT LocationItem final : public Item {
+    /** Item class for displaying the value */
+    class CORE_EXPORT ValueItem final : public Item {
     public:
 
         /** No need for specialized constructor */
@@ -145,10 +142,43 @@ public:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "Location";
+	                return "Value";
 
 	            case Qt::ToolTipRole:
-	                return "Script location";
+	                return "Item value";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the description */
+    class CORE_EXPORT DescriptionItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Description";
+
+	            case Qt::ToolTipRole:
+	                return "Item description";
             }
 
             return {};
@@ -163,15 +193,16 @@ protected:
     public:
 
         /**
-         * Construct with \p type and pointer to \p script
-         * @param type View type
-         * @param script Pointer to the script
+         * Construct with shared pointer to \p headsUpDisplayItem
+         * @param headsUpDisplayItem Shared pointer to heads-up display item
          */
-        Row(const QString& type, util::Script* script) : QList<QStandardItem*>()
+        Row(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem) :
+    		QList<QStandardItem*>()
         {
-            append(new TypeItem(type, script));
-            append(new LanguageItem(type, script));
-            append(new LocationItem(type, script));
+            append(new IdItem(headsUpDisplayItem));
+            append(new TitleItem(headsUpDisplayItem));
+            append(new ValueItem(headsUpDisplayItem));
+            append(new DescriptionItem(headsUpDisplayItem));
         }
     };
 
@@ -181,7 +212,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    AbstractScriptsModel(QObject* parent = nullptr);
+    AbstractHeadsUpDisplayModel(QObject* parent = nullptr);
 
     /**
      * Get header data for \p section, \p orientation and display \p role
@@ -191,6 +222,21 @@ public:
      * @return Header
      */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+public: // Add/remove items
+
+    /**
+     * Add \p headsUpDisplayItem to the model, optionally under \p parentIndex
+     * @param headsUpDisplayItem Heads-up display item to add
+     * @param parentIndex Parent index to add the heads-up display item to (defaults to root)
+     */
+    void addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem, const QModelIndex& parentIndex = QModelIndex());
+
+    /**
+     * Remove heads-up display item with \p index from the model
+     * @param index Index of the heads-up display item to remove
+     */
+    void removeHeadsUpDisplayItem(const QModelIndex& index);
 };
 
 }
