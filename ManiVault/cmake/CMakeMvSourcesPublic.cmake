@@ -569,6 +569,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/View.h
     src/util/SecureNetworkAccessManager.h
     src/util/HttpsErrorReply.h
+    src/util/HeadsUpDisplayItem.h
 )
 
 if(APPLE)
@@ -628,6 +629,7 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/View.cpp
 	src/util/SecureNetworkAccessManager.cpp
 	src/util/HttpsErrorReply.cpp
+	src/util/HeadsUpDisplayItem.cpp
 )
 
 if(APPLE)
