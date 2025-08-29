@@ -133,7 +133,7 @@ QVariant AbstractHeadsUpDisplayModel::headerData(int section, Qt::Orientation or
     return {};
 }
 
-void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem, const QModelIndex& parentIndex)
+void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
 {
     try {
         Q_ASSERT(headsUpDisplayItem);
@@ -144,6 +144,8 @@ void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(const util::HeadsUpDispl
 #ifdef HEADS_UP_DISPLAY_MODEL_VERBOSE
         qDebug() << __FUNCTION__ << headsUpDisplayItem->getTitle() << parentIndex;
 #endif
+
+        const auto parentIndex = indexFromHeadsUpDisplayItem(headsUpDisplayItem->getSharedParent());
 
         if (parentIndex.isValid()) {
             if (auto parentItem = dynamic_cast<Item*>(itemFromIndex(parentIndex)))
@@ -165,12 +167,14 @@ void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(const util::HeadsUpDispl
     }
 }
 
-void AbstractHeadsUpDisplayModel::removeHeadsUpDisplayItem(const QModelIndex& index)
+void AbstractHeadsUpDisplayModel::removeHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
 {
     try {
 #ifdef HEADS_UP_DISPLAY_MODEL_VERBOSE
         qDebug() << __FUNCTION__ << index;
 #endif
+
+        const auto index = indexFromHeadsUpDisplayItem(headsUpDisplayItem);
 
         if (!removeRow(index.row(), index.parent()))
             throw std::runtime_error(QString("Unable to remove heads-up display item at index %1").arg(index.row()).toStdString());
@@ -183,6 +187,19 @@ void AbstractHeadsUpDisplayModel::removeHeadsUpDisplayItem(const QModelIndex& in
     {
         qCritical() << "Unable to remove heads-up display item from the heads-up display item model";
     }
+}
+
+QModelIndex AbstractHeadsUpDisplayModel::indexFromHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem) const
+{
+    if (!headsUpDisplayItem)
+        return {};
+
+    const auto idMatches = match(index(0, static_cast<std::int32_t>(Column::Id)), Qt::DisplayRole, headsUpDisplayItem->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+
+    if (!idMatches.isEmpty())
+        return idMatches.first();
+
+    return {};
 }
 
 }

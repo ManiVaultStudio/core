@@ -76,6 +76,20 @@ public:
      */
     HeadsUpDisplayTreeModel& getHeadsUpDisplayTreeModel();
 
+public: // Convenience wrappers around the model
+
+    /**
+     * Add \p headsUpDisplayItem, optionally under \p parentIndex
+     * @param headsUpDisplayItem Heads-up display item to add
+     */
+    void addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
+
+    /**
+     * Remove \p headsUpDisplayItem
+     * @param headsUpDisplayItem Heads-up display item to remove
+     */
+    void removeHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
+
 public: // Serialization
 
     /**

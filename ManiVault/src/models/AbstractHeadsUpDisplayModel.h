@@ -226,17 +226,25 @@ public:
 public: // Add/remove items
 
     /**
-     * Add \p headsUpDisplayItem to the model, optionally under \p parentIndex
+     * Add \p headsUpDisplayItem to the model
      * @param headsUpDisplayItem Heads-up display item to add
-     * @param parentIndex Parent index to add the heads-up display item to (defaults to root)
      */
-    void addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem, const QModelIndex& parentIndex = QModelIndex());
+    void addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
 
     /**
-     * Remove heads-up display item with \p index from the model
-     * @param index Index of the heads-up display item to remove
+     * Remove \p headsUpDisplayItem
+     * @param headsUpDisplayItem Heads-up display item to remove
      */
-    void removeHeadsUpDisplayItem(const QModelIndex& index);
+    void removeHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
+
+private: // Utility functions
+
+    /**
+     * Get model index from \p headsUpDisplayItem
+     * @param headsUpDisplayItem Heads-up display item
+     * @return Model index corresponding to the heads-up display item
+     */
+    QModelIndex indexFromHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem) const;
 };
 
 }

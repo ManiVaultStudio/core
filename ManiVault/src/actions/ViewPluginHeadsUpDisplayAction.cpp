@@ -98,6 +98,16 @@ HeadsUpDisplayTreeModel& ViewPluginHeadsUpDisplayAction::getHeadsUpDisplayTreeMo
     return _headsUpDisplayTreeModel;
 }
 
+void ViewPluginHeadsUpDisplayAction::addHeadsUpDisplayItem(const HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
+{
+    _headsUpDisplayTreeModel.addHeadsUpDisplayItem(headsUpDisplayItem);
+}
+
+void ViewPluginHeadsUpDisplayAction::removeHeadsUpDisplayItem(const HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
+{
+    _headsUpDisplayTreeModel.removeHeadsUpDisplayItem(headsUpDisplayItem);
+}
+
 void ViewPluginHeadsUpDisplayAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
