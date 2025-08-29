@@ -40,6 +40,8 @@ protected:
          */
         HeadsUpDisplayWidget(QWidget* parent, ViewPluginHeadsUpDisplayAction* viewPluginHeadsUpDisplayAction, const std::int32_t& widgetFlags);
 
+        void mousePressEvent(QMouseEvent* event) override;
+
         /**
          * Get minimum size hint for the widget
          * @return Minimum size hint for the widget
