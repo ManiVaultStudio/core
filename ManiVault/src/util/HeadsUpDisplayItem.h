@@ -10,6 +10,11 @@
 #include <QString>
 #include <QPersistentModelIndex>
 
+namespace mv
+{
+    class AbstractHeadsUpDisplayModel;
+}
+
 namespace mv::util
 {
 
@@ -62,7 +67,7 @@ private:
     HeadsUpDisplayItemSharedPtr     _parent;        /** Shared pointer to parent item (maybe nullptr) */
     QPersistentModelIndex           _index;         /** Persistent model index of the item */
 
-    friend class AbstractHeadsUpDisplayModel;
+    friend class mv::AbstractHeadsUpDisplayModel;
 };
 
 }
