@@ -36,8 +36,11 @@ public:
      */
     void setTargetWidget(QWidget* targetWidget);
 
+    bool eventFilter(QObject* obj, QEvent* event) override;
+
 private:
-    QPointer<WidgetAction>  _action;    /** Pointer to action (may not be nullptr) */
+    QPointer<WidgetAction>  _action;        /** Pointer to action (may not be nullptr) */
+    QWidget*                _actionWidget;  /** Pointer to action widget (may be nullptr) */
 };
 
 }
