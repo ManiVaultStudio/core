@@ -114,9 +114,6 @@ QVariant AbstractHeadsUpDisplayModel::headerData(int section, Qt::Orientation or
 {
     switch (static_cast<Column>(section))
     {
-	    case Column::Id:
-	        return IdItem::headerData(orientation, role);
-
 	    case Column::Title:
 	        return TitleItem::headerData(orientation, role);
 
@@ -126,6 +123,9 @@ QVariant AbstractHeadsUpDisplayModel::headerData(int section, Qt::Orientation or
         case Column::Description:
             return DescriptionItem::headerData(orientation, role);
 
+        case Column::Id:
+            return IdItem::headerData(orientation, role);
+
 		case Column::Count:
             break;
     }
@@ -133,7 +133,7 @@ QVariant AbstractHeadsUpDisplayModel::headerData(int section, Qt::Orientation or
     return {};
 }
 
-void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
+void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
 {
     try {
         Q_ASSERT(headsUpDisplayItem);
@@ -142,19 +142,21 @@ void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(const util::HeadsUpDispl
             throw std::runtime_error("Heads-up display item shared pointer not valid");
 
 #ifdef HEADS_UP_DISPLAY_MODEL_VERBOSE
-        qDebug() << __FUNCTION__ << headsUpDisplayItem->getTitle() << headsUpDisplayItem->getParentIndex();
+        qDebug() << __FUNCTION__ << headsUpDisplayItem->getTitle();
 #endif
 
-        const auto parentIndex = indexFromHeadsUpDisplayItem(headsUpDisplayItem->getSharedParent());
+        const auto parentIndex = headsUpDisplayItem->getParent() ? headsUpDisplayItem->getParent()->getIndex() : QPersistentModelIndex();
 
         if (parentIndex.isValid()) {
-            if (auto parentItem = dynamic_cast<Item*>(itemFromIndex(parentIndex)))
+            if (auto parentItem = dynamic_cast<Item*>(itemFromIndex(parentIndex.sibling(0, 0))))
                 parentItem->appendRow(Row(headsUpDisplayItem));
             else
                 throw std::runtime_error("Parent index is not a valid item");
         }
         else {
             appendRow(Row(headsUpDisplayItem));
+
+            headsUpDisplayItem->setIndex(indexFromHeadsUpDisplayItem(headsUpDisplayItem));
         }
     }
     catch (std::exception& exception)
@@ -167,14 +169,17 @@ void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(const util::HeadsUpDispl
     }
 }
 
-void AbstractHeadsUpDisplayModel::removeHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
+void AbstractHeadsUpDisplayModel::removeHeadsUpDisplayItem(const HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
 {
     try {
 #ifdef HEADS_UP_DISPLAY_MODEL_VERBOSE
-        qDebug() << __FUNCTION__ << index;
+        qDebug() << __FUNCTION__ << headsUpDisplayItem->getIndex();
 #endif
 
-        const auto index = indexFromHeadsUpDisplayItem(headsUpDisplayItem);
+        const auto index = headsUpDisplayItem->getIndex();
+
+        if (!index.isValid())
+            throw std::runtime_error("Heads-up display item index not valid");
 
         if (!removeRow(index.row(), index.parent()))
             throw std::runtime_error(QString("Unable to remove heads-up display item at index %1").arg(index.row()).toStdString());

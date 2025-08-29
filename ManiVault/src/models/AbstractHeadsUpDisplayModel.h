@@ -25,10 +25,10 @@ public:
 
     /** Model columns */
     enum class Column {
-        Id,             /** Item global unique identifier */  
         Title,          /** Item title */
         Value,          /** Item value */
         Description,    /** Item description */
+        Id,             /** Item global unique identifier */
 
         Count
     };
@@ -51,39 +51,6 @@ public:
 
     private:
         util::HeadsUpDisplayItemSharedPtr   _headsUpDisplayItem;  /** Pointer to heads-up display item */
-    };
-
-    /** Item class for displaying the item ID */
-    class CORE_EXPORT IdItem final : public Item {
-    public:
-
-        /** No need for specialized constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "ID";
-
-                case Qt::ToolTipRole:
-                    return "Globally unique identifier";
-            }
-
-            return {};
-        }
     };
 
     /** Item class for displaying the title */
@@ -185,6 +152,39 @@ public:
         }
     };
 
+    /** Item class for displaying the item ID */
+    class CORE_EXPORT IdItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "ID";
+
+	            case Qt::ToolTipRole:
+	                return "Globally unique identifier";
+            }
+
+            return {};
+        }
+    };
+
 protected:
 
     /** Convenience class for combining items in a row */
@@ -199,10 +199,10 @@ protected:
         Row(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem) :
     		QList<QStandardItem*>()
         {
-            append(new IdItem(headsUpDisplayItem));
             append(new TitleItem(headsUpDisplayItem));
             append(new ValueItem(headsUpDisplayItem));
             append(new DescriptionItem(headsUpDisplayItem));
+            append(new IdItem(headsUpDisplayItem));
         }
     };
 
@@ -229,7 +229,7 @@ public: // Add/remove items
      * Add \p headsUpDisplayItem to the model
      * @param headsUpDisplayItem Heads-up display item to add
      */
-    void addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
+    void addHeadsUpDisplayItem(util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
 
     /**
      * Remove \p headsUpDisplayItem
