@@ -22,40 +22,45 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
 
     setStyleSheet("background-color: red;");
 
+    _treeView.setModel(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel());
+
 	auto layout = new QVBoxLayout();
 
-    _contentLabel.setStyleSheet("color: black;");
-    //_contentLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    _contentLabel.setWordWrap(true);
-    _contentLabel.setStyleSheet("background-color: green;");
-    //layout->setSizeConstraint(QLayout::SetMaximumSize);
+    layout->addWidget(&_treeView);
 
-    layout->addWidget(&_contentLabel);
+ //   _contentLabel.setStyleSheet("color: black;");
+ //   //_contentLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+ //   _contentLabel.setWordWrap(true);
+ //   _contentLabel.setStyleSheet("background-color: green;");
+ //   //layout->setSizeConstraint(QLayout::SetMaximumSize);
+
+ //   layout->addWidget(&_contentLabel);
+
+ //   setLayout(layout);
+
+ //   const auto updateLabel = [this, layout]() -> void {
+ //       qDebug() << "Updating HUD content label (before)" << size() << _contentLabel.size();
+ //       _contentLabel.setText(_viewPluginHeadsUpDisplayAction->getContent());
+
+ //       QTimer::singleShot(10, [this]() -> void {
+ //           _contentLabel.updateGeometry();
+ //           _contentLabel.adjustSize();
+
+ //           adjustSize();
+ //       });
+ //       
+
+ //       //layout->activate();
+ //       //adjustSize();
+
+ //       qDebug() << "Updating HUD content label (after)" << size() << _contentLabel.size();
+	//};
+
+ //   updateLabel();
+
+ //   connect(_viewPluginHeadsUpDisplayAction, &ViewPluginHeadsUpDisplayAction::contentChanged, this, updateLabel);
 
     setLayout(layout);
-
-    const auto updateLabel = [this, layout]() -> void {
-        qDebug() << "Updating HUD content label (before)" << size() << _contentLabel.size();
-        _contentLabel.setText(_viewPluginHeadsUpDisplayAction->getContent());
-
-        QTimer::singleShot(10, [this]() -> void {
-            _contentLabel.updateGeometry();
-            _contentLabel.adjustSize();
-
-            adjustSize();
-        });
-        
-
-        //layout->activate();
-        //adjustSize();
-
-        qDebug() << "Updating HUD content label (after)" << size() << _contentLabel.size();
-	};
-
-    updateLabel();
-
-    connect(_viewPluginHeadsUpDisplayAction, &ViewPluginHeadsUpDisplayAction::contentChanged, this, updateLabel);
-
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 }
 
@@ -88,21 +93,9 @@ ViewPluginHeadsUpDisplayAction::ViewPluginHeadsUpDisplayAction(QObject* parent, 
 {
 }
 
-void ViewPluginHeadsUpDisplayAction::setContent(const QString& content)
+HeadsUpDisplayTreeModel& ViewPluginHeadsUpDisplayAction::getHeadsUpDisplayTreeModel()
 {
-    if (content == getContent())
-        return;
-
-    const auto previousContent = getContent();
-
-    _content = content;
-
-    emit contentChanged(previousContent, content);
-}
-
-QString ViewPluginHeadsUpDisplayAction::getContent() const
-{
-    return _content;
+    return _headsUpDisplayTreeModel;
 }
 
 void ViewPluginHeadsUpDisplayAction::fromVariantMap(const QVariantMap& variantMap)

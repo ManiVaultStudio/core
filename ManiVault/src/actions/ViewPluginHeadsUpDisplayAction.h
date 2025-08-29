@@ -6,6 +6,8 @@
 
 #include "WidgetAction.h"
 
+#include "models/HeadsUpDisplayTreeModel.h"
+
 #include <QWidget>
 #include <QLabel>
 
@@ -47,7 +49,7 @@ protected:
     protected:
         ViewPluginHeadsUpDisplayAction* _viewPluginHeadsUpDisplayAction;    /** Pointer to view plugin heads up display action */
         std::int32_t                    _widgetFlags;                       /** Widget flags */
-        QLabel                          _contentLabel;                      /** Content label */
+        QTreeView                       _treeView;                          /** Tree view for displaying the HUD entries */
 
         friend class ViewPluginHeadsUpDisplayAction;
     };
@@ -69,16 +71,10 @@ public:
     Q_INVOKABLE ViewPluginHeadsUpDisplayAction(QObject* parent, const QString& title);
 
     /**
-     * Set string content of the HUD action to \p content
-     * @param content String content of the HUD action
+     * Get heads up display tree model
+     * @return Heads up display tree model
      */
-    void setContent(const QString& content);
-
-    /**
-     * Get string content of the HUD action
-     * @return String content of the HUD action
-     */
-    QString getContent() const;
+    HeadsUpDisplayTreeModel& getHeadsUpDisplayTreeModel();
 
 public: // Serialization
 
@@ -104,7 +100,7 @@ signals:
     void contentChanged(const QString& previousContent, const QString& currentContent);
 
 private:
-    QString     _content;   /** String content of the HUD action */
+    HeadsUpDisplayTreeModel     _headsUpDisplayTreeModel;   /** Heads up display tree model */
 };
 
 }
