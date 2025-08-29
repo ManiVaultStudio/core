@@ -20,14 +20,14 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     if (!_viewPluginHeadsUpDisplayAction)
         return;
 
-    //setStyleSheet("background-color: red;");
+    setStyleSheet("background-color: red;");
 
 	auto layout = new QVBoxLayout();
 
     _contentLabel.setStyleSheet("color: black;");
     //_contentLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     _contentLabel.setWordWrap(true);
-
+    _contentLabel.setStyleSheet("background-color: green;");
     //layout->setSizeConstraint(QLayout::SetMaximumSize);
 
     layout->addWidget(&_contentLabel);
@@ -56,7 +56,7 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
 
     connect(_viewPluginHeadsUpDisplayAction, &ViewPluginHeadsUpDisplayAction::contentChanged, this, updateLabel);
 
-    //setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 }
 
 //QSize ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::minimumSizeHint() const
