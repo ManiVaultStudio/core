@@ -24,10 +24,10 @@ namespace mv::util {
 
 class SecureNetworkAccessManager;
 
-
 /**
  * File downloader class
- * Help class for simplifying file download
+ *
+ * Helper class for simplifying file download
  * 
  * @author Thomas Kroes
  */
