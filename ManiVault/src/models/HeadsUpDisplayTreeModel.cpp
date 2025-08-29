@@ -2,18 +2,18 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ScriptsTreeModel.h"
+#include "HeadsUpDisplayTreeModel.h"
 
 using namespace mv;
 
 #ifdef _DEBUG
-    #define SCRIPTS_TREE_MODEL_VERBOSE
+    #define HEADS_UP_DISPLAY_TREE_MODEL_VERBOSE
 #endif
 
 namespace mv {
 
-ScriptsTreeModel::ScriptsTreeModel(QObject* parent /*= nullptr*/) :
-    AbstractScriptsModel(parent)
+HeadsUpDisplayTreeModel::HeadsUpDisplayTreeModel(QObject* parent /*= nullptr*/) :
+    AbstractHeadsUpDisplayModel(parent)
 {
 }
 

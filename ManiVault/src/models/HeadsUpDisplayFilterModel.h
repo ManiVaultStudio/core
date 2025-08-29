@@ -11,13 +11,13 @@
 namespace mv {
 
 /**
- * Scripts filter model class
+ * Heads-up display filter model class
  *
- * Sorting and filtering model for scripts
+ * Sorting and filtering model for heads-up display items.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ScriptsFilterModel : public SortFilterProxyModel
+class CORE_EXPORT HeadsUpDisplayFilterModel : public SortFilterProxyModel
 {
 public:
 
@@ -25,7 +25,7 @@ public:
      * Construct the filter model with \p parent
      * @param parent Pointer to parent object
     */
-    ScriptsFilterModel(QObject* parent = nullptr);
+    HeadsUpDisplayFilterModel(QObject* parent = nullptr);
 };
 
 }

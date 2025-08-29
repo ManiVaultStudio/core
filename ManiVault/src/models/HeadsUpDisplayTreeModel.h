@@ -4,18 +4,18 @@
 
 #pragma once
 
-#include "AbstractScriptsModel.h"
+#include "AbstractHeadsUpDisplayModel.h"
 
 namespace mv {
 
 /**
- * Scripts tree model class
+ * Heads-up display tree model class
  *
- * Tree model for Scripts
+ * Tree model for heads-up display items.
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ScriptsTreeModel : public AbstractScriptsModel
+class CORE_EXPORT HeadsUpDisplayTreeModel : public AbstractHeadsUpDisplayModel
 {
 public:
 
@@ -23,7 +23,7 @@ public:
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
-    ScriptsTreeModel(QObject* parent = nullptr);
+    HeadsUpDisplayTreeModel(QObject* parent = nullptr);
 };
 
 }
