@@ -76,19 +76,25 @@ public:
      */
     HeadsUpDisplayTreeModel& getHeadsUpDisplayTreeModel();
 
-public: // Convenience wrappers around the model
+public: // Add/remove heads-up display items
 
     /**
-     * Add \p headsUpDisplayItem, optionally under \p parentIndex
-     * @param headsUpDisplayItem Heads-up display item to add
+     * Add heads-up display item
+     * @param title Title
+     * @param value Value
+     * @param description Description
+     * @param sharedParent Shared pointer to parent item (default: nullptr)
      */
-    void addHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
+    util::HeadsUpDisplayItemSharedPtr addHeadsUpDisplayItem(const QString& title, const QString& value, const QString& description, const util::HeadsUpDisplayItemSharedPtr& sharedParent = nullptr);
 
     /**
      * Remove \p headsUpDisplayItem
      * @param headsUpDisplayItem Heads-up display item to remove
      */
     void removeHeadsUpDisplayItem(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
+
+    /** Remove all heads-up display items */
+    void removeAllHeadsUpDisplayItems();
 
 public: // Serialization
 

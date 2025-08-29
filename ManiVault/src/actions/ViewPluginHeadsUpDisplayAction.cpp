@@ -5,6 +5,9 @@
 #include "ViewPluginHeadsUpDisplayAction.h"
 
 #include <QVBoxLayout>
+#include <QHeaderView>
+
+#include "models/AbstractHeadsUpDisplayModel.h"
 
 using namespace mv::util;
 
@@ -20,9 +23,26 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     if (!_viewPluginHeadsUpDisplayAction)
         return;
 
-    setStyleSheet("background-color: red;");
+    setAttribute(Qt::WA_TranslucentBackground, true);
+    setAttribute(Qt::WA_NoSystemBackground, true);
+    setAttribute(Qt::WA_TransparentForMouseEvents, true); // mouse-through by default
 
     _treeView.setModel(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel());
+    _treeView.setFixedWidth(300);
+    //_treeView.setHeaderHidden(true);
+    //_treeView.setRootIsDecorated(false);
+    _treeView.setFrameShape(QFrame::NoFrame);
+    _treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _treeView.setStyleSheet(
+        "QTreeView { background: transparent; }"
+        "QTreeView::item { color: black; padding: 2px 4px; }"
+    );
+    _treeView.viewport()->setAttribute(Qt::WA_TranslucentBackground, true);
+    _treeView.viewport()->setStyleSheet("background: transparent;");
+
+    _treeView.header()->hideSection(static_cast<int>(AbstractHeadsUpDisplayModel::Column::Id));
+    _treeView.header()->hideSection(static_cast<int>(AbstractHeadsUpDisplayModel::Column::Description));
 
 	auto layout = new QVBoxLayout();
 
@@ -61,7 +81,7 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
  //   connect(_viewPluginHeadsUpDisplayAction, &ViewPluginHeadsUpDisplayAction::contentChanged, this, updateLabel);
 
     setLayout(layout);
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    //setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 }
 
 //QSize ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::minimumSizeHint() const
@@ -98,14 +118,23 @@ HeadsUpDisplayTreeModel& ViewPluginHeadsUpDisplayAction::getHeadsUpDisplayTreeMo
     return _headsUpDisplayTreeModel;
 }
 
-void ViewPluginHeadsUpDisplayAction::addHeadsUpDisplayItem(const HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
+HeadsUpDisplayItemSharedPtr ViewPluginHeadsUpDisplayAction::addHeadsUpDisplayItem(const QString& title, const QString& value, const QString& description, const util::HeadsUpDisplayItemSharedPtr& sharedParent /*= nullptr*/)
 {
-    _headsUpDisplayTreeModel.addHeadsUpDisplayItem(headsUpDisplayItem);
+    auto sharedHeadsUpDisplayItem = std::make_shared<HeadsUpDisplayItem>(title, value, description, sharedParent);
+
+    _headsUpDisplayTreeModel.addHeadsUpDisplayItem(sharedHeadsUpDisplayItem);
+
+    return sharedHeadsUpDisplayItem;
 }
 
 void ViewPluginHeadsUpDisplayAction::removeHeadsUpDisplayItem(const HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
 {
     _headsUpDisplayTreeModel.removeHeadsUpDisplayItem(headsUpDisplayItem);
+}
+
+void ViewPluginHeadsUpDisplayAction::removeAllHeadsUpDisplayItems()
+{
+    _headsUpDisplayTreeModel.setRowCount(0);
 }
 
 void ViewPluginHeadsUpDisplayAction::fromVariantMap(const QVariantMap& variantMap)

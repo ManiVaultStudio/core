@@ -26,7 +26,7 @@ ActionOverlayWidget::ActionOverlayWidget(QWidget* target, const QPointer<WidgetA
 
 	auto actionWidget = action->createWidget(this);
 
-    addMouseEventReceiverWidget(actionWidget);
+    //addMouseEventReceiverWidget(actionWidget);
 
     layout->addWidget(actionWidget);
 

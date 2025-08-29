@@ -142,7 +142,7 @@ void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(const util::HeadsUpDispl
             throw std::runtime_error("Heads-up display item shared pointer not valid");
 
 #ifdef HEADS_UP_DISPLAY_MODEL_VERBOSE
-        qDebug() << __FUNCTION__ << headsUpDisplayItem->getTitle() << parentIndex;
+        qDebug() << __FUNCTION__ << headsUpDisplayItem->getTitle() << headsUpDisplayItem->getParentIndex();
 #endif
 
         const auto parentIndex = indexFromHeadsUpDisplayItem(headsUpDisplayItem->getSharedParent());
