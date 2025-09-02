@@ -54,6 +54,16 @@ void DecimalAction::setSingleStep(float singleStep)
     emit singleStepChanged(_singleStep);
 }
 
+WidgetAction* DecimalAction::getPublicCopy() const
+{
+    if (auto publicCopy = dynamic_cast<NumericalAction<float>*>(WidgetAction::getPublicCopy())) {
+        publicCopy->setRange(getRange());
+        return publicCopy;
+    }
+
+    return nullptr;
+}
+
 void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDecimalAction = dynamic_cast<DecimalAction*>(publicAction);

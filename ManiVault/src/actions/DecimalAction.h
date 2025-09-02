@@ -116,6 +116,12 @@ public:
      */
     void setSingleStep(float singleStep);
 
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    WidgetAction* getPublicCopy() const override;
+
 protected: // Linking
 
     /**
