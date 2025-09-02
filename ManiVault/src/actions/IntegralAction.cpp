@@ -80,6 +80,14 @@ void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Value");
 
     setValue(variantMap["Value"].toInt());
+
+    if (isPublic()) {
+        if (variantMap.contains("Minimum"))
+            setMinimum(variantMap["Minimum"].toInt());
+
+        if (variantMap.contains("Maximum"))
+            setMaximum(variantMap["Maximum"].toInt());
+    }
 }
 
 QVariantMap IntegralAction::toVariantMap() const
@@ -89,6 +97,13 @@ QVariantMap IntegralAction::toVariantMap() const
     variantMap.insert({
         { "Value", QVariant::fromValue(getValue()) }
     });
+
+    if (isPublic()) {
+        variantMap.insert({
+            { "Minimum", QVariant::fromValue(getMinimum()) },
+            { "Maximum", QVariant::fromValue(getMaximum()) }
+        });
+    }
 
     return variantMap;
 }

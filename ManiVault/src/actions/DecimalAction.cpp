@@ -107,7 +107,7 @@ void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
 			setMinimum(static_cast<float>(variantMap["Minimum"].toDouble()));
 
         if (variantMap.contains("Maximum"))
-            setMinimum(static_cast<float>(variantMap["Maximum"].toDouble()));
+            setMaximum(static_cast<float>(variantMap["Maximum"].toDouble()));
     }
 }
 
