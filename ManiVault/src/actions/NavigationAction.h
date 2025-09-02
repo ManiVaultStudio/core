@@ -29,7 +29,7 @@ namespace mv::gui
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT NavigationAction : public HorizontalGroupAction
+class CORE_EXPORT NavigationAction : public HorizontalToolbarAction
 {
 	Q_OBJECT
 
@@ -89,6 +89,7 @@ private:
     DecimalPointAction      _zoomCenterAction;          /** Zoom center action */
     DecimalAction           _zoomFactorAction;          /** Zoom factor action */
     ZoomMarginAction        _zoomMarginAction;          /** Zoom margin settings */
+    HorizontalGroupAction   _zoomGroupAction;           /** Group action for zoom actions */
 };
 
 }
