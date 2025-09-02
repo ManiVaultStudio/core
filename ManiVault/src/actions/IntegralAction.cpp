@@ -33,6 +33,16 @@ void IntegralAction::initialize(std::int32_t minimum, std::int32_t maximum, std:
     _valueChanged();
 }
 
+WidgetAction* IntegralAction::getPublicCopy() const
+{
+    if (auto publicCopy = dynamic_cast<NumericalAction<int>*>(WidgetAction::getPublicCopy())) {
+        publicCopy->setRange(getRange());
+        return publicCopy;
+    }
+        
+	return nullptr;
+}
+
 void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicIntegralAction = dynamic_cast<IntegralAction*>(publicAction);
