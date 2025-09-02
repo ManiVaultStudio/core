@@ -54,6 +54,16 @@ void DecimalAction::setSingleStep(float singleStep)
     emit singleStepChanged(_singleStep);
 }
 
+WidgetAction* DecimalAction::getPublicCopy() const
+{
+    if (auto publicCopy = dynamic_cast<NumericalAction<float>*>(WidgetAction::getPublicCopy())) {
+        publicCopy->setRange(getRange());
+        return publicCopy;
+    }
+
+    return nullptr;
+}
+
 void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDecimalAction = dynamic_cast<DecimalAction*>(publicAction);
@@ -101,6 +111,14 @@ void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Value");
 
     setValue(static_cast<float>(variantMap["Value"].toDouble()));
+
+    if (variantMap.contains("IsPublic") && variantMap["IsPublic"].toBool()) {
+        if (variantMap.contains("Minimum"))
+			setMinimum(static_cast<float>(variantMap["Minimum"].toDouble()));
+
+        if (variantMap.contains("Maximum"))
+            setMaximum(static_cast<float>(variantMap["Maximum"].toDouble()));
+    }
 }
 
 QVariantMap DecimalAction::toVariantMap() const
@@ -110,6 +128,13 @@ QVariantMap DecimalAction::toVariantMap() const
     variantMap.insert({
         { "Value", QVariant::fromValue(static_cast<double>(getValue())) }
     });
+
+    if (isPublic()) {
+        variantMap.insert({
+			{ "Minimum", QVariant::fromValue(static_cast<double>(getMinimum())) },
+            { "Maximum", QVariant::fromValue(static_cast<double>(getMaximum())) }
+        });
+    }
 
     return variantMap;
 }
