@@ -45,6 +45,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _freezeNavigation.setToolTip("Freeze the navigation");
 
     _zoomPercentageAction.setOverrideSizeHint(QSize(300, 0));
+    _zoomPercentageAction.setConnectionPermissionsToAll();
 
     _zoomOutAction.setIconByName("search-minus");
     _zoomInAction.setIconByName("search-plus");
@@ -66,6 +67,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomCenterAction.setIconByName("ruler");
     _zoomCenterAction.setDefaultWidgetFlags(GroupAction::WidgetFlag::Vertical);
     _zoomCenterAction.setPopupSizeHint(QSize(250, 0));
+    _zoomCenterAction.setConnectionPermissionsToAll(true);
 
     _zoomCenterAction.getXAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
     _zoomCenterAction.getYAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
