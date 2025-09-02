@@ -112,6 +112,7 @@ void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
 
     _zoomCenterAction.fromParentVariantMap(variantMap);
     _zoomFactorAction.fromParentVariantMap(variantMap);
+    _zoomPercentageAction.fromParentVariantMap(variantMap);
     _zoomMarginAction.fromParentVariantMap(variantMap, true);
 }
 
@@ -121,6 +122,7 @@ QVariantMap NavigationAction::toVariantMap() const
 
     _zoomCenterAction.insertIntoVariantMap(variantMap);
     _zoomFactorAction.insertIntoVariantMap(variantMap);
+    _zoomPercentageAction.insertIntoVariantMap(variantMap);
     _zoomMarginAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
