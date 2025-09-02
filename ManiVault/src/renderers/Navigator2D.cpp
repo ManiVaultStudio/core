@@ -479,7 +479,7 @@ void Navigator2D::setZoomPercentage(float zoomPercentage)
     if (getNavigationAction().getFreezeNavigation().isChecked())
         return;
 
-    if (util::almostEqual(getZoomPercentage(), zoomPercentage, 0.01))
+    if (util::almostEqual(getZoomPercentage(), zoomPercentage))
         return;
 
 	qDebug() << __FUNCTION__ << zoomPercentage;
