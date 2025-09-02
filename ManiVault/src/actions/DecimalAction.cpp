@@ -112,7 +112,7 @@ void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
 
     setValue(static_cast<float>(variantMap["Value"].toDouble()));
 
-    if (isPublic()) {
+    if (variantMap.contains("IsPublic") && variantMap["IsPublic"].toBool()) {
         if (variantMap.contains("Minimum"))
 			setMinimum(static_cast<float>(variantMap["Minimum"].toDouble()));
 

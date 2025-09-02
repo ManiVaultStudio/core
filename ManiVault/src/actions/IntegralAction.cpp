@@ -91,7 +91,7 @@ void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
 
     setValue(variantMap["Value"].toInt());
 
-    if (isPublic()) {
+    if (variantMap.contains("IsPublic") && variantMap["IsPublic"].toBool()) {
         if (variantMap.contains("Minimum"))
             setMinimum(variantMap["Minimum"].toInt());
 
