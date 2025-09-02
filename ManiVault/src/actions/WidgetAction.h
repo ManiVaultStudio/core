@@ -619,7 +619,7 @@ public:
      * Get public copy of the action (other compatible actions can connect to it)
      * @return Pointer to public copy of the action
      */
-    WidgetAction* getPublicCopy() const;
+    virtual WidgetAction* getPublicCopy() const;
 
     /**
      * Get connected actions
