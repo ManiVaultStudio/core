@@ -101,6 +101,14 @@ void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Value");
 
     setValue(static_cast<float>(variantMap["Value"].toDouble()));
+
+    if (isPublic()) {
+        if (variantMap.contains("Minimum"))
+			setMinimum(static_cast<float>(variantMap["Minimum"].toDouble()));
+
+        if (variantMap.contains("Maximum"))
+            setMinimum(static_cast<float>(variantMap["Maximum"].toDouble()));
+    }
 }
 
 QVariantMap DecimalAction::toVariantMap() const
@@ -110,6 +118,13 @@ QVariantMap DecimalAction::toVariantMap() const
     variantMap.insert({
         { "Value", QVariant::fromValue(static_cast<double>(getValue())) }
     });
+
+    if (isPublic()) {
+        variantMap.insert({
+			{ "Minimum", QVariant::fromValue(static_cast<double>(getMinimum())) },
+            { "Maximum", QVariant::fromValue(static_cast<double>(getMaximum())) }
+        });
+    }
 
     return variantMap;
 }
