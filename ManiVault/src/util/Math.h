@@ -23,14 +23,16 @@ namespace mv::util
 CORE_EXPORT float lerp(float v0, float v1, float t);
 
 /**
- * Checks whether two floating point numbers are almost equal
- * @param a Floating point number to compare
- * @param b Floating point number to compare with
- * @param eps Tolerance
- * @return Boolean determining whether the two floating point numbers are almost equal
+ * Checks whether two numerical values are almost equal
+ * @param a Numerical value to compare
+ * @param b Numerical value to compare with
+ * @param relativeTolerance Relative tolerance
+ * @param absoluteTolerance Absolute tolerance
+ * @return Boolean determining whether the numerical values are almost equal
  */
-inline bool almostEqual(double a, double b, double eps = 1e-9) {
-    return std::fabs(a - b) < eps;
+template <typename T>
+bool almostEqual(T a, T b, T relativeTolerance = T(1e-6), T absoluteTolerance = T(1e-12)) {
+    return std::fabs(a - b) <= std::max(relativeTolerance * std::max(std::fabs(a), std::fabs(b)), absoluteTolerance);
 }
 
 /**
