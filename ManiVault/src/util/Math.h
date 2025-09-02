@@ -15,6 +15,17 @@ namespace mv::util
 
 CORE_EXPORT float lerp(float v0, float v1, float t);
 
+/**
+ * Checks whether two floating point numbers are almost equal
+ * @param a Floating point number to compare
+ * @param b Floating point number to compare with
+ * @param eps Tolerance
+ * @return Boolean determining whether the two floating point numbers are almost equal
+ */
+inline bool almostEqual(double a, double b, double eps = 1e-9) {
+    return std::fabs(a - b) < eps;
+}
+
 inline bool arePointsEqual(const QPointF& point1, const QPointF& point2, qreal epsilon = 1e-5) {
     return qAbs(point1.x() - point2.x()) < epsilon && qAbs(point1.y() - point2.y()) < epsilon;
 }
