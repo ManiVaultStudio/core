@@ -43,6 +43,36 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
     bottomLayout->addWidget(_filterModel.getInstantiatedPluginsOnlyAction().createWidget(this));
     bottomLayout->addStretch(1);
+
+    if (!mv::plugins().getPluginLoadResults().empty()) {
+        auto resultsAction = new StringAction(this, "Loading errors");
+
+        QString pluginLoadErrorsHtmlTable;
+
+        pluginLoadErrorsHtmlTable += "<table>";
+        pluginLoadErrorsHtmlTable += "<tr><th align=\"left\">Plugin</th><th align=\"left\">Error</th></tr>";
+
+        for (const auto& loadResult : mv::plugins().getPluginLoadResults()) {
+            if (loadResult.success)
+                continue;
+
+            pluginLoadErrorsHtmlTable += QString("<tr><td>%1</td><td>%2</td></tr>").arg(loadResult.fileName, loadResult.errorString);
+        }
+
+        pluginLoadErrorsHtmlTable += "</table>";
+
+    	resultsAction->setIconByName("scroll");
+        resultsAction->setString(pluginLoadErrorsHtmlTable);
+        resultsAction->setDefaultWidgetFlags(StringAction::WidgetFlag::Label);
+        resultsAction->setPopupSizeHint(QSize(400, 400));
+        resultsAction->setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+            if (auto labelWidget = widget->findChild<QLabel*>("Label"))
+                labelWidget->setTextFormat(Qt::RichText);
+        });
+
+        bottomLayout->addWidget(resultsAction->createCollapsedWidget(this));
+    }
+
     bottomLayout->addWidget(_okAction.createWidget(this));
 
     layout->addLayout(bottomLayout);

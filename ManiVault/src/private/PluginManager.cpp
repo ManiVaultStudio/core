@@ -147,7 +147,7 @@ void PluginManager::loadPluginFactories()
         return baseName;
         };
 
-    auto loadPluginDependencies = [&getLibraryName, &getPluginDependencyDir](const QDir& pluginDir, const QString& fileName) -> void {
+    auto loadPluginDependencies = [this, &getLibraryName, &getPluginDependencyDir](const QDir& pluginDir, const QString& fileName) -> void {
 
         const auto pluginName = getLibraryName(fileName);
         const auto [pluginDependenciesDir, pluginDependenciesExists] = getPluginDependencyDir(pluginDir, pluginName);
@@ -183,7 +183,12 @@ void PluginManager::loadPluginFactories()
 
             if (++currentTry >= maxTries)
             {
-                qWarning() << "Could not load all dependencies for " << pluginName << ". Missing: " << dynamicLibsToLoad;
+                const auto missingLibs = dynamicLibsToLoad.values();
+                const auto errorString = QString("Could not load all dependencies for %1. Missing: %2").arg(pluginName, missingLibs.join(", "));
+
+                qWarning() << errorString;
+
+                _pluginLoadResults.emplace_back(fileName, false, errorString, missingLibs);
                 break;
             }
         }
@@ -225,7 +230,12 @@ void PluginManager::loadPluginFactories()
         // If pluginFactory is a nullptr then loading of the plugin failed for some reason. Print the reason to output.
         if (!pluginFactory)
         {
-            qWarning() << "Failed to load plugin: " << fileName << pluginLoader.errorString();
+            const auto errorString = QString("Failed to load plugin: %1: %2").arg(fileName, pluginLoader.errorString());
+
+            qWarning() << errorString;
+
+            _pluginLoadResults.emplace_back(fileName, false, errorString);
+
             continue;
         }
 
@@ -256,7 +266,12 @@ void PluginManager::loadPluginFactories()
         }
         else
         {
-            qDebug() << "Plugin " << fileName << " does not implement any of the possible interfaces!";
+            const auto errorString = QString("Plugin %1 does not implement any of the possible interfaces!").arg(fileName);
+
+            qDebug() << errorString;
+
+            _pluginLoadResults.emplace_back(fileName, false, errorString);
+
             return;
         }
     }
@@ -267,6 +282,11 @@ void PluginManager::loadPluginFactories()
 bool PluginManager::isPluginLoaded(const QString& kind) const
 {
     return _pluginFactories.keys().contains(kind);
+}
+
+AbstractPluginManager::PluginLoadResults PluginManager::getPluginLoadResults() const
+{
+    return _pluginLoadResults;
 }
 
 mv::plugin::PluginFactory* PluginManager::getPluginFactory(const QString& pluginKind) const

@@ -42,6 +42,12 @@ public:
      */
     bool isPluginLoaded(const QString& kind) const override;
 
+    /**
+     * Get results of the last plugins load attempt
+     * @return Vector of plugin load results
+     */
+    PluginLoadResults getPluginLoadResults() const override;
+
 public: // Plugin creation/destruction
 
     /**
@@ -255,10 +261,11 @@ protected:
     QStringList resolveDependencies(QDir pluginDir) const override;
 
 private:
-    QHash<QString, PluginFactory*>                  _pluginFactories;   /** All loaded plugin factories */
-    std::vector<std::unique_ptr<plugin::Plugin>>    _plugins;           /** Vector of plugin instances */
-    PluginsListModel*                               _listModel;         /** List model of all loaded plugins */
-    PluginsTreeModel*                               _treeModel;         /** Tree model of all loaded plugins */
+    QHash<QString, PluginFactory*>                  _pluginFactories;       /** All loaded plugin factories */
+    std::vector<std::unique_ptr<plugin::Plugin>>    _plugins;               /** Vector of plugin instances */
+    PluginsListModel*                               _listModel;             /** List model of all loaded plugins */
+    PluginsTreeModel*                               _treeModel;             /** Tree model of all loaded plugins */
+    PluginLoadResults                               _pluginLoadResults;     /** Results of the last plugin load attempt */
 };
 
 }

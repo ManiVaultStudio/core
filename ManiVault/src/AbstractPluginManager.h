@@ -39,6 +39,32 @@ class CORE_EXPORT AbstractPluginManager : public AbstractManager
 
 public:
 
+    /** Result of a plugin load attempt */
+    struct PluginLoadResult
+    {
+        /**
+         * Construct plugin load result
+         * @param fileName Plugin file name
+         * @param success Boolean determining whether loading was successful
+         * @param errorString Error string if loading failed
+         * @param dependencies List of plugin dependencies (not operational)
+         */
+        PluginLoadResult(const QString& fileName = QString(), bool success = false, const QString& errorString = QString(), const QStringList& dependencies = QStringList()) :
+            fileName(fileName),
+            success(success),
+            errorString(errorString),
+            dependencies(dependencies)
+        {
+        }
+
+        QString         fileName;           /** Plugin file name */
+        bool            success;            /** Boolean determining whether loading was successful */
+        QString         errorString;        /** Error string if loading failed */
+        QStringList     dependencies;       /** List of plugin dependencies (not operational) */
+    };
+
+    using PluginLoadResults = std::vector<PluginLoadResult>;
+
     /**
      * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
@@ -58,12 +84,19 @@ public:
      */
     virtual bool isPluginLoaded(const QString& kind) const = 0;
 
+    /**
+     * Get results of the last plugins load attempt
+     * @return Vector of plugin load results
+     */
+    virtual PluginLoadResults getPluginLoadResults() const = 0;
+
 public: // Plugin creation/destruction
 
     /**
      * Create a plugin of \p kind with input \p datasets
      * @param kind Kind of plugin (name of the plugin)
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @param inputDatasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @param outputDatasets Zero or more datasets that the plugin produces (e.g. analysis plugin)
      * @return Pointer to created plugin, nullptr if creation failed
      */
     virtual plugin::Plugin* requestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets()) = 0;
@@ -71,7 +104,8 @@ public: // Plugin creation/destruction
     /**
      * Create a plugin of \p kind with \p inputDatasets
      * @param kind Kind of plugin (name of the plugin)
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @param inputDatasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @param outputDatasets Zero or more datasets that the plugin produces (e.g. analysis plugin)
      * @return Pointer of \p PluginType to created plugin, nullptr if creation failed
      */
     template<typename PluginType>
@@ -235,7 +269,6 @@ public: // Plugin query
     /**
      * Get plugin GUI name from plugin kind
      * @param pluginKind Kind of plugin
-     * @param GUI name of the plugin, empty if the plugin kind was not found
      */
     virtual QString getPluginGuiName(const QString& pluginKind) const = 0;
 
