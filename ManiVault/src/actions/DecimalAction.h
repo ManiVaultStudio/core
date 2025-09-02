@@ -103,6 +103,7 @@ public:
      * @param minimum Minimum value
      * @param maximum Maximum value
      * @param value Value
+     * @param numberOfDecimals Number of decimals
      */
     void initialize(float minimum, float maximum, float value, std::uint32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
