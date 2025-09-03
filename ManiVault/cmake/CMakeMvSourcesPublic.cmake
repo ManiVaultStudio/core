@@ -354,6 +354,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/EditColorSchemeAction.h
     src/actions/NavigationAction.h
     src/actions/ZoomMarginAction.h
+    src/actions/ViewPluginHeadsUpDisplayAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -395,6 +396,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/EditColorSchemeAction.cpp
     src/actions/NavigationAction.cpp
     src/actions/ZoomMarginAction.cpp
+    src/actions/ViewPluginHeadsUpDisplayAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -429,6 +431,7 @@ set(PUBLIC_WIDGETS_INTERNAL_HEADERS
     src/widgets/HierarchyWidget.h
     src/widgets/InfoOverlayWidget.h
     src/widgets/OverlayWidget.h
+    src/widgets/ActionOverlayWidget.h
     src/widgets/InfoWidget.h
     src/widgets/ViewPluginEditorDialog.h
     src/widgets/ActionsWidget.h
@@ -449,6 +452,7 @@ set(PUBLIC_WIDGETS_INTERNAL_SOURCES
     src/widgets/HierarchyWidget.cpp
     src/widgets/InfoOverlayWidget.cpp
     src/widgets/OverlayWidget.cpp
+    src/widgets/ActionOverlayWidget.cpp
     src/widgets/InfoWidget.cpp
     src/widgets/ViewPluginEditorDialog.cpp
     src/widgets/ActionsWidget.cpp
@@ -565,6 +569,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/View.h
     src/util/SecureNetworkAccessManager.h
     src/util/HttpsErrorReply.h
+    src/util/HeadsUpDisplayItem.h
 )
 
 if(APPLE)
@@ -624,6 +629,7 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/View.cpp
 	src/util/SecureNetworkAccessManager.cpp
 	src/util/HttpsErrorReply.cpp
+	src/util/HeadsUpDisplayItem.cpp
 )
 
 if(APPLE)
@@ -1087,6 +1093,23 @@ set(PUBLIC_RECENT_FILES_MODEL_FILES
     ${PUBLIC_RECENT_FILES_MODEL_SOURCES}
 )
 
+set(PUBLIC_HUD_MODEL_HEADERS
+    src/models/AbstractHeadsUpDisplayModel.h
+    src/models/HeadsUpDisplayTreeModel.h
+    src/models/HeadsUpDisplayFilterModel.h
+)
+
+set(PUBLIC_HUD_MODEL_SOURCES
+    src/models/AbstractHeadsUpDisplayModel.cpp
+    src/models/HeadsUpDisplayTreeModel.cpp
+    src/models/HeadsUpDisplayFilterModel.cpp
+)
+
+set(PUBLIC_HUD_MODEL_FILES
+    ${PUBLIC_HUD_MODEL_HEADERS}
+    ${PUBLIC_HUD_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -1210,6 +1233,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_COLOR_SCHEMES_MODEL_HEADERS}
     ${PUBLIC_SCRIPTS_MODEL_HEADERS}
     ${PUBLIC_RECENT_FILES_MODEL_HEADERS}
+    ${PUBLIC_HUD_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_NOTIFICATIONS_HEADERS}
@@ -1262,6 +1286,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_COLOR_SCHEMES_MODEL_SOURCES}
     ${PUBLIC_SCRIPTS_MODEL_SOURCES}
     ${PUBLIC_RECENT_FILES_MODEL_SOURCES}
+    ${PUBLIC_HUD_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_NOTIFICATIONS_SOURCES}
@@ -1327,6 +1352,7 @@ source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(Models\\Scripts FILES ${PUBLIC_SCRIPTS_MODEL_FILES})
 source_group(Models\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_MODEL_FILES})
 source_group(Models\\RecentFiles FILES ${PUBLIC_RECENT_FILES_MODEL_FILES})
+source_group(Models\\HUD FILES ${PUBLIC_HUD_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})
