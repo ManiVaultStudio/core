@@ -16,6 +16,8 @@ namespace mv::gui
  *
  * Overlays the target widget with the action widget in a chosen location (alignment).
  *
+ * Note: This action is developed for internal use only and is in a WIP state
+ *
  * @author Thomas Kroes
  */
 class CORE_EXPORT ActionOverlayWidget : public OverlayWidget
@@ -36,11 +38,9 @@ public:
      */
     void setTargetWidget(QWidget* targetWidget);
 
-    bool eventFilter(QObject* obj, QEvent* event) override;
-
 private:
     QPointer<WidgetAction>  _action;        /** Pointer to action (may not be nullptr) */
-    QWidget*                _actionWidget;  /** Pointer to action widget (may be nullptr) */
+    QWidget*                _actionWidget;  /** Pointer to action widget (maybe nullptr) */
 };
 
 }

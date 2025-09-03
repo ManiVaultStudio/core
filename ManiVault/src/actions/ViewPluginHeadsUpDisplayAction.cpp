@@ -59,14 +59,12 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     if (!_viewPluginHeadsUpDisplayAction)
         return;
 
-    //setAttribute(Qt::WA_TranslucentBackground, true);
-    //setAttribute(Qt::WA_NoSystemBackground, true);
-    //setAttribute(Qt::WA_TransparentForMouseEvents, true); // mouse-through by default
+    setMouseTracking(true);
 
     _treeView.setModel(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel());
     _treeView.setFixedWidth(300);
     _treeView.setHeaderHidden(true);
-    _treeView.setRootIsDecorated(true);
+    _treeView.setRootIsDecorated(false);
     _treeView.setFrameShape(QFrame::NoFrame);
     _treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -75,6 +73,19 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     _treeView.setMinimumSize(100, 100);
     _treeView.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     _treeView.adjustSize();
+
+    connect(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel(), &QAbstractItemModel::rowsInserted, &_treeView, [this](const QModelIndex& parent, int first, int last) {
+		if (parent.isValid())
+			_treeView.expand(parent);
+    	for (int r = first; r <= last; ++r)
+			_treeView.expand(_treeView.model()->index(r, 0, parent));
+	});
+
+    connect(_treeView.model(), &QAbstractItemModel::modelReset, &_treeView, [this]() { _treeView.expandAll(); });
+    connect(_treeView.model(), &QAbstractItemModel::layoutChanged, &_treeView, [this]() { _treeView.expandAll(); });
+
+    _treeView.setItemsExpandable(false);
+    _treeView.setExpandsOnDoubleClick(false);
 
     QPalette palette = _treeView.palette();
 
@@ -97,26 +108,6 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     layout->addWidget(&_treeView);
 
     setLayout(layout);
-}
-
-void ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::mousePressEvent(QMouseEvent* event)
-{
-    QPoint treePos = _treeView.mapFromParent(event->pos());
-    QModelIndex idx = _treeView.indexAt(treePos);
-
-    if (idx.isValid()) {
-        // Let QTreeView handle the event
-        QWidget::mousePressEvent(event);
-    }
-    else {
-        // Forward event to underlying widget
-        auto underlying = parentWidget(); // or get the correct widget
-        if (underlying) {
-            QMouseEvent forwarded(event->type(), underlying->mapFromGlobal(mapToGlobal(event->pos())),
-                event->button(), event->buttons(), event->modifiers());
-            QCoreApplication::sendEvent(underlying, &forwarded);
-        }
-    }
 }
 
 QWidget* ViewPluginHeadsUpDisplayAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -153,7 +144,7 @@ HeadsUpDisplayItemSharedPtr ViewPluginHeadsUpDisplayAction::addHeadsUpDisplayIte
     auto sharedHeadsUpDisplayItem = std::make_shared<HeadsUpDisplayItem>(title, value, description, sharedParent);
 
     _headsUpDisplayTreeModel.addHeadsUpDisplayItem(sharedHeadsUpDisplayItem);
-
+    
     return sharedHeadsUpDisplayItem;
 }
 
