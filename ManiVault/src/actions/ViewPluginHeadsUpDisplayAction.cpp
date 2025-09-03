@@ -14,40 +14,40 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-    class BranchIconStyle : public QProxyStyle {
-    public:
-        BranchIconStyle(QStyle* base = nullptr)
-            : QProxyStyle(base) {
-        }
+class BranchIconStyle : public QProxyStyle {
+public:
+    BranchIconStyle(QStyle* base = nullptr)
+        : QProxyStyle(base) {
+    }
 
-        void drawPrimitive(PrimitiveElement elem,
-            const QStyleOption* opt,
-            QPainter* p,
-            const QWidget* w) const override
-        {
-            if (elem == PE_IndicatorBranch) {
-                const auto* vopt = qstyleoption_cast<const QStyleOptionViewItem*>(opt);
-                if (!vopt) {
-                    QProxyStyle::drawPrimitive(elem, opt, p, w);
-                    return;
-                }
-
-                const QRect r = opt->rect;
-                const bool expanded = vopt->state & State_Open;
-                const bool hasChildren = vopt->state & State_Children;
-                if (hasChildren) {
-                    const QIcon& icon = expanded ? StyledIcon("caret-down").withColor("black") : StyledIcon("caret-right").withColor("black");
-                    icon.paint(p, r, Qt::AlignCenter, QIcon::Normal);
-                    return;
-                }
+    void drawPrimitive(PrimitiveElement elem,
+        const QStyleOption* opt,
+        QPainter* p,
+        const QWidget* w) const override
+    {
+        if (elem == PE_IndicatorBranch) {
+            const auto* vopt = qstyleoption_cast<const QStyleOptionViewItem*>(opt);
+            if (!vopt) {
+                QProxyStyle::drawPrimitive(elem, opt, p, w);
+                return;
             }
-            QProxyStyle::drawPrimitive(elem, opt, p, w);
-        }
 
-    private:
-        QIcon closed_;
-        QIcon open_;
-    };
+            const QRect r = opt->rect;
+            const bool expanded = vopt->state & State_Open;
+            const bool hasChildren = vopt->state & State_Children;
+            if (hasChildren) {
+                const QIcon& icon = expanded ? StyledIcon("caret-down").withColor("black") : StyledIcon("caret-right").withColor("black");
+                icon.paint(p, r, Qt::AlignCenter, QIcon::Normal);
+                return;
+            }
+        }
+        QProxyStyle::drawPrimitive(elem, opt, p, w);
+    }
+
+private:
+    QIcon closed_;
+    QIcon open_;
+};
 
 ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidget* parent, ViewPluginHeadsUpDisplayAction* viewPluginHeadsUpDisplayAction, const std::int32_t& widgetFlags) :
     QWidget(parent),
@@ -69,7 +69,7 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     _treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _treeView.setIconSize(QSize(12, 12));
-    _treeView.setStyle(new BranchIconStyle(_treeView.style()));
+    //_treeView.setStyle(new BranchIconStyle(_treeView.style()));
     _treeView.setMinimumSize(100, 100);
     _treeView.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     _treeView.adjustSize();
