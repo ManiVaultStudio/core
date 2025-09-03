@@ -21,7 +21,7 @@ namespace mv::gui
 {
 
 NavigationAction::NavigationAction(QObject* parent, const QString& title) :
-    HorizontalGroupAction(parent, title),
+    HorizontalToolbarAction(parent, title),
     _zoomOutAction(this, "Zoom out"),
     _zoomPercentageAction(this, "Zoom Percentage", 0.01f, 1000.0f, 100.0f, 1),
     _zoomInAction(this, "Zoom In"),
@@ -32,9 +32,10 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomRectangleAction(this, "Zoom Rectangle"),
     _zoomCenterAction(this, "Zoom Center"),
     _zoomFactorAction(this, "Zoom Factor"),
-    _zoomMarginAction(this, "Zoom margin")
+    _zoomMarginAction(this, "Zoom margin"),
+    _zoomGroupAction(this, "Zoom group")
 {
-    setShowLabels(false);
+    //setShowLabels(false);
 
     _zoomOutAction.setToolTip("Zoom out by 10% (-)");
     _zoomPercentageAction.setToolTip("Zoom in/out (+)");
@@ -43,6 +44,9 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomSelectionAction.setToolTip("Zoom to the boundaries of the current selection (b)");
     _zoomRegionAction.setToolTip("Zoom to a picked region");
     _freezeNavigation.setToolTip("Freeze the navigation");
+
+    _freezeNavigation.setIconByName("icicles");
+    _freezeNavigation.setDefaultWidgetFlags(ToggleAction::WidgetFlag::CheckBox);
 
     _zoomPercentageAction.setOverrideSizeHint(QSize(300, 0));
     _zoomPercentageAction.setConnectionPermissionsToAll();
@@ -72,14 +76,21 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomCenterAction.getXAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
     _zoomCenterAction.getYAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
 
-	addAction(&_zoomOutAction, gui::TriggerAction::Icon);
-	addAction(&_zoomPercentageAction);
-	addAction(&_zoomInAction, gui::TriggerAction::Icon);
-    addAction(&_zoomCenterAction);
-	addAction(&_zoomExtentsAction, gui::TriggerAction::Icon);
-	addAction(&_zoomSelectionAction, gui::TriggerAction::Icon);
-	addAction(&_zoomRegionAction, gui::TriggerAction::Icon);
-	addAction(&_freezeNavigation, gui::ToggleAction::WidgetFlag::CheckBox);
+    _zoomMarginAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+
+    _zoomGroupAction.setShowLabels(false);
+    _zoomGroupAction.setIconByName("magnifying-glass");
+
+	_zoomGroupAction.addAction(&_zoomOutAction, TriggerAction::Icon);
+	_zoomGroupAction.addAction(&_zoomPercentageAction);
+	_zoomGroupAction.addAction(&_zoomInAction, TriggerAction::Icon);
+    _zoomGroupAction.addAction(&_zoomCenterAction);
+	_zoomGroupAction.addAction(&_zoomExtentsAction, TriggerAction::Icon);
+	_zoomGroupAction.addAction(&_zoomSelectionAction, TriggerAction::Icon);
+	_zoomGroupAction.addAction(&_zoomRegionAction, TriggerAction::Icon);
+	
+	addAction(&_zoomGroupAction, 1);
+	addAction(&_freezeNavigation, 50);
 	addAction(&_zoomMarginAction);
 
     const auto updateReadOnly = [this]() -> void {
@@ -110,7 +121,7 @@ void NavigationAction::setShortcutsEnabled(bool shortcutsEnabled)
 
 void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
 {
-	HorizontalGroupAction::fromVariantMap(variantMap);
+    HorizontalToolbarAction::fromVariantMap(variantMap);
 
     _zoomCenterAction.fromParentVariantMap(variantMap);
     _zoomFactorAction.fromParentVariantMap(variantMap);
@@ -120,7 +131,7 @@ void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap NavigationAction::toVariantMap() const
 {
-    auto variantMap = HorizontalGroupAction::toVariantMap();
+    auto variantMap = HorizontalToolbarAction::toVariantMap();
 
     _zoomCenterAction.insertIntoVariantMap(variantMap);
     _zoomFactorAction.insertIntoVariantMap(variantMap);
