@@ -107,7 +107,7 @@ endif()
 # Windows compiler and linker flags
 # -----------------------------------------------------------------------------
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus /Zc:__STDC__")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD")
@@ -130,13 +130,22 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)
 
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
-# File compression: zlib
+# File compression: zlib-ng
+set(CMAKE_C_STANDARD 11) # TEMP WORKAROUND, adjust c standard for zlib-ng
 CPMAddPackage(
   NAME              ZLIB
-  GITHUB_REPOSITORY madler/zlib
-  GIT_TAG           v1.3.1
-  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON" "ZLIB_BUILD_SHARED OFF" "ZLIB_BUILD_STATIC ON"
+  GITHUB_REPOSITORY zlib-ng/zlib-ng
+  GIT_TAG           2.2.5
+  OPTIONS 
+    "SKIP_INSTALL_ALL ON" 
+    "ZLIB_ENABLE_TESTS OFF" 
+    "ZLIB_COMPAT ON" 
+    "WITH_GTEST OFF" 
+    "WITH_AVX512VNNI OFF" 
+    "WITH_AVX512 OFF" 
+    "WITH_AVX2 ${MV_USE_AVX}"
 )
+set(CMAKE_C_STANDARD 17) # TEMP WORKAROUND, revert c standard back to project
 
 set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
@@ -677,8 +686,8 @@ list(APPEND INSTALL_LICENSE_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib-ng
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zlib_SOURCE_DIR}/LICENSE.md ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib-ng/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
 )
