@@ -80,11 +80,10 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
     notificationWidget->setAutoFillBackground(true);
-    notificationWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    //notificationWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum); // Not entirely sure about this one, so leave it out for now
     notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
 
     _iconLabel.setStyleSheet("padding: 3px;");
@@ -253,8 +252,15 @@ void Notification::updateMessageLabel()
 {
     _titleLabel.setText(QString("<b>%1</b>").arg(_title));
 
-    _messageLabel.setText(_description.toHtmlEscaped());
-    _messageLabel.setTextFormat(Qt::RichText);
+    if (_task.isNull()) {
+        _messageLabel.setTextFormat(Qt::RichText);
+        _messageLabel.setText(_description);
+        _messageLabel.adjustSize();
+        
+    } else {
+        _messageLabel.setText(" ");
+    }
+
     _messageLabel.adjustSize();
 }
 
