@@ -189,6 +189,8 @@ void WorkspaceManager::initialize()
 
         viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
+        _mainDockManager->warmupNativeWidgets();
+
         connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
             const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
@@ -708,6 +710,14 @@ void WorkspaceManager::setViewPluginDockWidgetPermissionsGlobally(const util::Do
         if (dockWidgetPermissions.testFlag(DockWidgetPermission::MayMove))
             viewPlugin->getMayMoveAction().setChecked(set);
     }
+}
+
+bool WorkspaceManager::hasWarmedUpNativeWidgets() const
+{
+    if (!_mainDockManager)
+        return false;
+
+    return _mainDockManager->hasWarmedUpNativeWidgets();
 }
 
 bool WorkspaceManager::mayLock() const

@@ -9,8 +9,12 @@
 
 #include "widgets/ViewPluginEditorDialog.h"
 #include "widgets/FileDialog.h"
+#include "widgets/ActionOverlayWidget.h"
+#include "widgets/ViewPluginOverlayWidget.h"
 
 #include <QWidget>
+
+#include <ranges>
 
 #ifdef _DEBUG
     #define VIEW_PLUGIN_VERBOSE
@@ -35,7 +39,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction(this, "Visible", true),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), StyledIcon(factory->icon())),
     _samplerAction(this, "Sampler"),
-    _progressTask(nullptr)
+    _progressTask(nullptr),
+    _headsUpDisplayAction(this, "HUD")
 {
     setText(isSystemViewPlugin() ? getKind() : getGuiName());
 
@@ -178,6 +183,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     getLearningCenterAction().createViewPluginOverlayWidget();
 
     addTitleBarMenuAction(&getLearningCenterAction());
+    addOverlayAction(&_headsUpDisplayAction);
 }
 
 void ViewPlugin::init()
@@ -309,6 +315,62 @@ void ViewPlugin::addDockingAction(WidgetAction* dockingAction, WidgetAction* doc
 mv::gui::WidgetActions ViewPlugin::getDockingActions() const
 {
     return _settingsActions;
+}
+
+void ViewPlugin::addOverlayAction(WidgetAction* overlayAction, const Qt::Alignment& alignment)
+{
+    Q_ASSERT(overlayAction);
+
+    if (overlayAction == nullptr)
+        return;
+
+    _actionsWidgets.push_back({ overlayAction, new ActionOverlayWidget(&_widget, overlayAction, alignment) });
+
+    connect(overlayAction, &WidgetAction::destroyed, this, [this, overlayAction]() -> void {
+        removeOverlayAction(overlayAction);
+    });
+}
+
+void ViewPlugin::removeOverlayAction(WidgetAction* overlayAction)
+{
+    Q_ASSERT(overlayAction);
+
+    if (overlayAction == nullptr)
+        return;
+
+    auto it = std::remove_if(_actionsWidgets.begin(), _actionsWidgets.end(),
+        [overlayAction](const ActionWidgetPair& p) {
+            return p.first == overlayAction;
+	});
+
+    if (it != _actionsWidgets.end()) {
+        it->second->deleteLater();
+
+    	_actionsWidgets.erase(it);
+    }
+}
+
+WidgetActions ViewPlugin::getOverlayActions() const
+{
+    WidgetActions overlayActions;
+
+    auto actions = _actionsWidgets | std::views::transform([](auto& p) { return p.first; });
+
+    for (const auto& action : actions)
+        overlayActions << action;
+
+	return overlayActions;
+}
+
+void ViewPlugin::setOverlayActionsTargetWidget(QWidget* targetWidget)
+{
+    Q_ASSERT(targetWidget);
+
+    if (targetWidget == nullptr)
+        return;
+
+    for (const auto& actionWidgetPair : _actionsWidgets)
+        actionWidgetPair.second->setTargetWidget(targetWidget);
 }
 
 mv::Task* ViewPlugin::getProgressTask()

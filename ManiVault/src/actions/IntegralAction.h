@@ -105,6 +105,12 @@ public:
      */
     void initialize(std::int32_t minimum, std::int32_t maximum, std::int32_t value);
 
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    WidgetAction* getPublicCopy() const override;
+
 protected: // Linking
 
     /**

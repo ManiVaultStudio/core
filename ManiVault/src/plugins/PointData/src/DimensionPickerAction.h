@@ -160,7 +160,7 @@ protected:
     std::uint32_t       _searchThreshold;           /** Select from a drop-down below the threshold and above use a search bar */
 
 protected:
-    static constexpr std::uint32_t DEFAULT_SEARCH_THRESHOLD = 100;     /** Default search threshold */
+    static constexpr std::uint32_t DEFAULT_SEARCH_THRESHOLD = 1000;     /** Default search threshold */
 
     friend class AbstractActionsManager;
 };

@@ -155,7 +155,7 @@ public:
 
     /**
      * Get workspace menu
-     * @param menu Pointer to parent menu
+     * @param parent Pointer to parent menu
      * @return Pointer to created menu
      */
     virtual QMenu* getMenu(QWidget* parent = nullptr) = 0;
@@ -265,6 +265,14 @@ public:
             dockManager->setStyleSheet(stylesheet);
     }
     */
+
+public: // Miscellaneous
+
+    /**
+     * Get whether the native widgets have been warmed up already, to prevent multiple warmups
+     * @return Boolean indicating whether the native widgets have been warmed up already
+     */
+    virtual bool hasWarmedUpNativeWidgets() const = 0;
 
 public: // View plugin dock widget permissions
 

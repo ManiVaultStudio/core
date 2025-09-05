@@ -17,6 +17,7 @@ RecentFilesFilterModel::RecentFilesFilterModel(QObject* parent /*= nullptr*/) :
     SortFilterProxyModel(parent)
 {
     //setFilterKeyColumn(static_cast<int>(AbstractRecentFilesModel::Column::FilePath));
+    sort(static_cast<int>(AbstractRecentFilesModel::Column::DateTime), Qt::DescendingOrder);
 }
 
 bool RecentFilesFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const

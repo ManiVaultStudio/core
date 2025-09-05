@@ -192,8 +192,13 @@ RecentFilesAction::Dialog::Dialog(RecentFilesAction* recentFilesAction) :
         if (selectedRows.isEmpty())
             return;
 
+        QList<QPersistentModelIndex> selectedRowsPersistent;
+
         for (const auto& selectedRow : selectedRows)
-            recentFilesAction->getModel().removeRecentFilePath(selectedRow.siblingAtColumn(static_cast<int>(AbstractRecentFilesModel::Column::FilePath)).data().toString());
+            selectedRowsPersistent << selectedRow;
+
+        for (const auto& selectedRowPersistent : selectedRowsPersistent)
+            recentFilesAction->getModel().removeRecentFilePath(selectedRowPersistent.sibling(selectedRowPersistent.row(), static_cast<int>(AbstractRecentFilesModel::Column::FilePath)).data().toString());
 
         recentFilesAction->getModel().load();
     });

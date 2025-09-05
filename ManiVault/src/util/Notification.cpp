@@ -22,8 +22,6 @@
 #include <QPainter>
 #include <QPainterPath>
 
-
-
 namespace mv::util
 {
 
@@ -57,9 +55,9 @@ QSize Notification::NotificationWidget::sizeHint() const
 
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
 	QWidget(parent),
-    _title(title),
     _icon(icon),
-    _description(description),
+    _title(title),
+	_description(description),
     _previousNotification(previousNotification),
     _closing(false),
     _taskAction(nullptr, "Task")
@@ -67,6 +65,7 @@ Notification::Notification(const QString& title, const QString& description, con
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setAttribute(Qt::WA_ShowWithoutActivating);
+    hide();
 
     if (_previousNotification)
         _previousNotification->_nextNotification = this;
@@ -81,17 +80,18 @@ Notification::Notification(const QString& title, const QString& description, con
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    notificationWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
     notificationWidget->setFixedWidth(fixedWidth);
     notificationWidget->setMinimumHeight(10);
     notificationWidget->setAutoFillBackground(true);
-    notificationWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    //notificationWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum); // Not entirely sure about this one, so leave it out for now
     notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
 
     _iconLabel.setStyleSheet("padding: 3px;");
 
+    _messageLabel.setWordWrap(false);
+    _messageLabel.setTextFormat(Qt::PlainText);
+
     _messageLabel.setWordWrap(true);
-    _messageLabel.setTextFormat(Qt::RichText);
     _messageLabel.setMinimumHeight(10);
     _messageLabel.setOpenExternalLinks(true);
 
@@ -101,6 +101,7 @@ Notification::Notification(const QString& title, const QString& description, con
 
     _messageLayout.setSpacing(4);
 
+    _messageLayout.addWidget(&_titleLabel);
     _messageLayout.addWidget(&_messageLabel);
 
     _messageLayout.setAlignment(&_messageLabel, Qt::AlignTop);
@@ -249,10 +250,16 @@ void Notification::updateIconLabel()
 
 void Notification::updateMessageLabel()
 {
-    if (_task.isNull())
-		_messageLabel.setText(QString("<b>%1</b><br>%2").arg(_title, _task.isNull() ? _description : ""));
-    else
-        _messageLabel.setText(QString("<b>%1</b>").arg(_title));
+    _titleLabel.setText(QString("<b>%1</b>").arg(_title));
+
+    if (_task.isNull()) {
+        _messageLabel.setTextFormat(Qt::RichText);
+        _messageLabel.setText(_description);
+        _messageLabel.adjustSize();
+        
+    } else {
+        _messageLabel.setText(" ");
+    }
 
     _messageLabel.adjustSize();
 }

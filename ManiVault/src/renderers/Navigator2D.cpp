@@ -439,8 +439,8 @@ void Navigator2D::setZoomFactor(float zoomFactor)
     if (getNavigationAction().getFreezeNavigation().isChecked())
         return;
 
-    if (zoomFactor == _zoomFactor)
-        return;
+    if (util::almostEqual(zoomFactor, _zoomFactor))
+		return;
 
     const auto previousZoomFactor = _zoomFactor;
 
@@ -475,6 +475,9 @@ float Navigator2D::getZoomPercentage() const
 void Navigator2D::setZoomPercentage(float zoomPercentage)
 {
     if (getNavigationAction().getFreezeNavigation().isChecked())
+        return;
+
+    if (util::almostEqual(getZoomPercentage(), zoomPercentage))
         return;
 
     beginZooming();

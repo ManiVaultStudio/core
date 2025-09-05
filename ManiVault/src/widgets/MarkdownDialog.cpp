@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 #include <QWebChannel>
 #include <QDesktopServices>
+#include <QFutureWatcher>
 
 #ifdef _DEBUG
     #define MARKDOWN_DIALOG_VERBOSE
@@ -32,31 +33,31 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
 
     _markdownPage.setWebChannel(channel);
 
-    connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this]() -> void {
-        FileDownloader::downloadToByteArrayAsync(_markdownUrl)
-            .then(this, [this](const QByteArray& data) {
-	            try {
+    connect(&_markdownPage, &QWebEnginePage::loadFinished, this, [this](bool ok) -> void {
+        auto future     = FileDownloader::downloadToByteArrayAsync(_markdownUrl);
+        auto watcher    = new QFutureWatcher<QByteArray>(this);
+
+        connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher]() {
+            try {
+                const auto& data = future.result();
+
 #ifdef MARKDOWN_DIALOG_VERBOSE
-                    qDebug() << _markdownUrl.toString() << "downloaded (" << data.size() << "bytes)";
+                qDebug() << _markdownUrl.toString() << "downloaded (" << data.size() << "bytes)";
 #endif
 
-                    if (!data.isEmpty())
-                        _markdownDocument.setText(data);
-                    else
-                        _markdownDocument.setText(QString("# Unable to display markdown file\n*%1* not found").arg(_markdownUrl.toString()));
-	            }
-	            catch (std::exception& e)
-	            {
-	                qCritical() << "Unable to display markdown:" << e.what();
-	            }
-	            catch (...)
-	            {
-	                qCritical() << "Unable to display markdown:";
-	            }
-			})
-            .onFailed(this, [this](const QException& e) {
-				qWarning().noquote() << "Download failed for" << _markdownUrl << ":" << e.what();
-			});
+            	if (!data.isEmpty())
+                    _markdownDocument.setText(data);
+                else
+                    _markdownDocument.setText(QString("# Unable to display markdown file\n*%1* not found").arg(_markdownUrl.toString()));
+            }
+            catch (std::exception& exception) {
+                qWarning() << "Download markdown failed: " << exception.what();
+            }
+
+            watcher->deleteLater();
+        });
+
+        watcher->setFuture(future);
     });
 
     _webEngineView.setPage(&_markdownPage);

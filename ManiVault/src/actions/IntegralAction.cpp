@@ -33,6 +33,16 @@ void IntegralAction::initialize(std::int32_t minimum, std::int32_t maximum, std:
     _valueChanged();
 }
 
+WidgetAction* IntegralAction::getPublicCopy() const
+{
+    if (auto publicCopy = dynamic_cast<NumericalAction<int>*>(WidgetAction::getPublicCopy())) {
+        publicCopy->setRange(getRange());
+        return publicCopy;
+    }
+        
+	return nullptr;
+}
+
 void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicIntegralAction = dynamic_cast<IntegralAction*>(publicAction);
@@ -80,6 +90,14 @@ void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Value");
 
     setValue(variantMap["Value"].toInt());
+
+    if (variantMap.contains("IsPublic") && variantMap["IsPublic"].toBool()) {
+        if (variantMap.contains("Minimum"))
+            setMinimum(variantMap["Minimum"].toInt());
+
+        if (variantMap.contains("Maximum"))
+            setMaximum(variantMap["Maximum"].toInt());
+    }
 }
 
 QVariantMap IntegralAction::toVariantMap() const
@@ -89,6 +107,13 @@ QVariantMap IntegralAction::toVariantMap() const
     variantMap.insert({
         { "Value", QVariant::fromValue(getValue()) }
     });
+
+    if (isPublic()) {
+        variantMap.insert({
+            { "Minimum", QVariant::fromValue(getMinimum()) },
+            { "Maximum", QVariant::fromValue(getMaximum()) }
+        });
+    }
 
     return variantMap;
 }

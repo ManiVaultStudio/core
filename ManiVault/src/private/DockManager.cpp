@@ -15,6 +15,7 @@
 
 #include <DockAreaWidget.h> 
 #include <QLoggingCategory> 
+#include <QOpenGLWidget> 
 
 #ifdef _DEBUG
     #define DOCK_MANAGER_VERBOSE
@@ -27,12 +28,19 @@ using namespace mv::plugin;
 using namespace mv::gui;
 using namespace mv::util;
 
+class OpenGLWarmupWidget : public QOpenGLWidget
+{
+public:
+    using QOpenGLWidget::QOpenGLWidget;
+};
+
 DockManager::DockManager(const QString& name, QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
     _name(name),
     _serializationTask(nullptr),
-    _layoutTask(this, "Load " + _name.toLower() + " layout")
+    _layoutTask(this, "Load " + _name.toLower() + " layout"),
+    _hasWarmedUpNativeWidgets(false)
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -161,6 +169,33 @@ void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDoc
 QWidget* DockManager::getWidget()
 {
     return this;
+}
+
+void DockManager::warmupNativeWidgets()
+{
+    try {
+        auto centerDockWidget   = new CDockWidget(this, "Warmup OpenGL Dock Widget");
+        auto warmupWidget       = new OpenGLWarmupWidget(centerDockWidget);
+
+        centerDockWidget->setWidget(warmupWidget);
+
+        addDockWidget(CenterDockWidgetArea, centerDockWidget);
+
+        centerDockWidget->toggleView(false);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to warmup native widgets to avoid app flicker", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to warmup native widgets to avoid app flicker");
+    }
+}
+
+bool DockManager::hasWarmedUpNativeWidgets() const
+{
+	return _hasWarmedUpNativeWidgets;
 }
 
 void DockManager::fromVariantMap(const QVariantMap& variantMap)

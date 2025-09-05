@@ -103,6 +103,7 @@ public:
      * @param minimum Minimum value
      * @param maximum Maximum value
      * @param value Value
+     * @param numberOfDecimals Number of decimals
      */
     void initialize(float minimum, float maximum, float value, std::uint32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
@@ -114,6 +115,12 @@ public:
      * @param singleStep Single step
      */
     void setSingleStep(float singleStep);
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    WidgetAction* getPublicCopy() const override;
 
 protected: // Linking
 

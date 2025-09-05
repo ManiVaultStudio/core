@@ -108,6 +108,14 @@ public: // View plugin dock widget permissions
      */
     void setViewPluginDockWidgetPermissionsGlobally(const util::DockWidgetPermissions& dockWidgetPermissions = util::DockWidgetPermission::All, bool set = true) override;
 
+public: // Miscellaneous
+
+    /**
+     * Get whether the native widgets have been warmed up already, to prevent multiple warmups
+     * @return Boolean indicating whether the native widgets have been warmed up already
+     */
+    bool hasWarmedUpNativeWidgets() const override;
+
 public: // Locking
 
     /**
@@ -191,7 +199,7 @@ public: // Serialization
 
     /**
      * Load layout from variant
-     * @param Variant representation of the layout
+     * @param variantMap Variant representation of the manager
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -205,10 +213,10 @@ public: // Menus
 
     /**
      * Get workspace menu
-     * @param menu Pointer to parent menu
+     * @param parent Pointer to parent menu
      * @return Pointer to created menu
      */
-    QMenu* getMenu(QWidget* parent = nullptr);
+    QMenu* getMenu(QWidget* parent = nullptr) override;
 
 private:
 
