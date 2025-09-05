@@ -109,7 +109,7 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
 
 	auto layout = new QVBoxLayout();
 
-    layout->addWidget(&_treeView);
+    //layout->addWidget(&_treeView);
     layout->addWidget(new QPushButton("--------"));
 
     setLayout(layout);
