@@ -153,22 +153,60 @@ QWidget* childAtIncludingTransparent(QWidget* parent, const QPoint& posInParent)
     return parent->childAt(posInParent);          // now includes “transparent” widgets
 }
 
-QWidget* topChildAt(QWidget* parent, const QPoint& pLocal)
+static QWidget* topChildAtSkipEmptyViews(QWidget* container, const QPoint& posInContainer)
 {
-    QWidget* best = nullptr;
-    // Direct children only; recurse if you want the deepest widget
-    const auto children = parent->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
-    // You'd need correct Z-order here; QWidget doesn't expose it publicly,
-    // so this approach is only safe if you control stacking or don't care.
-    for (QWidget* c : children) {
-        if (!c->isVisible()) continue;
-        QPoint q = c->mapFromParent(pLocal);
-        if (!c->rect().contains(q)) continue;
-        if (!c->mask().isEmpty() && !c->mask().contains(q)) continue; // respect masks
-        // Do NOT check WA_TransparentForMouseEvents — that's the point
-        best = c; // pick the topmost; without Z-order info, this is heuristic
+    if (!container) return nullptr;
+
+    // RAII: temporarily make widgets transparent-for-mouse to look through them.
+    struct Flip { QPointer<QWidget> w; bool old; };
+    QVector<Flip> flips;
+    auto makeTransparent = [&](QWidget* w) {
+        if (!w) return;
+        flips.push_back({ w, w->testAttribute(Qt::WA_TransparentForMouseEvents) });
+        w->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        };
+    auto restore = [&]() {
+        for (auto& f : flips)
+            if (f.w) f.w->setAttribute(Qt::WA_TransparentForMouseEvents, f.old);
+        };
+
+    for (int guard = 0; guard < 64; ++guard) {
+        QWidget* cand = container->childAt(posInContainer);
+        if (!cand) { restore(); return container; }
+
+        // Case 1: candidate is the viewport of an item view
+        if (auto view = qobject_cast<QAbstractItemView*>(cand->parentWidget())) {
+            const QPoint inVp = cand->mapFrom(container, posInContainer);
+            // If not over the viewport rect (frame/header/scrollbars), accept as-is
+            if (!static_cast<QWidget*>(view->viewport())->rect().contains(inVp)) {
+                restore(); return cand; // or 'view' if you prefer
+            }
+            // Only accept the view if there's an index under the cursor
+            if (view->indexAt(inVp).isValid()) {
+                restore(); return view;
+            }
+            // Empty area -> look through this viewport and retry
+            makeTransparent(cand);
+            continue;
+        }
+
+        // Case 2: candidate is the view itself (rare; usually the viewport is hit)
+        if (auto view = qobject_cast<QAbstractItemView*>(cand)) {
+            const QPoint inVp = view->viewport()->mapFrom(container, posInContainer);
+            if (view->viewport()->rect().contains(inVp) && view->indexAt(inVp).isValid()) {
+                restore(); return view;
+            }
+            // Empty area look through viewport and retry
+            makeTransparent(view->viewport());
+            continue;
+        }
+
+        // Case 3: normal widget accept
+        restore(); return cand;
     }
-    return best;
+
+    restore();
+    return container; // safety fallback
 }
 
 #include <QWidget>
@@ -319,10 +357,15 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
 
                     //const auto sourceWidgetUnderCursor = _sourceWidget->underMouse();
 
-                    if (auto child = topChildAt(_sourceWidget, localPos)) {
-                        qDebug() << "Source widget (or one of its descendants) is under the mouse" << QCursor::pos();
 
-                        _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+                    if (auto child = _sourceWidget->childAt(localPos)) {
+                        //qDebug() << "Source widget (or one of its descendants) is under the mouse" << QCursor::pos();
+
+                        if (const auto itemView = dynamic_cast<QAbstractItemView*>(child->parentWidget()))
+                            qDebug() << "Parent is item view:" << itemView << "index at cursor:" << itemView->indexAt(itemView->viewport()->mapFromGlobal(QCursor::pos()));
+
+                        qDebug() << "Child under cursor:" << child;
+                        _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents, child != _sourceWidget);
 	                    {
                             //QMouseEvent event(QEvent::MouseMove,
                             //    localPos,
@@ -334,7 +377,11 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
 	                    }
 	                    //_sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-                        return false;
+                        //return false;
+                    } else {
+                        qDebug() <<"No child under cursor, make source widget transparent for mouse events" << QCursor::pos();
+                        
+                        //return false;
                     }
                         
 
@@ -363,12 +410,12 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
                     const auto child = _sourceWidget->childAt(localPos);
 
 
-                    if (!topChildAt(_sourceWidget, localPos)) {
-                        _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+                    if (!childAtExcludingEmptyItemViews(_sourceWidget, localPos)) {
+                        //_sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-                        return true;
+                        //return false;
                     } else {
-                        return false;
+                        //return false;
                     }
                 }
             }
