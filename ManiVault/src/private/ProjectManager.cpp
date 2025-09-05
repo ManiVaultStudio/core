@@ -18,6 +18,7 @@
 
 #include <util/Exception.h>
 #include <util/Serialization.h>
+#include <util/Timer.h>
 
 #include <widgets/FileDialog.h>
 
@@ -353,6 +354,8 @@ void ProjectManager::newBlankProject()
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
 {
     Application::requestOverrideCursor(Qt::WaitCursor);
+
+    Timer openProjectTimer("Open project");
 
     try
     {
