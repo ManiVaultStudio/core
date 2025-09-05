@@ -91,6 +91,8 @@ private:
     /** Source widget geometry is synchronized with the target widget geometry */
     void synchronizeGeometry() const;
 
+    void enableTrackingRecursive(QWidget* w);
+
 signals:
 
     /**

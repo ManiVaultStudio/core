@@ -21,7 +21,7 @@ ActionOverlayWidget::ActionOverlayWidget(QWidget* target, const QPointer<WidgetA
     _action(action),
     _actionWidget(action->createWidget(this))
 {
-    setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    //setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
     auto layout = new QVBoxLayout();
 

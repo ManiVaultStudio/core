@@ -61,18 +61,22 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
 
     setMouseTracking(true);
 
+
     _treeView.setModel(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel());
     _treeView.setFixedWidth(300);
     _treeView.setHeaderHidden(true);
-    _treeView.setRootIsDecorated(false);
+    //_treeView.setRootIsDecorated(false);
     _treeView.setFrameShape(QFrame::NoFrame);
     _treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _treeView.setIconSize(QSize(12, 12));
-    //_treeView.setStyle(new BranchIconStyle(_treeView.style()));
+    _treeView.setStyle(new BranchIconStyle(_treeView.style()));
     _treeView.setMinimumSize(100, 100);
     _treeView.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     _treeView.adjustSize();
+
+    _treeView.viewport()->setMouseTracking(true);
+    //_treeView.setStyleSheet("background-color: red;");
 
     connect(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel(), &QAbstractItemModel::rowsInserted, &_treeView, [this](const QModelIndex& parent, int first, int last) {
 		if (parent.isValid())
@@ -94,7 +98,7 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
 	_treeView.setPalette(palette);
 
     if (auto viewport = _treeView.viewport()) {
-        viewport->setAttribute(Qt::WA_TranslucentBackground, true);
+        //viewport->setAttribute(Qt::WA_TranslucentBackground, true);
         viewport->setStyleSheet("background: transparent;");
     }
 
@@ -106,6 +110,7 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
 	auto layout = new QVBoxLayout();
 
     layout->addWidget(&_treeView);
+    layout->addWidget(new QPushButton("--------"));
 
     setLayout(layout);
 }
