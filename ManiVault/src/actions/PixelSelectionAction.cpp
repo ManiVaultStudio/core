@@ -254,7 +254,7 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
     _rectangleAction.setShortcut(shortcutsEnabled ? QKeySequence("R") : QKeySequence());
     _lineAction.setShortcut(shortcutsEnabled ? QKeySequence("N") : QKeySequence());
     _brushAction.setShortcut(shortcutsEnabled ? QKeySequence("B") : QKeySequence());
-    _lineAction.setShortcut(shortcutsEnabled ? QKeySequence("L, N") : QKeySequence());
+    _lineAction.setShortcut(shortcutsEnabled ? QKeySequence("N") : QKeySequence());
     _polygonAction.setShortcut(shortcutsEnabled ? QKeySequence("P") : QKeySequence());
     _sampleAction.setShortcut(shortcutsEnabled ? QKeySequence("U") : QKeySequence());
     _roiAction.setShortcut(shortcutsEnabled ? QKeySequence("W") : QKeySequence());
