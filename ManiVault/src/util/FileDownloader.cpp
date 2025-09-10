@@ -4,6 +4,7 @@
 
 #include "FileDownloader.h"
 #include "Application.h"
+#include "CoreInterface.h"
 #include "Task.h"
 
 #include <QThread>

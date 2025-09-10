@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QMainWindow>
+#include <QVBoxLayout>
 
 #ifdef _DEBUG
     #define ACTION_OVERLAY_WIDGET_VERBOSE

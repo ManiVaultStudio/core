@@ -17,9 +17,12 @@
 #include "models/ProjectsTreeModel.h"
 #include "models/ProjectsModelProject.h"
 
+#include "util/Exception.h"
+
 #include <QObject>
 #include <QMenu>
 #include <QTemporaryDir>
+#include <QFuture>
 
 #include "Task.h"
 

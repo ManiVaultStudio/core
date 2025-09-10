@@ -9,6 +9,8 @@
 
 #include "util/Exception.h"
 
+#include "StyledIcon.h"
+
 #include "Task.h"
 
 #include <QObject>

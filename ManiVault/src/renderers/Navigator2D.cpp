@@ -3,8 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Navigator2D.h"
-
 #include "Renderer2D.h"
+
+#include "util/math.h"
 
 #include <QPainter>
 #include <QPaintEvent>
