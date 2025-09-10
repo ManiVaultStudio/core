@@ -135,12 +135,6 @@ void SplashScreenWidget::paintEvent(QPaintEvent* paintEvent)
 
     pixmapRectangle.moveCenter(centerOfWidget);
 
-    const QBrush backgroundImageBrush(_backgroundImage);
-
-    painter.setPen(QPen(Qt::transparent, 1));
-    painter.setBrush(backgroundImageBrush);
-    painter.drawPath(path);
-
     QLinearGradient overlayGradient(0, 0, 0, height() - (2 * SplashScreenWidget::shadowMargin));
 
     overlayGradient.setColorAt(0.0, QColor(255, 255, 255, 0));
@@ -257,6 +251,26 @@ void SplashScreenWidget::createToolbar()
 
 void SplashScreenWidget::createBody()
 {
+    QString bodyHtml = "";
+
+    auto bodyLayout = new QGridLayout();
+    auto bodyLabel  = new QLabel();
+
+    bodyLabel->setTextFormat(Qt::RichText);
+    bodyLabel->setText(bodyHtml);
+    bodyLabel->setOpenExternalLinks(true);
+
+    bodyLayout->addWidget(bodyLabel);
+
+    _roundedFrameLayout.addLayout(bodyLayout, 1);
+
+    //const QBrush backgroundImageBrush(_backgroundImage);
+
+    //painter.setPen(QPen(Qt::transparent, 1));
+    //painter.setBrush(backgroundImageBrush);
+    //painter.drawPath(path);
+
+	/*
     auto bodyLayout     = new QGridLayout();
     auto leftColumn     = new QVBoxLayout();
     auto middleColumn   = new QVBoxLayout();
@@ -306,8 +320,10 @@ void SplashScreenWidget::createBody()
         auto& versionAction = projectMetaAction->getProjectVersionAction();
         auto title          = projectMetaAction->getTitleAction().getString();
         auto version        = QString("%1.%2.%3").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), QString::number(versionAction.getPatchAction().getValue()));
-        if(!versionAction.getSuffixAction().getString().isEmpty())
+
+    	if(!versionAction.getSuffixAction().getString().isEmpty())
             version.append("-" + versionAction.getSuffixAction().getString());
+
         auto description    = projectMetaAction->getDescriptionAction().getString();
         auto comments       = projectMetaAction->getCommentsAction().getString();
 
@@ -378,6 +394,7 @@ void SplashScreenWidget::createBody()
 
         bodyLayout->addWidget(copyrightNoticeLabel, bodyLayout->rowCount(), 0, 1, 3);
     }
+    */
 }
 
 void SplashScreenWidget::createFooter()
