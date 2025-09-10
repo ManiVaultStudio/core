@@ -8,6 +8,7 @@
 #include "actions/TaskAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/TriggerAction.h"
+#include "actions/StringAction.h"
 #include "actions/VerticalGroupAction.h"
 
 namespace mv {
@@ -149,6 +150,12 @@ public:
      */
     void setMayCloseSplashScreenWidget(bool mayCloseSplashScreenWidget);
 
+    /**
+     * Get HTML body
+     * @return HTML body, empty string if not available
+     */
+    QString getHtmlBody() const;
+
 public:
 
     /**
@@ -175,7 +182,7 @@ public: // Serialization
 
     /**
      * Load splash screen action from variant
-     * @param Variant representation of the project
+     * @param variantMap Variant representation of the project
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -193,6 +200,7 @@ public: // Action getters
     const VerticalGroupAction& getEditAction() const { return _editAction; }
     const ImageAction& getProjectImageAction() const { return _projectImageAction; }
     const ImageAction& getAffiliateLogosImageAction() const { return _affiliateLogosImageAction; }
+    const StringAction& getHtmlOverrideAction() const { return _htmlOverrideAction; }
     const TaskAction& getTaskAction() const { return _taskAction; }
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
@@ -201,6 +209,7 @@ public: // Action getters
     VerticalGroupAction& getEditAction() { return _editAction; }
     ImageAction& getProjectImageAction() { return _projectImageAction; }
     ImageAction& getAffiliateLogosImageAction() { return _affiliateLogosImageAction; }
+    StringAction& getHtmlOverrideAction() { return _htmlOverrideAction; }
     TaskAction& getTaskAction() { return _taskAction; }
 
 private:
@@ -209,6 +218,7 @@ private:
     ToggleAction                        _enabledAction;                 /** Action to setEnabled the splash screen on/off */
     ImageAction                         _projectImageAction;            /** Image action for the project image */
     ImageAction                         _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
+    StringAction                        _htmlOverrideAction;            /** String action for custom html content */
     VerticalGroupAction                 _editAction;                    /** Vertical group action for editing the splash screen */
     TriggerAction                       _openAction;                    /** Trigger action to show the splash screen */
     TriggerAction                       _closeAction;                   /** Trigger action to manually close the splash screen */

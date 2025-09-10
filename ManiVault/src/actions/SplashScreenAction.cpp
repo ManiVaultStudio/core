@@ -87,6 +87,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _enabledAction(this, "Enable splash screen"),
     _projectImageAction(this, "Project Image", false),
     _affiliateLogosImageAction(this, "Affiliate Logos", false),
+    _htmlOverrideAction(this, "HTML Override"),
     _editAction(this, "Edit"),
     _openAction(this, "Open splash screen"),
     _closeAction(this, "Close splash screen"),
@@ -172,6 +173,14 @@ void SplashScreenAction::setMayCloseSplashScreenWidget(bool mayCloseSplashScreen
     _mayCloseSplashScreenWidget = mayCloseSplashScreenWidget;
 }
 
+QString SplashScreenAction::getHtmlBody() const
+{
+    if (!_htmlOverrideAction.getString().isEmpty())
+        return _htmlOverrideAction.getString();
+
+    return {};
+}
+
 ProjectMetaAction* SplashScreenAction::getProjectMetaAction()
 {
     return _projectMetaAction;
@@ -212,6 +221,7 @@ void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
     _enabledAction.fromParentVariantMap(variantMap);
     _projectImageAction.fromParentVariantMap(variantMap);
     _affiliateLogosImageAction.fromParentVariantMap(variantMap);
+    _htmlOverrideAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap SplashScreenAction::toVariantMap() const
@@ -221,6 +231,7 @@ QVariantMap SplashScreenAction::toVariantMap() const
     _enabledAction.insertIntoVariantMap(variantMap);
     _projectImageAction.insertIntoVariantMap(variantMap);
     _affiliateLogosImageAction.insertIntoVariantMap(variantMap);
+    _htmlOverrideAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
