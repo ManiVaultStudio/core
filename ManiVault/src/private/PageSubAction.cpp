@@ -3,8 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PageSubAction.h"
+#include <CoreInterface.h>
 
-#include "util/Exception.h"
+#include <util/Exception.h>
 
 #include <QBuffer>
 

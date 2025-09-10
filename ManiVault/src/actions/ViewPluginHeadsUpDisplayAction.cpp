@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QProxyStyle>
+#include <QMenu>
 
 #include "models/AbstractHeadsUpDisplayModel.h"
 

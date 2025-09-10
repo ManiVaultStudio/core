@@ -9,6 +9,7 @@
 #include "models/HeadsUpDisplayTreeModel.h"
 
 #include <QWidget>
+#include <QTreeView>
 #include <QLabel>
 
 namespace mv::gui {

@@ -8,6 +8,8 @@
 
 #include "OverlayWidget.h"
 
+#include "actions/WidgetAction.h"
+
 namespace mv::gui
 {
 
