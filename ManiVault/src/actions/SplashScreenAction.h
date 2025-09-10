@@ -181,6 +181,12 @@ protected:
     /** Establishes whether project information should be shown or not */
     bool shouldDisplayProjectInfo() const;
 
+    /**
+     * Get HTML from template (located in resources)
+     * @return HTML content from template, empty string if not available
+     */
+    QString getHtmlFromTemplate() const;
+
 public: // Serialization
 
     /**

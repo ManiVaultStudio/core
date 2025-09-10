@@ -178,12 +178,7 @@ QString SplashScreenAction::getHtml() const
     if (!_htmlOverrideAction.getString().isEmpty())
         return _htmlOverrideAction.getString();
 
-    QString htmlBody = ""
-    
-
-    
-
-    return {};
+    return getHtmlFromTemplate();
 }
 
 ProjectMetaAction* SplashScreenAction::getProjectMetaAction()
@@ -222,6 +217,25 @@ void SplashScreenAction::closeSplashScreenWidget()
 bool SplashScreenAction::shouldDisplayProjectInfo() const
 {
     return getEnabledAction().isChecked() && _projectMetaAction;
+}
+
+QString SplashScreenAction::getHtmlFromTemplate() const
+{
+    QFile f(":/HTML/SplashScreen.html");
+
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+        return QStringLiteral("<html><body>Error: cannot load template</body></html>");
+
+    QTextStream textStreamIn(&f);
+
+	textStreamIn.setEncoding(QStringConverter::Utf8);
+
+    QString htmlTemplate = textStreamIn.readAll();
+
+    htmlTemplate.replace(QStringLiteral("{{LEFT_COLUMN}}"), "Left column!");
+    htmlTemplate.replace(QStringLiteral("{{RIGHT_COLUMN}}"), "Right column!");
+
+    return htmlTemplate;
 }
 
 void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
