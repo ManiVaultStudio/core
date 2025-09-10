@@ -151,10 +151,10 @@ public:
     void setMayCloseSplashScreenWidget(bool mayCloseSplashScreenWidget);
 
     /**
-     * Get HTML body
-     * @return HTML body, empty string if not available
+     * Get HTML content
+     * @return HTML content, empty string if not available
      */
-    QString getHtmlBody() const;
+    QString getHtml() const;
 
 public:
 
@@ -177,6 +177,9 @@ protected:
 
     /** Animates the splash screen widget's opacity and position and afterwards closes it */
     void closeSplashScreenWidget();
+
+    /** Establishes whether project information should be shown or not */
+    bool shouldDisplayProjectInfo() const;
 
 public: // Serialization
 

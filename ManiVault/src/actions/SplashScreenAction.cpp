@@ -173,10 +173,15 @@ void SplashScreenAction::setMayCloseSplashScreenWidget(bool mayCloseSplashScreen
     _mayCloseSplashScreenWidget = mayCloseSplashScreenWidget;
 }
 
-QString SplashScreenAction::getHtmlBody() const
+QString SplashScreenAction::getHtml() const
 {
     if (!_htmlOverrideAction.getString().isEmpty())
         return _htmlOverrideAction.getString();
+
+    QString htmlBody = ""
+    
+
+    
 
     return {};
 }
@@ -212,6 +217,11 @@ void SplashScreenAction::closeSplashScreenWidget()
     _splashScreenWidget->closeAnimated();
 
     _splashScreenWidget.clear();
+}
+
+bool SplashScreenAction::shouldDisplayProjectInfo() const
+{
+    return getEnabledAction().isChecked() && _projectMetaAction;
 }
 
 void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
