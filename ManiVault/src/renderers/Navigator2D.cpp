@@ -5,7 +5,7 @@
 #include "Navigator2D.h"
 #include "Renderer2D.h"
 
-#include "util/math.h"
+#include "util/Math.h"
 
 #include <QPainter>
 #include <QPaintEvent>
