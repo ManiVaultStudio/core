@@ -151,8 +151,8 @@ set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
 # zlib-ng BUILD_SHARED_LIBS OFF defines zlibstatic as an ALIAS to zlib
-add_library(ZLIB::ZLIB ALIAS zlibstatic)
-set(ZLIB_LIBRARIES zlibstatic)
+add_library(ZLIB::ZLIB ALIAS zlib)
+set(ZLIB_LIBRARIES zlib)
 
 # File compression: QuaZip
 CPMAddPackage(
