@@ -131,11 +131,11 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 # File compression: zlib-ng
-set(CMAKE_C_STANDARD 11) # TEMP WORKAROUND, adjust c standard for zlib-ng
 CPMAddPackage(
   NAME              ZLIB
-  GITHUB_REPOSITORY zlib-ng/zlib-ng
-  GIT_TAG           2.2.5
+#  GITHUB_REPOSITORY zlib-ng/zlib-ng
+#  GIT_TAG           2.2.5
+  URL               https://github.com/zlib-ng/zlib-ng/archive/78005695a1b186234477f7ca34ad75770394f05b.zip
   OPTIONS 
     "SKIP_INSTALL_ALL ON" 
     "ZLIB_ENABLE_TESTS OFF" 
@@ -145,7 +145,6 @@ CPMAddPackage(
     "WITH_AVX512 OFF" 
     "WITH_AVX2 ${MV_USE_AVX}"
 )
-set(CMAKE_C_STANDARD 17) # TEMP WORKAROUND, revert c standard back to project
 
 set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
