@@ -144,11 +144,13 @@ CPMAddPackage(
     "WITH_AVX512VNNI OFF" 
     "WITH_AVX512 OFF" 
     "WITH_AVX2 ${MV_USE_AVX}"
+    "BUILD_SHARED_LIBS OFF"
 )
 
 set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
+# zlib-ng BUILD_SHARED_LIBS OFF defines zlibstatic as an ALIAS to zlib
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
 set(ZLIB_LIBRARIES zlibstatic)
 
@@ -410,7 +412,7 @@ if(APPLE)
     
 endif()
 
-set_target_properties(qtadvanceddocking-qt6 QuaZip zlib zlibstatic
+set_target_properties(qtadvanceddocking-qt6 QuaZip zlib
     PROPERTIES
     FOLDER CoreDependencies
 )
