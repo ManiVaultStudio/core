@@ -45,7 +45,7 @@ class HdpsCoreConan(ConanFile):
         "fPIC": [True, False],
         "macos_bundle": [True, False],
     }
-    default_options = {"shared": True, "fPIC": True, "macos_bundle": False}
+    default_options = {"shared": False, "fPIC": True, "macos_bundle": False}
 
     # Custom attributes for Bincrafters recipe conventions
     install_dir = None
