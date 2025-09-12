@@ -243,27 +243,29 @@ QString SplashScreenAction::getHtmlFromTemplate() const
             htmlTemplate.replace(placeholder, value);
     };
 
+    const auto bodyColor = qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Dark).name();
+
+    replaceInHtml("{{BODY_COLOR}}", bodyColor);
+
     if (auto projectImageAction = dynamic_cast<const ProjectMetaAction*>(_projectMetaAction)) {
         replaceInHtml("{{APP_TITLE}}", projectImageAction->getTitleAction().getString());
         replaceInHtml("{{APP_VERSION}}", projectImageAction->getProjectVersionAction().getVersionStringAction().getString());
     } else {
-        replaceInHtml("{{APP_TITLE}}", "<p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span></p>");
+        replaceInHtml("{{APP_TITLE}}", "ManiVault <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span>");
         replaceInHtml("{{APP_VERSION}}", QString("Version: %1").arg(QString::fromStdString(Application::current()->getVersion().getVersionString())));
+        replaceInHtml("{{APP_SUBTITLE}}", "An extensible open-source visual analytics framework for analyzing high-dimensional data");
 
         QStringList externalLinks;
 
         const auto addExternalLink = [&externalLinks](const QString& linkUrl, const QString& linkTitle, const QString& icon) -> void {
-            externalLinks << QString("<span style='color: black'><i class='%3 fa-xs' style='padding-right: 5px;'></i><a href='%1' style='color: black'>%2</a></span>").arg(linkUrl, linkTitle, icon);
+            externalLinks << QString("<span style='color: black; padding-bottom: 5px;'><i class='%3 fa-sm icon' style='padding-right: 5px;'></i><a href='%1' style='color: black'>%2</a></span>").arg(linkUrl, linkTitle, icon);
         };
 
         addExternalLink("https://www.manivault.studio/", "Visit our website", "fa-solid fa-earth-europe");
         addExternalLink("https://github.com/ManiVaultStudio", "Contribute to ManiVault on Github", "fa-brands fa-github");
         addExternalLink("https://discord.gg/pVxmC2cSzA", "Get in touch on our Discord", "fa-brands fa-discord");
 
-        replaceInHtml("{{APP_DESCRIPTION}}", QString("<p style='font-size: 8'>%1</p>").arg(externalLinks.join("<br>")));
-
-        //qDebug() << " ";
-        //qDebug() << htmlTemplate;
+        replaceInHtml("{{APP_DESCRIPTION}}", QString("<p class='description'>%1</p>").arg(externalLinks.join("<br>")));
     }
 
     //qDebug() << htmlTemplate;

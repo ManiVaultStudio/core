@@ -20,11 +20,12 @@
         //background: url({{BACKGROUND_IMAGE_BASE64}}) no-repeat center center fixed;
         //background-size: cover; /* use 'contain' or remove if you prefer */
 		font-family: system-ui, sans-serif;
+		color: "{{BODY_COLOR}}";
       }
 
-      .content {
+      div.content {
         flex: 1; /* take remaining space above the footer */
-        padding: 16px;
+        padding: 50px;
         box-sizing: border-box;
       }
 
@@ -44,27 +45,69 @@
 
       /* Small niceties */
       p { margin: 0 0 0.75em 0; }
+	  
+	  p.column {
+		//padding-top: 25px;
+	  }
+	  
+	  span.title {
+		color: rgb(102, 159, 178);
+		font-size: 20pt;
+		font-weight: bold;
+		padding-top: 0px;
+		padding-bottom: 7px;
+	  }
+	  
+	  span.version {
+		font-size: 9pt;
+		font-weight: bold;
+		padding-top: 0px;
+		padding-bottom: 0px;
+	  }
+	  
+	  span.subtitle {
+		padding-top: 20px;
+		padding-bottom: 20px;
+		font-size: 9pt;
+		font-style: italic;
+	  }
+	  
+	  p.description {
+		font-size: 10pt;
+		padding-top: 20px;
+	  }
+	  
       span { display: inline-block; }
+	  
+	  .icon {
+		  font-size: 1em;        /* match surrounding text */
+		  line-height: 1;        /* remove extra leading */
+		  vertical-align: -0.12em; /* nudge up a bit */
+		}
+		
+		
     </style>
   </head>
   <body>
-    <main class="content">
+    <div class="content">
       <table>
         <tr>
           <td style="width:25%;">
-            <img class="app-logo" src="{{APP_LOGO}}" alt="App logo">
+			<p class="column">
+				<img class="app-logo" src="{{APP_LOGO}}" alt="App logo">
+			</p>
           </td>
           <td style="width:75%;">
-            <p>
-              <span>{{APP_TITLE}}</span>
-              <b>{{APP_VERSION}}</b>
+            <p class="column">
+              <span class="title">{{APP_TITLE}}</span><br>
+              <span class="version">{{APP_VERSION}}</span><br>
+              <span class="subtitle">{{APP_SUBTITLE}}</span><br>
             </p>
             <p>{{APP_DESCRIPTION}}</p>
           </td>
         </tr>
       </table>
-    </main>
-
+    </div>
     <footer class="footer">
       {{FOOTER}}
 	  <i class="fa-solid fa-circle-info"></i> Info
