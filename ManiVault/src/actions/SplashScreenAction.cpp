@@ -4,6 +4,8 @@
 
 #include "SplashScreenAction.h"
 
+#include <QBuffer>
+
 #include "Application.h"
 
 #include "widgets/SplashScreenWidget.h"
@@ -206,12 +208,14 @@ void SplashScreenAction::showSplashScreenWidget()
 
 void SplashScreenAction::closeSplashScreenWidget()
 {
-    if (_splashScreenWidget.isNull())
-        return;
+    QTimer::singleShot(5000, [this]() -> void {
+        if (_splashScreenWidget.isNull())
+            return;
 
-    _splashScreenWidget->closeAnimated();
+        _splashScreenWidget->closeAnimated();
 
-    _splashScreenWidget.clear();
+        _splashScreenWidget.clear();
+	});
 }
 
 bool SplashScreenAction::shouldDisplayProjectInfo() const
@@ -221,19 +225,48 @@ bool SplashScreenAction::shouldDisplayProjectInfo() const
 
 QString SplashScreenAction::getHtmlFromTemplate() const
 {
-    QFile f(":/HTML/SplashScreen.html");
+    QFile splashScreenFile(":/HTML/SplashScreen");
 
-    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (!splashScreenFile.open(QIODevice::ReadOnly | QIODevice::Text))
         return QStringLiteral("<html><body>Error: cannot load template</body></html>");
 
-    QTextStream textStreamIn(&f);
+    QTextStream textStreamIn(&splashScreenFile);
 
 	textStreamIn.setEncoding(QStringConverter::Utf8);
 
     QString htmlTemplate = textStreamIn.readAll();
 
-    htmlTemplate.replace(QStringLiteral("{{LEFT_COLUMN}}"), "Left column!");
-    htmlTemplate.replace(QStringLiteral("{{RIGHT_COLUMN}}"), "Right column!");
+    const auto replaceInHtml = [&htmlTemplate](const QString& placeholder, const QString& value) -> void {
+        if (value.isEmpty())
+            htmlTemplate.replace(placeholder, "N/A");
+        else
+            htmlTemplate.replace(placeholder, value);
+    };
+
+    if (auto projectImageAction = dynamic_cast<const ProjectMetaAction*>(_projectMetaAction)) {
+        replaceInHtml("{{APP_TITLE}}", projectImageAction->getTitleAction().getString());
+        replaceInHtml("{{APP_VERSION}}", projectImageAction->getProjectVersionAction().getVersionStringAction().getString());
+    } else {
+        replaceInHtml("{{APP_TITLE}}", "<p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span></p>");
+        replaceInHtml("{{APP_VERSION}}", QString("Version: %1").arg(QString::fromStdString(Application::current()->getVersion().getVersionString())));
+
+        QStringList externalLinks;
+
+        const auto addExternalLink = [&externalLinks](const QString& linkUrl, const QString& linkTitle, const QString& icon) -> void {
+            externalLinks << QString("<span style='color: black'><i class='%3 fa-xs' style='padding-right: 5px;'></i><a href='%1' style='color: black'>%2</a></span>").arg(linkUrl, linkTitle, icon);
+        };
+
+        addExternalLink("https://www.manivault.studio/", "Visit our website", "fa-solid fa-earth-europe");
+        addExternalLink("https://github.com/ManiVaultStudio", "Contribute to ManiVault on Github", "fa-brands fa-github");
+        addExternalLink("https://discord.gg/pVxmC2cSzA", "Get in touch on our Discord", "fa-brands fa-discord");
+
+        replaceInHtml("{{APP_DESCRIPTION}}", QString("<p style='font-size: 8'>%1</p>").arg(externalLinks.join("<br>")));
+
+        //qDebug() << " ";
+        //qDebug() << htmlTemplate;
+    }
+
+    //qDebug() << htmlTemplate;
 
     return htmlTemplate;
 }
