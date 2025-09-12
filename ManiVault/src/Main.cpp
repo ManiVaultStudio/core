@@ -169,8 +169,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (shouldShowSplashScreen)
+    if (shouldShowSplashScreen) {
         splashScreenAction.getOpenAction().trigger();
+    }
 
     MainWindow mainWindow;
 
