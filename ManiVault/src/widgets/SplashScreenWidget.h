@@ -12,6 +12,7 @@
 #include <QFrame>
 #include <QGraphicsDropShadowEffect>
 #include <QTimer>
+#include <QWebEngineView>
 
 namespace mv::gui {
 
@@ -105,9 +106,6 @@ private: // Splash screen content
     /** Create footer content with some images and when necessary a progress bar */
     void createFooter();
 
-    /** Establishes whether project information should be shown or not */
-    bool shouldDisplayProjectInfo() const;
-
     /** Get the ManiVault copyright notice tooltip string */
     static QString getCopyrightNoticeTooltip();
 
@@ -119,6 +117,7 @@ private:
     QFrame                      _roundedFrame;          /** Frame with rounded edges */
     QVBoxLayout                 _roundedFrameLayout;    /** Layout for the rounded frame */
     QToolButton                 _closeToolButton;       /** Button for forcefully closing the splash screen */
+    QWebEngineView              _webEngineView;         /** Web engine view for displaying the HTML content */  
     QGraphicsDropShadowEffect   _dropShadowEffect;      /** For adding a drop shadow to the splash screen widget */
     QTimer                      _processEventsTimer;    /** Timer to keep the splash screen widget somewhat responsive */
 

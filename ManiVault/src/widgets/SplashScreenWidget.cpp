@@ -57,6 +57,22 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     });
 
     _processEventsTimer.start(10);
+
+    //_roundedFrameLayout.addLayout(bodyLayout, 1);
+    _roundedFrameLayout.setContentsMargins(0, 0, 0, 0);
+    _roundedFrameLayout.addWidget(&_webEngineView);
+
+    _roundedFrame.setObjectName("RoundedFrame");
+    _roundedFrame.setContentsMargins(0, 0, 0, 0);
+    _roundedFrame.setLayout(&_roundedFrameLayout);
+
+    auto mainLayout = new QVBoxLayout();
+
+    mainLayout->setContentsMargins(SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin);
+    mainLayout->addWidget(&_roundedFrame);
+
+    setLayout(mainLayout);
+    setGraphicsEffect(&_dropShadowEffect);
 }
 
 SplashScreenWidget::~SplashScreenWidget()
@@ -71,86 +87,75 @@ void SplashScreenWidget::showEvent(QShowEvent* event)
     if (_initialized)
         return;
 
-    setGraphicsEffect(&_dropShadowEffect);
+    _initialized = true;
 
-    if (!_backgroundImage.isNull())
-        _backgroundImage = _backgroundImage.scaled(_backgroundImage.size() / 5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    _webEngineView.setHtml(_splashScreenAction.getHtml(), QUrl("qrc:/"));
 
-    createToolbar();
-    createBody();
-    createFooter();
+    QEventLoop loop;
 
-    auto mainLayout = new QVBoxLayout();
+    // quit when the page finishes loading
+    QObject::connect(&_webEngineView, &QWebEngineView::loadFinished, &loop, &QEventLoop::quit);
 
-    mainLayout->setContentsMargins(SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin);
-    mainLayout->addWidget(&_roundedFrame);
+    // also quit after 1000 ms as a fallback
+    QTimer::singleShot(1000, &loop, &QEventLoop::quit);
 
-    _roundedFrameLayout.setContentsMargins(0, 0, 0, 0);
+    // run a nested loop so rendering continues
+    loop.exec();
 
-    _roundedFrame.setObjectName("RoundedFrame");
-    _roundedFrame.setContentsMargins(0, 0, 0, 0);
-    _roundedFrame.setLayout(&_roundedFrameLayout);
+    //if (!_backgroundImage.isNull())
+    //    _backgroundImage = _backgroundImage.scaled(_backgroundImage.size() / 5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    setLayout(mainLayout);
+    //createToolbar();
+    //createBody();
+    //createFooter();
 
-    _roundedFrame.setStyleSheet(QString(" \
+    /*_roundedFrame.setStyleSheet(QString(" \
         QFrame#RoundedFrame { \
             background-color: transparent; \
             border-radius: %1px; \
         } \
-    ").arg(SplashScreenWidget::frameRadius));
+    ").arg(SplashScreenWidget::frameRadius));*/
 
-    _closeToolButton.raise();
-
-    _initialized = true;
+    //_closeToolButton.raise();
 }
 
 void SplashScreenWidget::paintEvent(QPaintEvent* paintEvent)
 {
-    QPainter painter(this);
+    QWidget::paintEvent(paintEvent);
 
-    painter.setRenderHint(QPainter::Antialiasing);
+    //QPainter painter(this);
 
-    auto backgroundRect = rect().marginsRemoved(QMargins(SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin));
+    //painter.setRenderHint(QPainter::Antialiasing);
 
-    if (Application::current()->getStartupTask().isRunning())
-        backgroundRect.setHeight(height() - SplashScreenWidget::frameRadius - (2 * SplashScreenWidget::shadowMargin));
+    //auto backgroundRect = rect().marginsRemoved(QMargins(SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin));
 
-    QPainterPath path;
+    //if (Application::current()->getStartupTask().isRunning())
+    //    backgroundRect.setHeight(height() - SplashScreenWidget::frameRadius - (2 * SplashScreenWidget::shadowMargin));
 
-    path.setFillRule(Qt::WindingFill);
-    path.addRoundedRect(backgroundRect, SplashScreenWidget::frameRadius, SplashScreenWidget::frameRadius);
+    //QPainterPath path;
 
-    if (Application::current()->getStartupTask().isRunning()) {
-        qreal squareSize = backgroundRect.height() / 2;
+    //path.setFillRule(Qt::WindingFill);
+    //path.addRoundedRect(backgroundRect, SplashScreenWidget::frameRadius, SplashScreenWidget::frameRadius);
 
-        path.addRect(QRect(backgroundRect.left(), backgroundRect.top() + backgroundRect.height() - squareSize, squareSize, squareSize));
-        path.addRect(QRect((backgroundRect.left() + backgroundRect.width()) - squareSize, backgroundRect.top() + backgroundRect.height() - squareSize, squareSize, squareSize));
+    //if (Application::current()->getStartupTask().isRunning()) {
+    //    qreal squareSize = backgroundRect.height() / 2;
 
-        path = path.simplified();
-    }
+    //    path.addRect(QRect(backgroundRect.left(), backgroundRect.top() + backgroundRect.height() - squareSize, squareSize, squareSize));
+    //    path.addRect(QRect((backgroundRect.left() + backgroundRect.width()) - squareSize, backgroundRect.top() + backgroundRect.height() - squareSize, squareSize, squareSize));
 
-    auto centerOfWidget     = rect().center();
-    auto pixmapRectangle    = _backgroundImage.rect();
+    //    path = path.simplified();
+    //}
 
-    pixmapRectangle.moveCenter(centerOfWidget);
+    //QLinearGradient overlayGradient(0, 0, 0, height() - (2 * SplashScreenWidget::shadowMargin));
 
-    const QBrush backgroundImageBrush(_backgroundImage);
+    //overlayGradient.setColorAt(0.0, QColor(255, 255, 255, 0));
+    //overlayGradient.setColorAt(1.0, QColor(255, 255, 255, 255));
 
-    painter.setPen(QPen(Qt::transparent, 1));
-    painter.setBrush(backgroundImageBrush);
-    painter.drawPath(path);
+    //painter.setOpacity(1.0);
+    //painter.setBrush(overlayGradient);
+    //painter.drawPath(path);
 
-    QLinearGradient overlayGradient(0, 0, 0, height() - (2 * SplashScreenWidget::shadowMargin));
-
-    overlayGradient.setColorAt(0.0, QColor(255, 255, 255, 0));
-    overlayGradient.setColorAt(1.0, QColor(255, 255, 255, 255));
-
-    painter.setOpacity(1.0);
-    painter.setBrush(overlayGradient);
-    painter.drawPath(path);
-
-    _closeToolButton.raise();
+    //_closeToolButton.raise();
 }
 
 void SplashScreenWidget::showAnimated()
@@ -257,181 +262,200 @@ void SplashScreenWidget::createToolbar()
 
 void SplashScreenWidget::createBody()
 {
-    auto bodyLayout     = new QGridLayout();
-    auto leftColumn     = new QVBoxLayout();
-    auto middleColumn   = new QVBoxLayout();
-    auto rightColumn    = new QVBoxLayout();
+    qDebug() << __FUNCTION__;
+    //bodyLabel->setHtml(_splashScreenAction.getHtml(), QUrl("qrc:/"));
+    //bodyLabel->setOpenExternalLinks(true);
+    //bodyLabel->setStyleSheet("background-color: yellow;");
 
-    bodyLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin, SplashScreenWidget::margin, shouldDisplayProjectInfo() ? SplashScreenWidget::margin : SplashScreenWidget::margin / 2);
-    bodyLayout->setSpacing(10);
-    bodyLayout->setAlignment(Qt::AlignTop);
-    bodyLayout->setColumnStretch(2, 1);
-    bodyLayout->setColumnMinimumWidth(1, 25);
+    //_roundedFrameLayout.addLayout(bodyLayout, 1);
 
-    bodyLayout->addLayout(leftColumn, 0, 0);
-    bodyLayout->addLayout(middleColumn, 0, 1);
-    bodyLayout->addLayout(rightColumn, 0, 2);
+    //auto centerOfWidget = rect().center();
+    //auto pixmapRectangle = _backgroundImage.rect();
 
-    bodyLayout->setRowStretch(0, 1);
+    //pixmapRectangle.moveCenter(centerOfWidget);
 
-    leftColumn->setAlignment(Qt::AlignTop);
-    rightColumn->setAlignment(Qt::AlignTop);
+    //const QBrush backgroundImageBrush(_backgroundImage);
 
-    auto projectLogoLabel   = new QLabel();
-    auto htmlLabel          = new QLabel();
+    //painter.setPen(QPen(Qt::transparent, 1));
+    //painter.setBrush(backgroundImageBrush);
+    //painter.drawPath(path);
 
-    projectLogoLabel->setScaledContents(true);
-    projectLogoLabel->setFixedSize(SplashScreenWidget::logoSize, SplashScreenWidget::logoSize);
 
-    htmlLabel->setWordWrap(true);
-    htmlLabel->setTextFormat(Qt::RichText);
-    htmlLabel->setOpenExternalLinks(true);
+    //auto bodyLayout     = new QGridLayout();
+    //auto leftColumn     = new QVBoxLayout();
+    //auto middleColumn   = new QVBoxLayout();
+    //auto rightColumn    = new QVBoxLayout();
 
-    leftColumn->addWidget(projectLogoLabel);
-    rightColumn->addWidget(htmlLabel);
+    //bodyLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin, SplashScreenWidget::margin, shouldDisplayProjectInfo() ? SplashScreenWidget::margin : SplashScreenWidget::margin / 2);
+    //bodyLayout->setSpacing(10);
+    //bodyLayout->setAlignment(Qt::AlignTop);
+    //bodyLayout->setColumnStretch(2, 1);
+    //bodyLayout->setColumnMinimumWidth(1, 25);
 
-    rightColumn->setSpacing(8);
+    //bodyLayout->addLayout(leftColumn, 0, 0);
+    //bodyLayout->addLayout(middleColumn, 0, 1);
+    //bodyLayout->addLayout(rightColumn, 0, 2);
 
-    const auto bodyColor = qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Dark).name();
+    //bodyLayout->setRowStretch(0, 1);
 
-    if (shouldDisplayProjectInfo()) {
-        auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
-        //auto& splashScreenAction = _splashScreenAction.getProjectMetaAction()->getSplashScreenAction();
+    //leftColumn->setAlignment(Qt::AlignTop);
+    //rightColumn->setAlignment(Qt::AlignTop);
 
-        const auto projectLogoPixmap = QPixmap::fromImage(_splashScreenAction.getProjectImageAction().getImage());
+    //auto projectLogoLabel   = new QLabel();
+    //auto htmlLabel          = new QLabel();
 
-        if (!projectLogoPixmap.isNull())
-            projectLogoLabel->setPixmap(projectLogoPixmap.scaledToHeight(SplashScreenWidget::logoSize, Qt::SmoothTransformation));
+    //projectLogoLabel->setScaledContents(true);
+    //projectLogoLabel->setFixedSize(SplashScreenWidget::logoSize, SplashScreenWidget::logoSize);
 
-        auto& versionAction = projectMetaAction->getProjectVersionAction();
-        auto title          = projectMetaAction->getTitleAction().getString();
-        auto version        = QString("%1.%2.%3").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), QString::number(versionAction.getPatchAction().getValue()));
-        if(!versionAction.getSuffixAction().getString().isEmpty())
-            version.append("-" + versionAction.getSuffixAction().getString());
-        auto description    = projectMetaAction->getDescriptionAction().getString();
-        auto comments       = projectMetaAction->getCommentsAction().getString();
+    //htmlLabel->setWordWrap(true);
+    //htmlLabel->setTextFormat(Qt::RichText);
+    //htmlLabel->setOpenExternalLinks(true);
 
-        if (title.isEmpty())
-            title = projects().hasProject() ? QFileInfo(projects().getCurrentProject()->getFilePath()).fileName() : "Untitled";
+    //leftColumn->addWidget(projectLogoLabel);
+    //rightColumn->addWidget(htmlLabel);
 
-        htmlLabel->setText(QString(" \
-            <div style='color: %5;'> \
-                <p style='font-size: 20pt; font-weight: bold; color: rgb(25, 25, 25);'><span>%1</span></p> \
-                <p style='font-weight: bold;'>Version: %2</p> \
-                <p>%3</p> \
-                <p>%4</p> \
-            </div> \
-        ").arg(title, version, description, comments, bodyColor));
-    }
-    else {
-        projectLogoLabel->setPixmap(_logoImage);
-        projectLogoLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
+    //rightColumn->setSpacing(8);
 
-        const auto applicationVersion   = Application::current()->getVersion();
-        auto versionString              = QString("%1.%2.%3").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor()), QString::number(applicationVersion.getPatch()));
+    //const auto bodyColor = qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Dark).name();
 
-        if(applicationVersion.getSuffix().size() > 0)
-            versionString.append("-" + applicationVersion.getSuffix());
+    //if (shouldDisplayProjectInfo()) {
+    //    auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
+    //    //auto& splashScreenAction = _splashScreenAction.getProjectMetaAction()->getSplashScreenAction();
 
-        htmlLabel->setText(QString(" \
-            <div> \
-                <p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span></p> \
-                <p style='font-weight: bold; color: %2;'>Version: %1</p> \
-                <p style='color: %2;'><i>An extensible open-source visual analytics framework for analyzing high-dimensional data</i></p> \
-            </div> \
-        ").arg(versionString, bodyColor));
+    //    const auto projectLogoPixmap = QPixmap::fromImage(_splashScreenAction.getProjectImageAction().getImage());
 
-        htmlLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
+    //    if (!projectLogoPixmap.isNull())
+    //        projectLogoLabel->setPixmap(projectLogoPixmap.scaledToHeight(SplashScreenWidget::logoSize, Qt::SmoothTransformation));
 
-        rightColumn->addStretch(1);
+    //    auto& versionAction = projectMetaAction->getProjectVersionAction();
+    //    auto title          = projectMetaAction->getTitleAction().getString();
+    //    auto version        = QString("%1.%2.%3").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), QString::number(versionAction.getPatchAction().getValue()));
+    //    if(!versionAction.getSuffixAction().getString().isEmpty())
+    //        version.append("-" + versionAction.getSuffixAction().getString());
+    //    auto description    = projectMetaAction->getDescriptionAction().getString();
+    //    auto comments       = projectMetaAction->getCommentsAction().getString();
 
-        rightColumn->addWidget(new ExternalLinkWidget("globe", "Visit our website", QUrl("https://www.manivault.studio/")));
-        rightColumn->addWidget(new ExternalLinkWidget("globe", "Contribute to ManiVault on Github", QUrl("https://github.com/ManiVaultStudio")));
-        rightColumn->addWidget(new ExternalLinkWidget("globe", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
-    }
+    //    if (title.isEmpty())
+    //        title = projects().hasProject() ? QFileInfo(projects().getCurrentProject()->getFilePath()).fileName() : "Untitled";
 
-    leftColumn->addStretch(1);
-    rightColumn->addStretch(1);
+    //    htmlLabel->setText(QString(" \
+    //        <div style='color: %5;'> \
+    //            <p style='font-size: 20pt; font-weight: bold; color: rgb(25, 25, 25);'><span>%1</span></p> \
+    //            <p style='font-weight: bold;'>Version: %2</p> \
+    //            <p>%3</p> \
+    //            <p>%4</p> \
+    //        </div> \
+    //    ").arg(title, version, description, comments, bodyColor));
+    //}
+    //else {
+    //    projectLogoLabel->setPixmap(_logoImage);
+    //    projectLogoLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
-    if (!_splashScreenAction.getAlerts().isEmpty()) {
-        for (const auto& alert : _splashScreenAction.getAlerts()) {
-            if (alert.getType() != SplashScreenAction::Alert::Type::Debug) {
-                const auto rowCount = bodyLayout->rowCount();
+    //    const auto applicationVersion   = Application::current()->getVersion();
+    //    auto versionString              = QString("%1.%2.%3").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor()), QString::number(applicationVersion.getPatch()));
 
-                bodyLayout->addWidget(alert.getIconLabel(this), rowCount, 1);
-                bodyLayout->addWidget(alert.getMessageLabel(this), rowCount, 2);
-            }
-        }
-    }
+    //    if(applicationVersion.getSuffix().size() > 0)
+    //        versionString.append("-" + applicationVersion.getSuffix());
 
-    _roundedFrameLayout.addLayout(bodyLayout, 1);
+    //    htmlLabel->setText(QString(" \
+    //        <div> \
+    //            <p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span></p> \
+    //            <p style='font-weight: bold; color: %2;'>Version: %1</p> \
+    //            <p style='color: %2;'><i>An extensible open-source visual analytics framework for analyzing high-dimensional data</i></p> \
+    //        </div> \
+    //    ").arg(versionString, bodyColor));
 
-    if (!shouldDisplayProjectInfo()) {
-        auto copyrightNoticeLabel = new QLabel();
+    //    htmlLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
-        copyrightNoticeLabel->setAlignment(Qt::AlignBottom);
-        copyrightNoticeLabel->setWordWrap(true);
-        copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 7pt;'> \
-            This software is licensed under the GNU Lesser General Public License v3.0.<br> \
-            Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</p>"
-        );
+    //    rightColumn->addStretch(1);
 
-        bodyLayout->addWidget(copyrightNoticeLabel, bodyLayout->rowCount(), 0, 1, 3);
-    }
+    //    rightColumn->addWidget(new ExternalLinkWidget("globe", "Visit our website", QUrl("https://www.manivault.studio/")));
+    //    rightColumn->addWidget(new ExternalLinkWidget("globe", "Contribute to ManiVault on Github", QUrl("https://github.com/ManiVaultStudio")));
+    //    rightColumn->addWidget(new ExternalLinkWidget("globe", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
+    //}
+
+    //leftColumn->addStretch(1);
+    //rightColumn->addStretch(1);
+
+    //if (!_splashScreenAction.getAlerts().isEmpty()) {
+    //    for (const auto& alert : _splashScreenAction.getAlerts()) {
+    //        if (alert.getType() != SplashScreenAction::Alert::Type::Debug) {
+    //            const auto rowCount = bodyLayout->rowCount();
+
+    //            bodyLayout->addWidget(alert.getIconLabel(this), rowCount, 1);
+    //            bodyLayout->addWidget(alert.getMessageLabel(this), rowCount, 2);
+    //        }
+    //    }
+    //}
+
+    //_roundedFrameLayout.addLayout(bodyLayout, 1);
+
+    //if (!shouldDisplayProjectInfo()) {
+    //    auto copyrightNoticeLabel = new QLabel();
+
+    //    copyrightNoticeLabel->setAlignment(Qt::AlignBottom);
+    //    copyrightNoticeLabel->setWordWrap(true);
+    //    copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 7pt;'> \
+    //        This software is licensed under the GNU Lesser General Public License v3.0.<br> \
+    //        Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</p>"
+    //    );
+
+    //    bodyLayout->addWidget(copyrightNoticeLabel, bodyLayout->rowCount(), 0, 1, 3);
+    //}
 }
 
 void SplashScreenWidget::createFooter()
 {
-    if (shouldDisplayProjectInfo()) {
-        auto imagesLayout = new QHBoxLayout();
+    //if (shouldDisplayProjectInfo()) {
+    //    auto imagesLayout = new QHBoxLayout();
 
-        imagesLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin / 2, SplashScreenWidget::margin, 30);
+    //    imagesLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin / 2, SplashScreenWidget::margin, 30);
 
-        auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
+    //    auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
 
-        auto& splashScreenAction = projectMetaAction->getSplashScreenAction();
+    //    auto& splashScreenAction = projectMetaAction->getSplashScreenAction();
 
-        auto affiliateLogosImageLabel = new QLabel();
+    //    auto affiliateLogosImageLabel = new QLabel();
 
-        const auto affiliatesLogosPixmap = QPixmap::fromImage(splashScreenAction.getAffiliateLogosImageAction().getImage());
+    //    const auto affiliatesLogosPixmap = QPixmap::fromImage(splashScreenAction.getAffiliateLogosImageAction().getImage());
 
-        if (!affiliatesLogosPixmap.isNull())
-            affiliateLogosImageLabel->setPixmap(affiliatesLogosPixmap.scaledToHeight(SplashScreenWidget::footerImagesHeight, Qt::SmoothTransformation));
+    //    if (!affiliatesLogosPixmap.isNull())
+    //        affiliateLogosImageLabel->setPixmap(affiliatesLogosPixmap.scaledToHeight(SplashScreenWidget::footerImagesHeight, Qt::SmoothTransformation));
 
-        auto builtWithWidget        = new QWidget();
-        auto builtWithWidgetLayout  = new QHBoxLayout();
-        
-        auto logoLabel      = new QLabel();
-        auto builtWithLabel = new QLabel();
+    //    auto builtWithWidget        = new QWidget();
+    //    auto builtWithWidgetLayout  = new QHBoxLayout();
+    //    
+    //    auto logoLabel      = new QLabel();
+    //    auto builtWithLabel = new QLabel();
 
-        logoLabel->setFixedSize(SplashScreenWidget::footerImagesHeight, SplashScreenWidget::footerImagesHeight);
-        logoLabel->setScaledContents(true);
-        logoLabel->setPixmap(_logoImage);
+    //    logoLabel->setFixedSize(SplashScreenWidget::footerImagesHeight, SplashScreenWidget::footerImagesHeight);
+    //    logoLabel->setScaledContents(true);
+    //    logoLabel->setPixmap(_logoImage);
 
-        const auto& applicationVersionAction = projectMetaAction->getApplicationVersionAction();
+    //    const auto& applicationVersionAction = projectMetaAction->getApplicationVersionAction();
 
-        builtWithLabel->setTextFormat(Qt::RichText);
-        builtWithLabel->setText(QString(" \
-            <div style='margin-left: 10px; font-family: --bs-font-sans-serif'> \
-                <span style='font-size: 10pt; font-weight: bold; color: rgb(162, 141, 208);'>Built with</span> \
-                <br> \
-                <span style='font-size: 12pt; font-weight: bold; color: rgb(102, 159, 178); padding: 0px;'>ManiVault Studio v%1<sup>&copy;</sup></span> \
-            </div> \
-        ").arg(applicationVersionAction.getVersionStringAction().getString()));
+    //    builtWithLabel->setTextFormat(Qt::RichText);
+    //    builtWithLabel->setText(QString(" \
+    //        <div style='margin-left: 10px; font-family: --bs-font-sans-serif'> \
+    //            <span style='font-size: 10pt; font-weight: bold; color: rgb(162, 141, 208);'>Built with</span> \
+    //            <br> \
+    //            <span style='font-size: 12pt; font-weight: bold; color: rgb(102, 159, 178); padding: 0px;'>ManiVault Studio v%1<sup>&copy;</sup></span> \
+    //        </div> \
+    //    ").arg(applicationVersionAction.getVersionStringAction().getString()));
 
-        builtWithWidgetLayout->setContentsMargins(0, 0, 0, 0);
-        builtWithWidgetLayout->addWidget(logoLabel);
-        builtWithWidgetLayout->addWidget(builtWithLabel);
+    //    builtWithWidgetLayout->setContentsMargins(0, 0, 0, 0);
+    //    builtWithWidgetLayout->addWidget(logoLabel);
+    //    builtWithWidgetLayout->addWidget(builtWithLabel);
 
-        builtWithWidget->setLayout(builtWithWidgetLayout);
-        builtWithWidget->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
+    //    builtWithWidget->setLayout(builtWithWidgetLayout);
+    //    builtWithWidget->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
-        imagesLayout->addWidget(affiliateLogosImageLabel);
-        imagesLayout->addStretch(1);
-        imagesLayout->addWidget(builtWithWidget);
+    //    imagesLayout->addWidget(affiliateLogosImageLabel);
+    //    imagesLayout->addStretch(1);
+    //    imagesLayout->addWidget(builtWithWidget);
 
-        _roundedFrameLayout.addLayout(imagesLayout);
-    }
+    //    _roundedFrameLayout.addLayout(imagesLayout);
+    //}
 
     if (Application::current()->getStartupTask().getEnabled()) {
         auto progressWidget         = new QWidget();
@@ -486,11 +510,6 @@ void SplashScreenWidget::createFooter()
 
         _roundedFrameLayout.addWidget(progressWidget);
     }
-}
-
-bool SplashScreenWidget::shouldDisplayProjectInfo() const
-{
-    return _splashScreenAction.getEnabledAction().isChecked() && _splashScreenAction.getProjectMetaAction();
 }
 
 QString SplashScreenWidget::getCopyrightNoticeTooltip()
