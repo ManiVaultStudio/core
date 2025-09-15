@@ -143,10 +143,6 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 			});
         }
     });
-
-    //addAlert(Alert::info("Info message!"));
-    //addAlert(Alert::debug("Debug message!"));
-    //addAlert(Alert::warning("Error message!"));
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)
