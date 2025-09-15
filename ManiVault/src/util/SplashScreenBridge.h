@@ -23,7 +23,8 @@ class SplashScreenBridge : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(std::int32_t progress READ progress NOTIFY progressChanged)
+    Q_PROPERTY(int progress READ progress NOTIFY progressChanged)
+    Q_PROPERTY(QString progressDescription READ progressDescription NOTIFY progressDescriptionChanged)
 
 public:
 
@@ -37,7 +38,13 @@ public:
      * Get progress value
      * @return Progress value in range [0, 100]
      */
-    std::int32_t progress() const;
+    int progress() const;
+
+    /**
+     * Get progress description
+     * @return Progress description
+     */
+    QString progressDescription() const;
 
 public slots:
 
@@ -45,11 +52,16 @@ public slots:
      * Set progress value to \p progress
      * @param progress Progress value in range [0, 100]
      */
-	void setProgress(std::int32_t progress);
+	void setProgress(int progress);
 
+    /**
+     * Set progress description to \p description
+     * @param progressDescription Progress description
+     */
+    void setProgressDescription(const QString& progressDescription);
+
+    /** called by JS at load */
     void requestInitial();
-
-    // called by JS at load
 
 signals:
 
@@ -57,10 +69,17 @@ signals:
      * Signals that progress changed to \p progress
      * @param progress New progress value in range [0, 100]
      */
-    void progressChanged(std::int32_t progress);
+    void progressChanged(int progress);
+
+    /**
+     * Signals that progress description changed to \p description
+     * @param description New progress description
+     */
+    void progressDescriptionChanged(const QString& description);
 
 private:
-    std::int32_t    _progress = 0;      /** Progress value in range [0, 100] */
+    int     _progress = 0;          /** Progress value in range [0, 100] */
+    QString _progressDescription;   /** Progress description */
 };
 
 }

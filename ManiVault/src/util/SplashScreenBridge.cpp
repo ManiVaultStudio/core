@@ -14,12 +14,17 @@ SplashScreenBridge::SplashScreenBridge(QObject* parent):
 {
 }
 
-std::int32_t SplashScreenBridge::progress() const
+int SplashScreenBridge::progress() const
 {
 	return _progress;
 }
 
-void SplashScreenBridge::setProgress(std::int32_t progress)
+QString SplashScreenBridge::progressDescription() const
+{
+	return _progressDescription;
+}
+
+void SplashScreenBridge::setProgress(int progress)
 {
 	progress = std::clamp(progress, 0, 100);
 
@@ -31,9 +36,20 @@ void SplashScreenBridge::setProgress(std::int32_t progress)
 	emit progressChanged(_progress);
 }
 
+void SplashScreenBridge::setProgressDescription(const QString& progressDescription)
+{
+    if (progressDescription == _progressDescription)
+        return;
+
+    _progressDescription = progressDescription;
+
+    emit progressDescriptionChanged(_progressDescription);
+}
+
 void SplashScreenBridge::requestInitial()
 {
 	emit progressChanged(_progress);
+    emit progressDescriptionChanged(_progressDescription);
 }
 
 }
