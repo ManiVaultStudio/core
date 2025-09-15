@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "util/SplashScreenBridge.h"
+
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QToolButton>
@@ -13,6 +15,7 @@
 #include <QGraphicsDropShadowEffect>
 #include <QTimer>
 #include <QWebEngineView>
+#include <QWebChannel>
 
 namespace mv::gui {
 
@@ -117,17 +120,16 @@ private:
     QFrame                      _roundedFrame;          /** Frame with rounded edges */
     QVBoxLayout                 _roundedFrameLayout;    /** Layout for the rounded frame */
     QToolButton                 _closeToolButton;       /** Button for forcefully closing the splash screen */
-    QWebEngineView              _webEngineView;         /** Web engine view for displaying the HTML content */  
+    QWebEngineView              _webEngineView;         /** Web engine view for displaying the HTML content */
+    QWebChannel                 _webChannel;            /** Web channel for communication between C++ and JavaScript */
+    util::SplashScreenBridge    _splashScreenBridge;    /** Bridge for communication between C++ and JavaScript */
     QGraphicsDropShadowEffect   _dropShadowEffect;      /** For adding a drop shadow to the splash screen widget */
     QTimer                      _processEventsTimer;    /** Timer to keep the splash screen widget somewhat responsive */
 
     static const std::uint32_t fixedWidth           = 640;      /** Widget fixed width */
     static const std::uint32_t fixedHeight          = 480;      /** Widget fixed height */
-    static const std::uint32_t margin               = 40;       /** Widget layout margins */
-    static const std::uint32_t logoSize             = 150;      /** Body content left-column logo maximum size */
-    static const std::uint32_t footerImagesHeight   = 40;       /** Maximum size of the footer content images */
     static const std::uint32_t frameRadius          = 7;        /** CSS radius of SplashScreenWidget#_roundedFrame */
-    static const std::uint32_t animationDuration    = 300;      /** Duration of the show and close animations */
+    static const std::uint32_t animationDuration    = 250;      /** Duration of the show and close animations */
     static const std::uint32_t panAmount            = 25;       /** The amount of up/down panning to do during the animations */
     static const std::uint32_t shadowMargin         = 20;       /** Extra margins allocated for drop shadow */
     static const std::uint32_t maxBlurRadius        = 20.0;     /** Maximum blur radius */

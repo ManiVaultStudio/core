@@ -29,12 +29,25 @@ using namespace mv::util;
 
 namespace mv::gui {
 
+    class Page : public QWebEnginePage {
+
+    public:
+        using QWebEnginePage::QWebEnginePage;
+    protected:
+        void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level,
+            const QString& message, int line, const QString& source) override {
+            qDebug().noquote() << "[JS]" << message << "(line" << line << "src" << source << ")";
+        }
+    };
+
 SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _splashScreenAction(splashScreenAction),
     _logoImage(":/Icons/AppIcon256"),
     _backgroundImage(":/Images/SplashScreenBackground"),
-    _closeToolButton(&_roundedFrame)
+    _closeToolButton(&_roundedFrame),
+    _webChannel(&_webEngineView),
+    _splashScreenBridge(&_webEngineView)
 {
     setObjectName("SplashScreenWidget");
     setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::WindowStaysOnTopHint);
@@ -58,7 +71,6 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 
     _processEventsTimer.start(10);
 
-    //_roundedFrameLayout.addLayout(bodyLayout, 1);
     _roundedFrameLayout.setContentsMargins(0, 0, 0, 0);
     _roundedFrameLayout.addWidget(&_webEngineView);
 
@@ -73,6 +85,32 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 
     setLayout(mainLayout);
     setGraphicsEffect(&_dropShadowEffect);
+
+    _webChannel.registerObject(QStringLiteral("bridge"), &_splashScreenBridge);
+
+    _webEngineView.setPage(new Page(&_webEngineView));
+    _webEngineView.page()->setWebChannel(&_webChannel);
+
+    connect(_splashScreenAction.getTaskAction().getTask(), &Task::progressChanged, this, [this](float progress) -> void {
+        if (!Application::current()->getStartupTask().getEnabled())
+            return;
+
+        if (!_initialized)
+            return;
+
+        QMetaObject::invokeMethod(&_splashScreenBridge, "setProgress", Qt::QueuedConnection, Q_ARG(int, static_cast<int>(100.0f * progress)));
+
+        _webEngineView.update();
+    });
+
+    connect(&Application::current()->getStartupTask(), &Task::progressDescriptionChanged, this, [this](const QString& progressDescription) -> void {
+        if (!Application::current()->getStartupTask().getEnabled())
+            return;
+
+        QMetaObject::invokeMethod(&_splashScreenBridge, "setProgressDescription", Qt::QueuedConnection, Q_ARG(QString, progressDescription));
+
+        _webEngineView.update();
+    });
 }
 
 SplashScreenWidget::~SplashScreenWidget()
@@ -89,73 +127,25 @@ void SplashScreenWidget::showEvent(QShowEvent* event)
 
     _initialized = true;
 
+    
     _webEngineView.setHtml(_splashScreenAction.getHtml(), QUrl("qrc:/"));
 
     QEventLoop loop;
 
-    // quit when the page finishes loading
-    QObject::connect(&_webEngineView, &QWebEngineView::loadFinished, &loop, &QEventLoop::quit);
+    connect(&_webEngineView, &QWebEngineView::loadFinished, [this, &loop]() -> void {
+        QMetaObject::invokeMethod(&_splashScreenBridge, "requestInitial", Qt::QueuedConnection);
 
-    // also quit after 1000 ms as a fallback
+    	loop.quit();
+    });
+
     QTimer::singleShot(1000, &loop, &QEventLoop::quit);
 
-    // run a nested loop so rendering continues
     loop.exec();
-
-    //if (!_backgroundImage.isNull())
-    //    _backgroundImage = _backgroundImage.scaled(_backgroundImage.size() / 5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-    //createToolbar();
-    //createBody();
-    //createFooter();
-
-    /*_roundedFrame.setStyleSheet(QString(" \
-        QFrame#RoundedFrame { \
-            background-color: transparent; \
-            border-radius: %1px; \
-        } \
-    ").arg(SplashScreenWidget::frameRadius));*/
-
-    //_closeToolButton.raise();
 }
 
 void SplashScreenWidget::paintEvent(QPaintEvent* paintEvent)
 {
     QWidget::paintEvent(paintEvent);
-
-    //QPainter painter(this);
-
-    //painter.setRenderHint(QPainter::Antialiasing);
-
-    //auto backgroundRect = rect().marginsRemoved(QMargins(SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin));
-
-    //if (Application::current()->getStartupTask().isRunning())
-    //    backgroundRect.setHeight(height() - SplashScreenWidget::frameRadius - (2 * SplashScreenWidget::shadowMargin));
-
-    //QPainterPath path;
-
-    //path.setFillRule(Qt::WindingFill);
-    //path.addRoundedRect(backgroundRect, SplashScreenWidget::frameRadius, SplashScreenWidget::frameRadius);
-
-    //if (Application::current()->getStartupTask().isRunning()) {
-    //    qreal squareSize = backgroundRect.height() / 2;
-
-    //    path.addRect(QRect(backgroundRect.left(), backgroundRect.top() + backgroundRect.height() - squareSize, squareSize, squareSize));
-    //    path.addRect(QRect((backgroundRect.left() + backgroundRect.width()) - squareSize, backgroundRect.top() + backgroundRect.height() - squareSize, squareSize, squareSize));
-
-    //    path = path.simplified();
-    //}
-
-    //QLinearGradient overlayGradient(0, 0, 0, height() - (2 * SplashScreenWidget::shadowMargin));
-
-    //overlayGradient.setColorAt(0.0, QColor(255, 255, 255, 0));
-    //overlayGradient.setColorAt(1.0, QColor(255, 255, 255, 255));
-
-    //painter.setOpacity(1.0);
-    //painter.setBrush(overlayGradient);
-    //painter.drawPath(path);
-
-    //_closeToolButton.raise();
 }
 
 void SplashScreenWidget::showAnimated()
@@ -262,62 +252,6 @@ void SplashScreenWidget::createToolbar()
 
 void SplashScreenWidget::createBody()
 {
-    qDebug() << __FUNCTION__;
-    //bodyLabel->setHtml(_splashScreenAction.getHtml(), QUrl("qrc:/"));
-    //bodyLabel->setOpenExternalLinks(true);
-    //bodyLabel->setStyleSheet("background-color: yellow;");
-
-    //_roundedFrameLayout.addLayout(bodyLayout, 1);
-
-    //auto centerOfWidget = rect().center();
-    //auto pixmapRectangle = _backgroundImage.rect();
-
-    //pixmapRectangle.moveCenter(centerOfWidget);
-
-    //const QBrush backgroundImageBrush(_backgroundImage);
-
-    //painter.setPen(QPen(Qt::transparent, 1));
-    //painter.setBrush(backgroundImageBrush);
-    //painter.drawPath(path);
-
-
-    //auto bodyLayout     = new QGridLayout();
-    //auto leftColumn     = new QVBoxLayout();
-    //auto middleColumn   = new QVBoxLayout();
-    //auto rightColumn    = new QVBoxLayout();
-
-    //bodyLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin, SplashScreenWidget::margin, shouldDisplayProjectInfo() ? SplashScreenWidget::margin : SplashScreenWidget::margin / 2);
-    //bodyLayout->setSpacing(10);
-    //bodyLayout->setAlignment(Qt::AlignTop);
-    //bodyLayout->setColumnStretch(2, 1);
-    //bodyLayout->setColumnMinimumWidth(1, 25);
-
-    //bodyLayout->addLayout(leftColumn, 0, 0);
-    //bodyLayout->addLayout(middleColumn, 0, 1);
-    //bodyLayout->addLayout(rightColumn, 0, 2);
-
-    //bodyLayout->setRowStretch(0, 1);
-
-    //leftColumn->setAlignment(Qt::AlignTop);
-    //rightColumn->setAlignment(Qt::AlignTop);
-
-    //auto projectLogoLabel   = new QLabel();
-    //auto htmlLabel          = new QLabel();
-
-    //projectLogoLabel->setScaledContents(true);
-    //projectLogoLabel->setFixedSize(SplashScreenWidget::logoSize, SplashScreenWidget::logoSize);
-
-    //htmlLabel->setWordWrap(true);
-    //htmlLabel->setTextFormat(Qt::RichText);
-    //htmlLabel->setOpenExternalLinks(true);
-
-    //leftColumn->addWidget(projectLogoLabel);
-    //rightColumn->addWidget(htmlLabel);
-
-    //rightColumn->setSpacing(8);
-
-    //const auto bodyColor = qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Dark).name();
-
     //if (shouldDisplayProjectInfo()) {
     //    auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
     //    //auto& splashScreenAction = _splashScreenAction.getProjectMetaAction()->getSplashScreenAction();
@@ -369,9 +303,6 @@ void SplashScreenWidget::createBody()
 
     //    rightColumn->addStretch(1);
 
-    //    rightColumn->addWidget(new ExternalLinkWidget("globe", "Visit our website", QUrl("https://www.manivault.studio/")));
-    //    rightColumn->addWidget(new ExternalLinkWidget("globe", "Contribute to ManiVault on Github", QUrl("https://github.com/ManiVaultStudio")));
-    //    rightColumn->addWidget(new ExternalLinkWidget("globe", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
     //}
 
     //leftColumn->addStretch(1);
@@ -386,21 +317,6 @@ void SplashScreenWidget::createBody()
     //            bodyLayout->addWidget(alert.getMessageLabel(this), rowCount, 2);
     //        }
     //    }
-    //}
-
-    //_roundedFrameLayout.addLayout(bodyLayout, 1);
-
-    //if (!shouldDisplayProjectInfo()) {
-    //    auto copyrightNoticeLabel = new QLabel();
-
-    //    copyrightNoticeLabel->setAlignment(Qt::AlignBottom);
-    //    copyrightNoticeLabel->setWordWrap(true);
-    //    copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 7pt;'> \
-    //        This software is licensed under the GNU Lesser General Public License v3.0.<br> \
-    //        Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</p>"
-    //    );
-
-    //    bodyLayout->addWidget(copyrightNoticeLabel, bodyLayout->rowCount(), 0, 1, 3);
     //}
 }
 
