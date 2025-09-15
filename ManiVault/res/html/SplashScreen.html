@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <title>Splash Screen</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self' qrc:;
+               script-src  'self' 'unsafe-inline' qrc:;
+               style-src   'self' 'unsafe-inline';
+               font-src    'self' data: qrc:;
+               img-src     'self' data:;">
 	<link rel="preload" href="qrc:/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
 	<link rel="preload" href="qrc:/webfonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
 	<link rel="preload" href="qrc:/webfonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
@@ -16,11 +22,7 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
-        /* If you pass a data URL below, it will show as background */
-        //background: url({{BACKGROUND_IMAGE_BASE64}}) no-repeat center center fixed;
-        //background-size: cover; /* use 'contain' or remove if you prefer */
 		font-family: system-ui, sans-serif;
-		color: "{{BODY_COLOR}}";
       }
 
       div.content {
@@ -47,35 +49,34 @@
       p { margin: 0 0 0.75em 0; }
 	  
 	  p.column {
-		//padding-top: 25px;
 	  }
 	  
-	  span.title {
+	span.title {
 		color: rgb(102, 159, 178);
 		font-size: 20pt;
 		font-weight: bold;
 		padding-top: 0px;
 		padding-bottom: 7px;
-	  }
-	  
-	  span.version {
+	}
+
+	span.version {
 		font-size: 9pt;
 		font-weight: bold;
 		padding-top: 0px;
 		padding-bottom: 0px;
-	  }
-	  
-	  span.subtitle {
+	}
+
+	span.subtitle {
 		padding-top: 20px;
 		padding-bottom: 20px;
 		font-size: 9pt;
 		font-style: italic;
-	  }
-	  
-	  p.description {
+	}
+
+	p.description {
 		font-size: 10pt;
 		padding-top: 20px;
-	  }
+	}
 	  
       span { display: inline-block; }
 	  
@@ -85,16 +86,54 @@
 		  vertical-align: -0.12em; /* nudge up a bit */
 		}
 		
-		
+	#progress {
+		position: fixed;
+		left: 0; right: 0; bottom: 0;
+		display: flex;
+		align-items: center;
+		padding: 4px 8px;
+		gap: 8px;                 /* space between text and bar */
+		height: 24px;
+		background: rgb(70, 70, 70);
+		font-size: 12px;
+		z-index: 99999;
+	}
+
+	/* description takes all remaining space */
+	#description {
+		flex: 1;
+		overflow: hidden;         /* prevent overflow */
+		text-overflow: ellipsis;  /* show … when too long */
+		white-space: nowrap;
+		color: rgb(220, 220, 220);
+		padding-left: 5px;
+	}
+
+	/* progress bar */
+	.bar-container {
+		flex: 0 0 150px;          /* fixed width (adjust as you like) */
+		height: 4px;              /* thin bar */
+		background: #ddd;
+		border-radius: 2px;
+		overflow: hidden;
+	}
+	
+	#bar {
+		height: 100%;
+		width: 0%;
+		background: #3b82f6;
+		transition: width .2s linear;
+	}
+  
     </style>
   </head>
   <body>
-    <div class="content">
+    <div id="test" class="content">
       <table>
         <tr>
           <td style="width:25%;">
 			<p class="column">
-				<img class="app-logo" src="{{APP_LOGO}}" alt="App logo">
+				
 			</p>
           </td>
           <td style="width:75%;">
@@ -108,13 +147,35 @@
         </tr>
       </table>
     </div>
-    <footer class="footer">
-      {{FOOTER}}
-	  <i class="fa-solid fa-circle-info"></i> Info
-  <i class="fa-solid fa-circle-info"></i>
-<i class="fa-regular fa-circle"></i>
-<i class="fa-brands fa-github"></i>
+	<p style='color: rgba(0, 0, 0, 80); font-size: 7pt;'>{{COPYRIGHT_NOTICE}}</p>
+	<div id="progress" class="progress">
+		<div id="description" class="description">asdasdasd</div>
+		<div class="bar-container">
+			<div id="bar" class="bar"></div>
+		</div>
+	</div>
 
-    </footer>
+	<script src="qrc:/qtwebchannel/qwebchannel.js"></script>
+	<script>
+	  // Update helper
+	  function setProgress(p) {
+		document.getElementById('bar').style.width = p + '%';
+	  }
+	  
+	  function setProgressDescription(progressDescription) {
+		document.getElementById('description').textContent = progressDescription;
+	  }
+
+	  // Connect to C++ via WebChannel
+	  new QWebChannel(qt.webChannelTransport, function (channel) {
+		const bridge = channel.objects.bridge;
+		
+		bridge.progressChanged.connect(setProgress);
+		bridge.progressDescriptionChanged.connect(setProgressDescription);
+		
+		if (bridge.requestInitial)
+			bridge.requestInitial();
+	  });
+	</script>
   </body>
 </html>
