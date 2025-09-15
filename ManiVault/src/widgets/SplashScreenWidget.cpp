@@ -233,23 +233,6 @@ void SplashScreenWidget::closeAnimated()
     deleteLater();
 }
 
-void SplashScreenWidget::createToolbar()
-{
-    const auto margin       = 10;
-    const auto fixedSize    = 25;
-
-    _closeToolButton.setFixedSize(fixedSize, fixedSize);
-    //_closeToolButton.setVisible(_splashScreenAction.getMayCloseSplashScreenWidget());
-    _closeToolButton.setIcon(StyledIcon("xmark"));
-    _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
-    _closeToolButton.setAutoRaise(true);
-    _closeToolButton.setToolTip("Close the splash screen");
-    _closeToolButton.setIconSize(QSize(20, 20));
-    _closeToolButton.move(width() - (2 * SplashScreenWidget::shadowMargin) - fixedSize - margin, margin);
-
-    connect(&_closeToolButton, &QToolButton::clicked, this, &SplashScreenWidget::closeAnimated);
-}
-
 void SplashScreenWidget::createBody()
 {
     //if (shouldDisplayProjectInfo()) {

@@ -22,7 +22,7 @@ class SplashScreenWidget;
 /**
  * Splash screen action class
  *
- * Action class for configuring and displaying a splash screen.
+ * For configuring and displaying a splash screen.
  *
  * Note: This action is developed for internal use only
  * 
@@ -46,14 +46,15 @@ public:
 
     public:
         /**
-         * Construct from \p icon and \p message
-         * @param icon Icon
+         * Construct from \p type, \p iconName, \p message and color
+         * @param type Alert type
+         * @param iconName Name of the icon (FontAwesome web fonts)
          * @param message Error message
          * @param color Icon and error message color
          */
-        Alert(const Type& type, const QIcon& icon, const QString& message, const QColor& color = Qt::black):
+        Alert(const Type& type, const QString& iconName, const QString& message, const QColor& color = Qt::black):
             _type(type),
-            _icon(icon),
+            _iconName(iconName),
             _message(message),
             _color(color)
         {
@@ -66,10 +67,10 @@ public:
         Type getType() const;
 
         /**
-         * Get alert icon
-         * @return Alert icon
+         * Get alert icon name
+         * @return Alert icon name (FontAwesome web fonts)
          */
-        QIcon getIcon() const;
+        QString getIconName() const;
 
         /**
          * Get alert message
@@ -83,29 +84,17 @@ public:
          */
         QColor getColor() const;
 
-        /**
-         * Get label representation of the alert icon
-         * @param parent Pointer to parent widget (if any)
-         * @return Pointer to label
-         */
-        QLabel* getIconLabel(QWidget* parent = nullptr) const;
+    public: // Static constructors for convenience
 
-        /**
-         * Get label representation of the alert message
-         * @param parent Pointer to parent widget (if any)
-         * @return Pointer to label
-         */
-        QLabel* getMessageLabel(QWidget* parent = nullptr) const;
-
-        static Alert info(const QString& message);      /** Get warning error message */
-        static Alert debug(const QString& message);     /** Get warning error message */
-        static Alert warning(const QString& message);   /** Get warning error message */
+        static Alert info(const QString& message);      /** Create information alert */
+        static Alert debug(const QString& message);     /** Create debug alert */
+        static Alert warning(const QString& message);   /** Create warning alert */
 
     private:
-        Type        _type;      /** Error type */
-        QIcon       _icon;      /** Error icon */
-        QString     _message;   /** Error message */
-        QColor      _color;     /** Icon and error message color */
+        Type        _type;      /** Alert type */
+        QString     _iconName;  /** Alert icon name */
+        QString     _message;   /** Alert message */
+        QColor      _color;     /** Icon and alert message color */
     };
 
     using Alerts = QVector<Alert>;

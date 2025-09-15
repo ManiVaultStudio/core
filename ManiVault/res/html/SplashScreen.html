@@ -15,149 +15,165 @@
 	<link rel="preload" href="qrc:/webfonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
 	<link rel="stylesheet" href="qrc:/webfonts/all.min.css">
     <style>
-      /* Make the page fill the viewport */
-      html, body { height: 100%; margin: 0; }
-      /* Stack content + footer; footer stays at bottom when short */
-      body {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-		font-family: system-ui, sans-serif;
-      }
+	
+		html, body { height: 100%; margin: 0; }
+      
+		body {
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			font-family: system-ui, sans-serif;
+		}
 
-      div.content {
-        flex: 1; /* take remaining space above the footer */
-        padding: 50px;
-        box-sizing: border-box;
-      }
+		div.content {
+			flex: 1;
+			padding: 50px;
+			box-sizing: border-box;
+		}
 
-      footer.footer {
-        margin-top: auto; /* pushes footer to bottom when content is short */
-        padding: 12px 16px;
-        box-sizing: border-box;
-      }
+		footer.footer {
+			margin-top: auto;
+			padding: 12px 16px;
+			box-sizing: border-box;
+		}
 
-      /* Table layout from your original snippet */
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      td { vertical-align: top; }
-      img.app-logo { max-width: 100%; height: auto; display: block; }
-
-      /* Small niceties */
-      p { margin: 0 0 0.75em 0; }
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
 	  
-	  p.column {
-	  }
-	  
-	span.title {
-		color: rgb(102, 159, 178);
-		font-size: 20pt;
-		font-weight: bold;
-		padding-top: 0px;
-		padding-bottom: 7px;
-	}
-
-	span.version {
-		font-size: 9pt;
-		font-weight: bold;
-		padding-top: 0px;
-		padding-bottom: 0px;
-	}
-
-	span.subtitle {
-		padding-top: 20px;
-		padding-bottom: 20px;
-		font-size: 9pt;
-		font-style: italic;
-	}
-
-	p.description {
-		font-size: 10pt;
-		padding-top: 20px;
-	}
-	  
-      span { display: inline-block; }
-	  
-	  .icon {
-		  font-size: 1em;        /* match surrounding text */
-		  line-height: 1;        /* remove extra leading */
-		  vertical-align: -0.12em; /* nudge up a bit */
+		td {
+			vertical-align: top;
 		}
 		
-	#progress {
-		position: fixed;
-		left: 0; right: 0; bottom: 0;
-		display: flex;
-		align-items: center;
-		padding: 4px 8px;
-		gap: 8px;                 /* space between text and bar */
-		height: 24px;
-		background: rgb(70, 70, 70);
-		font-size: 12px;
-		z-index: 99999;
-	}
+		img.app-logo { max-width: 100%; height: auto; display: block; }
 
-	/* description takes all remaining space */
-	#description {
-		flex: 1;
-		overflow: hidden;         /* prevent overflow */
-		text-overflow: ellipsis;  /* show … when too long */
-		white-space: nowrap;
-		color: rgb(220, 220, 220);
-		padding-left: 5px;
-	}
+		p {
+			margin: 0 0 0.75em 0;
+		}
 
-	/* progress bar */
-	.bar-container {
-		flex: 0 0 150px;          /* fixed width (adjust as you like) */
-		height: 4px;              /* thin bar */
-		background: #ddd;
-		border-radius: 2px;
-		overflow: hidden;
-	}
-	
-	#bar {
-		height: 100%;
-		width: 0%;
-		background: #3b82f6;
-		transition: width .2s linear;
-	}
+		p.column {
+		}
+		
+		p.description {
+			font-size: 10pt;
+			padding-top: 10px;
+		}
+		
+		p.alerts {
+			font-size: 10pt;
+		}
+		
+		p.copyright {
+			color: grey;
+			font-size: 10px;
+			padding-top: 20px;
+		}
+		
+		span {
+			
+		}
+		
+		span.title {
+			color: rgb(102, 159, 178);
+			font-size: 20pt;
+			font-weight: bold;
+			padding-top: 0px;
+			padding-bottom: 7px;
+		}
+
+		span.version {
+			font-size: 9pt;
+			font-weight: bold;
+			padding-top: 0px;
+			padding-bottom: 0px;
+		}
+
+		span.subtitle {
+			padding-top: 20px;
+			padding-bottom: 20px;
+			font-size: 9pt;
+			font-style: italic;
+		}
+		  
+		.icon {
+			font-size: 1em;
+			line-height: 1;
+			vertical-align: -0.12em;
+		}
+			
+		#progress {
+			position: fixed;
+			left: 0; right: 0; bottom: 0;
+			display: flex;
+			align-items: center;
+			padding: 4px 8px;
+			gap: 8px;
+			height: 24px;
+			background: rgb(70, 70, 70);
+			font-size: 12px;
+			z-index: 99999;
+		}
+
+		#description {
+			flex: 1;
+			overflow: hidden;         /* prevent overflow */
+			text-overflow: ellipsis;  /* show … when too long */
+			white-space: nowrap;
+			color: rgb(220, 220, 220);
+			padding-left: 5px;
+		}
+
+		.bar-container {
+			flex: 0 0 150px;          /* fixed width (adjust as you like) */
+			height: 4px;              /* thin bar */
+			background: #ddd;
+			border-radius: 2px;
+			overflow: hidden;
+		}
+		
+		#bar {
+			height: 100%;
+			width: 0%;
+			background: #3b82f6;
+			transition: width .2s linear;
+		}
   
     </style>
   </head>
   <body>
-    <div id="test" class="content">
+    <div class="content">
       <table>
         <tr>
           <td style="width:25%;">
 			<p class="column">
-				
+				{{LOGO}}
 			</p>
           </td>
           <td style="width:75%;">
             <p class="column">
-              <span class="title">{{APP_TITLE}}</span><br>
-              <span class="version">{{APP_VERSION}}</span><br>
-              <span class="subtitle">{{APP_SUBTITLE}}</span><br>
+              <span class="title">{{TITLE}}</span><br>
+              <span class="version">{{VERSION}}</span><br>
+              <span class="subtitle">{{SUBTITLE}}</span><br>
             </p>
-            <p>{{APP_DESCRIPTION}}</p>
+            <p class="description">{{DESCRIPTION}}</p>
+			<p class="alerts">{{ALERTS}}</p>
+			<p class="copyright">{{COPYRIGHT}}</p>
           </td>
         </tr>
       </table>
-    </div>
-	<p style='color: rgba(0, 0, 0, 80); font-size: 7pt;'>{{COPYRIGHT_NOTICE}}</p>
+	  <div>
+		
+	</div>
 	<div id="progress" class="progress">
-		<div id="description" class="description">asdasdasd</div>
+		<div id="description" class="description"></div>
 		<div class="bar-container">
 			<div id="bar" class="bar"></div>
 		</div>
 	</div>
-
+    </div>
 	<script src="qrc:/qtwebchannel/qwebchannel.js"></script>
 	<script>
-	  // Update helper
 	  function setProgress(p) {
 		document.getElementById('bar').style.width = p + '%';
 	  }
@@ -166,7 +182,6 @@
 		document.getElementById('description').textContent = progressDescription;
 	  }
 
-	  // Connect to C++ via WebChannel
 	  new QWebChannel(qt.webChannelTransport, function (channel) {
 		const bridge = channel.objects.bridge;
 		

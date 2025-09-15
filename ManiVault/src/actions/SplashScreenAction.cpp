@@ -20,21 +20,36 @@ SplashScreenAction::Alert SplashScreenAction::Alert::info(const QString& message
 {
     const auto color = QColor::fromHsv(220, 200, 150);
 
-    return Alert(Type::Info, StyledIcon("info-circle"), message, color);
+    return {
+        Type::Info,
+        "fa-solid fa-info-circle",
+        message,
+        color
+    };
 }
 
 SplashScreenAction::Alert SplashScreenAction::Alert::debug(const QString& message)
 {
     const auto color = QColor::fromHsv(125, 200, 150);
 
-    return Alert(Type::Debug, StyledIcon("bug"), message, color);
+    return {
+        Type::Debug,
+        "fa-solid fa-bug",
+        message,
+        color
+    };
 }
 
 SplashScreenAction::Alert SplashScreenAction::Alert::warning(const QString& message)
 {
     const auto color = QColor::fromHsv(0, 200, 150);
 
-    return Alert(Type::Warning, StyledIcon("exclamation-circle"), message, color);
+    return {
+        Type::Warning,
+        "fa-solid fa-exclamation-circle",
+        message,
+        color
+    };
 }
 
 SplashScreenAction::Alert::Type SplashScreenAction::Alert::getType() const
@@ -42,9 +57,9 @@ SplashScreenAction::Alert::Type SplashScreenAction::Alert::getType() const
     return _type;
 }
 
-QIcon SplashScreenAction::Alert::getIcon() const
+QString SplashScreenAction::Alert::getIconName() const
 {
-    return _icon;
+    return _iconName;
 }
 
 QString SplashScreenAction::Alert::getMessage() const
@@ -55,31 +70,6 @@ QString SplashScreenAction::Alert::getMessage() const
 QColor SplashScreenAction::Alert::getColor() const
 {
     return _color;
-}
-
-QLabel* SplashScreenAction::Alert::getIconLabel(QWidget* parent /*= nullptr*/) const
-{
-    auto iconLabel = new QLabel();
-
-    iconLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    iconLabel->setAlignment(Qt::AlignTop | Qt::AlignRight);
-    iconLabel->setStyleSheet("padding-top: 6px;");
-    iconLabel->setPixmap(_icon.pixmap(QSize(24, 24)));
-
-    return iconLabel;
-}
-
-QLabel* SplashScreenAction::Alert::getMessageLabel(QWidget* parent /*= nullptr*/) const
-{
-    auto messageLabel = new QLabel();
-
-    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-    messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    messageLabel->setStyleSheet(QString("color: %1; margin-top: 1px;").arg(_color.name(QColor::HexRgb)));
-    messageLabel->setWordWrap(true);
-    messageLabel->setText(_message);
-
-    return messageLabel;
 }
 
 SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*/) :
@@ -153,6 +143,10 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 			});
         }
     });
+
+    //addAlert(Alert::info("Info message!"));
+    //addAlert(Alert::debug("Debug message!"));
+    //addAlert(Alert::warning("Error message!"));
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)
@@ -208,7 +202,7 @@ void SplashScreenAction::showSplashScreenWidget()
 
 void SplashScreenAction::closeSplashScreenWidget()
 {
-    QTimer::singleShot(1000, [this]() -> void {
+    QTimer::singleShot(5000, [this]() -> void {
         if (_splashScreenWidget.isNull())
             return;
 
@@ -238,7 +232,7 @@ QString SplashScreenAction::getHtmlFromTemplate() const
 
     const auto replaceInHtml = [&htmlTemplate](const QString& placeholder, const QString& value) -> void {
         if (value.isEmpty())
-            htmlTemplate.replace(placeholder, "N/A");
+            htmlTemplate.replace(placeholder, "");
         else
             htmlTemplate.replace(placeholder, value);
     };
@@ -247,15 +241,17 @@ QString SplashScreenAction::getHtmlFromTemplate() const
 
     replaceInHtml("{{BODY_COLOR}}", bodyColor);
 
+    
+
     if (auto projectImageAction = dynamic_cast<const ProjectMetaAction*>(_projectMetaAction)) {
-        replaceInHtml("{{APP_TITLE}}", projectImageAction->getTitleAction().getString());
-        replaceInHtml("{{APP_VERSION}}", projectImageAction->getProjectVersionAction().getVersionStringAction().getString());
-        replaceInHtml("{{APP_SUBTITLE}}", "");
+        replaceInHtml("{{TITLE}}", projectImageAction->getTitleAction().getString());
+        replaceInHtml("{{VERSION}}", projectImageAction->getProjectVersionAction().getVersionStringAction().getString());
+        replaceInHtml("{{SUBTITLE}}", "");
         replaceInHtml("{{COPYRIGHT_NOTICE}}", "");
     } else {
-        replaceInHtml("{{APP_TITLE}}", "ManiVault <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span>");
-        replaceInHtml("{{APP_VERSION}}", QString("Version: %1").arg(QString::fromStdString(Application::current()->getVersion().getVersionString())));
-        replaceInHtml("{{APP_SUBTITLE}}", "An extensible open-source visual analytics framework for analyzing high-dimensional data");
+        replaceInHtml("{{TITLE}}", "ManiVault <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span>");
+        replaceInHtml("{{VERSION}}", QString("Version: %1").arg(QString::fromStdString(Application::current()->getVersion().getVersionString())));
+        replaceInHtml("{{SUBTITLE}}", "An extensible open-source visual analytics framework for analyzing high-dimensional data");
 
         QStringList externalLinks;
 
@@ -267,10 +263,21 @@ QString SplashScreenAction::getHtmlFromTemplate() const
         addExternalLink("https://github.com/ManiVaultStudio", "Contribute to ManiVault on Github", "fa-brands fa-github");
         addExternalLink("https://discord.gg/pVxmC2cSzA", "Get in touch on our Discord", "fa-brands fa-discord");
 
-        replaceInHtml("{{APP_DESCRIPTION}}", QString("<p class='description'>%1</p>").arg(externalLinks.join("<br>")));
-        replaceInHtml("{{COPYRIGHT_NOTICE}}", "This software is licensed under the GNU Lesser General Public License v3.0.<br>Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)");
+        replaceInHtml("{{DESCRIPTION}}", externalLinks.join("<br>"));
+        replaceInHtml("{{COPYRIGHT}}", "This software is licensed under the GNU Lesser General Public License v3.0.<br>Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)");
     }
 
+    QStringList alertStrings;
+
+    const auto addAlertString = [&alertStrings](const QString& iconName, const QString& alertMessage, const QColor& color) -> void {
+        alertStrings << QString("<span style='color: %3'><i class='%1 fa-sm icon' style='padding-right: 5px;'></i>%2</span>").arg(iconName, alertMessage, color.name());
+	};
+
+    for (const auto& alert : getAlerts()) {
+        addAlertString(alert.getIconName(), alert.getMessage(), alert.getColor());
+    }
+
+    replaceInHtml("{{ALERTS}}", alertStrings.join("<br>"));
 
     //qDebug() << htmlTemplate;
 

@@ -82,7 +82,7 @@ public:
     SplashScreenWidget(SplashScreenAction& splashScreenAction, QWidget* parent = nullptr);
 
     /** Destructor */
-    ~SplashScreenWidget();
+    ~SplashScreenWidget() override;
 
     void showEvent(QShowEvent* event) override;
 
@@ -99,9 +99,6 @@ public:
     void closeAnimated();
 
 private: // Splash screen content
-
-    /** Create toolbar with close button (if appropriate)*/
-    void createToolbar();
 
     /** Create two-column body content */
     void createBody();
