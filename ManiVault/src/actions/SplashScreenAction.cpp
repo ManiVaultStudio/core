@@ -208,7 +208,7 @@ void SplashScreenAction::showSplashScreenWidget()
 
 void SplashScreenAction::closeSplashScreenWidget()
 {
-    QTimer::singleShot(5000, [this]() -> void {
+    QTimer::singleShot(1000, [this]() -> void {
         if (_splashScreenWidget.isNull())
             return;
 
@@ -250,6 +250,8 @@ QString SplashScreenAction::getHtmlFromTemplate() const
     if (auto projectImageAction = dynamic_cast<const ProjectMetaAction*>(_projectMetaAction)) {
         replaceInHtml("{{APP_TITLE}}", projectImageAction->getTitleAction().getString());
         replaceInHtml("{{APP_VERSION}}", projectImageAction->getProjectVersionAction().getVersionStringAction().getString());
+        replaceInHtml("{{APP_SUBTITLE}}", "");
+        replaceInHtml("{{COPYRIGHT_NOTICE}}", "");
     } else {
         replaceInHtml("{{APP_TITLE}}", "ManiVault <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span>");
         replaceInHtml("{{APP_VERSION}}", QString("Version: %1").arg(QString::fromStdString(Application::current()->getVersion().getVersionString())));
@@ -266,7 +268,9 @@ QString SplashScreenAction::getHtmlFromTemplate() const
         addExternalLink("https://discord.gg/pVxmC2cSzA", "Get in touch on our Discord", "fa-brands fa-discord");
 
         replaceInHtml("{{APP_DESCRIPTION}}", QString("<p class='description'>%1</p>").arg(externalLinks.join("<br>")));
+        replaceInHtml("{{COPYRIGHT_NOTICE}}", "This software is licensed under the GNU Lesser General Public License v3.0.<br>Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)");
     }
+
 
     //qDebug() << htmlTemplate;
 
