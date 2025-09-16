@@ -125,7 +125,7 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 
         QMetaObject::invokeMethod(&_splashScreenBridge, "setProgress", Qt::QueuedConnection, Q_ARG(int, static_cast<int>(100.0f * progress)));
 
-        _webEngineView.update();
+        QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
     });
 
     connect(&Application::current()->getStartupTask(), &Task::progressDescriptionChanged, this, [this](const QString& progressDescription) -> void {
@@ -134,7 +134,7 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 
         QMetaObject::invokeMethod(&_splashScreenBridge, "setProgressDescription", Qt::QueuedConnection, Q_ARG(QString, progressDescription));
 
-        _webEngineView.update();
+        QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
     });
 }
 

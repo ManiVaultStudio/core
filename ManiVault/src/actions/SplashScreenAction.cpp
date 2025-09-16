@@ -132,17 +132,6 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
         if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
             closeSplashScreenWidget();
     });
-
-   // connect(&mv::projects().getProjectSerializationTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-   //     if (previousStatus == Task::Status::Running && status == Task::Status::Finished) {
-   //         QPointer<SplashScreenAction> splashScreenAction(this);
-
-   //         QTimer::singleShot(2500, parentWidget(), [this, splashScreenAction]() -> void {
-   //             if (!splashScreenAction.isNull())
-			//		closeSplashScreenWidget();
-			//});
-   //     }
-   // });
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)
@@ -210,7 +199,9 @@ void SplashScreenAction::showSplashScreenWidget()
 
 void SplashScreenAction::closeSplashScreenWidget() 
 {
-    QTimer::singleShot(1000, [this]() -> void {
+    const auto closeDelayMs = 1500 + _alerts.count() * 1000;
+
+    QTimer::singleShot(closeDelayMs, [this]() -> void {
         if (_splashScreenWidget.isNull())
             return;
 
