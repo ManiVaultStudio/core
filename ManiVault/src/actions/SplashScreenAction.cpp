@@ -3,14 +3,14 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "SplashScreenAction.h"
-
-#include <QBuffer>
-
+#include "CoreInterface.h"
 #include "Application.h"
+
+#include "util/Miscellaneous.h"
 
 #include "widgets/SplashScreenWidget.h"
 
-#include "CoreInterface.h"
+#include <QBuffer>
 
 using namespace mv::util;
 
@@ -249,10 +249,7 @@ QString SplashScreenAction::getHtmlFromTemplate() const
 
     replaceInHtml("{{BODY_COLOR}}", bodyColor);
 
-
-    QPixmap backgroundPixmap(":/Images/SplashScreenBackground");
-
-
+    applyResourceImageToCss(htmlTemplate, QStringLiteral(":/Images/SplashScreenBackground"));
 
     QPixmap logoPixmap(":/Icons/AppIcon128");
 
