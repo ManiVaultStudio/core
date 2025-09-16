@@ -84,7 +84,7 @@
 	<qresource prefix="/HTML">
         <file alias="Markdown">html/markdown.html</file>
         <file alias="ErrorLoggingConsent">html/ErrorLoggingConsent.html</file>
-        <file alias="SplashScreen">html/SplashScreen.html</file>
+        <file alias="SplashScreenTemplate">html/SplashScreenTemplate.html</file>
     </qresource>
 	<qresource prefix="/JSON">
         <file alias="TutorialsSchema">json/tutorials.schema.json</file>

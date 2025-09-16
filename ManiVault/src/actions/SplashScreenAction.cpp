@@ -218,7 +218,7 @@ bool SplashScreenAction::shouldDisplayProjectInfo() const
 
 QString SplashScreenAction::getHtmlFromTemplate() const
 {
-    QFile splashScreenFile(":/HTML/SplashScreen");
+    QFile splashScreenFile(":/HTML/SplashScreenTemplate");
 
     if (!splashScreenFile.open(QIODevice::ReadOnly | QIODevice::Text))
         return QStringLiteral("<html><body>Error: cannot load template</body></html>");
