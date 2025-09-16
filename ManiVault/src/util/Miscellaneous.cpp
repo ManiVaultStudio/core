@@ -503,9 +503,9 @@ QString pixmapToDataUrl(const QPixmap& pixmap, const QByteArray& fmt, int qualit
 	return QStringLiteral("data:%1;base64,%2").arg(mime, QString::fromLatin1(b64));
 }
 
-QString applyPixmapToCss(QString css, const QPixmap& pm, const QByteArray& fmt, int quality, const QString& token)
+QString applyPixmapToCss(QString css, const QPixmap& pixmap, const QByteArray& format, int quality, const QString& token)
 {
-	const auto dataUrl = pixmapToDataUrl(pm, fmt, quality);
+	const auto dataUrl = pixmapToDataUrl(pixmap, format, quality);
 	const auto urlExpr = QStringLiteral("url(%1)").arg(dataUrl);
 
 	QRegularExpression regularExpression(QStringLiteral(R"(url\(\s*(['"]?)%1\1\s*\))").arg(QRegularExpression::escape(token)));

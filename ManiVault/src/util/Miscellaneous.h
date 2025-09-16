@@ -221,12 +221,12 @@ CORE_EXPORT QString pixmapToDataUrl(const QPixmap& pixmap, const QByteArray& fmt
  * Replace \p token in \p css with a CSS data URL formed from \p pixmap encoded as \p fmt with \p quality
  * @param css Input CSS
  * @param pixmap Input pixmap
- * @param fmt Encoding format (PNG, JPEG, etc.)
+ * @param format Encoding format (PNG, JPEG, etc.)
  * @param quality Encoding quality (-1 is default)
  * @param token Token to replace in the CSS (default {{BACKGROUND_IMAGE}})
  * @return CSS with token replaced by data URL
  */
-CORE_EXPORT QString applyPixmapToCss(QString css, const QPixmap& pm, const QByteArray& fmt = "PNG", int quality = -1, const QString& token = QStringLiteral("{{BACKGROUND_IMAGE}}"));
+CORE_EXPORT QString applyPixmapToCss(QString css, const QPixmap& pixmap, const QByteArray& format = "PNG", int quality = -1, const QString& token = QStringLiteral("{{BACKGROUND_IMAGE}}"));
 
 /**
  * Replace \p token in \p css with a CSS data URL formed from image at \p pathOrResource encoded as \p quality

@@ -94,12 +94,6 @@ public:
 
 private: // Splash screen content
 
-    /** Create two-column body content */
-    void createBody();
-
-    /** Create footer content with some images and when necessary a progress bar */
-    void createFooter();
-
     /** Get the ManiVault copyright notice tooltip string */
     static QString getCopyrightNoticeTooltip();
 
