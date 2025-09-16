@@ -132,10 +132,12 @@
 		}
 		
 		#bar {
+			width: 0px;
 			height: 100%;
-			width: 0%;
 			background: #3b82f6;
 			transition: width .2s linear;
+			transition: transform .2s linear; /* smooth updates */
+			will-change: transform;
 		}
   
     </style>
@@ -174,7 +176,8 @@
 	<script src="qrc:/qtwebchannel/qwebchannel.js"></script>
 	<script>
 	  function setProgress(p) {
-		document.getElementById('bar').style.width = p + '%';
+	  console.log("----------" + p)
+		document.getElementById('bar').style.width = ((p / 100.0) * 150) + 'px';
 	  }
 	  
 	  function setProgressDescription(progressDescription) {
