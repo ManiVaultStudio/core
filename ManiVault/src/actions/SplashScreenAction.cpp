@@ -208,9 +208,9 @@ void SplashScreenAction::showSplashScreenWidget()
     _splashScreenWidget->showAnimated();
 }
 
-void SplashScreenAction::closeSplashScreenWidget()
+void SplashScreenAction::closeSplashScreenWidget() 
 {
-    QTimer::singleShot(5000, [this]() -> void {
+    QTimer::singleShot(1000, [this]() -> void {
         if (_splashScreenWidget.isNull())
             return;
 
@@ -290,8 +290,6 @@ QString SplashScreenAction::getHtmlFromTemplate() const
     }
 
     replaceInHtml("{{ALERTS}}", alertStrings.join("<br>"));
-
-    //qDebug() << htmlTemplate;
 
     return htmlTemplate;
 }
