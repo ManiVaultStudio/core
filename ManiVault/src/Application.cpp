@@ -291,6 +291,18 @@ std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShap
     return cursorOverridesCount.first().count;
 }
 
+void Application::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+}
+
+QVariantMap Application::toVariantMap() const
+{
+    auto variantMap = Serializable::toVariantMap();
+
+    return variantMap;
+}
+
 Application::TemporaryDirs::TemporaryDirs(QObject* parent) :
     QObject(parent),
     _task(this, "Remove stale ManiVault temporary directories")

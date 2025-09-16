@@ -253,6 +253,20 @@ public: // Cursor overrides
      */
     static std::int32_t requestRemoveOverrideCursor(Qt::CursorShape cursorShape, bool all = false);
 
+public: // Serialization
+
+    /**
+     * Load application state from variant map
+     * @param variantMap Variant representation of the application
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save application state to variant maps
+     * @return Variant representation of the application
+     */
+    QVariantMap toVariantMap() const override;
+
 public: // Statics
 
     static QMainWindow* getMainWindow();
