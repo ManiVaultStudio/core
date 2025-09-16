@@ -194,13 +194,9 @@ CORE_EXPORT std::string pixmapToCssSrc(const QPixmap& pixmap);
 CORE_EXPORT QString mimeForFormat(const QByteArray& byteArray);
 
 /**
- * Replace \p token in \p css with a CSS data URL formed from \p pixmap encoded as \p fmt with \p quality
- * @param css Input CSS
- * @param pixmap Input pixmap
- * @param fmt Encoding format (PNG, JPEG, etc.)
- * @param quality Encoding quality (-1 is default)
- * @param token Token to replace in the CSS (default {{BACKGROUND_IMAGE}})
- * @return CSS with token replaced by data URL
+ * Normalize image format from file \p path suffix (e.g. jpg -> JPEG)
+ * @param path Input file path
+ * @return Normalized format (PNG, JPEG, etc.)
  */
 CORE_EXPORT QByteArray normalizeFormatFromSuffix(const QString& path);
 
@@ -240,5 +236,5 @@ CORE_EXPORT QString applyPixmapToCss(QString css, const QPixmap& pm, const QByte
  * @param quality Encoding quality (-1 is default)
  * @return CSS with token replaced by data URL
  */
-inline QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token = QStringLiteral("{{BACKGROUND_IMAGE}}"), int quality = 90);
+CORE_EXPORT QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token = QStringLiteral("{{BACKGROUND_IMAGE}}"), int quality = 90);
 }
