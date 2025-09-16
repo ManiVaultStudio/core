@@ -38,10 +38,6 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
     _groupAction.addAction(&project->getTagsAction());
     _groupAction.addAction(&project->getCommentsAction());
     _groupAction.addAction(&project->getContributorsAction());
-    //_groupAction.addAction(&project->getOverrideApplicationStatusBarAction());
-    //_groupAction.addAction(&project->getStatusBarVisibleAction());
-    //_groupAction.addAction(&project->getStatusBarOptionsAction());
-    _groupAction.addAction(&project->getSplashScreenAction());
     _groupAction.addAction(&project->getStudioModeAction());
     _groupAction.addAction(&workspaces().getLockingAction().getLockedAction());
 
