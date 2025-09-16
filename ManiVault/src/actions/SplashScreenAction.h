@@ -145,6 +145,12 @@ public:
      */
     QString getHtml() const;
 
+    /**
+     * Convert \p pixmap to base64 string
+     * @param pixmap Pixmap to convert
+     * @return Base64 representation of the pixmap, empty string if not available
+     */
+    static QString pixmapToBase64(const QPixmap& pixmap);
 public:
 
     /**

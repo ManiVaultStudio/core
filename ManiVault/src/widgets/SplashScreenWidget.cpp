@@ -29,16 +29,45 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-    class Page : public QWebEnginePage {
+/** Custom QWebEnginePage to handle JavaScript console messages and navigation requests */
+class Page : public QWebEnginePage
+{
+public:
 
-    public:
-        using QWebEnginePage::QWebEnginePage;
-    protected:
-        void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level,
-            const QString& message, int line, const QString& source) override {
-            qDebug().noquote() << "[JS]" << message << "(line" << line << "src" << source << ")";
+    /** No need for custom constructor */
+    using QWebEnginePage::QWebEnginePage;
+
+protected:
+
+    /**
+     * Handle JavaScript console messages
+     * @param level Level of the message
+     * @param message Message content
+     * @param line Line number
+     * @param source Source file
+     */
+    void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int line, const QString& source) override {
+        qDebug().noquote() << "[JS]" << message << "(line" << line << "src" << source << ")";
+    }
+
+    /**
+     * Handle navigation requests
+     * @param url URL to navigate to
+     * @param type Type of navigation
+     * @param isMainFrame Whether the navigation is for the main frame
+     * @return 
+     */
+    bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override
+    {
+        if (type == QWebEnginePage::NavigationTypeLinkClicked) {
+	        QDesktopServices::openUrl(url);
+
+	        return false;
         }
-    };
+
+        return true;
+    }
+};
 
 SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, QWidget* parent /*= nullptr*/) :
     QWidget(parent),

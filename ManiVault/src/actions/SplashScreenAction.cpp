@@ -173,6 +173,18 @@ QString SplashScreenAction::getHtml() const
     return getHtmlFromTemplate();
 }
 
+QString SplashScreenAction::pixmapToBase64(const QPixmap& pixmap)
+{
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+
+    buffer.open(QIODevice::WriteOnly);
+
+    pixmap.save(&buffer, "PNG");
+
+    return QString::fromLatin1(byteArray.toBase64());
+}
+
 ProjectMetaAction* SplashScreenAction::getProjectMetaAction()
 {
     return _projectMetaAction;
@@ -237,7 +249,14 @@ QString SplashScreenAction::getHtmlFromTemplate() const
 
     replaceInHtml("{{BODY_COLOR}}", bodyColor);
 
-    
+
+    QPixmap backgroundPixmap(":/Images/SplashScreenBackground");
+
+
+
+    QPixmap logoPixmap(":/Icons/AppIcon128");
+
+    replaceInHtml("{{LOGO}}", QString("<img src='data:image/png;base64,%1'>").arg(pixmapToBase64(logoPixmap.scaled(96, 96, Qt::IgnoreAspectRatio, Qt::SmoothTransformation))));
 
     if (auto projectImageAction = dynamic_cast<const ProjectMetaAction*>(_projectMetaAction)) {
         replaceInHtml("{{TITLE}}", projectImageAction->getTitleAction().getString());
