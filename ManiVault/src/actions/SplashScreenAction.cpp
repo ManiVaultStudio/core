@@ -3,12 +3,14 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "SplashScreenAction.h"
-
+#include "CoreInterface.h"
 #include "Application.h"
+
+#include "util/Miscellaneous.h"
 
 #include "widgets/SplashScreenWidget.h"
 
-#include "CoreInterface.h"
+#include <QBuffer>
 
 using namespace mv::util;
 
@@ -18,21 +20,36 @@ SplashScreenAction::Alert SplashScreenAction::Alert::info(const QString& message
 {
     const auto color = QColor::fromHsv(220, 200, 150);
 
-    return Alert(Type::Info, StyledIcon("info-circle"), message, color);
+    return {
+        Type::Info,
+        "fa-solid fa-info-circle",
+        message,
+        color
+    };
 }
 
 SplashScreenAction::Alert SplashScreenAction::Alert::debug(const QString& message)
 {
     const auto color = QColor::fromHsv(125, 200, 150);
 
-    return Alert(Type::Debug, StyledIcon("bug"), message, color);
+    return {
+        Type::Debug,
+        "fa-solid fa-bug",
+        message,
+        color
+    };
 }
 
 SplashScreenAction::Alert SplashScreenAction::Alert::warning(const QString& message)
 {
     const auto color = QColor::fromHsv(0, 200, 150);
 
-    return Alert(Type::Warning, StyledIcon("exclamation-circle"), message, color);
+    return {
+        Type::Warning,
+        "fa-solid fa-exclamation-circle",
+        message,
+        color
+    };
 }
 
 SplashScreenAction::Alert::Type SplashScreenAction::Alert::getType() const
@@ -40,9 +57,9 @@ SplashScreenAction::Alert::Type SplashScreenAction::Alert::getType() const
     return _type;
 }
 
-QIcon SplashScreenAction::Alert::getIcon() const
+QString SplashScreenAction::Alert::getIconName() const
 {
-    return _icon;
+    return _iconName;
 }
 
 QString SplashScreenAction::Alert::getMessage() const
@@ -53,31 +70,6 @@ QString SplashScreenAction::Alert::getMessage() const
 QColor SplashScreenAction::Alert::getColor() const
 {
     return _color;
-}
-
-QLabel* SplashScreenAction::Alert::getIconLabel(QWidget* parent /*= nullptr*/) const
-{
-    auto iconLabel = new QLabel();
-
-    iconLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    iconLabel->setAlignment(Qt::AlignTop | Qt::AlignRight);
-    iconLabel->setStyleSheet("padding-top: 6px;");
-    iconLabel->setPixmap(_icon.pixmap(QSize(24, 24)));
-
-    return iconLabel;
-}
-
-QLabel* SplashScreenAction::Alert::getMessageLabel(QWidget* parent /*= nullptr*/) const
-{
-    auto messageLabel = new QLabel();
-
-    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-    messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    messageLabel->setStyleSheet(QString("color: %1; margin-top: 1px;").arg(_color.name(QColor::HexRgb)));
-    messageLabel->setWordWrap(true);
-    messageLabel->setText(_message);
-
-    return messageLabel;
 }
 
 SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*/) :
@@ -140,17 +132,6 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
         if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
             closeSplashScreenWidget();
     });
-
-    connect(&mv::projects().getProjectSerializationTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-        if (previousStatus == Task::Status::Running && status == Task::Status::Finished) {
-            QPointer<SplashScreenAction> splashScreenAction(this);
-
-            QTimer::singleShot(2500, parentWidget(), [this, splashScreenAction]() -> void {
-                if (!splashScreenAction.isNull())
-					closeSplashScreenWidget();
-			});
-        }
-    });
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)
@@ -173,12 +154,24 @@ void SplashScreenAction::setMayCloseSplashScreenWidget(bool mayCloseSplashScreen
     _mayCloseSplashScreenWidget = mayCloseSplashScreenWidget;
 }
 
-QString SplashScreenAction::getHtmlBody() const
+QString SplashScreenAction::getHtml() const
 {
     if (!_htmlOverrideAction.getString().isEmpty())
         return _htmlOverrideAction.getString();
 
-    return {};
+    return getHtmlFromTemplate();
+}
+
+QString SplashScreenAction::pixmapToBase64(const QPixmap& pixmap)
+{
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+
+    buffer.open(QIODevice::WriteOnly);
+
+    pixmap.save(&buffer, "PNG");
+
+    return QString::fromLatin1(byteArray.toBase64());
 }
 
 ProjectMetaAction* SplashScreenAction::getProjectMetaAction()
@@ -204,14 +197,92 @@ void SplashScreenAction::showSplashScreenWidget()
     _splashScreenWidget->showAnimated();
 }
 
-void SplashScreenAction::closeSplashScreenWidget()
+void SplashScreenAction::closeSplashScreenWidget() 
 {
-    if (_splashScreenWidget.isNull())
-        return;
+    const auto closeDelayMs = 1500 + _alerts.count() * 1000;
 
-    _splashScreenWidget->closeAnimated();
+    QTimer::singleShot(closeDelayMs, [this]() -> void {
+        if (_splashScreenWidget.isNull())
+            return;
 
-    _splashScreenWidget.clear();
+        _splashScreenWidget->closeAnimated();
+
+        _splashScreenWidget.clear();
+	});
+}
+
+bool SplashScreenAction::shouldDisplayProjectInfo() const
+{
+    return getEnabledAction().isChecked() && _projectMetaAction;
+}
+
+QString SplashScreenAction::getHtmlFromTemplate() const
+{
+    QFile splashScreenFile(":/HTML/SplashScreenTemplate");
+
+    if (!splashScreenFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        return QStringLiteral("<html><body>Error: cannot load template</body></html>");
+
+    QTextStream textStreamIn(&splashScreenFile);
+
+	textStreamIn.setEncoding(QStringConverter::Utf8);
+
+    QString htmlTemplate = textStreamIn.readAll();
+
+    const auto replaceInHtml = [&htmlTemplate](const QString& placeholder, const QString& value) -> void {
+        if (value.isEmpty())
+            htmlTemplate.replace(placeholder, "");
+        else
+            htmlTemplate.replace(placeholder, value);
+    };
+
+    const auto bodyColor = qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Dark).name();
+
+    replaceInHtml("{{BODY_COLOR}}", bodyColor);
+
+    htmlTemplate = applyResourceImageToCss(htmlTemplate, QStringLiteral(":/Images/SplashScreenBackground"), "{{BACKGROUND_IMAGE}}", .2f);
+
+    QPixmap logoPixmap(":/Icons/AppIcon128");
+
+    replaceInHtml("{{LOGO}}", QString("<img src='data:image/png;base64,%1'>").arg(pixmapToBase64(logoPixmap.scaled(96, 96, Qt::IgnoreAspectRatio, Qt::SmoothTransformation))));
+
+    if (auto projectImageAction = dynamic_cast<const ProjectMetaAction*>(_projectMetaAction)) {
+        replaceInHtml("{{TITLE}}", projectImageAction->getTitleAction().getString());
+        replaceInHtml("{{VERSION}}", projectImageAction->getProjectVersionAction().getVersionStringAction().getString());
+        replaceInHtml("{{SUBTITLE}}", "");
+        replaceInHtml("{{COPYRIGHT_NOTICE}}", "");
+    } else {
+        replaceInHtml("{{TITLE}}", "ManiVault <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span>");
+        replaceInHtml("{{VERSION}}", QString("Version: %1").arg(QString::fromStdString(Application::current()->getVersion().getVersionString())));
+        replaceInHtml("{{SUBTITLE}}", "An extensible open-source visual analytics framework for analyzing high-dimensional data");
+
+        QStringList externalLinks;
+
+        const auto addExternalLink = [&externalLinks](const QString& linkUrl, const QString& linkTitle, const QString& icon) -> void {
+            externalLinks << QString("<span style='color: black; padding-bottom: 5px;'><i class='%3 fa-sm icon' style='padding-right: 5px;'></i><a href='%1' style='color: black'>%2</a></span>").arg(linkUrl, linkTitle, icon);
+        };
+
+        addExternalLink("https://www.manivault.studio/", "Visit our website", "fa-solid fa-earth-europe");
+        addExternalLink("https://github.com/ManiVaultStudio", "Contribute to ManiVault on Github", "fa-brands fa-github");
+        addExternalLink("https://discord.gg/pVxmC2cSzA", "Get in touch on our Discord", "fa-brands fa-discord");
+
+        replaceInHtml("{{DESCRIPTION}}", externalLinks.join("<br>"));
+        replaceInHtml("{{COPYRIGHT}}", "This software is licensed under the GNU Lesser General Public License v3.0.<br>Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)");
+    }
+
+    QStringList alertStrings;
+
+    const auto addAlertString = [&alertStrings](const QString& iconName, const QString& alertMessage, const QColor& color) -> void {
+        alertStrings << QString("<span style='color: %3'><i class='%1 fa-sm icon' style='padding-right: 5px;'></i>%2</span>").arg(iconName, alertMessage, color.name());
+	};
+
+    for (const auto& alert : getAlerts()) {
+        addAlertString(alert.getIconName(), alert.getMessage(), alert.getColor());
+    }
+
+    replaceInHtml("{{ALERTS}}", alertStrings.join("<br>"));
+
+    return htmlTemplate;
 }
 
 void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)

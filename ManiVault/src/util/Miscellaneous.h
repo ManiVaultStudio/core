@@ -12,6 +12,11 @@
 #include <QVariant>
 #include <QVector>
 #include <QWidget>
+#include <QPixmap>
+#include <QByteArray>
+#include <QBuffer>
+#include <QImageReader>
+#include <QRegularExpression>
 
 #include <algorithm>
 
@@ -151,4 +156,86 @@ CORE_EXPORT void waitForDuration(int milliSeconds);
  */
 CORE_EXPORT void disconnectRecursively(const QObject* object);
 
+/**
+ * Replace all occurrences of \p from with \p to in \p inputString and return the result
+ * @param inputString Input string
+ * @param from String to replace
+ * @param to Replace from with this
+ * @return Replaced string
+ */
+CORE_EXPORT std::string replaceAll(std::string inputString, const std::string& from, const std::string& to);
+
+/**
+ * Remove CR/LF from a base64 string (some encoders insert line breaks)
+ * @param inputString Input string
+ * @return Curated resulting string
+ */
+CORE_EXPORT std::string stripNewLines(std::string inputString);
+
+/**
+ * Escape for a CSS double-quoted string (inside url("..."))
+ * @param inputString Input string
+ * @return Curated resulting string
+ */
+CORE_EXPORT std::string escapeCssDq(std::string inputString);
+
+/**
+ * Convert the contents of \p pixmap to base46 encoded string and form a CSS src string
+ * @param pixmap Input pixmap
+ * @return String ('')
+ */
+CORE_EXPORT std::string pixmapToCssSrc(const QPixmap& pixmap);
+
+/**
+ * Determine the MIME format based on \p byteArray
+ * @param byteArray Input byte array
+ * @return MIME type
+ */
+CORE_EXPORT QString mimeForFormat(const QByteArray& byteArray);
+
+/**
+ * Normalize image format from file \p path suffix (e.g. jpg -> JPEG)
+ * @param path Input file path
+ * @return Normalized format (PNG, JPEG, etc.)
+ */
+CORE_EXPORT QByteArray normalizeFormatFromSuffix(const QString& path);
+
+/**
+ * Choose encoding format for \p img, optionally using \p hinted format (if the source format is unknown, pick PNG when alpha is present, else JPEG)
+ * @param img Input image
+ * @param hinted Hinted format (may be empty)
+ * @return Chosen format (PNG, JPEG, etc.)
+ */
+CORE_EXPORT QByteArray chooseFormatForImage(const QImage& img, const QByteArray& hinted);
+
+/**
+ * Convert the contents of \p pixmap to base64 encoded data URL
+ * @param pixmap Input pixmap
+ * @param fmt Encoding format (PNG, JPEG, etc.)
+ * @param quality Encoding quality (-1 is default)
+ * @return Data URL string
+ */
+CORE_EXPORT QString pixmapToDataUrl(const QPixmap& pixmap, const QByteArray& fmt = "PNG", int quality = -1);
+
+/**
+ * Replace \p token in \p css with a CSS data URL formed from \p pixmap encoded as \p fmt with \p quality
+ * @param css Input CSS
+ * @param pixmap Input pixmap
+ * @param format Encoding format (PNG, JPEG, etc.)
+ * @param quality Encoding quality (-1 is default)
+ * @param token Token to replace in the CSS (default {{BACKGROUND_IMAGE}})
+ * @return CSS with token replaced by data URL
+ */
+CORE_EXPORT QString applyPixmapToCss(QString css, const QPixmap& pixmap, const QByteArray& format = "PNG", int quality = -1, const QString& token = QStringLiteral("{{BACKGROUND_IMAGE}}"));
+
+/**
+ * Replace \p token in \p css with a CSS data URL formed from image at \p pathOrResource encoded as \p quality
+ * @param css Input CSS
+ * @param pathOrResource Path to image file or resource path (e.g. ":/images/background.png")
+ * @param token Token to replace in the CSS (default {{BACKGROUND_IMAGE}})
+ * @param scaleFactor Scale factor (0 is default, i.e. no scaling)
+ * @param quality Encoding quality (-1 is default)
+ * @return CSS with token replaced by data URL
+ */
+CORE_EXPORT QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token, float scaleFactor = 0, int quality = 90);
 }

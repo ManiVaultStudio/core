@@ -407,4 +407,141 @@ void disconnectRecursively(const QObject* object)
 		disconnectRecursively(child);
 }
 
+std::string replaceAll(std::string inputString, const std::string& from, const std::string& to)
+{
+	if (from.empty())
+		return inputString;
+
+	std::size_t pos = 0;
+
+	while ((pos = inputString.find(from, pos)) != std::string::npos) {
+		inputString.replace(pos, from.length(), to);
+        
+		pos += to.length();
+	}
+
+	return inputString;
+}
+
+std::string stripNewLines(std::string inputString)
+{
+	inputString.erase(std::remove(inputString.begin(), inputString.end(), '\n'), inputString.end());
+	inputString.erase(std::remove(inputString.begin(), inputString.end(), '\r'), inputString.end());
+
+	return inputString;
+}
+
+std::string escapeCssDq(std::string inputString)
+{
+	std::string out; out.reserve(inputString.size() * 11 / 10);
+
+	for (char c : inputString) {
+		if (c == '\\' || c == '\"') out.push_back('\\');
+			out.push_back(c);
+	}
+
+	return out;
+}
+
+QString mimeForFormat(const QByteArray& byteArray)
+{
+	const QByteArray upper = byteArray.toUpper();
+
+	if (upper == "PNG")
+		return "image/png";
+
+	if (upper == "JPG" || upper == "JPEG")
+		return "image/jpeg";
+
+	if (upper == "WEBP")
+		return "image/webp";
+
+	if (upper == "BMP")
+		return "image/bmp";
+
+	if (upper == "GIF")
+		return "image/gif";
+    
+	return "application/octet-stream";
+}
+
+QByteArray normalizeFormatFromSuffix(const QString& path)
+{
+	const auto suffix = QFileInfo(path).suffix().toUpper();
+
+	if (suffix == "JPG")
+		return "JPEG";
+
+	return suffix.toLatin1();
+}
+
+QByteArray chooseFormatForImage(const QImage& img, const QByteArray& hinted)
+{
+	if (!hinted.isEmpty())
+		return hinted.toUpper();
+
+	if (img.hasAlphaChannel())
+        return { "PNG" };
+
+    return { "JPEG" };
+}
+
+QString pixmapToDataUrl(const QPixmap& pixmap, const QByteArray& fmt, int quality)
+{
+	QByteArray bytes;
+	{
+		QBuffer buf(&bytes);
+
+		buf.open(QIODevice::WriteOnly);
+
+		pixmap.save(&buf, fmt.constData(), quality);
+	}
+
+	const auto mime = mimeForFormat(fmt);
+	const auto b64  = bytes.toBase64();
+
+	return QStringLiteral("data:%1;base64,%2").arg(mime, QString::fromLatin1(b64));
+}
+
+QString applyPixmapToCss(QString css, const QPixmap& pixmap, const QByteArray& format, int quality, const QString& token)
+{
+	const auto dataUrl = pixmapToDataUrl(pixmap, format, quality);
+	const auto urlExpr = QStringLiteral("url(%1)").arg(dataUrl);
+
+	QRegularExpression regularExpression(QStringLiteral(R"(url\(\s*(['"]?)%1\1\s*\))").arg(QRegularExpression::escape(token)));
+
+	if (regularExpression.match(css).hasMatch())
+		css.replace(regularExpression, urlExpr);
+	else
+		css.replace(token, dataUrl);
+
+	return css;
+}
+
+QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token, float scaleFactor, int quality)
+{
+	QImageReader reader(pathOrResource);
+
+	auto sourceFormat = reader.format();
+
+	if (sourceFormat.isEmpty())
+		sourceFormat = normalizeFormatFromSuffix(pathOrResource);
+
+	QImage image;
+
+	if (!reader.read(&image))
+	{
+		qWarning() << "applyResourceImageToCss: failed to read" << pathOrResource << "error:" << reader.errorString();
+
+		return css;
+	}
+
+	const auto encodingFormat = chooseFormatForImage(image, sourceFormat);
+
+	auto pixmap = QPixmap::fromImage(image);
+
+    pixmap = pixmap.scaledToHeight(pixmap.height() * scaleFactor);
+
+	return applyPixmapToCss(css, pixmap, encodingFormat, quality, token);
+}
 }

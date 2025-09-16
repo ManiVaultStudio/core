@@ -13,6 +13,12 @@
 		<file alias="FontAwesomeSolid-6.7.2.otf">iconfonts/FontAwesomeSolid-6.7.2.otf</file>
 		<file alias="FontAwesome-6.7.2.json">iconfonts/FontAwesome-6.7.2.json</file>
 	</qresource>
+	<qresource prefix="/">
+		<file>webfonts/fa-brands-400.woff2</file>
+		<file>webfonts/fa-regular-400.woff2</file>
+		<file>webfonts/fa-solid-900.woff2</file>
+		<file>webfonts/all.min.css</file>
+	</qresource>
     <qresource prefix="/Icons">
         <file alias="AppIcon32">icons/AppIcon32.png</file>
         <file alias="AppIcon64">icons/AppIcon64.png</file>
@@ -78,6 +84,7 @@
 	<qresource prefix="/HTML">
         <file alias="Markdown">html/markdown.html</file>
         <file alias="ErrorLoggingConsent">html/ErrorLoggingConsent.html</file>
+        <file alias="SplashScreenTemplate">html/SplashScreenTemplate.html</file>
     </qresource>
 	<qresource prefix="/JSON">
         <file alias="TutorialsSchema">json/tutorials.schema.json</file>

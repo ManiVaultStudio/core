@@ -95,6 +95,10 @@ int main(int argc, char *argv[])
 
     core.createManagers();
 
+    SplashScreenAction splashScreenAction(&application, true);
+
+    splashScreenAction.getOpenAction().trigger();
+
     if (settings().getTemporaryDirectoriesSettingsAction().getRemoveStaleTemporaryDirsAtStartupAction().isChecked()) {
         application.getTemporaryDirs().getTask().setParentTask(&application.getStartupTask());
         application.getTemporaryDirs().removeStale();
@@ -112,7 +116,6 @@ int main(int argc, char *argv[])
         projectsTreeModel.populateFromJsonFile(projectsJsonFileName);
 
     core.initialize();
-
     application.initialize();
 
     HardwareSpec::updateSystemHardwareSpecs();
@@ -124,53 +127,11 @@ int main(int argc, char *argv[])
 
     loadGuiTask.setSubtaskStarted("Apply styles");
 
-    application.setStyle(new NoProxyRectanglesFusionStyle);
+    Application::setStyle(new NoProxyRectanglesFusionStyle);
 
     loadGuiTask.setSubtaskFinished("Apply styles");
 	
 	ModalTask::getGlobalHandler()->setEnabled(true);
-
-    auto shouldShowSplashScreen = true;
-
-    SplashScreenAction splashScreenAction(&application, true);
-
-    if (application.shouldOpenProjectAtStartup()) {
-        if (auto startupProjectMetaAction = mv::projects().getProjectMetaAction(application.getStartupProjectUrl().toLocalFile())) {
-            try {
-                application.getStartupTask().getLoadProjectTask().setEnabled(true, true);
-
-                splashScreenAction.setProjectMetaAction(startupProjectMetaAction);
-                splashScreenAction.fromVariantMap(startupProjectMetaAction->getSplashScreenAction().toVariantMap());
-
-                application.setStartupProjectMetaAction(startupProjectMetaAction);
-
-                if (startupProjectMetaAction->getReadOnlyAction().isChecked() && startupProjectMetaAction->getApplicationIconAction().getOverrideAction().isChecked())
-                    application.setWindowIcon(startupProjectMetaAction->getApplicationIconAction().getIconPickerAction().getIcon());
-
-                if (!splashScreenAction.getEnabledAction().isChecked())
-                    shouldShowSplashScreen = false;
-            	//else {
-                //    splashScreenAction.addAlert(SplashScreenAction::Alert::warning(QString("\
-                //        <b>%1</b> does not exist. \
-                //        Provide an existing project file path when using <b>-p</b>/<b>--project</b> ManiVault<sup>&copy;</sup> command line parameters. \
-                //    ").arg(startupProjectFilePath)));
-
-                //    throw std::runtime_error("Project file not found");
-                //}
-            }
-            catch (std::exception& e)
-            {
-                qDebug() << "Unable to load startup project:" << e.what();
-            }
-            catch (...)
-            {
-                qDebug() << "Unable to load startup project due to an unhandled exception";
-            }
-        }
-    }
-
-    if (shouldShowSplashScreen)
-        splashScreenAction.getOpenAction().trigger();
 
     MainWindow mainWindow;
 
@@ -181,5 +142,5 @@ int main(int argc, char *argv[])
 
     loadGuiTask.setSubtaskFinished("Create main window");
 
-    return application.exec();
+    return Application::exec();
 }
