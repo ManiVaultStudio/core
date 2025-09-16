@@ -151,4 +151,26 @@ CORE_EXPORT void waitForDuration(int milliSeconds);
  */
 CORE_EXPORT void disconnectRecursively(const QObject* object);
 
+/**
+ * Replace all occurrences of \p from with \p to in \p inputString and return the result
+ * @param inputString Input string
+ * @param from String to replace
+ * @param to Replace from with this
+ * @return Replaced string
+ */
+CORE_EXPORT std::string replaceAll(std::string inputString, const std::string& from, const std::string& to);
+
+/**
+ * Remove CR/LF from a base64 string (some encoders insert line breaks)
+ * @param inputString Input string
+ * @return Curated resulting string
+ */
+CORE_EXPORT std::string stripNewLines(std::string inputString);
+
+/**
+ * Escape for a CSS double-quoted string (inside url("..."))
+ * @param inputString Input string
+ * @return Curated resulting string
+ */
+CORE_EXPORT std::string escapeCssDq(std::string inputString);
 }

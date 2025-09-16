@@ -407,4 +407,41 @@ void disconnectRecursively(const QObject* object)
 		disconnectRecursively(child);
 }
 
+std::string replaceAll(std::string inputString, const std::string& from, const std::string& to)
+{
+	if (from.empty())
+		return inputString;
+
+	std::size_t pos = 0;
+
+	while ((pos = inputString.find(from, pos)) != std::string::npos) {
+		inputString.replace(pos, from.length(), to);
+        
+		pos += to.length();
+	}
+
+	return inputString;
+}
+
+std::string stripNewLines(std::string inputString)
+{
+	inputString.erase(std::remove(inputString.begin(), inputString.end(), '\n'), inputString.end());
+	inputString.erase(std::remove(inputString.begin(), inputString.end(), '\r'), inputString.end());
+
+	return inputString;
+}
+
+std::string escapeCssDq(std::string inputString)
+{
+
+	std::string out; out.reserve(inputString.size() * 11 / 10);
+
+	for (char c : inputString) {
+		if (c == '\\' || c == '\"') out.push_back('\\');
+			out.push_back(c);
+	}
+
+	return out;
+}
+
 }
