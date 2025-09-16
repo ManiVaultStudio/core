@@ -17,7 +17,6 @@
 
 #include <QDebug>
 #include <QMainWindow>
-#include <QUuid>
 #include <QDir>
 
 using namespace mv::gui;
