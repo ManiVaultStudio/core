@@ -24,54 +24,12 @@ class SplashScreenAction;
 /**
  * Splash screen widget class
  *
- * Widget class for displaying a splash screen
- * 
- * This widget can either serve as:
- *  - an application splash screen widget (shown when no project is loaded at startup)
- *  - a project splash screen widget
- *    This only works when: a) the project is loaded from the command line i.e. "ManiVault Studio".exe -p c:\project.mv
- *    b) the associated splash screen is enabled and c) SplashScreenAction#_projectMetaAction is valid.
+ * For displaying a splash screen using an mv::gui::SplashScreenAction
  *
  * @author Thomas Kroes
  */
 class CORE_EXPORT SplashScreenWidget : public QWidget
 {
-public:
-
-    /** Widget class for adding an external link on the splash screen widget */
-    class CORE_EXPORT ExternalLinkWidget : public QWidget {
-    public:
-
-        /**
-         * Construct with \p fontAwesomeIconName, descriptive \p text, \p externalLink and pointer to \p parent widget
-         * @param fontAwesomeIconName Name of the Font Awesome icon
-         * @param text Descriptive text
-         * @param externalLink URL of the external website
-         * @param parent Pointer to parent widget
-         */
-        ExternalLinkWidget(const QString& fontAwesomeIconName, const QString& text, const QUrl& externalLink, QWidget* parent = nullptr);
-
-        /**
-         * Invoked when the mouse enters the widget
-         * @param event Pointer to event that occurred
-         */
-        void enterEvent(QEnterEvent* event) override;
-
-        /**
-         * Invoked when the mouse leaves the widget
-         * @param event Pointer to event that occurred
-         */
-        void leaveEvent(QEvent* event) override;
-        
-    private:
-        
-        /** Updates the CSS style */
-        void updateStyle();
-
-    private:
-        const QUrl&     _externalLink;      /** URL of the website to visit when the widget is pressed */
-    };
-
 public:
 
     /**

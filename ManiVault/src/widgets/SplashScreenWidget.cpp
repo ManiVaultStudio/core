@@ -261,49 +261,4 @@ QString SplashScreenWidget::getCopyrightNoticeTooltip()
     return "This software is licensed under the GNU Lesser General Public License v3.0.<br>Copyright (c) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)";
 }
 
-SplashScreenWidget::ExternalLinkWidget::ExternalLinkWidget(const QString& fontAwesomeIconName, const QString& text, const QUrl& externalLink, QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _externalLink(externalLink)
-{
-    auto layout     = new QHBoxLayout();
-    auto iconLabel  = new QLabel(StyledIcon::getIconCharacter(fontAwesomeIconName));
-    auto textLabel = new QLabel(QString("<a href='%1' style='color: gray'>%2</a>").arg(externalLink.toString(), text));
-
-    iconLabel->setFont(StyledIcon::getIconFont());
-    iconLabel->setAlignment(Qt::AlignCenter);
-
-    textLabel->setTextFormat(Qt::RichText);
-    textLabel->setOpenExternalLinks(true);
-
-    layout->setContentsMargins(2, 0, 2, 0);
-
-    layout->addWidget(iconLabel);
-    layout->addWidget(textLabel, 1);
-
-    setLayout(layout);
-
-    updateStyle();
-}
-
-void SplashScreenWidget::ExternalLinkWidget::enterEvent(QEnterEvent* event)
-{
-    QWidget::enterEvent(event);
-
-    updateStyle();
-}
-
-void SplashScreenWidget::ExternalLinkWidget::leaveEvent(QEvent* event)
-{
-    QWidget::leaveEvent(event);
-
-    updateStyle();
-}
-
-void SplashScreenWidget::ExternalLinkWidget::updateStyle()
-{
-    const auto shouldHighlight = underMouse();
-
-    setStyleSheet(QString("color: %1").arg(shouldHighlight ? "black" : "gray"));
-}
-
 }
