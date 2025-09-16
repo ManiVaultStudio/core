@@ -8,6 +8,7 @@
 
 #include "util/Logger.h"
 #include "util/Version.h"
+#include "util/Serializable.h"
 
 #include "actions/TriggerAction.h"
 #include "actions/OptionsAction.h"
@@ -32,7 +33,7 @@ class ProjectMetaAction;
  * 
  * @author Thomas Kroes
  */
-class CORE_EXPORT Application final : public QApplication
+class CORE_EXPORT Application final : public QApplication, public util::Serializable
 {
     Q_OBJECT
 
