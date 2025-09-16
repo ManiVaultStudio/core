@@ -233,8 +233,9 @@ CORE_EXPORT QString applyPixmapToCss(QString css, const QPixmap& pixmap, const Q
  * @param css Input CSS
  * @param pathOrResource Path to image file or resource path (e.g. ":/images/background.png")
  * @param token Token to replace in the CSS (default {{BACKGROUND_IMAGE}})
+ * @param scaleFactor Scale factor (0 is default, i.e. no scaling)
  * @param quality Encoding quality (-1 is default)
  * @return CSS with token replaced by data URL
  */
-CORE_EXPORT QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token = QStringLiteral("{{BACKGROUND_IMAGE}}"), int quality = 90);
+CORE_EXPORT QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token, float scaleFactor = 0, int quality = 90);
 }

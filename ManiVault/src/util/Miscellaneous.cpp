@@ -518,7 +518,7 @@ QString applyPixmapToCss(QString css, const QPixmap& pixmap, const QByteArray& f
 	return css;
 }
 
-QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token, int quality)
+QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token, float scaleFactor, int quality)
 {
 	QImageReader reader(pathOrResource);
 
@@ -537,7 +537,10 @@ QString applyResourceImageToCss(QString css, const QString& pathOrResource, cons
 	}
 
 	const auto encodingFormat = chooseFormatForImage(image, sourceFormat);
-	const auto pixmap         = QPixmap::fromImage(image);
+
+	auto pixmap = QPixmap::fromImage(image);
+
+    pixmap = pixmap.scaledToHeight(pixmap.height() * scaleFactor);
 
 	return applyPixmapToCss(css, pixmap, encodingFormat, quality, token);
 }
