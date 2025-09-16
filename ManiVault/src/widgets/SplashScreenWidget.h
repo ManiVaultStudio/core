@@ -86,12 +86,6 @@ public:
 
     void showEvent(QShowEvent* event) override;
 
-    /**
-     * Invoked when the dialog is painted (used to draw the background)
-     * @param paintEvent Pointer to paint event
-     */
-    void paintEvent(QPaintEvent* paintEvent);
-
     /** Show the splash screen widget animated, wraps QWidget::show() */
     void showAnimated();
 

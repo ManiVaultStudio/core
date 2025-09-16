@@ -172,11 +172,6 @@ void SplashScreenWidget::showEvent(QShowEvent* event)
     loop.exec();
 }
 
-void SplashScreenWidget::paintEvent(QPaintEvent* paintEvent)
-{
-    QWidget::paintEvent(paintEvent);
-}
-
 void SplashScreenWidget::showAnimated()
 {
 #ifdef SPLASH_SCREEN_DIALOG_VERBOSE
