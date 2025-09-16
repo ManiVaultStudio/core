@@ -30,13 +30,12 @@ QList<Application::CursorShapeCount> Application::cursorOverridesCount;
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     Serializable("Application"),
-    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _core(nullptr),
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
     _serializationAborted(false),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
-    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), _id.mid(0, 6)))),
+    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), getId().mid(0, 6)))),
     _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock"))
 {
@@ -208,11 +207,6 @@ QMainWindow* Application::getMainWindow()
 ApplicationStartupTask& Application::getStartupTask()
 {
     return *_startupTask;
-}
-
-QString Application::getId() const
-{
-    return _id;
 }
 
 const QTemporaryDir& Application::getTemporaryDir() const
