@@ -249,7 +249,7 @@ QString SplashScreenAction::getHtmlFromTemplate() const
 
     replaceInHtml("{{BODY_COLOR}}", bodyColor);
 
-    applyResourceImageToCss(htmlTemplate, QStringLiteral(":/Images/SplashScreenBackground"));
+    htmlTemplate = applyResourceImageToCss(htmlTemplate, QStringLiteral(":/Images/SplashScreenBackground"), "{{BACKGROUND_IMAGE}}", .2f);
 
     QPixmap logoPixmap(":/Icons/AppIcon128");
 
