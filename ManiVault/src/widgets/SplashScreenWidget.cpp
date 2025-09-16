@@ -3,17 +3,13 @@
 // Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "SplashScreenWidget.h"
-#include "ProjectMetaAction.h"
 #include "CoreInterface.h"
 #include "Application.h"
 #include "ManiVaultVersion.h"
 
 #include "actions/SplashScreenAction.h"
 
-#include "widgets/ElidedLabel.h"
-
 #include <QScreen>
-#include <QPainter>
 #include <QPainterPath>
 #include <QEventLoop>
 #include <QPropertyAnimation>
