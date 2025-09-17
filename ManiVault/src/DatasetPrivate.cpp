@@ -29,6 +29,11 @@ DatasetPrivate::DatasetPrivate() :
     registerDatasetEvents();
 }
 
+DatasetPrivate::~DatasetPrivate()
+{
+    _destroyed = true;
+}
+
 DatasetPrivate::DatasetPrivate(const DatasetPrivate& other) :
     _datasetId(),
     _dataset(nullptr),
@@ -146,6 +151,7 @@ void DatasetPrivate::registerDatasetEvents()
         _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetRemoved));
 
         _eventListener.registerDataEvent([this](DatasetEvent* dataEvent) {
+            if (_destroyed) return;
             switch (dataEvent->getType()) {
 
                 case EventType::DatasetAboutToBeRemoved:
