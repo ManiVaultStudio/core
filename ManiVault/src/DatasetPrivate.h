@@ -54,8 +54,8 @@ protected: // Construction/destruction
      */
     DatasetPrivate& operator=(const DatasetPrivate& other) = delete;
 
-    /** Remove the destructor */
-    ~DatasetPrivate() override = default;
+    /** Destructor */
+    ~DatasetPrivate() override;
 
 public: // Member access and reset
 
@@ -152,7 +152,7 @@ private:
     QString         _datasetId;         /** Globally unique identifier of the dataset */
     DatasetImpl*    _dataset;           /** Pointer to the dataset (if any) */
     EventListener   _eventListener;     /** Listen to ManiVault events */
-
+    bool            _destroyed = false; /** prevent access to a destroyed object **/
     friend class DatasetImpl;
 };
 
