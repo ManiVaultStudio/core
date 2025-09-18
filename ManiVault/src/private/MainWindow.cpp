@@ -37,6 +37,7 @@
 #include <QStackedWidget>
 #include <QStatusBar>
 #include <QRandomGenerator>
+#include <QShortcut>
 
 #ifdef _DEBUG
     #define MAIN_WINDOW_VERBOSE
@@ -164,8 +165,15 @@ void MainWindow::initialize()
     }
 		
     auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
-    
-    auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
+
+    auto customizeApplicationShortcut = new QShortcut(QKeySequence(Qt::Key_F8), this);
+
+	customizeApplicationShortcut->setContext(Qt::ApplicationShortcut);
+
+    connect(customizeApplicationShortcut, &QShortcut::activated, this, [this] {
+        Application::current()->getCustomizeApplicationAction().setVisible(true);
+    });
+	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
     auto viewMenuAction     = menuBar()->addMenu(new ViewMenu());
     auto projectsMenuAction = menuBar()->addMenu(new ProjectsMenu());
     auto helpMenuAction     = menuBar()->addMenu(new HelpMenu());
@@ -187,13 +195,13 @@ void MainWindow::initialize()
     
     statusBar()->setSizeGripEnabled(false);
     
-    auto startPageStatusBarAction = new FrontPagesStatusBarAction(this, "Start Page");
-    auto versionStatusBarAction = new ManiVaultVersionStatusBarAction(this, "Version");
-    auto pluginsStatusBarAction = new PluginsStatusBarAction(this, "Plugins");
-    auto loggingStatusBarAction = new LoggingStatusBarAction(this, "Logging");
+    auto startPageStatusBarAction       = new FrontPagesStatusBarAction(this, "Start Page");
+    auto versionStatusBarAction         = new ManiVaultVersionStatusBarAction(this, "Version");
+    auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
+    auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
     auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
-    auto settingsTasksStatusBarAction = new SettingsStatusBarAction(this, "Settings");
-    auto workspaceStatusBarAction = new WorkspaceStatusBarAction(this, "Workspace");
+    auto settingsTasksStatusBarAction   = new SettingsStatusBarAction(this, "Settings");
+    auto workspaceStatusBarAction       = new WorkspaceStatusBarAction(this, "Workspace");
     
     statusBar()->insertPermanentWidget(0, startPageStatusBarAction->createWidget(this));
     statusBar()->insertPermanentWidget(1, versionStatusBarAction->createWidget(this));
