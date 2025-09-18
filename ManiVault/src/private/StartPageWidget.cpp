@@ -80,17 +80,3 @@ QVariantMap StartPageWidget::toVariantMap() const
 
 	return variantMap;
 }
-
-void StartPageWidget::loadConfiguration()
-{
-    fromJsonFile(getConfigurationFileName());
-
-    mv::help().addNotification(QString("%1 configuration").arg(getSerializationName()), QString("Configuration loaded from <b>%1.json</b>").arg(getSerializationName()), StyledIcon("folder-open"));
-}
-
-void StartPageWidget::saveConfiguration() const
-{
-    toJsonFile(getConfigurationFileName());
-
-    mv::help().addNotification(QString("%1 configuration").arg(getSerializationName()), QString("Configuration saved to <b>%1.json</b>").arg(getSerializationName()), StyledIcon("save"));
-}

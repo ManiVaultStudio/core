@@ -47,14 +47,6 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-private:
-
-    /** Load the current configuration from a file */
-    void loadConfiguration();
-
-    /** Save the current configuration to a file */
-    void saveConfiguration() const;
-
 public: // Action getters
 
     mv::gui::TriggerAction& getLoadAction() { return _loadAction; }
