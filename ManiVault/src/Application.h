@@ -95,9 +95,6 @@ public: // Construction
 
 public: // Miscellaneous
 
-    /** Get the globally unique identifier of the application instance */
-    QString getId() const;
-
     /** Returns a pointer to the current ManiVault application (if the current application derives from mv::Application) */
     static Application* current();
 
