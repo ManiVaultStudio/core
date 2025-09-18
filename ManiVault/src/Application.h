@@ -268,6 +268,10 @@ public: // Statics
 
     static QMainWindow* getMainWindow();
 
+public: // Action getters
+
+    gui::TriggerAction& getCustomizeApplicationAction() { return _customizeApplicationAction; }
+
 signals:
 
     /**
@@ -302,6 +306,7 @@ protected:
     QTemporaryDir               _temporaryDir;                      /** Directory where application temporary files reside */
     TemporaryDirs               _temporaryDirs;                     /** ManiVault application temporary directories manager */
     QLockFile                   _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
+    gui::TriggerAction          _customizeApplicationAction;        /** Action for editing the application customization (visible when F8 is pressed) */
 
     /** Count of cursor overrides for each cursor shape */
 	static QList<CursorShapeCount> cursorOverridesCount;

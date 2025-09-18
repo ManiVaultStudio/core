@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QMainWindow>
 #include <QDir>
+#include <QShortcut>
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -36,9 +37,12 @@ Application::Application(int& argc, char** argv) :
     _startupTask(nullptr),
     _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), getId().mid(0, 6)))),
     _temporaryDirs(this),
-    _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock"))
+    _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
+    _customizeApplicationAction(this, "Customize...")
 {
     _lockFile.lock();
+
+    _customizeApplicationAction.setVisible(false);
 
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
         _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
@@ -52,6 +56,10 @@ Application::Application(int& argc, char** argv) :
         BackgroundTask::createHandler(Application::current());
         ForegroundTask::createHandler(Application::current());
         ModalTask::createHandler(Application::current());
+    });
+
+    connect(&_customizeApplicationAction, &QAction::triggered, this, [this] {
+        _customizeApplicationAction.setVisible(true);
     });
 }
 
