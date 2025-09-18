@@ -65,19 +65,6 @@ void StartPageWidget::showEvent(QShowEvent* showEvent)
     _startPageContentWidget.updateActions();
 }
 
-bool StartPageWidget::event(QEvent* event)
-{
-    if (event->type() == QEvent::KeyPress) {
-        if (auto keyEvent = dynamic_cast<QKeyEvent*>(event)) {
-            if (keyEvent->key() == Qt::Key_F8) {
-                _startPageContentWidget.getSettingsAction().setVisible(true);
-                _configurationAction.setVisible(true);
-            }
-        }
-    }
-    return PageWidget::event(event);
-}
-
 void StartPageWidget::fromVariantMap(const QVariantMap& variantMap)
 {
     _startPageContentWidget.fromParentVariantMap(variantMap);

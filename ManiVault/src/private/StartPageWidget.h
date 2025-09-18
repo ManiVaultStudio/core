@@ -13,7 +13,7 @@
 /**
  * Start page widget class
  *
- * Widget class which show various project-related operations.
+ * Shows various project-related operations.
  *
  * @author Thomas Kroes
  */
@@ -32,13 +32,6 @@ public:
      * @param showEvent Pointer to show event which occurred
      */
     void showEvent(QShowEvent* showEvent);
-
-    /**
-     * Override to conditionally add the export action
-     * @param event Pointer to event that occurred
-     * @return
-     */
-    bool event(QEvent* event) override;
 
 public: // Serialization
 

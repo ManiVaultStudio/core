@@ -45,6 +45,20 @@ void FileMenu::showEvent(QShowEvent* event)
         populate();
 }
 
+bool FileMenu::event(QEvent* event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        if (auto keyEvent = dynamic_cast<QKeyEvent*>(event)) {
+            if (keyEvent->key() == Qt::Key_F8) {
+                _startPageContentWidget.getSettingsAction().setVisible(true);
+                _configurationAction.setVisible(true);
+            }
+        }
+    }
+
+	return FileMenu::event(event);
+}
+
 void FileMenu::populate()
 {
     clear();
