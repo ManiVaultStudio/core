@@ -11,7 +11,7 @@
 /**
  * File menu class
  * 
- * Menu class for file-related operations
+ * For file-related operations
  * 
  * @author Thomas Kroes
  */
