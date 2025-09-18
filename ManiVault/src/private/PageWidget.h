@@ -32,7 +32,7 @@ public:
      * Override paint event to draw the logo in the background
      * @param paintEvent Pointer to paint event
      */
-    void paintEvent(QPaintEvent* paintEvent);
+    void paintEvent(QPaintEvent* paintEvent) override;
 
     /**
      * Get page header widget
