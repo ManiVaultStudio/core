@@ -38,6 +38,27 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     
     // macOS does not like populating the menu on show, so we rather do it explicitly here
     populate();
+
+    /*
+     * getTitleAction().setString(QString("<b>ManiVault</b> v%1").arg(QString::fromStdString(MV_VERSION_STRING())));
+
+    _fileAction.setShowLabels(false);
+
+    _fileAction.addAction(&getLoadAction());
+    _fileAction.addAction(&getSaveAction());
+
+    _startPageContentWidget.getToolbarAction().addAction(&_configurationAction);
+
+    _configurationAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _configurationAction.setIconByName("gear");
+    _configurationAction.setPopupSizeHint(QSize(400, 0));
+    _configurationAction.setVisible(false);
+
+    _configurationAction.addAction(&_fileAction);
+    _configurationAction.addAction(&getLogoAction());
+    _configurationAction.addAction(&getTitleAction());
+    _configurationAction.addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction());
+     */
 }
 
 void FileMenu::showEvent(QShowEvent* event)

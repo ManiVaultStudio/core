@@ -47,15 +47,6 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-public: // Action getters
-
-    mv::gui::TriggerAction& getLoadAction() { return _loadAction; }
-    mv::gui::TriggerAction& getSaveAction() { return _saveAction; }
-
 protected:
-    StartPageContentWidget          _startPageContentWidget;    /** Widget which contains all the actions */
-    mv::gui::TriggerAction          _loadAction;                /** Trigger action for loading a configuration (ony for experimental purposes) */
-    mv::gui::TriggerAction          _saveAction;                /** Trigger action for saving a configuration (ony for experimental purposes) */
-    mv::gui::HorizontalGroupAction  _fileAction;                /** Group action for load/save configurations */
-    mv::gui::VerticalGroupAction    _configurationAction;       /** Group action for the configuration */
+    StartPageContentWidget  _startPageContentWidget;    /** Widget which contains all the actions */
 };
