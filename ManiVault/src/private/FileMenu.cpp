@@ -15,20 +15,23 @@ using namespace mv::gui;
 
 FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
-    _exitApplictionAction(nullptr, "Exit")
+    _exitApplicationAction(nullptr, "Exit"),
+    _editApplicationAction(nullptr, "Edit")
 {
     setTitle("File");
     setToolTip("File operations");
-    
+
+    _editApplicationAction.setVisible(false);
+
     //  Quit is by default in the app menu on macOS
     if (QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
         
-        _exitApplictionAction.setShortcut(QKeySequence("Alt+F4"));
-        _exitApplictionAction.setShortcutContext(Qt::ApplicationShortcut);
-        _exitApplictionAction.setIconByName("right-from-bracket");
-        _exitApplictionAction.setToolTip("Exit ManiVault");
+        _exitApplicationAction.setShortcut(QKeySequence("Alt+F4"));
+        _exitApplicationAction.setShortcutContext(Qt::ApplicationShortcut);
+        _exitApplicationAction.setIconByName("right-from-bracket");
+        _exitApplicationAction.setToolTip("Exit ManiVault");
         
-        connect(&_exitApplictionAction, &TriggerAction::triggered, this, []() -> void {
+        connect(&_exitApplicationAction, &TriggerAction::triggered, this, []() -> void {
             Application::current()->quit();
         });
     }
@@ -50,8 +53,7 @@ bool FileMenu::event(QEvent* event)
     if (event->type() == QEvent::KeyPress) {
         if (auto keyEvent = dynamic_cast<QKeyEvent*>(event)) {
             if (keyEvent->key() == Qt::Key_F8) {
-                _startPageContentWidget.getSettingsAction().setVisible(true);
-                _configurationAction.setVisible(true);
+                _editApplicationAction.setVisible(true);
             }
         }
     }
@@ -82,11 +84,13 @@ void FileMenu::populate()
     addSeparator();
     addAction(&projects().getShowStartPageAction());
     addAction(&help().getShowLearningCenterPageAction());
+    addSeparator();
+    addAction(&_editApplicationAction);
     
     //  Quit is by default in the app menu on macOS
     //if(QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
     //addSeparator();
-    //addAction(&_exitApplictionAction);
+    //addAction(&_exitApplicationAction);
     //}
 
 #if defined(_DEBUG) && defined(TEST_STYLESHEET)

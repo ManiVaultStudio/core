@@ -47,5 +47,6 @@ private:
     void populate ();
 
 private:
-    mv::gui::TriggerAction    _exitApplictionAction;  /** Trigger action to exit the application */
+    mv::gui::TriggerAction    _exitApplicationAction;   /** Trigger action to exit the application */
+    mv::gui::TriggerAction    _editApplicationAction;   /** Trigger action to edit the application settings */
 };
