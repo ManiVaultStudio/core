@@ -15,13 +15,10 @@ using namespace mv::gui;
 
 FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
-    _exitApplicationAction(nullptr, "Exit"),
-    _editApplicationAction(nullptr, "Edit")
+    _exitApplicationAction(nullptr, "Exit")
 {
     setTitle("File");
     setToolTip("File operations");
-
-    _editApplicationAction.setVisible(false);
 
     //  Quit is by default in the app menu on macOS
     if (QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
@@ -69,19 +66,6 @@ void FileMenu::showEvent(QShowEvent* event)
         populate();
 }
 
-bool FileMenu::event(QEvent* event)
-{
-    if (event->type() == QEvent::KeyPress) {
-        if (auto keyEvent = dynamic_cast<QKeyEvent*>(event)) {
-            if (keyEvent->key() == Qt::Key_F8) {
-                _editApplicationAction.setVisible(true);
-            }
-        }
-    }
-
-	return FileMenu::event(event);
-}
-
 void FileMenu::populate()
 {
     clear();
@@ -106,7 +90,7 @@ void FileMenu::populate()
     addAction(&projects().getShowStartPageAction());
     addAction(&help().getShowLearningCenterPageAction());
     addSeparator();
-    addAction(&_editApplicationAction);
+    addAction(&Application::current()->getCustomizeApplicationAction());
     
     //  Quit is by default in the app menu on macOS
     //if(QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {

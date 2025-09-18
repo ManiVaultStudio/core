@@ -31,14 +31,6 @@ public:
      */
     void showEvent(QShowEvent* event) override;
 
-    /**
-    * Override to allow app customization
-    * Shows the edit... menu item when the F8 key is pressed
-    * @param event Pointer to event that occurred
-    * @return True if the event was consumed, false to pass it on to the base class
-    */
-    bool event(QEvent* event) override;
-
 private:
     
     /**
@@ -48,5 +40,4 @@ private:
 
 private:
     mv::gui::TriggerAction    _exitApplicationAction;   /** Trigger action to exit the application */
-    mv::gui::TriggerAction    _editApplicationAction;   /** Trigger action to edit the application settings */
 };
