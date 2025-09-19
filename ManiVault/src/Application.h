@@ -276,6 +276,7 @@ public: // Statics
 
 public: // Action getters
 
+    gui::StringAction& getNameAction() { return _nameAction; }
     gui::TriggerAction& getCustomizeApplicationAction() { return _customizeAction; }
 
 signals:
@@ -299,7 +300,7 @@ signals:
     void coreManagersCreated(CoreInterface* core);
 
 protected:
-    QString                     _name;                              /** Application name */       
+    gui::StringAction           _nameAction;                        /** Application name */       
     CoreInterface*              _core;                              /** Pointer to the ManiVault core */
     const util::Version         _version;                           /** Application version */
     QSettings                   _settings;                          /** Settings */

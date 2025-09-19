@@ -30,7 +30,7 @@ QList<Application::CursorShapeCount> Application::cursorOverridesCount;
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     Serializable("Application"),
-    _name("ManiVault Studio"),
+    _nameAction(this, "ManiVault Studio"),
     _core(nullptr),
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
     _serializationAborted(false),
@@ -133,7 +133,7 @@ QString Application::getName()
     if (!current())
         return {};
 
-    return "ManiVault Studio";
+    return current()->_nameAction.getString();
 }
 
 void Application::setName(const QString& name)
@@ -141,7 +141,7 @@ void Application::setName(const QString& name)
     if (!current())
         return;
 
-    current()->_name = name;
+    current()->_nameAction.setString(name);
 }
 
 QString Application::getAbout()
@@ -328,12 +328,16 @@ std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShap
 void Application::fromVariantMap(const QVariantMap& variantMap)
 {
 	Serializable::fromVariantMap(variantMap);
+
+    _nameAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap Application::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 
+    _nameAction.insertIntoVariantMap(variantMap);
+    
     return variantMap;
 }
 
