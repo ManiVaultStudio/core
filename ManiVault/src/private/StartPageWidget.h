@@ -31,21 +31,7 @@ public:
      * Override show event to update start page actions
      * @param showEvent Pointer to show event which occurred
      */
-    void showEvent(QShowEvent* showEvent);
-
-public: // Serialization
-
-    /**
-     * Load widget action from variant
-     * @param variantMap Variant representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
+    void showEvent(QShowEvent* showEvent) override;
 
 protected:
     StartPageContentWidget  _startPageContentWidget;    /** Widget which contains all the actions */

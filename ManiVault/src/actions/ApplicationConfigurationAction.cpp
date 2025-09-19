@@ -16,7 +16,8 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
     _baseNameAction(this, "Base name"),
     _fullNameAction(this, "Full name"),
     _editFullNameAction(this, "Edit full name"),
-    _logoAction(this, "Logo")
+    _logoAction(this, "Logo"),
+    _startPageConfigurationAction(this, "Start page")
 {
     _configureAction.setVisible(false);
     _configureAction.setIconByName("gear");
@@ -29,6 +30,7 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
     addAction(&_fullNameAction);
     addAction(&_editFullNameAction);
     addAction(&_logoAction);
+    addAction(&_startPageConfigurationAction);
 
     connect(&_configureAction, &QAction::triggered, this, [this] {
         QDialog customizeDialog;

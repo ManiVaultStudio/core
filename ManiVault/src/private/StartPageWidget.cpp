@@ -22,19 +22,3 @@ void StartPageWidget::showEvent(QShowEvent* showEvent)
 {
     _startPageContentWidget.updateActions();
 }
-
-void StartPageWidget::fromVariantMap(const QVariantMap& variantMap)
-{
-    _startPageContentWidget.fromParentVariantMap(variantMap);
-
-    PageWidget::fromVariantMap(variantMap);
-}
-
-QVariantMap StartPageWidget::toVariantMap() const
-{
-    auto variantMap = PageWidget::toVariantMap();
-
-	_startPageContentWidget.insertIntoVariantMap(variantMap);
-
-	return variantMap;
-}

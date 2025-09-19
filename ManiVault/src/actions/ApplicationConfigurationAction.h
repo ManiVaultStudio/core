@@ -8,6 +8,7 @@
 #include "ImageAction.h"
 #include "StringAction.h"
 #include "ToggleAction.h"
+#include "StartPageConfigurationAction.h"
 
 namespace mv::gui {
 
@@ -53,15 +54,16 @@ public: // Action getters
     StringAction& getBaseNameAction() { return _baseNameAction; }
     StringAction& getFullNameAction() { return _fullNameAction; }
     ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
-
     ImageAction& getLogoAction() { return _logoAction; }
+    StartPageConfigurationAction& getStartPageConfigurationAction() { return _startPageConfigurationAction; }
 
 private:
-    TriggerAction   _configureAction;       /** Action for editing the application customization (visible when Ctrl + F8 is pressed) */
-    StringAction    _baseNameAction;        /** Application base name action (e.g. main window title) */
-    StringAction    _fullNameAction;        /** Application full name action (e.g. start page title) */
-    ToggleAction    _editFullNameAction;    /** Whether to edit the full name (otherwise it is derived from base name and version) */
-    ImageAction     _logoAction;            /** Application logo action */
+    TriggerAction                   _configureAction;               /** Action for editing the application customization (visible when Ctrl + F8 is pressed) */
+    StringAction                    _baseNameAction;                /** Application base name action (e.g. main window title) */
+    StringAction                    _fullNameAction;                /** Application full name action (e.g. start page title) */
+    ToggleAction                    _editFullNameAction;            /** Whether to edit the full name (otherwise it is derived from base name and version) */
+    ImageAction                     _logoAction;                    /** Application logo action */
+    StartPageConfigurationAction    _startPageConfigurationAction;  /** Start page configuration action */
 };
 
 }
