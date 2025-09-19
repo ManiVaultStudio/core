@@ -246,9 +246,9 @@ void MainWindow::initialize()
                 const auto projectFilePath = projects().getCurrentProject()->getFilePath();
     
                 if (projectFilePath.isEmpty())
-                    setWindowTitle("Unsaved - ManiVault");
+                    setWindowTitle(QString("Unsaved - %1").arg(Application::current()->getName()));
                 else
-                    setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
+                    setWindowTitle(QString("%1 - %2").arg(projectFilePath, Application::current()->getName()));
             }
         }
     

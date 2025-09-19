@@ -30,6 +30,7 @@ QList<Application::CursorShapeCount> Application::cursorOverridesCount;
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     Serializable("Application"),
+    _name("ManiVault Studio"),
     _core(nullptr),
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
     _serializationAborted(false),
@@ -84,13 +85,13 @@ Application::~Application()
 
 Application* Application::current()
 {
-    auto applicationInstance = instance();
-    auto maniVaultApplication = dynamic_cast<Application*>(applicationInstance);
+    auto applicationInstance    = instance();
+    auto maniVaultApplication   = dynamic_cast<Application*>(applicationInstance);
 
     return maniVaultApplication;
 }
 
-mv::CoreInterface* Application::getCore()
+mv::CoreInterface* Application::getCore() const
 {
     return _core;
 }
@@ -116,20 +117,23 @@ void Application::setCore(CoreInterface* core)
 
 mv::CoreInterface* Application::core()
 {
-    if (current() == nullptr)
-        return nullptr;
+    if (!current())
+        return {};
 
     return current()->getCore();
 }
 
-util::Version Application::getVersion() const
+Version Application::getVersion() const
 {
     return _version;
 }
 
 QString Application::getName()
 {
-    return "ManiVault";
+    if (!current())
+        return {};
+
+    return "ManiVault Studio";
 }
 
 QString Application::getAbout()

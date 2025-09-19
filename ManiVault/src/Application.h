@@ -293,6 +293,7 @@ signals:
     void coreManagersCreated(CoreInterface* core);
 
 protected:
+    QString                     _name;                              /** Application name */       
     CoreInterface*              _core;                              /** Pointer to the ManiVault core */
     const util::Version         _version;                           /** Application version */
     QSettings                   _settings;                          /** Settings */
