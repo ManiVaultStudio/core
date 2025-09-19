@@ -18,7 +18,7 @@ StartPageConfigurationAction::StartPageConfigurationAction(QObject* parent, cons
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleTutorialsAction(this, "Tutorials", true),
     _settingsGroupAction(this, "Settings", true),
-    _toggleCustomizationAction(this, "Toggle customization")
+    _toggleCustomizationAction(this, "Customization")
 {
     setIconByName("gear");
 
