@@ -17,8 +17,6 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     _applicationIconAction(this, "Application icon"),
 	_iconFromLogoAction(this, "Generate icon from logo")
 {
-    setDefaultWidgetFlags(0);
-
     _logoAction.setDefaultWidgetFlags(ImageAction::WidgetFlag::Loader);
 
     _editFullNameAction.setChecked(false);
