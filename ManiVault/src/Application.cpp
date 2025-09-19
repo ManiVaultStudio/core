@@ -38,11 +38,11 @@ Application::Application(int& argc, char** argv) :
     _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), getId().mid(0, 6)))),
     _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
-    _customizeApplicationAction(this, "Customize...")
+    _customizeAction(this, "Customize...")
 {
     _lockFile.lock();
 
-    _customizeApplicationAction.setVisible(false);
+    _customizeAction.setVisible(false);
 
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
         _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
@@ -58,8 +58,22 @@ Application::Application(int& argc, char** argv) :
         ModalTask::createHandler(Application::current());
     });
 
-    connect(&_customizeApplicationAction, &QAction::triggered, this, [this] {
-        _customizeApplicationAction.setVisible(true);
+    _customizeAction.setIconByName("gear");
+
+    connect(&_customizeAction, &QAction::triggered, this, [this] {
+        QDialog customizeDialog;
+
+        customizeDialog.setWindowTitle("Customize ManiVault");
+
+        auto settingsGroupDialog = new GroupAction(&customizeDialog, "Settings");
+
+        auto customizeDialogLayout = new QVBoxLayout();
+
+    	customizeDialogLayout->addWidget(settingsGroupDialog->createWidget(&customizeDialog));
+
+    	customizeDialog.setLayout(customizeDialogLayout);
+
+        customizeDialog.exec();
     });
 }
 
