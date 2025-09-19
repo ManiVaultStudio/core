@@ -18,7 +18,6 @@ StartPageConfigurationAction::StartPageConfigurationAction(QObject* parent, cons
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleTutorialsAction(this, "Tutorials", true)
 {
-    setText("Toggle Views");
     setToolTip("Adjust page settings");
     setIconByName("toggle-on");
     setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);

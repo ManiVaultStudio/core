@@ -20,6 +20,8 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
     _brandingAction(this, "Branding"),
     _startPageConfigurationAction(this, "Start page")
 {
+    setDefaultWidgetFlags(0);
+    
     _configureAction.setVisible(false);
     _configureAction.setIconByName("gear");
 
@@ -27,11 +29,10 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
 
     _editFullNameAction.setChecked(false);
 
-    _brandingAction.addAction(&_brandingAction);
+    _brandingAction.addAction(&_baseNameAction);
     _brandingAction.addAction(&_fullNameAction);
     _brandingAction.addAction(&_editFullNameAction);
     _brandingAction.addAction(&_logoAction);
-    _brandingAction.addAction(&_startPageConfigurationAction);
 
     addGroupAction(&_brandingAction);
     addGroupAction(&_startPageConfigurationAction);
@@ -46,7 +47,6 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
         auto customizeDialogLayout = new QVBoxLayout();
 
         customizeDialogLayout->addWidget(createWidget(&customizeDialog));
-        customizeDialogLayout->addStretch(1);
 
         QDialogButtonBox dialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
@@ -92,6 +92,7 @@ void ApplicationConfigurationAction::fromVariantMap(const QVariantMap& variantMa
     _fullNameAction.fromParentVariantMap(variantMap, true);
     _editFullNameAction.fromParentVariantMap(variantMap, true);
     _logoAction.fromParentVariantMap(variantMap, true);
+    _startPageConfigurationAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap ApplicationConfigurationAction::toVariantMap() const
@@ -102,7 +103,9 @@ QVariantMap ApplicationConfigurationAction::toVariantMap() const
     _fullNameAction.insertIntoVariantMap(variantMap);
     _editFullNameAction.insertIntoVariantMap(variantMap);
     _logoAction.insertIntoVariantMap(variantMap);
+    _startPageConfigurationAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
+
 }
