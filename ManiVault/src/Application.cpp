@@ -30,7 +30,6 @@ QList<Application::CursorShapeCount> Application::cursorOverridesCount;
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     Serializable("Application"),
-    _nameAction(this, "ManiVault Studio"),
     _core(nullptr),
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
     _serializationAborted(false),
@@ -39,11 +38,9 @@ Application::Application(int& argc, char** argv) :
     _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), getId().mid(0, 6)))),
     _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
-    _customizeAction(this, "Customize...")
+    _configurationAction(this, "Configuration")
 {
     _lockFile.lock();
-
-    _customizeAction.setVisible(false);
 
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
         _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
@@ -59,23 +56,8 @@ Application::Application(int& argc, char** argv) :
         ModalTask::createHandler(Application::current());
     });
 
-    _customizeAction.setIconByName("gear");
-
-    connect(&_customizeAction, &QAction::triggered, this, [this] {
-        QDialog customizeDialog;
-
-        customizeDialog.setWindowTitle("Customize ManiVault");
-
-        auto settingsGroupDialog = new GroupAction(&customizeDialog, "Settings");
-
-        auto customizeDialogLayout = new QVBoxLayout();
-
-    	customizeDialogLayout->addWidget(settingsGroupDialog->createWidget(&customizeDialog));
-
-    	customizeDialog.setLayout(customizeDialogLayout);
-
-        customizeDialog.exec();
-    });
+    if (QFileInfo(getConfigurationFilePath()).exists())
+        _configurationAction.fromJsonFile(getConfigurationFilePath());
 }
 
 Application::~Application()
@@ -133,15 +115,7 @@ QString Application::getName()
     if (!current())
         return {};
 
-    return current()->_nameAction.getString();
-}
-
-void Application::setName(const QString& name)
-{
-    if (!current())
-        return;
-
-    current()->_nameAction.setString(name);
+    return current()->getConfigurationAction().getNameAction().getString();
 }
 
 QString Application::getAbout()
@@ -329,16 +303,26 @@ void Application::fromVariantMap(const QVariantMap& variantMap)
 {
 	Serializable::fromVariantMap(variantMap);
 
-    _nameAction.fromParentVariantMap(variantMap, true);
+    _configurationAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap Application::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 
-    _nameAction.insertIntoVariantMap(variantMap);
+    _configurationAction.insertIntoVariantMap(variantMap);
     
     return variantMap;
+}
+
+QString Application::getConfigurationFileName()
+{
+    return QStringLiteral("app.json");
+}
+
+QString Application::getConfigurationFilePath()
+{
+    return QDir(applicationDirPath()).filePath(getConfigurationFileName());
 }
 
 Application::TemporaryDirs::TemporaryDirs(QObject* parent) :

@@ -166,13 +166,14 @@ void MainWindow::initialize()
 		
     auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
 
-    auto customizeApplicationShortcut = new QShortcut(QKeySequence(Qt::Key_F8), this);
+    auto customizeApplicationShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_F8), this);
 
 	customizeApplicationShortcut->setContext(Qt::ApplicationShortcut);
 
     connect(customizeApplicationShortcut, &QShortcut::activated, this, [this] {
-        Application::current()->getCustomizeApplicationAction().setVisible(true);
+        Application::current()->getConfigurationAction().getCustomizeAction().setVisible(true);
     });
+
 	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
     auto viewMenuAction     = menuBar()->addMenu(new ViewMenu());
     auto projectsMenuAction = menuBar()->addMenu(new ProjectsMenu());
@@ -236,7 +237,7 @@ void MainWindow::initialize()
     
     const auto projectChanged = [this, updateStatusBarVisibility]() -> void {
         if (!projects().hasProject()) {
-            setWindowTitle("ManiVault");
+            setWindowTitle(Application::getName());
         }
         else {
             if (projects().getCurrentProject()->getReadOnlyAction().isChecked()) {
@@ -246,9 +247,9 @@ void MainWindow::initialize()
                 const auto projectFilePath = projects().getCurrentProject()->getFilePath();
     
                 if (projectFilePath.isEmpty())
-                    setWindowTitle(QString("Unsaved - %1").arg(Application::current()->getName()));
+                    setWindowTitle(QString("Unsaved - %1").arg(Application::getName()));
                 else
-                    setWindowTitle(QString("%1 - %2").arg(projectFilePath, Application::current()->getName()));
+                    setWindowTitle(QString("%1 - %2").arg(projectFilePath, Application::getName()));
             }
         }
     
@@ -259,6 +260,8 @@ void MainWindow::initialize()
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, projectChanged);
     connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
     connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
+
+	connect(&Application::current()->getConfigurationAction().getNameAction(), &StringAction::stringChanged, this, projectChanged);
     
     const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
         if (toggled)

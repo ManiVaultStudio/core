@@ -87,13 +87,6 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
-    const auto appJsonFileName  = QStringLiteral("app.json");
-    const auto appJsonFilePath  = QDir(QCoreApplication::applicationDirPath()).filePath(appJsonFileName);
-
-    if (QFileInfo(appJsonFilePath).exists()) {
-        application.fromJsonFile(appJsonFilePath);
-    }
-
     Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
     Core core;

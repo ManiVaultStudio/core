@@ -12,6 +12,7 @@
 
 #include "actions/TriggerAction.h"
 #include "actions/OptionsAction.h"
+#include "actions/ApplicationConfigurationAction.h"
 
 #include "ApplicationStartupTask.h"
 
@@ -121,12 +122,6 @@ public: // Miscellaneous
      * @return The application name string
      */
     static QString getName();
-
-    /**
-     * Set the application name string to \p name
-     * @param name The application name string
-     */
-    static void setName(const QString& name);
 
     /**
      * Get the application about string
@@ -270,14 +265,27 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+protected: // Customization
+
+    /**
+     * Get the configuration file name
+     * @return The configuration file name
+     */
+    static QString getConfigurationFileName();
+
+    /**
+     * Get the path to the configuration file
+     * @return The path to the configuration file
+     */
+    static QString getConfigurationFilePath();
+
 public: // Statics
 
     static QMainWindow* getMainWindow();
 
 public: // Action getters
 
-    gui::StringAction& getNameAction() { return _nameAction; }
-    gui::TriggerAction& getCustomizeApplicationAction() { return _customizeAction; }
+    gui::ApplicationConfigurationAction& getConfigurationAction() { return _configurationAction; }
 
 signals:
 
@@ -300,21 +308,20 @@ signals:
     void coreManagersCreated(CoreInterface* core);
 
 protected:
-    gui::StringAction           _nameAction;                        /** Application name */       
-    CoreInterface*              _core;                              /** Pointer to the ManiVault core */
-    const util::Version         _version;                           /** Application version */
-    QSettings                   _settings;                          /** Settings */
-    QString                     _serializationTemporaryDirectory;   /** Temporary directory for serialization */
-    bool                        _serializationAborted;              /** Whether serialization was aborted */
-    util::Logger                _logger;                            /** Logger instance */
-    gui::TriggerAction*         _exitAction;                        /** Action for exiting the application */
-    QUrl                        _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
-    ProjectMetaAction*          _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    ApplicationStartupTask*     _startupTask;                       /** Application startup task */
-    QTemporaryDir               _temporaryDir;                      /** Directory where application temporary files reside */
-    TemporaryDirs               _temporaryDirs;                     /** ManiVault application temporary directories manager */
-    QLockFile                   _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
-    gui::TriggerAction          _customizeAction;                   /** Action for editing the application customization (visible when F8 is pressed) */
+    CoreInterface*                          _core;                              /** Pointer to the ManiVault core */
+    const util::Version                     _version;                           /** Application version */
+    QSettings                               _settings;                          /** Settings */
+    QString                                 _serializationTemporaryDirectory;   /** Temporary directory for serialization */
+    bool                                    _serializationAborted;              /** Whether serialization was aborted */
+    util::Logger                            _logger;                            /** Logger instance */
+    gui::TriggerAction*                     _exitAction;                        /** Action for exiting the application */
+    QUrl                                    _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
+    ProjectMetaAction*                      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    ApplicationStartupTask*                 _startupTask;                       /** Application startup task */
+    QTemporaryDir                           _temporaryDir;                      /** Directory where application temporary files reside */
+    TemporaryDirs                           _temporaryDirs;                     /** ManiVault application temporary directories manager */
+    QLockFile                               _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
+    gui::ApplicationConfigurationAction     _configurationAction;               /** Application configuration action */
 
     /** Count of cursor overrides for each cursor shape */
 	static QList<CursorShapeCount> cursorOverridesCount;

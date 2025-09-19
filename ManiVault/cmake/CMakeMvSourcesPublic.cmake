@@ -355,6 +355,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/NavigationAction.h
     src/actions/ZoomMarginAction.h
     src/actions/ViewPluginHeadsUpDisplayAction.h
+    src/actions/ApplicationConfigurationAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -397,6 +398,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/NavigationAction.cpp
     src/actions/ZoomMarginAction.cpp
     src/actions/ViewPluginHeadsUpDisplayAction.cpp
+    src/actions/ApplicationConfigurationAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
