@@ -48,7 +48,7 @@ PageTutorialsWidget::PageTutorialsWidget(QWidget* parent, const QStringList& tag
 
         qDebug() << "Populated from DSNs, setting tags filter action to:" << tagsFilterAction.getOptions();
         //getTutorialsFilterModel().getTagsFilterAction().setSelectedOptions(tagsFilterAction.getSelectedOptions().isEmpty() ? getTutorialsFilterModel().getTagsFilterAction().getOptions() : tagsFilterAction.getSelectedOptions());
-	});
+    });
     */
 }
 
@@ -72,36 +72,36 @@ void PageTutorialsWidget::updateActions()
         auto tutorial = dynamic_cast<LearningCenterTutorialsModel::Item*>(mv::help().getTutorialsModel().itemFromIndex(sourceRowIndex))->getTutorial();
 
         auto tutorialAction = std::make_shared<PageAction>(StyledIcon(tutorial->getIconName()), tutorial->getTitle(), tutorial->getSummary(), "", [this, tutorial]() -> void {
-			try {
+            try {
                 if (tutorial->hasProject()) {
                     mv::projects().openProject(tutorial->getProjectUrl());
                 } else {
                     if (!mv::projects().hasProject())
-						mv::projects().newBlankProject();
+                        mv::projects().newBlankProject();
 
-                	if (auto tutorialPlugin = mv::plugins().requestViewPlugin("Tutorial")) {
+                    if (auto tutorialPlugin = mv::plugins().requestViewPlugin("Tutorial")) {
                         if (auto pickerAction = dynamic_cast<OptionAction*>(tutorialPlugin->findChildByPath("Pick tutorial")))
                             pickerAction->setCurrentText(tutorial->getTitle());
 
                         if (auto toolbarAction = dynamic_cast<HorizontalGroupAction*>(tutorialPlugin->findChildByPath("Toolbar")))
                             toolbarAction->setVisible(false);
-                	}
+                    }
 
                     mv::help().getShowLearningCenterPageAction().setChecked(false);
                     mv::projects().getShowStartPageAction().setChecked(false);
                 }
             }
             catch (std::exception& e)
-	        {
-	            exceptionMessageBox("Unable to load tutorial", e);
+            {
+                exceptionMessageBox("Unable to load tutorial", e);
 
-	            projects().getProjectSerializationTask().setFinished();
-	        }
-	        catch (...)
-	        {
-	            exceptionMessageBox("Unable to load tutorial");
-	        }
-		});
+                projects().getProjectSerializationTask().setFinished();
+            }
+            catch (...)
+            {
+                exceptionMessageBox("Unable to load tutorial");
+            }
+        });
 
         const auto comments = tutorial->hasProject() ? QString("A tutorial project will be downloaded from: %1.").arg(tutorial->getProjectUrl().toString()) : "Creates a project with a tutorial plugin.";
 
@@ -111,7 +111,7 @@ void PageTutorialsWidget::updateActions()
         const auto tags = tutorial->getTags();
 
         if (!tags.isEmpty())
-    		tutorialAction->createSubAction<TagsPageSubAction>(tags);
+            tutorialAction->createSubAction<TagsPageSubAction>(tags);
 
         getModel().add(tutorialAction);
     }

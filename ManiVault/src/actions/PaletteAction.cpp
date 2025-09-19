@@ -15,7 +15,7 @@ using namespace mv::util;
 namespace mv::gui {
 
 QStringList PaletteAction::colorRoleNames = {
-	"WindowText",
+    "WindowText",
     "Button",
     "Light",
     "Midlight",
@@ -75,7 +75,7 @@ PaletteAction::PaletteAction(QObject* parent, const QString& title) :
         QTimer::singleShot(5000, this, [this]() {
             qApp->setPalette(_cachedPalette);
 
-        	AbstractThemeManager::restyleAllWidgets();
+            AbstractThemeManager::restyleAllWidgets();
 
             _fromThemeAction.setEnabled(true);
             _previewAction.setEnabled(true);
@@ -83,8 +83,8 @@ PaletteAction::PaletteAction(QObject* parent, const QString& title) :
             for (auto& _paletteColorRoleAction : _paletteColorRoleActions) {
                 _paletteColorRoleAction->setEnabled(true);
             }
-		});
-	});
+        });
+    });
 }
 
 void PaletteAction::initialize()

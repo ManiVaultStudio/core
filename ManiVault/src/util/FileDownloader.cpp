@@ -18,7 +18,7 @@
 #include <functional>
 
 #ifdef _DEBUG
-	#define FILE_DOWNLOADER_VERBOSE
+    #define FILE_DOWNLOADER_VERBOSE
 #endif
 
 namespace mv::util {
@@ -111,16 +111,16 @@ bool FileDownloader::FileSink::open(QNetworkReply* reply, const QUrl& url, const
         if (error)
             *error = QStringLiteral("File exists and overwrite is disabled: %1").arg(_finalPath);
 
-    	return false;
+        return false;
     }
 
-	const QString dirPath = QFileInfo(_finalPath).absolutePath();
+    const QString dirPath = QFileInfo(_finalPath).absolutePath();
 
-	if (!QDir().mkpath(dirPath)) {
+    if (!QDir().mkpath(dirPath)) {
         if (error)
             *error = QStringLiteral("Unable to create directory: %1").arg(dirPath);
 
-		return false;
+        return false;
     }
 
     _saveFile.setFileName(_finalPath);
@@ -129,26 +129,26 @@ bool FileDownloader::FileSink::open(QNetworkReply* reply, const QUrl& url, const
         if (error)
             *error = QStringLiteral("Failed to open %1 for writing").arg(_finalPath);
 
-    	_saveFile.reset();
+        _saveFile.reset();
 
         return false;
     }
 
-	return true;
+    return true;
 }
 
 bool FileDownloader::FileSink::write(const QByteArray& chunk, QString* error)
 {
     const auto numberOfBytesWritten = _saveFile.write(chunk);
 
-	if (numberOfBytesWritten != chunk.size()) {
+    if (numberOfBytesWritten != chunk.size()) {
         if (error)
             *error = QStringLiteral("Short write to %1").arg(_finalPath);
 
         return false;
     }
 
-	return true;
+    return true;
 }
 
 bool FileDownloader::FileSink::commit(QString* error)
@@ -170,7 +170,7 @@ void FileDownloader::FileSink::cancel() noexcept
 
 QString FileDownloader::FileSink::result() const
 {
-	return _finalPath;
+    return _finalPath;
 }
 
 bool FileDownloader::ByteArraySink::open(QNetworkReply*, const QUrl&, const QString&, bool, QString*)
@@ -184,22 +184,22 @@ bool FileDownloader::ByteArraySink::write(const QByteArray& chunk, QString*)
 {
     _data.append(chunk);
 
-	return true;
+    return true;
 }
 
 bool FileDownloader::ByteArraySink::commit(QString*)
 {
-	return true;
+    return true;
 }
 
 void FileDownloader::ByteArraySink::cancel() noexcept
 {
-	_data.clear();
+    _data.clear();
 }
 
 QByteArray FileDownloader::ByteArraySink::result() const
 {
-	return _data;
+    return _data;
 }
 
 FileDownloader::Exception::Exception(const QString& message) :
@@ -307,9 +307,9 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
 
 void FileDownloader::notifyError(const QString& urlDisplayString, const QString& errorString)
 {
-	qCritical() << QStringLiteral("Download problem: <a>%1</a> not downloaded: %2").arg(urlDisplayString, errorString.toHtmlEscaped());
+    qCritical() << QStringLiteral("Download problem: <a>%1</a> not downloaded: %2").arg(urlDisplayString, errorString.toHtmlEscaped());
 
-	mv::help().addNotification("Download problem", QStringLiteral("Project not downloaded: %1").arg(errorString), StyledIcon("circle-exclamation"));
+    mv::help().addNotification("Download problem", QStringLiteral("Project not downloaded: %1").arg(errorString), StyledIcon("circle-exclamation"));
 }
 
 }

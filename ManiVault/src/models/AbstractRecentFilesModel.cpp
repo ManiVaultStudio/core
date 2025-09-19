@@ -20,40 +20,40 @@ AbstractRecentFilesModel::Item::Item(const util::RecentFile& recentFile) :
 
 QVariant AbstractRecentFilesModel::FilePathItem::data(int role) const {
     switch (role) {
-	    case Qt::EditRole:
-	    case Qt::DisplayRole:
+        case Qt::EditRole:
+        case Qt::DisplayRole:
             return getRecentFile().getFilePath();
 
-	    case Qt::ToolTipRole:
-	        return "File path: " + data(Qt::DisplayRole).toString();
+        case Qt::ToolTipRole:
+            return "File path: " + data(Qt::DisplayRole).toString();
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
-	return Item::data(role);
+    return Item::data(role);
 }
 
 QVariant AbstractRecentFilesModel::DateTimeItem::data(int role) const {
     switch (role) {
-	    case Qt::EditRole:
+        case Qt::EditRole:
             return getRecentFile().getDateTime();
 
-	    case Qt::DisplayRole:
-	        return data(Qt::EditRole).toDateTime().toString();
+        case Qt::DisplayRole:
+            return data(Qt::EditRole).toDateTime().toString();
 
-	    case Qt::ToolTipRole:
-	        return "Date & time: " + data(Qt::DisplayRole).toString();
+        case Qt::ToolTipRole:
+            return "Date & time: " + data(Qt::DisplayRole).toString();
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
-	return Item::data(role);
+    return Item::data(role);
 }
 
 AbstractRecentFilesModel::AbstractRecentFilesModel(QObject* parent, const QString& recentFileType) :
-	StandardItemModel(parent, "RecentFiles"),
+    StandardItemModel(parent, "RecentFiles"),
     _recentFileType(recentFileType)
 {
 }
@@ -62,11 +62,11 @@ QVariant AbstractRecentFilesModel::headerData(int section, Qt::Orientation orien
 {
     switch (static_cast<Column>(section))
     {
-	    case Column::FilePath:
-	        return FilePathItem::headerData(orientation, role);
+        case Column::FilePath:
+            return FilePathItem::headerData(orientation, role);
 
-	    case Column::DateTime:
-	        return DateTimeItem::headerData(orientation, role);
+        case Column::DateTime:
+            return DateTimeItem::headerData(orientation, role);
     }
 
     return {};
@@ -74,18 +74,18 @@ QVariant AbstractRecentFilesModel::headerData(int section, Qt::Orientation orien
 
 RecentFile AbstractRecentFilesModel::getRecentFileFromIndex(const QModelIndex& index) const
 {
-	if (!index.isValid())
-		return {};
+    if (!index.isValid())
+        return {};
 
-	if (const auto item = itemFromIndex(index))
-		return dynamic_cast<Item*>(item)->getRecentFile();
+    if (const auto item = itemFromIndex(index))
+        return dynamic_cast<Item*>(item)->getRecentFile();
 
-	return {};
+    return {};
 }
 
 QString AbstractRecentFilesModel::getSettingsKey() const
 {
-	return QString("%1/%2").arg(StandardItemModel::getSettingsPrefix(), getRecentFileType());
+    return QString("%1/%2").arg(StandardItemModel::getSettingsPrefix(), getRecentFileType());
 }
 
 }

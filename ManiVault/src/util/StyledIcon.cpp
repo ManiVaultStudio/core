@@ -16,7 +16,7 @@
 #include <QPainter>
 
 #ifdef _DEBUG
-	#define STYLED_ICON_VERBOSE
+    #define STYLED_ICON_VERBOSE
 #endif
 
 namespace mv::util
@@ -54,7 +54,7 @@ QMap<QString, QVector<Version>>     StyledIcon::iconFontVersions            = {}
 StyledIcon::StyledIcon(const QString& iconName /*= ""*/, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/)
 {
     if (!iconName.isEmpty() && !iconFontName.isEmpty())
-		set(iconName, iconFontName, iconFontVersion);
+        set(iconName, iconFontName, iconFontVersion);
 }
 
 StyledIcon::StyledIcon(const QIcon& other)
@@ -74,23 +74,23 @@ void StyledIcon::set(const QString& iconName, const QString& iconFontName, const
             return;
         }
 
-	    _iconName           = iconName;
-	    _iconFontName       = iconFontName;
-	    _iconFontVersion    = iconFontVersion;
+        _iconName           = iconName;
+        _iconFontName       = iconFontName;
+        _iconFontVersion    = iconFontVersion;
 
         _iconSettings._sha = generateSha(_iconName, _iconFontName, _iconFontVersion);
 
         const auto iconFontResourcePath = getIconFontResourcePath(_iconFontName, _iconFontVersion);
 
-	    if (!QFile::exists(iconFontResourcePath))
+        if (!QFile::exists(iconFontResourcePath))
             throw std::runtime_error(QString("Font resource not found: %1").arg(iconFontResourcePath).toStdString());
 
-	    updateIconPixmap();
-	}
-	catch (std::exception& e)
-	{
+        updateIconPixmap();
+    }
+    catch (std::exception& e)
+    {
         qWarning() << "Unable to set styled icon: " << e.what();
-	}
+    }
 }
 
 StyledIcon StyledIcon::fromFontAwesomeRegular(const QString& iconName, const Version& version /*= defaultIconFontVersion*/)
@@ -117,40 +117,40 @@ void StyledIcon::initializeIconFont(const QString& iconFontName, const Version& 
         if (fontMetadata.contains(iconFontName))
             return;
 
-	    const auto iconFontResourceName         = getIconFontResourceName(iconFontName, iconFontVersion);
-	    const auto iconFontResourcePath         = getIconFontResourcePath(iconFontName, iconFontVersion);
-	    const auto iconFontMetadataResourcePath = getIconFontMetadataResourcePath(iconFontName, iconFontVersion);
-	    const auto addApplicationFontResult     = QFontDatabase::addApplicationFont(iconFontResourcePath);
+        const auto iconFontResourceName         = getIconFontResourceName(iconFontName, iconFontVersion);
+        const auto iconFontResourcePath         = getIconFontResourcePath(iconFontName, iconFontVersion);
+        const auto iconFontMetadataResourcePath = getIconFontMetadataResourcePath(iconFontName, iconFontVersion);
+        const auto addApplicationFontResult     = QFontDatabase::addApplicationFont(iconFontResourcePath);
 
-	    if (addApplicationFontResult < 0) {
-	        throw std::runtime_error(QString("Unable to load %1").arg(iconFontResourceName).toStdString());
-	    }
+        if (addApplicationFontResult < 0) {
+            throw std::runtime_error(QString("Unable to load %1").arg(iconFontResourceName).toStdString());
+        }
 
 #ifdef STYLED_ICON_VERBOSE
-	    qDebug() << "Loaded" << iconFontResourceName << QFontDatabase::applicationFontFamilies(addApplicationFontResult);
+        qDebug() << "Loaded" << iconFontResourceName << QFontDatabase::applicationFontFamilies(addApplicationFontResult);
 #endif
 
-	    fonts[iconFontResourceName] = QFont(QFontDatabase::applicationFontFamilies(addApplicationFontResult).first(), 100.0);
+        fonts[iconFontResourceName] = QFont(QFontDatabase::applicationFontFamilies(addApplicationFontResult).first(), 100.0);
 
-	    QFile iconFontMetaDataFile;
+        QFile iconFontMetaDataFile;
 
-	    iconFontMetaDataFile.setFileName(iconFontMetadataResourcePath);
-	    iconFontMetaDataFile.open(QIODevice::ReadOnly | QIODevice::Text);
+        iconFontMetaDataFile.setFileName(iconFontMetadataResourcePath);
+        iconFontMetaDataFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
-	    QString iconFontMetaData = iconFontMetaDataFile.readAll();
+        QString iconFontMetaData = iconFontMetaDataFile.readAll();
 
-	    iconFontMetaDataFile.close();
+        iconFontMetaDataFile.close();
 
-	    const auto jsonDocument     = QJsonDocument::fromJson(iconFontMetaData.toUtf8());
-	    const auto metadataObject   = jsonDocument.object();
+        const auto jsonDocument     = QJsonDocument::fromJson(iconFontMetaData.toUtf8());
+        const auto metadataObject   = jsonDocument.object();
 
-	    fontMetadata[iconFontResourceName] = metadataObject.toVariantMap();
+        fontMetadata[iconFontResourceName] = metadataObject.toVariantMap();
 
         if (!iconFontVersions.contains(iconFontName))
             iconFontVersions[iconFontName] = {};
 
 #ifdef STYLED_ICON_VERBOSE
-	    qDebug() << QString("Found %1 %2 icons").arg(QString::number(fontMetadata[iconFontResourceName].count()), iconFontName);
+        qDebug() << QString("Found %1 %2 icons").arg(QString::number(fontMetadata[iconFontResourceName].count()), iconFontName);
 #endif
     }
     catch (std::exception& e)
@@ -303,15 +303,15 @@ QFont StyledIcon::getIconFont(std::int32_t fontPointSize /*= -1*/, const QString
 QString StyledIcon::getIconCharacter(const QString& iconName, const QString& iconFontName /*= defaultIconFontName*/, const Version& iconFontVersion /*= defaultIconFontVersion*/)
 {
     try {
-	    if (iconName.isEmpty())
-	        throw std::runtime_error("Icon name is empty");
+        if (iconName.isEmpty())
+            throw std::runtime_error("Icon name is empty");
 
-	    if (iconFontName.isEmpty())
-	        throw std::runtime_error("Icon font name is empty");
+        if (iconFontName.isEmpty())
+            throw std::runtime_error("Icon font name is empty");
 
         const auto it = std::find_if(iconFontPreferenceGroups.begin(), iconFontPreferenceGroups.end(), [iconFontName](const QStringList& iconFontPreferenceGroup) {
             return iconFontPreferenceGroup.contains(iconFontName);
-		});
+        });
 
         if (it == iconFontPreferenceGroups.end())
             throw std::runtime_error(QString("'%1' not found in icon font preference groups").arg(iconFontName).toStdString());
@@ -331,7 +331,7 @@ QString StyledIcon::getIconCharacter(const QString& iconName, const QString& ico
             updateIconFontVersions(candidateIconFontName);
 
             for (const auto& candidateIconFontVersion : iconFontVersions[candidateIconFontName])
-				iconFontCandidates.append({ candidateIconFontName, QString::fromStdString(candidateIconFontVersion.getVersionString()) });
+                iconFontCandidates.append({ candidateIconFontName, QString::fromStdString(candidateIconFontVersion.getVersionString()) });
         }
 
         // Try all candidates
@@ -364,11 +364,11 @@ QString StyledIcon::getIconCharacter(const QString& iconName, const QString& ico
         }
 
         throw std::runtime_error(QString("%1 not found in any of these: %2").arg(iconName, iconFontVariants.join(", ")).toStdString());
-	}
-	catch (std::exception& e)
-	{
-	    qWarning() << "Unable to retrieve icon character: " << e.what();
-	}
+    }
+    catch (std::exception& e)
+    {
+        qWarning() << "Unable to retrieve icon character: " << e.what();
+    }
 
     return "";
 }
@@ -380,7 +380,7 @@ Badge::Parameters StyledIcon::getBadge() const
 
 void StyledIcon::setBadgeEnabled(bool badgeEnabled)
 {
-	_iconSettings._badgeParameters._enabled = badgeEnabled;
+    _iconSettings._badgeParameters._enabled = badgeEnabled;
 }
 
 bool StyledIcon::isBadgeEnabled() const
@@ -412,21 +412,21 @@ void StyledIcon::updateIconPixmap() const
 {
     try {
         if (!_iconSettings._sha.isEmpty() && !pixmaps.contains(_iconSettings._sha)) {
-	        pixmaps[_iconSettings._sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _iconSettings._mode == StyledIconMode::FixedColor ? Qt::black : _iconSettings._fixedColor);
+            pixmaps[_iconSettings._sha] = createIconPixmap(_iconName, _iconFontName, _iconFontVersion, _iconSettings._mode == StyledIconMode::FixedColor ? Qt::black : _iconSettings._fixedColor);
         }
-	}
-	catch (std::exception& e)
-	{
+    }
+    catch (std::exception& e)
+    {
         qWarning() << "Unable to update styled icon" << e.what();
-	}
+    }
 }
 
 QString StyledIcon::generateSha(const QString& iconName, const QString& iconFontName, const Version& iconFontVersion)
 {
     const auto input    = iconName + iconFontName + QString::fromStdString(iconFontVersion.getVersionString());
-	const auto hash     = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha256);
+    const auto hash     = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha256);
 
-	return hash.toHex();
+    return hash.toHex();
 }
 
 void StyledIcon::updateIconFontVersions(const QString& iconFontName)

@@ -13,7 +13,7 @@ using namespace mv::util;
 #endif
 
 #ifdef ERROR_LOGGING
-	#include "private/SentryErrorLogger.h"
+    #include "private/SentryErrorLogger.h"
 #endif
 
 namespace mv
@@ -39,7 +39,7 @@ ErrorManager::ErrorManager(QObject* parent) :
 //#ifdef _DEBUG
 //    _loggingEnabledAction.setEnabled(false);
 //#endif
-	
+    
     _loggingDsnAction.setSettingsPrefix(QString("%1Logging/DSN").arg(getSettingsPrefix()));
     _loggingDsnAction.setToolTip("The Sentry error logging data source name");
     _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
@@ -50,7 +50,7 @@ ErrorManager::ErrorManager(QObject* parent) :
     const auto allowErrorReportingChanged = [this]() -> void {
         _loggingShowCrashReportDialogAction.setEnabled(_loggingEnabledAction.isChecked());
         _loggingDsnAction.setEnabled(_loggingEnabledAction.isChecked());
-	};
+    };
 
     allowErrorReportingChanged();
 
@@ -85,9 +85,9 @@ void ErrorManager::initialize()
 #ifdef ERROR_LOGGING
         setErrorLogger(new SentryErrorLogger(this));
 
-    	getErrorLogger()->initialize();
+        getErrorLogger()->initialize();
 
-    	connect(&getLoggingAskConsentDialogAction(), &TriggerAction::triggered, this, &ErrorManager::showErrorLoggingConsentDialog);
+        connect(&getLoggingAskConsentDialogAction(), &TriggerAction::triggered, this, &ErrorManager::showErrorLoggingConsentDialog);
 
         if (!getLoggingUserHasOptedAction().isChecked())
             showErrorLoggingConsentDialog();

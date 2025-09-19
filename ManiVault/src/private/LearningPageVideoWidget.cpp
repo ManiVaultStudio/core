@@ -29,40 +29,40 @@ using namespace mv::gui;
 using namespace mv::util;
 
 GraphicsItemFader::GraphicsItemFader(QGraphicsItem* item, qreal opacity, QObject* parent):
-	QObject(parent),
-	_item(item),
-	_opacityEffect(this),
-	_opacityAnimation(&_opacityEffect, "opacity")
+    QObject(parent),
+    _item(item),
+    _opacityEffect(this),
+    _opacityAnimation(&_opacityEffect, "opacity")
 {
-	_item->setGraphicsEffect(&_opacityEffect);
+    _item->setGraphicsEffect(&_opacityEffect);
 
-	fadeIn(opacity);
+    fadeIn(opacity);
 }
 
 void GraphicsItemFader::fadeIn(qreal opacity, int duration, int delay)
 {
-	return setOpacity(opacity, duration, delay);
+    return setOpacity(opacity, duration, delay);
 }
 
 void GraphicsItemFader::fadeIn(int duration, int delay)
 {
-	return setOpacity(1.0, duration, delay);
+    return setOpacity(1.0, duration, delay);
 }
 
 void GraphicsItemFader::fadeOut(qreal opacity, int duration, int delay)
 {
-	return setOpacity(opacity, duration, delay);
+    return setOpacity(opacity, duration, delay);
 }
 
 void GraphicsItemFader::fadeOut(int duration, int delay)
 {
-	return setOpacity(0.0, duration, delay);
+    return setOpacity(0.0, duration, delay);
 }
 
 void GraphicsItemFader::setOpacity(qreal opacity, int duration, int delay)
 {
-	if (_opacityEffect.opacity() == opacity)
-		return;
+    if (_opacityEffect.opacity() == opacity)
+        return;
 
     const auto animateOpacity = [this, duration, opacity]() -> void {
         _opacityAnimation.stop();
@@ -71,7 +71,7 @@ void GraphicsItemFader::setOpacity(qreal opacity, int duration, int delay)
         _opacityAnimation.setEndValue(opacity);
 
         _opacityAnimation.start();
-	};
+    };
 
     if (delay > 0) {
         QTimer::singleShot(delay, animateOpacity);
@@ -81,11 +81,11 @@ void GraphicsItemFader::setOpacity(qreal opacity, int duration, int delay)
 }
 
 GraphicsIconItem::GraphicsIconItem(const QString& iconName, const QSize& iconSize, qreal intermediateOpacity /*= 0.5*/, QGraphicsItem* parent /*= nullptr*/):
-	QGraphicsPixmapItem(QIcon(StyledIcon(iconName)).pixmap(iconSize), parent),
-	_fader(this),
+    QGraphicsPixmapItem(QIcon(StyledIcon(iconName)).pixmap(iconSize), parent),
+    _fader(this),
     _intermediateOpacity(intermediateOpacity)
 {
-	setAcceptHoverEvents(true);
+    setAcceptHoverEvents(true);
 
     //
 }
@@ -94,46 +94,46 @@ void GraphicsIconItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     QGraphicsPixmapItem::hoverEnterEvent(event);
 
-	_fader.fadeIn(1.0, 150);
+    _fader.fadeIn(1.0, 150);
 }
 
 void GraphicsIconItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
     QGraphicsPixmapItem::hoverLeaveEvent(event);
 
-	_fader.setOpacity(_intermediateOpacity);
+    _fader.setOpacity(_intermediateOpacity);
 }
 
 void GraphicsIconItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-	QGraphicsPixmapItem::mousePressEvent(event);
+    QGraphicsPixmapItem::mousePressEvent(event);
 
     emit clicked();
 }
 
 OverlayRectangleItem::OverlayRectangleItem(QGraphicsItem* parent) :
-	QGraphicsRectItem(parent),
+    QGraphicsRectItem(parent),
     _fader(this)
 {
 }
 
 void OverlayRectangleItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
-	QGraphicsRectItem::hoverEnterEvent(event);
+    QGraphicsRectItem::hoverEnterEvent(event);
 
     _fader.fadeIn(1.0, 150);
 }
 
 void OverlayRectangleItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
-	QGraphicsRectItem::hoverLeaveEvent(event);
+    QGraphicsRectItem::hoverLeaveEvent(event);
 
     _fader.setOpacity(0);
 }
 
 GraphicsItemFader& OverlayRectangleItem::getFader()
 {
-	return _fader;
+    return _fader;
 }
 
 LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidget* parent /*= nullptr*/) :
@@ -141,10 +141,10 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _index(index),
     _overlayGraphicsScene(this),
     _overlayGraphicsView(this),
-	_playIconItem("play", { 32, 32 }, 0.5),
-	_summaryIconItem("scroll", { 12, 12 }, 0.3),
-	_dateIconItem("calendar", { 12, 12 }, 0.3),
-	_tagsIconItem("tags", { 12, 12 }, 0.3)
+    _playIconItem("play", { 32, 32 }, 0.5),
+    _summaryIconItem("scroll", { 12, 12 }, 0.3),
+    _dateIconItem("calendar", { 12, 12 }, 0.3),
+    _tagsIconItem("tags", { 12, 12 }, 0.3)
 {
     const auto title = _index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Title)).data().toString();
 
@@ -177,9 +177,9 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     const auto sourceModelIndex = dynamic_cast<const QSortFilterProxyModel*>(_index.model())->mapToSource(_index);
     const auto modelItem        = mv::help().getVideosModel().itemFromIndex(sourceModelIndex.siblingAtColumn(0));
     const auto videoModelItem   = dynamic_cast<LearningCenterVideosModel::Item*>(modelItem);
-	const auto video            = videoModelItem->getVideo();
+    const auto video            = videoModelItem->getVideo();
 
-	const auto updateThumbnailImage = [this, video]() -> void {
+    const auto updateThumbnailImage = [this, video]() -> void {
         _thumbnailPixmap = QPixmap::fromImage(video->getThumbnailImage());
 
         constexpr auto  marginToRemove = 9;
@@ -214,7 +214,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
 #else
         QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Resource)).data().toString()));
 #endif
-	});
+    });
 
     QLocale locale;
 

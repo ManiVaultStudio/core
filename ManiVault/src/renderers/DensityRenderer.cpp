@@ -47,28 +47,28 @@ QRectF DensityRenderer::computeWorldBounds() const
     float marginY = 0.f;
 
     switch (getNavigator().getZoomMarginType()) {
-	    case Navigator2D::ZoomMarginType::AbsoluteScreen:
-	    {
-	        const auto zoomMarginScreen = getNavigator().getZoomMarginScreen();
+        case Navigator2D::ZoomMarginType::AbsoluteScreen:
+        {
+            const auto zoomMarginScreen = getNavigator().getZoomMarginScreen();
 
-	        marginX = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height() - 2.f * zoomMarginScreen));
-	        marginY = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width() - 2.f * zoomMarginScreen));
+            marginX = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height() - 2.f * zoomMarginScreen));
+            marginY = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width() - 2.f * zoomMarginScreen));
 
-	        break;
-	    }
+            break;
+        }
 
-	    case Navigator2D::ZoomMarginType::RelativeToData:
-	    {
-	        const auto zoomMarginData = 0.01f * getNavigator().getZoomMarginData();
+        case Navigator2D::ZoomMarginType::RelativeToData:
+        {
+            const auto zoomMarginData = 0.01f * getNavigator().getZoomMarginData();
 
-	        marginX = zoomMarginData * static_cast<float>(getDataBounds().height());
-	        marginY = zoomMarginData * static_cast<float>(getDataBounds().width());
+            marginX = zoomMarginData * static_cast<float>(getDataBounds().height());
+            marginY = zoomMarginData * static_cast<float>(getDataBounds().width());
 
-	        break;
-	    }
+            break;
+        }
     }
 
-	const auto margin           = std::max(marginX, marginY);
+    const auto margin           = std::max(marginX, marginY);
     const auto margins          = QMarginsF(margin, margin, margin, margin);
 
     return squareDataBounds.marginsAdded(margins);
@@ -114,9 +114,9 @@ float DensityRenderer::getMaxDensity() const
 mv::Vector3f DensityRenderer::getColorMapRange() const
 {
     return {
-    	0.0f,
-    	_densityComputation.getMaxDensity(),
-    	_densityComputation.getMaxDensity()
+        0.0f,
+        _densityComputation.getMaxDensity(),
+        _densityComputation.getMaxDensity()
     };
 }
 
@@ -137,7 +137,7 @@ void DensityRenderer::init()
     loaded &= _shaderDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/DensityDraw.frag");
     loaded &= _shaderIsoDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/IsoDensityDraw.frag");
 
-	if (!loaded) {
+    if (!loaded) {
         qDebug() << "Failed to load one of the Density shaders";
     }
 
@@ -150,15 +150,15 @@ void DensityRenderer::render()
     beginRender();
     {
         switch (_renderMode) {
-			case DENSITY: {
-				drawDensity();
-				break;
-			}
+            case DENSITY: {
+                drawDensity();
+                break;
+            }
 
-			case LANDSCAPE: {
-				drawLandscape();
-				break;
-			}
+            case LANDSCAPE: {
+                drawLandscape();
+                break;
+            }
         }
     }
     endRender();
@@ -265,16 +265,16 @@ void DensityRenderer::drawLandscape()
 
     const auto maxDensity = _densityComputation.getMaxDensity();
 
-	if (maxDensity <= 0) {
-		return;
-	}
+    if (maxDensity <= 0) {
+        return;
+    }
 
     _shaderIsoDensityDraw.bind();
     {
         _densityComputation.getDensityTexture().bind(0);
 
         _shaderIsoDensityDraw.uniformMatrix4f("mvp", getModelViewProjectionMatrix().data());
-    	_shaderIsoDensityDraw.uniform1i("tex", 0);
+        _shaderIsoDensityDraw.uniform1i("tex", 0);
         _shaderIsoDensityDraw.uniform2f("renderParams", 1.0f / maxDensity, 1.0f / _densityComputation.getNumPoints());
         _shaderIsoDensityDraw.uniform3f("colorMapRange", _colorMapRange);
 

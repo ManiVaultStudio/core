@@ -81,7 +81,7 @@ public:
      */
     bool lessThan(const HardwareComponentSpec& other) const override {
         if (auto otherRamComponentSpec = dynamic_cast<const RamComponentSpec*>(&other))
-			return *this < *otherRamComponentSpec;
+            return *this < *otherRamComponentSpec;
 
         return false; // Cannot compare with non-RAM component spec
     }
@@ -93,7 +93,7 @@ public:
      */
     bool equals(const HardwareComponentSpec& other) const override {
         if (auto otherRamComponentSpec = dynamic_cast<const RamComponentSpec*>(&other))
-			return *this == *otherRamComponentSpec;
+            return *this == *otherRamComponentSpec;
 
         return false; // Cannot compare with non-RAM component spec
     }

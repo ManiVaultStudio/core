@@ -159,10 +159,10 @@ void MainWindow::checkGraphicsCapabilities()
 void MainWindow::initialize()
 {
     if (centralWidget()) {
-	    qDebug() << "Main window already initialized";
+        qDebug() << "Main window already initialized";
         return;
     }
-		
+        
     auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
     
     auto fileMenuAction     = menuBar()->addMenu(new FileMenu());

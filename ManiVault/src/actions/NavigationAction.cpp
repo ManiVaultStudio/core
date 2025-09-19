@@ -55,7 +55,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomInAction.setIconByName("search-plus");
     _zoomExtentsAction.setIconByName("compress");
 
-	_zoomSelectionAction.setIcon(StyledIcon("compress").withModifier("mouse-pointer"));
+    _zoomSelectionAction.setIcon(StyledIcon("compress").withModifier("mouse-pointer"));
     _zoomSelectionAction.setEnabled(false);
 
     _zoomRegionAction.setIcon(StyledIcon("compress").withModifier("search"));
@@ -81,17 +81,17 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomGroupAction.setShowLabels(false);
     _zoomGroupAction.setIconByName("magnifying-glass");
 
-	_zoomGroupAction.addAction(&_zoomOutAction, TriggerAction::Icon);
-	_zoomGroupAction.addAction(&_zoomPercentageAction);
-	_zoomGroupAction.addAction(&_zoomInAction, TriggerAction::Icon);
+    _zoomGroupAction.addAction(&_zoomOutAction, TriggerAction::Icon);
+    _zoomGroupAction.addAction(&_zoomPercentageAction);
+    _zoomGroupAction.addAction(&_zoomInAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomCenterAction);
-	_zoomGroupAction.addAction(&_zoomExtentsAction, TriggerAction::Icon);
-	_zoomGroupAction.addAction(&_zoomSelectionAction, TriggerAction::Icon);
-	_zoomGroupAction.addAction(&_zoomRegionAction, TriggerAction::Icon);
-	
-	addAction(&_zoomGroupAction, 1);
-	addAction(&_freezeNavigation, 50);
-	addAction(&_zoomMarginAction);
+    _zoomGroupAction.addAction(&_zoomExtentsAction, TriggerAction::Icon);
+    _zoomGroupAction.addAction(&_zoomSelectionAction, TriggerAction::Icon);
+    _zoomGroupAction.addAction(&_zoomRegionAction, TriggerAction::Icon);
+    
+    addAction(&_zoomGroupAction, 1);
+    addAction(&_freezeNavigation, 50);
+    addAction(&_zoomMarginAction);
 
     const auto updateReadOnly = [this]() -> void {
         const auto notFrozen = _freezeNavigation.isChecked();
@@ -103,7 +103,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
         _zoomSelectionAction.setEnabled(!notFrozen);
         _zoomRegionAction.setEnabled(!notFrozen);
         _zoomCenterAction.setEnabled(!notFrozen);
-	};
+    };
 
     updateReadOnly();
 

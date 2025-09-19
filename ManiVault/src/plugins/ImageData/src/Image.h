@@ -38,11 +38,11 @@ public:
     void toFloatVector(std::vector<float>& pixels) const;
 
 private:
-    std::vector<std::uint16_t>	_data;
+    std::vector<std::uint16_t>    _data;
     QSize                       _size;
-    std::uint32_t				_noComponents;
-    QString						_imageFilePath;
-    QString						_dimensionName;
+    std::uint32_t                _noComponents;
+    QString                        _imageFilePath;
+    QString                        _dimensionName;
 };
 
 inline QDebug operator<<(QDebug dbg, Image& image)

@@ -89,14 +89,14 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
             QStringList datasetIds, datasetIdsLog;
 
             for (const auto& selectedDataset : _selectedDatasets) {
-	            datasetIds << selectedDataset->getId();
-            	datasetIdsLog << selectedDataset->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked());
+                datasetIds << selectedDataset->getId();
+                datasetIdsLog << selectedDataset->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked());
             }
 
             QGuiApplication::clipboard()->setText(datasetIds.join("\n"));
 
             if (datasetIdsLog.count() > 1)
-				qDebug() << "Dataset identifiers" << datasetIdsLog.join(", ") << "copied to clipboard";
+                qDebug() << "Dataset identifiers" << datasetIdsLog.join(", ") << "copied to clipboard";
             else
                 qDebug() << "Dataset identifier" << datasetIdsLog.join(", ") << "copied to clipboard";
         };
@@ -180,7 +180,7 @@ void DataHierarchyWidgetContextMenu::addMenusForScripts()
                 menus[menuPath] = new QMenu(titleSegment);
 
                 if (titleSegment == titleSegments.first())
-					menus[menuPath]->setIcon(scriptTriggerAction->getLanguageIcon());
+                    menus[menuPath]->setIcon(scriptTriggerAction->getLanguageIcon());
 
                 if (titleSegment != titleSegments.first()) {
                     if (titleSegment == titleSegments.last())
@@ -597,5 +597,5 @@ SelectionPatternGroupIndexDialog::SelectionPatternGroupIndexDialog(QWidget* pare
 
     layout->addWidget(settingsGroupAction->createWidget(this));
 
-	setLayout(layout);
+    setLayout(layout);
 }

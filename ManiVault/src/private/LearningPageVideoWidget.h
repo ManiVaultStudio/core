@@ -118,7 +118,7 @@ public:
 signals:
 
     /** Signal emitted when the item is clicked */
-	void clicked();
+    void clicked();
 
 private:
     GraphicsItemFader   _fader;                 /** Fader for the item */
@@ -163,13 +163,13 @@ class OverlayGraphicsView : public QGraphicsView
 {
 public:
 
-	/**
-	 * Create with pointer to \p parent widget
+    /**
+     * Create with pointer to \p parent widget
      * @param parent Pointer to parent widget
-	 */
-	explicit OverlayGraphicsView(QWidget* parent = nullptr)
+     */
+    explicit OverlayGraphicsView(QWidget* parent = nullptr)
         : QGraphicsView(parent), _targetWidget(parent)
-	{
+    {
         setFrameStyle(QFrame::NoFrame);
     }
 

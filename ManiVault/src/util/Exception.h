@@ -24,32 +24,32 @@ class CORE_EXPORT BaseException : public QException
 {
 public:
 
-	/**
+    /**
      * Construct with \p message and \p icon
      * @param message Exception message
      * @param icon Icon to display in message box (default is empty)
-	 */
-	BaseException(const QString& message, const QIcon& icon = QIcon());
+     */
+    BaseException(const QString& message, const QIcon& icon = QIcon());
 
-	/**
+    /**
      * Get the exception message in UTF-8 format
      * @return UTF-8 encoded exception message
-	 */
-	const char* what() const noexcept override;
+     */
+    const char* what() const noexcept override;
 
-	/** Raises an exception, required by QException for rethrowing */
+    /** Raises an exception, required by QException for rethrowing */
     void raise() const override;
 
-	/** Clones an exception, required by QException for rethrowing */
+    /** Clones an exception, required by QException for rethrowing */
     BaseException* clone() const override;
 
-	/**
+    /**
      * Get the exception message
      * @return Exception message
      */
     QString getMessage() const;
 
-	/**
+    /**
      * Get the icon to display in message box
      * @return Exception icon
      */

@@ -59,8 +59,8 @@ StatusBarAction::~StatusBarAction()
 
     /* TODO: Fix plugin status bar action visibility
     if (!core()->isAboutToBeDestroyed())
-		settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
-	*/
+        settings().getMiscellaneousSettings().updateStatusBarOptionsAction();
+    */
 }
 
 WidgetActions StatusBarAction::getStatusBarActions()

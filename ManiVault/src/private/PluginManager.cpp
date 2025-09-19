@@ -100,7 +100,7 @@ void PluginManager::loadPluginFactories()
     qDebug() << "Loading plugin factories";
 #endif
 
-	QDir pluginDir(qApp->applicationDirPath());
+    QDir pluginDir(qApp->applicationDirPath());
     
 #if defined(Q_OS_WIN)
     //if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
@@ -231,7 +231,7 @@ void PluginManager::loadPluginFactories()
 
         // Loading of the plugin succeeded so cast it to its original class
         _pluginFactories[pluginKind] = pluginFactory;
-    	_pluginFactories[pluginKind]->setKind(pluginKind);
+        _pluginFactories[pluginKind]->setKind(pluginKind);
         _pluginFactories[pluginKind]->getPluginMetadata().getVersion().setContext(QString("%1 plugin").arg(pluginKind).toStdString());
         _pluginFactories[pluginKind]->getPluginMetadata().getVersion().initialize(version);
         _pluginFactories[pluginKind]->initialize();
@@ -459,33 +459,33 @@ plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin
 {
     try
     {
-	    if (!_pluginFactories.keys().contains(kind))
-	        throw std::runtime_error("Unrecognized view plugin kind");
+        if (!_pluginFactories.keys().contains(kind))
+            throw std::runtime_error("Unrecognized view plugin kind");
 
         auto viewPluginFactory = dynamic_cast<plugin::ViewPluginFactory*>(_pluginFactories[kind]);
 
         if (!viewPluginFactory)
             throw std::runtime_error(QString("%1 plugin factory does not exist").arg(kind).toStdString());
 
-	    if (viewPluginFactory->getStartFloating())
-	        return requestViewPluginFloated(kind, datasets);
+        if (viewPluginFactory->getStartFloating())
+            return requestViewPluginFloated(kind, datasets);
 
-	    const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
+        const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
 
-	    if (viewPlugin != nullptr)
-	        mv::workspaces().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
+        if (viewPlugin != nullptr)
+            mv::workspaces().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
 
-	    return viewPlugin;
-	}
-	catch (std::exception& e)
-	{
-	    exceptionMessageBox("Unable to create view plugin", e);
-	}
-	catch (...) {
-	    exceptionMessageBox("Unable to create view plugin");
-	}
+        return viewPlugin;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to create view plugin", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to create view plugin");
+    }
 
-	return {};
+    return {};
 }
 
 plugin::ViewPlugin* PluginManager::requestViewPluginFloated(const QString& kind, Datasets datasets)
@@ -607,7 +607,7 @@ void PluginManager::destroyPluginById(const QString& pluginId)
     {
         const auto it = std::find_if(_plugins.begin(), _plugins.end(), [pluginId](const auto& pluginPtr) -> bool {
             return pluginId == pluginPtr->getId();
-		});
+        });
 
         if (it == _plugins.end())
             throw std::runtime_error(QString("Plugin (%1) not found").arg(pluginId).toStdString());
@@ -714,7 +714,7 @@ QStringList PluginManager::getPluginKindsByPluginTypes(const plugin::Types& plug
 
     if (pluginTypes.isEmpty()) {
         for (const auto& pluginFactory : _pluginFactories)
-        	pluginKinds << pluginFactory->getKind();
+            pluginKinds << pluginFactory->getKind();
     } else {
         for (const auto& pluginType : pluginTypes)
             for (auto pluginFactory : _pluginFactories)
@@ -908,25 +908,25 @@ QVariantMap PluginManager::toVariantMap() const
             usedPluginsList << pluginFactory->getKind();
 
     for (const auto& loadedPlugin : _plugins) {
-	    if (loadedPlugin->getType() == Type::ANALYSIS)
-	    {
-	    	// Make sure the analysisPlugin overloads toVariantMap() and fromVariantMap(QVariantMap) before saving it in the project
-	    	auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get());
-	    	const QMetaObject* metaObj = analysisPlugin->metaObject();
+        if (loadedPlugin->getType() == Type::ANALYSIS)
+        {
+            // Make sure the analysisPlugin overloads toVariantMap() and fromVariantMap(QVariantMap) before saving it in the project
+            auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get());
+            const QMetaObject* metaObj = analysisPlugin->metaObject();
 
-	    	if (metaObj == nullptr)
-	    		continue;
+            if (metaObj == nullptr)
+                continue;
 
-	    	auto toVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("toVariantMap()").constData());
-	    	auto fromVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("fromVariantMap(QVariantMap)").constData());
+            auto toVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("toVariantMap()").constData());
+            auto fromVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("fromVariantMap(QVariantMap)").constData());
 
-	    	if (toVariantMapIndex != -1 && fromVariantMapIndex != -1)
-	    		loadedAnalysesList << analysisPlugin->toVariantMap();
-	    	else if (toVariantMapIndex != -1)
-	    		qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements toVariantMap() but not fromVariantMap(QVariantMap) - analysis plugin is not saved.";
-	    	else if (fromVariantMapIndex != -1)
-	    		qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements fromVariantMap(QVariantMap) but not toVariantMap() - analysis plugin is not saved.";
-	    }
+            if (toVariantMapIndex != -1 && fromVariantMapIndex != -1)
+                loadedAnalysesList << analysisPlugin->toVariantMap();
+            else if (toVariantMapIndex != -1)
+                qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements toVariantMap() but not fromVariantMap(QVariantMap) - analysis plugin is not saved.";
+            else if (fromVariantMapIndex != -1)
+                qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements fromVariantMap(QVariantMap) but not toVariantMap() - analysis plugin is not saved.";
+        }
     }
 
     variantMap.insert({

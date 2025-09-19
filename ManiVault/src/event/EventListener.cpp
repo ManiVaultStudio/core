@@ -23,7 +23,7 @@ EventListener::EventListener()
 EventListener::~EventListener()
 {
     if (!core()->isAboutToBeDestroyed())
-		core()->getEventManager().unregisterEventListener(this);
+        core()->getEventManager().unregisterEventListener(this);
 }
 
 bool EventListener::isEventTypeSupported(std::uint32_t eventType) const

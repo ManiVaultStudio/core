@@ -199,10 +199,10 @@ void StartPageOpenProjectWidget::setupRecentProjectsSection()
     auto& recentProjectsActionModel = static_cast<const RecentFilesAction&>(recentProjectsAction).getModel();
     auto& hierarchyWidget           = _recentProjectsWidget.getHierarchyWidget();
 
-	hierarchyWidget.getFilterColumnAction().setCurrentText("FilePath");
-	hierarchyWidget.setItemTypeName("Recent Project");
-	hierarchyWidget.getToolbarAction().addAction(&recentProjectsAction);
-	hierarchyWidget.setWindowIcon(StyledIcon("clock"));
+    hierarchyWidget.getFilterColumnAction().setCurrentText("FilePath");
+    hierarchyWidget.setItemTypeName("Recent Project");
+    hierarchyWidget.getToolbarAction().addAction(&recentProjectsAction);
+    hierarchyWidget.setWindowIcon(StyledIcon("clock"));
 
     auto& toolbarAction = hierarchyWidget.getToolbarAction();
 
@@ -210,7 +210,7 @@ void StartPageOpenProjectWidget::setupRecentProjectsSection()
     toolbarAction.addAction(&_recentProjectsFilterModel.getTextFilterAction());
     toolbarAction.addAction(&recentProjectsAction.getEditAction());
 
-	_recentProjectsFilterModel.setSourceModel(const_cast<RecentFilesListModel*>(&recentProjectsActionModel));
+    _recentProjectsFilterModel.setSourceModel(const_cast<RecentFilesListModel*>(&recentProjectsActionModel));
 
     const auto populateModel = [this, &recentProjectsAction, &recentProjectsActionModel]() -> void {
         _recentProjectsWidget.getModel().removeRows(0, _recentProjectsWidget.getModel().rowCount());
@@ -259,7 +259,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
 {
     auto& hierarchyWidget = _projectsWidget.getHierarchyWidget();
 
-	hierarchyWidget.getFilterColumnAction().setCurrentText("Title");
+    hierarchyWidget.getFilterColumnAction().setCurrentText("Title");
     hierarchyWidget.setItemTypeName("Project");
     hierarchyWidget.setWindowIcon(StyledIcon("file"));
     hierarchyWidget.getFilterColumnAction().setCurrentText("Title");
@@ -279,14 +279,14 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
     toolbarAction.addAction(&projectsTreeModel.getDsnsAction());
 
     const auto addProjectPageAction = [this, &projectsPageTreeModel](ProjectsModelProjectSharedPtr project) -> PageActionSharedPtr {
-    	auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), [this, project]() -> void {
+        auto projectPageAction = std::make_shared<PageAction>(StyledIcon("file"), project->getTitle(), project->getUrl().toString(), project->getSummary(), [this, project]() -> void {
             mv::projects().openProject(project);
         });
 
         projectPageAction->setParentTitle(project->getGroup());
 
         if (!project->isGroup() && project->isDownloaded())
-        	projectPageAction->createSubAction<ProjectPurgePageSubAction>(project);
+            projectPageAction->createSubAction<ProjectPurgePageSubAction>(project);
 
         if (!project->getTags().isEmpty())
             projectPageAction->createSubAction<TagsPageSubAction>(project->getTags());
@@ -307,7 +307,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
 
         if (!project->isGroup()) {
             if (const auto& summary = project->getSummary(); !summary.isEmpty())
-				projectPageAction->createSubAction<CommentsPageSubAction>(project->getSummary());
+                projectPageAction->createSubAction<CommentsPageSubAction>(project->getSummary());
 
             projectPageAction->createSubAction<ProjectCompatibilityPageSubAction>(HardwareSpec::getSystemCompatibility(project->getMinimumHardwareSpec(), project->getRecommendedHardwareSpec()));
 
@@ -317,12 +317,12 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
 
             updateMetadata();
 
-        	auto lastUpdatedPageSubAction = projectPageAction->createSubAction<ProjectLastUpdatedPageSubAction>();
+            auto lastUpdatedPageSubAction = projectPageAction->createSubAction<ProjectLastUpdatedPageSubAction>();
 
             if (!project->getServerLastModified().isValid()) {
                 connect(project.get(), &ProjectsModelProject::lastModifiedDetermined, projectPageAction.get(), [project, lastUpdatedPageSubAction](const QDateTime& lastModified) {
                     lastUpdatedPageSubAction->setProjectLastUpdated(lastModified);
-				});
+                });
             }
 
             if (project->getServerDownloadSize() == 0) {
@@ -349,8 +349,8 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
         connect(projectPageAction.get(), &PageAction::expandedChanged, project.get(), &ProjectsModelProject::setExpanded);
 
         if (!project->isGroup()) {
-	        projectPageAction->createSubAction<ProjectPluginsPageSubAction>(project->getRequiredPlugins());
-        	projectPageAction->createSubAction<ProjectsJsonUrlPageSubAction>(project->getProjectsJsonDsn());
+            projectPageAction->createSubAction<ProjectPluginsPageSubAction>(project->getRequiredPlugins());
+            projectPageAction->createSubAction<ProjectsJsonUrlPageSubAction>(project->getProjectsJsonDsn());
         }
 
         projectsPageTreeModel.add(projectPageAction);
@@ -363,9 +363,9 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
 
         for (int filterRowIndex = 0; filterRowIndex <= _projectsFilterModel.rowCount(); ++filterRowIndex) {
             const auto filterIndex = _projectsFilterModel.index(filterRowIndex, 0);
-	        const auto sourceIndex = _projectsFilterModel.mapToSource(filterIndex);
+            const auto sourceIndex = _projectsFilterModel.mapToSource(filterIndex);
 
-        	if (!sourceIndex.isValid())
+            if (!sourceIndex.isValid())
                 continue;
             
             if (const auto project = projectsTreeModel.getProject(sourceIndex)) {
@@ -373,22 +373,22 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
 
                 //qDebug() << "Adding project page action for" << project->getTitle() << "at filter row index" << filterRowIndex;
 
-	            if (const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex); numberOfChildren >= 1) {
+                if (const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex); numberOfChildren >= 1) {
                     QStringList childProjectNames;
 
-	                for (int childFilterRowIndex = 0; childFilterRowIndex < numberOfChildren; ++childFilterRowIndex) {
-	                    const auto childFilterIndex = _projectsFilterModel.index(childFilterRowIndex, 0, filterIndex);
-	                    const auto childSourceIndex = _projectsFilterModel.mapToSource(childFilterIndex);
+                    for (int childFilterRowIndex = 0; childFilterRowIndex < numberOfChildren; ++childFilterRowIndex) {
+                        const auto childFilterIndex = _projectsFilterModel.index(childFilterRowIndex, 0, filterIndex);
+                        const auto childSourceIndex = _projectsFilterModel.mapToSource(childFilterIndex);
 
-	                    if (const auto childProject = projectsTreeModel.getProject(childSourceIndex)) {
+                        if (const auto childProject = projectsTreeModel.getProject(childSourceIndex)) {
                             addProjectPageAction(childProject);
 
                             childProjectNames << childProject->getTitle();
-	                    }
-	                }
+                        }
+                    }
 
                     projectPageAction->setSubtitle(childProjectNames.join(", "));
-				}
+                }
             }
         }
     };
@@ -414,7 +414,7 @@ void StartPageOpenProjectWidget::updateCustomStyle()
 
 void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-	Serializable::fromVariantMap(variantMap);
+    Serializable::fromVariantMap(variantMap);
 
     _openCreateProjectWidget.fromParentVariantMap(variantMap, true);
     _recentProjectsWidget.fromParentVariantMap(variantMap, true);
@@ -426,7 +426,7 @@ void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap StartPageOpenProjectWidget::toVariantMap() const
 {
-	auto variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     _openCreateProjectWidget.insertIntoVariantMap(variantMap);
     _recentProjectsWidget.insertIntoVariantMap(variantMap);

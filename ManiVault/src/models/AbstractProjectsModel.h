@@ -135,15 +135,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Last Modified";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Last Modified";
 
-	            case Qt::ToolTipRole:
-	                return "Date and time when the project was last modified";
+                case Qt::ToolTipRole:
+                    return "Date and time when the project was last modified";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -175,15 +175,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Downloaded";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Downloaded";
 
-	            case Qt::ToolTipRole:
-	                return "Whether the project has been downloaded before";
+                case Qt::ToolTipRole:
+                    return "Whether the project has been downloaded before";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -355,15 +355,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Icon name";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Icon name";
 
-	            case Qt::ToolTipRole:
-	                return "Project Font Awesome icon name";
+                case Qt::ToolTipRole:
+                    return "Project Font Awesome icon name";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -391,15 +391,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Summary";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Summary";
 
-	            case Qt::ToolTipRole:
-	                return "Project description";
+                case Qt::ToolTipRole:
+                    return "Project description";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -463,15 +463,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Min. app core version";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Min. app core version";
 
-	            case Qt::ToolTipRole:
-	                return "Minimum ManiVault Studio application core version";
+                case Qt::ToolTipRole:
+                    return "Minimum ManiVault Studio application core version";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -499,15 +499,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Required plugins";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Required plugins";
 
-	            case Qt::ToolTipRole:
-	                return "Required plugins for the project";
+                case Qt::ToolTipRole:
+                    return "Required plugins for the project";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -575,15 +575,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Download Size";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Download Size";
 
-	            case Qt::ToolTipRole:
-	                return "Download Size of the project";
+                case Qt::ToolTipRole:
+                    return "Download Size of the project";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -647,15 +647,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "IsStartup";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "IsStartup";
 
-	            case Qt::ToolTipRole:
-	                return "Whether the project can be opened at application startup";
+                case Qt::ToolTipRole:
+                    return "Whether the project can be opened at application startup";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -683,15 +683,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "SHA";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "SHA";
 
-	            case Qt::ToolTipRole:
-	                return "SHA-256 hash of the project";
+                case Qt::ToolTipRole:
+                    return "SHA-256 hash of the project";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -719,15 +719,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Projects DSN";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Projects DSN";
 
-	            case Qt::ToolTipRole:
-	                return "Projects Data Source Name";
+                case Qt::ToolTipRole:
+                    return "Projects Data Source Name";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -746,11 +746,11 @@ protected:
         Row(util::ProjectsModelProjectSharedPtr project) :
             QList<QStandardItem*>()
         {
-        	append(new TitleItem(project));
-        	append(new LastModifiedItem(project));
-        	append(new DownloadedItem(project));
-        	append(new GroupItem(project));
-        	append(new IsGroupItem(project));
+            append(new TitleItem(project));
+            append(new LastModifiedItem(project));
+            append(new DownloadedItem(project));
+            append(new GroupItem(project));
+            append(new IsGroupItem(project));
             append(new TagsItem(project));
             append(new DateItem(project));
             append(new IconNameItem(project));
@@ -828,7 +828,7 @@ public: // Tags
 
 public: // Project getters
 
-	/**
+    /**
      * Get the project at \p index
      * @return Shared pointer to project at index
      */

@@ -258,11 +258,11 @@ ToggleAction::ToggleImageLabelWidget::ToggleImageLabelWidget(QWidget* parent, To
     const auto updatePixmap = [this, imageLabel, titleLabel]() -> void {
         imageLabel->setPixmap(QIcon(StyledIcon(_toggleAction->isChecked() ? "toggle-on" : "toggle-off")).pixmap(QSize(20, 20)));
 
-    	imageLabel->setToolTip(_toggleAction->toolTip());
+        imageLabel->setToolTip(_toggleAction->toolTip());
 
         if (titleLabel)
-			titleLabel->setToolTip(_toggleAction->toolTip());
-	};
+            titleLabel->setToolTip(_toggleAction->toolTip());
+    };
 
     updatePixmap();
 

@@ -176,7 +176,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     shortcuts.add({ QKeySequence(Qt::Key_F2), "General", "Make a screenshot" });
 
     if (!isSystemViewPlugin())
-		shortcuts.add({ QKeySequence(Qt::Key_F3), "General", "Toggle view isolation (hides the other views)" });
+        shortcuts.add({ QKeySequence(Qt::Key_F3), "General", "Toggle view isolation (hides the other views)" });
 
     shortcuts.add({ QKeySequence(Qt::Key_F12), "General", "Edit the view parameters" });
 
@@ -341,12 +341,12 @@ void ViewPlugin::removeOverlayAction(WidgetAction* overlayAction)
     auto it = std::remove_if(_actionsWidgets.begin(), _actionsWidgets.end(),
         [overlayAction](const ActionWidgetPair& p) {
             return p.first == overlayAction;
-	});
+    });
 
     if (it != _actionsWidgets.end()) {
         it->second->deleteLater();
 
-    	_actionsWidgets.erase(it);
+        _actionsWidgets.erase(it);
     }
 }
 
@@ -359,7 +359,7 @@ WidgetActions ViewPlugin::getOverlayActions() const
     for (const auto& action : actions)
         overlayActions << action;
 
-	return overlayActions;
+    return overlayActions;
 }
 
 void ViewPlugin::setOverlayActionsTargetWidget(QWidget* targetWidget)

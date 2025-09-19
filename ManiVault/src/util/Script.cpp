@@ -7,7 +7,7 @@
 #include "util/StyledIcon.h"
 
 #ifdef _DEBUG
-	#define SCRIPT_VERBOSE
+    #define SCRIPT_VERBOSE
 #endif
 
 namespace mv::util
@@ -30,17 +30,17 @@ QMap<Script::Language, QString> Script::languageMap = {
 
 QString Script::getTypeName(const Type& type)
 {
-	return typeMap.value(type, "None");
+    return typeMap.value(type, "None");
 }
 
 Script::Type Script::getTypeEnum(const QString& typeName)
 {
-	const auto scriptTypes = typeMap.keys(typeName);
+    const auto scriptTypes = typeMap.keys(typeName);
 
-	if (scriptTypes.isEmpty())
-		return Type::None; // Default to None if typeName is not found
+    if (scriptTypes.isEmpty())
+        return Type::None; // Default to None if typeName is not found
 
-	return scriptTypes.first();
+    return scriptTypes.first();
 }
 
 QString Script::getLanguageName(const Language& language)
@@ -103,16 +103,16 @@ void Script::run()
 
 QIcon Script::getLanguageIcon() const
 {
-	switch (_language) {
-	    case Language::Python:
-	        return StyledIcon("python");
+    switch (_language) {
+        case Language::Python:
+            return StyledIcon("python");
 
-	    case Language::R:
-	        return StyledIcon("r");
+        case Language::R:
+            return StyledIcon("r");
 
         case Language::None:
-	        break;
-	}
+            break;
+    }
 
     return StyledIcon("play");
 }

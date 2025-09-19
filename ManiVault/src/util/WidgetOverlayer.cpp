@@ -74,7 +74,7 @@ void WidgetOverlayer::addMouseEventReceiverWidget(const QWidget* mouseEventRecei
         return;
 
     if (!_mouseEventReceiverWidgets.contains(mouseEventReceiverWidget))
-		_mouseEventReceiverWidgets << mouseEventReceiverWidget;
+        _mouseEventReceiverWidgets << mouseEventReceiverWidget;
 
     emit mouseEventReceiverWidgetAdded(mouseEventReceiverWidget);
 

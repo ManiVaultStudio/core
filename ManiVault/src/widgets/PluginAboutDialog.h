@@ -38,9 +38,9 @@ class PluginAboutDialog : public QDialog
 {
 public:
 
-	/** Ensure links open an external browser */
-	class LinksExternalWebEnginePage : public QWebEnginePage
-	{
+    /** Ensure links open an external browser */
+    class LinksExternalWebEnginePage : public QWebEnginePage
+    {
     public:
         using QWebEnginePage::QWebEnginePage;
 

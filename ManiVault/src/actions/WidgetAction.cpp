@@ -77,7 +77,7 @@ WidgetAction::~WidgetAction()
         return;
 
     if (!core()->isAboutToBeDestroyed())
-		actions().removeAction(this);
+        actions().removeAction(this);
 }
 
 QString WidgetAction::getLocation(bool recompute /*= false*/) const

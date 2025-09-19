@@ -18,8 +18,8 @@ LearningCenterVideo::LearningCenterVideo(const Type& type, const QString& title,
     _resource(resource)
 {
     switch (_type) {
-	    case Type::YouTube:
-	    {
+        case Type::YouTube:
+        {
             const auto thumbnailUrl = getYouTubeThumbnailUrl(_resource);
 
             auto future = FileDownloader::downloadToByteArrayAsync(thumbnailUrl);
@@ -33,7 +33,7 @@ LearningCenterVideo::LearningCenterVideo(const Type& type, const QString& title,
 
                     QMetaObject::invokeMethod(qApp, [this, future]() {
                         setThumbnailImage(QImage::fromData(future.result()));
-					});
+                    });
                 }
                 catch (const BaseException& exception) {
                     qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << ":" << exception.what();
@@ -46,12 +46,12 @@ LearningCenterVideo::LearningCenterVideo(const Type& type, const QString& title,
                 }
 
                 watcher->deleteLater();
-			});
+            });
 
             watcher->setFuture(future);
 
-	        break;
-	    }
+            break;
+        }
 
         case Type::GIF:
         {

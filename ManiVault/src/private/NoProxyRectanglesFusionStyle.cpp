@@ -7,14 +7,14 @@
 #include <QStyleFactory>
 
 NoProxyRectanglesFusionStyle::NoProxyRectanglesFusionStyle():
-	QProxyStyle(QStyleFactory::create("Fusion"))
+    QProxyStyle(QStyleFactory::create("Fusion"))
 {
 }
 
 int NoProxyRectanglesFusionStyle::styleHint(StyleHint hint, const QStyleOption* option, const QWidget* widget, QStyleHintReturn* returnData) const
 {
-	if (hint == QStyle::SH_Widget_Animate)
-		return 0;  // Disable proxy rectangles & animation effects
+    if (hint == QStyle::SH_Widget_Animate)
+        return 0;  // Disable proxy rectangles & animation effects
 
-	return QProxyStyle::styleHint(hint, option, widget, returnData);
+    return QProxyStyle::styleHint(hint, option, widget, returnData);
 }

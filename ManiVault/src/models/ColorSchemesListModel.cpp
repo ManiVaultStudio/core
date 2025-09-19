@@ -35,7 +35,7 @@ void ColorSchemesListModel::removeColorScheme(const QString& colorSchemeName)
     _colorSchemes.erase(
         std::remove_if(_colorSchemes.begin(), _colorSchemes.end(), [colorSchemeName](const ColorScheme& colorScheme) {
             return colorScheme.getName() == colorSchemeName;
-		}),
+        }),
         _colorSchemes.end()
     );
 }
@@ -47,7 +47,7 @@ void ColorSchemesListModel::addBuiltInColorSchemes()
 #endif
 
     const auto addBuiltInCustomColorScheme = [this](const QString& name, const QString& description, QColor window, QColor windowText, QColor base, QColor alternateBase, QColor tooltipBase, QColor tooltipText, QColor text, QColor button, QColor buttonText, QColor brightText) -> void {
-    	auto palette = QPalette();
+        auto palette = QPalette();
 
         palette.setColor(QPalette::Window, window);
         palette.setColor(QPalette::WindowText, windowText);
@@ -61,7 +61,7 @@ void ColorSchemesListModel::addBuiltInColorSchemes()
         palette.setColor(QPalette::BrightText, brightText);
 
         addColorScheme(ColorScheme(ColorScheme::Mode::BuiltIn, name, description, palette));
-	};
+    };
 
     addBuiltInCustomColorScheme("Dark", "Dark color scheme", QColor(45, 45, 45), Qt::white, QColor(30, 30, 30), QColor(45, 45, 45), Qt::white, Qt::white, Qt::white, QColor(60, 60, 60), Qt::white, Qt::red);
     addBuiltInCustomColorScheme("Light", "Light color scheme", Qt::white, Qt::black, Qt::white, QColor(240, 240, 240), Qt::white, Qt::black, Qt::black, QColor(220, 220, 220), Qt::black, Qt::red);

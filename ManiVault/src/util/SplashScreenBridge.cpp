@@ -10,30 +10,30 @@ namespace mv::util
 {
 
 SplashScreenBridge::SplashScreenBridge(QObject* parent):
-	QObject(parent)
+    QObject(parent)
 {
 }
 
 int SplashScreenBridge::progress() const
 {
-	return _progress;
+    return _progress;
 }
 
 QString SplashScreenBridge::progressDescription() const
 {
-	return _progressDescription;
+    return _progressDescription;
 }
 
 void SplashScreenBridge::setProgress(int progress)
 {
-	progress = std::clamp(progress, 0, 100);
+    progress = std::clamp(progress, 0, 100);
 
-	if (progress == _progress)
+    if (progress == _progress)
         return;
 
-	_progress = progress;
+    _progress = progress;
 
-	emit progressChanged(_progress);
+    emit progressChanged(_progress);
 }
 
 void SplashScreenBridge::setProgressDescription(const QString& progressDescription)
@@ -48,7 +48,7 @@ void SplashScreenBridge::setProgressDescription(const QString& progressDescripti
 
 void SplashScreenBridge::requestInitial()
 {
-	emit progressChanged(_progress);
+    emit progressChanged(_progress);
     emit progressDescriptionChanged(_progressDescription);
 }
 

@@ -60,7 +60,7 @@ PluginMetadata::PluginMetadata(const PluginFactory& pluginFactory) :
         PluginShortcutsDialog pluginShortcutsDialog(_pluginFactory.getPluginMetadata());
 
         pluginShortcutsDialog.exec();
-	});
+    });
 }
 
 QString PluginMetadata::getGuiName() const

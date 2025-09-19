@@ -190,10 +190,10 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
                             widget->setStyleSheet("color: red;");
                         else
                             widget->setStyleSheet("");
-					};
+                    };
 
                     connect(&nameAction, &StringAction::stringChanged, widget, nameChanged);
-				});
+                });
 
                 nameAction.setToolTip("Name of the shared parameter");
 

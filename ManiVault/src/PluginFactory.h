@@ -418,7 +418,7 @@ private:
     gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
     bool                                    _allowPluginCreationFromStandardGui;    /** Boolean determining whether a plugin instance may be created from the standard GUI (e.g. main menu etc.) */
     PluginMetadata                          _pluginMetadata;                        /** Plugin metadata */
-	QIcon                                   _categoryIcon;                          /** Category icon */
+    QIcon                                   _categoryIcon;                          /** Category icon */
     gui::StringsAction                      _tutorialsDsnsAction;                   /** Action for editing the tutorials Data Source Names */
     gui::StringsAction                      _projectsDsnsAction;                    /** Action for editing the project Data Source Names */
 };

@@ -46,7 +46,7 @@ void SampleScopeWidget::initialize()
     _viewsWidgetLayout.addWidget(&_htmlView);
     _viewsWidgetLayout.addWidget(&_widgetView);
 
-	_widgetView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _widgetView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _widgetView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     
     _noSamplesOverlayWidget.show();
@@ -64,7 +64,7 @@ void SampleScopeWidget::initialize()
 
             updateVisibility();
         }
-	});
+    });
 
     _widgetView.setScene(&_widgetViewScene);
     _widgetView.setRenderHint(QPainter::Antialiasing);
@@ -93,7 +93,7 @@ void SampleScopeWidget::setViewWidget(const QWidget* widget)
 
         _widgetViewScene.removeItem(_proxyWidget);
 
-    	delete _proxyWidget;
+        delete _proxyWidget;
 
         _proxyWidget = nullptr;
     }
@@ -115,7 +115,7 @@ InfoOverlayWidget& SampleScopeWidget::getNoSamplesOverlayWidget()
 
 void SampleScopeWidget::resizeEvent(QResizeEvent* event)
 {
-	QWidget::resizeEvent(event);
+    QWidget::resizeEvent(event);
 
     _widgetViewScene.setSceneRect(0, 0, width(), height());
 
@@ -134,21 +134,21 @@ void SampleScopeWidget::updateVisibility()
 
     if (viewPluginSamplerAction.canView()) {
         switch (viewPluginSamplerAction.getViewGeneratorType()) {
-	        case ViewPluginSamplerAction::ViewGeneratorType::HTML:
-	        {
-	            _htmlView.show();
-	            _widgetView.hide();
+            case ViewPluginSamplerAction::ViewGeneratorType::HTML:
+            {
+                _htmlView.show();
+                _widgetView.hide();
 
-	            break;
-	        }
+                break;
+            }
 
-	        case ViewPluginSamplerAction::ViewGeneratorType::Widget:
-	        {
-	            _htmlView.hide();
-	            _widgetView.show();
+            case ViewPluginSamplerAction::ViewGeneratorType::Widget:
+            {
+                _htmlView.hide();
+                _widgetView.show();
 
-	            break;
-	        }
+                break;
+            }
         }
     }
 }

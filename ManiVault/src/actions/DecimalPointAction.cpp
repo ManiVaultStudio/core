@@ -16,7 +16,7 @@ DecimalPointAction::DecimalPointAction(QObject* parent, const QString& title) :
 
         connect(&getAction(static_cast<NumericalPointAction::Axis>(axisIndex)), &DecimalAction::valueChanged, this, [this](float value) -> void {
             emit valueChanged(getX(), getY());
-		});
+        });
     }
 }
 
@@ -31,7 +31,7 @@ void DecimalPointAction::connectToPublicAction(WidgetAction* publicAction, bool 
 
     connect(this, &DecimalPointAction::valueChanged, publicDecimalPointAction, [publicDecimalPointAction](float x, float y) -> void {
         publicDecimalPointAction->set(x, y);
-	});
+    });
 
     connect(publicDecimalPointAction, &DecimalPointAction::valueChanged, this, [this](float x, float y) -> void {
         set(x, y);

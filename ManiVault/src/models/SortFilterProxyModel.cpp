@@ -166,7 +166,7 @@ void SortFilterProxyModel::updateFilterColumnAction()
 
 void SortFilterProxyModel::fromVariantMap(const QVariantMap& variantMap)
 {
-	Serializable::fromVariantMap(variantMap);
+    Serializable::fromVariantMap(variantMap);
 
     _textFilterAction.fromParentVariantMap(variantMap);
     _textFilterColumnAction.fromParentVariantMap(variantMap);
@@ -176,7 +176,7 @@ void SortFilterProxyModel::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap SortFilterProxyModel::toVariantMap() const
 {
-	auto variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     _textFilterAction.insertIntoVariantMap(variantMap);
     _textFilterColumnAction.insertIntoVariantMap(variantMap);

@@ -749,7 +749,7 @@ DimensionsPickerAction& Points::getDimensionsPickerAction()
     if (!isFull())
         return getFullDataset<Points>()->getDimensionsPickerAction();
 
-	return *_dimensionsPickerAction;
+    return *_dimensionsPickerAction;
 }
 
 /* -------------------------------------------------------------------------- */

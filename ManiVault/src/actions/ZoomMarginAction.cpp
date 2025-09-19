@@ -32,9 +32,9 @@ ZoomMarginAction::ZoomMarginAction(QObject* parent, const QString& title) :
     setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
     setPopupSizeHint(QSize(300, 0));
 
-	addAction(&_marginTypeAction);
-	addAction(&_zoomMarginScreenAction);
-	addAction(&_zoomMarginDataAction);
+    addAction(&_marginTypeAction);
+    addAction(&_zoomMarginScreenAction);
+    addAction(&_zoomMarginDataAction);
 
     _marginTypeAction.setToolTip("Zoom margin type");
 
@@ -51,7 +51,7 @@ ZoomMarginAction::ZoomMarginAction(QObject* parent, const QString& title) :
 
         _zoomMarginScreenAction.setEnabled(currentTypeIndex == 0);
         _zoomMarginDataAction.setEnabled(currentTypeIndex == 1);
-	};
+    };
 
     updateReadOnly();
 

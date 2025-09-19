@@ -32,7 +32,7 @@ PageSubAction::~PageSubAction()
 
 void PageSubAction::setIcon(const QIcon& icon)
 {
-	_iconLabel->setIcon(icon);
+    _iconLabel->setIcon(icon);
 }
 
 QString PageSubAction::getTooltip() const
@@ -45,7 +45,7 @@ QString PageSubAction::getTooltip() const
 
 void PageSubAction::setVisible(bool visible)
 {
-	_iconLabel->setVisible(visible);
+    _iconLabel->setVisible(visible);
 }
 
 IconLabel* PageSubAction::getIconLabel()
@@ -55,22 +55,22 @@ IconLabel* PageSubAction::getIconLabel()
 
 PageSubAction::ClickedCallback PageSubAction::getClickedCallback() const
 {
-	return _iconLabel->getClickedCallback();
+    return _iconLabel->getClickedCallback();
 }
 
 void PageSubAction::setClickedCallback(const ClickedCallback& clickedCallback)
 {
-	_iconLabel->setClickedCallback(clickedCallback);
+    _iconLabel->setClickedCallback(clickedCallback);
 }
 
 PageSubAction::TooltipCallback PageSubAction::getTooltipCallback() const
 {
-	return _iconLabel->getTooltipCallback();
+    return _iconLabel->getTooltipCallback();
 }
 
 void PageSubAction::setTooltipCallback(const TooltipCallback& tooltipCallback)
 {
-	_iconLabel->setTooltipCallback(tooltipCallback);
+    _iconLabel->setTooltipCallback(tooltipCallback);
 }
 
 ProjectPurgePageSubAction::ProjectPurgePageSubAction(ProjectsModelProjectSharedPtr project) :
@@ -79,7 +79,7 @@ ProjectPurgePageSubAction::ProjectPurgePageSubAction(ProjectsModelProjectSharedP
 {
     setTooltipCallback([]() -> QString {
         return "Remove downloaded project";
-	});
+    });
 
     setClickedCallback([this]() -> void {
         
@@ -96,19 +96,19 @@ ProjectPurgePageSubAction::ProjectPurgePageSubAction(ProjectsModelProjectSharedP
 
             const auto fileInfo = QFileInfo(downloadedProjectFilePath);
 
-        	if (!fileInfo.exists())
+            if (!fileInfo.exists())
                 throw BaseException("File does not exist");
 
-        	if (!QFile::remove(downloadedProjectFilePath))
+            if (!QFile::remove(downloadedProjectFilePath))
                 throw BaseException("Unable to remove file");
 
             _project->setDownloaded();
 
-        	qDebug() << "Purged downloaded project at" << downloadedProjectFilePath;
+            qDebug() << "Purged downloaded project at" << downloadedProjectFilePath;
 
             mv::help().addNotification("Project removed", QString("%1 has been removed from the system.").arg(_project->getTitle()), StyledIcon("trash"));
 
-        	setVisible(false);
+            setVisible(false);
         }
         catch (const std::exception& e) {
             qWarning() << "Unable to purge downloaded project:" << e.what();
@@ -119,7 +119,7 @@ ProjectPurgePageSubAction::ProjectPurgePageSubAction(ProjectsModelProjectSharedP
 }
 
 CommentsPageSubAction::CommentsPageSubAction(const QString& comments) :
-	PageSubAction(StyledIcon("scroll"))
+    PageSubAction(StyledIcon("scroll"))
 {
     setTooltipCallback([this, comments]() -> QString {
         return comments;
@@ -147,15 +147,15 @@ ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const Hardw
 {
     setIcon(systemCompatibilityInfo._icon);
 
-	switch (systemCompatibilityInfo._compatibility) {
-		case HardwareSpec::SystemCompatibility::Incompatible:
-		{
-			setTooltipCallback([this]() -> QString {
-				return "Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!";
-			});
+    switch (systemCompatibilityInfo._compatibility) {
+        case HardwareSpec::SystemCompatibility::Incompatible:
+        {
+            setTooltipCallback([this]() -> QString {
+                return "Your system does not meet the minimum requirements for this project, there might be problems with opening it, its stability and performance!";
+            });
 
-			break;
-		}
+            break;
+        }
 
         case HardwareSpec::SystemCompatibility::Minimum:
         {
@@ -171,7 +171,7 @@ ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const Hardw
             setTooltipCallback([this]() -> QString {
                 return "Your system meets the minimum requirements for this project!";
             });
-			
+            
             break;
         }
 
@@ -180,10 +180,10 @@ ProjectCompatibilityPageSubAction::ProjectCompatibilityPageSubAction(const Hardw
             setTooltipCallback([this]() -> QString {
                 return "Your system compatibility is unknown, the project does not specify hardware requirements!";
             });
-			
+            
             break;
         }
-	}
+    }
 }
 
 ContributorsPageSubAction::ContributorsPageSubAction(const QStringList& contributors) :
@@ -191,7 +191,7 @@ ContributorsPageSubAction::ContributorsPageSubAction(const QStringList& contribu
 {
     setTooltipCallback([this, contributors]() -> QString {
         return QString("Contributor(s): %1").arg(contributors.join(", "));
-	});
+    });
 }
 
 ProjectsJsonUrlPageSubAction::ProjectsJsonUrlPageSubAction(const QUrl& projectJsonUrl) :
@@ -199,7 +199,7 @@ ProjectsJsonUrlPageSubAction::ProjectsJsonUrlPageSubAction(const QUrl& projectJs
 {
     setTooltipCallback([this, projectJsonUrl]() -> QString {
         return QString("Projects JSON: %1").arg(projectJsonUrl.toString());
-	});
+    });
 }
 
 ProjectPluginsPageSubAction::ProjectPluginsPageSubAction(const QStringList& plugins) :
@@ -207,7 +207,7 @@ ProjectPluginsPageSubAction::ProjectPluginsPageSubAction(const QStringList& plug
 {
     setTooltipCallback([this, plugins]() -> QString {
         return QString("Plugin(s): %1").arg(plugins.isEmpty() ? "none" : plugins.join(", "));
-	});
+    });
 }
 
 ProjectLastUpdatedPageSubAction::ProjectLastUpdatedPageSubAction(const QDateTime& lastUpdated) :
@@ -245,7 +245,7 @@ ProjectPreviewPageSubAction::ProjectPreviewPageSubAction(const QImage& previewIm
 
 void ProjectPreviewPageSubAction::setPreviewImage(const QImage& previewImage)
 {
-	_previewImage = previewImage;
+    _previewImage = previewImage;
 }
 
 ProxyPageSubAction::ProxyPageSubAction(const QIcon& icon, const TooltipCallback& tooltipCallback) :

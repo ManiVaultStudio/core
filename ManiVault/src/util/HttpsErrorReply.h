@@ -21,7 +21,7 @@ namespace mv::util
  */
 class HttpsErrorReply : public QNetworkReply {
 
-	Q_OBJECT
+    Q_OBJECT
 
 public:
 
@@ -36,17 +36,17 @@ public:
     /** Abort the reply (this method is called when the reply is aborted). */
     void abort() override;
 
-	/**
+    /**
      * Read data from the reply.
      * @param data Pointer to the data buffer where the read data will be stored
      * @param maxlen Maximum length of data to read
      * @return The number of bytes read, or -1 if no data is available
-	 */
-	qint64 readData(char* data, qint64 maxlen) override;
+     */
+    qint64 readData(char* data, qint64 maxlen) override;
 
 private slots:
 
-	/** Emit an error signal after a short delay (this is necessary to ensure that the reply is fully initialized before emitting the error) */
+    /** Emit an error signal after a short delay (this is necessary to ensure that the reply is fully initialized before emitting the error) */
     void emitError();
 };
 

@@ -13,7 +13,7 @@ using namespace mv::gui;
 
 PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-	Serializable(title),
+    Serializable(title),
     _pageHeaderWidget(title),
     _backgroundImage(":/Images/StartPageBackground"),
     _logoAction(this, "Logo"),
@@ -80,7 +80,7 @@ void PageWidget::paintEvent(QPaintEvent* paintEvent)
 
 PageHeaderWidget& PageWidget::getPageHeaderWidget()
 {
-	return _pageHeaderWidget;
+    return _pageHeaderWidget;
 }
 
 QVBoxLayout& PageWidget::getContentLayout()
@@ -105,7 +105,7 @@ QString PageWidget::getConfigurationFileName() const
 
 void PageWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-	Serializable::fromVariantMap(variantMap);
+    Serializable::fromVariantMap(variantMap);
 
     _logoAction.fromParentVariantMap(variantMap);
     _titleAction.fromParentVariantMap(variantMap);

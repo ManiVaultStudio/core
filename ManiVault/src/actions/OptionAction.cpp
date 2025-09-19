@@ -264,7 +264,7 @@ bool OptionAction::hasCustomModel() const
 
 std::int32_t OptionAction::getCompletionColumn() const
 {
-	return _completionColumn;
+    return _completionColumn;
 }
 
 void OptionAction::setCompletionColumn(const std::int32_t& completionColumn)
@@ -274,7 +274,7 @@ void OptionAction::setCompletionColumn(const std::int32_t& completionColumn)
 
     const auto previousCompletionColumn = completionColumn;
 
-	_completionColumn = completionColumn;
+    _completionColumn = completionColumn;
 
     emit completionColumnChanged(previousCompletionColumn, _completionColumn);
 }
@@ -291,7 +291,7 @@ void OptionAction::setCompletionMatchMode(const Qt::MatchFlag& completionMatchMo
 
     const auto previousCompletionMatchMode = _completionMatchMode;
 
-	_completionMatchMode = completionMatchMode;
+    _completionMatchMode = completionMatchMode;
 
     emit completionMatchModeChanged(previousCompletionMatchMode, _completionMatchMode);
 }
@@ -350,7 +350,7 @@ void OptionAction::setCurrentText(const QString& currentText)
     _currentIndex = -1;
 
     if (hasOption(currentText)) {
-	    const auto matches = getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, currentText, 1, Qt::MatchExactly);
+        const auto matches = getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, currentText, 1, Qt::MatchExactly);
 
         if (!matches.isEmpty())
             _currentIndex = matches.first().row();
@@ -492,34 +492,34 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     });
 
     connect(this, &QLineEdit::textEdited, this, [this](const QString& s) {
-		_stringsFilterModel.setTextFilter(s);
+        _stringsFilterModel.setTextFilter(s);
 
-		static constexpr int maxNumberOfItems = 5000;
+        static constexpr int maxNumberOfItems = 5000;
 
-    	QVector<int> srcRows; srcRows.reserve(maxNumberOfItems);
+        QVector<int> srcRows; srcRows.reserve(maxNumberOfItems);
 
-    	const int numberOfItems = qMin(maxNumberOfItems, _stringsFilterModel.rowCount());
+        const int numberOfItems = qMin(maxNumberOfItems, _stringsFilterModel.rowCount());
 
-		for (int rowIndex = 0; rowIndex < numberOfItems; ++rowIndex) {
-		   const auto proxyIdx  = _stringsFilterModel.index(rowIndex, 0);
-		   const auto srcRow    = _stringsFilterModel.mapToSource(proxyIdx).row();
+        for (int rowIndex = 0; rowIndex < numberOfItems; ++rowIndex) {
+           const auto proxyIdx  = _stringsFilterModel.index(rowIndex, 0);
+           const auto srcRow    = _stringsFilterModel.mapToSource(proxyIdx).row();
 
-		   srcRows.push_back(srcRow);
-		}
+           srcRows.push_back(srcRow);
+        }
 
         _lazyIndicesModel.setSourceAndMatches(const_cast<QAbstractItemModel*>(_optionAction->getModel()), std::move(srcRows));
 
         _completer.popup()->setAlternatingRowColors(true);
 
         if (_optionAction->getCompleterPopupFixedWidth() > 0)
-			_completer.popup()->setFixedWidth(_optionAction->getCompleterPopupFixedWidth());
+            _completer.popup()->setFixedWidth(_optionAction->getCompleterPopupFixedWidth());
 
-		_completer.complete();
+        _completer.complete();
     });
 
     const auto updateCompletionColumn = [this, optionAction]() {
         _completer.setCompletionColumn(optionAction->getCompletionColumn());
-	};
+    };
 
     updateCompletionColumn();
 
@@ -621,13 +621,13 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
 
 bool OptionAction::StringsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
-	if (sourceRow < 0 || sourceRow >= sourceModel()->rowCount(sourceParent))
-		return false;
+    if (sourceRow < 0 || sourceRow >= sourceModel()->rowCount(sourceParent))
+        return false;
 
-	const auto index = sourceModel()->index(sourceRow, 0, sourceParent);
-	const auto data  = index.data(Qt::DisplayRole).toString();
+    const auto index = sourceModel()->index(sourceRow, 0, sourceParent);
+    const auto data  = index.data(Qt::DisplayRole).toString();
 
-	return data.startsWith(_textFilter);
+    return data.startsWith(_textFilter);
 }
 
 QString OptionAction::StringsFilterModel::getTextFilter() const
@@ -635,12 +635,12 @@ QString OptionAction::StringsFilterModel::getTextFilter() const
 
 void OptionAction::StringsFilterModel::setTextFilter(const QString& textFilter)
 {
-	if (_textFilter == textFilter)
-		return;
+    if (_textFilter == textFilter)
+        return;
 
-	_textFilter = textFilter;
+    _textFilter = textFilter;
 
-	invalidateFilter(); // Reapply the filter
+    invalidateFilter(); // Reapply the filter
 }
 
 OptionAction::LazyIndicesModel::LazyIndicesModel(QObject* parent): QAbstractListModel(parent)
@@ -648,52 +648,52 @@ OptionAction::LazyIndicesModel::LazyIndicesModel(QObject* parent): QAbstractList
 
 void OptionAction::LazyIndicesModel::setSourceAndMatches(QAbstractItemModel* sourceModel, const QVector<int>& matches)
 {
-	beginResetModel();
-	{
-		_sourceModel = sourceModel;
-		_all         = std::move(matches);
-		_loaded      = 0;
-	}
-	endResetModel();
+    beginResetModel();
+    {
+        _sourceModel = sourceModel;
+        _all         = std::move(matches);
+        _loaded      = 0;
+    }
+    endResetModel();
 }
 
 int OptionAction::LazyIndicesModel::rowCount(const QModelIndex& index) const
 {
-	return index.isValid() ? 0 : _loaded;
+    return index.isValid() ? 0 : _loaded;
 }
 
 QVariant OptionAction::LazyIndicesModel::data(const QModelIndex& index, int role) const
 {
-	if (!index.isValid() || role != Qt::DisplayRole || !_sourceModel)
-		return {};
+    if (!index.isValid() || role != Qt::DisplayRole || !_sourceModel)
+        return {};
 
-	const auto srcRow = _all[index.row()];
+    const auto srcRow = _all[index.row()];
 
-	return _sourceModel->index(srcRow, 0).data(Qt::DisplayRole); // No string copies stored
+    return _sourceModel->index(srcRow, 0).data(Qt::DisplayRole); // No string copies stored
 }
 
 bool OptionAction::LazyIndicesModel::canFetchMore(const QModelIndex& index) const
 {
-	return !index.isValid() && _loaded < _all.size();
+    return !index.isValid() && _loaded < _all.size();
 }
 
 void OptionAction::LazyIndicesModel::fetchMore(const QModelIndex& index)
 {
-	if (index.isValid())
-		return;
+    if (index.isValid())
+        return;
 
-	static constexpr int chunk = 50;
+    static constexpr int chunk = 50;
 
-	const auto add = qMin(chunk, _all.size() - _loaded);
+    const auto add = qMin(chunk, _all.size() - _loaded);
 
-	if (add <= 0)
-		return;
+    if (add <= 0)
+        return;
 
-	beginInsertRows({}, _loaded, _loaded + add - 1);
-	{
-		_loaded += add;
-	}
-	endInsertRows();
+    beginInsertRows({}, _loaded, _loaded + add - 1);
+    {
+        _loaded += add;
+    }
+    endInsertRows();
 }
 
 QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

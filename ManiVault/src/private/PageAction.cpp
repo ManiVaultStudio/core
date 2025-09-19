@@ -13,7 +13,7 @@ PageAction::PageAction(const QIcon& icon, const QString& title, const QString& s
     _title(title),
     _subtitle(subtitle),
     _tooltip(tooltip),
-	_clickedCallback(clickedCallback)
+    _clickedCallback(clickedCallback)
 {
 }
 
@@ -24,27 +24,27 @@ PageAction::PageAction(const QModelIndex& index)
 
 QIcon PageAction::getIcon() const
 {
-	return _icon;
+    return _icon;
 }
 
 void PageAction::setIcon(const QIcon& icon)
 {
-	_icon = icon;
+    _icon = icon;
 
-	emit iconChanged(_icon);
+    emit iconChanged(_icon);
 }
 
 QString PageAction::getTitle() const
 {
-	return _title.isEmpty() ? "NA" : _title;
+    return _title.isEmpty() ? "NA" : _title;
 }
 
 void PageAction::setTitle(const QString& title)
 {
     if (title != _title) {
-	    _title = title;
+        _title = title;
 
-    	emit titleChanged(_title);
+        emit titleChanged(_title);
     }
 }
 
@@ -56,9 +56,9 @@ QString PageAction::getSubtitle() const
 void PageAction::setSubtitle(const QString& subtitle)
 {
     if (subtitle != _subtitle) {
-	    _subtitle = subtitle;
+        _subtitle = subtitle;
 
-    	emit subtitleChanged(_subtitle);
+        emit subtitleChanged(_subtitle);
     }
 }
 
@@ -73,9 +73,9 @@ QString PageAction::getTooltip() const
 void PageAction::setTooltip(const QString& tooltip)
 {
     if (tooltip != _tooltip) {
-    	_tooltip = tooltip;
+        _tooltip = tooltip;
 
-    	emit tooltipChanged(_tooltip);
+        emit tooltipChanged(_tooltip);
     }
 }
 
@@ -101,15 +101,15 @@ void PageAction::setTooltipCallback(const TooltipCallback& tooltipCallback)
 
 QString PageAction::getMetaData() const
 {
-	return _metaData;
+    return _metaData;
 }
 
 void PageAction::setMetaData(const QString& metaData)
 {
     if (metaData != _metaData) {
-	    _metaData = metaData;
+        _metaData = metaData;
 
-    	emit metadataChanged(_metaData);
+        emit metadataChanged(_metaData);
     }
 }
 
@@ -121,9 +121,9 @@ QString PageAction::getParentTitle() const
 void PageAction::setParentTitle(const QString& parentTitle)
 {
     if (parentTitle != _parentTitle) {
-	    _parentTitle = parentTitle;
+        _parentTitle = parentTitle;
 
-    	emit parentTitleChanged(_parentTitle);
+        emit parentTitleChanged(_parentTitle);
     }
 }
 
@@ -136,7 +136,7 @@ void PageAction::removeSubAction(const PageSubActionPtr& subAction)
 
 void PageAction::clearSubActions()
 {
-	_subActions.clear();
+    _subActions.clear();
 
     emit subActionsChanged(_subActions);
 }

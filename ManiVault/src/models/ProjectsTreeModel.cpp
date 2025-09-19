@@ -24,11 +24,11 @@ void ProjectsTreeModel::populate(ProjectsModelProjectSharedPtrs projects)
     qDebug() << __FUNCTION__ << "Populating projects tree model with" << projects.size() << "projects";
 #endif
 
-	for (const auto& project : projects) {
+    for (const auto& project : projects) {
         if (!project)
             return;
 
-		if (!project->getGroup().isEmpty()) {
+        if (!project->getGroup().isEmpty()) {
             const auto groupTitleMatches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getGroup(), 1, Qt::MatchExactly | Qt::MatchRecursive);
 
             if (groupTitleMatches.isEmpty()) {
@@ -38,12 +38,12 @@ void ProjectsTreeModel::populate(ProjectsModelProjectSharedPtrs projects)
 
                 addProject(projectGroup);
             }
-		}
+        }
 
-		const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getGroup(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+        const auto matches = match(index(0, static_cast<std::int32_t>(Column::Title)), Qt::DisplayRole, project->getGroup(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
-		addProject(project, matches.isEmpty() ? QModelIndex() : matches.first());
-	}
+        addProject(project, matches.isEmpty() ? QModelIndex() : matches.first());
+    }
 }
 
 }

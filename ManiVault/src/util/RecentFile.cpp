@@ -11,19 +11,19 @@
 namespace mv::util {
 
 RecentFile::RecentFile(const QString& filePath /*= ""*/, const QDateTime& dateTime /*= QDateTime::currentDateTime()*/):
-	_filePath(filePath),
-	_dateTime(dateTime)
+    _filePath(filePath),
+    _dateTime(dateTime)
 {
 }
 
 QString RecentFile::getFilePath() const
 {
-	return _filePath;
+    return _filePath;
 }
 
 QDateTime RecentFile::getDateTime() const
 {
-	return _dateTime;
+    return _dateTime;
 }
 
 }

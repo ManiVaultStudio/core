@@ -20,14 +20,14 @@ QIcon CrashReportDialog::frownIcon          = QIcon();
 QIcon CrashReportDialog::exclamationIcon    = QIcon();
 
 CrashReportDialog::CrashReportDialog(QWidget* parent):
-	QDialog(parent),
+    QDialog(parent),
     _notificationLabel("ManiVault Studio has encountered an error and needs to close. Please help us improve by providing some information about what happened.\n"),
     _feedbackLabel("What were you doing when the crash occurred?"),
     _contactLabel("\nYour email (optional):"),
     _sendButton("Send report"),
     _cancelButton("Cancel")
 {
-	setWindowTitle("Crash report");
+    setWindowTitle("Crash report");
     setWindowModality(Qt::ApplicationModal);
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowTitleHint);
@@ -46,7 +46,7 @@ CrashReportDialog::CrashReportDialog(QWidget* parent):
 
     _layout.addWidget(&_feedbackLabel);
 
-	_feedbackTextEdit.setPlaceholderText("Describe the steps leading to the crash...");
+    _feedbackTextEdit.setPlaceholderText("Describe the steps leading to the crash...");
 
     _layout.addWidget(&_feedbackTextEdit);
 
@@ -55,19 +55,19 @@ CrashReportDialog::CrashReportDialog(QWidget* parent):
     QRegularExpression emailRegularExpression("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b", QRegularExpression::CaseInsensitiveOption);
 
     _contactLineEdit.setValidator(new QRegularExpressionValidator(emailRegularExpression, this));
-	_contactLineEdit.setPlaceholderText("Enter your email if you'd like us to follow up...");
-	_contactLineEdit.addAction(&_trailingAction, QLineEdit::TrailingPosition);
+    _contactLineEdit.setPlaceholderText("Enter your email if you'd like us to follow up...");
+    _contactLineEdit.addAction(&_trailingAction, QLineEdit::TrailingPosition);
 
     _trailingAction.setIcon(exclamationIcon);
     _trailingAction.setVisible(false);
 
-	connect(&_contactLineEdit, &QLineEdit::textChanged, this, [this]() -> void {
+    connect(&_contactLineEdit, &QLineEdit::textChanged, this, [this]() -> void {
         if (!_contactLineEdit.text().isEmpty() && !_contactLineEdit.hasAcceptableInput()) {
             _trailingAction.setVisible(true);
         } else {
             _trailingAction.setVisible(false);
         }
-	});
+    });
 
     _layout.addWidget(&_contactLineEdit);
 
@@ -80,8 +80,8 @@ CrashReportDialog::CrashReportDialog(QWidget* parent):
 
     setLayout(&_layout);
 
-	connect(&_sendButton, &QPushButton::clicked, this, &CrashReportDialog::accept);
-	connect(&_cancelButton, &QPushButton::clicked, this, &CrashReportDialog::reject);
+    connect(&_sendButton, &QPushButton::clicked, this, &CrashReportDialog::accept);
+    connect(&_cancelButton, &QPushButton::clicked, this, &CrashReportDialog::reject);
 }
 
 CrashReportDialog::CrashUserInfo CrashReportDialog::getCrashUserInfo() const

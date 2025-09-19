@@ -19,17 +19,17 @@ bool CpuComponentSpec::meets(const HardwareComponentSpec& required) const
 
 QString CpuComponentSpec::getFailureString(const HardwareComponentSpec& required) const
 {
-	if (meets(required))
-		return {};
+    if (meets(required))
+        return {};
 
-	const auto& cpuComponentSpec = dynamic_cast<const CpuComponentSpec&>(required);
+    const auto& cpuComponentSpec = dynamic_cast<const CpuComponentSpec&>(required);
 
-	return "CPU does not meet requirements";
+    return "CPU does not meet requirements";
 }
 
 QStandardItem* CpuComponentSpec::getStandardItem() const
 {
-	auto item = HardwareComponentSpec::getStandardItem();
+    auto item = HardwareComponentSpec::getStandardItem();
 
     item->setIcon(StyledIcon("microchip"));
 
@@ -42,7 +42,7 @@ void CpuComponentSpec::fromSystem()
 
 void CpuComponentSpec::fromVariantMap(const QVariantMap& variantMap)
 {
-	HardwareComponentSpec::fromVariantMap(variantMap);
+    HardwareComponentSpec::fromVariantMap(variantMap);
 }
 
 

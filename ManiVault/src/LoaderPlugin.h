@@ -16,7 +16,7 @@ struct CORE_EXPORT DataLoadException : public std::exception
 {
 public:
     DataLoadException(QString filePath, QString reason) :
-		_filePath(filePath),
+        _filePath(filePath),
         _reason(reason)
     {
         _what = ("Failed to load file at: " + _filePath + "\nReason: " + _reason).toStdString();

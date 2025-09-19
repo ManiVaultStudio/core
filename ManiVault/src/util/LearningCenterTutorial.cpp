@@ -34,10 +34,10 @@ LearningCenterTutorial::LearningCenterTutorial(const QVariantMap& variantMap) :
         for (const auto& requiredPluginVariant : variantMap["plugins"].toList()) {
             const auto requiredPluginName = requiredPluginVariant.toString();
 
-			_requiredPlugins << requiredPluginName;
+            _requiredPlugins << requiredPluginName;
 
             if (!mv::plugins().isPluginLoaded(requiredPluginName)) {
-				_missingPlugins << requiredPluginName;
+                _missingPlugins << requiredPluginName;
             }
         }
     }

@@ -68,13 +68,13 @@ void IconLabel::leaveEvent(QEvent* event)
 
 bool IconLabel::event(QEvent* event)
 {
-	if (event->type() == QEvent::ToolTip) {
-		if (auto helpEvent = dynamic_cast<QHelpEvent*>(event)) {
-			QToolTip::showText(helpEvent->globalPos(), _tooltipCallback ? _tooltipCallback() : "", this);
+    if (event->type() == QEvent::ToolTip) {
+        if (auto helpEvent = dynamic_cast<QHelpEvent*>(event)) {
+            QToolTip::showText(helpEvent->globalPos(), _tooltipCallback ? _tooltipCallback() : "", this);
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 
     if (event->type() == QEvent::MouseButtonRelease) {
         if (_clickedCallback) {

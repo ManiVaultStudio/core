@@ -60,7 +60,7 @@ public: // Action getters
     const mv::gui::GroupAction& getSettingsAction() const { return _settingsAction; }
     const mv::gui::TriggerAction& getToLearningCenterAction() const { return _toLearningCenterAction; }
 
-	mv::gui::GroupAction& getSettingsAction() { return _settingsAction; }
+    mv::gui::GroupAction& getSettingsAction() { return _settingsAction; }
     mv::gui::HorizontalGroupAction& getToolbarAction() { return _toolbarAction; }
 
 private:
@@ -70,7 +70,7 @@ private:
     mv::gui::ToggleAction           _toggleRecentProjectsAction;        /** Toggle recent projects section */
     mv::gui::ToggleAction           _toggleProjectFromDataAction;       /** Toggle project from data section */
     mv::gui::ToggleAction           _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
-	mv::gui::ToggleAction           _toggleTutorialsAction;             /** Toggle tutorials section */
+    mv::gui::ToggleAction           _toggleTutorialsAction;             /** Toggle tutorials section */
     mv::gui::GroupAction            _settingsAction;                    /** Settings action */
     mv::gui::TriggerAction          _toLearningCenterAction;            /** Trigger action for showing the learning center */
     mv::gui::HorizontalGroupAction  _toolbarAction;                     /** Bottom toolbar action */

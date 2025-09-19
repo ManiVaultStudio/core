@@ -84,7 +84,7 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
                             for (const auto tutorial : jsonDocument.object()["tutorials"].toArray())
                                 addTutorial(new LearningCenterTutorial(tutorial.toVariant().toMap()));
                         }
-					});
+                    });
                 }
                 catch (const BaseException& exception) {
                     qCritical() << "Download failed for" << dsn << ":" << exception.what();
@@ -101,7 +101,7 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
 
             watcher->setFuture(future);
         }
-	});
+    });
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
         connect(&pluginFactory->getTutorialsDsnsAction(), &StringsAction::stringsChanged, this, &LearningCenterTutorialsModel::synchronizeWithDsns);
@@ -145,7 +145,7 @@ QVariant LearningCenterTutorialsModel::headerData(int section, Qt::Orientation o
         case Column::MissingPlugins:
             return MissingPluginsItem::headerData(orientation, role);
 
-		case Column::Count:
+        case Column::Count:
             break;
     }
 
@@ -263,15 +263,15 @@ QVariant LearningCenterTutorialsModel::DateItem::data(int role /*= Qt::UserRole 
 QVariant LearningCenterTutorialsModel::IconNameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
-	    case Qt::EditRole:
-	    case Qt::DisplayRole:
-	        return getTutorial()->getIconName();
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getTutorial()->getIconName();
 
-	    case Qt::ToolTipRole:
-	        return "Icon name: " + data(Qt::DisplayRole).toString();
+        case Qt::ToolTipRole:
+            return "Icon name: " + data(Qt::DisplayRole).toString();
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -314,17 +314,17 @@ QVariant LearningCenterTutorialsModel::ContentItem::data(int role /*= Qt::UserRo
 QVariant LearningCenterTutorialsModel::UrlItem::data(int role) const
 {
     switch (role) {
-	    case Qt::EditRole:
+        case Qt::EditRole:
             return QVariant::fromValue(getTutorial()->getUrl());
 
-	    case Qt::DisplayRole:
+        case Qt::DisplayRole:
             return QVariant::fromValue(getTutorial()->getUrl().toString());
 
         case Qt::ToolTipRole:
             return "URL: " + data(Qt::DisplayRole).toString();
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -352,17 +352,17 @@ QVariant LearningCenterTutorialsModel::ProjectUrlItem::data(int role /*= Qt::Use
 QVariant LearningCenterTutorialsModel::MinimumCoreVersionItem::data(int role) const
 {
     switch (role) {
-	    case Qt::EditRole:
-	        return QVariant::fromValue(getTutorial()->getMinimumCoreVersion());
+        case Qt::EditRole:
+            return QVariant::fromValue(getTutorial()->getMinimumCoreVersion());
 
-	    case Qt::DisplayRole:
-	        return QString::fromStdString(data(Qt::EditRole).value<Version>().getVersionString());
+        case Qt::DisplayRole:
+            return QString::fromStdString(data(Qt::EditRole).value<Version>().getVersionString());
 
-	    case Qt::ToolTipRole:
-	        return "Minimum ManiVault Studio application core version: " + data(Qt::DisplayRole).toString();
+        case Qt::ToolTipRole:
+            return "Minimum ManiVault Studio application core version: " + data(Qt::DisplayRole).toString();
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);

@@ -21,11 +21,11 @@ QList<QPersistentModelIndex> getAllPersistentModelIndexesAtColumn(const QAbstrac
 
         for (int row = 0; row < rowCount; ++row)
             recurse(model->index(row, columnIndex, parent));
-	};
+    };
 
     const int topLevelRows = model->rowCount();
 
-	for (int row = 0; row < topLevelRows; ++row)
+    for (int row = 0; row < topLevelRows; ++row)
         recurse(model->index(row, columnIndex));
 
     return results;

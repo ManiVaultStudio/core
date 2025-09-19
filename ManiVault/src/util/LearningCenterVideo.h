@@ -31,7 +31,7 @@ class CORE_EXPORT LearningCenterVideo : public QObject
 public:
     /** Type of video */
     enum class Type {
-	    YouTube,        /** Youtube video */
+        YouTube,        /** Youtube video */
         GIF             /** GIF animation*/
     };
 

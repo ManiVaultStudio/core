@@ -25,7 +25,7 @@ using namespace mv::util;
 
 PageActionsWidget::PageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
     QWidget(parent),
-	Serializable(title),
+    Serializable(title),
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Item", _model, &_filterModel, true, true),
@@ -164,13 +164,13 @@ void PageActionsWidget::updateCustomStyle()
             "background-color: rgba(0, 0, 0, 0);"
         "}"
         "QTreeView::item {"
-			"border-radius: 5px;"
+            "border-radius: 5px;"
         "}"
         "QTreeView::item:hover:!selected {"
             "background-color: %1;"
         "}"
         "QTreeView::item:selected {"
-			"background-color: rgba(0, 0, 0, 100);"
+            "background-color: rgba(0, 0, 0, 100);"
         "}"
     ).arg(rowHoverColor.name(QColor::HexArgb));
     
@@ -186,21 +186,21 @@ void PageActionsWidget::updateCustomStyle()
     
     auto color = qApp->palette().color(QPalette::Normal, QPalette::Window).name();
 
-	styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
+    styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
 
-	treeView.setStyleSheet(styleSheet);
+    treeView.setStyleSheet(styleSheet);
 }
 
 void PageActionsWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-	Serializable::fromVariantMap(variantMap);
+    Serializable::fromVariantMap(variantMap);
 
     _hierarchyWidget.fromParentVariantMap(variantMap);
 }
 
 QVariantMap PageActionsWidget::toVariantMap() const
 {
-	auto variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     _hierarchyWidget.insertIntoVariantMap(variantMap);
 

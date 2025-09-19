@@ -28,10 +28,10 @@ Script* AbstractScriptsModel::Item::getScript() const
 QVariant AbstractScriptsModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
-		case Qt::EditRole:
+        case Qt::EditRole:
             return static_cast<std::int32_t>(getScript()->getType());
 
-		case Qt::DisplayRole:
+        case Qt::DisplayRole:
             return Script::getTypeName(getScript()->getType());
 
         case Qt::ToolTipRole:
@@ -47,31 +47,31 @@ QVariant AbstractScriptsModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) c
 QVariant AbstractScriptsModel::LanguageItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
-	    case Qt::EditRole:
-	        return static_cast<std::int32_t>(getScript()->getLanguage());
+        case Qt::EditRole:
+            return static_cast<std::int32_t>(getScript()->getLanguage());
 
-	    case Qt::DisplayRole:
-	        return Script::getLanguageName(getScript()->getLanguage());
+        case Qt::DisplayRole:
+            return Script::getLanguageName(getScript()->getLanguage());
 
-	    case Qt::ToolTipRole:
-	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+        case Qt::ToolTipRole:
+            return QString("%1").arg(data(Qt::DisplayRole).toString());
 
-	    case Qt::DecorationRole:
+        case Qt::DecorationRole:
         {
             switch (getScript()->getLanguage()) {
-	            case Script::Language::Python:
-	                return StyledIcon("python");
+                case Script::Language::Python:
+                    return StyledIcon("python");
 
-	            case Script::Language::R:
+                case Script::Language::R:
                     return StyledIcon("r");
 
-	            default:
-	                return QIcon();
+                default:
+                    return QIcon();
             }
-		}
+        }
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -80,15 +80,15 @@ QVariant AbstractScriptsModel::LanguageItem::data(int role /*= Qt::UserRole + 1*
 QVariant AbstractScriptsModel::LocationItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
-	    case Qt::EditRole:
-	    case Qt::DisplayRole:
-	        return getScript()->getLocation();
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getScript()->getLocation();
 
-	    case Qt::ToolTipRole:
-	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+        case Qt::ToolTipRole:
+            return QString("%1").arg(data(Qt::DisplayRole).toString());
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -104,17 +104,17 @@ QVariant AbstractScriptsModel::headerData(int section, Qt::Orientation orientati
 {
     switch (static_cast<Column>(section))
     {
-	    case Column::Type:
-	        return TypeItem::headerData(orientation, role);
+        case Column::Type:
+            return TypeItem::headerData(orientation, role);
 
-	    case Column::Language:
-	        return LanguageItem::headerData(orientation, role);
+        case Column::Language:
+            return LanguageItem::headerData(orientation, role);
 
-	    case Column::Location:
-	        return LocationItem::headerData(orientation, role);
+        case Column::Location:
+            return LocationItem::headerData(orientation, role);
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return {};

@@ -18,12 +18,12 @@ using namespace mv::gui;
 using namespace mv::util;
 
 ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
-	QDialog(parent),
+    QDialog(parent),
     _acceptPushButton("Accept"),
     _optOutPushButton( "Opt Out"),
     _decideLaterPushButton("Decide Later")
 {
-	setWindowTitle("Help us improve ManiVault Studio");
+    setWindowTitle("Help us improve ManiVault Studio");
     setWindowModality(Qt::ApplicationModal);
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowTitleHint);
@@ -39,7 +39,7 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     if (errorLoggingConsentHtmlFile.open(QIODevice::ReadOnly)) {
         _notificationLabel.setText(errorLoggingConsentHtmlFile.readAll());
         errorLoggingConsentHtmlFile.close();
-	}
+    }
 
     _layout.addWidget(&_notificationLabel);
     _layout.addStretch(1);
@@ -51,7 +51,7 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     const auto& constErrorManager = mv::errors();
 
     if (!constErrorManager.getLoggingUserHasOptedAction().isChecked())
-		_buttonsLayout.addWidget(&_decideLaterPushButton);
+        _buttonsLayout.addWidget(&_decideLaterPushButton);
 
     _layout.addLayout(&_buttonsLayout);
 
@@ -60,21 +60,21 @@ ErrorLoggingConsentDialog::ErrorLoggingConsentDialog(QWidget* parent):
     _acceptPushButton.setEnabled(!constErrorManager.getLoggingUserHasOptedAction().isChecked() || !constErrorManager.getLoggingEnabledAction().isChecked());
     _optOutPushButton.setEnabled(!constErrorManager.getLoggingUserHasOptedAction().isChecked() || constErrorManager.getLoggingEnabledAction().isChecked());
 
-	connect(&_acceptPushButton, &QPushButton::clicked, this, [this, &constErrorManager]() -> void {
+    connect(&_acceptPushButton, &QPushButton::clicked, this, [this, &constErrorManager]() -> void {
         const_cast<mv::gui::ToggleAction&>(constErrorManager.getLoggingUserHasOptedAction()).setChecked(true);
         const_cast<mv::gui::ToggleAction&>(constErrorManager.getLoggingEnabledAction()).setChecked(true);
 
         accept();
-	});
+    });
     
-	connect(&_optOutPushButton, &QPushButton::clicked, this, [this, &constErrorManager]() -> void {
+    connect(&_optOutPushButton, &QPushButton::clicked, this, [this, &constErrorManager]() -> void {
         const_cast<mv::gui::ToggleAction&>(constErrorManager.getLoggingUserHasOptedAction()).setChecked(true);
         const_cast<mv::gui::ToggleAction&>(constErrorManager.getLoggingEnabledAction()).setChecked(false);
 
         accept();
-	});
+    });
 
     connect(&_decideLaterPushButton, &QPushButton::clicked, this, [this]() -> void {
         reject();
-	});
+    });
 }

@@ -31,7 +31,7 @@ ActionOverlayWidget::ActionOverlayWidget(QWidget* target, const QPointer<WidgetA
 
     layout->addWidget(_actionWidget);
 
-	setLayout(layout);
+    setLayout(layout);
     
 }
 

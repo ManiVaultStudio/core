@@ -9,19 +9,19 @@ namespace mv::util
 
 void TextElideDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
 {
-	QStyledItemDelegate::initStyleOption(option, index);
+    QStyledItemDelegate::initStyleOption(option, index);
 
-	option->textElideMode = _textElideMode;
+    option->textElideMode = _textElideMode;
 }
 
 Qt::TextElideMode TextElideDelegate::getTextElideMode() const
 {
-	return _textElideMode;
+    return _textElideMode;
 }
 
 void TextElideDelegate::setTextElideMode(const Qt::TextElideMode& textElideMode)
 {
-	_textElideMode = textElideMode;
+    _textElideMode = textElideMode;
 }
 
 }

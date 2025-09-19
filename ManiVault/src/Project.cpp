@@ -37,7 +37,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     initStatusBarOptionsAction();
 
     connect(&mv::settings().getMiscellaneousSettings().getStatusBarOptionsAction(), &OptionsAction::optionsChanged, initStatusBarOptionsAction);
-	*/
+    */
 
     /*
     const auto updateStatusBarActions = [this]() -> void {

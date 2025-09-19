@@ -52,20 +52,20 @@ void StringsAction::setStrings(const QStringList& strings)
 
     const auto previousStrings = getStrings();
 
-	_stringsModel.setStringList(strings);
+    _stringsModel.setStringList(strings);
 
     emit stringsChanged(getStrings());
 
-	QStringList addedStrings, removedStrings;
+    QStringList addedStrings, removedStrings;
 
     for (const QString& string : strings) {
         if (!previousStrings.contains(string))
-			addedStrings.push_back(string);
+            addedStrings.push_back(string);
     }
 
     for (const auto& previousString : previousStrings) {
         if (!strings.contains(previousString))
-			removedStrings.push_back(previousString);
+            removedStrings.push_back(previousString);
     }
 
     if (!addedStrings.isEmpty())
@@ -129,10 +129,10 @@ bool StringsAction::mayAddString(const QString& string) const
     if (string.isEmpty())
         return false;
 
-	if (allowsDuplicates())
-		return true;
+    if (allowsDuplicates())
+        return true;
 
-	return !getStrings().contains(string);
+    return !getStrings().contains(string);
 }
 
 void StringsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -216,7 +216,7 @@ void StringsAction::addStrings(const QStringList& strings, bool allowDuplication
 
     updatedStrings << strings;
 
-	if (!allowDuplication) {
+    if (!allowDuplication) {
         updatedStrings.removeDuplicates();
     }
 
@@ -253,8 +253,8 @@ void StringsAction::removeStrings(const QStringList& strings)
     getStringsModel().setStringList(updatedStrings);
     
     if (!removedStrings.isEmpty()) {
-	    emit stringsChanged(updatedStrings);
-    	emit stringsRemoved(removedStrings);
+        emit stringsChanged(updatedStrings);
+        emit stringsRemoved(removedStrings);
     }
 }
 
@@ -359,7 +359,7 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
         _hierarchyWidget.getSelectionModel().clear();
 
         _selectedRows = QModelIndexList();
-	};
+    };
     
     const auto updateNameAction = [this, isStringLocked]() -> void {
         const auto numberOfSelectedRows = _selectedRows.count();
@@ -388,7 +388,7 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
 
         if (numberOfSelectedRows >= 1)
             _stringsAction->getAddAction().setEnabled(false);
-	};
+    };
 
     connect(&_stringsAction->getNameAction(), &StringAction::stringChanged, this, updateAddAction);
 
@@ -440,15 +440,15 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
         updateNameAction();
         updateAddAction();
         updateRemoveAction();
-	});
+    });
 
     connect(_stringsAction, &StringsAction::lockedStringsChanged, this, [this, updateNameAction, updateAddAction, updateRemoveAction]() -> void {
         _hierarchyWidget.getSelectionModel().clear();
 
-    	updateNameAction();
+        updateNameAction();
         updateAddAction();
         updateRemoveAction();
-	});
+    });
 
     connect(&_stringsAction->getNameAction(), &StringAction::stringChanged, this, [this, isStringLocked]() -> void {
         if (_selectedRows.isEmpty())

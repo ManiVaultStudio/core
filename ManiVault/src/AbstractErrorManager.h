@@ -52,7 +52,7 @@ protected:
      */
     AbstractErrorLogger* getErrorLogger() const
     {
-	    return _errorLogger;
+        return _errorLogger;
     };
 
     /**
@@ -68,7 +68,7 @@ public: // Const action getters
 
     virtual const gui::TriggerAction& getLoggingAskConsentDialogAction() const { return const_cast<AbstractErrorManager*>(this)->getLoggingAskConsentDialogAction(); };             /** Get action for asking the user for consent to log errors */
     virtual const gui::ToggleAction& getLoggingUserHasOptedAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingUserHasOptedAction(); };                     /** Get action for user has opted */
-	virtual const gui::ToggleAction& getLoggingEnabledAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingEnabledAction(); };                               /** Get action for logging enabled */
+    virtual const gui::ToggleAction& getLoggingEnabledAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingEnabledAction(); };                               /** Get action for logging enabled */
     virtual const gui::StringAction& getLoggingDsnAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingDsnAction(); };                                       /** Get action for logging data source name (DSN) */
     virtual const gui::ToggleAction& getLoggingShowCrashReportDialogAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingShowCrashReportDialogAction(); };   /** Get action for showing a crash report dialog when the application fails */
 

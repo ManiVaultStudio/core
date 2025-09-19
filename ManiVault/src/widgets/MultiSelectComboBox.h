@@ -19,12 +19,12 @@ namespace mv::gui {
  */
 class CORE_EXPORT MultiSelectComboBox : public QComboBox {
 
-	Q_OBJECT
+    Q_OBJECT
 
 public:
 
     
-	/**
+    /**
      * Construct with pointer to \p parent widget
      * @param parent Pointer to parent widget
      */
@@ -39,7 +39,7 @@ protected:
     void hidePopup() override;
 
     
-	/**
+    /**
      * Called when \p event happens for \p watched object
      * @param watched Pointer to watched object
      * @param event Pointer to event that occurred
@@ -50,7 +50,7 @@ protected:
 private:
 
     
-	/**
+    /**
      * Toggle the check state of \p index
      * @param index Index of which to toggle the check state
      */

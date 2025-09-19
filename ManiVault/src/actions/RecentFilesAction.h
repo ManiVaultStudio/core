@@ -133,7 +133,7 @@ public:
 
 signals:
 
-	/** Signals that recent \p filePath is triggered */
+    /** Signals that recent \p filePath is triggered */
     void triggered(const QString& filePath);
 
 protected:

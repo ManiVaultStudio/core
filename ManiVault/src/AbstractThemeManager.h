@@ -49,7 +49,7 @@ public:
     
 
     /** Maps custom color scheme name to palette */
-	using CustomColorSchemesMap = QMap<QString, QPalette>;
+    using CustomColorSchemesMap = QMap<QString, QPalette>;
 
 public:
 
@@ -85,7 +85,7 @@ public:
         if (colorSchemeMode == getColorSchemeMode())
             return;
 
-	    getColorSchemeModeAction().setCurrentIndex(static_cast<int>(colorSchemeMode));
+        getColorSchemeModeAction().setCurrentIndex(static_cast<int>(colorSchemeMode));
     }
 
     /**
@@ -203,7 +203,7 @@ signals:
 
 protected: // Action getters
 
-	virtual gui::OptionAction& getColorSchemeModeAction() = 0;
+    virtual gui::OptionAction& getColorSchemeModeAction() = 0;
     virtual gui::ToggleAction& getSystemLightColorSchemeAction() = 0;
     virtual gui::ToggleAction& getSystemDarkColorSchemeAction() = 0;
     virtual gui::ColorSchemeAction& getCustomColorSchemeAction() = 0;

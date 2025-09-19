@@ -52,7 +52,7 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     if (getShowIndicator()) {
-	    constexpr auto margin = 5.0f;
+        constexpr auto margin = 5.0f;
 
         QPointF center;
 

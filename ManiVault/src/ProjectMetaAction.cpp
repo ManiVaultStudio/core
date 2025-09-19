@@ -77,7 +77,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
         const auto loadedPlugins = mv::plugins().getLoadedPluginKinds();
         const auto lockedPlugins = _allowedPluginsAction.getLockedStrings();
 
-    	_allowedPluginsModel.setStringList(QSet<QString>(loadedPlugins.begin(), loadedPlugins.end()).subtract(QSet<QString>(lockedPlugins.begin(), lockedPlugins.end())).values());
+        _allowedPluginsModel.setStringList(QSet<QString>(loadedPlugins.begin(), loadedPlugins.end()).subtract(QSet<QString>(lockedPlugins.begin(), lockedPlugins.end())).values());
     };
 
     updateAllowedPluginsModel();
@@ -85,7 +85,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     connect(&_allowedPluginsAction, &StringsAction::lockedStringsChanged, this, updateAllowedPluginsModel);
 
     const auto updateAllowedPluginsAction = [this]() -> void {
-		_allowedPluginsAction.setEnabled(_allowedPluginsOnlyAction.isChecked());
+        _allowedPluginsAction.setEnabled(_allowedPluginsOnlyAction.isChecked());
     };
 
     updateAllowedPluginsAction();

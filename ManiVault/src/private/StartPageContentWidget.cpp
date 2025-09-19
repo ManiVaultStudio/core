@@ -22,7 +22,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleOpenCreateProjectAction(this, "Open & Create", true),
     _toggleProjectDatabaseAction(this, "Project Database", true),
     _toggleRecentProjectsAction(this, "Recent Projects", true),
-	_toggleProjectFromDataAction(this, "Project From Data", true),
+    _toggleProjectFromDataAction(this, "Project From Data", true),
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleTutorialsAction(this, "Tutorials", true),
     _settingsAction(this, "Settings"),
@@ -60,7 +60,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
 
-	_settingsAction.addAction(&_toggleProjectDatabaseAction);
+    _settingsAction.addAction(&_toggleProjectDatabaseAction);
 
     _settingsAction.addAction(&_toggleRecentProjectsAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);
@@ -104,7 +104,7 @@ void StartPageContentWidget::updateActions()
 
 void StartPageContentWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-	Serializable::fromVariantMap(variantMap);
+    Serializable::fromVariantMap(variantMap);
 
     _compactViewAction.fromParentVariantMap(variantMap);
     _toggleOpenCreateProjectAction.fromParentVariantMap(variantMap);
@@ -119,7 +119,7 @@ void StartPageContentWidget::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap StartPageContentWidget::toVariantMap() const
 {
-	auto variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     _compactViewAction.insertIntoVariantMap(variantMap);
     _toggleOpenCreateProjectAction.insertIntoVariantMap(variantMap);

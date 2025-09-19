@@ -63,7 +63,7 @@ void WidgetFader::fadeOut(std::int32_t duration /*= -1*/, bool autoHideAfterFade
     if (autoHideAfterFade) {
         connect(&_opacityAnimation, &QPropertyAnimation::finished, this, [this]() {
             _targetWidget->hide();
-		}, Qt::SingleShotConnection);
+        }, Qt::SingleShotConnection);
     }
 }
 
@@ -86,7 +86,7 @@ void WidgetFader::setOpacity(float opacity, std::uint32_t duration /*= 0*/, std:
 
             QTimer::singleShot(50, this, &WidgetFader::startAnimation);
         }
-	};
+    };
 
     if (delay > 0)
         QTimer::singleShot(delay, startOpacityAnimation);

@@ -72,7 +72,7 @@ public:
      * @return Logger name
      */
     QString getLoggerName() const {
-	    return _loggerName;
+        return _loggerName;
     }
 
     /** Starts the error logger if the pre-flight conditions are met */
@@ -88,7 +88,7 @@ public:
      * @return Boolean determining whether the error logger is initialized or not
      */
     bool isInitialized() const {
-	    return _initialized;
+        return _initialized;
     }
 
     /**
@@ -109,33 +109,33 @@ public:
             addNotification("Enabled", {
                 QString("%1 error logging").arg(_loggerName),
                 QString("Logging will be <b>%1</b> after restarting the application.").arg(toggled ? "enabled" : "disabled"),
-            	util::StyledIcon("bug")
+                util::StyledIcon("bug")
             });
         });
 
         connect(&mv::errors().getLoggingDsnAction(), &gui::StringAction::stringChanged, this, [this](const QString& dsn) -> void {
             if (mv::errors().getLoggingDsnAction().isValid() == QValidator::Acceptable)
                 addNotification("DSN", {
-                	QString("%1 error logging").arg(_loggerName),
-                	QString("The logging Data Source Name (DSN) will be changed to <a href='%1'>%1</a> after restarting the application.").arg(dsn),
-                	util::StyledIcon("bug")
+                    QString("%1 error logging").arg(_loggerName),
+                    QString("The logging Data Source Name (DSN) will be changed to <a href='%1'>%1</a> after restarting the application.").arg(dsn),
+                    util::StyledIcon("bug")
                 });
-		});
+        });
 
         connect(&mv::errors().getLoggingShowCrashReportDialogAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
             if (toggled)
                 addNotification("ShowCrashReportDialog", {
                     QString("%1 error logging").arg(_loggerName),
                     QString("A window will popup when a fatal error occurs in which you can give details surrounding the crash. This setting will take effect after restarting the application."),
-                	util::StyledIcon("bug")
-				});
+                    util::StyledIcon("bug")
+                });
             else
                 addNotification("ShowCrashReportDialog", {
                     QString("%1 error logging").arg(_loggerName),
                     QString("You will not be asked for details surrounding a crash, a report will be sent automatically to the Sentry server. This setting will take effect after restarting the application."),
-                	util::StyledIcon("bug")
+                    util::StyledIcon("bug")
                 });
-		});
+        });
     }
 
     /** End the initialization of the error logger */

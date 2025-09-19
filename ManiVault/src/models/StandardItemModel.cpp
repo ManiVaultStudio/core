@@ -25,7 +25,7 @@ StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/, const QStrin
 
 StandardItemModel::PopulationMode StandardItemModel::getPopulationMode() const
 {
-	return _populationMode;
+    return _populationMode;
 }
 
 void StandardItemModel::setPopulationMode(const PopulationMode& populationMode)
@@ -40,11 +40,11 @@ void StandardItemModel::setPopulationMode(const PopulationMode& populationMode)
 
 void StandardItemModel::fromVariantMap(const QVariantMap& variantMap)
 {
-	Serializable::fromVariantMap(variantMap);
+    Serializable::fromVariantMap(variantMap);
 }
 
 QVariantMap StandardItemModel::toVariantMap() const
 {
-	return Serializable::toVariantMap();
+    return Serializable::toVariantMap();
 }
 }

@@ -249,10 +249,10 @@ QValidator::State StringAction::isValid() const
 }
 
 StringAction::InlineAction::StyledToolButton::StyledToolButton(InlineAction& inlineAction, QWidget* parent):
-	QToolButton(parent),
-	_inlineAction(inlineAction)
+    QToolButton(parent),
+    _inlineAction(inlineAction)
 {
-	installEventFilter(this);
+    installEventFilter(this);
     
     inlineAction.installEventFilter(this);
 
@@ -271,32 +271,32 @@ bool StringAction::InlineAction::StyledToolButton::eventFilter(QObject* watched,
     }
 
     if (watched == &_inlineAction) {
-    	if (event->type() == QEvent::EnabledChange)
+        if (event->type() == QEvent::EnabledChange)
             synchronizeWithInlineAction();
 
-    	if (event->type() == QEvent::ToolTipChange)
+        if (event->type() == QEvent::ToolTipChange)
             synchronizeWithInlineAction();
     }
 
-	return QToolButton::eventFilter(watched, event);
+    return QToolButton::eventFilter(watched, event);
 }
 
 void StringAction::InlineAction::StyledToolButton::addGlowEffect()
 {
-	auto* effect = new QGraphicsDropShadowEffect(this);
+    auto* effect = new QGraphicsDropShadowEffect(this);
 
     auto color = palette().color(QPalette::ColorRole::Accent);
 
-	effect->setBlurRadius(12);
-	effect->setColor(color);
-	effect->setOffset(0, 0);
+    effect->setBlurRadius(12);
+    effect->setColor(color);
+    effect->setOffset(0, 0);
 
-	setGraphicsEffect(effect);
+    setGraphicsEffect(effect);
 }
 
 void StringAction::InlineAction::StyledToolButton::removeGlowEffect()
 {
-	setGraphicsEffect(nullptr);
+    setGraphicsEffect(nullptr);
 }
 
 void StringAction::InlineAction::StyledToolButton::synchronizeWithInlineAction()
@@ -329,7 +329,7 @@ QWidget* StringAction::InlineAction::createWidget(QWidget* parent)
 
 void StringAction::InlineAction::setIconByName(const QString& iconName)
 {
-	setIcon(util::StyledIcon(iconName));
+    setIcon(util::StyledIcon(iconName));
 }
 
 StringAction::LabelWidget::LabelWidget(QWidget* parent, StringAction* stringAction) :

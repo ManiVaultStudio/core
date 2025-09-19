@@ -96,10 +96,10 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
 
     const auto patchTabStyling = [this]() -> void {
         setStyleSheet(QString(" \
-			ads--CDockWidgetTab { \
-				background-color: %1; \
-			}").arg(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Window).name()));
-	};
+            ads--CDockWidgetTab { \
+                background-color: %1; \
+            }").arg(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Window).name()));
+    };
 
     patchTabStyling();
 

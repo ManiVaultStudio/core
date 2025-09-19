@@ -210,7 +210,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
 
 void StartPageGetStartedWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-	Serializable::fromVariantMap(variantMap);
+    Serializable::fromVariantMap(variantMap);
 
     _createProjectFromWorkspaceWidget.fromParentVariantMap(variantMap);
     _createProjectFromDatasetWidget.fromParentVariantMap(variantMap);
@@ -219,7 +219,7 @@ void StartPageGetStartedWidget::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap StartPageGetStartedWidget::toVariantMap() const
 {
-	auto variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     _createProjectFromWorkspaceWidget.insertIntoVariantMap(variantMap);
     _createProjectFromDatasetWidget.insertIntoVariantMap(variantMap);

@@ -114,7 +114,7 @@ void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap.contains("IsPublic") && variantMap["IsPublic"].toBool()) {
         if (variantMap.contains("Minimum"))
-			setMinimum(static_cast<float>(variantMap["Minimum"].toDouble()));
+            setMinimum(static_cast<float>(variantMap["Minimum"].toDouble()));
 
         if (variantMap.contains("Maximum"))
             setMaximum(static_cast<float>(variantMap["Maximum"].toDouble()));
@@ -131,7 +131,7 @@ QVariantMap DecimalAction::toVariantMap() const
 
     if (isPublic()) {
         variantMap.insert({
-			{ "Minimum", QVariant::fromValue(static_cast<double>(getMinimum())) },
+            { "Minimum", QVariant::fromValue(static_cast<double>(getMinimum())) },
             { "Maximum", QVariant::fromValue(static_cast<double>(getMaximum())) }
         });
     }

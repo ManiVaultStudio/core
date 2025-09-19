@@ -39,7 +39,7 @@ bool ColorSchemesFilterModel::filterAcceptsRow(int row, const QModelIndex& paren
             return false;
     }
 
-	return SortFilterProxyModel::filterAcceptsRow(row, parent);
+    return SortFilterProxyModel::filterAcceptsRow(row, parent);
 }
 
 }

@@ -229,7 +229,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     connect(expandAllAction, &TriggerAction::triggered, this, [this]() -> void {
         _hierarchyWidget.getExpandAllAction().trigger();
-	});
+    });
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -436,7 +436,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         QGuiApplication::clipboard()->setText(datasetId);
 
         qDebug() << "Dataset identifier" << datasetIdLog << "copied to clipboard";
-	});
+    });
 }
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset) const

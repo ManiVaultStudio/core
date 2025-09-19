@@ -208,7 +208,7 @@ void SplashScreenAction::closeSplashScreenWidget()
         _splashScreenWidget->closeAnimated();
 
         _splashScreenWidget.clear();
-	});
+    });
 }
 
 bool SplashScreenAction::shouldDisplayProjectInfo() const
@@ -225,7 +225,7 @@ QString SplashScreenAction::getHtmlFromTemplate() const
 
     QTextStream textStreamIn(&splashScreenFile);
 
-	textStreamIn.setEncoding(QStringConverter::Utf8);
+    textStreamIn.setEncoding(QStringConverter::Utf8);
 
     QString htmlTemplate = textStreamIn.readAll();
 
@@ -274,7 +274,7 @@ QString SplashScreenAction::getHtmlFromTemplate() const
 
     const auto addAlertString = [&alertStrings](const QString& iconName, const QString& alertMessage, const QColor& color) -> void {
         alertStrings << QString("<span style='color: %3'><i class='%1 fa-sm icon' style='padding-right: 5px;'></i>%2</span>").arg(iconName, alertMessage, color.name());
-	};
+    };
 
     for (const auto& alert : getAlerts()) {
         addAlertString(alert.getIconName(), alert.getMessage(), alert.getColor());

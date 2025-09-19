@@ -89,9 +89,9 @@ QVariantMap StartPageWidget::toVariantMap() const
 {
     auto variantMap = PageWidget::toVariantMap();
 
-	_startPageContentWidget.insertIntoVariantMap(variantMap);
+    _startPageContentWidget.insertIntoVariantMap(variantMap);
 
-	return variantMap;
+    return variantMap;
 }
 
 void StartPageWidget::loadConfiguration()

@@ -11,12 +11,12 @@ namespace mv::util
 
 QPalette::ColorGroup StyledIconSettings::getColorGroupForCurrentTheme() const
 {
-	return mv::theme().isSystemDarkColorSchemeActive() ? _colorGroupDarkTheme : _colorGroupLightTheme;
+    return mv::theme().isSystemDarkColorSchemeActive() ? _colorGroupDarkTheme : _colorGroupLightTheme;
 }
 
 QPalette::ColorRole StyledIconSettings::getColorRoleForCurrentTheme() const
 {
-	return mv::theme().isSystemDarkColorSchemeActive() ? _colorRoleDarkTheme : _colorRoleLightTheme;
+    return mv::theme().isSystemDarkColorSchemeActive() ? _colorRoleDarkTheme : _colorRoleLightTheme;
 }
 
 }

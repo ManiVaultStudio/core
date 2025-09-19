@@ -93,7 +93,7 @@ public:
      */
     bool equals(const HardwareComponentSpec& other) const override {
         if (auto otherStorageComponentSpec = dynamic_cast<const StorageComponentSpec*>(&other))
-			return *this == *otherStorageComponentSpec;
+            return *this == *otherStorageComponentSpec;
 
         return false; // Cannot compare with non-storage component spec
     }

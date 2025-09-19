@@ -22,7 +22,7 @@ namespace mv::util
  */
 class SecureNetworkAccessManager : public QNetworkAccessManager {
 
-	Q_OBJECT
+    Q_OBJECT
 
 public:
 

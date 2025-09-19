@@ -37,12 +37,12 @@ Core::Core() :
     connect(Application::current(), &QCoreApplication::aboutToQuit, this, [this]() -> void {
         emit aboutToBeDestroyed();
 
-    	_aboutToBeDestroyed = true;
+        _aboutToBeDestroyed = true;
 
         for (auto& manager : _managers)
             manager->setCoreIsDestroyed();
 
-    	reset();
+        reset();
 
         _managers.clear();
     });
@@ -55,7 +55,7 @@ void Core::createManagers()
     _managers[static_cast<int>(ManagerType::Errors)]        = std::make_unique<ErrorManager>(this);
     _managers[static_cast<int>(ManagerType::Actions)]       = std::make_unique<ActionsManager>(this);
     _managers[static_cast<int>(ManagerType::Theme)]         = std::make_unique<ThemeManager>(this);
-	_managers[static_cast<int>(ManagerType::Plugins)]       = std::make_unique<PluginManager>(this);
+    _managers[static_cast<int>(ManagerType::Plugins)]       = std::make_unique<PluginManager>(this);
     _managers[static_cast<int>(ManagerType::Events)]        = std::make_unique<EventManager>(this);
     _managers[static_cast<int>(ManagerType::Data)]          = std::make_unique<DataManager>(this);
     _managers[static_cast<int>(ManagerType::DataHierarchy)] = std::make_unique<DataHierarchyManager>(this);

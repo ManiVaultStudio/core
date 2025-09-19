@@ -293,7 +293,7 @@ protected:
     QLockFile                   _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
 
     /** Count of cursor overrides for each cursor shape */
-	static QList<CursorShapeCount> cursorOverridesCount;
+    static QList<CursorShapeCount> cursorOverridesCount;
 };
 
 }

@@ -191,15 +191,15 @@ public:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "mode";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "mode";
 
-	            case Qt::ToolTipRole:
-	                return "Color scheme mode";
+                case Qt::ToolTipRole:
+                    return "Color scheme mode";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};

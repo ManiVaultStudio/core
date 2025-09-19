@@ -39,7 +39,7 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
 
 void FileMenu::showEvent(QShowEvent* event)
 {
-	QMenu::showEvent(event);
+    QMenu::showEvent(event);
 
     if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows)
         populate();

@@ -14,7 +14,7 @@ using namespace mv;
 using namespace mv::gui;
 
 AbstractPageActionsModel::Item::Item(const PageActionSharedPtr& pageAction, bool editable) :
-	_pageAction(pageAction)
+    _pageAction(pageAction)
 {
     setEditable(editable);
 }
@@ -22,20 +22,20 @@ AbstractPageActionsModel::Item::Item(const PageActionSharedPtr& pageAction, bool
 QVariant AbstractPageActionsModel::Item::data(int role) const
 {
     switch (role) {
-	    case Qt::EditRole:
-	        return QVariant::fromValue(getPageAction()->getTitle());
+        case Qt::EditRole:
+            return QVariant::fromValue(getPageAction()->getTitle());
 
-	    case Qt::DisplayRole:
-	        return "";
+        case Qt::DisplayRole:
+            return "";
 
         case Qt::ToolTipRole:
             return getPageAction()->getTooltip();
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
-	return QStandardItem::data(role);
+    return QStandardItem::data(role);
 }
 
 PageActionSharedPtr AbstractPageActionsModel::Item::getPageAction() const

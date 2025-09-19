@@ -64,7 +64,7 @@ bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
 {
     const auto index = sourceModel()->index(row, 0, parent);
 
-	if (!index.isValid())
+    if (!index.isValid())
         return false;
 
     const auto isGroup = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::IsGroup)).data(Qt::EditRole).toBool();
@@ -95,9 +95,9 @@ bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
 
         const auto projectMinimumCoreVersion = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MinimumCoreVersion)).data(Qt::EditRole).value<Version>();
 
-    	const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0);
+        const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0);
 
-    	if (targetAppVersion > projectMinimumCoreVersion)
+        if (targetAppVersion > projectMinimumCoreVersion)
             return false;
 
         const auto missingPlugins = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MissingPlugins)).data(Qt::EditRole).toStringList();
@@ -131,7 +131,7 @@ void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
         const auto firstTime = _tagsFilterAction.getOptions().isEmpty();
 
         _tagsFilterAction.setOptions(uniqueTags);
-    	_tagsFilterAction.setSelectedOptions(_tagsFilterAction.hasSelectedOptions() ? _tagsFilterAction.getSelectedOptions() : uniqueTags);
+        _tagsFilterAction.setSelectedOptions(_tagsFilterAction.hasSelectedOptions() ? _tagsFilterAction.getSelectedOptions() : uniqueTags);
     };
 
     connect(_projectDatabaseModel, &AbstractProjectsModel::tagsChanged, this, updateTags);
@@ -162,7 +162,7 @@ bool ProjectsFilterModel::hasAcceptedChildren(const QModelIndex& parent) const
 
 void ProjectsFilterModel::fromVariantMap(const QVariantMap& variantMap)
 {
-	SortFilterProxyModel::fromVariantMap(variantMap);
+    SortFilterProxyModel::fromVariantMap(variantMap);
 
     _tagsFilterAction.fromParentVariantMap(variantMap);
     _excludeTagsFilterAction.fromParentVariantMap(variantMap);
@@ -172,7 +172,7 @@ void ProjectsFilterModel::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap ProjectsFilterModel::toVariantMap() const
 {
-	auto variantMap = SortFilterProxyModel::toVariantMap();
+    auto variantMap = SortFilterProxyModel::toVariantMap();
 
     _tagsFilterAction.insertIntoVariantMap(variantMap);
     _excludeTagsFilterAction.insertIntoVariantMap(variantMap);

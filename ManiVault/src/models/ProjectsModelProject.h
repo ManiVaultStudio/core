@@ -241,7 +241,7 @@ public:
         _serverDownloadSize         = rhs.getServerDownloadSize();
         _userSpecifiedDownloadSize  = rhs.getUserSpecifiedDownloadSize();
         _group                      = rhs.getGroup();
-    	_isGroup                    = rhs.isGroup();
+        _isGroup                    = rhs.isGroup();
         _tags                       = rhs.getTags();
         _date                       = rhs.getDate();
         _iconName                   = rhs.getIconName();

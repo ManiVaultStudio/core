@@ -161,7 +161,7 @@ void ShaderProgram::uniformMatrix3f(const char* name, float* data) {
 }
 
 void ShaderProgram::uniformMatrix4f(const char* name, float* data) {
-	glUniformMatrix4fv(location(name), 1, false, data);
+    glUniformMatrix4fv(location(name), 1, false, data);
 }
 
 void ShaderProgram::uniformMatrix4f(const char* name, const float* const m)

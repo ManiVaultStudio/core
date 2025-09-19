@@ -26,14 +26,14 @@ class CORE_EXPORT Renderer : public QObject, protected QOpenGLFunctions_3_3_Core
 {
 protected:
 
-	/**
+    /**
      * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
      */
     explicit Renderer(QObject* parent = nullptr) :
         QObject(parent)
-	{
-	}
+    {
+    }
 
     virtual void init() = 0;
     virtual void resize(QSize renderSize) = 0;

@@ -52,7 +52,7 @@ public slots:
      * Set progress value to \p progress
      * @param progress Progress value in range [0, 100]
      */
-	void setProgress(int progress);
+    void setProgress(int progress);
 
     /**
      * Set progress description to \p description

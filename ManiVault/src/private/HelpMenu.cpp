@@ -92,7 +92,7 @@ void HelpMenu::populate()
 
     connect(&_devDocAction, &QAction::triggered, this, [this](bool) {
         QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode));
-	});
+    });
 
     connect(&_aboutAction, &TriggerAction::triggered, this, &HelpMenu::about);
     connect(&_aboutThirdPartiesAction, &TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);

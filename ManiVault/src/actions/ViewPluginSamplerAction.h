@@ -72,13 +72,13 @@ public:
     /** Sampling modes */
     enum class SamplingMode
     {
-	    Selection,      /** Sampling is based on the current selection */
+        Selection,      /** Sampling is based on the current selection */
         FocusRegion,    /** Sampling is based on the current focus region */
     };
 
     /** Viewing modes */
     enum class ViewingMode
-	{
+    {
         None,       /** Do not show samples */
         Windowed,   /** Force sample scope view plugin based view */
         Tooltip     /** Force tooltip view (regardless of the size of the tooltip) */
@@ -321,7 +321,7 @@ private:
     IntegralAction                  _maximumNumberOfElementsAction;             /** Action to restrict the maximum number of elements in the focus region */
     IntegralAction                  _lazyUpdateIntervalAction;                  /** Action to control the view update timer interval */
     OptionAction                    _samplingModeAction;                        /** Action to control the sampling mode */
-	OptionAction                    _viewingModeAction;                         /** Action to control the viewing mode */
+    OptionAction                    _viewingModeAction;                         /** Action to control the viewing mode */
     SampleContext                   _sampleContext;                             /** Context for the tooltip */
     QTimer                          _sampleContextLazyUpdateTimer;              /** Lazily (periodically) updates the sample context tooltip string */
     bool                            _sampleContextDirty;                        /** Indicates that the sample context is dirty */

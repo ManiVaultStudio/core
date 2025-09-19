@@ -28,7 +28,7 @@ namespace mv::gui {
  */
 class CORE_EXPORT DatasetPickerAction : public OptionAction
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
 

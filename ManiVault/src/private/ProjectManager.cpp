@@ -188,7 +188,7 @@ ProjectManager::ProjectManager(QObject* parent) :
 
         for (auto& pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::LOADER))
             if (pluginTriggerAction->getPluginFactory()->getAllowPluginCreationFromStandardGui())
-				_importDataMenu.addAction(pluginTriggerAction);
+                _importDataMenu.addAction(pluginTriggerAction);
 
         _importDataMenu.setEnabled(!_importDataMenu.actions().isEmpty());
     });
@@ -472,8 +472,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         if (!importDataOnly)
             newProject();
 
-		emit projectAboutToBeOpened(*_project);
-	    {
+        emit projectAboutToBeOpened(*_project);
+        {
             _project->setFilePath(filePath);
 
             auto& projectSerializationTask      = projects().getProjectSerializationTask();
@@ -538,7 +538,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 miscellaneousSettings.getStatusBarVisibleAction().setChecked(_project->getStatusBarVisibleAction().isChecked());
 
                 /* TODO: Fix plugin status bar action visibility
-            	miscellaneousSettings.getStatusBarOptionsAction().setSelectedOptions(_project->getStatusBarOptionsAction().getSelectedOptions());
+                miscellaneousSettings.getStatusBarOptionsAction().setSelectedOptions(_project->getStatusBarOptionsAction().getSelectedOptions());
                 */
             }
 
@@ -632,7 +632,7 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                                 else {
                                     mv::projects().openProject(downloadedProjectFilePath);
                                 }
-							});
+                            });
                         }
                         else {
                             qDebug() << "Project is not stale, opening from" << downloadedProjectFilePath;
@@ -645,7 +645,7 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                     }
 
                     watcher->deleteLater();
-				});
+                });
 
                 watcher->setFuture(isDownloadProjectStaleFuture);
             }
@@ -653,15 +653,15 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
                 downloadAndOpenProject(url, targetDirectory);
             }
         }
-	}
-	catch (std::exception& e)
-	{
-	    exceptionMessageBox("Unable to open ManiVault project", e);
-	}
-	catch (...)
-	{
-	    exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
-	}
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to open ManiVault project", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
+    }
 
     Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
@@ -670,7 +670,7 @@ void ProjectManager::downloadAndOpenProject(QUrl url, const QString& targetDirec
 {
     QFuture<QString> future = mv::projects().downloadProjectAsync(url, targetDirectory);
 
-	auto watcher = new QFutureWatcher<QString>(const_cast<ProjectManager*>(this));
+    auto watcher = new QFutureWatcher<QString>(const_cast<ProjectManager*>(this));
 
     connect(watcher, &QFutureWatcher<QString>::finished, watcher, [watcher, url]() {
         try {
@@ -683,7 +683,7 @@ void ProjectManager::downloadAndOpenProject(QUrl url, const QString& targetDirec
 
             QMetaObject::invokeMethod(qApp, [projectFilePath]() {
                 mv::projects().openProject(projectFilePath);
-			});
+            });
         }
         catch (const std::exception& e) {
             qCritical() << "Failed to download project from" << url.toString() << ":" << e.what();
@@ -714,7 +714,7 @@ void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, co
         if (notCompatible || notRecommended) {
             QDialog projectIncompatibleWithSystemDialog;
 
-        	projectIncompatibleWithSystemDialog.setWindowIcon(systemCompatibility._icon);
+            projectIncompatibleWithSystemDialog.setWindowIcon(systemCompatibility._icon);
             projectIncompatibleWithSystemDialog.setWindowTitle("Incompatible System");
             projectIncompatibleWithSystemDialog.setMinimumWidth(500);
             projectIncompatibleWithSystemDialog.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -1231,7 +1231,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             currentProject->getOverrideApplicationStatusBarAction().restoreState();
             currentProject->getProjectMetaAction().getApplicationVersionAction().setVersion(Application::current()->getVersion());
 
-			/* TODO: Fix plugin status bar action visibility
+            /* TODO: Fix plugin status bar action visibility
             currentProject->getStatusBarVisibleAction().restoreState();
             currentProject->getStatusBarOptionsAction().restoreState();
             */
@@ -1320,7 +1320,7 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
         if (!workspacePreviewImage.isNull())
             return workspacePreviewImage.scaled(targetSize, Qt::KeepAspectRatio);
         
-		return {};
+        return {};
     }
     catch (std::exception& e)
     {
@@ -1346,14 +1346,14 @@ const ProjectsTreeModel& ProjectManager::getProjectsTreeModel() const
 
 QFuture<QString> ProjectManager::downloadProjectAsync(QUrl url, const QString& targetDirectory /*= ""*/, Task* task /*= nullptr*/)
 {
-	return FileDownloader::downloadToFileAsync(url, targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : targetDirectory, task ? task : &getProjectDownloadTask());
+    return FileDownloader::downloadToFileAsync(url, targetDirectory.isEmpty() ? getDownloadedProjectsDir().absolutePath() : targetDirectory, task ? task : &getProjectDownloadTask());
 }
 
 QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
 {
     auto promise = std::make_shared<QPromise<bool>>();
 
-	QFuture<bool> future = promise->future();
+    QFuture<bool> future = promise->future();
 
     QMetaObject::invokeMethod(qApp, [this, promise, url]() mutable {
         auto modifiedWatcher    = new QFutureWatcher<QDateTime>(const_cast<ProjectManager*>(this));
@@ -1441,34 +1441,34 @@ QMenu& ProjectManager::getImportDataMenu()
 
 ProjectMetaAction* ProjectManager::getProjectMetaAction(const QString& projectFilePath)
 {
-	try {
-		const QString metaJsonFilePath("meta.json");
+    try {
+        const QString metaJsonFilePath("meta.json");
 
-		QFileInfo extractFileInfo(Application::current()->getTemporaryDir().path(), metaJsonFilePath);
+        QFileInfo extractFileInfo(Application::current()->getTemporaryDir().path(), metaJsonFilePath);
 
-		Archiver archiver;
+        Archiver archiver;
 
-		QString extractedMetaJsonFilePath = "";
+        QString extractedMetaJsonFilePath = "";
 
-		archiver.extractSingleFile(projectFilePath, metaJsonFilePath, extractFileInfo.absoluteFilePath());
+        archiver.extractSingleFile(projectFilePath, metaJsonFilePath, extractFileInfo.absoluteFilePath());
 
-		extractedMetaJsonFilePath = extractFileInfo.absoluteFilePath();
+        extractedMetaJsonFilePath = extractFileInfo.absoluteFilePath();
 
-		if (!QFileInfo(extractedMetaJsonFilePath).exists())
-			throw std::runtime_error("Unable to extract meta.json");
+        if (!QFileInfo(extractedMetaJsonFilePath).exists())
+            throw std::runtime_error("Unable to extract meta.json");
 
-		return new ProjectMetaAction(extractedMetaJsonFilePath, Application::current());
-	}
-	catch (std::exception& e)
-	{
-		qDebug() << "No meta data available, please re-save the project to solve the problem" << e.what();
-	}
-	catch (...)
-	{
-		qDebug() << "No meta data available due to an unhandled problem, please re-save the project to solve the problem";
-	}
+        return new ProjectMetaAction(extractedMetaJsonFilePath, Application::current());
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "No meta data available, please re-save the project to solve the problem" << e.what();
+    }
+    catch (...)
+    {
+        qDebug() << "No meta data available due to an unhandled problem, please re-save the project to solve the problem";
+    }
 
-	return {};
+    return {};
 }
 
 void ProjectManager::createProject()

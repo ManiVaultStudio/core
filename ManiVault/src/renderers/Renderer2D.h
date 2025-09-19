@@ -35,11 +35,11 @@ public:
      */
     explicit Renderer2D(QObject* parent = nullptr);
 
-	/**
+    /**
      * Resize the renderer to \p renderSize
      * @param renderSize New size of the renderer
-	 */
-	void resize(QSize renderSize) override;
+     */
+    void resize(QSize renderSize) override;
 
     /**
      * Get the render size
@@ -67,11 +67,11 @@ public:
 
 public:
 
-	/**
-	 * Get custom navigator
-	 * @return Pointer to custom navigator
-	 */
-	QPointer<Navigator2D> getCustomNavigator() const;
+    /**
+     * Get custom navigator
+     * @return Pointer to custom navigator
+     */
+    QPointer<Navigator2D> getCustomNavigator() const;
 
 /**
      * Set custom navigator to \p customNavigator
@@ -116,9 +116,9 @@ public: // Coordinate conversions
     /** Returns the matrix that converts normalized screen coordinates [-1..1, -1..1] to screen coordinates [0..width, 0..height] */
     QMatrix4x4 getNormalizedScreenToScreenMatrix() const;
 
-	float getZoomPercentage() const;
+    float getZoomPercentage() const;
 
-	/** Returns the projection matrix */
+    /** Returns the projection matrix */
     QMatrix4x4 getProjectionMatrix() const;
 
     /**
@@ -127,11 +127,11 @@ public: // Coordinate conversions
      */
     QRect getScreenRectangleFromWorldRectangle(const QRectF& worldBoundingRectangle) const;
 
-	/**
+    /**
      * Get model matrix
      * @return Model matrix
-	 */
-	QMatrix4x4 getModelMatrix() const;
+     */
+    QMatrix4x4 getModelMatrix() const;
 
     /**
      * Set model matrix to \p modelMatrix
@@ -139,11 +139,11 @@ public: // Coordinate conversions
      */
     void setModelMatrix(const QMatrix4x4& modelMatrix);
 
-	/**
-	 * Get model-view-projection matrix
-	 * @return Model-view-projection matrix
-	 */
-	QMatrix4x4 getModelViewProjectionMatrix() const;
+    /**
+     * Get model-view-projection matrix
+     * @return Model-view-projection matrix
+     */
+    QMatrix4x4 getModelViewProjectionMatrix() const;
 
 protected:
 
@@ -155,11 +155,11 @@ protected:
 
 public:
 
-	/**
-	 * Get data bounds
+    /**
+     * Get data bounds
      * @return Data bounds
-	 */
-	QRectF getDataBounds() const;
+     */
+    QRectF getDataBounds() const;
 
     /**
      * Set data bounds to \p dataBounds
@@ -191,12 +191,12 @@ protected:
 
 signals:
 
-	/**
-	 * Signals that the data bounds have changed from \p previousDataBounds to \p currentDataBounds
+    /**
+     * Signals that the data bounds have changed from \p previousDataBounds to \p currentDataBounds
      * @param previousDataBounds Previous data bounds
      * @param currentDataBounds Current data bounds
-	 */
-	void dataBoundsChanged(const QRectF& previousDataBounds, const QRectF& currentDataBounds);
+     */
+    void dataBoundsChanged(const QRectF& previousDataBounds, const QRectF& currentDataBounds);
 
     /**
      * Signals that the world bounds have changed from \p previousWorldBounds to \p currentWorldBounds
