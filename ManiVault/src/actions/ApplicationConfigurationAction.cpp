@@ -13,11 +13,7 @@ namespace mv::gui {
 ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, const QString& title) :
     GroupsAction(parent, title),
     _configureAction(this, "Configure..."),
-    _baseNameAction(this, "Base name"),
-    _fullNameAction(this, "Full name"),
-    _editFullNameAction(this, "Edit full name"),
-    _logoAction(this, "Logo"),
-    _brandingGroupAction(this, "Branding"),
+    _brandingConfigurationAction(this, "Branding"),
     _startPageConfigurationAction(this, "Start page"),
     _projectsGroupAction(this, "Projects")
 {
@@ -26,20 +22,11 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
     _configureAction.setVisible(false);
     _configureAction.setIconByName("gear");
 
-    _logoAction.setDefaultWidgetFlags(ImageAction::WidgetFlag::Loader);
-
-    _editFullNameAction.setChecked(false);
-
-    _brandingGroupAction.addAction(&_baseNameAction);
-    _brandingGroupAction.addAction(&_fullNameAction);
-    _brandingGroupAction.addAction(&_editFullNameAction);
-    _brandingGroupAction.addAction(&_logoAction);
-
     connect(Application::current(), &Application::coreInitialized, this, [this]() {
         _projectsGroupAction.addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction());
     });
 
-    addGroupAction(&_brandingGroupAction);
+    addGroupAction(&_brandingConfigurationAction);
     addGroupAction(&_startPageConfigurationAction);
     addGroupAction(&_projectsGroupAction);
 
@@ -76,28 +63,13 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
 
         customizeDialog.exec();
 	});
-
-    const auto updateFullNameAction = [this]() -> void {
-        _fullNameAction.setEnabled(_editFullNameAction.isChecked());
-
-        if (!_editFullNameAction.isChecked())
-            _fullNameAction.setString(QString("%1 %2").arg(_baseNameAction.getString(), QString::fromStdString(Application::current()->getVersion().getVersionString())));
-	};
-
-    updateFullNameAction();
-
-    connect(&_editFullNameAction, &ToggleAction::toggled, this, updateFullNameAction);
-    connect(&_baseNameAction, &StringAction::stringChanged, this, updateFullNameAction);
 }
 
 void ApplicationConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
 {
     GroupsAction::fromVariantMap(variantMap);
 
-    _baseNameAction.fromParentVariantMap(variantMap, true);
-    _fullNameAction.fromParentVariantMap(variantMap, true);
-    _editFullNameAction.fromParentVariantMap(variantMap, true);
-    _logoAction.fromParentVariantMap(variantMap, true);
+    _brandingConfigurationAction.fromParentVariantMap(variantMap, true);
     _startPageConfigurationAction.fromParentVariantMap(variantMap, true);
 }
 
@@ -105,10 +77,7 @@ QVariantMap ApplicationConfigurationAction::toVariantMap() const
 {
     auto variantMap = GroupsAction::toVariantMap();
 
-    _baseNameAction.insertIntoVariantMap(variantMap);
-    _fullNameAction.insertIntoVariantMap(variantMap);
-    _editFullNameAction.insertIntoVariantMap(variantMap);
-    _logoAction.insertIntoVariantMap(variantMap);
+    _brandingConfigurationAction.insertIntoVariantMap(variantMap);
     _startPageConfigurationAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

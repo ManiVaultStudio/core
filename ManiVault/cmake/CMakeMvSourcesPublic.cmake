@@ -357,6 +357,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/ViewPluginHeadsUpDisplayAction.h
     src/actions/ApplicationConfigurationAction.h
     src/actions/StartPageConfigurationAction.h
+    src/actions/BrandingConfigurationAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -401,6 +402,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/ViewPluginHeadsUpDisplayAction.cpp
     src/actions/ApplicationConfigurationAction.cpp
     src/actions/StartPageConfigurationAction.cpp
+    src/actions/BrandingConfigurationAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES

@@ -54,10 +54,10 @@ PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     setBackgroundRole(QPalette::Window);
     setAttribute(Qt::WA_NoSystemBackground, false);
 
-    auto& applicationConfigurationAction = Application::current()->getConfigurationAction();
+    auto& brandingConfigurationAction = Application::current()->getConfigurationAction().getBrandingConfigurationAction();
 
-    connect(&applicationConfigurationAction.getLogoAction(), &ImageAction::imageChanged, this, &PageWidget::updateLogo);
-    connect(&applicationConfigurationAction.getFullNameAction(), &StringAction::stringChanged, this, &PageWidget::updateTitle);
+    connect(&brandingConfigurationAction.getLogoAction(), &ImageAction::imageChanged, this, &PageWidget::updateLogo);
+    connect(&brandingConfigurationAction.getFullNameAction(), &StringAction::stringChanged, this, &PageWidget::updateTitle);
 
     updateLogo();
     updateTitle();
@@ -88,12 +88,12 @@ QVBoxLayout& PageWidget::getContentLayout()
 
 void PageWidget::updateLogo()
 {
-    _pageHeaderWidget.setPixmap(QPixmap::fromImage(Application::current()->getConfigurationAction().getLogoAction().getImage()));
+    _pageHeaderWidget.setPixmap(QPixmap::fromImage(Application::current()->getConfigurationAction().getBrandingConfigurationAction().getLogoAction().getImage()));
 }
 
 void PageWidget::updateTitle()
 {
-    _titleLabel.setText(Application::current()->getConfigurationAction().getFullNameAction().getString());
+    _titleLabel.setText(Application::current()->getConfigurationAction().getBrandingConfigurationAction().getFullNameAction().getString());
 }
 
 

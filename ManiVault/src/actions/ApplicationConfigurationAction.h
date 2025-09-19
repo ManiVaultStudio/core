@@ -5,9 +5,8 @@
 #pragma once
 
 #include "GroupsAction.h"
-#include "ImageAction.h"
-#include "StringAction.h"
-#include "ToggleAction.h"
+#include "TriggerAction.h"
+#include "BrandingConfigurationAction.h"
 #include "StartPageConfigurationAction.h"
 
 namespace mv::gui {
@@ -51,21 +50,13 @@ public: // Serialization
 public: // Action getters
 
     TriggerAction& getConfigureAction() { return _configureAction; }
-    StringAction& getBaseNameAction() { return _baseNameAction; }
-    StringAction& getFullNameAction() { return _fullNameAction; }
-    ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
-    ImageAction& getLogoAction() { return _logoAction; }
-    VerticalGroupAction& getBrandingGroupAction() { return _brandingGroupAction; }
+    BrandingConfigurationAction& getBrandingConfigurationAction() { return _brandingConfigurationAction; }
     StartPageConfigurationAction& getStartPageConfigurationAction() { return _startPageConfigurationAction; }
     VerticalGroupAction& getProjectsGroupAction() { return _projectsGroupAction; }
 
 private:
     TriggerAction                   _configureAction;               /** Action for editing the application customization (visible when Ctrl + F8 is pressed) */
-    StringAction                    _baseNameAction;                /** Application base name action (e.g. main window title) */
-    StringAction                    _fullNameAction;                /** Application full name action (e.g. start page title) */
-    ToggleAction                    _editFullNameAction;            /** Whether to edit the full name (otherwise it is derived from base name and version) */
-    ImageAction                     _logoAction;                    /** Application logo action */
-    VerticalGroupAction             _brandingGroupAction;           /** Branding group action */
+    BrandingConfigurationAction     _brandingConfigurationAction;   /** Branding configuration action */
     StartPageConfigurationAction    _startPageConfigurationAction;  /** Start page configuration action */
     VerticalGroupAction             _projectsGroupAction;           /** Projects group action */
 };
