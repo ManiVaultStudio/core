@@ -15,7 +15,8 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     _editFullNameAction(this, "Edit full name"),
     _logoAction(this, "Logo"),
     _applicationIconAction(this, "Application icon"),
-	_iconFromLogoAction(this, "Generate icon from logo")
+	_iconFromLogoAction(this, "Generate icon from logo"),
+    _splashScreenAction(this, "Splash screen")
 {
     _logoAction.setDefaultWidgetFlags(ImageAction::WidgetFlag::Loader);
 
@@ -27,6 +28,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     addAction(&_logoAction);
     addAction(&_applicationIconAction);
     addAction(&_iconFromLogoAction);
+    addAction(&_splashScreenAction);
 
     const auto updateFullNameAction = [this]() -> void {
         _fullNameAction.setEnabled(_editFullNameAction.isChecked());
@@ -56,8 +58,9 @@ void BrandingConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
     _baseNameAction.fromParentVariantMap(variantMap, true);
     _fullNameAction.fromParentVariantMap(variantMap, true);
     _editFullNameAction.fromParentVariantMap(variantMap, true);
-    _applicationIconAction.fromParentVariantMap(variantMap, true);
     _logoAction.fromParentVariantMap(variantMap, true);
+	_applicationIconAction.fromParentVariantMap(variantMap, true);
+    _splashScreenAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap BrandingConfigurationAction::toVariantMap() const
@@ -67,8 +70,9 @@ QVariantMap BrandingConfigurationAction::toVariantMap() const
     _baseNameAction.insertIntoVariantMap(variantMap);
     _fullNameAction.insertIntoVariantMap(variantMap);
     _editFullNameAction.insertIntoVariantMap(variantMap);
-    _applicationIconAction.insertIntoVariantMap(variantMap);
     _logoAction.insertIntoVariantMap(variantMap);
+    _applicationIconAction.insertIntoVariantMap(variantMap);
+    _splashScreenAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

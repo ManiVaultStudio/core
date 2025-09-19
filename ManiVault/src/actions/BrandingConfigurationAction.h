@@ -9,6 +9,7 @@
 #include "StringAction.h"
 #include "ToggleAction.h"
 #include "ApplicationIconAction.h"
+#include "SplashScreenAction.h"
 
 namespace mv::gui {
 
@@ -56,6 +57,7 @@ public: // Action getters
     ImageAction& getLogoAction() { return _logoAction; }
     ApplicationIconAction& getApplicationIconAction() { return _applicationIconAction; }
     ToggleAction& getIconFromLogoAction() { return _iconFromLogoAction; }
+    SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
 
 private:
     StringAction            _baseNameAction;            /** Application base name action (e.g. main window title) */
@@ -64,6 +66,7 @@ private:
     ImageAction             _logoAction;                /** Application logo action */
 	ApplicationIconAction   _applicationIconAction;     /** Application icon action */
     ToggleAction            _iconFromLogoAction;        /** Whether to use the logo as application icon */
+    SplashScreenAction      _splashScreenAction;        /** Application splash screen action */  
 };
 
 }
