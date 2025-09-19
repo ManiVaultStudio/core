@@ -136,6 +136,14 @@ QString Application::getName()
     return "ManiVault Studio";
 }
 
+void Application::setName(const QString& name)
+{
+    if (!current())
+        return;
+
+    current()->_name = name;
+}
+
 QString Application::getAbout()
 {
     return QString("%3 is a flexible and extensible visual analytics framework for high-dimensional data.<br> <br>"
@@ -164,7 +172,7 @@ void Application::setStartupProjectUrl(const QUrl& startupProjectUrl)
     _startupProjectUrl = startupProjectUrl;
 }
 
-ProjectMetaAction* Application::getStartupProjectMetaAction()
+ProjectMetaAction* Application::getStartupProjectMetaAction() const
 {
     return _startupProjectMetaAction;
 }

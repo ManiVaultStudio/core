@@ -99,7 +99,7 @@ public: // Miscellaneous
     static Application* current();
 
     /** Get pointer to the core */
-    CoreInterface* getCore();
+    CoreInterface* getCore() const;
 
     /**
      * Set pointer to the core
@@ -123,6 +123,12 @@ public: // Miscellaneous
     static QString getName();
 
     /**
+     * Set the application name string to \p name
+     * @param name The application name string
+     */
+    static void setName(const QString& name);
+
+    /**
      * Get the application about string
      * @return The application about string
      */
@@ -144,7 +150,7 @@ public: // Miscellaneous
      * Get startup project meta action
      * @return Pointer to project meta action (non-nullptr when ManiVault starts up with a project)
      */
-    ProjectMetaAction* getStartupProjectMetaAction();
+    ProjectMetaAction* getStartupProjectMetaAction() const;
 
     /**
      * Set startup project meta action to \p projectMetaAction (the application takes ownership of the pointer)
