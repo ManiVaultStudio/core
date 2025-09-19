@@ -5,6 +5,9 @@
 #pragma once
 
 #include "VerticalGroupAction.h"
+#include "ImageAction.h"
+#include "StringAction.h"
+#include "ToggleAction.h"
 
 namespace mv::gui {
 
@@ -30,14 +33,35 @@ public:
      */
     Q_INVOKABLE ApplicationConfigurationAction(QObject* parent, const QString& title);
 
+public: // Serialization
+
+    /**
+     * Load application configuration from variant map
+     * @param variantMap Variant map representation of the application configuration
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save application configuration to variant maps
+     * @return Variant representation of the application configuration
+     */
+    QVariantMap toVariantMap() const override;
+
 public: // Action getters
 
     TriggerAction& getCustomizeAction() { return _configureAction; }
-    StringAction& getNameAction() { return _nameAction; }
+    StringAction& getBaseNameAction() { return _baseNameAction; }
+    StringAction& getFullNameAction() { return _fullNameAction; }
+    ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
+
+    ImageAction& getLogoAction() { return _logoAction; }
 
 private:
-    gui::TriggerAction  _configureAction;   /** Action for editing the application customization (visible when Ctrl + F8 is pressed) */
-    StringAction        _nameAction;        /** Application name */
+    TriggerAction   _configureAction;       /** Action for editing the application customization (visible when Ctrl + F8 is pressed) */
+    StringAction    _baseNameAction;        /** Application base name action (e.g. main window title) */
+    StringAction    _fullNameAction;        /** Application full name action (e.g. start page title) */
+    ToggleAction    _editFullNameAction;    /** Whether to edit the full name (otherwise it is derived from base name and version) */
+    ImageAction     _logoAction;            /** Application logo action */
 };
 
 }

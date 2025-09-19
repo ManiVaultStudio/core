@@ -13,27 +13,34 @@ namespace mv::gui {
 ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
     _configureAction(this, "Configure..."),
-    _nameAction(this, "Name", "ManiVault Studio")
+    _baseNameAction(this, "Base name"),
+    _fullNameAction(this, "Full name"),
+    _editFullNameAction(this, "Edit full name"),
+    _logoAction(this, "Logo")
 {
     _configureAction.setVisible(false);
     _configureAction.setIconByName("gear");
 
-    addAction(&_nameAction);
+    _logoAction.setDefaultWidgetFlags(ImageAction::WidgetFlag::Loader);
+
+    _editFullNameAction.setChecked(false);
+
+    addAction(&_baseNameAction);
+    addAction(&_fullNameAction);
+    addAction(&_editFullNameAction);
+    addAction(&_logoAction);
 
     connect(&_configureAction, &QAction::triggered, this, [this] {
         QDialog customizeDialog;
 
         customizeDialog.setWindowTitle("Customize ManiVault Studio");
         customizeDialog.setWindowIcon(StyledIcon("gear"));
-        customizeDialog.setMinimumSize(QSize(600, 400));
-
-        auto customizeGroup = new GroupAction(&customizeDialog, "Settings");
-
-        customizeGroup->addAction(&_nameAction);
+        customizeDialog.setMinimumSize(QSize(500, 200));
 
         auto customizeDialogLayout = new QVBoxLayout();
 
-        customizeDialogLayout->addWidget(customizeGroup->createWidget(&customizeDialog));
+        customizeDialogLayout->addWidget(createWidget(&customizeDialog));
+        customizeDialogLayout->addStretch(1);
 
         QDialogButtonBox dialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
@@ -45,7 +52,10 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
         customizeDialog.setLayout(customizeDialogLayout);
 
         connect(&dialogButtonBox, &QDialogButtonBox::accepted, this, [this, &customizeDialog]() -> void {
-            Application::current()->toJsonFile();
+            const auto configurationFilePath = Application::getConfigurationFilePath();
+
+            if (!configurationFilePath.isEmpty())
+				Application::current()->toJsonFile(configurationFilePath);
 
         	customizeDialog.accept();
         });
@@ -54,6 +64,39 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
 
         customizeDialog.exec();
 	});
+
+    const auto updateFullNameAction = [this]() -> void {
+        _fullNameAction.setEnabled(_editFullNameAction.isChecked());
+
+        if (!_editFullNameAction.isChecked())
+            _fullNameAction.setString(QString("%1 %2").arg(_baseNameAction.getString(), QString::fromStdString(Application::current()->getVersion().getVersionString())));
+	};
+
+    updateFullNameAction();
+
+    connect(&_editFullNameAction, &ToggleAction::toggled, this, updateFullNameAction);
+    connect(&_baseNameAction, &StringAction::stringChanged, this, updateFullNameAction);
 }
 
+void ApplicationConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
+{
+	VerticalGroupAction::fromVariantMap(variantMap);
+
+    _baseNameAction.fromParentVariantMap(variantMap, true);
+    _fullNameAction.fromParentVariantMap(variantMap, true);
+    _editFullNameAction.fromParentVariantMap(variantMap, true);
+    _logoAction.fromParentVariantMap(variantMap, true);
+}
+
+QVariantMap ApplicationConfigurationAction::toVariantMap() const
+{
+    auto variantMap = VerticalGroupAction::toVariantMap();
+
+    _baseNameAction.insertIntoVariantMap(variantMap);
+    _fullNameAction.insertIntoVariantMap(variantMap);
+    _editFullNameAction.insertIntoVariantMap(variantMap);
+    _logoAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
 }

@@ -31,7 +31,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _openProjectWidget(this),
     _getStartedWidget(this)
 {
-    if (!QFileInfo("StartPage.json").exists()) {
+    if (!Application::hasConfigurationFile()) {
         _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
         _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
         _toggleProjectDatabaseAction.setSettingsPrefix("StartPage/ToggleProjectsRepository");

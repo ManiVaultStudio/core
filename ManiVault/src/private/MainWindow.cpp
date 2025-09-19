@@ -237,7 +237,7 @@ void MainWindow::initialize()
     
     const auto projectChanged = [this, updateStatusBarVisibility]() -> void {
         if (!projects().hasProject()) {
-            setWindowTitle(Application::getName());
+            setWindowTitle(Application::getBaseName());
         }
         else {
             if (projects().getCurrentProject()->getReadOnlyAction().isChecked()) {
@@ -247,9 +247,9 @@ void MainWindow::initialize()
                 const auto projectFilePath = projects().getCurrentProject()->getFilePath();
     
                 if (projectFilePath.isEmpty())
-                    setWindowTitle(QString("Unsaved - %1").arg(Application::getName()));
+                    setWindowTitle(QString("Unsaved - %1").arg(Application::getBaseName()));
                 else
-                    setWindowTitle(QString("%1 - %2").arg(projectFilePath, Application::getName()));
+                    setWindowTitle(QString("%1 - %2").arg(projectFilePath, Application::getBaseName()));
             }
         }
     
@@ -261,7 +261,7 @@ void MainWindow::initialize()
     connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
     connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
 
-	connect(&Application::current()->getConfigurationAction().getNameAction(), &StringAction::stringChanged, this, projectChanged);
+	connect(&Application::current()->getConfigurationAction().getBaseNameAction(), &StringAction::stringChanged, this, projectChanged);
     
     const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
         if (toggled)

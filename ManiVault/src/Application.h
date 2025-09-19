@@ -118,10 +118,16 @@ public: // Miscellaneous
     util::Version getVersion() const;
 
     /**
-     * Get the application name string
+     * Get the application base name (omits version)
      * @return The application name string
      */
-    static QString getName();
+    static QString getBaseName();
+
+    /**
+     * Get the full application name (includes version)
+     * @return The application name string
+     */
+    static QString getFullName();
 
     /**
      * Get the application about string
@@ -265,7 +271,7 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-protected: // Customization
+public: // Customization
 
     /**
      * Get the configuration file name
@@ -278,6 +284,12 @@ protected: // Customization
      * @return The path to the configuration file
      */
     static QString getConfigurationFilePath();
+
+    /**
+     * Check whether a configuration file exists
+     * @return Boolean determining whether a configuration file exists
+     */
+    static bool hasConfigurationFile();
 
 public: // Statics
 

@@ -35,7 +35,7 @@ Application::Application(int& argc, char** argv) :
     _serializationAborted(false),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
-    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), getId().mid(0, 6)))),
+    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
     _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
     _configurationAction(this, "Configuration")
@@ -48,16 +48,22 @@ Application::Application(int& argc, char** argv) :
         auto& temporaryDirsTask = _temporaryDirs.getTask();
 
         temporaryDirsTask.addToTaskManager();
-    });
+	});
 
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
         BackgroundTask::createHandler(Application::current());
         ForegroundTask::createHandler(Application::current());
         ModalTask::createHandler(Application::current());
-    });
+        });
 
-    if (QFileInfo(getConfigurationFilePath()).exists())
-        _configurationAction.fromJsonFile(getConfigurationFilePath());
+    if (hasConfigurationFile()) {
+        fromJsonFile(getConfigurationFilePath());
+    } else {
+        const auto baseName = "ManiVault Studio";
+
+        _configurationAction.getBaseNameAction().setString(baseName);
+        _configurationAction.getFullNameAction().setString(QString("%1 %2").arg(baseName, QString::fromStdString(current()->getVersion().getVersionString())));
+	}
 }
 
 Application::~Application()
@@ -110,12 +116,20 @@ Version Application::getVersion() const
     return _version;
 }
 
-QString Application::getName()
+QString Application::getBaseName()
 {
     if (!current())
         return {};
 
-    return current()->getConfigurationAction().getNameAction().getString();
+    return current()->getConfigurationAction().getBaseNameAction().getString();
+}
+
+QString Application::getFullName()
+{
+    if (!current())
+        return {};
+
+    return QString("%1 %2").arg(getBaseName(), QString::fromStdString(current()->getVersion().getVersionString()));
 }
 
 QString Application::getAbout()
@@ -130,7 +144,7 @@ QString Application::getAbout()
     ).arg(
         /*1: year*/ QStringLiteral("2023"),
         /*2: source*/ QStringLiteral("github.com/ManiVaultStudio"),
-        /*3: name*/ getName(),
+        /*3: name*/ getBaseName(),
         /*4: version*/ QString::fromStdString(Application::current()->getVersion().getVersionString()),
         /*5: webpage*/ QStringLiteral("manivault.studio")
     );
@@ -323,6 +337,11 @@ QString Application::getConfigurationFileName()
 QString Application::getConfigurationFilePath()
 {
     return QDir(applicationDirPath()).filePath(getConfigurationFileName());
+}
+
+bool Application::hasConfigurationFile()
+{
+    return QFileInfo(getConfigurationFilePath()).exists();
 }
 
 Application::TemporaryDirs::TemporaryDirs(QObject* parent) :

@@ -6,8 +6,6 @@
 
 #include "PageHeaderWidget.h"
 
-#include <actions/ImageAction.h>
-
 #include <QWidget>
 
 /**
@@ -56,39 +54,10 @@ private:
     /** Update the title of the start page */
     void updateTitle();
 
-protected:
-
-    /**
-     * Get the name of the configuration file
-     * @return Name of the configuration file
-     */
-    QString getConfigurationFileName() const;
-
-public: // Serialization
-
-    /**
-     * Load widget action from variant
-     * @param variantMap Variant representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
-
-public: // Action getters
-
-    mv::gui::ImageAction& getLogoAction() { return _logoAction; }
-    mv::gui::StringAction& getTitleAction() { return _titleAction; }
-
 private:
-    QHBoxLayout                 _layout;                /** Main layout */
-    QVBoxLayout                 _contentLayout;         /** Layout for the main content */
-    QLabel                      _titleLabel;            /** Title label */
-    PageHeaderWidget            _pageHeaderWidget;      /** Widget which contains the header */
-    QPixmap                     _backgroundImage;       /** Background image */
-    mv::gui::ImageAction        _logoAction;            /** Logo action */
-    mv::gui::StringAction       _titleAction;           /** String action for the page title */
+    QHBoxLayout         _layout;                /** Main layout */
+    QVBoxLayout         _contentLayout;         /** Layout for the main content */
+    QLabel              _titleLabel;            /** Title label */
+    PageHeaderWidget    _pageHeaderWidget;      /** Widget which contains the header */
+    QPixmap             _backgroundImage;       /** Background image */
 };
