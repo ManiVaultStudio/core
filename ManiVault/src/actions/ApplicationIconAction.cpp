@@ -13,14 +13,14 @@ namespace mv::gui {
 
 ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
-    _overrideAction(this, "Override"),
+    _overrideAction(this, "Override", true),
     _iconPickerAction(this, "IconPicker"),
     _testAction(this, "Test"),
     _testTimer(this)
 {
     setShowLabels(false);
 
-    addAction(&_overrideAction);
+    //addAction(&_overrideAction);
     addAction(&_iconPickerAction.getInputFilePathPickerAction().getPickAction());
     addAction(&_iconPickerAction.getIconAction());
     addAction(&_testAction);

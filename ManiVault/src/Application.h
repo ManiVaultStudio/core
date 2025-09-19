@@ -8,9 +8,11 @@
 
 #include "util/Logger.h"
 #include "util/Version.h"
+#include "util/Serializable.h"
 
 #include "actions/TriggerAction.h"
 #include "actions/OptionsAction.h"
+#include "actions/ApplicationConfigurationAction.h"
 
 #include "ApplicationStartupTask.h"
 
@@ -32,7 +34,7 @@ class ProjectMetaAction;
  * 
  * @author Thomas Kroes
  */
-class CORE_EXPORT Application final : public QApplication
+class CORE_EXPORT Application final : public QApplication, public util::Serializable
 {
     Q_OBJECT
 
@@ -94,14 +96,11 @@ public: // Construction
 
 public: // Miscellaneous
 
-    /** Get the globally unique identifier of the application instance */
-    QString getId() const;
-
     /** Returns a pointer to the current ManiVault application (if the current application derives from mv::Application) */
     static Application* current();
 
     /** Get pointer to the core */
-    CoreInterface* getCore();
+    CoreInterface* getCore() const;
 
     /**
      * Set pointer to the core
@@ -119,10 +118,16 @@ public: // Miscellaneous
     util::Version getVersion() const;
 
     /**
-     * Get the application name string
+     * Get the application base name (omits version)
      * @return The application name string
      */
-    static QString getName();
+    static QString getBaseName();
+
+    /**
+     * Get the full application name (includes version)
+     * @return The application name string
+     */
+    static QString getFullName();
 
     /**
      * Get the application about string
@@ -146,7 +151,7 @@ public: // Miscellaneous
      * Get startup project meta action
      * @return Pointer to project meta action (non-nullptr when ManiVault starts up with a project)
      */
-    ProjectMetaAction* getStartupProjectMetaAction();
+    ProjectMetaAction* getStartupProjectMetaAction() const;
 
     /**
      * Set startup project meta action to \p projectMetaAction (the application takes ownership of the pointer)
@@ -252,9 +257,47 @@ public: // Cursor overrides
      */
     static std::int32_t requestRemoveOverrideCursor(Qt::CursorShape cursorShape, bool all = false);
 
+public: // Serialization
+
+    /**
+     * Load application state from variant map
+     * @param variantMap Variant representation of the application
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save application state to variant maps
+     * @return Variant representation of the application
+     */
+    QVariantMap toVariantMap() const override;
+
+public: // Customization
+
+    /**
+     * Get the configuration file name
+     * @return The configuration file name
+     */
+    static QString getConfigurationFileName();
+
+    /**
+     * Get the path to the configuration file
+     * @return The path to the configuration file
+     */
+    static QString getConfigurationFilePath();
+
+    /**
+     * Check whether a configuration file exists
+     * @return Boolean determining whether a configuration file exists
+     */
+    static bool hasConfigurationFile();
+
 public: // Statics
 
     static QMainWindow* getMainWindow();
+
+public: // Action getters
+
+    gui::ApplicationConfigurationAction& getConfigurationAction() { return _configurationAction; }
 
 signals:
 
@@ -277,20 +320,20 @@ signals:
     void coreManagersCreated(CoreInterface* core);
 
 protected:
-    QString                     _id;                                /** Globally unique identifier of the application instance */
-    CoreInterface*              _core;                              /** Pointer to the ManiVault core */
-    const util::Version         _version;                           /** Application version */
-    QSettings                   _settings;                          /** Settings */
-    QString                     _serializationTemporaryDirectory;   /** Temporary directory for serialization */
-    bool                        _serializationAborted;              /** Whether serialization was aborted */
-    util::Logger                _logger;                            /** Logger instance */
-    gui::TriggerAction*         _exitAction;                        /** Action for exiting the application */
-    QUrl                        _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
-    ProjectMetaAction*          _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    ApplicationStartupTask*     _startupTask;                       /** Application startup task */
-    QTemporaryDir               _temporaryDir;                      /** Directory where application temporary files reside */
-    TemporaryDirs               _temporaryDirs;                     /** ManiVault application temporary directories manager */
-    QLockFile                   _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
+    CoreInterface*                          _core;                              /** Pointer to the ManiVault core */
+    const util::Version                     _version;                           /** Application version */
+    QSettings                               _settings;                          /** Settings */
+    QString                                 _serializationTemporaryDirectory;   /** Temporary directory for serialization */
+    bool                                    _serializationAborted;              /** Whether serialization was aborted */
+    util::Logger                            _logger;                            /** Logger instance */
+    gui::TriggerAction*                     _exitAction;                        /** Action for exiting the application */
+    QUrl                                    _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
+    ProjectMetaAction*                      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    ApplicationStartupTask*                 _startupTask;                       /** Application startup task */
+    QTemporaryDir                           _temporaryDir;                      /** Directory where application temporary files reside */
+    TemporaryDirs                           _temporaryDirs;                     /** ManiVault application temporary directories manager */
+    QLockFile                               _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
+    gui::ApplicationConfigurationAction     _configurationAction;               /** Application configuration action */
 
     /** Count of cursor overrides for each cursor shape */
 	static QList<CursorShapeCount> cursorOverridesCount;

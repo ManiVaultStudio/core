@@ -24,7 +24,7 @@ class StartPageContentWidget;
  *
  * @author Thomas Kroes
  */
-class StartPageOpenProjectWidget : public QWidget, public mv::util::Serializable
+class StartPageOpenProjectWidget : public QWidget
 {
 protected:
 
@@ -66,20 +66,6 @@ private:
     
     /** Update all  custom style elements */
     void updateCustomStyle();
-
-public: // Serialization
-
-    /**
-     * Load from variant map
-     * @param variantMap Variant map
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save to variant map
-     * @return Variant map
-     */
-    QVariantMap toVariantMap() const override;
 
 private:
     StartPageContentWidget*         _startPageContentWidget;        /** Non-owning pointer to start page content widget */

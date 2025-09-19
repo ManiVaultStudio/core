@@ -24,7 +24,6 @@ using namespace mv::util;
 
 StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
-    Serializable("GetStartedWidget"),
     _startPageContentWidget(startPageContentWidget),
     _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
     _createProjectFromDatasetWidget(this, "Project From Data"),
@@ -67,15 +66,17 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _recentWorkspacesAction.initialize("Workspace", "Ctrl+Alt");
     _recentProjectsAction.initialize("Project", "Ctrl");
 
-    const auto toggleViews = [this]() -> void {
-        _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());
-        _createProjectFromDatasetWidget.setVisible(_startPageContentWidget->getToggleProjectFromDataAction().isChecked());
-        _tutorialsWidget.setVisible(_startPageContentWidget->getToggleTutorialsAction().isChecked());
+    auto& startPageConfigurationAction = Application::current()->getConfigurationAction().getStartPageConfigurationAction();
+
+    const auto toggleViews = [this, &startPageConfigurationAction]() -> void {
+        _createProjectFromWorkspaceWidget.setVisible(startPageConfigurationAction.getToggleProjectFromWorkspaceAction().isChecked());
+        _createProjectFromDatasetWidget.setVisible(startPageConfigurationAction.getToggleProjectFromDataAction().isChecked());
+        _tutorialsWidget.setVisible(startPageConfigurationAction.getToggleTutorialsAction().isChecked());
     };
 
-    connect(&_startPageContentWidget->getToggleProjectFromWorkspaceAction(), &ToggleAction::toggled, this, toggleViews);
-    connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
-    connect(&_startPageContentWidget->getToggleTutorialsAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&startPageConfigurationAction.getToggleProjectFromWorkspaceAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&startPageConfigurationAction.getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&startPageConfigurationAction.getToggleTutorialsAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
 }
@@ -207,25 +208,3 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
         _createProjectFromDatasetWidget.getModel().add(fromDataPageAction);
     }
 }
-
-void StartPageGetStartedWidget::fromVariantMap(const QVariantMap& variantMap)
-{
-	Serializable::fromVariantMap(variantMap);
-
-    _createProjectFromWorkspaceWidget.fromParentVariantMap(variantMap);
-    _createProjectFromDatasetWidget.fromParentVariantMap(variantMap);
-    _tutorialsWidget.fromParentVariantMap(variantMap);
-}
-
-QVariantMap StartPageGetStartedWidget::toVariantMap() const
-{
-	auto variantMap = Serializable::toVariantMap();
-
-    _createProjectFromWorkspaceWidget.insertIntoVariantMap(variantMap);
-    _createProjectFromDatasetWidget.insertIntoVariantMap(variantMap);
-    _tutorialsWidget.insertIntoVariantMap(variantMap);
-
-    return variantMap;
-}
-
-

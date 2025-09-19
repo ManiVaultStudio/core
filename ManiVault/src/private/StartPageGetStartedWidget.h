@@ -24,7 +24,7 @@ class StartPageContentWidget;
  *
  * @author Thomas Kroes
  */
-class StartPageGetStartedWidget : public QWidget, public mv::util::Serializable
+class StartPageGetStartedWidget : public QWidget
 {
 public:
 
@@ -59,20 +59,6 @@ private:
 
     /** Update actions for creating a project from dataset */
     void updateCreateProjectFromDatasetActions();
-
-public: // Serialization
-
-    /**
-     * Load from variant map
-     * @param variantMap Variant map
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save to variant map
-     * @return Variant map
-     */
-    QVariantMap toVariantMap() const override;
 
 private:
     StartPageContentWidget*         _startPageContentWidget;                /** Non-owning pointer to start page content widget */
