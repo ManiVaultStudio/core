@@ -17,8 +17,9 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
     _fullNameAction(this, "Full name"),
     _editFullNameAction(this, "Edit full name"),
     _logoAction(this, "Logo"),
-    _brandingAction(this, "Branding"),
-    _startPageConfigurationAction(this, "Start page")
+    _brandingGroupAction(this, "Branding"),
+    _startPageConfigurationAction(this, "Start page"),
+    _projectsGroupAction(this, "Projects")
 {
     setDefaultWidgetFlags(0);
     
@@ -29,20 +30,25 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
 
     _editFullNameAction.setChecked(false);
 
-    _brandingAction.addAction(&_baseNameAction);
-    _brandingAction.addAction(&_fullNameAction);
-    _brandingAction.addAction(&_editFullNameAction);
-    _brandingAction.addAction(&_logoAction);
+    _brandingGroupAction.addAction(&_baseNameAction);
+    _brandingGroupAction.addAction(&_fullNameAction);
+    _brandingGroupAction.addAction(&_editFullNameAction);
+    _brandingGroupAction.addAction(&_logoAction);
 
-    addGroupAction(&_brandingAction);
+    connect(Application::current(), &Application::coreInitialized, this, [this]() {
+        _projectsGroupAction.addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction());
+    });
+
+    addGroupAction(&_brandingGroupAction);
     addGroupAction(&_startPageConfigurationAction);
+    addGroupAction(&_projectsGroupAction);
 
     connect(&_configureAction, &QAction::triggered, this, [this] {
         QDialog customizeDialog;
 
         customizeDialog.setWindowTitle("Customize ManiVault Studio");
         customizeDialog.setWindowIcon(StyledIcon("gear"));
-        customizeDialog.setMinimumSize(QSize(500, 200));
+        customizeDialog.setMinimumSize(QSize(600, 300));
 
         auto customizeDialogLayout = new QVBoxLayout();
 

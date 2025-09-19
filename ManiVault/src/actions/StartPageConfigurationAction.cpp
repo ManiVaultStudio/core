@@ -16,12 +16,15 @@ StartPageConfigurationAction::StartPageConfigurationAction(QObject* parent, cons
     _toggleRecentProjectsAction(this, "Recent Projects", true),
     _toggleProjectFromDataAction(this, "Project From Data", true),
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
-    _toggleTutorialsAction(this, "Tutorials", true)
+    _toggleTutorialsAction(this, "Tutorials", true),
+    _settingsGroupAction(this, "Settings", true),
+    _toggleCustomizationAction(this, "Toggle customization")
 {
-    setToolTip("Adjust page settings");
-    setIconByName("toggle-on");
-    setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    //setIconByName("gear");
+    setIconByName("gear");
+
+	_settingsGroupAction.setToolTip("Adjust page settings");
+    _settingsGroupAction.setIconByName("toggle-on");
+    _settingsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
 	if (!Application::hasConfigurationFile()) {
         _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
@@ -47,6 +50,23 @@ StartPageConfigurationAction::StartPageConfigurationAction(QObject* parent, cons
     addAction(&_toggleProjectFromWorkspaceAction);
     addAction(&_toggleTutorialsAction);
     // addAction(&_toggleProjectFromWorkspaceAction); Disable until the project from workspace action is implemented properly
+    addAction(&_toggleCustomizationAction);
+
+    _settingsGroupAction.addAction(&_compactViewAction);
+    _settingsGroupAction.addAction(&_toggleOpenCreateProjectAction);
+    _settingsGroupAction.addAction(&_toggleProjectDatabaseAction);
+    _settingsGroupAction.addAction(&_toggleRecentProjectsAction);
+    _settingsGroupAction.addAction(&_toggleProjectFromDataAction);
+    _settingsGroupAction.addAction(&_toggleProjectFromWorkspaceAction);
+    _settingsGroupAction.addAction(&_toggleTutorialsAction);
+
+    const auto toggleCustomization = [this]() -> void {
+        _settingsGroupAction.setVisible(_toggleCustomizationAction.isChecked());
+	};
+
+    toggleCustomization();
+
+    connect(&_toggleCustomizationAction, &ToggleAction::toggled, this, toggleCustomization);
 }
 
 void StartPageConfigurationAction::fromVariantMap(const QVariantMap& variantMap)

@@ -89,8 +89,6 @@ void FileMenu::populate()
     addSeparator();
     addAction(&projects().getShowStartPageAction());
     addAction(&help().getShowLearningCenterPageAction());
-    addSeparator();
-    addAction(&Application::current()->getConfigurationAction().getCustomizeAction());
     
     //  Quit is by default in the app menu on macOS
     //if(QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {

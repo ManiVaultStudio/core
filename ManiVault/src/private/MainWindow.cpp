@@ -171,7 +171,7 @@ void MainWindow::initialize()
 	customizeApplicationShortcut->setContext(Qt::ApplicationShortcut);
 
     connect(customizeApplicationShortcut, &QShortcut::activated, this, [this] {
-        Application::current()->getConfigurationAction().getCustomizeAction().setVisible(true);
+        Application::current()->getConfigurationAction().getConfigureAction().trigger();
     });
 
 	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());

@@ -43,7 +43,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     auto& startPageConfigurationAction = Application::current()->getConfigurationAction().getStartPageConfigurationAction();
 
     _toolbarAction.addAction(new StretchAction(this, "Left stretch"));
-    _toolbarAction.addAction(&startPageConfigurationAction);
+    _toolbarAction.addAction(&startPageConfigurationAction.getSettingsGroupAction());
     _toolbarAction.addAction(&_toLearningCenterAction);
     _toolbarAction.addAction(&mv::projects().getBackToProjectAction());
 

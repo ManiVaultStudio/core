@@ -54,15 +54,19 @@ public: // Action getters
     ToggleAction& getToggleProjectFromDataAction() { return _toggleProjectFromDataAction; }
     ToggleAction& getToggleProjectFromWorkspaceAction() { return _toggleProjectFromWorkspaceAction; }
     ToggleAction& getToggleTutorialsAction() { return _toggleTutorialsAction; }
+    VerticalGroupAction& getSettingsGroupAction() { return _settingsGroupAction; }
+    ToggleAction& getToggleCustomizationAction() { return _toggleCustomizationAction; }
 
 private:
-    ToggleAction    _compactViewAction;                 /** Toggle compact view on/off */
-    ToggleAction    _toggleOpenCreateProjectAction;     /** Toggle open and create project section */
-    ToggleAction    _toggleProjectDatabaseAction;       /** Toggle project database section */
-    ToggleAction    _toggleRecentProjectsAction;        /** Toggle recent projects section */
-    ToggleAction    _toggleProjectFromDataAction;       /** Toggle project from data section */
-    ToggleAction    _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
-    ToggleAction    _toggleTutorialsAction;             /** Toggle tutorials section */
+    ToggleAction            _compactViewAction;                 /** Toggle compact view on/off */
+    ToggleAction            _toggleOpenCreateProjectAction;     /** Toggle open and create project section */
+    ToggleAction            _toggleProjectDatabaseAction;       /** Toggle project database section */
+    ToggleAction            _toggleRecentProjectsAction;        /** Toggle recent projects section */
+    ToggleAction            _toggleProjectFromDataAction;       /** Toggle project from data section */
+    ToggleAction            _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
+    ToggleAction            _toggleTutorialsAction;             /** Toggle tutorials section */
+    VerticalGroupAction     _settingsGroupAction;               /** Group for holding settings actions */
+    ToggleAction            _toggleCustomizationAction;         /** Toggle configuration action (for future use) */
 };
 
 }

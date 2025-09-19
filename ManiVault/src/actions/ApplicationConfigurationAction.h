@@ -50,13 +50,14 @@ public: // Serialization
 
 public: // Action getters
 
-    TriggerAction& getCustomizeAction() { return _configureAction; }
+    TriggerAction& getConfigureAction() { return _configureAction; }
     StringAction& getBaseNameAction() { return _baseNameAction; }
     StringAction& getFullNameAction() { return _fullNameAction; }
     ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
     ImageAction& getLogoAction() { return _logoAction; }
-    VerticalGroupAction& getBrandingAction() { return _brandingAction; }
+    VerticalGroupAction& getBrandingGroupAction() { return _brandingGroupAction; }
     StartPageConfigurationAction& getStartPageConfigurationAction() { return _startPageConfigurationAction; }
+    VerticalGroupAction& getProjectsGroupAction() { return _projectsGroupAction; }
 
 private:
     TriggerAction                   _configureAction;               /** Action for editing the application customization (visible when Ctrl + F8 is pressed) */
@@ -64,8 +65,9 @@ private:
     StringAction                    _fullNameAction;                /** Application full name action (e.g. start page title) */
     ToggleAction                    _editFullNameAction;            /** Whether to edit the full name (otherwise it is derived from base name and version) */
     ImageAction                     _logoAction;                    /** Application logo action */
-    VerticalGroupAction             _brandingAction;                /** Branding group action */
+    VerticalGroupAction             _brandingGroupAction;           /** Branding group action */
     StartPageConfigurationAction    _startPageConfigurationAction;  /** Start page configuration action */
+    VerticalGroupAction             _projectsGroupAction;           /** Projects group action */
 };
 
 }
