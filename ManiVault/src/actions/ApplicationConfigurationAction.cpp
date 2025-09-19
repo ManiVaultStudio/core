@@ -11,12 +11,13 @@ using namespace mv::util;
 namespace mv::gui {
 
 ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, const QString& title) :
-    VerticalGroupAction(parent, title),
+    GroupsAction(parent, title),
     _configureAction(this, "Configure..."),
     _baseNameAction(this, "Base name"),
     _fullNameAction(this, "Full name"),
     _editFullNameAction(this, "Edit full name"),
     _logoAction(this, "Logo"),
+    _brandingAction(this, "Branding"),
     _startPageConfigurationAction(this, "Start page")
 {
     _configureAction.setVisible(false);
@@ -26,11 +27,14 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
 
     _editFullNameAction.setChecked(false);
 
-    addAction(&_baseNameAction);
-    addAction(&_fullNameAction);
-    addAction(&_editFullNameAction);
-    addAction(&_logoAction);
-    addAction(&_startPageConfigurationAction);
+    _brandingAction.addAction(&_brandingAction);
+    _brandingAction.addAction(&_fullNameAction);
+    _brandingAction.addAction(&_editFullNameAction);
+    _brandingAction.addAction(&_logoAction);
+    _brandingAction.addAction(&_startPageConfigurationAction);
+
+    addGroupAction(&_brandingAction);
+    addGroupAction(&_startPageConfigurationAction);
 
     connect(&_configureAction, &QAction::triggered, this, [this] {
         QDialog customizeDialog;
@@ -82,7 +86,7 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
 
 void ApplicationConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
 {
-	VerticalGroupAction::fromVariantMap(variantMap);
+    GroupsAction::fromVariantMap(variantMap);
 
     _baseNameAction.fromParentVariantMap(variantMap, true);
     _fullNameAction.fromParentVariantMap(variantMap, true);
@@ -92,7 +96,7 @@ void ApplicationConfigurationAction::fromVariantMap(const QVariantMap& variantMa
 
 QVariantMap ApplicationConfigurationAction::toVariantMap() const
 {
-    auto variantMap = VerticalGroupAction::toVariantMap();
+    auto variantMap = GroupsAction::toVariantMap();
 
     _baseNameAction.insertIntoVariantMap(variantMap);
     _fullNameAction.insertIntoVariantMap(variantMap);

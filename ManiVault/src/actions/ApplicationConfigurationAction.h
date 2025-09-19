@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "VerticalGroupAction.h"
+#include "GroupsAction.h"
 #include "ImageAction.h"
 #include "StringAction.h"
 #include "ToggleAction.h"
@@ -21,7 +21,7 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ApplicationConfigurationAction : public VerticalGroupAction
+class CORE_EXPORT ApplicationConfigurationAction : public GroupsAction
 {
     Q_OBJECT
 
@@ -55,6 +55,7 @@ public: // Action getters
     StringAction& getFullNameAction() { return _fullNameAction; }
     ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
     ImageAction& getLogoAction() { return _logoAction; }
+    VerticalGroupAction& getBrandingAction() { return _brandingAction; }
     StartPageConfigurationAction& getStartPageConfigurationAction() { return _startPageConfigurationAction; }
 
 private:
@@ -63,6 +64,7 @@ private:
     StringAction                    _fullNameAction;                /** Application full name action (e.g. start page title) */
     ToggleAction                    _editFullNameAction;            /** Whether to edit the full name (otherwise it is derived from base name and version) */
     ImageAction                     _logoAction;                    /** Application logo action */
+    VerticalGroupAction             _brandingAction;                /** Branding group action */
     StartPageConfigurationAction    _startPageConfigurationAction;  /** Start page configuration action */
 };
 
