@@ -61,8 +61,10 @@ Application::Application(int& argc, char** argv) :
     } else {
         const auto baseName = "ManiVault Studio";
 
-        _configurationAction.getBaseNameAction().setString(baseName);
-        _configurationAction.getFullNameAction().setString(QString("%1 %2").arg(baseName, QString::fromStdString(current()->getVersion().getVersionString())));
+        auto& brandingConfigurationAction = _configurationAction.getBrandingConfigurationAction();
+
+        brandingConfigurationAction.getBaseNameAction().setString(baseName);
+        brandingConfigurationAction.getFullNameAction().setString(QString("%1 %2").arg(baseName, QString::fromStdString(current()->getVersion().getVersionString())));
 	}
 }
 
@@ -121,7 +123,7 @@ QString Application::getBaseName()
     if (!current())
         return {};
 
-    return current()->getConfigurationAction().getBaseNameAction().getString();
+    return current()->getConfigurationAction().getBrandingConfigurationAction().getBaseNameAction().getString();
 }
 
 QString Application::getFullName()

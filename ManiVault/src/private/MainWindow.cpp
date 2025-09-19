@@ -261,7 +261,7 @@ void MainWindow::initialize()
     connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
     connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
 
-	connect(&Application::current()->getConfigurationAction().getBaseNameAction(), &StringAction::stringChanged, this, projectChanged);
+	connect(&Application::current()->getConfigurationAction().getBrandingConfigurationAction().getBaseNameAction(), &StringAction::stringChanged, this, projectChanged);
     
     const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
         if (toggled)
