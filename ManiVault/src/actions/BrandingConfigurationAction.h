@@ -58,6 +58,7 @@ public: // Action getters
     ApplicationIconAction& getApplicationIconAction() { return _applicationIconAction; }
     ToggleAction& getIconFromLogoAction() { return _iconFromLogoAction; }
     SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
+    StringAction& getAboutAction() { return _aboutAction; }
 
 private:
     StringAction            _baseNameAction;            /** Application base name action (e.g. main window title) */
@@ -66,7 +67,8 @@ private:
     ImageAction             _logoAction;                /** Application logo action */
 	ApplicationIconAction   _applicationIconAction;     /** Application icon action */
     ToggleAction            _iconFromLogoAction;        /** Whether to use the logo as application icon */
-    SplashScreenAction      _splashScreenAction;        /** Application splash screen action */  
+    SplashScreenAction      _splashScreenAction;        /** Application splash screen action */
+    StringAction            _aboutAction;               /** Application about action (HTML content) */
 };
 
 }

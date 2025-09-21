@@ -16,11 +16,14 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     _logoAction(this, "Logo"),
     _applicationIconAction(this, "Application icon"),
 	_iconFromLogoAction(this, "Generate icon from logo"),
-    _splashScreenAction(this, "Splash screen")
+    _splashScreenAction(this, "Splash screen"),
+    _aboutAction(this, "About")
 {
     _logoAction.setDefaultWidgetFlags(ImageAction::WidgetFlag::Loader);
 
     _editFullNameAction.setChecked(false);
+
+    _aboutAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextEdit);
 
     addAction(&_baseNameAction);
     addAction(&_fullNameAction);
@@ -29,6 +32,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     addAction(&_applicationIconAction);
     addAction(&_iconFromLogoAction);
     addAction(&_splashScreenAction);
+    addAction(&_aboutAction);
 
     const auto updateFullNameAction = [this]() -> void {
         _fullNameAction.setEnabled(_editFullNameAction.isChecked());
@@ -49,6 +53,21 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     updateApplicationIconAction();
 
     connect(&_iconFromLogoAction, &ToggleAction::toggled, this, updateApplicationIconAction);
+
+    _aboutAction.setString(QString("%3 is a flexible and extensible visual analytics framework for high-dimensional data.<br> <br>"
+        "For more information, please visit: <br>"
+        "Webpage: <a href=\"https://%5/\">%5</a> <br>"
+        "Source: <a href=\"https://%2/\">%2</a> <br> <br>"
+        "%3 Core %4 <br> <br>"
+        "This software is licensed under the GNU Lesser General Public License v3.0.<br>"
+        "Copyright (C) %1 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)"
+    ).arg(
+        /*1: year*/ QStringLiteral("2023"),
+        /*2: source*/ QStringLiteral("github.com/ManiVaultStudio"),
+        /*3: name*/ _baseNameAction.getString(),
+        /*4: version*/ QString::fromStdString(Application::current()->getVersion().getVersionString()),
+        /*5: webpage*/ QStringLiteral("manivault.studio")
+    ));
 }
 
 void BrandingConfigurationAction::fromVariantMap(const QVariantMap& variantMap)

@@ -43,7 +43,7 @@ public: // Serialization
 
     /**
      * Load image action from variant
-     * @param Variant representation of the image action
+     * @param variantMap Variant map representation of the image action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
