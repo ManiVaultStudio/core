@@ -22,7 +22,7 @@ using namespace mv::plugin;
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
     _devDocAction(nullptr, "Developer Documentation"),
-    _aboutAction(nullptr, "About"),
+    _aboutAction(nullptr, QString("About %1").arg(Application::getBaseName())),
     _aboutQtAction(nullptr, "About Qt"),
     _aboutThirdPartiesAction(nullptr, "About third-parties"),
     _releaseNotesAction(nullptr, "Release notes")
