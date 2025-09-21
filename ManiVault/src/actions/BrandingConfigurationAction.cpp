@@ -15,7 +15,8 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     _editFullNameAction(this, "Edit full name"),
     _logoAction(this, "Logo"),
     _applicationIconAction(this, "Application icon"),
-	_iconFromLogoAction(this, "Generate icon from logo"),
+    _overrideIconAction(this, "Override icon"),
+	_iconFromLogoAction(this, "Icon from logo"),
     _splashScreenAction(this, "Splash screen"),
     _aboutAction(this, "About")
 {
@@ -68,6 +69,8 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
         /*4: version*/ QString::fromStdString(Application::current()->getVersion().getVersionString()),
         /*5: webpage*/ QStringLiteral("manivault.studio")
     ));
+
+    const auto updateIcon
 }
 
 void BrandingConfigurationAction::fromVariantMap(const QVariantMap& variantMap)

@@ -56,6 +56,7 @@ public: // Action getters
     ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
     ImageAction& getLogoAction() { return _logoAction; }
     ApplicationIconAction& getApplicationIconAction() { return _applicationIconAction; }
+    ToggleAction& getOverrideIconAction() { return _overrideIconAction; }
     ToggleAction& getIconFromLogoAction() { return _iconFromLogoAction; }
     SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
     StringAction& getAboutAction() { return _aboutAction; }
@@ -66,6 +67,7 @@ private:
     ToggleAction            _editFullNameAction;        /** Whether to edit the full name (otherwise it is derived from base name and version) */
     ImageAction             _logoAction;                /** Application logo action */
 	ApplicationIconAction   _applicationIconAction;     /** Application icon action */
+    ToggleAction            _overrideIconAction;        /** Whether to override the default application icon */
     ToggleAction            _iconFromLogoAction;        /** Whether to use the logo as application icon */
     SplashScreenAction      _splashScreenAction;        /** Application splash screen action */
     StringAction            _aboutAction;               /** Application about action (HTML content) */
