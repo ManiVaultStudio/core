@@ -48,6 +48,8 @@ Application::Application(int& argc, char** argv) :
         auto& temporaryDirsTask = _temporaryDirs.getTask();
 
         temporaryDirsTask.addToTaskManager();
+
+        _configurationAction.getBrandingConfigurationAction().getSplashScreenAction().setStartupTask(_startupTask);
 	});
 
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {

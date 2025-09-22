@@ -151,13 +151,14 @@ public:
      * @return Base64 representation of the pixmap, empty string if not available
      */
     static QString pixmapToBase64(const QPixmap& pixmap);
+
 public:
 
     /**
      * Get project meta action
      * @return Pointer to project meta action, nullptr if not available
      */
-    ProjectMetaAction* getProjectMetaAction();
+    ProjectMetaAction* getProjectMetaAction() const;
 
     /**
      * Get project meta action to \p projectMetaAction
@@ -182,6 +183,12 @@ protected:
      */
     QString getHtmlFromTemplate() const;
 
+    /**
+     * Set startup task to \p startupTask
+     * @param startupTask Pointer to startup task
+     */
+    void setStartupTask(Task* startupTask);
+
 public: // Serialization
 
     /**
@@ -202,8 +209,6 @@ public: // Action getters
     const TriggerAction& getOpenAction() const { return _openAction; }
     const TriggerAction& getCloseAction() const { return _closeAction; }
     const VerticalGroupAction& getEditAction() const { return _editAction; }
-    const ImageAction& getProjectImageAction() const { return _projectImageAction; }
-    const ImageAction& getAffiliateLogosImageAction() const { return _affiliateLogosImageAction; }
     const StringAction& getHtmlOverrideAction() const { return _htmlOverrideAction; }
     const TaskAction& getTaskAction() const { return _taskAction; }
 
@@ -211,8 +216,6 @@ public: // Action getters
     TriggerAction& getOpenAction() { return _openAction; }
     TriggerAction& getCloseAction() { return _closeAction; }
     VerticalGroupAction& getEditAction() { return _editAction; }
-    ImageAction& getProjectImageAction() { return _projectImageAction; }
-    ImageAction& getAffiliateLogosImageAction() { return _affiliateLogosImageAction; }
     StringAction& getHtmlOverrideAction() { return _htmlOverrideAction; }
     TaskAction& getTaskAction() { return _taskAction; }
 
@@ -220,8 +223,6 @@ private:
     bool                                _mayCloseSplashScreenWidget;    /** Whether the user can close the splash screen widget with a close tool button */
     ProjectMetaAction*                  _projectMetaAction;             /** Shared pointer to project meta action (used by the splash screen widget to display project information) */
     ToggleAction                        _enabledAction;                 /** Action to setEnabled the splash screen on/off */
-    ImageAction                         _projectImageAction;            /** Image action for the project image */
-    ImageAction                         _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
     StringAction                        _htmlOverrideAction;            /** String action for custom html content */
     VerticalGroupAction                 _editAction;                    /** Vertical group action for editing the splash screen */
     TriggerAction                       _openAction;                    /** Trigger action to show the splash screen */
@@ -229,6 +230,8 @@ private:
     TaskAction                          _taskAction;                    /** Task action for showing load progress */
     QPointer<SplashScreenWidget>        _splashScreenWidget;            /** Splash screen dialog */
     Alerts                              _alerts;                        /** Alerts that will be displayed on the splash screen widget */
+
+    friend class Application;
 };
 
 }

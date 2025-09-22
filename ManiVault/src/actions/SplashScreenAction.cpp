@@ -77,8 +77,6 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _mayCloseSplashScreenWidget(mayClose),
     _projectMetaAction(nullptr),
     _enabledAction(this, "Enable splash screen"),
-    _projectImageAction(this, "Project Image", false),
-    _affiliateLogosImageAction(this, "Affiliate Logos", false),
     _htmlOverrideAction(this, "HTML Override"),
     _editAction(this, "Edit"),
     _openAction(this, "Open splash screen"),
@@ -90,10 +88,6 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     addAction(&_openAction);
 
     _editAction.addAction(&_enabledAction);
-    _editAction.addAction(&_projectImageAction);
-    _editAction.addAction(&_affiliateLogosImageAction);
-
-    _taskAction.setTask(&Application::current()->getStartupTask());
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
@@ -114,27 +108,10 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _editAction.setToolTip("Edit the splash screen settings");
     _editAction.setPopupSizeHint(QSize(350, 0));
 
-    _projectImageAction.setDefaultWidgetFlags(ImageAction::Loader);
-    _projectImageAction.setIconByName("image");
-    _projectImageAction.setToolTip("Project image");
-
-    _affiliateLogosImageAction.setDefaultWidgetFlags(ImageAction::Loader);
-    _affiliateLogosImageAction.setIconByName("image");
-    _affiliateLogosImageAction.setToolTip("Affiliate logos image");
-
     connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenWidget);
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
 
-    connect(&Application::current()->getStartupTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-        if (!getEnabledAction().isChecked())
-            return;
-
-    	if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
-            return;
-
-        if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
-            closeSplashScreenWidget();
-    });
+    
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)
@@ -157,6 +134,24 @@ void SplashScreenAction::setMayCloseSplashScreenWidget(bool mayCloseSplashScreen
     _mayCloseSplashScreenWidget = mayCloseSplashScreenWidget;
 }
 
+void SplashScreenAction::setStartupTask(Task* startupTask)
+{
+    Q_ASSERT(startupTask);
+
+    if (!startupTask)
+        return;
+
+    _taskAction.setTask(startupTask);
+
+    connect(startupTask, &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+        if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
+            return;
+
+        if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
+            closeSplashScreenWidget();
+	});
+}
+
 QString SplashScreenAction::getHtml() const
 {
     if (!_htmlOverrideAction.getString().isEmpty())
@@ -177,7 +172,7 @@ QString SplashScreenAction::pixmapToBase64(const QPixmap& pixmap)
     return QString::fromLatin1(byteArray.toBase64());
 }
 
-ProjectMetaAction* SplashScreenAction::getProjectMetaAction()
+ProjectMetaAction* SplashScreenAction::getProjectMetaAction() const
 {
     return _projectMetaAction;
 }
@@ -189,6 +184,9 @@ void SplashScreenAction::setProjectMetaAction(ProjectMetaAction* projectMetaActi
 
 void SplashScreenAction::showSplashScreenWidget()
 {
+    if (!getEnabledAction().isChecked())
+        return;
+
     if (_splashScreenWidget.isNull()) {
         _splashScreenWidget = new SplashScreenWidget(*this, nullptr);
 
@@ -293,8 +291,6 @@ void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
     HorizontalGroupAction::fromVariantMap(variantMap);
 
     _enabledAction.fromParentVariantMap(variantMap);
-    _projectImageAction.fromParentVariantMap(variantMap);
-    _affiliateLogosImageAction.fromParentVariantMap(variantMap);
     _htmlOverrideAction.fromParentVariantMap(variantMap, true);
 }
 
@@ -303,8 +299,6 @@ QVariantMap SplashScreenAction::toVariantMap() const
     auto variantMap = HorizontalGroupAction::toVariantMap();
 
     _enabledAction.insertIntoVariantMap(variantMap);
-    _projectImageAction.insertIntoVariantMap(variantMap);
-    _affiliateLogosImageAction.insertIntoVariantMap(variantMap);
     _htmlOverrideAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
