@@ -10,6 +10,7 @@ namespace mv::gui {
 
 BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
+    _organizationAction(this, "Organization name"),
     _baseNameAction(this, "Base name"),
     _fullNameAction(this, "Full name"),
     _editFullNameAction(this, "Edit full name"),
@@ -26,6 +27,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
 
     _aboutAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextEdit);
 
+    addAction(&_organizationAction);
     addAction(&_baseNameAction);
     addAction(&_fullNameAction);
     addAction(&_editFullNameAction);
@@ -69,8 +71,6 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
         /*4: version*/ QString::fromStdString(Application::current()->getVersion().getVersionString()),
         /*5: webpage*/ QStringLiteral("manivault.studio")
     ));
-
-    //const auto updateIcon
 }
 
 void BrandingConfigurationAction::fromVariantMap(const QVariantMap& variantMap)

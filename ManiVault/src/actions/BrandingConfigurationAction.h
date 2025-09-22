@@ -51,6 +51,7 @@ public: // Serialization
 
 public: // Action getters
 
+    StringAction& getOrganizationAction() { return _organizationAction; }
     StringAction& getBaseNameAction() { return _baseNameAction; }
     StringAction& getFullNameAction() { return _fullNameAction; }
     ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
@@ -62,11 +63,12 @@ public: // Action getters
     StringAction& getAboutAction() { return _aboutAction; }
 
 private:
+    StringAction            _organizationAction;        /** Organization name action */
     StringAction            _baseNameAction;            /** Application base name action (e.g. main window title) */
     StringAction            _fullNameAction;            /** Application full name action (e.g. start page title) */
     ToggleAction            _editFullNameAction;        /** Whether to edit the full name (otherwise it is derived from base name and version) */
     ImageAction             _logoAction;                /** Application logo action */
-	ApplicationIconAction   _iconAction;     /** Application icon action */
+	ApplicationIconAction   _iconAction;                /** Application icon action */
     ToggleAction            _overrideIconAction;        /** Whether to override the default application icon */
     ToggleAction            _iconFromLogoAction;        /** Whether to use the logo as application icon */
     SplashScreenAction      _splashScreenAction;        /** Application splash screen action */
