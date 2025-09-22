@@ -160,6 +160,8 @@ void SplashScreenWidget::showEvent(QShowEvent* event)
         QMetaObject::invokeMethod(&_splashScreenBridge, "requestInitial", Qt::QueuedConnection);
 
     	loop.quit();
+
+        QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
     });
 
     QTimer::singleShot(1000, &loop, &QEventLoop::quit);

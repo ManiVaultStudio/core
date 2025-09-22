@@ -83,7 +83,8 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _openAction(this, "Open splash screen"),
     _testAction(this, "Test the splash screen"),
     _closeAction(this, "Close splash screen"),
-    _taskAction(this, "ManiVault")
+    _taskAction(this, "ManiVault"),
+    _simulateStartupTask(this, "Test splash screen")
 {
     addAction(&_enabledAction);
     addAction(&_editAction);
@@ -123,8 +124,34 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenWidget);
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
 
-    connect(&_testAction, &TriggerAction::triggered, this, [this]() -> void {
-        showSplashScreenWidget(2500);
+    _simulateTimer.setInterval(500);
+
+	connect(&_simulateTimer, &QTimer::timeout, this, [this]() -> void {
+        auto progress = _simulateStartupTask.getProgress();
+
+		progress += .1f;
+
+        _simulateStartupTask.setProgress(progress);
+
+		if (progress >= 1.f) {
+            progress = 1.f;
+
+            _simulateTimer.stop();
+            _simulateStartupTask.setFinished();
+        }
+
+        _simulateStartupTask.setProgress(progress);
+    });
+
+	connect(&_testAction, &TriggerAction::triggered, this, [this]() -> void {
+        _simulateStartupTask.setRunning();
+        _simulateStartupTask.setProgress(.0f);
+
+        setStartupTask(&_simulateStartupTask);
+
+        showSplashScreenWidget();
+
+        _simulateTimer.start();
     });
 
     const auto updateHtmlOverrideAction = [this]() -> void {
@@ -176,7 +203,7 @@ void SplashScreenAction::setStartupTask(Task* startupTask)
 
 QString SplashScreenAction::getHtml() const
 {
-    if (!_htmlOverrideAction.getString().isEmpty())
+    if (_overrideAction.isChecked() && !_htmlOverrideAction.getString().isEmpty())
         return _htmlOverrideAction.getString();
 
     return getHtmlFromTemplate();
@@ -204,7 +231,7 @@ void SplashScreenAction::setProjectMetaAction(ProjectMetaAction* projectMetaActi
     _projectMetaAction = projectMetaAction;
 }
 
-void SplashScreenAction::showSplashScreenWidget(std::int32_t closeDelay)
+void SplashScreenAction::showSplashScreenWidget()
 {
     if (!getEnabledAction().isChecked())
         return;
@@ -218,12 +245,6 @@ void SplashScreenAction::showSplashScreenWidget(std::int32_t closeDelay)
     }
         
     _splashScreenWidget->showAnimated();
-
-    if (closeDelay >= 1) {
-        QTimer::singleShot(closeDelay, [this]() -> void {
-            closeSplashScreenWidget();
-		});
-    }
 }
 
 void SplashScreenAction::closeSplashScreenWidget() 

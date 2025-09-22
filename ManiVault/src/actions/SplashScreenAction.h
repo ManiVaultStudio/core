@@ -11,6 +11,10 @@
 #include "actions/StringAction.h"
 #include "actions/VerticalGroupAction.h"
 
+#include "Task.h"
+
+#include <QTimer>
+
 namespace mv {
     class ProjectMetaAction;
 }
@@ -168,11 +172,8 @@ public:
 
 protected:
 
-    /**
-     * Shows the splash screen widget and optionally closes it after \p closeDelay milliseconds
-     * @param closeDelay Delay in milliseconds after which the splash screen widget will be closed, 0 to not close it automatically
-     */
-    void showSplashScreenWidget(std::int32_t closeDelay = 0);
+    /** Shows the splash screen widget */
+    void showSplashScreenWidget();
 
     /** Animates the splash screen widget's opacity and position and afterwards closes it */
     void closeSplashScreenWidget();
@@ -239,6 +240,8 @@ private:
     TaskAction                          _taskAction;                    /** Task action for showing load progress */
     QPointer<SplashScreenWidget>        _splashScreenWidget;            /** Splash screen dialog */
     Alerts                              _alerts;                        /** Alerts that will be displayed on the splash screen widget */
+    Task                                _simulateStartupTask;           /** Test task to simulate load progress */
+    QTimer                              _simulateTimer;                 /** Timer to simulate load progress */
 
     friend class Application;
 };
