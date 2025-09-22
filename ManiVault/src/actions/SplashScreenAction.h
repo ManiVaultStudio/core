@@ -168,8 +168,11 @@ public:
 
 protected:
 
-    /** Shows the splash screen and animates its opacity and position */
-    void showSplashScreenWidget();
+    /**
+     * Shows the splash screen widget and optionally closes it after \p closeDelay milliseconds
+     * @param closeDelay Delay in milliseconds after which the splash screen widget will be closed, 0 to not close it automatically
+     */
+    void showSplashScreenWidget(std::int32_t closeDelay = 0);
 
     /** Animates the splash screen widget's opacity and position and afterwards closes it */
     void closeSplashScreenWidget();
@@ -210,6 +213,7 @@ public: // Action getters
     const StringAction& getHtmlOverrideAction() const { return _htmlOverrideAction; }
     const VerticalGroupAction& getEditAction() const { return _editAction; }
 	const TriggerAction& getOpenAction() const { return _openAction; }
+	const TriggerAction& getTestAction() const { return _testAction; }
     const TriggerAction& getCloseAction() const { return _closeAction; }
     const TaskAction& getTaskAction() const { return _taskAction; }
 
@@ -218,6 +222,7 @@ public: // Action getters
     StringAction& getHtmlOverrideAction() { return _htmlOverrideAction; }
     VerticalGroupAction& getEditAction() { return _editAction; }
 	TriggerAction& getOpenAction() { return _openAction; }
+	TriggerAction& getTestAction() { return _testAction; }
     TriggerAction& getCloseAction() { return _closeAction; }
     TaskAction& getTaskAction() { return _taskAction; }
 
@@ -229,6 +234,7 @@ private:
     StringAction                        _htmlOverrideAction;            /** String action for custom html content */
     VerticalGroupAction                 _editAction;                    /** Vertical group action for editing the splash screen */
     TriggerAction                       _openAction;                    /** Trigger action to show the splash screen */
+    TriggerAction                       _testAction;                    /** Trigger action to briefly show the splash screen for testing purposes */
     TriggerAction                       _closeAction;                   /** Trigger action to manually close the splash screen */
     TaskAction                          _taskAction;                    /** Task action for showing load progress */
     QPointer<SplashScreenWidget>        _splashScreenWidget;            /** Splash screen dialog */

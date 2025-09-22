@@ -81,16 +81,17 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _htmlOverrideAction(this, "HTML"),
     _editAction(this, "Edit"),
     _openAction(this, "Open splash screen"),
+    _testAction(this, "Test the splash screen"),
     _closeAction(this, "Close splash screen"),
     _taskAction(this, "ManiVault")
 {
     addAction(&_enabledAction);
     addAction(&_editAction);
-    addAction(&_openAction);
+    addAction(&_testAction);
 
     _editAction.setPopupSizeHint(QSize(600, 400));
 
-    _editAction.addAction(&_enabledAction);
+    //_editAction.addAction(&_enabledAction);
     _editAction.addAction(&_overrideAction);
     _editAction.addAction(&_htmlOverrideAction);
 
@@ -105,6 +106,10 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _openAction.setIconByName("eye");
     _openAction.setToolTip("Open the splash screen");
 
+    _testAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _testAction.setIconByName("play");
+    _testAction.setToolTip("Test the splash screen");
+
     _closeAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _closeAction.setIconByName("eye-slash");
     _closeAction.setToolTip("Close the splash screen");
@@ -117,6 +122,10 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 
     connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenWidget);
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
+
+    connect(&_testAction, &TriggerAction::triggered, this, [this]() -> void {
+        showSplashScreenWidget(2500);
+    });
 
     const auto updateHtmlOverrideAction = [this]() -> void {
         _htmlOverrideAction.setEnabled(_overrideAction.isChecked());
@@ -195,7 +204,7 @@ void SplashScreenAction::setProjectMetaAction(ProjectMetaAction* projectMetaActi
     _projectMetaAction = projectMetaAction;
 }
 
-void SplashScreenAction::showSplashScreenWidget()
+void SplashScreenAction::showSplashScreenWidget(std::int32_t closeDelay)
 {
     if (!getEnabledAction().isChecked())
         return;
@@ -209,6 +218,12 @@ void SplashScreenAction::showSplashScreenWidget()
     }
         
     _splashScreenWidget->showAnimated();
+
+    if (closeDelay >= 1) {
+        QTimer::singleShot(closeDelay, [this]() -> void {
+            closeSplashScreenWidget();
+		});
+    }
 }
 
 void SplashScreenAction::closeSplashScreenWidget() 

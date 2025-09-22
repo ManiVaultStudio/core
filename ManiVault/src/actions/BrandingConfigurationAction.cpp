@@ -14,7 +14,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     _fullNameAction(this, "Full name"),
     _editFullNameAction(this, "Edit full name"),
     _logoAction(this, "Logo"),
-    _applicationIconAction(this, "Application icon"),
+    _iconAction(this, "Icon"),
     _overrideIconAction(this, "Override icon"),
 	_iconFromLogoAction(this, "Icon from logo"),
     _splashScreenAction(this, "Splash screen"),
@@ -30,7 +30,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     addAction(&_fullNameAction);
     addAction(&_editFullNameAction);
     addAction(&_logoAction);
-    addAction(&_applicationIconAction);
+    addAction(&_iconAction);
     addAction(&_iconFromLogoAction);
     addAction(&_splashScreenAction);
     addAction(&_aboutAction);
@@ -48,7 +48,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     connect(&_baseNameAction, &StringAction::stringChanged, this, updateFullNameAction);
 
     const auto updateApplicationIconAction = [this]() -> void {
-        _applicationIconAction.setEnabled(_iconFromLogoAction.isChecked());
+        _iconAction.setEnabled(_iconFromLogoAction.isChecked());
 	};
 
     updateApplicationIconAction();
@@ -81,7 +81,7 @@ void BrandingConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
     _fullNameAction.fromParentVariantMap(variantMap, true);
     _editFullNameAction.fromParentVariantMap(variantMap, true);
     _logoAction.fromParentVariantMap(variantMap, true);
-	_applicationIconAction.fromParentVariantMap(variantMap, true);
+	_iconAction.fromParentVariantMap(variantMap, true);
     _splashScreenAction.fromParentVariantMap(variantMap, true);
 }
 
@@ -93,7 +93,7 @@ QVariantMap BrandingConfigurationAction::toVariantMap() const
     _fullNameAction.insertIntoVariantMap(variantMap);
     _editFullNameAction.insertIntoVariantMap(variantMap);
     _logoAction.insertIntoVariantMap(variantMap);
-    _applicationIconAction.insertIntoVariantMap(variantMap);
+    _iconAction.insertIntoVariantMap(variantMap);
     _splashScreenAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

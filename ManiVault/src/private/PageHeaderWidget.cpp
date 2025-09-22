@@ -64,7 +64,7 @@ void PageHeaderWidget::resizeLogo(const QSize& newSize)
         float scale         = std::clamp(fracHeight, 0.1f, 1.0f);
 
         if (_pixmap.isNull())
-			_iconLabel.setPixmap(QPixmap(_iconName).scaled(scale * 256, scale * 256));
+			_iconLabel.setPixmap(QPixmap(_iconName).scaled(scale * 256, scale * 256, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         else
             _iconLabel.setPixmap(_pixmap.scaled(scale * 256, scale * 256));
 

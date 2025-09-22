@@ -55,7 +55,7 @@ public: // Action getters
     StringAction& getFullNameAction() { return _fullNameAction; }
     ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
     ImageAction& getLogoAction() { return _logoAction; }
-    ApplicationIconAction& getApplicationIconAction() { return _applicationIconAction; }
+    ApplicationIconAction& getApplicationIconAction() { return _iconAction; }
     ToggleAction& getOverrideIconAction() { return _overrideIconAction; }
     ToggleAction& getIconFromLogoAction() { return _iconFromLogoAction; }
     SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
@@ -66,7 +66,7 @@ private:
     StringAction            _fullNameAction;            /** Application full name action (e.g. start page title) */
     ToggleAction            _editFullNameAction;        /** Whether to edit the full name (otherwise it is derived from base name and version) */
     ImageAction             _logoAction;                /** Application logo action */
-	ApplicationIconAction   _applicationIconAction;     /** Application icon action */
+	ApplicationIconAction   _iconAction;     /** Application icon action */
     ToggleAction            _overrideIconAction;        /** Whether to override the default application icon */
     ToggleAction            _iconFromLogoAction;        /** Whether to use the logo as application icon */
     SplashScreenAction      _splashScreenAction;        /** Application splash screen action */
