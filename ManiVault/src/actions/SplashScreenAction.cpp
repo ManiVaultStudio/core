@@ -126,7 +126,10 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
 
     connect(&Application::current()->getStartupTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-        if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
+        if (!getEnabledAction().isChecked())
+            return;
+
+    	if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
             return;
 
         if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
