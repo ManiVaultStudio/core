@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
     core.createManagers();
 
-    SplashScreenAction splashScreenAction(&application, true);
+    auto& splashScreenAction = application.getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction();
 
     splashScreenAction.getOpenAction().trigger();
 
