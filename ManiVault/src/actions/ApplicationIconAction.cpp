@@ -20,8 +20,11 @@ ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& tit
 {
     setShowLabels(false);
 
+    auto& inputFilePathPickerAction = _iconPickerAction.getInputFilePathPickerAction();
+
     //addAction(&_overrideAction);
-    addAction(&_iconPickerAction.getInputFilePathPickerAction().getPickAction());
+    addAction(&inputFilePathPickerAction.getFilePathAction());
+    addAction(&inputFilePathPickerAction.getPickAction());
     addAction(&_iconPickerAction.getIconAction());
     addAction(&_testAction);
 

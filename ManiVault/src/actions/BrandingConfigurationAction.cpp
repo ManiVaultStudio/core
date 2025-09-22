@@ -70,7 +70,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
         /*5: webpage*/ QStringLiteral("manivault.studio")
     ));
 
-    const auto updateIcon
+    //const auto updateIcon
 }
 
 void BrandingConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
