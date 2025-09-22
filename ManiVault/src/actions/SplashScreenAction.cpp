@@ -77,7 +77,8 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _mayCloseSplashScreenWidget(mayClose),
     _projectMetaAction(nullptr),
     _enabledAction(this, "Enable splash screen"),
-    _htmlOverrideAction(this, "HTML Override"),
+    _overrideAction(this, "Override"),
+    _htmlOverrideAction(this, "HTML"),
     _editAction(this, "Edit"),
     _openAction(this, "Open splash screen"),
     _closeAction(this, "Close splash screen"),
@@ -87,12 +88,18 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     addAction(&_editAction);
     addAction(&_openAction);
 
+    _editAction.setPopupSizeHint(QSize(600, 400));
+
     _editAction.addAction(&_enabledAction);
+    _editAction.addAction(&_overrideAction);
+    _editAction.addAction(&_htmlOverrideAction);
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     _enabledAction.setStretch(1);
     _enabledAction.setToolTip("Show splash screen at startup");
+
+    _htmlOverrideAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextEdit);
 
     _openAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _openAction.setIconByName("eye");
@@ -111,7 +118,13 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenWidget);
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
 
-    
+    const auto updateHtmlOverrideAction = [this]() -> void {
+        _htmlOverrideAction.setEnabled(_overrideAction.isChecked());
+	};
+
+    updateHtmlOverrideAction();
+
+    connect(&_overrideAction, &ToggleAction::toggled, this, updateHtmlOverrideAction);
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)

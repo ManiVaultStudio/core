@@ -206,23 +206,26 @@ public: // Serialization
 public: // Action getters
 
     const ToggleAction& getEnabledAction() const { return _enabledAction; }
-    const TriggerAction& getOpenAction() const { return _openAction; }
-    const TriggerAction& getCloseAction() const { return _closeAction; }
-    const VerticalGroupAction& getEditAction() const { return _editAction; }
+    const ToggleAction& getOverrideAction() const { return _overrideAction; }
     const StringAction& getHtmlOverrideAction() const { return _htmlOverrideAction; }
+    const VerticalGroupAction& getEditAction() const { return _editAction; }
+	const TriggerAction& getOpenAction() const { return _openAction; }
+    const TriggerAction& getCloseAction() const { return _closeAction; }
     const TaskAction& getTaskAction() const { return _taskAction; }
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
-    TriggerAction& getOpenAction() { return _openAction; }
-    TriggerAction& getCloseAction() { return _closeAction; }
-    VerticalGroupAction& getEditAction() { return _editAction; }
+    ToggleAction& getOverrideAction() { return _overrideAction; }
     StringAction& getHtmlOverrideAction() { return _htmlOverrideAction; }
+    VerticalGroupAction& getEditAction() { return _editAction; }
+	TriggerAction& getOpenAction() { return _openAction; }
+    TriggerAction& getCloseAction() { return _closeAction; }
     TaskAction& getTaskAction() { return _taskAction; }
 
 private:
     bool                                _mayCloseSplashScreenWidget;    /** Whether the user can close the splash screen widget with a close tool button */
     ProjectMetaAction*                  _projectMetaAction;             /** Shared pointer to project meta action (used by the splash screen widget to display project information) */
     ToggleAction                        _enabledAction;                 /** Action to setEnabled the splash screen on/off */
+    ToggleAction                        _overrideAction;                /** Toggle action to override the default ManiVault splash screen */
     StringAction                        _htmlOverrideAction;            /** String action for custom html content */
     VerticalGroupAction                 _editAction;                    /** Vertical group action for editing the splash screen */
     TriggerAction                       _openAction;                    /** Trigger action to show the splash screen */
