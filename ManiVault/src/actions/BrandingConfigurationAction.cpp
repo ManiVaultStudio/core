@@ -34,6 +34,12 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     _splashScreenAction.setToolTip("Configure the splash screen");
     _aboutAction.setToolTip("Overrides the default (HTML) text in the about dialog");
 
+    const auto nonEmptyValidator = QRegularExpression("^.+$");
+
+    _organizationNameAction.getValidator().setRegularExpression(nonEmptyValidator);
+    _organizationDomainAction.getValidator().setRegularExpression(nonEmptyValidator);
+    _baseNameAction.getValidator().setRegularExpression(nonEmptyValidator);
+
     _logoAction.setDefaultWidgetFlags(ImageAction::WidgetFlag::Loader);
 
     _editFullNameAction.setChecked(false);

@@ -382,13 +382,39 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 
     addAction(&_validatorAction, QLineEdit::TrailingPosition);
 
+    setStyleSheet(R"(
+	    QLineEdit[invalid="true"] {
+	        border: 1px solid #C2351A;
+	        border-radius: 4px;
+	    }
+	    QLineEdit[invalid="true"]:focus {
+	        border: 1px solid #E33F1E;
+	        border-radius: 4px;
+	    }
+	)");
+
+    auto updateBorder = [this] {
+        const bool invalid = !hasAcceptableInput();
+
+    	setProperty("invalid", invalid);
+
+        style()->unpolish(this);
+        style()->polish(this);
+
+    	update();
+    };
+
+    updateBorder();
+
+    QObject::connect(this, &QLineEdit::textChanged, this, updateBorder);
+
     const auto updateValidatorAction = [this]() -> void {
-        _validatorAction.setVisible(!_stringAction->getString().isEmpty() && !_stringAction->getValidator().regularExpression().pattern().isEmpty());
+        _validatorAction.setVisible(!_stringAction->getValidator().regularExpression().pattern().isEmpty());
 
         if (hasAcceptableInput())
-            _validatorAction.setIcon(StyledIcon("check"));
+            _validatorAction.setIcon(StyledIcon("check").withColor(palette().color(QPalette::ColorRole::Accent)));
         else
-            _validatorAction.setIcon(StyledIcon("exclamation"));
+            _validatorAction.setIcon(StyledIcon("times").withColor(QColor("#C2351A")));
     };
 
     connect(_stringAction, &StringAction::stringChanged, this, updateValidatorAction);

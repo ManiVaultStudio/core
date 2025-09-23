@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "actions/ImageAction.h"
 #include "actions/TaskAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/TriggerAction.h"
