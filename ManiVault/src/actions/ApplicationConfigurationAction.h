@@ -47,6 +47,22 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+private:
+
+    /**
+     * Check whether the application configuration may be edited
+     * @return True if the application configuration may be edited, false otherwise
+     */
+    bool mayConfigure();
+
+signals:
+
+    /**
+     * Signals that the may configure state has changed to /p mayConfigure
+     * @param mayConfigure New may configure state
+     */
+    void mayConfigureChanged(bool mayConfigure);
+
 public: // Action getters
 
     TriggerAction& getConfigureAction() { return _configureAction; }

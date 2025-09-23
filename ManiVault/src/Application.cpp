@@ -382,7 +382,7 @@ QString Application::getConfigurationFileName()
 
 QString Application::getConfigurationFilePath()
 {
-    return QDir::cleanPath(StandardPaths::getCustomizationDirectory() + getConfigurationFileName());
+    return QDir::cleanPath(StandardPaths::getCustomizationDirectory() + "/" + getConfigurationFileName());
 }
 
 bool Application::hasConfigurationFile()

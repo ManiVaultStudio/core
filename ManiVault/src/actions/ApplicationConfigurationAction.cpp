@@ -30,6 +30,10 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
     addGroupAction(&_startPageConfigurationAction);
     addGroupAction(&_projectsGroupAction);
 
+    connect(&_brandingConfigurationAction.getOrganizationNameAction(), &StringAction::stringChanged, this, [this]() -> void { emit mayConfigureChanged(mayConfigure()); });
+    connect(&_brandingConfigurationAction.getOrganizationDomainAction(), &StringAction::stringChanged, this, [this]() -> void { emit mayConfigureChanged(mayConfigure()); });
+    connect(&_brandingConfigurationAction.getBaseNameAction(), &StringAction::stringChanged, this, [this]() -> void { emit mayConfigureChanged(mayConfigure()); });
+
     connect(&_configureAction, &QAction::triggered, this, [this] {
         QDialog customizeDialog;
 
@@ -49,6 +53,14 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
         customizeDialogLayout->addWidget(&dialogButtonBox);
 
         customizeDialog.setLayout(customizeDialogLayout);
+
+        const auto updateSaveButtonReadOnly = [this, &dialogButtonBox]() -> void {
+            dialogButtonBox.button(QDialogButtonBox::Ok)->setEnabled(mayConfigure());
+        };
+
+        updateSaveButtonReadOnly();
+
+        connect(this, &ApplicationConfigurationAction::mayConfigureChanged, this, updateSaveButtonReadOnly);
 
         connect(&dialogButtonBox, &QDialogButtonBox::accepted, this, [this, &customizeDialog]() -> void {
             const auto configurationFilePath = Application::getConfigurationFilePath();
@@ -81,6 +93,20 @@ QVariantMap ApplicationConfigurationAction::toVariantMap() const
     _startPageConfigurationAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
+}
+
+bool ApplicationConfigurationAction::mayConfigure()
+{
+    if (_brandingConfigurationAction.getOrganizationNameAction().getString().isEmpty())
+        return false;
+
+    if (_brandingConfigurationAction.getOrganizationDomainAction().getString().isEmpty())
+        return false;
+
+    if (_brandingConfigurationAction.getBaseNameAction().getString().isEmpty())
+        return false;
+
+    return true;
 }
 
 }
