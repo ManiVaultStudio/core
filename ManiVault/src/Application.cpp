@@ -58,8 +58,16 @@ Application::Application(int& argc, char** argv) :
         ModalTask::createHandler(Application::current());
         });
 
+    QString organizationName    = "ManiVault";
+    QString organizationDomain  = "LUMC (LKEB) & TU Delft (CGV)";
+	QString applicationName     = QString("Studio %1").arg(QString::fromStdString(_version.getVersionString()));
+
     if (hasConfigurationFile()) {
         fromJsonFile(getConfigurationFilePath());
+
+        organizationName    = _configurationAction.getBrandingConfigurationAction().getOrganizationAction().getString();
+        organizationDomain  = QString("%1 (%2)").arg(_configurationAction.getBrandingConfigurationAction().getOrganizationAction().getString(), organizationDomain);
+        applicationName     = _configurationAction.getBrandingConfigurationAction().getFullNameAction().getString();
     } else {
         const auto baseName = "ManiVault Studio";
 
@@ -68,6 +76,10 @@ Application::Application(int& argc, char** argv) :
         brandingConfigurationAction.getBaseNameAction().setString(baseName);
         brandingConfigurationAction.getFullNameAction().setString(QString("%1 %2").arg(baseName, QString::fromStdString(current()->getVersion().getVersionString())));
 	}
+
+    setOrganizationName(organizationName);
+    setOrganizationDomain(organizationDomain);
+    setApplicationName(applicationName);
 }
 
 Application::~Application()

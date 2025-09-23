@@ -51,7 +51,8 @@ public: // Serialization
 
 public: // Action getters
 
-    StringAction& getOrganizationAction() { return _organizationAction; }
+    StringAction& getOrganizationNameAction() { return _organizationNameAction; }
+    StringAction& getOrganizationDomainAction() { return _organizationDomainAction; }
     StringAction& getBaseNameAction() { return _baseNameAction; }
     StringAction& getFullNameAction() { return _fullNameAction; }
     ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
@@ -63,7 +64,8 @@ public: // Action getters
     StringAction& getAboutAction() { return _aboutAction; }
 
 private:
-    StringAction            _organizationAction;        /** Organization name action */
+    StringAction            _organizationNameAction;    /** Organization name action */
+    StringAction            _organizationDomainAction;  /** Organization domain action */
     StringAction            _baseNameAction;            /** Application base name action (e.g. main window title) */
     StringAction            _fullNameAction;            /** Application full name action (e.g. start page title) */
     ToggleAction            _editFullNameAction;        /** Whether to edit the full name (otherwise it is derived from base name and version) */

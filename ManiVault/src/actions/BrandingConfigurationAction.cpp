@@ -10,7 +10,8 @@ namespace mv::gui {
 
 BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
-    _organizationAction(this, "Organization name"),
+    _organizationNameAction(this, "Organization name"),
+    _organizationDomainAction(this, "Organization domain"),
     _baseNameAction(this, "Base name"),
     _fullNameAction(this, "Full name"),
     _editFullNameAction(this, "Edit full name"),
@@ -18,16 +19,29 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     _iconAction(this, "Icon"),
     _overrideIconAction(this, "Override icon"),
 	_iconFromLogoAction(this, "Icon from logo"),
-    _splashScreenAction(this, "Splash screen"),
+    _splashScreenAction(this),
     _aboutAction(this, "About")
 {
+    _organizationNameAction.setToolTip("The name of the organization (primarily used for storing settings)");
+    _organizationDomainAction.setToolTip("The domain of the organization (primarily used for storing settings)");
+    _baseNameAction.setToolTip("The name of the application without the version (show in the titlebar and used in storing settings)");
+    _fullNameAction.setToolTip("The full name of the application (might include version))");
+    _editFullNameAction.setToolTip("Override the auto-generated full name of the application");
+    _logoAction.setToolTip("Set the logo");
+    _iconAction.setToolTip("Change the application icon");
+    _overrideIconAction.setToolTip("Override the default application icon");
+    _iconFromLogoAction.setToolTip("Use the logo to generate the application icon");
+    _splashScreenAction.setToolTip("Configure the splash screen");
+    _aboutAction.setToolTip("Overrides the default (HTML) text in the about dialog");
+
     _logoAction.setDefaultWidgetFlags(ImageAction::WidgetFlag::Loader);
 
     _editFullNameAction.setChecked(false);
 
     _aboutAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextEdit);
 
-    addAction(&_organizationAction);
+    addAction(&_organizationNameAction);
+    addAction(&_organizationDomainAction);
     addAction(&_baseNameAction);
     addAction(&_fullNameAction);
     addAction(&_editFullNameAction);
@@ -77,7 +91,7 @@ void BrandingConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
 {
     VerticalGroupAction::fromVariantMap(variantMap);
 
-    _organizationAction.fromParentVariantMap(variantMap, true);
+    _organizationNameAction.fromParentVariantMap(variantMap, true);
     _baseNameAction.fromParentVariantMap(variantMap, true);
     _fullNameAction.fromParentVariantMap(variantMap, true);
     _editFullNameAction.fromParentVariantMap(variantMap, true);
@@ -91,7 +105,7 @@ QVariantMap BrandingConfigurationAction::toVariantMap() const
 {
     auto variantMap = VerticalGroupAction::toVariantMap();
 
-    _organizationAction.insertIntoVariantMap(variantMap);
+    _organizationNameAction.insertIntoVariantMap(variantMap);
     _baseNameAction.insertIntoVariantMap(variantMap);
     _fullNameAction.insertIntoVariantMap(variantMap);
     _editFullNameAction.insertIntoVariantMap(variantMap);

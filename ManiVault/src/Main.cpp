@@ -33,33 +33,6 @@ using namespace mv::gui;
 
 int main(int argc, char *argv[])
 {
-
-    // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings
-    auto coreApplication = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
-
-    QCommandLineParser commandLineParser;
-
-    commandLineParser.setApplicationDescription("Application for viewing and analyzing high-dimensional data");
-    commandLineParser.addHelpOption();
-    commandLineParser.addVersionOption();
-
-    QCommandLineOption organizationNameOption({ "org_name", "organization_name" }, "Name of the organization", "organization_name", "BioVault");
-    QCommandLineOption organizationDomainOption({ "org_dom", "organization_domain" }, "Domain of the organization", "organization_domain", "LUMC (LKEB) & TU Delft (CGV)");
-    QCommandLineOption applicationNameOption({ "app_name", "application_name" }, "Name of the application", "application_name", "ManiVault");
-
-    commandLineParser.addOption(organizationNameOption);
-    commandLineParser.addOption(organizationDomainOption);
-    commandLineParser.addOption(applicationNameOption);
-
-    commandLineParser.process(QCoreApplication::arguments());
-
-    // Remove the temporary application
-    coreApplication.reset();
-
-    QCoreApplication::setOrganizationName(commandLineParser.value("organization_name"));
-    QCoreApplication::setOrganizationDomain(commandLineParser.value("organization_domain"));
-    QCoreApplication::setApplicationName(commandLineParser.value("application_name"));
-    
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
 
