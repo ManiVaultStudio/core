@@ -243,7 +243,7 @@ private:
     Task                                _simulateStartupTask;           /** Test task to simulate load progress */
     QTimer                              _simulateTimer;                 /** Timer to simulate load progress */
 
-    friend class Application;
+    friend class mv::Application;
 };
 
 }

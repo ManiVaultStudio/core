@@ -61,7 +61,7 @@ Application::Application(int& argc, char** argv) :
         BackgroundTask::createHandler(Application::current());
         ForegroundTask::createHandler(Application::current());
         ModalTask::createHandler(Application::current());
-        });
+    });
 
     if (hasConfigurationFile()) {
         fromJsonFile(getConfigurationFilePath());
