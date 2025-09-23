@@ -227,7 +227,7 @@ void Application::initializeAttributes()
 {
     QString organizationName    = "ManiVault";
     QString organizationDomain  = "LUMC (LKEB) & TU Delft (CGV)";
-    QString applicationName     = QString("Studio %1").arg(QString::fromStdString(Version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())).getVersionString()));
+    QString applicationName     = QString("ManiVault Studio %1").arg(QString::fromStdString(Version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())).getVersionString()));
 
     if (hasConfigurationFile()) {
         try {
