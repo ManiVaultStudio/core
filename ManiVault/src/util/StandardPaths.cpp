@@ -58,7 +58,7 @@ QString StandardPaths::getCustomizationDirectory()
     const auto applicationDir   = QDir(QCoreApplication::applicationDirPath());
     const auto dirName          = QString("Customization");
 
-    QString pathSuffix = QString("/%1").arg(dirName);
+    QString pathSuffix = QString("/%1//").arg(dirName);
 
     if (isMacOS())
         pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../%1").arg(dirName) : QString("/../%1").arg(dirName);

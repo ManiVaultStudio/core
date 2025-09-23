@@ -14,6 +14,7 @@
 
 #include <util/Icon.h>
 #include <util/HardwareSpec.h>
+#include <util/StandardPaths.h>
 
 #include <ModalTask.h>
 #include <ModalTaskHandler.h>
@@ -87,14 +88,13 @@ int main(int argc, char *argv[])
         settings().getTemporaryDirectoriesSettingsAction().getScanForStaleTemporaryDirectoriesAction().trigger();
     }
 
-    const QString projectsJsonFileName{ "projects.json" };
-
-    const auto hasProjectsJsonInAppDir = QFileInfo(QCoreApplication::applicationDirPath(), projectsJsonFileName).exists();
+    const auto projectsJsonFilePath = QDir::cleanPath(StandardPaths::getCustomizationDirectory() + "/projects.json");
+    const auto hasProjectsJsonFile  = QFileInfo(projectsJsonFilePath).exists();
 
     auto& projectsTreeModel = const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel());
 
-    if (hasProjectsJsonInAppDir)
-        projectsTreeModel.populateFromJsonFile(projectsJsonFileName);
+    if (hasProjectsJsonFile)
+        projectsTreeModel.populateFromJsonFile(projectsJsonFilePath);
 
     core.initialize();
     application.initialize();

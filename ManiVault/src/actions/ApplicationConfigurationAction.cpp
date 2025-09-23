@@ -56,7 +56,7 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
             if (!configurationFilePath.isEmpty())
 				Application::current()->toJsonFile(configurationFilePath);
 
-        	customizeDialog.accept();
+        	//customizeDialog.accept();
         });
 
         connect(&dialogButtonBox, &QDialogButtonBox::rejected, &customizeDialog, &QDialog::reject);

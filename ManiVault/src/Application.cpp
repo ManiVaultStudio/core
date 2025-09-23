@@ -9,6 +9,7 @@
 #include "ManiVaultVersion.h"
 
 #include "util/Exception.h"
+#include "util/StandardPaths.h"
 
 #include "actions/WidgetAction.h"
 #include "actions/StatusBarAction.h"
@@ -381,7 +382,7 @@ QString Application::getConfigurationFileName()
 
 QString Application::getConfigurationFilePath()
 {
-    return QDir(applicationDirPath()).filePath(getConfigurationFileName());
+    return QDir::cleanPath(StandardPaths::getCustomizationDirectory() + getConfigurationFileName());
 }
 
 bool Application::hasConfigurationFile()
