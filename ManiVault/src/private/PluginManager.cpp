@@ -16,6 +16,7 @@
 #include <WriterPlugin.h>
 
 #include <util/Serialization.h>
+#include <util/StandardPaths.h>
 
 #include <actions/PluginTriggerAction.h>
 
@@ -100,33 +101,25 @@ void PluginManager::loadPluginFactories()
     qDebug() << "Loading plugin factories";
 #endif
 
-    QDir pluginDir(qApp->applicationDirPath());
-    
-#if defined(Q_OS_WIN)
-    //if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
-    //    pluginsDir.cdUp();
-#elif defined(Q_OS_MAC)
-    if (pluginDir.dirName() == "MacOS")
-    {
-        pluginDir.cdUp();
-        pluginDir.cdUp();
-        pluginDir.cdUp();
-    }
-#endif
-    pluginDir.cd("Plugins");
+    QDir pluginsDir(StandardPaths::getPluginsDirectory());
     
     _pluginFactories.clear();
 
     auto getPluginDependencyDir = [](const QDir& dir, const QString& name) -> std::pair<QDir, bool> {
         QDir dependenciesDir = dir;
+
         dependenciesDir.cdUp();
-        if (!dependenciesDir.cd("PluginDependencies"))  // name by convention
+
+    	if (!dependenciesDir.cd("PluginDependencies"))  // name by convention
             return { dependenciesDir, false };
-        if (!dependenciesDir.cd(name))
+
+    	if (!dependenciesDir.cd(name))
             return { dependenciesDir, false };
-        dependenciesDir.cd(name);
-        return { dependenciesDir, true };
-        };
+
+    	dependenciesDir.cd(name);
+
+    	return { dependenciesDir, true };
+    };
 
     auto getLibraryName = [](const QString& libFileName) -> QString {
         // Use QFileInfo to get the base name without the suffix (.dll, .so, .dylib)
@@ -190,16 +183,16 @@ void PluginManager::loadPluginFactories()
         };
 
     // List of filenames of dependency resolved plugins
-    const QStringList resolvedPlugins = resolveDependencies(pluginDir);
+    const QStringList resolvedPlugins = resolveDependencies(pluginsDir);
 
     // For each of the plugin files which are resolved, load them and add them in their proper menu category
     for (const auto& fileName: resolvedPlugins)
     {
         // Load plugin dependencies, if there are any
-        loadPluginDependencies(pluginDir, fileName);
+        loadPluginDependencies(pluginsDir, fileName);
 
         // Dynamic loader of plugin shared library
-        QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
+        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
         
         // Get metadata about plugin from the accompanying .json file compiled in the shared library
         const QJsonObject pluginMetaData = pluginLoader.metaData().value("MetaData").toObject();
