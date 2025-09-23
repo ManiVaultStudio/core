@@ -577,6 +577,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/HttpsErrorReply.h
     src/util/HeadsUpDisplayItem.h
     src/util/SplashScreenBridge.h
+    src/util/StandardPaths.h
 )
 
 if(APPLE)
@@ -638,6 +639,7 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/HttpsErrorReply.cpp
 	src/util/HeadsUpDisplayItem.cpp
 	src/util/SplashScreenBridge.cpp
+	src/util/StandardPaths.cpp
 )
 
 if(APPLE)
