@@ -77,24 +77,28 @@ void BrandingConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
 {
     VerticalGroupAction::fromVariantMap(variantMap);
 
+    _organizationAction.fromParentVariantMap(variantMap, true);
     _baseNameAction.fromParentVariantMap(variantMap, true);
     _fullNameAction.fromParentVariantMap(variantMap, true);
     _editFullNameAction.fromParentVariantMap(variantMap, true);
     _logoAction.fromParentVariantMap(variantMap, true);
 	_iconAction.fromParentVariantMap(variantMap, true);
     _splashScreenAction.fromParentVariantMap(variantMap, true);
+    _aboutAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap BrandingConfigurationAction::toVariantMap() const
 {
     auto variantMap = VerticalGroupAction::toVariantMap();
 
+    _organizationAction.insertIntoVariantMap(variantMap);
     _baseNameAction.insertIntoVariantMap(variantMap);
     _fullNameAction.insertIntoVariantMap(variantMap);
     _editFullNameAction.insertIntoVariantMap(variantMap);
     _logoAction.insertIntoVariantMap(variantMap);
     _iconAction.insertIntoVariantMap(variantMap);
     _splashScreenAction.insertIntoVariantMap(variantMap);
+    _aboutAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
