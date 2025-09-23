@@ -92,6 +92,7 @@ void BrandingConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
     VerticalGroupAction::fromVariantMap(variantMap);
 
     _organizationNameAction.fromParentVariantMap(variantMap, true);
+    _organizationDomainAction.fromParentVariantMap(variantMap, true);
     _baseNameAction.fromParentVariantMap(variantMap, true);
     _fullNameAction.fromParentVariantMap(variantMap, true);
     _editFullNameAction.fromParentVariantMap(variantMap, true);
@@ -106,6 +107,7 @@ QVariantMap BrandingConfigurationAction::toVariantMap() const
     auto variantMap = VerticalGroupAction::toVariantMap();
 
     _organizationNameAction.insertIntoVariantMap(variantMap);
+    _organizationDomainAction.insertIntoVariantMap(variantMap);
     _baseNameAction.insertIntoVariantMap(variantMap);
     _fullNameAction.insertIntoVariantMap(variantMap);
     _editFullNameAction.insertIntoVariantMap(variantMap);

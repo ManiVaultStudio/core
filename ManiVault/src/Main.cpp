@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
-    qDebug() << "Starting ManiVault" << MV_VERSION_STRING();
+    qDebug() << "Starting" << Application::applicationName();
 
     Application application(argc, argv);
 

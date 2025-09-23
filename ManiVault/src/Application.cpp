@@ -250,9 +250,9 @@ void Application::initializeAttributes()
         	}
 
         	try {
-        		organizationName    = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/OrganizationName/Value"_json_pointer));
-        		organizationDomain  = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/OrganizationDomain/Value"_json_pointer));
-        		applicationName     = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/FullName/Value"_json_pointer));
+        		organizationName    = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/Organization name/Value"_json_pointer));
+        		organizationDomain  = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/Organization domain/Value"_json_pointer));
+        		applicationName     = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/Full name/Value"_json_pointer));
 
         		qDebug() << organizationName << organizationDomain << applicationName;
         	}
