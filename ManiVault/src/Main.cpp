@@ -9,7 +9,6 @@
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
-#include <ProjectMetaAction.h>
 
 #include <models/ProjectsTreeModel.h>
 
@@ -35,6 +34,15 @@ int main(int argc, char *argv[])
 {
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
+
+    // Temporary application to be able to query application dir path
+    auto tempApp = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
+
+    // Initialize application attributes (organization name, domain and application name)
+    Application::initializeAttributes();
+
+    // Destroy temporary application
+    tempApp.reset();
 
 #ifdef Q_OS_MAC
     QSurfaceFormat defaultFormat;

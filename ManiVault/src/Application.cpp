@@ -13,12 +13,16 @@
 #include "actions/WidgetAction.h"
 #include "actions/StatusBarAction.h"
 
+#include <nlohmann/json.hpp>
+
 #include <stdexcept>
 
 #include <QDebug>
 #include <QMainWindow>
 #include <QDir>
 #include <QShortcut>
+
+using nlohmann::json;
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -58,16 +62,8 @@ Application::Application(int& argc, char** argv) :
         ModalTask::createHandler(Application::current());
         });
 
-    QString organizationName    = "ManiVault";
-    QString organizationDomain  = "LUMC (LKEB) & TU Delft (CGV)";
-	QString applicationName     = QString("Studio %1").arg(QString::fromStdString(_version.getVersionString()));
-
     if (hasConfigurationFile()) {
         fromJsonFile(getConfigurationFilePath());
-
-        organizationName    = _configurationAction.getBrandingConfigurationAction().getOrganizationAction().getString();
-        organizationDomain  = QString("%1 (%2)").arg(_configurationAction.getBrandingConfigurationAction().getOrganizationAction().getString(), organizationDomain);
-        applicationName     = _configurationAction.getBrandingConfigurationAction().getFullNameAction().getString();
     } else {
         const auto baseName = "ManiVault Studio";
 
@@ -76,10 +72,6 @@ Application::Application(int& argc, char** argv) :
         brandingConfigurationAction.getBaseNameAction().setString(baseName);
         brandingConfigurationAction.getFullNameAction().setString(QString("%1 %2").arg(baseName, QString::fromStdString(current()->getVersion().getVersionString())));
 	}
-
-    setOrganizationName(organizationName);
-    setOrganizationDomain(organizationDomain);
-    setApplicationName(applicationName);
 }
 
 Application::~Application()
@@ -119,7 +111,7 @@ void Application::setCore(CoreInterface* core)
     }
 }
 
-mv::CoreInterface* Application::core()
+CoreInterface* Application::core()
 {
     if (!current())
         return {};
@@ -229,6 +221,53 @@ QMainWindow* Application::getMainWindow()
             return mainWindow;
 
     return nullptr;
+}
+
+void Application::initializeAttributes()
+{
+    QString organizationName    = "ManiVault";
+    QString organizationDomain  = "LUMC (LKEB) & TU Delft (CGV)";
+    QString applicationName     = QString("Studio %1").arg(QString::fromStdString(Version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())).getVersionString()));
+
+    if (hasConfigurationFile()) {
+        try {
+	        QFile jsonFile(getConfigurationFilePath());
+
+        	if (!jsonFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        		throw std::runtime_error(QString("Failed to open JSON file: %1").arg(jsonFile.errorString()).toStdString());
+
+        	const auto bytes = jsonFile.readAll();
+
+        	jsonFile.close();
+
+        	json jsonDocument;
+
+        	try {
+        		jsonDocument = json::parse(bytes.constBegin(), bytes.constEnd());
+        	}
+        	catch (const std::exception& exception) {
+        		throw std::runtime_error(QString("Parse error: %1").arg(exception.what()).toStdString());
+        	}
+
+        	try {
+        		organizationName    = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/OrganizationName/Value"_json_pointer));
+        		organizationDomain  = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/OrganizationDomain/Value"_json_pointer));
+        		applicationName     = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/FullName/Value"_json_pointer));
+
+        		qDebug() << organizationName << organizationDomain << applicationName;
+        	}
+        	catch (const std::exception& exception) {
+        		throw std::runtime_error(QString("Lookup error: %1").arg(exception.what()).toStdString());
+        	}
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Parse error:" << e.what();
+        }
+    }
+
+    setOrganizationName(organizationName);
+    setOrganizationDomain(organizationDomain);
+    setApplicationName(applicationName);
 }
 
 ApplicationStartupTask& Application::getStartupTask()

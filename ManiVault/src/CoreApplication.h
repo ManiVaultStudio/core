@@ -30,11 +30,11 @@ class CoreInterface;
 class ProjectMetaAction;
 
 /**
- * ManiVault (Studio) application class
+ * Core application class
  * 
  * @author Thomas Kroes
  */
-class CORE_EXPORT Application final : public QApplication, public util::Serializable
+class CORE_EXPORT CoreApplication : public QApplication, public util::Serializable
 {
     Q_OBJECT
 
@@ -323,7 +323,6 @@ signals:
     void coreManagersCreated(CoreInterface* core);
 
 protected:
-    CoreInterface*                          _core;                              /** Pointer to the ManiVault core */
     const util::Version                     _version;                           /** Application version */
     QSettings                               _settings;                          /** Settings */
     QString                                 _serializationTemporaryDirectory;   /** Temporary directory for serialization */
