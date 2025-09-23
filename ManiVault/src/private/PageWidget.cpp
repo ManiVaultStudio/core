@@ -13,7 +13,7 @@ using namespace mv::gui;
 
 PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-	Serializable(title),
+    Serializable(title),
     _pageHeaderWidget(title),
     _backgroundImage(":/Images/StartPageBackground")
 {
@@ -78,7 +78,7 @@ void PageWidget::paintEvent(QPaintEvent* paintEvent)
 
 PageHeaderWidget& PageWidget::getPageHeaderWidget()
 {
-	return _pageHeaderWidget;
+    return _pageHeaderWidget;
 }
 
 QVBoxLayout& PageWidget::getContentLayout()
@@ -95,5 +95,4 @@ void PageWidget::updateTitle()
 {
     _titleLabel.setText(Application::current()->getConfigurationAction().getBrandingConfigurationAction().getFullNameAction().getString());
 }
-
 

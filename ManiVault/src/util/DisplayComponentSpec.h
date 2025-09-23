@@ -93,9 +93,9 @@ public:
      */
     bool lessThan(const HardwareComponentSpec& other) const override {
         if (auto otherDisplayComponentSpec = dynamic_cast<const DisplayComponentSpec*>(&other))
-			return *this < *otherDisplayComponentSpec;
+            return *this < *otherDisplayComponentSpec;
 
-    	return false; // Cannot compare with non-display component spec
+        return false; // Cannot compare with non-display component spec
     }
 
     /**
@@ -105,7 +105,7 @@ public:
      */
     bool equals(const HardwareComponentSpec& other) const override {
         if (auto otherDisplayComponentSpec = dynamic_cast<const DisplayComponentSpec*>(&other))
-			return *this == *otherDisplayComponentSpec;
+            return *this == *otherDisplayComponentSpec;
 
         return false; // Cannot compare with non-display component spec
     }

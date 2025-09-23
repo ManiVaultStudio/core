@@ -144,7 +144,7 @@ public:
      */
     void setTextElideMode(const Qt::TextElideMode& textElideMode);
 
-	/**
+    /**
      * Check whether \p string may be added
      * @param string String to check
      * @return True if the string may be added, false otherwise

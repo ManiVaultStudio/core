@@ -16,7 +16,7 @@ ErrorLoggingSettingsAction::ErrorLoggingSettingsAction(QObject* parent) :
 
 const gui::TriggerAction& ErrorLoggingSettingsAction::getLoggingAskConsentDialogAction() const
 {
-	return mv::errors().getLoggingAskConsentDialogAction();
+    return mv::errors().getLoggingAskConsentDialogAction();
 }
 
 const gui::ToggleAction& ErrorLoggingSettingsAction::getUserHasOptedAction() const

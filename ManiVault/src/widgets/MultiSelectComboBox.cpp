@@ -10,7 +10,7 @@
 namespace mv::gui {
 
 MultiSelectComboBox::MultiSelectComboBox(QWidget* parent) :
-	QComboBox(parent),
+    QComboBox(parent),
     _preventHidePopup(true)
 {
 }

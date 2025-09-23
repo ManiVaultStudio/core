@@ -267,7 +267,7 @@ private:
     static void updateIconFontVersions(const QString& iconFontName);
 
 private:
-	QString                 _iconName;                  /** Name of the icon */
+    QString                 _iconName;                  /** Name of the icon */
     QString                 _iconFontName;              /** Name of the icon font */
     Version                 _iconFontVersion;           /** Version of the icon font */
     StyledIconSettings      _iconSettings;              /** Icon settings */
@@ -276,7 +276,7 @@ private:
     Version                 _modifierIconFontVersion;   /** Version of the modifier icon font */
 
 protected:
-	static QMap<QString, QVariantMap>       fontMetadata;               /** Font-specific metadata */
+    static QMap<QString, QVariantMap>       fontMetadata;               /** Font-specific metadata */
     static QMap<QString, QFont>             fonts;                      /** Icon fonts */
     static QString                          defaultIconFontName;        /** Default icon font name */
     static Version                          defaultIconFontVersion;     /** Default icon font version */

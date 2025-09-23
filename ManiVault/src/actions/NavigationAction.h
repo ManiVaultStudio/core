@@ -31,7 +31,7 @@ namespace mv::gui
  */
 class CORE_EXPORT NavigationAction : public HorizontalToolbarAction
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
 
@@ -42,11 +42,11 @@ public:
      */
     Q_INVOKABLE NavigationAction(QObject* parent, const QString& title);
 
-	/**
+    /**
      * Set whether shortcuts are enabled
      * @param shortcutsEnabled Boolean determining whether shortcuts are enabled
-	 */
-	void setShortcutsEnabled(bool shortcutsEnabled);
+     */
+    void setShortcutsEnabled(bool shortcutsEnabled);
 
 public: // Serialization
 

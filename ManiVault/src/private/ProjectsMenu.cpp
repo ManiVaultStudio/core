@@ -65,7 +65,7 @@ void ProjectsMenu::populate()
                     const auto childModelIndex = mv::projects().getProjectsTreeModel().index(childRowIndex, 0, sourceModelIndex);
 
                     if (const auto childProject = mv::projects().getProjectsTreeModel().getProject(childModelIndex))
-						addProject(projectGroupMenu, childProject);
+                        addProject(projectGroupMenu, childProject);
                 }
 
                 addMenu(projectGroupMenu);

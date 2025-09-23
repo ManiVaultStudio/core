@@ -36,7 +36,7 @@ protected:
     public:
 
         /** No need for custom constructor*/
-    	using QWidget::QWidget;
+        using QWidget::QWidget;
 
         /**
          * Override the default paint behavior
@@ -172,7 +172,7 @@ private:
     void requestFinish();
 
     /** Perform final operations after fade-out animation and before being deleted */
-	void finish();
+    void finish();
 
     /** Slide the notification in */
     void slideIn();
@@ -200,7 +200,7 @@ signals:
 
 private:
     QIcon                   _icon;                          /** Notification icon (maybe empty) */
-	QString                 _title;                         /** Notification title (maybe HTML) */
+    QString                 _title;                         /** Notification title (maybe HTML) */
     QString                 _description;                   /** Notification description (maybe HTML) */
     QPointer<Task>          _task;                          /** Task associated with this notification (maybe nullptr) */
     QPointer<Notification>  _previousNotification;          /** Pointer to previous notification (maybe nullptr) */

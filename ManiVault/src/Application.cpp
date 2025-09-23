@@ -288,7 +288,7 @@ Application::TemporaryDirs& Application::getTemporaryDirs()
 std::int32_t Application::requestOverrideCursor(Qt::CursorShape cursorShape)
 {
     auto it = std::find_if(cursorOverridesCount.begin(), cursorOverridesCount.end(), [&cursorShape](const CursorShapeCount& cursorShapeCount) {
-	    return cursorShapeCount.shape == cursorShape;
+        return cursorShapeCount.shape == cursorShape;
     });
 
     if (it != cursorOverridesCount.end())
@@ -300,7 +300,7 @@ std::int32_t Application::requestOverrideCursor(Qt::CursorShape cursorShape)
         if (cursorShapeCountRhs.shape == cursorShape)
             return true;
 
-    	return cursorShapeCountRhs.count > cursorShapeCountLhs.count;
+        return cursorShapeCountRhs.count > cursorShapeCountLhs.count;
     });
 
     setOverrideCursor(cursorOverridesCount.first().shape);
@@ -318,7 +318,7 @@ std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShap
 
     auto it = std::find_if(cursorOverridesCount.begin(), cursorOverridesCount.end(), [&cursorShape](const CursorShapeCount& cursorShapeCount) {
         return cursorShapeCount.shape == cursorShape;
-	});
+    });
 
     if (it != cursorOverridesCount.end()) {
         if (all)
@@ -333,7 +333,7 @@ std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShap
 
         if (cursorOverridesCount.empty()) {
 
-        	while (QApplication::overrideCursor())
+            while (QApplication::overrideCursor())
                 QApplication::restoreOverrideCursor();
 
             return 0;
@@ -346,13 +346,13 @@ std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShap
 
     if (cursorOverridesCount.empty()) {
 
-    	while (QApplication::overrideCursor())
+        while (QApplication::overrideCursor())
             QApplication::restoreOverrideCursor();
 
         return 0;
     }
 
-	setOverrideCursor(cursorOverridesCount.first().shape);
+    setOverrideCursor(cursorOverridesCount.first().shape);
     processEvents();
 
     return cursorOverridesCount.first().count;

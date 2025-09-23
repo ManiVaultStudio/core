@@ -38,7 +38,6 @@ public: // Action getters
     mv::gui::HorizontalGroupAction& getToolbarAction() { return _toolbarAction; }
 
 private:
-    
     mv::gui::TriggerAction          _toLearningCenterAction;            /** Trigger action for showing the learning center */
     mv::gui::HorizontalGroupAction  _toolbarAction;                     /** Bottom toolbar action */
     StartPageOpenProjectWidget      _openProjectWidget;                 /** Left column widget for opening existing projects */

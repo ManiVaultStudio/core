@@ -26,11 +26,11 @@ class CORE_EXPORT HardwareComponentSpec
 {
 public:
 
-	/**
+    /**
      * Construct with hardware component specification \p title
-	 * @param title hardware component specification title
-	 */
-	HardwareComponentSpec(const QString& title);
+     * @param title hardware component specification title
+     */
+    HardwareComponentSpec(const QString& title);
 
     virtual ~HardwareComponentSpec() = default;
 
@@ -40,17 +40,17 @@ public:
      */
     QString getTitle() const { return _title; }
 
-	/**
+    /**
      * Load the hardware component spec from \p variantMap
      * @param variantMap Variant map containing the hardware component spec properties
      */
     virtual void fromVariantMap(const QVariantMap& variantMap);
 
-	/**
+    /**
      * Convert the hardware component spec to a variant map
      * @return Variant map containing the hardware component spec properties
-	 */
-	virtual QVariantMap toVariantMap() const;
+     */
+    virtual QVariantMap toVariantMap() const;
 
     /**
      * Get the reason why the hardware component spec does not meet the \p required hardware component spec
@@ -107,11 +107,11 @@ protected: // Population methods
     /** Load the hardware component spec from current system */
     virtual void fromSystem() = 0;
 
-	/**
+    /**
      * Set whether the hardware spec has been initialized to \p initialized
      * @param initialized Boolean determining whether the hardware spec has been initialized
-	 */
-	void setInitialized(bool initialized = true) { _initialized = initialized; }
+     */
+    void setInitialized(bool initialized = true) { _initialized = initialized; }
 
 private:
     const QString   _title;         /** Hardware component specification title */

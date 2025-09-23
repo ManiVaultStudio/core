@@ -208,3 +208,4 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
         _createProjectFromDatasetWidget.getModel().add(fromDataPageAction);
     }
 }
+

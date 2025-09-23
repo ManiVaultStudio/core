@@ -102,16 +102,16 @@ QString getNoBytesHumanReadable(std::uint64_t byteCount, bool useIEC /*= true*/)
 
 QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex)
 {
-	static constexpr std::uint32_t tabSize = 4;
+    static constexpr std::uint32_t tabSize = 4;
 
-	QString indentation;
+    QString indentation;
 
-	for (std::uint32_t i = 0; i < tabIndex * tabSize; i++)
-		indentation += " ";
+    for (std::uint32_t i = 0; i < tabIndex * tabSize; i++)
+        indentation += " ";
 
-	message.insert(0, indentation);
+    message.insert(0, indentation);
 
-	return message;
+    return message;
 }
 
 CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha /*= true*/)
@@ -184,7 +184,7 @@ void clearLayout(QLayout* layout, bool removeWidgets)
 
     while ((layoutItem = layout->takeAt(0)) != nullptr) {
         if (removeWidgets)
-			delete layoutItem->widget();
+            delete layoutItem->widget();
 
         delete layoutItem;
     }
@@ -239,7 +239,7 @@ QIcon getAlignmentIcon(const Qt::Alignment& alignment)
         painter.setBrush(QBrush(Qt::black));
         painter.setPen(Qt::NoPen);
         painter.drawEllipse(dotPosition, radius, radius);
-	};
+    };
 
     drawCorner(Qt::AlignTop | Qt::AlignLeft);
     drawCorner(Qt::AlignTop | Qt::AlignRight);
@@ -273,7 +273,7 @@ QVariant setValueByPath(QVariant variant, const QString& path, const QVariant& v
             return {};
         }
 
-    	qWarning() << "Cannot set value: leaf not QVariantMap nor QVariantList";
+        qWarning() << "Cannot set value: leaf not QVariantMap nor QVariantList";
         return {};
     }
 
@@ -291,7 +291,7 @@ QVariant setValueByPath(QVariant variant, const QString& path, const QVariant& v
         return map;
     }
 
-	components.removeFirst();
+    components.removeFirst();
 
     map[components.first()] = setValueByPath(map[components.first()], components.join(","), value);
 
@@ -300,28 +300,28 @@ QVariant setValueByPath(QVariant variant, const QString& path, const QVariant& v
 
 QVariant getValueByPath(const QVariant& root, const QString& path, const QVariant& valueIfNotFound /*= QVariant()*/)
 {
-	QStringList     components = path.split('/', Qt::SkipEmptyParts);
-	const QVariant* current    = &root;
+    QStringList     components = path.split('/', Qt::SkipEmptyParts);
+    const QVariant* current    = &root;
 
     QVariant foundValue;
 
-	for (const QString& key : components) {
-		if (current->typeId() == QMetaType::QVariantMap) {
-			const auto map = current->toMap();
+    for (const QString& key : components) {
+        if (current->typeId() == QMetaType::QVariantMap) {
+            const auto map = current->toMap();
 
-			if (map.contains(key)) {
-				foundValue = map[key];
-			}
-			else {
-				return valueIfNotFound; // Return invalid QVariant if the key doesn't exist
-			}
-		}
-		else {
-			return valueIfNotFound; // Return invalid QVariant if the current node isn't a map
-		}
-	}
+            if (map.contains(key)) {
+                foundValue = map[key];
+            }
+            else {
+                return valueIfNotFound; // Return invalid QVariant if the key doesn't exist
+            }
+        }
+        else {
+            return valueIfNotFound; // Return invalid QVariant if the current node isn't a map
+        }
+    }
 
-	return foundValue; // Return the found value
+    return foundValue; // Return the found value
 }
 
 QString gifToBase64(const QByteArray& gifByteArray)
@@ -364,123 +364,123 @@ QString embedGifFromBase64(const QString& gifBase64)
 
 QString embedGifFromResource(const QString& resourcePath)
 {
-	try {
-		const auto gifResource = QResource(resourcePath);
+    try {
+        const auto gifResource = QResource(resourcePath);
 
-		if (!gifResource.isValid())
-			throw std::runtime_error(QString("GIF resource is not valid: %1").arg(resourcePath).toStdString());
+        if (!gifResource.isValid())
+            throw std::runtime_error(QString("GIF resource is not valid: %1").arg(resourcePath).toStdString());
 
-		const auto gifDataBase64 = gifToBase64(QByteArray(reinterpret_cast<const char*>(gifResource.data()), gifResource.size()));
+        const auto gifDataBase64 = gifToBase64(QByteArray(reinterpret_cast<const char*>(gifResource.data()), gifResource.size()));
 
-		return embedGifFromBase64(gifDataBase64);
-	}
-	catch (std::exception& e)
-	{
-		exceptionMessageBox("Unable to embed GIF image from resource", e);
-	}
-	catch (...) {
-		exceptionMessageBox("Unable to embed GIF image from resource");
-	}
+        return embedGifFromBase64(gifDataBase64);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to embed GIF image from resource", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to embed GIF image from resource");
+    }
 
-	return {};
+    return {};
 }
 
 void waitForDuration(int milliSeconds)
 {
-	QEventLoop localEventLoop;
+    QEventLoop localEventLoop;
 
-	QTimer::singleShot(milliSeconds, &localEventLoop, &QEventLoop::quit);
+    QTimer::singleShot(milliSeconds, &localEventLoop, &QEventLoop::quit);
 
-	localEventLoop.exec();
+    localEventLoop.exec();
 }
 
 void disconnectRecursively(const QObject* object)
 {
     Q_ASSERT(object);
 
-	if (!object)
-		return;
+    if (!object)
+        return;
 
     [[maybe_unused]] auto result = object->disconnect();
 
-	for (auto child : object->children())
-		disconnectRecursively(child);
+    for (auto child : object->children())
+        disconnectRecursively(child);
 }
 
 std::string replaceAll(std::string inputString, const std::string& from, const std::string& to)
 {
-	if (from.empty())
-		return inputString;
+    if (from.empty())
+        return inputString;
 
-	std::size_t pos = 0;
+    std::size_t pos = 0;
 
-	while ((pos = inputString.find(from, pos)) != std::string::npos) {
-		inputString.replace(pos, from.length(), to);
+    while ((pos = inputString.find(from, pos)) != std::string::npos) {
+        inputString.replace(pos, from.length(), to);
         
-		pos += to.length();
-	}
+        pos += to.length();
+    }
 
-	return inputString;
+    return inputString;
 }
 
 std::string stripNewLines(std::string inputString)
 {
-	inputString.erase(std::remove(inputString.begin(), inputString.end(), '\n'), inputString.end());
-	inputString.erase(std::remove(inputString.begin(), inputString.end(), '\r'), inputString.end());
+    inputString.erase(std::remove(inputString.begin(), inputString.end(), '\n'), inputString.end());
+    inputString.erase(std::remove(inputString.begin(), inputString.end(), '\r'), inputString.end());
 
-	return inputString;
+    return inputString;
 }
 
 std::string escapeCssDq(std::string inputString)
 {
-	std::string out; out.reserve(inputString.size() * 11 / 10);
+    std::string out; out.reserve(inputString.size() * 11 / 10);
 
-	for (char c : inputString) {
-		if (c == '\\' || c == '\"') out.push_back('\\');
-			out.push_back(c);
-	}
+    for (char c : inputString) {
+        if (c == '\\' || c == '\"') out.push_back('\\');
+            out.push_back(c);
+    }
 
-	return out;
+    return out;
 }
 
 QString mimeForFormat(const QByteArray& byteArray)
 {
-	const QByteArray upper = byteArray.toUpper();
+    const QByteArray upper = byteArray.toUpper();
 
-	if (upper == "PNG")
-		return "image/png";
+    if (upper == "PNG")
+        return "image/png";
 
-	if (upper == "JPG" || upper == "JPEG")
-		return "image/jpeg";
+    if (upper == "JPG" || upper == "JPEG")
+        return "image/jpeg";
 
-	if (upper == "WEBP")
-		return "image/webp";
+    if (upper == "WEBP")
+        return "image/webp";
 
-	if (upper == "BMP")
-		return "image/bmp";
+    if (upper == "BMP")
+        return "image/bmp";
 
-	if (upper == "GIF")
-		return "image/gif";
+    if (upper == "GIF")
+        return "image/gif";
     
-	return "application/octet-stream";
+    return "application/octet-stream";
 }
 
 QByteArray normalizeFormatFromSuffix(const QString& path)
 {
-	const auto suffix = QFileInfo(path).suffix().toUpper();
+    const auto suffix = QFileInfo(path).suffix().toUpper();
 
-	if (suffix == "JPG")
-		return "JPEG";
+    if (suffix == "JPG")
+        return "JPEG";
 
-	return suffix.toLatin1();
+    return suffix.toLatin1();
 }
 
 QByteArray chooseFormatForImage(const QImage& img, const QByteArray& hinted)
 {
-	if (!hinted.isEmpty())
-		return hinted.toUpper();
+    if (!hinted.isEmpty())
+        return hinted.toUpper();
 
-	if (img.hasAlphaChannel())
+    if (img.hasAlphaChannel())
         return { "PNG" };
 
     return { "JPEG" };
@@ -488,60 +488,60 @@ QByteArray chooseFormatForImage(const QImage& img, const QByteArray& hinted)
 
 QString pixmapToDataUrl(const QPixmap& pixmap, const QByteArray& fmt, int quality)
 {
-	QByteArray bytes;
-	{
-		QBuffer buf(&bytes);
+    QByteArray bytes;
+    {
+        QBuffer buf(&bytes);
 
-		buf.open(QIODevice::WriteOnly);
+        buf.open(QIODevice::WriteOnly);
 
-		pixmap.save(&buf, fmt.constData(), quality);
-	}
+        pixmap.save(&buf, fmt.constData(), quality);
+    }
 
-	const auto mime = mimeForFormat(fmt);
-	const auto b64  = bytes.toBase64();
+    const auto mime = mimeForFormat(fmt);
+    const auto b64  = bytes.toBase64();
 
-	return QStringLiteral("data:%1;base64,%2").arg(mime, QString::fromLatin1(b64));
+    return QStringLiteral("data:%1;base64,%2").arg(mime, QString::fromLatin1(b64));
 }
 
 QString applyPixmapToCss(QString css, const QPixmap& pixmap, const QByteArray& format, int quality, const QString& token)
 {
-	const auto dataUrl = pixmapToDataUrl(pixmap, format, quality);
-	const auto urlExpr = QStringLiteral("url(%1)").arg(dataUrl);
+    const auto dataUrl = pixmapToDataUrl(pixmap, format, quality);
+    const auto urlExpr = QStringLiteral("url(%1)").arg(dataUrl);
 
-	QRegularExpression regularExpression(QStringLiteral(R"(url\(\s*(['"]?)%1\1\s*\))").arg(QRegularExpression::escape(token)));
+    QRegularExpression regularExpression(QStringLiteral(R"(url\(\s*(['"]?)%1\1\s*\))").arg(QRegularExpression::escape(token)));
 
-	if (regularExpression.match(css).hasMatch())
-		css.replace(regularExpression, urlExpr);
-	else
-		css.replace(token, dataUrl);
+    if (regularExpression.match(css).hasMatch())
+        css.replace(regularExpression, urlExpr);
+    else
+        css.replace(token, dataUrl);
 
-	return css;
+    return css;
 }
 
 QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token, float scaleFactor, int quality)
 {
-	QImageReader reader(pathOrResource);
+    QImageReader reader(pathOrResource);
 
-	auto sourceFormat = reader.format();
+    auto sourceFormat = reader.format();
 
-	if (sourceFormat.isEmpty())
-		sourceFormat = normalizeFormatFromSuffix(pathOrResource);
+    if (sourceFormat.isEmpty())
+        sourceFormat = normalizeFormatFromSuffix(pathOrResource);
 
-	QImage image;
+    QImage image;
 
-	if (!reader.read(&image))
-	{
-		qWarning() << "applyResourceImageToCss: failed to read" << pathOrResource << "error:" << reader.errorString();
+    if (!reader.read(&image))
+    {
+        qWarning() << "applyResourceImageToCss: failed to read" << pathOrResource << "error:" << reader.errorString();
 
-		return css;
-	}
+        return css;
+    }
 
-	const auto encodingFormat = chooseFormatForImage(image, sourceFormat);
+    const auto encodingFormat = chooseFormatForImage(image, sourceFormat);
 
-	auto pixmap = QPixmap::fromImage(image);
+    auto pixmap = QPixmap::fromImage(image);
 
     pixmap = pixmap.scaledToHeight(pixmap.height() * scaleFactor);
 
-	return applyPixmapToCss(css, pixmap, encodingFormat, quality, token);
+    return applyPixmapToCss(css, pixmap, encodingFormat, quality, token);
 }
 }

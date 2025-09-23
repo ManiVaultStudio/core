@@ -11,7 +11,7 @@
 #include <QFuture>
 
 #ifdef _DEBUG
-	#define PROJECTS_MODEL_PROJECT_VERBOSE
+    #define PROJECTS_MODEL_PROJECT_VERBOSE
 #endif
 
 namespace mv::util {
@@ -29,15 +29,15 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _url(QUrl(variantMap.contains("url") ? variantMap["url"].toString() : "")),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
-	_startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false),
-	_projectsJsonDsn(variantMap.contains("projectsJsonDsn") ? variantMap["projectsJsonDsn"].toUrl() : QUrl()),
+    _startup(variantMap.contains("startup") ? variantMap["startup"].toBool() : false),
+    _projectsJsonDsn(variantMap.contains("projectsJsonDsn") ? variantMap["projectsJsonDsn"].toUrl() : QUrl()),
     _expanded(false)
 {
     if (variantMap.contains("coreVersion")) {
         const auto coreVersionMap = variantMap["coreVersion"].toMap();
 
         if (coreVersionMap.contains("major"))
-			_minimumCoreVersion.setMajor(coreVersionMap["major"].toInt());
+            _minimumCoreVersion.setMajor(coreVersionMap["major"].toInt());
 
         if (coreVersionMap.contains("minor"))
             _minimumCoreVersion.setMinor(coreVersionMap["minor"].toInt());
@@ -87,7 +87,7 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _title(groupTitle),
     _serverDownloadSize(0),
-	_isGroup(true),
+    _isGroup(true),
     _iconName("folder"),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
@@ -146,7 +146,7 @@ QString ProjectsModelProject::getDownloadSizeHumanReadable() const
 
 bool ProjectsModelProject::isDownloaded() const
 {
-	QFileInfo fileInfo(getDownloadedProjectFilePath());
+    QFileInfo fileInfo(getDownloadedProjectFilePath());
 
     fileInfo.refresh();
 
@@ -248,14 +248,14 @@ HardwareSpec ProjectsModelProject::getRecommendedHardwareSpec() const
 
 bool ProjectsModelProject::isStartup() const
 {
-	return _startup;
+    return _startup;
 }
 
 QString ProjectsModelProject::getSha() const
 {
     const_cast<ProjectsModelProject*>(this)->computeSha();
 
-	return _sha;
+    return _sha;
 }
 
 QUrl ProjectsModelProject::getProjectsJsonDsn() const
@@ -265,12 +265,12 @@ QUrl ProjectsModelProject::getProjectsJsonDsn() const
 
 void ProjectsModelProject::setProjectsJsonDsn(const QUrl& projectsJsonDsn)
 {
-	_projectsJsonDsn = projectsJsonDsn;
+    _projectsJsonDsn = projectsJsonDsn;
 }
 
 bool ProjectsModelProject::isExpanded() const
 {
-	return _expanded;
+    return _expanded;
 }
 
 void ProjectsModelProject::setExpanded(bool expanded)
@@ -278,7 +278,7 @@ void ProjectsModelProject::setExpanded(bool expanded)
     if (expanded == _expanded)
         return;
 
-	_expanded = expanded;
+    _expanded = expanded;
 
     updateIcon();
     updateTooltip();
@@ -316,7 +316,7 @@ void ProjectsModelProject::determineDownloadSize()
                 _serverDownloadSize = future.result();
 
                 emit downloadSizeDetermined(_serverDownloadSize);
-			});
+            });
         }
         catch (const BaseException& exception) {
             emit downloadSizeDetermined(0);
@@ -326,16 +326,16 @@ void ProjectsModelProject::determineDownloadSize()
         catch (const std::exception& exception) {
             emit downloadSizeDetermined(0);
 
-        	qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
+            qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
         }
         catch (...) {
             emit downloadSizeDetermined(0);
 
-        	qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
+            qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
         }
 
         watcher->deleteLater();
-	});
+    });
 
     watcher->setFuture(future);
 }
@@ -361,7 +361,7 @@ void ProjectsModelProject::determineLastModified()
                 _serverLastModified = future.result();
 
                 emit lastModifiedDetermined(_serverLastModified);
-			});
+            });
         }
         catch (const BaseException& exception) {
             emit lastModifiedDetermined({});
@@ -371,12 +371,12 @@ void ProjectsModelProject::determineLastModified()
         catch (const std::exception& exception) {
             emit lastModifiedDetermined({});
 
-        	qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << exception.what();
+            qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << exception.what();
         }
         catch (...) {
             emit lastModifiedDetermined({});
 
-        	qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
+            qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << ", an unknown exception occurred";
         }
 
         watcher->deleteLater();
@@ -406,16 +406,16 @@ void ProjectsModelProject::updateIcon()
     } else {
         if (isDownloaded()) {
             switch (HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec())._compatibility) {
-	            case HardwareSpec::SystemCompatibility::Incompatible:
-	            case HardwareSpec::SystemCompatibility::Minimum:
+                case HardwareSpec::SystemCompatibility::Incompatible:
+                case HardwareSpec::SystemCompatibility::Minimum:
                     _icon = StyledIcon("file-circle-exclamation");
                     break;
 
-	            case HardwareSpec::SystemCompatibility::Compatible:
+                case HardwareSpec::SystemCompatibility::Compatible:
                     _icon = StyledIcon("file-circle-check");
                     break;
 
-	            case HardwareSpec::SystemCompatibility::Unknown:
+                case HardwareSpec::SystemCompatibility::Unknown:
                     _icon = StyledIcon("file-circle-question");
                     break;
             }
@@ -438,14 +438,14 @@ void ProjectsModelProject::updateTooltip()
             const auto systemCompatibility = HardwareSpec::getSystemCompatibility(getMinimumHardwareSpec(), getRecommendedHardwareSpec());
 
             switch (systemCompatibility._compatibility) {
-	            case HardwareSpec::SystemCompatibility::Incompatible:
-	            case HardwareSpec::SystemCompatibility::Minimum:
-	            case HardwareSpec::SystemCompatibility::Compatible:
-	            case HardwareSpec::SystemCompatibility::Unknown:
-	            {
+                case HardwareSpec::SystemCompatibility::Incompatible:
+                case HardwareSpec::SystemCompatibility::Minimum:
+                case HardwareSpec::SystemCompatibility::Compatible:
+                case HardwareSpec::SystemCompatibility::Unknown:
+                {
                     _tooltip = QString("<p><b>Click to open the project</b></p><p>%1</p>").arg(systemCompatibility._message);
-					break;
-	            }
+                    break;
+                }
 
             }
         }
@@ -459,7 +459,7 @@ void ProjectsModelProject::updateTooltip()
 
 QString ProjectsModelProject::getDownloadedProjectFilePath() const
 {
-	return mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
+    return mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
 }
 
 std::uint64_t ProjectsModelProject::getDownloadedProjectFileSize() const
@@ -467,7 +467,7 @@ std::uint64_t ProjectsModelProject::getDownloadedProjectFileSize() const
     if (const auto downloadedProjectFilePath = getDownloadedProjectFilePath(); !downloadedProjectFilePath.isEmpty()) {
         QFileInfo fileInfo(downloadedProjectFilePath);
 
-    	if (fileInfo.exists() && fileInfo.isFile())
+        if (fileInfo.exists() && fileInfo.isFile())
             return fileInfo.size();
     }
 

@@ -128,7 +128,7 @@ void EventManager::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
         if (core()->isAboutToBeDestroyed())
             return;
 
-    	DatasetAddedEvent dataEvent(dataset);
+        DatasetAddedEvent dataEvent(dataset);
 
         const auto eventListeners = _eventListeners;
 

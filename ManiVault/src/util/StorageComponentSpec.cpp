@@ -63,9 +63,9 @@ void StorageComponentSpec::fromVariantMap(const QVariantMap& variantMap)
 
         const auto storageString = variantMap.value("storage", 0).toString();
 
-    	_numberOfBytesAvailableInAppData = parseByteSize(storageString);
+        _numberOfBytesAvailableInAppData = parseByteSize(storageString);
 
-    	setInitialized();
+        setInitialized();
     }
     catch (std::exception& e)
     {

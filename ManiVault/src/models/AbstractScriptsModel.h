@@ -110,12 +110,12 @@ public:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Language";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Language";
 
-	            case Qt::ToolTipRole:
-	                return "Script language";
+                case Qt::ToolTipRole:
+                    return "Script language";
             }
 
             return {};
@@ -143,12 +143,12 @@ public:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Location";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Location";
 
-	            case Qt::ToolTipRole:
-	                return "Script location";
+                case Qt::ToolTipRole:
+                    return "Script location";
             }
 
             return {};

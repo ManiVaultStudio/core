@@ -184,7 +184,7 @@ protected: // Sub-actions
      */
     const PageSubActionPtrs& getSubActions() const { return _subActions; }
 
-	/**
+    /**
      * Get sub-actions
      * @return List of sub-actions
      */

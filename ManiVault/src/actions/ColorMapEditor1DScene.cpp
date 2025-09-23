@@ -18,7 +18,7 @@ ColorMapEditor1DScene::ColorMapEditor1DScene(ColorMapEditor1DWidget& colorMapEdi
 {
     const auto updateCustomStyle = [this]() -> void {
         setBackgroundBrush(qApp->palette().color(QPalette::ColorGroup::Normal, QPalette::ColorRole::Window));
-	};
+    };
 
     updateCustomStyle();
 

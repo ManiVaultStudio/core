@@ -310,59 +310,59 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 {
     try {
 #ifdef DATA_MANAGER_VERBOSE
-    	qDebug() << "Remove dataset" << dataset->getGuiName() << "from the data manager";
+        qDebug() << "Remove dataset" << dataset->getGuiName() << "from the data manager";
 #endif
 
-    	if (!dataset.isValid())
-    		throw std::runtime_error("Dataset smart pointer is invalid");
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset smart pointer is invalid");
 
-    	if (dataset->isLocked()) {
+        if (dataset->isLocked()) {
 
 #ifdef DATA_MANAGER_VERBOSE
-    		qDebug() << "Dataset is locked and will be removed as soon as it is un-locked";
+            qDebug() << "Dataset is locked and will be removed as soon as it is un-locked";
 #endif
 
-    		connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this, dataset](bool locked) -> void {
-				disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, nullptr);
+            connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this, dataset](bool locked) -> void {
+                disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, nullptr);
 
-				if (!locked)
-					removeDataset(dataset);
-				});
-    	}
-
-    	const auto datasetId = dataset->getId();
-        const auto datasetDataType = dataset->getDataType();
-    	const auto rawDataName = dataset->getRawDataName();
-
-    	dataset->setAboutToBeRemoved();
-
-    	for (const auto& underiveDataset : _datasets) {
-    		if (underiveDataset->isDerivedData() && underiveDataset->getNextSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
-    			if (underiveDataset->mayUnderive()) {
-    				underiveDataset->_derived = false;
-    				underiveDataset->setSourceDataset(Dataset<DatasetImpl>());
-    			}
-    			else {
-    				removeDataset(underiveDataset.get());
-    			}
-    		}
-    	}
-
-        if (!mv::core()->isAboutToBeDestroyed()) {
-	        for (const auto dataHierarchyItem : dataset->getDataHierarchyItem().getChildren()) {
-	        	if (!dataHierarchyItem->getDataset()->mayUnderive())
-	        		removeDataset(dataHierarchyItem->getDataset());
-	        	else
-	        		dataHierarchyItem->setParent(nullptr);
-	        }
+                if (!locked)
+                    removeDataset(dataset);
+                });
         }
 
-    	dataset->setLocked(true);
+        const auto datasetId = dataset->getId();
+        const auto datasetDataType = dataset->getDataType();
+        const auto rawDataName = dataset->getRawDataName();
 
-    	if (!mv::core()->isAboutToBeDestroyed()) {
-    		events().notifyDatasetAboutToBeRemoved(dataset);
-    		emit datasetAboutToBeRemoved(dataset);
-		}
+        dataset->setAboutToBeRemoved();
+
+        for (const auto& underiveDataset : _datasets) {
+            if (underiveDataset->isDerivedData() && underiveDataset->getNextSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
+                if (underiveDataset->mayUnderive()) {
+                    underiveDataset->_derived = false;
+                    underiveDataset->setSourceDataset(Dataset<DatasetImpl>());
+                }
+                else {
+                    removeDataset(underiveDataset.get());
+                }
+            }
+        }
+
+        if (!mv::core()->isAboutToBeDestroyed()) {
+            for (const auto dataHierarchyItem : dataset->getDataHierarchyItem().getChildren()) {
+                if (!dataHierarchyItem->getDataset()->mayUnderive())
+                    removeDataset(dataHierarchyItem->getDataset());
+                else
+                    dataHierarchyItem->setParent(nullptr);
+            }
+        }
+
+        dataset->setLocked(true);
+
+        if (!mv::core()->isAboutToBeDestroyed()) {
+            events().notifyDatasetAboutToBeRemoved(dataset);
+            emit datasetAboutToBeRemoved(dataset);
+        }
 
         const auto it = std::find_if(_datasets.begin(), _datasets.end(), [datasetId](const auto& datasetPtr) -> bool {
             return datasetId == datasetPtr->getId();
@@ -381,10 +381,10 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         if (shouldRemoveRawData)
             removeRawData(rawDataName);
 
-	    if (!mv::core()->isAboutToBeDestroyed()) {
-		    events().notifyDatasetRemoved(datasetId, datasetDataType);
-    		emit datasetRemoved(datasetId);
-	    }
+        if (!mv::core()->isAboutToBeDestroyed()) {
+            events().notifyDatasetRemoved(datasetId, datasetDataType);
+            emit datasetRemoved(datasetId);
+        }
     }
     catch (std::exception& e)
     {

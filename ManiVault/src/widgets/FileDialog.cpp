@@ -52,7 +52,7 @@ QUrl FileDialog::getOpenFileUrl(QWidget* parent, const QString& caption, const Q
     fileOpenDialog.setDirectoryUrl(directoryUrl);
     fileOpenDialog.setNameFilter(filter);
     fileOpenDialog.setOptions(options);
-	fileOpenDialog.setSupportedSchemes(supportedSchemes);
+    fileOpenDialog.setSupportedSchemes(supportedSchemes);
 
     if (selectedFilter && !selectedFilter->isEmpty())
         fileOpenDialog.selectNameFilter(*selectedFilter);
@@ -102,7 +102,7 @@ QUrl FileDialog::getExistingDirectoryUrl(QWidget* parent, const QString& caption
 }
 
 FileOpenDialog::FileOpenDialog(QWidget* parent, const QString& caption, const QString& directory, const QString& filter) :
-	FileDialog(parent, caption, directory, filter)
+    FileDialog(parent, caption, directory, filter)
 {
 #ifdef FILE_DIALOG_VERBOSE
     qDebug() << __FUNCTION__;
@@ -126,7 +126,7 @@ DirectoryOpenDialog::DirectoryOpenDialog(QWidget* parent, const QString& caption
 }
 
 FileSaveDialog::FileSaveDialog(QWidget* parent, const QString& caption, const QString& directory, const QString& filter) :
-	FileDialog(parent, caption, directory, filter)
+    FileDialog(parent, caption, directory, filter)
 {
 #ifdef FILE_DIALOG_VERBOSE
     qDebug() << __FUNCTION__;

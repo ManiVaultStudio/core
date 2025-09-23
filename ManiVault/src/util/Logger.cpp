@@ -335,17 +335,17 @@ std::mutex& Logger::getMutex()
 
 QString MessageRecord::toString() const
 {
-	QStringList items;
+    QStringList items;
 
-	items << QString::number(number);
-	items << Logger::getMessageTypeName(type);
-	items << QString(file);
-	items << QString::number(line);
-	items << QString(function);
-	items << QString(category);
-	items << message;
+    items << QString::number(number);
+    items << Logger::getMessageTypeName(type);
+    items << QString(file);
+    items << QString::number(line);
+    items << QString(function);
+    items << QString(category);
+    items << message;
 
-	return items.join("\t");
+    return items.join("\t");
 }
 
 }

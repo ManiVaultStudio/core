@@ -240,13 +240,13 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
     switch (event->type())
     {
-		case QEvent::Enter:
-	    {
+        case QEvent::Enter:
+        {
             if (getType() == PixelSelectionType::Sample)
                 _active = true;
                 
             break;
-	    }
+        }
 
         case QEvent::Leave:
         {

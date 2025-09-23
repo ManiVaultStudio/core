@@ -128,7 +128,7 @@ public:
         AbstractManager(parent, "Project"),
         _state(State::Idle),
         _projectSerializationTask(this, "Project serialization"),
-		_projectDownloadTask(this, "Project Download", { Task::GuiScope::Modal })
+        _projectDownloadTask(this, "Project Download", { Task::GuiScope::Modal })
     {
     }
 

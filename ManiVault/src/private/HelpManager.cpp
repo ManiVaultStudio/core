@@ -124,7 +124,7 @@ void HelpManager::initialize()
 
                     const auto& data = future.result();
 
-                	json fullJson = json::parse(QString::fromUtf8(data).toStdString());
+                    json fullJson = json::parse(QString::fromUtf8(data).toStdString());
 
                     if (fullJson.contains("videos")) {
                         validateJson(fullJson["videos"].dump(), videosDsn, loadJsonFromResource(":/JSON/VideosSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/VideosSchema.json");
@@ -149,7 +149,7 @@ void HelpManager::initialize()
                     }
 
                     emit videosModelPopulatedFromWebsite();
-				});
+                });
             }
             catch (const BaseException& exception) {
                 qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
@@ -162,7 +162,7 @@ void HelpManager::initialize()
             }
 
             watcher->deleteLater();
-		});
+        });
 
         watcher->setFuture(future);
 
@@ -178,7 +178,7 @@ void HelpManager::initialize()
             for (int filterModelRowIndex = first; filterModelRowIndex <= last; filterModelRowIndex++) {
                 const auto sourceModelIndex = _tasksFilterModel.mapToSource(_tasksFilterModel.index(filterModelRowIndex, 0));
 
-            	auto task = _tasksModel.getTask(sourceModelIndex.row());
+                auto task = _tasksModel.getTask(sourceModelIndex.row());
 
                 // Avoid polluting the toaster with too many task-based notifications; only add task notifications for tasks that are running or running indeterminate after 500ms
                 QTimer::singleShot(500, this, [this, task, sourceModelIndex]() -> void {
@@ -330,7 +330,7 @@ QMenu* HelpManager::getTutorialsMenu() const
                     if (auto toolbarAction = dynamic_cast<HorizontalGroupAction*>(tutorialPlugin->findChildByPath("Toolbar")))
                         toolbarAction->setVisible(false);
                 }
-			});
+            });
         }
 
         tutorialsMenu->addAction(tutorialAction);

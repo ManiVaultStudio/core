@@ -45,7 +45,7 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
                 qDebug() << _markdownUrl.toString() << "downloaded (" << data.size() << "bytes)";
 #endif
 
-            	if (!data.isEmpty())
+                if (!data.isEmpty())
                     _markdownDocument.setText(data);
                 else
                     _markdownDocument.setText(QString("# Unable to display markdown file\n*%1* not found").arg(_markdownUrl.toString()));

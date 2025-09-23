@@ -52,7 +52,7 @@ protected:
 
 public: // Getters
 
-	QString getId() const { return _id; }
+    QString getId() const { return _id; }
     QString getTitle() const { return _title; }
     QString getValue() const { return _value; }
     QString getDescription() const { return _description; }

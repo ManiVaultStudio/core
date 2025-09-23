@@ -160,10 +160,10 @@ void MainWindow::checkGraphicsCapabilities()
 void MainWindow::initialize()
 {
     if (centralWidget()) {
-	    qDebug() << "Main window already initialized";
+        qDebug() << "Main window already initialized";
         return;
     }
-		
+        
     auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
 
     auto customizeApplicationShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_F8), this);

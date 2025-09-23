@@ -116,7 +116,7 @@ public:
         setCategoryIconByName("square-root-variable");
     }
 
-	~AnalysisPluginFactory() override = default;
+    ~AnalysisPluginFactory() override = default;
 
     AnalysisPlugin* produce() override = 0;
 };

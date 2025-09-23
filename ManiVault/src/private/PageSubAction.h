@@ -63,7 +63,7 @@ public:
 
 public: // Callbacks
 
-	/**
+    /**
      * Get the clicked callback
      * @return ClickedCallback that is called when the sub-action is clicked
      */
@@ -73,7 +73,7 @@ public: // Callbacks
      * Set the clicked callback to \p clickedCallback
      * @param clickedCallback ClickedCallback that is called when the sub-action is clicked
      */
-	void setClickedCallback(const ClickedCallback& clickedCallback);
+    void setClickedCallback(const ClickedCallback& clickedCallback);
 
     /**
      * Get the tooltip callback
@@ -113,11 +113,11 @@ class CommentsPageSubAction : public PageSubAction
 {
 public:
 
-	/**
+    /**
      * Construct with \p comments
-	 * @param comments Comments to display
-	 */
-	CommentsPageSubAction(const QString& comments);
+     * @param comments Comments to display
+     */
+    CommentsPageSubAction(const QString& comments);
 };
 
 /** For displaying tags */

@@ -183,7 +183,7 @@ public:
      * Get the shared network access manager instance
      * @return Reference to the shared QNetworkAccessManager instance
      */
-	static SecureNetworkAccessManager& sharedManager();
+    static SecureNetworkAccessManager& sharedManager();
 
     /** 
      * Download file to byte array asynchronously
@@ -262,16 +262,16 @@ private:
 
                 state->finished = true;
 
-            	std::forward<decltype(fn)>(fn)();
+                std::forward<decltype(fn)>(fn)();
 
-            	promise->finish();
-			};
+                promise->finish();
+            };
 
             // Abort handling (user clicks on cancel in the UI, task->abort() is called)
             if (task) {
                 connect(task, &Task::requestAbort, reply, [reply, state, task]() {
 
-                	// Guard network reply access
+                    // Guard network reply access
                     QPointer<QNetworkReply> safeReply = reply;
 
                     // Abort the download if we have a valid reply
@@ -283,7 +283,7 @@ private:
                     safeReply->abort();
 
                     // Also abort te task
-                	if (task)
+                    if (task)
                         task->setAborted();
                 });
             }
@@ -332,7 +332,7 @@ private:
                 // Guard network reply access
                 auto safeReply = QPointer<QNetworkReply>(reply);
 
-            	if (!openIfNeeded(safeReply))
+                if (!openIfNeeded(safeReply))
                     return;
 
                 while (reply->bytesAvailable() > 0) {
@@ -372,7 +372,7 @@ private:
 
                 const auto urlDisplayString = reply->url().toDisplayString().toHtmlEscaped();
 
-				if (statusVar.isValid()) {
+                if (statusVar.isValid()) {
                     const int status = statusVar.toInt();
 
                     if (status < 200 || status >= 300) {
@@ -390,10 +390,10 @@ private:
 
                         finishOnce([safeReply]() {
                             safeReply->deleteLater();
-						});
+                        });
 
                         return;
-					}
+                    }
                 }
 
                 if (safeReply->error() == QNetworkReply::NoError) {
@@ -434,7 +434,7 @@ private:
                         task->setAborted();
                     }
 
-                	notifyError(urlDisplayString, errorString);
+                    notifyError(urlDisplayString, errorString);
 
                     promise->setException(std::make_exception_ptr(Exception(errorString)));
 

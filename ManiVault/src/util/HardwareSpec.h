@@ -181,7 +181,7 @@ public: // Conditional
 
 public: // System hardware specification
 
-	/**
+    /**
      * Get system hardware specification
      * @return System hardware specification
      */

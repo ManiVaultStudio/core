@@ -49,9 +49,9 @@ void RecentFilesListModel::save() const
 
     for (const auto& recentFile : getRecentFiles()) {
         QVariantMap recentFileMap{
-	        { "FilePath", recentFile.getFilePath() },
-	        { "DateTime", recentFile.getDateTime() }
-	    };
+            { "FilePath", recentFile.getFilePath() },
+            { "DateTime", recentFile.getDateTime() }
+        };
 
         recentFileMaps << recentFileMap;
     }
@@ -64,10 +64,10 @@ void RecentFilesListModel::addRecentFilePath(const QString& filePath)
     removeRecentFilePath(filePath);
     appendRow(Row(RecentFile(filePath, QDateTime::currentDateTime())));
 
-	while (rowCount() > maxRecentFiles)
+    while (rowCount() > maxRecentFiles)
         removeRow(rowCount() - 1);
 
-	save();
+    save();
 
     emit populated();
 }
@@ -76,7 +76,7 @@ void RecentFilesListModel::removeRecentFilePath(const QString& filePath)
 {
     const auto matches = match(index(0, static_cast<std::int32_t>(Column::FilePath)), Qt::DisplayRole, filePath, -1, Qt::MatchExactly | Qt::MatchRecursive);
 
-	for (const auto& match : matches)
+    for (const auto& match : matches)
         if (match.isValid())
             removeRow(match.row(), match.parent());
 
@@ -103,7 +103,7 @@ RecentFiles RecentFilesListModel::getRecentFiles() const
         const auto filePath = data(index(rowIndex, static_cast<int>(Column::FilePath))).toString();
         const auto dateTime = data(index(rowIndex, static_cast<int>(Column::DateTime)), Qt::EditRole).toDateTime();
 
-    	if (!filePath.isEmpty())
+        if (!filePath.isEmpty())
             recentFiles.emplace_back(RecentFile(filePath, dateTime));
     }
 

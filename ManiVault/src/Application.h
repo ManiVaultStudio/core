@@ -339,7 +339,7 @@ protected:
     gui::ApplicationConfigurationAction     _configurationAction;               /** Application configuration action */
 
     /** Count of cursor overrides for each cursor shape */
-	static QList<CursorShapeCount> cursorOverridesCount;
+    static QList<CursorShapeCount> cursorOverridesCount;
 };
 
 }

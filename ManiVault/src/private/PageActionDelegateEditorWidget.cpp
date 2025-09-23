@@ -175,9 +175,9 @@ void PageActionDelegateEditorWidget::updateTooltip()
 void PageActionDelegateEditorWidget::updateMetadata()
 {
     if (_pageAction) {
-    	_metaDataLabel.setText(_pageAction->getMetaData());
+        _metaDataLabel.setText(_pageAction->getMetaData());
 
-    	updateCustomStyle();
+        updateCustomStyle();
     }
 }
 

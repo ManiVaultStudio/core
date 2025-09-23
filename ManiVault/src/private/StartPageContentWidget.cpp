@@ -64,3 +64,4 @@ void StartPageContentWidget::updateActions()
     _openProjectWidget.updateActions();
     _getStartedWidget.updateActions();
 }
+

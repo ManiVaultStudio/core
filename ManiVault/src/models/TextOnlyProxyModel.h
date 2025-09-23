@@ -55,7 +55,7 @@ signals:
      * Signals that the completion column changed to \p column
      * @param column Column index of the completion column
      */
-	void completionColumnChanged(std::int32_t column);
+    void completionColumnChanged(std::int32_t column);
 
 private:
     int      _completionColumn = 0;

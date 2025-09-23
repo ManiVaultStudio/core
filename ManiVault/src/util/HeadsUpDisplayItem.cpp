@@ -19,7 +19,7 @@ HeadsUpDisplayItem::HeadsUpDisplayItem(const QString& title, const QString& valu
 
 void HeadsUpDisplayItem::setIndex(const QPersistentModelIndex& index)
 {
-	_index = index;
+    _index = index;
 }
 
 }

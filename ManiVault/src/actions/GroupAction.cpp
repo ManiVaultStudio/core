@@ -355,7 +355,7 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
                     break;
                 }
 
-				case LabelSizingType::Fixed:
+                case LabelSizingType::Fixed:
                     break;
             }
         }
@@ -485,9 +485,9 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
                 layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this, widgetConfigurationFunction));
             } else {
                 if (action->getStretch() >= 1)
-					layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags), action->getStretch());
+                    layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags), action->getStretch());
                 else
-					layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags));
+                    layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags));
             }
         }
 

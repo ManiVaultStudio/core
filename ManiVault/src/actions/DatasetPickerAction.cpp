@@ -307,7 +307,7 @@ void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
     if (isValueSerializationDisabled())
         return;
 
-	variantMapMustContain(variantMap, "Value");
+    variantMapMustContain(variantMap, "Value");
 
     setCurrentDataset(variantMap["Value"].toString());
 }
@@ -318,7 +318,7 @@ QVariantMap DatasetPickerAction::toVariantMap() const
 
     if (!isValueSerializationDisabled()) {
         variantMap.insert({
-			{ "Value", getCurrentDatasetId() }
+            { "Value", getCurrentDatasetId() }
         });
     }
 

@@ -74,12 +74,12 @@ public:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Title";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Title";
 
-	            case Qt::ToolTipRole:
-	                return "Item title";
+                case Qt::ToolTipRole:
+                    return "Item title";
             }
 
             return {};
@@ -107,12 +107,12 @@ public:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Value";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Value";
 
-	            case Qt::ToolTipRole:
-	                return "Item value";
+                case Qt::ToolTipRole:
+                    return "Item value";
             }
 
             return {};
@@ -140,12 +140,12 @@ public:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Description";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Description";
 
-	            case Qt::ToolTipRole:
-	                return "Item description";
+                case Qt::ToolTipRole:
+                    return "Item description";
             }
 
             return {};
@@ -173,12 +173,12 @@ public:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "ID";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "ID";
 
-	            case Qt::ToolTipRole:
-	                return "Globally unique identifier";
+                case Qt::ToolTipRole:
+                    return "Globally unique identifier";
             }
 
             return {};
@@ -197,7 +197,7 @@ protected:
          * @param headsUpDisplayItem Shared pointer to heads-up display item
          */
         Row(const util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem) :
-    		QList<QStandardItem*>()
+            QList<QStandardItem*>()
         {
             append(new TitleItem(headsUpDisplayItem));
             append(new ValueItem(headsUpDisplayItem));

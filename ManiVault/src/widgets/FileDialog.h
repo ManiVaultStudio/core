@@ -39,7 +39,7 @@ public:
      */
     QSize sizeHint() const override {
         if (testOption(DontUseNativeDialog))
-			return { 800, 600 };
+            return { 800, 600 };
 
         return QFileDialog::sizeHint();
     }

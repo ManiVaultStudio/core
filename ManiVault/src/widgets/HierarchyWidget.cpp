@@ -297,7 +297,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         connect(_filterModel, &QAbstractItemModel::modelReset, this, &HierarchyWidget::updateOverlayWidget);
     }
     else {
-    	connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
+        connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
         connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateHeaderVisibility);
 
         connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateOverlayWidget);
@@ -368,7 +368,7 @@ QModelIndex HierarchyWidget::toSourceModelIndex(const QModelIndex& modelIndex) c
 
 void HierarchyWidget::showEvent(QShowEvent* event)
 {
-	QWidget::showEvent(event);
+    QWidget::showEvent(event);
 
     updateOverlayWidget();
 }
@@ -606,7 +606,7 @@ void HierarchyWidget::updateFilterModel()
 
 void HierarchyWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-	Serializable::fromVariantMap(variantMap);
+    Serializable::fromVariantMap(variantMap);
 
     _filterNameAction.fromParentVariantMap(variantMap);
     _filterColumnAction.fromParentVariantMap(variantMap);
@@ -617,7 +617,7 @@ void HierarchyWidget::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap HierarchyWidget::toVariantMap() const
 {
-	auto variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     _filterNameAction.insertIntoVariantMap(variantMap);
     _filterColumnAction.insertIntoVariantMap(variantMap);

@@ -76,15 +76,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "File path";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "File path";
 
-	            case Qt::ToolTipRole:
-	                return "Recent file path";
+                case Qt::ToolTipRole:
+                    return "Recent file path";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -112,15 +112,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Date & time";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Date & time";
 
-	            case Qt::ToolTipRole:
-	                return "Recent file date and time";
+                case Qt::ToolTipRole:
+                    return "Recent file date and time";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};

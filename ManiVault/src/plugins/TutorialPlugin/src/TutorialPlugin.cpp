@@ -123,7 +123,7 @@ void TutorialPlugin::fromVariantMap(const QVariantMap& variantMap)
 
     _autoOpenProject = false;
     {
-	    _tutorialPickerAction.fromParentVariantMap(variantMap);
+        _tutorialPickerAction.fromParentVariantMap(variantMap);
     }
     _autoOpenProject = true;
 
@@ -140,7 +140,7 @@ QVariantMap TutorialPlugin::toVariantMap() const
 }
 
 TutorialPluginFactory::TutorialPluginFactory() :
-	ViewPluginFactory(false, true)
+    ViewPluginFactory(false, true)
 {
     setIconByName("chalkboard");
 
@@ -149,7 +149,7 @@ TutorialPluginFactory::TutorialPluginFactory() :
     getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setAuthors({
         { "T. Kroes", { "Lead software architect" }, { "LUMC" } }
-	});
+    });
     getPluginMetadata().setOrganizations({
         { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
         { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }

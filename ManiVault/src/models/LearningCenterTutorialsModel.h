@@ -30,7 +30,7 @@ public:
 
     /** Model columns */
     enum class Column {
-    	Title,
+        Title,
         Tags,
         Date,
         IconName,
@@ -207,15 +207,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Icon name";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Icon name";
 
-	            case Qt::ToolTipRole:
-	                return "Tutorial Font Awesome icon name";
+                case Qt::ToolTipRole:
+                    return "Tutorial Font Awesome icon name";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -243,15 +243,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Summary";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Summary";
 
-	            case Qt::ToolTipRole:
-	                return "Tutorial description";
+                case Qt::ToolTipRole:
+                    return "Tutorial description";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -279,15 +279,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Content";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Content";
 
-	            case Qt::ToolTipRole:
-	                return "Tutorial content";
+                case Qt::ToolTipRole:
+                    return "Tutorial content";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -387,15 +387,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Min. app core version";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Min. app core version";
 
-	            case Qt::ToolTipRole:
-	                return "Minimum ManiVault Studio application core version";
+                case Qt::ToolTipRole:
+                    return "Minimum ManiVault Studio application core version";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -423,15 +423,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Required plugins";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Required plugins";
 
-	            case Qt::ToolTipRole:
-	                return "Required plugins for the tutorial";
+                case Qt::ToolTipRole:
+                    return "Required plugins for the tutorial";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -459,15 +459,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Missing plugins";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Missing plugins";
 
-	            case Qt::ToolTipRole:
-	                return "Missing plugins for the tutorial";
+                case Qt::ToolTipRole:
+                    return "Missing plugins for the tutorial";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -486,7 +486,7 @@ protected:
         Row(const util::LearningCenterTutorial* tutorial) :
             QList<QStandardItem*>()
         {
-        	append(new TitleItem(tutorial));
+            append(new TitleItem(tutorial));
             append(new TagsItem(tutorial));
             append(new DateItem(tutorial));
             append(new IconNameItem(tutorial));

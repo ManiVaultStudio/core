@@ -11,16 +11,16 @@ namespace mv::util
 {
 
 HttpsErrorReply::HttpsErrorReply(const QNetworkRequest& request, QObject* parent) :
-	QNetworkReply(parent)
+    QNetworkReply(parent)
 {
-	setRequest(request);
-	setUrl(request.url());
-	setOperation(QNetworkAccessManager::GetOperation);
-	setError(QNetworkReply::ProtocolUnknownError, "Only HTTPS is allowed");
+    setRequest(request);
+    setUrl(request.url());
+    setOperation(QNetworkAccessManager::GetOperation);
+    setError(QNetworkReply::ProtocolUnknownError, "Only HTTPS is allowed");
 
-	open(QIODevice::ReadOnly);
+    open(QIODevice::ReadOnly);
 
-	QTimer::singleShot(0, this, &HttpsErrorReply::emitError);
+    QTimer::singleShot(0, this, &HttpsErrorReply::emitError);
 }
 
 void HttpsErrorReply::abort()
@@ -29,16 +29,16 @@ void HttpsErrorReply::abort()
 
 qint64 HttpsErrorReply::readData(char* data, qint64 maxlen)
 {
-	Q_UNUSED(data)
-	Q_UNUSED(maxlen)
+    Q_UNUSED(data)
+    Q_UNUSED(maxlen)
 
-	return -1;
+    return -1;
 }
 
 void HttpsErrorReply::emitError()
 {
-	emit errorOccurred(error());
-	emit finished();
+    emit errorOccurred(error());
+    emit finished();
 }
 
 }

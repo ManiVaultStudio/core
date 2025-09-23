@@ -27,7 +27,7 @@ void HardwareSpecTreeModel::setHardwareSpec(const util::HardwareSpec& hardwareSp
 
     for (const auto& hardwareComponentSpec : hardwareSpec.getHardwareComponentSpecs())
         if (hardwareComponentSpec->isInitialized())
-    		appendRow(hardwareComponentSpec->getStandardItem());
+            appendRow(hardwareComponentSpec->getStandardItem());
 }
 
 }

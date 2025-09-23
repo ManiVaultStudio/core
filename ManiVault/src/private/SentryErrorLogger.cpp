@@ -28,10 +28,10 @@ QString SentryErrorLogger::getCrashpadHandlerExecutableName() const
 
     switch (QOperatingSystemVersion::current().type())
     {
-	    case QOperatingSystemVersion::Windows:
+        case QOperatingSystemVersion::Windows:
             return "crashpad_handler.exe";
 
-	    case QOperatingSystemVersion::MacOS:
+        case QOperatingSystemVersion::MacOS:
             return "crashpad_handler";
 
         case QOperatingSystemVersion::Unknown:
@@ -69,15 +69,15 @@ void SentryErrorLogger::start()
         return;
     }
 
-	const auto dsn = getDsnAction().getString();
+    const auto dsn = getDsnAction().getString();
 
-	sentry_options_t* options = sentry_options_new();
+    sentry_options_t* options = sentry_options_new();
     
-	sentry_options_set_dsn(options, dsn.toUtf8());
-	sentry_options_set_handler_path(options, QString("%1/%2").arg(QDir::currentPath(), getCrashpadHandlerExecutableName()).toUtf8());
-	sentry_options_set_database_path(options, ".sentry-native");
+    sentry_options_set_dsn(options, dsn.toUtf8());
+    sentry_options_set_handler_path(options, QString("%1/%2").arg(QDir::currentPath(), getCrashpadHandlerExecutableName()).toUtf8());
+    sentry_options_set_database_path(options, ".sentry-native");
 
-	const auto releaseString = getReleaseString().toUtf8();
+    const auto releaseString = getReleaseString().toUtf8();
 
 #ifdef _DEBUG
     sentry_options_set_debug(options, 1);
@@ -85,10 +85,10 @@ void SentryErrorLogger::start()
     sentry_options_set_release(options, releaseString + "-debug");
     sentry_set_tag("build_type", "debug");
 #else
-	sentry_options_set_debug(options, 0);
-	sentry_options_set_environment(options, "release");
-	sentry_options_set_release(options, releaseString + "-release");
-	sentry_set_tag("build_type", "release");
+    sentry_options_set_debug(options, 0);
+    sentry_options_set_environment(options, "release");
+    sentry_options_set_release(options, releaseString + "-release");
+    sentry_set_tag("build_type", "release");
 #endif
 
     static const bool showCrashReportDialog = getShowCrashReportDialogAction().isChecked();
@@ -99,7 +99,7 @@ void SentryErrorLogger::start()
         //auto showCrashReportDialog = static_cast<bool*>(closure);
 
         //qDebug() << "Sending crash report..." << showCrashReportDialog;
-    	if (!showCrashReportDialog)
+        if (!showCrashReportDialog)
             return event;
 
         CrashReportDialog crashReportDialog;
@@ -133,7 +133,7 @@ void SentryErrorLogger::start()
         "Error logging using <a href='https://sentry.io/'>Sentry</a> is active, crash reports will be logged to improve the application.",
         StyledIcon("bug"),
         2500
-	});
+    });
 
     //sentry_flush(2000);
     //sentry_shutdown();

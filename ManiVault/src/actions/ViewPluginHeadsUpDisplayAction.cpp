@@ -76,11 +76,11 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     _treeView.adjustSize();
 
     connect(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel(), &QAbstractItemModel::rowsInserted, &_treeView, [this](const QModelIndex& parent, int first, int last) {
-		if (parent.isValid())
-			_treeView.expand(parent);
-    	for (int r = first; r <= last; ++r)
-			_treeView.expand(_treeView.model()->index(r, 0, parent));
-	});
+        if (parent.isValid())
+            _treeView.expand(parent);
+        for (int r = first; r <= last; ++r)
+            _treeView.expand(_treeView.model()->index(r, 0, parent));
+    });
 
     connect(_treeView.model(), &QAbstractItemModel::modelReset, &_treeView, [this]() { _treeView.expandAll(); });
     connect(_treeView.model(), &QAbstractItemModel::layoutChanged, &_treeView, [this]() { _treeView.expandAll(); });
@@ -90,9 +90,9 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
 
     QPalette palette = _treeView.palette();
 
-	palette.setColor(QPalette::Text, Qt::black);
+    palette.setColor(QPalette::Text, Qt::black);
 
-	_treeView.setPalette(palette);
+    _treeView.setPalette(palette);
 
     if (auto viewport = _treeView.viewport()) {
         viewport->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -104,7 +104,7 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
         header->hideSection(static_cast<int>(AbstractHeadsUpDisplayModel::Column::Description));
     }
 
-	auto layout = new QVBoxLayout();
+    auto layout = new QVBoxLayout();
 
     layout->addWidget(&_treeView);
 
@@ -166,7 +166,7 @@ void ViewPluginHeadsUpDisplayAction::fromVariantMap(const QVariantMap& variantMa
 
 QVariantMap ViewPluginHeadsUpDisplayAction::toVariantMap() const
 {
-	return WidgetAction::toVariantMap();
+    return WidgetAction::toVariantMap();
 }
 
 }

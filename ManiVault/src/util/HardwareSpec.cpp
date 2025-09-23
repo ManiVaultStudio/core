@@ -51,9 +51,9 @@ HardwareComponentSpecs HardwareSpec::getHardwareComponentSpecs(bool initializedO
     if (!initializedOnly)
         return _hardwareComponentSpecs;
 
-	HardwareComponentSpecs initializedHardwareComponentSpecs;
+    HardwareComponentSpecs initializedHardwareComponentSpecs;
 
-	for (const auto& candidateHardwareComponentSpec : _hardwareComponentSpecs)
+    for (const auto& candidateHardwareComponentSpec : _hardwareComponentSpecs)
         if (candidateHardwareComponentSpec->isInitialized())
             initializedHardwareComponentSpecs.push_back(candidateHardwareComponentSpec);
 
@@ -74,10 +74,10 @@ QString HardwareSpec::getFailureString(const HardwareSpec& required) const
         const auto rhs = required._hardwareComponentSpecs[i];
 
         if (lhs->isInitialized() && rhs->isInitialized() && !lhs->meets(*rhs))
-        	status.append(QString("<p>%1</p>").arg(lhs->getFailureString(*rhs)));
+            status.append(QString("<p>%1</p>").arg(lhs->getFailureString(*rhs)));
     }
 
-	return status;
+    return status;
 }
 
 const HardwareSpec& HardwareSpec::getSystemHardwareSpec()
@@ -92,23 +92,23 @@ void HardwareSpec::updateSystemHardwareSpecs()
 
 HardwareSpec::SystemCompatibilityInfo HardwareSpec::getSystemCompatibility(const HardwareSpec& minimumHardwareSpec, const HardwareSpec& recommendedHardwareSpec)
 {
-	if (!systemHardwareSpec.isInitialized() || !minimumHardwareSpec.isInitialized() || !recommendedHardwareSpec.isInitialized())
+    if (!systemHardwareSpec.isInitialized() || !minimumHardwareSpec.isInitialized() || !recommendedHardwareSpec.isInitialized())
         return {
-        	SystemCompatibility::Unknown,
-        	"<p>There is no information about system compatibility</p>",
+            SystemCompatibility::Unknown,
+            "<p>There is no information about system compatibility</p>",
             StyledIcon("circle-question")
         };
 
     if (systemHardwareSpec.meets(minimumHardwareSpec) && systemHardwareSpec.meets(recommendedHardwareSpec))
         return {
-        	SystemCompatibility::Compatible,
-        	"<p>Your system is fully equipped to run the project</p>",
+            SystemCompatibility::Compatible,
+            "<p>Your system is fully equipped to run the project</p>",
             StyledIcon("circle-check")
         };
 
     if (!systemHardwareSpec.meets(minimumHardwareSpec)) {
         return {
-        	SystemCompatibility::Incompatible,
+            SystemCompatibility::Incompatible,
             QString("<p>Your system does not meet the minimum hardware requirements for this project, there might be problems with opening it, its stability and performance</p><b>%1</b>").arg(systemHardwareSpec.getFailureString(minimumHardwareSpec)),
             StyledIcon("triangle-exclamation")
         };

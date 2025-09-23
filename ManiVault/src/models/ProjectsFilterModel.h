@@ -81,9 +81,9 @@ public: // Action getters
     gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
     gui::OptionsAction& getExcludeTagsFilterAction() { return _excludeTagsFilterAction; }
     gui::VersionAction& getTargetAppVersionAction() { return _targetAppVersionAction; }
-	gui::ToggleAction& getFilterLoadableOnlyAction() { return _filterLoadableOnlyAction; }
-	gui::ToggleAction& getFilterStartupOnlyAction() { return _filterStartupOnlyAction; }
-	gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
+    gui::ToggleAction& getFilterLoadableOnlyAction() { return _filterLoadableOnlyAction; }
+    gui::ToggleAction& getFilterStartupOnlyAction() { return _filterStartupOnlyAction; }
+    gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
     AbstractProjectsModel*      _projectDatabaseModel;          /** Pointer to source model */

@@ -65,9 +65,9 @@ public:
 
     void init() override;
 
-	void render() override;
+    void render() override;
 
-	void destroy() override;
+    void destroy() override;
 
     void setColorMapRange(const float& min, const float& max);
 

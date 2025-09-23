@@ -56,9 +56,9 @@ protected:
     bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override
     {
         if (type == QWebEnginePage::NavigationTypeLinkClicked) {
-	        QDesktopServices::openUrl(url);
+            QDesktopServices::openUrl(url);
 
-	        return false;
+            return false;
         }
 
         return true;
@@ -145,7 +145,7 @@ SplashScreenWidget::~SplashScreenWidget()
 
 void SplashScreenWidget::showEvent(QShowEvent* event)
 {
-	QWidget::showEvent(event);
+    QWidget::showEvent(event);
 
     if (_initialized)
         return;

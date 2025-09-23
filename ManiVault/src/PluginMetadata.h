@@ -34,16 +34,16 @@ public:
     /** Formatted item for use in auto-generated about Markdown */
     struct FormattedItem
     {
-	    /**
-	     * Construct with \p name, \p description and \p externalLink
-	     * @param name Item name
-	     * @param description Item description
-	     * @param externalLink External link
-	     */
-	    FormattedItem(const QString& name, const QString& description, const QString& externalLink) :
-	        _name(name),
-	        _description(description),
-			_externalLink(externalLink)
+        /**
+         * Construct with \p name, \p description and \p externalLink
+         * @param name Item name
+         * @param description Item description
+         * @param externalLink External link
+         */
+        FormattedItem(const QString& name, const QString& description, const QString& externalLink) :
+            _name(name),
+            _description(description),
+            _externalLink(externalLink)
         {
         }
 
@@ -76,14 +76,14 @@ public:
             return true;
         }
 
-	    /**
+        /**
          * Inequality operator
          * @param rhs Right-hand-side formatted item
          * @return Whether this formatted item and \p rhs formatted item are not the same
          */
         bool operator!=(const FormattedItem& rhs) const {
             return !(*this == rhs);
-	    }
+        }
 
         QString     _name;              /** Item name*/
         QString     _description;       /** Item description */
@@ -124,7 +124,7 @@ public:
          */
         Author(const QString& name, const QStringList& roles = QStringList(), const QStringList& organizationNames = QStringList(), const QString& externalLink = QString()) :
             FormattedItem(name, "", externalLink),
-			_organizationNames(organizationNames),
+            _organizationNames(organizationNames),
             _roles(roles)
         {
         }
@@ -149,7 +149,7 @@ public:
 
             const auto affiliations = indices.isEmpty() ? "" : QString("<sup>%1</sup>").arg(indices.join(","));
 
-        	auto rolesString = _roles.isEmpty() ? "" : QString("(%1)").arg(_roles.join(", "));
+            auto rolesString = _roles.isEmpty() ? "" : QString("(%1)").arg(_roles.join(", "));
 
             if (!_roles.isEmpty()) {
                 int lastCommaIndex = rolesString.lastIndexOf(',');

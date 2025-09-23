@@ -6,12 +6,12 @@
 #include "HardwareSpec.h"
 
 #ifdef Q_OS_WIN
-	#define _WIN32_WINNT 0x0600
-	#include <windows.h>
+    #define _WIN32_WINNT 0x0600
+    #include <windows.h>
 #endif
 
 #ifdef Q_OS_LINUX
-	#include <sys/sysinfo.h>
+    #include <sys/sysinfo.h>
 #endif
 
 #ifdef Q_OS_MAC
@@ -72,9 +72,9 @@ void RamComponentSpec::fromVariantMap(const QVariantMap& variantMap)
 
         const auto ramString = variantMap.value("ram", 0).toString();
 
-    	_numberOfBytes = parseByteSize(ramString);
+        _numberOfBytes = parseByteSize(ramString);
 
-    	setInitialized();
+        setInitialized();
     }
     catch (std::exception& e)
     {

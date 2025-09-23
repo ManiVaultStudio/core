@@ -41,7 +41,7 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
     connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();
-	});
+    });
 
     const auto update = [this, triggerAction, widgetFlags]() -> void {
         QSignalBlocker blocker(this);
@@ -62,11 +62,11 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
         setToolTip(triggerAction->toolTip());
         setVisible(triggerAction->isVisible());
-	};
+    };
 
     connect(triggerAction, &QAction::changed, this, [this, update]() {
         update();
-	});
+    });
 
     update();
 }
@@ -76,9 +76,9 @@ void TriggerAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
     //QPushButton::resizeEvent(event);
     //return;
     if (_widgetFlags & WidgetFlag::Icon && (_widgetFlags & WidgetFlag::Text) == 0)
-		setFixedSize(sizeHint().height(), sizeHint().height());
+        setFixedSize(sizeHint().height(), sizeHint().height());
     else
-		QPushButton::resizeEvent(event);
+        QPushButton::resizeEvent(event);
 }
 
 void TriggerAction::PushButtonWidget::paintEvent(QPaintEvent* event) {
@@ -149,14 +149,14 @@ void TriggerAction::disconnectFromPublicAction(bool recursive)
 
 void TriggerAction::setIconByName(const QString& iconName)
 {
-	WidgetAction::setIconByName(iconName);
+    WidgetAction::setIconByName(iconName);
 
     setDefaultWidgetFlag(WidgetFlag::Icon);
 }
 
 void TriggerAction::setIconByName(const QString& iconName, const QString& iconFontName, const util::Version& iconFontVersion)
 {
-	WidgetAction::setIconByName(iconName, iconFontName, iconFontVersion);
+    WidgetAction::setIconByName(iconName, iconFontName, iconFontVersion);
 
     setDefaultWidgetFlag(WidgetFlag::Icon);
 }

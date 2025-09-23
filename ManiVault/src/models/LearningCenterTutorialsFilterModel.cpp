@@ -140,7 +140,7 @@ bool LearningCenterTutorialsFilterModel::lessThan(const QModelIndex& lhs, const 
 
 void LearningCenterTutorialsFilterModel::fromVariantMap(const QVariantMap& variantMap)
 {
-	SortFilterProxyModel::fromVariantMap(variantMap);
+    SortFilterProxyModel::fromVariantMap(variantMap);
 
     _excludeTagsFilterAction.fromParentVariantMap(variantMap);
     _tagsFilterAction.fromParentVariantMap(variantMap);
@@ -150,7 +150,7 @@ void LearningCenterTutorialsFilterModel::fromVariantMap(const QVariantMap& varia
 
 QVariantMap LearningCenterTutorialsFilterModel::toVariantMap() const
 {
-	auto variantMap = SortFilterProxyModel::toVariantMap();
+    auto variantMap = SortFilterProxyModel::toVariantMap();
 
     _excludeTagsFilterAction.insertIntoVariantMap(variantMap);
     _tagsFilterAction.insertIntoVariantMap(variantMap);

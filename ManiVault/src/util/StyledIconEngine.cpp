@@ -30,12 +30,12 @@ void StyledIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode m
 QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
 {
     if (StyledIcon::pixmaps.contains(_iconSettings._sha)) {
-	    auto iconPixmap = StyledIcon::pixmaps[_iconSettings._sha].copy();
+        auto iconPixmap = StyledIcon::pixmaps[_iconSettings._sha].copy();
 
-    	if (!iconPixmap.isNull()) {
+        if (!iconPixmap.isNull()) {
             QPixmap result;
 
-		    switch (_iconSettings._mode) {
+            switch (_iconSettings._mode) {
                 case StyledIconMode::ThemeAware:
                 {
                     mode = std::clamp(mode, QIcon::Normal, QIcon::Active);
@@ -44,7 +44,7 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
                     const auto scaledPixmap     = iconPixmap.scaled(size, Qt::AspectRatioMode::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation);
                     const auto recoloredPixmap  = recolorPixmap(scaledPixmap, size, recolorColor);
                     
-					result = recoloredPixmap;
+                    result = recoloredPixmap;
 
                     break;
                 }
@@ -57,7 +57,7 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
 
                     break;
                 }
-		    }
+            }
 
             if (!_iconSettings._modifierSha.isEmpty()) {
                 const auto recolorColor                 = qApp->palette().color(static_cast<QPalette::ColorGroup>(mode), _iconSettings.getColorRoleForCurrentTheme());
@@ -91,7 +91,7 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
                 badgeIconPixmapPainter.setRenderHint(QPainter::Antialiasing);
                 badgeIconPixmapPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
                 badgeIconPixmapPainter.setRenderHint(QPainter::LosslessImageRendering, true);
-            	badgeIconPixmapPainter.drawPixmap(QRectF(QPoint(iconMargin, iconMargin), iconPixmapSize), result, iconPixmapRectangle);
+                badgeIconPixmapPainter.drawPixmap(QRectF(QPoint(iconMargin, iconMargin), iconPixmapSize), result, iconPixmapRectangle);
 
                 const auto badgeScale           = badgeParameters._scale;
                 const auto scaledIconPixmapSize = badgeScale * iconPixmapSize;
@@ -123,13 +123,13 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
             }
 
             return result;
-    	}
+        }
         else {
             qWarning() << "StyledIconEngine::pixmap() - pixmap is null" << _iconSettings._sha;
         }
     }
 
-	return {};
+    return {};
 }
 
 QIconEngine* StyledIconEngine::clone() const

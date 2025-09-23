@@ -221,8 +221,8 @@ void WorkspaceManager::reset()
 
     beginReset();
     {
-		for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
-			plugin->destroy();
+        for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
+            plugin->destroy();
 
         _mainDockManager->reset();
         _viewPluginsDockManager->reset();
@@ -576,7 +576,7 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
     _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 
     for (auto viewPluginDockWidget : _mainDockManager->getViewPluginDockWidgets(true))
-    	viewPluginDockWidget->restoreViewPluginState();
+        viewPluginDockWidget->restoreViewPluginState();
 
     for (auto viewPluginDockWidget : _viewPluginsDockManager->getViewPluginDockWidgets(true))
         viewPluginDockWidget->restoreViewPluginState();

@@ -51,7 +51,7 @@ QStandardItem* DisplayComponentSpec::getStandardItem() const
     if (systemDisplayComponentSpec && systemDisplayComponentSpec->isInitialized()) {
         const auto systemResolution = systemDisplayComponentSpec->getResolution();
 
-    	resolutionRow.first()->appendRow(getParameterRow("Horizontal", QString::number(systemResolution.width), QString::number(_resolution.width)));
+        resolutionRow.first()->appendRow(getParameterRow("Horizontal", QString::number(systemResolution.width), QString::number(_resolution.width)));
         resolutionRow.first()->appendRow(getParameterRow("Vertical", QString::number(systemResolution.height), QString::number(_resolution.height)));
     } else {
         resolutionRow.first()->appendRow(getParameterRow("Horizontal", "Unknown"));

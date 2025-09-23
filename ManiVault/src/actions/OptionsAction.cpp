@@ -333,7 +333,7 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     _comboBox.installEventFilter(this);
     _comboBox.lineEdit()->installEventFilter(this);
 
-	_comboBox.init();
+    _comboBox.init();
 
     _layout.setContentsMargins(0, 0, 0, 0);
 
@@ -697,7 +697,7 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
             _optionsAction.setSelectedOptions(selection);
 
             _loadSelectionAction.setEnabled(false);
-		});
+        });
 
         fileOpenDialog.exec();
     });
@@ -727,7 +727,7 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
             jsonFile.write(jsonDocument.toJson());
 
             _saveSelectionAction.setEnabled(false);
-		});
+        });
 
         fileSaveDialog.exec();
     });

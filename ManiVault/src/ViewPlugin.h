@@ -117,7 +117,7 @@ public: // Settings actions
 
 public: // Overlay actions
 
-	/**
+    /**
      * Add \p overlayAction to the view (the action widget will be overlaid on top of the view)
      * @param overlayAction Pointer to overlay action to add (may not be nullptr)
      * @param alignment Alignment of the overlay action in the view
@@ -130,7 +130,7 @@ public: // Overlay actions
      */
     void removeOverlayAction(WidgetAction* overlayAction);
 
-	/**
+    /**
      * Get all overlay actions
      * @return List of pointers to overlay actions
      */

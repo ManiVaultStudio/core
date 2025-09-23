@@ -56,7 +56,7 @@ DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
 
 void DataHierarchyPluginFactory::initialize()
 {
-	ViewPluginFactory::initialize();
+    ViewPluginFactory::initialize();
 }
 
 QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const

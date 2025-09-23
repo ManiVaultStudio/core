@@ -73,7 +73,7 @@ public: // Action getters
     gui::OptionsAction& getExcludeTagsFilterAction() { return _excludeTagsFilterAction; }
     gui::VersionAction& getTargetAppVersionAction() { return _targetAppVersionAction; }
     gui::ToggleAction& getFilterLoadableOnlyAction() { return _filterLoadableOnlyAction; }
-	gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
+    gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
 
 private:
     LearningCenterTutorialsModel*   _learningCenterTutorialsModel;  /** Pointer to source model */

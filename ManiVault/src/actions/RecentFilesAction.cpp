@@ -50,15 +50,15 @@ QMenu* RecentFilesAction::getMenu(QWidget* parent)
     std::ranges::reverse(recentFiles.begin(), recentFiles.end());
 
     for (const auto& recentFile : recentFiles) {
-	    auto openRecentFileAction = new TriggerAction(this, recentFile.getFilePath());
-    	openRecentFileAction->setIcon(StyledIcon("clock"));
-    	openRecentFileAction->setToolTip(QString("Open %1").arg(recentFile.getFilePath()));
+        auto openRecentFileAction = new TriggerAction(this, recentFile.getFilePath());
+        openRecentFileAction->setIcon(StyledIcon("clock"));
+        openRecentFileAction->setToolTip(QString("Open %1").arg(recentFile.getFilePath()));
 
-    	connect(openRecentFileAction, &TriggerAction::triggered, this, [this, recentFile]() -> void {
-			emit triggered(recentFile.getFilePath());
-		});
+        connect(openRecentFileAction, &TriggerAction::triggered, this, [this, recentFile]() -> void {
+            emit triggered(recentFile.getFilePath());
+        });
 
-    	menu->addAction(openRecentFileAction);
+        menu->addAction(openRecentFileAction);
     }
 
     if (!menu->actions().isEmpty()) {

@@ -265,7 +265,7 @@ namespace mv
 
         void PointRenderer::setDataBounds(const QRectF& dataBounds)
         {
-	        Renderer2D::setDataBounds(dataBounds);
+            Renderer2D::setDataBounds(dataBounds);
         }
 
         QRectF PointRenderer::computeWorldBounds() const
@@ -273,16 +273,16 @@ namespace mv
             float marginX = 0.f;
             float marginY = 0.f;
 
-        	switch (getNavigator().getZoomMarginType()) {
-	            case Navigator2D::ZoomMarginType::AbsoluteScreen:
-	            {
+            switch (getNavigator().getZoomMarginType()) {
+                case Navigator2D::ZoomMarginType::AbsoluteScreen:
+                {
                     const auto zoomMarginScreen = getNavigator().getZoomMarginScreen();
 
                     marginX = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height() - 2.f * zoomMarginScreen));
-					marginY = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width() - 2.f * zoomMarginScreen));
+                    marginY = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width() - 2.f * zoomMarginScreen));
 
                     break;
-	            }
+                }
 
                 case Navigator2D::ZoomMarginType::RelativeToData:
                 {

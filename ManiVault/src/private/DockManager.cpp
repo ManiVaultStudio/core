@@ -163,7 +163,7 @@ void DockManager::removeViewPluginDockWidget(ViewPluginDockWidget* viewPluginDoc
 
     CDockManager::removeDockWidget((DockWidget*)viewPluginDockWidget);
 
-	viewPluginDockWidget->deleteLater();
+    viewPluginDockWidget->deleteLater();
 }
 
 QWidget* DockManager::getWidget()
@@ -195,7 +195,7 @@ void DockManager::warmupNativeWidgets()
 
 bool DockManager::hasWarmedUpNativeWidgets() const
 {
-	return _hasWarmedUpNativeWidgets;
+    return _hasWarmedUpNativeWidgets;
 }
 
 void DockManager::fromVariantMap(const QVariantMap& variantMap)

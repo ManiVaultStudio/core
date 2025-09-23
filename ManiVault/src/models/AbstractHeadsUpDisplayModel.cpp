@@ -30,18 +30,18 @@ QVariant AbstractHeadsUpDisplayModel::IdItem::data(int role) const
         return Item::data(role);
 
     switch (role) {
-	    case Qt::EditRole:
+        case Qt::EditRole:
         case Qt::DisplayRole:
-	        return getHeadsupDisplayItem()->getId();
+            return getHeadsupDisplayItem()->getId();
 
-	    case Qt::ToolTipRole:
-	        return QString("Global unique identifier: %1").arg(data(Qt::DisplayRole).toString());
+        case Qt::ToolTipRole:
+            return QString("Global unique identifier: %1").arg(data(Qt::DisplayRole).toString());
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
-	return Item::data(role);
+    return Item::data(role);
 }
 
 QVariant AbstractHeadsUpDisplayModel::TitleItem::data(int role) const
@@ -50,15 +50,15 @@ QVariant AbstractHeadsUpDisplayModel::TitleItem::data(int role) const
         return Item::data(role);
 
     switch (role) {
-	    case Qt::EditRole:
-	    case Qt::DisplayRole:
-	        return getHeadsupDisplayItem()->getTitle();
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getHeadsupDisplayItem()->getTitle();
 
-	    case Qt::ToolTipRole:
-	        return QString("Title: %1").arg(data(Qt::DisplayRole).toString());
+        case Qt::ToolTipRole:
+            return QString("Title: %1").arg(data(Qt::DisplayRole).toString());
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -70,15 +70,15 @@ QVariant AbstractHeadsUpDisplayModel::ValueItem::data(int role) const
         return Item::data(role);
 
     switch (role) {
-	    case Qt::EditRole:
-	    case Qt::DisplayRole:
-	        return getHeadsupDisplayItem()->getValue();
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getHeadsupDisplayItem()->getValue();
 
-	    case Qt::ToolTipRole:
-	        return QString("Value: %1").arg(data(Qt::DisplayRole).toString());
+        case Qt::ToolTipRole:
+            return QString("Value: %1").arg(data(Qt::DisplayRole).toString());
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -90,15 +90,15 @@ QVariant AbstractHeadsUpDisplayModel::DescriptionItem::data(int role) const
         return Item::data(role);
 
     switch (role) {
-	    case Qt::EditRole:
-	    case Qt::DisplayRole:
-	        return getHeadsupDisplayItem()->getDescription();
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getHeadsupDisplayItem()->getDescription();
 
-	    case Qt::ToolTipRole:
-	        return QString("Description: %1").arg(data(Qt::DisplayRole).toString());
+        case Qt::ToolTipRole:
+            return QString("Description: %1").arg(data(Qt::DisplayRole).toString());
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -114,11 +114,11 @@ QVariant AbstractHeadsUpDisplayModel::headerData(int section, Qt::Orientation or
 {
     switch (static_cast<Column>(section))
     {
-	    case Column::Title:
-	        return TitleItem::headerData(orientation, role);
+        case Column::Title:
+            return TitleItem::headerData(orientation, role);
 
-	    case Column::Value:
-	        return ValueItem::headerData(orientation, role);
+        case Column::Value:
+            return ValueItem::headerData(orientation, role);
 
         case Column::Description:
             return DescriptionItem::headerData(orientation, role);
@@ -126,7 +126,7 @@ QVariant AbstractHeadsUpDisplayModel::headerData(int section, Qt::Orientation or
         case Column::Id:
             return IdItem::headerData(orientation, role);
 
-		case Column::Count:
+        case Column::Count:
             break;
     }
 

@@ -57,7 +57,7 @@ public:
     /** Script language */
     enum class Language {
         None = 0,   /** Not a valid script language */
-    	Python,     /** Python scripting */
+        Python,     /** Python scripting */
         R           /** R scripting */
     };
 

@@ -232,10 +232,10 @@ void MeanShift::computeMeanShift()
     for (int j = 0; j < RESOLUTION; ++j)
     {
         for (int i = 0; i < RESOLUTION; ++i)
-    	{
+        {
             int idx = j * RESOLUTION + i;
             centers.setPixel(i, RESOLUTION - j - 1, qRgb(_meanshiftPixels[idx].x * 255, _meanshiftPixels[idx].y * 255, 0));
-    	}
+        }
     }
     centers.save("meanshift_centers.png");
     Matrix3f ortho = createProjectionMatrix(_bounds);

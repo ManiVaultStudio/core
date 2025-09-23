@@ -436,7 +436,7 @@ protected:
         {
         public:
             
-	        /**
+            /**
              * Construct with pointer to \p target widget and \p viewPlugin
              * @param target Pointer to target widget
              * @param viewPlugin Pointer to view plugin
@@ -444,7 +444,7 @@ protected:
             BackgroundWidget(QWidget* target, const plugin::ViewPlugin* viewPlugin);
 
             
-	        /**
+            /**
              * Transition to \p geometry over time
              * @param geometry Geometry at the end of the animation
              * @param animate Whether to animate the geometry over time
@@ -453,7 +453,7 @@ protected:
 
         protected:
 
-	        /**
+            /**
              * Override paint event to do some custom background painting
              * @param event Pointer to paint event
              */
@@ -571,7 +571,7 @@ protected: // Expand/collapse
     /** Expand all visible items in the toolbar */
     void expand();
     
-	/**
+    /**
      * Get whether all displayable items in the toolbar are visible
      * @return Boolean determining whether all displayable items in the toolbar are visible
      */

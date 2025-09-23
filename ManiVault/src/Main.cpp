@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
     QSurfaceFormat format;
 
-	format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
 
     QSurfaceFormat::setDefaultFormat(format);
 #endif
@@ -111,8 +111,8 @@ int main(int argc, char *argv[])
     Application::setStyle(new NoProxyRectanglesFusionStyle);
 
     loadGuiTask.setSubtaskFinished("Apply styles");
-	
-	ModalTask::getGlobalHandler()->setEnabled(true);
+    
+    ModalTask::getGlobalHandler()->setEnabled(true);
 
     MainWindow mainWindow;
 

@@ -171,11 +171,11 @@ void InfoWidget::updateStyling()
     setStyleSheet(QString(
         "QWidget#InfoWidget"
         "{"
-			"background-color: %1;"
+            "background-color: %1;"
         "}"
         "QWidget#InfoWidget > QLabel"
         "{"
-			"color: %2;"
+            "color: %2;"
         "}").arg(backgroundColor.name(), foregroundColor.name()));
 
     _iconLabel.setPixmap(_icon.pixmap(QSize(24, 24)));

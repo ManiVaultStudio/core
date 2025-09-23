@@ -20,13 +20,13 @@ WatchVideoAction::WatchVideoAction(QObject* parent, const QString& title, const 
 
     if (_video) {
         switch (_video->getType()) {
-			case LearningCenterVideo::Type::YouTube:
-	            setIconByName("youtube");
-	            break;
+            case LearningCenterVideo::Type::YouTube:
+                setIconByName("youtube");
+                break;
 
-	        case LearningCenterVideo::Type::GIF:
-	            setIconByName("video");
-	            break;
+            case LearningCenterVideo::Type::GIF:
+                setIconByName("video");
+                break;
         }
 
         connect(this, &TriggerAction::triggered, this, &WatchVideoAction::watch);
@@ -41,15 +41,15 @@ void WatchVideoAction::watch() const
         return;
 
     switch (_video->getType()) {
-	    case LearningCenterVideo::Type::YouTube: {
-	    	QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_video->getResource()));
-	    	break;
-	    }
+        case LearningCenterVideo::Type::YouTube: {
+            QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_video->getResource()));
+            break;
+        }
 
-    	case LearningCenterVideo::Type::GIF: {
-	    	qDebug() << "Watch GIF";
-	    	break;
-    	}
+        case LearningCenterVideo::Type::GIF: {
+            qDebug() << "Watch GIF";
+            break;
+        }
     }
 }
 

@@ -29,7 +29,7 @@ void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);
 
-	painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::Antialiasing);
 
     const auto windowColor = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Window);
     const auto borderColor = QApplication::palette().color(QPalette::ColorGroup::Normal, QPalette::Light);
@@ -38,7 +38,7 @@ void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
 
     QPainterPath path;
 
-	path.addRoundedRect(rect().adjusted(1, 1, -1, -1), radius, radius);
+    path.addRoundedRect(rect().adjusted(1, 1, -1, -1), radius, radius);
 
     painter.fillPath(path, windowColor);
     painter.setPen(QPen(borderColor, 1));
@@ -47,31 +47,31 @@ void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
 
 QSize Notification::NotificationWidget::sizeHint() const
 {
-	return {
+    return {
         fixedWidth,
         0
-	};
+    };
 }
 
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
-	QWidget(parent),
+    QWidget(parent),
     _icon(icon),
     _title(title),
-	_description(description),
+    _description(description),
     _previousNotification(previousNotification),
     _closing(false),
     _taskAction(nullptr, "Task")
 {
-	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
-	setAttribute(Qt::WA_TranslucentBackground);
-	setAttribute(Qt::WA_ShowWithoutActivating);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
+    setAttribute(Qt::WA_TranslucentBackground);
+    setAttribute(Qt::WA_ShowWithoutActivating);
     hide();
 
     if (_previousNotification)
         _previousNotification->_nextNotification = this;
 
     if (_previousNotification) {
-		connect(_previousNotification, &QObject::destroyed, this, &Notification::updatePosition);
+        connect(_previousNotification, &QObject::destroyed, this, &Notification::updatePosition);
     }
 
     auto mainLayout                 = new QVBoxLayout();
@@ -115,32 +115,32 @@ Notification::Notification(const QString& title, const QString& description, con
 
     _notificationWidgetLayout.addLayout(&_messageLayout, 1);
 
-	_notificationWidgetLayout.addWidget(closePushButton);
+    _notificationWidgetLayout.addWidget(closePushButton);
     _notificationWidgetLayout.setAlignment(closePushButton, Qt::AlignTop);
 
     notificationWidget->setLayout(&_notificationWidgetLayout);
 
-	updateIconLabel();
+    updateIconLabel();
     updateMessageLabel();
 
     mainLayout->addWidget(notificationWidget);
 
     setLayout(mainLayout);
 
-	switch (durationType) {
-	    case DurationType::Fixed:
-	    case DurationType::Calculated:
-	    {
+    switch (durationType) {
+        case DurationType::Fixed:
+        case DurationType::Calculated:
+        {
             const auto duration = durationType == DurationType::Fixed ? fixedDuration : getEstimatedReadingTime(title + description);
 
             QTimer::singleShot(duration, this, &Notification::requestFinish);
 
-	    	break;
-	    }
+            break;
+        }
 
         case DurationType::Task:
             break;
-	}
+    }
     
     connect(closePushButton, &QPushButton::clicked, this, &Notification::requestFinish);
 }
@@ -155,7 +155,7 @@ Notification::Notification(QPointer<Task> task, Notification* previousNotificati
 
     _task = task;
 
-	_taskAction.setTask(task);
+    _taskAction.setTask(task);
 
     _messageLayout.addWidget(_taskAction.createWidget(this));
 
@@ -171,7 +171,7 @@ Notification::Notification(QPointer<Task> task, Notification* previousNotificati
     connect(task, &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
         if (previousStatus == Task::Status::Running || previousStatus == Task::Status::RunningIndeterminate)
             QTimer::singleShot(1000, this, &Notification::requestFinish);
-	});
+    });
 
     updateMessageLabel();
 }
@@ -268,9 +268,9 @@ double Notification::getEstimatedReadingTime(const QString& text)
 {
     QRegularExpression wordRegex(R"(\b\w+\b)");
 
-	auto wordIterator = wordRegex.globalMatch(text);
+    auto wordIterator = wordRegex.globalMatch(text);
 
-	size_t wordCount = 0;
+    size_t wordCount = 0;
 
     while (wordIterator.hasNext()) {
         wordIterator.next();
@@ -319,14 +319,14 @@ QIcon Notification::getIcon() const
 
 void Notification::setIcon(const QIcon& icon)
 {
-	_icon = icon;
+    _icon = icon;
 
-	updateIconLabel();
+    updateIconLabel();
 }
 
 QString Notification::getTitle() const
 {
-	return _title;
+    return _title;
 }
 
 void Notification::setTitle(const QString& title)
@@ -334,14 +334,14 @@ void Notification::setTitle(const QString& title)
     if (_title == title)
         return;
 
-	_title = title;
+    _title = title;
 
-	updateMessageLabel();
+    updateMessageLabel();
 }
 
 QString Notification::getDescription() const
 {
-	return _description;
+    return _description;
 }
 
 void Notification::setDescription(const QString& description)
@@ -349,19 +349,19 @@ void Notification::setDescription(const QString& description)
     if (_description == description)
         return;
 
-	_description = description;
+    _description = description;
 
-	updateMessageLabel();
+    updateMessageLabel();
 }
 
 QSize Notification::minimumSizeHint() const
 {
-	return { fixedWidth, 10 };
+    return { fixedWidth, 10 };
 }
 
 QSize Notification::sizeHint() const
 {
-	return minimumSizeHint();
+    return minimumSizeHint();
 }
 
 void Notification::showEvent(QShowEvent* event)

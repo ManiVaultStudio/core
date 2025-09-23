@@ -29,7 +29,7 @@ void IntegralPointAction::connectToPublicAction(WidgetAction* publicAction, bool
 
     connect(this, &IntegralPointAction::valueChanged, publicIntegralPointAction, [publicIntegralPointAction](std::int32_t x, std::int32_t y) -> void {
         publicIntegralPointAction->set(x, y);
-	});
+    });
 
     connect(publicIntegralPointAction, &IntegralPointAction::valueChanged, this, [this](std::int32_t x, std::int32_t y) -> void {
         set(x, y);

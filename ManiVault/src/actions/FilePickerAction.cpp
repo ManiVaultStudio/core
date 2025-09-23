@@ -72,7 +72,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
         fileDialog->setDirectory(Application::current()->getSetting(getSettingsPrefix(), QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
         fileDialog->setOption(QFileDialog::DontUseNativeDialog, !_useNativeDialog);
 
-		connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
+        connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
             if (fileDialog->selectedFiles().count() != 1)
                 throw std::runtime_error("Only one file may be selected");
 
@@ -98,7 +98,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
             if (canonicalFilePath.startsWith(canonicalAppDir + QDir::separator()))
                 _applicationRelativeFilePath = QDir(filePath).relativeFilePath(applicationDir.path());
-		});
+        });
 
         connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
@@ -234,7 +234,7 @@ void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("Value"))
         setFilePath(variantMap["Value"].toString());
 
-	if (variantMap.contains("RelativeFilePath"))
+    if (variantMap.contains("RelativeFilePath"))
         _applicationRelativeFilePath = variantMap["RelativeFilePath"].toString();
 }
 

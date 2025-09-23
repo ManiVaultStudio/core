@@ -20,7 +20,7 @@
 #include <AutoHideDockContainer.h>
 
 #ifdef _DEBUG
-	#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+    #define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;
@@ -33,30 +33,30 @@ using namespace mv::gui;
 QMap<QString, Task*> ViewPluginDockWidget::serializationTasks = QMap<QString, Task*>();
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidget* parent /*= nullptr*/) :
-	DockWidget(title, parent),
-	_viewPlugin(nullptr),
-	_settingsMenu(this),
-	_toggleMenu("Toggle", this),
-	_helpAction(this, "Help"),
-	_cachedVisibility(false),
+    DockWidget(title, parent),
+    _viewPlugin(nullptr),
+    _settingsMenu(this),
+    _toggleMenu("Toggle", this),
+    _helpAction(this, "Help"),
+    _cachedVisibility(false),
     _centralDockWidget("Central"),
     //_progressTask(this, "Serialization"),
-	_progressOverlayWidget(this)
+    _progressOverlayWidget(this)
 {
-	setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
-	initialize();
+    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
+    initialize();
 }
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
-	ViewPluginDockWidget(title, parent)
+    ViewPluginDockWidget(title, parent)
 {
-	setViewPlugin(viewPlugin);
+    setViewPlugin(viewPlugin);
 }
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
-	ViewPluginDockWidget()
+    ViewPluginDockWidget()
 {
-	fromVariantMap(variantMap);
+    fromVariantMap(variantMap);
 }
 
 ViewPluginDockWidget::~ViewPluginDockWidget()
@@ -65,85 +65,85 @@ ViewPluginDockWidget::~ViewPluginDockWidget()
     qDebug() << __FUNCTION__ << objectName() << windowTitle();
 #endif
 
-	serializationTasks.remove(getId());
+    serializationTasks.remove(getId());
 }
 
 QString ViewPluginDockWidget::getTypeString() const
 {
-	return "ViewPluginDockWidget";
+    return "ViewPluginDockWidget";
 }
 
 void ViewPluginDockWidget::initialize()
 {
-	_toggleMenu.setIcon(StyledIcon("eye-low-vision"));
+    _toggleMenu.setIcon(StyledIcon("eye-low-vision"));
 
-	_helpAction.setIconByName("question");
-	_helpAction.setShortcut(tr("F1"));
-	_helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-	_helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _helpAction.setIconByName("question");
+    _helpAction.setShortcut(tr("F1"));
+    _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
 
-	connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
-		_viewPlugin->getLearningCenterAction().getViewHelpAction().trigger();
-	});
+    connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
+        _viewPlugin->getLearningCenterAction().getViewHelpAction().trigger();
+    });
 
-	connect(&_settingsMenu, &QMenu::aboutToShow, this, [this]() -> void {
-		_settingsMenu.clear();
+    connect(&_settingsMenu, &QMenu::aboutToShow, this, [this]() -> void {
+        _settingsMenu.clear();
 
-		const auto projectIsReadOnly = projects().hasProject() ? projects().getCurrentProject()->getReadOnlyAction().isChecked() : false;
+        const auto projectIsReadOnly = projects().hasProject() ? projects().getCurrentProject()->getReadOnlyAction().isChecked() : false;
 
-		if (!_viewPlugin->isSystemViewPlugin() && !projectIsReadOnly) {
-			_settingsMenu.addMenu(_viewPlugin->getPresetsAction().getMenu());
-			_settingsMenu.addSeparator();
-		}
+        if (!_viewPlugin->isSystemViewPlugin() && !projectIsReadOnly) {
+            _settingsMenu.addMenu(_viewPlugin->getPresetsAction().getMenu());
+            _settingsMenu.addSeparator();
+        }
 
-		if (_viewPlugin->getLearningCenterAction().hasHelp())
-			_settingsMenu.addAction(&_helpAction);
+        if (_viewPlugin->getLearningCenterAction().hasHelp())
+            _settingsMenu.addAction(&_helpAction);
 
-		if (_viewPlugin->getFactory()->getReadmeMarkdownUrl().isValid())
-			_settingsMenu.addAction(&const_cast<PluginFactory*>(_viewPlugin->getFactory())->getPluginMetadata().getTriggerReadmeAction());
+        if (_viewPlugin->getFactory()->getReadmeMarkdownUrl().isValid())
+            _settingsMenu.addAction(&const_cast<PluginFactory*>(_viewPlugin->getFactory())->getPluginMetadata().getTriggerReadmeAction());
 
-		_settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
+        _settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
 
-		if (!_viewPlugin->isSystemViewPlugin())
-			_settingsMenu.addAction(&_viewPlugin->getIsolateAction());
+        if (!_viewPlugin->isSystemViewPlugin())
+            _settingsMenu.addAction(&_viewPlugin->getIsolateAction());
 
-		_settingsMenu.addSeparator();
+        _settingsMenu.addSeparator();
 
-		if (!projectIsReadOnly)
-			_settingsMenu.addAction(&_viewPlugin->getDestroyAction());
+        if (!projectIsReadOnly)
+            _settingsMenu.addAction(&_viewPlugin->getDestroyAction());
 
-		if (!_viewPlugin->getLockingAction().isLocked() && !projectIsReadOnly)
-			_settingsMenu.addAction(&_viewPlugin->getEditorAction());
+        if (!_viewPlugin->getLockingAction().isLocked() && !projectIsReadOnly)
+            _settingsMenu.addAction(&_viewPlugin->getEditorAction());
 
-		_settingsMenu.addSeparator();
+        _settingsMenu.addSeparator();
 
-		if (!projectIsReadOnly)
-			_settingsMenu.addAction(&_viewPlugin->getLockingAction().getLockedAction());
+        if (!projectIsReadOnly)
+            _settingsMenu.addAction(&_viewPlugin->getLockingAction().getLockedAction());
 
-		_settingsMenu.addSeparator();
+        _settingsMenu.addSeparator();
 
-		if (projects().getCurrentProject()->getStudioModeAction().isChecked())
-			_settingsMenu.addMenu(&_toggleMenu);
+        if (projects().getCurrentProject()->getStudioModeAction().isChecked())
+            _settingsMenu.addMenu(&_toggleMenu);
 
-		_settingsMenu.addSeparator();
+        _settingsMenu.addSeparator();
 
-		if (!_viewPlugin->getTitleBarMenuActions().isEmpty()) {
-			_settingsMenu.addSeparator();
+        if (!_viewPlugin->getTitleBarMenuActions().isEmpty()) {
+            _settingsMenu.addSeparator();
 
-			for (auto titleBarMenuAction : _viewPlugin->getTitleBarMenuActions())
-			{
-			    if (auto contextMenu = titleBarMenuAction->getContextMenu())
+            for (auto titleBarMenuAction : _viewPlugin->getTitleBarMenuActions())
+            {
+                if (auto contextMenu = titleBarMenuAction->getContextMenu())
                     _settingsMenu.addMenu(contextMenu);
                 else
                     _settingsMenu.addAction(titleBarMenuAction);
-			}
-		}
-	});
+            }
+        }
+    });
 
     connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
         if (_dockManager.centralWidget() && plugin == _viewPlugin)
             _dockManager.centralWidget()->takeWidget();
-	});
+    });
 }
 
 void ViewPluginDockWidget::loadViewPlugin()
@@ -152,34 +152,34 @@ void ViewPluginDockWidget::loadViewPlugin()
     qDebug() << __FUNCTION__;
 #endif
 
-	if (!plugins().isPluginLoaded(_viewPluginKind))
-		return;
+    if (!plugins().isPluginLoaded(_viewPluginKind))
+        return;
 
-	if (auto viewPlugin = dynamic_cast<ViewPlugin*>(plugins().requestPlugin(_viewPluginKind)))
-		setViewPlugin(viewPlugin);
+    if (auto viewPlugin = dynamic_cast<ViewPlugin*>(plugins().requestPlugin(_viewPluginKind)))
+        setViewPlugin(viewPlugin);
 }
 
 ViewPlugin* ViewPluginDockWidget::getViewPlugin() const
 {
-	return _viewPlugin;
+    return _viewPlugin;
 }
 
 void ViewPluginDockWidget::restoreViewPluginState()
 {
-	if (!_viewPlugin)
-		return;
+    if (!_viewPlugin)
+        return;
 
     //_progressTask.setRunningIndeterminate();
-	{
+    {
         _viewPlugin->fromVariantMap(_viewPluginMap);
         //_dockManager.centralWidget()->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
-	}
+    }
     //_progressTask.setFinished();
 }
 
 QMenu* ViewPluginDockWidget::getSettingsMenu()
 {
-	return &_settingsMenu;
+    return &_settingsMenu;
 }
 
 void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
@@ -188,40 +188,40 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     qDebug() << __FUNCTION__;
 #endif
 
-	DockWidget::fromVariantMap(variantMap);
+    DockWidget::fromVariantMap(variantMap);
 
-	const auto viewPluginDockWidgetId = variantMap["ID"].toString();
-	const auto viewPluginMap          = variantMap["ViewPlugin"].toMap();
-	const auto guiName                = viewPluginMap["GuiName"].toMap()["Value"].toString();
-	const auto viewPluginId           = viewPluginMap["ID"].toString();
+    const auto viewPluginDockWidgetId = variantMap["ID"].toString();
+    const auto viewPluginMap          = variantMap["ViewPlugin"].toMap();
+    const auto guiName                = viewPluginMap["GuiName"].toMap()["Value"].toString();
+    const auto viewPluginId           = viewPluginMap["ID"].toString();
 
-	auto serializationTask = ViewPluginDockWidget::getSerializationTask(viewPluginDockWidgetId);
+    auto serializationTask = ViewPluginDockWidget::getSerializationTask(viewPluginDockWidgetId);
 
-	serializationTask->setName(QString("Loading view plugin: %1").arg(guiName));
-	serializationTask->setRunning();
+    serializationTask->setName(QString("Loading view plugin: %1").arg(guiName));
+    serializationTask->setRunning();
 
-	variantMapMustContain(variantMap, "ViewPlugin");
+    variantMapMustContain(variantMap, "ViewPlugin");
 
-	_viewPluginMap = variantMap["ViewPlugin"].toMap();
+    _viewPluginMap = variantMap["ViewPlugin"].toMap();
 
-	variantMapMustContain(_viewPluginMap, "Kind");
+    variantMapMustContain(_viewPluginMap, "Kind");
 
-	_viewPluginKind = _viewPluginMap["Kind"].toString();
+    _viewPluginKind = _viewPluginMap["Kind"].toString();
 
-	loadViewPlugin();
+    loadViewPlugin();
 
-	_viewPlugin->setId(viewPluginId);
+    _viewPlugin->setId(viewPluginId);
 
-	QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
 
-	if (variantMap.contains("DockManagerState"))
-		_dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
+    if (variantMap.contains("DockManagerState"))
+        _dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
 
-	QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
 
-	serializationTask->setFinished();
+    serializationTask->setFinished();
 
-	setProperty("ViewPluginId", _viewPlugin->getId());
+    setProperty("ViewPluginId", _viewPlugin->getId());
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const
@@ -230,64 +230,64 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
     qDebug() << __FUNCTION__;
 #endif
 
-	auto viewPlugin        = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin();
-	auto serializationTask = ViewPluginDockWidget::getSerializationTask(getId());
+    auto viewPlugin        = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin();
+    auto serializationTask = ViewPluginDockWidget::getSerializationTask(getId());
 
-	serializationTask->setName(QString("Saving view plugin: %1").arg(viewPlugin->text()));
-	serializationTask->setRunning();
+    serializationTask->setName(QString("Saving view plugin: %1").arg(viewPlugin->text()));
+    serializationTask->setRunning();
 
-	auto variantMap = DockWidget::toVariantMap();
+    auto variantMap = DockWidget::toVariantMap();
 
-	if (_viewPlugin) {
-		variantMap.insert({{"ViewPlugin", viewPlugin->toVariantMap()}});
-	}
+    if (_viewPlugin) {
+        variantMap.insert({{"ViewPlugin", viewPlugin->toVariantMap()}});
+    }
 
-	QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
 
-	variantMap.insert({{"DockManagerState", QVariant::fromValue(_dockManager.saveState().toBase64())}});
+    variantMap.insert({{"DockManagerState", QVariant::fromValue(_dockManager.saveState().toBase64())}});
 
-	serializationTask->setFinished();
+    serializationTask->setFinished();
 
-	return variantMap;
+    return variantMap;
 }
 
 void ViewPluginDockWidget::cacheVisibility()
 {
-	_cachedVisibility = !isClosed();
+    _cachedVisibility = !isClosed();
 }
 
 void ViewPluginDockWidget::restoreVisibility()
 {
-	toggleView(_cachedVisibility);
+    toggleView(_cachedVisibility);
 }
 
 void ViewPluginDockWidget::preRegisterSerializationTask(QObject* parent, const QString& viewPluginDockWidgetId, DockManager* dockManager)
 {
-	if (viewPluginDockWidgetId.isEmpty())
-		return;
+    if (viewPluginDockWidgetId.isEmpty())
+        return;
 
-	auto serializationTask = new Task(parent, "View plugin Dock Widget");
+    auto serializationTask = new Task(parent, "View plugin Dock Widget");
 
-	serializationTask->setMayKill(false);
-	serializationTask->setParentTask(dockManager->getSerializationTask());
+    serializationTask->setMayKill(false);
+    serializationTask->setParentTask(dockManager->getSerializationTask());
 
-	serializationTasks[viewPluginDockWidgetId] = serializationTask;
+    serializationTasks[viewPluginDockWidgetId] = serializationTask;
 }
 
 Task* ViewPluginDockWidget::getSerializationTask(const QString& viewPluginDockWidgetId)
 {
-	if (serializationTasks.contains(viewPluginDockWidgetId))
-		return serializationTasks[viewPluginDockWidgetId];
+    if (serializationTasks.contains(viewPluginDockWidgetId))
+        return serializationTasks[viewPluginDockWidgetId];
 
-	return nullptr;
+    return nullptr;
 }
 
 void ViewPluginDockWidget::removeAllSerializationTasks()
 {
-	for (auto serializationTask : serializationTasks.values())
-		delete serializationTask;
+    for (auto serializationTask : serializationTasks.values())
+        delete serializationTask;
 
-	serializationTasks.clear();
+    serializationTasks.clear();
 }
 
 void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
@@ -296,103 +296,103 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
     qDebug() << __FUNCTION__;
 #endif
 
-	Q_ASSERT(viewPlugin);
+    Q_ASSERT(viewPlugin);
 
-	if (!viewPlugin)
-		return;
+    if (!viewPlugin)
+        return;
 
-	_viewPlugin = viewPlugin;
+    _viewPlugin = viewPlugin;
 
     connect(_viewPlugin, &ViewPlugin::progressTaskChanged, this, [this](Task* progressTask) {
         _progressOverlayWidget.setTask(progressTask);
-	});
+    });
 
     //_viewPlugin->setProgressTask(&_progressTask);
 
     //_progressTask.setRunningIndeterminate();
     //_progressTask.setProgressTextFormatter([](Task& task) -> QString { return ""; });
 
-	setWindowIcon(_viewPlugin->icon());
+    setWindowIcon(_viewPlugin->icon());
 
     const auto updateViewPluginIdProperty = [this](const QString& viewPluginId) -> void {
         setProperty("ViewPluginId", viewPluginId);
-	};
+    };
 
     updateViewPluginIdProperty(_viewPlugin->getId());
 
     connect(_viewPlugin, &WidgetAction::idChanged, _viewPlugin, updateViewPluginIdProperty);
 
-	auto centralDockWidget = new CDockWidget("Central");
+    auto centralDockWidget = new CDockWidget("Central");
 
-	centralDockWidget->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
+    centralDockWidget->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
     centralDockWidget->setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 
-	_dockManager.setCentralWidget(centralDockWidget);
+    _dockManager.setCentralWidget(centralDockWidget);
 
     centralDockWidget->dockAreaWidget()->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
-	for (auto settingsAction : _viewPlugin->getDockingActions()) {
+    for (auto settingsAction : _viewPlugin->getDockingActions()) {
         addDockingAction(settingsAction);
-	}
+    }
 
     connect(_viewPlugin, &ViewPlugin::dockingActionAdded, this, &ViewPluginDockWidget::addDockingAction);
 
-	_toggleMenu.setEnabled(!_viewPlugin->getDockingActions().isEmpty());
+    _toggleMenu.setEnabled(!_viewPlugin->getDockingActions().isEmpty());
 
     /*
-	if (!_viewPlugin->getDockingActions().isEmpty()) {
-		_toggleMenu.addSeparator();
+    if (!_viewPlugin->getDockingActions().isEmpty()) {
+        _toggleMenu.addSeparator();
 
-		connect(hideAllAction, &TriggerAction::triggered, this, [this]() {
-			for (auto settingsDockWidget : _settingsDockWidgetsMap)
-				settingsDockWidget->toggleView(false);
-		});
+        connect(hideAllAction, &TriggerAction::triggered, this, [this]() {
+            for (auto settingsDockWidget : _settingsDockWidgetsMap)
+                settingsDockWidget->toggleView(false);
+        });
 
-		connect(showAllAction, &TriggerAction::triggered, this, [this]() {
-			for (auto settingsDockWidget : _settingsDockWidgetsMap)
-				settingsDockWidget->toggleView(true);
-		});
+        connect(showAllAction, &TriggerAction::triggered, this, [this]() {
+            for (auto settingsDockWidget : _settingsDockWidgetsMap)
+                settingsDockWidget->toggleView(true);
+        });
 
-		_toggleMenu.addAction(hideAllAction);
-		_toggleMenu.addAction(showAllAction);
-	}
+        _toggleMenu.addAction(hideAllAction);
+        _toggleMenu.addAction(showAllAction);
+    }
     */
 
-	_dockManager.setStyleSheet("");
+    _dockManager.setStyleSheet("");
 
-	setIcon(StyledIcon(viewPlugin->icon()));
-	setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
-	setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
+    setIcon(StyledIcon(viewPlugin->icon()));
+    setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
+    setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
 
-	const auto updateWindowTitle = [this]() -> void {
-		setWindowTitle(_viewPlugin->getGuiNameAction().getString());
-	};
+    const auto updateWindowTitle = [this]() -> void {
+        setWindowTitle(_viewPlugin->getGuiNameAction().getString());
+    };
 
-	connect(&viewPlugin->getGuiNameAction(), &StringAction::stringChanged, this, updateWindowTitle);
+    connect(&viewPlugin->getGuiNameAction(), &StringAction::stringChanged, this, updateWindowTitle);
 
-	updateWindowTitle();
+    updateWindowTitle();
 
-	const auto updateFeatures = [this]() -> void {
-		setFeature(CDockWidget::DockWidgetClosable, _viewPlugin->getMayCloseAction().isChecked());
-		setFeature(CDockWidget::DockWidgetFloatable, _viewPlugin->getMayFloatAction().isChecked());
-		setFeature(CDockWidget::DockWidgetMovable, _viewPlugin->getMayMoveAction().isChecked());
-	};
+    const auto updateFeatures = [this]() -> void {
+        setFeature(CDockWidget::DockWidgetClosable, _viewPlugin->getMayCloseAction().isChecked());
+        setFeature(CDockWidget::DockWidgetFloatable, _viewPlugin->getMayFloatAction().isChecked());
+        setFeature(CDockWidget::DockWidgetMovable, _viewPlugin->getMayMoveAction().isChecked());
+    };
 
-	connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, updateFeatures);
-	connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, updateFeatures);
-	connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, updateFeatures);
+    connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, updateFeatures);
+    connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, updateFeatures);
+    connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, updateFeatures);
 
-	updateFeatures();
+    updateFeatures();
 
-	connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this](bool toggled) {
-		toggleView(toggled);
-	});
+    connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this](bool toggled) {
+        toggleView(toggled);
+    });
 
-	connect(this, &CDockWidget::viewToggled, viewPlugin, [this, viewPlugin](bool toggled) {
-		QSignalBlocker toggleActionBlocker(&viewPlugin->getVisibleAction());
+    connect(this, &CDockWidget::viewToggled, viewPlugin, [this, viewPlugin](bool toggled) {
+        QSignalBlocker toggleActionBlocker(&viewPlugin->getVisibleAction());
 
-		viewPlugin->getVisibleAction().setChecked(toggled);
-	});
+        viewPlugin->getVisibleAction().setChecked(toggled);
+    });
 }
 
 void ViewPluginDockWidget::addDockingAction(mv::gui::WidgetAction* dockingAction)
@@ -490,101 +490,101 @@ void ViewPluginDockWidget::addDockingAction(mv::gui::WidgetAction* dockingAction
 }
 
 ViewPluginDockWidget::SettingsActionWidget::SettingsActionWidget(QWidget* parent, mv::gui::WidgetAction* settingsAction) :
-	QWidget(parent),
-	_settingsAction(settingsAction)
+    QWidget(parent),
+    _settingsAction(settingsAction)
 {
-	Q_ASSERT(settingsAction != nullptr);
+    Q_ASSERT(settingsAction != nullptr);
 
-	if (settingsAction == nullptr)
-		return;
+    if (settingsAction == nullptr)
+        return;
 
-	setAutoFillBackground(true);
+    setAutoFillBackground(true);
 
-	auto layout = new QVBoxLayout();
+    auto layout = new QVBoxLayout();
 
-	layout->setContentsMargins(0, 0, 0, 0);
-	layout->addWidget(_settingsAction->createWidget(this));
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(_settingsAction->createWidget(this));
 
-	setLayout(layout);
+    setLayout(layout);
 }
 
 QSize ViewPluginDockWidget::SettingsActionWidget::minimumSizeHint() const
 {
-	if (_settingsAction == nullptr)
-		return {};
+    if (_settingsAction == nullptr)
+        return {};
 
-	return _settingsAction->property("MinimumDockWidgetSize").toSize();
+    return _settingsAction->property("MinimumDockWidgetSize").toSize();
 }
 
 QSize ViewPluginDockWidget::SettingsActionWidget::sizeHint() const
 {
-	return minimumSizeHint();
+    return minimumSizeHint();
 }
 
 ViewPluginDockWidget::ProgressOverlayWidget::ProgressOverlayWidget(QWidget* parent) :
-	OverlayWidget(parent),
-	_loadTaskAction(this, "View plugin progress"),
-	_loadTaskWidget(_loadTaskAction.createWidget(this)),
-	_task(nullptr)
+    OverlayWidget(parent),
+    _loadTaskAction(this, "View plugin progress"),
+    _loadTaskWidget(_loadTaskAction.createWidget(this)),
+    _task(nullptr)
 {
-	_loadTaskAction.setDefaultWidgetFlag(TaskAction::KillButton, true);
-	_loadTaskAction.getProgressAction().setTextFormat("");
+    _loadTaskAction.setDefaultWidgetFlag(TaskAction::KillButton, true);
+    _loadTaskAction.getProgressAction().setTextFormat("");
 
-	_loadTaskWidget->setFixedHeight(2);
+    _loadTaskWidget->setFixedHeight(2);
 
-	auto layout = new QVBoxLayout();
+    auto layout = new QVBoxLayout();
 
-	layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-	layout->addWidget(_loadTaskWidget);
-	layout->addStretch(1);
+    layout->addWidget(_loadTaskWidget);
+    layout->addStretch(1);
 
-	setLayout(layout);
+    setLayout(layout);
 
-	updateVisibility();
-	updateCustomStyle();
+    updateVisibility();
+    updateCustomStyle();
 }
 
 bool ViewPluginDockWidget::ProgressOverlayWidget::event(QEvent* event)
 {
-	if (event->type() == QEvent::ApplicationPaletteChange)
-		updateCustomStyle();
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
 
-	return QWidget::event(event);
+    return QWidget::event(event);
 }
 
 void ViewPluginDockWidget::ProgressOverlayWidget::setTask(Task* task)
 {
-	if (_task)
-		disconnect(_task, &Task::statusChanged, this, nullptr);
+    if (_task)
+        disconnect(_task, &Task::statusChanged, this, nullptr);
 
-	_task = task;
+    _task = task;
 
-	_loadTaskAction.setTask(_task);
+    _loadTaskAction.setTask(_task);
 
-	if (_task) {
-		connect(_task, &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-			if (status == Task::Status::Running || status == Task::Status::RunningIndeterminate)
-				QTimer::singleShot(20, this, &ProgressOverlayWidget::updateVisibility);
-			else
-				updateVisibility();
-		});
-	}
+    if (_task) {
+        connect(_task, &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+            if (status == Task::Status::Running || status == Task::Status::RunningIndeterminate)
+                QTimer::singleShot(20, this, &ProgressOverlayWidget::updateVisibility);
+            else
+                updateVisibility();
+        });
+    }
 
-	updateVisibility();
+    updateVisibility();
 }
 
 void ViewPluginDockWidget::ProgressOverlayWidget::updateVisibility()
 {
-	if (_task)
-		setVisible(_task->isRunning() || _task->isRunningIndeterminate());
-	else
-		setVisible(false);
+    if (_task)
+        setVisible(_task->isRunning() || _task->isRunningIndeterminate());
+    else
+        setVisible(false);
 }
 
 void ViewPluginDockWidget::ProgressOverlayWidget::updateCustomStyle()
 {
-	//const auto backgroundColor = qApp->palette().color(QPalette::Disabled, QPalette::ButtonText);
+    //const auto backgroundColor = qApp->palette().color(QPalette::Disabled, QPalette::ButtonText);
 
-	//_loadTaskWidget->setStyleSheet("background-color: " + backgroundColor.name());
+    //_loadTaskWidget->setStyleSheet("background-color: " + backgroundColor.name());
 }

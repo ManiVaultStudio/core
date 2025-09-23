@@ -27,14 +27,14 @@ QVariant AbstractPluginsModel::Item::data(int role) const
 {
     switch (role)
     {
-		case Qt::UserRole + 1:
-	        return QVariant::fromValue(getPlugin());
+        case Qt::UserRole + 1:
+            return QVariant::fromValue(getPlugin());
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
-	return QStandardItem::data(role);
+    return QStandardItem::data(role);
 }
 
 plugin::Plugin* AbstractPluginsModel::Item::getPlugin() const

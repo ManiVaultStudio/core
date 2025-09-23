@@ -30,7 +30,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
     _maximumNumberOfElementsAction(this, "Max. number of elements", 0, 1000, 100),
     _lazyUpdateIntervalAction(this, "Lazy update interval", 10, 1000, 100),
     _samplingModeAction(this, "Sampling mode", { "Selection", "Focus Region" }, "Focus Region"),
-	_viewingModeAction(this, "Viewing mode", { "None", "Windowed", "Tooltip" }, "None"),
+    _viewingModeAction(this, "Viewing mode", { "None", "Windowed", "Tooltip" }, "None"),
     _openSampleScopeWindow(this, "Open sample scope window"),
     _sampleScopePlugin(nullptr)
 {
@@ -99,7 +99,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
             return;
 
         if (getSamplingMode() == SamplingMode::FocusRegion)
-			emit sampleContextRequested();
+            emit sampleContextRequested();
 
         _sampleContextDirty = false;
     });
@@ -114,12 +114,12 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
         updateMaximumNumberOfElementsAction();
 
         switch (getSamplingMode()) {
-        	case SamplingMode::FocusRegion:
-			{
+            case SamplingMode::FocusRegion:
+            {
                 _viewingModeAction.setOptions({ "None", "Windowed", "Tooltip" });
                 _sampleContextDirty = true;
                 break;
-        	}
+            }
 
             case SamplingMode::Selection:
             {
@@ -127,7 +127,7 @@ ViewPluginSamplerAction::ViewPluginSamplerAction(QObject* parent, const QString&
                 break;
             }
         }
-	};
+    };
 
     samplingModeChanged();
 
@@ -248,13 +248,13 @@ void ViewPluginSamplerAction::setSamplingMode(const SamplingMode& samplingMode)
 
 bool ViewPluginSamplerAction::canView() const
 {
-	switch (_viewGeneratorType) {
-	    case ViewGeneratorType::HTML:
-	        return _enabledAction.isChecked() && _htmlViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
+    switch (_viewGeneratorType) {
+        case ViewGeneratorType::HTML:
+            return _enabledAction.isChecked() && _htmlViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
 
-	    case ViewGeneratorType::Widget:
-	        return _enabledAction.isChecked() && _widgetViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
-	}
+        case ViewGeneratorType::Widget:
+            return _enabledAction.isChecked() && _widgetViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
+    }
 
     return false;
 }
@@ -314,23 +314,23 @@ void ViewPluginSamplerAction::setSampleContext(const SampleContext& sampleContex
     _sampleContextDirty = true;
 
     if (_enabledAction.isChecked()) {
-	    switch (_viewGeneratorType) {
-	        case ViewGeneratorType::HTML:
-	        {
-	            if (_htmlViewGeneratorFunction)
-	                setViewString(_htmlViewGeneratorFunction(_sampleContext));
+        switch (_viewGeneratorType) {
+            case ViewGeneratorType::HTML:
+            {
+                if (_htmlViewGeneratorFunction)
+                    setViewString(_htmlViewGeneratorFunction(_sampleContext));
 
-	            break;
-	        }
+                break;
+            }
 
             case ViewGeneratorType::Widget:
-			{
+            {
                 if (_widgetViewGeneratorFunction)
                     setViewWidget(_widgetViewGeneratorFunction(_sampleContext));
 
                 break;
-		    }
-	    }
+            }
+        }
 
         emit canViewChanged(canView());
     }
@@ -448,7 +448,7 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 
             case QEvent::MouseButtonPress:
             {
-				_samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
+                _samplerPixelSelectionAction->getPixelSelectionTool()->setEnabled(false);
                 _toolTipLabel.hide();
                 break;
             }
@@ -481,19 +481,19 @@ bool ViewPluginSamplerAction::eventFilter(QObject* target, QEvent* event)
 
 void ViewPluginSamplerAction::updateReadOnly()
 {
-	switch (_viewGeneratorType) {
-	    case ViewGeneratorType::HTML:
-	    {
-	        setEnabled(_htmlViewGeneratorFunction ? true : false);
-	        break;
-	    }
+    switch (_viewGeneratorType) {
+        case ViewGeneratorType::HTML:
+        {
+            setEnabled(_htmlViewGeneratorFunction ? true : false);
+            break;
+        }
 
         case ViewGeneratorType::Widget:
         {
             setEnabled(_widgetViewGeneratorFunction ? true : false);
             break;
         }
-	}
+    }
 }
 
 QWidget* ViewPluginSamplerAction::getTargetWidget() const

@@ -18,13 +18,13 @@ ScriptTriggerAction::ScriptTriggerAction(QObject* parent, const std::shared_ptr<
 
 QString ScriptTriggerAction::getMenuLocation() const
 {
-	return _menuLocation;
+    return _menuLocation;
 }
 
 QIcon ScriptTriggerAction::getLanguageIcon() const
 {
     if (_script)
-		return _script->getLanguageIcon();
+        return _script->getLanguageIcon();
 
     return {};
 }

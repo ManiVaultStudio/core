@@ -43,8 +43,8 @@ public:
     NumericalPointAction(QObject* parent, const QString& title, NumericalType minimum, NumericalType maximum) :
         GroupAction(parent, title),
         _elementActions{
-        	NumericalActionType(this, "X", minimum, maximum),
-        	NumericalActionType(this, "Y", minimum, maximum)
+            NumericalActionType(this, "X", minimum, maximum),
+            NumericalActionType(this, "Y", minimum, maximum)
         }
     {
         setText(title);
@@ -65,7 +65,7 @@ public:
      * @param x X coordinate value
      */
     void setX(const NumericalType& x) {
-	    getXAction().setValue(x);
+        getXAction().setValue(x);
     }
 
     /**
@@ -167,7 +167,7 @@ public: // Serialization
         WidgetAction::fromVariantMap(variantMap);
 
         for (int axisIndex = 0; axisIndex < static_cast<int>(Axis::Count); ++axisIndex)
-			_elementActions[axisIndex].fromParentVariantMap(variantMap);
+            _elementActions[axisIndex].fromParentVariantMap(variantMap);
     }
 
     /**

@@ -155,7 +155,7 @@ Qt::Alignment PluginLearningCenterAction::getAlignment() const
 
 void PluginLearningCenterAction::setAlignment(const Qt::Alignment& alignment)
 {
-	const auto it = std::find(alignmentFlags.begin(), alignmentFlags.end(), alignment);
+    const auto it = std::find(alignmentFlags.begin(), alignmentFlags.end(), alignment);
 
     if (it != alignmentFlags.end())
         _alignmentAction.setCurrentIndex(static_cast<std::int32_t>(std::distance(alignmentFlags.begin(), it)));

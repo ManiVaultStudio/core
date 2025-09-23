@@ -29,7 +29,7 @@ public:
     /** Model columns */
     enum class Column {
         Type,
-    	Title,
+        Title,
         Tags,
         Date,
         Summary,
@@ -94,15 +94,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Type";
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Type";
 
-	            case Qt::ToolTipRole:
-	                return "Type of video";
+                case Qt::ToolTipRole:
+                    return "Type of video";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -310,15 +310,15 @@ protected:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
-	            case Qt::DisplayRole:
-            	case Qt::EditRole:
+                case Qt::DisplayRole:
+                case Qt::EditRole:
                     return "Thumbnail";
 
-	            case Qt::ToolTipRole:
-	                return "Video thumbnail";
+                case Qt::ToolTipRole:
+                    return "Video thumbnail";
 
-	            default:
-	                break;
+                default:
+                    break;
             }
 
             return {};
@@ -368,7 +368,7 @@ protected:
             QList<QStandardItem*>()
         {
             append(new TypeItem(video));
-        	append(new TitleItem(video));
+            append(new TitleItem(video));
             append(new TagsItem(video));
             append(new DateItem(video));
             append(new SummaryItem(video));

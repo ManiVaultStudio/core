@@ -41,7 +41,7 @@ QVariant AbstractColorSchemesModel::NameItem::data(int role /*= Qt::UserRole + 1
         case Qt::ToolTipRole:
             return QString("Name: %1").arg(data(Qt::DisplayRole).toString());
 
-		case Qt::DecorationRole:
+        case Qt::DecorationRole:
             return getColorScheme().getMode() == ColorScheme::Mode::UserAdded ? StyledIcon("pen") : QIcon();
 
         default:
@@ -54,12 +54,12 @@ QVariant AbstractColorSchemesModel::NameItem::data(int role /*= Qt::UserRole + 1
 QVariant AbstractColorSchemesModel::DescriptionItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
-	    case Qt::EditRole:
-	    case Qt::DisplayRole:
-	        return getColorScheme().getName();
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getColorScheme().getName();
 
-	    case Qt::ToolTipRole:
-	        return QString("Description: %1").arg(data(Qt::DisplayRole).toString());
+        case Qt::ToolTipRole:
+            return QString("Description: %1").arg(data(Qt::DisplayRole).toString());
 
         default:
             break;
@@ -84,17 +84,17 @@ QVariant AbstractColorSchemesModel::PaletteItem::data(int role /*= Qt::UserRole 
 QVariant AbstractColorSchemesModel::ModeItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
-		case Qt::EditRole:
-	        return static_cast<int>(getColorScheme().getMode());
+        case Qt::EditRole:
+            return static_cast<int>(getColorScheme().getMode());
 
-	    case Qt::DisplayRole:
-	            return data(Qt::EditRole).toInt() == static_cast<int>(ColorScheme::Mode::BuiltIn) ? "Built-int" : "User-added";
+        case Qt::DisplayRole:
+                return data(Qt::EditRole).toInt() == static_cast<int>(ColorScheme::Mode::BuiltIn) ? "Built-int" : "User-added";
 
-	    case Qt::ToolTipRole:
-	        return QString("Mode: %1").arg(data(Qt::DisplayRole).toString());
+        case Qt::ToolTipRole:
+            return QString("Mode: %1").arg(data(Qt::DisplayRole).toString());
 
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);

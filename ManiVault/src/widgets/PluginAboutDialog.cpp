@@ -69,29 +69,29 @@ PluginAboutDialog::PluginAboutDialog(const plugin::PluginMetadata& pluginMetaDat
             _markdownPage.runJavaScript(QString("document.body.style.backgroundColor = '%1';").arg(getColorAsCssString(qApp->palette().window().color())));
 
             const auto setFontSizeJs = R"(
-				var style = document.createElement('style');
-				style.innerHTML = `body {
-					font-size:)" + QString::number(fontSize) + R"(pt !important;
-				}
-				summary {
+                var style = document.createElement('style');
+                style.innerHTML = `body {
+                    font-size:)" + QString::number(fontSize) + R"(pt !important;
+                }
+                summary {
                     font-weight: bold;
                     margin-left: 0px;
                     margin-bottom: 10px;
-				}
-				summary:hover {
-					text-decoration: underline;
-					cursor: pointer;
-				}`;
-				document.head.appendChild(style);
-			)";
+                }
+                summary:hover {
+                    text-decoration: underline;
+                    cursor: pointer;
+                }`;
+                document.head.appendChild(style);
+            )";
 
             _markdownPage.runJavaScript(setFontSizeJs);
             _markdownPage.runJavaScript(QString("document.body.style.color = '%1';").arg(colorHex));
 
             QTimer::singleShot(250, [this]() -> void {
                 _waitingOverlayWidget.getWidgetFader().fadeOut(350);
-			});
-		});
+            });
+        });
 
         _webEngineView.setPage(&_markdownPage);
         _webEngineView.load(QUrl("qrc:/HTML/Markdown"));

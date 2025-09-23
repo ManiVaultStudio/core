@@ -13,8 +13,8 @@ namespace mv::util
 {
 
 Notifications::Notifications(QWidget* parent) :
-	QObject(parent),
-	_parentWidget(parent)
+    QObject(parent),
+    _parentWidget(parent)
 {
 }
 
@@ -36,7 +36,7 @@ void Notifications::showMessage(const QString& title, const QString& description
         connect(notification, &Notification::finished, this, [this, notification]() {
             _notifications.removeOne(notification);
             notification->deleteLater();
-		});
+        });
     };
 
     if (delayMs > 0)
@@ -59,7 +59,7 @@ void Notifications::showTask(QPointer<Task> task)
     connect(notification, &Notification::finished, this, [this, notification]() {
         _notifications.removeOne(notification);
         notification->deleteLater();
-	});
+    });
 }
 
 void Notifications::setParentWidget(QWidget* parentWidget)
@@ -76,7 +76,7 @@ bool Notifications::eventFilter(QObject* watched, QEvent* event)
             QTimer::singleShot(10, notification, &Notification::updatePosition);
     }
 
-	return QObject::eventFilter(watched, event);
+    return QObject::eventFilter(watched, event);
 }
 
 }

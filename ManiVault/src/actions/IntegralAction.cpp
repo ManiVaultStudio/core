@@ -40,7 +40,7 @@ WidgetAction* IntegralAction::getPublicCopy() const
         return publicCopy;
     }
         
-	return nullptr;
+    return nullptr;
 }
 
 void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)

@@ -42,9 +42,9 @@ public:
         Serializable(name),
         _initialized(false),
         _lockingAction(nullptr),
-		_coreIsDestroyed(false),
+        _coreIsDestroyed(false),
         _isInitializing(false),
-		_isResetting(false)
+        _isResetting(false)
     {
     }
 
@@ -80,7 +80,7 @@ public:
     qDebug() << __FUNCTION__;
 #endif
 
-		_isResetting = false;
+        _isResetting = false;
 
         emit managerReset();
     }
@@ -126,7 +126,7 @@ public:
      * @return Boolean determining whether the manager is initializing or not
      */
     bool isInitializing() const {
-	    return _isInitializing;
+        return _isInitializing;
     }
 
     /**

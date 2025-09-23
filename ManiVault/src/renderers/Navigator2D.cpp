@@ -25,8 +25,8 @@ namespace mv
 {
 
 Navigator2D::ZoomOverlayWidget::ZoomOverlayWidget(Navigator2D& navigator, QWidget* targetWidget):
-	gui::OverlayWidget(targetWidget),
-	_navigator(navigator)
+    gui::OverlayWidget(targetWidget),
+    _navigator(navigator)
 {
 }
 
@@ -97,15 +97,15 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         connect(&_navigationAction.getZoomRectangleAction(), &DecimalRectangleAction::rectangleChanged, this, zoomRectangleChanged);
 
         _navigationAction.getZoomPercentageAction().setValue(getZoomPercentage());
-	});
+    });
 
     connect(this, &Navigator2D::zoomCenterWorldChanged, this, [this](const QPointF& previousZoomCenterWorld, const QPointF& currentZoomCenterWorld) -> void {
         _navigationAction.getZoomCenterAction().set(currentZoomCenterWorld);
-	});
+    });
 
     connect(this, &Navigator2D::zoomFactorChanged, this, [this](float previousZoomFactor, float currentZoomFactor) -> void {
         _navigationAction.getZoomFactorAction().setValue(currentZoomFactor);
-	});
+    });
 
     connect(&_navigationAction.getZoomCenterAction(), &DecimalPointAction::valueChanged, this, [this](float x, float y) -> void {
         beginChangeZoomRectangleWorld();
@@ -113,7 +113,7 @@ void Navigator2D::initialize(QWidget* sourceWidget)
             setZoomCenterWorld(QPointF(x, y));
         }
         endChangeZoomRectangleWorld();
-	});
+    });
 
     connect(&_navigationAction.getZoomInAction(), &TriggerAction::triggered, this, [this]() -> void {
         setZoomPercentage(getZoomPercentage() + 10.f);
@@ -122,26 +122,26 @@ void Navigator2D::initialize(QWidget* sourceWidget)
     connect(&_navigationAction.getZoomPercentageAction(), &DecimalAction::valueChanged, this, [this](float value) -> void {
         _userHasNavigated = true;
         setZoomPercentage(value);
-	});
+    });
 
     connect(&_navigationAction.getZoomOutAction(), &TriggerAction::triggered, this, [this]() -> void {
         setZoomPercentage(getZoomPercentage() - 10.f);
-	});
+    });
 
     connect(&_navigationAction.getZoomFactorAction(), &DecimalAction::valueChanged, this, [this](float value) -> void {
         setZoomFactor(value);
-	});
+    });
 
     connect(&_renderer, &Renderer2D::worldBoundsChanged, this, [this](const QRectF& worldBounds) -> void {
         resetView(true);
 
         if (!hasUserNavigated())
             resetView();
-	});
+    });
 
     connect(&_navigationAction.getZoomRegionAction(), &TriggerAction::triggered, this, [this]() -> void {
         beginZoomToRegion();
-	});
+    });
 
     setZoomFactor(_navigationAction.getZoomFactorAction().getValue());
 
@@ -163,7 +163,7 @@ void Navigator2D::initialize(QWidget* sourceWidget)
 
     const auto updateZoomMarginScreen = [this]() -> void {
         setZoomMarginScreen(_navigationAction.getZoomMarginAction().getZoomMarginScreenAction().getValue());
-	};
+    };
 
     updateZoomMarginScreen();
 
@@ -171,7 +171,7 @@ void Navigator2D::initialize(QWidget* sourceWidget)
 
     const auto updateZoomMarginData = [this]() -> void {
         setZoomMarginData(_navigationAction.getZoomMarginAction().getZoomMarginDataAction().getValue());
-	};
+    };
 
     updateZoomMarginData();
 
@@ -224,11 +224,11 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
                 int x2 = std::max(_zoomRegionPoints[0].x(), _zoomRegionPoints[1].x());
                 int y2 = std::max(_zoomRegionPoints[0].y(), _zoomRegionPoints[1].y());
 
-				_zoomRegionRectangle = QRect(x1, y1, x2 - x1, y2 - y1);
+                _zoomRegionRectangle = QRect(x1, y1, x2 - x1, y2 - y1);
 
                 if (_zoomOverlayWidget)
                     _zoomOverlayWidget->update();
-			};
+            };
 
             if (event->type() == QEvent::MouseButtonPress) {
                 if (const auto* mouseEvent = dynamic_cast<QMouseEvent*>(event)) {
@@ -376,7 +376,7 @@ void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 
     _zoomCenterWorld = zoomRectangleWorld.center();
 
-	emit zoomRectangleWorldChanged(previousZoomRectangleWorld, getZoomRectangleWorld());
+    emit zoomRectangleWorldChanged(previousZoomRectangleWorld, getZoomRectangleWorld());
 }
 
 Navigator2D::ZoomMarginType Navigator2D::getZoomMarginType() const
@@ -391,7 +391,7 @@ void Navigator2D::setZoomMarginType(ZoomMarginType zoomMarginType)
 
     beginChangeZoomMargin();
     {
-		_zoomMarginType = zoomMarginType;
+        _zoomMarginType = zoomMarginType;
     }
     endChangeZoomMargin();
 }
@@ -408,7 +408,7 @@ void Navigator2D::setZoomMarginScreen(float zoomMarginScreen)
 
     beginChangeZoomMargin();
     {
-		_zoomMarginScreen = zoomMarginScreen;
+        _zoomMarginScreen = zoomMarginScreen;
     }
     endChangeZoomMargin();
 }
@@ -425,7 +425,7 @@ void Navigator2D::setZoomMarginData(float zoomMarginData)
 
     beginChangeZoomMargin();
     {
-		_zoomMarginData = zoomMarginData;
+        _zoomMarginData = zoomMarginData;
     }
     endChangeZoomMargin();
 }
@@ -441,13 +441,13 @@ void Navigator2D::setZoomFactor(float zoomFactor)
         return;
 
     if (util::almostEqual(zoomFactor, _zoomFactor))
-		return;
+        return;
 
     const auto previousZoomFactor = _zoomFactor;
 
     _zoomFactor = zoomFactor;
 
-	emit zoomFactorChanged(previousZoomFactor, _zoomFactor);
+    emit zoomFactorChanged(previousZoomFactor, _zoomFactor);
 
     if (!_prohibitZoomPercentageValueChange) {
         _prohibitZoomFactorValueChange = true;
@@ -493,13 +493,13 @@ void Navigator2D::setZoomPercentage(float zoomPercentage)
             const auto zoomFactorY              = static_cast<float>(_renderer.getWorldBounds().height()) / static_cast<float>(_renderer.getRenderSize().height());
 
             if (!_prohibitZoomFactorValueChange) {
-	            _prohibitZoomPercentageValueChange = true;
+                _prohibitZoomPercentageValueChange = true;
                 {
                     setZoomFactor(std::max(zoomFactorX, zoomFactorY) / zoomPercentageNormalized);
                 }
                 _prohibitZoomPercentageValueChange = false;
             }
-				
+                
         }
         endChangeZoomRectangleWorld();
     }
@@ -568,7 +568,7 @@ void Navigator2D::zoomToRectangle(const QRectF& zoomRectangle)
     if (getNavigationAction().getFreezeNavigation().isChecked())
         return;
 
-	if (!_initialized)
+    if (!_initialized)
         return;
 
     beginZooming();
@@ -587,7 +587,7 @@ void Navigator2D::panBy(const QPointF& delta)
     if (getNavigationAction().getFreezeNavigation().isChecked())
         return;
 
-	if (!_initialized)
+    if (!_initialized)
         return;
 
     beginPanning();
@@ -640,7 +640,7 @@ void Navigator2D::resetView(bool force /*= false*/)
     beginZooming();
     {
         beginChangeZoomRectangleWorld();
-	    {
+        {
             const auto zoomFactorX = _renderer.getWorldBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
             const auto zoomFactorY = _renderer.getWorldBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
 
@@ -676,7 +676,7 @@ bool Navigator2D::hasUserNavigated() const
 
 QRect Navigator2D::getZoomRegionRectangle() const
 {
-	return _zoomRegionRectangle;
+    return _zoomRegionRectangle;
 }
 
 void Navigator2D::setIsPanning(bool isPanning)
@@ -842,7 +842,7 @@ void Navigator2D::endZoomToRegion()
 
     setZoomRectangleWorld(QRectF(p1, p2));
 
-	_zoomRegionInProgress   = false;
+    _zoomRegionInProgress   = false;
     _zoomRegionRectangle    = QRect();
 
     if (_zoomOverlayWidget)
@@ -861,22 +861,22 @@ void Navigator2D::endChangeZoomMargin()
 
 void Navigator2D::changeCursor(const QCursor& cursor)
 {
-	Q_ASSERT(_sourceWidget);
+    Q_ASSERT(_sourceWidget);
 
-	if (!_sourceWidget)
-		return;
+    if (!_sourceWidget)
+        return;
 
     _cachedCursor = _sourceWidget->cursor();
 
-	_sourceWidget->setCursor(cursor);
+    _sourceWidget->setCursor(cursor);
 }
 
 void Navigator2D::restoreCursor() const
 {
-	Q_ASSERT(_sourceWidget);
+    Q_ASSERT(_sourceWidget);
 
-	if (!_sourceWidget)
-		return;
+    if (!_sourceWidget)
+        return;
 
     _sourceWidget->setCursor(_cachedCursor);
 }

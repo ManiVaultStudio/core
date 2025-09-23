@@ -91,11 +91,11 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
         connect(fileOpenDialog, &QFileDialog::accepted, this, [this, fileOpenDialog]() -> void {
             _dimensionsPickerAction.loadSelectionFromFile(fileOpenDialog->selectedFiles().first());
             fileOpenDialog->deleteLater();
-		});
+        });
 
         connect(fileOpenDialog, &QFileDialog::rejected, this, [this, fileOpenDialog]() -> void {
             fileOpenDialog->deleteLater();
-		});
+        });
 
         fileOpenDialog->open();
     });
@@ -110,12 +110,12 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
             QString fileName = fileSaveDialog->selectedFiles().first();;
             _dimensionsPickerAction.saveSelectionToFile(fileName);
 
-        	fileSaveDialog->deleteLater();
-		});
+            fileSaveDialog->deleteLater();
+        });
 
         connect(fileSaveDialog, &QFileDialog::rejected, this, [this, fileSaveDialog]() -> void {
             fileSaveDialog->deleteLater();
-		});
+        });
 
         fileSaveDialog->open();
     });

@@ -81,7 +81,7 @@ DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
     getPluginMetadata().setAuthors({
         { "T. Kroes", { "Lead software architect" }, { "LUMC" } },
         { "A. Vieth", { "Plugin developer", "Maintainer" }, { "LUMC", "TU Delft" } }
-	});
+    });
     getPluginMetadata().setOrganizations({
         { "LUMC", "Leiden University Medical Center", "https://www.lumc.nl/en/" },
         { "TU Delft", "Delft university of technology", "https://www.tudelft.nl/" }

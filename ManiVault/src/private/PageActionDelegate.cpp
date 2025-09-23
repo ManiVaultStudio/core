@@ -17,7 +17,7 @@ PageActionDelegate::PageActionDelegate(QObject* parent /*= nullptr*/) :
 
 QSize PageActionDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-	return PageAction::isCompactView() ? QSize(0, 26) : QSize(0, 43);
+    return PageAction::isCompactView() ? QSize(0, 26) : QSize(0, 43);
 }
 
 QWidget* PageActionDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const

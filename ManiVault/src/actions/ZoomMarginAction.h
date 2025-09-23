@@ -24,7 +24,7 @@ namespace mv::gui
  */
 class CORE_EXPORT ZoomMarginAction : public VerticalGroupAction
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
 

@@ -54,7 +54,7 @@ private:
      * Set popup layout (layout contains groupbox etc.)
      * @param popupLayout Pointer to the popup layout
      */
-	void setPopupLayout(QLayout* popupLayout);
+    void setPopupLayout(QLayout* popupLayout);
 };
 
 }

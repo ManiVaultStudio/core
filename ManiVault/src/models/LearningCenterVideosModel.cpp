@@ -107,19 +107,19 @@ const LearningCenterVideo* LearningCenterVideosModel::Item::getVideo() const
 QVariant LearningCenterVideosModel::TypeItem::data(int role) const
 {
     switch (role) {
-	    case Qt::EditRole:
-	        return static_cast<int>(getVideo()->getType());
+        case Qt::EditRole:
+            return static_cast<int>(getVideo()->getType());
 
-	    case Qt::DisplayRole: {
-	        switch (getVideo()->getType()) {
-		        case LearningCenterVideo::Type::YouTube:
-		            return "YouTube";
+        case Qt::DisplayRole: {
+            switch (getVideo()->getType()) {
+                case LearningCenterVideo::Type::YouTube:
+                    return "YouTube";
 
-		        case LearningCenterVideo::Type::GIF:
-		            return "GIF";
-	        }
+                case LearningCenterVideo::Type::GIF:
+                    return "GIF";
+            }
 
-	        break;
+            break;
     }
 
     case Qt::ToolTipRole:
@@ -222,13 +222,13 @@ QVariant LearningCenterVideosModel::ResourceItem::data(int role /*= Qt::UserRole
 QVariant LearningCenterVideosModel::ThumbnailItem::data(int role) const
 {
     switch (role) {
-	    case Qt::EditRole:
+        case Qt::EditRole:
             return QVariant::fromValue(getVideo()->getThumbnailImage());
 
-	    case Qt::DisplayRole:
+        case Qt::DisplayRole:
         case Qt::ToolTipRole:
-	    default:
-	        break;
+        default:
+            break;
     }
 
     return Item::data(role);
