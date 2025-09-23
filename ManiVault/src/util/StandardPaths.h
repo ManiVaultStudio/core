@@ -24,7 +24,8 @@ public:
         Plugins,
         Downloads,
         Customization,
-        Projects
+        Projects,
+        Logs
     };
 
     /**
@@ -41,6 +42,7 @@ public: // Specific getters for convenience
     static QString getDownloadsDirectory();
     static QString getCustomizationDirectory();
     static QString getProjectsDirectory();
+    static QString getLogsDirectory();
 
 private:
 

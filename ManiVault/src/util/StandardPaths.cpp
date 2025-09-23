@@ -16,6 +16,7 @@ QString StandardPaths::get(StandardLocation location)
         case Downloads:     return getDownloadsDirectory();
         case Customization: return getCustomizationDirectory();
         case Projects:      return getProjectsDirectory();
+        case Logs:          return getLogsDirectory();
 	}
 
     return {};
@@ -75,6 +76,22 @@ QString StandardPaths::getProjectsDirectory()
     QDir documentLocationsDir(documentLocations);
 
     const auto dirSuffix = QString("%1/%2/Projects").arg(Application::organizationName(), Application::getBaseName());
+
+    [[maybe_unused]] auto result = documentLocationsDir.mkpath(dirSuffix);
+
+    if (documentLocations.isEmpty())
+        return QDir::homePath();
+
+    return documentLocationsDir.filePath(dirSuffix);
+}
+
+QString StandardPaths::getLogsDirectory()
+{
+    const auto documentLocations = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+
+    QDir documentLocationsDir(documentLocations);
+
+    const auto dirSuffix = QString("%1/%2/Logs").arg(Application::organizationName(), Application::getBaseName());
 
     [[maybe_unused]] auto result = documentLocationsDir.mkpath(dirSuffix);
 
