@@ -43,7 +43,17 @@ public:
     /** Destructor */
     ~SplashScreenWidget() override;
 
+    /**
+     * Override the show event to initialize the widget once, wraps QWidget::showEvent()
+     * @param event Pointer to show event
+     */
     void showEvent(QShowEvent* event) override;
+
+    /**
+     * Override the hide event to stop the event processing timer, wraps QWidget::hideEvent()
+     * @param event Pointer to hide event
+     */
+    void hideEvent(QHideEvent* event) override;
 
     /** Show the splash screen widget animated, wraps QWidget::show() */
     void showAnimated();
@@ -55,6 +65,12 @@ private: // Splash screen content
 
     /** Get the ManiVault copyright notice tooltip string */
     static QString getCopyrightNoticeTooltip();
+
+    /** Connect to the current task signals */
+    void connectToCurrentTask();
+
+    /** Disconnect from the current task signals */
+    void disconnectFromCurrentTask();
 
 private:
     bool                        _initialized{ false };  /** Whether the widget has been initialized */

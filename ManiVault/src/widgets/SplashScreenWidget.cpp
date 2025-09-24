@@ -116,8 +116,6 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 
     _webEngineView.setPage(new Page(&_webEngineView));
     _webEngineView.page()->setWebChannel(&_webChannel);
-
-    
 }
 
 SplashScreenWidget::~SplashScreenWidget()
@@ -151,34 +149,19 @@ void SplashScreenWidget::showEvent(QShowEvent* event)
     loop.exec();
     
     if (_splashScreenAction.getTaskAction().getTask() != _currentTask) {
-	    if (_currentTask) {
-            disconnect(_currentTask, &Task::progressChanged, this, nullptr);
-            disconnect(_currentTask, &Task::progressDescriptionChanged, this, nullptr);
-	    }
+        disconnectFromCurrentTask();
 
         _currentTask = _splashScreenAction.getTaskAction().getTask();
 
-        connect(_currentTask, &Task::progressChanged, this, [this](float progress) -> void {
-            if (!_currentTask)
-                return;
-
-            if (!_initialized)
-                return;
-
-            QMetaObject::invokeMethod(&_splashScreenBridge, "setProgress", Qt::QueuedConnection, Q_ARG(int, static_cast<int>(100.0f * progress)));
-
-            QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
-        });
-
-        connect(_currentTask, &Task::progressDescriptionChanged, this, [this](const QString& progressDescription) -> void {
-            if (!_currentTask)
-                return;
-
-            QMetaObject::invokeMethod(&_splashScreenBridge, "setProgressDescription", Qt::QueuedConnection, Q_ARG(QString, progressDescription));
-
-            QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
-        });
+        connectToCurrentTask();
     }
+}
+
+void SplashScreenWidget::hideEvent(QHideEvent* event)
+{
+	QWidget::hideEvent(event);
+
+    disconnectFromCurrentTask();
 }
 
 void SplashScreenWidget::showAnimated()
@@ -269,6 +252,38 @@ void SplashScreenWidget::closeAnimated()
 QString SplashScreenWidget::getCopyrightNoticeTooltip()
 {
     return "This software is licensed under the GNU Lesser General Public License v3.0.<br>Copyright (c) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)";
+}
+
+void SplashScreenWidget::connectToCurrentTask()
+{
+    connect(_currentTask, &Task::progressChanged, this, [this](float progress) -> void {
+        if (!_currentTask)
+            return;
+
+        if (!_initialized)
+            return;
+
+        QMetaObject::invokeMethod(&_splashScreenBridge, "setProgress", Qt::QueuedConnection, Q_ARG(int, static_cast<int>(100.0f * progress)));
+
+        QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
+	});
+
+    connect(_currentTask, &Task::progressDescriptionChanged, this, [this](const QString& progressDescription) -> void {
+        if (!_currentTask)
+            return;
+
+        QMetaObject::invokeMethod(&_splashScreenBridge, "setProgressDescription", Qt::QueuedConnection, Q_ARG(QString, progressDescription));
+
+        QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
+	});
+}
+
+void SplashScreenWidget::disconnectFromCurrentTask()
+{
+    if (_currentTask) {
+        disconnect(_currentTask, &Task::progressChanged, this, nullptr);
+        disconnect(_currentTask, &Task::progressDescriptionChanged, this, nullptr);
+    }
 }
 
 }
