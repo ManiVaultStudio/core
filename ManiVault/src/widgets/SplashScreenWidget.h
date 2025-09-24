@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "Task.h"
 
 #include "util/SplashScreenBridge.h"
 
@@ -42,7 +43,17 @@ public:
     /** Destructor */
     ~SplashScreenWidget() override;
 
+    /**
+     * Override the show event to initialize the widget once, wraps QWidget::showEvent()
+     * @param event Pointer to show event
+     */
     void showEvent(QShowEvent* event) override;
+
+    /**
+     * Override the hide event to stop the event processing timer, wraps QWidget::hideEvent()
+     * @param event Pointer to hide event
+     */
+    void hideEvent(QHideEvent* event) override;
 
     /** Show the splash screen widget animated, wraps QWidget::show() */
     void showAnimated();
@@ -54,6 +65,12 @@ private: // Splash screen content
 
     /** Get the ManiVault copyright notice tooltip string */
     static QString getCopyrightNoticeTooltip();
+
+    /** Connect to the current task signals */
+    void connectToCurrentTask();
+
+    /** Disconnect from the current task signals */
+    void disconnectFromCurrentTask();
 
 private:
     bool                        _initialized{ false };  /** Whether the widget has been initialized */
@@ -68,6 +85,7 @@ private:
     util::SplashScreenBridge    _splashScreenBridge;    /** Bridge for communication between C++ and JavaScript */
     QGraphicsDropShadowEffect   _dropShadowEffect;      /** For adding a drop shadow to the splash screen widget */
     QTimer                      _processEventsTimer;    /** Timer to keep the splash screen widget somewhat responsive */
+    Task*                       _currentTask;           /** Current task being displayed on the splash screen */
 
     static const std::uint32_t fixedWidth           = 640;      /** Widget fixed width */
     static const std::uint32_t fixedHeight          = 480;      /** Widget fixed height */

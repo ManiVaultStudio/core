@@ -13,15 +13,17 @@ namespace mv::gui {
 
 ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
-    _overrideAction(this, "Override"),
+    _overrideAction(this, "Override", true),
     _iconPickerAction(this, "IconPicker"),
     _testAction(this, "Test"),
     _testTimer(this)
 {
     setShowLabels(false);
 
+    auto& inputFilePathPickerAction = _iconPickerAction.getInputFilePathPickerAction();
+
     addAction(&_overrideAction);
-    addAction(&_iconPickerAction.getInputFilePathPickerAction().getPickAction());
+    addAction(&inputFilePathPickerAction.getPickAction());
     addAction(&_iconPickerAction.getIconAction());
     addAction(&_testAction);
 
@@ -38,6 +40,9 @@ ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& tit
         overrideMainWindowIcon();
 
         _testAction.setIconByName("stopwatch");
+
+        QCoreApplication::processEvents();
+
         _testTimer.start();
     });
 
@@ -45,6 +50,8 @@ ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& tit
         ApplicationIconAction::resetApplicationIcon();
 
         _testAction.setIconByName(testIconName);
+
+        QCoreApplication::processEvents();
     });
 
     const auto updateApplicationIconActionReadOnly = [this]() -> void {
@@ -70,6 +77,14 @@ ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& tit
 
     connect(&_iconPickerAction, &IconPickerAction::iconChanged, this, updateTestActionReadOnly);
     connect(&_overrideAction, &ToggleAction::toggled, this, updateTestActionReadOnly);
+}
+
+QIcon ApplicationIconAction::getIcon() const
+{
+    if (!_overrideAction.isChecked())
+        return qApp->windowIcon();
+    
+	return _iconPickerAction.getIcon();
 }
 
 void ApplicationIconAction::overrideMainWindowIcon() const

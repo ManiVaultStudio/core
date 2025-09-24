@@ -7,6 +7,8 @@
 
 #include "Application.h"
 
+#include "util/StandardPaths.h"
+
 // Qt header files:
 #include <QByteArray>
 #include <QCoreApplication>
@@ -27,6 +29,7 @@
 #include <typeinfo>
 
 using namespace mv;
+using namespace mv::util;
 
 namespace
 {
@@ -45,16 +48,10 @@ namespace
     }
 
 
-    auto GetLogDirectoryPathName()
-    {
-        return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    }
-
-
     auto CreateLogFilePathName()
     {
         const auto currentDateTime = QDateTime::currentDateTime();
-        const QDir logDir = GetLogDirectoryPathName();
+        const QDir logDir = StandardPaths::getLogsDirectory();
         const QFileInfo applicationFileInfo(QCoreApplication::applicationFilePath());
 
         return logDir.filePath(applicationFileInfo.completeBaseName()
@@ -280,7 +277,6 @@ QString Logger::getMessageTypeName(const QtMsgType msgType)
 
 void Logger::initialize()
 {
-    QDir{}.mkpath(GetLogDirectoryPathName());
     (void)GetPreviousMessageHandler(qInstallMessageHandler(&MessageHandler));
 }
 

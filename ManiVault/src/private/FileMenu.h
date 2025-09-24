@@ -11,7 +11,7 @@
 /**
  * File menu class
  * 
- * Menu class for file-related operations
+ * For file-related operations
  * 
  * @author Thomas Kroes
  */
@@ -39,5 +39,5 @@ private:
     void populate ();
 
 private:
-    mv::gui::TriggerAction    _exitApplictionAction;  /** Trigger action to exit the application */
+    mv::gui::TriggerAction    _exitApplicationAction;   /** Trigger action to exit the application */
 };

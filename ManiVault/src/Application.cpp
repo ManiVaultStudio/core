@@ -9,16 +9,21 @@
 #include "ManiVaultVersion.h"
 
 #include "util/Exception.h"
+#include "util/StandardPaths.h"
 
 #include "actions/WidgetAction.h"
 #include "actions/StatusBarAction.h"
+
+#include <nlohmann/json.hpp>
 
 #include <stdexcept>
 
 #include <QDebug>
 #include <QMainWindow>
-#include <QUuid>
 #include <QDir>
+#include <QShortcut>
+
+using nlohmann::json;
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -29,15 +34,16 @@ QList<Application::CursorShapeCount> Application::cursorOverridesCount;
 
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
-    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
+    Serializable("Application"),
     _core(nullptr),
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
     _serializationAborted(false),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
-    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), _id.mid(0, 6)))),
+    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
     _temporaryDirs(this),
-    _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock"))
+    _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
+    _configurationAction(this, "Configuration")
 {
     _lockFile.lock();
 
@@ -47,13 +53,26 @@ Application::Application(int& argc, char** argv) :
         auto& temporaryDirsTask = _temporaryDirs.getTask();
 
         temporaryDirsTask.addToTaskManager();
-    });
+
+        _configurationAction.getBrandingConfigurationAction().getSplashScreenAction().setStartupTask(_startupTask);
+	});
 
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
         BackgroundTask::createHandler(Application::current());
         ForegroundTask::createHandler(Application::current());
         ModalTask::createHandler(Application::current());
     });
+
+    if (hasConfigurationFile()) {
+        fromJsonFile(getConfigurationFilePath());
+    } else {
+        const auto baseName = "ManiVault Studio";
+
+        auto& brandingConfigurationAction = _configurationAction.getBrandingConfigurationAction();
+
+        brandingConfigurationAction.getBaseNameAction().setString(baseName);
+        brandingConfigurationAction.getFullNameAction().setString(QString("%1 %2").arg(baseName, QString::fromStdString(current()->getVersion().getVersionString())));
+	}
 }
 
 Application::~Application()
@@ -63,13 +82,13 @@ Application::~Application()
 
 Application* Application::current()
 {
-    auto applicationInstance = instance();
-    auto maniVaultApplication = dynamic_cast<Application*>(applicationInstance);
+    auto applicationInstance    = instance();
+    auto maniVaultApplication   = dynamic_cast<Application*>(applicationInstance);
 
     return maniVaultApplication;
 }
 
-mv::CoreInterface* Application::getCore()
+mv::CoreInterface* Application::getCore() const
 {
     return _core;
 }
@@ -93,40 +112,41 @@ void Application::setCore(CoreInterface* core)
     }
 }
 
-mv::CoreInterface* Application::core()
+CoreInterface* Application::core()
 {
-    if (current() == nullptr)
-        return nullptr;
+    if (!current())
+        return {};
 
     return current()->getCore();
 }
 
-util::Version Application::getVersion() const
+Version Application::getVersion() const
 {
     return _version;
 }
 
-QString Application::getName()
+QString Application::getBaseName()
 {
-    return "ManiVault";
+    if (!current())
+        return {};
+
+    return current()->getConfigurationAction().getBrandingConfigurationAction().getBaseNameAction().getString();
+}
+
+QString Application::getFullName()
+{
+    if (!current())
+        return {};
+
+    return QString("%1 %2").arg(getBaseName(), QString::fromStdString(current()->getVersion().getVersionString()));
 }
 
 QString Application::getAbout()
 {
-    return QString("%3 is a flexible and extensible visual analytics framework for high-dimensional data.<br> <br>"
-        "For more information, please visit: <br>"
-        "Webpage: <a href=\"https://%5/\">%5</a> <br>"
-        "Source: <a href=\"https://%2/\">%2</a> <br> <br>"
-        "%3 Core %4 <br> <br>"
-        "This software is licensed under the GNU Lesser General Public License v3.0.<br>"
-        "Copyright (C) %1 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)"
-    ).arg(
-        /*1: year*/ QStringLiteral("2023"),
-        /*2: source*/ QStringLiteral("github.com/ManiVaultStudio"),
-        /*3: name*/ getName(),
-        /*4: version*/ QString::fromStdString(Application::current()->getVersion().getVersionString()),
-        /*5: webpage*/ QStringLiteral("manivault.studio")
-    );
+    if (!current())
+        return {};
+
+    return current()->getConfigurationAction().getBrandingConfigurationAction().getAboutAction().getString();
 }
 
 QUrl Application::getStartupProjectUrl() const
@@ -139,7 +159,7 @@ void Application::setStartupProjectUrl(const QUrl& startupProjectUrl)
     _startupProjectUrl = startupProjectUrl;
 }
 
-ProjectMetaAction* Application::getStartupProjectMetaAction()
+ProjectMetaAction* Application::getStartupProjectMetaAction() const
 {
     return _startupProjectMetaAction;
 }
@@ -204,14 +224,54 @@ QMainWindow* Application::getMainWindow()
     return nullptr;
 }
 
+void Application::initializeAttributes()
+{
+    QString organizationName    = "ManiVault";
+    QString organizationDomain  = "LUMC (LKEB) & TU Delft (CGV)";
+    QString applicationName     = QString("ManiVault Studio %1").arg(QString::fromStdString(Version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())).getVersionString()));
+
+    if (hasConfigurationFile()) {
+        try {
+	        QFile jsonFile(getConfigurationFilePath());
+
+        	if (!jsonFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        		throw std::runtime_error(QString("Failed to open JSON file: %1").arg(jsonFile.errorString()).toStdString());
+
+        	const auto bytes = jsonFile.readAll();
+
+        	jsonFile.close();
+
+        	json jsonDocument;
+
+        	try {
+        		jsonDocument = json::parse(bytes.constBegin(), bytes.constEnd());
+        	}
+        	catch (const std::exception& exception) {
+        		throw std::runtime_error(QString("Parse error: %1").arg(exception.what()).toStdString());
+        	}
+
+        	try {
+        		organizationName    = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/Organization name/Value"_json_pointer));
+        		organizationDomain  = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/Organization domain/Value"_json_pointer));
+        		applicationName     = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/Full name/Value"_json_pointer));
+        	}
+        	catch (const std::exception& exception) {
+        		throw std::runtime_error(QString("Lookup error: %1").arg(exception.what()).toStdString());
+        	}
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Parse error:" << e.what();
+        }
+    }
+
+    setOrganizationName(organizationName);
+    setOrganizationDomain(organizationDomain);
+    setApplicationName(applicationName);
+}
+
 ApplicationStartupTask& Application::getStartupTask()
 {
     return *_startupTask;
-}
-
-QString Application::getId() const
-{
-    return _id;
 }
 
 const QTemporaryDir& Application::getTemporaryDir() const
@@ -295,6 +355,39 @@ std::int32_t Application::requestRemoveOverrideCursor(Qt::CursorShape cursorShap
     processEvents();
 
     return cursorOverridesCount.first().count;
+}
+
+void Application::fromVariantMap(const QVariantMap& variantMap)
+{
+	Serializable::fromVariantMap(variantMap);
+
+    _configurationAction.fromParentVariantMap(variantMap, true);
+
+    setWindowIcon(_configurationAction.getBrandingConfigurationAction().getApplicationIconAction().getIcon());
+}
+
+QVariantMap Application::toVariantMap() const
+{
+    auto variantMap = Serializable::toVariantMap();
+
+    _configurationAction.insertIntoVariantMap(variantMap);
+    
+    return variantMap;
+}
+
+QString Application::getConfigurationFileName()
+{
+    return QStringLiteral("app.json");
+}
+
+QString Application::getConfigurationFilePath()
+{
+    return QDir::cleanPath(StandardPaths::getCustomizationDirectory() + "/" + getConfigurationFileName());
+}
+
+bool Application::hasConfigurationFile()
+{
+    return QFileInfo(getConfigurationFilePath()).exists();
 }
 
 Application::TemporaryDirs::TemporaryDirs(QObject* parent) :

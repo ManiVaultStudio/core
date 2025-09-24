@@ -77,32 +77,39 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _mayCloseSplashScreenWidget(mayClose),
     _projectMetaAction(nullptr),
     _enabledAction(this, "Enable splash screen"),
-    _projectImageAction(this, "Project Image", false),
-    _affiliateLogosImageAction(this, "Affiliate Logos", false),
-    _htmlOverrideAction(this, "HTML Override"),
+    _overrideAction(this, "Override"),
+    _htmlOverrideAction(this, "HTML"),
     _editAction(this, "Edit"),
     _openAction(this, "Open splash screen"),
+    _testAction(this, "Test the splash screen"),
     _closeAction(this, "Close splash screen"),
-    _taskAction(this, "ManiVault")
+    _taskAction(this, "ManiVault"),
+    _simulateStartupTask(this, "Test splash screen")
 {
     addAction(&_enabledAction);
     addAction(&_editAction);
-    addAction(&_openAction);
+    addAction(&_testAction);
 
-    _editAction.addAction(&_enabledAction);
-    _editAction.addAction(&_projectImageAction);
-    _editAction.addAction(&_affiliateLogosImageAction);
+    _editAction.setPopupSizeHint(QSize(600, 400));
 
-    _taskAction.setTask(&Application::current()->getStartupTask());
+    //_editAction.addAction(&_enabledAction);
+    _editAction.addAction(&_overrideAction);
+    _editAction.addAction(&_htmlOverrideAction);
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     _enabledAction.setStretch(1);
     _enabledAction.setToolTip("Show splash screen at startup");
 
+    _htmlOverrideAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextEdit);
+
     _openAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _openAction.setIconByName("eye");
     _openAction.setToolTip("Open the splash screen");
+
+    _testAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _testAction.setIconByName("play");
+    _testAction.setToolTip("Test the splash screen");
 
     _closeAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _closeAction.setIconByName("eye-slash");
@@ -114,24 +121,52 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _editAction.setToolTip("Edit the splash screen settings");
     _editAction.setPopupSizeHint(QSize(350, 0));
 
-    _projectImageAction.setDefaultWidgetFlags(ImageAction::Loader);
-    _projectImageAction.setIconByName("image");
-    _projectImageAction.setToolTip("Project image");
-
-    _affiliateLogosImageAction.setDefaultWidgetFlags(ImageAction::Loader);
-    _affiliateLogosImageAction.setIconByName("image");
-    _affiliateLogosImageAction.setToolTip("Affiliate logos image");
-
     connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenWidget);
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
 
-    connect(&Application::current()->getStartupTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-        if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
-            return;
+    _simulateTimer.setInterval(500);
 
-        if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
-            closeSplashScreenWidget();
+	connect(&_simulateTimer, &QTimer::timeout, this, [this]() -> void {
+        auto progress = _simulateStartupTask.getProgress();
+
+		progress += .1f;
+
+        _simulateStartupTask.setProgress(progress);
+
+        qDebug() << "Simulate progress:" << progress;
+        
+
+        _splashScreenWidget->update();
+        QCoreApplication::processEvents();
+
+		if (progress >= 1.f) {
+            progress = 1.f;
+
+            _simulateTimer.stop();
+            _simulateStartupTask.setFinished();
+        }
+
+        _simulateStartupTask.setProgress(progress);
     });
+
+	connect(&_testAction, &TriggerAction::triggered, this, [this]() -> void {
+        _simulateStartupTask.setRunning();
+        _simulateStartupTask.setProgress(.0f);
+
+        setStartupTask(&_simulateStartupTask);
+
+        showSplashScreenWidget();
+
+        _simulateTimer.start();
+    });
+
+    const auto updateHtmlOverrideAction = [this]() -> void {
+        _htmlOverrideAction.setEnabled(_overrideAction.isChecked());
+	};
+
+    updateHtmlOverrideAction();
+
+    connect(&_overrideAction, &ToggleAction::toggled, this, updateHtmlOverrideAction);
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)
@@ -154,9 +189,27 @@ void SplashScreenAction::setMayCloseSplashScreenWidget(bool mayCloseSplashScreen
     _mayCloseSplashScreenWidget = mayCloseSplashScreenWidget;
 }
 
+void SplashScreenAction::setStartupTask(Task* startupTask)
+{
+    Q_ASSERT(startupTask);
+
+    if (!startupTask)
+        return;
+
+    _taskAction.setTask(startupTask);
+
+    connect(startupTask, &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+        if (mv::projects().isOpeningProject() || mv::projects().isImportingProject())
+            return;
+
+        if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
+            closeSplashScreenWidget();
+	});
+}
+
 QString SplashScreenAction::getHtml() const
 {
-    if (!_htmlOverrideAction.getString().isEmpty())
+    if (_overrideAction.isChecked() && !_htmlOverrideAction.getString().isEmpty())
         return _htmlOverrideAction.getString();
 
     return getHtmlFromTemplate();
@@ -174,7 +227,7 @@ QString SplashScreenAction::pixmapToBase64(const QPixmap& pixmap)
     return QString::fromLatin1(byteArray.toBase64());
 }
 
-ProjectMetaAction* SplashScreenAction::getProjectMetaAction()
+ProjectMetaAction* SplashScreenAction::getProjectMetaAction() const
 {
     return _projectMetaAction;
 }
@@ -186,6 +239,9 @@ void SplashScreenAction::setProjectMetaAction(ProjectMetaAction* projectMetaActi
 
 void SplashScreenAction::showSplashScreenWidget()
 {
+    if (!getEnabledAction().isChecked())
+        return;
+
     if (_splashScreenWidget.isNull()) {
         _splashScreenWidget = new SplashScreenWidget(*this, nullptr);
 
@@ -290,8 +346,7 @@ void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
     HorizontalGroupAction::fromVariantMap(variantMap);
 
     _enabledAction.fromParentVariantMap(variantMap);
-    _projectImageAction.fromParentVariantMap(variantMap);
-    _affiliateLogosImageAction.fromParentVariantMap(variantMap);
+    _overrideAction.fromParentVariantMap(variantMap, true);
     _htmlOverrideAction.fromParentVariantMap(variantMap, true);
 }
 
@@ -300,8 +355,7 @@ QVariantMap SplashScreenAction::toVariantMap() const
     auto variantMap = HorizontalGroupAction::toVariantMap();
 
     _enabledAction.insertIntoVariantMap(variantMap);
-    _projectImageAction.insertIntoVariantMap(variantMap);
-    _affiliateLogosImageAction.insertIntoVariantMap(variantMap);
+    _overrideAction.insertIntoVariantMap(variantMap);
     _htmlOverrideAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

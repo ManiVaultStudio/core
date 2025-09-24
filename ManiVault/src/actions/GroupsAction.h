@@ -161,7 +161,7 @@ public:
      */
     Q_INVOKABLE GroupsAction(QObject* parent, const QString& title);
 
-    ~GroupsAction();
+    ~GroupsAction() override;
 
 public: // Adding/removing group action(s)
 

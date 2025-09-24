@@ -4,6 +4,8 @@
 
 #include "PageWidget.h"
 
+#include <Application.h>
+
 #include <QDebug>
 #include <QPainter>
 
@@ -15,9 +17,7 @@ PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     Serializable(title),
     _pageHeaderWidget(title),
-    _backgroundImage(":/Images/StartPageBackground"),
-    _logoAction(this, "Logo"),
-    _titleAction(this, "Title")
+    _backgroundImage(":/Images/StartPageBackground")
 {
     setObjectName("PageWidget");
     setLayout(&_layout);
@@ -56,10 +56,10 @@ PageWidget::PageWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     setBackgroundRole(QPalette::Window);
     setAttribute(Qt::WA_NoSystemBackground, false);
 
-    _logoAction.setDefaultWidgetFlags(ImageAction::WidgetFlag::Loader);
+    auto& brandingConfigurationAction = Application::current()->getConfigurationAction().getBrandingConfigurationAction();
 
-    connect(&_logoAction, &ImageAction::imageChanged, this, &PageWidget::updateLogo);
-    connect(&_titleAction, &StringAction::stringChanged, this, &PageWidget::updateTitle);
+    connect(&brandingConfigurationAction.getLogoAction(), &ImageAction::imageChanged, this, &PageWidget::updateLogo);
+    connect(&brandingConfigurationAction.getFullNameAction(), &StringAction::stringChanged, this, &PageWidget::updateTitle);
 
     updateLogo();
     updateTitle();
@@ -90,33 +90,11 @@ QVBoxLayout& PageWidget::getContentLayout()
 
 void PageWidget::updateLogo()
 {
-    _pageHeaderWidget.setPixmap(QPixmap::fromImage(_logoAction.getImage()));
+    _pageHeaderWidget.setPixmap(QPixmap::fromImage(Application::current()->getConfigurationAction().getBrandingConfigurationAction().getLogoAction().getImage()));
 }
 
 void PageWidget::updateTitle()
 {
-    _titleLabel.setText(_titleAction.getString());
+    _titleLabel.setText(Application::current()->getConfigurationAction().getBrandingConfigurationAction().getFullNameAction().getString());
 }
 
-QString PageWidget::getConfigurationFileName() const
-{
-    return QString("%1.json").arg(getSerializationName());
-}
-
-void PageWidget::fromVariantMap(const QVariantMap& variantMap)
-{
-    Serializable::fromVariantMap(variantMap);
-
-    _logoAction.fromParentVariantMap(variantMap);
-    _titleAction.fromParentVariantMap(variantMap);
-}
-
-QVariantMap PageWidget::toVariantMap() const
-{
-    auto variantMap = Serializable::toVariantMap();
-
-    _logoAction.insertIntoVariantMap(variantMap);
-    _titleAction.insertIntoVariantMap(variantMap);
-
-    return variantMap;
-}

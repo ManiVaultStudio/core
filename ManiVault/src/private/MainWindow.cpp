@@ -37,6 +37,7 @@
 #include <QStackedWidget>
 #include <QStatusBar>
 #include <QRandomGenerator>
+#include <QShortcut>
 
 #ifdef _DEBUG
     #define MAIN_WINDOW_VERBOSE
@@ -164,8 +165,16 @@ void MainWindow::initialize()
     }
         
     auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
-    
-    auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
+
+    auto customizeApplicationShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_F8), this);
+
+	customizeApplicationShortcut->setContext(Qt::ApplicationShortcut);
+
+    connect(customizeApplicationShortcut, &QShortcut::activated, this, [this] {
+        Application::current()->getConfigurationAction().getConfigureAction().trigger();
+    });
+
+	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
     auto viewMenuAction     = menuBar()->addMenu(new ViewMenu());
     auto projectsMenuAction = menuBar()->addMenu(new ProjectsMenu());
     auto helpMenuAction     = menuBar()->addMenu(new HelpMenu());
@@ -187,13 +196,13 @@ void MainWindow::initialize()
     
     statusBar()->setSizeGripEnabled(false);
     
-    auto startPageStatusBarAction = new FrontPagesStatusBarAction(this, "Start Page");
-    auto versionStatusBarAction = new ManiVaultVersionStatusBarAction(this, "Version");
-    auto pluginsStatusBarAction = new PluginsStatusBarAction(this, "Plugins");
-    auto loggingStatusBarAction = new LoggingStatusBarAction(this, "Logging");
+    auto startPageStatusBarAction       = new FrontPagesStatusBarAction(this, "Start Page");
+    auto versionStatusBarAction         = new ManiVaultVersionStatusBarAction(this, "Version");
+    auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
+    auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
     auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
-    auto settingsTasksStatusBarAction = new SettingsStatusBarAction(this, "Settings");
-    auto workspaceStatusBarAction = new WorkspaceStatusBarAction(this, "Workspace");
+    auto settingsTasksStatusBarAction   = new SettingsStatusBarAction(this, "Settings");
+    auto workspaceStatusBarAction       = new WorkspaceStatusBarAction(this, "Workspace");
     
     statusBar()->insertPermanentWidget(0, startPageStatusBarAction->createWidget(this));
     statusBar()->insertPermanentWidget(1, versionStatusBarAction->createWidget(this));
@@ -228,7 +237,7 @@ void MainWindow::initialize()
     
     const auto projectChanged = [this, updateStatusBarVisibility]() -> void {
         if (!projects().hasProject()) {
-            setWindowTitle("ManiVault");
+            setWindowTitle(Application::getBaseName());
         }
         else {
             if (projects().getCurrentProject()->getReadOnlyAction().isChecked()) {
@@ -238,9 +247,9 @@ void MainWindow::initialize()
                 const auto projectFilePath = projects().getCurrentProject()->getFilePath();
     
                 if (projectFilePath.isEmpty())
-                    setWindowTitle("Unsaved - ManiVault");
+                    setWindowTitle(QString("Unsaved - %1").arg(Application::getBaseName()));
                 else
-                    setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
+                    setWindowTitle(QString("%1 - %2").arg(projectFilePath, Application::getBaseName()));
             }
         }
     
@@ -251,6 +260,8 @@ void MainWindow::initialize()
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, projectChanged);
     connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
     connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
+
+	connect(&Application::current()->getConfigurationAction().getBrandingConfigurationAction().getBaseNameAction(), &StringAction::stringChanged, this, projectChanged);
     
     const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
         if (toggled)

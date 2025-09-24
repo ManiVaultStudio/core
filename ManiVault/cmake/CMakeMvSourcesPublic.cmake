@@ -355,6 +355,9 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/NavigationAction.h
     src/actions/ZoomMarginAction.h
     src/actions/ViewPluginHeadsUpDisplayAction.h
+    src/actions/ApplicationConfigurationAction.h
+    src/actions/StartPageConfigurationAction.h
+    src/actions/BrandingConfigurationAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -397,6 +400,9 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/NavigationAction.cpp
     src/actions/ZoomMarginAction.cpp
     src/actions/ViewPluginHeadsUpDisplayAction.cpp
+    src/actions/ApplicationConfigurationAction.cpp
+    src/actions/StartPageConfigurationAction.cpp
+    src/actions/BrandingConfigurationAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -571,6 +577,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/HttpsErrorReply.h
     src/util/HeadsUpDisplayItem.h
     src/util/SplashScreenBridge.h
+    src/util/StandardPaths.h
 )
 
 if(APPLE)
@@ -632,6 +639,7 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/HttpsErrorReply.cpp
 	src/util/HeadsUpDisplayItem.cpp
 	src/util/SplashScreenBridge.cpp
+	src/util/StandardPaths.cpp
 )
 
 if(APPLE)

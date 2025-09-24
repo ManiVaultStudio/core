@@ -34,7 +34,6 @@ using namespace mv::gui;
 
 StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
-    Serializable("OpenProjectWidget"),
     _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
@@ -81,15 +80,17 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     createCustomIcons();
 
-    const auto toggleViews = [this]() -> void {
-        _openCreateProjectWidget.setVisible(_startPageContentWidget->getToggleOpenCreateProjectAction().isChecked());
-        _projectsWidget.setVisible(_startPageContentWidget->getToggleProjectDatabaseAction().isChecked());
-        _recentProjectsWidget.setVisible(_startPageContentWidget->getToggleRecentProjectsAction().isChecked());
+    auto& startPageConfigurationAction = Application::current()->getConfigurationAction().getStartPageConfigurationAction();
+
+    const auto toggleViews = [this, &startPageConfigurationAction]() -> void {
+        _openCreateProjectWidget.setVisible(startPageConfigurationAction.getToggleOpenCreateProjectAction().isChecked());
+        _projectsWidget.setVisible(startPageConfigurationAction.getToggleProjectDatabaseAction().isChecked());
+        _recentProjectsWidget.setVisible(startPageConfigurationAction.getToggleRecentProjectsAction().isChecked());
     };
 
-    connect(&_startPageContentWidget->getToggleOpenCreateProjectAction(), &ToggleAction::toggled, this, toggleViews);
-    connect(&_startPageContentWidget->getToggleProjectDatabaseAction(), &ToggleAction::toggled, this, toggleViews);
-    connect(&_startPageContentWidget->getToggleRecentProjectsAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&startPageConfigurationAction.getToggleOpenCreateProjectAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&startPageConfigurationAction.getToggleProjectDatabaseAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&startPageConfigurationAction.getToggleRecentProjectsAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
 }
@@ -410,30 +411,4 @@ void StartPageOpenProjectWidget::updateCustomStyle()
 {
     createCustomIcons();
     updateActions();
-}
-
-void StartPageOpenProjectWidget::fromVariantMap(const QVariantMap& variantMap)
-{
-    Serializable::fromVariantMap(variantMap);
-
-    _openCreateProjectWidget.fromParentVariantMap(variantMap, true);
-    _recentProjectsWidget.fromParentVariantMap(variantMap, true);
-    _projectsWidget.fromParentVariantMap(variantMap, true);
-    _projectsFilterModel.fromParentVariantMap(variantMap, true);
-
-    const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction().fromParentVariantMap(variantMap, true);
-}
-
-QVariantMap StartPageOpenProjectWidget::toVariantMap() const
-{
-    auto variantMap = Serializable::toVariantMap();
-
-    _openCreateProjectWidget.insertIntoVariantMap(variantMap);
-    _recentProjectsWidget.insertIntoVariantMap(variantMap);
-    _projectsWidget.insertIntoVariantMap(variantMap);
-    _projectsFilterModel.insertIntoVariantMap(variantMap);
-
-    mv::projects().getProjectsTreeModel().getDsnsAction().insertIntoVariantMap(variantMap);
-
-    return variantMap;
 }

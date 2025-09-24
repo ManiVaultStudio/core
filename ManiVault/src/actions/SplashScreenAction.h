@@ -4,12 +4,16 @@
 
 #pragma once
 
-#include "actions/ImageAction.h"
 #include "actions/TaskAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/TriggerAction.h"
 #include "actions/StringAction.h"
 #include "actions/VerticalGroupAction.h"
+#include "actions/HorizontalGroupAction.h"
+
+#include "Task.h"
+
+#include <QTimer>
 
 namespace mv {
     class ProjectMetaAction;
@@ -151,13 +155,14 @@ public:
      * @return Base64 representation of the pixmap, empty string if not available
      */
     static QString pixmapToBase64(const QPixmap& pixmap);
+
 public:
 
     /**
      * Get project meta action
      * @return Pointer to project meta action, nullptr if not available
      */
-    ProjectMetaAction* getProjectMetaAction();
+    ProjectMetaAction* getProjectMetaAction() const;
 
     /**
      * Get project meta action to \p projectMetaAction
@@ -167,7 +172,7 @@ public:
 
 protected:
 
-    /** Shows the splash screen and animates its opacity and position */
+    /** Shows the splash screen widget */
     void showSplashScreenWidget();
 
     /** Animates the splash screen widget's opacity and position and afterwards closes it */
@@ -181,6 +186,12 @@ protected:
      * @return HTML content from template, empty string if not available
      */
     QString getHtmlFromTemplate() const;
+
+    /**
+     * Set startup task to \p startupTask
+     * @param startupTask Pointer to startup task
+     */
+    void setStartupTask(Task* startupTask);
 
 public: // Serialization
 
@@ -199,36 +210,40 @@ public: // Serialization
 public: // Action getters
 
     const ToggleAction& getEnabledAction() const { return _enabledAction; }
-    const TriggerAction& getOpenAction() const { return _openAction; }
-    const TriggerAction& getCloseAction() const { return _closeAction; }
-    const VerticalGroupAction& getEditAction() const { return _editAction; }
-    const ImageAction& getProjectImageAction() const { return _projectImageAction; }
-    const ImageAction& getAffiliateLogosImageAction() const { return _affiliateLogosImageAction; }
+    const ToggleAction& getOverrideAction() const { return _overrideAction; }
     const StringAction& getHtmlOverrideAction() const { return _htmlOverrideAction; }
+    const VerticalGroupAction& getEditAction() const { return _editAction; }
+	const TriggerAction& getOpenAction() const { return _openAction; }
+	const TriggerAction& getTestAction() const { return _testAction; }
+    const TriggerAction& getCloseAction() const { return _closeAction; }
     const TaskAction& getTaskAction() const { return _taskAction; }
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
-    TriggerAction& getOpenAction() { return _openAction; }
-    TriggerAction& getCloseAction() { return _closeAction; }
-    VerticalGroupAction& getEditAction() { return _editAction; }
-    ImageAction& getProjectImageAction() { return _projectImageAction; }
-    ImageAction& getAffiliateLogosImageAction() { return _affiliateLogosImageAction; }
+    ToggleAction& getOverrideAction() { return _overrideAction; }
     StringAction& getHtmlOverrideAction() { return _htmlOverrideAction; }
+    VerticalGroupAction& getEditAction() { return _editAction; }
+	TriggerAction& getOpenAction() { return _openAction; }
+	TriggerAction& getTestAction() { return _testAction; }
+    TriggerAction& getCloseAction() { return _closeAction; }
     TaskAction& getTaskAction() { return _taskAction; }
 
 private:
     bool                                _mayCloseSplashScreenWidget;    /** Whether the user can close the splash screen widget with a close tool button */
     ProjectMetaAction*                  _projectMetaAction;             /** Shared pointer to project meta action (used by the splash screen widget to display project information) */
     ToggleAction                        _enabledAction;                 /** Action to setEnabled the splash screen on/off */
-    ImageAction                         _projectImageAction;            /** Image action for the project image */
-    ImageAction                         _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
+    ToggleAction                        _overrideAction;                /** Toggle action to override the default ManiVault splash screen */
     StringAction                        _htmlOverrideAction;            /** String action for custom html content */
     VerticalGroupAction                 _editAction;                    /** Vertical group action for editing the splash screen */
     TriggerAction                       _openAction;                    /** Trigger action to show the splash screen */
+    TriggerAction                       _testAction;                    /** Trigger action to briefly show the splash screen for testing purposes */
     TriggerAction                       _closeAction;                   /** Trigger action to manually close the splash screen */
     TaskAction                          _taskAction;                    /** Task action for showing load progress */
     QPointer<SplashScreenWidget>        _splashScreenWidget;            /** Splash screen dialog */
     Alerts                              _alerts;                        /** Alerts that will be displayed on the splash screen widget */
+    Task                                _simulateStartupTask;           /** Test task to simulate load progress */
+    QTimer                              _simulateTimer;                 /** Timer to simulate load progress */
+
+    friend class mv::Application;
 };
 
 }

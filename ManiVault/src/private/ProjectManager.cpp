@@ -19,6 +19,7 @@
 #include <util/Exception.h>
 #include <util/Serialization.h>
 #include <util/Timer.h>
+#include <util/StandardPaths.h>
 
 #include <widgets/FileDialog.h>
 
@@ -355,8 +356,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 {
     Application::requestOverrideCursor(Qt::WaitCursor);
 
-    Timer openProjectTimer("Open project");
-
     try
     {
 #ifdef PROJECT_MANAGER_VERBOSE
@@ -393,7 +392,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             fileOpenDialog.setWindowTitle("Open ManiVault Project");
             fileOpenDialog.setNameFilters({ "ManiVault project files (*.mv)" });
             fileOpenDialog.setDefaultSuffix(".mv");
-            fileOpenDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+            fileOpenDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
             fileOpenDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
             StringAction    titleAction(this, "Title");
@@ -474,6 +473,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         emit projectAboutToBeOpened(*_project);
         {
+            Timer openProjectTimer("Open project");
+
             _project->setFilePath(filePath);
 
             auto& projectSerializationTask      = projects().getProjectSerializationTask();
@@ -865,7 +866,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 saveFileDialog.setWindowTitle("Save ManiVault Project");
                 saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
                 saveFileDialog.setDefaultSuffix(".mv");
-                saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+                saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
 
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
@@ -1096,7 +1097,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                 saveFileDialog.setWindowTitle("Publish ManiVault Project");
                 saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
                 saveFileDialog.setDefaultSuffix(".mv");
-                saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+                saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
 
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
@@ -1413,17 +1414,14 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
 
 QDir ProjectManager::getDownloadedProjectsDir() const
 {
-    const auto baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir downloadsDir(StandardPaths::getDownloadsDirectory());
 
-    QDir dir(baseDir);
-
-    const auto subPath  = "Downloads/Projects";
-    const auto fullPath = dir.filePath(subPath);
+    const auto fullPath = downloadsDir.filePath("Projects");
 
     QDir resultDir(fullPath);
 
     if (!resultDir.exists()) {
-        const auto madePath = QDir().mkpath(fullPath);
+        [[maybe_unused]] const auto madePath = QDir().mkpath(fullPath);
     }
 
     return resultDir;

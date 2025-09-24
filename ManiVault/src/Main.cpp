@@ -9,12 +9,12 @@
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
-#include <ProjectMetaAction.h>
 
 #include <models/ProjectsTreeModel.h>
 
 #include <util/Icon.h>
 #include <util/HardwareSpec.h>
+#include <util/StandardPaths.h>
 
 #include <ModalTask.h>
 #include <ModalTaskHandler.h>
@@ -33,35 +33,17 @@ using namespace mv::gui;
 
 int main(int argc, char *argv[])
 {
-
-    // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings
-    auto coreApplication = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
-
-    QCommandLineParser commandLineParser;
-
-    commandLineParser.setApplicationDescription("Application for viewing and analyzing high-dimensional data");
-    commandLineParser.addHelpOption();
-    commandLineParser.addVersionOption();
-
-    QCommandLineOption organizationNameOption({ "org_name", "organization_name" }, "Name of the organization", "organization_name", "BioVault");
-    QCommandLineOption organizationDomainOption({ "org_dom", "organization_domain" }, "Domain of the organization", "organization_domain", "LUMC (LKEB) & TU Delft (CGV)");
-    QCommandLineOption applicationNameOption({ "app_name", "application_name" }, "Name of the application", "application_name", "ManiVault");
-
-    commandLineParser.addOption(organizationNameOption);
-    commandLineParser.addOption(organizationDomainOption);
-    commandLineParser.addOption(applicationNameOption);
-
-    commandLineParser.process(QCoreApplication::arguments());
-
-    // Remove the temporary application
-    coreApplication.reset();
-
-    QCoreApplication::setOrganizationName(commandLineParser.value("organization_name"));
-    QCoreApplication::setOrganizationDomain(commandLineParser.value("organization_domain"));
-    QCoreApplication::setApplicationName(commandLineParser.value("application_name"));
-    
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
+
+    // Temporary application to be able to query application dir path
+    auto tempApp = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
+
+    // Initialize application attributes (organization name, domain and application name)
+    Application::initializeAttributes();
+
+    // Destroy temporary application
+    tempApp.reset();
 
 #ifdef Q_OS_MAC
     QSurfaceFormat defaultFormat;
@@ -83,11 +65,9 @@ int main(int argc, char *argv[])
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
-    qDebug() << "Starting ManiVault" << MV_VERSION_STRING();
+    qDebug() << "Starting" << Application::applicationName();
 
     Application application(argc, argv);
-
-    Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 
     Core core;
 
@@ -95,7 +75,7 @@ int main(int argc, char *argv[])
 
     core.createManagers();
 
-    SplashScreenAction splashScreenAction(&application, true);
+    auto& splashScreenAction = application.getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction();
 
     splashScreenAction.getOpenAction().trigger();
 
@@ -106,14 +86,13 @@ int main(int argc, char *argv[])
         settings().getTemporaryDirectoriesSettingsAction().getScanForStaleTemporaryDirectoriesAction().trigger();
     }
 
-    const QString projectsJsonFileName{ "projects.json" };
-
-    const auto hasProjectsJsonInAppDir = QFileInfo(QCoreApplication::applicationDirPath(), projectsJsonFileName).exists();
+    const auto projectsJsonFilePath = QDir::cleanPath(StandardPaths::getCustomizationDirectory() + "/projects.json");
+    const auto hasProjectsJsonFile  = QFileInfo(projectsJsonFilePath).exists();
 
     auto& projectsTreeModel = const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel());
 
-    if (hasProjectsJsonInAppDir)
-        projectsTreeModel.populateFromJsonFile(projectsJsonFileName);
+    if (hasProjectsJsonFile)
+        projectsTreeModel.populateFromJsonFile(projectsJsonFilePath);
 
     core.initialize();
     application.initialize();

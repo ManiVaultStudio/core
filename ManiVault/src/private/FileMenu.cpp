@@ -15,26 +15,47 @@ using namespace mv::gui;
 
 FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
-    _exitApplictionAction(nullptr, "Exit")
+    _exitApplicationAction(nullptr, "Exit")
 {
     setTitle("File");
     setToolTip("File operations");
-    
+
     //  Quit is by default in the app menu on macOS
     if (QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
         
-        _exitApplictionAction.setShortcut(QKeySequence("Alt+F4"));
-        _exitApplictionAction.setShortcutContext(Qt::ApplicationShortcut);
-        _exitApplictionAction.setIconByName("right-from-bracket");
-        _exitApplictionAction.setToolTip("Exit ManiVault");
+        _exitApplicationAction.setShortcut(QKeySequence("Alt+F4"));
+        _exitApplicationAction.setShortcutContext(Qt::ApplicationShortcut);
+        _exitApplicationAction.setIconByName("right-from-bracket");
+        _exitApplicationAction.setToolTip("Exit ManiVault");
         
-        connect(&_exitApplictionAction, &TriggerAction::triggered, this, []() -> void {
+        connect(&_exitApplicationAction, &TriggerAction::triggered, this, []() -> void {
             Application::current()->quit();
         });
     }
     
     // macOS does not like populating the menu on show, so we rather do it explicitly here
     populate();
+
+    /*
+     * getTitleAction().setString(QString("<b>ManiVault</b> v%1").arg(QString::fromStdString(MV_VERSION_STRING())));
+
+    _fileAction.setShowLabels(false);
+
+    _fileAction.addAction(&getLoadAction());
+    _fileAction.addAction(&getSaveAction());
+
+    _startPageContentWidget.getToolbarAction().addAction(&_configurationAction);
+
+    _configurationAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _configurationAction.setIconByName("gear");
+    _configurationAction.setPopupSizeHint(QSize(400, 0));
+    _configurationAction.setVisible(false);
+
+    _configurationAction.addAction(&_fileAction);
+    _configurationAction.addAction(&getLogoAction());
+    _configurationAction.addAction(&getTitleAction());
+    _configurationAction.addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction());
+     */
 }
 
 void FileMenu::showEvent(QShowEvent* event)
@@ -72,7 +93,7 @@ void FileMenu::populate()
     //  Quit is by default in the app menu on macOS
     //if(QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
     //addSeparator();
-    //addAction(&_exitApplictionAction);
+    //addAction(&_exitApplicationAction);
     //}
 
 #if defined(_DEBUG) && defined(TEST_STYLESHEET)
