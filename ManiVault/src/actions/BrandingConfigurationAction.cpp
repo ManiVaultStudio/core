@@ -18,8 +18,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     _editFullNameAction(this, "Edit full name"),
     _logoAction(this, "Logo"),
     _iconAction(this, "Icon"),
-    _overrideIconAction(this, "Override icon"),
-	_iconFromLogoAction(this, "Icon from logo"),
+    _generateIconFromLogoAction(this, "Generate icon from logo"),
     _splashScreenAction(this),
     _aboutAction(this, "About")
 {
@@ -30,8 +29,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     _editFullNameAction.setToolTip("Override the auto-generated full name of the application");
     _logoAction.setToolTip("Set the logo");
     _iconAction.setToolTip("Change the application icon");
-    _overrideIconAction.setToolTip("Override the default application icon");
-    _iconFromLogoAction.setToolTip("Use the logo to generate the application icon");
+    _generateIconFromLogoAction.setToolTip("Generate the application icon from the current logo");
     _splashScreenAction.setToolTip("Configure the splash screen");
     _aboutAction.setToolTip("Overrides the default (HTML) text in the about dialog");
 
@@ -54,7 +52,7 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     addAction(&_editFullNameAction);
     addAction(&_logoAction);
     addAction(&_iconAction);
-    addAction(&_iconFromLogoAction);
+    addAction(&_generateIconFromLogoAction);
     addAction(&_splashScreenAction);
     addAction(&_aboutAction);
 
@@ -70,13 +68,13 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     connect(&_editFullNameAction, &ToggleAction::toggled, this, updateFullNameAction);
     connect(&_baseNameAction, &StringAction::stringChanged, this, updateFullNameAction);
 
-    const auto updateApplicationIconAction = [this]() -> void {
-        _iconAction.setEnabled(_iconFromLogoAction.isChecked());
+    const auto updateFromLogoReadOnly = [this]() -> void {
+        _generateIconFromLogoAction.setEnabled(!_logoAction.getImage().isNull());
 	};
 
-    updateApplicationIconAction();
+    updateFromLogoReadOnly();
 
-    connect(&_iconFromLogoAction, &ToggleAction::toggled, this, updateApplicationIconAction);
+    connect(&_logoAction, &ImageAction::imageChanged, this, updateFromLogoReadOnly);
 
     _aboutAction.setString(QString("%3 is a flexible and extensible visual analytics framework for high-dimensional data.<br> <br>"
         "For more information, please visit: <br>"

@@ -58,23 +58,21 @@ public: // Action getters
     ToggleAction& getEditFullNameAction() { return _editFullNameAction; }
     ImageAction& getLogoAction() { return _logoAction; }
     ApplicationIconAction& getApplicationIconAction() { return _iconAction; }
-    ToggleAction& getOverrideIconAction() { return _overrideIconAction; }
-    ToggleAction& getIconFromLogoAction() { return _iconFromLogoAction; }
+    TriggerAction& getIconFromLogoAction() { return _generateIconFromLogoAction; }
     SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
     StringAction& getAboutAction() { return _aboutAction; }
 
 private:
-    StringAction            _organizationNameAction;    /** Organization name action */
-    StringAction            _organizationDomainAction;  /** Organization domain action */
-    StringAction            _baseNameAction;            /** Application base name action (e.g. main window title) */
-    StringAction            _fullNameAction;            /** Application full name action (e.g. start page title) */
-    ToggleAction            _editFullNameAction;        /** Whether to edit the full name (otherwise it is derived from base name and version) */
-    ImageAction             _logoAction;                /** Application logo action */
-	ApplicationIconAction   _iconAction;                /** Application icon action */
-    ToggleAction            _overrideIconAction;        /** Whether to override the default application icon */
-    ToggleAction            _iconFromLogoAction;        /** Whether to use the logo as application icon */
-    SplashScreenAction      _splashScreenAction;        /** Application splash screen action */
-    StringAction            _aboutAction;               /** Application about action (HTML content) */
+    StringAction            _organizationNameAction;        /** Organization name action */
+    StringAction            _organizationDomainAction;      /** Organization domain action */
+    StringAction            _baseNameAction;                /** Application base name action (e.g. main window title) */
+    StringAction            _fullNameAction;                /** Application full name action (e.g. start page title) */
+    ToggleAction            _editFullNameAction;            /** Whether to edit the full name (otherwise it is derived from base name and version) */
+    ImageAction             _logoAction;                    /** Application logo action */
+	ApplicationIconAction   _iconAction;                    /** Application icon action */
+    TriggerAction           _generateIconFromLogoAction;    /** Whether to generate the application icon from the logo (if there is one) */
+    SplashScreenAction      _splashScreenAction;            /** Application splash screen action */
+    StringAction            _aboutAction;                   /** Application about action (HTML content) */
 };
 
 }

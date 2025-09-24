@@ -22,8 +22,7 @@ ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& tit
 
     auto& inputFilePathPickerAction = _iconPickerAction.getInputFilePathPickerAction();
 
-    //addAction(&_overrideAction);
-    addAction(&inputFilePathPickerAction.getFilePathAction());
+    addAction(&_overrideAction);
     addAction(&inputFilePathPickerAction.getPickAction());
     addAction(&_iconPickerAction.getIconAction());
     addAction(&_testAction);
