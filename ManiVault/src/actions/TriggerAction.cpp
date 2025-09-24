@@ -62,6 +62,8 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
         setToolTip(triggerAction->toolTip());
         setVisible(triggerAction->isVisible());
+
+    	this->update();
     };
 
     connect(triggerAction, &QAction::changed, this, [this, update]() {
@@ -73,8 +75,6 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
 void TriggerAction::PushButtonWidget::resizeEvent(QResizeEvent* event)
 {
-    //QPushButton::resizeEvent(event);
-    //return;
     if (_widgetFlags & WidgetFlag::Icon && (_widgetFlags & WidgetFlag::Text) == 0)
         setFixedSize(sizeHint().height(), sizeHint().height());
     else

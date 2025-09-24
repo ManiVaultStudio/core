@@ -346,6 +346,7 @@ void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
     HorizontalGroupAction::fromVariantMap(variantMap);
 
     _enabledAction.fromParentVariantMap(variantMap);
+    _overrideAction.fromParentVariantMap(variantMap, true);
     _htmlOverrideAction.fromParentVariantMap(variantMap, true);
 }
 
@@ -354,6 +355,7 @@ QVariantMap SplashScreenAction::toVariantMap() const
     auto variantMap = HorizontalGroupAction::toVariantMap();
 
     _enabledAction.insertIntoVariantMap(variantMap);
+    _overrideAction.insertIntoVariantMap(variantMap);
     _htmlOverrideAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

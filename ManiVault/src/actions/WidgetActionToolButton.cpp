@@ -114,6 +114,8 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
         const auto actionChanged = [this]() {
             setToolTip(_action->toolTip());
             setIcon(_action->icon());
+
+            update();
         };
 
         const auto actionEnabledChanged = [this]() {

@@ -40,6 +40,9 @@ ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& tit
         overrideMainWindowIcon();
 
         _testAction.setIconByName("stopwatch");
+
+        QCoreApplication::processEvents();
+
         _testTimer.start();
     });
 
@@ -47,6 +50,8 @@ ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& tit
         ApplicationIconAction::resetApplicationIcon();
 
         _testAction.setIconByName(testIconName);
+
+        QCoreApplication::processEvents();
     });
 
     const auto updateApplicationIconActionReadOnly = [this]() -> void {
