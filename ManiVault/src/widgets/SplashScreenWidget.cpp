@@ -121,6 +121,8 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 SplashScreenWidget::~SplashScreenWidget()
 {
     _processEventsTimer.stop();
+
+    disconnectFromCurrentTask();
 }
 
 void SplashScreenWidget::showEvent(QShowEvent* event)
