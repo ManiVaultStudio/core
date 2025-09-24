@@ -68,13 +68,13 @@ public: // Action getters
     TriggerAction& getConfigureAction() { return _configureAction; }
     BrandingConfigurationAction& getBrandingConfigurationAction() { return _brandingConfigurationAction; }
     StartPageConfigurationAction& getStartPageConfigurationAction() { return _startPageConfigurationAction; }
-    VerticalGroupAction& getProjectsGroupAction() { return _projectsGroupAction; }
+    VerticalGroupAction& getProjectsConfigurationAction() { return _projectsConfigurationAction; }
 
 private:
-    TriggerAction                   _configureAction;               /** Action for editing the application customization (visible when Ctrl + F8 is pressed) */
-    BrandingConfigurationAction     _brandingConfigurationAction;   /** Branding configuration action */
-    StartPageConfigurationAction    _startPageConfigurationAction;  /** Start page configuration action */
-    VerticalGroupAction             _projectsGroupAction;           /** Projects group action */
+    TriggerAction                   _configureAction;                   /** Action for editing the application customization (visible when Ctrl + F8 is pressed) */
+    BrandingConfigurationAction     _brandingConfigurationAction;       /** Branding configuration action */
+    StartPageConfigurationAction    _startPageConfigurationAction;      /** Start page configuration action */
+    VerticalGroupAction             _projectsConfigurationAction;       /** Projects configuration action */
 };
 
 }

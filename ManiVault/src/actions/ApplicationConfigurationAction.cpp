@@ -15,7 +15,7 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
     _configureAction(this, "Configure..."),
     _brandingConfigurationAction(this, "Branding"),
     _startPageConfigurationAction(this, "Start page"),
-    _projectsGroupAction(this, "Projects")
+    _projectsConfigurationAction(this, "Projects")
 {
     setDefaultWidgetFlags(0);
     
@@ -23,12 +23,12 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
     _configureAction.setIconByName("gear");
 
     connect(Application::current(), &Application::coreInitialized, this, [this]() {
-        _projectsGroupAction.addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction());
+        _projectsConfigurationAction.addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction());
     });
 
     addGroupAction(&_brandingConfigurationAction);
     addGroupAction(&_startPageConfigurationAction);
-    addGroupAction(&_projectsGroupAction);
+    addGroupAction(&_projectsConfigurationAction);
 
     connect(&_brandingConfigurationAction.getOrganizationNameAction(), &StringAction::stringChanged, this, [this]() -> void { emit mayConfigureChanged(mayConfigure()); });
     connect(&_brandingConfigurationAction.getOrganizationDomainAction(), &StringAction::stringChanged, this, [this]() -> void { emit mayConfigureChanged(mayConfigure()); });

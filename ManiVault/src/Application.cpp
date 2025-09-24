@@ -254,8 +254,6 @@ void Application::initializeAttributes()
         		organizationName    = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/Organization name/Value"_json_pointer));
         		organizationDomain  = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/Organization domain/Value"_json_pointer));
         		applicationName     = QString::fromStdString(jsonDocument.at("/Application/Configuration/Branding/Full name/Value"_json_pointer));
-
-        		qDebug() << organizationName << organizationDomain << applicationName;
         	}
         	catch (const std::exception& exception) {
         		throw std::runtime_error(QString("Lookup error: %1").arg(exception.what()).toStdString());
