@@ -133,6 +133,12 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 
         _simulateStartupTask.setProgress(progress);
 
+        qDebug() << "Simulate progress:" << progress;
+        
+
+        _splashScreenWidget->update();
+        QCoreApplication::processEvents();
+
 		if (progress >= 1.f) {
             progress = 1.f;
 

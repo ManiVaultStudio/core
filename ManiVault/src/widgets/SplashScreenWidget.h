@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "Task.h"
 
 #include "util/SplashScreenBridge.h"
 
@@ -68,6 +69,7 @@ private:
     util::SplashScreenBridge    _splashScreenBridge;    /** Bridge for communication between C++ and JavaScript */
     QGraphicsDropShadowEffect   _dropShadowEffect;      /** For adding a drop shadow to the splash screen widget */
     QTimer                      _processEventsTimer;    /** Timer to keep the splash screen widget somewhat responsive */
+    Task*                       _currentTask;           /** Current task being displayed on the splash screen */
 
     static const std::uint32_t fixedWidth           = 640;      /** Widget fixed width */
     static const std::uint32_t fixedHeight          = 480;      /** Widget fixed height */

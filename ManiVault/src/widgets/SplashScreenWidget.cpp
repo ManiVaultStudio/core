@@ -72,7 +72,8 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     _backgroundImage(":/Images/SplashScreenBackground"),
     _closeToolButton(&_roundedFrame),
     _webChannel(&_webEngineView),
-    _splashScreenBridge(&_webEngineView)
+    _splashScreenBridge(&_webEngineView),
+    _currentTask(nullptr)
 {
     setObjectName("SplashScreenWidget");
     setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::WindowStaysOnTopHint);
@@ -116,26 +117,7 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     _webEngineView.setPage(new Page(&_webEngineView));
     _webEngineView.page()->setWebChannel(&_webChannel);
 
-    connect(_splashScreenAction.getTaskAction().getTask(), &Task::progressChanged, this, [this](float progress) -> void {
-        if (!Application::current()->getStartupTask().getEnabled())
-            return;
-
-        if (!_initialized)
-            return;
-
-        QMetaObject::invokeMethod(&_splashScreenBridge, "setProgress", Qt::QueuedConnection, Q_ARG(int, static_cast<int>(100.0f * progress)));
-
-        QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
-    });
-
-    connect(&Application::current()->getStartupTask(), &Task::progressDescriptionChanged, this, [this](const QString& progressDescription) -> void {
-        if (!Application::current()->getStartupTask().getEnabled())
-            return;
-
-        QMetaObject::invokeMethod(&_splashScreenBridge, "setProgressDescription", Qt::QueuedConnection, Q_ARG(QString, progressDescription));
-
-        QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
-    });
+    
 }
 
 SplashScreenWidget::~SplashScreenWidget()
@@ -167,6 +149,36 @@ void SplashScreenWidget::showEvent(QShowEvent* event)
     QTimer::singleShot(1000, &loop, &QEventLoop::quit);
 
     loop.exec();
+    
+    if (_splashScreenAction.getTaskAction().getTask() != _currentTask) {
+	    if (_currentTask) {
+            disconnect(_currentTask, &Task::progressChanged, this, nullptr);
+            disconnect(_currentTask, &Task::progressDescriptionChanged, this, nullptr);
+	    }
+
+        _currentTask = _splashScreenAction.getTaskAction().getTask();
+
+        connect(_currentTask, &Task::progressChanged, this, [this](float progress) -> void {
+            if (!_currentTask)
+                return;
+
+            if (!_initialized)
+                return;
+
+            QMetaObject::invokeMethod(&_splashScreenBridge, "setProgress", Qt::QueuedConnection, Q_ARG(int, static_cast<int>(100.0f * progress)));
+
+            QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
+        });
+
+        connect(_currentTask, &Task::progressDescriptionChanged, this, [this](const QString& progressDescription) -> void {
+            if (!_currentTask)
+                return;
+
+            QMetaObject::invokeMethod(&_splashScreenBridge, "setProgressDescription", Qt::QueuedConnection, Q_ARG(QString, progressDescription));
+
+            QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
+        });
+    }
 }
 
 void SplashScreenWidget::showAnimated()
