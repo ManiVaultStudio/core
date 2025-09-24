@@ -9,6 +9,7 @@
 #include "actions/TriggerAction.h"
 #include "actions/StringAction.h"
 #include "actions/VerticalGroupAction.h"
+#include "actions/HorizontalGroupAction.h"
 
 #include "Task.h"
 

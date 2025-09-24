@@ -3,9 +3,12 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StandardPaths.h"
+#include "Application.h"
 
 #include <QOperatingSystemVersion>
 #include <QStandardPaths>
+#include <QDir>
+#include <QCoreApplication>
 
 namespace mv::util {
 

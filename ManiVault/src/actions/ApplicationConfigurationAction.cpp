@@ -3,8 +3,15 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ApplicationConfigurationAction.h"
+#include "Application.h"
+#include "CoreInterface.h"
 
 #include "util/StyledIcon.h"
+
+#include "models/ProjectsTreeModel.h"
+
+#include <QDialog>
+#include <QDialogButtonBox>
 
 using namespace mv::util;
 

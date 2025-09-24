@@ -21,6 +21,7 @@
 #include <QUrl>
 #include <QVariant>
 #include <QRegularExpression>
+#include <QFileInfo>
 
 #include <exception>
 

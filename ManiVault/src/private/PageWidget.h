@@ -6,6 +6,8 @@
 
 #include "PageHeaderWidget.h"
 
+#include "util/Serializable.h"
+
 #include <QWidget>
 
 /**

@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StartPageConfigurationAction.h"
+#include "Application.h"
 
 using namespace mv::util;
 

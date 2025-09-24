@@ -11,6 +11,7 @@
 #include <QToolButton>
 #include <QGraphicsDropShadowEffect>
 #include <QEvent>
+#include <QStyle>
 
 using namespace mv::util;
 

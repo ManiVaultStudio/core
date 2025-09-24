@@ -4,6 +4,8 @@
 
 #include "PageWidget.h"
 
+#include <Application.h>
+
 #include <QDebug>
 #include <QPainter>
 
