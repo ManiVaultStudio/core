@@ -43,6 +43,8 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
 
     _editFullNameAction.setChecked(false);
 
+    _iconAction.getIconPickerAction().setIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
+
     _aboutAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextEdit);
 
     addAction(&_organizationNameAction);
@@ -75,6 +77,24 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
     updateFromLogoReadOnly();
 
     connect(&_logoAction, &ImageAction::imageChanged, this, updateFromLogoReadOnly);
+
+    connect(&_generateIconFromLogoAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (_logoAction.getImage().isNull())
+            return;
+
+        const auto logoPixmap = QPixmap::fromImage(_logoAction.getImage());
+
+    	if (logoPixmap.isNull())
+            return;
+
+        if (logoPixmap.size().width() != logoPixmap.size().height())
+            mv::help().addNotification("Logo image is not a square", "The logo is not square and will be resized to a square to fit.", StyledIcon("palette"));
+            
+
+        const auto scaledLogoPixmap = logoPixmap.scaled(QSize(64, 64), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+        _iconAction.getIconPickerAction().setIcon(QIcon(scaledLogoPixmap));
+    });
 
     _aboutAction.setString(QString("%3 is a flexible and extensible visual analytics framework for high-dimensional data.<br> <br>"
         "For more information, please visit: <br>"

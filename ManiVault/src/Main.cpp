@@ -69,8 +69,6 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
-    Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
-
     Core core;
 
     application.setCore(&core);

@@ -33,6 +33,9 @@ public:
      */
     Q_INVOKABLE ApplicationIconAction(QObject* parent, const QString& title);
 
+
+    QIcon getIcon() const;
+
     /** Set the main window icon to the override application icon */
     void overrideMainWindowIcon() const;
 

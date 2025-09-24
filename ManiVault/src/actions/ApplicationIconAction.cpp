@@ -79,6 +79,14 @@ ApplicationIconAction::ApplicationIconAction(QObject* parent, const QString& tit
     connect(&_overrideAction, &ToggleAction::toggled, this, updateTestActionReadOnly);
 }
 
+QIcon ApplicationIconAction::getIcon() const
+{
+    if (!_overrideAction.isChecked())
+        return qApp->windowIcon();
+    
+	return _iconPickerAction.getIcon();
+}
+
 void ApplicationIconAction::overrideMainWindowIcon() const
 {
     if (_iconPickerAction.getIcon().isNull())

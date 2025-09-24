@@ -362,6 +362,8 @@ void Application::fromVariantMap(const QVariantMap& variantMap)
 	Serializable::fromVariantMap(variantMap);
 
     _configurationAction.fromParentVariantMap(variantMap, true);
+
+    setWindowIcon(_configurationAction.getBrandingConfigurationAction().getApplicationIconAction().getIcon());
 }
 
 QVariantMap Application::toVariantMap() const
