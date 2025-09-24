@@ -30,7 +30,7 @@ QString StandardPaths::getPluginsDirectory()
     const auto applicationDir   = QDir(QCoreApplication::applicationDirPath());
     const auto dirName          = QString("Plugins");
 
-    auto pathSuffix = QString("/%1").arg(dirName);
+    auto pathSuffix = QString("/%1/").arg(dirName);
 
     if (isMacOS())
         pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);

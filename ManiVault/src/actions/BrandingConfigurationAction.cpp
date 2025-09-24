@@ -4,6 +4,9 @@
 
 #include "BrandingConfigurationAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
+
+#include "util/StyledIcon.h"
 
 using namespace mv::util;
 
