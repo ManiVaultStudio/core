@@ -46,7 +46,7 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
 
         customizeDialog.setWindowTitle("Customize ManiVault Studio");
         customizeDialog.setWindowIcon(StyledIcon("gear"));
-        customizeDialog.setMinimumSize(QSize(600, 300));
+        customizeDialog.setMinimumSize(QSize(640, 480));
 
         auto customizeDialogLayout = new QVBoxLayout();
 
