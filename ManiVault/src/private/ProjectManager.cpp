@@ -354,8 +354,6 @@ void ProjectManager::newBlankProject()
 
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
 {
-    Application::requestOverrideCursor(Qt::WaitCursor);
-
     try
     {
 #ifdef PROJECT_MANAGER_VERBOSE
@@ -468,11 +466,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         workspaces().reset();
 
+
         if (!importDataOnly)
             newProject();
 
         emit projectAboutToBeOpened(*_project);
         {
+            Application::requestOverrideCursor(Qt::WaitCursor);
+
             Timer openProjectTimer("Open project");
 
             _project->setFilePath(filePath);
@@ -571,8 +572,6 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
     qDebug() << __FUNCTION__ << url << targetDirectory << importDataOnly << loadWorkspace;
 #endif
 
-    Application::requestOverrideCursor(Qt::WaitCursor);
-
     try {
         if (url.isLocalFile()) {
             mv::projects().openProject(url.toLocalFile());
@@ -663,8 +662,6 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
     {
         exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
     }
-
-    Application::requestRemoveOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectManager::downloadAndOpenProject(QUrl url, const QString& targetDirectory) const
