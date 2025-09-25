@@ -93,7 +93,6 @@ BrandingConfigurationAction::BrandingConfigurationAction(QObject* parent, const 
 
         if (logoPixmap.size().width() != logoPixmap.size().height())
             mv::help().addNotification("Logo image is not a square", "The logo is not square and will be resized to a square to fit.", StyledIcon("palette"));
-            
 
         const auto scaledLogoPixmap = logoPixmap.scaled(QSize(64, 64), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
