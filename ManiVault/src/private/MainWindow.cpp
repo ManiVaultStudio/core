@@ -74,6 +74,8 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
 
     restoreWindowGeometryFromSettings();
+
+    setWindowTitle(Application::getBaseName());
 }
 
 void MainWindow::moveEvent(QMoveEvent* moveEvent)
