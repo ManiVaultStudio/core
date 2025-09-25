@@ -206,4 +206,33 @@ bool ShaderProgram::loadShaderFromFile(QString vertPath, QString fragPath) {
     return success;
 }
 
+bool ShaderProgram::loadShaderFromFile(QString vertPath, QString geomPath, QString fragPath)
+{
+    initializeOpenGLFunctions();
+
+    bool success = true;
+
+    GLuint vertexShader, geometryShader, fragmentShader;
+    success &= loadShader(vertPath, GL_VERTEX_SHADER, vertexShader);
+    success &= loadShader(geomPath, GL_GEOMETRY_SHADER, geometryShader);
+    success &= loadShader(fragPath, GL_FRAGMENT_SHADER, fragmentShader);
+
+    if (!success) return false;
+
+    _handle = glCreateProgram();
+
+    glAttachShader(_handle, vertexShader);
+    glAttachShader(_handle, geometryShader);
+    glAttachShader(_handle, fragmentShader);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(geometryShader);
+    glDeleteShader(fragmentShader);
+
+    success &= linkProgram(_handle);
+    success &= validateProgram(_handle);
+
+    return success;
+}
+
 }
