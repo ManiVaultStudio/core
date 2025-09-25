@@ -19,7 +19,7 @@ StartPageConfigurationAction::StartPageConfigurationAction(QObject* parent, cons
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleTutorialsAction(this, "Tutorials", true),
     _settingsGroupAction(this, "Settings", true),
-    _toggleCustomizationAction(this, "Customization")
+    _toggleCustomizationAction(this, "Customization", false)
 {
     setIconByName("gear");
 
@@ -40,8 +40,6 @@ StartPageConfigurationAction::StartPageConfigurationAction(QObject* parent, cons
         //setVisible(false);
         //_toLearningCenterAction.setVisible(false);
     }
-
-    _toggleProjectFromWorkspaceAction.setEnabled(false);
 
     addAction(&_compactViewAction);
     addAction(&_toggleOpenCreateProjectAction);
