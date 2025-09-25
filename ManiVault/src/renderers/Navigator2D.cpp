@@ -177,6 +177,12 @@ void Navigator2D::initialize(QWidget* sourceWidget)
 
     connect(&_navigationAction.getZoomMarginAction().getZoomMarginDataAction(), &DecimalAction::valueChanged, this, updateZoomMarginData);
 
+    const auto initZoomAfterProjectOpen = [this]() -> void {
+        setZoomPercentage(_navigationAction.getZoomPercentageAction().getValue());
+	};
+
+    connect(&mv::projects(), &mv::AbstractProjectManager::projectOpened, this, initZoomAfterProjectOpen);
+
     _sourceWidget->addAction(&_navigationAction.getZoomInAction());
     _sourceWidget->addAction(&_navigationAction.getZoomExtentsAction());
     _sourceWidget->addAction(&_navigationAction.getZoomOutAction());
