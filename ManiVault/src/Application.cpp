@@ -74,6 +74,8 @@ Application::Application(int& argc, char** argv) :
         brandingConfigurationAction.getFullNameAction().setString(QString("%1 %2").arg(baseName, QString::fromStdString(current()->getVersion().getVersionString())));
         brandingConfigurationAction.getSplashScreenAction().getEnabledAction().setChecked(true);
 
+        _configurationAction.getStartPageConfigurationAction().getToggleCustomizationAction().setChecked(true);
+
         Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 	}
 }
