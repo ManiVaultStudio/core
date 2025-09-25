@@ -20,7 +20,7 @@ public:
     void addKeyValuePairs(const std::vector<QString>& keys, const std::vector<uint32_t>& values);
 
     std::vector<QString> getKeysByValues(const std::vector<uint32_t>& values) const;
-    std::vector<uint32_t> getValuesByKeys(const std::vector<QString>& keys) const;
+    std::vector<uint32_t> getValuesByKeys(const std::vector<QString>& keys, bool verbose = false) const;
     std::vector<int> getValuesByKeysWithMissingValue(const std::vector<QString>& keys, int missingValue) const;
 
 public: // Serialization

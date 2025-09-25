@@ -69,7 +69,7 @@ namespace mv
         return keys;
     }
 
-    std::vector<uint32_t> BiMap::getValuesByKeys(const std::vector<QString>& keys) const
+    std::vector<uint32_t> BiMap::getValuesByKeys(const std::vector<QString>& keys, bool verbose) const
     {
         std::vector<uint32_t> values;// (keys.size());
 
@@ -93,7 +93,8 @@ namespace mv
             }
             else
             {
-                qDebug() << "This key wasn't found: " << keys[i];
+                if (verbose)
+                    qDebug() << "This key wasn't found: " << keys[i];
             }
         }
 
