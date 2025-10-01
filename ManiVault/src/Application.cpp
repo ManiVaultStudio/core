@@ -9,6 +9,7 @@
 #include "ManiVaultVersion.h"
 
 #include "util/Exception.h"
+#include "util/Icon.h"
 #include "util/StandardPaths.h"
 
 #include "actions/WidgetAction.h"

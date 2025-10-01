@@ -46,10 +46,11 @@ QString StandardPaths::getDownloadsDirectory()
 
     if (isMacOS()) {
         const auto pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
+        const auto finalPath = QDir::cleanPath(applicationDir.path() + pathSuffix);
 
-        [[maybe_unused]] auto resultMacOS = applicationDir.mkpath(pathSuffix);
+        [[maybe_unused]] auto resultMacOS = QDir().mkpath(finalPath);
 
-        return QDir::cleanPath(applicationDir.path() + pathSuffix);
+        return finalPath;
     }
 
     [[maybe_unused]] auto resultOther = applicationDataDir.mkpath(QString("/%1").arg(dirName));
@@ -62,10 +63,16 @@ QString StandardPaths::getCustomizationDirectory()
     const auto applicationDir   = QDir(QCoreApplication::applicationDirPath());
     const auto dirName          = QString("Customization");
 
-    QString pathSuffix = QString("/%1//").arg(dirName);
+    QString pathSuffix = QString("/%1").arg(dirName);
 
-    if (isMacOS())
+    if (isMacOS()) {
         pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
+        const auto finalPath = QDir::cleanPath(applicationDir.path() + pathSuffix);
+
+        [[maybe_unused]] auto result = QDir().mkpath(finalPath);
+
+        return finalPath;
+    }
 
     [[maybe_unused]] auto result = applicationDir.mkpath(pathSuffix);
 
