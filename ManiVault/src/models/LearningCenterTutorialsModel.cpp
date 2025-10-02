@@ -43,6 +43,7 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
     _dsnsAction(this, "Data Source Names")
 {
     setColumnCount(static_cast<int>(Column::Count));
+    setRowCount(0);
 
     _dsnsAction.setIconByName("globe");
     _dsnsAction.setToolTip("Tutorials Data Source Names (DSN)");
@@ -51,8 +52,6 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
     _dsnsAction.setPopupSizeHint(QSize(550, 100));
 
     connect(&_dsnsAction, &StringsAction::stringsChanged, this, [this]() -> void {
-        setRowCount(0);
-
         for (const auto& dsn : _dsnsAction.getStrings()) {
             const auto dsnIndex = _dsnsAction.getStrings().indexOf(dsn);
 
