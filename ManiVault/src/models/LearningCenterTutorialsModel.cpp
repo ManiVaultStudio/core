@@ -10,6 +10,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include <algorithm>
+
 #include <QtConcurrent>
 
 #ifdef _DEBUG
@@ -162,6 +164,15 @@ void LearningCenterTutorialsModel::addTutorial(const LearningCenterTutorial* tut
     Q_ASSERT(tutorial);
 
     if (!tutorial)
+        return;
+
+    // Only add tutorial if it's title is unique
+    auto it = std::ranges::find_if(_tutorials,
+        [&tutorial](const LearningCenterTutorial* ptr) {
+            return ptr->getTitle() == tutorial->getTitle();
+        });
+
+    if (it != _tutorials.end())
         return;
 
     appendRow(Row(tutorial));
