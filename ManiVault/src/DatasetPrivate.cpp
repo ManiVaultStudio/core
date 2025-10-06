@@ -21,21 +21,46 @@ namespace mv
 using namespace util;
 
 DatasetPrivate::DatasetPrivate() :
-    QObject(),
-    _datasetId(),
     _dataset(nullptr),
-    _eventListener()
+    _eventListener(std::make_unique<mv::EventListener>())
 {
     registerDatasetEvents();
 }
 
-DatasetPrivate::DatasetPrivate(const DatasetPrivate& other) :
-    _datasetId(),
-    _dataset(nullptr),
-    _eventListener()
+DatasetPrivate::DatasetPrivate(DatasetPrivate&& other) noexcept
+    : QObject(),
+    _datasetId(std::move(other._datasetId)),
+    _dataset(other._dataset),
+    _eventListener(std::move(other._eventListener)),
+    _eventsRegistered(other._eventsRegistered)
 {
-    registerDatasetEvents();
+    // Make the moved-from safe
+    other._dataset          = nullptr;
+    other._eventsRegistered = false;
 }
+
+DatasetPrivate& DatasetPrivate::operator=(DatasetPrivate&& other) noexcept {
+    if (this != &other) {
+        // no QObject parent/children assumed; if present, handle carefully
+        _datasetId          = std::move(other._datasetId);
+        _dataset            = other._dataset;
+        _eventListener      = std::move(other._eventListener);
+        _eventsRegistered   = other._eventsRegistered;
+
+        other._dataset          = nullptr;
+        other._eventsRegistered = false;
+    }
+
+    return *this;
+}
+//
+//DatasetPrivate::DatasetPrivate(const DatasetPrivate& other) :
+//    _datasetId(),
+//    _dataset(nullptr),
+//    _eventListener()
+//{
+//    registerDatasetEvents();
+//}
 
 QString DatasetPrivate::getDatasetId() const
 {
@@ -105,47 +130,47 @@ void DatasetPrivate::reset()
 void DatasetPrivate::connectNotify(const QMetaMethod& signal)
 {
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataChanged))
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
+        _eventListener->addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataDimensionsChanged))
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataDimensionsChanged));
+        _eventListener->addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataDimensionsChanged));
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataSelectionChanged))
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
+        _eventListener->addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::childAdded))
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildAdded));
+        _eventListener->addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildAdded));
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::childRemoved))
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildRemoved));
+        _eventListener->addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildRemoved));
 }
 
 void DatasetPrivate::disconnectNotify(const QMetaMethod& signal)
 {
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataChanged))
-        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
+        _eventListener->removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataDimensionsChanged))
-        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataDimensionsChanged));
+        _eventListener->removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataDimensionsChanged));
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataSelectionChanged))
-        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
+        _eventListener->removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::childAdded))
-        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildAdded));
+        _eventListener->removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildAdded));
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::childRemoved))
-        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildRemoved));
+        _eventListener->removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildRemoved));
 }
 
 void DatasetPrivate::registerDatasetEvents()
 {
     try
     {
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAboutToBeRemoved));
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetRemoved));
+        _eventListener->addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAboutToBeRemoved));
+        _eventListener->addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetRemoved));
 
-        _eventListener.registerDataEvent([this](DatasetEvent* dataEvent) {
+        _eventListener->registerDataEvent([this](DatasetEvent* dataEvent) {
             switch (dataEvent->getType()) {
 
                 case EventType::DatasetAboutToBeRemoved:
