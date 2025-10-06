@@ -17,11 +17,15 @@ namespace mv
 
 EventListener::EventListener()
 {
+    qDebug() << "Registering event listener";
+
     core()->getEventManager().registerEventListener(this);
 }
 
 EventListener::~EventListener()
 {
+    qDebug() << "Unregistering event listener";
+
     if (!core()->isAboutToBeDestroyed())
         core()->getEventManager().unregisterEventListener(this);
 }

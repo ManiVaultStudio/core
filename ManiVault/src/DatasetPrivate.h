@@ -42,22 +42,10 @@ protected: // Construction/destruction
     /** Default constructor */
     DatasetPrivate();
 
-    /** Object is non-copyable and move-only */
     DatasetPrivate(const DatasetPrivate& other) = delete;
     DatasetPrivate& operator=(const DatasetPrivate&) = delete;
-
-    /**
-     * Move constructor
-     * @param other Object to move from
-     */
-	DatasetPrivate(DatasetPrivate&& other) noexcept;
-
-    /**
-     * Move assignment operator
-     * @param other Object to move from
-     * @return Reference to this object
-     */
-	DatasetPrivate& operator=(DatasetPrivate&& other) noexcept;
+	DatasetPrivate(DatasetPrivate&& other) = delete;
+	DatasetPrivate& operator=(DatasetPrivate&& other) = delete;
 
     /** Remove the destructor */
     ~DatasetPrivate() override = default;
@@ -158,6 +146,7 @@ private:
     DatasetImpl*                    _dataset;                       /** Pointer to the dataset (if any) */
     std::unique_ptr<EventListener>  _eventListener;                 /** Listen to ManiVault events */
     bool                            _eventsRegistered = false;      /** Whether events have been registered */
+    QSet<std::uint32_t>             _pendingSupportedEventTypes;    /** Pending supported event types (to be registered when the dataset is set) */
 
     friend class DatasetImpl;
 };
