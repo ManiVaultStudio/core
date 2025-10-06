@@ -44,8 +44,6 @@ void DatasetPrivate::setDatasetId(const QString& datasetId)
     else {
         _dataset = getDataset();
 
-        registerDatasetEvents();
-
         emit changed(_dataset);
     }
 }
@@ -98,6 +96,8 @@ void DatasetPrivate::reset()
 void DatasetPrivate::connectNotify(const QMetaMethod& signal)
 {
     auto scheduleAdd = [&](std::uint32_t t) {
+        registerDatasetEvents();
+
         if (_eventListener)
             _eventListener->addSupportedEventType(t);
         else
