@@ -10,6 +10,7 @@
 
 #include <QDebug>
 #include <QWebEngineView>
+#include <QDesktopServices>
 
 namespace mv::gui
 {
@@ -21,6 +22,35 @@ using namespace mv::gui;
 using namespace mv::plugin;
 using namespace mv::util;
 
+/** Custom web engine page to handle navigation requests */
+class Page : public QWebEnginePage
+{
+public:
+
+    /** No need for custom constructor */
+    using QWebEnginePage::QWebEnginePage;
+
+protected:
+
+    /**
+     * Handle navigation requests
+     * @param url URL to navigate to
+     * @param type Type of navigation
+     * @param isMainFrame Whether the navigation is for the main frame
+     * @return
+     */
+    bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override
+    {
+        if (type == QWebEnginePage::NavigationTypeLinkClicked) {
+            QDesktopServices::openUrl(url);
+
+            return false;
+        }
+
+        return true;
+    }
+};
+
 TutorialWidget::TutorialWidget(TutorialPlugin* tutorialPlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _tutorialPlugin(tutorialPlugin)
@@ -31,6 +61,8 @@ TutorialWidget::TutorialWidget(TutorialPlugin* tutorialPlugin, QWidget* parent /
     _layout.addWidget(&_webEngineView);
 
     setLayout(&_layout);
+
+    _webEngineView.setPage(new Page(&_webEngineView));
 }
 
 void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
