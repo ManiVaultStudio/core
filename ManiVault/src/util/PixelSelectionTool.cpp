@@ -602,41 +602,46 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
             switch (_type)
             {
-            case PixelSelectionType::Rectangle:
-                break;
-            case PixelSelectionType::Line:
-            {
-                // Optionally, check for a modifier if you want (like Shift)
-                if (_fixedLineWidthModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedLineWidthModifier)
-                    break;
+	            case PixelSelectionType::Rectangle:
+	                break;
 
-                if (wheelEvent->angleDelta().y() < 0)
-                    setLineWidth(_lineWidth - LINE_WIDTH_DELTA);
-                else
-                    setLineWidth(_lineWidth + LINE_WIDTH_DELTA);
+	            case PixelSelectionType::Line:
+	            {
+	                // Optionally, check for a modifier if you want (like Shift)
+	                if (_fixedLineWidthModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedLineWidthModifier)
+	                    break;
 
-                shouldPaint = true;
-                break;
-            }
-            case PixelSelectionType::Brush:
-            case PixelSelectionType::Sample:
-            {
-                if (_fixedBrushRadiusModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedBrushRadiusModifier)
-                    break;
+	                if (wheelEvent->angleDelta().y() < 0)
+	                    setLineWidth(_lineWidth - LINE_WIDTH_DELTA);
+	                else
+	                    setLineWidth(_lineWidth + LINE_WIDTH_DELTA);
 
-                if (wheelEvent->angleDelta().y() < 0)
-                    setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
-                else
-                    setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
+	                shouldPaint = true;
+					
+	                break;
+	            }
 
-                shouldPaint = true;
-                break;
-            }
-            case PixelSelectionType::Lasso:
-            case PixelSelectionType::Polygon:
-                break;
-            default:
-                break;
+	            case PixelSelectionType::Brush:
+	            case PixelSelectionType::Sample:
+	            {
+	                if (_fixedBrushRadiusModifier != Qt::NoModifier && QGuiApplication::keyboardModifiers() == _fixedBrushRadiusModifier)
+	                    break;
+
+	                if (wheelEvent->angleDelta().y() < 0)
+	                    setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
+	                else
+	                    setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
+
+	                shouldPaint = true;
+	                break;
+	            }
+
+	            case PixelSelectionType::Lasso:
+	            case PixelSelectionType::Polygon:
+	                break;
+
+            	default:
+	                break;
             }
 
             break;
