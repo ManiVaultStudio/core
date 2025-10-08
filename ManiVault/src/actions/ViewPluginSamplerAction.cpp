@@ -186,6 +186,8 @@ void ViewPluginSamplerAction::initialize(plugin::ViewPlugin* viewPlugin, PixelSe
         _samplerPixelSelectionAction    = samplerPixelSelectionAction;
         _toolTipOverlayWidget           = std::make_unique<OverlayWidget>(&_viewPlugin->getWidget());
 
+        _samplerPixelSelectionAction->getPixelSelectionTool()->setType(PixelSelectionType::Sample);
+
         _toolTipOverlayWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
 
         _viewPlugin->getWidget().installEventFilter(this);
@@ -250,10 +252,10 @@ bool ViewPluginSamplerAction::canView() const
 {
     switch (_viewGeneratorType) {
         case ViewGeneratorType::HTML:
-            return _enabledAction.isChecked() && _htmlViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
+            return _enabledAction.isChecked() && _htmlViewGeneratorFunction && getViewingMode() != ViewingMode::None;// && !_sampleContext.isEmpty();
 
         case ViewGeneratorType::Widget:
-            return _enabledAction.isChecked() && _widgetViewGeneratorFunction && getViewingMode() != ViewingMode::None && !_sampleContext.isEmpty();
+            return _enabledAction.isChecked() && _widgetViewGeneratorFunction && getViewingMode() != ViewingMode::None;// && !_sampleContext.isEmpty();
     }
 
     return false;
