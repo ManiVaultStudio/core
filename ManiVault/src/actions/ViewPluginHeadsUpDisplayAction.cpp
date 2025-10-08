@@ -119,6 +119,7 @@ QWidget* ViewPluginHeadsUpDisplayAction::getWidget(QWidget* parent, const std::i
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
+    widget->setAttribute(Qt::WA_TransparentForMouseEvents);
     widget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
     layout->setContentsMargins(0, 0, 0, 0);
