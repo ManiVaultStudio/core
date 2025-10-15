@@ -34,6 +34,8 @@ TutorialPlugin::TutorialPlugin(const PluginFactory* factory) :
     _tutorialsFilterModel.getTagsFilterAction().selectAll();
     _tutorialsFilterModel.getExcludeTagsFilterAction().initialize({ "Installation" }, { "Installation" });
 
+    _horizontalGroupAction.setVisible(!mv::projects().isOpeningProject());
+
     _tutorialPickerAction.setCustomModel(&_tutorialsFilterModel);
     _tutorialPickerAction.setPlaceHolderString("Pick a tutorial...");
 
