@@ -146,7 +146,7 @@ void SplashScreenWidget::showEvent(QShowEvent* event)
         QTimer::singleShot(50, [this]() -> void { _webEngineView.update(); });
     });
 
-    QTimer::singleShot(1000, &loop, &QEventLoop::quit);
+    QTimer::singleShot(5000, &loop, &QEventLoop::quit);
 
     loop.exec();
     

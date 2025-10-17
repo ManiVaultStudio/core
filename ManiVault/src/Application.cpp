@@ -9,6 +9,7 @@
 #include "ManiVaultVersion.h"
 
 #include "util/Exception.h"
+#include "util/Icon.h"
 #include "util/StandardPaths.h"
 
 #include "actions/WidgetAction.h"
@@ -73,6 +74,8 @@ Application::Application(int& argc, char** argv) :
         brandingConfigurationAction.getBaseNameAction().setString(baseName);
         brandingConfigurationAction.getFullNameAction().setString(QString("%1 %2").arg(baseName, QString::fromStdString(current()->getVersion().getVersionString())));
         brandingConfigurationAction.getSplashScreenAction().getEnabledAction().setChecked(true);
+
+        _configurationAction.getStartPageConfigurationAction().getToggleCustomizationAction().setChecked(true);
 
         Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
 	}

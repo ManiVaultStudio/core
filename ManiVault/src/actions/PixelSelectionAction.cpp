@@ -265,8 +265,8 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
 
 void PixelSelectionAction::initType()
 {
-    if (_typeModel.rowCount() > 0)
-        _typeAction.setCurrentIndex(0);
+	if (_typeModel.rowCount() > 0)
+		_typeAction.setCurrentIndex(0);
 
     if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle))
         _typeActionGroup.addAction(&_rectangleAction);
@@ -290,7 +290,8 @@ void PixelSelectionAction::initType()
         _typeActionGroup.addAction(&_roiAction);
 
     connect(&_typeAction, &OptionAction::currentTextChanged, [this](const QString& currentText) {
-        _pixelSelectionTool->setType(util::pixelSelectionTypes.key(currentText));
+        if (_pixelSelectionTypes.contains(getPixelSelectionTypeEnum(currentText)))
+			_pixelSelectionTool->setType(getPixelSelectionTypeEnum(currentText));
     });
 
     const auto updateType = [this]() {

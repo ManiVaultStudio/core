@@ -45,6 +45,7 @@ public:
     void uniformMatrix4f(const char* name, const float* const m);
 
     bool loadShaderFromFile(QString vertPath, QString fragPath);
+    bool loadShaderFromFile(QString vertPath, QString geomPath, QString fragPath);
 private:
     int location(const char* uniform);
 

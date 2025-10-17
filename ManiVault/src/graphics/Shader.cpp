@@ -71,7 +71,8 @@ namespace
 
         GLint status = 0;
         f->glGetProgramiv(program, GL_VALIDATE_STATUS, &status);
-
+        if (status != GL_TRUE)
+            qCritical().noquote() << "[Shader validation] Error in shader validation with status code: " << status;
         return status == GL_TRUE;
     }
 
@@ -80,8 +81,11 @@ namespace
         QOpenGLFunctions_3_3_Core* f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(QOpenGLContext::currentContext());;
 
         QString source = mv::util::loadFileContents(path);
-        if (source.isEmpty()) return false;
-
+        if (source.isEmpty())
+        {
+            qCritical() << "[Shader loading] Could not open source file or it was empty: " << path;
+            return false;
+        }
         std::string ssource = source.toStdString();
         const char* csource = ssource.c_str();
 
@@ -198,6 +202,35 @@ bool ShaderProgram::loadShaderFromFile(QString vertPath, QString fragPath) {
     glAttachShader(_handle, fragmentShader);
 
     glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    success &= linkProgram(_handle);
+    success &= validateProgram(_handle);
+
+    return success;
+}
+
+bool ShaderProgram::loadShaderFromFile(QString vertPath, QString geomPath, QString fragPath)
+{
+    initializeOpenGLFunctions();
+
+    bool success = true;
+
+    GLuint vertexShader, geometryShader, fragmentShader;
+    success &= loadShader(vertPath, GL_VERTEX_SHADER, vertexShader);
+    success &= loadShader(geomPath, GL_GEOMETRY_SHADER, geometryShader);
+    success &= loadShader(fragPath, GL_FRAGMENT_SHADER, fragmentShader);
+
+    if (!success) return false;
+
+    _handle = glCreateProgram();
+
+    glAttachShader(_handle, vertexShader);
+    glAttachShader(_handle, geometryShader);
+    glAttachShader(_handle, fragmentShader);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(geometryShader);
     glDeleteShader(fragmentShader);
 
     success &= linkProgram(_handle);
