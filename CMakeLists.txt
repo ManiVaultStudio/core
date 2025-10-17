@@ -25,8 +25,6 @@ option(MV_UNITY_BUILD "Combine target source files into batches for faster compi
 include(ManiVault/cmake/Utils.cmake)
 mv_set_version()
 
-set(MV_USE_ERROR_LOGGING OFF CACHE BOOL "" FORCE)
-
 message(STATUS "Building ManiVault ${MV_VERSION_FULL}")
 message(STATUS "  Using precompiled headers: ${MV_PRECOMPILE_HEADERS}")
 message(STATUS "  Using unity build: ${MV_UNITY_BUILD}")
