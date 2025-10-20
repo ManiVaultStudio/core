@@ -63,7 +63,6 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     setMouseTracking(true);
 
     _treeView.setModel(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel());
-    _treeView.setFixedWidth(300);
     _treeView.setHeaderHidden(true);
     _treeView.setRootIsDecorated(false);
     _treeView.setFrameShape(QFrame::NoFrame);
@@ -72,7 +71,7 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     _treeView.setIconSize(QSize(12, 12));
     //_treeView.setStyle(new BranchIconStyle(_treeView.style()));
     _treeView.setMinimumSize(100, 100);
-    _treeView.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    _treeView.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
     _treeView.adjustSize();
 
     connect(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel(), &QAbstractItemModel::rowsInserted, &_treeView, [this](const QModelIndex& parent, int first, int last) {
