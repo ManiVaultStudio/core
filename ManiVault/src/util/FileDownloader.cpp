@@ -209,17 +209,19 @@ FileDownloader::Exception::Exception(const QString& message) :
 
 SecureNetworkAccessManager& FileDownloader::sharedManager()
 {
-    static SecureNetworkAccessManager instance;
+    static SecureNetworkAccessManager* instance;
     static bool initialized = false;
 
-    if (!initialized) {
-        initialized = true;
+    if (!initialized)
+    {
+        instance = new SecureNetworkAccessManager;
 
-        if (instance.thread() != qApp->thread())
-            instance.moveToThread(qApp->thread());
+        if (instance->thread() != qApp->thread())
+            instance->moveToThread(qApp->thread());
+        initialized = true;
     }
 
-    return instance;
+    return *instance;
 }
 
 QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Task* task /*= nullptr*/)
