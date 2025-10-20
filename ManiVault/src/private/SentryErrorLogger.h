@@ -37,6 +37,8 @@ private:
     /** Start error logging to */
     void start() override;
 
+    void stop() override;
+
     /**
      * Get release string for Sentry
      * @return Release string
