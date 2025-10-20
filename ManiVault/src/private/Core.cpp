@@ -140,7 +140,10 @@ bool Core::isAboutToBeDestroyed() const
 
 AbstractManager* Core::getManager(const ManagerType& managerType)
 {
-    return _managers[static_cast<int>(managerType)].get();
+    if (static_cast<int>(managerType) < _managers.size())
+        return _managers[static_cast<int>(managerType)].get();
+    else
+        return nullptr;
 }
 
 AbstractErrorManager& Core::getErrorManager()
