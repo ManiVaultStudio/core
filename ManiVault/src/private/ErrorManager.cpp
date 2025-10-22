@@ -106,6 +106,8 @@ void ErrorManager::reset()
 
     beginReset();
     {
+        if (getErrorLogger())
+            getErrorLogger()->requestStop();
     }
     endReset();
 }

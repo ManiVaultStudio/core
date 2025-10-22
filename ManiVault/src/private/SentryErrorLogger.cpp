@@ -127,7 +127,7 @@ void SentryErrorLogger::start()
         qDebug() << "Sentry error logging is running, crash reports will send to: " + dsn;
     else
         qDebug() << "Sentry error logging is not running";
-
+    
     addNotification("Started", {
         QString("%1 error logging").arg(getLoggerName()),
         "Error logging using <a href='https://sentry.io/'>Sentry</a> is active, crash reports will be logged to improve the application.",
@@ -137,6 +137,11 @@ void SentryErrorLogger::start()
 
     //sentry_flush(2000);
     //sentry_shutdown();
+}
+
+void SentryErrorLogger::stop()
+{
+    sentry_close();
 }
 
 QString SentryErrorLogger::getReleaseString()

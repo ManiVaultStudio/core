@@ -83,6 +83,12 @@ public:
         }
     }
 
+    /** Stops the error logger if it exists */
+    void requestStop()
+    {
+        stop();
+    }
+
     /**
      * Get whether the error logger is initialized or not
      * @return Boolean determining whether the error logger is initialized or not
@@ -147,6 +153,9 @@ private:
 
     /** Starts the error logger */
     virtual void start() = 0;
+
+    /** Shuts down the error logger */
+    virtual void stop() = 0;
 
     /**
      * Get whether the Sentry data source name (DSN) is valid
