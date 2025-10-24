@@ -78,7 +78,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _projectMetaAction(nullptr),
     _enabledAction(this, "Enable splash screen"),
     _overrideAction(this, "Override"),
-    _htmlOverrideAction(this, "HTML"),
+    _htmlAction(this, "HTML", getHtmlFromTemplate()),
     _editAction(this, "Edit"),
     _openAction(this, "Open splash screen"),
     _testAction(this, "Test the splash screen"),
@@ -90,18 +90,17 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     addAction(&_editAction);
     addAction(&_testAction);
 
-    _editAction.setPopupSizeHint(QSize(600, 400));
-
     //_editAction.addAction(&_enabledAction);
     _editAction.addAction(&_overrideAction);
-    _editAction.addAction(&_htmlOverrideAction);
+    _editAction.addAction(&_htmlAction);
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     _enabledAction.setStretch(1);
     _enabledAction.setToolTip("Show splash screen at startup");
 
-    _htmlOverrideAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextEdit);
+    _htmlAction.setDefaultWidgetFlags(StringAction::WidgetFlag::TextEdit);
+    _htmlAction.setOverrideSizeHint(QSize(800, 600));
 
     _openAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _openAction.setIconByName("eye");
@@ -119,7 +118,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
     _editAction.setIconByName("gear");
     _editAction.setToolTip("Edit the splash screen settings");
-    _editAction.setPopupSizeHint(QSize(350, 0));
+    _editAction.setPopupSizeHint(QSize(1024, 1024));
 
     connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenWidget);
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
@@ -133,11 +132,9 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 
         _simulateStartupTask.setProgress(progress);
 
-        qDebug() << "Simulate progress:" << progress;
-        
-
         _splashScreenWidget->update();
-        QCoreApplication::processEvents();
+
+		QCoreApplication::processEvents();
 
 		if (progress >= 1.f) {
             progress = 1.f;
@@ -160,13 +157,13 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
         _simulateTimer.start();
     });
 
-    const auto updateHtmlOverrideAction = [this]() -> void {
-        _htmlOverrideAction.setEnabled(_overrideAction.isChecked());
+    const auto updateHtmlActionReadOnly = [this]() -> void {
+        _htmlAction.setEnabled(_overrideAction.isChecked());
 	};
 
-    updateHtmlOverrideAction();
+    updateHtmlActionReadOnly();
 
-    connect(&_overrideAction, &ToggleAction::toggled, this, updateHtmlOverrideAction);
+    connect(&_overrideAction, &ToggleAction::toggled, this, updateHtmlActionReadOnly);
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)
@@ -209,10 +206,7 @@ void SplashScreenAction::setStartupTask(Task* startupTask)
 
 QString SplashScreenAction::getHtml() const
 {
-    if (_overrideAction.isChecked() && !_htmlOverrideAction.getString().isEmpty())
-        return _htmlOverrideAction.getString();
-
-    return getHtmlFromTemplate();
+    return _htmlAction.getString();
 }
 
 QString SplashScreenAction::pixmapToBase64(const QPixmap& pixmap)
@@ -347,7 +341,7 @@ void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
 
     _enabledAction.fromParentVariantMap(variantMap);
     _overrideAction.fromParentVariantMap(variantMap, true);
-    _htmlOverrideAction.fromParentVariantMap(variantMap, true);
+    _htmlAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap SplashScreenAction::toVariantMap() const
@@ -356,7 +350,7 @@ QVariantMap SplashScreenAction::toVariantMap() const
 
     _enabledAction.insertIntoVariantMap(variantMap);
     _overrideAction.insertIntoVariantMap(variantMap);
-    _htmlOverrideAction.insertIntoVariantMap(variantMap);
+    _htmlAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

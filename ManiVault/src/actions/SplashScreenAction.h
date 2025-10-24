@@ -211,7 +211,7 @@ public: // Action getters
 
     const ToggleAction& getEnabledAction() const { return _enabledAction; }
     const ToggleAction& getOverrideAction() const { return _overrideAction; }
-    const StringAction& getHtmlOverrideAction() const { return _htmlOverrideAction; }
+    const StringAction& getHtmlAction() const { return _htmlAction; }
     const VerticalGroupAction& getEditAction() const { return _editAction; }
 	const TriggerAction& getOpenAction() const { return _openAction; }
 	const TriggerAction& getTestAction() const { return _testAction; }
@@ -220,7 +220,7 @@ public: // Action getters
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
     ToggleAction& getOverrideAction() { return _overrideAction; }
-    StringAction& getHtmlOverrideAction() { return _htmlOverrideAction; }
+    StringAction& getHtmlAction() { return _htmlAction; }
     VerticalGroupAction& getEditAction() { return _editAction; }
 	TriggerAction& getOpenAction() { return _openAction; }
 	TriggerAction& getTestAction() { return _testAction; }
@@ -228,18 +228,18 @@ public: // Action getters
     TaskAction& getTaskAction() { return _taskAction; }
 
 private:
+    Alerts                              _alerts;                        /** Alerts that will be displayed on the splash screen widget */
     bool                                _mayCloseSplashScreenWidget;    /** Whether the user can close the splash screen widget with a close tool button */
     ProjectMetaAction*                  _projectMetaAction;             /** Shared pointer to project meta action (used by the splash screen widget to display project information) */
     ToggleAction                        _enabledAction;                 /** Action to setEnabled the splash screen on/off */
     ToggleAction                        _overrideAction;                /** Toggle action to override the default ManiVault splash screen */
-    StringAction                        _htmlOverrideAction;            /** String action for custom html content */
+    StringAction                        _htmlAction;                    /** String action for custom html content */
     VerticalGroupAction                 _editAction;                    /** Vertical group action for editing the splash screen */
     TriggerAction                       _openAction;                    /** Trigger action to show the splash screen */
     TriggerAction                       _testAction;                    /** Trigger action to briefly show the splash screen for testing purposes */
     TriggerAction                       _closeAction;                   /** Trigger action to manually close the splash screen */
     TaskAction                          _taskAction;                    /** Task action for showing load progress */
     QPointer<SplashScreenWidget>        _splashScreenWidget;            /** Splash screen dialog */
-    Alerts                              _alerts;                        /** Alerts that will be displayed on the splash screen widget */
     Task                                _simulateStartupTask;           /** Test task to simulate load progress */
     QTimer                              _simulateTimer;                 /** Timer to simulate load progress */
 
