@@ -292,9 +292,7 @@ QString SplashScreenAction::getHtmlFromTemplate() const
 
     htmlTemplate = applyResourceImageToCss(htmlTemplate, QStringLiteral(":/Images/SplashScreenBackground"), "{{BACKGROUND_IMAGE}}", .2f);
 
-    QPixmap logoPixmap(":/Icons/AppIcon128");
-
-    replaceInHtml("{{LOGO}}", QString("<img src='data:image/png;base64,%1'>").arg(pixmapToBase64(logoPixmap.scaled(96, 96, Qt::IgnoreAspectRatio, Qt::SmoothTransformation))));
+    replaceInHtml("{{LOGO}}", "<img src='custom-assets:logo.png'>");
 
     if (auto projectImageAction = dynamic_cast<const ProjectMetaAction*>(_projectMetaAction)) {
         replaceInHtml("{{TITLE}}", projectImageAction->getTitleAction().getString());

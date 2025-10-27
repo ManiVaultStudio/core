@@ -578,6 +578,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/HeadsUpDisplayItem.h
     src/util/SplashScreenBridge.h
     src/util/StandardPaths.h
+    src/util/CustomAssetsUrlSchemeHandler.h
 )
 
 if(APPLE)
@@ -640,6 +641,7 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/HeadsUpDisplayItem.cpp
 	src/util/SplashScreenBridge.cpp
 	src/util/StandardPaths.cpp
+	src/util/CustomAssetsUrlSchemeHandler.cpp
 )
 
 if(APPLE)
