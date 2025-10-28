@@ -9,6 +9,8 @@
 
 #include "actions/SplashScreenAction.h"
 
+#include "util/CustomAssetsUrlSchemeHandler.h"
+
 #include <QScreen>
 #include <QPainterPath>
 #include <QEventLoop>
@@ -16,6 +18,8 @@
 #include <QParallelAnimationGroup>
 #include <QGraphicsDropShadowEffect>
 #include <QDesktopServices>
+#include <QWebEngineUrlScheme>
+#include <QWebEngineProfile>
 
 #ifdef _DEBUG
     #define SPLASH_SCREEN_WIDGET_VERBOSE
@@ -30,8 +34,15 @@ class Page : public QWebEnginePage
 {
 public:
 
-    /** No need for custom constructor */
-    using QWebEnginePage::QWebEnginePage;
+    /**
+     * Constructor with profile and optional parent
+     * @param profile Profile object
+     * @param parent Parent object
+     */
+    Page(QWebEngineProfile* profile, QObject* parent = nullptr) :
+        QWebEnginePage(profile, parent)
+    {
+    }
 
 protected:
 
@@ -95,7 +106,7 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
         QCoreApplication::processEvents();
     });
 
-    _processEventsTimer.start(10);
+    _processEventsTimer.start(100);
 
     _roundedFrameLayout.setContentsMargins(0, 0, 0, 0);
     _roundedFrameLayout.addWidget(&_webEngineView);
@@ -114,7 +125,17 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 
     _webChannel.registerObject(QStringLiteral("bridge"), &_splashScreenBridge);
 
-    _webEngineView.setPage(new Page(&_webEngineView));
+    QWebEngineUrlScheme urlScheme("custom-assets");
+
+    urlScheme.setSyntax(QWebEngineUrlScheme::Syntax::Path);
+
+    QWebEngineUrlScheme::registerScheme(urlScheme);
+
+    auto profile = new QWebEngineProfile(this);
+
+	profile->installUrlSchemeHandler("custom-assets", new CustomAssetsUrlSchemeHandler(profile));
+
+    _webEngineView.setPage(new Page(profile, &_webEngineView));
     _webEngineView.page()->setWebChannel(&_webChannel);
 }
 
