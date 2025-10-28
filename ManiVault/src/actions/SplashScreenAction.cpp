@@ -11,6 +11,7 @@
 #include "widgets/SplashScreenWidget.h"
 
 #include <QBuffer>
+#include <QClipboard>
 
 using namespace mv::util;
 
@@ -79,6 +80,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _enabledAction(this, "Enable splash screen"),
     _overrideAction(this, "Override"),
     _htmlAction(this, "HTML", getHtmlFromTemplate()),
+    _toClipboardAction(this, "Copy HTML to clipboard"),
     _editAction(this, "Edit"),
     _openAction(this, "Open splash screen"),
     _testAction(this, "Test the splash screen"),
@@ -87,12 +89,21 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _simulateStartupTask(this, "Test splash screen")
 {
     addAction(&_enabledAction);
-    addAction(&_editAction);
     addAction(&_testAction);
 
-    //_editAction.addAction(&_enabledAction);
+    const auto splashScreenHtmlFilePath = QDir::cleanPath(StandardPaths::getCustomizationDirectory() + "/assets/" + "SplashScreen.html");
+
+    if (QFileInfo(splashScreenHtmlFilePath).exists()) {
+		QFile splashScreenHtmlFile(splashScreenHtmlFilePath);
+
+    	if (splashScreenHtmlFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            _htmlAction.setString(QString::fromUtf8(splashScreenHtmlFile.readAll()));
+        }
+    }
+
     _editAction.addAction(&_overrideAction);
     _editAction.addAction(&_htmlAction);
+    _editAction.addAction(&_toClipboardAction);
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
@@ -164,6 +175,10 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     updateHtmlActionReadOnly();
 
     connect(&_overrideAction, &ToggleAction::toggled, this, updateHtmlActionReadOnly);
+
+    connect(&_toClipboardAction, &TriggerAction::triggered, this, [this]() -> void {
+        QGuiApplication::clipboard()->setText(getHtml());
+    });
 }
 
 void SplashScreenAction::addAlert(const Alert& alert)
@@ -206,7 +221,11 @@ void SplashScreenAction::setStartupTask(Task* startupTask)
 
 QString SplashScreenAction::getHtml() const
 {
-    return _htmlAction.getString();
+    auto html = _htmlAction.getString();
+
+    html = applyResourceImageToCss(html, QStringLiteral(":/Images/SplashScreenBackground"), "{{BACKGROUND_IMAGE}}", .2f);
+
+    return html;
 }
 
 QString SplashScreenAction::pixmapToBase64(const QPixmap& pixmap)
@@ -290,9 +309,7 @@ QString SplashScreenAction::getHtmlFromTemplate() const
 
     replaceInHtml("{{BODY_COLOR}}", bodyColor);
 
-    htmlTemplate = applyResourceImageToCss(htmlTemplate, QStringLiteral(":/Images/SplashScreenBackground"), "{{BACKGROUND_IMAGE}}", .2f);
-
-    replaceInHtml("{{LOGO}}", "<img src='custom-assets:logo.png'>");
+    replaceInHtml("{{LOGO}}", "<img src='custom-assets:ManiVault.png' style='width: 110px;'>");
 
     if (auto projectImageAction = dynamic_cast<const ProjectMetaAction*>(_projectMetaAction)) {
         replaceInHtml("{{TITLE}}", projectImageAction->getTitleAction().getString());
@@ -339,7 +356,6 @@ void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
 
     _enabledAction.fromParentVariantMap(variantMap);
     _overrideAction.fromParentVariantMap(variantMap, true);
-    _htmlAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap SplashScreenAction::toVariantMap() const
@@ -348,7 +364,6 @@ QVariantMap SplashScreenAction::toVariantMap() const
 
     _enabledAction.insertIntoVariantMap(variantMap);
     _overrideAction.insertIntoVariantMap(variantMap);
-    _htmlAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

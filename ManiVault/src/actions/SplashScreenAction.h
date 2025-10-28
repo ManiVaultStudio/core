@@ -212,6 +212,7 @@ public: // Action getters
     const ToggleAction& getEnabledAction() const { return _enabledAction; }
     const ToggleAction& getOverrideAction() const { return _overrideAction; }
     const StringAction& getHtmlAction() const { return _htmlAction; }
+    const TriggerAction& getToClipboardAction() const { return _toClipboardAction; }
     const VerticalGroupAction& getEditAction() const { return _editAction; }
 	const TriggerAction& getOpenAction() const { return _openAction; }
 	const TriggerAction& getTestAction() const { return _testAction; }
@@ -221,6 +222,7 @@ public: // Action getters
     ToggleAction& getEnabledAction() { return _enabledAction; }
     ToggleAction& getOverrideAction() { return _overrideAction; }
     StringAction& getHtmlAction() { return _htmlAction; }
+    TriggerAction& getToClipboardAction() { return _toClipboardAction; }
     VerticalGroupAction& getEditAction() { return _editAction; }
 	TriggerAction& getOpenAction() { return _openAction; }
 	TriggerAction& getTestAction() { return _testAction; }
@@ -233,7 +235,8 @@ private:
     ProjectMetaAction*                  _projectMetaAction;             /** Shared pointer to project meta action (used by the splash screen widget to display project information) */
     ToggleAction                        _enabledAction;                 /** Action to setEnabled the splash screen on/off */
     ToggleAction                        _overrideAction;                /** Toggle action to override the default ManiVault splash screen */
-    StringAction                        _htmlAction;                    /** String action for custom html content */
+    TriggerAction                       _toClipboardAction;             /** Trigger action to copy the splash screen HTML to clipboard */
+	StringAction                        _htmlAction;                    /** String action for custom html content */
     VerticalGroupAction                 _editAction;                    /** Vertical group action for editing the splash screen */
     TriggerAction                       _openAction;                    /** Trigger action to show the splash screen */
     TriggerAction                       _testAction;                    /** Trigger action to briefly show the splash screen for testing purposes */

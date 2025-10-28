@@ -106,7 +106,7 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
         QCoreApplication::processEvents();
     });
 
-    _processEventsTimer.start(10);
+    _processEventsTimer.start(100);
 
     _roundedFrameLayout.setContentsMargins(0, 0, 0, 0);
     _roundedFrameLayout.addWidget(&_webEngineView);
