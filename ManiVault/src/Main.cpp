@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
     // Destroy temporary application
     tempApp.reset();
 
+
 #ifdef Q_OS_MAC
     QSurfaceFormat defaultFormat;
     
