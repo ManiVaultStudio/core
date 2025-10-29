@@ -7,6 +7,7 @@
 #include "Application.h"
 
 #include "util/Miscellaneous.h"
+#include "util/StandardPaths.h"
 
 #include "widgets/SplashScreenWidget.h"
 
