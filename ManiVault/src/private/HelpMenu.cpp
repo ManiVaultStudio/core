@@ -104,7 +104,7 @@ void HelpMenu::populate()
     connect(&_releaseNotesAction, &QAction::triggered, this, [this](bool) {
         const auto applicationVersion = Application::current()->getVersion();
 
-        QDesktopServices::openUrl(QUrl(QString("https://github.com/ManiVaultStudio/core/releases/tag/v%1.%2").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor())), QUrl::TolerantMode));
+        QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/core/releases/", QUrl::TolerantMode));
     });
 }
 
