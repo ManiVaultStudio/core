@@ -362,11 +362,15 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
-if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
-    target_link_libraries(${MV_EXE} PRIVATE sentry)
-    target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
+if(${MV_USE_ERROR_LOGGING})
+    target_compile_definitions(${MV_EXE} PRIVATE MV_USE_ERROR_LOGGING=1)
     
-    add_dependencies(${MV_EXE} crashpad_handler)
+    if(NOT APPLE)
+        target_link_libraries(${MV_EXE} PRIVATE sentry)
+        target_link_libraries(${MV_EXE} PRIVATE crashpad_client)
+        
+        add_dependencies(${MV_EXE} crashpad_handler)
+    endif()
 endif()
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})

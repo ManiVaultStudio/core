@@ -123,6 +123,9 @@ void HelpMenu::aboutThirdParties() const
         "&bull; nlohmann json (MIT license): <a href=\"https://%3/\">%3</a> <br>"
         "&bull; valijson (BSD-2-Clause license): <a href=\"https://%3/\">%3</a> <br>"
         "&bull; biovault_bfloat16 (Apache-2.0): <a href=\"https://%3/\">%3</a> <br>"
+#ifdef MV_USE_ERROR_LOGGING
+        "&bull; sentry (MIT license): <a href=\"https://%3/\">%3</a> <br>"
+#endif
         "&bull; Qt ((L)GPL): <a href=\"https://%4/\">%4</a> "
     ).arg(QStringLiteral("github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"),
           QStringLiteral("github.com/stachenov/quazip"),
@@ -130,6 +133,9 @@ void HelpMenu::aboutThirdParties() const
           QStringLiteral("json.nlohmann.me"),
           QStringLiteral("github.com/tristanpenman/valijson"),
           QStringLiteral("github.com/biovault/biovault_bfloat16"),
+#ifdef MV_USE_ERROR_LOGGING
+          QStringLiteral("sentry.io"),
+#endif
           QStringLiteral("qt.io"));
 
     auto msgBox = new QMessageBox(this->parentWidget());
