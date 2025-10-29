@@ -5,6 +5,11 @@
 #include "CustomAssetsUrlSchemeHandler.h"
 
 #include <QWebEngineUrlRequestJob>
+#include <QCoreApplication>
+#include <QDir>
+#include <QFileInfo>
+#include <QFile>
+#include <QMimeDatabase>
 
 using namespace mv::util;
 
