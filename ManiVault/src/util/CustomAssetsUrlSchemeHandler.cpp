@@ -4,6 +4,8 @@
 
 #include "CustomAssetsUrlSchemeHandler.h"
 
+#include "util/StandardPaths.h"
+
 #include <QWebEngineUrlRequestJob>
 #include <QCoreApplication>
 #include <QDir>
@@ -18,28 +20,7 @@ namespace mv::util
 
 CustomAssetsUrlSchemeHandler::CustomAssetsUrlSchemeHandler(QObject* parent):
 	QWebEngineUrlSchemeHandler(parent),
-	_rootDir([]() -> QString {
-		const QDir appDir(QCoreApplication::applicationDirPath());
-
-		QString candidate;
-
-#if defined(Q_OS_MAC)
-		QDir d(appDir);
-		while (!d.dirName().endsWith(".app") && d.cdUp()) {}
-
-		if (d.dirName().endsWith(".app")) {
-			QDir parent = d;
-			if (parent.cdUp()) {
-				candidate = parent.filePath("Customization/assets");
-			}
-		}
-#endif
-		if (!candidate.isEmpty() && QFileInfo::exists(candidate)) {
-			return QDir::cleanPath(candidate);
-		}
-
-		return QDir::cleanPath(appDir.filePath("Customization/assets"));
-	}())
+	_rootDir(QDir::cleanPath(StandardPaths::getCustomizationDirectory() + "/assets"))
 {
 }
 
