@@ -78,10 +78,11 @@ void DatasetPrivate::setDataset(DatasetImpl* dataset)
         reset();
     }
     else {
-        disconnect(dataset, &gui::WidgetAction::textChanged, this, nullptr);
-
         if (dataset == _dataset)
             return;
+
+        if (_dataset)
+            disconnect(_dataset, &gui::WidgetAction::textChanged, this, nullptr);
 
         _dataset        = dataset;
         _datasetId    = _dataset->getId();
