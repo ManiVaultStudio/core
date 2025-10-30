@@ -99,6 +99,8 @@ QVariantMap ApplicationConfigurationAction::toVariantMap() const
     _brandingConfigurationAction.insertIntoVariantMap(variantMap);
     _startPageConfigurationAction.insertIntoVariantMap(variantMap);
 
+    mv::projects().getProjectsTreeModel().getDsnsAction().insertIntoVariantMap(variantMap);
+
     return variantMap;
 }
 
