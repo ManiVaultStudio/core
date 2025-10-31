@@ -17,6 +17,7 @@
 #include <QBuffer>
 #include <QImageReader>
 #include <QRegularExpression>
+#include <QStringDecoder>
 
 #include <algorithm>
 
@@ -238,4 +239,15 @@ CORE_EXPORT QString applyPixmapToCss(QString css, const QPixmap& pixmap, const Q
  * @return CSS with token replaced by data URL
  */
 CORE_EXPORT QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token, float scaleFactor = 0, int quality = 90);
+
+CORE_EXPORT inline auto isLikelyUtf16 = [](const QByteArray& byteArray) {
+    if (byteArray.size() < 2)
+        return false;
+    
+    return static_cast<uchar>(byteArray[0]) == 0xFF && static_cast<uchar>(byteArray[1]) == 0xFE
+        || static_cast<uchar>(byteArray[0]) == 0xFE && static_cast<uchar>(byteArray[1]) == 0xFF
+        || (byteArray[0] == 0x00 && byteArray[1] == '{') || (byteArray[0] == '{' && byteArray[1] == 0x00);
+    };
+
+CORE_EXPORT QByteArray ensureUtf8(QByteArray byteArray);
 }

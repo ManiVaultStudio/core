@@ -545,4 +545,22 @@ QString applyResourceImageToCss(QString css, const QString& pathOrResource, cons
 
     return applyPixmapToCss(css, pixmap, encodingFormat, quality, token);
 }
+
+QByteArray ensureUtf8(QByteArray byteArray)
+{
+	if (isLikelyUtf16(byteArray)) {
+		QStringDecoder stringDecoder(QStringDecoder::Utf16);
+
+		QString stringUtf16 = stringDecoder.decode(byteArray);
+
+		return stringUtf16.toUtf8();
+	}
+
+	// Strip UTF-8 BOM if present
+	if (byteArray.startsWith("\xEF\xBB\xBF"))
+		byteArray.remove(0, 3);
+
+	return byteArray;
+}
+
 }
