@@ -114,6 +114,12 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::Title:
             return TitleItem::headerData(orientation, role);
 
+        case Column::UUID:
+            return UUIDItem::headerData(orientation, role);
+
+        case Column::IsVisible:
+            return IsVisibleItem::headerData(orientation, role);
+
         case Column::LastModified:
             return LastModifiedItem::headerData(orientation, role);
 
@@ -185,10 +191,14 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectSharedPtr project, co
 #endif
         beginPopulate();
         {
-            const auto matches = match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::EditRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+            const auto matches = project->getUUID().isEmpty() ? match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::EditRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive) : match(index(0, static_cast<std::int32_t>(Column::UUID)), Qt::EditRole, project->getUUID(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
             for (const auto& match : matches) {
-                removeProject(match.siblingAtColumn(0));
+                if (QUrl::fromUserInput(match.siblingAtColumn(static_cast<std::int32_t>(Column::ProjectsJsonDsn)).data(Qt::EditRole).toUrl().toString()).isLocalFile()) {
+                    getProject(match)->setVisible(false);
+                } else {
+                    removeProject(match.siblingAtColumn(0));
+                }
             }
 
             updateTags();
@@ -253,8 +263,12 @@ void AbstractProjectsModel::purge()
     for (const auto& persistentModelIndex : allPersistentModelIndexes) {
         const auto projectsDsn = persistentModelIndex.data(Qt::EditRole).toUrl();
 
-        if (!getDsnsAction().getStrings().contains(projectsDsn))
+        if (QUrl::fromUserInput(projectsDsn.toString()).isLocalFile()) {
+            getProject(persistentModelIndex)->setVisible(true);
+        } else {
+            if (!getDsnsAction().getStrings().contains(projectsDsn))
                 removeProject(persistentModelIndex.sibling(persistentModelIndex.row(), 0));
+        }
     }
 }
 
@@ -273,7 +287,7 @@ void AbstractProjectsModel::addDsn(const QUrl& dsn)
 
             connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher, dsnIndex, dsn]() {
                 try {
-                    const auto& data = future.result();
+                    const auto& data = sanitizeJsonWhitespaceOutsideStrings(future.result());
 
                     if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
                         throw std::runtime_error("Future is cancelled or did not finish");
@@ -337,7 +351,7 @@ void AbstractProjectsModel::populateFromJsonByteArray(const QByteArray& jsonByte
         if (jsonByteArray.isEmpty())
             throw std::runtime_error("JSON byte array is empty");
 
-        const auto fullJson = json::parse(QString::fromUtf8(jsonByteArray.constData()).toStdString());
+        const auto fullJson = json::parse(jsonByteArray.constData(), jsonByteArray.constData() + jsonByteArray.size());
 
         if (fullJson.contains("projects")) {
             validateJson(fullJson["projects"].dump(), jsonLocation.toStdString(), loadJsonFromResource(":/JSON/ProjectsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
@@ -407,9 +421,11 @@ void AbstractProjectsModel::populateFromJsonFile(const QString& filePath)
 
 void AbstractProjectsModel::updateTags()
 {
-    for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
-        for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getProject()->getTags())
-            _tags.insert(tag);
+    for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex) {
+        if (auto item = dynamic_cast<Item*>(this->item(rowIndex, 0)))
+	        for (const auto& tag : item->getProject()->getTags())
+	            _tags.insert(tag);
+    }
 
     emit tagsChanged(_tags);
 }
@@ -485,6 +501,52 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
 
         default:
             break;
+    }
+
+    return Item::data(role);
+}
+
+AbstractProjectsModel::IsVisibleItem::IsVisibleItem(util::ProjectsModelProjectSharedPtr project) :
+    Item(project)
+{
+    Q_ASSERT(project);
+
+    if (project) {
+        connect(project.get(), &ProjectsModelProject::visibilityChanged, this, [this](bool visible) {
+            emitDataChanged();
+		});
+    }
+}
+
+QVariant AbstractProjectsModel::IsVisibleItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getProject()->getVisible();
+
+	    case Qt::ToolTipRole:
+	        return QString("%1").arg(data(Qt::EditRole).toBool() ? "visible" : "hidden");
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::UUIDItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getProject()->getUUID();
+
+	    case Qt::ToolTipRole:
+	        return QString("Universally unique identifier: %1").arg(data(Qt::DisplayRole).toString());
+
+	    default:
+	        break;
     }
 
     return Item::data(role);

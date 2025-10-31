@@ -59,6 +59,9 @@
 			"title": {
 				"type": "string"
 			},
+			"uuid": {
+				"type": "string"
+			},
 			"ignore": {
 				"type": "boolean"
 			},
