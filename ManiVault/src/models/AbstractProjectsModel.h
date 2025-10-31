@@ -31,7 +31,7 @@ public:
     enum class Column {
         Title,                  /** Title of the project */
         UUID,                   /** Title of the project */
-        Visible,                /** Whether the project is visible in the model */
+        IsVisible,                /** Whether the project is visible in the model */
         LastModified,           /** Last modified date of the project */
         Downloaded,             /** Whether the project has been downloaded before */
         Group,                  /** Group title of the project */
@@ -149,7 +149,7 @@ protected:
     };
 
     /** Standard model item class for displaying the project visibility */
-    class VisibleItem final : public Item {
+    class IsVisibleItem final : public Item {
     public:
 
         /**
@@ -157,7 +157,7 @@ protected:
          * @param project Const pointer to project
          * @param editable Boolean determining whether the item is editable or not
          */
-        VisibleItem(util::ProjectsModelProjectSharedPtr project);
+        IsVisibleItem(util::ProjectsModelProjectSharedPtr project);
 
         /**
          * Get model data for \p role
@@ -826,7 +826,7 @@ protected:
         {
             append(new TitleItem(project));
             append(new UUIDItem(project));
-            append(new VisibleItem(project));
+            append(new IsVisibleItem(project));
             append(new LastModifiedItem(project));
             append(new DownloadedItem(project));
             append(new GroupItem(project));
