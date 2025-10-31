@@ -22,6 +22,7 @@ namespace mv::util {
 ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
     _uuid(variantMap.contains("uuid") ? variantMap["uuid"].toString() : ""),
+    _visible(true),
     _serverDownloadSize(0),
     _userSpecifiedDownloadSize(variantMap.contains("downloadSize") ? parseByteSize(variantMap["downloadSize"].toString()) : 0),
     _isGroup(false),
@@ -91,6 +92,7 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
 ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _title(groupTitle),
     _uuid(Serializable::createId()),
+    _visible(true),
     _serverDownloadSize(0),
     _isGroup(true),
     _iconName("folder"),
@@ -110,6 +112,21 @@ QString ProjectsModelProject::getTitle() const
 QString ProjectsModelProject::getUUID() const
 {
     return _uuid;
+}
+
+bool ProjectsModelProject::getVisible() const
+{
+    return _visible;
+}
+
+void ProjectsModelProject::setVisible(bool visible)
+{
+    if (visible == _visible)
+        return;
+
+    _visible = visible;
+
+    emit visibilityChanged(_visible);
 }
 
 QString ProjectsModelProject::getTooltip() const

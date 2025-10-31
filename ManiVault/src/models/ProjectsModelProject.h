@@ -56,6 +56,18 @@ public:
     QString getUUID() const;
 
     /**
+     * Get visible
+     * @return Project visible state
+     */
+    bool getVisible() const;
+
+    /**
+     * Set visible to \p visible
+     * @param visible Project visible state
+     */
+    void setVisible(bool visible);
+
+    /**
      * Get tooltip
      * @return Tooltip containing the title and summary
      */
@@ -244,6 +256,7 @@ public:
     {
         _title                      = rhs.getTitle();
         _uuid                       = rhs.getUUID();
+        _visible                    = rhs.getVisible();
         _serverLastModified         = rhs.getServerLastModified();
         _serverDownloadSize         = rhs.getServerDownloadSize();
         _userSpecifiedDownloadSize  = rhs.getUserSpecifiedDownloadSize();
@@ -328,14 +341,21 @@ signals:
     void iconChanged(const QIcon& icon);
 
     /**
-     *  Signals that the project tooltip has changed to \p tooltip
+     * Signals that the project tooltip has changed to \p tooltip
      * @param tooltip New project tooltip
      */
     void tooltipChanged(const QString& tooltip);
 
+    /**
+     * Signals that the project visibility has changed to \p visible
+     * @param visible New project visibility
+     */
+    void visibilityChanged(bool visible);
+
 private:
     QString         _title;                         /** Title */
     QString         _uuid;                          /** Unique project identifier */
+    bool            _visible;                       /** Boolean determining whether the project is visible in the model */ 
     QDateTime       _serverLastModified;            /** Last modified date of the project file on the server */
     std::int64_t    _serverDownloadSize;            /** Download size of the project file on the server */
     std::int64_t    _userSpecifiedDownloadSize;     /** Download size of the project file as specified in the projects JSON file */
