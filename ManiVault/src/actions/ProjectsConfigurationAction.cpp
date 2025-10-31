@@ -3,6 +3,11 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ProjectsConfigurationAction.h"
+#include "Application.h"
+
+#include "CoreInterface.h"
+
+#include "models/ProjectsTreeModel.h"
 
 using namespace mv::util;
 
