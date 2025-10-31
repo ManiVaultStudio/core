@@ -358,6 +358,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/ApplicationConfigurationAction.h
     src/actions/StartPageConfigurationAction.h
     src/actions/BrandingConfigurationAction.h
+    src/actions/ProjectsConfigurationAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -403,6 +404,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/ApplicationConfigurationAction.cpp
     src/actions/StartPageConfigurationAction.cpp
     src/actions/BrandingConfigurationAction.cpp
+    src/actions/ProjectsConfigurationAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES

@@ -30,6 +30,8 @@ public:
     /** Model columns */
     enum class Column {
         Title,                  /** Title of the project */
+        UUID,                   /** Title of the project */
+        IsVisible,                /** Whether the project is visible in the model */
         LastModified,           /** Last modified date of the project */
         Downloaded,             /** Whether the project has been downloaded before */
         Group,                  /** Group title of the project */
@@ -100,10 +102,86 @@ protected:
                     return "Title";
 
                 case Qt::ToolTipRole:
-                    return "Video title";
+                    return "Project title";
 
                 default:
                     break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the project UUID */
+    class UUIDItem final : public Item {
+    public:
+
+        /** No need for custom constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "UUID";
+
+            case Qt::ToolTipRole:
+                return "Project UUID";
+
+            default:
+                break;
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the project visibility */
+    class IsVisibleItem final : public Item {
+    public:
+
+        /**
+         * Construct with pointer \p project
+         * @param project Const pointer to project
+         * @param editable Boolean determining whether the item is editable or not
+         */
+        IsVisibleItem(util::ProjectsModelProjectSharedPtr project);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "Visible";
+
+            case Qt::ToolTipRole:
+                return "Project visibility";
+
+            default:
+                break;
             }
 
             return {};
@@ -747,6 +825,8 @@ protected:
             QList<QStandardItem*>()
         {
             append(new TitleItem(project));
+            append(new UUIDItem(project));
+            append(new IsVisibleItem(project));
             append(new LastModifiedItem(project));
             append(new DownloadedItem(project));
             append(new GroupItem(project));

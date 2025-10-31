@@ -67,6 +67,9 @@ bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
     if (!index.isValid())
         return false;
 
+    if (!index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::IsVisible)).data(Qt::EditRole).toBool())
+        return false;
+
     const auto isGroup = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::IsGroup)).data(Qt::EditRole).toBool();
 
     if (filterRegularExpression().isValid()) {
