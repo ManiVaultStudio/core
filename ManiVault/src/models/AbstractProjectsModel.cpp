@@ -117,6 +117,9 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::UUID:
             return UUIDItem::headerData(orientation, role);
 
+        case Column::Visible:
+            return VisibleItem::headerData(orientation, role);
+
         case Column::LastModified:
             return LastModifiedItem::headerData(orientation, role);
 
@@ -188,10 +191,15 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectSharedPtr project, co
 #endif
         beginPopulate();
         {
-            const auto matches = match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::EditRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive);
-
+            qDebug() << QString("Adding project %1 (UUID: %2, SHA: %3)").arg(project->getTitle(), project->getUUID(), project->getSha());
+            const auto matches = project->getUUID().isEmpty() ? match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::EditRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive) : match(index(0, static_cast<std::int32_t>(Column::UUID)), Qt::EditRole, project->getUUID(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+            qDebug() << QString("Found %1 existing project(s) with same UUID/SHA").arg(matches.size());
             for (const auto& match : matches) {
-                removeProject(match.siblingAtColumn(0));
+                if (QUrl::fromUserInput(match.siblingAtColumn(static_cast<std::int32_t>(Column::ProjectsJsonDsn)).data(Qt::EditRole).toUrl().toString()).isLocalFile()) {
+	                
+                } else {
+                    removeProject(match.siblingAtColumn(0));
+                }
             }
 
             updateTags();
@@ -413,9 +421,11 @@ void AbstractProjectsModel::populateFromJsonFile(const QString& filePath)
 
 void AbstractProjectsModel::updateTags()
 {
-    for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
-        for (const auto& tag : dynamic_cast<Item*>(itemFromIndex(index(rowIndex, 0)))->getProject()->getTags())
-            _tags.insert(tag);
+    for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex) {
+        if (auto item = dynamic_cast<Item*>(this->item(rowIndex, 0)))
+	        for (const auto& tag : item->getProject()->getTags())
+	            _tags.insert(tag);
+    }
 
     emit tagsChanged(_tags);
 }
@@ -491,6 +501,23 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
 
         default:
             break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::VisibleItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getProject()->getVisible();
+
+	    case Qt::ToolTipRole:
+	        return QString("%1").arg(data(Qt::EditRole).toBool() ? "visible" : "hidden");
+
+	    default:
+	        break;
     }
 
     return Item::data(role);
