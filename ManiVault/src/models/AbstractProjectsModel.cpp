@@ -253,6 +253,9 @@ void AbstractProjectsModel::purge()
     for (const auto& persistentModelIndex : allPersistentModelIndexes) {
         const auto projectsDsn = persistentModelIndex.data(Qt::EditRole).toUrl();
 
+        if (QUrl::fromUserInput(projectsDsn.toString()).isLocalFile())
+            continue;
+
         if (!getDsnsAction().getStrings().contains(projectsDsn))
             removeProject(persistentModelIndex.sibling(persistentModelIndex.row(), 0));
     }
