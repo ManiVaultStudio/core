@@ -50,6 +50,12 @@ public:
     QString getTitle() const;
 
     /**
+     * Get UUID
+     * @return Project UUID
+     */
+    QString getUUID() const;
+
+    /**
      * Get tooltip
      * @return Tooltip containing the title and summary
      */
@@ -237,6 +243,7 @@ public:
     ProjectsModelProject& operator=(const ProjectsModelProject& rhs)
     {
         _title                      = rhs.getTitle();
+        _uuid                       = rhs.getUUID();
         _serverLastModified         = rhs.getServerLastModified();
         _serverDownloadSize         = rhs.getServerDownloadSize();
         _userSpecifiedDownloadSize  = rhs.getUserSpecifiedDownloadSize();
@@ -328,6 +335,7 @@ signals:
 
 private:
     QString         _title;                         /** Title */
+    QString         _uuid;                          /** Unique project identifier */
     QDateTime       _serverLastModified;            /** Last modified date of the project file on the server */
     std::int64_t    _serverDownloadSize;            /** Download size of the project file on the server */
     std::int64_t    _userSpecifiedDownloadSize;     /** Download size of the project file as specified in the projects JSON file */
