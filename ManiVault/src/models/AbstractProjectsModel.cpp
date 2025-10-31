@@ -506,6 +506,18 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
+AbstractProjectsModel::VisibleItem::VisibleItem(util::ProjectsModelProjectSharedPtr project) :
+    Item(project)
+{
+    Q_ASSERT(project);
+
+    if (project) {
+        connect(project.get(), &ProjectsModelProject::visibilityChanged, this, [this](bool visible) {
+            emitDataChanged();
+		});
+    }
+}
+
 QVariant AbstractProjectsModel::VisibleItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {

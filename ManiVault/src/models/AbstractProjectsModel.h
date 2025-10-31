@@ -152,8 +152,12 @@ protected:
     class VisibleItem final : public Item {
     public:
 
-        /** No need for custom constructor */
-        using Item::Item;
+        /**
+         * Construct with pointer \p project
+         * @param project Const pointer to project
+         * @param editable Boolean determining whether the item is editable or not
+         */
+        VisibleItem(util::ProjectsModelProjectSharedPtr project);
 
         /**
          * Get model data for \p role
