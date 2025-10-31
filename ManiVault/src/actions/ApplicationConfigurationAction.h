@@ -8,6 +8,7 @@
 #include "TriggerAction.h"
 #include "BrandingConfigurationAction.h"
 #include "StartPageConfigurationAction.h"
+#include "ProjectsConfigurationAction.h"
 
 namespace mv::gui {
 
@@ -68,13 +69,13 @@ public: // Action getters
     TriggerAction& getConfigureAction() { return _configureAction; }
     BrandingConfigurationAction& getBrandingConfigurationAction() { return _brandingConfigurationAction; }
     StartPageConfigurationAction& getStartPageConfigurationAction() { return _startPageConfigurationAction; }
-    VerticalGroupAction& getProjectsConfigurationAction() { return _projectsConfigurationAction; }
+    ProjectsConfigurationAction& getProjectsConfigurationAction() { return _projectsConfigurationAction; }
 
 private:
     TriggerAction                   _configureAction;                   /** Action for editing the application customization (visible when Ctrl + F8 is pressed) */
     BrandingConfigurationAction     _brandingConfigurationAction;       /** Branding configuration action */
     StartPageConfigurationAction    _startPageConfigurationAction;      /** Start page configuration action */
-    VerticalGroupAction             _projectsConfigurationAction;       /** Projects configuration action */
+    ProjectsConfigurationAction     _projectsConfigurationAction;       /** Projects configuration action */
 };
 
 }

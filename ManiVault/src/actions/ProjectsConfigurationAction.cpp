@@ -13,6 +13,10 @@ ProjectsConfigurationAction::ProjectsConfigurationAction(QObject* parent, const 
     _projectsDsnsAction(this, "Projects")
 {
     addAction(&_projectsDsnsAction);
+
+    connect(Application::current(), &Application::coreInitialized, this, [this]() {
+        const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction().setStrings(_projectsDsnsAction.getStrings());
+    });
 }
 
 void ProjectsConfigurationAction::fromVariantMap(const QVariantMap& variantMap)

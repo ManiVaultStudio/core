@@ -29,10 +29,6 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
     _configureAction.setVisible(false);
     _configureAction.setIconByName("gear");
 
-    connect(Application::current(), &Application::coreInitialized, this, [this]() {
-        _projectsConfigurationAction.addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction());
-    });
-
     addGroupAction(&_brandingConfigurationAction);
     addGroupAction(&_startPageConfigurationAction);
     addGroupAction(&_projectsConfigurationAction);
@@ -90,6 +86,7 @@ void ApplicationConfigurationAction::fromVariantMap(const QVariantMap& variantMa
 
     _brandingConfigurationAction.fromParentVariantMap(variantMap, true);
     _startPageConfigurationAction.fromParentVariantMap(variantMap, true);
+    _projectsConfigurationAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap ApplicationConfigurationAction::toVariantMap() const
@@ -98,8 +95,7 @@ QVariantMap ApplicationConfigurationAction::toVariantMap() const
 
     _brandingConfigurationAction.insertIntoVariantMap(variantMap);
     _startPageConfigurationAction.insertIntoVariantMap(variantMap);
-
-    mv::projects().getProjectsTreeModel().getDsnsAction().insertIntoVariantMap(variantMap);
+    _projectsConfigurationAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
