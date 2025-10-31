@@ -114,6 +114,9 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::Title:
             return TitleItem::headerData(orientation, role);
 
+        case Column::UUID:
+            return UUIDItem::headerData(orientation, role);
+
         case Column::LastModified:
             return LastModifiedItem::headerData(orientation, role);
 
@@ -488,6 +491,23 @@ QVariant AbstractProjectsModel::TitleItem::data(int role /*= Qt::UserRole + 1*/)
 
         default:
             break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractProjectsModel::UUIDItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getProject()->getUUID();
+
+	    case Qt::ToolTipRole:
+	        return QString("Universally unique identifier: %1").arg(data(Qt::DisplayRole).toString());
+
+	    default:
+	        break;
     }
 
     return Item::data(role);
