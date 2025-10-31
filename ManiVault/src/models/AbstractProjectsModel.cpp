@@ -254,7 +254,7 @@ void AbstractProjectsModel::purge()
         const auto projectsDsn = persistentModelIndex.data(Qt::EditRole).toUrl();
 
         if (!getDsnsAction().getStrings().contains(projectsDsn))
-                removeProject(persistentModelIndex.sibling(persistentModelIndex.row(), 0));
+            removeProject(persistentModelIndex.sibling(persistentModelIndex.row(), 0));
     }
 }
 
@@ -273,7 +273,7 @@ void AbstractProjectsModel::addDsn(const QUrl& dsn)
 
             connect(watcher, &QFutureWatcher<QByteArray>::finished, watcher, [this, future, watcher, dsnIndex, dsn]() {
                 try {
-                    const auto& data = future.result();
+                    const auto& data = sanitizeJsonWhitespaceOutsideStrings(future.result());
 
                     if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
                         throw std::runtime_error("Future is cancelled or did not finish");
@@ -337,7 +337,7 @@ void AbstractProjectsModel::populateFromJsonByteArray(const QByteArray& jsonByte
         if (jsonByteArray.isEmpty())
             throw std::runtime_error("JSON byte array is empty");
 
-        const auto fullJson = json::parse(QString::fromUtf8(jsonByteArray.constData()).toStdString());
+        const auto fullJson = json::parse(jsonByteArray.constData(), jsonByteArray.constData() + jsonByteArray.size());
 
         if (fullJson.contains("projects")) {
             validateJson(fullJson["projects"].dump(), jsonLocation.toStdString(), loadJsonFromResource(":/JSON/ProjectsSchema"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/ProjectsSchema.json");
