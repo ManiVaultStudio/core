@@ -203,7 +203,7 @@ namespace mv
         for (size_t i = 0; i < _datasets.size(); i++)
         {
             Dataset<DatasetImpl> d = _datasets[i];
-            if (d != dataset)
+            if (d != dataset && d.isValid())
             {
                 std::vector<uint32_t> indices = _biMaps[i].getValuesByKeys(keys);
                 
