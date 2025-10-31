@@ -563,4 +563,42 @@ QByteArray ensureUtf8(QByteArray byteArray)
 	return byteArray;
 }
 
+QByteArray sanitizeJsonWhitespaceOutsideStrings(const QByteArray& utf8)
+{
+	const QString s = QString::fromUtf8(utf8);
+	QString       out; out.reserve(s.size());
+
+	bool inStr = false;
+	bool esc   = false;
+
+	auto isAllowedWs = [](QChar c) {
+		return c == u' ' || c == u'\t' || c == u'\n' || c == u'\r';
+	};
+
+	for (int i = 0; i < s.size(); ++i) {
+		const QChar ch = s.at(i);
+		if (inStr) {
+			out.append(ch);
+			if (esc) { esc = false; continue; }
+			if (ch == u'\\') { esc = true; continue; }
+			if (ch == u'"') { inStr = false; }
+		}
+		else {
+			if (ch == u'"') {
+				inStr = true;
+				out.append(ch);
+			}
+			else if (isAllowedWs(ch)) {
+				out.append(ch);               // keep legal JSON whitespace
+			}
+			else if (ch.isSpace()) {
+				out.append(u' ');             // normalize EN SPACE, NBSP, etc.
+			}
+			else {
+				out.append(ch);               // non-space token char
+			}
+		}
+	}
+	return out.toUtf8();
+}
 }
