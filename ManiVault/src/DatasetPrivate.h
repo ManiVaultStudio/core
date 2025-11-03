@@ -85,8 +85,11 @@ public: // Member access and reset
      */
     void setDataset(DatasetImpl* dataset);
 
-    /** Resets the smart pointer */
-    void reset();
+    /**
+     * Reset the dataset pointer and disconnect from the dataset
+     * @param notify Whether to notify listeners about the reset
+     */
+    void reset(bool notify = true);
 
 public: // Keep track of when someone connects/disconnects from our signal(s)
 
