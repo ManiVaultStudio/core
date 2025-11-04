@@ -74,18 +74,17 @@ const DatasetImpl* DatasetPrivate::getDataset() const
 
 void DatasetPrivate::setDataset(DatasetImpl* dataset)
 {
-    if (dataset == nullptr) {
+    if (!dataset) {
         reset();
     }
     else {
         if (dataset == _dataset)
             return;
 
-        if (_dataset)
-            disconnect(_dataset, &gui::WidgetAction::textChanged, this, nullptr);
+        reset(false);
 
-        _dataset        = dataset;
-        _datasetId    = _dataset->getId();
+    	_dataset    = dataset;
+        _datasetId  = _dataset->getId();
 
         connect(_dataset, &gui::WidgetAction::textChanged, this, [this]() -> void {
             emit guiNameChanged();
@@ -95,12 +94,16 @@ void DatasetPrivate::setDataset(DatasetImpl* dataset)
     }
 }
 
-void DatasetPrivate::reset()
+void DatasetPrivate::reset(bool notify /*= true*/)
 {
+    if (_dataset)
+        disconnect(_dataset, &gui::WidgetAction::textChanged, this, nullptr);
+
     _dataset    = nullptr;
     _datasetId  = "";
 
-    emit changed(_dataset);
+    if (notify)
+		emit changed(_dataset);
 }
 
 void DatasetPrivate::connectNotify(const QMetaMethod& signal)
