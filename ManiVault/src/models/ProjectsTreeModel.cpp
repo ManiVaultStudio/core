@@ -14,7 +14,8 @@ using namespace mv::gui;
 namespace mv {
 
 ProjectsTreeModel::ProjectsTreeModel(const PopulationMode& populationMode /*= Mode::Automatic*/, QObject* parent /*= nullptr*/) :
-    AbstractProjectsModel(populationMode, parent)
+    AbstractProjectsModel(populationMode, parent),
+    _visibilityController(this)
 {
 }
 

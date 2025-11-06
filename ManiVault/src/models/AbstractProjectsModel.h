@@ -166,6 +166,13 @@ protected:
         QVariant data(int role = Qt::UserRole + 1) const override;
 
         /**
+         * Set model data for \p role
+         * @param value Data value
+         * @param role Data role
+         */
+        void setData(const QVariant& value, int role) override;
+
+        /**
          * Get header data for \p orientation and \p role
          * @param orientation Horizontal/vertical
          * @param role Data role
