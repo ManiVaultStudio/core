@@ -82,6 +82,7 @@ private:
 private:
     AbstractProjectsModel*  _projectsModel = nullptr;   /** Pointer to the controlled projects model */
     VisibilityRuleFunction  _visibilityRuleFunction;    /** Function to choose the winning row among duplicates */
+    bool                    _isUpdating = false;        /** Flag indicating whether an update is in progress to prevent recursive updates */
 };
 
 }

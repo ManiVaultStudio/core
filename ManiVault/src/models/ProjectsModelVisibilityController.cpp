@@ -20,7 +20,8 @@ namespace mv {
 ProjectsModelVisibilityController::ProjectsModelVisibilityController(AbstractProjectsModel* projectsModel, VisibilityRuleFunction visibilityRuleFunction, QObject* parent) :
 	QObject(parent),
 	_projectsModel(projectsModel),
-	_visibilityRuleFunction(std::move(visibilityRuleFunction))
+	_visibilityRuleFunction(std::move(visibilityRuleFunction)),
+    _isUpdating(false)
 {
     Q_ASSERT(_projectsModel);
 
@@ -39,9 +40,9 @@ void ProjectsModelVisibilityController::recomputeAll()
 
     QHash<QString, QModelIndexList> groups;
 
-    walk(QModelIndex{}, [&](const QModelIndex& ix) {
-        const auto uuid = _projectsModel->index(ix.row(), static_cast<int>(AbstractProjectsModel::Column::UUID), ix.parent()).data().toString();
-        groups[uuid] << ix;
+    walk(QModelIndex{}, [&](const QModelIndex& index) {
+        const auto uuid = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::UUID)).data().toString();
+        groups[uuid] << index;
 	});
 
     for (auto it = groups.begin(); it != groups.end(); ++it)
@@ -68,6 +69,9 @@ void ProjectsModelVisibilityController::onDataChanged(const QModelIndex& topLeft
     Q_UNUSED(bottomRight)
     Q_UNUSED(roles)
 
+    if (_isUpdating)
+        return;
+
 	recomputeAll();
 }
 
@@ -75,6 +79,11 @@ void ProjectsModelVisibilityController::applyGroupVisibility(const QModelIndexLi
 {
     if (rows.isEmpty())
         return;
+
+    if (_isUpdating)
+        return;
+
+	_isUpdating = true;
 
     if (rows.size() == 1 && rows.first().isValid()) {
 	    setVisibility(rows.front(), true);
