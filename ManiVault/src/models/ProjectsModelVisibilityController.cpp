@@ -19,11 +19,40 @@ namespace mv {
 
 ProjectsModelVisibilityController::ProjectsModelVisibilityController(AbstractProjectsModel* projectsModel, VisibilityRuleFunction visibilityRuleFunction, QObject* parent) :
 	QObject(parent),
-	_projectsModel(projectsModel),
-	_visibilityRuleFunction(std::move(visibilityRuleFunction)),
-    _isUpdating(false)
+	_projectsModel(projectsModel)
 {
     Q_ASSERT(_projectsModel);
+
+    if (visibilityRuleFunction) {
+        _visibilityRuleFunction = std::move(visibilityRuleFunction);
+    }
+    else {
+        _visibilityRuleFunction = [this](const QModelIndexList& rows, QStandardItemModel* model) -> QModelIndex {
+            Q_ASSERT(!rows.isEmpty());
+
+            if (rows.isEmpty())
+                return {};
+
+            QModelIndexList fromLocal, fromServer;
+
+            for (const auto& row : rows) {
+                const auto projectsJsonDsn = row.siblingAtColumn(static_cast<std::int32_t>(AbstractProjectsModel::Column::ProjectsJsonDsn)).data(Qt::EditRole).toString();
+
+                if (QUrl::fromUserInput(projectsJsonDsn).isLocalFile())
+                    fromLocal << row;
+                else
+                    fromServer << row;
+            }
+
+            if (!fromServer.isEmpty())
+                return fromServer.last();
+
+            if (!fromLocal.isEmpty())
+                return fromLocal.last();
+
+            return {};
+        };
+    }
 
     connect(_projectsModel, &QStandardItemModel::modelReset, this, &ProjectsModelVisibilityController::recomputeAll);
     connect(_projectsModel, &QStandardItemModel::rowsInserted, this, &ProjectsModelVisibilityController::onRowsInserted);

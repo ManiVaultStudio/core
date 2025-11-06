@@ -36,7 +36,7 @@ public:
      * @param visibilityRuleFunction Function to assign visibility among duplicates
      * @param parent Pointer to parent QObject
      */
-    ProjectsModelVisibilityController(AbstractProjectsModel* projectsModel, VisibilityRuleFunction visibilityRuleFunction, QObject* parent = nullptr);
+    ProjectsModelVisibilityController(AbstractProjectsModel* projectsModel, VisibilityRuleFunction visibilityRuleFunction = {}, QObject* parent = nullptr);
 
     /** Recompute visibility for all rows in the model */
     void recomputeAll();

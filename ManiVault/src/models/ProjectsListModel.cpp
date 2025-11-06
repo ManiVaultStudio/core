@@ -15,31 +15,7 @@ namespace mv {
 
 ProjectsListModel::ProjectsListModel(const PopulationMode& populationMode /*= Mode::Automatic*/, QObject* parent /*= nullptr*/) :
     AbstractProjectsModel(populationMode, parent),
-    _visibilityController(this, [this](const QModelIndexList& rows, QStandardItemModel* model) -> QModelIndex {
-	    Q_ASSERT(!rows.isEmpty());
-
-	    if (rows.isEmpty())
-	        return {};
-
-	    QModelIndexList fromLocal, fromServer;
-
-	    for (const auto& row : rows) {
-	        const auto projectsJsonDsn = row.siblingAtColumn(static_cast<std::int32_t>(Column::ProjectsJsonDsn)).data(Qt::EditRole).toString();
-
-	        if (QUrl::fromUserInput(projectsJsonDsn).isLocalFile())
-	            fromLocal << row;
-	        else
-	            fromServer << row;
-	    }
-
-	    if (!fromServer.isEmpty())
-	        return fromServer.last();
-
-	    if (!fromLocal.isEmpty())
-	        return fromLocal.last();
-
-	    return {};
-	})
+    _visibilityController(this)
 {
 }
 
