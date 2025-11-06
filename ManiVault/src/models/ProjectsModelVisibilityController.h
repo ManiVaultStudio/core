@@ -6,93 +6,87 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "models/SortFilterProxyModel.h"
-
-#include "actions/OptionsAction.h"
-#include "actions/VersionAction.h"
+#include <QStandardItemModel>
+#include <QObject>
+#include <QSet>
+#include <functional>
 
 namespace mv {
 
 class AbstractProjectsModel;
 
 /**
- * Project database filter model class
+ * Projects model visibility controller class
  *
- * Sorting and filtering model for the project database model
+ * Controls the visibility of projects in a projects model, ensuring that among duplicate projects (with the same UUID) only one is visible based on a user-defined criterion
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectsFilterModel : public SortFilterProxyModel
+class ProjectsModelVisibilityController : public QObject
 {
+    Q_OBJECT
+
 public:
 
-    /** 
-     * Construct with pointer to \p parent object
-     * @param parent Pointer to parent object
-    */
-    ProjectsFilterModel(QObject* parent = nullptr);
+    /** Function type to assign visibility among duplicates */
+    using VisibilityRuleFunction = std::function<QModelIndex(const QModelIndexList&, QStandardItemModel*)>;
 
     /**
-     * Returns whether \p row with \p parent is filtered out (false) or in (true)
-     * @param row Row index
-     * @param parent Parent index
-     * @return Boolean indicating whether the item is filtered in or out
+     * Construct a visibility controller for the given projects model
+     * @param projectsModel Pointer to the projects model to control
+     * @param visibilityRuleFunction Function to assign visibility among duplicates
+     * @param parent Pointer to parent QObject
      */
-    bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+    ProjectsModelVisibilityController(AbstractProjectsModel* projectsModel, VisibilityRuleFunction visibilityRuleFunction, QObject* parent = nullptr);
 
-    /**
-     * Set source model to \p sourceModel
-     * @param sourceModel Pointer to source model
-     */
-    void setSourceModel(QAbstractItemModel* sourceModel) override;
-
-    /**
-     * Compares two model indices plugin \p lhs with \p rhs
-     * @param lhs Left-hand model index
-     * @param rhs Right-hand model index
-     */
-    bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
+    /** Recompute visibility for all rows in the model */
+    void recomputeAll();
 
 private:
 
-    /**
-     * Get whether the parent has accepted children
-     * @param parent Parent model index
-     * @return Boolean indicating whether the parent has accepted children
-     */
-    bool hasAcceptedChildren(const QModelIndex& parent) const;
+    /** Slot called when rows are inserted */
+    void onRowsInserted(const QModelIndex& parent, int first, int last);
 
-public: // Serialization
+    /** Slot called before rows are removed */
+    void onRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last);
 
-    /**
-     * Load from variant map
-     * @param variantMap Variant map
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    /** Slot called after rows are removed */
+    void onRowsRemoved(const QModelIndex& parent, int /*first*/, int /*last*/);
 
-    /**
-     * Save to variant map
-     * @return Variant map
-     */
-    QVariantMap toVariantMap() const override;
-
-public: // Action getters
-
-    gui::OptionsAction& getTagsFilterAction() { return _tagsFilterAction; }
-    gui::OptionsAction& getExcludeTagsFilterAction() { return _excludeTagsFilterAction; }
-    gui::VersionAction& getTargetAppVersionAction() { return _targetAppVersionAction; }
-    gui::ToggleAction& getFilterLoadableOnlyAction() { return _filterLoadableOnlyAction; }
-    gui::ToggleAction& getFilterStartupOnlyAction() { return _filterStartupOnlyAction; }
-    gui::VerticalGroupAction& getFilterGroupAction() { return _filterGroupAction; }
+    /** Slot called when data changes */
+    void onDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles);
 
 private:
-    AbstractProjectsModel*      _projectDatabaseModel;          /** Pointer to source model */
-    gui::OptionsAction          _tagsFilterAction;              /** Filter based on tag(s) */
-    gui::OptionsAction          _excludeTagsFilterAction;       /** Filter out based on tag(s) */
-    gui::VersionAction          _targetAppVersionAction;        /** Target app minimum version filter action */
-    gui::ToggleAction           _filterLoadableOnlyAction;      /** Filter out projects that are not loadable */
-    gui::ToggleAction           _filterStartupOnlyAction;       /** Filter out projects that are not startup projects */
-    gui::VerticalGroupAction    _filterGroupAction;             /** Groups the filter text, filter settings and minimum version settings */
+
+    /** Apply group visibility for the given rows */
+    void applyGroupVisibility(const QModelIndexList& rows);
+
+    /**
+     * Set visibility of the given index to \p on
+     * @param index Model index to set visibility for
+     * @param on Boolean determining whether to set visibility on or off
+     */
+    void setVisibility(const QModelIndex& index, bool on);
+
+    template<class F>
+    void walk(const QModelIndex& parent, F&& f)
+    {
+        const auto numberOfRows = _projectsModel->rowCount(parent);
+
+        for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
+            QModelIndex rowIx = _projectsModel->index(rowIndex, 0, parent);
+
+            f(rowIx);
+
+        	if (_projectsModel->rowCount(rowIx) > 0)
+                walk(rowIx, f);
+        }
+    }
+
+private:
+    QStandardItemModel*     _projectsModel = nullptr;   /** Pointer to the controlled projects model */
+    VisibilityRuleFunction  _visibilityRuleFunction;    /** Function to choose the winning row among duplicates */
+    QSet<QString>           _uuidsPendingRemove;        /** UUIDs of rows pending removal */
 };
 
 }

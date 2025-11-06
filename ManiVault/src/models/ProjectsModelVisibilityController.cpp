@@ -2,17 +2,15 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ProjectsFilterModel.h"
-#include "AbstractProjectsModel.h"
+#include "ProjectsModelVisibilityController.h"
 
-#include "util/Version.h"
-
-#include "Application.h"
-
+#include <QHash>
 #include <QDebug>
+#include <algorithm>
+#include <QDateTime>
 
 #ifdef _DEBUG
-    #define PROJECTS_FILTER_MODEL_VERBOSE
+    #define PROJECTS_MODEL_VISIBILITY_CONTROLLER _VERBOSE
 #endif
 
 using namespace mv::gui;
@@ -20,169 +18,97 @@ using namespace mv::util;
 
 namespace mv {
 
-ProjectsFilterModel::ProjectsFilterModel(QObject* parent /*= nullptr*/) :
-    SortFilterProxyModel(parent, "ProjectsFilterModel"),
-    _projectDatabaseModel(nullptr),
-    _tagsFilterAction(this, "Tags filter"),
-    _excludeTagsFilterAction(this, "Exclude tags filter"),
-    _targetAppVersionAction(this, "App version"),
-    _filterLoadableOnlyAction(this, "Loadable only", true),
-    _filterStartupOnlyAction(this, "Startup only", false),
-    _filterGroupAction(this, "Filter group")
+ProjectsModelVisibilityController::ProjectsModelVisibilityController(AbstractProjectsModel* projectsModel, VisibilityRuleFunction visibilityRuleFunction, QObject* parent) :
+	QObject(parent),
+	_projectsModel(projectsModel),
+	_visibilityRuleFunction(std::move(visibilityRuleFunction))
 {
-    setDynamicSortFilter(true);
-    setRecursiveFilteringEnabled(true);
-    setRowTypeName("Project");
+    Q_ASSERT(_projectsModel);
 
-    _tagsFilterAction.setIconByName("tag");
-    _tagsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _tagsFilterAction.setPopupSizeHint(QSize(400, 0));
+    connect(_projectsModel, &QStandardItemModel::modelReset, this, &ProjectsModelVisibilityController::recomputeAll);
+    connect(_projectsModel, &QStandardItemModel::rowsInserted, this, &ProjectsModelVisibilityController::onRowsInserted);
+    connect(_projectsModel, &QStandardItemModel::rowsAboutToBeRemoved, this, &ProjectsModelVisibilityController::onRowsAboutToBeRemoved);
+    connect(_projectsModel, &QStandardItemModel::rowsRemoved, this, &ProjectsModelVisibilityController::onRowsRemoved);
+    connect(_projectsModel, &QStandardItemModel::dataChanged, this, &ProjectsModelVisibilityController::onDataChanged);
 
-    const auto applicationVersion = Application::current()->getVersion();
-
-    _targetAppVersionAction.setToolTip("Minimum ManiVault Studio version");
-    _targetAppVersionAction.getSuffixAction().setVisible(false);
-
-    _filterGroupAction.setIconByName("filter");
-    _filterGroupAction.setPopupSizeHint({ 400, 0 });
-
-    connect(&_tagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &ProjectsFilterModel::invalidate);
-    connect(&_excludeTagsFilterAction, &OptionsAction::selectedOptionsChanged, this, &ProjectsFilterModel::invalidate);
-    connect(&_targetAppVersionAction, &VersionAction::versionChanged, this, &ProjectsFilterModel::invalidate);
-    connect(&_filterLoadableOnlyAction, &ToggleAction::toggled, this, &ProjectsFilterModel::invalidate);
-    connect(&_filterStartupOnlyAction, &ToggleAction::toggled, this, &ProjectsFilterModel::invalidate);
-
-    _filterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-
-    _filterGroupAction.addAction(&getFilterLoadableOnlyAction());
-    _filterGroupAction.addAction(&getTextFilterCaseSensitiveAction());
-    _filterGroupAction.addAction(&getTextFilterRegularExpressionAction());
-    _filterGroupAction.addAction(&getTargetAppVersionAction());
+    recomputeAll();
 }
 
-bool ProjectsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+void ProjectsModelVisibilityController::recomputeAll()
 {
-    const auto index = sourceModel()->index(row, 0, parent);
+    if (!_projectsModel)
+        return;
 
-    if (!index.isValid())
-        return false;
+    QHash<QString, QModelIndexList> groups;
 
-    if (!index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::IsVisible)).data(Qt::EditRole).toBool())
-        return false;
+    walk(QModelIndex{}, [&](const QModelIndex& ix) {
+        const auto uuid = _projectsModel->index(ix.row(), static_cast<int>(AbstractProjectsModel::Column::UUID), ix.parent()).data().toString();
+        groups[uuid] << ix;
+	});
 
-    const auto isGroup = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::IsGroup)).data(Qt::EditRole).toBool();
+    for (auto it = groups.begin(); it != groups.end(); ++it)
+        applyGroupVisibility(it.value());
+}
 
-    if (filterRegularExpression().isValid()) {
-        const auto key = index.siblingAtColumn(filterKeyColumn()).data(filterRole()).toString();
+void ProjectsModelVisibilityController::onRowsInserted(const QModelIndex& parent, int first, int last)
+{
+    Q_UNUSED(parent)
 
-        if (!key.contains(filterRegularExpression())) {
-            if (isGroup && hasAcceptedChildren(index))
-                return true;
+	recomputeAll();
+}
 
-            return false;
-        }
+void ProjectsModelVisibilityController::onRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last)
+{
+    _uuidsPendingRemove.clear();
+
+    for (int rowIndex = first; rowIndex <= last; ++rowIndex) {
+        _uuidsPendingRemove.insert(_projectsModel->index(rowIndex, static_cast<int>(AbstractProjectsModel::Column::UUID), parent).data().toString());
+    }
+}
+
+void ProjectsModelVisibilityController::onRowsRemoved(const QModelIndex& parent, int, int)
+{
+    Q_UNUSED(parent)
+
+	recomputeAll();
+
+    _uuidsPendingRemove.clear();
+}
+
+void ProjectsModelVisibilityController::onDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles)
+{
+    Q_UNUSED(topLeft)
+    Q_UNUSED(bottomRight)
+    Q_UNUSED(roles)
+
+	recomputeAll();
+}
+
+void ProjectsModelVisibilityController::applyGroupVisibility(const QModelIndexList& rows)
+{
+    if (rows.isEmpty())
+        return;
+
+    if (rows.size() == 1) {
+	    setVisibility(rows.front(), true);
+    	return;
     }
 
-    if (!isGroup) {
-        const auto tagsList         = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::Tags)).data(Qt::EditRole).toStringList();
-        const auto filterTagsList   = _tagsFilterAction.getSelectedOptions();
+    const auto winner = _visibilityRuleFunction(rows, _projectsModel);
 
-        if (_tagsFilterAction.hasSelectedOptions()) {
-            bool matchTags = std::any_of(tagsList.begin(), tagsList.end(), [&](const QString& tag) {
-                return filterTagsList.contains(tag);
-            });
-
-            if (!matchTags)
-                return false;
-        }
-
-        const auto projectMinimumCoreVersion = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MinimumCoreVersion)).data(Qt::EditRole).value<Version>();
-
-        const Version targetAppVersion(_targetAppVersionAction.getMajor(), _targetAppVersionAction.getMinor(), 0);
-
-        if (targetAppVersion > projectMinimumCoreVersion)
-            return false;
-
-        const auto missingPlugins = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::MissingPlugins)).data(Qt::EditRole).toStringList();
-
-        if (_filterLoadableOnlyAction.isChecked() && !missingPlugins.isEmpty())
-            return false;
-
-        const auto isStartup = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::IsStartup)).data(Qt::EditRole).toBool();
-
-        if (_filterStartupOnlyAction.isChecked() && !isStartup)
-            return false;
-    } else {
-        return hasAcceptedChildren(index);
+    for (const auto& ix0 : rows) {
+        setVisibility(ix0, ix0 == winner);
     }
-
-    return true;
 }
 
-void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
+void ProjectsModelVisibilityController::setVisibility(const QModelIndex& rowIndex, bool on)
 {
-    SortFilterProxyModel::setSourceModel(sourceModel);
+    const auto isVisibleIndex = _projectsModel->index(rowIndex.row(), static_cast<int>(AbstractProjectsModel::Column::IsVisible), rowIndex.parent());
 
-    _projectDatabaseModel = dynamic_cast<AbstractProjectsModel*>(sourceModel);
+    if (isVisibleIndex.data(Qt::EditRole).toBool() == on)
+        return;
 
-    const auto updateTags = [this]() -> void {
-        const auto uniqueTags = QStringList(_projectDatabaseModel->getTagsSet().begin(), _projectDatabaseModel->getTagsSet().end());
-
-        if (uniqueTags == _tagsFilterAction.getOptions())
-            return;
-
-        const auto firstTime = _tagsFilterAction.getOptions().isEmpty();
-
-        _tagsFilterAction.setOptions(uniqueTags);
-        _tagsFilterAction.setSelectedOptions(_tagsFilterAction.hasSelectedOptions() ? _tagsFilterAction.getSelectedOptions() : uniqueTags);
-    };
-
-    connect(_projectDatabaseModel, &AbstractProjectsModel::tagsChanged, this, updateTags);
-    connect(_projectDatabaseModel, &AbstractProjectsModel::populated, this, &SortFilterProxyModel::invalidate);
-
-    updateTags();
-}
-
-bool ProjectsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
-{
-    return lhs.data().toString() < rhs.data().toString();
-}
-
-bool ProjectsFilterModel::hasAcceptedChildren(const QModelIndex& parent) const
-{
-    const auto model    = sourceModel();
-    const auto rowCount = model->rowCount(parent);
-
-    for (int i = 0; i < rowCount; ++i) {
-        const auto child = model->index(i, 0, parent);
-
-        if (filterAcceptsRow(i, parent) || hasAcceptedChildren(child))
-            return true;
-    }
-
-    return false;
-}
-
-void ProjectsFilterModel::fromVariantMap(const QVariantMap& variantMap)
-{
-    SortFilterProxyModel::fromVariantMap(variantMap);
-
-    _tagsFilterAction.fromParentVariantMap(variantMap);
-    _excludeTagsFilterAction.fromParentVariantMap(variantMap);
-    _targetAppVersionAction.fromParentVariantMap(variantMap);
-    _filterLoadableOnlyAction.fromParentVariantMap(variantMap);
-}
-
-QVariantMap ProjectsFilterModel::toVariantMap() const
-{
-    auto variantMap = SortFilterProxyModel::toVariantMap();
-
-    _tagsFilterAction.insertIntoVariantMap(variantMap);
-    _excludeTagsFilterAction.insertIntoVariantMap(variantMap);
-    _targetAppVersionAction.insertIntoVariantMap(variantMap);
-    _filterLoadableOnlyAction.insertIntoVariantMap(variantMap);
-
-    return variantMap;
+	_projectsModel->setData(isVisibleIndex, on, Qt::EditRole);
 }
 
 }

@@ -191,16 +191,6 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectSharedPtr project, co
 #endif
         beginPopulate();
         {
-            const auto matches = project->getUUID().isEmpty() ? match(index(0, static_cast<std::int32_t>(Column::Sha)), Qt::EditRole, project->getSha(), -1, Qt::MatchExactly | Qt::MatchRecursive) : match(index(0, static_cast<std::int32_t>(Column::UUID)), Qt::EditRole, project->getUUID(), -1, Qt::MatchExactly | Qt::MatchRecursive);
-
-            for (const auto& match : matches) {
-                if (QUrl::fromUserInput(match.siblingAtColumn(static_cast<std::int32_t>(Column::ProjectsJsonDsn)).data(Qt::EditRole).toUrl().toString()).isLocalFile()) {
-                    getProject(match)->setVisible(false);
-                } else {
-                    removeProject(match.siblingAtColumn(0));
-                }
-            }
-
             updateTags();
 
             project->setParent(this);
@@ -533,6 +523,15 @@ QVariant AbstractProjectsModel::IsVisibleItem::data(int role /*= Qt::UserRole + 
     }
 
     return Item::data(role);
+}
+
+void AbstractProjectsModel::IsVisibleItem::setData(const QVariant& value, int role)
+{
+	Item::setData(value, role);
+
+    if (value.isValid() && role == Qt::EditRole && value.typeId() == QMetaType::Bool) {
+        getProject()->setVisible(value.toBool());
+    }
 }
 
 QVariant AbstractProjectsModel::UUIDItem::data(int role /*= Qt::UserRole + 1*/) const

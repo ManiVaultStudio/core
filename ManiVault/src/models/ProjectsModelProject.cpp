@@ -22,7 +22,7 @@ namespace mv::util {
 ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
     _uuid(variantMap.contains("uuid") ? variantMap["uuid"].toString() : ""),
-    _visible(true),
+    _visible(false),
     _serverDownloadSize(0),
     _userSpecifiedDownloadSize(variantMap.contains("downloadSize") ? parseByteSize(variantMap["downloadSize"].toString()) : 0),
     _isGroup(false),

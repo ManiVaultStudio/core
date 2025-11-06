@@ -52,19 +52,20 @@ void ProjectsMenu::populate()
     };
 
     for (int rowIndex = 0; rowIndex < _projectsFilterModel.rowCount(); rowIndex++) {
-        const auto filterModelIndex = _projectsFilterModel.index(rowIndex, 0);
-        const auto sourceModelIndex = _projectsFilterModel.mapToSource(filterModelIndex);
+        const auto filterIndex  = _projectsFilterModel.index(rowIndex, 0);
+        const auto sourceIndex  = _projectsFilterModel.mapToSource(filterIndex);
 
-        if (const auto project = mv::projects().getProjectsTreeModel().getProject(sourceModelIndex)) {
+        if (const auto project = mv::projects().getProjectsTreeModel().getProject(sourceIndex)) {
             if (project->isGroup()) {
                 auto projectGroupMenu = new QMenu(project->getTitle());
 
                 projectGroupMenu->setIcon(StyledIcon("folder"));
 
-                for (int childRowIndex = 0; childRowIndex < mv::projects().getProjectsTreeModel().rowCount(sourceModelIndex); childRowIndex++) {
-                    const auto childModelIndex = mv::projects().getProjectsTreeModel().index(childRowIndex, 0, sourceModelIndex);
+                for (int childRowIndexFilter = 0; childRowIndexFilter < _projectsFilterModel.rowCount(filterIndex); childRowIndexFilter++) {
+                    const auto childFilterIndex = _projectsFilterModel.index(childRowIndexFilter, 0, filterIndex);
+                    const auto childSourceIndex = _projectsFilterModel.mapToSource(childFilterIndex);
 
-                    if (const auto childProject = mv::projects().getProjectsTreeModel().getProject(childModelIndex))
+                    if (const auto childProject = mv::projects().getProjectsTreeModel().getProject(childSourceIndex))
                         addProject(projectGroupMenu, childProject);
                 }
 
