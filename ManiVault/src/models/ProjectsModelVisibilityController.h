@@ -47,9 +47,6 @@ private:
     /** Slot called when rows are inserted */
     void onRowsInserted(const QModelIndex& parent, int first, int last);
 
-    /** Slot called before rows are removed */
-    void onRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last);
-
     /** Slot called after rows are removed */
     void onRowsRemoved(const QModelIndex& parent, int /*first*/, int /*last*/);
 
@@ -86,7 +83,6 @@ private:
 private:
     QStandardItemModel*     _projectsModel = nullptr;   /** Pointer to the controlled projects model */
     VisibilityRuleFunction  _visibilityRuleFunction;    /** Function to choose the winning row among duplicates */
-    QSet<QString>           _uuidsPendingRemove;        /** UUIDs of rows pending removal */
 };
 
 }

@@ -57,22 +57,11 @@ void ProjectsModelVisibilityController::onRowsInserted(const QModelIndex& parent
 	recomputeAll();
 }
 
-void ProjectsModelVisibilityController::onRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last)
-{
-    _uuidsPendingRemove.clear();
-
-    for (int rowIndex = first; rowIndex <= last; ++rowIndex) {
-        _uuidsPendingRemove.insert(_projectsModel->index(rowIndex, static_cast<int>(AbstractProjectsModel::Column::UUID), parent).data().toString());
-    }
-}
-
 void ProjectsModelVisibilityController::onRowsRemoved(const QModelIndex& parent, int, int)
 {
     Q_UNUSED(parent)
 
 	recomputeAll();
-
-    _uuidsPendingRemove.clear();
 }
 
 void ProjectsModelVisibilityController::onDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles)
