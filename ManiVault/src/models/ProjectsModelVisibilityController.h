@@ -8,7 +8,6 @@
 
 #include <QStandardItemModel>
 #include <QObject>
-#include <QSet>
 #include <functional>
 
 namespace mv {
@@ -81,7 +80,7 @@ private:
     }
 
 private:
-    QStandardItemModel*     _projectsModel = nullptr;   /** Pointer to the controlled projects model */
+    AbstractProjectsModel*  _projectsModel = nullptr;   /** Pointer to the controlled projects model */
     VisibilityRuleFunction  _visibilityRuleFunction;    /** Function to choose the winning row among duplicates */
 };
 

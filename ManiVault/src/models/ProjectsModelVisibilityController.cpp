@@ -7,7 +7,6 @@
 #include <QHash>
 #include <QDebug>
 #include <algorithm>
-#include <QDateTime>
 
 #ifdef _DEBUG
     #define PROJECTS_MODEL_VISIBILITY_CONTROLLER _VERBOSE
@@ -27,7 +26,6 @@ ProjectsModelVisibilityController::ProjectsModelVisibilityController(AbstractPro
 
     connect(_projectsModel, &QStandardItemModel::modelReset, this, &ProjectsModelVisibilityController::recomputeAll);
     connect(_projectsModel, &QStandardItemModel::rowsInserted, this, &ProjectsModelVisibilityController::onRowsInserted);
-    connect(_projectsModel, &QStandardItemModel::rowsAboutToBeRemoved, this, &ProjectsModelVisibilityController::onRowsAboutToBeRemoved);
     connect(_projectsModel, &QStandardItemModel::rowsRemoved, this, &ProjectsModelVisibilityController::onRowsRemoved);
     connect(_projectsModel, &QStandardItemModel::dataChanged, this, &ProjectsModelVisibilityController::onDataChanged);
 
