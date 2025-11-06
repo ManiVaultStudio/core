@@ -89,7 +89,7 @@ void ProjectsModelVisibilityController::applyGroupVisibility(const QModelIndexLi
     if (rows.isEmpty())
         return;
 
-    if (rows.size() == 1) {
+    if (rows.size() == 1 && rows.first().isValid()) {
 	    setVisibility(rows.front(), true);
     	return;
     }
@@ -97,6 +97,9 @@ void ProjectsModelVisibilityController::applyGroupVisibility(const QModelIndexLi
     const auto winner = _visibilityRuleFunction(rows, _projectsModel);
 
     for (const auto& ix0 : rows) {
+        if (!ix0.isValid())
+            continue;
+
         setVisibility(ix0, ix0 == winner);
     }
 }
