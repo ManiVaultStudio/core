@@ -39,11 +39,22 @@ void ProjectsModelVisibilityController::recomputeAll()
         return;
 
     QHash<QString, QModelIndexList> groups;
+    QModelIndexList emptyUuidRows;
 
     walk(QModelIndex{}, [&](const QModelIndex& index) {
-        const auto uuid = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::UUID)).data().toString();
-        groups[uuid] << index;
-	});
+        const auto uuidIndex    = index.siblingAtColumn(static_cast<int>(AbstractProjectsModel::Column::UUID));
+        const auto uuid         = uuidIndex.data().toString().trimmed();
+
+        if (uuid.isEmpty()) {
+            emptyUuidRows << index;
+            return;
+        }
+
+    	groups[uuid] << index;
+    });
+
+    for (const auto& index : emptyUuidRows)
+        setVisibility(index, true);
 
     for (auto it = groups.begin(); it != groups.end(); ++it)
         applyGroupVisibility(it.value());
@@ -85,18 +96,27 @@ void ProjectsModelVisibilityController::applyGroupVisibility(const QModelIndexLi
 
 	_isUpdating = true;
 
+    auto resetGuard = qScopeGuard([&] { _isUpdating = false; });
+
     if (rows.size() == 1 && rows.first().isValid()) {
 	    setVisibility(rows.front(), true);
     	return;
     }
 
-    const auto winner = _visibilityRuleFunction(rows, _projectsModel);
+    const auto visibilityWinner = _visibilityRuleFunction(rows, _projectsModel);
 
-    for (const auto& ix0 : rows) {
-        if (!ix0.isValid())
-            continue;
+	if (!visibilityWinner.isValid() || !rows.contains(visibilityWinner)) {
+        setVisibility(rows.front(), true);
 
-        setVisibility(ix0, ix0 == winner);
+        for (int rowIndex = 1; rowIndex < rows.size(); ++rowIndex)
+            setVisibility(rows[rowIndex], false);
+    } else {
+        for (const auto& index : rows) {
+            if (!index.isValid())
+                continue;
+
+            setVisibility(index, index == visibilityWinner);
+        }
     }
 }
 
