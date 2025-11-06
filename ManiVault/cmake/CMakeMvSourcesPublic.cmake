@@ -1022,6 +1022,7 @@ set(PUBLIC_PROJECTS_MODEL_HEADERS
     src/models/ProjectsTreeModel.h
 	src/models/ProjectsFilterModel.h
 	src/models/ProjectsModelProject.h
+	src/models/ProjectsModelVisibilityController.h
 )
 
 set(PUBLIC_PROJECTS_MODEL_SOURCES
@@ -1030,6 +1031,7 @@ set(PUBLIC_PROJECTS_MODEL_SOURCES
     src/models/ProjectsTreeModel.cpp
 	src/models/ProjectsFilterModel.cpp
 	src/models/ProjectsModelProject.cpp
+	src/models/ProjectsModelVisibilityController.cpp
 )
 
 set(PUBLIC_PROJECTS_MODEL_FILES

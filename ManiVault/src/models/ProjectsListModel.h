@@ -6,7 +6,7 @@
 
 #include "models/AbstractProjectsModel.h"
 #include "models/ProjectsModelProject.h"
-
+#include "ProjectsModelVisibilityController.h"
 
 namespace mv {
 
@@ -37,6 +37,9 @@ protected:
      * @param projects Shared pointers to projects to populate the model with
      */
     void populate(util::ProjectsModelProjectSharedPtrs projects) override;
+
+private:
+    ProjectsModelVisibilityController   _visibilityController;      /** To control the visibility of rows with duplicate UUID */
 };
 
 }
