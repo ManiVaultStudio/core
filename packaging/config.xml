@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Installer>
+	<Name>Cytosplore Viewer</Name>
+	<Version>bican_bg</Version>
+	<Title>Cytosplore Viewer offline installer</Title>
+	<Publisher>BioVault</Publisher>
+	<ProductUrl>https://github.com/ManiVaultStudio</ProductUrl>
+	<InstallerApplicationIcon>app</InstallerApplicationIcon>
+	<InstallerWindowIcon>app.png</InstallerWindowIcon>
+	<Logo>app.png</Logo>
+	<RunProgram>@TargetDir@/run_app.bat</RunProgram>
+	<RunProgramDescription>Run Cytosplore Viewer now</RunProgramDescription>
+	<StartMenuDir>Cytosplore Viewer</StartMenuDir>
+	<MaintenanceToolName>MaintenanceTool</MaintenanceToolName>
+	<TargetDir>@HomeDir@/Cytosplore Viewer</TargetDir>
+</Installer>

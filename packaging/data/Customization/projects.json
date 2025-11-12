@@ -1,0 +1,143 @@
+{
+	"projects": [
+		{
+			"title": "Spatial Transcriptomics Multispecies Basal Ganglia",
+			"uuid": "48a50999-557e-4242-a28a-33048aaccf30",
+			"group": "HMBA:Basal Ganglia Preprint",
+			"startup": true,
+			"url": "https://allen-hmba-releases.s3.us-west-2.amazonaws.com/cytosplore/Release/BasalGanglia_Preprint/Preprint_2025_Spatial_Multispecies_BG.mv",
+			"summary": "",
+			"requiredPlugins": [],
+			"coreVersion": {
+				"major": 1,
+				"minor": 4,
+				"patch": 0,
+				"suffix": ""
+			},
+			"tags": [],
+			"date": "2025-09-25 13:00:00",
+			"downloadSize": "1142391KB"
+		},
+		{
+			"title": "ATACseq + Spatial Tx Marmoset Subcortex",
+			"uuid": "4ee2b3fa-c421-47b3-b518-a931a4439cd8",
+			"group": "HMBA:Basal Ganglia Preprint",
+			"startup": true,
+			"url": "https://allen-hmba-releases.s3.us-west-2.amazonaws.com/cytosplore/Release/BasalGanglia_Preprint/Preprint_2025_ATACseq_Marmoset_Subcortex.mv",
+			"summary": "",
+			"requiredPlugins": [],
+			"coreVersion": {
+				"major": 1,
+				"minor": 4,
+				"patch": 0,
+				"suffix": ""
+			},
+			"tags": [],
+			"date": "2025-09-25 13:00:00",
+			"downloadSize": "2698583KB"
+		},
+		{
+			"title": "RNAseq MultiSpecies Basal Ganglia",
+			"uuid": "3f3aaa43-e4f1-41a0-84df-2d9ddb2783c1",
+			"group": "HMBA:Basal Ganglia Preprint",
+			"startup": true,
+			"url": "https://allen-hmba-releases.s3.us-west-2.amazonaws.com/cytosplore/Release/BasalGanglia_Preprint/Preprint_2025_RNAseq_MultiSpecies_BG.mv",
+			"summary": "",
+			"requiredPlugins": [],
+			"coreVersion": {
+				"major": 1,
+				"minor": 4,
+				"patch": 0,
+				"suffix": ""
+			},
+			"tags": [],
+			"date": "2025-09-25 13:00:00",
+			"downloadSize": "1501385KB"
+		},
+		{
+			"title": "Evo Viewer 2025 (subset)",
+			"uuid": "e5d25616-86a2-4729-a92a-0fa42624e882",
+			"group": "Other",
+			"startup": true,
+			"url": "https://sec.lumc.nl/mtg-viewer/MV_data/CytosploreHMBAViewer/EvoViewer/EvoViewerSubsetProject.mv",
+			"summary": "",
+			"requiredPlugins": [],
+			"coreVersion": {
+				"major": 1,
+				"minor": 4,
+				"patch": 0,
+				"suffix": ""
+			},
+			"tags": [],
+			"date": "2025-09-25 13:00:00"
+		},
+		{
+			"title": "Evo Viewer (full set)",
+			"uuid": "39a347cd-d97d-4498-81fb-48f564148233",
+			"group": "Other",
+			"startup": true,
+			"url": "https://sec.lumc.nl/mtg-viewer/MV_data/CytosploreHMBAViewer/EvoViewer/EvoViewerFullProject.mv",
+			"summary": "",
+			"requiredPlugins": [],
+			"coreVersion": {
+				"major": 1,
+				"minor": 4,
+				"patch": 0,
+				"suffix": ""
+			},
+			"tags": [],
+			"date": "2025-09-25 13:00:00"
+		},
+		{
+			"title": "Simian Viewer",
+			"uuid": "da3ccd44-e236-4c25-9ff5-fb620a8bc41c",
+			"group": "Other",
+			"startup": true,
+			"url": "https://sec.lumc.nl/mtg-viewer/MV_data/CytosploreHMBAViewer/SimianViewer/SimianViewerProject.mv",
+			"summary": "",
+			"requiredPlugins": [],
+			"coreVersion": {
+				"major": 1,
+				"minor": 4,
+				"patch": 0,
+				"suffix": ""
+			},
+			"tags": [],
+			"date": "2025-09-25 13:00:00"
+		},
+		{
+			"title": "Gradient Surfer (SMFISH & MERFISH)",
+			"uuid": "cbb7d719-78fb-4500-af0c-79ee73f96d57",
+			"group": "Other",
+			"startup": true,
+			"url": "https://sec.lumc.nl/mtg-viewer/MV_data/CytosploreHMBAViewer/GradientSurfer/GradientSurfer_SMFISH_MERFISH.mv",
+			"summary": "",
+			"requiredPlugins": [],
+			"coreVersion": {
+				"major": 1,
+				"minor": 4,
+				"patch": 0,
+				"suffix": ""
+			},
+			"tags": [],
+			"date": "2025-09-25 13:00:00"
+		},
+		{
+			"title": "Gradient Surfer (template)",
+			"uuid": "29ee6d2b-833f-4592-aa8f-a381c7bdbb14",
+			"group": "Other",
+			"startup": true,
+			"url": "https://sec.lumc.nl/mtg-viewer/MV_data/CytosploreHMBAViewer/GradientSurfer/GradientSurfer_Template.mv",
+			"summary": "",
+			"requiredPlugins": [],
+			"coreVersion": {
+				"major": 1,
+				"minor": 4,
+				"patch": 0,
+				"suffix": ""
+			},
+			"tags": [],
+			"date": "2025-09-25 13:00:00"
+		}
+	]
+}

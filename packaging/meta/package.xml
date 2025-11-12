@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package>
+	<DisplayName>Cytosplore Viewer</DisplayName>
+	<Description>Cytosplore viewer applications for visual exploration of high-dimensional single-cell data.</Description>
+	<Version>1.0</Version>
+	<ReleaseDate>2025-10-31 17:28:43.125848</ReleaseDate>
+	<Name>Com.ManiVault</Name>
+	<Script>install.qs</Script>
+	<SortingPriority>1000</SortingPriority>
+	<RequiresAdminRights>true</RequiresAdminRights>
+	<UserInterfaces>
+		<UserInterface>target.ui</UserInterface>
+	</UserInterfaces>
+	<Licenses>
+		<License name="License Agreement" file="license.txt"></License>
+	</Licenses>
+	<ForcedInstallation>true</ForcedInstallation>
+</Package>
