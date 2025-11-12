@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Installer>
-	<Name>Cytosplore Viewer</Name>
+	<Name>Packaging</Name>
 	<Version>bican_bg</Version>
-	<Title>Cytosplore Viewer offline installer</Title>
+	<Title>Packaging test installer</Title>
 	<Publisher>BioVault</Publisher>
 	<ProductUrl>https://github.com/ManiVaultStudio</ProductUrl>
 	<InstallerApplicationIcon>app</InstallerApplicationIcon>

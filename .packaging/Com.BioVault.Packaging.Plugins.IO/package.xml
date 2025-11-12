@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package>
+	<DisplayName>Input/output plugins</DisplayName>
+	<Description>Application input/output extensions</Description>
+	<Dependencies>Com.BioVault.Packaging</Dependencies>
+	<Version>1.0</Version>
+	<ReleaseDate>2025-10-31</ReleaseDate>
+	<Name>Com.BioVault.Packaging.Plugins</Name>
+</Package>

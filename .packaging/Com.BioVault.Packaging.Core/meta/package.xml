@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package>
+	<DisplayName>Core</DisplayName>
+	<Description>Core elements of ManiVault</Description>
+	<Dependencies>Com.BioVault.Packaging</Dependencies>
+	<ForcedInstallation>true</ForcedInstallation>
+	<Virtual>true</Virtual>
+	<Version>1.0</Version>
+	<ReleaseDate>2025-10-31</ReleaseDate>
+	<Name>Com.BioVault.Packaging.Core</Name>
+</Package>

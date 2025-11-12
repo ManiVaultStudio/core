@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package>
+	<DisplayName>Analysis plugins</DisplayName>
+	<Description>Application analysis extensions</Description>
+	<Dependencies>Com.BioVault.Packaging</Dependencies>
+	<Version>1.0</Version>
+	<ReleaseDate>2025-10-31</ReleaseDate>
+	<Name>Com.BioVault.Packaging.Plugins.Analysis</Name>
+</Package>
