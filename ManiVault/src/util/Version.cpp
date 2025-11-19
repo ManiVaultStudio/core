@@ -85,7 +85,7 @@ std::string Version::getVersionString() const
     if (!isValid())
         return {};
 
-    if(_suffix == " ")
+    if(_suffix.empty() || _suffix.find_first_not_of(" ") == std::string::npos)
         return std::to_string(_major) + "." + std::to_string(_minor) + "." + std::to_string(_patch);
     else
         return std::to_string(_major) + "." + std::to_string(_minor) + "." + std::to_string(_patch) + "-" + _suffix;
