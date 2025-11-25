@@ -111,7 +111,7 @@ private:
     gui::StringsAction              _tagsAction;                        /** Tags action */
     gui::StringAction               _commentsAction;                    /** Comments action */
     gui::StringsAction              _contributorsAction;                /** Contributors action */
-    gui::SplashScreenAction         _splashScreenAction;                /** Action for configuring the project splash screen */
+    gui::SplashScreenAction         _splashScreenAction;                /** Action for configuring the project splash screen (will be removed at some point, because it is replaced by application-wide splash screen customization) */
     gui::ToggleAction               _studioModeAction;                  /** Toggle between view- and studio mode action */
     gui::ApplicationIconAction      _applicationIconAction;             /** Application icon action (only used in application mode) */
     ProjectCompressionAction        _compressionAction;                 /** Project compression action */
