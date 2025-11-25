@@ -1223,21 +1223,15 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             workspaceLockingAction.setLocked(true);
             {
                 auto& readOnlyAction            = getCurrentProject()->getReadOnlyAction();
-                auto& splashScreenEnabledAction = getCurrentProject()->getSplashScreenAction().getEnabledAction();
 
                 QSignalBlocker readOnlyActionSignalBlocker(&readOnlyAction);
-                QSignalBlocker splashScreenEnabledActionSignalBlocker(&splashScreenEnabledAction);
 
                 readOnlyAction.cacheState();
                 readOnlyAction.setChecked(true);
 
-                splashScreenEnabledAction.cacheState();
-                splashScreenEnabledAction.setChecked(true);
-
                 saveProject(filePath, passwordAction.getString());
 
                 readOnlyAction.restoreState();
-                splashScreenEnabledAction.restoreState();
             }
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
 
