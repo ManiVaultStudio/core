@@ -128,7 +128,7 @@ public: // Project meta action getters facade
     const gui::ToggleAction& getAllowProjectSwitchingAction() const { return _projectMetaAction.getAllowProjectSwitchingAction(); }
     const gui::ToggleAction& getAllowedPluginsOnlyAction() const { return _projectMetaAction.getAllowedPluginsOnlyAction(); }
     const gui::StringsAction& getAllowedPluginsAction() const { return _projectMetaAction.getAllowedPluginsAction(); }
-    const gui::SplashScreenAction& getSplashScreenAction() const { return _projectMetaAction.getSplashScreenAction(); }
+
     const gui::ToggleAction& getStudioModeAction() const { return _projectMetaAction.getStudioModeAction(); }
     const gui::ApplicationIconAction& getApplicationIconAction() const { return _projectMetaAction.getApplicationIconAction(); }
     const gui::ToggleAction& getSelectionGroupingAction() const { return _selectionGroupingAction; }
@@ -148,7 +148,6 @@ public: // Project meta action getters facade
     gui::ToggleAction& getAllowProjectSwitchingAction() { return _projectMetaAction.getAllowProjectSwitchingAction(); }
     gui::ToggleAction& getAllowedPluginsOnlyAction() { return _projectMetaAction.getAllowedPluginsOnlyAction(); }
     gui::StringsAction& getAllowedPluginsAction() { return _projectMetaAction.getAllowedPluginsAction(); }
-    gui::SplashScreenAction& getSplashScreenAction() { return _projectMetaAction.getSplashScreenAction(); }
     gui::ToggleAction& getStudioModeAction() { return _projectMetaAction.getStudioModeAction(); }
     gui::ApplicationIconAction& getApplicationIconAction() { return _projectMetaAction.getApplicationIconAction(); }
     gui::ToggleAction& getSelectionGroupingAction() { return _selectionGroupingAction; }

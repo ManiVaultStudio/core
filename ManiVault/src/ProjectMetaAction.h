@@ -77,8 +77,11 @@ public: // Action getters
     const gui::StringsAction& getTagsAction() const { return _tagsAction; }
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
+
+    [[deprecated("Replaced by application-wide splash screen customization")]]
     const gui::SplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
-    const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
+
+	const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
     const gui::ApplicationIconAction& getApplicationIconAction() const { return _applicationIconAction; }
     const ProjectCompressionAction& getCompressionAction() const { return _compressionAction; }
     const gui::ToggleAction& getAllowProjectSwitchingAction() const { return _allowProjectSwitchingAction; }
@@ -93,8 +96,11 @@ public: // Action getters
     gui::StringsAction& getTagsAction() { return _tagsAction; }
     gui::StringAction& getCommentsAction() { return _commentsAction; }
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
+
+    [[deprecated("Replaced by application-wide splash screen customization")]]
     gui::SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
-    gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
+
+	gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
     gui::ApplicationIconAction& getApplicationIconAction() { return _applicationIconAction; }
     ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
     gui::ToggleAction& getAllowProjectSwitchingAction() { return _allowProjectSwitchingAction; }
@@ -111,7 +117,7 @@ private:
     gui::StringsAction              _tagsAction;                        /** Tags action */
     gui::StringAction               _commentsAction;                    /** Comments action */
     gui::StringsAction              _contributorsAction;                /** Contributors action */
-    gui::SplashScreenAction         _splashScreenAction;                /** Action for configuring the project splash screen */
+    gui::SplashScreenAction         _splashScreenAction;                /** Action for configuring the project splash screen (will be removed at some point, because it is replaced by application-wide splash screen customization) */
     gui::ToggleAction               _studioModeAction;                  /** Toggle between view- and studio mode action */
     gui::ApplicationIconAction      _applicationIconAction;             /** Application icon action (only used in application mode) */
     ProjectCompressionAction        _compressionAction;                 /** Project compression action */

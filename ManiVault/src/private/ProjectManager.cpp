@@ -1162,7 +1162,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getDescriptionAction());
                     settingsGroupAction.addAction(&currentProject->getTagsAction());
                     settingsGroupAction.addAction(&currentProject->getCommentsAction());
-                    settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
+                    //settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
                     //settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
                     //settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
                     settingsGroupAction.addAction(&currentProject->getAllowedPluginsOnlyAction());
@@ -1223,21 +1223,15 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             workspaceLockingAction.setLocked(true);
             {
                 auto& readOnlyAction            = getCurrentProject()->getReadOnlyAction();
-                auto& splashScreenEnabledAction = getCurrentProject()->getSplashScreenAction().getEnabledAction();
 
                 QSignalBlocker readOnlyActionSignalBlocker(&readOnlyAction);
-                QSignalBlocker splashScreenEnabledActionSignalBlocker(&splashScreenEnabledAction);
 
                 readOnlyAction.cacheState();
                 readOnlyAction.setChecked(true);
 
-                splashScreenEnabledAction.cacheState();
-                splashScreenEnabledAction.setChecked(true);
-
                 saveProject(filePath, passwordAction.getString());
 
                 readOnlyAction.restoreState();
-                splashScreenEnabledAction.restoreState();
             }
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
 
