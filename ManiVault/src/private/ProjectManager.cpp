@@ -1068,8 +1068,6 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
         emit projectAboutToBePublished(*_project);
         {
-            Application::requestOverrideCursor(Qt::WaitCursor);
-
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
@@ -1215,6 +1213,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
+
+            Application::requestOverrideCursor(Qt::WaitCursor);
 
             auto& workspaceLockingAction = workspaces().getCurrentWorkspace()->getLockingAction();
 
