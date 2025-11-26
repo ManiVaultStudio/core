@@ -1163,6 +1163,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.addAction(&currentProject->getTagsAction());
                     settingsGroupAction.addAction(&currentProject->getCommentsAction());
                     settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
+                    settingsGroupAction.addAction(&currentProject->getProjectVersionAction());
                     //settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
                     //settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
                     settingsGroupAction.addAction(&currentProject->getAllowedPluginsOnlyAction());
