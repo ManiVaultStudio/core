@@ -111,24 +111,14 @@ void EventManager::reset()
     }
     endReset();
 }
-static std::int32_t numRegister = 0;
-static std::int32_t numUnegister = 0;
     
 void EventManager::registerEventListener(EventListener* eventListener)
 {
-    ++numRegister;
-
-    qDebug() << __FUNCTION__ << numRegister;
-
     _eventListeners.push_back(eventListener);
 }
 
 void EventManager::unregisterEventListener(EventListener* eventListener)
 {
-    ++numUnegister;
-
-    qDebug() << __FUNCTION__ << numUnegister;
-
     _eventListeners.erase(std::remove(_eventListeners.begin(), _eventListeners.end(), eventListener), _eventListeners.end());
 }
 
