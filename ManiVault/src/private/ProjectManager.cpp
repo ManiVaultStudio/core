@@ -850,8 +850,6 @@ void ProjectManager::importProject(QString filePath /*= ""*/)
 
 void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& password /*= ""*/)
 {
-    Application::requestOverrideCursor(Qt::WaitCursor);
-
     try
     {
 #ifdef PROJECT_MANAGER_VERBOSE
@@ -962,6 +960,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
+
+            Application::requestOverrideCursor(Qt::WaitCursor);
 
             if (_project->getCompressionAction().getEnabledAction().isChecked())
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << _project->getCompressionAction().getLevelAction().getValue();
