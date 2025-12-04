@@ -42,17 +42,10 @@ protected: // Construction/destruction
     /** Default constructor */
     DatasetPrivate();
 
-    /**
-     * Copy constructor
-     * @param other Object to copy from
-     */
-    DatasetPrivate(const DatasetPrivate& other);
-
-    /**
-     * Assignment operator
-     * @param other Object to assign from
-     */
-    DatasetPrivate& operator=(const DatasetPrivate& other) = delete;
+    DatasetPrivate(const DatasetPrivate& other) = delete;
+    DatasetPrivate& operator=(const DatasetPrivate&) = delete;
+	DatasetPrivate(DatasetPrivate&& other) = delete;
+	DatasetPrivate& operator=(DatasetPrivate&& other) = delete;
 
     /** Remove the destructor */
     ~DatasetPrivate() override = default;
@@ -152,9 +145,11 @@ signals:
     void childRemoved(const QString& childDatasetGuid);
 
 private:
-    QString         _datasetId;         /** Globally unique identifier of the dataset */
-    DatasetImpl*    _dataset;           /** Pointer to the dataset (if any) */
-    EventListener   _eventListener;     /** Listen to ManiVault events */
+    QString                         _datasetId;                     /** Globally unique identifier of the dataset */
+    DatasetImpl*                    _dataset;                       /** Pointer to the dataset (if any) */
+    std::unique_ptr<EventListener>  _eventListener;                 /** Listen to ManiVault events */
+    bool                            _eventsRegistered = false;      /** Whether events have been registered */
+    QSet<std::uint32_t>             _pendingSupportedEventTypes;    /** Pending supported event types (to be registered when the dataset is set) */
 
     friend class DatasetImpl;
 };

@@ -111,7 +111,7 @@ void EventManager::reset()
     }
     endReset();
 }
-
+    
 void EventManager::registerEventListener(EventListener* eventListener)
 {
     _eventListeners.push_back(eventListener);
