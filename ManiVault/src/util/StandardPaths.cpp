@@ -65,18 +65,14 @@ QString StandardPaths::getCustomizationDirectory()
 
     QString pathSuffix = QString("/%1").arg(dirName);
 
-    if (isMacOS()){
+    if (isMacOS())
         pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
-        const auto finalPath = QDir::cleanPath(applicationDir.path() + pathSuffix);
 
-        [[maybe_unused]] auto result = QDir().mkpath(finalPath);
+    const auto finalPath = QDir::cleanPath(applicationDir.path() + pathSuffix);
 
-        return finalPath;
-    }
+    [[maybe_unused]] auto result = QDir().mkpath(finalPath);
 
-    [[maybe_unused]] auto result = applicationDir.mkpath(pathSuffix);
-
-    return QDir::cleanPath(applicationDir.path() + pathSuffix);
+    return finalPath;
 }
 
 QString StandardPaths::getProjectsDirectory()
