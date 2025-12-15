@@ -1,0 +1,76 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: 'ManiVault: A Flexible and Extensible Visual Analytics Framework for High-Dimensional Data'
+authors:
+  - family-names: Vieth
+    given-names: Alexander
+    orcid: "https://orcid.org/0000-0002-5809-4316"
+  - family-names: Kroes
+    given-names: Thomas
+    orcid: "https://orcid.org/0000-0002-0658-2203"
+  - family-names: Thijssen
+    given-names: Julian
+    orcid: "https://orcid.org/0009-0007-7585-6451"
+  - family-names: van Lew
+    given-names: Baldur
+    orcid: "https://orcid.org/0000-0003-0628-1264"
+  - family-names: Eggermont
+    given-names: Jeroen
+    orcid: "https://orcid.org/0000-0003-0361-9469"
+  - family-names: Basu
+    given-names: Soumyadeep
+    orcid: "https://orcid.org/0000-0002-8918-9203"
+  - family-names: Eisemann
+    given-names: Elmar
+    orcid: "https://orcid.org/0000-0003-4153-065X"
+  - family-names: Vilanova
+    given-names: Anna
+    orcid: "https://orcid.org/0000-0002-1034-737X"
+  - family-names: Höllt
+    given-names: Thomas
+    orcid: "https://orcid.org/0000-0001-8125-1650"
+  - family-names: Lelieveldt
+    given-names: Boudewijn
+    orcid: "https://orcid.org/0000-0001-8269-7603"
+url: "https://github.com/ManiVaultStudio/core"
+preferred-citation:
+  title: 'ManiVault: A Flexible and Extensible Visual Analytics Framework for High-Dimensional Data'
+  type: article-journal
+  authors:
+    - family-names: Vieth
+      given-names: Alexander
+      orcid: "https://orcid.org/0000-0002-5809-4316"
+    - family-names: Kroes
+      given-names: Thomas
+      orcid: "https://orcid.org/0000-0002-0658-2203"
+    - family-names: Thijssen
+      given-names: Julian
+      orcid: "https://orcid.org/0009-0007-7585-6451"
+    - family-names: van Lew
+      given-names: Baldur
+      orcid: "https://orcid.org/0000-0003-0628-1264"
+    - family-names: Eggermont
+      given-names: Jeroen
+      orcid: "https://orcid.org/0000-0003-0361-9469"
+    - family-names: Basu
+      given-names: Soumyadeep
+      orcid: "https://orcid.org/0000-0002-8918-9203"
+    - family-names: Eisemann
+      given-names: Elmar
+      orcid: "https://orcid.org/0000-0003-4153-065X"
+    - family-names: Vilanova
+      given-names: Anna
+      orcid: "https://orcid.org/0000-0002-1034-737X"
+    - family-names: Höllt
+      given-names: Thomas
+      orcid: "https://orcid.org/0000-0001-8125-1650"
+    - family-names: Lelieveldt
+      given-names: Boudewijn
+      orcid: "https://orcid.org/0000-0001-8269-7603"
+  journal: "IEEE Transactions on Visualization and Computer Graphics"
+  doi: "10.1109/TVCG.2023.3326582"
+  start: 175
+  end: 185
+  year: 2024
+  volume: 30
+  issue: 1
