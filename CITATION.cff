@@ -35,7 +35,7 @@ authors:
 url: "https://github.com/ManiVaultStudio/core"
 preferred-citation:
   title: 'ManiVault: A Flexible and Extensible Visual Analytics Framework for High-Dimensional Data'
-  type: article-journal
+  type: article
   authors:
     - family-names: Vieth
       given-names: Alexander
