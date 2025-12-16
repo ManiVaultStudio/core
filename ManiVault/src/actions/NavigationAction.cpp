@@ -123,9 +123,16 @@ void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
 {
     HorizontalToolbarAction::fromVariantMap(variantMap);
 
+    _zoomOutAction.fromParentVariantMap(variantMap);
+    _zoomPercentageAction.fromParentVariantMap(variantMap);
+    _zoomInAction.fromParentVariantMap(variantMap);
+    _zoomExtentsAction.fromParentVariantMap(variantMap);
+    _zoomSelectionAction.fromParentVariantMap(variantMap);
+    _zoomRegionAction.fromParentVariantMap(variantMap);
+    _freezeNavigation.fromParentVariantMap(variantMap);
+    //_zoomRectangleAction.fromParentVariantMap(variantMap); // Buggy behavior if uncommented
     _zoomCenterAction.fromParentVariantMap(variantMap);
     _zoomFactorAction.fromParentVariantMap(variantMap);
-    _zoomPercentageAction.fromParentVariantMap(variantMap);
     _zoomMarginAction.fromParentVariantMap(variantMap, true);
 }
 
@@ -133,9 +140,16 @@ QVariantMap NavigationAction::toVariantMap() const
 {
     auto variantMap = HorizontalToolbarAction::toVariantMap();
 
+    _zoomOutAction.insertIntoVariantMap(variantMap);
+    _zoomPercentageAction.insertIntoVariantMap(variantMap);
+    _zoomInAction.insertIntoVariantMap(variantMap);
+    _zoomExtentsAction.insertIntoVariantMap(variantMap);
+    _zoomSelectionAction.insertIntoVariantMap(variantMap);
+    _zoomRegionAction.insertIntoVariantMap(variantMap);
+    _freezeNavigation.insertIntoVariantMap(variantMap);
+    //_zoomRectangleAction.insertIntoVariantMap(variantMap);
     _zoomCenterAction.insertIntoVariantMap(variantMap);
     _zoomFactorAction.insertIntoVariantMap(variantMap);
-    _zoomPercentageAction.insertIntoVariantMap(variantMap);
     _zoomMarginAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
