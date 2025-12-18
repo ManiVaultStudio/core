@@ -5,14 +5,13 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "AbstractProjectsModel.h"
 
 #include <QStandardItemModel>
 #include <QObject>
 #include <functional>
 
 namespace mv {
-
-class AbstractProjectsModel;
 
 /**
  * Projects model visibility controller class
@@ -28,7 +27,7 @@ class ProjectsModelVisibilityController : public QObject
 public:
 
     /** Function type to assign visibility among duplicates */
-    using VisibilityRuleFunction = std::function<QModelIndex(const QModelIndexList&, QStandardItemModel*)>;
+    using VisibilityRuleFunction = std::function<QModelIndex(const QModelIndexList&, AbstractProjectsModel*)>;
 
     /**
      * Construct a visibility controller for the given projects model

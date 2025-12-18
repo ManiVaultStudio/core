@@ -6,14 +6,13 @@
 
 #include <QHash>
 #include <QDebug>
+#include <QUrl>
+#include <QScopeGuard>
 #include <algorithm>
 
 #ifdef _DEBUG
     #define PROJECTS_MODEL_VISIBILITY_CONTROLLER _VERBOSE
 #endif
-
-using namespace mv::gui;
-using namespace mv::util;
 
 namespace mv {
 
@@ -27,7 +26,7 @@ ProjectsModelVisibilityController::ProjectsModelVisibilityController(AbstractPro
         _visibilityRuleFunction = std::move(visibilityRuleFunction);
     }
     else {
-        _visibilityRuleFunction = [this](const QModelIndexList& rows, QStandardItemModel* model) -> QModelIndex {
+        _visibilityRuleFunction = [this](const QModelIndexList& rows, AbstractProjectsModel* model) -> QModelIndex {
             Q_ASSERT(!rows.isEmpty());
 
             if (rows.isEmpty())
