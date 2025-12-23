@@ -100,6 +100,8 @@ namespace
     }
 }
 
+QMap<QUrl, QString> FileDownloader::resolvedFileNamesForUrl = {};
+
 bool FileDownloader::FileSink::open(QNetworkReply* reply, const QUrl& url, const QString& targetDirectory, bool overwriteAllowed, QString* error)
 {
     const QString baseDir   = targetDirectory.isEmpty() ? Application::current()->getTemporaryDir().path() : targetDirectory;
@@ -303,6 +305,122 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
             promise.finish();
         });
     });
+
+    return future;
+}
+
+QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
+{
+    QPromise<QString> promise;
+    QFuture<QString> future = promise.future();
+
+    struct State {
+        QPromise<QString> promise;
+        std::atomic_bool finished{ false };
+    };
+
+    auto state = std::make_shared<State>();
+    state->promise = std::move(promise);
+
+    // Ensure we run in the main thread
+    QMetaObject::invokeMethod(qApp, [state, url]() mutable {
+
+        auto finishWith = [state, url](QString name) mutable {
+            if (state->finished.exchange(true)) {
+                return; // already finished
+            }
+
+            name = name.trimmed();
+
+        	if (name.isEmpty()) {
+                name = u"download"_qs;
+            }
+
+            resolvedFileNamesForUrl[url] = name;
+
+            state->promise.addResult(name);
+            state->promise.finish();
+        };
+
+        QNetworkRequest request(url);
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+
+        auto headReply = sharedManager().head(request);
+
+        QObject::connect(headReply, &QNetworkReply::finished, [headReply, url, finishWith]() mutable {
+            headReply->deleteLater();
+
+            if (headReply->error() != QNetworkReply::NoError) {
+                qCritical() << QString("Get final file name HEAD request failed for %1: %2").arg(url.toDisplayString(), headReply->errorString());
+                finishWith(QString{});
+                return;
+            }
+
+            const QUrl effectiveUrl = headReply->url(); // final after redirects
+
+            const QString cdName =
+                getFilenameFromContentDisposition(headReply->rawHeader("Content-Disposition"));
+
+            if (!cdName.isEmpty()) {
+                finishWith(cdName);
+                return;
+            }
+
+            // OSF-specific (WaterButler)
+            const QString osfName = getFilenameFromWaterButlerMetadata(headReply->rawHeader("x-waterbutler-metadata"));
+
+            if (!osfName.isEmpty()) {
+                finishWith(osfName);
+                return;
+            }
+
+            const QString urlName = getFilenameFromUrlPath(effectiveUrl);
+            if (!urlName.isEmpty()) {
+                finishWith(urlName);
+                return;
+            }
+
+            // Fallback: GET with Range to encourage Content-Disposition
+            QNetworkRequest getReq(effectiveUrl);
+            getReq.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+            getReq.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+            getReq.setRawHeader("Range", "bytes=0-0");
+
+            auto getReply = sharedManager().get(getReq);
+
+            QObject::connect(getReply, &QNetworkReply::finished, [getReply, finishWith]() mutable {
+                getReply->deleteLater();
+
+                if (getReply->error() != QNetworkReply::NoError) {
+                    qCritical() << QString("Get final file name GET(range) request failed: %1")
+                        .arg(getReply->errorString());
+                    finishWith(QString{});
+                    return;
+                }
+
+                const QUrl finalUrl = getReply->url();
+
+                const QString cdName2 =
+                    getFilenameFromContentDisposition(getReply->rawHeader("Content-Disposition"));
+
+                if (!cdName2.isEmpty()) {
+                    finishWith(cdName2);
+                    return;
+                }
+
+                // OSF-specific (WaterButler)
+                const QString osfName = getFilenameFromWaterButlerMetadata(getReply->rawHeader("x-waterbutler-metadata"));
+
+                if (!osfName.isEmpty()) {
+                    finishWith(osfName);
+                    return;
+                }
+
+                finishWith(getFilenameFromUrlPath(finalUrl));
+                });
+            });
+        });
 
     return future;
 }

@@ -217,8 +217,23 @@ public:
      */
     static QFuture<QDateTime> getLastModifiedAsync(const QUrl& url);
 
-private:
+    /**
+     * Get the final file name of the file at \p url asynchronously (works with redirected URL)
+     * @param url URL of the file to check
+     * @return Final file name of the file
+     */
+    static QFuture<QString> getFinalFileNameAsync(const QUrl& url);
 
+private:
+    /**
+     * Download with sink asynchronously
+     * @tparam SinkT Sink type
+     * @param url URL of the file to download
+     * @param targetDirectory Directory where the file should be saved (OS temporary dir when empty)
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
+     * @param overwriteAllowed Whether it is ok to overwrite existing download
+     * @return 
+     */
     template <typename SinkT>
     static QFuture<typename SinkT::Result> downloadWithSinkAsync(const QUrl& url, const QString& targetDirectory, Task* task, bool overwriteAllowed)
     {
@@ -229,7 +244,7 @@ private:
 
         QMetaObject::invokeMethod(qApp, [promise, url, targetDirectory, task, overwriteAllowed]() mutable {
             if (task) {
-                task->setName(QStringLiteral("Download %1").arg(url.fileName()));
+                task->setName(QStringLiteral("Download %1").arg(resolvedFileNamesForUrl.contains(url) ? resolvedFileNamesForUrl[url] : url.fileName()));
                 task->setIcon(StyledIcon("download"));
                 task->setRunning();
             }
@@ -239,7 +254,7 @@ private:
             request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6,7,0)
-            request.setMaximumRedirectsAllowed(10);
+            request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
 #endif
 
             auto reply = sharedManager().get(request);
@@ -459,6 +474,9 @@ private:
     static void notifyError(const QString& urlDisplayString, const QString& errorString);
 
     static constexpr std::int32_t maximumNumberOfRedirectsAllowed = 10; /** Puts a cap on the number of redirects. Malicious URLs could loop indefinitely */
+
+private:
+    static QMap<QUrl, QString> resolvedFileNamesForUrl;  /** Cache of resolved file names for URLs */
 };
 
 }
