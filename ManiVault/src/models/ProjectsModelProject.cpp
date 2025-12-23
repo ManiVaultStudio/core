@@ -96,7 +96,6 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
 
             _downloadFileName = watcher->future().result();
 
-            qDebug() << "------" << _downloadFileName;
             if (QFileInfo(getDownloadedProjectFilePath()).exists())
                 setDownloaded();
         }
@@ -109,7 +108,6 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
 
     watcher->setFuture(finalNameFuture);
 
-    computeSha();
     updateIcon();
 }
 
@@ -124,7 +122,6 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
     _expanded(false)
 {
-    computeSha();
     updateIcon();
 }
 
@@ -201,7 +198,6 @@ bool ProjectsModelProject::isDownloaded() const
 
     fileInfo.refresh();
 
-    qDebug() << getDownloadedProjectFilePath() << "exists:" << fileInfo.exists() << ", isFile:" << fileInfo.isFile();
     return fileInfo.exists() && fileInfo.isFile();
 }
 
@@ -301,13 +297,6 @@ HardwareSpec ProjectsModelProject::getRecommendedHardwareSpec() const
 bool ProjectsModelProject::isStartup() const
 {
     return _startup;
-}
-
-QString ProjectsModelProject::getSha() const
-{
-    const_cast<ProjectsModelProject*>(this)->computeSha();
-
-    return _sha;
 }
 
 QUrl ProjectsModelProject::getProjectsJsonDsn() const
@@ -435,20 +424,6 @@ void ProjectsModelProject::determineLastModified()
     });
 
     watcher->setFuture(future);
-}
-
-void ProjectsModelProject::computeSha()
-{
-    QCryptographicHash hash(QCryptographicHash::Sha256);
-
-    hash.addData(_title.toUtf8());
-    hash.addData(_tags.join(",").toUtf8());
-    hash.addData(_iconName.toUtf8());
-    hash.addData(_summary.toUtf8());
-    hash.addData(_url.toString().toUtf8());
-    hash.addData(_requiredPlugins.join(",").toUtf8());
-
-    _sha = hash.result().toHex();
 }
 
 void ProjectsModelProject::updateIcon()
