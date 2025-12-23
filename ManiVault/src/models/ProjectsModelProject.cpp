@@ -21,7 +21,7 @@ namespace mv::util {
 
 ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
-    _uuid(variantMap.contains("uuid") ? variantMap["uuid"].toString() : ""),
+    _uuid(variantMap.contains("uuid") ? variantMap["uuid"].toString() : Serializable::createId()),
     _visible(false),
     _serverDownloadSize(0),
     _userSpecifiedDownloadSize(variantMap.contains("downloadSize") ? parseByteSize(variantMap["downloadSize"].toString()) : 0),
@@ -84,6 +84,30 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     
     if (!_missingPlugins.isEmpty())
         qWarning() << "Project" << _title << "is added to the project database but cannot be opened because of missing plugins:" << _missingPlugins.join(", ");
+
+    auto finalNameFuture = FileDownloader::getFinalFileNameAsync(_url);
+
+    auto watcher = new QFutureWatcher<QString>(this);
+
+    connect(watcher, &QFutureWatcher<QString>::finished, watcher, [this, watcher]() {
+        try {
+            if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                throw std::runtime_error("Future is cancelled or did not finish");
+
+            _downloadFileName = watcher->future().result();
+
+            qDebug() << "------" << _downloadFileName;
+            if (QFileInfo(getDownloadedProjectFilePath()).exists())
+                setDownloaded();
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Failed to determine file name from" << _url.toString() << ":" << e.what();
+        }
+
+        watcher->deleteLater();
+    });
+
+    watcher->setFuture(finalNameFuture);
 
     computeSha();
     updateIcon();
@@ -177,6 +201,7 @@ bool ProjectsModelProject::isDownloaded() const
 
     fileInfo.refresh();
 
+    qDebug() << getDownloadedProjectFilePath() << "exists:" << fileInfo.exists() << ", isFile:" << fileInfo.isFile();
     return fileInfo.exists() && fileInfo.isFile();
 }
 
@@ -486,7 +511,12 @@ void ProjectsModelProject::updateTooltip()
 
 QString ProjectsModelProject::getDownloadedProjectFilePath() const
 {
-    return mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
+    return mv::projects().getDownloadedProjectsDir().filePath(getDownloadFileName());
+}
+
+QString ProjectsModelProject::getDownloadFileName() const
+{
+	return _downloadFileName;
 }
 
 std::uint64_t ProjectsModelProject::getDownloadedProjectFileSize() const

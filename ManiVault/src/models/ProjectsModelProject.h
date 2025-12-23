@@ -248,6 +248,12 @@ public:
     QString getDownloadedProjectFilePath() const;
 
     /**
+     * Get the download file name
+     * @return Download file name
+     */
+    QString getDownloadFileName() const;
+
+    /**
      * Overload assignment operator
      * @param rhs Right hand side project
      * @return Assigned project
@@ -275,6 +281,7 @@ public:
         _startup                    = rhs.isStartup();
         _sha                        = rhs.getSha();
         _projectsJsonDsn            = rhs.getProjectsJsonDsn();
+        _downloadFileName           = rhs.getDownloadFileName();
 
         return *this;
     }
@@ -377,6 +384,7 @@ private:
     bool            _expanded;                      /** Boolean determining whether the project is expanded in the model */
     QIcon           _icon;                          /** Icon for the project (group) */
     QString         _tooltip;                       /** Tooltip for the project (group) */
+    QString         _downloadFileName;              /** File name of the downloaded project file */
 };
 
 using ProjectsModelProjectSharedPtr   = std::shared_ptr<ProjectsModelProject>;
