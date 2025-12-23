@@ -45,6 +45,9 @@ QString PageSubAction::getTooltip() const
 
 void PageSubAction::setVisible(bool visible)
 {
+    if (!_iconLabel)
+        return;
+    
     _iconLabel->setVisible(visible);
 }
 
