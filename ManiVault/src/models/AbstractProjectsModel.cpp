@@ -165,9 +165,6 @@ QVariant AbstractProjectsModel::headerData(int section, Qt::Orientation orientat
         case Column::IsStartup:
             return IsStartupItem::headerData(orientation, role);
 
-        case Column::Sha:
-            return ShaItem::headerData(orientation, role);
-
         case Column::ProjectsJsonDsn:
             return ProjectsJsonDsnItem::headerData(orientation, role);
 
@@ -907,23 +904,6 @@ QVariant AbstractProjectsModel::IsStartupItem::data(int role) const
 
         case Qt::ToolTipRole:
             return "IsStartup project: " + data(Qt::DisplayRole).toString();
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
-QVariant AbstractProjectsModel::ShaItem::data(int role) const
-{
-    switch (role) {
-        case Qt::EditRole:
-        case Qt::DisplayRole:
-            return getProject()->getSha();
-
-        case Qt::ToolTipRole:
-            return "SHA: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
