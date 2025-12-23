@@ -676,4 +676,37 @@ QString getFilenameFromUrlPath(const QUrl& effectiveUrl)
 	return base.trimmed();
 }
 
+QString getFilenameFromWaterButlerMetadata(const QByteArray& raw)
+{
+	if (raw.isEmpty()) {
+		return {};
+	}
+
+	QJsonParseError jsonParseError{};
+
+	const auto jsonDocument = QJsonDocument::fromJson(raw, &jsonParseError);
+
+	if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+		return {};
+	}
+
+	const auto root       = jsonDocument.object();
+	const auto attributes = root.value(u"attributes"_qs).toObject();
+
+	// Prefer "name" if present
+	const QString name = attributes.value(u"name"_qs).toString().trimmed();
+
+	if (!name.isEmpty()) {
+		return QFileInfo(name).fileName();
+	}
+
+	// Fallback: "materialized" is a full path
+	const QString materialized = attributes.value(u"materialized"_qs).toString().trimmed();
+
+	if (!materialized.isEmpty()) {
+		return QFileInfo(materialized).fileName();
+	}
+
+	return {};
+}
 }

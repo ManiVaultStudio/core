@@ -275,4 +275,13 @@ CORE_EXPORT QString getFilenameFromContentDisposition(const QByteArray& contentD
  * @return Filename from URL path
  */
 CORE_EXPORT QString getFilenameFromUrlPath(const QUrl& effectiveUrl);
+
+/**
+ * Extract filename from OSF Waterbutler metadata JSON \p raw
+ * This is used to determine the filename of files downloaded from OSF storage providers.
+ * @param raw Raw Waterbutler metadata JSON
+ * @return Filename if found, otherwise an empty string
+ */
+CORE_EXPORT QString getFilenameFromWaterButlerMetadata(const QByteArray& raw);
+
 }
