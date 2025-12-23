@@ -262,4 +262,17 @@ CORE_EXPORT QByteArray ensureUtf8(QByteArray byteArray);
  */
 CORE_EXPORT QByteArray sanitizeJsonWhitespaceOutsideStrings(const QByteArray& utf8);
 
+/**
+ * Minimal, practical parser for Content-Disposition filenames (Prefers RFC 5987 filename*=utf-8''... when present).
+ * @param contentDispositionRaw Raw Content-Disposition header value
+ * @return Filename if found, otherwise an empty string
+ */
+CORE_EXPORT QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRaw);
+
+/**
+ * Extract filename from \p effectiveUrl
+ * @param effectiveUrl Input URL
+ * @return Filename from URL path
+ */
+CORE_EXPORT QString getFilenameFromUrlPath(const QUrl& effectiveUrl);
 }
