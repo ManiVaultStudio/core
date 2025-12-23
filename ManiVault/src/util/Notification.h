@@ -44,7 +44,21 @@ protected:
          */
         void paintEvent(QPaintEvent* event) override;
 
-        QSize sizeHint() const override;
+        //QSize sizeHint() const
+        //{
+        //    QSize s = QWidget::sizeHint();
+
+        //    s.setWidth(fixedWidth);
+
+        //    s.rheight() += 6;   // tweak this number (4–8) to taste
+
+        //    return s;
+        //}
+
+        //QSize minimumSizeHint() const
+        //{
+        //    return sizeHint();
+        //}
     };
 
 public:
@@ -193,6 +207,9 @@ private:
      */
     static double getEstimatedReadingTime(const QString& text);
 
+    /** Compute the size of the notification widget based on its contents */
+    void computeSizeHint();
+
 signals:
 
     /** Signal emitted when the toaster finishes displaying */
@@ -206,12 +223,14 @@ private:
     QPointer<Notification>  _previousNotification;          /** Pointer to previous notification (maybe nullptr) */
     QPointer<Notification>  _nextNotification;              /** Pointer to next notification (maybe nullptr) */
     bool                    _closing;                       /** Whether this notification is being closed */
+    QWidget                 _notificationWidget;            /** Notification widget */
     QHBoxLayout             _notificationWidgetLayout;      /** Layout of the notification widget */
     QVBoxLayout             _messageLayout;                 /** Message layout of the notification */
     QLabel                  _iconLabel;                     /** Label for the icon (maybe empty) */
     QLabel                  _titleLabel;                    /** Label for the title text */
     QLabel                  _messageLabel;                  /** Label for the message text */
     gui::TaskAction         _taskAction;                    /** Task action for the task associated with this notification */
+    QSize                   _sizeHint;                      /** Cached size hint */
 
     static const int    margin                  = 9;        /** Margin around the notification widget */
     static const int    fixedWidth              = 500;      /** Width of the notification */

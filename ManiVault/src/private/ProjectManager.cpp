@@ -1359,6 +1359,8 @@ QFuture<QString> ProjectManager::downloadProjectAsync(QUrl url, const QString& t
 
 QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
 {
+    qDebug() << "Checking if downloaded project is stale for URL:" << url.toString();
+
     auto promise = std::make_shared<QPromise<bool>>();
 
     QFuture<bool> future = promise->future();

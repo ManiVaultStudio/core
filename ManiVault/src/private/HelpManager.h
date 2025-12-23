@@ -128,7 +128,7 @@ private:
     gui::TriggerAction              _toWikiAction;                  /** External link to wiki */
     gui::TriggerAction              _toRepositoryAction;            /** External link to repository */
     gui::TriggerAction              _toLearningCenterAction;        /** Trigger action to go the learning center */
-    LearningCenterVideosModel          _videosModel;                   /** Videos model */
+    LearningCenterVideosModel       _videosModel;                   /** Videos model */
     LearningCenterTutorialsModel    _tutorialsModel;                /** Tutorials model */
     util::Notifications             _notifications;                 /** Notifications manager */
     mv::TasksListModel              _tasksModel;                    /** Tasks list model */

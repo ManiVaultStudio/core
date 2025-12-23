@@ -195,7 +195,9 @@ void MainWindow::initialize()
     setCentralWidget(stackedWidget);
     
     loadGuiTask.setSubtaskFinished("Initializing start page");
-    
+
+    statusBar()->hide();
+
     statusBar()->setSizeGripEnabled(false);
     
     auto startPageStatusBarAction       = new FrontPagesStatusBarAction(this, "Start Page");
@@ -205,7 +207,7 @@ void MainWindow::initialize()
     auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
     auto settingsTasksStatusBarAction   = new SettingsStatusBarAction(this, "Settings");
     auto workspaceStatusBarAction       = new WorkspaceStatusBarAction(this, "Workspace");
-    
+
     statusBar()->insertPermanentWidget(0, startPageStatusBarAction->createWidget(this));
     statusBar()->insertPermanentWidget(1, versionStatusBarAction->createWidget(this));
     statusBar()->insertPermanentWidget(2, pluginsStatusBarAction->createWidget(this));
@@ -213,7 +215,7 @@ void MainWindow::initialize()
     statusBar()->insertPermanentWidget(4, loggingStatusBarAction->createWidget(this), 4);
     statusBar()->insertPermanentWidget(5, backgroundTasksStatusBarAction->createWidget(this), 1);
     statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
-    
+
     const auto updateStatusBarVisibility = [this]() -> void {
         statusBar()->setVisible(mv::projects().hasProject() && mv::settings().getMiscellaneousSettings().getStatusBarVisibleAction().isChecked());
     };

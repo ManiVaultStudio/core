@@ -45,14 +45,6 @@ void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
     painter.drawPath(path);
 }
 
-QSize Notification::NotificationWidget::sizeHint() const
-{
-    return {
-        fixedWidth,
-        0
-    };
-}
-
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
     QWidget(parent),
     _icon(icon),
@@ -60,12 +52,16 @@ Notification::Notification(const QString& title, const QString& description, con
     _description(description),
     _previousNotification(previousNotification),
     _closing(false),
-    _taskAction(nullptr, "Task")
+    _taskAction(nullptr, "Task"),
+    _notificationWidget(nullptr)
 {
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
+    //setWindowFlags(Qt::Widget);
+    //setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
+    //setWindowFlags(Qt::ToolTip | Qt::WindowDoesNotAcceptFocus);
     setAttribute(Qt::WA_TranslucentBackground);
-    setAttribute(Qt::WA_ShowWithoutActivating);
+    //setAttribute(Qt::WA_ShowWithoutActivating);
     hide();
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
     if (_previousNotification)
         _previousNotification->_nextNotification = this;
@@ -74,17 +70,20 @@ Notification::Notification(const QString& title, const QString& description, con
         connect(_previousNotification, &QObject::destroyed, this, &Notification::updatePosition);
     }
 
-    auto mainLayout                 = new QVBoxLayout();
-    auto notificationWidget         = new NotificationWidget();
-    auto closePushButton            = new QToolButton(this);
+    auto mainLayout         = new QVBoxLayout();
+    auto closePushButton    = new QToolButton(this);
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
-
-    notificationWidget->setFixedWidth(fixedWidth);
-    notificationWidget->setMinimumHeight(10);
-    notificationWidget->setAutoFillBackground(true);
-    //notificationWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum); // Not entirely sure about this one, so leave it out for now
-    notificationWidget->setAttribute(Qt::WA_TranslucentBackground);
+    //mainLayout->setSizeConstraint(QLayout::SetMaximumSize);
+    _notificationWidget.setObjectName("NotificationWidget");
+    _notificationWidget.setFixedWidth(fixedWidth);
+    //_notificationWidget.setMinimumHeight(10);
+    _notificationWidget.setAutoFillBackground(true);
+    _notificationWidget.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding); // Not entirely sure about this one, so leave it out for now
+    _notificationWidget.setAttribute(Qt::WA_TranslucentBackground);
+    _notificationWidget.setStyleSheet("QWidget#NotificationWidget{ background-color: gray; border: 1px solid red; border-radius: 5px; }");
+    _notificationWidget.hide();
+    //_notificationWidget.setWindowFlags(Qt::Tool);
 
     _iconLabel.setStyleSheet("padding: 3px;");
 
@@ -106,7 +105,15 @@ Notification::Notification(const QString& title, const QString& description, con
 
     _messageLayout.setAlignment(&_messageLabel, Qt::AlignTop);
 
-    _notificationWidgetLayout.setContentsMargins(margin, margin, margin, margin);
+    constexpr int extraVPadding = 0;
+
+	_notificationWidgetLayout.setContentsMargins(
+        margin,
+        margin + extraVPadding,
+        margin,
+        margin + extraVPadding
+    );
+
     _notificationWidgetLayout.setSpacing(10);
     _notificationWidgetLayout.setAlignment(Qt::AlignTop);
 
@@ -118,12 +125,13 @@ Notification::Notification(const QString& title, const QString& description, con
     _notificationWidgetLayout.addWidget(closePushButton);
     _notificationWidgetLayout.setAlignment(closePushButton, Qt::AlignTop);
 
-    notificationWidget->setLayout(&_notificationWidgetLayout);
+    _notificationWidget.setLayout(&_notificationWidgetLayout);
 
     updateIconLabel();
     updateMessageLabel();
+    computeSizeHint();
 
-    mainLayout->addWidget(notificationWidget);
+    mainLayout->addWidget(&_notificationWidget);
 
     setLayout(mainLayout);
 
@@ -178,6 +186,8 @@ Notification::Notification(QPointer<Task> task, Notification* previousNotificati
 
 void Notification::requestFinish()
 {
+    hide();
+    return;
     if (_closing)
         return;
 
@@ -200,7 +210,7 @@ void Notification::finish()
 void Notification::slideIn()
 {
     auto animationGroup         = new QParallelAnimationGroup(this);
-    auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
+    auto windowOpacityAnimation = new QPropertyAnimation(&_notificationWidget, "windowOpacity");
     auto positionAnimation      = new QPropertyAnimation(this, "pos");
 
     animationGroup->addAnimation(windowOpacityAnimation);
@@ -222,7 +232,7 @@ void Notification::slideIn()
 void Notification::slideOut()
 {
     auto animationGroup         = new QParallelAnimationGroup(this);
-    auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
+    auto windowOpacityAnimation = new QPropertyAnimation(&_notificationWidget, "windowOpacity");
     auto positionAnimation      = new QPropertyAnimation(this, "pos");
 
     animationGroup->addAnimation(windowOpacityAnimation);
@@ -262,7 +272,11 @@ void Notification::updateMessageLabel()
     }
 
     _messageLabel.adjustSize();
-}
+
+    QCoreApplication::processEvents();
+
+    adjustSize();
+}   
 
 double Notification::getEstimatedReadingTime(const QString& text)
 {
@@ -281,6 +295,22 @@ double Notification::getEstimatedReadingTime(const QString& text)
     const double readingTimeMilliseconds  = readingTimeMinutes * 60 * 1000;
 
     return readingTimeMilliseconds;
+}
+
+void Notification::computeSizeHint()
+{
+    qDebug() << "Computing size hint for notification:" << _title;
+
+	_notificationWidget.setAttribute(Qt::WA_DontShowOnScreen);
+    _notificationWidget.show();
+
+    QCoreApplication::processEvents();
+
+    _notificationWidget.adjustSize();
+
+    _sizeHint = _notificationWidget.size();
+
+    _notificationWidget.setAttribute(Qt::WA_DontShowOnScreen, false);
 }
 
 bool Notification::isClosing() const
@@ -356,36 +386,49 @@ void Notification::setDescription(const QString& description)
 
 QSize Notification::minimumSizeHint() const
 {
-    return { fixedWidth, 10 };
+    return _sizeHint;
 }
 
 QSize Notification::sizeHint() const
 {
-    return minimumSizeHint();
+    return _sizeHint;
 }
 
 void Notification::showEvent(QShowEvent* event)
 {
+    updatePosition();
     QWidget::showEvent(event);
 
-    QTimer::singleShot(10, this, [this]() -> void {
-        adjustSize();
-        updatePosition();
-        slideIn();
-    });
+    //QTimer::singleShot(5, this, [this]() -> void {
+    //    //_notificationWidget.show();
+
+    //   
+    //    
+    //    
+    //    
+
+    //    _notificationWidget.setAttribute(Qt::WA_DontShowOnScreen, false);
+
+    //    show();
+    //    _notificationWidget.show();
+    //    //slideIn();
+    //});
 }
 
 void Notification::updatePosition()
 {
+    //adjustSize();
+
     if (_previousNotification) {
         _previousNotification->updateGeometry();
         _previousNotification->adjustSize();
 
-        move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
+        move(QPoint(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - _sizeHint.height() - spacing);
     } else {
         const auto statusBarHeight = Application::getMainWindow()->statusBar()->isVisible() ? Application::getMainWindow()->statusBar()->height() : 0;
 
-        move(parentWidget()->mapToGlobal(QPoint(spacing, Application::getMainWindow()->height() - statusBarHeight - height() - spacing)));
+        //qDebug() << "Updating notification position based on main window with height" << Application::getMainWindow()->height() << height() << _title;
+        move(QPoint(spacing, Application::getMainWindow()->height() - statusBarHeight - _sizeHint.height() - spacing));
     }
         
     if (_nextNotification)
