@@ -14,6 +14,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QPromise>
+#include <QMutexLocker>
 
 #include <functional>
 
@@ -101,6 +102,7 @@ namespace
 }
 
 QMap<QUrl, QString> FileDownloader::resolvedFileNamesForUrl = {};
+QMutex FileDownloader::resolvedFileNamesMutex;
 
 bool FileDownloader::FileSink::open(QNetworkReply* reply, const QUrl& url, const QString& targetDirectory, bool overwriteAllowed, QString* error)
 {
@@ -337,7 +339,10 @@ QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
                 name = u"download"_qs;
             }
 
-            resolvedFileNamesForUrl[url] = name;
+            {
+                QMutexLocker locker(&resolvedFileNamesMutex);
+                resolvedFileNamesForUrl[url] = name;
+            }
 
             state->promise.addResult(name);
             state->promise.finish();
