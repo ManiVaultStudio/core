@@ -320,6 +320,7 @@ QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
     };
 
     auto state = std::make_shared<State>();
+
     state->promise = std::move(promise);
 
     // Ensure we run in the main thread
@@ -342,11 +343,12 @@ QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
             state->promise.finish();
         };
 
-        QNetworkRequest request(url);
-        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-        request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+        QNetworkRequest headRequest(url);
 
-        auto headReply = sharedManager().head(request);
+        headRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        headRequest.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+
+        auto headReply = sharedManager().head(headRequest);
 
         QObject::connect(headReply, &QNetworkReply::finished, [headReply, url, finishWith]() mutable {
             headReply->deleteLater();
@@ -359,11 +361,10 @@ QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
 
             const QUrl effectiveUrl = headReply->url(); // final after redirects
 
-            const QString cdName =
-                getFilenameFromContentDisposition(headReply->rawHeader("Content-Disposition"));
+            const QString contentDispositionNameHead = getFilenameFromContentDisposition(headReply->rawHeader("Content-Disposition"));
 
-            if (!cdName.isEmpty()) {
-                finishWith(cdName);
+            if (!contentDispositionNameHead.isEmpty()) {
+                finishWith(contentDispositionNameHead);
                 return;
             }
 
@@ -376,36 +377,36 @@ QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
             }
 
             const QString urlName = getFilenameFromUrlPath(effectiveUrl);
+
             if (!urlName.isEmpty()) {
                 finishWith(urlName);
                 return;
             }
 
             // Fallback: GET with Range to encourage Content-Disposition
-            QNetworkRequest getReq(effectiveUrl);
-            getReq.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-            getReq.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
-            getReq.setRawHeader("Range", "bytes=0-0");
+            QNetworkRequest getRequest(effectiveUrl);
 
-            auto getReply = sharedManager().get(getReq);
+            getRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+            getRequest.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+            getRequest.setRawHeader("Range", "bytes=0-0");
+
+            auto getReply = sharedManager().get(getRequest);
 
             QObject::connect(getReply, &QNetworkReply::finished, [getReply, finishWith]() mutable {
                 getReply->deleteLater();
 
                 if (getReply->error() != QNetworkReply::NoError) {
-                    qCritical() << QString("Get final file name GET(range) request failed: %1")
-                        .arg(getReply->errorString());
+                    qCritical() << QString("Get final file name GET(range) request failed: %1").arg(getReply->errorString());
                     finishWith(QString{});
                     return;
                 }
 
-                const QUrl finalUrl = getReply->url();
+                const auto finalUrl = getReply->url();
 
-                const QString cdName2 =
-                    getFilenameFromContentDisposition(getReply->rawHeader("Content-Disposition"));
+                const QString contentDispositionNameGet = getFilenameFromContentDisposition(getReply->rawHeader("Content-Disposition"));
 
-                if (!cdName2.isEmpty()) {
-                    finishWith(cdName2);
+                if (!contentDispositionNameGet.isEmpty()) {
+                    finishWith(contentDispositionNameGet);
                     return;
                 }
 
@@ -418,9 +419,9 @@ QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
                 }
 
                 finishWith(getFilenameFromUrlPath(finalUrl));
-                });
             });
         });
+    });
 
     return future;
 }

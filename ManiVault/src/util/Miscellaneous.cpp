@@ -649,7 +649,6 @@ QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRa
 		}
 	}
 
-	// Try filename=
 	{
 		const QString key = u"filename="_qs;
 		const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);

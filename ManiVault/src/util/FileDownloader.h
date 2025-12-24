@@ -225,6 +225,7 @@ public:
     static QFuture<QString> getFinalFileNameAsync(const QUrl& url);
 
 private:
+
     /**
      * Download with sink asynchronously
      * @tparam SinkT Sink type
