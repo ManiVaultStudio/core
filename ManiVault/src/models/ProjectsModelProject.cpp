@@ -486,12 +486,18 @@ void ProjectsModelProject::updateTooltip()
 
 QString ProjectsModelProject::getDownloadedProjectFilePath() const
 {
-    return mv::projects().getDownloadedProjectsDir().filePath(getDownloadFileName());
+    const QString fileName = getDownloadFileName();
+    if (fileName.isEmpty()) {
+        // Download file name not yet resolved or failed; signal absence with empty path.
+        return QString();
+    }
+
+    return mv::projects().getDownloadedProjectsDir().filePath(fileName);
 }
 
 QString ProjectsModelProject::getDownloadFileName() const
 {
-	return _downloadFileName;
+    return _downloadFileName;
 }
 
 std::uint64_t ProjectsModelProject::getDownloadedProjectFileSize() const
