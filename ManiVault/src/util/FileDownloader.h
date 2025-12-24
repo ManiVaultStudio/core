@@ -233,7 +233,7 @@ private:
      * @param targetDirectory Directory where the file should be saved (OS temporary dir when empty)
      * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
      * @param overwriteAllowed Whether it is ok to overwrite existing download
-     * @return 
+     * @return QFuture that will be fulfilled with the sink result type (SinkT::Result) when the download completes
      */
     template <typename SinkT>
     static QFuture<typename SinkT::Result> downloadWithSinkAsync(const QUrl& url, const QString& targetDirectory, Task* task, bool overwriteAllowed)
