@@ -263,7 +263,8 @@ CORE_EXPORT QByteArray ensureUtf8(QByteArray byteArray);
 CORE_EXPORT QByteArray sanitizeJsonWhitespaceOutsideStrings(const QByteArray& utf8);
 
 /**
- * Minimal, practical parser for Content-Disposition filenames (Prefers RFC 5987 filename*=utf-8''... when present).
+ * Minimal, practical parser for Content-Disposition filenames (prefers RFC 5987 filename* with UTF-8 when present,
+ * but also accepts other charsets as provided in the header without strict validation).
  * @param contentDispositionRaw Raw Content-Disposition header value
  * @return Filename if found, otherwise an empty string
  */
