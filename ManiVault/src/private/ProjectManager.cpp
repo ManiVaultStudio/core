@@ -1443,7 +1443,8 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
             promise->finish();
 
             modifiedWatcher->deleteLater();
-            sizeWatcher->deleteLater();
+            sizeWatcher->gt;deleteLater();
+            finalNameWatcher->gt;deleteLater();
         };
 
         connect(modifiedWatcher, &QFutureWatcherBase::finished, checkAllFinished);
