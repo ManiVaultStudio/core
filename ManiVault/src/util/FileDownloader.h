@@ -21,6 +21,8 @@
 #include <QFuture>
 #include <QSaveFile>
 #include <QCoreApplication>
+#include <QMutex>
+#include <QMutexLocker>
 
 namespace mv::util {
 
@@ -217,8 +219,24 @@ public:
      */
     static QFuture<QDateTime> getLastModifiedAsync(const QUrl& url);
 
+    /**
+     * Get the final file name of the file at \p url asynchronously (works with redirected URL)
+     * @param url URL of the file to check
+     * @return QFuture that will contain the final file name of the file, or an empty string if it cannot be determined
+     */
+    static QFuture<QString> getFinalFileNameAsync(const QUrl& url);
+
 private:
 
+    /**
+     * Download with sink asynchronously
+     * @tparam SinkT Sink type
+     * @param url URL of the file to download
+     * @param targetDirectory Directory where the file should be saved (OS temporary dir when empty)
+     * @param task Optional task to associate with the download operation (must live in the main/GUI thread)
+     * @param overwriteAllowed Whether it is ok to overwrite existing download
+     * @return QFuture that will be fulfilled with the sink result type (SinkT::Result) when the download completes
+     */
     template <typename SinkT>
     static QFuture<typename SinkT::Result> downloadWithSinkAsync(const QUrl& url, const QString& targetDirectory, Task* task, bool overwriteAllowed)
     {
@@ -229,7 +247,12 @@ private:
 
         QMetaObject::invokeMethod(qApp, [promise, url, targetDirectory, task, overwriteAllowed]() mutable {
             if (task) {
-                task->setName(QStringLiteral("Download %1").arg(url.fileName()));
+                QString taskName;
+                {
+                    QMutexLocker locker(&resolvedFileNamesMutex);
+                    taskName = QStringLiteral("Download %1").arg(resolvedFileNamesForUrl.contains(url) ? resolvedFileNamesForUrl[url] : url.fileName());
+                }
+                task->setName(taskName);
                 task->setIcon(StyledIcon("download"));
                 task->setRunning();
             }
@@ -239,7 +262,7 @@ private:
             request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6,7,0)
-            request.setMaximumRedirectsAllowed(10);
+            request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
 #endif
 
             auto reply = sharedManager().get(request);
@@ -459,6 +482,10 @@ private:
     static void notifyError(const QString& urlDisplayString, const QString& errorString);
 
     static constexpr std::int32_t maximumNumberOfRedirectsAllowed = 10; /** Puts a cap on the number of redirects. Malicious URLs could loop indefinitely */
+
+private:
+    static QMap<QUrl, QString> resolvedFileNamesForUrl;  /** Cache of resolved file names for URLs */
+    static QMutex resolvedFileNamesMutex;  /** Mutex to protect resolvedFileNamesForUrl cache */
 };
 
 }

@@ -203,12 +203,6 @@ public:
     bool isStartup() const;
 
     /**
-     * Get SHA-256 hash of the project (for comparison purposes)
-     * @return SHA-256 hash of the project
-     */
-    QString getSha() const;
-
-    /**
      * Get url of the projects JSON file DSN
      * @return Data Source Name (DSN) of the projects JSON file, used for loading the project
      */
@@ -248,6 +242,12 @@ public:
     QString getDownloadedProjectFilePath() const;
 
     /**
+     * Get the download file name
+     * @return Download file name
+     */
+    QString getDownloadFileName() const;
+
+    /**
      * Overload assignment operator
      * @param rhs Right hand side project
      * @return Assigned project
@@ -273,8 +273,8 @@ public:
         _minimumHardwareSpec        = rhs.getMinimumHardwareSpec();
         _recommendedHardwareSpec    = rhs.getRecommendedHardwareSpec();
         _startup                    = rhs.isStartup();
-        _sha                        = rhs.getSha();
         _projectsJsonDsn            = rhs.getProjectsJsonDsn();
+        _downloadFileName           = rhs.getDownloadFileName();
 
         return *this;
     }
@@ -285,7 +285,7 @@ public:
     * @return Boolean determining whether the project is equal to the \p other project
     */
     bool operator==(const ProjectsModelProject& other) const {
-        return _sha == other.getSha();
+        return _uuid == other.getUUID();
     }
 
 private:
@@ -295,9 +295,6 @@ private:
 
     /** Determines the last modified date of the project */
     void determineLastModified();
-
-    /** Compute cryptographic hash (for comparison purposes) */
-    void computeSha();
 
     /** Update project icon */
     void updateIcon();
@@ -372,11 +369,11 @@ private:
     HardwareSpec    _minimumHardwareSpec;           /** Minimum hardware specification for the project */
     HardwareSpec    _recommendedHardwareSpec;       /** Recommended hardware specification for the project */
     bool            _startup;                       /** Boolean determining whether this is a startup project */
-    QString         _sha;                           /** SHA-256 hash of the project (for comparison purposes) */
     QUrl            _projectsJsonDsn;               /** Data Source Name (DSN) of the projects JSON file, used for loading the project */
     bool            _expanded;                      /** Boolean determining whether the project is expanded in the model */
     QIcon           _icon;                          /** Icon for the project (group) */
     QString         _tooltip;                       /** Tooltip for the project (group) */
+    QString         _downloadFileName;              /** File name of the downloaded project file */
 };
 
 using ProjectsModelProjectSharedPtr   = std::shared_ptr<ProjectsModelProject>;

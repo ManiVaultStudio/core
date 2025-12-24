@@ -601,4 +601,111 @@ QByteArray sanitizeJsonWhitespaceOutsideStrings(const QByteArray& utf8)
 	}
 	return out.toUtf8();
 }
+
+static QString unquote(QString s)
+{
+    s = s.trimmed();
+    if (s.size() >= 2 && ((s.front() == u'"' && s.back() == u'"') || (s.front() == u'\'' && s.back() == u'\''))) {
+        s = s.mid(1, s.size() - 2);
+    }
+    return s;
+}
+
+QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRaw)
+{
+	if (contentDispositionRaw.isEmpty()) {
+		return {};
+	}
+
+	const auto contentDisposition = QString::fromLatin1(contentDispositionRaw);
+
+	// Try filename*= first (RFC 5987): filename*=utf-8''percent-encoded
+	{
+		const QString key = u"filename*="_qs;
+		const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
+		if (idx >= 0) {
+			QString   v    = contentDisposition.mid(idx + key.size());
+			const int semi = v.indexOf(u';');
+			if (semi >= 0) {
+				v = v.left(semi);
+			}
+
+			v = unquote(v);
+
+			// expected: charset'lang'value
+			const int firstTick  = v.indexOf(u'\'');
+			const int secondTick = (firstTick >= 0) ? v.indexOf(u'\'', firstTick + 1) : -1;
+
+			if (secondTick >= 0) {
+				// QString charset = v.left(firstTick); // usually "utf-8"
+				const QString    encoded = v.mid(secondTick + 1);
+				const QByteArray decoded = QUrl::fromPercentEncoding(encoded.toUtf8()).toUtf8();
+
+				return QString::fromUtf8(decoded).trimmed();
+			}
+
+			// If it doesn't match the strict pattern, still try percent-decoding as best effort.
+			return QUrl::fromPercentEncoding(v.toUtf8()).trimmed();
+		}
+	}
+
+	{
+		const QString key = u"filename="_qs;
+		const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
+
+		if (idx >= 0) {
+			QString   v    = contentDisposition.mid(idx + key.size());
+			const int semi = v.indexOf(u';');
+			if (semi >= 0) {
+				v = v.left(semi);
+			}
+			v = unquote(v);
+			return v.trimmed();
+		}
+	}
+
+	return {};
+}
+
+QString getFilenameFromUrlPath(const QUrl& effectiveUrl)
+{
+	const auto path = effectiveUrl.path();
+	const auto base = QFileInfo(path).fileName();
+
+	return base.trimmed();
+}
+
+QString getFilenameFromWaterButlerMetadata(const QByteArray& raw)
+{
+	if (raw.isEmpty()) {
+		return {};
+	}
+
+	QJsonParseError jsonParseError{};
+
+	const auto jsonDocument = QJsonDocument::fromJson(raw, &jsonParseError);
+
+	if (jsonParseError.error != QJsonParseError::NoError || !jsonDocument.isObject()) {
+		return {};
+	}
+
+	const auto root       = jsonDocument.object();
+	const auto attributes = root.value(u"attributes"_qs).toObject();
+
+	// Prefer "name" if present
+	const QString name = attributes.value(u"name"_qs).toString().trimmed();
+
+	if (!name.isEmpty()) {
+		return QFileInfo(name).fileName();
+	}
+
+	// Fallback: "materialized" is a full path
+	const QString materialized = attributes.value(u"materialized"_qs).toString().trimmed();
+
+	if (!materialized.isEmpty()) {
+		return QFileInfo(materialized).fileName();
+	}
+
+	return {};
+}
 }

@@ -590,91 +590,100 @@ void ProjectManager::openProject(QUrl url, const QString& targetDirectory /*= ""
     try {
         if (url.isLocalFile()) {
             mv::projects().openProject(url.toLocalFile());
-        } else {
-            const auto fileName                         = url.fileName();
-            const auto downloadedProjectFilePath        = getDownloadedProjectsDir().filePath(fileName);
-            const auto downloadedProjectFileInfo        = QFileInfo(downloadedProjectFilePath);
-            const auto downloadedProjectLastModified    = downloadedProjectFileInfo.lastModified();
+            return;
+        }
 
-            if (downloadedProjectFileInfo.exists()) {
-                QFuture<bool> isDownloadProjectStaleFuture = isDownloadedProjectStaleAsync(url);
+        auto fileNameFuture = resolveProjectFileNameAsync(url);
 
-                auto watcher = new QFutureWatcher<bool>(this);
+        auto* fileNameWatcher = new QFutureWatcher<QString>(this);
 
-                connect(watcher, &QFutureWatcher<QString>::finished, [this, watcher, url, isDownloadProjectStaleFuture, fileName, downloadedProjectFilePath, targetDirectory]() {
-                    try {
-                        Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
+        connect(fileNameWatcher, &QFutureWatcher<QString>::finished, this,
+            [this, fileNameWatcher, url, targetDirectory]() {
+                try {
+                    const auto fileName = fileNameWatcher->result();
 
-                        if (watcher->future().isCanceled() || !watcher->future().isFinished()) {
-                            qDebug() << "Failed to check if project is stale at" << downloadedProjectFilePath;
+                    fileNameWatcher->deleteLater();
 
+                    const auto downloadedProjectFilePath = getDownloadedProjectsDir().filePath(fileName);
+
+                    const QFileInfo downloadedProjectFileInfo(downloadedProjectFilePath);
+
+                    if (downloadedProjectFileInfo.exists()) {
+                        QFuture<bool> staleFuture = isDownloadedProjectStaleAsync(url);
+
+                        auto staleWatcher = new QFutureWatcher<bool>(this);
+
+                        connect(staleWatcher, &QFutureWatcher<bool>::finished, this, [this, staleWatcher, url, fileName, downloadedProjectFilePath, targetDirectory]() {
                             try {
-                                mv::projects().openProject(downloadedProjectFilePath);
-                            }
-                            catch (const BaseException& exception) {
-                                qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
-                            }
-                            catch (const std::exception& exception) {
-                                qWarning() << "Unable to establish whether the project is stale" << ":" << exception.what();
-                            }
-                            catch (...) {
-                                qWarning() << "Unable to establish whether the project is stale, an unknown exception occurred";
-                            }
-                        }
+                                Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
-                        if (isDownloadProjectStaleFuture.result<bool>()) {
-                            qDebug() << "Project is stale, prompting to download again from" << url.toDisplayString();
+                                if (staleWatcher->future().isCanceled() || !staleWatcher->future().isFinished()) {
+                                    qDebug() << "Failed to check if project is stale at" << downloadedProjectFilePath;
 
-                            QMetaObject::invokeMethod(qApp, [this, fileName, downloadedProjectFilePath, url, targetDirectory]() {
-                                QMessageBox downloadQuestionMessageBox;
+                                    try {
+                                        mv::projects().openProject(downloadedProjectFilePath);
+                                    }
+                                    catch (...) {
+                                        qWarning() << "Unable to establish whether the project is stale";
+                                    }
 
-                                downloadQuestionMessageBox.setWindowIcon(StyledIcon("download"));
-                                downloadQuestionMessageBox.setWindowTitle(QString("Updated project available...").arg(fileName));
-                                downloadQuestionMessageBox.setText(QString("An updated version of %1 is available on the server. Do you want to download it?").arg(fileName));
-                                downloadQuestionMessageBox.setIcon(QMessageBox::Warning);
+                                    staleWatcher->deleteLater();
+                                    return;
+                                }
 
-                                auto yesButton = downloadQuestionMessageBox.addButton("Yes", QMessageBox::AcceptRole);
-                                auto noButton = downloadQuestionMessageBox.addButton("No", QMessageBox::RejectRole);
+                                if (staleWatcher->result()) {
+                                    QMetaObject::invokeMethod(qApp, [this, fileName, downloadedProjectFilePath, url, targetDirectory]() {
+                                        QMessageBox downloadQuestionMessageBox;
 
-                                downloadQuestionMessageBox.setDefaultButton(noButton);
-                                downloadQuestionMessageBox.exec();
+                                        downloadQuestionMessageBox.setWindowIcon(StyledIcon("download"));
+                                        downloadQuestionMessageBox.setWindowTitle(QString("Updated project available...").arg(fileName));
+                                        downloadQuestionMessageBox.setText(QString("An updated version of %1 is available on the server. Do you want to download it?").arg(fileName));
+                                        downloadQuestionMessageBox.setIcon(QMessageBox::Warning);
 
-                                if (downloadQuestionMessageBox.clickedButton() == yesButton) {
-                                    QFile::remove(downloadedProjectFilePath);
+                                        auto yesButton = downloadQuestionMessageBox.addButton("Yes", QMessageBox::AcceptRole);
+                                        auto noButton = downloadQuestionMessageBox.addButton("No", QMessageBox::RejectRole);
 
-                                    downloadAndOpenProject(url, targetDirectory);
+                                        downloadQuestionMessageBox.setDefaultButton(noButton);
+                                        downloadQuestionMessageBox.exec();
+
+                                        if (downloadQuestionMessageBox.clickedButton() == yesButton) {
+                                            QFile::remove(downloadedProjectFilePath);
+                                            downloadAndOpenProject(url, targetDirectory);
+                                        }
+                                        else {
+                                            mv::projects().openProject(downloadedProjectFilePath);
+                                        }
+                                        });
                                 }
                                 else {
+                                    qDebug() << "Project is not stale, opening from" << downloadedProjectFilePath;
                                     mv::projects().openProject(downloadedProjectFilePath);
                                 }
-                            });
-                        }
-                        else {
-                            qDebug() << "Project is not stale, opening from" << downloadedProjectFilePath;
+                            }
+                            catch (const std::exception& e) {
+                                qCritical() << "Failed while checking stale/opening project from" << url.toString() << ":" << e.what();
+                            }
 
-                            mv::projects().openProject(downloadedProjectFilePath);
-                        }
-                    }
-                    catch (const std::exception& e) {
-                        qCritical() << "Failed to download project from" << url.toString() << ":" << e.what();
-                    }
+                            staleWatcher->deleteLater();
+                        });
 
-                    watcher->deleteLater();
-                });
-
-                watcher->setFuture(isDownloadProjectStaleFuture);
+                    staleWatcher->setFuture(staleFuture);
+                }
+                else {
+                    downloadAndOpenProject(url, targetDirectory);
+                }
             }
-            else {
-                downloadAndOpenProject(url, targetDirectory);
+            catch (const std::exception& e) {
+                qCritical() << "Failed to resolve project filename for" << url.toString() << ":" << e.what();
             }
-        }
+        });
+
+        fileNameWatcher->setFuture(fileNameFuture);
     }
-    catch (std::exception& e)
-    {
+    catch (std::exception& e) {
         exceptionMessageBox("Unable to open ManiVault project", e);
     }
-    catch (...)
-    {
+    catch (...) {
         exceptionMessageBox("Unable to open ManiVault project due to an unhandled exception");
     }
 }
@@ -706,6 +715,25 @@ void ProjectManager::downloadAndOpenProject(QUrl url, const QString& targetDirec
     });
 
     watcher->setFuture(future);
+}
+
+QFuture<QString> ProjectManager::resolveProjectFileNameAsync(const QUrl& url)
+{
+	const auto candidate = url.fileName();
+
+	if (!candidate.isEmpty() && isMvFileName(candidate)) {
+		QPromise<QString> promise;
+
+		auto future = promise.future();
+
+		promise.addResult(candidate);
+		promise.finish();
+
+		return future;
+	}
+
+	// Otherwise use robust resolver (Content Disposition / OSF metadata / etc.)
+	return FileDownloader::getFinalFileNameAsync(url);
 };
 
 void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory, bool importDataOnly, bool loadWorkspace)
@@ -1371,22 +1399,25 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
     QMetaObject::invokeMethod(qApp, [this, promise, url]() mutable {
         auto modifiedWatcher    = new QFutureWatcher<QDateTime>(const_cast<ProjectManager*>(this));
         auto sizeWatcher        = new QFutureWatcher<std::uint64_t>(const_cast<ProjectManager*>(this));
+        auto finalNameWatcher   = new QFutureWatcher<QString>(const_cast<ProjectManager*>(this));
 
-        auto modifiedFuture   = FileDownloader::getLastModifiedAsync(url);
-        auto sizeFuture       = FileDownloader::getDownloadSizeAsync(url);
+        auto modifiedFuture     = FileDownloader::getLastModifiedAsync(url);
+        auto sizeFuture         = FileDownloader::getDownloadSizeAsync(url);
+        auto finalNameFuture    = FileDownloader::getFinalFileNameAsync(url);
 
         modifiedWatcher->setFuture(modifiedFuture);
         sizeWatcher->setFuture(sizeFuture);
+        finalNameWatcher->setFuture(finalNameFuture);
 
-        auto checkBothFinished = [this, promise, url, modifiedWatcher, sizeWatcher, modifiedFuture, sizeFuture]() mutable {
-            if (!modifiedWatcher->isFinished() || !sizeWatcher->isFinished())
+        auto checkAllFinished = [this, promise, url, modifiedWatcher, sizeWatcher, finalNameWatcher, modifiedFuture, sizeFuture, finalNameFuture]() mutable {
+            if (!modifiedWatcher->isFinished() || !sizeWatcher->isFinished() || !finalNameWatcher->isFinished())
                 return;
 
             try {
-                if (modifiedFuture.resultCount() > 0 && sizeFuture.resultCount() > 0) {
+                if (modifiedFuture.resultCount() > 0 && sizeFuture.resultCount() > 0 && finalNameFuture.resultCount() > 0) {
                     const auto serverLastModified   = modifiedFuture.result();
                     const auto serverDownloadSize   = sizeFuture.result();
-                    const auto fileName             = url.fileName();
+                    const auto fileName             = finalNameFuture.result();
                     const auto downloadedPath       = getDownloadedProjectsDir().filePath(fileName);
                     const auto localInfo            = QFileInfo(downloadedPath);
                     const auto localModified        = localInfo.lastModified();
@@ -1402,6 +1433,9 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
 
                     if (sizeFuture.resultCount() == 0)
                         throw BaseException("Failed to get size headers from server");
+
+                    if (finalNameFuture.resultCount() == 0)
+                        throw BaseException("Failed to get file name info from server");
                 }
             }
             catch (const QException& e) {
@@ -1415,10 +1449,12 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
 
             modifiedWatcher->deleteLater();
             sizeWatcher->deleteLater();
+            finalNameWatcher->deleteLater();
         };
 
-        connect(modifiedWatcher, &QFutureWatcherBase::finished, checkBothFinished);
-        connect(sizeWatcher, &QFutureWatcherBase::finished, checkBothFinished);
+        connect(modifiedWatcher, &QFutureWatcherBase::finished, checkAllFinished);
+        connect(sizeWatcher, &QFutureWatcherBase::finished, checkAllFinished);
+        connect(finalNameWatcher, &QFutureWatcherBase::finished, checkAllFinished);
     });
 
     return future;
@@ -1479,6 +1515,11 @@ ProjectMetaAction* ProjectManager::getProjectMetaAction(const QString& projectFi
     }
 
     return {};
+}
+
+bool ProjectManager::isMvFileName(const QString& name)
+{
+    return QFileInfo(name).suffix().compare(QStringLiteral("mv"), Qt::CaseInsensitive) == 0;
 }
 
 void ProjectManager::createProject()
