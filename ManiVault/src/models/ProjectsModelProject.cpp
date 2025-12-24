@@ -21,7 +21,7 @@ namespace mv::util {
 
 ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _title(variantMap.contains("title") ? variantMap["title"].toString() : ""),
-    _uuid(variantMap.contains("uuid") ? variantMap["uuid"].toString() : ""),
+    _uuid(variantMap.contains("uuid") ? variantMap["uuid"].toString() : Serializable::createId()),
     _visible(false),
     _serverDownloadSize(0),
     _userSpecifiedDownloadSize(variantMap.contains("downloadSize") ? parseByteSize(variantMap["downloadSize"].toString()) : 0),
@@ -85,7 +85,29 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     if (!_missingPlugins.isEmpty())
         qWarning() << "Project" << _title << "is added to the project database but cannot be opened because of missing plugins:" << _missingPlugins.join(", ");
 
-    computeSha();
+    auto finalNameFuture = FileDownloader::getFinalFileNameAsync(_url);
+
+    auto watcher = new QFutureWatcher<QString>(this);
+
+    connect(watcher, &QFutureWatcher<QString>::finished, watcher, [this, watcher]() {
+        try {
+            if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
+                throw std::runtime_error("Future is cancelled or did not finish");
+
+            _downloadFileName = watcher->future().result();
+
+            if (QFileInfo(getDownloadedProjectFilePath()).exists())
+                setDownloaded();
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Failed to determine file name from" << _url.toString() << ":" << e.what();
+        }
+
+        watcher->deleteLater();
+    });
+
+    watcher->setFuture(finalNameFuture);
+
     updateIcon();
 }
 
@@ -100,7 +122,6 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
     _expanded(false)
 {
-    computeSha();
     updateIcon();
 }
 
@@ -278,13 +299,6 @@ bool ProjectsModelProject::isStartup() const
     return _startup;
 }
 
-QString ProjectsModelProject::getSha() const
-{
-    const_cast<ProjectsModelProject*>(this)->computeSha();
-
-    return _sha;
-}
-
 QUrl ProjectsModelProject::getProjectsJsonDsn() const
 {
     return _projectsJsonDsn;
@@ -412,20 +426,6 @@ void ProjectsModelProject::determineLastModified()
     watcher->setFuture(future);
 }
 
-void ProjectsModelProject::computeSha()
-{
-    QCryptographicHash hash(QCryptographicHash::Sha256);
-
-    hash.addData(_title.toUtf8());
-    hash.addData(_tags.join(",").toUtf8());
-    hash.addData(_iconName.toUtf8());
-    hash.addData(_summary.toUtf8());
-    hash.addData(_url.toString().toUtf8());
-    hash.addData(_requiredPlugins.join(",").toUtf8());
-
-    _sha = hash.result().toHex();
-}
-
 void ProjectsModelProject::updateIcon()
 {
     if (isGroup()) {
@@ -486,7 +486,18 @@ void ProjectsModelProject::updateTooltip()
 
 QString ProjectsModelProject::getDownloadedProjectFilePath() const
 {
-    return mv::projects().getDownloadedProjectsDir().filePath(getUrl().fileName());
+    const QString fileName = getDownloadFileName();
+    if (fileName.isEmpty()) {
+        // Download file name not yet resolved or failed; signal absence with empty path.
+        return QString();
+    }
+
+    return mv::projects().getDownloadedProjectsDir().filePath(fileName);
+}
+
+QString ProjectsModelProject::getDownloadFileName() const
+{
+    return _downloadFileName;
 }
 
 std::uint64_t ProjectsModelProject::getDownloadedProjectFileSize() const

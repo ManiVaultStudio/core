@@ -197,6 +197,13 @@ public: // Miscellaneous
      */
     ProjectMetaAction* getProjectMetaAction(const QString& projectFilePath) override;
 
+    /**
+     * Determine whether \p name is a ManiVault project file name
+     * @param name File name to check
+     * @return Boolean determining whether the file name is a ManiVault project file name
+     */
+    static bool isMvFileName(const QString& name);
+
 private:
 
     /** Resets the manager and creates a new project */
@@ -208,6 +215,13 @@ private:
      * @param targetDirectory Directory where the project is stored (temporary directory when empty)
      */
     void downloadAndOpenProject(QUrl url, const QString& targetDirectory) const;
+
+    /**
+     * Resolve project file name from \p url asynchronously (in case of redirecting URL)
+     * @param url URL of the project
+     * @return Future containing the resolved project file name
+     */
+    static QFuture<QString> resolveProjectFileNameAsync(const QUrl& url);
 
 public: // Serialization
 

@@ -32,11 +32,17 @@ PageSubAction::~PageSubAction()
 
 void PageSubAction::setIcon(const QIcon& icon)
 {
+    if (!_iconLabel)
+        return;
+    
     _iconLabel->setIcon(icon);
 }
 
 QString PageSubAction::getTooltip() const
 {
+    if (!_iconLabel)
+        return {};
+    
     if (_iconLabel->getTooltipCallback())
         return _iconLabel->getTooltipCallback()();
 
@@ -45,6 +51,9 @@ QString PageSubAction::getTooltip() const
 
 void PageSubAction::setVisible(bool visible)
 {
+    if (!_iconLabel)
+        return;
+    
     _iconLabel->setVisible(visible);
 }
 
@@ -55,21 +64,33 @@ IconLabel* PageSubAction::getIconLabel()
 
 PageSubAction::ClickedCallback PageSubAction::getClickedCallback() const
 {
+    if (!_iconLabel)
+        return {};
+    
     return _iconLabel->getClickedCallback();
 }
 
 void PageSubAction::setClickedCallback(const ClickedCallback& clickedCallback)
 {
+    if (!_iconLabel)
+        return;
+    
     _iconLabel->setClickedCallback(clickedCallback);
 }
 
 PageSubAction::TooltipCallback PageSubAction::getTooltipCallback() const
 {
+    if (!_iconLabel)
+        return {};
+    
     return _iconLabel->getTooltipCallback();
 }
 
 void PageSubAction::setTooltipCallback(const TooltipCallback& tooltipCallback)
 {
+    if (!_iconLabel)
+        return;
+    
     _iconLabel->setTooltipCallback(tooltipCallback);
 }
 

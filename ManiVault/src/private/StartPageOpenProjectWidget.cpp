@@ -286,8 +286,13 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
 
         projectPageAction->setParentTitle(project->getGroup());
 
-        if (!project->isGroup() && project->isDownloaded())
-            projectPageAction->createSubAction<ProjectPurgePageSubAction>(project);
+        auto projectPurgePageSubAction = projectPageAction->createSubAction<ProjectPurgePageSubAction>(project);
+
+        projectPurgePageSubAction->setVisible(false);
+
+        connect(project.get(), &ProjectsModelProject::downloaded, projectPageAction.get(), [projectPurgePageSubAction]() -> void {
+            projectPurgePageSubAction->setVisible(true);
+        });
 
         if (!project->getTags().isEmpty())
             projectPageAction->createSubAction<TagsPageSubAction>(project->getTags());
@@ -330,7 +335,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
                 connect(project.get(), &ProjectsModelProject::downloadSizeDetermined, projectPageAction.get(), updateMetadata);
             }
 
-            connect(project.get(), &ProjectsModelProject::downloaded, projectPageAction.get(), [updateMetadata]() -> void {
+            connect(project.get(), &ProjectsModelProject::downloaded, projectPageAction.get(), [updateMetadata, projectPageAction, project]() -> void {
                 updateMetadata();
             });
 
