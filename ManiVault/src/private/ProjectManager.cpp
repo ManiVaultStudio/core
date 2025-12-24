@@ -1514,7 +1514,7 @@ ProjectMetaAction* ProjectManager::getProjectMetaAction(const QString& projectFi
 
 bool ProjectManager::isMvFileName(const QString& name)
 {
-	return QFileInfo(name).suffix().compare(u"mv"_qs, Qt::CaseInsensitive) == 0;
+    return QFileInfo(name).suffix().compare(QStringLiteral("mv"), Qt::CaseInsensitive) == 0;
 }
 
 void ProjectManager::createProject()
