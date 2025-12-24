@@ -21,6 +21,8 @@
 #include <QFuture>
 #include <QSaveFile>
 #include <QCoreApplication>
+#include <QMutex>
+#include <QMutexLocker>
 
 namespace mv::util {
 
@@ -245,7 +247,12 @@ private:
 
         QMetaObject::invokeMethod(qApp, [promise, url, targetDirectory, task, overwriteAllowed]() mutable {
             if (task) {
-                task->setName(QStringLiteral("Download %1").arg(resolvedFileNamesForUrl.contains(url) ? resolvedFileNamesForUrl[url] : url.fileName()));
+                QString taskName;
+                {
+                    QMutexLocker locker(&resolvedFileNamesMutex);
+                    taskName = QStringLiteral("Download %1").arg(resolvedFileNamesForUrl.contains(url) ? resolvedFileNamesForUrl[url] : url.fileName());
+                }
+                task->setName(taskName);
                 task->setIcon(StyledIcon("download"));
                 task->setRunning();
             }
@@ -478,6 +485,7 @@ private:
 
 private:
     static QMap<QUrl, QString> resolvedFileNamesForUrl;  /** Cache of resolved file names for URLs */
+    static QMutex resolvedFileNamesMutex;  /** Mutex to protect resolvedFileNamesForUrl cache */
 };
 
 }
