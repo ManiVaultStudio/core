@@ -47,7 +47,6 @@ public:
         DownloadSize,           /** Download size of the ManiVault project */
         SystemCompatibility,    /** System compatibility of the project */
         IsStartup,              /** Whether the project can be opened at application startup */
-        Sha,                    /** SHA-256 cryptographic hash of the project */
         ProjectsJsonDsn,        /** Data Source Name (DSN) of the projects JSON file, used for loading the project */
 
         Count                   /** Number of columns in the model */
@@ -747,42 +746,6 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the project SHA */
-    class ShaItem final : public Item {
-    public:
-
-        /** No need for custom constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "SHA";
-
-                case Qt::ToolTipRole:
-                    return "SHA-256 hash of the project";
-
-                default:
-                    break;
-            }
-
-            return {};
-        }
-    };
-
     /** Standard model item class for displaying to which projects JSON DSN a row belongs */
     class ProjectsJsonDsnItem final : public Item {
     public:
@@ -849,7 +812,6 @@ protected:
             append(new DownloadSizeItem(project));
             append(new SystemCompatibilityItem(project));
             append(new IsStartupItem(project));
-            append(new ShaItem(project));
             append(new ProjectsJsonDsnItem(project));
         }
     };
