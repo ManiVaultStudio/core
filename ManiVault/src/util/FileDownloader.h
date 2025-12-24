@@ -220,7 +220,7 @@ public:
     /**
      * Get the final file name of the file at \p url asynchronously (works with redirected URL)
      * @param url URL of the file to check
-     * @return Final file name of the file
+     * @return QFuture that will contain the final file name of the file, or an empty string if it cannot be determined
      */
     static QFuture<QString> getFinalFileNameAsync(const QUrl& url);
 
