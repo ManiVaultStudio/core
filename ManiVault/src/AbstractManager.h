@@ -23,7 +23,8 @@ namespace mv
  * Abstract manager
  * 
  * Base abstract manager class for the core.
- * 
+ *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractManager : public QObject, public util::Serializable

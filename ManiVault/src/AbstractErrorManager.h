@@ -23,6 +23,7 @@ class AbstractErrorLogger;
  *
  * Base abstract error manager class
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractErrorManager : public AbstractManager

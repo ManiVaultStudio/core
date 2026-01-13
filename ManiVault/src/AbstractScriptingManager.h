@@ -20,6 +20,7 @@ namespace mv {
  *
  * Base abstract scripting manager class
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractScriptingManager : public AbstractManager

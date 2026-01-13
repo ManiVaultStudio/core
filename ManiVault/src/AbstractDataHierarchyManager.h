@@ -23,6 +23,7 @@ namespace mv
  *
  * Base abstract data hierarchy manager class for organizing the dataset hierarchy.
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractDataHierarchyManager : public AbstractManager

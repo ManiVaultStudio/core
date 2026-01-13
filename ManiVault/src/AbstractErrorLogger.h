@@ -22,6 +22,7 @@ namespace mv
  *
  * Base class for logging errors.
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class AbstractErrorLogger : public QObject

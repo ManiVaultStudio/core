@@ -18,6 +18,7 @@ class KeyBasedSelectionGroup;
  *
  * Base abstract event manager class for managing events.
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractEventManager : public AbstractManager
