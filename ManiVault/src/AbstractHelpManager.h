@@ -24,6 +24,7 @@ namespace mv {
  *
  * Base abstract help manager class
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractHelpManager : public AbstractManager

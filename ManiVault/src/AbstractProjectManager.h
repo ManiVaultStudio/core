@@ -33,6 +33,7 @@ namespace mv {
  *
  * Base abstract plugin manager class for managing projects.
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractProjectManager : public AbstractManager

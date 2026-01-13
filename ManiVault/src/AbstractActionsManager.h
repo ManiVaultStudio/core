@@ -25,6 +25,7 @@ class ActionsListModel;
  *
  * Base abstract actions manager class for managing widget actions.
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractActionsManager : public AbstractManager

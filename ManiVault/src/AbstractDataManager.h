@@ -26,6 +26,7 @@ namespace plugin {
  *
  * Base abstract data manager class for managing datasets.
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes and Julian Thijssen
  */
 class CORE_EXPORT AbstractDataManager : public AbstractManager

@@ -31,6 +31,7 @@ namespace plugin {
  *
  * Base abstract plugin manager class for managing plugin instances.
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractPluginManager : public AbstractManager
