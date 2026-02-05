@@ -135,14 +135,18 @@ CPMAddPackage(
   NAME              ZLIB
   GITHUB_REPOSITORY madler/zlib
   GIT_TAG           v1.3.1
-  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON" "ZLIB_BUILD_SHARED OFF" "ZLIB_BUILD_STATIC ON"
+  OPTIONS 
+    "ZLIB_BUILD_EXAMPLES OFF" 
+    "ZLIB_BUILD_SHARED OFF" 
+    "ZLIB_BUILD_STATIC ON"
+    "SKIP_INSTALL_ALL ON" 
+    "EXCLUDE_FROM_ALL YES"
 )
-
-set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
 set(ZLIB_LIBRARIES zlibstatic)
+set_target_properties(zlibstatic PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # File compression: QuaZip
 CPMAddPackage(
