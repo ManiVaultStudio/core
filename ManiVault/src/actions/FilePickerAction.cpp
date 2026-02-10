@@ -31,6 +31,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
     _filePathAction.setStretch(1);
     _filePathAction.getTrailingAction().setVisible(true);
+    _filePathAction.getTrailingAction().setEnabled(false);
 
     if (populateCompleter)
     {
@@ -50,8 +51,6 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     updatePickActionToolTip();
 
     connect(this, &FilePickerAction::fileTypeChanged, this, updatePickActionToolTip);
-
-    _filePathAction.getTrailingAction().setEnabled(false);
 
     const auto updateStatusAction = [this]() -> void {
         _filePathAction.getTrailingAction().setIcon(isValid() ? StyledIcon("check") : StyledIcon("exclamation"));
