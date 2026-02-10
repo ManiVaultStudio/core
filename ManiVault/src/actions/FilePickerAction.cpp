@@ -28,7 +28,6 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    setFilePath(filePath);
 
     _filePathAction.setStretch(1);
     _filePathAction.getTrailingAction().setVisible(true);
