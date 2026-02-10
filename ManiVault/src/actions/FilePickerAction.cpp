@@ -28,10 +28,10 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    setFilePath(filePath);
 
     _filePathAction.setStretch(1);
     _filePathAction.getTrailingAction().setVisible(true);
+    _filePathAction.getTrailingAction().setEnabled(false);
 
     if (populateCompleter)
     {
@@ -52,8 +52,6 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
     connect(this, &FilePickerAction::fileTypeChanged, this, updatePickActionToolTip);
 
-    _filePathAction.getTrailingAction().setEnabled(false);
-
     const auto updateStatusAction = [this]() -> void {
         _filePathAction.getTrailingAction().setIcon(isValid() ? StyledIcon("check") : StyledIcon("exclamation"));
         _filePathAction.getTrailingAction().setToolTip(isValid() ? "File exists" : "File does not exist");
@@ -61,7 +59,11 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
     updateStatusAction();
 
-    connect(&_filePathAction, &StringAction::stringChanged, this, updateStatusAction);
+    connect(&_filePathAction, &StringAction::stringChanged, this, [this, updateStatusAction](const QString& changedString){
+        updateStatusAction();
+        FilePickerAction::filePathChanged(changedString);
+    });
+    connect(&_filePathAction, &StringAction::placeholderStringChanged, this, &FilePickerAction::placeholderStringChanged);
 
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
         auto* fileDialog = new FileOpenDialog(nullptr);
@@ -104,9 +106,6 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
         fileDialog->open();
     });
-
-    connect(&_filePathAction, &StringAction::stringChanged, this, &FilePickerAction::filePathChanged);
-    connect(&_filePathAction, &StringAction::placeholderStringChanged, this, &FilePickerAction::placeholderStringChanged);
 
     setFilePath(filePath);
 }
