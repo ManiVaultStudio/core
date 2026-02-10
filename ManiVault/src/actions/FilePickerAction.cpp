@@ -60,7 +60,11 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
     updateStatusAction();
 
-    connect(&_filePathAction, &StringAction::stringChanged, this, updateStatusAction);
+    connect(&_filePathAction, &StringAction::stringChanged, this, [this, updateStatusAction](const QString& changedString){
+        updateStatusAction();
+        FilePickerAction::filePathChanged(changedString);
+    });
+    connect(&_filePathAction, &StringAction::placeholderStringChanged, this, &FilePickerAction::placeholderStringChanged);
 
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
         auto* fileDialog = new FileOpenDialog(nullptr);
@@ -103,9 +107,6 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
 
         fileDialog->open();
     });
-
-    connect(&_filePathAction, &StringAction::stringChanged, this, &FilePickerAction::filePathChanged);
-    connect(&_filePathAction, &StringAction::placeholderStringChanged, this, &FilePickerAction::placeholderStringChanged);
 
     setFilePath(filePath);
 }
