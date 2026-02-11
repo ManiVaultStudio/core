@@ -8,7 +8,7 @@
 ManiVault is a flexible and extensible visual analytics framework for high-dimensional data.
 
 The system allows for creating custom visualization applications tailored to your specific field, data, and preferences. Applications are composed of several modular plugins, that can be combined to fit your needs. The plugins are fully self-encapsulated but can communicate through ManiVault's core.
-For more information on the system, see our [wiki](https://github.com/ManiVaultStudio/PublicWiki/wiki).
+For more information on the system, see our [documentation]([https://github.com/ManiVaultStudio/PublicWiki/wiki](https://manivault.readthedocs.io/)).
 
 The best starting point is the [example plugins](https://github.com/ManiVaultStudio/ExamplePlugins) which showcases each possible plugin type.
 
