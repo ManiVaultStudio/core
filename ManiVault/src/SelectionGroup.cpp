@@ -178,6 +178,15 @@ namespace mv
         }
         throw std::runtime_error("Dataset not found in selection group");
     }
+
+    void KeyBasedSelectionGroup::addDataset(Dataset<DatasetImpl> dataset, const std::vector<QString>& keys)
+    {
+        _datasets.push_back(dataset);
+        BiMap bimap;
+        std::vector<uint32_t> indices(keys.size());
+        std::iota(indices.begin(), indices.end(), 0);
+        bimap.addKeyValuePairs(keys, indices);
+        _biMaps.push_back(std::move(bimap));
     }
 
     void KeyBasedSelectionGroup::addDataset(Dataset<DatasetImpl> dataset, BiMap& bimap)
