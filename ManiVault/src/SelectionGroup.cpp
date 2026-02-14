@@ -176,6 +176,8 @@ namespace mv
                 return _biMaps[i];
             }
         }
+        throw std::runtime_error("Dataset not found in selection group");
+    }
     }
 
     void KeyBasedSelectionGroup::addDataset(Dataset<DatasetImpl> dataset, BiMap& bimap)
