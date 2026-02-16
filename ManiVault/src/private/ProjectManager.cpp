@@ -384,7 +384,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             return;
         }
 
-        const auto scopedState = ScopedState(this, State::OpeningProject);
+        setState(State::OpeningProject);
 
         if (QFileInfo(filePath).isDir())
             throw std::runtime_error("Project file path may not be a directory");
@@ -564,6 +564,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
             qDebug().noquote() << filePath << "loaded successfully";
+
+            setState(State::Idle);
         }
         emit projectOpened(*_project);
     }
