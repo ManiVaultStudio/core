@@ -881,7 +881,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        const auto scopedState = ScopedState(this, State::SavingProject);
+        // State is already set in projectManager::publishProject(...)
+        if (!isPublishingProject())
+            setState(State::SavingProject);
 
         emit projectAboutToBeSaved(*_project);
         {
@@ -1042,6 +1044,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             unsetTemporaryDirPath(TemporaryDirType::Save);
 
+            setState(State::Idle);
+
             qDebug().noquote() << filePath << "saved successfully";
         }
         emit projectSaved(*_project);
@@ -1078,7 +1082,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
         if (!hasProject())
             return;
 
-        const auto scopedState = ScopedState(this, State::PublishingProject);
+        setState(State::PublishingProject);
 
         /*
         auto& readOnlyAction        = getCurrentProject()->getReadOnlyAction();
