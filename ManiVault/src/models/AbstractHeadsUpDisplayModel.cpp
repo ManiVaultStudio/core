@@ -17,6 +17,7 @@ namespace mv {
 AbstractHeadsUpDisplayModel::Item::Item(const HeadsUpDisplayItemSharedPtr& headsUpDisplayItem) :
     _headsUpDisplayItem(headsUpDisplayItem)
 {
+    _headsUpDisplayItem->setIndex(index());
 }
 
 HeadsUpDisplayItemSharedPtr AbstractHeadsUpDisplayModel::Item::getHeadsupDisplayItem() const
@@ -133,7 +134,7 @@ QVariant AbstractHeadsUpDisplayModel::headerData(int section, Qt::Orientation or
     return {};
 }
 
-void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(HeadsUpDisplayItemSharedPtr& headsUpDisplayItem)
+void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(HeadsUpDisplayItemSharedPtr headsUpDisplayItem)
 {
     try {
         Q_ASSERT(headsUpDisplayItem);
@@ -145,7 +146,7 @@ void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(HeadsUpDisplayItemShared
         qDebug() << __FUNCTION__ << headsUpDisplayItem->getTitle();
 #endif
 
-        const auto parentIndex = headsUpDisplayItem->getParent() ? headsUpDisplayItem->getParent()->getIndex() : QPersistentModelIndex();
+        const auto parentIndex = headsUpDisplayItem->getParent() ? QPersistentModelIndex(indexFromHeadsUpDisplayItem(headsUpDisplayItem->getParent())) : QPersistentModelIndex();
 
         if (parentIndex.isValid()) {
             if (auto parentItem = dynamic_cast<Item*>(itemFromIndex(parentIndex.sibling(0, 0))))
@@ -155,8 +156,6 @@ void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(HeadsUpDisplayItemShared
         }
         else {
             appendRow(Row(headsUpDisplayItem));
-
-            headsUpDisplayItem->setIndex(indexFromHeadsUpDisplayItem(headsUpDisplayItem));
         }
     }
     catch (std::exception& exception)
@@ -200,6 +199,8 @@ QModelIndex AbstractHeadsUpDisplayModel::indexFromHeadsUpDisplayItem(const util:
         return {};
 
     const auto idMatches = match(index(0, static_cast<std::int32_t>(Column::Id)), Qt::DisplayRole, headsUpDisplayItem->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+
+    qDebug() << headsUpDisplayItem->getTitle() << headsUpDisplayItem->getId() << idMatches;
 
     if (!idMatches.isEmpty())
         return idMatches.first();
