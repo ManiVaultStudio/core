@@ -380,10 +380,12 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     };
 
     const auto updateReadOnlyAndSelection = [this, optionAction]() -> void {
+        /* TODO
         if (optionAction->getCurrentIndex() < 0)
             setEnabled(optionAction->getNumberOfOptions() >= 1);
         else
             setEnabled(optionAction->getNumberOfOptions() >= 2);
+        */
 
         setCurrentText(optionAction->getCurrentText());
     };
