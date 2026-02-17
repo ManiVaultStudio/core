@@ -15,6 +15,7 @@
 #include <QLayoutItem>
 #include <QPainter>
 #include <QPixmap>
+#include <QJsonDocument>
 #include <QString>
 #include <QTimer>
 #include <QTcpSocket>
