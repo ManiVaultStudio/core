@@ -200,8 +200,6 @@ QModelIndex AbstractHeadsUpDisplayModel::indexFromHeadsUpDisplayItem(const util:
 
     const auto idMatches = match(index(0, static_cast<std::int32_t>(Column::Id)), Qt::DisplayRole, headsUpDisplayItem->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
 
-    qDebug() << headsUpDisplayItem->getTitle() << headsUpDisplayItem->getId() << idMatches;
-
     if (!idMatches.isEmpty())
         return idMatches.first();
 
