@@ -44,7 +44,6 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param title Title of the action
-     * @param mode Picker mode
      */
     Q_INVOKABLE DatasetPickerAction(QObject* parent, const QString& title);
 
@@ -94,6 +93,9 @@ public:
      * @return The globally unique identifier of the currently selected dataset (if any)
      */
     QString getCurrentDatasetId() const;
+
+    /** Invalidate the current filter so that the internal datasets list is refreshed (only when population mode is AbstractDatasetsModel::PopulationMode::Automatic) */
+    void invalidateFilter();
 
 public: // Population
 
@@ -145,7 +147,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant map
-     * @param Variant map representation of the widget action
+     * @param variantMap Variant map representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 

@@ -208,6 +208,11 @@ QString DatasetPickerAction::getCurrentDatasetId() const
     return getCurrentDataset().getDatasetId();
 }
 
+void DatasetPickerAction::invalidateFilter()
+{
+    _datasetsFilterModel.invalidate();
+}
+
 AbstractDatasetsModel::PopulationMode DatasetPickerAction::getPopulationMode() const
 {
     return _populationMode;
