@@ -134,11 +134,12 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 CPMAddPackage(
   NAME              ZLIB
   GITHUB_REPOSITORY madler/zlib
-  GIT_TAG           v1.3.1
+  GIT_TAG           v1.3.2
   OPTIONS 
     "ZLIB_BUILD_EXAMPLES OFF" 
     "ZLIB_BUILD_SHARED OFF" 
     "ZLIB_BUILD_STATIC ON"
+    "ZLIB_BUILD_TESTING OFF"
     "SKIP_INSTALL_ALL ON" 
     "EXCLUDE_FROM_ALL YES"
 )
@@ -410,7 +411,7 @@ if(APPLE)
     
 endif()
 
-set_target_properties(qtadvanceddocking-qt6 QuaZip zlib zlibstatic
+set_target_properties(qtadvanceddocking-qt6 QuaZip zlibstatic
     PROPERTIES
     FOLDER CoreDependencies
 )
