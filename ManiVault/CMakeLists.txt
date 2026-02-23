@@ -219,7 +219,7 @@ if(${MV_USE_ERROR_LOGGING})
     CPMAddPackage(
         NAME sentry-native
         GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-        GIT_TAG 0.7.20 														# Use the latest stable version
+        GIT_TAG 0.13.0 														# Use the latest stable version
         EXCLUDE_FROM_ALL  YES
         OPTIONS
             "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
@@ -227,6 +227,8 @@ if(${MV_USE_ERROR_LOGGING})
             "SENTRY_BUILD_SHARED_LIBS OFF"
             "CRASHPAD_ENABLE_INSTALL OFF"
             "CRASHPAD_ENABLE_INSTALL_DEV OFF"
+            "CMAKE_C_STANDARD ${CMAKE_C_STANDARD}"
+            "CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD}"
     )
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -237,7 +239,7 @@ if(${MV_USE_ERROR_LOGGING})
         )
         
         # Put targets in the proper source folder
-        set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
+        set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_mpack crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
             PROPERTIES
             FOLDER CoreDependencies/Crashpad
         )
