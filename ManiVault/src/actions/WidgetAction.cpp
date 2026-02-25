@@ -108,7 +108,7 @@ void WidgetAction::updateLocation(bool recursive /*= true*/)
 plugin::Plugin* WidgetAction::findPluginAncestor() const
 {
     const auto ancestors = getAncestors<plugin::Plugin>();
-    return ancestors.isEmpty() ? nullptr : ancestors.first();
+    return ancestors.isEmpty() ? nullptr :  ancestors.first();
 }
 
 bool WidgetAction::isRoot() const

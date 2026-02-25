@@ -168,12 +168,13 @@ public: // Hierarchy queries
     WidgetActionsOfType<WidgetActionType> getAncestors() const {
         WidgetActionsOfType<WidgetActionType> ancestors;
 
-        auto currentParent = dynamic_cast<WidgetActionType*>(parent());
+        auto currentParent = parent();
 
         while (currentParent) {
-            ancestors << currentParent;
+            if (auto ancestor = dynamic_cast<WidgetActionType*>(currentParent))
+                ancestors << ancestor;
 
-            currentParent = dynamic_cast<WidgetActionType*>(currentParent->parent());
+            currentParent = currentParent->parent();
         }
 
         return ancestors;
