@@ -282,6 +282,8 @@ public: // Hierarchy queries
         return false;
     }
 
+
+
 public: // Location
 
     /**
@@ -319,6 +321,12 @@ public:
                 qDebug() << segments.join("/");
         }
     }
+
+    /**
+     * Find the nearest plugin ancestor of the action
+     * @return Pointer to plugin ancestor, otherwise nullptr
+     */
+    plugin::Plugin* findPluginAncestor() const;
 
 public:
 
