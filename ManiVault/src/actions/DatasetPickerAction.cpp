@@ -31,6 +31,8 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
     connect(this, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
         const auto sourceModelRow = _datasetsFilterModel.mapToSource(_datasetsFilterModel.index(currentIndex, 0)).row();
 
+        emit datasetAboutToBePicked(getCurrentDataset());
+
         switch (_populationMode)
         {
             case AbstractDatasetsModel::PopulationMode::Manual:

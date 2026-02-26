@@ -178,6 +178,12 @@ public: // Serialization
 signals:
 
     /**
+     * Signals that a dataset is about to be picked
+     * @param currentDataset Smart pointer to current dataset (if any, otherwise an invalid dataset)
+     */
+    void datasetAboutToBePicked(mv::Dataset<> currentDataset);
+
+    /**
      * Signals that a dataset has been picked
      * @param pickedDataset Smart pointer to picked dataset
      */
