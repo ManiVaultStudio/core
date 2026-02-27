@@ -148,10 +148,12 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
         columnVisibilityAction->setConnectionPermissionsToForceNone();
 
+#ifndef Q_OS_LINUX
         connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex, updateSelectAllCollumnsReadOnly](bool toggled) -> void {
             _treeView.setColumnHidden(columnIndex, !toggled);
             updateSelectAllCollumnsReadOnly();
         });
+#endif
 
         _columnsGroupAction.addAction(columnVisibilityAction);
     }
