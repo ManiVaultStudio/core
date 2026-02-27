@@ -73,6 +73,8 @@ void ActionsHierarchyModel::addAction(gui::WidgetAction* action)
 
         addAction(childAction);
     }
+
+//    setColumnCount(18);
 }
 
 void ActionsHierarchyModel::removeAction(gui::WidgetAction* action)

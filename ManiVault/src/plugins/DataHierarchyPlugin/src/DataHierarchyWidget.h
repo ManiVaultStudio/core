@@ -92,5 +92,5 @@ private:
     mv::gui::HierarchyWidget        _hierarchyWidget;       /** Widget for displaying hierarchy */
     mv::gui::TriggerAction          _resetAction;           /** Reset all action */
     UnhideAction                    _unhideAction;          /** Action class for un-hiding hidden datasets */
-    StatisticsAction                _statisticsAction;      /** Action class for showing data manager statistics */
+    QPointer<StatisticsAction>      _statisticsAction;      /** Action class for showing data manager statistics */
 };
