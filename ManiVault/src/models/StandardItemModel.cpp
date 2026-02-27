@@ -18,9 +18,9 @@ StandardItemModel::StandardItemModel(QObject* parent /*= nullptr*/, const QStrin
     QStandardItemModel(parent),
     Serializable(title),
     _populationMode(populationMode),
-    _numberOfRowsAction(nullptr, "Number of rows")
+    _numberOfRowsAction(new NumberOfRowsAction(this, "Number of rows"))
 {
-    _numberOfRowsAction.initialize(this);
+    _numberOfRowsAction->initialize(this);
 }
 
 StandardItemModel::PopulationMode StandardItemModel::getPopulationMode() const
