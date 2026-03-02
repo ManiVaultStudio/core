@@ -80,9 +80,9 @@ public: // Serialization
 
 public: // Action getters
 
-    gui::NumberOfRowsAction& getNumberOfRowsAction() { return _numberOfRowsAction; }
+    gui::NumberOfRowsAction& getNumberOfRowsAction() { return *_numberOfRowsAction; }
     
-    const gui::NumberOfRowsAction& getNumberOfRowsAction() const { return _numberOfRowsAction; }
+    const gui::NumberOfRowsAction& getNumberOfRowsAction() const { return *_numberOfRowsAction; }
 
 signals:
 
@@ -93,8 +93,8 @@ signals:
     void populationModeChanged(const PopulationMode& populationMode);
 
 private:
-    PopulationMode              _populationMode;        /** Population mode of the model */
-    gui::NumberOfRowsAction     _numberOfRowsAction;    /** String action for displaying the number of rows */
+    PopulationMode                      _populationMode;        /** Population mode of the model */
+    QPointer<gui::NumberOfRowsAction>   _numberOfRowsAction;    /** String action for displaying the number of rows */
 };
 
 }

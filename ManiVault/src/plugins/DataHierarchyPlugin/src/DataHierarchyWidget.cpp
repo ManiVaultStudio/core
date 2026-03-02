@@ -172,7 +172,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _hierarchyWidget(this, "Dataset", _treeModel, &_filterModel),
     _resetAction(this, "Reset"),
     _unhideAction(this, "Unhide"),
-    _statisticsAction(this, "Statistics")
+    _statisticsAction(new StatisticsAction(this, "Statistics"))
 {
     setObjectName("DataHierarchyWidget");
 
@@ -209,7 +209,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     auto& toolbarAction = _hierarchyWidget.getToolbarAction();
 
     toolbarAction.addAction(&_unhideAction);
-    toolbarAction.addAction(&_statisticsAction);
+    toolbarAction.addAction(_statisticsAction);
 
     auto collapseAllAction = new QAction(this);
 
