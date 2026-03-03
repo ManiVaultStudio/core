@@ -352,7 +352,7 @@ namespace mv
 
         void PointRenderer::setColormap(const QImage& image)
         {
-            _colormap.loadFromImage(image.mirrored());
+            _colormap.loadFromImage(image);
         }
 
         const PointArrayObject& PointRenderer::getGpuPoints() const

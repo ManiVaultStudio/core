@@ -46,7 +46,7 @@ ColorMapViewAction::Widget::Widget(QWidget* parent, ColorMapViewAction* colorMap
         const auto colorMapImage        = colorMapViewAction->getColorMapAction().getColorMapImage();
         const auto scaledColorMapImage  = colorMapImage.scaled(colorMapPreviewLabel->size(), Qt::IgnoreAspectRatio);
 
-        colorMapPreviewLabel->setPixmap(QPixmap::fromImage(scaledColorMapImage.mirrored(false, true)));
+        colorMapPreviewLabel->setPixmap(QPixmap::fromImage(scaledColorMapImage));
     };
 
     connect(&colorMapViewAction->getColorMapAction(), &ColorMapAction::imageChanged, this, updateColorMapImagePreview);
