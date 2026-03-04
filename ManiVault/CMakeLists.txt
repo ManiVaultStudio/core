@@ -300,8 +300,11 @@ target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/incl
 
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_20)
 
-target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
-target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
+target_compile_definitions(${MV_PUBLIC_LIB} 
+    PRIVATE 
+        MV_SHARED_EXPORT
+        VALIJSON_USE_EXCEPTIONS=1
+)
 
 target_compile_options(${MV_PUBLIC_LIB} 
     PRIVATE
@@ -366,6 +369,12 @@ target_compile_options(${MV_EXE}
         $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
 )
 
+target_link_options(${MV_EXE}
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/ENTRY:mainCRTStartup>
+        $<$<CXX_COMPILER_ID:MSVC>:/SUBSYSTEM:CONSOLE>
+)
+
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
@@ -402,14 +411,7 @@ if(MV_UNITY_BUILD)
     set_target_properties(${MV_EXE} PROPERTIES UNITY_BUILD ON)
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set_target_properties(${MV_EXE} PROPERTIES
-        LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:CONSOLE"
-    )
-endif()
-
 if(APPLE)
-    
     # Find libraries relative to the executable in the macOS .app tree
     set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 
