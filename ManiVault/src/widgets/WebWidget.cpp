@@ -47,13 +47,10 @@ void WebWidget::init(WebCommunicationObject* communicationObject)
     _webView->setAcceptDrops(false);
 
     connect(_webView, &QWebEngineView::loadFinished, this, &WebWidget::onWebPageLoaded);
-    //assert(_webView->settings()->testAttribute(QWebEngineSettings::JavascriptEnabled));
 
     QVBoxLayout* layout = new QVBoxLayout();
     layout->addWidget(_webView);
     setLayout(layout);
-
-    //QWebEnginePage* page = _webView->page();
 
     _communicationChannel = new QWebChannel();
     _webView->page()->setWebChannel(_communicationChannel);
