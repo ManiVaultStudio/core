@@ -46,9 +46,10 @@ public: // Plugin creation/destruction
 
     /**
      * Create a plugin of \p kind with input \p datasets
+     * If a view plugin is requested, this method will be delegated to the \p requestViewPlugin method.
      * @param kind Kind of plugin (name of the plugin)
      * @param inputDatasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @param outputDatasets Zero or more datasets that the plugin produces (e.g. analysis plugin)
+     * @param outputDatasets Zero or more datasets that are the result of the plugin (e.g. transformation plugin)
      * @return Pointer to created plugin, nullptr if creation failed
      */
     plugin::Plugin* requestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets()) override;
