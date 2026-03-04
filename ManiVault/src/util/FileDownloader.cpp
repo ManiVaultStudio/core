@@ -336,7 +336,8 @@ QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
             name = name.trimmed();
 
         	if (name.isEmpty()) {
-                name = u"download"_qs;
+                using namespace Qt::StringLiterals;
+                name = u"download"_s;
             }
 
             {

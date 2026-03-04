@@ -617,12 +617,13 @@ QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRa
 	if (contentDispositionRaw.isEmpty()) {
 		return {};
 	}
+    using namespace Qt::StringLiterals;
 
 	const auto contentDisposition = QString::fromLatin1(contentDispositionRaw);
 
 	// Try filename*= first (RFC 5987): filename*=utf-8''percent-encoded
 	{
-		const QString key = u"filename*="_qs;
+		const QString key = u"filename*="_s;
 		const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
 		if (idx >= 0) {
 			QString   v    = contentDisposition.mid(idx + key.size());
@@ -651,7 +652,7 @@ QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRa
 	}
 
 	{
-		const QString key = u"filename="_qs;
+		const QString key = u"filename="_s;
 		const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
 
 		if (idx >= 0) {
@@ -681,6 +682,7 @@ QString getFilenameFromWaterButlerMetadata(const QByteArray& raw)
 	if (raw.isEmpty()) {
 		return {};
 	}
+    using namespace Qt::StringLiterals;
 
 	QJsonParseError jsonParseError{};
 
@@ -691,17 +693,17 @@ QString getFilenameFromWaterButlerMetadata(const QByteArray& raw)
 	}
 
 	const auto root       = jsonDocument.object();
-	const auto attributes = root.value(u"attributes"_qs).toObject();
+	const auto attributes = root.value(u"attributes"_s).toObject();
 
 	// Prefer "name" if present
-	const QString name = attributes.value(u"name"_qs).toString().trimmed();
+	const QString name = attributes.value(u"name"_s).toString().trimmed();
 
 	if (!name.isEmpty()) {
 		return QFileInfo(name).fileName();
 	}
 
 	// Fallback: "materialized" is a full path
-	const QString materialized = attributes.value(u"materialized"_qs).toString().trimmed();
+	const QString materialized = attributes.value(u"materialized"_s).toString().trimmed();
 
 	if (!materialized.isEmpty()) {
 		return QFileInfo(materialized).fileName();
