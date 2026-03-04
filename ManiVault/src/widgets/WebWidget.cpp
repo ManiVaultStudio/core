@@ -38,10 +38,11 @@ WebWidget::WebWidget() :
 void WebWidget::init(WebCommunicationObject* communicationObject)
 {
     _webCommunicationObject = communicationObject;
-    connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::onJsBridgeIsAvailable);
-
     // DEPRECATED, to be removed in any release after 2.0
-    connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::initWebPage);
+    connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, [this](){
+        initWebPage();
+        onJsBridgeIsAvailable();
+    });
 
     _webView = new QWebEngineView();
     _webView->setAcceptDrops(false);
