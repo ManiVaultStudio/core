@@ -207,22 +207,22 @@ public: // Plugin query
     /**
      * Get plugin GUI name from plugin kind
      * @param pluginKind Kind of plugin
-     * @param GUI name of the plugin, empty if the plugin kind was not found
+     * @return GUI name of the plugin, empty if the plugin kind was not found
      */
-    QString getPluginGuiName(const QString& pluginKind) const;
+    QString getPluginGuiName(const QString& pluginKind) const override;
 
     /**
      * Get plugin icon from plugin kind
      * @param pluginKind Kind of plugin
      * @return Plugin icon name of the plugin, null icon the plugin kind was not found
      */
-    QIcon getPluginIcon(const QString& pluginKind) const;
+    QIcon getPluginIcon(const QString& pluginKind) const override;
 
 public: // Serialization
 
     /**
      * Load widget action from variant
-     * @param Variant representation of the widget action
+     * @param variantMap Variant representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -254,6 +254,18 @@ protected:
      * @return List of resolved plugin filenames
      */
     QStringList resolveDependencies(QDir pluginDir) const override;
+
+private:
+
+    /**
+     * Create a plugin of \p kind with input \p datasets (needed to prevent circular dependency in view plugin request delegation)
+     * If a view plugin is requested, this method will be delegated to the \p requestViewPlugin method.
+     * @param kind Kind of plugin (name of the plugin)
+     * @param inputDatasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @param outputDatasets Zero or more datasets that are the result of the plugin (e.g. transformation plugin)
+     * @return Pointer to created plugin, nullptr if creation failed
+     */
+    plugin::Plugin* privateRequestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets());
 
 private:
     QHash<QString, PluginFactory*>                  _pluginFactories;   /** All loaded plugin factories */

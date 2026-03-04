@@ -373,6 +373,30 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 
 plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets inputDatasets /*= Datasets()*/, Datasets outputDatasets /*= Datasets()*/)
 {
+    try {
+	    if (!_pluginFactories.keys().contains(kind))
+	    	throw std::runtime_error("Unrecognized plugin kind");
+
+    	auto pluginFactory = _pluginFactories[kind];
+
+        if (pluginFactory->getType() == plugin::Type::VIEW)
+            return requestViewPlugin(kind, nullptr, gui::DockAreaFlag::Right, inputDatasets);
+        
+        return privateRequestPlugin(kind, inputDatasets, outputDatasets);
+
+    } catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to create plugin", e);
+    }
+    catch (...) {
+	    exceptionMessageBox("Unable to create plugin");
+    }
+
+    return {};
+}
+
+plugin::Plugin* PluginManager::privateRequestPlugin(const QString& kind, Datasets inputDatasets /*= Datasets()*/, Datasets outputDatasets /*= Datasets()*/)
+{
     try
     {
         if (!_pluginFactories.keys().contains(kind))
@@ -392,36 +416,38 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
 
         switch (pluginFactory->getType()) {
             case plugin::Type::ANALYSIS: {
-                auto analysisPlugin = dynamic_cast<AnalysisPlugin*>(pluginInstance);
+                if (auto analysisPlugin = dynamic_cast<AnalysisPlugin*>(pluginInstance)) {
+                    if (!inputDatasets.isEmpty())
+                        analysisPlugin->setInputDatasets(inputDatasets);
 
-                if (!inputDatasets.isEmpty())
-                    analysisPlugin->setInputDatasets(inputDatasets);
-
-                if (!outputDatasets.isEmpty())
-                    analysisPlugin->setOutputDatasets(outputDatasets);
+                    if (!outputDatasets.isEmpty())
+                        analysisPlugin->setOutputDatasets(outputDatasets);
+                }
 
                 break;
             }
 
             case plugin::Type::TRANSFORMATION: {
-                auto analysisPlugin = dynamic_cast<TransformationPlugin*>(pluginInstance);
-
-                if (!inputDatasets.isEmpty())
-                    analysisPlugin->setInputDatasets(inputDatasets);
+                if (auto transformationPlugin = dynamic_cast<TransformationPlugin*>(pluginInstance)) {
+                    if (!inputDatasets.isEmpty())
+                        transformationPlugin->setInputDatasets(inputDatasets);
+                }
 
                 break;
             }
 
             case plugin::Type::WRITER: {
-                auto writerPlugin = dynamic_cast<WriterPlugin*>(pluginInstance);
-
-                if (!inputDatasets.isEmpty())
-                    writerPlugin->setInputDatasets(inputDatasets);
+                if (auto writerPlugin = dynamic_cast<WriterPlugin*>(pluginInstance)) {
+                    if (!inputDatasets.isEmpty())
+                        writerPlugin->setInputDatasets(inputDatasets);
+                }
 
                 break;
             }
 
-            default:
+			case plugin::Type::DATA:
+			case plugin::Type::LOADER:
+			case plugin::Type::VIEW:
                 break;
         }
 
@@ -463,12 +489,10 @@ plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin
         if (viewPluginFactory->getStartFloating())
             return requestViewPluginFloated(kind, datasets);
 
-        const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
-
-        if (viewPlugin != nullptr)
+        if (const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(privateRequestPlugin(kind, datasets))) {
             mv::workspaces().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
-
-        return viewPlugin;
+            return viewPlugin;
+        }
     }
     catch (std::exception& e)
     {
@@ -483,12 +507,13 @@ plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin
 
 plugin::ViewPlugin* PluginManager::requestViewPluginFloated(const QString& kind, Datasets datasets)
 {
-    const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
-
-    if (viewPlugin != nullptr)
+    if (const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(privateRequestPlugin(kind, datasets))) {
         mv::workspaces().addViewPluginFloated(viewPlugin);
 
-    return viewPlugin;
+    	return viewPlugin;
+    }
+
+    return {};
 }
 
 void PluginManager::addPlugin(plugin::Plugin* plugin)
@@ -512,7 +537,11 @@ void PluginManager::addPlugin(plugin::Plugin* plugin)
                 break;
             }
 
+            case plugin::Type::ANALYSIS:
+            case plugin::Type::LOADER:
+            case plugin::Type::WRITER:
             case plugin::Type::VIEW:
+            case plugin::Type::TRANSFORMATION:
                 break;
         }
 
@@ -522,26 +551,35 @@ void PluginManager::addPlugin(plugin::Plugin* plugin)
         {
             case plugin::Type::ANALYSIS:
             {
-                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
-
-                if (analysisPlugin)
+                if (auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin)) {
                     events().notifyDatasetAdded(analysisPlugin->getOutputDataset());
+                }
 
                 break;
             }
 
             case plugin::Type::LOADER:
             {
-                dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+                if (auto loaderPlugin = dynamic_cast<plugin::LoaderPlugin*>(plugin)) {
+                    loaderPlugin->loadData();
+                }
+                
                 break;
             }
 
             case plugin::Type::WRITER:
             {
-                dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
+                if (auto writerPlugin = dynamic_cast<plugin::WriterPlugin*>(plugin)) {
+                    writerPlugin->writeData();
+                }
+
                 break;
             }
 
+            case plugin::Type::DATA:
+            case plugin::Type::TRANSFORMATION:
+            case plugin::Type::VIEW:
+                break;
         }
     }
     catch (std::exception& e)
