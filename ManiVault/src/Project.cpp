@@ -253,7 +253,7 @@ QSharedPointer<ProjectMetaAction> Project::getProjectMetaActionFromProjectFilePa
 
 void Project::initialize()
 {
-    getProjectMetaAction().getSplashScreenAction().setMayCloseSplashScreenWidget(true);
+    Application::current()->getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction().setMayCloseSplashScreenWidget(true);
 
     updateContributors();
 
