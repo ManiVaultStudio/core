@@ -39,8 +39,8 @@ void WebWidget::init(WebCommunicationObject* communicationObject)
 {
     _webCommunicationObject = communicationObject;
     connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, [this](){
-        initWebPage();
         onJsBridgeIsAvailable();
+        initWebPage();
     });
 
     _webView = new QWebEngineView();
