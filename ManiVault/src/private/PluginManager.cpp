@@ -379,7 +379,7 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
 
     	auto pluginFactory = _pluginFactories[kind];
 
-        if (pluginFactory->getType() == plugin::Type::VIEW)
+        if (!mv::projects().isOpeningProject() && pluginFactory->getType() == plugin::Type::VIEW)
             return requestViewPlugin(kind, nullptr, gui::DockAreaFlag::Right, inputDatasets);
         
         return privateRequestPlugin(kind, inputDatasets, outputDatasets);
