@@ -17,6 +17,27 @@ using namespace mv::util;
 
 namespace mv::gui {
 
+static QMenu* ensureMenuPath(QMenu* root, const QStringList& parts, QHash<QString, QMenu*>& cache)
+{
+    auto current = root;
+
+    QString currentPath;
+
+    for (const auto& part : parts) {
+        currentPath += "/" + part;
+
+        if (!cache.contains(currentPath)) {
+            auto* subMenu = new QMenu(part, current);
+            current->addMenu(subMenu);
+            cache.insert(currentPath, subMenu);
+        }
+
+        current = cache[currentPath];
+    }
+
+    return current;
+}
+
 WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions actions) :
     QMenu(parent),
     _actions(actions),
@@ -118,6 +139,51 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
             }
 
             connectMenu->setEnabled(connectMenu->actions().isEmpty() ? false : firstAction->mayConnect(WidgetAction::ConnectionContextFlag::Gui));
+
+            connectMenu->setEnabled(true);
+
+            if (actions.size() == 1) {
+                for (auto viewPlugin : mv::plugins().getPluginsByType(plugin::Type::VIEW)) {
+                    auto connectToViewPluginActionMenu = new QMenu(viewPlugin->getGuiName(), connectMenu);
+
+                    connectToViewPluginActionMenu->setIcon(viewPlugin->icon());
+
+                    QHash<QString, QMenu*> menuCache;
+
+                    for (auto* childAction : viewPlugin->findChildren<WidgetAction*>()) {
+                        if (childAction == firstAction)
+                            continue;
+
+                        if (childAction->getTypeString() != actions.first()->getTypeString())
+                            continue;
+
+                        if (childAction->isConnected() || !childAction->mayConnect(WidgetAction::ConnectionContextFlag::Gui))
+                            continue;
+
+                        if (!childAction->isEnabled())
+                            continue;
+
+                        QStringList parts = childAction->getLocation().split('/', Qt::SkipEmptyParts);
+
+                        if (!parts.isEmpty() && parts.last() == childAction->text())
+                            parts.removeLast();
+
+                        auto targetMenu = ensureMenuPath(connectToViewPluginActionMenu, parts, menuCache);
+
+                        auto* action = new QAction(childAction->text(), targetMenu);
+                        targetMenu->addAction(action);
+
+                        connect(action, &QAction::triggered, this, [this, firstAction, childAction]() {
+                            mv::actions().connectPrivateActions(firstAction, childAction);
+                        });
+                    }
+
+                    if (connectToViewPluginActionMenu->actions().isEmpty())
+                        delete connectToViewPluginActionMenu;
+                    else
+                        connectMenu->addMenu(connectToViewPluginActionMenu);
+                }
+            }
 
             insertMenu(&_disconnectAction, connectMenu);
         }
