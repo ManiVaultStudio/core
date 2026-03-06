@@ -17,6 +17,27 @@ using namespace mv::util;
 
 namespace mv::gui {
 
+static QMenu* ensureMenuPath(QMenu* root, const QStringList& parts, QHash<QString, QMenu*>& cache)
+{
+    auto current = root;
+
+    QString currentPath;
+
+    for (const auto& part : parts) {
+        currentPath += "/" + part;
+
+        if (!cache.contains(currentPath)) {
+            auto* subMenu = new QMenu(part, current);
+            current->addMenu(subMenu);
+            cache.insert(currentPath, subMenu);
+        }
+
+        current = cache[currentPath];
+    }
+
+    return current;
+}
+
 WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions actions) :
     QMenu(parent),
     _actions(actions),
@@ -117,7 +138,75 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
                 connectMenu->addAction(connectAction);
             }
 
-            connectMenu->setEnabled(connectMenu->actions().isEmpty() ? false : firstAction->mayConnect(WidgetAction::ConnectionContextFlag::Gui));
+            if (actions.size() == 1) {
+                for (auto viewPlugin : mv::plugins().getPluginsByType(plugin::Type::VIEW)) {
+                    auto connectToViewPluginActionMenu = new QMenu(viewPlugin->getGuiName(), connectMenu);
+
+                	connectToViewPluginActionMenu->setIcon(viewPlugin->icon());
+
+                    QHash<QString, QMenu*> menuCache;
+
+                    auto ensureMenuPath = [&](const QStringList& parts) -> QMenu* {
+                        auto current = connectToViewPluginActionMenu;
+
+                        QString currentPath;
+
+                        for (const auto& part : parts) {
+                            currentPath += "/" + part;
+
+                            if (!menuCache.contains(currentPath)) {
+                                auto subMenu = new QMenu(part, current);
+                                current->addMenu(subMenu);
+                                menuCache.insert(currentPath, subMenu);
+                            }
+
+                            current = menuCache[currentPath];
+                        }
+
+                        return current;
+                    };
+
+                    for (auto candidateAction : viewPlugin->findChildren<WidgetAction*>()) {
+                        if (candidateAction == firstAction)
+                            continue;
+
+                    	if (!candidateAction->isEnabled())
+                            continue;
+
+                        if (candidateAction->isConnected())
+                            continue;
+
+                        if (candidateAction->getTypeString() != actions.first()->getTypeString())
+                            continue;
+
+                        QStringList parts = candidateAction->getLocation().split('/', Qt::SkipEmptyParts);
+
+                        // Remove duplicated top-level plugin name
+                        if (!parts.isEmpty() && parts.first() == viewPlugin->getGuiName())
+                            parts.removeFirst();
+
+                        // Remove duplicated leaf label
+                        if (!parts.isEmpty() && parts.last() == candidateAction->text())
+                            parts.removeLast();
+
+                        auto targetMenu = ensureMenuPath(parts);
+                        auto action     = new QAction(candidateAction->text(), targetMenu);
+
+                    	targetMenu->addAction(action);
+
+                        connect(action, &QAction::triggered, this, [this, firstAction, candidateAction]() {
+                            mv::actions().connectPrivateActions(firstAction, candidateAction);
+                        });
+                    }
+
+                    if (connectToViewPluginActionMenu->actions().isEmpty())
+                        delete connectToViewPluginActionMenu;
+                    else
+                        connectMenu->addMenu(connectToViewPluginActionMenu);
+                }
+
+                connectMenu->setEnabled(connectMenu->actions().isEmpty() ? false : firstAction->mayConnect(WidgetAction::ConnectionContextFlag::Gui));
+            }
 
             insertMenu(&_disconnectAction, connectMenu);
         }
