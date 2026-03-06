@@ -39,7 +39,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _toggleMenu("Toggle", this),
     _helpAction(this, "Help"),
     _cachedVisibility(false),
-    _centralDockWidget("Central"),
+    _centralDockWidget(nullptr, "Central", nullptr),
     //_progressTask(this, "Serialization"),
     _progressOverlayWidget(this)
 {
@@ -322,7 +322,7 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
     connect(_viewPlugin, &WidgetAction::idChanged, _viewPlugin, updateViewPluginIdProperty);
 
-    auto centralDockWidget = new CDockWidget("Central");
+    auto centralDockWidget = new CDockWidget(nullptr, "Central", nullptr);
 
     centralDockWidget->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
     centralDockWidget->setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
@@ -414,7 +414,7 @@ void ViewPluginDockWidget::addDockingAction(mv::gui::WidgetAction* dockingAction
         showAllAction->setEnabled(numberOfVisibleSettingsDockWidgets < numberOfSettingsDockWidgets);
         };
 
-    auto settingsDockWidget = new CDockWidget(dockingAction->text(), this);
+    auto settingsDockWidget = new CDockWidget(nullptr, dockingAction->text(), this);
     auto settingsWidget = new SettingsActionWidget(this, dockingAction);
     auto containerWidget = new QWidget();
     auto containerWidgetLayout = new QVBoxLayout();

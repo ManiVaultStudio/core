@@ -38,22 +38,19 @@ WebWidget::WebWidget() :
 void WebWidget::init(WebCommunicationObject* communicationObject)
 {
     _webCommunicationObject = communicationObject;
-    connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::onJsBridgeIsAvailable);
-
-    // DEPRECATED, to be removed in any release after 2.0
-    connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::initWebPage);
+    connect(_webCommunicationObject, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, [this](){
+        onJsBridgeIsAvailable();
+        initWebPage();
+    });
 
     _webView = new QWebEngineView();
     _webView->setAcceptDrops(false);
 
     connect(_webView, &QWebEngineView::loadFinished, this, &WebWidget::onWebPageLoaded);
-    //assert(_webView->settings()->testAttribute(QWebEngineSettings::JavascriptEnabled));
 
     QVBoxLayout* layout = new QVBoxLayout();
     layout->addWidget(_webView);
     setLayout(layout);
-
-    //QWebEnginePage* page = _webView->page();
 
     _communicationChannel = new QWebChannel();
     _webView->page()->setWebChannel(_communicationChannel);

@@ -24,7 +24,7 @@ using namespace mv::util;
 using namespace mv::plugin;
 
 DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
-    CDockWidget(title, parent),
+    CDockWidget(nullptr, title, parent),
     Serializable(title),
     _settingsToolButton(nullptr)
 {

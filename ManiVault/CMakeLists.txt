@@ -300,8 +300,16 @@ target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/incl
 
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_20)
 
-target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
-target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
+target_compile_definitions(${MV_PUBLIC_LIB} 
+    PRIVATE 
+        MV_SHARED_EXPORT
+        VALIJSON_USE_EXCEPTIONS=1
+)
+
+target_compile_options(${MV_PUBLIC_LIB} 
+    PRIVATE
+        $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+)
 
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Core)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
@@ -356,6 +364,17 @@ target_compile_features(${MV_EXE} PRIVATE cxx_std_20)
 
 target_compile_definitions(${MV_EXE} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
 
+target_compile_options(${MV_EXE} 
+    PRIVATE
+        $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+)
+
+target_link_options(${MV_EXE}
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/ENTRY:mainCRTStartup>
+        $<$<CXX_COMPILER_ID:MSVC>:/SUBSYSTEM:CONSOLE>
+)
+
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
@@ -392,14 +411,7 @@ if(MV_UNITY_BUILD)
     set_target_properties(${MV_EXE} PROPERTIES UNITY_BUILD ON)
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set_target_properties(${MV_EXE} PROPERTIES
-        LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:CONSOLE"
-    )
-endif()
-
 if(APPLE)
-    
     # Find libraries relative to the executable in the macOS .app tree
     set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 
@@ -428,10 +440,27 @@ add_subdirectory(src/plugins/TasksPlugin)
 add_subdirectory(src/plugins/SampleScopePlugin)
 add_subdirectory(src/plugins/TutorialPlugin)
 
-set_target_properties(DataHierarchyPlugin DataPropertiesPlugin SharedParametersPlugin LoggingPlugin TasksPlugin SampleScopePlugin TutorialPlugin
+set(MV_SYSTEM_PLUGINS
+    DataHierarchyPlugin 
+    DataPropertiesPlugin 
+    SharedParametersPlugin 
+    LoggingPlugin 
+    TasksPlugin 
+    SampleScopePlugin 
+    TutorialPlugin
+)
+
+set_target_properties(${MV_SYSTEM_PLUGINS}
     PROPERTIES
     FOLDER SystemPlugins
 )
+
+foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)
+    target_compile_options(${system_plugin_target}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+endforeach()
 
 # Data plugins
 add_subdirectory(src/plugins/PointData)
@@ -440,10 +469,25 @@ add_subdirectory(src/plugins/TextData)
 add_subdirectory(src/plugins/ClusterData)
 add_subdirectory(src/plugins/ImageData)
 
-set_target_properties(PointData ColorData TextData ClusterData ImageData
+set(MV_DATA_PLUGINS
+    PointData 
+    ColorData 
+    TextData 
+    ClusterData 
+    ImageData
+)
+
+set_target_properties(${MV_DATA_PLUGINS}
     PROPERTIES
     FOLDER DataPlugins
 )
+
+foreach(data_plugin_target IN LISTS MV_DATA_PLUGINS)
+    target_compile_options(${data_plugin_target}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+endforeach()
 
 # -----------------------------------------------------------------------------
 # Installation
