@@ -35,7 +35,18 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomMarginAction(this, "Zoom margin"),
     _zoomGroupAction(this, "Zoom group")
 {
-    //setShowLabels(false);
+    setConnectionPermissionsToAll();
+
+	_zoomOutAction.setConnectionPermissionsToForceNone(true);
+    _zoomInAction.setConnectionPermissionsToForceNone(true);
+    _zoomExtentsAction.setConnectionPermissionsToForceNone(true);
+    _zoomSelectionAction.setConnectionPermissionsToForceNone(true);
+    _zoomRegionAction.setConnectionPermissionsToForceNone(true);
+    _freezeNavigation.setConnectionPermissionsToForceNone(true);
+    _zoomRectangleAction.setConnectionPermissionsToForceNone(true);
+    _zoomFactorAction.setConnectionPermissionsToForceNone(true);
+    _zoomMarginAction.setConnectionPermissionsToForceNone(true);
+    _zoomGroupAction.setConnectionPermissionsToForceNone(true);
 
     _zoomOutAction.setToolTip("Zoom out by 10% (-)");
     _zoomPercentageAction.setToolTip("Zoom in/out (+)");
@@ -49,7 +60,6 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _freezeNavigation.setDefaultWidgetFlags(ToggleAction::WidgetFlag::CheckBox);
 
     _zoomPercentageAction.setOverrideSizeHint(QSize(300, 0));
-    _zoomPercentageAction.setConnectionPermissionsToAll();
 
     _zoomOutAction.setIconByName("search-minus");
     _zoomInAction.setIconByName("search-plus");
@@ -71,7 +81,6 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomCenterAction.setIconByName("ruler");
     _zoomCenterAction.setDefaultWidgetFlags(GroupAction::WidgetFlag::Vertical);
     _zoomCenterAction.setPopupSizeHint(QSize(250, 0));
-    _zoomCenterAction.setConnectionPermissionsToAll(true);
 
     _zoomCenterAction.getXAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
     _zoomCenterAction.getYAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
@@ -117,6 +126,36 @@ void NavigationAction::setShortcutsEnabled(bool shortcutsEnabled)
     _zoomExtentsAction.setShortcut(shortcutsEnabled ? QKeySequence("O") : QKeySequence());
     _zoomSelectionAction.setShortcut(shortcutsEnabled ? QKeySequence("H") : QKeySequence());
     _zoomRegionAction.setShortcut(shortcutsEnabled ? QKeySequence("F") : QKeySequence());
+}
+
+void NavigationAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
+{
+    auto publicNavigationSourceAction = dynamic_cast<NavigationAction*>(publicAction);
+
+    Q_ASSERT(publicNavigationSourceAction != nullptr);
+
+    if (publicNavigationSourceAction == nullptr)
+        return;
+
+    if (recursive) {
+        actions().connectPrivateActionToPublicAction(&_zoomCenterAction, &publicNavigationSourceAction->getZoomCenterAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_zoomPercentageAction, &publicNavigationSourceAction->getZoomPercentageAction(), recursive);
+    }
+
+    HorizontalToolbarAction::connectToPublicAction(publicAction, recursive);
+}
+
+void NavigationAction::disconnectFromPublicAction(bool recursive)
+{
+    if (!isConnected())
+        return;
+
+    if (recursive) {
+        actions().disconnectPrivateActionFromPublicAction(&_zoomCenterAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_zoomPercentageAction, recursive);
+    }
+
+    HorizontalToolbarAction::disconnectFromPublicAction(recursive);
 }
 
 void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
