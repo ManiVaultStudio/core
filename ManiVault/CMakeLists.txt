@@ -265,8 +265,14 @@ if(${MV_USE_ERROR_LOGGING})
         CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
         CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
     )
-
-    set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_mpack crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
+    
+    set(CRASHPAD_LIBS crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_mpack crashpad_snapshot crashpad_tools crashpad_util crashpad_zlib)
+    
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        list(APPEND CRASHPAD_LIBS crashpad_wer)
+    endif()
+    
+    set_target_properties(${CRASHPAD_LIBS}
         PROPERTIES
         FOLDER CoreDependencies/Crashpad
         CXX_STANDARD ${CMAKE_CXX_STANDARD}
