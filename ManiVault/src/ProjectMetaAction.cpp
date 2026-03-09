@@ -126,7 +126,7 @@ ProjectMetaAction::ProjectMetaAction(const QString& filePath, QObject* parent /*
 
 void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    Serializable::fromVariantMap(variantMap);
+    GroupAction::fromVariantMap(variantMap);
 
     _applicationVersionAction.fromParentVariantMap(variantMap);
     _projectVersionAction.fromParentVariantMap(variantMap);
@@ -147,7 +147,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap ProjectMetaAction::toVariantMap() const
 {
-    auto variantMap = Serializable::toVariantMap();
+    auto variantMap = GroupAction::toVariantMap();
 
     _applicationVersionAction.insertIntoVariantMap(variantMap);
     _projectVersionAction.insertIntoVariantMap(variantMap);

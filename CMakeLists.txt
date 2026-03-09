@@ -20,6 +20,7 @@ option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
 option(MV_USE_ERROR_LOGGING "Use error logging with Sentry" OFF)
 option(MV_PRECOMPILE_HEADERS "Precompile several headers for faster compilation" ON)
 option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
+option(MV_WARNINGS_AS_ERRORS "Treat warnings as errors when using MSVC" ON)
 
 # defines MV_VERSION
 include(ManiVault/cmake/Utils.cmake)

@@ -111,21 +111,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 
     projects().getProjectSerializationTask().setName("Load project");
 
-    _projectMetaAction.getApplicationVersionAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getProjectVersionAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getReadOnlyAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getTitleAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getDescriptionAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getTagsAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getCommentsAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getContributorsAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getCompressionAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getAllowProjectSwitchingAction().fromParentVariantMap(variantMap, true);
-    _projectMetaAction.getAllowedPluginsOnlyAction().fromParentVariantMap(variantMap, true);
-    _projectMetaAction.getAllowedPluginsAction().fromParentVariantMap(variantMap, true);
-    _projectMetaAction.getSplashScreenAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getStudioModeAction().fromParentVariantMap(variantMap);
-    _projectMetaAction.getApplicationIconAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.fromParentVariantMap(variantMap);
 
     if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
         _selectionGroupingAction.fromParentVariantMap(variantMap);
@@ -155,21 +141,7 @@ QVariantMap Project::toVariantMap() const
 
     auto variantMap = Serializable::toVariantMap();
     
-    _projectMetaAction.getApplicationVersionAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getProjectVersionAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getReadOnlyAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getTitleAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getDescriptionAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getTagsAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getCommentsAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getContributorsAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getCompressionAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getAllowProjectSwitchingAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getAllowedPluginsOnlyAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getAllowedPluginsAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getSplashScreenAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getStudioModeAction().insertIntoVariantMap(variantMap);
-    _projectMetaAction.getApplicationIconAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.insertIntoVariantMap(variantMap);
 
     _selectionGroupingAction.insertIntoVariantMap(variantMap);
 
@@ -253,7 +225,7 @@ QSharedPointer<ProjectMetaAction> Project::getProjectMetaActionFromProjectFilePa
 
 void Project::initialize()
 {
-    getProjectMetaAction().getSplashScreenAction().setMayCloseSplashScreenWidget(true);
+    Application::current()->getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction().setMayCloseSplashScreenWidget(true);
 
     updateContributors();
 
