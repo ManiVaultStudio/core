@@ -33,7 +33,7 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
-#ifdef ERROR_LOGGING
+#ifdef MV_USE_ERROR_LOGGING
     _groupsAction.addGroupAction(&mv::settings().getErrorLoggingSettingsAction());
 #endif
 

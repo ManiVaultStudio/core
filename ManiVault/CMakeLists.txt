@@ -81,6 +81,8 @@ if(APPLE)
     # add the automatically determined parts of the RPATH
     # which point to directories outside the build tree to the install RPATH
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    
+    set(CMAKE_XCODE_GENERATE_SCHEME ON)
 endif()
 
 
@@ -134,26 +136,43 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 CPMAddPackage(
   NAME              ZLIB
   GITHUB_REPOSITORY madler/zlib
-  GIT_TAG           v1.3.1
+  GIT_TAG           v1.3.2
   OPTIONS 
     "ZLIB_BUILD_EXAMPLES OFF" 
     "ZLIB_BUILD_SHARED OFF" 
     "ZLIB_BUILD_STATIC ON"
-    "SKIP_INSTALL_ALL ON" 
-    "EXCLUDE_FROM_ALL YES"
+    "ZLIB_BUILD_TESTING OFF"
+    "ZLIB_INSTALL OFF"
 )
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
 set(ZLIB_LIBRARIES zlibstatic)
-set_target_properties(zlibstatic PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(zlibstatic PROPERTIES 
+    POSITION_INDEPENDENT_CODE ON
+    FOLDER CoreDependencies
+    C_STANDARD ${CMAKE_C_STANDARD}
+    C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+    C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+)
 
 # File compression: QuaZip
 CPMAddPackage(
   NAME              quazip
   GITHUB_REPOSITORY stachenov/quazip
   GIT_TAG           v1.5
-  OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF" "BUILD_SHARED_LIBS OFF"
+  OPTIONS 
+    "QUAZIP_QT_MAJOR_VERSION 6" 
+    "QUAZIP_BZIP2 OFF" 
+    "QUAZIP_INSTALL OFF" 
+    "BUILD_SHARED_LIBS OFF"
+)
+
+set_target_properties(QuaZip PROPERTIES 
+    FOLDER CoreDependencies
+    CXX_STANDARD ${CMAKE_CXX_STANDARD}
+    CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+    CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
 )
 
 # Serialization: JSON
@@ -163,34 +182,42 @@ CPMAddPackage(
   GIT_TAG           v3.12.0
   DOWNLOAD_ONLY     YES
   OPTIONS
-      "JSON_BuildTests=OFF"            # skip upstream tests
-      "JSON_MultipleHeaders=ON"        # shave compile time (optional)
+    "JSON_BuildTests=OFF"            # skip upstream tests
+    "JSON_MultipleHeaders=ON"        # shave compile time (optional)
 )
 
 # Serialization: Add valijson as a header-only library
 CPMAddPackage(
   NAME              valijson
   GITHUB_REPOSITORY tristanpenman/valijson
-  GIT_TAG           v1.0.6 
+  GIT_TAG           v1.1.0
   #GIT_SUBMODULES   ""                  # Does not yet work with CPM, see workaround from https://github.com/cpm-cmake/CPM.cmake/pull/461#issuecomment-1665044141
   GIT_SUBMODULES    "doc"               # list an existing subdir from the repo to not download any submodules
   DOWNLOAD_ONLY     YES
-  OPTIONS "VALIJSON_BUILD_TESTS OFF" "VALIJSON_USE_EXCEPTIONS ON"
+  OPTIONS 
+    "VALIJSON_BUILD_TESTS OFF" 
+    "VALIJSON_USE_EXCEPTIONS ON"
 )
 
 # Layout: Qt Advanced docking system
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
-  GIT_TAG           4.4.1
-  OPTIONS "BUILD_EXAMPLES OFF"
+  GIT_TAG           e2c960238d64982a4ac93c2c006155e86f23bb5f
+  VERSION           "4.5.0-260308"
+  OPTIONS 
+    "BUILD_EXAMPLES OFF"
 )
 
-if(MV_UNITY_BUILD)
-    set_target_properties(qtadvanceddocking-qt6 PROPERTIES UNITY_BUILD ON)
-endif()
-
-set_target_properties(qtadvanceddocking-qt6 PROPERTIES PROJECT_LABEL "qtadvanceddocking" OUTPUT_NAME "qtadvanceddocking")
+set_target_properties(qtadvanceddocking-qt6 PROPERTIES 
+    PROJECT_LABEL "qtadvanceddocking" 
+    OUTPUT_NAME "qtadvanceddocking"
+    FOLDER CoreDependencies
+    UNITY_BUILD ${MV_UNITY_BUILD}
+    CXX_STANDARD ${CMAKE_CXX_STANDARD}
+    CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+    CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
+)
 
 # bfloat16 implementation for pre c++23
 CPMAddPackage(
@@ -212,14 +239,11 @@ if(${MV_USE_ERROR_LOGGING})
         set(SENTRY_TRANSPORT "curl")        # Use the curl HTTP transport
     endif()
 
-    # Add preprocessor directive to notify sources of error logging
-    add_compile_definitions(ERROR_LOGGING)
-
     CPMAddPackage(
-        NAME sentry-native
-        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-        GIT_TAG 0.7.20 														# Use the latest stable version
-        EXCLUDE_FROM_ALL  YES
+        NAME                sentry-native
+        GITHUB_REPOSITORY   getsentry/sentry-native
+        GIT_TAG             0.13.1 											# Use the latest stable version
+        EXCLUDE_FROM_ALL    YES
         OPTIONS
             "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
             "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
@@ -228,26 +252,40 @@ if(${MV_USE_ERROR_LOGGING})
             "CRASHPAD_ENABLE_INSTALL_DEV OFF"
     )
 
+    set_target_properties(sentry mini_chromium
+        PROPERTIES
+        FOLDER CoreDependencies
+        C_STANDARD ${CMAKE_C_STANDARD}
+        C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+        C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+        CXX_STANDARD ${CMAKE_CXX_STANDARD}
+        CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+        CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
+    )
+    
+    set(CRASHPAD_LIBS crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_mpack crashpad_snapshot crashpad_tools crashpad_util crashpad_zlib)
+    
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        # Put targets in the proper source folder
-        set_target_properties(sentry mini_chromium
-            PROPERTIES
-            FOLDER CoreDependencies
-        )
-        
-        # Put targets in the proper source folder
-        set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
-            PROPERTIES
-            FOLDER CoreDependencies/Crashpad
-        )
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set_target_properties(sentry PROPERTIES
-            CXX_EXTENSIONS ON
-            C_EXTENSIONS ON
-        )
+        list(APPEND CRASHPAD_LIBS crashpad_wer)
+    endif()
+    
+    set_target_properties(${CRASHPAD_LIBS}
+        PROPERTIES
+        FOLDER CoreDependencies/Crashpad
+        CXX_STANDARD ${CMAKE_CXX_STANDARD}
+        CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+        CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
+    )
 
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_compile_definitions(sentry PRIVATE
             _GNU_SOURCE
+        )
+        # override settings for sentry
+        set_target_properties(sentry
+            PROPERTIES
+            C_EXTENSIONS ON
+            CXX_EXTENSIONS ON
         )
     endif()
 
@@ -259,10 +297,6 @@ if(${MV_USE_ERROR_LOGGING})
         string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
     endif()
 
-endif()
-
-if(APPLE)
-    set(CMAKE_XCODE_GENERATE_SCHEME ON)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -421,11 +455,6 @@ if(APPLE)
     set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app")
     
 endif()
-
-set_target_properties(qtadvanceddocking-qt6 QuaZip zlib zlibstatic
-    PROPERTIES
-    FOLDER CoreDependencies
-)
 
 # -----------------------------------------------------------------------------
 # Plugin projects
