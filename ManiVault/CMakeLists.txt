@@ -148,6 +148,7 @@ add_library(ZLIB::ZLIB ALIAS zlibstatic)
 set(ZLIB_LIBRARIES zlibstatic)
 set_target_properties(zlibstatic PROPERTIES 
     POSITION_INDEPENDENT_CODE ON
+    FOLDER CoreDependencies
     C_STANDARD ${CMAKE_C_STANDARD}
     C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
     C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
@@ -163,6 +164,13 @@ CPMAddPackage(
     "QUAZIP_BZIP2 OFF" 
     "QUAZIP_INSTALL OFF" 
     "BUILD_SHARED_LIBS OFF"
+)
+
+set_target_properties(QuaZip PROPERTIES 
+    FOLDER CoreDependencies
+    CXX_STANDARD ${CMAKE_CXX_STANDARD}
+    CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+    CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
 )
 
 # Serialization: JSON
@@ -202,14 +210,12 @@ CPMAddPackage(
 set_target_properties(qtadvanceddocking-qt6 PROPERTIES 
     PROJECT_LABEL "qtadvanceddocking" 
     OUTPUT_NAME "qtadvanceddocking"
+    FOLDER CoreDependencies
+    UNITY_BUILD ${MV_UNITY_BUILD}
     CXX_STANDARD ${CMAKE_CXX_STANDARD}
     CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
     CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
 )
-
-if(MV_UNITY_BUILD)
-    set_target_properties(qtadvanceddocking-qt6 PROPERTIES UNITY_BUILD ON)
-endif()
 
 # bfloat16 implementation for pre c++23
 CPMAddPackage(
@@ -448,11 +454,6 @@ if(APPLE)
     set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app")
     
 endif()
-
-set_target_properties(qtadvanceddocking-qt6 QuaZip zlibstatic
-    PROPERTIES
-    FOLDER CoreDependencies
-)
 
 # -----------------------------------------------------------------------------
 # Plugin projects
