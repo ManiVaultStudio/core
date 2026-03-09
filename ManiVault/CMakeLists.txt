@@ -183,7 +183,8 @@ CPMAddPackage(
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
-  GIT_TAG           4.4.1
+  GIT_TAG           e2c960238d64982a4ac93c2c006155e86f23bb5f
+  VERSION           "4.5.0-260308"
   OPTIONS "BUILD_EXAMPLES OFF"
 )
 
