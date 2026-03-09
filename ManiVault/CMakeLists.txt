@@ -235,10 +235,10 @@ if(${MV_USE_ERROR_LOGGING})
     add_compile_definitions(ERROR_LOGGING)
 
     CPMAddPackage(
-        NAME sentry-native
-        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-        GIT_TAG 0.13.1 														# Use the latest stable version
-        EXCLUDE_FROM_ALL  YES
+        NAME                sentry-native
+        GITHUB_REPOSITORY   getsentry/sentry-native
+        GIT_TAG             0.13.1 											# Use the latest stable version
+        EXCLUDE_FROM_ALL    YES
         OPTIONS
             "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
             "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
