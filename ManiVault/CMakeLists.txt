@@ -141,6 +141,8 @@ CPMAddPackage(
     "ZLIB_BUILD_STATIC ON"
     "ZLIB_BUILD_TESTING OFF"
     "ZLIB_INSTALL OFF"
+    "CMAKE_C_STANDARD ${CMAKE_C_STANDARD}"
+    "CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD}"
 )
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
@@ -184,7 +186,10 @@ CPMAddPackage(
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
   GIT_TAG           e2c960238d64982a4ac93c2c006155e86f23bb5f
   VERSION           "4.5.0-260308"
-  OPTIONS "BUILD_EXAMPLES OFF"
+  OPTIONS 
+    "BUILD_EXAMPLES OFF"
+    "CMAKE_C_STANDARD ${CMAKE_C_STANDARD}"
+    "CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD}"
 )
 
 if(MV_UNITY_BUILD)
