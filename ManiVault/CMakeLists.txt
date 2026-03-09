@@ -245,30 +245,36 @@ if(${MV_USE_ERROR_LOGGING})
             "SENTRY_BUILD_SHARED_LIBS OFF"
             "CRASHPAD_ENABLE_INSTALL OFF"
             "CRASHPAD_ENABLE_INSTALL_DEV OFF"
-            "CMAKE_C_STANDARD ${CMAKE_C_STANDARD}"
-            "CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD}"
     )
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        # Put targets in the proper source folder
-        set_target_properties(sentry mini_chromium
-            PROPERTIES
-            FOLDER CoreDependencies
-        )
-        
-        # Put targets in the proper source folder
-        set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_mpack crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
-            PROPERTIES
-            FOLDER CoreDependencies/Crashpad
-        )
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set_target_properties(sentry PROPERTIES
-            CXX_EXTENSIONS ON
-            C_EXTENSIONS ON
-        )
+    set_target_properties(sentry mini_chromium
+        PROPERTIES
+        FOLDER CoreDependencies
+        C_STANDARD ${CMAKE_C_STANDARD}
+        C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+        C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+        CXX_STANDARD ${CMAKE_CXX_STANDARD}
+        CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+        CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
+    )
 
+    set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_mpack crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
+        PROPERTIES
+        FOLDER CoreDependencies/Crashpad
+        CXX_STANDARD ${CMAKE_CXX_STANDARD}
+        CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+        CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
+    )
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_compile_definitions(sentry PRIVATE
             _GNU_SOURCE
+        )
+        # override settings for sentry
+        set_target_properties(sentry
+            PROPERTIES
+            C_EXTENSIONS ON
+            CXX_EXTENSIONS ON
         )
     endif()
 
