@@ -141,14 +141,17 @@ CPMAddPackage(
     "ZLIB_BUILD_STATIC ON"
     "ZLIB_BUILD_TESTING OFF"
     "ZLIB_INSTALL OFF"
-    "CMAKE_C_STANDARD ${CMAKE_C_STANDARD}"
-    "CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD}"
 )
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
 set(ZLIB_LIBRARIES zlibstatic)
-set_target_properties(zlibstatic PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(zlibstatic PROPERTIES 
+    POSITION_INDEPENDENT_CODE ON
+    C_STANDARD ${CMAKE_C_STANDARD}
+    C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+    C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+)
 
 # File compression: QuaZip
 CPMAddPackage(
@@ -194,15 +197,19 @@ CPMAddPackage(
   VERSION           "4.5.0-260308"
   OPTIONS 
     "BUILD_EXAMPLES OFF"
-    "CMAKE_C_STANDARD ${CMAKE_C_STANDARD}"
-    "CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD}"
+)
+
+set_target_properties(qtadvanceddocking-qt6 PROPERTIES 
+    PROJECT_LABEL "qtadvanceddocking" 
+    OUTPUT_NAME "qtadvanceddocking"
+    CXX_STANDARD ${CMAKE_CXX_STANDARD}
+    CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+    CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
 )
 
 if(MV_UNITY_BUILD)
     set_target_properties(qtadvanceddocking-qt6 PROPERTIES UNITY_BUILD ON)
 endif()
-
-set_target_properties(qtadvanceddocking-qt6 PROPERTIES PROJECT_LABEL "qtadvanceddocking" OUTPUT_NAME "qtadvanceddocking")
 
 # bfloat16 implementation for pre c++23
 CPMAddPackage(
