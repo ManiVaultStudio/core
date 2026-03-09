@@ -155,7 +155,11 @@ CPMAddPackage(
   NAME              quazip
   GITHUB_REPOSITORY stachenov/quazip
   GIT_TAG           v1.5
-  OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF" "BUILD_SHARED_LIBS OFF"
+  OPTIONS 
+    "QUAZIP_QT_MAJOR_VERSION 6" 
+    "QUAZIP_BZIP2 OFF" 
+    "QUAZIP_INSTALL OFF" 
+    "BUILD_SHARED_LIBS OFF"
 )
 
 # Serialization: JSON
@@ -165,8 +169,8 @@ CPMAddPackage(
   GIT_TAG           v3.12.0
   DOWNLOAD_ONLY     YES
   OPTIONS
-      "JSON_BuildTests=OFF"            # skip upstream tests
-      "JSON_MultipleHeaders=ON"        # shave compile time (optional)
+    "JSON_BuildTests=OFF"            # skip upstream tests
+    "JSON_MultipleHeaders=ON"        # shave compile time (optional)
 )
 
 # Serialization: Add valijson as a header-only library
@@ -177,7 +181,9 @@ CPMAddPackage(
   #GIT_SUBMODULES   ""                  # Does not yet work with CPM, see workaround from https://github.com/cpm-cmake/CPM.cmake/pull/461#issuecomment-1665044141
   GIT_SUBMODULES    "doc"               # list an existing subdir from the repo to not download any submodules
   DOWNLOAD_ONLY     YES
-  OPTIONS "VALIJSON_BUILD_TESTS OFF" "VALIJSON_USE_EXCEPTIONS ON"
+  OPTIONS 
+    "VALIJSON_BUILD_TESTS OFF" 
+    "VALIJSON_USE_EXCEPTIONS ON"
 )
 
 # Layout: Qt Advanced docking system
