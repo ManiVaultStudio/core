@@ -81,6 +81,8 @@ if(APPLE)
     # add the automatically determined parts of the RPATH
     # which point to directories outside the build tree to the install RPATH
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    
+    set(CMAKE_XCODE_GENERATE_SCHEME ON)
 endif()
 
 
@@ -292,10 +294,6 @@ if(${MV_USE_ERROR_LOGGING})
         string(REPLACE "/OPT:ICF" "" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
     endif()
 
-endif()
-
-if(APPLE)
-    set(CMAKE_XCODE_GENERATE_SCHEME ON)
 endif()
 
 # -----------------------------------------------------------------------------
