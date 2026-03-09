@@ -140,8 +140,7 @@ CPMAddPackage(
     "ZLIB_BUILD_SHARED OFF" 
     "ZLIB_BUILD_STATIC ON"
     "ZLIB_BUILD_TESTING OFF"
-    "SKIP_INSTALL_ALL ON" 
-    "EXCLUDE_FROM_ALL YES"
+    "ZLIB_INSTALL OFF"
 )
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
