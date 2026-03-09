@@ -239,9 +239,6 @@ if(${MV_USE_ERROR_LOGGING})
         set(SENTRY_TRANSPORT "curl")        # Use the curl HTTP transport
     endif()
 
-    # Add preprocessor directive to notify sources of error logging
-    add_compile_definitions(ERROR_LOGGING)
-
     CPMAddPackage(
         NAME                sentry-native
         GITHUB_REPOSITORY   getsentry/sentry-native

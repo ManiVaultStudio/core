@@ -12,7 +12,7 @@ using namespace mv::util;
     //#define ERROR_MANAGER_VERBOSE
 #endif
 
-#ifdef ERROR_LOGGING
+#ifdef MV_USE_ERROR_LOGGING
     #include "private/SentryErrorLogger.h"
 #endif
 
@@ -82,7 +82,7 @@ void ErrorManager::initialize()
         errorLoggingSettingsAction.addAction(&getLoggingDsnAction());
         errorLoggingSettingsAction.addAction(&getLoggingShowCrashReportDialogAction());
 
-#ifdef ERROR_LOGGING
+#ifdef MV_USE_ERROR_LOGGING
         setErrorLogger(new SentryErrorLogger(this));
 
         getErrorLogger()->initialize();
