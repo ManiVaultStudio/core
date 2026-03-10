@@ -171,7 +171,7 @@ namespace mv
         for (size_t i = 0; i < _datasets.size(); i++)
         {
             Dataset<DatasetImpl> d = _datasets[i];
-            if (d == dataset)
+            if (d == dataset && d.isValid())
             {
                 return _biMaps[i];
             }
@@ -205,7 +205,7 @@ namespace mv
         for (size_t i = 0; i < _datasets.size(); i++)
         {
             Dataset<DatasetImpl> d = _datasets[i];
-            if (d == dataset)
+            if (d == dataset && d.isValid())
             {
                 keys = _biMaps[i].getKeysByValues(indices);
             }
