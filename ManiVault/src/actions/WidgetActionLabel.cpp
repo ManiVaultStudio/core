@@ -52,13 +52,21 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
 
 bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 {
+    bool isInStudioMode = false;
+    
+    if (auto project = mv::projects().getCurrentProject())
+        isInStudioMode = project->getStudioModeAction().isChecked();
+    
     switch (event->type())
     {
         case QEvent::MouseButtonPress:
         {
             if (dynamic_cast<QWidget*>(target) != &_nameLabel)
                 break;
-
+            
+            if (auto project = mv::projects().getCurrentProject(); !project->getStudioModeAction().isChecked())
+                break;
+            
             auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
             switch (mouseEvent->button())
@@ -106,6 +114,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Enter:
         {
+            if (!isInStudioMode)
+                break;
+            
             if (dynamic_cast<QWidget*>(target) != &_nameLabel)
                 break;
 
@@ -118,6 +129,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Leave:
         {
+            if (!isInStudioMode)
+                break;
+            
             if (dynamic_cast<QWidget*>(target) != &_nameLabel)
                 break;
 
@@ -193,10 +207,15 @@ QString WidgetActionLabel::getLabelText() const
 void WidgetActionLabel::updateNameLabel()
 {
     const auto connectionEnabled = getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui);
-
+    
+    bool isInStudioMode = false;
+    
+    if (auto project = mv::projects().getCurrentProject())
+        isInStudioMode = project->getStudioModeAction().isChecked();
+    
     auto font = _nameLabel.font();
-
-    font.setUnderline(getAction()->isEnabled() && connectionEnabled);
+    
+    font.setUnderline(getAction()->isEnabled() && connectionEnabled && isInStudioMode);
     font.setItalic(getAction()->isConnected());
 
     _nameLabel.setFont(font);
