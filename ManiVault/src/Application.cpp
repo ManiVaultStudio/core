@@ -302,10 +302,13 @@ std::int32_t Application::requestOverrideCursor(Qt::CursorShape cursorShape)
         cursorOverridesCount.emplace_back(CursorShapeCount{ cursorShape, 1 });
 
     std::sort(cursorOverridesCount.begin(), cursorOverridesCount.end(), [cursorShape](auto& cursorShapeCountLhs, auto& cursorShapeCountRhs) -> bool {
-        if (cursorShapeCountRhs.shape == cursorShape)
+        if (cursorShapeCountLhs.shape == cursorShape && cursorShapeCountRhs.shape != cursorShape)
             return true;
 
-        return cursorShapeCountRhs.count > cursorShapeCountLhs.count;
+        if (cursorShapeCountRhs.shape == cursorShape && cursorShapeCountLhs.shape != cursorShape)
+            return false;
+
+        return cursorShapeCountLhs.count > cursorShapeCountRhs.count;
     });
 
     setOverrideCursor(cursorOverridesCount.first().shape);
