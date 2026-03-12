@@ -77,6 +77,24 @@ public:
      */
     [[nodiscard]] virtual Result decode(const QByteArray& input, qsizetype expectedSize = -1) const = 0;
 
+    /*
+     * Encode a block of raw bytes and save the encoded data to a file on disk.
+     *
+     * @param input Raw input bytes
+     * @param filePath Path of the file on disk to which the encoded data is saved
+     * @return Encoded bytes or an error
+     */
+    [[nodiscard]] Result encodeToFile(const QByteArray& input, const QString& filePath) const;
+
+    /*
+     * Load encoded data from a file on disk and decode it.
+     *
+     * @param filePath Path of the file on disk from which the encoded data is loaded
+     * @param expectedSize Expected decoded size in bytes, or -1 if unknown
+     * @return Decoded bytes or an error
+     */
+    [[nodiscard]] Result decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const;
+
     /** Convert codec type to persistent string */
     [[nodiscard]] static QString typeToString(Type type);
 

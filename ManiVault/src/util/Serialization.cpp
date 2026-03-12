@@ -137,6 +137,8 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 	    	throw std::runtime_error(QString("Unable to load raw data, blob codec %1 is not registered").arg(variantMap["Codec"].toString()).toLatin1());
 
     	blobCodec = BlobCodec::create(variantMap["Codec"].toString()).release();
+    } else {
+        blobCodec = BlobCodec::create(BlobCodec::Type::None).release();
     }
 
     variantMapMustContain(variantMap, "BlockSize");
@@ -157,8 +159,9 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         const auto offset   = map["Offset"].value<uint64_t>();
         const auto size     = map["Size"].value<uint64_t>();
 
-        if (map.contains("URI"))
-            loadRawDataFromBinaryFile(&bytes[offset], size, QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Open) + QDir::separator() + map["URI"].toString()));
+        if (map.contains("URI")) {
+	        loadRawDataFromBinaryFile(&bytes[offset], size, QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Open) + QDir::separator() + map["URI"].toString()));
+        }
 
         if (map.contains("Data")) {
             const auto data         = map["Data"].toString();

@@ -14,6 +14,34 @@ namespace
     std::mutex factoriesMutex;
 }
 
+BlobCodec::Result BlobCodec::encodeToFile(const QByteArray& input, const QString& filePath) const
+{
+    const auto encoded = encode(input);
+
+    if (!encoded.isSuccess())
+        return encoded;
+
+    QFile file(filePath);
+
+    if (!file.open(QIODevice::WriteOnly))
+        return { false, {}, QString("Unable to open file for writing: %1").arg(filePath) };
+
+    if (file.write(encoded._data) != encoded._data.size())
+        return { false, {}, QString("Unable to write file: %1").arg(filePath) };
+
+    return encoded;
+}
+
+BlobCodec::Result BlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
+{
+    QFile file(filePath);
+
+    if (!file.open(QIODevice::ReadOnly))
+        return { false, {}, QString("Unable to open file for reading: %1").arg(filePath) };
+
+    return decode(file.readAll(), expectedSize);
+}
+
 QString BlobCodec::typeToString(Type type)
 {
     switch (type) {

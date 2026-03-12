@@ -6,6 +6,7 @@
 #include "private/Archiver.h"
 #include "private/Core.h"
 #include "private/NoProxyRectanglesFusionStyle.h"
+#include "private/ZstdBlobCodec.h"
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
@@ -15,6 +16,7 @@
 #include <util/Icon.h>
 #include <util/HardwareSpec.h>
 #include <util/StandardPaths.h>
+#include <util/BlobCodec.h>
 
 #include <ModalTask.h>
 #include <ModalTaskHandler.h>
@@ -45,6 +47,9 @@ int main(int argc, char *argv[])
     // Destroy temporary application
     tempApp.reset();
 
+    BlobCodec::registerCodec(BlobCodec::Type::Zstd, [] {
+        return std::make_unique<ZstdBlobCodec>();
+    });
 
 #ifdef Q_OS_MAC
     QSurfaceFormat defaultFormat;
