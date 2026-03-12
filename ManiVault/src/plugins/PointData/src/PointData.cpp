@@ -1106,13 +1106,13 @@ QVariantMap Points::toVariantMap() const
         selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
     }
 
-    variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
-    variantMap["NumberOfPoints"]        = getNumPoints();
-    variantMap["Indices"]               = indices;
-    variantMap["Selection"]             = selection;
-    variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
-    variantMap["NumberOfDimensions"]    = getNumDimensions();
-    variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
+    variantMap["Data"]               = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
+    variantMap["NumberOfPoints"]     = getNumPoints();
+    variantMap["Indices"]            = indices;
+    variantMap["Selection"]          = selection;
+    variantMap["DimensionNames"]     = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
+    variantMap["NumberOfDimensions"] = getNumDimensions();
+    variantMap["Dimensions"]         = _dimensionsPickerAction->toVariantMap();
 
     variantMap["Dense"]                 = Experimental::isDense(this);
 

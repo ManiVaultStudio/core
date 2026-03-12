@@ -43,7 +43,7 @@ CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& num
  * @param maxBlockSize Maximum size per block (defaults to DEFAULT_MAX_BLOCK_SIZE)
  * @param blobCodec Optional blob codec to use for encoding the data blocks (defaults to nullptr, which means no compression)
  */
-CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, std::uint64_t maxBlockSize = DEFAULT_MAX_BLOCK_SIZE, BlobCodec* blobCodec = nullptr);
+CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, std::uint64_t maxBlockSize = DEFAULT_MAX_BLOCK_SIZE, const BlobCodec* blobCodec = nullptr);
 
 /**
  * Convert variant map to raw data

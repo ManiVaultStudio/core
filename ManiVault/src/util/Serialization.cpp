@@ -61,7 +61,7 @@ void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& numberOfBytes, 
         throw std::runtime_error("Unable to load binary file, number of requested bytes is not the same as in the file");
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/, BlobCodec* blobCodec /*= nullptr*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/, const BlobCodec* blobCodec /*= nullptr*/)
 {
     Q_ASSERT(maxBlockSize != 0);
 
