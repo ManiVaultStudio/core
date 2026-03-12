@@ -6,9 +6,7 @@
 
 #include "util/BlobCodec.h"
 
-namespace mv::util {
-
-class ZstdBlobCodec final : public util::BlobCodec
+class ZstdBlobCodec final : public mv::util::BlobCodec
 {
 public:
 
@@ -27,5 +25,3 @@ public:
 private:
     int _compressionLevel;
 };
-
-}

@@ -170,7 +170,7 @@ public: // Miscellaneous
 
     /** Perform one-time startup initialization */
     void initialize();
-    
+
 public: // Settings API
 
     /**

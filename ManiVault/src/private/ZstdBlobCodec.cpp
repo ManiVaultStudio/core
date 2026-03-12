@@ -6,8 +6,6 @@
 
 #include <zstd.h>
 
-namespace mv::util {
-
 namespace {
 
     QString getZstdErrorString(const char* prefix, size_t code)
@@ -23,7 +21,7 @@ ZstdBlobCodec::ZstdBlobCodec(int compressionLevel) :
 {
 }
 
-BlobCodec::Type ZstdBlobCodec::getType() const
+mv::util::BlobCodec::Type ZstdBlobCodec::getType() const
 {
     return Type::Zstd;
 }
@@ -33,7 +31,7 @@ QString ZstdBlobCodec::getName() const
     return QStringLiteral("zstd");
 }
 
-BlobCodec::Result ZstdBlobCodec::encode(const QByteArray& input) const
+mv::util::BlobCodec::Result ZstdBlobCodec::encode(const QByteArray& input) const
 {
     if (input.isEmpty())
         return { true, {}, {} };
@@ -57,7 +55,7 @@ BlobCodec::Result ZstdBlobCodec::encode(const QByteArray& input) const
     return { true, output, {} };
 }
 
-BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
+mv::util::BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
 {
     if (input.isEmpty()) {
         if (expectedSize > 0)
@@ -113,4 +111,3 @@ int ZstdBlobCodec::getCompressionLevel() const
     return _compressionLevel;
 }
 
-}

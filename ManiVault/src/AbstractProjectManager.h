@@ -28,6 +28,11 @@
 
 namespace mv {
 
+namespace util
+{
+    class BlobCodec;
+}
+
 /**
  * Abstract project manager class
  *
@@ -249,6 +254,12 @@ public: // Project download
      * @return Directory where downloaded projects are stored 
      */
     virtual QDir getDownloadedProjectsDir() const = 0;
+
+    /**
+     * Get the blob codec that is used by default for project serialization
+     * @return Reference to the default blob codec
+     */
+    virtual const util::BlobCodec& getDefaultBlobCodec() const = 0;
 
 public: // Temporary directories
 

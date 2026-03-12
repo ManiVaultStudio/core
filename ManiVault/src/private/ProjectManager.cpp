@@ -36,6 +36,8 @@
 
 #include "Task.h"
 
+#include "ZstdBlobCodec.h"
+
 #ifdef _DEBUG
     #define PROJECT_MANAGER_VERBOSE
 #endif
@@ -1469,6 +1471,12 @@ QDir ProjectManager::getDownloadedProjectsDir() const
     }
 
     return resultDir;
+}
+
+const util::BlobCodec& ProjectManager::getDefaultBlobCodec() const
+{
+    static ZstdBlobCodec zstdBlobCodec;
+    return zstdBlobCodec;
 }
 
 QMenu& ProjectManager::getNewProjectMenu()
