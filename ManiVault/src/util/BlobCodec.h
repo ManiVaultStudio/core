@@ -93,6 +93,13 @@ public:
      */
     static void registerCodec(Type type, FactoryFunction factoryFunction);
 
+    /**
+     * Check whether a blob codec factory function is registered for a given type
+     * @param type Codec type
+     * @return Boolean indicating whether a factory function is registered for the given type
+     */
+    [[nodiscard]] static bool isRegistered(Type type);
+
     /** Create a blob codec instance for a given type */
     static std::unique_ptr<BlobCodec> create(Type type);
 };

@@ -22,7 +22,6 @@ QString BlobCodec::typeToString(Type type)
 	    case Type::Zstd:        return QStringLiteral("zstd");
     }
 
-    Q_UNREACHABLE();
     return {};
 }
 
@@ -45,6 +44,12 @@ void BlobCodec::registerCodec(Type type, FactoryFunction factoryFunction)
     std::scoped_lock lock(factoriesMutex);
 
 	factories[type] = std::move(factoryFunction);
+}
+
+bool BlobCodec::isRegistered(Type type)
+{
+	std::scoped_lock lock(factoriesMutex);
+    return factories.find(type) != factories.end();
 }
 
 std::unique_ptr<BlobCodec> BlobCodec::create(Type type)
