@@ -103,7 +103,10 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
             const auto filePath = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save) + QDir::separator() + fileName);
 
             // Save the raw data to binary file
-            saveRawDataToBinaryFile(&bytes[offset], blockSize, filePath);
+            //saveRawDataToBinaryFile(&bytes[offset], blockSize, filePath);
+
+            if (!blobCodec->encodeToFile(QByteArray::fromRawData(&bytes[offset], blockSize), filePath).isSuccess())
+                throw std::runtime_error(QString("Unable to encode block to file: %1").arg(filePath).toLatin1());
 
             // Set the raw data URL
             block["URI"] = fileName;
@@ -160,7 +163,12 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         const auto size     = map["Size"].value<uint64_t>();
 
         if (map.contains("URI")) {
-	        loadRawDataFromBinaryFile(&bytes[offset], size, QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Open) + QDir::separator() + map["URI"].toString()));
+	        //loadRawDataFromBinaryFile(&bytes[offset], size, QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Open) + QDir::separator() + map["URI"].toString()));
+
+            const auto filePath = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Open) + QDir::separator() + map["URI"].toString());
+
+            if (!blobCodec->decodeFromFile(filePath, size).isSuccess())
+                throw std::runtime_error(QString("Unable to decode block from file: %1").arg(filePath).toLatin1());
         }
 
         if (map.contains("Data")) {
