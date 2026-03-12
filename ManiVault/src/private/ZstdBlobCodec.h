@@ -1,43 +1,30 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #pragma once
 
-#include <actions/TriggerAction.h>
+#include "util/BlobCodec.h"
 
-#include <QMenu>
+namespace mv::util {
 
-/**
- * File menu class
- * 
- * For file-related operations
- * 
- * @author Thomas Kroes
- */
-class FileMenu : public QMenu
+class ZstdBlobCodec final : public util::BlobCodec
 {
 public:
 
-    /**
-     * Constructor
-     * @param parent Pointer to parent widget
-     */
-    FileMenu(QWidget *parent = nullptr);
+    explicit ZstdBlobCodec(int compressionLevel = 3);
 
-    /**
-     * Invoked when the menu is shown
-     * @param event Pointer to show event
-     */
-    void showEvent(QShowEvent* event) override;
+    [[nodiscard]] Type getType() const override;
+    [[nodiscard]] QString getName() const override;
 
-private:
-    
-    /**
-     * Populate the menu
-     */
-    void populate ();
+    [[nodiscard]] Result encode(const QByteArray& input) const override;
+    [[nodiscard]] Result decode(const QByteArray& input, qsizetype expectedSize = -1) const override;
+
+    void setCompressionLevel(int compressionLevel);
+    [[nodiscard]] int getCompressionLevel() const;
 
 private:
-    mv::gui::TriggerAction    _exitApplicationAction;   /** Trigger action to exit the application */
+    int _compressionLevel;
 };
+
+}

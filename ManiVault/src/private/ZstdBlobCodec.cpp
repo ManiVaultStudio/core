@@ -1,110 +1,111 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
-#include "FileMenu.h"
+#include "ZstdBlobCodec.h"
 
-#include <Application.h>
-#include <CoreInterface.h>
-#include <QOperatingSystemVersion>
+#include <zstd.h>
 
-#define TEST_STYLESHEET
+namespace mv::util {
 
-using namespace mv;
-using namespace mv::gui;
+namespace {
 
-FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
-    QMenu(parent),
-    _exitApplicationAction(nullptr, "Exit")
-{
-    setTitle("File");
-    setToolTip("File operations");
-
-    //  Quit is by default in the app menu on macOS
-    if (QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
-        
-        _exitApplicationAction.setShortcut(QKeySequence("Alt+F4"));
-        _exitApplicationAction.setShortcutContext(Qt::ApplicationShortcut);
-        _exitApplicationAction.setIconByName("right-from-bracket");
-        _exitApplicationAction.setToolTip("Exit ManiVault");
-        
-        connect(&_exitApplicationAction, &TriggerAction::triggered, this, []() -> void {
-            Application::current()->quit();
-        });
+    QString getZstdErrorString(const char* prefix, size_t code)
+    {
+        return QStringLiteral("%1: %2")
+            .arg(QString::fromUtf8(prefix), QString::fromUtf8(ZSTD_getErrorName(code)));
     }
-    
-    // macOS does not like populating the menu on show, so we rather do it explicitly here
-    populate();
 
-    /*
-     * getTitleAction().setString(QString("<b>ManiVault</b> v%1").arg(QString::fromStdString(MV_VERSION_STRING())));
-
-    _fileAction.setShowLabels(false);
-
-    _fileAction.addAction(&getLoadAction());
-    _fileAction.addAction(&getSaveAction());
-
-    _startPageContentWidget.getToolbarAction().addAction(&_configurationAction);
-
-    _configurationAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _configurationAction.setIconByName("gear");
-    _configurationAction.setPopupSizeHint(QSize(400, 0));
-    _configurationAction.setVisible(false);
-
-    _configurationAction.addAction(&_fileAction);
-    _configurationAction.addAction(&getLogoAction());
-    _configurationAction.addAction(&getTitleAction());
-    _configurationAction.addAction(&const_cast<ProjectsTreeModel&>(mv::projects().getProjectsTreeModel()).getDsnsAction());
-     */
 }
 
-void FileMenu::showEvent(QShowEvent* event)
+ZstdBlobCodec::ZstdBlobCodec(int compressionLevel) :
+    _compressionLevel(compressionLevel)
 {
-    QMenu::showEvent(event);
-
-    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows)
-        populate();
 }
 
-void FileMenu::populate()
+BlobCodec::Type ZstdBlobCodec::getType() const
 {
-    clear();
+    return Type::Zstd;
+}
 
-    addMenu(&projects().getNewProjectMenu());
-    addAction(&projects().getOpenProjectAction());
-    //addAction(&projects().getImportProjectAction());
-    addAction(&projects().getSaveProjectAction());
-    addAction(&projects().getSaveProjectAsAction());
-    addAction(&projects().getEditProjectSettingsAction());
-    addAction(&projects().getPublishAction());
-    addMenu(projects().getRecentProjectsAction().getMenu(this));
-    //addSeparator();
-    //addMenu(Application::core()->getWorkspaceManager().getMenu());
-    addSeparator();
-    addMenu(&projects().getImportDataMenu());
-    addSeparator();
-    addAction(&projects().getPluginManagerAction());
-    addSeparator();
-    addAction(&settings().getEditSettingsAction());
-    addSeparator();
-    addAction(&projects().getShowStartPageAction());
-    addAction(&help().getShowLearningCenterPageAction());
-    
-    //  Quit is by default in the app menu on macOS
-    //if(QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
-    //addSeparator();
-    //addAction(&_exitApplicationAction);
-    //}
+QString ZstdBlobCodec::getName() const
+{
+    return QStringLiteral("zstd");
+}
 
-#if defined(_DEBUG) && defined(TEST_STYLESHEET)
-    /*
-    addSeparator();
-    
-    auto applyStyleSheetAction = new TriggerAction(this, "Apply Stylesheet");
+BlobCodec::Result ZstdBlobCodec::encode(const QByteArray& input) const
+{
+    if (input.isEmpty())
+        return { true, {}, {} };
 
-    connect(applyStyleSheetAction, &TriggerAction::triggered, &workspaces(), &AbstractWorkspaceManager::applyStyleSheet);
+    const auto bound = ZSTD_compressBound(static_cast<size_t>(input.size()));
 
-    addAction(applyStyleSheetAction);
-    */
-#endif
+    QByteArray output;
+    output.resize(static_cast<qsizetype>(bound));
+
+    const auto compressedSize = ZSTD_compress(output.data(),
+        bound,
+        input.constData(),
+        static_cast<size_t>(input.size()),
+        _compressionLevel);
+
+    if (ZSTD_isError(compressedSize))
+        return { false, {}, getZstdErrorString("ZSTD_compress failed", compressedSize) };
+
+    output.resize(static_cast<qsizetype>(compressedSize));
+
+    return { true, output, {} };
+}
+
+BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
+{
+    if (input.isEmpty()) {
+        if (expectedSize > 0)
+            return { false, {}, QStringLiteral("Input is empty but expected decoded data") };
+
+        return { true, {}, {} };
+    }
+
+    unsigned long long frameContentSize = ZSTD_getFrameContentSize(input.constData(),
+        static_cast<size_t>(input.size()));
+
+    if (frameContentSize == ZSTD_CONTENTSIZE_ERROR)
+        return { false, {}, QStringLiteral("Input is not a valid zstd frame") };
+
+    if (frameContentSize == ZSTD_CONTENTSIZE_UNKNOWN) {
+        if (expectedSize < 0)
+            return { false, {}, QStringLiteral("Expected decoded size is required for this zstd frame") };
+
+        frameContentSize = static_cast<unsigned long long>(expectedSize);
+    }
+
+    QByteArray output;
+    output.resize(static_cast<qsizetype>(frameContentSize));
+
+    const auto decompressedSize = ZSTD_decompress(output.data(),
+        static_cast<size_t>(output.size()),
+        input.constData(),
+        static_cast<size_t>(input.size()));
+
+    if (ZSTD_isError(decompressedSize))
+        return { false, {}, getZstdErrorString("ZSTD_decompress failed", decompressedSize) };
+
+    output.resize(static_cast<qsizetype>(decompressedSize));
+
+    if (expectedSize >= 0 && output.size() != expectedSize)
+        return { false, {}, QStringLiteral("Decoded size mismatch") };
+
+    return { true, output, {} };
+}
+
+void ZstdBlobCodec::setCompressionLevel(int compressionLevel)
+{
+    _compressionLevel = compressionLevel;
+}
+
+int ZstdBlobCodec::getCompressionLevel() const
+{
+    return _compressionLevel;
+}
+
 }
