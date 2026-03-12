@@ -4,11 +4,15 @@
 
 #include "BlobCodec.h"
 
-#include "PassthroughBlobCodec.h"
-
 #include <stdexcept>
 
 namespace mv::util {
+
+namespace
+{
+    std::map<BlobCodec::Type, BlobCodec::FactoryFunction> factories;
+    std::mutex factoriesMutex;
+}
 
 QString BlobCodec::typeToString(Type type)
 {
@@ -36,20 +40,24 @@ BlobCodec::Type BlobCodec::typeFromString(const QString& typeString)
     throw std::runtime_error(QString("Unknown blob codec type: %1").arg(typeString).toStdString());
 }
 
-BlobCodec* BlobCodec::create(Type type)
+void BlobCodec::registerCodec(Type type, FactoryFunction factoryFunction)
 {
-    switch (type) {
-        case Type::None:
-            return new PassthroughBlobCodec();
+    std::scoped_lock lock(factoriesMutex);
 
-        case Type::QtCompress:
-        case Type::Zstd:
-            break;
-    }
-
-    Q_UNREACHABLE();
-
-    return nullptr;
+	factories[type] = std::move(factoryFunction);
 }
+
+std::unique_ptr<BlobCodec> BlobCodec::create(Type type)
+{
+    std::scoped_lock lock(factoriesMutex);
+
+    const auto it = factories.find(type);
+
+    if (it == factories.end())
+        throw std::runtime_error("No factory registered for requested blob codec type");
+
+    return it->second();
+}
+
 
 }

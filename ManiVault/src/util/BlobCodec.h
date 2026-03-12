@@ -43,6 +43,9 @@ public:
         [[nodiscard]] bool hasError() const { return !_success; }
     };
 
+    /** Factory function for creating blob codec instances */
+    using FactoryFunction = std::function<std::unique_ptr<BlobCodec>()>;
+
 public:
 
     /** No need for custom constructor */
@@ -80,8 +83,15 @@ public:
     /** Convert persistent string to codec type */
     [[nodiscard]] static Type typeFromString(const QString& typeString);
 
-    /** Factory function */
-    [[nodiscard]] static BlobCodec* create(Type type);
+    /**
+     * Register a blob codec factory function for a given type (used for deserialization)
+     * @param type Codec type
+     * @param factoryFunction Factory function that creates an instance of the blob codec
+     */
+    static void registerCodec(Type type, FactoryFunction factoryFunction);
+
+    /** Create a blob codec instance for a given type */
+    static std::unique_ptr<BlobCodec> create(Type type);
 };
 
-} // namespace mv::util
+}

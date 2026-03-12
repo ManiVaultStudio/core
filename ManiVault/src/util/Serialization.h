@@ -17,6 +17,8 @@ inline constexpr auto DEFAULT_MAX_BLOCK_SIZE = std::numeric_limits<std::int32_t>
 
 namespace mv::util {
 
+class BlobCodec;
+
 /**
  * Save raw data to binary file on disk
  * @param bytes Pointer to input buffer
@@ -39,8 +41,9 @@ CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& num
  * @param numberOfBytes Number of input bytes 
  * @param saveToDisk Whether to save the raw data to disk or inline in the variant
  * @param maxBlockSize Maximum size per block (defaults to DEFAULT_MAX_BLOCK_SIZE)
+ * @param blobCodec Optional blob codec to use for encoding the data blocks (defaults to nullptr, which means no compression)
  */
-CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, std::uint64_t maxBlockSize = DEFAULT_MAX_BLOCK_SIZE);
+CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, std::uint64_t maxBlockSize = DEFAULT_MAX_BLOCK_SIZE, BlobCodec* blobCodec = nullptr);
 
 /**
  * Convert variant map to raw data
