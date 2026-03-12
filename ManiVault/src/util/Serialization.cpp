@@ -130,15 +130,21 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
 {
-    if (variantMap.contains("Codec"))
-        qDebug() << "--------------------Codec:" << variantMap["Codec"].toString();
+    const BlobCodec* blobCodec = nullptr;
+
+    if (variantMap.contains("Codec")) {
+	    if (!BlobCodec::isRegistered(variantMap["Codec"].toString()))
+	    	throw std::runtime_error(QString("Unable to load raw data, blob codec %1 is not registered").arg(variantMap["Codec"].toString()).toLatin1());
+
+    	blobCodec = BlobCodec::create(variantMap["Codec"].toString()).release();
+    }
 
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
 
     const auto blockSize    = variantMap["BlockSize"].toInt();
     const auto blocks       = variantMap["Blocks"].toList();
-
+		
     // Go over all blocks in the blocks map and copy the raw data to the output bytes
     for (const auto& block : blocks) {
 

@@ -52,6 +52,11 @@ bool BlobCodec::isRegistered(Type type)
     return factories.find(type) != factories.end();
 }
 
+bool BlobCodec::isRegistered(const QString& typeString)
+{
+    return isRegistered(typeFromString(typeString));
+}
+
 std::unique_ptr<BlobCodec> BlobCodec::create(Type type)
 {
     std::scoped_lock lock(factoriesMutex);
@@ -64,5 +69,9 @@ std::unique_ptr<BlobCodec> BlobCodec::create(Type type)
     return it->second();
 }
 
+std::unique_ptr<BlobCodec> BlobCodec::create(const QString& typeString)
+{
+    return create(typeFromString(typeString));
+}
 
 }
