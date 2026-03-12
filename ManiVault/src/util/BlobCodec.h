@@ -83,6 +83,9 @@ public:
     /** Convert persistent string to codec type */
     [[nodiscard]] static Type typeFromString(const QString& typeString);
 
+    [[nodiscard]] virtual QString getFileExtension() const = 0;
+    [[nodiscard]] virtual bool supportsInlineData() const { return true; }
+
     /**
      * Register a blob codec factory function for a given type (used for deserialization)
      * @param type Codec type

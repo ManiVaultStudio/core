@@ -29,4 +29,9 @@ BlobCodec::Result PassthroughBlobCodec::decode(const QByteArray& input, qsizetyp
     return { true, input, {} };
 }
 
+QString PassthroughBlobCodec::getFileExtension() const
+{
+    return QStringLiteral(".bin");
+}
+
 }

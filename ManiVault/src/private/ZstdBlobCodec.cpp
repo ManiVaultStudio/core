@@ -98,6 +98,11 @@ BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsizetype expec
     return { true, output, {} };
 }
 
+QString ZstdBlobCodec::getFileExtension() const
+{
+    return QStringLiteral(".bin.zst");
+}
+
 void ZstdBlobCodec::setCompressionLevel(int compressionLevel)
 {
     _compressionLevel = compressionLevel;

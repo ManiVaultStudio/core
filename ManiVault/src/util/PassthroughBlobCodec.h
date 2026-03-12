@@ -16,6 +16,7 @@ public:
 
     [[nodiscard]] Result encode(const QByteArray& input) const override;
     [[nodiscard]] Result decode(const QByteArray& input, qsizetype expectedSize = -1) const override;
+    [[nodiscard]] QString getFileExtension() const override;
 };
 
 }
