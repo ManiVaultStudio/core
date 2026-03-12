@@ -61,8 +61,10 @@ void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& numberOfBytes, 
         throw std::runtime_error("Unable to load binary file, number of requested bytes is not the same as in the file");
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/, const BlobCodec* blobCodec /*= nullptr*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/, const BlobCodec* blobCodecOverride /*= nullptr*/)
 {
+    const auto blobCodec = blobCodecOverride ? blobCodecOverride : &mv::projects().getDefaultBlobCodec();
+
     Q_ASSERT(maxBlockSize != 0);
 
     if (maxBlockSize == -1)
@@ -71,7 +73,8 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
     QVariantMap rawData;
 
     // Save the number of bytes
-    rawData["Size"] = QVariant::fromValue(numberOfBytes);
+    rawData["Size"]     = QVariant::fromValue(numberOfBytes);
+    rawData["Codec"]    = QVariant::fromValue(blobCodec->getName());
 
     // Compute the number of blocks
     const auto numberOfBlocks = static_cast<std::uint64_t>(ceilf(numberOfBytes / static_cast<float>(maxBlockSize)));
@@ -80,6 +83,8 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
     std::uint64_t offset = 0;
 
     QVariantList blocks;
+
+    const auto& fileExtension = blobCodec->getFileExtension();
 
     while (offset < numberOfBytes)
     {
@@ -94,7 +99,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         if (saveToDisk) {
 
             // File name and path of the external binary file in the temporary directory
-            const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + ".bin";
+            const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + fileExtension;
             const auto filePath = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save) + QDir::separator() + fileName);
 
             // Save the raw data to binary file
@@ -125,6 +130,9 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
 {
+    if (variantMap.contains("Codec"))
+        qDebug() << "--------------------Codec:" << variantMap["Codec"].toString();
+
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
 
