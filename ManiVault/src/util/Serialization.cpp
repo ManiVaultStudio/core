@@ -183,9 +183,11 @@ QVariantMap rawDataToVariantMap(const char* bytes,
                 + fileName
             );
 
-            saveRawDataToBinaryFile(result._encodedData.constData(),
-                static_cast<std::uint64_t>(result._encodedData.size()),
-                filePath);
+            // Save the raw data to binary file
+            //saveRawDataToBinaryFile(&bytes[offset], blockSize, filePath);
+
+            if (!blobCodec->encodeToFile(QByteArray::fromRawData(&bytes[offset], blockSize), filePath).isSuccess())
+                throw std::runtime_error(QString("Unable to encode block to file: %1").arg(filePath).toLatin1());
 
             block["URI"] = fileName;
         }
