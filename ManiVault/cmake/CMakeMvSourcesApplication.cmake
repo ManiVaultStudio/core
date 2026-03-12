@@ -295,6 +295,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/ProjectsMenu.h
     src/private/HelpMenu.h
     src/private/NoProxyRectanglesFusionStyle.h
+    src/private/ZstdBlobCodec.h
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -314,6 +315,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/ProjectsMenu.cpp
     src/private/HelpMenu.cpp
     src/private/NoProxyRectanglesFusionStyle.cpp
+    src/private/ZstdBlobCodec.cpp
 )
 
 if(MV_USE_ERROR_LOGGING)
