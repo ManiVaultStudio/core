@@ -17,6 +17,17 @@ public:
 
     [[nodiscard]] Result encode(const QByteArray& input) const override;
     [[nodiscard]] Result decode(const QByteArray& input, qsizetype expectedSize = -1) const override;
+
+    /**
+     * Decode a previously encoded block of zstd bytes directly to a provided output buffer.
+     *
+     * @param encodedData Zstd-encoded input bytes
+     * @param destination Output buffer to which the decoded data is copied
+     * @param destinationSize Size of the output buffer in bytes
+     * @return Decoded bytes or an error
+     */
+    [[nodiscard]] Result decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const override;
+
     [[nodiscard]] QString getFileExtension() const override;
 
     void setCompressionLevel(int compressionLevel);

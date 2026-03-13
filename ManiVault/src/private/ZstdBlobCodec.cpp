@@ -96,6 +96,31 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsize
     return { true, output, {} };
 }
 
+mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const
+{
+    Result result;
+
+    if (destination == nullptr) {
+        result._error = "Destination buffer is null";
+        return result;
+    }
+
+    const size_t decodedSize = ZSTD_decompress(
+        destination,
+        static_cast<size_t>(destinationSize),
+        encodedData.constData(),
+        static_cast<size_t>(encodedData.size()));
+
+    if (ZSTD_isError(decodedSize)) {
+        result._error = QString("ZSTD decompression failed: %1")
+            .arg(ZSTD_getErrorName(decodedSize));
+        return result;
+    }
+
+    result._success = true;
+    return result;
+}
+
 QString ZstdBlobCodec::getFileExtension() const
 {
     return QStringLiteral(".bin.zst");

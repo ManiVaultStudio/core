@@ -33,9 +33,7 @@ BlobCodec::Result BlobCodec::decodeTo(const QByteArray& encodedData, char* desti
     const auto decodedSize = static_cast<std::uint64_t>(decodeResult._data.size());
 
     if (decodedSize > destinationSize) {
-        result._error = QString("Decoded data size (%1) exceeds destination buffer size (%2)")
-            .arg(decodedSize)
-            .arg(destinationSize);
+        result._error = QString("Decoded data size (%1) exceeds destination buffer size (%2)").arg(decodedSize).arg(destinationSize);
         return result;
     }
 
