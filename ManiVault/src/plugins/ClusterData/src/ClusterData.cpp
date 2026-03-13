@@ -120,6 +120,7 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
 void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
+    return;
 
     const auto dataMap = variantMap["Data"].toMap();
 
