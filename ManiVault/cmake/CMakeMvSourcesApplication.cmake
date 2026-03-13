@@ -295,6 +295,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/ProjectsMenu.h
     src/private/HelpMenu.h
     src/private/NoProxyRectanglesFusionStyle.h
+    src/private/PassthroughBlobCodec.h
     src/private/ZstdBlobCodec.h
 )
 
@@ -315,6 +316,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/ProjectsMenu.cpp
     src/private/HelpMenu.cpp
     src/private/NoProxyRectanglesFusionStyle.cpp
+    src/private/PassthroughBlobCodec.cpp
     src/private/ZstdBlobCodec.cpp
 )
 

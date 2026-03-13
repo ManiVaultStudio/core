@@ -8,8 +8,6 @@
 
 #include <zstd.h>
 
-#include <quazip/JlCompress.h>
-
 namespace {
 
     QString getZstdErrorString(const char* prefix, size_t code)
@@ -123,6 +121,32 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
 
     result._success = true;
     return result;
+}
+
+mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
+{
+    QFile file(filePath);
+
+    if (!file.open(QIODevice::ReadOnly))
+        return { false, {}, QString("Unable to open file for reading: %1").arg(filePath) };
+
+    const auto zstdBytes = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
+
+    return decode(zstdBytes, expectedSize);
+}
+
+mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
+{
+    if (destination == nullptr) {
+        Result result;
+
+    	result._error = "Destination buffer is null";
+        return result;
+    }
+
+    const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
+
+    return decodeTo(encodedData, destination, destinationSize);
 }
 
 QString ZstdBlobCodec::getFileExtension() const

@@ -498,6 +498,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
                 archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
+                archiver.extractSingleFile(filePath, "project.json", QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
 
                 compressionTask.setSubtasks(archiver.getTaskNamesForDecompression(filePath));
                 compressionTask.setRunning();
@@ -520,7 +521,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     throw std::runtime_error("Canceled before project was loaded");
                 });
 
-                archiver.decompress(filePath, temporaryDirectoryPath);
+                //archiver.decompress(filePath, temporaryDirectoryPath);
 
                 compressionTask.setFinished();
 

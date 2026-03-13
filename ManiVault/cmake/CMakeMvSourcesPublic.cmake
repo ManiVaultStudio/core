@@ -582,7 +582,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/StandardPaths.h
     src/util/CustomAssetsUrlSchemeHandler.h
     src/util/BlobCodec.h
-    src/util/PassthroughBlobCodec.h
 )
 
 if(APPLE)
@@ -647,7 +646,6 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/StandardPaths.cpp
 	src/util/CustomAssetsUrlSchemeHandler.cpp
 	src/util/BlobCodec.cpp
-    src/util/PassthroughBlobCodec.cpp
 )
 
 if(APPLE)

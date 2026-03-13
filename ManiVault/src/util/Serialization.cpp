@@ -271,7 +271,8 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
             job.size    = blockMap["Size"].value<quint64>();
 
             if (blockMap.contains("URI"))
-                job.uri = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Open) + QDir::separator() + blockMap["URI"].toString());
+                job.uri = blockMap["URI"].toString();
+                //job.uri = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Open) + QDir::separator() + blockMap["URI"].toString());
 
             if (blockMap.contains("Data"))
                 job.data = blockMap["Data"].toString();

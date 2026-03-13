@@ -7,16 +7,15 @@
 #include "private/Core.h"
 #include "private/NoProxyRectanglesFusionStyle.h"
 #include "private/ZstdBlobCodec.h"
+#include "private/PassthroughBlobCodec.h"
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
 
 #include <models/ProjectsTreeModel.h>
 
-#include <util/Icon.h>
 #include <util/HardwareSpec.h>
 #include <util/StandardPaths.h>
-#include <util/PassthroughBlobCodec.h>
 #include <util/BlobCodec.h>
 
 #include <ModalTask.h>

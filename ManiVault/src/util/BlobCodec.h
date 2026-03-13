@@ -103,7 +103,7 @@ public:
      * @param expectedSize Expected decoded size in bytes, or -1 if unknown
      * @return Decoded bytes or an error
      */
-    [[nodiscard]] Result decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const;
+    [[nodiscard]] virtual Result decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const = 0;
 
     /*
      * Load encoded data from a file on disk and decode it directly to a provided output buffer.
@@ -113,7 +113,7 @@ public:
      * @param destinationSize Size of the output buffer in bytes
      * @return Decoded bytes or an error
      */
-    [[nodiscard]] Result decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const;
+    [[nodiscard]] virtual Result decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const = 0;
 
     /** Convert codec type to persistent string */
     [[nodiscard]] static QString typeToString(Type type);
