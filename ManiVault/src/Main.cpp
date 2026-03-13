@@ -132,8 +132,5 @@ int main(int argc, char *argv[])
 
     loadGuiTask.setSubtaskFinished("Create main window");
 
-    qDebug() << "ideal threads:" << QThread::idealThreadCount();
-    qDebug() << "pool max threads:" << QThreadPool::globalInstance()->maxThreadCount();
-
     return Application::exec();
 }
