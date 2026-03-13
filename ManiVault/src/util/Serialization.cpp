@@ -297,17 +297,9 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 	                qDebug() << "Loading raw data from binary file for block with offset" << job.offset << "and size" << job.size;
                 }
 
-                const auto decodeResult = blobCodec->decodeFromFile(job.uri);
+                const auto decodeResult = blobCodec->decodeFromFileTo(job.uri, bytes + job.offset, static_cast<qsizetype>(job.size));
 
-                if (decodeResult.isSuccess()) {
-                    const auto& blockData = decodeResult._data;
-
-                    if (static_cast<quint64>(blockData.size()) < job.size) {
-                        throw std::runtime_error(QString("Decoded block is smaller than expected: got %1 bytes, expected %2 bytes").arg(blockData.size()).arg(job.size).toStdString());
-                    }
-
-                    memcpy(bytes + job.offset, blockData.constData(), static_cast<size_t>(job.size));
-                } else {
+                if (!decodeResult.isSuccess()) {
                     throw std::runtime_error(QString("Failed to decode block from file: %1").arg(job.uri).toStdString());
                 }
             }

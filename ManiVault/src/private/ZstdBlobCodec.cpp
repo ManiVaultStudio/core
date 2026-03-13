@@ -64,7 +64,6 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsize
         return { true, {}, {} };
     }
 
-    qDebug() << "ZstdBlobCodec::decode: compressed size" << input.size();
     unsigned long long frameContentSize = ZSTD_getFrameContentSize(input.constData(),
         static_cast<size_t>(input.size()));
 
@@ -91,7 +90,6 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsize
 
     output.resize(static_cast<qsizetype>(decompressedSize));
 
-    qDebug() << "ZstdBlobCodec::decode: decompressed size" << output.size();
     if (expectedSize >= 0 && output.size() != expectedSize)
         return { false, {}, QStringLiteral("Decoded size mismatch") };
 
