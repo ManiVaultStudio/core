@@ -104,13 +104,6 @@ QByteArray readBinaryFileToByteArray(const QString& filePath)
     return file.readAll();
 }
 
-#include <QtConcurrent>
-#include <QUuid>
-#include <QDir>
-#include <QFile>
-#include <QVector>
-#include <QVariantList>
-
 QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/, const BlobCodec* blobCodecOverride /*= nullptr*/)
 {
     struct EncodeBlockJob
@@ -182,7 +175,6 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
             block["Offset"]         = QVariant::fromValue(job._offset);
             block["Size"]           = QVariant::fromValue(job._size);
-            
 
             if (saveToDisk) {
                 const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + blobCodec->getFileExtension();
