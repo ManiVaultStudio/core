@@ -77,6 +77,16 @@ public:
      */
     [[nodiscard]] virtual Result decode(const QByteArray& input, qsizetype expectedSize = -1) const = 0;
 
+    /**
+     * Decode a previously encoded block of bytes directly to a provided output buffer.
+     *
+     * @param encodedData Encoded input bytes
+     * @param destination Output buffer to which the decoded data is copied
+     * @param destinationSize Size of the output buffer in bytes
+     * @return Decoded bytes or an error
+     */
+    [[nodiscard]] virtual Result decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const;
+
     /*
      * Encode a block of raw bytes and save the encoded data to a file on disk.
      *
@@ -94,6 +104,16 @@ public:
      * @return Decoded bytes or an error
      */
     [[nodiscard]] Result decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const;
+
+    /*
+     * Load encoded data from a file on disk and decode it directly to a provided output buffer.
+     *
+     * @param filePath Path of the file on disk from which the encoded data is loaded
+     * @param destination Output buffer to which the decoded data is copied
+     * @param destinationSize Size of the output buffer in bytes
+     * @return Decoded bytes or an error
+     */
+    [[nodiscard]] Result decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const;
 
     /** Convert codec type to persistent string */
     [[nodiscard]] static QString typeToString(Type type);

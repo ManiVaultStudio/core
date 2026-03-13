@@ -13,7 +13,7 @@
 #include <QStringList>
 #include <QVector>
 
-inline constexpr auto DEFAULT_MAX_BLOCK_SIZE = std::numeric_limits<std::int32_t>::max() / 8;
+inline constexpr std::uint64_t DEFAULT_MAX_BLOCK_SIZE = 4ull * 1024ull * 1024ull;
 
 namespace mv::util {
 

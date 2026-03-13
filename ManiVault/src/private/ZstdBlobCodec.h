@@ -10,7 +10,7 @@ class ZstdBlobCodec final : public mv::util::BlobCodec
 {
 public:
 
-    explicit ZstdBlobCodec(int compressionLevel = 3);
+    explicit ZstdBlobCodec(int compressionLevel = 15);
 
     [[nodiscard]] Type getType() const override;
     [[nodiscard]] QString getName() const override;

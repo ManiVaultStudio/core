@@ -16,6 +16,7 @@
 #include <util/Icon.h>
 #include <util/HardwareSpec.h>
 #include <util/StandardPaths.h>
+#include <util/PassthroughBlobCodec.h>
 #include <util/BlobCodec.h>
 
 #include <ModalTask.h>
@@ -47,8 +48,12 @@ int main(int argc, char *argv[])
     // Destroy temporary application
     tempApp.reset();
 
+    BlobCodec::registerCodec(BlobCodec::Type::None, [] {
+        return std::make_unique<PassthroughBlobCodec>();
+    });
+
     BlobCodec::registerCodec(BlobCodec::Type::Zstd, [] {
-        return std::make_unique<ZstdBlobCodec>();
+        return std::make_unique<ZstdBlobCodec>(mv::projects().getCurrentProject()->getCompressionAction().getLevelAction().getValue());
     });
 
 #ifdef Q_OS_MAC
@@ -126,6 +131,9 @@ int main(int argc, char *argv[])
     mainWindow.initialize();
 
     loadGuiTask.setSubtaskFinished("Create main window");
+
+    qDebug() << "ideal threads:" << QThread::idealThreadCount();
+    qDebug() << "pool max threads:" << QThreadPool::globalInstance()->maxThreadCount();
 
     return Application::exec();
 }
