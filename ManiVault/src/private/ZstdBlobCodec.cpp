@@ -4,7 +4,11 @@
 
 #include "ZstdBlobCodec.h"
 
+#include "Archiver.h"
+
 #include <zstd.h>
+
+#include <quazip/JlCompress.h>
 
 namespace {
 
