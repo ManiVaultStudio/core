@@ -29,6 +29,23 @@ namespace mv
         }
     }
 
+    std::vector<QString> BiMap::getKeys() const
+    {
+        std::vector<uint32_t> values(_vkMap.size());
+        std::iota(values.begin(), values.end(), 0);
+        std::vector<QString> keys(values.size());
+        for (int i = 0; i < values.size(); i++)
+        {
+            try {
+                keys[i] = _vkMap.at(values[i]);
+            }
+            catch (std::exception&) {
+                continue;
+            }
+        }
+        return keys;
+    }
+
     std::vector<QString> BiMap::getKeysByValues(const std::vector<uint32_t>& values) const
     {
         std::vector<QString> keys;
@@ -223,6 +240,30 @@ namespace mv
                 d->markSelectionDirty(true);
             }
         }
+    }
+
+    bool KeyBasedSelectionGroup::areDatasetsPartOfGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2)
+    {
+        bool foundDataset1 = false;
+        bool foundDataset2 = false;
+
+        for (Dataset<DatasetImpl> d : _datasets)
+        {
+            if (d.getDatasetId() == d1.getDatasetId())
+                foundDataset1 = true;
+            if (d.getDatasetId() == d2.getDatasetId())
+                foundDataset2 = true;
+        }
+        return foundDataset1 && foundDataset2;
+    }
+
+    std::vector<int> KeyBasedSelectionGroup::getMappingBetweenDatasets(Dataset<DatasetImpl> fromDataset, Dataset<DatasetImpl> toDataset)
+    {
+        BiMap& fromBimap = getBiMap(fromDataset);
+        std::vector<QString> keys = fromBimap.getKeys();
+        BiMap& toBimap = getBiMap(toDataset);
+        std::vector<int> values = toBimap.getValuesByKeysWithMissingValue(keys, -1);
+        return values;
     }
 
     void KeyBasedSelectionGroup::fromVariantMap(const QVariantMap& variantMap)
