@@ -123,4 +123,39 @@ BlobCodec::Type BlobCodec::typeFromString(const QString& typeString)
     throw std::runtime_error(QString("Unknown blob codec type: %1").arg(typeString).toStdString());
 }
 
+void BlobCodec::registerCodec(Type type, FactoryFunction factoryFunction)
+{
+    std::scoped_lock lock(factoriesMutex);
+
+	factories[type] = std::move(factoryFunction);
+}
+
+bool BlobCodec::isRegistered(Type type)
+{
+	std::scoped_lock lock(factoriesMutex);
+    return factories.find(type) != factories.end();
+}
+
+bool BlobCodec::isRegistered(const QString& typeString)
+{
+    return isRegistered(typeFromString(typeString));
+}
+
+std::unique_ptr<BlobCodec> BlobCodec::create(Type type)
+{
+    std::scoped_lock lock(factoriesMutex);
+
+    const auto it = factories.find(type);
+
+    if (it == factories.end())
+        throw std::runtime_error("No factory registered for requested blob codec type");
+
+    return it->second();
+}
+
+std::unique_ptr<BlobCodec> BlobCodec::create(const QString& typeString)
+{
+    return create(typeFromString(typeString));
+}
+
 }

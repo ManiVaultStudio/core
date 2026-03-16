@@ -6,7 +6,7 @@
 
 #include "actions/GroupAction.h"
 #include "actions/ToggleAction.h"
-#include "actions/IntegralAction.h"
+#include "actions/OptionAction.h"
 
 namespace mv {
 
@@ -30,7 +30,7 @@ public: // Serialization
 
     /**
      * Load compression action from variant
-     * @param Variant representation of the compression action
+     * @param variantMap Variant representation of the compression action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -43,15 +43,16 @@ public: // Serialization
 public: // Action getters
 
     gui::ToggleAction& getEnabledAction() { return _enabledAction; }
-    gui::IntegralAction& getLevelAction() { return _levelAction; }
+    gui::OptionAction& getCodecTypeAction() { return _codecTypeAction; }
+
+    //gui::HorizontalGroupAction* getCodecEditAction();
 
 private:
-    gui::ToggleAction       _enabledAction;     /** Action to enable/disable project file compression */
-    gui::IntegralAction     _levelAction;       /** Action to control the amount of project file compression */
+    gui::ToggleAction   _enabledAction;     /** Action to enable/disable project file compression */
+    gui::OptionAction   _codecTypeAction;   /** Blob codec type action for project serialization */
 
 public:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
-    static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
 };
 
 }

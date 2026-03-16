@@ -28,6 +28,8 @@ set(PRIVATE_ACTIONS_HEADERS
     src/private/FrontPagesStatusBarAction.h
     src/private/SettingsStatusBarAction.h
     src/private/WorkspaceStatusBarAction.h
+    src/private/ZstdCodecSettingsAction.h
+    src/private/PassthroughCodecSettingsAction.h
 )
 
 set(PRIVATE_ACTIONS_SOURCES
@@ -38,6 +40,8 @@ set(PRIVATE_ACTIONS_SOURCES
     src/private/FrontPagesStatusBarAction.cpp
     src/private/SettingsStatusBarAction.cpp
     src/private/WorkspaceStatusBarAction.cpp
+    src/private/ZstdCodecSettingsAction.cpp
+    src/private/PassthroughCodecSettingsAction.cpp
 )
 
 set(PRIVATE_ACTIONS_FILES
@@ -296,7 +300,9 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/HelpMenu.h
     src/private/NoProxyRectanglesFusionStyle.h
     src/private/PassthroughBlobCodec.h
+    src/private/PassthroughBlobCodecFactory.h
     src/private/ZstdBlobCodec.h
+    src/private/ZstdBlobCodecFactory.h
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -317,7 +323,9 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/HelpMenu.cpp
     src/private/NoProxyRectanglesFusionStyle.cpp
     src/private/PassthroughBlobCodec.cpp
+    src/private/PassthroughBlobCodecFactory.cpp
     src/private/ZstdBlobCodec.cpp
+    src/private/ZstdBlobCodecFactory.cpp
 )
 
 if(MV_USE_ERROR_LOGGING)

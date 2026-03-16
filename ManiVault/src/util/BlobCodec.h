@@ -123,41 +123,6 @@ public:
 
     [[nodiscard]] virtual QString getFileExtension() const = 0;
     [[nodiscard]] virtual bool supportsInlineData() const { return true; }
-
-    /**
-     * Register a blob codec factory function for a given type (used for deserialization)
-     * @param type Codec type
-     * @param factoryFunction Factory function that creates an instance of the blob codec
-     */
-    static void registerCodec(Type type, FactoryFunction factoryFunction);
-
-    /**
-     * Check whether a blob codec factory function is registered for a given type
-     * @param type Codec type
-     * @return Boolean indicating whether a factory function is registered for the given type
-     */
-    [[nodiscard]] static bool isRegistered(Type type);
-
-    /**
-     * Check whether a blob codec factory function is registered for a given type string
-     * @param typeString Codec type string
-     * @return Boolean indicating whether a factory function is registered for the given type
-     */
-    [[nodiscard]] static bool isRegistered(const QString& typeString);
-
-    /**
-     * Create a blob codec instance for a given type
-     * @param type Codec type
-     * @return Unique pointer to created blob codec instance
-     */
-    static std::unique_ptr<BlobCodec> create(Type type);
-
-    /**
-     * Create a blob codec instance for a given type string
-     * @param typeString Codec type string
-     * @return Unique pointer to created blob codec instance
-     */
-    static std::unique_ptr<BlobCodec> create(const QString& typeString);
 };
 
 }

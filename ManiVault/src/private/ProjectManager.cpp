@@ -920,7 +920,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 auto compressionLayout = new QHBoxLayout();
 
                 compressionLayout->addWidget(_project->getCompressionAction().getEnabledAction().createWidget(&saveFileDialog));
-                compressionLayout->addWidget(_project->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
+                //compressionLayout->addWidget(_project->getCompressionAction().getCodecEditAction().createWidget(&saveFileDialog), 1);
                 
                 fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 
@@ -968,7 +968,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                         return;
 
                     _project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
-                    _project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
+                    //_project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 
                 saveFileDialog.open();
@@ -993,10 +993,12 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             Application::requestOverrideCursor(Qt::WaitCursor);
 
+            /*
             if (_project->getCompressionAction().getEnabledAction().isChecked())
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << _project->getCompressionAction().getLevelAction().getValue();
             else
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
+			*/
 
             auto& projectSerializationTask  = projects().getProjectSerializationTask();
             auto& compressionTask           = projectSerializationTask.getCompressionTask();
@@ -1173,7 +1175,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     auto compressionLayout = new QHBoxLayout();
 
                     compressionLayout->addWidget(currentProject->getCompressionAction().getEnabledAction().createWidget(&saveFileDialog));
-                    compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
+                    //compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
 
                     fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 }
@@ -1224,7 +1226,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                         return;
 
                     currentProject->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
+                    //currentProject->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 
                 saveFileDialog.open();

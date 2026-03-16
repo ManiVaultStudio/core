@@ -12,9 +12,10 @@ namespace mv {
 ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/) :
     GroupAction(parent, "ProjectCompression"),
     _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION),
-    _levelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL)
+    _codecTypeAction(this, "Blob Codec")
 {
     addAction(&_enabledAction);
+    /*
     addAction(&_levelAction);
 
     _levelAction.setPrefix("Level: ");
@@ -22,10 +23,10 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
     const auto updateCompressionLevelReadOnly = [this]() -> void {
         _levelAction.setEnabled(_enabledAction.isChecked());
     };
+    */
+    //connect(&_enabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
 
-    connect(&_enabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
-
-    updateCompressionLevelReadOnly();
+    //updateCompressionLevelReadOnly();
 }
 
 void ProjectCompressionAction::fromVariantMap(const QVariantMap& variantMap)
@@ -33,7 +34,7 @@ void ProjectCompressionAction::fromVariantMap(const QVariantMap& variantMap)
     WidgetAction::fromVariantMap(variantMap);
 
     _enabledAction.fromParentVariantMap(variantMap);
-    _levelAction.fromParentVariantMap(variantMap);
+    //_levelAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ProjectCompressionAction::toVariantMap() const
@@ -41,7 +42,7 @@ QVariantMap ProjectCompressionAction::toVariantMap() const
     QVariantMap variantMap = WidgetAction::toVariantMap();
 
     _enabledAction.insertIntoVariantMap(variantMap);
-    _levelAction.insertIntoVariantMap(variantMap);
+    //_levelAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

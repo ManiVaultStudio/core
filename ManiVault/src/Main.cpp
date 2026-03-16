@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     });
 
     BlobCodec::registerCodec(BlobCodec::Type::Zstd, [] {
-        return std::make_unique<ZstdBlobCodec>(mv::projects().getCurrentProject()->getCompressionAction().getLevelAction().getValue());
+        return std::make_unique<ZstdBlobCodec>();
     });
 
 #ifdef Q_OS_MAC

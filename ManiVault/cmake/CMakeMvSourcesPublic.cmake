@@ -277,6 +277,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/StatusBarAction.h
     src/actions/PluginStatusBarAction.h
     src/actions/EventAction.h
+    src/actions/CodecSettingsAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -293,6 +294,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/StatusBarAction.cpp
     src/actions/PluginStatusBarAction.cpp
     src/actions/EventAction.cpp
+    src/actions/CodecSettingsAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
@@ -582,6 +584,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/StandardPaths.h
     src/util/CustomAssetsUrlSchemeHandler.h
     src/util/BlobCodec.h
+    src/util/BlobCodecFactory.h
+    src/util/CodecRegistry.h
 )
 
 if(APPLE)
@@ -646,6 +650,8 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/StandardPaths.cpp
 	src/util/CustomAssetsUrlSchemeHandler.cpp
 	src/util/BlobCodec.cpp
+    src/util/BlobCodecFactory.cpp
+    src/util/CodecRegistry.cpp
 )
 
 if(APPLE)
