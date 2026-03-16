@@ -9,6 +9,13 @@
 class PassthroughBlobCodec final : public mv::util::BlobCodec
 {
 public:
+    
+    /*
+     * Constructs a PassthroughBlobCodec with an optional codec settings action
+     * @param codecSettingsAction Codec settings action for this codec
+     */
+    explicit PassthroughBlobCodec(const mv::gui::CodecSettingsAction* codecSettingsAction = nullptr);
+
     [[nodiscard]] Type getType() const override;
     [[nodiscard]] QString getName() const override;
 

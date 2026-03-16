@@ -5,6 +5,7 @@
 #include "Serialization.h"
 #include "CoreInterface.h"
 #include "Application.h"
+#include "CodecRegistry.h"
 
 #include <QUuid>
 #include <QtConcurrent>
@@ -12,8 +13,6 @@
 #include <exception>
 
 #include <math.h>
-
-#include "BlobCodec.h"
 
 namespace mv::util {
 
@@ -119,23 +118,23 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         QString     _error;
     };
 
-    const auto* selectedBlobCodec = blobCodecOverride ? blobCodecOverride : &mv::projects().getDefaultBlobCodec();
+    std::unique_ptr<BlobCodec> codec = nullptr;
 
-    Q_ASSERT(selectedBlobCodec != nullptr);
+    if (auto currentProject = mv::projects().getCurrentProject()) {
+        codec = currentProject->getCompressionAction().createCodec();
+    }
+
+    Q_ASSERT(codec.get());
     Q_ASSERT(maxBlockSize != 0);
 
     if (maxBlockSize == static_cast<std::uint64_t>(-1))
         maxBlockSize = DEFAULT_MAX_BLOCK_SIZE;
 
-    const QString codecName = selectedBlobCodec->getName();
+    const QString codecName = codec->getName();
 
-    if (!BlobCodec::isRegistered(codecName)) {
+    if (!codecRegistry().isRegistered(codecName)) {
         throw std::runtime_error(QString("Unable to save raw data, blob codec %1 is not registered").arg(codecName).toStdString());
     }
-
-    auto createCodec = [codecName]() -> std::unique_ptr<BlobCodec> {
-        return BlobCodec::create(codecName);
-    };
 
     QVariantMap rawData;
 
@@ -165,21 +164,19 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
     const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
 
-    const auto results = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(jobs, [createCodec, saveToDisk, saveDir](const EncodeBlockJob& job) -> EncodeBlockResult {
+    const auto results = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(jobs, [&codec, saveToDisk, saveDir](const EncodeBlockJob& job) -> EncodeBlockResult {
         EncodeBlockResult result;
 
         try {
-            auto blobCodec = createCodec();
-
             QVariantMap block;
 
             block["Offset"]         = QVariant::fromValue(job._offset);
             block["Size"]           = QVariant::fromValue(job._size);
 
             if (saveToDisk) {
-                const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + blobCodec->getFileExtension();
+                const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
                 const auto filePath     = QDir::cleanPath(saveDir + QDir::separator() + fileName);
-                const auto encodeResult = blobCodec->encodeToFile(job._rawData, filePath);
+                const auto encodeResult = codec->encodeToFile(job._rawData, filePath);
 
                 if (encodeResult.isSuccess()) {
                     block["CompressedSize"] = QVariant::fromValue<std::uint64_t>(static_cast<std::uint64_t>(encodeResult._data.size()));
@@ -235,27 +232,24 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         variantMapMustContain(variantMap, "BlockSize");
         variantMapMustContain(variantMap, "Blocks");
 
-        const auto totalTimerStart = std::chrono::steady_clock::now();
-        const auto blocks = variantMap["Blocks"].toList();
+        const auto totalTimerStart  = std::chrono::steady_clock::now();
+        const auto blocks           = variantMap["Blocks"].toList();
+        const auto hasCodec         = variantMap.contains("Codec");
+        const auto codecName        = hasCodec ? variantMap["Codec"].toString() : QStringLiteral("none");
 
-        const auto hasCodec = variantMap.contains("Codec");
-        const auto codecName = hasCodec ? variantMap["Codec"].toString() : QStringLiteral("none");
-
-        if (hasCodec && !BlobCodec::isRegistered(codecName)) {
-            throw std::runtime_error(
-                QString("Unable to load raw data, blob codec %1 is not registered")
-                .arg(codecName)
-                .toStdString());
+        if (hasCodec && !codecRegistry().isRegistered(codecName)) {
+            throw std::runtime_error(QString("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
         }
 
         auto createCodec = [&]() -> std::unique_ptr<BlobCodec> {
             if (hasCodec)
-                return BlobCodec::create(codecName);
+                return codecRegistry().createCodec(codecName);
 
-            return BlobCodec::create(BlobCodec::Type::None);
-            };
+            return codecRegistry().createCodec(BlobCodec::Type::None);
+        };
 
         const auto blockSize = variantMap["BlockSize"].toInt();
+
         Q_UNUSED(blockSize);
 
         QVector<BlockJob> jobs;

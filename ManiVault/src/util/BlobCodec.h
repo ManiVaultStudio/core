@@ -9,6 +9,11 @@
 #include <QByteArray>
 #include <QString>
 
+namespace mv::gui
+{
+    class CodecSettingsAction;
+}
+
 namespace mv::util {
 
 /**
@@ -43,13 +48,13 @@ public:
         [[nodiscard]] bool hasError() const { return !_success; }
     };
 
-    /** Factory function for creating blob codec instances */
-    using FactoryFunction = std::function<std::unique_ptr<BlobCodec>()>;
-
 public:
 
-    /** No need for custom constructor */
-    BlobCodec() = default;
+    /**
+     * Constructs a blob codec with an optional codec settings action
+     * @param codecSettingsAction Codec settings action for this codec
+     */
+    BlobCodec(const gui::CodecSettingsAction* codecSettingsAction = nullptr);
 
     /* Virtual destructor for proper cleanup in derived classes */
 	virtual ~BlobCodec() = default;
@@ -123,6 +128,21 @@ public:
 
     [[nodiscard]] virtual QString getFileExtension() const = 0;
     [[nodiscard]] virtual bool supportsInlineData() const { return true; }
+
+    /**
+     * Get codec settings action for this codec (returns nullptr if no settings are needed)
+     * @return Codec settings action for this codec (returns nullptr if no settings are needed)
+     */
+    const gui::CodecSettingsAction* getSettingsAction() const;
+
+    /**
+     * Set codec settings action for this codec (the codec takes ownership of the pointer)
+     * @param codecSettingsAction Codec settings action for this codec (the codec takes ownership of the pointer)
+     */
+    void setCodecSettingsAction(const gui::CodecSettingsAction* codecSettingsAction) { _codecSettingsAction = codecSettingsAction; }
+
+private:
+    const gui::CodecSettingsAction* _codecSettingsAction;    /* Cached settings action instance (if any) for this codec */
 };
 
 }

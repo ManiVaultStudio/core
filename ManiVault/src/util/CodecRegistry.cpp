@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "CodecRegistry.h"
+#include "Application.h"
 
 #include "actions/CodecSettingsAction.h"
 
@@ -10,18 +11,22 @@ using namespace mv::gui;
 
 namespace mv::util {
 
-CodecRegistry& CodecRegistry::instance()
-{
-	static CodecRegistry registry;
+CodecRegistry::CodecRegistry() = default;
 
-	return registry;
+CodecRegistry& codecRegistry()
+{
+    return Application::current()->getCodecRegistry();
 }
 
 void CodecRegistry::registerFactory(std::unique_ptr<BlobCodecFactory> factory)
 {
 	const auto type = factory->type();
+	const auto key  = factory->key();
 
-	_factoriesByType[type] = std::move(factory);
+	_factoriesByType[type] = factory.get();
+	_factoriesByKey[key]   = factory.get();
+
+	_factoriesOwned.push_back(std::move(factory));
 }
 
 bool CodecRegistry::isRegistered(BlobCodec::Type type) const
@@ -31,7 +36,7 @@ bool CodecRegistry::isRegistered(BlobCodec::Type type) const
 
 bool CodecRegistry::isRegistered(const QString& key) const
 {
-	return _factoriesByType.contains(BlobCodec::typeFromString(key));
+	return _factoriesByKey.contains(key);
 }
 
 const BlobCodecFactory& CodecRegistry::factory(BlobCodec::Type type) const
@@ -39,26 +44,53 @@ const BlobCodecFactory& CodecRegistry::factory(BlobCodec::Type type) const
 	const auto it = _factoriesByType.find(type);
 
 	if (it == _factoriesByType.end())
-		throw std::runtime_error("No codec factory registered for requested type");
+		throw std::runtime_error("Blob codec not registered");
 
 	return *it->second;
 }
 
-CodecSettingsAction* CodecRegistry::createDefaultSettings(BlobCodec::Type type, QObject* parent) const
+const BlobCodecFactory& CodecRegistry::factory(const QString& key) const
 {
-	return factory(type).createDefaultSettings(parent);
+	const auto it = _factoriesByKey.find(key);
+
+	if (it == _factoriesByKey.end())
+		throw std::runtime_error("Blob codec not registered");
+
+	return *it.value();
 }
 
-CodecSettingsAction* CodecRegistry::createSettingsFromVariantMap(BlobCodec::Type type, const QVariantMap& map, QObject* parent) const
+gui::CodecSettingsAction* CodecRegistry::createSettingsFromVariantMap(BlobCodec::Type type, const QVariantMap& map, QObject* parent) const
 {
 	return factory(type).createSettingsFromVariantMap(map, parent);
 }
 
-std::unique_ptr<BlobCodec> CodecRegistry::createCodec(const CodecSettingsAction& codecSettingsAction) const
+std::unique_ptr<BlobCodec> CodecRegistry::createCodec(const mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
-    const auto codecType = BlobCodec::typeFromString(codecSettingsAction.getTypeAction().getString());
+    Q_ASSERT(codecSettingsAction);
 
-	return factory(codecType).createCodec(codecSettingsAction);
+	return factory(codecSettingsAction->getTypeAction().getString()).createCodec(codecSettingsAction);
+}
+
+std::unique_ptr<BlobCodec> CodecRegistry::createCodec(BlobCodec::Type type) const
+{
+    return factory(type).createCodec();
+}
+
+std::unique_ptr<BlobCodec> CodecRegistry::createCodec(const QString& typeName) const
+{
+    return createCodec(BlobCodec::typeFromString(typeName));
+}
+
+std::vector<BlobCodec::Type> CodecRegistry::availableTypes() const
+{
+	std::vector<BlobCodec::Type> types;
+
+	types.reserve(_factoriesByType.size());
+
+	for (const auto& [type, factory] : _factoriesByType)
+		types.push_back(type);
+
+	return types;
 }
 
 }

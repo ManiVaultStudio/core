@@ -15,10 +15,9 @@ namespace mv::gui
 
 namespace mv::util {
 
-class CodecRegistry
+class CORE_EXPORT CodecRegistry
 {
 public:
-    static CodecRegistry& instance();
 
     void registerFactory(std::unique_ptr<BlobCodecFactory> factory);
 
@@ -28,13 +27,33 @@ public:
 
     const BlobCodecFactory& factory(BlobCodec::Type type) const;
 
-    gui::CodecSettingsAction* createDefaultSettings(BlobCodec::Type type, QObject* parent = nullptr) const;
+    const BlobCodecFactory& factory(const QString& key) const;
+
     gui::CodecSettingsAction* createSettingsFromVariantMap(BlobCodec::Type type, const QVariantMap& map, QObject* parent = nullptr) const;
 
-    std::unique_ptr<BlobCodec> createCodec(const gui::CodecSettingsAction& codecSettingsAction) const;
+    std::unique_ptr<BlobCodec> createCodec(const mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const;
+    std::unique_ptr<BlobCodec> createCodec(BlobCodec::Type type) const;
+    std::unique_ptr<BlobCodec> createCodec(const QString& typeName) const;
 
-private:
-    std::unordered_map<BlobCodec::Type, std::unique_ptr<BlobCodecFactory>> _factoriesByType;
+    std::vector<BlobCodec::Type> availableTypes() const;
+
+    CodecRegistry(const CodecRegistry&) = delete;
+    CodecRegistry& operator=(const CodecRegistry&) = delete;
+
+    CodecRegistry(CodecRegistry&&) = delete;
+    CodecRegistry& operator=(CodecRegistry&&) = delete;
+
+protected:
+
+    CodecRegistry();
+
+    std::vector<std::unique_ptr<BlobCodecFactory>>          _factoriesOwned;
+    std::unordered_map<BlobCodec::Type, BlobCodecFactory*>  _factoriesByType;
+    QHash<QString, BlobCodecFactory*>                       _factoriesByKey;
+
+    friend class Application;
 };
+
+CORE_EXPORT CodecRegistry& codecRegistry();
 
 }

@@ -10,7 +10,11 @@ class ZstdBlobCodec final : public mv::util::BlobCodec
 {
 public:
 
-    explicit ZstdBlobCodec(int compressionLevel = 15);
+    /*
+     * Constructs a ZstdBlobCodec with an optional codec settings action
+     * @param codecSettingsAction Codec settings action for this codec
+     */
+    explicit ZstdBlobCodec(const mv::gui::CodecSettingsAction* codecSettingsAction = nullptr);
 
     [[nodiscard]] Type getType() const override;
     [[nodiscard]] QString getName() const override;

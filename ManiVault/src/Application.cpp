@@ -290,6 +290,11 @@ Application::TemporaryDirs& Application::getTemporaryDirs()
     return _temporaryDirs;
 }
 
+util::CodecRegistry& Application::getCodecRegistry()
+{
+	return _codecRegistry;
+}
+
 std::int32_t Application::requestOverrideCursor(Qt::CursorShape cursorShape)
 {
     auto it = std::find_if(cursorOverridesCount.begin(), cursorOverridesCount.end(), [&cursorShape](const CursorShapeCount& cursorShapeCount) {

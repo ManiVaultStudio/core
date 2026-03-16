@@ -6,8 +6,10 @@
 #include "private/Archiver.h"
 #include "private/Core.h"
 #include "private/NoProxyRectanglesFusionStyle.h"
-#include "private/ZstdBlobCodec.h"
 #include "private/PassthroughBlobCodec.h"
+#include "private/PassthroughBlobCodecFactory.h"
+#include "private/ZstdBlobCodec.h"
+#include "private/ZstdBlobCodecFactory.h"
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
@@ -47,13 +49,8 @@ int main(int argc, char *argv[])
     // Destroy temporary application
     tempApp.reset();
 
-    BlobCodec::registerCodec(BlobCodec::Type::None, [] {
-        return std::make_unique<PassthroughBlobCodec>();
-    });
-
-    BlobCodec::registerCodec(BlobCodec::Type::Zstd, [] {
-        return std::make_unique<ZstdBlobCodec>();
-    });
+    codecRegistry().registerFactory(std::make_unique<PassthroughBlobCodecFactory>());
+    codecRegistry().registerFactory(std::make_unique<ZstdBlobCodecFactory   >());
 
 #ifdef Q_OS_MAC
     QSurfaceFormat defaultFormat;

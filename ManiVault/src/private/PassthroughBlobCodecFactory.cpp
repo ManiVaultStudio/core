@@ -6,6 +6,11 @@
 #include "PassthroughBlobCodec.h"
 #include "PassthroughCodecSettingsAction.h"
 
+PassthroughBlobCodecFactory::PassthroughBlobCodecFactory() :
+    _defaultSettingsAction(nullptr, "Settings")
+{
+}
+
 mv::util::BlobCodec::Type PassthroughBlobCodecFactory::type() const
 {
     return mv::util::BlobCodec::Type::Zstd;
@@ -21,11 +26,6 @@ QString PassthroughBlobCodecFactory::displayName() const
     return "No compression";
 }
 
-mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::createDefaultSettings(QObject* parent) const
-{
-    return new PassthroughCodecSettingsAction(nullptr, "Settings");
-}
-
 mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::createSettingsFromVariantMap(const QVariantMap& map, QObject* parent) const
 {
     auto* settings = new PassthroughCodecSettingsAction(nullptr, "Settings");
@@ -33,7 +33,12 @@ mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::createSettingsFromVar
     return settings;
 }
 
-std::unique_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(const mv::gui::CodecSettingsAction& codecSettingsAction) const
+std::unique_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(const mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
-    return std::make_unique<PassthroughBlobCodec>();
+    return std::make_unique<PassthroughBlobCodec>(codecSettingsAction);
+}
+
+const mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::getDefaultCodecSettingsAction() const
+{
+    return &_defaultSettingsAction;
 }

@@ -18,8 +18,8 @@ namespace {
 
 }
 
-ZstdBlobCodec::ZstdBlobCodec(int compressionLevel) :
-    _compressionLevel(compressionLevel)
+ZstdBlobCodec::ZstdBlobCodec(const mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
+    _compressionLevel(2)
 {
 }
 

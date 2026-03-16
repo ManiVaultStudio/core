@@ -4,6 +4,8 @@
 
 #include "ProjectCompressionAction.h"
 
+#include "util/CodecRegistry.h"
+
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -29,9 +31,27 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
     //updateCompressionLevelReadOnly();
 }
 
+std::unique_ptr<BlobCodec> ProjectCompressionAction::createCodec() const
+{
+    try {
+        if (!codecRegistry().isRegistered(_codecTypeAction.getCurrentText()))
+            throw std::runtime_error("Codec not registered");
+
+        if (_codecSettingsAction)
+            throw std::runtime_error("Codec settings action is not available");
+
+        return codecRegistry().createCodec();
+    }
+    catch (const std::exception& e) {
+        qWarning() << "Failed to create blob codec:" << e.what();
+
+        return nullptr;
+    }
+}
+
 void ProjectCompressionAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    GroupAction::fromVariantMap(variantMap);
 
     _enabledAction.fromParentVariantMap(variantMap);
     //_levelAction.fromParentVariantMap(variantMap);
@@ -39,7 +59,7 @@ void ProjectCompressionAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap ProjectCompressionAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = GroupAction::toVariantMap();
 
     _enabledAction.insertIntoVariantMap(variantMap);
     //_levelAction.insertIntoVariantMap(variantMap);

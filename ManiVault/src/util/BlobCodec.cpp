@@ -8,10 +8,10 @@
 
 namespace mv::util {
 
-namespace
+BlobCodec::BlobCodec(const gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
+    _codecSettingsAction(nullptr)
 {
-    std::map<BlobCodec::Type, BlobCodec::FactoryFunction> factories;
-    std::mutex factoriesMutex;
+    setCodecSettingsAction(codecSettingsAction);
 }
 
 BlobCodec::Result BlobCodec::decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const
@@ -121,6 +121,11 @@ BlobCodec::Type BlobCodec::typeFromString(const QString& typeString)
         return Type::Zstd;
 
     throw std::runtime_error(QString("Unknown blob codec type: %1").arg(typeString).toStdString());
+}
+
+const gui::CodecSettingsAction* BlobCodec::getSettingsAction() const
+{
+	return _codecSettingsAction;
 }
 
 }

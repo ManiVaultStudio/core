@@ -28,10 +28,15 @@ public:
     virtual QString key() const = 0;
     virtual QString displayName() const = 0;
 
-    virtual gui::CodecSettingsAction* createDefaultSettings(QObject* parent = nullptr) const = 0;
     virtual gui::CodecSettingsAction* createSettingsFromVariantMap(const QVariantMap& map, QObject* parent = nullptr) const = 0;
 
-    virtual std::unique_ptr<BlobCodec> createCodec(const gui::CodecSettingsAction& settings) const = 0;
+    virtual std::unique_ptr<BlobCodec> createCodec(const gui::CodecSettingsAction* codecSettingsAction = nullptr) const = 0;
+
+    /**
+     * Get default codec settings action for this codec (returns nullptr if no settings are needed)
+     * @return Default codec settings action for this codec (returns nullptr if no settings are needed)
+     */
+    virtual const gui::CodecSettingsAction* getDefaultCodecSettingsAction() const = 0;
 };
 
 }

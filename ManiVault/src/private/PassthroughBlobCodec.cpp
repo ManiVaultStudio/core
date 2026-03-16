@@ -6,6 +6,11 @@
 
 #include "Archiver.h"
 
+PassthroughBlobCodec::PassthroughBlobCodec(const mv::gui::CodecSettingsAction* codecSettingsAction) :
+    BlobCodec(codecSettingsAction)
+{
+}
+
 mv::util::BlobCodec::Type PassthroughBlobCodec::getType() const
 {
     return Type::None;
