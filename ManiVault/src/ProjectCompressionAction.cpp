@@ -17,38 +17,32 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
     _codecTypeAction(this, "Blob Codec")
 {
     addAction(&_enabledAction);
-    /*
-    addAction(&_levelAction);
 
-    _levelAction.setPrefix("Level: ");
+    QMap<QString, QString> typeNameForDisplayName;
 
-    const auto updateCompressionLevelReadOnly = [this]() -> void {
-        _levelAction.setEnabled(_enabledAction.isChecked());
-    };
-    */
-    //connect(&_enabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
+    auto addCodec = [&](const BlobCodecFactory* factory) {
+        Q_ASSERT(factory);
 
-    //updateCompressionLevelReadOnly();
+        typeNameForDisplayName[factory->displayName()] = factory->key();
 
-    QMap<QString, QString> typeNameForDisplayName {
-        { "None", "none" },
-        { "Qt Compress", "QtCompress" },
-        { "Zstandard", "Zstdandard" } 
+        _codecInstanceMap[factory->displayName()] = factory->createCodec();
     };
 
-    _codecTypeAction.initialize(codecRegistry().availableTypeDisplayNames(), "Zstandard");
+    addCodec(&codecRegistry().factory(BlobCodec::Type::None));
+    addCodec(&codecRegistry().factory(BlobCodec::Type::Zstd));
+
+    _codecTypeAction.initialize(typeNameForDisplayName.keys(), codecRegistry().factory(BlobCodec::Type::Zstd).displayName());
 }
 
-std::unique_ptr<BlobCodec> ProjectCompressionAction::createCodec() const
+std::shared_ptr<BlobCodec> ProjectCompressionAction::getCodec() const
 {
     try {
-        if (!codecRegistry().isRegistered( codecRegistry().typeFromDisplayName(_codecTypeAction.getCurrentText())))
+        const auto codecType = codecRegistry().typeFromDisplayName(_codecTypeAction.getCurrentText());
+
+        if (!codecRegistry().isRegistered(codecType))
             throw std::runtime_error("Codec not registered");
 
-        if (_codecSettingsAction)
-            throw std::runtime_error("Codec settings action is not available");
-
-        return codecRegistry().createCodec();
+        return _codecInstanceMap.at(_codecTypeAction.getCurrentText());
     }
     catch (const std::exception& e) {
         qWarning() << "Failed to create blob codec:" << e.what();

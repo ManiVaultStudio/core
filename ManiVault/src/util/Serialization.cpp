@@ -118,10 +118,10 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         QString     _error;
     };
 
-    std::unique_ptr<BlobCodec> codec = nullptr;
+    std::shared_ptr<BlobCodec> codec = nullptr;
 
     if (auto currentProject = mv::projects().getCurrentProject()) {
-        codec = currentProject->getCompressionAction().createCodec();
+        codec = currentProject->getCompressionAction().getCodec();
     }
 
     Q_ASSERT(codec.get());

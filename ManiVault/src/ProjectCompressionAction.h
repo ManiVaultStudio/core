@@ -19,6 +19,11 @@ namespace mv {
  * @author Thomas Kroes
  */
 class CORE_EXPORT ProjectCompressionAction final : public gui::GroupAction {
+protected:
+
+    /** Maps codec display names to codec instances */
+    using CodecInstanceMap = std::unordered_map<QString,std::shared_ptr<util::BlobCodec>>;
+
 public:
 
     /**
@@ -27,7 +32,7 @@ public:
      */
     ProjectCompressionAction(QObject* parent = nullptr);
 
-    std::unique_ptr<util::BlobCodec> createCodec() const;
+    std::shared_ptr<util::BlobCodec> getCodec() const;
 
 public: // Serialization
 
@@ -48,16 +53,13 @@ public: // Action getters
     gui::ToggleAction& getEnabledAction() { return _enabledAction; }
     gui::OptionAction& getCodecTypeAction() { return _codecTypeAction; }
 
-
-    //gui::HorizontalGroupAction* getCodecEditAction();
-
 private:
-    gui::ToggleAction           _enabledAction;         /** Action to enable/disable project file compression */
-    gui::OptionAction           _codecTypeAction;       /** Blob codec type action for project serialization */
-    gui::CodecSettingsAction*   _codecSettingsAction;   /** Codec settings action for project serialization */
+    gui::ToggleAction   _enabledAction;         /** Action to enable/disable project file compression */
+    gui::OptionAction   _codecTypeAction;       /** Blob codec type action for project serialization */
+    CodecInstanceMap    _codecInstanceMap;      /** Maps codec display names to codec instances, used for serialization */
 
 public:
-    static constexpr bool       DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
+    static constexpr bool   DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
 };
 
 }

@@ -66,8 +66,6 @@ gui::CodecSettingsAction* CodecRegistry::createSettingsFromVariantMap(BlobCodec:
 
 std::unique_ptr<BlobCodec> CodecRegistry::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
-    Q_ASSERT(codecSettingsAction);
-
 	return factory(codecSettingsAction->getTypeAction().getString()).createCodec(codecSettingsAction);
 }
 
