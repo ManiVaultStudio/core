@@ -29,6 +29,7 @@ struct EncodeBlockResult
     std::uint64_t _size = 0;
     QByteArray _encodedData;
     QString _error;
+    QVariantMap _block;
 };
 
 struct DecodeBlockJob
@@ -105,117 +106,103 @@ QByteArray readBinaryFileToByteArray(const QString& filePath)
 
 QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/, const BlobCodec* blobCodecOverride /*= nullptr*/)
 {
-    struct EncodeBlockJob
-    {
-        std::uint64_t _offset = 0;
-        std::uint64_t _size = 0;
-        QByteArray    _rawData;
-    };
+    try {
+        if (!mv::projects().hasProject())
+            throw std::runtime_error("Unable to save raw data, no project is currently open");
 
-    struct EncodeBlockResult
-    {
-        QVariantMap _block;
-        QString     _error;
-    };
+	    auto codec = mv::projects().getCurrentProject()->getCompressionAction().getCodec();
 
-    std::shared_ptr<BlobCodec> codec = nullptr;
+	    Q_ASSERT(maxBlockSize != 0);
 
-    if (auto currentProject = mv::projects().getCurrentProject()) {
-        codec = currentProject->getCompressionAction().getCodec();
-    }
+	    if (maxBlockSize == static_cast<std::uint64_t>(-1))
+	        maxBlockSize = DEFAULT_MAX_BLOCK_SIZE;
 
-    Q_ASSERT(codec.get());
-    Q_ASSERT(maxBlockSize != 0);
+	    QVariantMap rawData;
 
-    if (maxBlockSize == static_cast<std::uint64_t>(-1))
-        maxBlockSize = DEFAULT_MAX_BLOCK_SIZE;
+	    rawData["Size"]     = QVariant::fromValue(numberOfBytes);
+	    rawData["Codec"]    = QVariant::fromValue(codec->getName());
 
-    const QString codecName = codec->getName();
+	    const auto numberOfBlocks = static_cast<std::uint64_t>((numberOfBytes + maxBlockSize - 1) / maxBlockSize);
 
-    if (!codecRegistry().isRegistered(codecName)) {
-        throw std::runtime_error(QString("Unable to save raw data, blob codec %1 is not registered").arg(codecName).toStdString());
-    }
+	    QVector<EncodeBlockJob> jobs;
+	    jobs.reserve(static_cast<int>(numberOfBlocks));
 
-    QVariantMap rawData;
+	    std::uint64_t offset = 0;
 
-    rawData["Size"]     = QVariant::fromValue(numberOfBytes);
-    rawData["Codec"]    = QVariant::fromValue(codecName);
+	    while (offset < numberOfBytes)
+	    {
+	        const auto blockSize = std::min(maxBlockSize, numberOfBytes - offset);
 
-    const auto numberOfBlocks = static_cast<std::uint64_t>((numberOfBytes + maxBlockSize - 1) / maxBlockSize);
+	        EncodeBlockJob job;
+	        job._offset     = offset;
+	        job._size       = blockSize;
+	        job._rawData    = QByteArray(bytes + offset, static_cast<qsizetype>(blockSize));
 
-    QVector<EncodeBlockJob> jobs;
-    jobs.reserve(static_cast<int>(numberOfBlocks));
+	        jobs.push_back(std::move(job));
 
-    std::uint64_t offset = 0;
+	        offset += blockSize;
+	    }
 
-    while (offset < numberOfBytes)
-    {
-        const auto blockSize = std::min(maxBlockSize, numberOfBytes - offset);
+	    const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
 
-        EncodeBlockJob job;
-        job._offset     = offset;
-        job._size       = blockSize;
-        job._rawData    = QByteArray(bytes + offset, static_cast<qsizetype>(blockSize));
+	    const auto results = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(jobs, [&codec, saveToDisk, saveDir](const EncodeBlockJob& job) -> EncodeBlockResult {
+	        EncodeBlockResult result;
 
-        jobs.push_back(std::move(job));
+	        try {
+	            QVariantMap block;
 
-        offset += blockSize;
-    }
+	            block["Offset"]         = QVariant::fromValue(job._offset);
+	            block["Size"]           = QVariant::fromValue(job._size);
 
-    const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
+	            if (saveToDisk) {
+	                const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
+	                const auto filePath     = QDir::cleanPath(saveDir + QDir::separator() + fileName);
+	                const auto encodeResult = codec->encodeToFile(job._rawData, filePath);
 
-    const auto results = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(jobs, [&codec, saveToDisk, saveDir](const EncodeBlockJob& job) -> EncodeBlockResult {
-        EncodeBlockResult result;
+	                if (encodeResult.isSuccess()) {
+	                    block["CompressedSize"] = QVariant::fromValue<std::uint64_t>(static_cast<std::uint64_t>(encodeResult._data.size()));
+	                }
+	                else {
+	                    throw std::runtime_error(QString("Failed to encode block to file: %1").arg(filePath).toStdString());
+	                }
 
-        try {
-            QVariantMap block;
+	                block["URI"] = fileName;
+	            }
+	            else {
+	                block["Data"] = QString::fromUtf8(job._rawData.toBase64());
+	            }
 
-            block["Offset"]         = QVariant::fromValue(job._offset);
-            block["Size"]           = QVariant::fromValue(job._size);
+	            result._block = std::move(block);
+	        }
+	        catch (const std::exception& e) {
+	            result._error = QString::fromUtf8(e.what());
+	        }
 
-            if (saveToDisk) {
-                const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
-                const auto filePath     = QDir::cleanPath(saveDir + QDir::separator() + fileName);
-                const auto encodeResult = codec->encodeToFile(job._rawData, filePath);
+	        return result;
+	    });
 
-                if (encodeResult.isSuccess()) {
-                    block["CompressedSize"] = QVariant::fromValue<std::uint64_t>(static_cast<std::uint64_t>(encodeResult._data.size()));
-                }
-                else {
-                    throw std::runtime_error(QString("Failed to encode block to file: %1").arg(filePath).toStdString());
-                }
+	    QVariantList blocks;
+	    blocks.reserve(results.size());
 
-                block["URI"] = fileName;
-            }
-            else {
-                block["Data"] = QString::fromUtf8(job._rawData.toBase64());
-            }
+	    for (const auto& result : results)
+	    {
+	        if (!result._error.isEmpty())
+	            throw std::runtime_error(result._error.toStdString());
 
-            result._block = std::move(block);
-        }
-        catch (const std::exception& e) {
-            result._error = QString::fromUtf8(e.what());
-        }
+	        blocks.push_back(result._block);
+	    }
 
-        return result;
-    });
+	    rawData["NumberOfBlocks"]   = QVariant::fromValue(numberOfBlocks);
+	    rawData["BlockSize"]        = QVariant::fromValue(maxBlockSize);
+	    rawData["Blocks"]           = QVariant::fromValue(blocks);
 
-    QVariantList blocks;
-    blocks.reserve(results.size());
+        return rawData;
+     }
+     catch (const std::exception& e) {
+         qWarning() << "Unable to convert raw data to variant map:" << e.what();
+     }
 
-    for (const auto& result : results)
-    {
-        if (!result._error.isEmpty())
-            throw std::runtime_error(result._error.toStdString());
-
-        blocks.push_back(result._block);
-    }
-
-    rawData["NumberOfBlocks"]   = QVariant::fromValue(numberOfBlocks);
-    rawData["BlockSize"]        = QVariant::fromValue(maxBlockSize);
-    rawData["Blocks"]           = QVariant::fromValue(blocks);
-
-    return rawData;
+     return {};
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
@@ -241,7 +228,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
             throw std::runtime_error(QString("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
         }
 
-        auto createCodec = [&]() -> std::unique_ptr<BlobCodec> {
+        auto createCodec = [&]() -> std::shared_ptr<BlobCodec> {
             if (hasCodec)
                 return codecRegistry().createCodec(codecName);
 
@@ -320,7 +307,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
             } activeTaskGuard{ activeTasks };
 
             thread_local bool printed = false;
-            thread_local std::unique_ptr<BlobCodec> blobCodec;
+            thread_local std::shared_ptr<BlobCodec> blobCodec;
 
             if (!printed) {
                 printed = true;

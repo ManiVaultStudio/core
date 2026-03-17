@@ -9,6 +9,10 @@
 
 #include <zstd.h>
 
+#ifdef _DEBUG
+	#define ZSTD_CODEC_VERBOSE
+#endif
+
 namespace {
 
     QString getZstdErrorString(const char* prefix, size_t code)
@@ -20,9 +24,19 @@ namespace {
 }
 
 ZstdBlobCodec::ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
-	BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new ZstdCodecSettingsAction(this, "Settings")),
+	BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new ZstdCodecSettingsAction(parent, "Settings")),
     _compressionLevel(2)
 {
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
+ZstdBlobCodec::~ZstdBlobCodec()
+{
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }
 
 mv::util::BlobCodec::Type ZstdBlobCodec::getType() const
@@ -37,6 +51,10 @@ QString ZstdBlobCodec::getName() const
 
 mv::util::BlobCodec::Result ZstdBlobCodec::encode(const QByteArray& input) const
 {
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     if (input.isEmpty())
         return { true, {}, {} };
 
@@ -61,6 +79,10 @@ mv::util::BlobCodec::Result ZstdBlobCodec::encode(const QByteArray& input) const
 
 mv::util::BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
 {
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     if (input.isEmpty()) {
         if (expectedSize > 0)
             return { false, {}, QStringLiteral("Input is empty but expected decoded data") };
@@ -102,6 +124,10 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsize
 
 mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const
 {
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     Result result;
 
     if (destination == nullptr) {
@@ -127,6 +153,10 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
 
 mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
 {
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     QFile file(filePath);
 
     if (!file.open(QIODevice::ReadOnly))
@@ -139,6 +169,10 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFile(const QString& filePat
 
 mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
 {
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     if (destination == nullptr) {
         Result result;
 
@@ -158,6 +192,10 @@ QString ZstdBlobCodec::getFileExtension() const
 
 void ZstdBlobCodec::setCompressionLevel(int compressionLevel)
 {
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _compressionLevel = compressionLevel;
 }
 

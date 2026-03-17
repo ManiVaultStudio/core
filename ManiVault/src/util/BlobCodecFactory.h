@@ -32,7 +32,7 @@ public:
 
     virtual gui::CodecSettingsAction* createSettingsFromVariantMap(const QVariantMap& map, QObject* parent = nullptr) const = 0;
 
-    virtual std::unique_ptr<BlobCodec> createCodec(gui::CodecSettingsAction* codecSettingsAction = nullptr) const = 0;
+    virtual std::shared_ptr<BlobCodec> createCodec(gui::CodecSettingsAction* codecSettingsAction = nullptr) const = 0;
 
     /**
      * Get default codec settings action for this codec (returns nullptr if no settings are needed)

@@ -6,15 +6,29 @@
 #include "PassthroughBlobCodec.h"
 #include "PassthroughCodecSettingsAction.h"
 
+#ifdef _DEBUG
+	#define PASSTHROUGH_CODEC_FACTORY_VERBOSE
+#endif
+
 PassthroughBlobCodecFactory::PassthroughBlobCodecFactory(QObject* parent /*= nullptr*/) :
     BlobCodecFactory(parent),
     _defaultSettingsAction(nullptr, "Settings")
 {
+#ifdef 	PASSTHROUGH_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
+PassthroughBlobCodecFactory::~PassthroughBlobCodecFactory()
+{
+#ifdef 	PASSTHROUGH_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }
 
 mv::util::BlobCodec::Type PassthroughBlobCodecFactory::type() const
 {
-    return mv::util::BlobCodec::Type::Zstd;
+    return mv::util::BlobCodec::Type::None;
 }
 
 QString PassthroughBlobCodecFactory::key() const
@@ -29,17 +43,29 @@ QString PassthroughBlobCodecFactory::displayName() const
 
 mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::createSettingsFromVariantMap(const QVariantMap& map, QObject* parent) const
 {
+#ifdef 	PASSTHROUGH_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     auto* settings = new PassthroughCodecSettingsAction(nullptr, "Settings");
     settings->fromVariantMap(map);
     return settings;
 }
 
-std::unique_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
+std::shared_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
-    return std::make_unique<PassthroughBlobCodec>(const_cast<PassthroughBlobCodecFactory*>(this), codecSettingsAction);
+#ifdef 	PASSTHROUGH_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    return std::make_shared<PassthroughBlobCodec>(const_cast<PassthroughBlobCodecFactory*>(this), codecSettingsAction);
 }
 
 const mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::getDefaultCodecSettingsAction() const
 {
+#ifdef 	PASSTHROUGH_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     return &_defaultSettingsAction;
 }

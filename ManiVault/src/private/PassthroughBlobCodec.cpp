@@ -7,9 +7,23 @@
 
 #include "Archiver.h"
 
+#ifdef _DEBUG
+	#define PASSTHROUGH_CODEC_VERBOSE
+#endif
+
 PassthroughBlobCodec::PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction) :
-    BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new PassthroughCodecSettingsAction(this, "Settings"))
+    BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new PassthroughCodecSettingsAction(parent, "Settings"))
 {
+#ifdef PASSTHROUGH_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
+PassthroughBlobCodec::~PassthroughBlobCodec()
+{
+#ifdef PASSTHROUGH_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }
 
 mv::util::BlobCodec::Type PassthroughBlobCodec::getType() const
@@ -24,11 +38,19 @@ QString PassthroughBlobCodec::getName() const
 
 mv::util::BlobCodec::Result PassthroughBlobCodec::encode(const QByteArray& input) const
 {
+#ifdef PASSTHROUGH_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     return { true, input, {} };
 }
 
 mv::util::BlobCodec::Result PassthroughBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
 {
+#ifdef PASSTHROUGH_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     if (expectedSize >= 0 && input.size() != expectedSize)
         return { false, {}, QStringLiteral("Decoded size mismatch") };
 
@@ -37,6 +59,10 @@ mv::util::BlobCodec::Result PassthroughBlobCodec::decode(const QByteArray& input
 
 mv::util::BlobCodec::Result PassthroughBlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
 {
+#ifdef PASSTHROUGH_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
 
     return { true, encodedData, {} };
@@ -44,6 +70,10 @@ mv::util::BlobCodec::Result PassthroughBlobCodec::decodeFromFile(const QString& 
 
 mv::util::BlobCodec::Result PassthroughBlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
 {
+#ifdef PASSTHROUGH_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
 
     memcpy(destination, encodedData.constData(), encodedData.size());

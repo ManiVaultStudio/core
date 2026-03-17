@@ -330,7 +330,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
             projectDataSerializationTask.setSubtaskFinished(datasetId, subtaskName);
 
-            QCoreApplication::processEvents();
+            //QCoreApplication::processEvents();
         }
     };
 

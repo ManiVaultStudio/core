@@ -6,10 +6,24 @@
 #include "ZstdBlobCodec.h"
 #include "ZstdCodecSettingsAction.h"
 
+#ifdef _DEBUG
+	#define ZSTD_CODEC_FACTORY_VERBOSE
+#endif
+
 ZstdBlobCodecFactory::ZstdBlobCodecFactory(QObject* parent /*= nullptr*/) :
     BlobCodecFactory(parent),
     _defaultSettingsAction(nullptr, "Settings")
 {
+#ifdef ZSTD_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
+ZstdBlobCodecFactory::~ZstdBlobCodecFactory()
+{
+#ifdef ZSTD_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }
 
 mv::util::BlobCodec::Type ZstdBlobCodecFactory::type() const
@@ -29,17 +43,29 @@ QString ZstdBlobCodecFactory::displayName() const
 
 mv::gui::CodecSettingsAction* ZstdBlobCodecFactory::createSettingsFromVariantMap(const QVariantMap& map, QObject* parent) const
 {
+#ifdef ZSTD_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
 	auto* settings = new ZstdCodecSettingsAction(nullptr, "Settings");
 	settings->fromVariantMap(map);
 	return settings;
 }
 
-std::unique_ptr<mv::util::BlobCodec> ZstdBlobCodecFactory::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
+std::shared_ptr<mv::util::BlobCodec> ZstdBlobCodecFactory::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
-	return std::make_unique<ZstdBlobCodec>(const_cast<ZstdBlobCodecFactory*>(this), codecSettingsAction);
+#ifdef ZSTD_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+	return std::make_shared<ZstdBlobCodec>(const_cast<ZstdBlobCodecFactory*>(this), codecSettingsAction);
 }
 
 const mv::gui::CodecSettingsAction* ZstdBlobCodecFactory::getDefaultCodecSettingsAction() const
 {
+#ifdef ZSTD_CODEC_FACTORY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
 	return &_defaultSettingsAction;
 }

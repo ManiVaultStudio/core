@@ -7,6 +7,10 @@
 
 #include "actions/CodecSettingsAction.h"
 
+#ifdef _DEBUG
+	#define CODEC_REGISTRY_VERBOSE
+#endif
+
 using namespace mv::gui;
 
 namespace mv::util {
@@ -20,6 +24,10 @@ CodecRegistry& codecRegistry()
 
 void CodecRegistry::registerFactory(std::unique_ptr<BlobCodecFactory> factory)
 {
+#ifdef CODEC_REGISTRY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
 	const auto type = factory->type();
 	const auto key  = factory->key();
 
@@ -64,18 +72,36 @@ gui::CodecSettingsAction* CodecRegistry::createSettingsFromVariantMap(BlobCodec:
 	return factory(type).createSettingsFromVariantMap(map, parent);
 }
 
-std::unique_ptr<BlobCodec> CodecRegistry::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
+std::shared_ptr<BlobCodec> CodecRegistry::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
+#ifdef CODEC_REGISTRY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (!codecSettingsAction)
+        throw std::runtime_error("Codec settings action is null");
+
 	return factory(codecSettingsAction->getTypeAction().getString()).createCodec(codecSettingsAction);
 }
 
-std::unique_ptr<BlobCodec> CodecRegistry::createCodec(BlobCodec::Type type) const
+std::shared_ptr<BlobCodec> CodecRegistry::createCodec(BlobCodec::Type type) const
 {
+#ifdef CODEC_REGISTRY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     return factory(type).createCodec();
 }
 
-std::unique_ptr<BlobCodec> CodecRegistry::createCodec(const QString& typeName) const
+std::shared_ptr<BlobCodec> CodecRegistry::createCodec(const QString& typeName) const
 {
+#ifdef CODEC_REGISTRY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (typeName == "none")
+        throw std::runtime_error("Blob codec type name is empty");
+
     return createCodec(BlobCodec::typeFromString(typeName));
 }
 

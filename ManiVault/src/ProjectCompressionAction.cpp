@@ -25,7 +25,7 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
 
         typeNameForDisplayName[factory->displayName()] = factory->key();
 
-        _codecInstanceMap[factory->displayName()] = factory->createCodec();
+        _codecInstanceMap.emplace(factory->displayName(), factory->createCodec());
     };
 
     addCodec(&codecRegistry().factory(BlobCodec::Type::None));

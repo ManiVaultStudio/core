@@ -17,6 +17,8 @@ public:
      */
     explicit ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr);
 
+    ~ZstdBlobCodec();
+
     [[nodiscard]] Type getType() const override;
     [[nodiscard]] QString getName() const override;
 

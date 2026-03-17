@@ -17,6 +17,8 @@ public:
      */
     explicit PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr);
 
+    ~PassthroughBlobCodec();
+
     [[nodiscard]] Type getType() const override;
     [[nodiscard]] QString getName() const override;
 
