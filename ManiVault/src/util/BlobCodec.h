@@ -136,7 +136,7 @@ public:
      * Get codec settings action for this codec (returns nullptr if no settings are needed)
      * @return Codec settings action for this codec (returns nullptr if no settings are needed)
      */
-    const gui::CodecSettingsAction* getSettingsAction() const;
+    gui::CodecSettingsAction* getSettingsAction() const;
 
     /**
      * Set codec settings action for this codec (the codec takes ownership of the pointer)

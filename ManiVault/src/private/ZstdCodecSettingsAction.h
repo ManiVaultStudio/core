@@ -23,4 +23,6 @@ public:
      * @param title Title of the action
      */
     ZstdCodecSettingsAction(QObject* parent, const QString& title);
+
+    ~ZstdCodecSettingsAction();
 };

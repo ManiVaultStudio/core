@@ -10,6 +10,9 @@ CodecSettingsAction::CodecSettingsAction(QObject* parent, const QString& title) 
     VerticalGroupAction(parent, title),
     _typeAction(this, "Type")
 {
+    setIconByName("gear");
+
+    setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
 }
 
 }

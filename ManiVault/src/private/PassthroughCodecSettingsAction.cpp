@@ -4,6 +4,10 @@
 
 #include "PassthroughCodecSettingsAction.h"
 
+#ifdef _DEBUG
+	#define PASSTHROUGH_CODEC_SETTINGS_VERBOSE
+#endif
+
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
@@ -11,4 +15,16 @@ using namespace mv::util;
 PassthroughCodecSettingsAction::PassthroughCodecSettingsAction(QObject* parent, const QString& title) :
     CodecSettingsAction(parent, title)
 {
+#ifdef PASSTHROUGH_CODEC_SETTINGS_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    setForceHidden(true);
+}
+
+PassthroughCodecSettingsAction::~PassthroughCodecSettingsAction()
+{
+#ifdef PASSTHROUGH_CODEC_SETTINGS_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }

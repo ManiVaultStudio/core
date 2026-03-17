@@ -23,4 +23,6 @@ public:
      * @param title Title of the action
      */
     PassthroughCodecSettingsAction(QObject* parent, const QString& title);
+
+    ~PassthroughCodecSettingsAction();
 };

@@ -911,25 +911,12 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
-                QCheckBox   passwordProtectedCheckBox("Password protected");
-                QLineEdit   passwordLineEdit;
-
-                passwordProtectedCheckBox.setChecked(false);
-                passwordLineEdit.setPlaceholderText("Enter encryption password...");
-
-                auto compressionLayout = new QHBoxLayout();
-
-                compressionLayout->addWidget(_project->getCompressionAction().getEnabledAction().createWidget(&saveFileDialog));
-                //compressionLayout->addWidget(_project->getCompressionAction().getCodecEditAction().createWidget(&saveFileDialog), 1);
-                
-                fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
-                
-                //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
-                //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
+                fileDialogLayout->addWidget(_project->getCompressionAction().createLabelWidget(&saveFileDialog), rowCount + 2, 0);
+                fileDialogLayout->addWidget(_project->getCompressionAction().createWidget(&saveFileDialog), rowCount + 2, 1, 1, 2);
 
                 auto& titleAction = _project->getTitleAction();
 
-                fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
+                fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 3, 0);
 
                 GroupAction settingsGroupAction(this, "Settings");
 
@@ -948,15 +935,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 titleLayout->addWidget(titleAction.createWidget(&saveFileDialog));
                 titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&saveFileDialog));
 
-                fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
-
-                //const auto updatePassword = [&]() -> void {
-                //    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
-                //};
-
-                //connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
-
-                //updatePassword();
+                fileDialogLayout->addLayout(titleLayout, rowCount + 3, 1, 1, 2);
 
                 connect(&saveFileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
@@ -967,7 +946,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     if (projectMetaAction.isNull())
                         return;
 
-                    _project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
+                    //_project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
                     //_project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 

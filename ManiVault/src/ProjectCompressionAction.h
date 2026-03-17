@@ -4,10 +4,9 @@
 
 #pragma once
 
-#include "actions/GroupAction.h"
+#include "actions/HorizontalGroupAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/OptionAction.h"
-#include "actions/CodecSettingsAction.h"
 
 namespace mv {
 
@@ -18,7 +17,7 @@ namespace mv {
  * 
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectCompressionAction final : public gui::GroupAction {
+class CORE_EXPORT ProjectCompressionAction final : public gui::HorizontalGroupAction {
 protected:
 
     /** Maps codec display names to codec instances */

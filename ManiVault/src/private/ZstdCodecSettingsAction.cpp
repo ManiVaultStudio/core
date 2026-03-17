@@ -4,6 +4,10 @@
 
 #include "ZstdCodecSettingsAction.h"
 
+#ifdef _DEBUG
+	#define ZSTD_CODEC_SETTINGS_VERBOSE
+#endif
+
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
@@ -11,4 +15,14 @@ using namespace mv::util;
 ZstdCodecSettingsAction::ZstdCodecSettingsAction(QObject* parent, const QString& title) :
     CodecSettingsAction(parent, title)
 {
+#ifdef ZSTD_CODEC_SETTINGS_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
+ZstdCodecSettingsAction::~ZstdCodecSettingsAction()
+{
+#ifdef ZSTD_CODEC_SETTINGS_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }

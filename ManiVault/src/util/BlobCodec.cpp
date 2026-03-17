@@ -4,6 +4,8 @@
 
 #include "BlobCodec.h"
 
+#include "actions/CodecSettingsAction.h"
+
 #include <stdexcept>
 
 namespace mv::util {
@@ -124,7 +126,7 @@ BlobCodec::Type BlobCodec::typeFromString(const QString& typeString)
     throw std::runtime_error(QString("Unknown blob codec type: %1").arg(typeString).toStdString());
 }
 
-const gui::CodecSettingsAction* BlobCodec::getSettingsAction() const
+gui::CodecSettingsAction* BlobCodec::getSettingsAction() const
 {
 	return _codecSettingsAction;
 }
@@ -141,6 +143,8 @@ void BlobCodec::setCodecSettingsAction(gui::CodecSettingsAction* codecSettingsAc
 
 	_codecSettingsAction = codecSettingsAction;
 
-    delete _codecSettingsAction;
+    if (previousCodeSettingsAction)
+        delete previousCodeSettingsAction;
 }
+
 }

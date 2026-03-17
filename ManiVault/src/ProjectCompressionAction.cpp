@@ -6,17 +6,20 @@
 
 #include "util/CodecRegistry.h"
 
+#include "actions/CodecSettingsAction.h"
+
 using namespace mv::gui;
 using namespace mv::util;
 
 namespace mv {
 
 ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/) :
-    GroupAction(parent, "ProjectCompression"),
+    HorizontalGroupAction(parent, "Compression"),
     _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION),
-    _codecTypeAction(this, "Blob Codec")
+    _codecTypeAction(this, "Codec")
 {
-    addAction(&_enabledAction);
+    setShowLabels(false);
+    addAction(&_codecTypeAction);
 
     QMap<QString, QString> typeNameForDisplayName;
 
@@ -25,13 +28,27 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
 
         typeNameForDisplayName[factory->displayName()] = factory->key();
 
-        _codecInstanceMap.emplace(factory->displayName(), factory->createCodec());
+        auto codec = factory->createCodec();
+
+        _codecInstanceMap.emplace(factory->displayName(), codec);
+
+        addAction(const_cast<gui::CodecSettingsAction*>(codec->getSettingsAction()));
     };
 
     addCodec(&codecRegistry().factory(BlobCodec::Type::None));
     addCodec(&codecRegistry().factory(BlobCodec::Type::Zstd));
 
     _codecTypeAction.initialize(typeNameForDisplayName.keys(), codecRegistry().factory(BlobCodec::Type::Zstd).displayName());
+
+    auto codecTypeChanged = [this]() -> void {
+		for (auto& [displayName, codec] : _codecInstanceMap) {
+            _codecInstanceMap[displayName]->getSettingsAction()->setVisible(displayName == _codecTypeAction.getCurrentText());
+        }
+	};
+
+    connect(&_codecTypeAction, &OptionAction::currentIndexChanged, this, codecTypeChanged);
+
+    codecTypeChanged();
 }
 
 std::shared_ptr<BlobCodec> ProjectCompressionAction::getCodec() const

@@ -58,7 +58,7 @@ std::shared_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(mv
     qDebug() << __FUNCTION__;
 #endif
 
-    return std::make_shared<PassthroughBlobCodec>(const_cast<PassthroughBlobCodecFactory*>(this), codecSettingsAction);
+    return std::make_shared<PassthroughBlobCodec>(parent(), codecSettingsAction);
 }
 
 const mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::getDefaultCodecSettingsAction() const
