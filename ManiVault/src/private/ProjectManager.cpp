@@ -991,6 +991,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
+            QElapsedTimer saveTimer;
+
+        	saveTimer.start();
+
             Application::requestOverrideCursor(Qt::WaitCursor);
 
             /*
@@ -1051,7 +1055,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             setState(State::Idle);
 
-            qDebug().noquote() << filePath << "saved successfully";
+            qDebug().noquote() << filePath << "saved successfully in " << saveTimer.elapsed() << "ms";
         }
         emit projectSaved(*_project);
     }
