@@ -29,6 +29,9 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
     //connect(&_enabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
 
     //updateCompressionLevelReadOnly();
+
+    for (const auto& codecName : codecRegistry().availableTypes())
+        _codecTypeAction.addItem(codecName);
 }
 
 std::unique_ptr<BlobCodec> ProjectCompressionAction::createCodec() const

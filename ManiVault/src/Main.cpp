@@ -49,9 +49,6 @@ int main(int argc, char *argv[])
     // Destroy temporary application
     tempApp.reset();
 
-    codecRegistry().registerFactory(std::make_unique<PassthroughBlobCodecFactory>());
-    codecRegistry().registerFactory(std::make_unique<ZstdBlobCodecFactory   >());
-
 #ifdef Q_OS_MAC
     QSurfaceFormat defaultFormat;
     
@@ -75,6 +72,9 @@ int main(int argc, char *argv[])
     qDebug() << "Starting" << Application::applicationName();
 
     Application application(argc, argv);
+
+    codecRegistry().registerFactory(std::make_unique<PassthroughBlobCodecFactory>());
+    codecRegistry().registerFactory(std::make_unique<ZstdBlobCodecFactory>());
 
     Core core;
 

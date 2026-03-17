@@ -36,6 +36,7 @@ public:
     std::unique_ptr<BlobCodec> createCodec(const QString& typeName) const;
 
     std::vector<BlobCodec::Type> availableTypes() const;
+    QStringList availableTypeNames() const;
 
     CodecRegistry(const CodecRegistry&) = delete;
     CodecRegistry& operator=(const CodecRegistry&) = delete;

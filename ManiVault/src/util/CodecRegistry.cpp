@@ -93,4 +93,14 @@ std::vector<BlobCodec::Type> CodecRegistry::availableTypes() const
 	return types;
 }
 
+QStringList CodecRegistry::availableTypeNames() const
+{
+    QStringList typeNames;
+
+    for (const auto& availableType : availableTypes())
+        typeNames.append(BlobCodec::typeToString(availableType));
+
+    return typeNames;
+}
+
 }
