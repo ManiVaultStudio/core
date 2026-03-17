@@ -212,9 +212,9 @@ public:
 
     mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
-    std::uint32_t getNumPoints() const;
+    std::uint64_t getNumPoints() const;
 
-    std::uint32_t getNumDimensions() const;
+    std::uint64_t getNumDimensions() const;
 
     std::uint64_t getNumberOfElements() const;
 
@@ -269,7 +269,7 @@ public:
 
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
     void extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
-    void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
+    void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<std::uint32_t>& indices) const;
     
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
@@ -277,14 +277,14 @@ public:
         CheckDimensionIndices(dimensionIndices);
         std::visit([&resultContainer, this, &dimensionIndices](const auto& vec)
             {
-                const std::ptrdiff_t numPoints{ getNumPoints() };
-                std::ptrdiff_t resultIndex{};
+                const std::uint64_t numPoints{ getNumPoints() };
+                std::uint64_t resultIndex{};
 
-                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+                for (std::uint64_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
                 {
-                    const std::ptrdiff_t n{ pointIndex * _numDimensions };
+                    const std::uint64_t n{ pointIndex * _numDimensions };
 
-                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                    for (const std::uint64_t dimensionIndex : dimensionIndices)
                     {
                         resultContainer[resultIndex] = vec[n + dimensionIndex];
                         ++resultIndex;
@@ -301,14 +301,14 @@ public:
 
         std::visit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
             {
-                const std::ptrdiff_t numPoints{ static_cast<std::uint32_t>(indices.size()) };
-                std::ptrdiff_t resultIndex{};
+                const std::uint64_t numPoints{ static_cast<std::uint32_t>(indices.size()) };
+                std::uint64_t resultIndex{};
 
-                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+                for (std::uint64_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
                 {
-                    const std::ptrdiff_t n{ indices[pointIndex] * _numDimensions };
+                    const std::uint64_t n{ indices[pointIndex] * _numDimensions };
 
-                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                    for (const std::uint64_t dimensionIndex : dimensionIndices)
                     {
                         resultContainer[resultIndex] = vec[n + dimensionIndex];
                         ++resultIndex;
@@ -387,7 +387,7 @@ public:
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
         _variantOfVectors = VariantOfVectors(data);
-        _numDimensions = static_cast<unsigned int>(numDimensions);
+        _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
     /// Efficiently "moves" the data from the specified vector into the internal
@@ -397,7 +397,7 @@ public:
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
         _variantOfVectors = VariantOfVectors(std::move(data));
-        _numDimensions = static_cast<unsigned int>(numDimensions);
+        _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
     void setDimensionNames(const std::vector<QString>& dimNames);
@@ -484,12 +484,12 @@ private:
     VariantOfVectors _variantOfVectors;
 
     /** Number of features of each data point */
-    unsigned int _numDimensions = 1;
+    std::uint64_t _numDimensions = 1;
 
     std::vector<QString> _dimNames;
 
 private: // Sparse data, experimental
-    unsigned int _numRows = 0;
+    std::uint64_t _numRows = 0;
     SparseMatrix<size_t, size_t, float> _sparseData = {};
 
     bool _isDense = true;
@@ -775,7 +775,7 @@ public:
         getRawData<PointData>()->populateDataForDimensions(resultContainer, dimensionIndices, indices);
     }
 
-    unsigned int getNumRawPoints() const
+    std::uint64_t getNumRawPoints() const
     {
         if (isProxy()) {
             return getNumPoints();
@@ -792,7 +792,7 @@ public:
      */
     bool mayProxy(const mv::Datasets& proxyDatasets) const override;
 
-    unsigned int getNumPoints() const
+    std::uint64_t getNumPoints() const
     {
         if (isProxy()) {
             auto numberOfPoints = 0;
@@ -808,7 +808,7 @@ public:
         }
     }
 
-    unsigned int getNumDimensions() const
+    std::uint64_t getNumDimensions() const
     {
         if (isProxy()) {
             return mv::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
@@ -924,7 +924,7 @@ public: // Index transformation
      * indexes into through being a subset or derived data or a combination.
      * @param globalIndices Resulting vector of global indices into the original raw data
      */
-    void getGlobalIndices(std::vector<unsigned int>& globalIndices) const;
+    void getGlobalIndices(std::vector<std::uint32_t>& globalIndices) const;
 
     /**
      * Passing a vector of global selection indices, returns a vector of booleans
@@ -933,9 +933,9 @@ public: // Index transformation
      * @param Vector of global selection indices
      * @param Boolean vector of locally selected points
      */
-    void selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const;
+    void selectedLocalIndices(const std::vector<std::uint32_t>& selectionIndices, std::vector<bool>& selected) const;
 
-    void getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const;
+    void getLocalSelectionIndices(std::vector<std::uint32_t>& localSelectionIndices) const;
 
 
 public: // Action getters
@@ -1003,7 +1003,7 @@ public: // Linked data
 
 public:
 
-    std::vector<unsigned int> indices;
+    std::vector<std::uint32_t> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */

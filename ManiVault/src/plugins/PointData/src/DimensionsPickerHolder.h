@@ -24,7 +24,7 @@ namespace mv
     {
         std::unique_ptr<QString[]> _names;
         std::unique_ptr<bool[]> _enabledDimensions;
-        unsigned _numberOfDimensions{};
+        std::uint64_t _numberOfDimensions{};
 
     public:
         std::vector<StatisticsPerDimension> _statistics;
@@ -35,15 +35,15 @@ namespace mv
 
         DimensionsPickerHolder() = default;
 
-        explicit DimensionsPickerHolder(const unsigned numberOfDimensions);
+        explicit DimensionsPickerHolder(const std::uint64_t numberOfDimensions);
 
         explicit DimensionsPickerHolder(
             const QString* const names,
             const unsigned numberOfDimensions);
 
-        unsigned getNumberOfDimensions() const noexcept;
+        std::uint64_t getNumberOfDimensions() const noexcept;
 
-        unsigned getNumberOfSelectedDimensions() const noexcept;
+        std::uint64_t getNumberOfSelectedDimensions() const noexcept;
 
         QString getName(const std::size_t) const;
 
