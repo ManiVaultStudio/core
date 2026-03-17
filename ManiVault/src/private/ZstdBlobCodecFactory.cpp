@@ -6,7 +6,8 @@
 #include "ZstdBlobCodec.h"
 #include "ZstdCodecSettingsAction.h"
 
-ZstdBlobCodecFactory::ZstdBlobCodecFactory() :
+ZstdBlobCodecFactory::ZstdBlobCodecFactory(QObject* parent /*= nullptr*/) :
+    BlobCodecFactory(parent),
     _defaultSettingsAction(nullptr, "Settings")
 {
 }
@@ -33,9 +34,9 @@ mv::gui::CodecSettingsAction* ZstdBlobCodecFactory::createSettingsFromVariantMap
 	return settings;
 }
 
-std::unique_ptr<mv::util::BlobCodec> ZstdBlobCodecFactory::createCodec(const mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
+std::unique_ptr<mv::util::BlobCodec> ZstdBlobCodecFactory::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
-	return std::make_unique<ZstdBlobCodec>(codecSettingsAction);
+	return std::make_unique<ZstdBlobCodec>(const_cast<ZstdBlobCodecFactory*>(this), codecSettingsAction);
 }
 
 const mv::gui::CodecSettingsAction* ZstdBlobCodecFactory::getDefaultCodecSettingsAction() const

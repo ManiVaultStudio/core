@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "ZstdBlobCodec.h"
+#include "ZstdCodecSettingsAction.h"
 
 #include "Archiver.h"
 
@@ -18,7 +19,8 @@ namespace {
 
 }
 
-ZstdBlobCodec::ZstdBlobCodec(const mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
+ZstdBlobCodec::ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
+	BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new ZstdCodecSettingsAction(this, "Settings")),
     _compressionLevel(2)
 {
 }

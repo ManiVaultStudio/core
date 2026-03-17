@@ -174,12 +174,6 @@ public:
      */
     QDir getDownloadedProjectsDir() const override;
 
-    /**
-     * Get the blob codec that is used by default for project serialization
-     * @return Reference to the default blob codec
-     */
-    const util::BlobCodec& getDefaultBlobCodec() const override;
-
 public: // Menus
 
     /**

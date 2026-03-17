@@ -1476,12 +1476,6 @@ QDir ProjectManager::getDownloadedProjectsDir() const
     return resultDir;
 }
 
-const util::BlobCodec& ProjectManager::getDefaultBlobCodec() const
-{
-    static ZstdBlobCodec zstdBlobCodec;
-    return zstdBlobCodec;
-}
-
 QMenu& ProjectManager::getNewProjectMenu()
 {
     return _newProjectMenu;

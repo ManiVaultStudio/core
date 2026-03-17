@@ -73,8 +73,8 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
-    codecRegistry().registerFactory(std::make_unique<PassthroughBlobCodecFactory>());
-    codecRegistry().registerFactory(std::make_unique<ZstdBlobCodecFactory>());
+    codecRegistry().registerFactory(std::make_unique<PassthroughBlobCodecFactory>(&application));
+    codecRegistry().registerFactory(std::make_unique<ZstdBlobCodecFactory>(&application));
 
     Core core;
 

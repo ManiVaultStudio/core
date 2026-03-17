@@ -25,7 +25,7 @@ namespace mv::util {
  *
  * @author Thomas Kroes
  */
-class CORE_EXPORT BlobCodec
+class CORE_EXPORT BlobCodec : public QObject
 {
 public:
 
@@ -34,7 +34,9 @@ public:
     {
         None,           /** No compression */
         QtCompress,     /** Qt compression */
-        Zstd            /** Zstandard compression */
+        Zstd,           /** Zstandard compression */
+
+        Count
     };
 
     /** Codec operation result */
@@ -51,10 +53,11 @@ public:
 public:
 
     /**
-     * Constructs a blob codec with an optional codec settings action
+     * Constructs a blob codec with an optional codec settings action.
+     * @param parent Parent QObject
      * @param codecSettingsAction Codec settings action for this codec
      */
-    BlobCodec(const gui::CodecSettingsAction* codecSettingsAction = nullptr);
+    BlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAction = nullptr);
 
     /* Virtual destructor for proper cleanup in derived classes */
 	virtual ~BlobCodec() = default;
@@ -139,10 +142,10 @@ public:
      * Set codec settings action for this codec (the codec takes ownership of the pointer)
      * @param codecSettingsAction Codec settings action for this codec (the codec takes ownership of the pointer)
      */
-    void setCodecSettingsAction(const gui::CodecSettingsAction* codecSettingsAction) { _codecSettingsAction = codecSettingsAction; }
+    void setCodecSettingsAction(gui::CodecSettingsAction* codecSettingsAction);
 
 private:
-    const gui::CodecSettingsAction* _codecSettingsAction;    /* Cached settings action instance (if any) for this codec */
+    gui::CodecSettingsAction* _codecSettingsAction;    /* Cached settings action instance (if any) for this codec */
 };
 
 }

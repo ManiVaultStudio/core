@@ -6,4 +6,9 @@
 
 namespace mv::util {
 
+BlobCodecFactory::BlobCodecFactory(QObject* parent) :
+    QObject(parent)
+{
+}
+
 }

@@ -13,7 +13,7 @@
 class ZstdBlobCodecFactory final : public mv::util::BlobCodecFactory
 {
 public:
-    ZstdBlobCodecFactory();
+    ZstdBlobCodecFactory(QObject* parent = nullptr);
 
 	mv::util::BlobCodec::Type type() const override;
 
@@ -24,7 +24,7 @@ public:
 
 	mv::gui::CodecSettingsAction* createSettingsFromVariantMap(const QVariantMap& map, QObject* parent = nullptr) const override;
 
-	std::unique_ptr<mv::util::BlobCodec> createCodec(const mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const override;
+	std::unique_ptr<mv::util::BlobCodec> createCodec(mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const override;
 
     /**
      * Get default codec settings action for this codec (returns nullptr if no settings are needed)

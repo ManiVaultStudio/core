@@ -11,10 +11,11 @@ class ZstdBlobCodec final : public mv::util::BlobCodec
 public:
 
     /*
-     * Constructs a ZstdBlobCodec with an optional codec settings action
+     * Constructs a ZstdBlobCodec with an optional codec settings action.
+     * @param parent Parent QObject
      * @param codecSettingsAction Codec settings action for this codec
      */
-    explicit ZstdBlobCodec(const mv::gui::CodecSettingsAction* codecSettingsAction = nullptr);
+    explicit ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr);
 
     [[nodiscard]] Type getType() const override;
     [[nodiscard]] QString getName() const override;

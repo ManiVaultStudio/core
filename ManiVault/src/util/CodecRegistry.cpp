@@ -64,7 +64,7 @@ gui::CodecSettingsAction* CodecRegistry::createSettingsFromVariantMap(BlobCodec:
 	return factory(type).createSettingsFromVariantMap(map, parent);
 }
 
-std::unique_ptr<BlobCodec> CodecRegistry::createCodec(const mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
+std::unique_ptr<BlobCodec> CodecRegistry::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
     Q_ASSERT(codecSettingsAction);
 
@@ -101,6 +101,29 @@ QStringList CodecRegistry::availableTypeNames() const
         typeNames.append(BlobCodec::typeToString(availableType));
 
     return typeNames;
+}
+
+QStringList CodecRegistry::availableTypeDisplayNames() const
+{
+    QStringList typeDisplayNames;
+
+    for (const auto& availableType : availableTypes())
+        typeDisplayNames << factory(availableType).displayName();
+
+    return typeDisplayNames;
+}
+
+BlobCodec::Type CodecRegistry::typeFromDisplayName(const QString& displayName) const
+{
+    const auto it = std::find_if(_factoriesOwned.begin(), _factoriesOwned.end(), [&displayName](const std::unique_ptr<BlobCodecFactory>& factory) {
+        return factory->displayName() == displayName;
+    });
+
+    if (it == _factoriesOwned.end())
+        throw std::runtime_error("Blob codec not registered");
+
+    return (*it)->type();
+
 }
 
 }

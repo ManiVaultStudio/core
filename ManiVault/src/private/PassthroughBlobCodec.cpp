@@ -3,11 +3,12 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "PassthroughBlobCodec.h"
+#include "PassthroughCodecSettingsAction.h"
 
 #include "Archiver.h"
 
-PassthroughBlobCodec::PassthroughBlobCodec(const mv::gui::CodecSettingsAction* codecSettingsAction) :
-    BlobCodec(codecSettingsAction)
+PassthroughBlobCodec::PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction) :
+    BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new PassthroughCodecSettingsAction(this, "Settings"))
 {
 }
 

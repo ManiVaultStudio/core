@@ -19,10 +19,12 @@ namespace mv::util {
 
 class BlobCodecSettings;
 
-class CORE_EXPORT BlobCodecFactory
+class CORE_EXPORT BlobCodecFactory : public QObject
 {
 public:
-    virtual ~BlobCodecFactory() = default;
+
+    BlobCodecFactory(QObject* parent);
+    ~BlobCodecFactory() override = default;
 
     virtual BlobCodec::Type type() const = 0;
     virtual QString key() const = 0;
@@ -30,7 +32,7 @@ public:
 
     virtual gui::CodecSettingsAction* createSettingsFromVariantMap(const QVariantMap& map, QObject* parent = nullptr) const = 0;
 
-    virtual std::unique_ptr<BlobCodec> createCodec(const gui::CodecSettingsAction* codecSettingsAction = nullptr) const = 0;
+    virtual std::unique_ptr<BlobCodec> createCodec(gui::CodecSettingsAction* codecSettingsAction = nullptr) const = 0;
 
     /**
      * Get default codec settings action for this codec (returns nullptr if no settings are needed)

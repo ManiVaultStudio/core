@@ -6,7 +6,8 @@
 #include "PassthroughBlobCodec.h"
 #include "PassthroughCodecSettingsAction.h"
 
-PassthroughBlobCodecFactory::PassthroughBlobCodecFactory() :
+PassthroughBlobCodecFactory::PassthroughBlobCodecFactory(QObject* parent /*= nullptr*/) :
+    BlobCodecFactory(parent),
     _defaultSettingsAction(nullptr, "Settings")
 {
 }
@@ -33,9 +34,9 @@ mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::createSettingsFromVar
     return settings;
 }
 
-std::unique_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(const mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
+std::unique_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
-    return std::make_unique<PassthroughBlobCodec>(codecSettingsAction);
+    return std::make_unique<PassthroughBlobCodec>(const_cast<PassthroughBlobCodecFactory*>(this), codecSettingsAction);
 }
 
 const mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::getDefaultCodecSettingsAction() const

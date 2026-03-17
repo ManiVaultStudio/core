@@ -31,12 +31,14 @@ public:
 
     gui::CodecSettingsAction* createSettingsFromVariantMap(BlobCodec::Type type, const QVariantMap& map, QObject* parent = nullptr) const;
 
-    std::unique_ptr<BlobCodec> createCodec(const mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const;
+    std::unique_ptr<BlobCodec> createCodec(mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const;
     std::unique_ptr<BlobCodec> createCodec(BlobCodec::Type type) const;
     std::unique_ptr<BlobCodec> createCodec(const QString& typeName) const;
 
     std::vector<BlobCodec::Type> availableTypes() const;
     QStringList availableTypeNames() const;
+    QStringList availableTypeDisplayNames() const;
+    BlobCodec::Type typeFromDisplayName(const QString& displayName) const;
 
     CodecRegistry(const CodecRegistry&) = delete;
     CodecRegistry& operator=(const CodecRegistry&) = delete;

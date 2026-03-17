@@ -30,14 +30,19 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
 
     //updateCompressionLevelReadOnly();
 
-    for (const auto& codecName : codecRegistry().availableTypes())
-        _codecTypeAction.addItem(codecName);
+    QMap<QString, QString> typeNameForDisplayName {
+        { "None", "none" },
+        { "Qt Compress", "QtCompress" },
+        { "Zstandard", "Zstdandard" } 
+    };
+
+    _codecTypeAction.initialize(codecRegistry().availableTypeDisplayNames(), "Zstandard");
 }
 
 std::unique_ptr<BlobCodec> ProjectCompressionAction::createCodec() const
 {
     try {
-        if (!codecRegistry().isRegistered(_codecTypeAction.getCurrentText()))
+        if (!codecRegistry().isRegistered( codecRegistry().typeFromDisplayName(_codecTypeAction.getCurrentText())))
             throw std::runtime_error("Codec not registered");
 
         if (_codecSettingsAction)

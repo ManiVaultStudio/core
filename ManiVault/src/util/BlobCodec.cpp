@@ -8,7 +8,8 @@
 
 namespace mv::util {
 
-BlobCodec::BlobCodec(const gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
+BlobCodec::BlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
+    QObject(parent),
     _codecSettingsAction(nullptr)
 {
     setCodecSettingsAction(codecSettingsAction);
@@ -128,4 +129,18 @@ const gui::CodecSettingsAction* BlobCodec::getSettingsAction() const
 	return _codecSettingsAction;
 }
 
+void BlobCodec::setCodecSettingsAction(gui::CodecSettingsAction* codecSettingsAction)
+{
+    if (codecSettingsAction == _codecSettingsAction)
+        return;
+
+    if (codecSettingsAction)
+        codecSettingsAction->setParent(this);
+
+    auto previousCodeSettingsAction = _codecSettingsAction;
+
+	_codecSettingsAction = codecSettingsAction;
+
+    delete _codecSettingsAction;
+}
 }
