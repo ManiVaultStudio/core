@@ -24,8 +24,7 @@ namespace {
 }
 
 ZstdBlobCodec::ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
-	BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new ZstdCodecSettingsAction(parent, "Settings")),
-    _compressionLevel(2)
+	BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new ZstdCodecSettingsAction(parent, "Settings"))
 {
 #ifdef ZSTD_CODEC_VERBOSE
     qDebug() << __FUNCTION__;
@@ -58,16 +57,14 @@ mv::util::BlobCodec::Result ZstdBlobCodec::encode(const QByteArray& input) const
     if (input.isEmpty())
         return { true, {}, {} };
 
+    ZstdCodecSettingsAction* settings = dynamic_cast<ZstdCodecSettingsAction*>(getSettingsAction());
+
     const auto bound = ZSTD_compressBound(static_cast<size_t>(input.size()));
 
     QByteArray output;
     output.resize(static_cast<qsizetype>(bound));
 
-    const auto compressedSize = ZSTD_compress(output.data(),
-        bound,
-        input.constData(),
-        static_cast<size_t>(input.size()),
-        _compressionLevel);
+    const auto compressedSize = ZSTD_compress(output.data(), bound, input.constData(), static_cast<size_t>(input.size()),settings->getLevelAction().getValue());
 
     if (ZSTD_isError(compressedSize))
         return { false, {}, getZstdErrorString("ZSTD_compress failed", compressedSize) };
@@ -190,17 +187,4 @@ QString ZstdBlobCodec::getFileExtension() const
     return QStringLiteral(".bin.zst");
 }
 
-void ZstdBlobCodec::setCompressionLevel(int compressionLevel)
-{
-#ifdef ZSTD_CODEC_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    _compressionLevel = compressionLevel;
-}
-
-int ZstdBlobCodec::getCompressionLevel() const
-{
-    return _compressionLevel;
-}
 

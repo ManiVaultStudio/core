@@ -55,10 +55,4 @@ public:
     [[nodiscard]] Result decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const override;
 
     [[nodiscard]] QString getFileExtension() const override;
-
-    void setCompressionLevel(int compressionLevel);
-    [[nodiscard]] int getCompressionLevel() const;
-
-private:
-    int _compressionLevel;
 };

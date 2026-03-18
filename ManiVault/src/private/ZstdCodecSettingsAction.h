@@ -5,6 +5,7 @@
 #pragma once
 
 #include <actions/CodecSettingsAction.h>
+#include <actions/IntegralAction.h>
 
 /**
  * TODO
@@ -25,4 +26,12 @@ public:
     ZstdCodecSettingsAction(QObject* parent, const QString& title);
 
     ~ZstdCodecSettingsAction();
+
+public: // Action getters
+
+     /** Get compression level action (1-22) */
+    mv::gui::IntegralAction& getLevelAction() { return _levelAction; }
+
+private:
+    mv::gui::IntegralAction  _levelAction;   /** Compression level action (1-22) */
 };

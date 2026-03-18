@@ -5,7 +5,7 @@
 #include "ZstdCodecSettingsAction.h"
 
 #ifdef _DEBUG
-	#define ZSTD_CODEC_SETTINGS_VERBOSE
+	#define ZSTD_CODEC_SETTINGS_ACTION_VERBOSE
 #endif
 
 using namespace mv;
@@ -13,16 +13,19 @@ using namespace mv::gui;
 using namespace mv::util;
 
 ZstdCodecSettingsAction::ZstdCodecSettingsAction(QObject* parent, const QString& title) :
-    CodecSettingsAction(parent, title)
+    CodecSettingsAction(parent, title),
+    _levelAction(this, "Level", 1, 22, 3)
 {
-#ifdef ZSTD_CODEC_SETTINGS_VERBOSE
+#ifdef ZSTD_CODEC_SETTINGS_ACTION_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    addAction(&_levelAction);
 }
 
 ZstdCodecSettingsAction::~ZstdCodecSettingsAction()
 {
-#ifdef ZSTD_CODEC_SETTINGS_VERBOSE
+#ifdef ZSTD_CODEC_SETTINGS_ACTION_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 }
