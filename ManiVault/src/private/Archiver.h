@@ -79,6 +79,15 @@ public:
      */
     void extractSingleFile(const QString& compressedFilePath, const QString& sourceFileName, const QString& targetFilePath, const QString& password = "");
 
+    /*
+     * Reads a file from a zip archive directly to memory
+     * Might throw a std::runtime_error exception if an error occurs during extraction
+     * @param zipPath File path of the compressed input file
+     * @param entryName File name of the compressed source file
+     * @return Byte array containing the file data
+     */
+    static QByteArray readZipEntryToMemory(const QString& zipPath, const QString& entryName);
+
 protected:
 
     /**

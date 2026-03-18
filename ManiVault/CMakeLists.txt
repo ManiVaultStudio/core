@@ -229,6 +229,19 @@ CPMAddPackage(
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
 
+CPMAddPackage(
+    NAME zstd
+    GITHUB_REPOSITORY facebook/zstd
+    GIT_TAG v1.5.7
+    SOURCE_SUBDIR build/cmake
+    OPTIONS
+        "ZSTD_BUILD_PROGRAMS OFF"
+        "ZSTD_BUILD_TESTS OFF"
+        "ZSTD_BUILD_CONTRIB OFF"
+        "ZSTD_BUILD_SHARED OFF"
+        "ZSTD_BUILD_STATIC ON"
+)
+
 # Use of Sentry on MacOS breaks the build so turn it off for now...
 if(${MV_USE_ERROR_LOGGING})
 
@@ -418,6 +431,12 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
+
+if(TARGET libzstd_static)
+    target_link_libraries(MV_Application PRIVATE libzstd_static)
+else()
+    message(FATAL_ERROR "libzstd_static target was not created")
+endif()
 
 if(${MV_USE_ERROR_LOGGING})
     target_compile_definitions(${MV_EXE} PRIVATE MV_USE_ERROR_LOGGING=1)

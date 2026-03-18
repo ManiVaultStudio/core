@@ -36,6 +36,8 @@
 
 #include "Task.h"
 
+#include "ZstdBlobCodec.h"
+
 #ifdef _DEBUG
     #define PROJECT_MANAGER_VERBOSE
 #endif
@@ -496,6 +498,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
                 archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
+                archiver.extractSingleFile(filePath, "project.json", QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
 
                 compressionTask.setSubtasks(archiver.getTaskNamesForDecompression(filePath));
                 compressionTask.setRunning();
@@ -518,7 +521,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     throw std::runtime_error("Canceled before project was loaded");
                 });
 
-                archiver.decompress(filePath, temporaryDirectoryPath);
+                //archiver.decompress(filePath, temporaryDirectoryPath);
 
                 compressionTask.setFinished();
 
@@ -908,25 +911,12 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
-                QCheckBox   passwordProtectedCheckBox("Password protected");
-                QLineEdit   passwordLineEdit;
-
-                passwordProtectedCheckBox.setChecked(false);
-                passwordLineEdit.setPlaceholderText("Enter encryption password...");
-
-                auto compressionLayout = new QHBoxLayout();
-
-                compressionLayout->addWidget(_project->getCompressionAction().getEnabledAction().createWidget(&saveFileDialog));
-                compressionLayout->addWidget(_project->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
-                
-                fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
-                
-                //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
-                //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
+                fileDialogLayout->addWidget(_project->getCompressionAction().createLabelWidget(&saveFileDialog), rowCount + 2, 0);
+                fileDialogLayout->addWidget(_project->getCompressionAction().createWidget(&saveFileDialog), rowCount + 2, 1, 1, 2);
 
                 auto& titleAction = _project->getTitleAction();
 
-                fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
+                fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 3, 0);
 
                 GroupAction settingsGroupAction(this, "Settings");
 
@@ -945,15 +935,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 titleLayout->addWidget(titleAction.createWidget(&saveFileDialog));
                 titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&saveFileDialog));
 
-                fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
-
-                //const auto updatePassword = [&]() -> void {
-                //    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
-                //};
-
-                //connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
-
-                //updatePassword();
+                fileDialogLayout->addLayout(titleLayout, rowCount + 3, 1, 1, 2);
 
                 connect(&saveFileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
@@ -964,8 +946,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     if (projectMetaAction.isNull())
                         return;
 
-                    _project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
-                    _project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
+                    //_project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
+                    //_project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 
                 saveFileDialog.open();
@@ -988,12 +970,18 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
+            QElapsedTimer saveTimer;
+
+        	saveTimer.start();
+
             Application::requestOverrideCursor(Qt::WaitCursor);
 
+            /*
             if (_project->getCompressionAction().getEnabledAction().isChecked())
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << _project->getCompressionAction().getLevelAction().getValue();
             else
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
+			*/
 
             auto& projectSerializationTask  = projects().getProjectSerializationTask();
             auto& compressionTask           = projectSerializationTask.getCompressionTask();
@@ -1034,7 +1022,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 compressionTask.setSubtaskFinished(taskName, QString("Compressing %1").arg(taskName));
             });
 
-            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, _project->getCompressionAction().getEnabledAction().isChecked() ? _project->getCompressionAction().getLevelAction().getValue() : 0, password);
+            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, 0, password);
 
             compressionTask.setFinished();
 
@@ -1046,7 +1034,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             setState(State::Idle);
 
-            qDebug().noquote() << filePath << "saved successfully";
+            qDebug().noquote() << filePath << "saved successfully in " << saveTimer.elapsed() << "ms";
         }
         emit projectSaved(*_project);
     }
@@ -1170,7 +1158,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     auto compressionLayout = new QHBoxLayout();
 
                     compressionLayout->addWidget(currentProject->getCompressionAction().getEnabledAction().createWidget(&saveFileDialog));
-                    compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
+                    //compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
 
                     fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 }
@@ -1221,7 +1209,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                         return;
 
                     currentProject->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
+                    //currentProject->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 
                 saveFileDialog.open();

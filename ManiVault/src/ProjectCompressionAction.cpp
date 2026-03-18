@@ -4,44 +4,84 @@
 
 #include "ProjectCompressionAction.h"
 
+#include "util/CodecRegistry.h"
+
+#include "actions/CodecSettingsAction.h"
+
 using namespace mv::gui;
 using namespace mv::util;
 
 namespace mv {
 
 ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/) :
-    GroupAction(parent, "ProjectCompression"),
+    HorizontalGroupAction(parent, "Compression"),
     _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION),
-    _levelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL)
+    _codecTypeAction(this, "Codec")
 {
-    addAction(&_enabledAction);
-    addAction(&_levelAction);
+    setShowLabels(false);
+    addAction(&_codecTypeAction);
 
-    _levelAction.setPrefix("Level: ");
+    QMap<QString, QString> typeNameForDisplayName;
 
-    const auto updateCompressionLevelReadOnly = [this]() -> void {
-        _levelAction.setEnabled(_enabledAction.isChecked());
+    auto addCodec = [&](const BlobCodecFactory* factory) {
+        Q_ASSERT(factory);
+
+        typeNameForDisplayName[factory->displayName()] = factory->key();
+
+        auto codec = factory->createCodec();
+
+        _codecInstanceMap.emplace(factory->displayName(), codec);
+
+        addAction(const_cast<gui::CodecSettingsAction*>(codec->getSettingsAction()));
     };
 
-    connect(&_enabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
+    addCodec(&codecRegistry().factory(BlobCodec::Type::None));
+    addCodec(&codecRegistry().factory(BlobCodec::Type::Zstd));
 
-    updateCompressionLevelReadOnly();
+    _codecTypeAction.initialize(typeNameForDisplayName.keys(), codecRegistry().factory(BlobCodec::Type::Zstd).displayName());
+
+    auto codecTypeChanged = [this]() -> void {
+		for (auto& [displayName, codec] : _codecInstanceMap) {
+            _codecInstanceMap[displayName]->getSettingsAction()->setVisible(displayName == _codecTypeAction.getCurrentText());
+        }
+	};
+
+    connect(&_codecTypeAction, &OptionAction::currentIndexChanged, this, codecTypeChanged);
+
+    codecTypeChanged();
+}
+
+std::shared_ptr<BlobCodec> ProjectCompressionAction::getCodec() const
+{
+    try {
+        const auto codecType = codecRegistry().typeFromDisplayName(_codecTypeAction.getCurrentText());
+
+        if (!codecRegistry().isRegistered(codecType))
+            throw std::runtime_error("Codec not registered");
+
+        return _codecInstanceMap.at(_codecTypeAction.getCurrentText());
+    }
+    catch (const std::exception& e) {
+        qWarning() << "Failed to create blob codec:" << e.what();
+
+        return nullptr;
+    }
 }
 
 void ProjectCompressionAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    GroupAction::fromVariantMap(variantMap);
 
     _enabledAction.fromParentVariantMap(variantMap);
-    _levelAction.fromParentVariantMap(variantMap);
+    //_levelAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ProjectCompressionAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = GroupAction::toVariantMap();
 
     _enabledAction.insertIntoVariantMap(variantMap);
-    _levelAction.insertIntoVariantMap(variantMap);
+    //_levelAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

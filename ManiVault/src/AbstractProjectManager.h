@@ -28,6 +28,11 @@
 
 namespace mv {
 
+namespace util
+{
+    class BlobCodec;
+}
+
 /**
  * Abstract project manager class
  *

@@ -27,7 +27,7 @@ WorkspaceStatusBarAction::WorkspaceStatusBarAction(QObject* parent, const QStrin
     _settingsAction.addAction(&_moreSettingsAction);
 
     _settingsAction.setShowLabels(false);
-    //_settingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
+    //_codecSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _settingsAction.setDefaultWidgetFlag(GroupAction::WidgetFlag::NoMargins);
     _settingsAction.setPopupSizeHint(QSize(250, 0));
 

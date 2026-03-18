@@ -150,11 +150,11 @@ QVariantMap SelectionMap::toVariantMap() const
         { "Height", QVariant::fromValue(_targetImageSize.height()) }
     };
 
-    variantMap["Type"] = QVariant::fromValue(static_cast<std::int32_t>(_type));
-    variantMap["SerializedMap"] = rawDataToVariantMap((char*)serializedMap.data(), serializedMap.size() * sizeof(std::uint32_t), true);
+    variantMap["Type"]              = QVariant::fromValue(static_cast<std::int32_t>(_type));
+    variantMap["SerializedMap"]     = rawDataToVariantMap((char*)serializedMap.data(), serializedMap.size() * sizeof(std::uint32_t), true);
     variantMap["SerializedMapSize"] = QVariant::fromValue(serializedMap.size());
-    variantMap["SourceImageSize"] = QVariant::fromValue(sourceImageSize);
-    variantMap["TargetImageSize"] = QVariant::fromValue(targetImageSize);
+    variantMap["SourceImageSize"]   = QVariant::fromValue(sourceImageSize);
+    variantMap["TargetImageSize"]   = QVariant::fromValue(targetImageSize);
 
     return variantMap;
 }

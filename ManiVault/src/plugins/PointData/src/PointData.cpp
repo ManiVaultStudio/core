@@ -156,7 +156,12 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     {
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
+
+        QElapsedTimer rawDataTimer;
+        rawDataTimer.start();
+
         populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
+        qDebug() << __FUNCTION__ << "Elapsed time for populating raw data (ms):" << rawDataTimer.elapsed();
     }
     else
     {
@@ -977,6 +982,9 @@ void Points::selectInvert()
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
 {
+    QElapsedTimer elapsedTimer;
+    elapsedTimer.start();
+
     DatasetImpl::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DimensionNames");
@@ -1002,8 +1010,13 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         const auto& indicesMap = variantMap["Indices"].toMap();
     
         indices.resize(indicesMap["Count"].toInt());
-    
+
+        QElapsedTimer indicesTimer;
+        indicesTimer.start();
+
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
+
+        qDebug() << __FUNCTION__ << "Elapsed time for indices (ms):" << indicesTimer.elapsed();
     }
 
     // Load dimension names
@@ -1019,7 +1032,15 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
         // Copy the dimension names raw data into the byte array
         dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
+
+
+        dimensionNames.reserve(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
+        QElapsedTimer dimensionsTimer;
+        dimensionsTimer.start();
+
         populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data());
+
+        qDebug() << __FUNCTION__ << "Elapsed time for copying dimension names to byte array (ms):" << dimensionsTimer.elapsed();
 
         // Open input data stream
         QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
@@ -1028,7 +1049,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         dimensionsDataStream >> dimensionNames;
 
         return dimensionNames;
-        };
+    };
 
     if (variantMap["NumberOfDimensions"].toInt() > 1000)
         dimensionNameList = fetchDimensionNames();
@@ -1046,14 +1067,15 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
     }
 
-    setDimensionNames(dimensionNames);
+    //setDimensionNames(dimensionNames);
+    getRawData<PointData>()->setDimensionNames(dimensionNames);
 
     if (variantMap.contains("Dimensions")) {
         _dimensionsPickerAction->fromParentVariantMap(variantMap);
     }
 
-    events().notifyDatasetDataChanged(this);
-
+    //events().notifyDatasetDataChanged(this);
+    /*
     // Handle saved selection
     if (isFull()) {
         const auto& selectionMap = variantMap["Selection"].toMap();
@@ -1067,9 +1089,12 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
             populateDataBufferFromVariantMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data());
 
-            events().notifyDatasetDataSelectionChanged(this);
+            //events().notifyDatasetDataSelectionChanged(this);
         }
     }
+
+    qDebug() << __FUNCTION__ << "Elapsed time (ms):" << elapsedTimer.elapsed();
+    */
 }
 
 QVariantMap Points::toVariantMap() const
@@ -1106,13 +1131,13 @@ QVariantMap Points::toVariantMap() const
         selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
     }
 
-    variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
-    variantMap["NumberOfPoints"]        = getNumPoints();
-    variantMap["Indices"]               = indices;
-    variantMap["Selection"]             = selection;
-    variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
-    variantMap["NumberOfDimensions"]    = getNumDimensions();
-    variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
+    variantMap["Data"]               = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
+    variantMap["NumberOfPoints"]     = getNumPoints();
+    variantMap["Indices"]            = indices;
+    variantMap["Selection"]          = selection;
+    variantMap["DimensionNames"]     = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
+    variantMap["NumberOfDimensions"] = getNumDimensions();
+    variantMap["Dimensions"]         = _dimensionsPickerAction->toVariantMap();
 
     variantMap["Dense"]                 = Experimental::isDense(this);
 

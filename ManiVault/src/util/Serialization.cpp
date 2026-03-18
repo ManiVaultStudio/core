@@ -5,14 +5,47 @@
 #include "Serialization.h"
 #include "CoreInterface.h"
 #include "Application.h"
+#include "CodecRegistry.h"
 
 #include <QUuid>
+#include <QtConcurrent>
 
 #include <exception>
 
 #include <math.h>
 
 namespace mv::util {
+
+struct EncodeBlockJob
+{
+    std::uint64_t _offset = 0;
+    std::uint64_t _size = 0;
+    QByteArray _rawData;
+};
+
+struct EncodeBlockResult
+{
+    std::uint64_t _offset = 0;
+    std::uint64_t _size = 0;
+    QByteArray _encodedData;
+    QString _error;
+    QVariantMap _block;
+};
+
+struct DecodeBlockJob
+{
+    std::uint64_t _offset = 0;
+    std::uint64_t _size = 0;
+    QByteArray _encodedData;
+};
+
+struct DecodeBlockResult
+{
+    std::uint64_t _offset = 0;
+    std::uint64_t _size = 0;
+    QByteArray _decodedData;
+    QString _error;
+};
 
 void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
 {
@@ -61,98 +94,297 @@ void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& numberOfBytes, 
         throw std::runtime_error("Unable to load binary file, number of requested bytes is not the same as in the file");
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/)
+QByteArray readBinaryFileToByteArray(const QString& filePath)
 {
-    Q_ASSERT(maxBlockSize != 0);
+    QFile file(filePath);
 
-    if (maxBlockSize == -1)
-        maxBlockSize = DEFAULT_MAX_BLOCK_SIZE;
+    if (!file.open(QIODevice::ReadOnly))
+        throw std::runtime_error(QString("Unable to open file %1").arg(filePath).toStdString());
 
-    QVariantMap rawData;
+    return file.readAll();
+}
 
-    // Save the number of bytes
-    rawData["Size"] = QVariant::fromValue(numberOfBytes);
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/, const BlobCodec* blobCodecOverride /*= nullptr*/)
+{
+    try {
+        if (!mv::projects().hasProject())
+            throw std::runtime_error("Unable to save raw data, no project is currently open");
 
-    // Compute the number of blocks
-    const auto numberOfBlocks = static_cast<std::uint64_t>(ceilf(numberOfBytes / static_cast<float>(maxBlockSize)));
+	    auto projectCodec   = mv::projects().getCurrentProject()->getCompressionAction().getCodec();
+        auto codec          = codecRegistry().createCodec(projectCodec->getSettingsAction());
 
-    // Offset in number of bytes
-    std::uint64_t offset = 0;
+	    Q_ASSERT(maxBlockSize != 0);
 
-    QVariantList blocks;
+	    if (maxBlockSize == static_cast<std::uint64_t>(-1))
+	        maxBlockSize = DEFAULT_MAX_BLOCK_SIZE;
 
-    while (offset < numberOfBytes)
-    {
-        QVariantMap block;
+	    QVariantMap rawData;
 
-        // Determine the size of the block
-        const auto blockSize = std::min(maxBlockSize, numberOfBytes - offset);
+	    rawData["Size"]     = QVariant::fromValue(numberOfBytes);
+	    rawData["Codec"]    = QVariant::fromValue(codec->getName());
 
-        block["Offset"] = QVariant::fromValue(offset);
-        block["Size"]   = QVariant::fromValue(blockSize);
+	    const auto numberOfBlocks = static_cast<std::uint64_t>((numberOfBytes + maxBlockSize - 1) / maxBlockSize);
 
-        if (saveToDisk) {
+	    QVector<EncodeBlockJob> jobs;
+	    jobs.reserve(static_cast<int>(numberOfBlocks));
 
-            // File name and path of the external binary file in the temporary directory
-            const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + ".bin";
-            const auto filePath = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save) + QDir::separator() + fileName);
+	    std::uint64_t offset = 0;
 
-            // Save the raw data to binary file
-            saveRawDataToBinaryFile(&bytes[offset], blockSize, filePath);
+	    while (offset < numberOfBytes)
+	    {
+	        const auto blockSize = std::min(maxBlockSize, numberOfBytes - offset);
 
-            // Set the raw data URL
-            block["URI"] = fileName;
-        }
-        else {
+	        EncodeBlockJob job;
+	        job._offset     = offset;
+	        job._size       = blockSize;
+	        job._rawData    = QByteArray(bytes + offset, static_cast<qsizetype>(blockSize));
 
-            // Create data block
-            block["Data"] = QString(qCompress(QByteArray::fromRawData(&bytes[offset], blockSize)).toBase64());
-        }
+	        jobs.push_back(std::move(job));
 
-        // Append block to the blocks
-        blocks.push_back(block);
+	        offset += blockSize;
+	    }
 
-        // Advance to next block 
-        offset += maxBlockSize;
-    }
+	    const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
 
-    rawData["NumberOfBlocks"]   = QVariant::fromValue(numberOfBlocks);
-    rawData["BlockSize"]        = QVariant::fromValue(maxBlockSize);
-    rawData["Blocks"]           = QVariant::fromValue(blocks);
+	    const auto results = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(jobs, [&codec, saveToDisk, saveDir](const EncodeBlockJob& job) -> EncodeBlockResult {
+	        EncodeBlockResult result;
 
-    return rawData;
+	        try {
+	            QVariantMap block;
+
+	            block["Offset"]         = QVariant::fromValue(job._offset);
+	            block["Size"]           = QVariant::fromValue(job._size);
+
+	            if (saveToDisk) {
+	                const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
+	                const auto filePath     = QDir::cleanPath(saveDir + QDir::separator() + fileName);
+	                const auto encodeResult = codec->encodeToFile(job._rawData, filePath);
+
+	                if (encodeResult.isSuccess()) {
+	                    block["CompressedSize"] = QVariant::fromValue<std::uint64_t>(static_cast<std::uint64_t>(encodeResult._data.size()));
+	                }
+	                else {
+	                    throw std::runtime_error(QString("Failed to encode block to file: %1").arg(filePath).toStdString());
+	                }
+
+	                block["URI"] = fileName;
+	            }
+	            else {
+	                block["Data"] = QString::fromUtf8(job._rawData.toBase64());
+	            }
+
+	            result._block = std::move(block);
+	        }
+	        catch (const std::exception& e) {
+	            result._error = QString::fromUtf8(e.what());
+	        }
+
+	        return result;
+	    });
+
+	    QVariantList blocks;
+	    blocks.reserve(results.size());
+
+	    for (const auto& result : results)
+	    {
+	        if (!result._error.isEmpty())
+	            throw std::runtime_error(result._error.toStdString());
+
+	        blocks.push_back(result._block);
+	    }
+
+	    rawData["NumberOfBlocks"]   = QVariant::fromValue(numberOfBlocks);
+	    rawData["BlockSize"]        = QVariant::fromValue(maxBlockSize);
+	    rawData["Blocks"]           = QVariant::fromValue(blocks);
+
+        return rawData;
+     }
+     catch (const std::exception& e) {
+         qWarning() << "Unable to convert raw data to variant map:" << e.what();
+     }
+
+     return {};
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
 {
-    variantMapMustContain(variantMap, "BlockSize");
-    variantMapMustContain(variantMap, "Blocks");
+    struct BlockJob
+    {
+        quint64 offset = 0;
+        quint64 size = 0;
+        QString uri;
+        QString data;
+    };
 
-    const auto blockSize    = variantMap["BlockSize"].toInt();
-    const auto blocks       = variantMap["Blocks"].toList();
+    try {
+        variantMapMustContain(variantMap, "BlockSize");
+        variantMapMustContain(variantMap, "Blocks");
 
-    // Go over all blocks in the blocks map and copy the raw data to the output bytes
-    for (const auto& block : blocks) {
+        const auto totalTimerStart  = std::chrono::steady_clock::now();
+        const auto blocks           = variantMap["Blocks"].toList();
+        const auto hasCodec         = variantMap.contains("Codec");
+        const auto codecName        = hasCodec ? variantMap["Codec"].toString() : QStringLiteral("none");
 
-        // Get block variant map
-        const auto map = block.toMap();
-
-        variantMapMustContain(map, "Offset");
-        variantMapMustContain(map, "Size");
-
-        const auto offset   = map["Offset"].value<uint64_t>();
-        const auto size     = map["Size"].value<uint64_t>();
-
-        if (map.contains("URI"))
-            loadRawDataFromBinaryFile(&bytes[offset], size, QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Open) + QDir::separator() + map["URI"].toString()));
-
-        if (map.contains("Data")) {
-            const auto data         = map["Data"].toString();
-            const auto blockData    = qUncompress(QByteArray::fromBase64(data.toUtf8()));
-
-            // Copy the block to the output bytes
-            memcpy((void*)&bytes[offset], blockData.data(), size);
+        if (hasCodec && !codecRegistry().isRegistered(codecName)) {
+            throw std::runtime_error(QString("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
         }
+
+        auto createCodec = [&]() -> std::shared_ptr<BlobCodec> {
+            if (hasCodec)
+                return codecRegistry().createCodec(codecName);
+
+            return codecRegistry().createCodec(BlobCodec::Type::None);
+        };
+
+        const auto blockSize = variantMap["BlockSize"].toInt();
+
+        Q_UNUSED(blockSize);
+
+        QVector<BlockJob> jobs;
+        jobs.reserve(blocks.size());
+
+        quint64 totalUncompressedBytes = 0;
+
+        for (const auto& block : blocks) {
+            const auto blockMap = block.toMap();
+
+            variantMapMustContain(blockMap, "Offset");
+            variantMapMustContain(blockMap, "Size");
+
+            BlockJob job;
+            job.offset = blockMap["Offset"].value<quint64>();
+            job.size = blockMap["Size"].value<quint64>();
+
+            if (blockMap.contains("URI"))
+                job.uri = blockMap["URI"].toString();
+
+            if (blockMap.contains("Data"))
+                job.data = blockMap["Data"].toString();
+
+            totalUncompressedBytes += job.size;
+            jobs.push_back(std::move(job));
+        }
+
+        QElapsedTimer parallelTimer;
+        parallelTimer.start();
+
+        std::atomic_bool hasError = false;
+        std::atomic<int> activeTasks = 0;
+        std::atomic<int> maxActiveTasks = 0;
+
+        QMutex errorMutex;
+        QString firstError;
+
+        QMutex threadSetMutex;
+        QSet<Qt::HANDLE> threadSet;
+
+        QtConcurrent::blockingMap(jobs, [&](const BlockJob& job) {
+            if (hasError.load(std::memory_order_relaxed))
+                return;
+
+            {
+                QMutexLocker locker(&threadSetMutex);
+                threadSet.insert(QThread::currentThreadId());
+            }
+
+            const int activeNow = activeTasks.fetch_add(1, std::memory_order_relaxed) + 1;
+
+            int observedMax = maxActiveTasks.load(std::memory_order_relaxed);
+            while (activeNow > observedMax &&
+                !maxActiveTasks.compare_exchange_weak(
+                    observedMax,
+                    activeNow,
+                    std::memory_order_relaxed)) {
+            }
+
+            struct ActiveTaskGuard
+            {
+                std::atomic<int>& counter;
+
+                ~ActiveTaskGuard()
+                {
+                    counter.fetch_sub(1, std::memory_order_relaxed);
+                }
+            } activeTaskGuard{ activeTasks };
+
+            thread_local bool printed = false;
+            thread_local std::shared_ptr<BlobCodec> blobCodec;
+
+            if (!printed) {
+                printed = true;
+                qDebug() << "Worker thread:" << QThread::currentThreadId();
+            }
+
+            try {
+                if (!blobCodec)
+                    blobCodec = createCodec();
+
+                if (!job.uri.isEmpty()) {
+                    const auto decodeResult = blobCodec->decodeFromFileTo(
+                        job.uri,
+                        bytes + job.offset,
+                        static_cast<std::uint64_t>(job.size));
+
+                    if (!decodeResult.isSuccess()) {
+                        throw std::runtime_error(
+                            QString("Failed to decode block from file: %1")
+                            .arg(job.uri)
+                            .toStdString());
+                    }
+
+                    return;
+                }
+
+                if (!job.data.isEmpty()) {
+                    const QByteArray encodedBytes = QByteArray::fromBase64(job.data.toUtf8());
+
+                    const auto decodeResult = blobCodec->decodeTo(
+                        encodedBytes,
+                        bytes + job.offset,
+                        static_cast<std::uint64_t>(job.size));
+
+                    if (!decodeResult.isSuccess()) {
+                        throw std::runtime_error(
+                            QString("Failed to decode inline block at offset %1")
+                            .arg(job.offset)
+                            .toStdString());
+                    }
+
+                    return;
+                }
+
+                throw std::runtime_error("Block contains neither URI nor Data");
+            }
+            catch (const std::exception& e) {
+                hasError.store(true, std::memory_order_relaxed);
+
+                QMutexLocker locker(&errorMutex);
+                if (firstError.isEmpty())
+                    firstError = QString::fromUtf8(e.what());
+            }
+            });
+
+        //const auto parallelElapsedMs = parallelTimer.elapsed();
+
+        //qDebug() << "populateDataBufferFromVariantMap stats:";
+        //qDebug() << "  codec:" << codecName;
+        //qDebug() << "  configured block size:" << blockSize;
+        //qDebug() << "  number of jobs:" << jobs.size();
+        //qDebug() << "  total uncompressed bytes:" << totalUncompressedBytes;
+        //qDebug() << "  unique worker threads used:" << threadSet.size();
+        //qDebug() << "  maximum concurrent tasks:" << maxActiveTasks.load(std::memory_order_relaxed);
+        //qDebug() << "  parallel decode stage took (ms):" << parallelElapsedMs;
+
+        //const auto totalElapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+        //    std::chrono::steady_clock::now() - totalTimerStart).count();
+
+        //qDebug() << "  total function time (ms):" << totalElapsedMs;
+
+        if (!firstError.isEmpty())
+            throw std::runtime_error(firstError.toStdString());
+    }
+    catch (const std::exception& e) {
+        qWarning() << "Unable to populate data from buffer:" << e.what();
     }
 }
 

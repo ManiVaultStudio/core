@@ -124,6 +124,7 @@ private:
     gui::ToggleAction               _allowProjectSwitchingAction;       /** Allow project switching action (only used in application mode) */
     gui::ToggleAction               _allowedPluginsOnlyAction;          /** Restrict to allowed plugins only action (only used in application mode) */
     gui::StringsAction              _allowedPluginsAction;              /** Allowed plugins action (only used in application mode) */
+    
     QCompleter                      _allowedPluginsCompleter;           /** Completer for allowed plugins action */
     QStringListModel                _allowedPluginsModel;               /** Model for allowed plugins action */
 };
