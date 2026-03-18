@@ -110,7 +110,8 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         if (!mv::projects().hasProject())
             throw std::runtime_error("Unable to save raw data, no project is currently open");
 
-	    auto codec = mv::projects().getCurrentProject()->getCompressionAction().getCodec();
+	    auto projectCodec   = mv::projects().getCurrentProject()->getCompressionAction().getCodec();
+        auto codec          = codecRegistry().createCodec(projectCodec->getSettingsAction());
 
 	    Q_ASSERT(maxBlockSize != 0);
 

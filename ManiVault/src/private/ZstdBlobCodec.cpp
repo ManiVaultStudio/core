@@ -24,11 +24,13 @@ namespace {
 }
 
 ZstdBlobCodec::ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
-	BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new ZstdCodecSettingsAction(parent, "Settings"))
+	BlobCodec(parent)
 {
 #ifdef ZSTD_CODEC_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    setCodecSettingsAction(codecSettingsAction ? codecSettingsAction : new ZstdCodecSettingsAction(this, "Settings"));
 }
 
 ZstdBlobCodec::~ZstdBlobCodec()
